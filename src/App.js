@@ -11,6 +11,7 @@ import firebase from "firebase/app";
 import "firebase/database";
 import Data from './Data.json'
 
+
 const AppPage = styled.div`
   text-align: center;
   background-color: #F8F8F8;
@@ -32,7 +33,7 @@ export default function App() {
     DataSource: "Uniswap"
   }
 
-  const componentDidMount = async () => {
+  /*const componentDidMount = async () => {
     const response = await axios.get('https://api.coinpaprika.com/v1/coins')
     const coinId = response.data.slice(0, COIN_COUNT).map(coin => coin.id)
     let tickerUrl = "https://api.coinpaprika.com/v1/tickers/"
@@ -50,9 +51,9 @@ export default function App() {
     });
     
     setOptionData(coinPriceData)
-   }
+   }*/
 
-   /*const componentDidMount = async () => {
+   const componentDidMount = async () => {
     var oData = {};
     console.log("Json file "+JSON.stringify(Data))
     const firebaseConfig = {
@@ -65,12 +66,14 @@ export default function App() {
       appId: "1:753300443145:web:b5df12e21e8db85b6068d8",
       measurementId: "G-DNP0BT03CD"
     };
-    var config = JSON.stringify(firebaseConfig)
-    if(firebase.app.length == 0) {
-      firebase.initializeApp(config);
-    }
-    firebase.initializeApp(config);
-    var database = firebase.database()
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+   }else {
+      firebase.app(); // if already initialized, use that one
+   }
+
+    const database = firebase.database()
     
     var starCountRef = database.ref('T_Options');
     
@@ -80,7 +83,7 @@ export default function App() {
     })
 
     console.log("oData - "+oData);
-   }*/
+   }
 
   useEffect(() => {
     if(optionData.length == 0) {
