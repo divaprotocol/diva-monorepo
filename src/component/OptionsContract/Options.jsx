@@ -6,8 +6,7 @@ import styled from 'styled-components';
 export default function Options(props) {
 
     return(
-        <tr>
-            
+        <tr>   
         </tr>
     );
 }

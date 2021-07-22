@@ -1,9 +1,6 @@
 import React from 'react';
 import 'styled-components';
 import styled from 'styled-components';
-import { DataGrid } from '@material-ui/data-grid'
-import { Height } from '@material-ui/icons';
-import  { useState, useEffect } from 'react';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -21,12 +18,6 @@ const useStyles = makeStyles({
     },
   });
 
-const FlexTableContainer = withStyles((theme) => ({
-    root: {
-        width: "max-content"
-    }
-}))(TableContainer);
-
 const PageDiv = styled.div `
     width: 80%;
     margin-left:10%;
@@ -36,14 +27,6 @@ const PageDiv = styled.div `
     border : '1px solid #cccccc';
     border-radius: 5px;
 `;
-
-const BuyTableCell = withStyles((theme) => ({
-    root: {
-        padding: "2px 2px",
-        textAlign: "center",
-        backgroundColor: "Yellow"
-    }
-}))(TableCell);
 
 const BuySpan = styled.span `
     background-color: green; 
