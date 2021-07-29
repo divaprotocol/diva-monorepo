@@ -9,6 +9,7 @@ import TabPanel from './component/Header/TabPanel';
 import Underlying from './component/Trade/Underlying';
 import firebase from "firebase/app";
 import "firebase/database";
+import 'firebase/firestore';
 import Data from './Data.json'
 
 
@@ -55,7 +56,7 @@ export default function App() {
 
    const componentDidMount = async () => {
     var oData = {};
-    console.log("Json file "+JSON.stringify(Data))
+    
     const firebaseConfig = {
       apiKey: "AIzaSyDdYKD_rbV2ssyZOlXYc6by6-AxgWQfpz4",
       authDomain: "divaprotocol-7afc0.firebaseapp.com",
@@ -73,13 +74,14 @@ export default function App() {
       firebase.app(); // if already initialized, use that one
    }
 
-    const database = firebase.database()
+    const database = firebase.firestore()
     
-    var starCountRef = database.ref('T_Options');
+    var optionsCount = database.collection('T_Options');
     
-    starCountRef.once('value',snapshot=>{
-      console.log(snapshot.val())
-      oData = snapshot.val
+    optionsCount.get().then( function(snapshot) {
+      snapshot.docs.forEach(doc => {
+        console.log(doc.data());
+      })
     })
 
     console.log("oData - "+oData);
