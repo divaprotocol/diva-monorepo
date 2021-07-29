@@ -11,7 +11,7 @@ const Image = styled.img`
 `;
 
 const AppHeader = styled.header`
-    background-color: #282c34;
+    background-color:  #141534;
     min-height: 10vh;
     display: flex;
     flex-direction: row;
