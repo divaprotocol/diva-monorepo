@@ -1,6 +1,6 @@
 import React from 'react'
 import InputBase from '@material-ui/core/InputBase';
-import { alpha, makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import 'styled-components';
 import styled from 'styled-components';

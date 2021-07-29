@@ -66,19 +66,10 @@ function a11yProps(index) {
     margin: 0 auto;
   `;
 
-  const useButtonStyles = makeStyles((theme) => ({
-    root: {
-      '& > *': {
-        margin: theme.spacing(1),
-      },
-    },
-  }));
-
 export default function CreateOrder() {
     const classes = useStyles();
     const dividerClass = useDividerStyle();
     const tabsClass = useTabsBorder();
-    const buttonClass = useButtonStyles();
     const [value, setValue] = React.useState(0);
     const orderData = {
         numberOfOptions : 10,

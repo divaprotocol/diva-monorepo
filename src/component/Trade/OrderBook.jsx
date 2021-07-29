@@ -27,10 +27,6 @@ const TableHeader = styled.h4 `
     padding-right : 515px;
 `;
 
-const BackGroundColor = styled.span `
-    background-color: #F8F8F8;
-`;
-
 const TableHeadStyle = withStyles(theme => ({
     root: {
       backgroundColor: 'orange'

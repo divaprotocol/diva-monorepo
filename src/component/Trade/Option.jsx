@@ -5,8 +5,8 @@ const PageDiv = styled.div `
     width: 100%;
     background-color: white;
 `;
-const OptionTd = styled.td `
 
+const OptionTd = styled.td `
     padding-bottom: 5px;
     width: 45vh;
     height: 10vh;

@@ -1,16 +1,15 @@
 import React from 'react';
 import 'styled-components';
 import styled from 'styled-components';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
 import Search from './Search';
-
+import { getDateTime } from '../../Util/Dates';
 
 const useStyles = makeStyles({
     table: {
@@ -40,16 +39,18 @@ const SellSpan = styled.span `
     width: 2rem%;
 `;
 
-function createData(key, name, ticker, date, price, maxYield, tvl) {
-  return { key, name, ticker, date, price, price, maxYield, tvl };
+function createData(id, underlying, payoutProfile, floor, strike, cap, expiry, sell,buy, maxYield, tvl) {
+  var range = floor + "/" + strike +"/"+ cap;
+  var expiryDT = getDateTime(expiry)
+  return { id, underlying, payoutProfile, range, expiryDT, sell, buy, maxYield, tvl };
 }
 
 export default function OptionsList(props) {
     const classes = useStyles();
     
     const rows = props.optionData.map((option) =>
-        //key, name, ticker, price, balance
-        createData(option.key, option.name, option.ticker, '2021-12-31', option.price, '5.2x', 'DAI 1m')
+      
+      createData(option.id,option.underlying, option.payoutProfile, option.rangeFloor, option.rangeStrike, option.rangeCap, option.expiry, option.sell, option.buy, option.maxYield, option.tvl)
     );
     return(
     <PageDiv>
@@ -70,16 +71,16 @@ export default function OptionsList(props) {
         </TableHead>
         <TableBody>
           {rows.map((row) => (
-              
-            <TableRow key={row.name}>
+              //underlying, payoutProfile, rangeFloor, expiry, sell, buy, maxYield,tvl
+            <TableRow key={row.id}>
               <TableCell component="th" scope="row">
-                {row.key}
+                {row.underlying}
               </TableCell>
-              <TableCell align="right">{row.name}</TableCell>
-              <TableCell align="right">{row.ticker}</TableCell>
-              <TableCell align="right">{row.date}</TableCell>
-              <TableCell align="right"><SellSpan >{row.price}</SellSpan></TableCell>
-              <TableCell align="right"><BuySpan>{row.price}</BuySpan></TableCell>
+              <TableCell align="right">{row.payoutProfile}</TableCell>
+              <TableCell align="right">{row.range}</TableCell>
+              <TableCell align="right">{row.expiryDT}</TableCell>
+              <TableCell align="right"><SellSpan >{row.sell}</SellSpan></TableCell>
+              <TableCell align="right"><BuySpan>{row.buy}</BuySpan></TableCell>
               <TableCell align="right">{row.maxYield}</TableCell>
               <TableCell align="right">{row.tvl}</TableCell>
 
