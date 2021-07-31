@@ -2,11 +2,11 @@ import React from 'react';
 import 'styled-components'
 import styled from 'styled-components'
 import OptionHeader from './OptionHeader';
-import Option from './Option';
+import OptionDetails from './OptionDetails';
 import OpenOrders from './OptionOrders'
 import OrderBook from './OrderBook';
 import CreateOrder from './CreateOrder';
-import PayOffChart from './PayOffChart';
+import LineSeries from '../Graphs/LineSeries';
 import './Underlying.css';
 
 const PageDiv = styled.div `
@@ -53,14 +53,14 @@ export default function Underlying(props) {
             <PageLeftDiv>
                <LeftCompDiv>
                     <OptionHeader/>
-                    <Option optionData={props.optionData}/>
+                    <OptionDetails optionData={props.optionData}/>
                 </LeftCompDiv>
                 <LeftCompDiv><OpenOrders/></LeftCompDiv>
                 <LeftCompDiv><OrderBook/></LeftCompDiv>
             </PageLeftDiv>
             <PageRightDiv>
                 <RightCompDiv><CreateOrder/></RightCompDiv>
-                <RightCompDiv><PayOffChart/></RightCompDiv>
+                <RightCompDiv><LineSeries/></RightCompDiv>
             </PageRightDiv>
         </PageDiv>
     );

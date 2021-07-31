@@ -40,7 +40,6 @@ const Table = styled.table`
 `;
 
 export default function Option(props) {
-    
     return(
         <PageDiv>
         <Table>

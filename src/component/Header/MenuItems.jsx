@@ -20,7 +20,7 @@ export default function MenuItems(props) {
 
   return (
     <div>
-        <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
+        <Tabs value={value} onChange={handleChange} aria-label="simple tabs example" TabIndicatorProps={{style: {backgroundColor: "#70D9BA"}}}>
           <Tab label="Markets" {...a11yProps(0)} />
           <Tab label="Trade" {...a11yProps(1)} />
           <Tab label="Request" {...a11yProps(2)} />

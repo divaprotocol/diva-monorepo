@@ -10,7 +10,8 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Search from './Search';
 import { getDateTime } from '../../Util/Dates';
-
+import Option from '../OptionDetails/Option';
+import Underlying from '../Trade/Underlying';
 const useStyles = makeStyles({
     table: {
       minWidth: 250,  
@@ -45,50 +46,41 @@ function createData(id, underlying, payoutProfile, floor, strike, cap, expiry, s
   return { id, underlying, payoutProfile, range, expiryDT, sell, buy, maxYield, tvl };
 }
 
+
 export default function OptionsList(props) {
     const classes = useStyles();
-    
     const rows = props.optionData.map((option) =>
-      
       createData(option.id,option.underlying, option.payoutProfile, option.rangeFloor, option.rangeStrike, option.rangeCap, option.expiry, option.sell, option.buy, option.maxYield, option.tvl)
     );
-    return(
-    <PageDiv>
-    <Search/>
-    <TableContainer style={{border: "1px solid #cccccc", borderRadius: "10px", backgroundColor: "white"}}>
-      <Table className={classes.table} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Underlying</TableCell>
-            <TableCell align="right">Payoff profile</TableCell>
-            <TableCell align="right">Range</TableCell>
-            <TableCell align="right">Expiry</TableCell>
-            <TableCell align="right">Sell</TableCell>
-            <TableCell align="right">Buy</TableCell>
-            <TableCell align="right">Max yield</TableCell>
-            <TableCell align="right">TVL</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-              //underlying, payoutProfile, rangeFloor, expiry, sell, buy, maxYield,tvl
-            <TableRow key={row.id}>
-              <TableCell component="th" scope="row">
-                {row.underlying}
-              </TableCell>
-              <TableCell align="right">{row.payoutProfile}</TableCell>
-              <TableCell align="right">{row.range}</TableCell>
-              <TableCell align="right">{row.expiryDT}</TableCell>
-              <TableCell align="right"><SellSpan >{row.sell}</SellSpan></TableCell>
-              <TableCell align="right"><BuySpan>{row.buy}</BuySpan></TableCell>
-              <TableCell align="right">{row.maxYield}</TableCell>
-              <TableCell align="right">{row.tvl}</TableCell>
 
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-    </PageDiv>
+    const handleRowSelect = (row) => {
+      return(<Underlying/>);
+    }
+
+    return(
+      <PageDiv>
+        <Search/>
+        <TableContainer style={{border: "1px solid #cccccc", borderRadius: "10px", backgroundColor: "white"}}>
+          <Table className={classes.table} aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Underlying</TableCell>
+                <TableCell align="right">Payoff profile</TableCell>
+                <TableCell align="right">Range</TableCell>
+                <TableCell align="right">Expiry</TableCell>
+                <TableCell align="right">Sell</TableCell>
+                <TableCell align="right">Buy</TableCell>
+                <TableCell align="right">Max yield</TableCell>
+                <TableCell align="right">TVL</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map((row) => (
+                <Option key={row.id} row={row} handleRowSelect={handleRowSelect}/>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </PageDiv>
     );
 }

@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components';
 import logo from '../../Images/logo.svg'
+import '../../Util/Dates'
 
 const AppHeader = styled.header`
     background-color: white;

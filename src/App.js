@@ -70,7 +70,7 @@ export default function App() {
         <OptionsList optionData={optionData}/>
       </TabPanel>
       <TabPanel value={activeTab} index={1}>
-        <Underlying optionData={data}/>
+        <Underlying optionData={optionData}/>
       </TabPanel>
     </AppPage>
   )
