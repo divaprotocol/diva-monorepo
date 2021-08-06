@@ -4,11 +4,14 @@ import 'styled-components'
 import styled from 'styled-components'
 import Header from './component/Header/Header';
 import OptionsList from './component/Markets/OptionsList';
-import TabPanel from './component/Header/TabPanel';
 import Underlying from './component/Trade/Underlying';
 import {optionsCount} from './DataService/FireStoreDB';
 
-
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+} from "react-router-dom";
 
 const AppPage = styled.div`
   text-align: center;
@@ -17,16 +20,6 @@ const AppPage = styled.div`
 
 export default function App() {
   const [optionData, setOptionData]  = useState([])
-  const [activeTab, setActiveTab] = useState(0)
-
-  const data = {
-    Expiry: "2021-12-31",
-    Range: "25k-35k",
-    Direction: "Up",
-    Collateral: "Dai",
-    DataFeedProvider: "Uniswap v3",
-    DataSource: "Uniswap"
-  }
 
   const componentDidMount = async () => {
   var oData = [];
@@ -59,19 +52,19 @@ export default function App() {
     }
   })
 
-  const handleTabClick = (tab) => {
-    setActiveTab(tab)
-  }
-
   return (
-    <AppPage>
-      <Header optionData={optionData} handleTabClick={handleTabClick}/>
-      <TabPanel value={activeTab} index={0}>
-        <OptionsList optionData={optionData}/>
-      </TabPanel>
-      <TabPanel value={activeTab} index={1}>
-        <Underlying optionData={optionData}/>
-      </TabPanel>
-    </AppPage>
-  )
+    <Router>
+      <AppPage>
+        <Header optionData={optionData}/>
+        <Switch>
+          <Route exact path="/">
+            <OptionsList optionData={optionData} />
+          </Route>
+          <Route path="/trade/:id">
+            <Underlying/>
+          </Route>
+        </Switch>
+      </AppPage>
+    </Router>
+  )  
 }

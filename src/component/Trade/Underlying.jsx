@@ -8,6 +8,8 @@ import OrderBook from './OrderBook';
 import CreateOrder from './CreateOrder';
 import LineSeries from '../Graphs/LineSeries';
 import './Underlying.css';
+import { useSelector } from 'react-redux'
+
 
 const PageDiv = styled.div `
     display: flex;
@@ -46,14 +48,15 @@ const RightCompDiv = styled.div `
     border-radius: 15px;
     background-color : white;
 `
+
 export default function Underlying(props) {
+    const selectedOption = useSelector((state) => state.tradeOption.option)
     return(
-        
         <PageDiv>
             <PageLeftDiv>
                <LeftCompDiv>
                     <OptionHeader/>
-                    <OptionDetails optionData={props.optionData}/>
+                    <OptionDetails optionData={selectedOption}/>
                 </LeftCompDiv>
                 <LeftCompDiv><OpenOrders/></LeftCompDiv>
                 <LeftCompDiv><OrderBook/></LeftCompDiv>

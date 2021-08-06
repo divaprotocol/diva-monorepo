@@ -30,6 +30,20 @@ function a11yProps(index) {
       }
   }));
 
+  const TabsDiv = styled.div`
+    display: flex;
+    justify-content: space-around;
+    aligh-items: flex-start;
+  `;
+
+  const LeftTabDiv = styled.div`
+    flex : 1;
+  `;
+
+  const RightTabDiv = styled.div`
+    flex : 1;
+  `;
+
   const useDividerStyle = makeStyles((theme) => ({
     tab: {
         width: 100,
@@ -70,27 +84,39 @@ export default function CreateOrder() {
     const classes = useStyles();
     const dividerClass = useDividerStyle();
     const tabsClass = useTabsBorder();
-    const [value, setValue] = React.useState(0);
+    const [orderTypeValue, setOrderTypeValue] = React.useState(0);
+    const [priceTypeValue, setPriceTypeValue] = React.useState(0);
+    
     const orderData = {
         numberOfOptions : 10,
         youPay : 1.9,
         token : 'DAI'
     }
 
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
+    const handleOrderTypeChange = (event, newValue) => {
+      setOrderTypeValue(newValue);
     };
 
-    
+    const handlePriceTypeChange = (event, newValue) => {
+      setPriceTypeValue(newValue);
+    };
 
     return(
         <PageDiv className={classes.root}>
-            <Tabs className={tabsClass.tabs} value={value} onChange={handleChange} aria-label="simple tabs example">
+          <TabsDiv>
+          <LeftTabDiv>
+            <Tabs className={tabsClass.tabs} value={orderTypeValue} onChange={handleOrderTypeChange} aria-label="simple tabs example">
                 <Tab label="BUY" {...a11yProps(0)} className={classes.tab}/>
                 <Tab label="SELL" {...a11yProps(1)} className={dividerClass.tab}/>
-                <Tab label="MARKET" {...a11yProps(2)} className={classes.tab}/>
-                <Tab label="LIMIT" {...a11yProps(3)} className={classes.tab}/>
             </Tabs>
+            </LeftTabDiv>
+            <RightTabDiv>
+            <Tabs className={tabsClass.tabs} value={priceTypeValue} onChange={handlePriceTypeChange} aria-label="simple tabs example">
+              <Tab label="MARKET" {...a11yProps(0)} className={classes.tab}/>
+              <Tab label="LIMIT" {...a11yProps(1)} className={classes.tab}/>
+            </Tabs>
+            </RightTabDiv>
+          </TabsDiv>  
             <LabelStyleDiv><label>Number of Options</label></LabelStyleDiv>
             <NumberLabelDiv><NumberLabel>{orderData.numberOfOptions}</NumberLabel></NumberLabelDiv>
             <LabelStyleDiv><label>Price per Option</label></LabelStyleDiv>

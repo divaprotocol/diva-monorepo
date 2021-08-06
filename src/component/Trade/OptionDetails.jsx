@@ -55,7 +55,7 @@ export default function Option(props) {
                 <tr>
                     <OptionTd>
                         <OptionTdHead>Expires at</OptionTdHead>
-                        <OptionTdData>{props.optionData.Expiry}</OptionTdData>
+                        <OptionTdData>{props.optionData.expiryDT}</OptionTdData>
                     </OptionTd>
                     <OptionTd>
                         <OptionTdHead>Range</OptionTdHead>
