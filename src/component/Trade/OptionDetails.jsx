@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
-
+import { useSelector } from 'react-redux';
+import { getDateTime } from '../../Util/Dates';
 const PageDiv = styled.div `
     width: 100%;
     background-color: white;
@@ -39,7 +40,18 @@ const Table = styled.table`
     display: inline-block;
 `;
 
+function createData(option) {
+    return {
+       expiry : getDateTime(option.ExpiryDate).slice(0,10),
+       Direction : "TBD",
+       floor : option.floor,
+       
+    }
+
+}
 export default function Option(props) {
+    const selectedOption = useSelector((state) => state.tradeOption.option)
+    const option = createData(selectedOption);
     return(
         <PageDiv>
         <Table>
@@ -55,7 +67,7 @@ export default function Option(props) {
                 <tr>
                     <OptionTd>
                         <OptionTdHead>Expires at</OptionTdHead>
-                        <OptionTdData>{props.optionData.expiryDT}</OptionTdData>
+                        <OptionTdData>{option.expiry}</OptionTdData>
                     </OptionTd>
                     <OptionTd>
                         <OptionTdHead>Range</OptionTdHead>

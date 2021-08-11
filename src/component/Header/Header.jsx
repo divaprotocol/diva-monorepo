@@ -24,7 +24,7 @@ export default function Header(props) {
     return(
         <AppHeader>
             <Image src={logo} alt="ReactApp"/>
-            <MenuItems optionData={props.optionData}/>
+            <MenuItems/>
         </AppHeader>
     );
 }

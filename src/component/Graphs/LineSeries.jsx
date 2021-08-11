@@ -84,31 +84,6 @@ if (collateralBalanceLong === 0) {
 }
 
 // Test some output values
-console.log(
-  "Long payoff: " +
-    payoffFunctionLong(
-      34500,
-      collateralBalanceLong,
-      collateralBalanceShort,
-      floor,
-      strike,
-      cap,
-      longPositionTokenSupply
-    )
-);
-
-console.log(
-  "Short payoff: " +
-    payoffFunctionShort(
-      32000,
-      collateralBalanceLong,
-      collateralBalanceShort,
-      floor,
-      strike,
-      cap,
-      shortPositionTokenSupply
-    )
-);
 
 // Aux range function
 const range = (start, stop, step) =>
@@ -130,24 +105,12 @@ const yValues = xValues.map((xValues) =>
   )
 );
 
-console.log(
-  payoffFunctionLong(
-    40000,
-    collateralBalanceLong,
-    collateralBalanceShort,
-    floor,
-    strike,
-    cap,
-    longPositionTokenSupply
-  )
-);
-
 // Generage object array containing xy values
 let data = [];
 for (let i = 0; i < xValues.length; i++) {
   data.push({ x: xValues[i], y: yValues[i] });
 }
-console.log(data);
+
 
 // Plot the data
 export default function PayOffChart() {

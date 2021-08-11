@@ -6,7 +6,8 @@ import Header from './component/Header/Header';
 import OptionsList from './component/Markets/OptionsList';
 import Underlying from './component/Trade/Underlying';
 import {optionsCount} from './DataService/FireStoreDB';
-
+import { useDispatch } from 'react-redux';
+import { setAllOptions } from './Redux/TradeOption';
 import {
   BrowserRouter as Router,
   Switch,
@@ -19,30 +20,18 @@ const AppPage = styled.div`
 `;
 
 export default function App() {
+  //Need to set initial state
   const [optionData, setOptionData]  = useState([])
+  const dispatch = useDispatch()
 
   const componentDidMount = async () => {
   var oData = [];
   await optionsCount.get().then( function(responseData) {
     responseData.docs.forEach(doc => {
-      let data = doc.data();  
-      const odata =
-        {
-          id : oData.length,
-          underlying : data.ReferenceAsset,
-          payoutProfile : "TBD",
-          rangeFloor : data.Floor,
-          rangeStrike : data.Strike,
-          rangeCap : data.Cap,
-          expiry : data.ExpiryDate,
-          sell : "TBD",
-          buy : "TBD",
-          maxYield : "TBD",
-          tvl : "TBD"
-        }      
-      oData.push(odata);  
+      oData.push(doc.data());  
     })
   })
+  dispatch(setAllOptions(oData))
   setOptionData(oData);
 }
 
@@ -55,10 +44,10 @@ export default function App() {
   return (
     <Router>
       <AppPage>
-        <Header optionData={optionData}/>
+        <Header/>
         <Switch>
           <Route exact path="/">
-            <OptionsList optionData={optionData} />
+            <OptionsList/>
           </Route>
           <Route path="/trade/:id">
             <Underlying/>

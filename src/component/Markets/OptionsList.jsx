@@ -11,6 +11,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Search from './Search';
 import { getDateTime } from '../../Util/Dates';
 import Option from '../OptionDetails/Option';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles({
     table: {
@@ -28,18 +29,9 @@ const PageDiv = styled.div `
     border-radius: 5px;
 `;
 
-function createData(id, underlying, payoutProfile, floor, strike, cap, expiry, sell,buy, maxYield, tvl) {
-  var range = floor + "/" + strike +"/"+ cap;
-  var expiryDT = getDateTime(expiry)
-  return { id, underlying, payoutProfile, range, expiryDT, sell, buy, maxYield, tvl };
-}
-
-export default function OptionsList(props) {
+export default function OptionsList() {
   const classes = useStyles();
-  const rows = props.optionData.map((option) =>
-    createData(option.id,option.underlying, option.payoutProfile, option.rangeFloor, option.rangeStrike, option.rangeCap, option.expiry, option.sell, option.buy, option.maxYield, option.tvl)
-  );
-      
+  const rows = useSelector(state => state.tradeOption.allOptions)
   return(
     <PageDiv>
       <Search/>
@@ -59,7 +51,7 @@ export default function OptionsList(props) {
           </TableHead>
           <TableBody>
             {rows.map((row) => (
-              <Option key={row.id} row={row}/>
+              <Option key={row.OptionId} option={row}/>
             ))}
           </TableBody>
         </Table>

@@ -7,7 +7,7 @@ import {
   Link  
 } from "react-router-dom";
 
-export default function MenuItems(props) {
+export default function MenuItems() {
   return (
     <div>
       <Route 
