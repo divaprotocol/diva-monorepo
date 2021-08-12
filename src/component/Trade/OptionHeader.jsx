@@ -22,9 +22,10 @@ const OptionTitle = styled.h2`
 
 const Image = styled.img`
     height: 3.5vmin;
-    width: 6vmin;
+    width: 3.5vmin;
     margin-left: 50px;
     pointer-events: none;
+    justify-content: center;
 `;
 
 
@@ -35,14 +36,14 @@ const ImgDiv = styled.div`
 `;
 const LeftAssetImg = styled.img`
     flex : 1;
-    height: 6vmin;
-    width: 6vmin;
+    height: 3.5vmin;
+    width: 3.5vmin;
     margin-left: 50px;
 `
 const RightAssetImg = styled.img`
     flex : 1;
-    height: 6vmin;
-    width: 6vmin;
+    height: 3.5vmin;
+    width: 3.5vmin;
     margin-left: 1px;
 `
 
