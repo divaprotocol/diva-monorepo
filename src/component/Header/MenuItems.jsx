@@ -13,7 +13,7 @@ export default function MenuItems() {
       <Route 
         path="/"
         render={(history) => (
-          <Tabs value={history.location.pathname.includes('/trade') ? false : history.location.pathname } aria-label="simple tabs example" TabIndicatorProps={{style: {backgroundColor: "#70D9BA"}}}>
+          <Tabs value={history.location.pathname.includes('/trade') ? false : history.location.pathname } aria-label="" TabIndicatorProps={{style: {backgroundColor: "#70D9BA"}}}>
             <Tab label="Markets" value={"/"} component={Link} to={"/"}/>
             <Tab label="Request" value={"/Request"} component={Link} to={"/Request"}/>
             <Tab label="Create" value={"/Create"} component={Link} to={"/Create"}/> 

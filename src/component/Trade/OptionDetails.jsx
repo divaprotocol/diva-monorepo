@@ -1,7 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
-import { useSelector } from 'react-redux';
 import { getDateTime } from '../../Util/Dates';
+import { Tooltip } from '@material-ui/core';
+
 const PageDiv = styled.div `
     width: 100%;
     background-color: white;
@@ -11,28 +12,34 @@ const OptionTd = styled.td `
     padding-bottom: 5px;
     width: 45vh;
     height: 10vh;
+    
 `;
 
 const OptionTdHead = styled.h5 `
-    padding-right: 50px;
+    padding-right: 35px;
     padding-top: 5px;
-`;
-
-const OptionSecTdHead = styled.h5 `
-    padding-right: 10px;
+    textAlign : "center";
+    
 `;
 
 const OptionTdData = styled.div `
-    padding-right: 40px;
+    padding-right: 35px;
+`;
+
+const OptionSecTdHead = styled.h5 `
+    padding-left: 5px;
 `;
 
 const OptionSecTdData = styled.div `
-    padding-right: 10px;
+    padding-left: 10px;
+    width : 100px;
+    overflow : hidden;
+    text-overflow : ellipsis;
 `;
 
 const TableHeadTh = styled.th`
     padding-right : 40px; 
-    border-bottom : solid 1px black; 
+     
 `;
 
 const Table = styled.table` 
@@ -40,18 +47,28 @@ const Table = styled.table`
     display: inline-block;
 `;
 
+const Border = styled.div`
+    border-bottom : 1px solid #70D9BA;
+`
+
 function createData(option) {
     return {
        expiry : getDateTime(option.ExpiryDate).slice(0,10),
        Direction : "TBD",
-       floor : option.floor,
-       
+       direction : option.isLong ? "Up" : "Down",
+       cap : option.Cap,
+       floor : option.Strike,
+       pivPt : option.Inflection,
+       collateral : option.CollateralTokenName,
+       dataFeedProvider : option.DataFeedProvider
     }
 
 }
 export default function Option(props) {
-    const selectedOption = useSelector((state) => state.tradeOption.option)
-    const option = createData(selectedOption);
+    //Instead of calling redux to get selected option at each component level
+    //we can call at root component of trade that is underlying and pass as porps
+    //to each child component.
+    const option = createData(props.optionData);
     return(
         <PageDiv>
         <Table>
@@ -61,8 +78,11 @@ export default function Option(props) {
                     <TableHeadTh></TableHeadTh>
                     <TableHeadTh></TableHeadTh>
                     <TableHeadTh></TableHeadTh>
+                    <TableHeadTh></TableHeadTh>
+                    <TableHeadTh></TableHeadTh>
                 </tr>
             </thead>
+                <Border></Border>
             <tbody>  
                 <tr>
                     <OptionTd>
@@ -70,26 +90,36 @@ export default function Option(props) {
                         <OptionTdData>{option.expiry}</OptionTdData>
                     </OptionTd>
                     <OptionTd>
-                        <OptionTdHead>Range</OptionTdHead>
-                        <OptionTdData>{props.optionData.Range}</OptionTdData>
+                        <OptionTdHead>Direction</OptionTdHead>
+                        <OptionTdData>{option.direction}</OptionTdData>
                     </OptionTd>
                     <OptionTd>
-                        <OptionTdHead>Direction</OptionTdHead>
-                        <OptionTdData>{props.optionData.Direction}</OptionTdData>
+                        <OptionTdHead>Floor</OptionTdHead>
+                        <OptionTdData>{option.floor}</OptionTdData>
+                    </OptionTd>
+                    <OptionTd>
+                        <OptionTdHead>PivPt</OptionTdHead>
+                        <OptionTdData>{option.pivPt}</OptionTdData>
+                    </OptionTd>
+                    <OptionTd>
+                        <OptionTdHead>Cap</OptionTdHead>
+                        <OptionTdData>{option.cap}</OptionTdData>
                     </OptionTd>
                     <OptionTd>
                         <OptionTdHead>Collateral</OptionTdHead>
-                        <OptionTdData>{props.optionData.Collateral}</OptionTdData>
+                        <OptionTdData>{option.collateral}</OptionTdData>
                     </OptionTd>
                 </tr>
                 <tr>
                     <OptionTd>
                         <OptionSecTdHead>Data feed provider</OptionSecTdHead>
-                        <OptionSecTdData>{props.optionData.DataFeedProvider}</OptionSecTdData>
+                        <Tooltip title={option.dataFeedProvider} arrow>
+                            <OptionSecTdData>{option.dataFeedProvider}</OptionSecTdData>
+                        </Tooltip>    
                     </OptionTd>
                     <OptionTd>
                         <OptionSecTdHead>Data source</OptionSecTdHead>
-                        <OptionSecTdData>{props.optionData.DataSource}</OptionSecTdData>
+                        <OptionSecTdData>TBD</OptionSecTdData>
                     </OptionTd>
                 </tr>    
             </tbody>

@@ -49,13 +49,14 @@ const RightCompDiv = styled.div `
     background-color : white;
 `
 
-export default function Underlying(props) {
+export default function Underlying() {
     const selectedOption = useSelector((state) => state.tradeOption.option)
+    
     return(
         <PageDiv>
             <PageLeftDiv>
                <LeftCompDiv>
-                    <OptionHeader/>
+                    <OptionHeader optionData={selectedOption}/>
                     <OptionDetails optionData={selectedOption}/>
                 </LeftCompDiv>
                 <LeftCompDiv><OpenOrders/></LeftCompDiv>

@@ -28,7 +28,7 @@ export default function App() {
   var oData = [];
   await optionsCount.get().then( function(responseData) {
     responseData.docs.forEach(doc => {
-      oData.push(doc.data());  
+      oData.push(doc.data());
     })
   })
   dispatch(setAllOptions(oData))
