@@ -57,8 +57,8 @@ function createData(option) {
        Direction : "TBD",
        direction : option.isLong ? "Up" : "Down",
        cap : option.Cap,
-       floor : option.Strike,
-       pivPt : option.Inflection,
+       strike : option.Strike,
+       inflection : option.Inflection,
        collateral : option.CollateralTokenName,
        dataFeedProvider : option.DataFeedProvider
     }
@@ -94,12 +94,12 @@ export default function Option(props) {
                         <OptionTdData>{option.direction}</OptionTdData>
                     </OptionTd>
                     <OptionTd>
-                        <OptionTdHead>Floor</OptionTdHead>
-                        <OptionTdData>{option.floor}</OptionTdData>
+                        <OptionTdHead>Strike</OptionTdHead>
+                        <OptionTdData>{option.strike}</OptionTdData>
                     </OptionTd>
                     <OptionTd>
-                        <OptionTdHead>PivPt</OptionTdHead>
-                        <OptionTdData>{option.pivPt}</OptionTdData>
+                        <OptionTdHead>Inflection</OptionTdHead>
+                        <OptionTdData>{option.inflection}</OptionTdData>
                     </OptionTd>
                     <OptionTd>
                         <OptionTdHead>Cap</OptionTdHead>
