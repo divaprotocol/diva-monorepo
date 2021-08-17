@@ -66,6 +66,12 @@ function a11yProps(index) {
     color: #282c34;
     font-size : 18px;
   `;
+
+  const CreateButtonWrapper = styled.div`
+    margin-top : 20px;
+    margin-bottom : 20px;
+    aligned : center;
+  `
   
   const ExpiryLabel = styled.label`
     margin-right : 10px;
@@ -85,7 +91,7 @@ function a11yProps(index) {
     text-align : center;
   `
 
-export default function CreateOrder() {
+export default function CreateOrder(props) {
     const classes = useStyles();
     const dividerClass = useDividerStyle();
     const tabsClass = useTabsBorder();
@@ -128,13 +134,13 @@ export default function CreateOrder() {
         <form onSubmit={handleOrderSubmit}>
           <LabelStyleDiv><label>Number of Options</label></LabelStyleDiv>
             <FormInput type="text" value={numberOfOptions} onChange={ event => setNumberOfOptions(event.target.value)} />
-          <LabelStyleDiv><label>Price per Option</label></LabelStyleDiv>
+          <LabelStyleDiv><label>Price per Option in {props.collateral}</label></LabelStyleDiv>
             <FormInput type="text" value={pricePerOption} onChange={event =>  setPricePerOption(event.target.value)}/>
           <LabelStyleDiv hidden={priceTypeValue===0}>
             <ExpiryLabel>Order expires in 10 mins</ExpiryLabel>
             <EditRoundedIcon aria-label="edit"/>
           </LabelStyleDiv>
-          
+          <CreateButtonWrapper hidden={priceTypeValue===1}/>
             <Button variant="contained"
               color="primary"
               size="large"

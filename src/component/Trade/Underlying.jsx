@@ -63,7 +63,7 @@ export default function Underlying() {
                 <LeftCompDiv><OrderBook/></LeftCompDiv>
             </PageLeftDiv>
             <PageRightDiv>
-                <RightCompDiv><CreateOrder/></RightCompDiv>
+                <RightCompDiv><CreateOrder collateral={selectedOption.CollateralTokenName}/></RightCompDiv>
                 <RightCompDiv><LineSeries/></RightCompDiv>
             </PageRightDiv>
         </PageDiv>
