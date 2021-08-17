@@ -57,7 +57,7 @@ function renderRefImgs(assetName) {
         return(<Image src={'/images/coin-logos/ETH.png'} alt="ReactApp"/>)
     } else {
         const asset = refAssetImgs.find(asset => asset.refAsset === assetName)
-        console.log(asset)
+        
         return(
             <ImgDiv>
                 <LeftAssetImg src={asset.img0} alt="ReactApp"/>

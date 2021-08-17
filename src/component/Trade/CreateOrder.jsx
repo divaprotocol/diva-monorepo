@@ -6,6 +6,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AddIcon from '@material-ui/icons/Add';
 import Button from '@material-ui/core/Button';
+import EditRoundedIcon from '@material-ui/icons/EditRounded';
 
 const PageDiv = styled.div `
     width: 400px;
@@ -59,39 +60,47 @@ function a11yProps(index) {
   }));
 
   const LabelStyleDiv = styled.div`
-        margin-top : 25px;
-        aligned : center;
-        color: #282c34;
-    `;
-
-  const NumberLabelDiv = styled.div`
-        width: 200px;
-        height: 30px;
-        margin-top : 25px;
-        margin-left: 100px;
-        align-items: center;
-        display: flex;
-        background-color: #F8F8F8;
-        padding-top:10px;
-        padding-bottom: 10px;
+    margin-top : 20px;
+    margin-bottom : 20px;
+    aligned : center;
+    color: #282c34;
+    font-size : 18px;
   `;
 
-  const NumberLabel = styled.label`
-    margin: 0 auto;
+  const CreateButtonWrapper = styled.div`
+    margin-top : 20px;
+    margin-bottom : 20px;
+    aligned : center;
+  `
+  
+  const ExpiryLabel = styled.label`
+    margin-right : 10px;
   `;
 
-export default function CreateOrder() {
+  const FormInput = styled.input`
+    width: 200px;
+    height: 30px;
+    margin-top : 25px;
+    margin-left: 100px;
+    display: flex;
+    background-color: #F8F8F8;
+    padding-top:10px;
+    padding-bottom: 10px;
+    font-size : 36px;
+    border : none;
+    text-align : center;
+  `
+
+export default function CreateOrder(props) {
     const classes = useStyles();
     const dividerClass = useDividerStyle();
     const tabsClass = useTabsBorder();
+    
     const [orderTypeValue, setOrderTypeValue] = React.useState(0);
     const [priceTypeValue, setPriceTypeValue] = React.useState(0);
+    const [numberOfOptions, setNumberOfOptions] = React.useState(5);
+    const [pricePerOption, setPricePerOption] = React.useState(0)
     
-    const orderData = {
-        numberOfOptions : 10,
-        youPay : 1.9,
-        token : 'DAI'
-    }
 
     const handleOrderTypeChange = (event, newValue) => {
       setOrderTypeValue(newValue);
@@ -101,35 +110,48 @@ export default function CreateOrder() {
       setPriceTypeValue(newValue);
     };
 
+    const handleOrderSubmit = (event) => {
+      event.preventDefault();
+    }
     return(
-        <PageDiv className={classes.root}>
-          <TabsDiv>
+      <PageDiv className={classes.root}>
+        <TabsDiv>
           <LeftTabDiv>
             <Tabs className={tabsClass.tabs} value={orderTypeValue} onChange={handleOrderTypeChange} aria-label="simple tabs example">
-                <Tab label="BUY" {...a11yProps(0)} className={classes.tab}/>
-                <Tab label="SELL" {...a11yProps(1)} className={dividerClass.tab}/>
+              <Tab label="BUY" {...a11yProps(0)} className={classes.tab}/>
+              <Tab label="SELL" {...a11yProps(1)} className={dividerClass.tab}/>
             </Tabs>
-            </LeftTabDiv>
-            <RightTabDiv>
+          </LeftTabDiv>
+            
+          <RightTabDiv>
             <Tabs className={tabsClass.tabs} value={priceTypeValue} onChange={handlePriceTypeChange} aria-label="simple tabs example">
               <Tab label="MARKET" {...a11yProps(0)} className={classes.tab}/>
               <Tab label="LIMIT" {...a11yProps(1)} className={classes.tab}/>
             </Tabs>
-            </RightTabDiv>
-          </TabsDiv>  
-            <LabelStyleDiv><label>Number of Options</label></LabelStyleDiv>
-            <NumberLabelDiv><NumberLabel>{orderData.numberOfOptions}</NumberLabel></NumberLabelDiv>
-            <LabelStyleDiv><label>Price per Option</label></LabelStyleDiv>
-            <NumberLabelDiv><NumberLabel>{orderData.numberOfOptions}</NumberLabel></NumberLabelDiv>
-            <LabelStyleDiv><label>Order expires in 10 mins</label></LabelStyleDiv>
+          </RightTabDiv>
+        </TabsDiv>  
+        
+        <form onSubmit={handleOrderSubmit}>
+          <LabelStyleDiv><label>Number of Options</label></LabelStyleDiv>
+            <FormInput type="text" value={numberOfOptions} onChange={ event => setNumberOfOptions(event.target.value)} />
+          <LabelStyleDiv><label>Price per Option in {props.collateral}</label></LabelStyleDiv>
+            <FormInput type="text" value={pricePerOption} onChange={event =>  setPricePerOption(event.target.value)}/>
+          <LabelStyleDiv hidden={priceTypeValue===0}>
+            <ExpiryLabel>Order expires in 10 mins</ExpiryLabel>
+            <EditRoundedIcon aria-label="edit"/>
+          </LabelStyleDiv>
+          <CreateButtonWrapper hidden={priceTypeValue===1}/>
             <Button variant="contained"
-            color="primary"
-            size="large"
-            className={classes.button}
-            startIcon={<AddIcon />}
+              color="primary"
+              size="large"
+              className={classes.button}
+              startIcon={<AddIcon />}
+              type="submit"
+              value="Submit"
             >
-            Create Order
-        </Button>
-        </PageDiv>
+              Create Order
+            </Button>
+        </form>
+      </PageDiv>
     ); 
 }
