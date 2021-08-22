@@ -19,11 +19,11 @@ const useStyles = makeStyles({
   });
 
 const PageDiv = styled.div `
-    width: 80%;
-    margin-left:10%;
-    margin-right:10%;
+    width: 90%;
+    margin-left:5%;
+    margin-right:5%;
     padding: 10px;
-    margin-top:2%;
+    margin-top:0%;
     border : '1px solid #cccccc';
     border-radius: 5px;
 `;
@@ -38,9 +38,12 @@ export default function OptionsList() {
         <Table className={classes.table} aria-label="simple table">
           <TableHead>
             <TableRow>
+              <TableCell></TableCell>
               <TableCell>Underlying</TableCell>
-              <TableCell align="right">Payoff profile</TableCell>
-              <TableCell align="right">Range</TableCell>
+              <TableCell align="center">Payoff profile</TableCell>
+              <TableCell align="right">Strike</TableCell>
+              <TableCell align="right">Inflection</TableCell>
+              <TableCell align="right">Cap</TableCell>
               <TableCell align="right">Expiry</TableCell>
               <TableCell align="right">Sell</TableCell>
               <TableCell align="right">Buy</TableCell>

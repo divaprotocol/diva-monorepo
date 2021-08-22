@@ -2,8 +2,6 @@ import React from 'react'
 import styled from 'styled-components';
 import '../../Util/Dates'
 
-
-
 const AppHeader = styled.header`
     background-color: white;
     min-height: 10vh;

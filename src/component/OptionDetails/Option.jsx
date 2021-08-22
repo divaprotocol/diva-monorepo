@@ -10,6 +10,7 @@ import {
     useHistory,   
 } from "react-router-dom";
 import { getDateTime } from '../../Util/Dates';
+
 const BuySpan = styled.span `
     background-color: green; 
     padding: 15px;
@@ -22,14 +23,62 @@ const SellSpan = styled.span `
     width: 2rem%;
 `;
 
+const ImgDiv = styled.div`
+    display: flex;
+    justify-content: flex-end;
+`;
+
+const Image = styled.img`
+    height: 2.5vmin;
+    width: 2.5vmin;
+    justify-content: center;
+    pointer-events: none;
+`;
+
+const LeftAssetImg = styled.img`
+    flex:2;
+    flex-grow: 0;
+    height: 2.5vmin;
+    width: 2.5vmin;
+    display: inline-block;
+`
+const RightAssetImg = styled.img`
+    flex:1;
+    flex-grow: 0;
+    height: 2.5vmin;
+    width: 2.5vmin;
+    display: inline-block;
+`
+
+const refAssetImgs = [
+    {refAsset : "ETH/USDT", img0 : "/images/coin-logos/ETH.png", img1 : "/images/coin-logos/USDT.png"},
+    {refAsset : "UNI/DAI", img0 : "/images/coin-logos/UNI.png", img1 : "/images/coin-logos/DAI.png"}
+];
+
+function renderRefImgs(assetName) {
+    if(assetName === 'ETH Gas Price') {
+        return(<Image src={'/images/coin-logos/ETH_GAS.png'} alt="ReactApp"/>)
+    } else {
+        const asset = refAssetImgs.find(asset => asset.refAsset === assetName)
+        
+        return(
+            <ImgDiv>
+                <LeftAssetImg src={asset.img0} alt="ReactApp"/>
+                <RightAssetImg src={asset.img1} alt="ReactApp"/>
+            </ImgDiv>
+        )
+    }
+}
+
 function createOptionRowDisplay(data) {
-    const rangeStr = data.Floor + "/" + data.Strike +"/"+ data.Cap; 
     const expiryStr = getDateTime(data.ExpiryDate)
     const rowDisplay = {
         id : data.optionId,
         underlying : data.ReferenceAsset,
         payoutProfile : "TBD",
-        range : rangeStr,
+        strike : data.Strike,
+        inflection : data.Inflection,
+        cap : data.Cap,
         expiry : expiryStr,
         sell : "TBD",
         buy : "TBD",
@@ -53,11 +102,14 @@ export default function Option(props) {
     }
     return(
         <TableRow onClick={handleRowSelect}>
+            <TableCell align="right">{renderRefImgs(displayRow.underlying)}</TableCell>
             <TableCell component="th" scope="row">
                 {displayRow.underlying}
             </TableCell>
-            <TableCell align="right">{displayRow.payoutProfile}</TableCell>
-            <TableCell align="right">{displayRow.range}</TableCell>
+            <TableCell align="center">{displayRow.payoutProfile}</TableCell>
+            <TableCell align="right">{displayRow.strike}</TableCell>
+            <TableCell align="right">{displayRow.inflection}</TableCell>
+            <TableCell align="right">{displayRow.cap}</TableCell>
             <TableCell align="right">{displayRow.expiry}</TableCell>
             <TableCell align="right"><SellSpan >{displayRow.sell}</SellSpan></TableCell>
             <TableCell align="right"><BuySpan>{displayRow.buy}</BuySpan></TableCell>
