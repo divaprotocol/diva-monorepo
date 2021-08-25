@@ -1,57 +1,6 @@
 import React from 'react'
-import 'styled-components'
-import styled from 'styled-components';
-import TableCell from '@material-ui/core/TableCell';
-import TableRow from '@material-ui/core/TableRow';
-import { useDispatch } from 'react-redux'
-import { setTradingOption } from '../../Redux/TradeOption'
-import {
-    BrowserRouter as Router,
-    useHistory,   
-} from "react-router-dom";
-import { getDateTime } from '../../Util/Dates';
 
-const BuySpan = styled.span `
-    background-color: green; 
-    padding: 15px;
-`;
-
-const SellSpan = styled.span `
-    background-color: pink; 
-    padding: 15px;
-    margin: 0px auto 0px auto;
-    width: 2rem%;
-`;
-
-const ImgDiv = styled.div`
-    display: flex;
-    justify-content: flex-end;
-`;
-
-const Image = styled.img`
-    height: 2.5vmin;
-    width: 2.5vmin;
-    justify-content: center;
-    pointer-events: none;
-`;
-
-const LeftAssetImg = styled.img`
-    flex:2;
-    flex-grow: 0;
-    height: 2.5vmin;
-    width: 2.5vmin;
-    display: inline-block;
-`
-const RightAssetImg = styled.img`
-    flex:1;
-    flex-grow: 0;
-    height: 2.5vmin;
-    width: 2.5vmin;
-    display: inline-block;
-`
-
-const assetLogoPath = '/images/coin-logos/'
-function renderRefImgs(assetName) {
+function createData(assetName) {
     const assets = assetName.split('/')
     console.log(assets)
 
