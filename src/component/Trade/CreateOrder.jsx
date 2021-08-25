@@ -7,10 +7,19 @@ import Tab from '@material-ui/core/Tab';
 import AddIcon from '@material-ui/icons/Add';
 import Button from '@material-ui/core/Button';
 import EditRoundedIcon from '@material-ui/icons/EditRounded';
+import Web3 from 'web3'
+import { buylimitOrder } from '../../Orders/BuyLimit';
+
+
+import InputLabel from '@material-ui/core/InputLabel';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import NativeSelect from '@material-ui/core/NativeSelect';
 
 const PageDiv = styled.div `
     width: 400px;
-    height: 400px;
+    height: 420px;
 `;
 
 function a11yProps(index) {
@@ -22,13 +31,20 @@ function a11yProps(index) {
   
   const useStyles = makeStyles((theme) => ({
     root: {
-        flexGrow: 1,
-        backgroundColor: theme.palette.background.paper,
+      flexGrow: 1,
+      backgroundColor: theme.palette.background.paper,
     },
     tab: {
-        width: 100,
-        minWidth: 50
-      }
+      width: 100,
+      minWidth: 50
+    },
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 200,
+    },
+    selectEmpty: {
+        marginTop: theme.spacing(1),
+    }
   }));
 
   const TabsDiv = styled.div`
@@ -67,6 +83,12 @@ function a11yProps(index) {
     font-size : 18px;
   `;
 
+  const LimitOrderExpiryDiv = styled.div`
+    aligned : center;
+    color: #282c34;
+    font-size : 18px;
+  `;
+
   const CreateButtonWrapper = styled.div`
     margin-top : 20px;
     margin-bottom : 20px;
@@ -91,6 +113,9 @@ function a11yProps(index) {
     text-align : center;
   `
 
+  const web3 = new Web3(Web3.givenProvider);
+  let accounts;
+
 export default function CreateOrder(props) {
     const classes = useStyles();
     const dividerClass = useDividerStyle();
@@ -100,8 +125,8 @@ export default function CreateOrder(props) {
     const [priceTypeValue, setPriceTypeValue] = React.useState(0);
     const [numberOfOptions, setNumberOfOptions] = React.useState(5);
     const [pricePerOption, setPricePerOption] = React.useState(0)
+    const option = props.option
     
-
     const handleOrderTypeChange = (event, newValue) => {
       setOrderTypeValue(newValue);
     };
@@ -110,21 +135,33 @@ export default function CreateOrder(props) {
       setPriceTypeValue(newValue);
     };
 
-    const handleOrderSubmit = (event) => {
+    const handleChange = () => {}
+    const handleOrderSubmit = async (event) => {
       event.preventDefault();
+      accounts = await window.ethereum.enable()
+      const orderData = {
+        maker : accounts[0],
+        provider : web3,
+        isBuy : orderTypeValue === 0 ? true : false,
+        nbrOptions : numberOfOptions,
+        limitPrice : pricePerOption,
+        orderExpiry : 8
+      }
+      buylimitOrder(orderData)
     }
+
     return(
       <PageDiv className={classes.root}>
         <TabsDiv>
           <LeftTabDiv>
-            <Tabs className={tabsClass.tabs} value={orderTypeValue} onChange={handleOrderTypeChange} aria-label="simple tabs example">
+            <Tabs className={tabsClass.tabs} value={orderTypeValue} onChange={handleOrderTypeChange} TabIndicatorProps={{style: {backgroundColor: "#70D9BA"}}}>
               <Tab label="BUY" {...a11yProps(0)} className={classes.tab}/>
               <Tab label="SELL" {...a11yProps(1)} className={dividerClass.tab}/>
             </Tabs>
           </LeftTabDiv>
             
           <RightTabDiv>
-            <Tabs className={tabsClass.tabs} value={priceTypeValue} onChange={handlePriceTypeChange} aria-label="simple tabs example">
+            <Tabs className={tabsClass.tabs} value={priceTypeValue} onChange={handlePriceTypeChange} TabIndicatorProps={{style: {backgroundColor: "#70D9BA"}}}>
               <Tab label="MARKET" {...a11yProps(0)} className={classes.tab}/>
               <Tab label="LIMIT" {...a11yProps(1)} className={classes.tab}/>
             </Tabs>
@@ -134,12 +171,28 @@ export default function CreateOrder(props) {
         <form onSubmit={handleOrderSubmit}>
           <LabelStyleDiv><label>Number of Options</label></LabelStyleDiv>
             <FormInput type="text" value={numberOfOptions} onChange={ event => setNumberOfOptions(event.target.value)} />
-          <LabelStyleDiv><label>Price per Option in {props.collateral}</label></LabelStyleDiv>
+          <LabelStyleDiv><label>Price per Option in {option.CollateralTokenName}</label></LabelStyleDiv>
             <FormInput type="text" value={pricePerOption} onChange={event =>  setPricePerOption(event.target.value)}/>
-          <LabelStyleDiv hidden={priceTypeValue===0}>
-            <ExpiryLabel>Order expires in 10 mins</ExpiryLabel>
-            <EditRoundedIcon aria-label="edit"/>
-          </LabelStyleDiv>
+          <LimitOrderExpiryDiv hidden={priceTypeValue===0}>
+          <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="expiry-native-helper">Mins</InputLabel>
+              <NativeSelect
+                value={0}
+                onChange={handleChange}
+                inputProps={{
+                  name: 'expiry',
+                  id: 'expiry-native-helper',
+                }}
+              >
+              <option aria-label="None" value="" />
+              <option value={1}>One</option>
+              <option value={2}>Two</option>
+              <option value={5}>Five</option>
+              <option value={10}>Ten</option>
+              </NativeSelect>
+              <FormHelperText>Select Order Expiry</FormHelperText>
+            </FormControl>
+          </LimitOrderExpiryDiv>
           <CreateButtonWrapper hidden={priceTypeValue===1}/>
             <Button variant="contained"
               color="primary"

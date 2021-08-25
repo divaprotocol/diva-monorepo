@@ -21,5 +21,3 @@ const firebaseConfig = {
 
   const database = firebase.firestore()
   export const optionsCount = database.collection('T_Options_New')
-
-  
