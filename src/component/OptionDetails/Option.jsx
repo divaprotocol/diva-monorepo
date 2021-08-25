@@ -10,6 +10,7 @@ import {
     useHistory,   
 } from "react-router-dom";
 import { getDateTime } from '../../Util/Dates';
+import MarketChart from '../Graphs/MarketChart.jsx';
 
 const BuySpan = styled.span `
     background-color: green; 
@@ -53,10 +54,8 @@ const RightAssetImg = styled.img`
 const assetLogoPath = '/images/coin-logos/'
 function renderRefImgs(assetName) {
     const assets = assetName.split('/')
-    console.log(assets)
 
     if(assets.length === 1) {
-        console.log(assetLogoPath + assets[0]+ '.png')
         return(<Image src={assetLogoPath + assets[0]+ '.png'} alt="ReactApp"/>)
     } else if (assets.length === 2) {
         return(
@@ -106,7 +105,7 @@ export default function Option(props) {
             <TableCell component="th" scope="row">
                 {displayRow.underlying}
             </TableCell>
-            <TableCell align="center">{displayRow.payoutProfile}</TableCell>
+            <TableCell align="center"> <MarketChart data={props.option}/></TableCell>
             <TableCell align="right">{displayRow.strike}</TableCell>
             <TableCell align="right">{displayRow.inflection}</TableCell>
             <TableCell align="right">{displayRow.cap}</TableCell>
