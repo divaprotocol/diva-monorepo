@@ -9,6 +9,10 @@ import CreateOrder from './CreateOrder';
 import LineSeries from '../Graphs/LineSeries';
 import './Underlying.css';
 import { useSelector } from 'react-redux'
+import {
+    BrowserRouter as Router,
+    useHistory,
+  } from "react-router-dom";
 
 
 const PageDiv = styled.div `
@@ -51,7 +55,12 @@ const RightCompDiv = styled.div `
 
 export default function Underlying() {
     const selectedOption = useSelector((state) => state.tradeOption.option)
-    
+    const history = useHistory();
+    if(Object.keys(selectedOption).length === 0) {
+        history.push("/")
+        return(<div/>)
+    }
+
     return(
         <PageDiv>
             <PageLeftDiv>
@@ -63,7 +72,7 @@ export default function Underlying() {
                 <LeftCompDiv><OrderBook/></LeftCompDiv>
             </PageLeftDiv>
             <PageRightDiv>
-                <RightCompDiv><CreateOrder collateral={selectedOption.CollateralTokenName}/></RightCompDiv>
+                <RightCompDiv><CreateOrder option={selectedOption}/></RightCompDiv>
                 <RightCompDiv><LineSeries/></RightCompDiv>
             </PageRightDiv>
         </PageDiv>
