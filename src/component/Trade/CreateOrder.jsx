@@ -6,7 +6,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import AddIcon from '@material-ui/icons/Add';
 import Button from '@material-ui/core/Button';
-import EditRoundedIcon from '@material-ui/icons/EditRounded';
+import { MenuItem } from '@material-ui/core';
 import Web3 from 'web3'
 import { buylimitOrder } from '../../Orders/BuyLimit';
 
@@ -125,6 +125,12 @@ export default function CreateOrder(props) {
     const [priceTypeValue, setPriceTypeValue] = React.useState(0);
     const [numberOfOptions, setNumberOfOptions] = React.useState(5);
     const [pricePerOption, setPricePerOption] = React.useState(0)
+    const [expiry, setExpiry] = React.useState(5);
+
+    const handleExpirySelection = (event) => {
+      event.preventDefault()
+      setExpiry(event.target.value);
+    };
     const option = props.option
     
     const handleOrderTypeChange = (event, newValue) => {
@@ -175,23 +181,23 @@ export default function CreateOrder(props) {
             <FormInput type="text" value={pricePerOption} onChange={event =>  setPricePerOption(event.target.value)}/>
           <LimitOrderExpiryDiv hidden={priceTypeValue===0}>
           <FormControl className={classes.formControl}>
-              <InputLabel htmlFor="expiry-native-helper">Mins</InputLabel>
-              <NativeSelect
-                value={0}
-                onChange={handleChange}
-                inputProps={{
-                  name: 'expiry',
-                  id: 'expiry-native-helper',
-                }}
-              >
-              <option aria-label="None" value="" />
-              <option value={1}>One</option>
-              <option value={2}>Two</option>
-              <option value={5}>Five</option>
-              <option value={10}>Ten</option>
-              </NativeSelect>
-              <FormHelperText>Select Order Expiry</FormHelperText>
-            </FormControl>
+            <Select
+              value={expiry}
+              onChange={handleExpirySelection}
+              displayEmpty
+              className={classes.selectEmpty}
+              inputProps={{ 'aria-label': 'Without label' }}
+            >
+              <MenuItem value={5} >
+                5 Minutes
+              </MenuItem>
+              <MenuItem value={10}>10 Minutes</MenuItem>
+              <MenuItem value={20}>20 Minutes</MenuItem>
+              <MenuItem value={30}>30 Minutes</MenuItem>
+              <MenuItem value={60}>1 Hour</MenuItem>
+            </Select>
+            <FormHelperText>Order expires in </FormHelperText>
+          </FormControl>
           </LimitOrderExpiryDiv>
           <CreateButtonWrapper hidden={priceTypeValue===1}/>
             <Button variant="contained"
