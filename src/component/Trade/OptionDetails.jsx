@@ -19,7 +19,6 @@ const OptionTdHead = styled.h5 `
     padding-right: 35px;
     padding-top: 5px;
     textAlign : "center";
-    
 `;
 
 const OptionTdData = styled.div `
