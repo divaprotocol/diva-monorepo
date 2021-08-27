@@ -11,17 +11,19 @@ function MarketChart(myData) {
       const width = 500;
       const margin = { top: 20, right: 30, bottom: 30, left: 40 };
 
-      const myData = {
-        CollateralBalanceLong: 20,
-        CollateralBalanceShort: 10,
-        Strike: 20,
-        Inflection: 35,
-        Cap: 40,
-        TokenSupply: 30,
-        IsLong: true
-      };
+      // const { data } = myData.data;
 
-      const data = generatePayoffChartData(myData)
+      // const myData = {
+      //   CollateralBalanceLong: 20,
+      //   CollateralBalanceShort: 10,
+      //   Strike: 20,
+      //   Inflection: 35,
+      //   Cap: 40,
+      //   TokenSupply: 30,
+      //   IsLong: true
+      // };
+      console.log(myData)
+      const data = generatePayoffChartData(myData.data)
 
       const x = d3
         .scaleLinear()

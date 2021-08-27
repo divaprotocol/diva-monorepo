@@ -53,7 +53,7 @@ function generatePayoffFunction({
     return payoffFunction;
 }
   
-function generatePayoffChartData(data) {
+export default function generatePayoffChartData(data) {
     //const optionData = data.data.option
     const optionData = data
     const payoffFunction = generatePayoffFunction(optionData);
@@ -78,6 +78,6 @@ function generatePayoffChartData(data) {
     }
 }
 
-export default generatePayoffChartData;
+// export default generatePayoffChartData;
   
   
