@@ -105,7 +105,7 @@ export default function Option(props) {
             <TableCell component="th" scope="row">
                 {displayRow.underlying}
             </TableCell>
-            <TableCell align="center"><MarketChart data={option}/></TableCell>
+            <TableCell align="center"><MarketChart data={option} targetHeight={50} targetWidth={70}/></TableCell>
             <TableCell align="right">{displayRow.strike}</TableCell>
             <TableCell align="right">{displayRow.inflection}</TableCell>
             <TableCell align="right">{displayRow.cap}</TableCell>
