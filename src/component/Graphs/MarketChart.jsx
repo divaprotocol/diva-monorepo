@@ -4,12 +4,13 @@ import * as d3 from 'd3';
 import generatePayoffChartData from '../../Graphs/DataGenerator.js';
 
 function MarketChart(myData) {
-
+  console.log(myData)
   const ref = useD3(
     (svg) => {
-      const height = 500;
-      const width = 500;
-      const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+      const height = myData.targetHeight;
+      const width = myData.targetWidth;
+
+      const margin = { top: 0, right: 0, bottom: 0, left: 0 };
 
       // const { data } = myData.data;
 
@@ -89,10 +90,8 @@ function MarketChart(myData) {
     <svg
       ref={ref}
       style={{
-        height: 500,
-        width: "100%",
-        marginRight: "0px",
-        marginLeft: "0px",
+        height: myData.targetHeight,
+        width: myData.targetWidth,
       }}
     >
       <g className="plot-area" />
