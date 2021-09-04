@@ -4,19 +4,10 @@ import styled from 'styled-components'
 import { makeStyles } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import AddIcon from '@material-ui/icons/Add';
-import Button from '@material-ui/core/Button';
-import { MenuItem } from '@material-ui/core';
-import Web3 from 'web3'
-import { buylimitOrder } from '../../Orders/BuyLimit';
-
-
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import NativeSelect from '@material-ui/core/NativeSelect';
-
+import BuyMarket from './Orders/BuyMarket'
+import BuyLimit from './Orders/BuyLimit';
+import SellLimit from './Orders/SellLimit'
+import SellMarket from './Orders/SellMarket'
 const PageDiv = styled.div `
     width: 400px;
     height: 420px;
@@ -75,64 +66,28 @@ function a11yProps(index) {
       }
   }));
 
-  const LabelStyleDiv = styled.div`
-    margin-top : 20px;
-    margin-bottom : 20px;
-    aligned : center;
-    color: #282c34;
-    font-size : 18px;
-  `;
-
-  const LimitOrderExpiryDiv = styled.div`
-    aligned : center;
-    color: #282c34;
-    font-size : 18px;
-  `;
-
-  const CreateButtonWrapper = styled.div`
-    margin-top : 20px;
-    margin-bottom : 20px;
-    aligned : center;
-  `
-  
-  const ExpiryLabel = styled.label`
-    margin-right : 10px;
-  `;
-
-  const FormInput = styled.input`
-    width: 200px;
-    height: 30px;
-    margin-top : 25px;
-    margin-left: 100px;
-    display: flex;
-    background-color: #F8F8F8;
-    padding-top:10px;
-    padding-bottom: 10px;
-    font-size : 36px;
-    border : none;
-    text-align : center;
-  `
-
-  const web3 = new Web3(Web3.givenProvider);
-  let accounts;
-
 export default function CreateOrder(props) {
+    const option = props.option
     const classes = useStyles();
     const dividerClass = useDividerStyle();
     const tabsClass = useTabsBorder();
     
-    const [orderTypeValue, setOrderTypeValue] = React.useState(0);
-    const [priceTypeValue, setPriceTypeValue] = React.useState(0);
+    const [orderType, setOrderTypeValue] = React.useState(0);
+    const [priceType, setPriceTypeValue] = React.useState(0);
     const [numberOfOptions, setNumberOfOptions] = React.useState(5);
-    const [pricePerOption, setPricePerOption] = React.useState(0)
+    const [pricePerOption, setPricePerOption] = React.useState(0);
+
     const [expiry, setExpiry] = React.useState(5);
 
-    const handleExpirySelection = (event) => {
-      event.preventDefault()
-      setExpiry(event.target.value);
-    };
-    const option = props.option
     
+    const handleNumberOfOptions = (value) => {
+      setNumberOfOptions(value)
+    }
+
+    const handlePricePerOption = (value) => {
+      setPricePerOption(value)
+    }
+
     const handleOrderTypeChange = (event, newValue) => {
       setOrderTypeValue(newValue);
     };
@@ -142,75 +97,45 @@ export default function CreateOrder(props) {
     };
 
     const handleChange = () => {}
-    const handleOrderSubmit = async (event) => {
-      event.preventDefault();
-      accounts = await window.ethereum.enable()
-      const orderData = {
-        maker : accounts[0],
-        provider : web3,
-        isBuy : orderTypeValue === 0 ? true : false,
-        nbrOptions : numberOfOptions,
-        limitPrice : pricePerOption,
-        orderExpiry : 8
-      }
-      buylimitOrder(orderData)
-    }
+    
 
+    const renderOrderInfo = () => {
+      if(orderType == 0 && priceType == 0) {
+        //Buy Market
+        return(<BuyMarket option= {option} handleNumberOfOptions={handleNumberOfOptions} handlePricePerOption={handlePricePerOption}/>)
+      }
+      if(orderType == 0 && priceType == 1 ) {
+        //Buy Limit
+        return(<BuyLimit option= {option} handleNumberOfOptions={handleNumberOfOptions} handlePricePerOption={handlePricePerOption}/>)
+      }
+      if(orderType == 1 && priceType == 0 ) {
+        //Sell Market
+        return(<SellMarket option= {option} handleNumberOfOptions={handleNumberOfOptions} handlePricePerOption={handlePricePerOption}/>)
+      }
+      if(orderType == 1 && priceType == 1) {
+        //Sell Limit
+        return(<SellLimit option= {option} handleNumberOfOptions={handleNumberOfOptions} handlePricePerOption={handlePricePerOption}/>)
+      }
+    }
+    
     return(
       <PageDiv className={classes.root}>
         <TabsDiv>
           <LeftTabDiv>
-            <Tabs className={tabsClass.tabs} value={orderTypeValue} onChange={handleOrderTypeChange} TabIndicatorProps={{style: {backgroundColor: "#70D9BA"}}}>
+            <Tabs className={tabsClass.tabs} value={orderType} onChange={handleOrderTypeChange} TabIndicatorProps={{style: {backgroundColor: "#70D9BA"}}}>
               <Tab label="BUY" {...a11yProps(0)} className={classes.tab}/>
               <Tab label="SELL" {...a11yProps(1)} className={dividerClass.tab}/>
             </Tabs>
           </LeftTabDiv>
             
           <RightTabDiv>
-            <Tabs className={tabsClass.tabs} value={priceTypeValue} onChange={handlePriceTypeChange} TabIndicatorProps={{style: {backgroundColor: "#70D9BA"}}}>
+            <Tabs className={tabsClass.tabs} value={priceType} onChange={handlePriceTypeChange} TabIndicatorProps={{style: {backgroundColor: "#70D9BA"}}}>
               <Tab label="MARKET" {...a11yProps(0)} className={classes.tab}/>
               <Tab label="LIMIT" {...a11yProps(1)} className={classes.tab}/>
             </Tabs>
           </RightTabDiv>
         </TabsDiv>  
-        
-        <form onSubmit={handleOrderSubmit}>
-          <LabelStyleDiv><label>Number of Options</label></LabelStyleDiv>
-            <FormInput type="text" value={numberOfOptions} onChange={ event => setNumberOfOptions(event.target.value)} />
-          <LabelStyleDiv><label>Price per Option in {option.CollateralTokenName}</label></LabelStyleDiv>
-            <FormInput type="text" value={pricePerOption} onChange={event =>  setPricePerOption(event.target.value)}/>
-          <LimitOrderExpiryDiv hidden={priceTypeValue===0}>
-          <FormControl className={classes.formControl}>
-            <Select
-              value={expiry}
-              onChange={handleExpirySelection}
-              displayEmpty
-              className={classes.selectEmpty}
-              inputProps={{ 'aria-label': 'Without label' }}
-            >
-              <MenuItem value={5} >
-                5 Minutes
-              </MenuItem>
-              <MenuItem value={10}>10 Minutes</MenuItem>
-              <MenuItem value={20}>20 Minutes</MenuItem>
-              <MenuItem value={30}>30 Minutes</MenuItem>
-              <MenuItem value={60}>1 Hour</MenuItem>
-            </Select>
-            <FormHelperText>Order expires in </FormHelperText>
-          </FormControl>
-          </LimitOrderExpiryDiv>
-          <CreateButtonWrapper hidden={priceTypeValue===1}/>
-            <Button variant="contained"
-              color="primary"
-              size="large"
-              className={classes.button}
-              startIcon={<AddIcon />}
-              type="submit"
-              value="Submit"
-            >
-              Create Order
-            </Button>
-        </form>
+          {renderOrderInfo()}
       </PageDiv>
     ); 
 }
