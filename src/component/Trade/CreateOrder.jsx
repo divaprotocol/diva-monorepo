@@ -80,13 +80,7 @@ export default function CreateOrder(props) {
     const [expiry, setExpiry] = React.useState(5);
 
     
-    const handleNumberOfOptions = (value) => {
-      setNumberOfOptions(value)
-    }
-
-    const handlePricePerOption = (value) => {
-      setPricePerOption(value)
-    }
+    
 
     const handleOrderTypeChange = (event, newValue) => {
       setOrderTypeValue(newValue);
