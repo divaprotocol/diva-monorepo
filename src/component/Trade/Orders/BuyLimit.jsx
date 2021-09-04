@@ -100,19 +100,12 @@ let accounts;
 export default function BuyLimit(props) {
   const classes = useStyles();
   const option = props.option
-  const [value, setValue] = React.useState(30);
   const [expiry, setExpiry] = React.useState(5);
   const [numberOfOptions, setNumberOfOptions] = React.useState(5);
   const [pricePerOption, setPricePerOption] = React.useState(0);
 
   const handleNumberOfOptions = (value) => {
-    
     setNumberOfOptions(value)
-    
-  }
-
-  const handlePricePerOption = (value) => {
-    setPricePerOption(value)
   }
 
   const handleExpirySelection = (event) => {

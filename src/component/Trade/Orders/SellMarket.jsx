@@ -110,7 +110,7 @@ const SliderDiv = styled.div`
     setNumberOfOptions(value)
   }
   const handleOrderSubmit = async (event) => {}
-  const handleExpirySelection = {}
+  
   const handleSliderChange = (event, newValue) => {
     setValue(newValue);
   };

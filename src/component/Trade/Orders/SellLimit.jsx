@@ -3,15 +3,10 @@ import styled from 'styled-components'
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
-import InputLabel from "@material-ui/core/InputLabel";
 import { MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import Slider from "@material-ui/core/Slider";
-import Input from "@material-ui/core/Input";
 import InfoIcon from "@material-ui/icons/InfoOutlined"
 
 const useStyles = makeStyles((theme) => ({
@@ -50,14 +45,6 @@ const LabelStyleDiv = styled.div`
     text-align : left;
   `;
 
-const SliderDiv = styled.div`
-  width : 60%;
-  height: 25px;
-  color: #282c34;
-  font-size : 24px;
-  text-align : left;
-`;
-
   const FormInput = styled.input`
     width : 30%;
     height: 25px;
@@ -85,14 +72,6 @@ const SliderDiv = styled.div`
     font-size: 22px;
     background-color: #F8F8F8;
   `
-
-  const FormControlDiv = styled.div`
-    width : 30%;
-    height: 25px;
-    border : none;
-    text-align: center;
-    margin-top:15px;
-  `;
   
   const LabelStyle = styled.label`
     font-size : 18px;
@@ -104,7 +83,7 @@ const SliderDiv = styled.div`
   `
 
   const CreateButtonWrapper = styled.div`
-    margin-top : 40px;
+    margin-top : 20px;
     margin-bottom : 20px;
     aligned : center;
   `
@@ -127,26 +106,10 @@ export default function SellLimit(props) {
   }
 
   const handleOrderSubmit = async (event) => {}
-  
-  const handleSliderChange = (event, newValue) => {
-    setValue(newValue);
-  };
-
-  const handleInputChange = (event) => {
-    setValue(event.target.value === "" ? "" : Number(event.target.value));
-  };
 
   const handleExpirySelection = (event) => {
     event.preventDefault()
     setExpiry(event.target.value);
-  };
-  
-  const handleBlur = () => {
-    if (value < 0) {
-      setValue(0);
-    } else if (value > 100) {
-      setValue(100);
-    }
   };
 
   return(
