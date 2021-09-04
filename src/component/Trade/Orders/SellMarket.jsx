@@ -82,7 +82,7 @@ const SliderDiv = styled.div`
     height: 25px;
     border : none;
     text-align: center;
-    margin-top:40px;
+    padding-top:20px;
   `;
   
   const LableStyle = styled.label`
@@ -102,10 +102,13 @@ const SliderDiv = styled.div`
   export default function SellMarket(props) {
   const classes = useStyles();
   const option = props.option
-  const numberOfOptions = 0
-  const pricePerOption = 0
   const [value, setValue] = React.useState(30);
+  const [numberOfOptions, setNumberOfOptions] = React.useState(5);
+  const [pricePerOption, setPricePerOption] = React.useState(0);
 
+  const handleNumberOfOptions = (value) => {
+    setNumberOfOptions(value)
+  }
   const handleOrderSubmit = async (event) => {}
   const handleExpirySelection = {}
   const handleSliderChange = (event, newValue) => {
@@ -129,7 +132,7 @@ const SliderDiv = styled.div`
       <form onSubmit={handleOrderSubmit}>
       <FormDiv>
         <LabelStyleDiv><LableStyle>Number of Options</LableStyle></LabelStyleDiv>
-        <FormInput type="text" value={numberOfOptions} onChange={event => props.handleNumberOfOptions(event.target.value)} />
+        <FormInput type="text" value={numberOfOptions} onChange={event => handleNumberOfOptions(event.target.value)} />
       </FormDiv>
       <FormDiv> 
         <LabelStyleDiv><LableStyle>Expected Rate </LableStyle><InfoIcon/></LabelStyleDiv>

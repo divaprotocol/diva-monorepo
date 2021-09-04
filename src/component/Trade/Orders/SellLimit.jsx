@@ -117,10 +117,14 @@ const SliderDiv = styled.div`
 export default function SellLimit(props) {
   const classes = useStyles();
   const option = props.option
-  const numberOfOptions = 0
-  const pricePerOption = 0
   const [value, setValue] = React.useState(30);
   const [expiry, setExpiry] = React.useState(5);
+  const [numberOfOptions, setNumberOfOptions] = React.useState(5);
+  const [pricePerOption, setPricePerOption] = React.useState(0);
+
+  const handleNumberOfOptions = (value) => {
+    setNumberOfOptions(value)
+  }
 
   const handleOrderSubmit = async (event) => {}
   
@@ -150,7 +154,7 @@ export default function SellLimit(props) {
       <form onSubmit={handleOrderSubmit}>
       <FormDiv>
         <LabelStyleDiv><LabelStyle>Number of Options</LabelStyle></LabelStyleDiv>
-        <FormInput type="text" value={numberOfOptions} onChange={event => props.handleNumberOfOptions(event.target.value)} />
+        <FormInput type="text" value={numberOfOptions} onChange={event => handleNumberOfOptions(event.target.value)} />
       </FormDiv>
       <FormDiv> 
         <LabelStyleDiv><LabelStyle>Price per option</LabelStyle></LabelStyleDiv>

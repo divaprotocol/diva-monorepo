@@ -79,9 +79,6 @@ export default function CreateOrder(props) {
 
     const [expiry, setExpiry] = React.useState(5);
 
-    
-    
-
     const handleOrderTypeChange = (event, newValue) => {
       setOrderTypeValue(newValue);
     };
@@ -91,24 +88,23 @@ export default function CreateOrder(props) {
     };
 
     const handleChange = () => {}
-    
 
     const renderOrderInfo = () => {
       if(orderType == 0 && priceType == 0) {
         //Buy Market
-        return(<BuyMarket option= {option} handleNumberOfOptions={handleNumberOfOptions} handlePricePerOption={handlePricePerOption}/>)
+        return(<BuyMarket option= {option}/>)
       }
       if(orderType == 0 && priceType == 1 ) {
         //Buy Limit
-        return(<BuyLimit option= {option} handleNumberOfOptions={handleNumberOfOptions} handlePricePerOption={handlePricePerOption}/>)
+        return(<BuyLimit option= {option} />)
       }
       if(orderType == 1 && priceType == 0 ) {
         //Sell Market
-        return(<SellMarket option= {option} handleNumberOfOptions={handleNumberOfOptions} handlePricePerOption={handlePricePerOption}/>)
+        return(<SellMarket option= {option}/>)
       }
       if(orderType == 1 && priceType == 1) {
         //Sell Limit
-        return(<SellLimit option= {option} handleNumberOfOptions={handleNumberOfOptions} handlePricePerOption={handlePricePerOption}/>)
+        return(<SellLimit option= {option}/>)
       }
     }
     

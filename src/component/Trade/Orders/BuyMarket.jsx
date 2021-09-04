@@ -82,6 +82,7 @@ const SliderDiv = styled.div`
     height: 25px;
     border : none;
     text-align: center;
+    padding-top : 20px;
   `;
   
   const LableStyle = styled.label`
@@ -100,9 +101,13 @@ const SliderDiv = styled.div`
 export default function BuyMarket(props) {
   const classes = useStyles();
   const option = props.option
-  const numberOfOptions = 0
-  const pricePerOption = 0
   const [value, setValue] = React.useState(30);
+  const [numberOfOptions, setNumberOfOptions] = React.useState(5);
+  const [pricePerOption, setPricePerOption] = React.useState(0);
+
+  const handleNumberOfOptions = (value) => {
+    setNumberOfOptions(value)
+  }
 
   const handleOrderSubmit = async (event) => {}
   const handleExpirySelection = {}
@@ -127,7 +132,7 @@ export default function BuyMarket(props) {
       <form onSubmit={handleOrderSubmit}>
       <FormDiv>
         <LabelStyleDiv><LableStyle>Number of Options</LableStyle></LabelStyleDiv>
-        <FormInput type="text" value={numberOfOptions} onChange={event => props.handleNumberOfOptions(event.target.value)} />
+        <FormInput type="text" value={numberOfOptions} onChange={event => handleNumberOfOptions(event.target.value)} />
       </FormDiv>
       <FormDiv> 
         <LabelStyleDiv><LableStyle>Expected Rate </LableStyle><InfoIcon/></LabelStyleDiv>
@@ -185,24 +190,3 @@ export default function BuyMarket(props) {
     </div>
   );
 }
-
-/**
- <FormControl variant="outlined" className={classes.formControl}>
-        <InputLabel id="demo-simple-select-outlined-label">%</InputLabel>
-        <Select
-          labelId="demo-simple-select-outlined-label"
-          id="demo-simple-select-outlined"
-          value={pricePerOption}
-          onChange={handleOrderSubmit}
-          label="%"
-        >
-          <MenuItem value="1">
-            <em>0.5</em>
-          </MenuItem>
-          <MenuItem value={2}>1</MenuItem>
-          <MenuItem value={3}>2</MenuItem>
-          <MenuItem value={4}>3</MenuItem>
-          <MenuItem value={5}>4</MenuItem>
-        </Select>
-      </FormControl>
- */
