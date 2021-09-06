@@ -9,91 +9,17 @@ import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import InfoIcon from "@material-ui/icons/InfoOutlined"
 import { buylimitOrder } from '../../../Orders/BuyLimit';
+import { LabelStyle } from './UiStyles';
+import { LabelGrayStyle } from './UiStyles';
+import { LabelStyleDiv } from './UiStyles';
+import { FormDiv } from './UiStyles';
+import { FormInput } from './UiStyles';
+import { RightSideLabel } from './UiStyles';
+import { RightSideGrayLabel } from './UiStyles';
+import { CreateButtonWrapper } from './UiStyles';
+import { LimitOrderExpiryDiv } from './UiStyles';
+import { useStyles } from './UiStyles';
 import Web3 from 'web3'
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.background.paper,
-  },
-  tab: {
-    width: 100,
-    minWidth: 50
-  },
-  formControl: {
-    minWidth:115,
-  },
-  selectEmpty: {
-      marginTop: theme.spacing(1),
-  }
-}));
-
-const FormDiv = styled.div`
-  display : flex;
-  flex-direction : row;
-  justify-content: space-around;
-  margin-top : 10px;
-  margin-bottom : 10px;
-  margin-left : 20px;
-  margin-right : 20px;
-`;
-
-const LabelStyleDiv = styled.div`
-    width : 70%;
-    height: 25px;
-    color: #282c34;
-    padding : 10px;
-    font-size : 24px;
-    text-align : left;
-  `;
-
-  const FormInput = styled.input`
-    width : 30%;
-    height: 25px;
-    background-color: #F8F8F8;
-    border : none;
-    padding : 10px;
-    text-align: center;
-    font-size: 26px;
-  `;
-
-  const RightSideLabel = styled.div`
-    width : 30%;
-    height: 25px;
-    border : none;
-    padding : 10px;
-    text-align: center;
-    font-size: 22px;
-  `
-  const RightSideGrayLabel = styled.div`
-    width : 30%;
-    height: 25px;
-    border : none;
-    padding : 10px;
-    text-align: center;
-    font-size: 22px;
-    background-color: #F8F8F8;
-  `
-  
-  const LabelStyle = styled.label`
-    font-size : 18px;
-  `
-
-  const LabelGrayStyle = styled.label`
-    font-size : 18px;
-    color : gray;
-  `
-
-  const CreateButtonWrapper = styled.div`
-    margin-top : 20px;
-    margin-bottom : 20px;
-    aligned : center;
-  `
-  const LimitOrderExpiryDiv = styled.div`
-    aligned : center;
-    color: #282c34;
-    font-size : 18px;
-  `;
 
 const web3 = new Web3(Web3.givenProvider);
 let accounts;
