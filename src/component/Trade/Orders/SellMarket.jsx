@@ -15,16 +15,19 @@ import { FormControlDiv } from './UiStyles';
 import { CreateButtonWrapper } from './UiStyles';
 import { SliderDiv } from './UiStyles';
 import { useStyles } from './UiStyles';
+import { InfoTooltip } from './UiStyles';
+import { MaxSlippageText } from './UiStyles';
+import { ExpectedRateInfoText } from './UiStyles';
 
 export default function SellMarket(props) {
 const classes = useStyles();
 const option = props.option
-const [value, setValue] = React.useState(30);
+const [value, setValue] = React.useState(0);
 const [numberOfOptions, setNumberOfOptions] = React.useState(5);
 const [pricePerOption, setPricePerOption] = React.useState(0);
 
-const handleNumberOfOptions = (value) => {
-  setNumberOfOptions(value)
+const handleNumberOfOptions = (newValue) => {
+  setNumberOfOptions(newValue)
 }
   
 const handleOrderSubmit = async (event) => {}
@@ -41,8 +44,8 @@ const handleInputChange = (event) => {
 const handleBlur = () => {
   if (value < 0) {
     setValue(0);
-  } else if (value > 100) {
-    setValue(100);
+  } else if (value >= 20) {
+    setValue(20);
   }
 };
 
@@ -54,11 +57,19 @@ return(
         <FormInput type="text" value={numberOfOptions} onChange={event => handleNumberOfOptions(event.target.value)} />
       </FormDiv>
       <FormDiv> 
-        <LabelStyleDiv><LabelStyle>Expected Rate </LabelStyle><InfoIcon/></LabelStyleDiv>
+      <InfoTooltip
+        title={
+          <React.Fragment>
+            {ExpectedRateInfoText}
+          </React.Fragment>
+        }
+      >
+        <LabelStyleDiv><LabelStyle>Expected Rate </LabelStyle><InfoIcon style={{fontSize : 15}}/></LabelStyleDiv>
+      </InfoTooltip>
         <RightSideLabel>{pricePerOption} {option.CollateralTokenName}</RightSideLabel>
       </FormDiv>
       <FormDiv> 
-        <LabelStyleDiv><LabelStyle>You Pay</LabelStyle></LabelStyleDiv>
+        <LabelStyleDiv><LabelStyle>You Receive</LabelStyle></LabelStyleDiv>
         <RightSideLabel>{pricePerOption} {option.CollateralTokenName}</RightSideLabel>
       </FormDiv>
       <FormDiv> 
@@ -69,12 +80,22 @@ return(
         <SliderDiv>
           <Typography id="input-slider" gutterBottom>
             <LabelGrayStyle>Max slippage%</LabelGrayStyle>
-            <InfoIcon/>
+            <InfoTooltip
+              title={
+                <React.Fragment>
+                  {MaxSlippageText}
+                </React.Fragment>
+              }>
+              <InfoIcon style={{fontSize : 15}}/>
+            </InfoTooltip>
           </Typography>
           
           <Slider
             value={typeof value === "number" ? value : 0}
             onChange={handleSliderChange}
+            step={0.1}
+            min={0}
+            max={20}
             aria-labelledby="input-slider"
           />
         </SliderDiv>
@@ -85,9 +106,9 @@ return(
             onChange={handleInputChange}
             onBlur={handleBlur}
             inputProps={{
-              step: 10,
-              min: 0,
-              max: 100,
+              step: 0.1,
+              min: 0.0,
+              max: 20,
               type: "number",
               "aria-labelledby": "input-slider"
             }}

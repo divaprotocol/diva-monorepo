@@ -16,11 +16,15 @@ import { FormControlDiv } from './UiStyles';
 import { CreateButtonWrapper } from './UiStyles';
 import { SliderDiv } from './UiStyles';
 import { useStyles } from './UiStyles';
+import { InfoTooltip } from './UiStyles';
+import { ExpectedRateInfoText } from './UiStyles';
+import { MaxSlippageText } from './UiStyles';
+import {getValueText} from './UiStyles'
 
 export default function BuyMarket(props) {
   const classes = useStyles();
   const option = props.option
-  const [value, setValue] = React.useState(30);
+  const [value, setValue] = React.useState(0);
   const [numberOfOptions, setNumberOfOptions] = React.useState(5);
   const [pricePerOption, setPricePerOption] = React.useState(0);
 
@@ -41,8 +45,8 @@ export default function BuyMarket(props) {
   const handleBlur = () => {
     if (value < 0) {
       setValue(0);
-    } else if (value > 100) {
-      setValue(100);
+    } else if (value >= 20) {
+      setValue(20);
     }
   };
 
@@ -53,8 +57,16 @@ export default function BuyMarket(props) {
         <LabelStyleDiv><LabelStyle>Number of Options</LabelStyle></LabelStyleDiv>
         <FormInput type="text" value={numberOfOptions} onChange={event => handleNumberOfOptions(event.target.value)} />
       </FormDiv>
-      <FormDiv> 
-        <LabelStyleDiv><LabelStyle>Expected Rate </LabelStyle><InfoIcon/></LabelStyleDiv>
+      <FormDiv>
+      <InfoTooltip
+        title={
+          <React.Fragment>
+            {ExpectedRateInfoText}
+          </React.Fragment>
+        }
+      >
+        <LabelStyleDiv><LabelStyle>Expected Rate </LabelStyle><InfoIcon style={{fontSize : 15}}/></LabelStyleDiv>
+      </InfoTooltip>
         <RightSideLabel>{pricePerOption} {option.CollateralTokenName}</RightSideLabel>
       </FormDiv>
       <FormDiv> 
@@ -69,11 +81,21 @@ export default function BuyMarket(props) {
         <SliderDiv>
           <Typography id="input-slider" gutterBottom>
             <LabelGrayStyle>Max slippage%</LabelGrayStyle>
-            <InfoIcon/>
+            <InfoTooltip
+              title={
+                <React.Fragment>
+                  {MaxSlippageText}
+                </React.Fragment>
+              }>
+              <InfoIcon style={{fontSize : 15}}/>
+            </InfoTooltip>
           </Typography>
           
           <Slider
             value={typeof value === "number" ? value : 0}
+            step={0.1}
+            min={0}
+            max={20}
             onChange={handleSliderChange}
             aria-labelledby="input-slider"
           />
@@ -85,12 +107,13 @@ export default function BuyMarket(props) {
             onChange={handleInputChange}
             onBlur={handleBlur}
             inputProps={{
-              step: 10,
-              min: 0,
-              max: 100,
+              step: 0.1,
+              min: 0.0,
+              max: 20,
               type: "number",
-              "aria-labelledby": "input-slider"
+              "aria-labelledby": "input-slider",
             }}
+            
           />
         </FormControlDiv>
       </FormDiv>
@@ -101,7 +124,7 @@ export default function BuyMarket(props) {
           className={classes.button}
           startIcon={<AddIcon />}
           type="submit"
-        value="Submit"
+          value="Submit"
         >
           Create Order
         </Button>

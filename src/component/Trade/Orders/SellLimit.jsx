@@ -29,6 +29,10 @@ export default function SellLimit(props) {
     setNumberOfOptions(value)
   }
 
+  const handlePricePerOptions = (value) => {
+    setPricePerOption(value)
+  }
+
   const handleOrderSubmit = async (event) => {}
 
   const handleExpirySelection = (event) => {
@@ -44,19 +48,19 @@ export default function SellLimit(props) {
         <FormInput type="text" value={numberOfOptions} onChange={event => handleNumberOfOptions(event.target.value)} />
       </FormDiv>
       <FormDiv> 
-        <LabelStyleDiv><LabelStyle>Price per option</LabelStyle></LabelStyleDiv>
-        <RightSideGrayLabel>{pricePerOption} {option.CollateralTokenName}</RightSideGrayLabel>
+        <LabelStyleDiv><LabelStyle>Price per Option</LabelStyle></LabelStyleDiv>
+        <FormInput type="text" value={pricePerOption} onChange={event => handlePricePerOptions(event.target.value)} />
       </FormDiv>
       <FormDiv> 
-        <LabelStyleDiv><LabelStyle>You Pay</LabelStyle></LabelStyleDiv>
-        <RightSideLabel>{pricePerOption} {option.CollateralTokenName}</RightSideLabel>
+        <LabelStyleDiv><LabelStyle>You Receive</LabelStyle></LabelStyleDiv>
+        <RightSideLabel>{pricePerOption * numberOfOptions} {option.CollateralTokenName}</RightSideLabel>
       </FormDiv>
       <FormDiv> 
         <LabelStyleDiv><LabelGrayStyle>Wallet Balance</LabelGrayStyle></LabelStyleDiv>
-        <RightSideLabel><LabelGrayStyle>{pricePerOption} {option.CollateralTokenName}</LabelGrayStyle></RightSideLabel>
+        <RightSideLabel><LabelGrayStyle>{} {option.CollateralTokenName}</LabelGrayStyle></RightSideLabel>
       </FormDiv>
       <FormDiv>
-      <LabelStyleDiv><LabelGrayStyle>Order Expires in</LabelGrayStyle><InfoIcon/></LabelStyleDiv>
+      <LabelStyleDiv><LabelGrayStyle>Order Expires in</LabelGrayStyle><InfoIcon style={{fontSize : 15}}/></LabelStyleDiv>
         <LimitOrderExpiryDiv>
           <FormControl className={classes.formControl}>
             <Select
@@ -74,7 +78,6 @@ export default function SellLimit(props) {
               <MenuItem value={30}><LabelGrayStyle>30 Minutes</LabelGrayStyle></MenuItem>
               <MenuItem value={60}><LabelGrayStyle>1 Hour</LabelGrayStyle></MenuItem>
             </Select>
-            <FormHelperText>Order expires in </FormHelperText>
           </FormControl>
         </LimitOrderExpiryDiv>
       </FormDiv>

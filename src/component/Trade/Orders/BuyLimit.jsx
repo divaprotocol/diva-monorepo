@@ -1,11 +1,9 @@
 import React from 'react';
-import styled from 'styled-components'
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 import { MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
 import InfoIcon from "@material-ui/icons/InfoOutlined"
 import { buylimitOrder } from '../../../Orders/BuyLimit';
@@ -33,6 +31,12 @@ export default function BuyLimit(props) {
   const handleNumberOfOptions = (value) => {
     setNumberOfOptions(value)
   }
+
+  const handlePricePerOptions = (value) => {
+    setPricePerOption(value)
+  }
+
+  
 
   const handleExpirySelection = (event) => {
     event.preventDefault()
@@ -62,19 +66,19 @@ export default function BuyLimit(props) {
         <FormInput type="text" value={numberOfOptions} onChange={event => handleNumberOfOptions(event.target.value)} />
       </FormDiv>
       <FormDiv> 
-        <LabelStyleDiv><LabelStyle>Price per option</LabelStyle></LabelStyleDiv>
-        <RightSideGrayLabel>{pricePerOption} {option.CollateralTokenName}</RightSideGrayLabel>
+        <LabelStyleDiv><LabelStyle>Price per Option</LabelStyle></LabelStyleDiv>
+        <FormInput type="text" value={pricePerOption} onChange={event => handlePricePerOptions(event.target.value)} />
       </FormDiv>
       <FormDiv> 
         <LabelStyleDiv><LabelStyle>You Pay</LabelStyle></LabelStyleDiv>
-        <RightSideLabel>{pricePerOption} {option.CollateralTokenName}</RightSideLabel>
+        <RightSideLabel>{pricePerOption * numberOfOptions} {option.CollateralTokenName}</RightSideLabel>
       </FormDiv>
       <FormDiv> 
         <LabelStyleDiv><LabelGrayStyle>Wallet Balance</LabelGrayStyle></LabelStyleDiv>
-        <RightSideLabel><LabelGrayStyle>{pricePerOption} {option.CollateralTokenName}</LabelGrayStyle></RightSideLabel>
+        <RightSideLabel><LabelGrayStyle>{} {option.CollateralTokenName}</LabelGrayStyle></RightSideLabel>
       </FormDiv>
       <FormDiv>
-      <LabelStyleDiv><LabelGrayStyle>Order Expires in</LabelGrayStyle><InfoIcon/></LabelStyleDiv>
+      <LabelStyleDiv><LabelGrayStyle>Order Expires in</LabelGrayStyle><InfoIcon style={{fontSize : 15}}/></LabelStyleDiv>
         <LimitOrderExpiryDiv>
           <FormControl className={classes.formControl}>
             <Select
@@ -92,7 +96,6 @@ export default function BuyLimit(props) {
               <MenuItem value={30}><LabelGrayStyle>30 Minutes</LabelGrayStyle></MenuItem>
               <MenuItem value={60}><LabelGrayStyle>1 Hour</LabelGrayStyle></MenuItem>
             </Select>
-            <FormHelperText>Order expires in </FormHelperText>
           </FormControl>
         </LimitOrderExpiryDiv>
       </FormDiv>
