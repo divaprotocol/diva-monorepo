@@ -18,6 +18,7 @@ import { useStyles } from './UiStyles';
 import { InfoTooltip } from './UiStyles';
 import { MaxSlippageText } from './UiStyles';
 import { ExpectedRateInfoText } from './UiStyles';
+import { grey } from '@material-ui/core/colors';
 
 export default function SellMarket(props) {
 const classes = useStyles();
@@ -64,7 +65,7 @@ return(
           </React.Fragment>
         }
       >
-        <LabelStyleDiv><LabelStyle>Expected Rate </LabelStyle><InfoIcon style={{fontSize : 15}}/></LabelStyleDiv>
+        <LabelStyleDiv><LabelStyle>Expected Rate </LabelStyle><InfoIcon style={{fontSize : 15, color: "grey"}}/></LabelStyleDiv>
       </InfoTooltip>
         <RightSideLabel>{pricePerOption} {option.CollateralTokenName}</RightSideLabel>
       </FormDiv>
@@ -73,20 +74,20 @@ return(
         <RightSideLabel>{pricePerOption} {option.CollateralTokenName}</RightSideLabel>
       </FormDiv>
       <FormDiv> 
-        <LabelStyleDiv><LabelGrayStyle>Wallet Balance</LabelGrayStyle></LabelStyleDiv>
-        <RightSideLabel><LabelGrayStyle>{pricePerOption} {option.CollateralTokenName}</LabelGrayStyle></RightSideLabel>
+        <LabelStyleDiv><LabelGrayStyle>Options in Wallet</LabelGrayStyle></LabelStyleDiv>
+        <RightSideLabel><LabelGrayStyle>{0}</LabelGrayStyle></RightSideLabel>
       </FormDiv>
       <FormDiv> 
         <SliderDiv>
           <Typography id="input-slider" gutterBottom>
-            <LabelGrayStyle>Max slippage%</LabelGrayStyle>
+            <LabelGrayStyle>Max slippage %</LabelGrayStyle>
             <InfoTooltip
               title={
                 <React.Fragment>
                   {MaxSlippageText}
                 </React.Fragment>
               }>
-              <InfoIcon style={{fontSize : 15}}/>
+              <InfoIcon style={{fontSize : 15, color: "grey"}}/>
             </InfoTooltip>
           </Typography>
           

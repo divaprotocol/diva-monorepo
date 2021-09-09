@@ -78,7 +78,7 @@ export default function BuyLimit(props) {
         <RightSideLabel><LabelGrayStyle>{} {option.CollateralTokenName}</LabelGrayStyle></RightSideLabel>
       </FormDiv>
       <FormDiv>
-      <LabelStyleDiv><LabelGrayStyle>Order Expires in</LabelGrayStyle><InfoIcon style={{fontSize : 15}}/></LabelStyleDiv>
+      <LabelStyleDiv><LabelGrayStyle>Order Expires in</LabelGrayStyle><InfoIcon style={{fontSize : 15, color: "grey"}}/></LabelStyleDiv>
         <LimitOrderExpiryDiv>
           <FormControl className={classes.formControl}>
             <Select

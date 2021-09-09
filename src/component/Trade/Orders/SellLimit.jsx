@@ -56,11 +56,11 @@ export default function SellLimit(props) {
         <RightSideLabel>{pricePerOption * numberOfOptions} {option.CollateralTokenName}</RightSideLabel>
       </FormDiv>
       <FormDiv> 
-        <LabelStyleDiv><LabelGrayStyle>Wallet Balance</LabelGrayStyle></LabelStyleDiv>
-        <RightSideLabel><LabelGrayStyle>{} {option.CollateralTokenName}</LabelGrayStyle></RightSideLabel>
+        <LabelStyleDiv><LabelGrayStyle>Options in Wallet</LabelGrayStyle></LabelStyleDiv>
+        <RightSideLabel><LabelGrayStyle>{0}</LabelGrayStyle></RightSideLabel>
       </FormDiv>
       <FormDiv>
-      <LabelStyleDiv><LabelGrayStyle>Order Expires in</LabelGrayStyle><InfoIcon style={{fontSize : 15}}/></LabelStyleDiv>
+      <LabelStyleDiv><LabelGrayStyle>Order Expires in</LabelGrayStyle><InfoIcon style={{fontSize : 15, color: "grey"}}/></LabelStyleDiv>
         <LimitOrderExpiryDiv>
           <FormControl className={classes.formControl}>
             <Select

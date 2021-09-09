@@ -65,7 +65,7 @@ export default function BuyMarket(props) {
           </React.Fragment>
         }
       >
-        <LabelStyleDiv><LabelStyle>Expected Rate </LabelStyle><InfoIcon style={{fontSize : 15}}/></LabelStyleDiv>
+        <LabelStyleDiv><LabelStyle>Expected Rate </LabelStyle><InfoIcon style={{fontSize : 15, color: "grey"}}/></LabelStyleDiv>
       </InfoTooltip>
         <RightSideLabel>{pricePerOption} {option.CollateralTokenName}</RightSideLabel>
       </FormDiv>
@@ -80,14 +80,14 @@ export default function BuyMarket(props) {
       <FormDiv> 
         <SliderDiv>
           <Typography id="input-slider" gutterBottom>
-            <LabelGrayStyle>Max slippage%</LabelGrayStyle>
+            <LabelGrayStyle>Max slippage %</LabelGrayStyle>
             <InfoTooltip
               title={
                 <React.Fragment>
                   {MaxSlippageText}
                 </React.Fragment>
               }>
-              <InfoIcon style={{fontSize : 15}}/>
+              <InfoIcon style={{fontSize : 15, color: "grey"}}/>
             </InfoTooltip>
           </Typography>
           
