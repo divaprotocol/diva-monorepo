@@ -6,6 +6,7 @@ import { MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import InfoIcon from "@material-ui/icons/InfoOutlined"
+import { sellLimitOrder } from '../../../Orders/SellLimit';
 import { LabelStyle } from './UiStyles';
 import { LabelGrayStyle } from './UiStyles';
 import { LabelStyleDiv } from './UiStyles';
@@ -17,6 +18,10 @@ import { CreateButtonWrapper } from './UiStyles';
 import { LimitOrderExpiryDiv } from './UiStyles';
 import { useStyles } from './UiStyles';
 
+import Web3 from 'web3'
+
+const web3 = new Web3(Web3.givenProvider);
+let accounts;
 export default function SellLimit(props) {
   const classes = useStyles();
   const option = props.option
@@ -33,7 +38,21 @@ export default function SellLimit(props) {
     setPricePerOption(value)
   }
 
-  const handleOrderSubmit = async (event) => {}
+  const handleOrderSubmit = async (event) => {
+    event.preventDefault();
+    accounts = await window.ethereum.enable()
+    const orderData = {
+      maker : accounts[0],
+      provider : web3,
+      isBuy : true,
+      nbrOptions : numberOfOptions,
+      limitPrice : pricePerOption,
+      collateralDecimals : option.DecimalsCollateralToken,
+      orderExpiry : expiry
+    }
+    
+    sellLimitOrder(orderData)
+  }
 
   const handleExpirySelection = (event) => {
     event.preventDefault()

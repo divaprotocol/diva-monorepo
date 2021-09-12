@@ -21,6 +21,7 @@ import Web3 from 'web3'
 
 const web3 = new Web3(Web3.givenProvider);
 let accounts;
+
 export default function BuyLimit(props) {
   const classes = useStyles();
   const option = props.option
@@ -45,7 +46,6 @@ export default function BuyLimit(props) {
 
   const handleOrderSubmit = async (event) => {
     event.preventDefault();
-    console.log(numberOfOptions)
     accounts = await window.ethereum.enable()
     const orderData = {
       maker : accounts[0],
@@ -53,8 +53,10 @@ export default function BuyLimit(props) {
       isBuy : true,
       nbrOptions : numberOfOptions,
       limitPrice : pricePerOption,
-      orderExpiry : 8
+      collateralDecimals : option.DecimalsCollateralToken,
+      orderExpiry : expiry
     }
+    
     buylimitOrder(orderData)
   }
 

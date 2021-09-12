@@ -5,7 +5,7 @@ import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/core/Slider";
 import Input from "@material-ui/core/Input";
 import InfoIcon from "@material-ui/icons/InfoOutlined"
-
+import { buylimitOrder } from '../../../Orders/BuyLimit';
 import { LabelGrayStyle } from './UiStyles';
 import { LabelStyle } from './UiStyles';
 import { LabelStyleDiv } from './UiStyles';
@@ -19,7 +19,10 @@ import { useStyles } from './UiStyles';
 import { InfoTooltip } from './UiStyles';
 import { ExpectedRateInfoText } from './UiStyles';
 import { MaxSlippageText } from './UiStyles';
-import {getValueText} from './UiStyles'
+import Web3 from 'web3'
+
+const web3 = new Web3(Web3.givenProvider);
+let accounts;
 
 export default function BuyMarket(props) {
   const classes = useStyles();
@@ -32,7 +35,22 @@ export default function BuyMarket(props) {
     setNumberOfOptions(value)
   }
 
-  const handleOrderSubmit = async (event) => {}
+  const handleOrderSubmit = async (event) => {
+    event.preventDefault();
+    
+    accounts = await window.ethereum.enable()
+    const orderData = {
+      maker : accounts[0],
+      provider : web3,
+      isBuy : false,
+      nbrOptions : numberOfOptions,
+      limitPrice : pricePerOption,
+      collateralDecimals : option.DecimalsCollateralToken,
+    }
+    
+    buylimitOrder(orderData)
+  }
+  
   const handleExpirySelection = {}
   const handleSliderChange = (event, newValue) => {
     setValue(newValue);
