@@ -10,7 +10,7 @@ function MarketChart(myData) {
       const height = myData.targetHeight;
       const width = myData.targetWidth;
 
-      const margin = { top: 0, right: 0, bottom: 0, left: 0 };
+      const margin = { top: 10, right: 0, bottom: 10, left: 0 };
 
       // const { data } = myData.data;
 
@@ -79,7 +79,7 @@ function MarketChart(myData) {
         .attr("class", "line")
         .attr("stroke", function() { return (myData.isLong ? "steelblue" : "orange"); }) // conditional formatting
         .attr("fill", "none")
-        .attr("stroke-width", "2px")
+        .attr("stroke-width", "1px")
         .attr("d", valueline);
 
     },
@@ -94,9 +94,6 @@ function MarketChart(myData) {
         width: myData.targetWidth,
       }}
     >
-      <g className="plot-area" />
-      <g className="x-axis" />
-      <g className="y-axis" />
     </svg>
   );
 }

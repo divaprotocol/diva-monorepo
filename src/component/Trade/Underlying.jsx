@@ -6,13 +6,15 @@ import OptionDetails from './OptionDetails';
 import OpenOrders from './OptionOrders'
 import OrderBook from './OrderBook';
 import CreateOrder from './CreateOrder';
-import LineSeries from '../Graphs/LineSeries';
+// import LineSeries from '../Graphs/LineSeries';
+import TradeChart from '../Graphs/TradeChart';
 import './Underlying.css';
 import { useSelector } from 'react-redux'
 import {
     BrowserRouter as Router,
     useHistory,
   } from "react-router-dom";
+import generatePayoffChartData from '../../Graphs/DataGenerator.js';
 
 
 const PageDiv = styled.div `
@@ -53,7 +55,41 @@ const RightCompDiv = styled.div `
     background-color : white;
 `
 
+
+
+
+
 export default function Underlying() {
+    const w = 380;
+    const h = 200;
+
+    // Call option example 
+    const OptionParams = {
+    CollateralBalanceLong: 20,
+    CollateralBalanceShort: 10,
+    Strike: 20,
+    Inflection: 35,
+    Cap: 40,
+    TokenSupply: 30,
+    IsLong: true
+    };
+
+    // Put option example 
+    // const OptionParams = {
+    //     collateralBalanceLong: 20,
+    //     collateralBalanceShort: 10,
+    //     strike: 40,
+    //     inflection: 35,
+    //     cap: 20,
+    //     tokenSupply: 30,
+    //     isLong: false
+    // };
+
+    // Generate the data array
+    // const data = generatePayoffChartData(OptionParams)
+    const data = generatePayoffChartData(OptionParams)    
+    
+    
     const selectedOption = useSelector((state) => state.tradeOption.option)
     const history = useHistory();
     if(Object.keys(selectedOption).length === 0) {
@@ -73,7 +109,7 @@ export default function Underlying() {
             </PageLeftDiv>
             <PageRightDiv>
                 <RightCompDiv><CreateOrder option={selectedOption}/></RightCompDiv>
-                <RightCompDiv><LineSeries/></RightCompDiv>
+                <RightCompDiv><TradeChart data={data} w={w} h={h} isLong={OptionParams.isLong}/></RightCompDiv>
             </PageRightDiv>
         </PageDiv>
     );
