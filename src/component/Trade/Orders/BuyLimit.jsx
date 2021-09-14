@@ -17,10 +17,15 @@ import { RightSideGrayLabel } from './UiStyles';
 import { CreateButtonWrapper } from './UiStyles';
 import { LimitOrderExpiryDiv } from './UiStyles';
 import { useStyles } from './UiStyles';
+import axios from 'axios';
 import Web3 from 'web3'
+import { w3cwebsocket as W3CWebSocket } from "websocket";
+
+
 
 const web3 = new Web3(Web3.givenProvider);
 let accounts;
+
 
 export default function BuyLimit(props) {
   const classes = useStyles();
@@ -58,6 +63,18 @@ export default function BuyLimit(props) {
     }
     
     buylimitOrder(orderData)
+    const socket = W3CWebSocket('wss://api.0x.org/sra/v4')
+    socket.onopen = () => {
+      console.log('Web socket client connected');
+    }
+    socket.onmessage = ({data}) => {
+      console.log('msg from server', data)
+    }
+
+     axios.get('https://ropsten.api.0x.org/sra/v4').then(function(data) {
+       console.log("Data - "+JSON.stringify(data))
+     })
+    
   }
 
   return(

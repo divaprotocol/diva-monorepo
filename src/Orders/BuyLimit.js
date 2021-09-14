@@ -13,8 +13,8 @@ export const buylimitOrder = async (orderData) => {
     const order = new utils.LimitOrder({
         makerToken: contractAddresses.etherToken,
         takerToken: contractAddresses.zrxToken,
-        makerAmount: orderData.nbrOptions * orderData.limitPrice * 10 ** orderData.collateralDecimals, // NOTE: This is 1 WEI, 1 ETH would be 1000000000000000000
-        takerAmount: orderData.nbrOptions * 10 ** 18, // NOTE this is 0.001 ZRX. 1 ZRX would be 1000000000000000000
+        makerAmount: (orderData.nbrOptions * orderData.limitPrice * 10 ** orderData.collateralDecimals).toString(), // NOTE: This is 1 WEI, 1 ETH would be 1000000000000000000
+        takerAmount: (orderData.nbrOptions * 10 ** 18).toString(), // NOTE this is 0.001 ZRX. 1 ZRX would be 1000000000000000000
         maker: orderData.maker,
         sender: NULL_ADDRESS,
         expiry: getFutureExpiryInSeconds(),
