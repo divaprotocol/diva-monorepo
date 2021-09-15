@@ -63,10 +63,14 @@ export default function BuyLimit(props) {
     }
     
     buylimitOrder(orderData)
+
+    //Remove the code below, this is only for testing.
     const socket = W3CWebSocket('wss://api.0x.org/sra/v4')
+    
     socket.onopen = () => {
       console.log('Web socket client connected');
     }
+    
     socket.onmessage = ({data}) => {
       console.log('msg from server', data)
     }
