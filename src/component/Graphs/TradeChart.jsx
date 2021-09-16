@@ -19,8 +19,6 @@ class DIVATradeChart extends Component {
 
         const {data, w, h, isLong, breakEven} = this.props;
 
-        
-
         // Set the dimensions and margins of the graph
         // var margin = {top: 50, right: 20, bottom: 30, left: 50},
         var margin = {top: 5, right: 2, bottom: 3, left: 5},
@@ -112,7 +110,7 @@ class DIVATradeChart extends Component {
             .style("stroke-width", "2px")
             .style("opacity", "0");
 
-        const tooltipBoxWidth = 195
+        const tooltipBoxWidth = 215
         const tooltipBoxHeight = 55
 
         tooltipPerLine.append("rect")
@@ -129,7 +127,7 @@ class DIVATradeChart extends Component {
         tooltipPerLine.append("text")
             .attr("x", 18)
             .attr("y", 22)
-            .attr("font-size", "12")
+            .attr("font-size", "14")
             .text("WBTC/USDT at Expiry:");
 
         tooltipPerLine.append("text")
@@ -137,12 +135,12 @@ class DIVATradeChart extends Component {
             .attr("text-anchor", "end")
             .attr("x", tooltipBoxWidth)
             .attr("y", 22)
-            .attr("font-size", "12");
+            .attr("font-size", "14");
 
         tooltipPerLine.append("text")
             .attr("x", 18)
             .attr("y", 44)
-            .attr("font-size", "12")
+            .attr("font-size", "14")
             .text("Option Payout (DAI):");
             
 
@@ -152,7 +150,7 @@ class DIVATradeChart extends Component {
             .attr("x", tooltipBoxWidth)
             .attr("y", 44)
             .attr("font-weight", "bold")
-            .attr("font-size", "12");
+            .attr("font-size", "14");
 
         // Create the text that travels along the curve of chart and the position relative to the mouse location
         tooltipPerLine.append("text")
@@ -222,25 +220,25 @@ class DIVATradeChart extends Component {
                 })
                 .style("stroke", function(d, i) { 
                     var pos = yPos(d, i, mouse[0], lines);    
-                    return (y.invert(pos.y) > breakEven ? greenColorCode : redColorCode); 
+                    return (y.invert(pos.y) >= breakEven ? greenColorCode : redColorCode); 
                 });
         
             d3.select(".mouse-per-line circle")
             .style("fill", function(d, i) { 
                 var pos = yPos(d, i, mouse[0], lines);    
-                return (y.invert(pos.y) > breakEven ? greenColorCode : redColorCode); 
+                return (y.invert(pos.y) >= breakEven ? greenColorCode : redColorCode); 
             });
             
             d3.select(".tooltip-per-line .tooltip-payout")
                 .style("fill", function(d, i) { 
                     var pos = yPos(d, i, mouse[0], lines);
-                    return (y.invert(pos.y) > breakEven ? greenColorCode : redColorCode); 
+                    return (y.invert(pos.y) >= breakEven ? greenColorCode : redColorCode); 
                 })
     
             d3.select(".line")
                 .style("stroke", function(d, i) { 
                     var pos = yPos(d, i, mouse[0], lines);
-                    return (y.invert(pos.y) > breakEven ? greenColorCode : redColorCode);   
+                    return (y.invert(pos.y) >= breakEven ? greenColorCode : redColorCode);   
                 });
 
             d3.selectAll(".mouse-per-line")

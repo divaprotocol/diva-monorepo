@@ -61,19 +61,18 @@ export default function Underlying() {
 
     const selectedOption = useSelector((state) => state.tradeOption.option)
     
-    // Call option example 
     const OptionParams = {
-    CollateralBalanceLong: 100,
-    CollateralBalanceShort: 100,
-    Strike: selectedOption.Strike,
-    Inflection: selectedOption.Inflection,
-    Cap: selectedOption.Cap,
-    TokenSupply: 200,
-    IsLong: selectedOption.IsLong
+        CollateralBalanceLong: 100,
+        CollateralBalanceShort: 100,
+        Strike: selectedOption.Strike,
+        Inflection: selectedOption.Inflection,
+        Cap: selectedOption.Cap,
+        TokenSupply: 200,
+        IsLong: selectedOption.IsLong
     };
     
     // Temporarily
-    const breakEvenOptionPrice = 0.5 
+    const breakEvenOptionPrice = 0 
     // Generate the data array
     // const data = generatePayoffChartData(OptionParams)
     const data = generatePayoffChartData(OptionParams)    
