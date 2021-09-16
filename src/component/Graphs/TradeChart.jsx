@@ -17,7 +17,7 @@ class DIVATradeChart extends Component {
 
     componentDidMount () {
 
-        const {data, w, h, isLong} = this.props;
+        const {data, w, h, isLong, breakEven} = this.props;
 
         
 
@@ -191,6 +191,25 @@ class DIVATradeChart extends Component {
     
         var formatDecimalComma = d3.format(",.2f") // For more formats check here: http://bl.ocks.org/mstanaland/6106487
 
+        const auxFunction = function(d,i,m, l) {
+            var beginning = 0,
+            end = l[i].getTotalLength(),
+            target = null,
+            pos = null;
+            console.log("end: " + end)
+            while (true){
+                target = Math.floor((beginning + end) / 2);
+                pos = l[i].getPointAtLength(target);
+                if ((target === end || target === beginning) && pos.x !== m) {
+                    break;
+                }
+                if (pos.x > m)      end = target;
+                else if (pos.x < m) beginning = target;
+                else break; //position found
+            }
+            return pos;
+        }
+
         var mousemove = function(event) { 
             var mouse = d3.pointer(event);
             // console.log("mouse[0]: " + x.invert(mouse[0]))
@@ -201,17 +220,34 @@ class DIVATradeChart extends Component {
                 d += " " + mouse[0] + "," + 60;
                 return d;
                 })
-                .style("stroke", function() { return (x.invert(mouse[0]) > 35 ? greenColorCode : redColorCode); });
+                .style("stroke", function(d,i) { 
+                    var pos = auxFunction(d,i,mouse[0],lines);    
+                    return (y.invert(pos.y) > breakEven ? greenColorCode : redColorCode); 
+                });
         
             d3.select(".mouse-per-line circle")
-                .style("fill", function() { return (x.invert(mouse[0]) > 35 ? greenColorCode : redColorCode); });
+            .style("fill", function(d,i) { 
+                var pos = auxFunction(d,i,mouse[0],lines);    
+                return (y.invert(pos.y) > breakEven ? greenColorCode : redColorCode); 
+            });
             
             d3.select(".tooltip-per-line .tooltip-payout")
-                .style("fill", function() { return (x.invert(mouse[0]) > 35 ? greenColorCode : redColorCode); })
+                .style("fill", function(d,i) { 
+                    var pos = auxFunction(d,i,mouse[0],lines);
+                    return (y.invert(pos.y) > breakEven ? greenColorCode : redColorCode); 
+                })
     
-            d3.select(".line")
-                .style("stroke", function() { return (x.invert(mouse[0]) > 35 ? greenColorCode : redColorCode); });
+            // d3.select(".line")
+            //     .style("stroke", function() { return (y.invert(mouse[1]) > breakEven ? greenColorCode : redColorCode); });
         
+            d3.select(".line")
+                .style("stroke", function(d,i) { 
+                    var pos = auxFunction(d,i,mouse[0],lines);
+                    return (y.invert(pos.y) > breakEven ? greenColorCode : redColorCode); 
+                
+                });
+
+            
             d3.selectAll(".mouse-per-line")
                 .attr("transform", function(d, i) {
                 // console.log(width/mouse[0])
@@ -222,47 +258,53 @@ class DIVATradeChart extends Component {
                 // console.log(d.y)
                 // Read here about .getTotalLength() and .getPointAtLength(): https://developpaper.com/the-story-of-a-flying-line-svg/
                 // The below is sort of a binary search algorithm to find the value at mouse[0]
-                var beginning = 0,
-                    end = lines[i].getTotalLength(),
-                    target = null,
-                    pos = null;
-                console.log("end: " + end)
-                while (true){
-                    target = Math.floor((beginning + end) / 2);
-                    pos = lines[i].getPointAtLength(target);
-                    if ((target === end || target === beginning) && pos.x !== mouse[0]) {
-                        break;
-                    }
-                    if (pos.x > mouse[0])      end = target;
-                    else if (pos.x < mouse[0]) beginning = target;
-                    else break; //position found
-                }
+                // var beginning = 0,
+                //     end = lines[i].getTotalLength(),
+                //     target = null,
+                //     pos = null;
+                // console.log("end: " + end)
+                // while (true){
+                //     target = Math.floor((beginning + end) / 2);
+                //     pos = lines[i].getPointAtLength(target);
+                //     if ((target === end || target === beginning) && pos.x !== mouse[0]) {
+                //         break;
+                //     }
+                //     if (pos.x > mouse[0])      end = target;
+                //     else if (pos.x < mouse[0]) beginning = target;
+                //     else break; //position found
+                // }
+                var pos = auxFunction(d,i,mouse[0],lines);
                 // console.log("pos.y: " + pos.y)
                 return "translate(" + mouse[0] + "," + pos.y +")"; 
                 // return `translate(" + ${mouse[0]} + "," + ${d.y} +")`; 
+
                 });
             
+            
+
+
             d3.selectAll(".tooltip-per-line")
                 .attr("transform", function(d, i) {
-                console.log(width/mouse[0])
+                // console.log(width/mouse[0])
                 var xValue = x.invert(mouse[0])
                     // bisect = d3.bisector(function(d) { return d.x; }).right;
                     // var idx = bisect(d.y, xValue);
                     // idx = 0;
                 
-                var beginning = 0,
-                    end = lines[i].getTotalLength(),
-                    target = null;
-                while (true){
-                    target = Math.floor((beginning + end) / 2);
-                    var pos = lines[i].getPointAtLength(target);
-                    if ((target === end || target === beginning) && pos.x !== mouse[0]) {
-                        break;
-                    }
-                    if (pos.x > mouse[0])      end = target;
-                    else if (pos.x < mouse[0]) beginning = target;
-                    else break; //position found
-                }
+                // var beginning = 0,
+                //     end = lines[i].getTotalLength(),
+                //     target = null;
+                // while (true){
+                //     target = Math.floor((beginning + end) / 2);
+                //     var pos = lines[i].getPointAtLength(target);
+                //     if ((target === end || target === beginning) && pos.x !== mouse[0]) {
+                //         break;
+                //     }
+                //     if (pos.x > mouse[0])      end = target;
+                //     else if (pos.x < mouse[0]) beginning = target;
+                //     else break; //position found
+                // }
+                var pos = auxFunction(d,i,mouse[0],lines);
                 
                 
                 d3.select(this).select('.tooltip-underlying')

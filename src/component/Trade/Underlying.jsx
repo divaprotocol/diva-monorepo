@@ -55,42 +55,31 @@ const RightCompDiv = styled.div `
     background-color : white;
 `
 
-
-
-
-
 export default function Underlying() {
     const w = 380;
     const h = 200;
 
+    const selectedOption = useSelector((state) => state.tradeOption.option)
+    
     // Call option example 
     const OptionParams = {
-    CollateralBalanceLong: 20,
-    CollateralBalanceShort: 10,
-    Strike: 20,
-    Inflection: 35,
-    Cap: 40,
-    TokenSupply: 30,
-    IsLong: true
+    CollateralBalanceLong: 100,
+    CollateralBalanceShort: 100,
+    Strike: selectedOption.Strike,
+    Inflection: selectedOption.Inflection,
+    Cap: selectedOption.Cap,
+    TokenSupply: 200,
+    IsLong: selectedOption.IsLong
     };
-
-    // Put option example 
-    // const OptionParams = {
-    //     collateralBalanceLong: 20,
-    //     collateralBalanceShort: 10,
-    //     strike: 40,
-    //     inflection: 35,
-    //     cap: 20,
-    //     tokenSupply: 30,
-    //     isLong: false
-    // };
-
+    
+    // Temporarily
+    const breakEvenOptionPrice = 0.5 
     // Generate the data array
     // const data = generatePayoffChartData(OptionParams)
     const data = generatePayoffChartData(OptionParams)    
     
+    // breakEven: Take option payout as reference and not underlying
     
-    const selectedOption = useSelector((state) => state.tradeOption.option)
     const history = useHistory();
     if(Object.keys(selectedOption).length === 0) {
         history.push("/")
@@ -109,7 +98,7 @@ export default function Underlying() {
             </PageLeftDiv>
             <PageRightDiv>
                 <RightCompDiv><CreateOrder option={selectedOption}/></RightCompDiv>
-                <RightCompDiv><TradeChart data={data} w={w} h={h} isLong={OptionParams.isLong}/></RightCompDiv>
+                <RightCompDiv><TradeChart data={data} w={w} h={h} isLong={OptionParams.isLong} breakEven={breakEvenOptionPrice}/></RightCompDiv>
             </PageRightDiv>
         </PageDiv>
     );

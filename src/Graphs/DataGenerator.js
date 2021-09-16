@@ -66,7 +66,7 @@ export default function generatePayoffChartData(data) {
   
   if (optionData.IsLong === true) {
   const chartData = [
-      {"x": optionData.Strike * 0.85, "y": 0},
+      {"x": optionData.Strike - optionData.Cap*0.15, "y": 0},
       {"x": optionData.Strike, "y": 0},
       {"x": optionData.Inflection, "y": payoffFunction(optionData.Inflection)},
       {"x": optionData.Cap, "y": payoffFunction(optionData.Cap)},
@@ -75,11 +75,12 @@ export default function generatePayoffChartData(data) {
   return chartData;
   } else {
   const chartData = [
-      {"x": optionData.Strike * 1.15, "y": 0},
-      {"x": optionData.Strike, "y": 0},
-      {"x": optionData.Inflection, "y": payoffFunction(optionData.Inflection)},
+      {"x": optionData.Cap - (optionData.Strike*0.15), "y": payoffFunction(optionData.Cap)},
       {"x": optionData.Cap, "y": payoffFunction(optionData.Cap)},
-      {"x": optionData.Cap * 0.85, "y": payoffFunction(optionData.Cap)}
+      {"x": optionData.Inflection, "y": payoffFunction(optionData.Inflection)},
+      {"x": optionData.Strike, "y": 0},
+      {"x": optionData.Strike * 1.15, "y": 0}
+    
   ]
   console.log("chart data: " + chartData[0])
   return chartData;
