@@ -5,7 +5,7 @@ import { utils } from './Config';
 import { metamaskProvider } from './Config';
 import { ROPSTEN } from './Config'
  
-export const buylimitOrder = async (orderData) => {
+export const sellLimitOrder = async (orderData) => {
     const getFutureExpiryInSeconds = () => {
         return Math.floor(Date.now() / 1000 + orderData.orderExpiry * 60).toString(); 
     }
@@ -13,8 +13,8 @@ export const buylimitOrder = async (orderData) => {
     const order = new utils.LimitOrder({
         makerToken: contractAddresses.etherToken,
         takerToken: contractAddresses.zrxToken,
-        makerAmount: (orderData.nbrOptions * orderData.limitPrice * 10 ** orderData.collateralDecimals).toString(), // NOTE: This is 1 WEI, 1 ETH would be 1000000000000000000
-        takerAmount: (orderData.nbrOptions * 10 ** 18).toString(), // NOTE this is 0.001 ZRX. 1 ZRX would be 1000000000000000000
+        makerAmount: (orderData.nbrOptions * 10 ** 18).toString(), 
+        takerAmount: (orderData.nbrOptions * orderData.limitPrice * 10 ** orderData.collateralDecimals).toString(), 
         maker: orderData.maker,
         sender: NULL_ADDRESS,
         expiry: getFutureExpiryInSeconds(),

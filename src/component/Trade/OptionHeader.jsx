@@ -8,7 +8,6 @@ const AppHeader = styled.header`
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
     color: #f8f8f8;
 `;
 
@@ -21,9 +20,9 @@ const OptionTitle = styled.h2`
 const Image = styled.img`
     height: 3.5vmin;
     width: 3.5vmin;
-    margin-left: 50px;
     pointer-events: none;
     justify-content: center;
+    margin-left : 10px;
 `;
 
 
@@ -31,12 +30,12 @@ const ImgDiv = styled.div`
     display : flex;
     flex-direction : row;
     justify-content: center;
+    margin-left : 25px;
 `;
 const LeftAssetImg = styled.img`
     flex : 1;
     height: 3.5vmin;
     width: 3.5vmin;
-    margin-left: 50px;
 `
 const RightAssetImg = styled.img`
     flex : 1;
