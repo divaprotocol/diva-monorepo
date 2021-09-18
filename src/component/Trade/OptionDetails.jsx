@@ -106,7 +106,7 @@ export default function OptionDetailsFlex(props) {
                     <FlexBoxData>{option.strike}</FlexBoxData>
                 </FlexBox>
                 <FlexBox>
-                    <FlexBoxHeader>Inflextion</FlexBoxHeader>
+                    <FlexBoxHeader>Inflection</FlexBoxHeader>
                     <FlexBoxData>{option.inflection}</FlexBoxData>
                 </FlexBox>
                 <FlexBox>
