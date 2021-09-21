@@ -40,9 +40,12 @@ function generatePayoffFunction(
             payoff = 0
           }
         } else if (Cap === Inflection && Strike === Inflection) {
-          if (valueUnderlying >= Inflection) {
+          if (valueUnderlying > Inflection) {
             payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
-          } else {
+          } else if (valueUnderlying === Inflection) {
+            payoff = CollateralBalanceLong / TokenSupply;
+          } 
+          else {
             payoff = 0;
           }
         } else {
@@ -87,9 +90,12 @@ function generatePayoffFunction(
             payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
           }
         } else if (Cap === Inflection && Strike === Inflection) {
-          if (valueUnderlying >= Inflection) {
+          if (valueUnderlying > Inflection) {
             payoff = 0;
-          } else {
+          } else if (valueUnderlying === Inflection) {
+            payoff = CollateralBalanceShort / TokenSupply;
+          } 
+          else {
             payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
           }
         } else {
