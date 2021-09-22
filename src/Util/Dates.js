@@ -3,3 +3,11 @@ export function getDateTime(dateData) {
   var time = new Date(dateData * 1e3).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   return date + " " + time;
 }
+
+export function getExpiryMinutesFromNow(timeStamp) {
+  const expiryDate = new Date(timeStamp * 1000)
+  const date = new Date()
+  const mins = parseInt(Math.abs(expiryDate.getTime() - date.getTime()) / (1000 % 60) % 60)
+  console.log("Mins "+mins)
+  return mins;
+}

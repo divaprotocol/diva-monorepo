@@ -9,6 +9,9 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
 
 const useStyles = makeStyles({
     table: {
@@ -24,7 +27,7 @@ const PageDiv = styled.div `
 const TableHeader = styled.h4 `
     font-size: 1rem;
     color: black;
-    padding-right : 515px;
+    padding-right : 570px;
 `;
 
 const TableHeadStyle = withStyles(theme => ({
@@ -40,6 +43,7 @@ const TableHeadStyle = withStyles(theme => ({
   }))(TableCell);
 
 export default function OpenOrdersMT(props) {
+    
     const openOrderData = [
         {
             orderType : 'BUY',
@@ -58,6 +62,8 @@ export default function OpenOrdersMT(props) {
     ]
 
     const classes = useStyles();
+
+    
     return(
         <PageDiv>
             <TableHeader>Your Open Orders</TableHeader>

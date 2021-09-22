@@ -9,7 +9,11 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-
+import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { get0xOpenOrders } from '../../DataService/OpenOrders';
+import { getExpiryMinutesFromNow } from '../../Util/Dates';
 const useStyles = makeStyles({
     table: {
       minWidth: 250,  
@@ -24,7 +28,7 @@ const PageDiv = styled.div `
 const TableHeader = styled.h4 `
     font-size: 1rem;
     color: black;
-    padding-right : 515px;
+    padding-right : 620px;
 `;
 
 const TableHeadStyle = withStyles(theme => ({
@@ -40,26 +44,32 @@ const TableHeadStyle = withStyles(theme => ({
   }))(TableCell);
 
 export default function OrderBook(props) {
-    const openOrderData = [
-        {
-            Expire : '5',
-            NbrOptions : 10,
-            Bid : 1.9,
-            Ask : 0.19,
-        },
-        {
-            Expire : '15',
-            NbrOptions : 8,
-            Bid : 10,
-            Ask : 19,
-        },
-        {
-            Expire : '1',
-            NbrOptions : 38,
-            Bid : 110,
-            Ask : 191,
+    const selectedOption = useSelector((state) => state.tradeOption.option)
+    const [orderBook, setOrderBook] = useState([])
+
+    const componentDidMount = async () => {
+        const response = await get0xOpenOrders(selectedOption.CollateralToken)
+        const records = response.data.records
+        const orderbook = records.map(record => {
+            const order = record.order;
+            var orders = {
+                id : records.indexOf(record),
+                expiry: getExpiryMinutesFromNow(order.expiry),
+                leftNbrOptions : order.takerAmount / 10 ** 18,
+                bid : order.makerAmount / order.takerAmount * 10**(18-selectedOption.DecimalsCollateralToken),
+                rightNbrOptions : order.makerAmount / 10 ** 18,
+                ask : order.takerAmount / order.makerAmount * 10**(18-selectedOption.DecimalsCollateralToken)
+             }
+             return orders
+            })
+        setOrderBook(orderbook)   
+    }
+    
+    useEffect(() => {
+        if(orderBook.length === 0) {
+            componentDidMount() 
         }
-    ]
+    });
 
     const classes = useStyles();
     return(
@@ -68,28 +78,26 @@ export default function OrderBook(props) {
             <TableContainer component={Paper}>
             <Table className={classes.table} aria-label="simple table">
                 <TableHeadStyle>
-                
                 <TableRow >
-                    <TableHeaderCell>Expires in Minutes</TableHeaderCell>
-                    <TableHeaderCell align="right">Nbr options</TableHeaderCell>
-                    <TableHeaderCell align="right">BID</TableHeaderCell>
-                    <TableHeaderCell align="right">ASK</TableHeaderCell>
-                    <TableHeaderCell align="right">Nbr options</TableHeaderCell>
-                    <TableHeaderCell>Expires in Minutes</TableHeaderCell>
+                    <TableHeaderCell align="center">Expires in Minutes</TableHeaderCell>
+                    <TableHeaderCell align="center">Nbr options</TableHeaderCell>
+                    <TableHeaderCell align="center">BID</TableHeaderCell>
+                    <TableHeaderCell align="center">ASK</TableHeaderCell>
+                    <TableHeaderCell align="center">Nbr options</TableHeaderCell>
+                    <TableHeaderCell align="center">Expires in Minutes</TableHeaderCell>
                 </TableRow>
                 </TableHeadStyle>
                 <TableBody>
-                {openOrderData.map((order) => (
-                    
-                    <TableRow key={order.Expire}>
-                    <TableCell component="th" scope="row">
-                        {order.Expire}
-                    </TableCell>
-                    <TableCell align="right">{order.NbrOptions}</TableCell>
-                    <TableCell align="right">{order.Bid}</TableCell>
-                    <TableCell align="right">{order.Ask}</TableCell>
-                    <TableCell align="right">{order.NbrOptions}</TableCell>
-                    <TableCell align="right">{order.Expire}</TableCell>
+                {orderBook.map((order) => (
+                    <TableRow key={order.id}>
+                        <TableCell align="center" component="th" scope="row">
+                            {order.expiry}
+                        </TableCell>
+                        <TableCell align="center">{order.leftNbrOptions}</TableCell>
+                        <TableCell align="center">{order.bid}</TableCell>
+                        <TableCell align="center">{order.ask}</TableCell>
+                        <TableCell align="center">{order.rightNbrOptions}</TableCell>
+                        <TableCell align="center">{order.expiry}</TableCell>
                     </TableRow>
                 ))}
                 </TableBody>

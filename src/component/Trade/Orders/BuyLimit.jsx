@@ -21,8 +21,6 @@ import axios from 'axios';
 import Web3 from 'web3'
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-
-
 const web3 = new Web3(Web3.givenProvider);
 let accounts;
 
@@ -42,8 +40,6 @@ export default function BuyLimit(props) {
     setPricePerOption(value)
   }
 
-  
-
   const handleExpirySelection = (event) => {
     event.preventDefault()
     setExpiry(event.target.value);
@@ -54,6 +50,8 @@ export default function BuyLimit(props) {
     accounts = await window.ethereum.enable()
     const orderData = {
       maker : accounts[0],
+      makerToken : option.CollateralToken,
+      takerToken : option.TokenAddress,
       provider : web3,
       isBuy : true,
       nbrOptions : numberOfOptions,
@@ -61,23 +59,32 @@ export default function BuyLimit(props) {
       collateralDecimals : option.DecimalsCollateralToken,
       orderExpiry : expiry
     }
-    
-    buylimitOrder(orderData)
 
-    //Remove the code below, this is only for testing.
-    const socket = W3CWebSocket('wss://api.0x.org/sra/v4')
-    
+    buylimitOrder(orderData)
+    const socket = W3CWebSocket('wss://ropsten.api.0x.org/sra/v4')
+    const msg = {
+      "type": "subscribe",
+      "channel": "orders",
+      "makerToken" : orderData.makerToken,
+      "takerToken" : orderData.takerToken,
+      "requestId": "123e4567-e89b-12d3-a456-426655440000"
+    }
+    console.log("maker "+orderData.makerToken)
+    console.log("Taker "+orderData.takerToken)
+
     socket.onopen = () => {
-      console.log('Web socket client connected');
+      console.log('Web socket client connected second');
+      socket.send(JSON.stringify(msg));
+      alert("Messaage Sent")
     }
     
     socket.onmessage = ({data}) => {
+      alert("Messaage received")
       console.log('msg from server', data)
     }
-
-     axios.get('https://ropsten.api.0x.org/sra/v4').then(function(data) {
-       console.log("Data - "+JSON.stringify(data))
-     })
+     //axios.get('https://ropsten.api.0x.org/sra/v4').then(function(data) {
+       //console.log("Data - "+JSON.stringify(data))
+     //})
     
   }
 

@@ -4,6 +4,7 @@ import { CHAIN_ID } from './Config';
 import { utils } from './Config';
 import { metamaskProvider } from './Config';
 import { ROPSTEN } from './Config'
+import { w3cwebsocket as W3CWebSocket } from "websocket";
  
 export const buylimitOrder = async (orderData) => {
     const getFutureExpiryInSeconds = () => {
@@ -11,8 +12,8 @@ export const buylimitOrder = async (orderData) => {
     }
 
     const order = new utils.LimitOrder({
-        makerToken: contractAddresses.etherToken,
-        takerToken: contractAddresses.zrxToken,
+        makerToken: orderData.makerToken,
+        takerToken: orderData.takerToken,
         makerAmount: (orderData.nbrOptions * orderData.limitPrice * 10 ** orderData.collateralDecimals).toString(), // NOTE: This is 1 WEI, 1 ETH would be 1000000000000000000
         takerAmount: (orderData.nbrOptions * 10 ** 18).toString(), // NOTE this is 0.001 ZRX. 1 ZRX would be 1000000000000000000
         maker: orderData.maker,
