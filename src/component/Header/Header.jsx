@@ -9,11 +9,13 @@ const Image = styled.img`
     margin-left: 20px;
     margin-right: 20px;
     pointer-events: none;
+    width: 2.5%;
+    height: 2.5%;
 `;
 
 const AppHeader = styled.header`
     background-color:  #141534;
-    min-height: 10vh;
+    min-height: 5vh;
     display: flex;
     flex-direction: row;
     align-items: center;
