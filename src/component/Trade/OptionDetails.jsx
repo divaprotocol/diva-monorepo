@@ -104,7 +104,8 @@ function createData(option) {
        strike : option.Strike,
        inflection : option.Inflection,
        collateral : option.CollateralTokenName,
-       dataFeedProvider : option.DataFeedProvider.length > 0 ? (String(option.DataFeedProvider).substring(0, 6) + "..." + String(option.DataFeedProvider).substring(38)) : ("n/a")
+       dataFeedProvider : option.DataFeedProvider,
+       dataFeedProviderAbbr : option.DataFeedProvider.length > 0 ? (String(option.DataFeedProvider).substring(0, 6) + "..." + String(option.DataFeedProvider).substring(38)) : ("n/a")
     }
 
 }
@@ -146,7 +147,7 @@ export default function OptionDetailsFlex(props) {
                 <FlexBoxSecondLine>
                     <FlexBoxHeader>Data feed provider</FlexBoxHeader>
                     <Tooltip title={option.dataFeedProvider} arrow>
-                        <FlexToolTipBoxData>{option.dataFeedProvider}</FlexToolTipBoxData>
+                        <FlexToolTipBoxData>{option.dataFeedProviderAbbr}</FlexToolTipBoxData>
                     </Tooltip>
                 </FlexBoxSecondLine>
                 <FlexBoxSecondLine>
