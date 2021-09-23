@@ -27,18 +27,20 @@ const PageDiv = styled.div `
 const TableHeader = styled.h4 `
     font-size: 1rem;
     color: black;
-    padding-right : 570px;
+    padding-left : 15px;
+    text-align: left;
 `;
 
 const TableHeadStyle = withStyles(theme => ({
     root: {
-      backgroundColor: 'orange'
+      backgroundColor: 'rgb(134,217,192)'
     }
   }))(TableHead);
   
   const TableHeaderCell = withStyles(theme => ({
     root: {
-      color: 'white'
+      color: '#282c34',
+      fontWeight: 'solid'
     }
   }))(TableCell);
 
@@ -72,10 +74,10 @@ export default function OpenOrdersMT(props) {
                 <TableHeadStyle>
                 
                 <TableRow >
-                    <TableHeaderCell>OrderType</TableHeaderCell>
-                    <TableHeaderCell align="right">Nbr options</TableHeaderCell>
-                    <TableHeaderCell align="right">Pay/Receive</TableHeaderCell>
-                    <TableHeaderCell align="right">Price per option</TableHeaderCell>
+                    <TableHeaderCell>Order Type</TableHeaderCell>
+                    <TableHeaderCell align="center">Nbr Options</TableHeaderCell>
+                    <TableHeaderCell align="center">Pay/Receive</TableHeaderCell>
+                    <TableHeaderCell align="center">Price per Option</TableHeaderCell>
                     <TableHeaderCell align="right">Cancel</TableHeaderCell>
                 </TableRow>
                 </TableHeadStyle>
@@ -83,12 +85,12 @@ export default function OpenOrdersMT(props) {
                 {openOrderData.map((order) => (
                     
                     <TableRow key={order.orderType}>
-                        <TableCell component="th" scope="row">
+                        <TableCell align="left" component="th" scope="row">
                             {order.orderType}
                         </TableCell>
-                        <TableCell align="right">{order.NbrOptions}</TableCell>
-                        <TableCell align="right">{order.PayReceive}</TableCell>
-                        <TableCell align="right">{order.pricePerOption}</TableCell>
+                        <TableCell align="center">{order.NbrOptions}</TableCell>
+                        <TableCell align="center">{order.PayReceive}</TableCell>
+                        <TableCell align="center">{order.pricePerOption}</TableCell>
                         <TableCell align="right">{order.cancel}</TableCell>
                     </TableRow>
                 ))}

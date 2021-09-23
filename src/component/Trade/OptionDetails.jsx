@@ -21,7 +21,6 @@ const HeaderLabel = styled.label`
     font-size: 1rem;
     font-weight : bold;
     margin-left : 15px;
-    margin-right : 670px;
     color: #282c34;
 `;
 

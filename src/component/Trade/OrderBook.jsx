@@ -28,18 +28,20 @@ const PageDiv = styled.div `
 const TableHeader = styled.h4 `
     font-size: 1rem;
     color: black;
-    padding-right : 620px;
+    padding-left: 15px;
+    text-align: left;
 `;
 
 const TableHeadStyle = withStyles(theme => ({
     root: {
-      backgroundColor: 'orange'
+      backgroundColor: 'rgb(134,217,192)'
     }
   }))(TableHead);
   
   const TableHeaderCell = withStyles(theme => ({
     root: {
-      color: 'white'
+        color: '#282c34',
+        fontWeight: 'solid'
     }
   }))(TableCell);
 
@@ -79,25 +81,25 @@ export default function OrderBook(props) {
             <Table className={classes.table} aria-label="simple table">
                 <TableHeadStyle>
                 <TableRow >
-                    <TableHeaderCell align="center">Expires in Minutes</TableHeaderCell>
-                    <TableHeaderCell align="center">Nbr options</TableHeaderCell>
+                    <TableHeaderCell align="left">Expires in Minutes</TableHeaderCell>
+                    <TableHeaderCell align="center">Nbr Options</TableHeaderCell>
                     <TableHeaderCell align="center">BID</TableHeaderCell>
                     <TableHeaderCell align="center">ASK</TableHeaderCell>
-                    <TableHeaderCell align="center">Nbr options</TableHeaderCell>
-                    <TableHeaderCell align="center">Expires in Minutes</TableHeaderCell>
+                    <TableHeaderCell align="center">Nbr Options</TableHeaderCell>
+                    <TableHeaderCell align="right">Expires in Minutes</TableHeaderCell>
                 </TableRow>
                 </TableHeadStyle>
                 <TableBody>
                 {orderBook.map((order) => (
                     <TableRow key={order.id}>
-                        <TableCell align="center" component="th" scope="row">
+                        <TableCell align="left" component="th" scope="row">
                             {order.expiry}
                         </TableCell>
                         <TableCell align="center">{order.leftNbrOptions}</TableCell>
                         <TableCell align="center">{order.bid}</TableCell>
                         <TableCell align="center">{order.ask}</TableCell>
                         <TableCell align="center">{order.rightNbrOptions}</TableCell>
-                        <TableCell align="center">{order.expiry}</TableCell>
+                        <TableCell align="right">{order.expiry}</TableCell>
                     </TableRow>
                 ))}
                 </TableBody>

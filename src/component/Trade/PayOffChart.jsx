@@ -12,7 +12,7 @@ import MuiTableRow from '@material-ui/core/TableRow';
 
 const PageDiv = styled.div `
     width: 400px;
-    border-bottom: '2px solid #cccccc'
+    border-bottom: '2px solid black'
 `;
   
   const useStyles = makeStyles((theme) => ({
