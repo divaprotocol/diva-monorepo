@@ -9,59 +9,80 @@ const PageDiv = styled.div `
     background-color: white;
 `;
 
+
 const HeaderDiv = styled.div`
     width: 100%;
-    border-bottom: 1px solid gray;
-    justify-content : start;
+    border-bottom: 1px solid rgba(224, 224, 224, 1);
+    text-align: left;
+    padding-bottom: 15px;
 `;
 
 const HeaderLabel = styled.label`
     font-size: 1rem;
     font-weight : bold;
-    padding : 5px;
-    margin-left : 25px;
+    margin-left : 15px;
     margin-right : 670px;
+    color: #282c34;
 `;
 
-const FlexBoxHeader = styled.label`
+const FlexBoxHeader = styled.div`
     font-size: 0.9rem;
-    font-weight : bold;
+    font-weight : solid;
+    text-align: left;
+    padding-left: 15px; 
+    color: #282c34;
 `;
 
 const FlexBoxData = styled.div`
-    padding : 15px;
+    padding: 15px;
     font-size: 0.9rem;
+    font-weight: bold;
+    text-align: left;
+    color: #282c34;
 `;
 
 const FlexDiv = styled.div`
     margin-top : 15px;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
     display : flex;
     flex-direction : row;
-    justify-content : space-between;
+    justify-content : flex-start;
 `;
 
 const FlexBox = styled.div`
     flex : 1;
+    justify-content: flex-start;
 `
 
 const FlexSecondLineDiv = styled.div`
-    width : 50%;
+    width : 33.3%;
     margin-top : 15px;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
     display : flex;
     flex-direction : row;
-    justify-content : space-between;
+    justify-content : flex-start;
 `;
 
 const FlexBoxSecondLine = styled.div`
     width : 50%;
     flex : 1;
 `;
+
 const FlexToolTipBoxData = styled.div`
     margin-left : 15px;
-    padding : 15px;
+    padding-top : 15px;
     font-size: 0.9rem;
     overflow : hidden;
     text-overflow : ellipsis;
+    color: #282c34;
+    font-weight: bold;
+    text-align: left;
 `;
 
 const FlexBoxSecondLineData = styled.div`
@@ -69,6 +90,9 @@ const FlexBoxSecondLineData = styled.div`
     font-size: 0.9rem;
     overflow : hidden;
     text-overflow : ellipsis;
+    color: #282c34;
+    font-weight: bold;
+    text-align: left;
 `;
 
 function createData(option) {
@@ -80,7 +104,7 @@ function createData(option) {
        strike : option.Strike,
        inflection : option.Inflection,
        collateral : option.CollateralTokenName,
-       dataFeedProvider : option.DataFeedProvider
+       dataFeedProvider : option.DataFeedProvider.length > 0 ? (String(option.DataFeedProvider).substring(0, 6) + "..." + String(option.DataFeedProvider).substring(38)) : ("n/a")
     }
 
 }
@@ -90,7 +114,7 @@ export default function OptionDetailsFlex(props) {
     //to each child component.
     const option = createData(props.optionData);
     return(
-        <PageDiv>
+        <PageDiv>            
             <HeaderDiv><HeaderLabel>Details</HeaderLabel></HeaderDiv>
             <FlexDiv>
                 <FlexBox>

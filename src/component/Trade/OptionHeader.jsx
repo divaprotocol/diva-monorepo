@@ -30,7 +30,7 @@ const ImgDiv = styled.div`
     display : flex;
     flex-direction : row;
     justify-content: center;
-    margin-left : 25px;
+    margin-left : 15px;
 `;
 const LeftAssetImg = styled.img`
     flex : 1;

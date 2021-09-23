@@ -90,10 +90,14 @@ function generatePayoffFunction(
             payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
           }
         } else if (Cap === Inflection && Strike === Inflection) {
+          console.log("cap: " + Cap + " inflection " + Inflection + " strike " + Strike)
           if (valueUnderlying > Inflection) {
+            console.log("test 1 ")
             payoff = 0;
-          } else if (valueUnderlying === Inflection) {
+          } else if (valueUnderlying === Inflection) {            
+            console.log("test 2 ")
             payoff = CollateralBalanceShort / TokenSupply;
+            console.log("*** I was here: ", payoff)
           } 
           else {
             payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
@@ -139,6 +143,7 @@ export default function generatePayoffChartData(data) {
     TokenSupply,
     optionData.IsLong);
   
+  console.log("******payoffFunction(optionData.Inflection): ", payoffFunction(optionData.Inflection))
   if (optionData.IsLong === true) {
   const chartData = [
       {"x": optionData.Strike - optionData.Cap * 0.15, "y": 0},
