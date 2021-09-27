@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components';
 import '../../Util/Dates'
+import { useSelector } from 'react-redux';
 
 const AppHeader = styled.header`
     background-color: white;
@@ -65,10 +66,11 @@ function renderRefImgs(assetName) {
 
 }
 
-export default function OptionHeader(props) {
-    const option = props.optionData
-    const headerTitle = option.ReferenceAsset
-
+export default function OptionHeader() {
+    //const option = props.optionData
+    const selectedOption = useSelector((state) => state.tradeOption.option)
+    const headerTitle = selectedOption.ReferenceAsset
+    
     return(
         <AppHeader>
             {renderRefImgs(headerTitle)}

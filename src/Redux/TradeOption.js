@@ -13,8 +13,9 @@ export const tradeOptionSlice = createSlice({
     },
 
     setTradingOption: (state, action) => {
-        state.option = action.payload
-      },
+      state.option = action.payload
+    },
+
   },
 })
 

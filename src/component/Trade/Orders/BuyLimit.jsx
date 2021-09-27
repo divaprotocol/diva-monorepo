@@ -17,21 +17,17 @@ import { RightSideGrayLabel } from './UiStyles';
 import { CreateButtonWrapper } from './UiStyles';
 import { LimitOrderExpiryDiv } from './UiStyles';
 import { useStyles } from './UiStyles';
-import axios from 'axios';
-import Web3 from 'web3'
-import { w3cwebsocket as W3CWebSocket } from "websocket";
+import Web3 from 'web3';
 
 const web3 = new Web3(Web3.givenProvider);
 let accounts;
-
-
 export default function BuyLimit(props) {
   const classes = useStyles();
   const option = props.option
   const [expiry, setExpiry] = React.useState(5);
   const [numberOfOptions, setNumberOfOptions] = React.useState(5);
   const [pricePerOption, setPricePerOption] = React.useState(0);
-
+        
   const handleNumberOfOptions = (value) => {
     setNumberOfOptions(value)
   }
@@ -61,31 +57,6 @@ export default function BuyLimit(props) {
     }
 
     buylimitOrder(orderData)
-    const socket = W3CWebSocket('wss://ropsten.api.0x.org/sra/v4')
-    const msg = {
-      "type": "subscribe",
-      "channel": "orders",
-      "makerToken" : orderData.makerToken,
-      "takerToken" : orderData.takerToken,
-      "requestId": "123e4567-e89b-12d3-a456-426655440000"
-    }
-    console.log("maker "+orderData.makerToken)
-    console.log("Taker "+orderData.takerToken)
-
-    socket.onopen = () => {
-      console.log('Web socket client connected second');
-      socket.send(JSON.stringify(msg));
-      alert("Messaage Sent")
-    }
-    
-    socket.onmessage = ({data}) => {
-      alert("Messaage received")
-      console.log('msg from server', data)
-    }
-     //axios.get('https://ropsten.api.0x.org/sra/v4').then(function(data) {
-       //console.log("Data - "+JSON.stringify(data))
-     //})
-    
   }
 
   return(

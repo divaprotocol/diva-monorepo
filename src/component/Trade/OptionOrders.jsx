@@ -1,4 +1,6 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import 'styled-components';
 import styled from 'styled-components';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -9,10 +11,8 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import axios from 'axios';
-
+import { get0xOpenOrders } from '../../DataService/OpenOrders';
+import { getExpiryMinutesFromNow } from '../../Util/Dates';
 const useStyles = makeStyles({
     table: {
       minWidth: 250,  
@@ -44,28 +44,56 @@ const TableHeadStyle = withStyles(theme => ({
     }
   }))(TableCell);
 
-export default function OpenOrdersMT(props) {
+function mapOrderData(response, selectedOption) {
+    const records = response.data.records
+    const orderbook = records.map(record => {
+        const order = record.order;
+        const orderMaker = order.maker
+        const makerToken = order.makerToken
+        const takerToken = order.takerToken
+        const collateralToken = selectedOption.CollateralToken.toLowerCase()
+        const tokenAddress = selectedOption.TokenAddress.toLowerCase()
+        
+        const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
+        
+        const payReceive = orderMaker === tokenAddress ? order.makerAmount : order.takerAmount
+        const nbrOptions = payReceive/10**18
+        const payment = orderMaker === tokenAddress ? order.takerAmount/10**18 : order.makerAmount/10**18
+        const pricePerOption = payment/nbrOptions
+
+        var orders = {
+            id : records.indexOf(record),
+            orderType : orderType,
+            nbrOptions : nbrOptions,
+            payReceive : payReceive,
+            paymentType : payment,
+            pricePerOption : pricePerOption
+         }
+         return orders
+        })
+    return orderbook
+}
+
+export default function OpenOrdersMT() {
+    const selectedOption = useSelector((state) => state.tradeOption.option)
+    const userAccount = useSelector((state) => state.userMetaMaskAccount)
+
+    const [orders, setOrders] = useState([])
+    const [response, setResponse] = useState({})
     
-    const openOrderData = [
-        {
-            orderType : 'BUY',
-            NbrOptions : 10,
-            PayReceive : 1.9,
-            pricePerOption : 0.19,
-            cancel : 'Cancel'
-        },
-        {
-            orderType : 'SELL',
-            NbrOptions : 8,
-            PayReceive : 1.5,
-            pricePerOption : 0.1875,
-            cancel : 'Cancel'
+    const componentDidMount = async () => {
+        const response = await get0xOpenOrders(selectedOption.CollateralToken, selectedOption.TokenAddress)
+        const orderBook = mapOrderData(response, selectedOption)
+        setResponse(response)
+        setOrders(orderBook)        
+    }
+
+    useEffect(() => {
+        if(Object.keys(response).length === 0) {
+            componentDidMount()
         }
-    ]
-
+    });
     const classes = useStyles();
-
-    
     return(
         <PageDiv>
             <TableHeader>Your Open Orders</TableHeader>
@@ -82,14 +110,13 @@ export default function OpenOrdersMT(props) {
                 </TableRow>
                 </TableHeadStyle>
                 <TableBody>
-                {openOrderData.map((order) => (
-                    
+                {orders.map((order) => (
                     <TableRow key={order.orderType}>
                         <TableCell align="left" component="th" scope="row">
                             {order.orderType}
                         </TableCell>
-                        <TableCell align="center">{order.NbrOptions}</TableCell>
-                        <TableCell align="center">{order.PayReceive}</TableCell>
+                        <TableCell align="center">{order.nbrOptions}</TableCell>
+                        <TableCell align="center">{order.payReceive}</TableCell>
                         <TableCell align="center">{order.pricePerOption}</TableCell>
                         <TableCell align="right">{order.cancel}</TableCell>
                     </TableRow>

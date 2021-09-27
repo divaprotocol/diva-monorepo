@@ -1,4 +1,5 @@
 import React from 'react';
+import { useEffect, useState } from 'react';
 import 'styled-components'
 import styled from 'styled-components'
 import OptionHeader from './OptionHeader';
@@ -9,7 +10,9 @@ import CreateOrder from './CreateOrder';
 // import LineSeries from '../Graphs/LineSeries';
 import TradeChart from '../Graphs/TradeChart';
 import './Underlying.css';
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { setTradingOption } from '../../Redux/TradeOption';
+import { setUserMetaMaskAccount } from '../../Redux/TradeOption';
 import {
     BrowserRouter as Router,
     useHistory,
@@ -54,12 +57,12 @@ const RightCompDiv = styled.div `
     border-radius: 15px;
     background-color : white;
 `
-
 export default function Underlying() {
     const w = 380;
     const h = 200;
-
+    const dispatch = useDispatch()
     const selectedOption = useSelector((state) => state.tradeOption.option)
+    const [option, setOption] = useState(selectedOption)
     
     const OptionParams = {
         CollateralBalanceLong: 100,
@@ -81,22 +84,30 @@ export default function Underlying() {
     
     const history = useHistory();
     if(Object.keys(selectedOption).length === 0) {
-        history.push("/")
-        return(<div/>)
+        //Page refresh logic
+        const localOption = JSON.parse(window.localStorage.getItem('option'))
+        setOption(localOption)
+        dispatch(setTradingOption(localOption))
+        history.push(`/trade/${localOption.OptionId}`)
     }
+
+    useEffect(() => {
+        //selected option stored in local browser storage to reference on page refresh.
+        window.localStorage.setItem('option', JSON.stringify(selectedOption))
+    });
 
     return(
         <PageDiv>
             <PageLeftDiv>
                <LeftCompDiv>
-                    <OptionHeader optionData={selectedOption}/>
-                    <OptionDetails optionData={selectedOption}/>
+                    <OptionHeader/>
+                    <OptionDetails optionData={option}/>
                 </LeftCompDiv>
                 <LeftCompDiv><OpenOrders/></LeftCompDiv>
                 <LeftCompDiv><OrderBook/></LeftCompDiv>
             </PageLeftDiv>
             <PageRightDiv>
-                <RightCompDiv><CreateOrder option={selectedOption}/></RightCompDiv>
+                <RightCompDiv><CreateOrder/></RightCompDiv>
                 <RightCompDiv><TradeChart data={data} w={w} h={h} isLong={OptionParams.isLong} breakEven={breakEvenOptionPrice}/></RightCompDiv>
             </PageRightDiv>
         </PageDiv>

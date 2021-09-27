@@ -11,8 +11,8 @@ export const sellLimitOrder = async (orderData) => {
     }
 
     const order = new utils.LimitOrder({
-        makerToken: contractAddresses.etherToken,
-        takerToken: contractAddresses.zrxToken,
+        makerToken: orderData.makerToken,
+        takerToken: orderData.takerToken,
         makerAmount: (orderData.nbrOptions * 10 ** 18).toString(), 
         takerAmount: (orderData.nbrOptions * orderData.limitPrice * 10 ** orderData.collateralDecimals).toString(), 
         maker: orderData.maker,

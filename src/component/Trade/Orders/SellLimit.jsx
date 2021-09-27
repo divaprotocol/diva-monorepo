@@ -1,6 +1,5 @@
 import React from 'react';
 import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 import { MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
@@ -13,19 +12,16 @@ import { LabelStyleDiv } from './UiStyles';
 import { FormDiv } from './UiStyles';
 import { FormInput } from './UiStyles';
 import { RightSideLabel } from './UiStyles';
-import { RightSideGrayLabel } from './UiStyles';
 import { CreateButtonWrapper } from './UiStyles';
 import { LimitOrderExpiryDiv } from './UiStyles';
 import { useStyles } from './UiStyles';
-
-import Web3 from 'web3'
+import Web3 from 'web3';
 
 const web3 = new Web3(Web3.givenProvider);
 let accounts;
 export default function SellLimit(props) {
   const classes = useStyles();
   const option = props.option
-  const [value, setValue] = React.useState(30);
   const [expiry, setExpiry] = React.useState(5);
   const [numberOfOptions, setNumberOfOptions] = React.useState(5);
   const [pricePerOption, setPricePerOption] = React.useState(0);
@@ -43,8 +39,10 @@ export default function SellLimit(props) {
     accounts = await window.ethereum.enable()
     const orderData = {
       maker : accounts[0],
+      makerToken : option.CollateralToken,
+      takerToken : option.TokenAddress,
       provider : web3,
-      isBuy : true,
+      isBuy : false,
       nbrOptions : numberOfOptions,
       limitPrice : pricePerOption,
       collateralDecimals : option.DecimalsCollateralToken,

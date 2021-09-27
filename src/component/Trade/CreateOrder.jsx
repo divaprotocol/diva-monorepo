@@ -1,4 +1,6 @@
 import React from 'react';
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import 'styled-components'
 import styled from 'styled-components'
 import { makeStyles } from '@material-ui/core/styles';
@@ -8,6 +10,8 @@ import BuyMarket from './Orders/BuyMarket'
 import BuyLimit from './Orders/BuyLimit';
 import SellLimit from './Orders/SellLimit'
 import SellMarket from './Orders/SellMarket'
+import Web3 from 'web3'
+
 const PageDiv = styled.div `
     width: 400px;
     height: 420px;
@@ -65,20 +69,18 @@ function a11yProps(index) {
         borderBottom: '1px solid #cccccc',
       }
   }));
-
+  
 export default function CreateOrder(props) {
-    const option = props.option
+    //const account = props.account
+    const option = useSelector((state) => state.tradeOption.option)
     const classes = useStyles();
     const dividerClass = useDividerStyle();
     const tabsClass = useTabsBorder();
-    
+
     const [orderType, setOrderTypeValue] = React.useState(0);
     const [priceType, setPriceTypeValue] = React.useState(0);
-    const [numberOfOptions, setNumberOfOptions] = React.useState(5);
-    const [pricePerOption, setPricePerOption] = React.useState(0);
 
-    const [expiry, setExpiry] = React.useState(5);
-
+    
     const handleOrderTypeChange = (event, newValue) => {
       setOrderTypeValue(newValue);
     };
@@ -87,16 +89,15 @@ export default function CreateOrder(props) {
       setPriceTypeValue(newValue);
     };
 
-    const handleChange = () => {}
-
     const renderOrderInfo = () => {
+      
       if(orderType == 0 && priceType == 0) {
         //Buy Market
         return(<BuyMarket option= {option}/>)
       }
       if(orderType == 0 && priceType == 1 ) {
         //Buy Limit
-        return(<BuyLimit option= {option} />)
+        return(<BuyLimit option= {option}/>)
       }
       if(orderType == 1 && priceType == 0 ) {
         //Sell Market
