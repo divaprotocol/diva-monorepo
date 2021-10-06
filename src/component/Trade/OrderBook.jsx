@@ -12,6 +12,7 @@ import Paper from '@material-ui/core/Paper';
 import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import Web3 from 'web3';
 import { get0xOpenOrders } from '../../DataService/OpenOrders';
 import { getExpiryMinutesFromNow } from '../../Util/Dates';
 const useStyles = makeStyles({
@@ -45,58 +46,64 @@ const TableHeadStyle = withStyles(theme => ({
     }
   }))(TableCell);
 
-function mapOrderData(response, selectedOption) {
-    const records = response.data.records
+function mapOrderData(records, selectedOption) {
     const orderbook = records.map(record => {
         const order = record.order;
         const makerToken = order.makerToken
         const takerToken = order.takerToken
         const collateralToken = selectedOption.CollateralToken.toLowerCase()
         const tokenAddress = selectedOption.TokenAddress.toLowerCase()
-        var orders ={
-            id : records.indexOf(record),
-            expiry: getExpiryMinutesFromNow(order.expiry)
-        }
-        if(makerToken === collateralToken && takerToken === tokenAddress) {    
+        var orders ={}
+    
+        if(makerToken === collateralToken && takerToken === tokenAddress) {
+            orders.expiry = getExpiryMinutesFromNow(order.expiry)  
             orders.orderType = 'buy'
+            orders.id = 'buy'+records.indexOf(record)
             orders.nbrOptions = order.takerAmount / (10 ** 18)
             orders.bid = order.makerAmount / order.takerAmount * 10**(18-selectedOption.DecimalsCollateralToken)
         }
         if(makerToken === tokenAddress && takerToken === collateralToken) {
+            orders.expiry = getExpiryMinutesFromNow(order.expiry)
             orders.orderType = 'sell'
+            orders.id = 'sell'+records.indexOf(record)
             orders.nbrOptions = order.makerAmount / (10 ** 18)
             orders.ask = order.takerAmount / order.makerAmount * 10**(18-selectedOption.DecimalsCollateralToken)
         }
         return orders
-    })
+    }
+    )
     return orderbook
 }
 
-export default function OrderBook(props) {
+const web3 = new Web3(Web3.givenProvider);
+let accounts;
+export default function OrderBook() {
     const selectedOption = useSelector((state) => state.tradeOption.option)
+    const responseBuy = useSelector((state) => state.tradeOption.responseBuy)
+    const responseSell = useSelector((state) => state.tradeOption.responseSell)
     const [orderBook, setOrderBook] = useState([])
-    const [response, setResponse] = useState({})
     const orderBookRef = useRef(orderBook);
     orderBookRef.current = orderBook
 
     const componentDidMount = async () => {
-        //setTimeout(async () => {
-            const response = await get0xOpenOrders(selectedOption.CollateralToken, selectedOption.TokenAddress)
-
-            const orderBook = mapOrderData(response, selectedOption)
-            if(orderBookRef.current !== orderBook) { 
-                setOrderBook(orderBook)
-            }
-            setResponse(response)
-        //}, 1000);
-          
-    }
-    
-    useEffect(() => {
-        if(Object.keys(response).length === 0) {
-            componentDidMount()
+        const orders = []
+        if(Object.keys(responseBuy).length > 0) {
+            const orderBookBuy = mapOrderData(responseBuy, selectedOption)
+            orders.push(orderBookBuy)
         }
-    });
+        if(Object.keys(responseSell).length > 0) {
+            const orderBookSell = mapOrderData(responseSell, selectedOption)
+            orders.push(orderBookSell)
+        }
+        setOrderBook(orders)        
+    }
+
+    useEffect(() => {
+        componentDidMount()
+        console.log("Order book")
+        
+        console.log("Use effect orders")
+    }, [responseBuy, responseSell])
 
     const classes = useStyles();
     return(
@@ -116,16 +123,18 @@ export default function OrderBook(props) {
                 </TableHeadStyle>
                 <TableBody>
                 {orderBook.map((order) => (
-                    <TableRow key={order.id}>
-                        <TableCell align="left" component="th" scope="row">
-                            {order.orderType === 'buy' ? order.expiry : ''}
-                        </TableCell>
-                        <TableCell align="center">{order.orderType === 'buy' ? order.nbrOptions : '-'}</TableCell>
-                        <TableCell align="center">{order.orderType === 'buy' ? order.bid : '-'}</TableCell>
-                        <TableCell align="center">{order.orderType === 'sell' ? order.ask : '-'}</TableCell>
-                        <TableCell align="center">{order.orderType === 'sell' ? order.nbrOptions : '-'}</TableCell>
-                        <TableCell align="right">{order.orderType === 'sell' ? order.expiry : ''}</TableCell>
-                    </TableRow>
+                    order.map(orderRow =>(
+                        <TableRow key={orderBook.indexOf(order)}>
+                            <TableCell align="left" component="th" scope="row">
+                            {orderRow.orderType === 'buy' ? orderRow.expiry : '-'}
+                            </TableCell>
+                            <TableCell align="center">{orderRow.orderType == 'buy' ? orderRow.nbrOptions : '-'}</TableCell>
+                            <TableCell align="center">{orderRow.orderType === 'buy' ? orderRow.bid : '-'}</TableCell>
+                            <TableCell align="center">{orderRow.orderType === 'sell' ? orderRow.ask : '-'}</TableCell>
+                            <TableCell align="center">{orderRow.orderType === 'sell' ? orderRow.nbrOptions : '-'}</TableCell>
+                            <TableCell align="right">{orderRow.orderType === 'sell' ? orderRow.expiry : '-'}</TableCell>
+                        </TableRow>
+                    ))
                 ))}
                 </TableBody>
             </Table>

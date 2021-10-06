@@ -4,7 +4,6 @@ import { CHAIN_ID } from './Config';
 import { utils } from './Config';
 import { metamaskProvider } from './Config';
 import { ROPSTEN } from './Config'
-import { w3cwebsocket as W3CWebSocket } from "websocket";
  
 export const buylimitOrder = async (orderData) => {
     const getFutureExpiryInSeconds = () => {
@@ -40,11 +39,15 @@ export const buylimitOrder = async (orderData) => {
     
         if (resp.status === 200) {
             alert("Successfully posted order to SRA");
+            
         } else {
             const body = await resp.json();
             alert(`ERROR(status code ${resp.status}): ${JSON.stringify(body, undefined, 2)}`)
+            
         }
-    } catch(e)  {
+        
+    } catch(error)  {
         alert("You need to sign the order")
     } 
+    
 }

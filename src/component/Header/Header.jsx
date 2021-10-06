@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components';
-import logo from '../../Images/logo.svg'
 import logo_small from '../../Images/logo_small.svg'
 import MenuItems from './MenuItems'
 

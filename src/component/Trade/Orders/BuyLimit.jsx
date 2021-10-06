@@ -1,6 +1,5 @@
 import React from 'react';
 import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 import { MenuItem } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
@@ -13,7 +12,6 @@ import { LabelStyleDiv } from './UiStyles';
 import { FormDiv } from './UiStyles';
 import { FormInput } from './UiStyles';
 import { RightSideLabel } from './UiStyles';
-import { RightSideGrayLabel } from './UiStyles';
 import { CreateButtonWrapper } from './UiStyles';
 import { LimitOrderExpiryDiv } from './UiStyles';
 import { useStyles } from './UiStyles';
@@ -56,7 +54,13 @@ export default function BuyLimit(props) {
       orderExpiry : expiry
     }
 
-    buylimitOrder(orderData)
+    buylimitOrder(orderData).then(function(response) {
+      console.log("Response "+response)
+      props.handleDisplayOrder()
+    }).catch(function(error) {
+      console.log("Error"+error)
+    })
+    
   }
 
   return(

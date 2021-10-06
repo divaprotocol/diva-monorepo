@@ -1,6 +1,5 @@
-import React from 'react';
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import 'styled-components'
 import styled from 'styled-components'
 import { makeStyles } from '@material-ui/core/styles';
@@ -10,7 +9,8 @@ import BuyMarket from './Orders/BuyMarket'
 import BuyLimit from './Orders/BuyLimit';
 import SellLimit from './Orders/SellLimit'
 import SellMarket from './Orders/SellMarket'
-import Web3 from 'web3'
+import { setMetamaskAccount, setResponseBuy, setResponseSell } from '../../Redux/TradeOption';
+import { get0xOpenOrders } from '../../DataService/OpenOrders';
 
 const PageDiv = styled.div `
     width: 400px;
@@ -69,18 +69,29 @@ function a11yProps(index) {
         borderBottom: '1px solid #cccccc',
       }
   }));
-  
-export default function CreateOrder(props) {
-    //const account = props.account
+
+
+let accounts;
+export default function CreateOrder() {
     const option = useSelector((state) => state.tradeOption.option)
+    const dispatch = useDispatch()
     const classes = useStyles();
     const dividerClass = useDividerStyle();
     const tabsClass = useTabsBorder();
-
     const [orderType, setOrderTypeValue] = React.useState(0);
     const [priceType, setPriceTypeValue] = React.useState(0);
-
+    const [userAccount, setUserAccount] = React.useState('');
     
+    const componentDidMount = async () => {
+      accounts = await window.ethereum.enable()
+      setUserAccount(accounts[0])
+    }
+    useEffect(() => {
+      if(Object.keys(userAccount).length === 0) {
+        componentDidMount()
+      }
+      dispatch(setMetamaskAccount(userAccount))
+    })
     const handleOrderTypeChange = (event, newValue) => {
       setOrderTypeValue(newValue);
     };
@@ -89,23 +100,30 @@ export default function CreateOrder(props) {
       setPriceTypeValue(newValue);
     };
 
+    const handleDisplayOrder = async () => {
+      console.log("I am in buy limit")
+      const responseSell = await get0xOpenOrders(option.TokenAddress, option.CollateralToken)
+      const responseBuy = await get0xOpenOrders(option.CollateralToken, option.TokenAddress)
+      if(Object.keys(responseSell).length > 0) { dispatch(setResponseSell(responseSell.data.records)) }
+      if(Object.keys(responseBuy).length > 0) { dispatch(setResponseBuy(responseBuy.data.records)) }
+    }
+
     const renderOrderInfo = () => {
-      
-      if(orderType == 0 && priceType == 0) {
+      if(orderType === 0 && priceType === 0) {
         //Buy Market
-        return(<BuyMarket option= {option}/>)
+        return(<BuyMarket option= {option} handleDisplayOrder={handleDisplayOrder}/>)
       }
-      if(orderType == 0 && priceType == 1 ) {
+      if(orderType === 0 && priceType === 1 ) {
         //Buy Limit
-        return(<BuyLimit option= {option}/>)
+        return(<BuyLimit option= {option} handleDisplayOrder={handleDisplayOrder}/>)
       }
-      if(orderType == 1 && priceType == 0 ) {
+      if(orderType === 1 && priceType === 0 ) {
         //Sell Market
-        return(<SellMarket option= {option}/>)
+        return(<SellMarket option= {option} handleDisplayOrder={handleDisplayOrder}/>)
       }
-      if(orderType == 1 && priceType == 1) {
+      if(orderType === 1 && priceType === 1) {
         //Sell Limit
-        return(<SellLimit option= {option}/>)
+        return(<SellLimit option= {option} handleDisplayOrder={handleDisplayOrder}/>)
       }
     }
     

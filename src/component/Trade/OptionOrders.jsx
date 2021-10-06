@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption';
 import 'styled-components';
 import styled from 'styled-components';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
@@ -12,7 +13,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { get0xOpenOrders } from '../../DataService/OpenOrders';
-import { getExpiryMinutesFromNow } from '../../Util/Dates';
+
 const useStyles = makeStyles({
     table: {
       minWidth: 250,  
@@ -44,55 +45,90 @@ const TableHeadStyle = withStyles(theme => ({
     }
   }))(TableCell);
 
-function mapOrderData(response, selectedOption) {
-    const records = response.data.records
+function mapOrderData(records, selectedOption, account) {
+    //const records = response.data.records
+    //const records = response
     const orderbook = records.map(record => {
         const order = record.order;
         const orderMaker = order.maker
-        const makerToken = order.makerToken
-        const takerToken = order.takerToken
-        const collateralToken = selectedOption.CollateralToken.toLowerCase()
-        const tokenAddress = selectedOption.TokenAddress.toLowerCase()
+        if(account === orderMaker) { 
+            const makerToken = order.makerToken
+            const tokenAddress = selectedOption.TokenAddress.toLowerCase()
+            
+            const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
+            const payReceive = orderMaker === tokenAddress ? order.makerAmount : order.takerAmount
+            const nbrOptions = payReceive/10**18
+            const payment = orderMaker === tokenAddress ? order.takerAmount/10**18 : order.makerAmount/10**18
+            const pricePerOption = payment/nbrOptions
         
-        const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
-        
-        const payReceive = orderMaker === tokenAddress ? order.makerAmount : order.takerAmount
-        const nbrOptions = payReceive/10**18
-        const payment = orderMaker === tokenAddress ? order.takerAmount/10**18 : order.makerAmount/10**18
-        const pricePerOption = payment/nbrOptions
-
-        var orders = {
-            id : records.indexOf(record),
-            orderType : orderType,
-            nbrOptions : nbrOptions,
-            payReceive : payReceive,
-            paymentType : payment,
-            pricePerOption : pricePerOption
-         }
-         return orders
-        })
+            var orders = {
+                id : orderType + records.indexOf(record),
+                orderType : orderType,
+                nbrOptions : nbrOptions,
+                payReceive : payReceive,
+                paymentType : payment,
+                pricePerOption : pricePerOption
+            }
+        }
+        return orders
+    })
     return orderbook
 }
 
+let accounts;
 export default function OpenOrdersMT() {
     const selectedOption = useSelector((state) => state.tradeOption.option)
-    const userAccount = useSelector((state) => state.userMetaMaskAccount)
-
+    var responseBuy = useSelector((state) => state.tradeOption.responseBuy)
+    var responseSell = useSelector((state) => state.tradeOption.responseSell)
+    const dispatch = useDispatch()
     const [orders, setOrders] = useState([])
-    const [response, setResponse] = useState({})
     
     const componentDidMount = async () => {
-        const response = await get0xOpenOrders(selectedOption.CollateralToken, selectedOption.TokenAddress)
-        const orderBook = mapOrderData(response, selectedOption)
-        setResponse(response)
-        setOrders(orderBook)        
+        accounts = await window.ethereum.enable()
+        var orderBook = []
+        if(responseSell.length === 0) {
+            const rSell = await get0xOpenOrders(selectedOption.TokenAddress, selectedOption.CollateralToken)
+            responseSell = rSell.data.records
+            dispatch(setResponseSell(responseSell))
+        }
+
+        if(responseBuy.length === 0) {
+            const rBuy = await get0xOpenOrders(selectedOption.CollateralToken, selectedOption.TokenAddress)
+            responseBuy = rBuy.data.records
+            dispatch(setResponseBuy(responseBuy))
+        }
+
+        const orderBookBuy = mapOrderData(responseBuy, selectedOption, accounts[0])
+        const orderBookSell = mapOrderData(responseSell, selectedOption, accounts[0])
+        
+        if(orderBookSell.length > 0){ 
+            orderBookSell.forEach((order) => {
+                if(order) {
+                    orderBook.push(order)
+                }
+            })
+        }
+
+        if(Object.keys(orderBookBuy).length > 0) {
+            orderBookBuy.forEach((order) => {
+                if(order) {
+                    orderBook.push(order)
+                }
+            })  
+        }   
+        setOrders(orderBook)  
     }
 
     useEffect(() => {
-        if(Object.keys(response).length === 0) {
+        if(responseBuy.length === 0 || responseSell === 0) {
             componentDidMount()
         }
-    });
+        return () => {
+            dispatch(setResponseSell([]))
+            dispatch(setResponseBuy([]))
+        }
+    }, [])
+
     const classes = useStyles();
     return(
         <PageDiv>
@@ -111,7 +147,7 @@ export default function OpenOrdersMT() {
                 </TableHeadStyle>
                 <TableBody>
                 {orders.map((order) => (
-                    <TableRow key={order.orderType}>
+                    <TableRow key={orders.indexOf(order)}>
                         <TableCell align="left" component="th" scope="row">
                             {order.orderType}
                         </TableCell>

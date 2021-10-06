@@ -39,8 +39,8 @@ export default function SellLimit(props) {
     accounts = await window.ethereum.enable()
     const orderData = {
       maker : accounts[0],
-      makerToken : option.CollateralToken,
-      takerToken : option.TokenAddress,
+      makerToken : option.TokenAddress,
+      takerToken : option.CollateralToken,
       provider : web3,
       isBuy : false,
       nbrOptions : numberOfOptions,
@@ -49,7 +49,12 @@ export default function SellLimit(props) {
       orderExpiry : expiry
     }
     
-    sellLimitOrder(orderData)
+    sellLimitOrder(orderData).then(function(response) {
+      console.log("Response "+response)
+      props.handleDisplayOrder()
+    }).catch(function(error) {
+      console.log("Error"+error)
+    })
   }
 
   const handleExpirySelection = (event) => {
