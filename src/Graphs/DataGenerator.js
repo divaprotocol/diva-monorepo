@@ -17,7 +17,17 @@ function generatePayoffFunction(
 
       if (IsLong) {
         sign = 1;
-        if (Cap === Inflection) {
+        if (Cap === Inflection && Strike === Inflection) {
+          if (valueUnderlying > Inflection) {
+            payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
+          } else if (valueUnderlying === Inflection) {
+            payoff = CollateralBalanceLong / TokenSupply;
+          } 
+          else {
+            payoff = 0;
+          }
+        }
+        else if (Cap === Inflection) {
           if (valueUnderlying <= Inflection) {
             beta = (sign * CollateralBalanceLong) / (Inflection - Strike);
             alpha = -Inflection * beta;
@@ -39,15 +49,6 @@ function generatePayoffFunction(
           } else {
             payoff = 0
           }
-        } else if (Cap === Inflection && Strike === Inflection) {
-          if (valueUnderlying > Inflection) {
-            payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
-          } else if (valueUnderlying === Inflection) {
-            payoff = CollateralBalanceLong / TokenSupply;
-          } 
-          else {
-            payoff = 0;
-          }
         } else {
           if (valueUnderlying >= Inflection) {
             beta = (sign * CollateralBalanceShort) / (Cap - Inflection);
@@ -67,7 +68,21 @@ function generatePayoffFunction(
         }
       } else {
         sign = -1;
-        if (Strike === Inflection) {
+        if (Cap === Inflection && Strike === Inflection) {
+          console.log("cap: " + Cap + " inflection " + Inflection + " strike " + Strike)
+          if (valueUnderlying > Inflection) {
+            console.log("test 1 ")
+            payoff = 0;
+          } else if (valueUnderlying === Inflection) {            
+            console.log("test 2 ")
+            payoff = CollateralBalanceShort / TokenSupply;
+            console.log("*** I was here: ", payoff)
+          } 
+          else {
+            payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
+          }
+        }
+        else if (Strike === Inflection) {
           if (valueUnderlying <= Inflection) {
             beta = (sign * CollateralBalanceLong) / (Inflection - Cap);
             alpha = -Inflection * beta;
@@ -87,19 +102,6 @@ function generatePayoffFunction(
               Math.max(0, alpha + beta * valueUnderlying + CollateralBalanceShort)
             ) / TokenSupply;
           } else {
-            payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
-          }
-        } else if (Cap === Inflection && Strike === Inflection) {
-          console.log("cap: " + Cap + " inflection " + Inflection + " strike " + Strike)
-          if (valueUnderlying > Inflection) {
-            console.log("test 1 ")
-            payoff = 0;
-          } else if (valueUnderlying === Inflection) {            
-            console.log("test 2 ")
-            payoff = CollateralBalanceShort / TokenSupply;
-            console.log("*** I was here: ", payoff)
-          } 
-          else {
             payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
           }
         } else {
