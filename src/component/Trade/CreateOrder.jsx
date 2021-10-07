@@ -101,7 +101,6 @@ export default function CreateOrder() {
     };
 
     const handleDisplayOrder = async () => {
-      console.log("I am in buy limit")
       const responseSell = await get0xOpenOrders(option.TokenAddress, option.CollateralToken)
       const responseBuy = await get0xOpenOrders(option.CollateralToken, option.TokenAddress)
       if(Object.keys(responseSell).length > 0) { dispatch(setResponseSell(responseSell.data.records)) }

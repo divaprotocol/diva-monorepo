@@ -46,8 +46,6 @@ const TableHeadStyle = withStyles(theme => ({
   }))(TableCell);
 
 function mapOrderData(records, selectedOption, account) {
-    //const records = response.data.records
-    //const records = response
     const orderbook = records.map(record => {
         const order = record.order;
         const orderMaker = order.maker
@@ -78,8 +76,10 @@ function mapOrderData(records, selectedOption, account) {
 let accounts;
 export default function OpenOrdersMT() {
     const selectedOption = useSelector((state) => state.tradeOption.option)
+    
     var responseBuy = useSelector((state) => state.tradeOption.responseBuy)
     var responseSell = useSelector((state) => state.tradeOption.responseSell)
+    
     const dispatch = useDispatch()
     const [orders, setOrders] = useState([])
     
@@ -116,18 +116,26 @@ export default function OpenOrdersMT() {
                 }
             })  
         }   
-        setOrders(orderBook)  
+        setOrders(orderBook)
     }
 
     useEffect(() => {
         if(responseBuy.length === 0 || responseSell === 0) {
             componentDidMount()
         }
-        return () => {
-            dispatch(setResponseSell([]))
-            dispatch(setResponseBuy([]))
-        }
     }, [])
+    
+    useEffect(() => {
+        if(responseBuy.length > 0 || responseSell > 0) {
+            componentDidMount()
+        }
+        return () => {
+            if(responseBuy.length > 0 || responseSell > 0) {
+                dispatch(setResponseSell([]))
+                dispatch(setResponseBuy([]))
+            }
+        }
+    }, [responseBuy, responseSell])
 
     const classes = useStyles();
     return(
