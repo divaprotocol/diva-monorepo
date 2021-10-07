@@ -79,30 +79,32 @@ const web3 = new Web3(Web3.givenProvider);
 let accounts;
 export default function OrderBook() {
     const selectedOption = useSelector((state) => state.tradeOption.option)
-    const responseBuy = useSelector((state) => state.tradeOption.responseBuy)
-    const responseSell = useSelector((state) => state.tradeOption.responseSell)
+    var responseBuy = useSelector((state) => state.tradeOption.responseBuy)
+    var responseSell = useSelector((state) => state.tradeOption.responseSell)
     const [orderBook, setOrderBook] = useState([])
-    const orderBookRef = useRef(orderBook);
-    orderBookRef.current = orderBook
 
     const componentDidMount = async () => {
         const orders = []
-        if(Object.keys(responseBuy).length > 0) {
-            const orderBookBuy = mapOrderData(responseBuy, selectedOption)
-            orders.push(orderBookBuy)
+
+        if(responseSell.length === 0) {
+            const rSell = await get0xOpenOrders(selectedOption.TokenAddress, selectedOption.CollateralToken)
+            responseSell = rSell.data.records
         }
-        if(Object.keys(responseSell).length > 0) {
-            const orderBookSell = mapOrderData(responseSell, selectedOption)
-            orders.push(orderBookSell)
+
+        if(responseBuy.length === 0) {
+            const rBuy = await get0xOpenOrders(selectedOption.CollateralToken, selectedOption.TokenAddress)
+            responseBuy = rBuy.data.records
         }
+
+        const orderBookBuy = mapOrderData(responseBuy, selectedOption)
+        orders.push(orderBookBuy)
+        const orderBookSell = mapOrderData(responseSell, selectedOption)
+        orders.push(orderBookSell)
         setOrderBook(orders)        
     }
 
     useEffect(() => {
         componentDidMount()
-        console.log("Order book")
-        
-        console.log("Use effect orders")
     }, [responseBuy, responseSell])
 
     const classes = useStyles();
