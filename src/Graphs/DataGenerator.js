@@ -10,120 +10,51 @@ function generatePayoffFunction(
   IsLong) {
   
   const payoffFunction = function(valueUnderlying) {  
-      let beta = 0;
-      let sign = 0;
-      let payoff;
-      let alpha;
+      let _Floor, _Cap, payoffLong, payoffShort, payoff;
 
       if (IsLong) {
-        sign = 1;
-        if (Cap === Inflection && Strike === Inflection) {
-          if (valueUnderlying > Inflection) {
-            payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
-          } else if (valueUnderlying === Inflection) {
-            payoff = CollateralBalanceLong / TokenSupply;
-          } 
-          else {
-            payoff = 0;
-          }
-        }
-        else if (Cap === Inflection) {
-          if (valueUnderlying <= Inflection) {
-            beta = (sign * CollateralBalanceLong) / (Inflection - Strike);
-            alpha = -Inflection * beta;
-            payoff = Math.min(
-              CollateralBalanceShort + CollateralBalanceLong,
-              Math.max(0, alpha + beta * valueUnderlying + CollateralBalanceLong)
-            ) / TokenSupply;
-          } else {
-            payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
-          } 
-        } else if (Strike === Inflection) {
-          if (valueUnderlying >= Inflection) {
-            beta = (sign * CollateralBalanceShort) / (Cap - Inflection);
-            alpha = -Inflection * beta;
-            payoff = Math.min(
-              CollateralBalanceShort + CollateralBalanceLong,
-              Math.max(0, alpha + beta * valueUnderlying + CollateralBalanceLong)
-            ) / TokenSupply;
-          } else {
-            payoff = 0
-          }
+        _Floor = Strike
+      } else {
+        _Floor = Cap
+        _Cap = Strike        
+      }
+
+      console.log("Floor: " + _Floor)
+      console.log("Inflection: " + Inflection)
+      console.log("Cap: " + _Cap)
+
+
+      if (valueUnderlying === Inflection) {
+        payoff = CollateralBalanceLong;
+      } else if (valueUnderlying < Inflection) {
+        if ((_Cap === Inflection && _Floor == Inflection) || (_Floor === Inflection)) {
+          payoffLong = 0;
         } else {
-          if (valueUnderlying >= Inflection) {
-            beta = (sign * CollateralBalanceShort) / (Cap - Inflection);
-            alpha = -Inflection * beta;
-            payoff = Math.min(
-              CollateralBalanceShort + CollateralBalanceLong,
-              Math.max(0, alpha + beta * valueUnderlying + CollateralBalanceLong)
-            ) / TokenSupply;
-          } else {
-            beta = (sign * CollateralBalanceLong) / (Inflection - Strike);
-            alpha = -Inflection * beta;
-            payoff = Math.min(
-              CollateralBalanceShort + CollateralBalanceLong,
-              Math.max(0, alpha + beta * valueUnderlying + CollateralBalanceLong)
-            ) / TokenSupply;
-          }
+            if (valueUnderlying > _Floor) {
+              payoffLong = CollateralBalanceLong * (valueUnderlying - _Floor) / (Inflection - _Floor);
+            } else {
+              payoffLong = 0;
+            }
         }
       } else {
-        sign = -1;
-        if (Cap === Inflection && Strike === Inflection) {
-          console.log("cap: " + Cap + " inflection " + Inflection + " strike " + Strike)
-          if (valueUnderlying > Inflection) {
-            console.log("test 1 ")
-            payoff = 0;
-          } else if (valueUnderlying === Inflection) {            
-            console.log("test 2 ")
-            payoff = CollateralBalanceShort / TokenSupply;
-            console.log("*** I was here: ", payoff)
-          } 
-          else {
-            payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
-          }
-        }
-        else if (Strike === Inflection) {
-          if (valueUnderlying <= Inflection) {
-            beta = (sign * CollateralBalanceLong) / (Inflection - Cap);
-            alpha = -Inflection * beta;
-            payoff = Math.min(
-              CollateralBalanceShort + CollateralBalanceLong,
-              Math.max(0, alpha + beta * valueUnderlying + CollateralBalanceShort)
-            ) / TokenSupply;
-          } else {
-            payoff = 0;
-          } 
-        } else if (Cap === Inflection) {
-          if (valueUnderlying >= Inflection) {
-            beta = (sign * CollateralBalanceShort) / (Strike - Inflection);
-            alpha = -Inflection * beta;
-            payoff = Math.min(
-              CollateralBalanceShort + CollateralBalanceLong,
-              Math.max(0, alpha + beta * valueUnderlying + CollateralBalanceShort)
-            ) / TokenSupply;
-          } else {
-            payoff = (CollateralBalanceShort + CollateralBalanceLong) / TokenSupply;
-          }
+        if ((_Cap === Inflection && _Floor == Inflection) || (Inflection === _Cap)) {
+          payoffLong = CollateralBalanceLong + CollateralBalanceShort;
         } else {
-          if (valueUnderlying >= Inflection) {
-            beta = (sign * CollateralBalanceShort) / (Strike - Inflection);
-            alpha = -Inflection * beta;
-            payoff = Math.min(
-              CollateralBalanceShort + CollateralBalanceLong,
-              Math.max(0, alpha + beta * valueUnderlying + CollateralBalanceShort)
-            ) / TokenSupply;
-          } else {
-            beta = (sign * CollateralBalanceLong) / (Inflection - Cap);
-            alpha = -Inflection * beta;
-            payoff = Math.min(
-              CollateralBalanceShort + CollateralBalanceLong,
-              Math.max(0, alpha + beta * valueUnderlying + CollateralBalanceShort)
-            ) / TokenSupply;
-          }
+            if (valueUnderlying < _Cap) {
+              payoffLong = CollateralBalanceLong + CollateralBalanceShort * (valueUnderlying - Inflection) / (_Cap - Inflection);
+            } else {
+              payoffLong = CollateralBalanceLong + CollateralBalanceShort;
+            }
         }
       }
 
-      return payoff;
+      payoffShort = CollateralBalanceLong + CollateralBalanceShort - payoffLong;
+
+      if (IsLong) {
+        return payoff = payoffLong / TokenSupply;
+      } else {
+        return payoff = payoffShort / TokenSupply;
+      }
   }
 
   return payoffFunction;
@@ -145,12 +76,11 @@ export default function generatePayoffChartData(data) {
     TokenSupply,
     optionData.IsLong);
   
-  console.log("******payoffFunction(optionData.Inflection): ", payoffFunction(optionData.Inflection))
   if (optionData.IsLong === true) {
   const chartData = [
       {"x": optionData.Strike - optionData.Cap * 0.15, "y": 0},
       {"x": optionData.Strike, "y": 0},
-      {"x": optionData.Inflection, "y": payoffFunction(optionData.Inflection)},
+      {"x": optionData.Inflection, "y": CollateralBalanceLong / TokenSupply},
       {"x": optionData.Cap, "y": (CollateralBalanceLong + CollateralBalanceShort) / TokenSupply},
       {"x": optionData.Cap*1.15, "y": (CollateralBalanceLong + CollateralBalanceShort) / TokenSupply}
   ]
@@ -159,7 +89,7 @@ export default function generatePayoffChartData(data) {
   const chartData = [
       {"x": optionData.Cap - optionData.Strike * 0.15, "y": (CollateralBalanceLong + CollateralBalanceShort) / TokenSupply},
       {"x": optionData.Cap, "y": (CollateralBalanceLong + CollateralBalanceShort) / TokenSupply},
-      {"x": optionData.Inflection, "y": payoffFunction(optionData.Inflection)},
+      {"x": optionData.Inflection, "y": CollateralBalanceShort / TokenSupply},
       {"x": optionData.Strike, "y": 0},
       {"x": optionData.Strike * 1.15, "y": 0}
     
