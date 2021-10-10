@@ -1,11 +1,17 @@
 import { useD3 } from '../../hooks/useD3.js';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import * as d3 from 'd3';
 import generatePayoffChartData from '../../Graphs/DataGenerator.js';
 
-function MarketChart(myData) {
-  console.log(myData)
+function MarketChart(data) {
+  console.log(data)
+  
+  const [myData, setMyData] = useState(data)
+  
   const ref = useD3(
+    Object.keys(data).length === 0 ?
+    (svg) => <svg /> :
+    
     (svg) => {
       const height = myData.targetHeight;
       const width = myData.targetWidth;
@@ -23,7 +29,7 @@ function MarketChart(myData) {
       //   TokenSupply: 30,
       //   IsLong: true
       // };
-      console.log(myData)
+      //console.log(myData)
       const data = generatePayoffChartData(myData.data)
 
       const x = d3
@@ -85,7 +91,13 @@ function MarketChart(myData) {
     },
    // [myData.length]
   );
-
+  
+  useEffect(() => {
+    
+    return () => {
+      setMyData({})
+    }
+  }, [])
   return (
     <svg
       ref={ref}

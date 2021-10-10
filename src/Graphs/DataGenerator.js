@@ -61,7 +61,6 @@ function generatePayoffFunction(
 }
 
 export default function generatePayoffChartData(data) {
-
   const optionData = data
   const CollateralBalanceLong = 100 // temporarily hard-coded
   const CollateralBalanceShort = 100 // temporarily hard-coded
