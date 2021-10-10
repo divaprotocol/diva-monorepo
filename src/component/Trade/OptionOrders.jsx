@@ -54,17 +54,15 @@ function mapOrderData(records, selectedOption, account) {
             const tokenAddress = selectedOption.TokenAddress.toLowerCase()
             
             const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
-            const payReceive = orderMaker === tokenAddress ? order.makerAmount : order.takerAmount
-            const nbrOptions = payReceive/10**18
-            const payment = orderMaker === tokenAddress ? order.takerAmount/10**18 : order.makerAmount/10**18
-            const pricePerOption = payment/nbrOptions
-        
+            const nbrOptions = (makerToken === tokenAddress ?  order.makerAmount :order.takerAmount ) /(10 **18)
+            const payReceive = (makerToken === tokenAddress ? order.takerAmount : order.makerAmount) / (10 ** selectedOption.DecimalsCollateralToken)
+            const pricePerOption = payReceive/nbrOptions
+    
             var orders = {
                 id : orderType + records.indexOf(record),
                 orderType : orderType,
                 nbrOptions : nbrOptions,
                 payReceive : payReceive,
-                paymentType : payment,
                 pricePerOption : pricePerOption
             }
         }
