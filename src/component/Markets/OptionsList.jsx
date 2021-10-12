@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -7,6 +8,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
+import Search from './Search';
 import { makeStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
 import { getDateTime } from '../../Util/Dates';
@@ -14,6 +16,7 @@ import { useSelector } from 'react-redux';
 import MarketChart from '../Graphs/MarketChart.jsx';
 import { useDispatch } from 'react-redux'
 import { setTradingOption } from '../../Redux/TradeOption'
+
 import {
     BrowserRouter as Router,
     useHistory,   
@@ -181,11 +184,12 @@ export default function OptionsListNew() {
   const rows = useSelector(state => state.tradeOption.allOptions)
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
-  const displayRows = createDisplayData(rows)
+  //Need to create a separate variable to hold initial all rows for search query resulting no match
+  const displayAllRows = createDisplayData(rows)
+  const [tableRows, setTableRows] = React.useState([])
   
   const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-    
+    setPage(newPage); 
   };
 
   const handleChangeRowsPerPage = (event) => {
@@ -201,8 +205,33 @@ export default function OptionsListNew() {
     history.push(`trade/${option.OptionId}`)
   }
 
+  const searchRow = (event) => {
+    const searchValue = event.target.value
+    if(searchValue.length === 0 || searchValue === '') {
+        setTableRows(displayAllRows)
+    } else {
+        const result = tableRows.filter((row) => {
+            return row.Underlying.toLowerCase().includes(searchValue.toLowerCase())
+        });
+        if(result.length > 0) {
+            setTableRows(result)
+        }
+    }
+  }
+
+  const componentDidMount = () => {
+    const tableRows = createDisplayData(rows)
+    setTableRows(tableRows)
+  }
+
+  useEffect(() => {
+    if(tableRows.length === 0) {
+        componentDidMount()
+    }
+  }, [rows])
   return (
     <PageDiv>
+        <Search searchRow={searchRow}/>
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
             <TableContainer sx={{ maxHeight: 700 }}  >
                 <Table stickyHeader aria-label="sticky table">
@@ -220,12 +249,12 @@ export default function OptionsListNew() {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {displayRows
+                    { tableRows
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row) => {
                         return (
                         <TableRow hover role="checkbox" tabIndex={-1} key={row.OptionId} onClick={event =>
-                            handleRowSelect(event, displayRows.indexOf(row))
+                            handleRowSelect(event, tableRows.indexOf(row))
                           }>
                             {columns.map((column) => {
                                 if(column.id === 'OptionImage'){

@@ -52,8 +52,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Search() {
+export default function Search(props) {
     const classes = useStyles();
+    
     return(
         <PageDiv>
           <div className={classes.search}>
@@ -67,6 +68,7 @@ export default function Search() {
                 input: classes.inputInput,
               }}
               inputProps={{ 'aria-label': 'search' }}
+              onChange={props.searchRow}
             />
           </div>
     </PageDiv>
