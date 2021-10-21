@@ -102,7 +102,7 @@ function createData(option) {
        cap : option.Cap,
        strike : option.Strike,
        inflection : option.Inflection,
-       collateral : option.CollateralTokenName,
+       collateral : option.CollateralBalance + ' '+option.CollateralTokenName,
        dataFeedProvider : option.DataFeedProvider,
        dataFeedProviderAbbr : option.DataFeedProvider.length > 0 ? (String(option.DataFeedProvider).substring(0, 6) + "..." + String(option.DataFeedProvider).substring(38)) : ("n/a")
     }

@@ -4,6 +4,7 @@ export const tradeOptionSlice = createSlice({
   name: 'option',
   initialState: {
     allOptions: [],
+    allOptionsLiquidity : [],
     option: {},
     userAccount : '',
     responseBuy : [],
@@ -27,6 +28,10 @@ export const tradeOptionSlice = createSlice({
       state.allOptions = action.payload
     },
 
+    setAllOptionsLiquidity : (state, action) => {
+      state.allOptionsLiquidity = action.payload
+    },
+
     setTradingOption: (state, action) => {
       state.option = action.payload
     },
@@ -40,4 +45,5 @@ export const { setAllOptions } = tradeOptionSlice.actions
 export const {setMetamaskAccount } = tradeOptionSlice.actions
 export const {setResponseBuy} = tradeOptionSlice.actions
 export const {setResponseSell} = tradeOptionSlice.actions
+export const {setAllOptionsLiquidity} = tradeOptionSlice.actions
 export default tradeOptionSlice.reducer

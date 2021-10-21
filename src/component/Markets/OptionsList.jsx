@@ -16,7 +16,8 @@ import { useSelector } from 'react-redux';
 import MarketChart from '../Graphs/MarketChart.jsx';
 import { useDispatch } from 'react-redux'
 import { setTradingOption } from '../../Redux/TradeOption'
-
+import { setAllOptions } from '../../Redux/TradeOption';
+import { getOptionCollateralUpdates } from '../../DataService/FireStoreDB';
 import {
     BrowserRouter as Router,
     useHistory,   
@@ -141,6 +142,7 @@ const columns = [
   ];
     
 function createDisplayData(rows) {
+    //console.log("All options " + JSON.stringify(rows))
     var optionsList = []
     rows.map(row => {
         const displyRow = {
@@ -154,7 +156,7 @@ function createDisplayData(rows) {
             Sell : "TBD",
             Buy : "TBD",
             MaxYield : "TBD",
-            TVL : "TBD"
+            TVL : row.CollateralBalance
         }
         optionsList.push(displyRow)
     })
@@ -184,7 +186,7 @@ export default function OptionsListNew() {
   const rows = useSelector(state => state.tradeOption.allOptions)
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
-  //Need to create a separate variable to hold initial all rows for search query resulting no match
+  //Need to create a separate variable to hold INITIAL all rows for search query resulting no match
   const displayAllRows = createDisplayData(rows)
   const [tableRows, setTableRows] = React.useState([])
   
@@ -219,16 +221,24 @@ export default function OptionsListNew() {
     }
   }
 
-  const componentDidMount = () => {
+  const componentDidMount = async () => {
     const tableRows = createDisplayData(rows)
     setTableRows(tableRows)
+    if(rows.length > 0) {
+        const oData = await getOptionCollateralUpdates(rows)
+        if(oData) {
+            dispatch(setAllOptions(oData))
+        }
+    }
   }
 
   useEffect(() => {
-    if(tableRows.length === 0) {
+    //if(tableRows.length === 0) {
         componentDidMount()
-    }
+        console.log("Count er")
+    //}
   }, [rows])
+
   return (
     <PageDiv>
         <Search searchRow={searchRow}/>

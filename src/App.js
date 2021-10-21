@@ -5,9 +5,10 @@ import styled from 'styled-components'
 import Header from './component/Header/Header';
 import OptionsList from './component/Markets/OptionsList';
 import Underlying from './component/Trade/Underlying';
-import {optionsCount} from './DataService/FireStoreDB';
-import { useDispatch } from 'react-redux';
+import { getAllOptions } from './DataService/FireStoreDB';
+import { useDispatch, useSelector } from 'react-redux';
 import { setAllOptions } from './Redux/TradeOption';
+import { getOptionCollateralUpdates } from './DataService/FireStoreDB';
 import {
   BrowserRouter as Router,
   Switch,
@@ -23,22 +24,17 @@ export default function App() {
   //Need to set initial state
   const [optionData, setOptionData]  = useState([])
   const dispatch = useDispatch()
-
+  
   const componentDidMount = async () => {
-  var oData = [];
-  await optionsCount.get().then( function(responseData) {
-    responseData.docs.forEach(doc => {
-      oData.push(doc.data());
-    })
-  })
-  dispatch(setAllOptions(oData))
-  setOptionData(oData);
-}
+    const oData = await getAllOptions()
+    setOptionData(oData);
+    dispatch(setAllOptions(oData))
+  }
 
   useEffect(() => {
     if(optionData.length === 0) {
       componentDidMount()
-    }
+    } 
   })
 
   return (
