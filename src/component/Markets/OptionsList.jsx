@@ -17,7 +17,13 @@ import MarketChart from '../Graphs/MarketChart.jsx';
 import { useDispatch } from 'react-redux'
 import { setTradingOption } from '../../Redux/TradeOption'
 import { setAllOptions } from '../../Redux/TradeOption';
-import { getOptionCollateralUpdates } from '../../DataService/FireStoreDB';
+import { getAllOptions } from '../../DataService/FireStoreDB'
+import { mapCollateralUpdate } from '../../DataService/FireStoreDB';
+import { optionLiquidity } from '../../DataService/FireStoreDB';
+import firebase from "firebase/app";
+import "firebase/database";
+import 'firebase/firestore';
+
 import {
     BrowserRouter as Router,
     useHistory,   
@@ -156,7 +162,7 @@ function createDisplayData(rows) {
             Sell : "TBD",
             Buy : "TBD",
             MaxYield : "TBD",
-            TVL : row.CollateralBalance
+            TVL : row.CollateralBalance+' '+row.CollateralTokenName,
         }
         optionsList.push(displyRow)
     })
@@ -180,16 +186,23 @@ function renderRefImgs(assetName) {
     }
 }
 
-export default function OptionsListNew() {
+export default function OptionsList() {
   const dispatch = useDispatch()
   const history = useHistory();
   const rows = useSelector(state => state.tradeOption.allOptions)
+  const [allOptions, setOptions] = React.useState([])
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
   //Need to create a separate variable to hold INITIAL all rows for search query resulting no match
   const displayAllRows = createDisplayData(rows)
   const [tableRows, setTableRows] = React.useState([])
-  
+  const allOptionsRef = React.useRef(allOptions)
+  const setAllOptionsRef = data => {
+    allOptionsRef.current = data
+    setOptions(data)
+  }
+
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage); 
   };
@@ -220,24 +233,44 @@ export default function OptionsListNew() {
         }
     }
   }
-
+  
   const componentDidMount = async () => {
-    const tableRows = createDisplayData(rows)
+    const options = await getAllOptions()
+    dispatch(setAllOptions(options))
+    setAllOptionsRef(options)
+    const tableRows = createDisplayData(options)
     setTableRows(tableRows)
-    if(rows.length > 0) {
-        const oData = await getOptionCollateralUpdates(rows)
-        if(oData) {
-            dispatch(setAllOptions(oData))
-        }
+  }
+
+  const mapCollateralBalance = async (collateralUpdates) => {
+    const options = allOptionsRef.current
+    const oData = mapCollateralUpdate(options, collateralUpdates)
+    if(oData.length > 0) {
+        const tableRows = createDisplayData(oData)
+        setTableRows(tableRows)
+        dispatch(setAllOptions(oData))
     }
   }
 
   useEffect(() => {
-    //if(tableRows.length === 0) {
-        componentDidMount()
-        console.log("Count er")
-    //}
-  }, [rows])
+    componentDidMount()
+    const collateralUpdates = optionLiquidity.onSnapshot(allOptionsLiquidity => {
+        allOptionsLiquidity.docChanges().forEach(change => {
+          if (change.type === 'added') {
+            mapCollateralBalance(change.doc.data())
+          }
+          if (change.type === 'modified') {
+            return change.doc.data()
+          }
+          if (change.type === 'removed') {
+            return change.doc.data()
+          }
+        });
+      });
+    return () => {
+        collateralUpdates()
+    }
+  }, [])
 
   return (
     <PageDiv>

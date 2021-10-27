@@ -8,7 +8,7 @@ import Underlying from './component/Trade/Underlying';
 import { getAllOptions } from './DataService/FireStoreDB';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAllOptions } from './Redux/TradeOption';
-import { getOptionCollateralUpdates } from './DataService/FireStoreDB';
+
 import {
   BrowserRouter as Router,
   Switch,
@@ -21,22 +21,6 @@ const AppPage = styled.div`
 `;
 
 export default function App() {
-  //Need to set initial state
-  const [optionData, setOptionData]  = useState([])
-  const dispatch = useDispatch()
-  
-  const componentDidMount = async () => {
-    const oData = await getAllOptions()
-    setOptionData(oData);
-    dispatch(setAllOptions(oData))
-  }
-
-  useEffect(() => {
-    if(optionData.length === 0) {
-      componentDidMount()
-    } 
-  })
-
   return (
     <Router>
       <AppPage>
