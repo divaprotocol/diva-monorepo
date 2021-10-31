@@ -4,6 +4,9 @@ import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates';
 import { Tooltip } from '@material-ui/core';
 import { useSelector } from 'react-redux';
+import { mapCollateralUpdate } from '../../DataService/FireStoreDB';
+import { optionLiquidity } from '../../DataService/FireStoreDB';
+
 const PageDiv = styled.div `
     width: 100%;
     background-color: white;
@@ -108,12 +111,13 @@ function createData(option) {
     }
 
 }
-export default function OptionDetailsFlex() {
+export default function OptionDetails() {
     //Instead of calling redux to get selected option at each component level
     //we can call at root component of trade that is underlying and pass as porps
     //to each child component.
     const selectedOption = useSelector((state) => state.tradeOption.option)
     const option = createData(selectedOption);
+
     return(
         <PageDiv>            
             <HeaderDiv><HeaderLabel>Details</HeaderLabel></HeaderDiv>

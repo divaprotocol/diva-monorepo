@@ -12,13 +12,19 @@ import TradeChart from '../Graphs/TradeChart';
 import './Underlying.css';
 import { useSelector, useDispatch } from 'react-redux'
 import { setTradingOption } from '../../Redux/TradeOption';
+import { setAllOptions } from '../../Redux/TradeOption';
 import { setUserMetaMaskAccount } from '../../Redux/TradeOption';
 import {
     BrowserRouter as Router,
     useHistory,
   } from "react-router-dom";
 import generatePayoffChartData from '../../Graphs/DataGenerator.js';
-
+import { getAllOptions } from '../../DataService/FireStoreDB'
+import { mapCollateralUpdate } from '../../DataService/FireStoreDB';
+import { optionLiquidity } from '../../DataService/FireStoreDB';
+import firebase from "firebase/app";
+import "firebase/database";
+import 'firebase/firestore';
 
 const PageDiv = styled.div `
     display: flex;
@@ -62,8 +68,8 @@ export default function Underlying() {
     const h = 200;
     const dispatch = useDispatch()
     const selectedOption = useSelector((state) => state.tradeOption.option)
-    const [option, setOption] = useState(selectedOption)
-    
+    const [option, setOption] = useState([])
+
     const OptionParams = {
         CollateralBalanceLong: 100,
         CollateralBalanceShort: 100,

@@ -8,7 +8,10 @@ export function getExpiryMinutesFromNow(timeStamp) {
   const expiryDate = new Date(timeStamp * 1000)
   const date = new Date()
   const mins = parseInt((expiryDate.getTime() - date.getTime()) /1000/ 60 )
-  console.log("Mins "+mins)
   return mins;
+}
+
+export const isExpired = (timeStamp) => {
+  return getExpiryMinutesFromNow(timeStamp) < 0 ? true : false
 }
 

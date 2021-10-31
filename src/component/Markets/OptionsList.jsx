@@ -12,6 +12,8 @@ import Search from './Search';
 import { makeStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
 import { getDateTime } from '../../Util/Dates';
+import { getExpiryMinutesFromNow } from '../../Util/Dates';
+import { isExpired } from '../../Util/Dates';
 import { useSelector } from 'react-redux';
 import MarketChart from '../Graphs/MarketChart.jsx';
 import { useDispatch } from 'react-redux'
@@ -28,6 +30,7 @@ import {
     BrowserRouter as Router,
     useHistory,   
 } from "react-router-dom";
+import { now } from 'd3-timer';
 
 const useStyles = makeStyles({
     table: {
@@ -148,24 +151,26 @@ const columns = [
   ];
     
 function createDisplayData(rows) {
-    //console.log("All options " + JSON.stringify(rows))
     var optionsList = []
     rows.map(row => {
-        const displyRow = {
-            OptionId : row.OptionId,
-            PayoffProfile : <MarketChart data={row} targetHeight={50} targetWidth={70} />,
-            Underlying : row.ReferenceAsset,
-            Strike : row.Strike,
-            Inflection : row.Inflection,
-            Cap : row.Cap,
-            Expiry : getDateTime(row.ExpiryDate),
-            Sell : "TBD",
-            Buy : "TBD",
-            MaxYield : "TBD",
-            TVL : row.CollateralBalance+' '+row.CollateralTokenName,
-        }
+        if(!isExpired(row.ExpiryDate)) {
+            const displyRow = {
+                OptionId : row.OptionId,
+                PayoffProfile : <MarketChart data={row} targetHeight={50} targetWidth={70} />,
+                Underlying : row.ReferenceAsset,
+                Strike : row.Strike,
+                Inflection : row.Inflection,
+                Cap : row.Cap,
+                Expiry : getDateTime(row.ExpiryDate),
+                Sell : "TBD",
+                Buy : "TBD",
+                MaxYield : "TBD",
+                TVL : row.CollateralBalance+' '+row.CollateralTokenName,
+            }
         optionsList.push(displyRow)
+        }
     })
+    console.log("Length "+optionsList.length)
     return optionsList
 }
 
@@ -212,12 +217,14 @@ export default function OptionsList() {
     setPage(0);
   };
 
-  const handleRowSelect = (event, rowIndex) => {
+  const handleRowSelect = (event, selectedOption) => {
     event.preventDefault()
-    const option = rows[rowIndex]
+    //const option = allOptions[rowIndex]
+    const option = allOptions.filter(data => data.OptionId === selectedOption.OptionId)
     //Set raw option Data as app state
-    dispatch(setTradingOption(option))
-    history.push(`trade/${option.OptionId}`)
+    
+    dispatch(setTradingOption(option[0]))
+    history.push(`trade/${option[0].OptionId}`)
   }
 
   const searchRow = (event) => {
@@ -247,8 +254,10 @@ export default function OptionsList() {
     const oData = mapCollateralUpdate(options, collateralUpdates)
     if(oData.length > 0) {
         const tableRows = createDisplayData(oData)
-        setTableRows(tableRows)
+        setAllOptionsRef(oData)
         dispatch(setAllOptions(oData))
+        setTableRows(tableRows)
+
     }
   }
 
@@ -276,7 +285,7 @@ export default function OptionsList() {
     <PageDiv>
         <Search searchRow={searchRow}/>
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-            <TableContainer sx={{ maxHeight: 700 }}  >
+            <TableContainer sx={{ maxHeight: 900 }}  >
                 <Table stickyHeader aria-label="sticky table">
                 <TableHead>
                     <TableRow>
@@ -294,10 +303,10 @@ export default function OptionsList() {
                 <TableBody>
                     { tableRows
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => {
+                    .map((row) => { 
                         return (
                         <TableRow hover role="checkbox" tabIndex={-1} key={row.OptionId} onClick={event =>
-                            handleRowSelect(event, tableRows.indexOf(row))
+                            handleRowSelect(event, row)
                           }>
                             {columns.map((column) => {
                                 if(column.id === 'OptionImage'){
@@ -339,7 +348,7 @@ export default function OptionsList() {
             <TablePagination
                 rowsPerPageOptions={[10, 25, 100]}
                 component="div"
-                count={rows.length}
+                count={tableRows.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

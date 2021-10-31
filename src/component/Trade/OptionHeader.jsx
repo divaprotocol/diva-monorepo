@@ -70,7 +70,6 @@ export default function OptionHeader() {
     //const option = props.optionData
     const selectedOption = useSelector((state) => state.tradeOption.option)
     const headerTitle = selectedOption.ReferenceAsset
-    
     return(
         <AppHeader>
             {renderRefImgs(headerTitle)}
