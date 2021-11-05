@@ -53,9 +53,9 @@ const refAssetImgs = [
 function renderRefImgs(assetName) {
     if(assetName === 'ETH Gas Price') {
         return(<Image src={'/images/coin-logos/ETH.png'} alt="ReactApp"/>)
-    } else {
+    }
+     else {
         const asset = refAssetImgs.find(asset => asset.refAsset === assetName)
-        
         return(
             <ImgDiv>
                 <LeftAssetImg src={asset.img0} alt="ReactApp"/>

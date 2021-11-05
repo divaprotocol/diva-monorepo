@@ -4,8 +4,10 @@ import 'styled-components'
 import styled from 'styled-components'
 import OptionHeader from './OptionHeader';
 import OptionDetails from './OptionDetails';
-import OpenOrders from './OptionOrders'
-import OrderBook from './OrderBook';
+//import OpenOrders from './OptionOrders'
+import OpenOrdersNew from './OptionOrdersNew';
+//import OrderBook from './OrderBook';
+import OrderBook from './OrderBookNew';
 import CreateOrder from './CreateOrder';
 // import LineSeries from '../Graphs/LineSeries';
 import TradeChart from '../Graphs/TradeChart';
@@ -109,7 +111,7 @@ export default function Underlying() {
                     <OptionHeader/>
                     <OptionDetails optionData={option}/>
                 </LeftCompDiv>
-                <LeftCompDiv><OpenOrders/></LeftCompDiv>
+                <LeftCompDiv><OpenOrdersNew/></LeftCompDiv>
                 <LeftCompDiv><OrderBook/></LeftCompDiv>
             </PageLeftDiv>
             <PageRightDiv>

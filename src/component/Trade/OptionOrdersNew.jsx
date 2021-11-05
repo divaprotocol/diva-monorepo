@@ -27,8 +27,18 @@ const PageDiv = styled.div `
     background-color: white;
 `;
 
+const NoOrderTextDiv = styled.div`
+    font-size: 1.1rem;
+    color: black;
+    width: 100%;
+    margin-left: 65%;
+    margin-top: 10%;
+    margin-bottom: 10%;
+`;
+
 const TableHeader = styled.h4 `
     font-size: 1rem;
+    font: regular;
     color: black;
     padding-left : 15px;
     text-align: left;
@@ -165,7 +175,8 @@ export default function OpenOrdersNew() {
                 </TableRow>
                 </TableHeadStyle>
                 <TableBody>
-                {orders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                {orders.length > 0 ?
+                orders.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((order, index) => {
                     return(
                         <TableRow 
@@ -181,7 +192,7 @@ export default function OpenOrdersNew() {
                             <TableCell align="right">{order.cancel}</TableCell>
                         </TableRow>
                     )
-                })}
+                }): <NoOrderTextDiv>You don't have any orders for this option</NoOrderTextDiv>}
                 </TableBody>
             </Table>
             </TableContainer>

@@ -34,6 +34,15 @@ const TableHeader = styled.h4 `
     text-align: left;
 `;
 
+const NoOrderTextDiv = styled.div`
+    font-size: 1.1rem;
+    color: black;
+    width: 100%;
+    margin-left: 100%;
+    margin-top: 10%;
+    margin-bottom: 10%;
+`;
+
 const TableHeadStyle = withStyles(theme => ({
     root: {
       backgroundColor: 'rgb(134,217,192)'
@@ -189,7 +198,7 @@ export default function OrderBookNew() {
                 </TableHeadStyle>
             
             <TableBody>
-              { orderBook.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              { orderBook.length > 0 ? orderBook.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   const labelId = `enhanced-table-${index}`;
 
@@ -214,7 +223,7 @@ export default function OrderBookNew() {
                       <TableCell align="right">{row.orderType === 'sell' ? row.expiry : '-'}</TableCell>
                     </TableRow>
                   );
-                })
+                }) : <NoOrderTextDiv>No orders exist for this option</NoOrderTextDiv>
               }
             </TableBody>
           </Table>
