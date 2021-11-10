@@ -32,6 +32,7 @@ export default function App() {
           <Route path="/trade/:id">
             <Underlying/>
           </Route>
+
         </Switch>
       </AppPage>
     </Router>
