@@ -109,7 +109,7 @@ export const useStyles = makeStyles((theme) => ({
   },
 }))
 
-export const InfoTooltip = withStyles((theme) => ({
+export const InfoTooltip = withStyles(() => ({
   tooltip: {
     backgroundColor: '#f5f5f9',
     color: 'rgba(0, 0, 0, 0.87)',
@@ -119,7 +119,7 @@ export const InfoTooltip = withStyles((theme) => ({
   },
 }))(Tooltip)
 
-export const InfoIconStyle = withStyles((theme) => ({
+export const InfoIconStyle = withStyles(() => ({
   tooltip: {
     height: 7,
     width: 7,

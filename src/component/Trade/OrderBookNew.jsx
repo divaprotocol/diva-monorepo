@@ -13,7 +13,6 @@ import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import Web3 from 'web3'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 const useStyles = makeStyles({

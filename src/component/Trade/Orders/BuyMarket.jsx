@@ -29,7 +29,7 @@ export default function BuyMarket(props) {
   const option = props.option
   const [value, setValue] = React.useState(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(5)
-  const [pricePerOption, setPricePerOption] = React.useState(0)
+  const [pricePerOption, _setPricePerOption] = React.useState(0)
 
   const handleNumberOfOptions = (value) => {
     setNumberOfOptions(value)
@@ -51,7 +51,6 @@ export default function BuyMarket(props) {
     buylimitOrder(orderData)
   }
 
-  const handleExpirySelection = {}
   const handleSliderChange = (event, newValue) => {
     setValue(newValue)
   }

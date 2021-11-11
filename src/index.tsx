@@ -5,11 +5,7 @@ import App from './App'
 import reportWebVitals from './reportWebVitals'
 import store from './Redux/Store'
 import { Provider } from 'react-redux'
-import {
-  createTheme,
-  ThemeProvider,
-  StyledEngineProvider,
-} from '@mui/material/styles'
+import { createTheme, ThemeProvider } from '@mui/material/styles'
 
 const theme = createTheme()
 console.log(theme)
