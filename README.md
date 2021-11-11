@@ -13,4 +13,3 @@ We're using `yarn` for depdency management. It's features are pretty much the sa
 - `yarn start` Starts the app in development mode
 - `yarn test` Runs tests
 - `yarn build` Builds applications for deployment (output can be found in `build` folder)
-

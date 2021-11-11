@@ -1,10 +1,7 @@
-import React from 'react';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import {
-  Route,
-  Link  
-} from "react-router-dom";
+import React from 'react'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
+import { Route, Link } from 'react-router-dom'
 
 export default function MenuItems() {
   return (
@@ -16,29 +13,29 @@ export default function MenuItems() {
             indicatorColor="primary"
             textColor="inherit"
             value={
-              history.location.pathname.includes("/trade")
+              history.location.pathname.includes('/trade')
                 ? false
                 : history.location.pathname
             }
             aria-label=""
-            TabIndicatorProps={{ style: { backgroundColor: "#70D9BA" } }}
+            TabIndicatorProps={{ style: { backgroundColor: '#70D9BA' } }}
           >
-            <Tab label="Markets" value={"/"} component={Link} to={"/"} />
+            <Tab label="Markets" value={'/'} component={Link} to={'/'} />
             <Tab
               label="Request"
-              value={"/Request"}
+              value={'/Request'}
               component={Link}
-              to={"/Request"}
+              to={'/Request'}
             />
             <Tab
               label="Create"
-              value={"/Create"}
+              value={'/Create'}
               component={Link}
-              to={"/Create"}
+              to={'/Create'}
             />
           </Tabs>
         )}
       />
     </div>
-  );
+  )
 }

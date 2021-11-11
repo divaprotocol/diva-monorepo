@@ -43,6 +43,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "lint": "eslint src --ext .ts,.tsx,.js,.jsx && tsc --noEmit",
     "eject": "react-scripts eject",
     "fmt": "prettier . -w"
   },
@@ -67,6 +68,9 @@
   "devDependencies": {
     "@types/react-router-dom": "^5.3.2",
     "@types/styled-components": "^5.1.15",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.3.1",
+    "eslint": "^8.2.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-no-floating-promise": "^1.0.2",
     "eslint-plugin-no-only-tests": "^2.6.0",
