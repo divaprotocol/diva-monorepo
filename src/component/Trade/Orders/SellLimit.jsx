@@ -1,10 +1,10 @@
 import React from 'react';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import { MenuItem } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import AddIcon from '@material-ui/icons/Add';
-import InfoIcon from "@material-ui/icons/InfoOutlined"
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import { MenuItem } from '@mui/material';
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
+import InfoIcon from "@mui/icons-material/InfoOutlined"
 import { sellLimitOrder } from '../../../Orders/SellLimit';
 import { LabelStyle } from './UiStyles';
 import { LabelGrayStyle } from './UiStyles';

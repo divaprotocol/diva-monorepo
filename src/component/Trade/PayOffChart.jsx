@@ -1,13 +1,13 @@
 import React from 'react';
 import 'styled-components'
 import styled from 'styled-components'
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@mui/styles';
 import LineSeries from '../Graphs/LineSeries'
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import MuiTableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import MuiTableRow from '@material-ui/core/TableRow';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import MuiTableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import MuiTableRow from '@mui/material/TableRow';
 
 
 const PageDiv = styled.div `

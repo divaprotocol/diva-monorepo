@@ -1,10 +1,10 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import AddIcon from '@material-ui/icons/Add';
-import Typography from "@material-ui/core/Typography";
-import Slider from "@material-ui/core/Slider";
-import Input from "@material-ui/core/Input";
-import InfoIcon from "@material-ui/icons/InfoOutlined"
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
+import Typography from "@mui/material/Typography";
+import Slider from "@mui/material/Slider";
+import Input from "@mui/material/Input";
+import InfoIcon from "@mui/icons-material/InfoOutlined"
 import { LabelStyle } from './UiStyles';
 import { LabelGrayStyle } from './UiStyles';
 import { LabelStyleDiv } from './UiStyles';
@@ -18,7 +18,7 @@ import { useStyles } from './UiStyles';
 import { InfoTooltip } from './UiStyles';
 import { MaxSlippageText } from './UiStyles';
 import { ExpectedRateInfoText } from './UiStyles';
-import { grey } from '@material-ui/core/colors';
+import { grey } from '@mui/material/colors';
 
 export default function SellMarket(props) {
 const classes = useStyles();

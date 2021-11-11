@@ -38,7 +38,6 @@ const PageDiv = styled.div `
     padding: 10px;
     margin-top:2%;
     border-radius : 1%;
-    
 `;
 
 const PageLeftDiv = styled.div`

@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption';
 import 'styled-components';
 import styled from 'styled-components';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@mui/styles';
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";

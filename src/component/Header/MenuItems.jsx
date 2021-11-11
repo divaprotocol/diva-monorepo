@@ -1,6 +1,6 @@
 import React from 'react';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import {
   Route,
   Link  
@@ -13,6 +13,8 @@ export default function MenuItems() {
         path="/"
         render={(history) => (
           <Tabs
+            indicatorColor="primary"
+            textColor="inherit"
             value={
               history.location.pathname.includes("/trade")
                 ? false

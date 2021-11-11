@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import {createTheme, withStyles, makeStyles } from '@material-ui/core/styles';
-import Tooltip from '@material-ui/core/Tooltip';
-import InfoIcon from '@material-ui/icons/InfoOutlined'
+import { withStyles, makeStyles } from '@mui/styles';
+import Tooltip from '@mui/material/Tooltip';
+import InfoIcon from '@mui/icons-material/InfoOutlined'
 
 
 export const LabelGrayStyle = styled.label`

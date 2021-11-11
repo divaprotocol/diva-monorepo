@@ -1,7 +1,7 @@
 import React from 'react'
-import InputBase from '@material-ui/core/InputBase';
-import { makeStyles } from '@material-ui/core/styles';
-import SearchIcon from '@material-ui/icons/Search';
+import InputBase from '@mui/material/InputBase';
+import { makeStyles } from '@mui/styles';
+import SearchIcon from '@mui/icons-material/Search';
 import 'styled-components';
 import styled from 'styled-components';
 
@@ -13,7 +13,10 @@ const PageDiv = styled.div`
   margin-bottom: 10px;
 `;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => {
+  console.log(theme)
+
+  return {
   search: {
     position: 'relative',
     border : '1px solid #cccccc',
@@ -50,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
-}));
+}});
 
 export default function Search(props) {
     const classes = useStyles();

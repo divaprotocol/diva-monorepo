@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import 'styled-components'
 import styled from 'styled-components'
-import { makeStyles } from '@material-ui/core/styles';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
+import { makeStyles } from '@mui/styles';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import BuyMarket from './Orders/BuyMarket'
 import BuyLimit from './Orders/BuyLimit';
 import SellLimit from './Orders/SellLimit'

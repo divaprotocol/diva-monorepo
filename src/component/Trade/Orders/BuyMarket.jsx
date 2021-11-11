@@ -1,10 +1,10 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import AddIcon from '@material-ui/icons/Add';
-import Typography from "@material-ui/core/Typography";
-import Slider from "@material-ui/core/Slider";
-import Input from "@material-ui/core/Input";
-import InfoIcon from "@material-ui/icons/InfoOutlined"
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
+import Typography from "@mui/material/Typography";
+import Slider from "@mui/material/Slider";
+import Input from "@mui/material/Input";
+import InfoIcon from "@mui/icons-material/InfoOutlined"
 import { buylimitOrder } from '../../../Orders/BuyLimit';
 import { LabelGrayStyle } from './UiStyles';
 import { LabelStyle } from './UiStyles';

@@ -2,7 +2,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates';
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { mapCollateralUpdate } from '../../DataService/FireStoreDB';
 import { optionLiquidity } from '../../DataService/FireStoreDB';

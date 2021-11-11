@@ -9,7 +9,6 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import Search from './Search';
-import { makeStyles } from '@material-ui/core/styles';
 import styled from 'styled-components';
 import { getDateTime } from '../../Util/Dates';
 import { getExpiryMinutesFromNow } from '../../Util/Dates';
@@ -22,21 +21,13 @@ import { setAllOptions } from '../../Redux/TradeOption';
 import { getAllOptions } from '../../DataService/FireStoreDB'
 import { mapCollateralUpdate } from '../../DataService/FireStoreDB';
 import { optionLiquidity } from '../../DataService/FireStoreDB';
-import firebase from "firebase/app";
 import "firebase/database";
 import 'firebase/firestore';
 
 import {
-    BrowserRouter as Router,
     useHistory,   
 } from "react-router-dom";
-import { now } from 'd3-timer';
 
-const useStyles = makeStyles({
-    table: {
-      minWidth: 250,  
-    },
-  });
 
 const PageDiv = styled.div `
     width: 90%;

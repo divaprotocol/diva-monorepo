@@ -1,7 +1,7 @@
 import React from 'react';
 import 'styled-components';
 import styled from 'styled-components';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@mui/styles';
 
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
