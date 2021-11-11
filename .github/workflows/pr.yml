@@ -9,5 +9,7 @@ jobs:
         # with:
         #   ref: ${{ github.event.pull_request.head.ref }}
 
+      - name: Install dependencies
+        run: yarn
       - name: Run eslint
         run: yarn lint
