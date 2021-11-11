@@ -15,5 +15,6 @@ jobs:
       - name: Run eslint and typescript to check for errors
         run: yarn lint
 
-      - name: Run tests
-        run: yarn test
+      # TODO: Enable when we actually have tests
+      # - name: Run tests
+      #   run: yarn test
