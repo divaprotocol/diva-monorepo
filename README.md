@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-We're using `yarn` for depdency management.
+We're using `yarn` for depdency management. It's features are pretty much the same as for npm. If you know how to use npm, you already know how to use yarn.
 
 1. `npm install -g yarn` if you haven't got yarn on your machine yet.
 2. Run `yarn` in this repository to install all dependencies.
