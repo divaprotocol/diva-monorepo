@@ -1,6 +1,6 @@
-import ContractAddresses from '@0x/contract-addresses'
+import * as ContractAddresses from '@0x/contract-addresses'
 import { MetamaskSubprovider } from '@0x/subproviders'
-import utils from '@0x/protocol-utils'
+import * as utils from '@0x/protocol-utils'
 
 export { utils }
 export const CHAIN_ID = 3
