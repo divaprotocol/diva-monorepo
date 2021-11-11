@@ -271,7 +271,8 @@ export default function OptionsList() {
     return () => {
       collateralUpdates()
     }
-  }, [componentDidMount, mapCollateralBalance])
+    // eslint-disable-next-line
+  }, [])
 
   return (
     <PageDiv>
