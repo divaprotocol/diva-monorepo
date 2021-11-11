@@ -12,7 +12,7 @@ const PageDiv = styled.div`
   margin-bottom: 10px;
 `
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles((theme: any) => {
   console.log(theme)
 
   return {
@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme) => {
   }
 })
 
-export default function Search(props) {
+export default function Search(props: { searchRow: (val: any) => void }) {
   const classes = useStyles()
 
   return (

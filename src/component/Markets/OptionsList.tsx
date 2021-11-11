@@ -82,64 +82,64 @@ const columns = [
     label: 'Strike',
     minWidth: 70,
     align: 'right',
-    format: (value) => value.toLocaleString('en-US'),
+    format: (value: any) => value.toLocaleString('en-US'),
   },
   {
     id: 'Inflection',
     label: 'Inflection',
     minWidth: 70,
     align: 'right',
-    format: (value) => value.toLocaleString('en-US'),
+    format: (value: any) => value.toLocaleString('en-US'),
   },
   {
     id: 'Cap',
     label: 'Cap',
     minWidth: 70,
     align: 'right',
-    format: (value) => value.toFixed(2),
+    format: (value: any) => value.toFixed(2),
   },
   {
     id: 'Expiry',
     label: 'Expiry',
     minWidth: 70,
     align: 'right',
-    format: (value) => value.toFixed(2),
+    format: (value: any) => value.toFixed(2),
   },
   {
     id: 'Sell',
     label: 'Sell',
     minWidth: 70,
     align: 'right',
-    format: (value) => value.toFixed(2),
+    format: (value: any) => value.toFixed(2),
   },
   {
     id: 'Buy',
     label: 'Buy',
     minWidth: 70,
     align: 'right',
-    format: (value) => value.toFixed(2),
+    format: (value: any) => value.toFixed(2),
   },
   {
     id: 'MaxYield',
     label: 'Max Yield',
     minWidth: 70,
     align: 'right',
-    format: (value) => value.toFixed(2),
+    format: (value: any) => value.toFixed(2),
   },
   {
     id: 'TVL',
     label: 'TVL',
     minWidth: 70,
     align: 'right',
-    format: (value) => value.toFixed(2),
+    format: (value: any) => value.toFixed(2),
   },
 ]
 
-function createDisplayData(rows) {
-  var optionsList = []
+function createDisplayData(rows: any[]) {
+  const optionsList: any[] = []
   rows.map((row) => {
     if (!isExpired(row.ExpiryDate)) {
-      const displyRow = {
+      const displayRow = {
         OptionId: row.OptionId,
         PayoffProfile: (
           <MarketChart data={row} targetHeight={50} targetWidth={70} />
@@ -154,7 +154,7 @@ function createDisplayData(rows) {
         MaxYield: 'TBD',
         TVL: row.CollateralBalance + ' ' + row.CollateralTokenName,
       }
-      optionsList.push(displyRow)
+      optionsList.push(displayRow)
     }
   })
   console.log('Length ' + optionsList.length)
@@ -162,7 +162,7 @@ function createDisplayData(rows) {
 }
 
 const assetLogoPath = '/images/coin-logos/'
-function renderRefImgs(assetName) {
+function renderRefImgs(assetName: string) {
   const assets = assetName.split('/')
   if (assets.length === 1) {
     return <Image src={assetLogoPath + assets[0] + '.png'} alt="ReactApp" />
@@ -184,33 +184,33 @@ function renderRefImgs(assetName) {
 export default function OptionsList() {
   const dispatch = useDispatch()
   const history = useHistory()
-  const rows = useSelector((state) => state.tradeOption.allOptions)
+  const rows = useSelector((state: any) => state.tradeOption.allOptions)
   const [allOptions, setOptions] = React.useState([])
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(25)
   //Need to create a separate variable to hold INITIAL all rows for search query resulting no match
   const displayAllRows = createDisplayData(rows)
-  const [tableRows, setTableRows] = React.useState([])
+  const [tableRows, setTableRows] = React.useState<any[]>([])
   const allOptionsRef = React.useRef(allOptions)
-  const setAllOptionsRef = (data) => {
+  const setAllOptionsRef = (data: any) => {
     allOptionsRef.current = data
     setOptions(data)
   }
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (_event: any, newPage: any) => {
     setPage(newPage)
   }
 
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = (event: any) => {
     setRowsPerPage(+event.target.value)
     setPage(0)
   }
 
-  const handleRowSelect = (event, selectedOption) => {
+  const handleRowSelect = (event: any, selectedOption: any) => {
     event.preventDefault()
     //const option = allOptions[rowIndex]
-    const option = allOptions.filter(
-      (data) => data.OptionId === selectedOption.OptionId
+    const option: any[] = allOptions.filter(
+      (data: any) => data.OptionId === selectedOption.OptionId
     )
     //Set raw option Data as app state
 
@@ -218,7 +218,7 @@ export default function OptionsList() {
     history.push(`trade/${option[0].OptionId}`)
   }
 
-  const searchRow = (event) => {
+  const searchRow = (event: any) => {
     const searchValue = event.target.value
     if (searchValue.length === 0 || searchValue === '') {
       setTableRows(displayAllRows)
@@ -240,7 +240,7 @@ export default function OptionsList() {
     setTableRows(tableRows)
   }
 
-  const mapCollateralBalance = async (collateralUpdates) => {
+  const mapCollateralBalance = async (collateralUpdates: any) => {
     const options = allOptionsRef.current
     const oData = mapCollateralUpdate(options, collateralUpdates)
     if (oData.length > 0) {
@@ -284,7 +284,7 @@ export default function OptionsList() {
                 {columns.map((column) => (
                   <TableCell
                     key={column.id}
-                    align={column.align}
+                    align={column.align as any}
                     style={{ minWidth: column.minWidth, fontWeight: 'bold' }}
                   >
                     {column.label}
@@ -330,8 +330,7 @@ export default function OptionsList() {
                         return (
                           <TableCell
                             key={column.id}
-                            align={column.align}
-                            style={column.style}
+                            align={column.align as any}
                           >
                             {column.format && typeof value === 'number'
                               ? column.format(value)
