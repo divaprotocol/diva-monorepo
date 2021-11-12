@@ -1,0 +1,11 @@
+dist
+coverage/
+.vscode/
+.gitignore
+*.yaml
+*.html
+*.log
+yarn.lock
+storybook-static
+package.json
+tsconfig.json

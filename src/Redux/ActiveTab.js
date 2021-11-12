@@ -5,11 +5,11 @@ export const activeTabSlice = createSlice({
   initialState: {
     activeTab: '/market',
   },
-  
+
   reducers: {
     setActiveTab: (state, action) => {
-        state.activeTab = action.payload
-      },
+      state.activeTab = action.payload
+    },
   },
 })
 
