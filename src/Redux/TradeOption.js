@@ -4,46 +4,45 @@ export const tradeOptionSlice = createSlice({
   name: 'option',
   initialState: {
     allOptions: [],
-    allOptionsLiquidity : [],
+    allOptionsLiquidity: [],
     option: {},
-    userAccount : '',
-    responseBuy : [],
-    responseSell : []
+    userAccount: '',
+    responseBuy: [],
+    responseSell: [],
   },
-  
+
   reducers: {
-    setResponseBuy : (state, action) => {
+    setResponseBuy: (state, action) => {
       state.responseBuy = action.payload
     },
 
-    setResponseSell : (state, action) => {
+    setResponseSell: (state, action) => {
       state.responseSell = action.payload
     },
 
-    setMetamaskAccount : (state, action) => {
+    setMetamaskAccount: (state, action) => {
       state.userAccount = action.payload
     },
 
-    setAllOptions : (state, action) => {
+    setAllOptions: (state, action) => {
       state.allOptions = action.payload
     },
 
-    setAllOptionsLiquidity : (state, action) => {
+    setAllOptionsLiquidity: (state, action) => {
       state.allOptionsLiquidity = action.payload
     },
 
     setTradingOption: (state, action) => {
       state.option = action.payload
     },
-
   },
 })
 
 // Action creators are generated for each case reducer function
 export const { setTradingOption } = tradeOptionSlice.actions
 export const { setAllOptions } = tradeOptionSlice.actions
-export const {setMetamaskAccount } = tradeOptionSlice.actions
-export const {setResponseBuy} = tradeOptionSlice.actions
-export const {setResponseSell} = tradeOptionSlice.actions
-export const {setAllOptionsLiquidity} = tradeOptionSlice.actions
+export const { setMetamaskAccount } = tradeOptionSlice.actions
+export const { setResponseBuy } = tradeOptionSlice.actions
+export const { setResponseSell } = tradeOptionSlice.actions
+export const { setAllOptionsLiquidity } = tradeOptionSlice.actions
 export default tradeOptionSlice.reducer

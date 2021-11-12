@@ -1,0 +1,20 @@
+on: pull_request
+name: Pull request automation
+jobs:
+  pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Run eslint and typescript to check for errors
+        run: yarn lint
+
+      # TODO: Enable when we actually have tests
+      # - name: Run tests
+      #   run: yarn test

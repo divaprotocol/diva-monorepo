@@ -1,12 +1,12 @@
-import React from 'react';
+import React from 'react'
 
 import {
   XYPlot,
   LineSeries,
   HorizontalGridLines,
   XAxis,
-  YAxis
-} from "react-vis";
+  YAxis,
+} from 'react-vis'
 
 // Payoff function for long position tokens (see whitepaper)
 function payoffFunctionLong(
@@ -18,81 +18,52 @@ function payoffFunctionLong(
   cap,
   tokenSupply
 ) {
-  let beta = 0;
+  let beta = 0
   // valueUnderlying is the variable here for a given option
   if (valueUnderlying >= strike) {
-    beta = collateralBalanceShort / (cap - strike);
+    beta = collateralBalanceShort / (cap - strike)
   } else {
-    beta = collateralBalanceLong / (strike - floor);
+    beta = collateralBalanceLong / (strike - floor)
   }
 
-  const alpha = -strike * beta;
+  const alpha = -strike * beta
 
   const payoffLong =
     Math.min(
       collateralBalanceShort + collateralBalanceLong,
       Math.max(0, alpha + beta * valueUnderlying + collateralBalanceLong)
-    ) / tokenSupply;
+    ) / tokenSupply
 
-  return payoffLong; // The function returns the product of p1 and p2
-}
-
-function payoffFunctionShort(
-  valueUnderlying,
-  collateralBalanceLong,
-  collateralBalanceShort,
-  floor,
-  strike,
-  cap,
-  tokenSupply
-) {
-  let beta = 0;
-  // valueUnderlying is the variable here for a given option
-  if (valueUnderlying >= strike) {
-    beta = -collateralBalanceShort / (cap - strike);
-  } else {
-    beta = -collateralBalanceLong / (strike - floor);
-  }
-
-  const alpha = -strike * beta;
-
-  const payoffShort =
-    Math.min(
-      collateralBalanceShort + collateralBalanceLong,
-      Math.max(0, alpha + beta * valueUnderlying + collateralBalanceShort)
-    ) / tokenSupply;
-
-  return payoffShort; // The function returns the product of p1 and p2
+  return payoffLong // The function returns the product of p1 and p2
 }
 
 // Generating the xy values for the chart based on option parameters
 // Note that all numeric values are stored with 18 decimals in the contracts
 // i.e., you would simply have to divide the values you get from db by 1e18
-const collateralBalanceShort = 50; // not yet available in the database
-const collateralBalanceLong = 50; // not yet available in the database
-let floor = 32000;
-let cap = 37000;
-const strike = 34500;
-const longPositionTokenSupply = 100;
-const shortPositionTokenSupply = 100;
+const collateralBalanceShort = 50 // not yet available in the database
+const collateralBalanceLong = 50 // not yet available in the database
+let floor = 32000
+let cap = 37000
+const strike = 34500
+const longPositionTokenSupply = 100
 
 if (collateralBalanceShort === 0) {
-  cap = strike;
+  cap = strike
 }
 if (collateralBalanceLong === 0) {
-  floor = strike;
+  floor = strike
 }
 
 // Test some output values
 
 // Aux range function
 const range = (start, stop, step) =>
-  Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
+  Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step)
 
-let xMin = 30000; // we need to find a logic how to make this part dynamic
-let xMax = 39000; // we need to find a logic how to make this part dynamic
+let xMin = 30000 // we need to find a logic how to make this part dynamic
+let xMax = 39000 // we need to find a logic how to make this part dynamic
 
-const xValues = range(xMin, xMax, 100);
+const xValues = range(xMin, xMax, 100)
 const yValues = xValues.map((xValues) =>
   payoffFunctionLong(
     xValues,
@@ -103,14 +74,13 @@ const yValues = xValues.map((xValues) =>
     cap,
     longPositionTokenSupply
   )
-);
+)
 
 // Generage object array containing xy values
-let data = [];
+let data = []
 for (let i = 0; i < xValues.length; i++) {
-  data.push({ x: xValues[i], y: yValues[i] });
+  data.push({ x: xValues[i], y: yValues[i] })
 }
-
 
 // Plot the data
 export default function PayOffChart() {
@@ -122,8 +92,8 @@ export default function PayOffChart() {
         position="middle"
         style={{
           title: {
-            fontWeight: 800
-          }
+            fontWeight: 800,
+          },
         }}
       />
       <YAxis
@@ -131,13 +101,13 @@ export default function PayOffChart() {
         position="middle"
         style={{
           title: {
-            fontWeight: 800
-          }
+            fontWeight: 800,
+          },
         }}
       />
       <LineSeries data={data} />
     </XYPlot>
-  );
+  )
 }
 
 /* Line chart for Markets tab
