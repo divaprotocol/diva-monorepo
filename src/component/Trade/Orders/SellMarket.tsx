@@ -14,32 +14,33 @@ import { RightSideLabel } from './UiStyles'
 import { FormControlDiv } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
 import { SliderDiv } from './UiStyles'
-import { useStyles } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 
-export default function SellMarket(props) {
-  const classes = useStyles()
+export default function SellMarket(props: { option: any }) {
   const option = props.option
-  const [value, setValue] = React.useState(0)
+  const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(5)
   const [pricePerOption, _setPricePerOption] = React.useState(0)
 
-  const handleNumberOfOptions = (newValue) => {
-    setNumberOfOptions(newValue)
+  const handleNumberOfOptions = (newValue: string) => {
+    setNumberOfOptions(parseInt(newValue))
   }
 
-  const handleOrderSubmit = async (_event) => {
+  const handleOrderSubmit = async (_event: any) => {
     /** TODO */
   }
 
-  const handleSliderChange = (event, newValue) => {
+  const handleSliderChange = (_event: any, newValue: any) => {
     setValue(newValue)
   }
 
-  const handleInputChange = (event) => {
-    setValue(event.target.value === '' ? '' : Number(event.target.value))
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    const value = event.target.value.toString()
+    setValue(value === '' ? '' : Number(value))
   }
 
   const handleBlur = () => {
@@ -133,7 +134,6 @@ export default function SellMarket(props) {
           variant="contained"
           color="primary"
           size="large"
-          className={classes.button}
           startIcon={<AddIcon />}
           type="submit"
           value="Submit"

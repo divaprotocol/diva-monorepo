@@ -15,7 +15,6 @@ import { RightSideLabel } from './UiStyles'
 import { FormControlDiv } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
 import { SliderDiv } from './UiStyles'
-import { useStyles } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
@@ -24,18 +23,17 @@ import Web3 from 'web3'
 const web3 = new Web3(Web3.givenProvider)
 let accounts
 
-export default function BuyMarket(props) {
-  const classes = useStyles()
+export default function BuyMarket(props: { option: any }) {
   const option = props.option
-  const [value, setValue] = React.useState(0)
+  const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(5)
   const [pricePerOption, _setPricePerOption] = React.useState(0)
 
-  const handleNumberOfOptions = (value) => {
-    setNumberOfOptions(value)
+  const handleNumberOfOptions = (value: string) => {
+    setNumberOfOptions(parseInt(value))
   }
 
-  const handleOrderSubmit = async (event) => {
+  const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     accounts = await window.ethereum.enable()
@@ -51,12 +49,15 @@ export default function BuyMarket(props) {
     buylimitOrder(orderData)
   }
 
-  const handleSliderChange = (event, newValue) => {
+  const handleSliderChange = (_event: any, newValue: any) => {
     setValue(newValue)
   }
 
-  const handleInputChange = (event) => {
-    setValue(event.target.value === '' ? '' : Number(event.target.value))
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    const value = event.target.value.toString()
+    setValue(value === '' ? '' : Number(value))
   }
 
   const handleBlur = () => {
@@ -135,7 +136,7 @@ export default function BuyMarket(props) {
             <Input
               value={value}
               margin="dense"
-              onChange={handleInputChange}
+              onChange={(event) => handleInputChange(event)}
               onBlur={handleBlur}
               inputProps={{
                 step: 0.1,
@@ -152,7 +153,6 @@ export default function BuyMarket(props) {
           variant="contained"
           color="primary"
           size="large"
-          className={classes.button}
           startIcon={<AddIcon />}
           type="submit"
           value="Submit"

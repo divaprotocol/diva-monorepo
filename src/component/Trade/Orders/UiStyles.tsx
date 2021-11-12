@@ -92,7 +92,7 @@ export const SliderDiv = styled.div`
   text-align: left;
 `
 
-export const useStyles = makeStyles((theme) => ({
+export const useStyles = makeStyles((theme: any) => ({
   root: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.paper,

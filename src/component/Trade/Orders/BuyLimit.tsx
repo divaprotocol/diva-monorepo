@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { FormEvent } from 'react'
 import FormControl from '@mui/material/FormControl'
-import Select from '@mui/material/Select'
+import Select, { SelectChangeEvent } from '@mui/material/Select'
 import { MenuItem } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
-import { sellLimitOrder } from '../../../Orders/SellLimit'
+import { buylimitOrder } from '../../../Orders/BuyLimit'
 import { LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
@@ -19,37 +19,49 @@ import Web3 from 'web3'
 
 const web3 = new Web3(Web3.givenProvider)
 let accounts
-export default function SellLimit(props) {
+export default function BuyLimit(props: {
+  option: any
+  handleDisplayOrder: () => void
+}) {
   const classes = useStyles()
   const option = props.option
   const [expiry, setExpiry] = React.useState(5)
   const [numberOfOptions, setNumberOfOptions] = React.useState(5)
   const [pricePerOption, setPricePerOption] = React.useState(0)
 
-  const handleNumberOfOptions = (value) => {
+  const handleNumberOfOptions = (value: number) => {
     setNumberOfOptions(value)
   }
 
-  const handlePricePerOptions = (value) => {
+  const handlePricePerOptions = (value: number) => {
     setPricePerOption(value)
   }
 
-  const handleOrderSubmit = async (event) => {
+  const handleExpirySelection = (event: SelectChangeEvent<number>) => {
+    event.preventDefault()
+    setExpiry(
+      typeof event.target.value === 'string'
+        ? parseInt(event.target.value)
+        : event.target.value
+    )
+  }
+
+  const handleOrderSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     accounts = await window.ethereum.enable()
     const orderData = {
       maker: accounts[0],
-      makerToken: option.TokenAddress,
-      takerToken: option.CollateralToken,
+      makerToken: option.CollateralToken,
+      takerToken: option.TokenAddress,
       provider: web3,
-      isBuy: false,
+      isBuy: true,
       nbrOptions: numberOfOptions,
       limitPrice: pricePerOption,
       collateralDecimals: option.DecimalsCollateralToken,
       orderExpiry: expiry,
     }
 
-    sellLimitOrder(orderData)
+    buylimitOrder(orderData)
       .then(function (response) {
         console.log('Response ' + response)
         props.handleDisplayOrder()
@@ -59,14 +71,9 @@ export default function SellLimit(props) {
       })
   }
 
-  const handleExpirySelection = (event) => {
-    event.preventDefault()
-    setExpiry(event.target.value)
-  }
-
   return (
     <div>
-      <form onSubmit={handleOrderSubmit}>
+      <form onSubmit={(event) => handleOrderSubmit(event)}>
         <FormDiv>
           <LabelStyleDiv>
             <LabelStyle>Number of Options</LabelStyle>
@@ -74,7 +81,9 @@ export default function SellLimit(props) {
           <FormInput
             type="text"
             value={numberOfOptions}
-            onChange={(event) => handleNumberOfOptions(event.target.value)}
+            onChange={(event) =>
+              handleNumberOfOptions(parseInt(event.target.value))
+            }
           />
         </FormDiv>
         <FormDiv>
@@ -84,12 +93,14 @@ export default function SellLimit(props) {
           <FormInput
             type="text"
             value={pricePerOption}
-            onChange={(event) => handlePricePerOptions(event.target.value)}
+            onChange={(event) =>
+              handlePricePerOptions(parseInt(event.target.value))
+            }
           />
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>You Receive</LabelStyle>
+            <LabelStyle>You Pay</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
             {pricePerOption * numberOfOptions} {option.CollateralTokenName}
@@ -97,10 +108,12 @@ export default function SellLimit(props) {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>Options in Wallet</LabelGrayStyle>
+            <LabelGrayStyle>Wallet Balance</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>{0}</LabelGrayStyle>
+            <LabelGrayStyle>
+              {} {option.CollateralTokenName}
+            </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -112,7 +125,7 @@ export default function SellLimit(props) {
             <FormControl className={classes.formControl}>
               <Select
                 value={expiry}
-                onChange={handleExpirySelection}
+                onChange={(event) => handleExpirySelection(event)}
                 displayEmpty
                 className={classes.selectEmpty}
                 inputProps={{ 'aria-label': 'Without label' }}
@@ -141,7 +154,6 @@ export default function SellLimit(props) {
           variant="contained"
           color="primary"
           size="large"
-          className={classes.button}
           startIcon={<AddIcon />}
           type="submit"
           value="Submit"

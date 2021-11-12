@@ -1,11 +1,11 @@
 import React from 'react'
 import FormControl from '@mui/material/FormControl'
-import Select from '@mui/material/Select'
+import Select, { SelectChangeEvent } from '@mui/material/Select'
 import { MenuItem } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
-import { buylimitOrder } from '../../../Orders/BuyLimit'
+import { sellLimitOrder } from '../../../Orders/SellLimit'
 import { LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
@@ -19,42 +19,40 @@ import Web3 from 'web3'
 
 const web3 = new Web3(Web3.givenProvider)
 let accounts
-export default function BuyLimit(props) {
+export default function SellLimit(props: {
+  option: any
+  handleDisplayOrder: () => void
+}) {
   const classes = useStyles()
   const option = props.option
   const [expiry, setExpiry] = React.useState(5)
   const [numberOfOptions, setNumberOfOptions] = React.useState(5)
   const [pricePerOption, setPricePerOption] = React.useState(0)
 
-  const handleNumberOfOptions = (value) => {
-    setNumberOfOptions(value)
+  const handleNumberOfOptions = (value: string) => {
+    setNumberOfOptions(parseInt(value))
   }
 
-  const handlePricePerOptions = (value) => {
-    setPricePerOption(value)
+  const handlePricePerOptions = (value: string) => {
+    setPricePerOption(parseInt(value))
   }
 
-  const handleExpirySelection = (event) => {
-    event.preventDefault()
-    setExpiry(event.target.value)
-  }
-
-  const handleOrderSubmit = async (event) => {
+  const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     accounts = await window.ethereum.enable()
     const orderData = {
       maker: accounts[0],
-      makerToken: option.CollateralToken,
-      takerToken: option.TokenAddress,
+      makerToken: option.TokenAddress,
+      takerToken: option.CollateralToken,
       provider: web3,
-      isBuy: true,
+      isBuy: false,
       nbrOptions: numberOfOptions,
       limitPrice: pricePerOption,
       collateralDecimals: option.DecimalsCollateralToken,
       orderExpiry: expiry,
     }
 
-    buylimitOrder(orderData)
+    sellLimitOrder(orderData)
       .then(function (response) {
         console.log('Response ' + response)
         props.handleDisplayOrder()
@@ -62,6 +60,15 @@ export default function BuyLimit(props) {
       .catch(function (error) {
         console.log('Error' + error)
       })
+  }
+
+  const handleExpirySelection = (event: SelectChangeEvent<number>) => {
+    event.preventDefault()
+    setExpiry(
+      typeof event.target.value === 'string'
+        ? parseInt(event.target.value)
+        : event.target.value
+    )
   }
 
   return (
@@ -89,7 +96,7 @@ export default function BuyLimit(props) {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>You Pay</LabelStyle>
+            <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
             {pricePerOption * numberOfOptions} {option.CollateralTokenName}
@@ -97,12 +104,10 @@ export default function BuyLimit(props) {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>Wallet Balance</LabelGrayStyle>
+            <LabelGrayStyle>Options in Wallet</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>
-              {} {option.CollateralTokenName}
-            </LabelGrayStyle>
+            <LabelGrayStyle>{0}</LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -143,7 +148,6 @@ export default function BuyLimit(props) {
           variant="contained"
           color="primary"
           size="large"
-          className={classes.button}
           startIcon={<AddIcon />}
           type="submit"
           value="Submit"
