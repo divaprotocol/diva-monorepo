@@ -6,7 +6,7 @@ import OptionsList from './component/Markets/OptionsList'
 import Underlying from './component/Trade/Underlying'
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
-import { Create } from './component/Create'
+import { Create } from './component/CreateOption/CreateOption'
 
 const AppPage = styled.div`
   text-align: center;

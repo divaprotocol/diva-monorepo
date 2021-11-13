@@ -147,6 +147,7 @@ export default function OrderBookNew() {
         selectedOption.TokenAddress,
         selectedOption.CollateralToken
       )
+      console.log(rSell)
       responseSell = rSell.data.records
     }
 
