@@ -6,7 +6,7 @@ import OptionsList from './component/Markets/OptionsList'
 import Underlying from './component/Trade/Underlying'
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
-import { Create } from './component/CreateOption/CreateOption'
+import { CreateOption } from './component/CreateOption/CreateOption'
 
 const AppPage = styled.div`
   text-align: center;
@@ -26,7 +26,7 @@ export default function App() {
             <Underlying />
           </Route>
           <Route path="/create">
-            <Create />
+            <CreateOption />
           </Route>
         </Switch>
       </AppPage>

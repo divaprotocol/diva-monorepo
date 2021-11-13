@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   FormControl,
   FormHelperText,
   InputLabel,
@@ -15,8 +16,9 @@ import { DatePicker } from '@mui/lab'
 import Container from '@mui/material/Container'
 import { useState } from 'react'
 import { PayoffProfile } from './PayoffProfile'
+import { useFormik } from 'formik'
 
-export function Create() {
+export function CreateOption() {
   const today = new Date()
   const [expiryDate, setExpiryDate] = useState<Date | null>(null)
   const [floor, setFloor] = useState<number>()
@@ -27,6 +29,13 @@ export function Create() {
   const [longPool, setLongPool] = useState<number>()
   const [shortToken, setShortToken] = useState<number>()
   const [longToken, setLongToken] = useState<number>()
+
+  const formik = useFormik({
+    initialValues: {},
+    onSubmit: () => {
+      console.log('submit')
+    },
+  })
 
   return (
     <Container maxWidth="xs">
@@ -169,6 +178,9 @@ export function Create() {
               onChange={(e) => setLongToken(parseInt(e.target.value))}
             />
           </FormControl>
+        </Box>
+        <Box pb={3}>
+          <Button onClick={() => formik.handleSubmit()}>Next</Button>
         </Box>
       </Box>
     </Container>
