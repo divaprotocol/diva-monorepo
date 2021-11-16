@@ -13,13 +13,11 @@ const Image = styled.img`
 `
 
 const AppHeader = styled.header`
-  background-color: #141534;
   min-height: 5vh;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  color: white;
 `
 
 export default function Header() {

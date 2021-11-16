@@ -24,12 +24,10 @@ const useStyles = makeStyles({
 
 const PageDiv = styled.div`
   width: 100%;
-  background-color: white;
 `
 
 const NoOrderTextDiv = styled.div`
   font-size: 1.1rem;
-  color: black;
   width: 100%;
   margin-left: 65%;
   margin-top: 10%;
@@ -39,7 +37,6 @@ const NoOrderTextDiv = styled.div`
 const TableHeader = styled.h4`
   font-size: 1rem;
   font: regular;
-  color: black;
   padding-left: 15px;
   text-align: left;
 `
@@ -52,7 +49,6 @@ const TableHeadStyle = withStyles(() => ({
 
 const TableHeaderCell = withStyles(() => ({
   root: {
-    color: '#282c34',
     fontWeight: 'solid',
   },
 }))(TableCell)

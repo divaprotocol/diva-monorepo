@@ -25,16 +25,6 @@ import 'firebase/firestore'
 
 import { useHistory } from 'react-router-dom'
 
-const PageDiv = styled.div`
-  width: 90%;
-  margin-left: 5%;
-  margin-right: 5%;
-  padding: 10px;
-  margin-top: 0%;
-  border: '1px solid #cccccc';
-  border-radius: 5px;
-`
-
 const ImgDiv = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -275,86 +265,83 @@ export default function OptionsList() {
   }, [])
 
   return (
-    <PageDiv>
-      <Search searchRow={searchRow} />
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-        <TableContainer sx={{ maxHeight: 900 }}>
-          <Table stickyHeader aria-label="sticky table">
-            <TableHead>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    align={column.align as any}
-                    style={{ minWidth: column.minWidth, fontWeight: 'bold' }}
+    <Paper>
+      <TableContainer>
+        <Table stickyHeader aria-label="sticky table">
+          <TableHead sx={{ pt: 10 }}>
+            <TableRow>
+              <TableCell>
+                <Search searchRow={searchRow} />
+              </TableCell>
+              {columns.slice(1).map((column) => (
+                <TableCell
+                  key={column.id}
+                  align={column.align as any}
+                  style={{ minWidth: column.minWidth, fontWeight: 'bold' }}
+                >
+                  {column.label}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {tableRows
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row) => {
+                return (
+                  <TableRow
+                    hover
+                    role="checkbox"
+                    tabIndex={-1}
+                    key={row.OptionId}
+                    onClick={(event) => handleRowSelect(event, row)}
                   >
-                    {column.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tableRows
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row) => {
-                  return (
-                    <TableRow
-                      hover
-                      role="checkbox"
-                      tabIndex={-1}
-                      key={row.OptionId}
-                      onClick={(event) => handleRowSelect(event, row)}
-                    >
-                      {columns.map((column) => {
-                        if (column.id === 'OptionImage') {
-                          return (
-                            <TableCell align="right">
-                              {renderRefImgs(row['Underlying'])}
-                            </TableCell>
-                          )
-                        }
-                        if (column.id === 'Buy') {
-                          return (
-                            <TableCell align="right">
-                              <BuySpan>{row['Buy']}</BuySpan>
-                            </TableCell>
-                          )
-                        }
-                        if (column.id === 'Sell') {
-                          return (
-                            <TableCell align="right">
-                              <SellSpan>{row['Sell']}</SellSpan>
-                            </TableCell>
-                          )
-                        }
-                        const value = row[column.id]
+                    {columns.map((column) => {
+                      if (column.id === 'OptionImage') {
                         return (
-                          <TableCell
-                            key={column.id}
-                            align={column.align as any}
-                          >
-                            {column.format && typeof value === 'number'
-                              ? column.format(value)
-                              : value}
+                          <TableCell align="right">
+                            {renderRefImgs(row['Underlying'])}
                           </TableCell>
                         )
-                      })}
-                    </TableRow>
-                  )
-                })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 100]}
-          component="div"
-          count={tableRows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
-    </PageDiv>
+                      }
+                      if (column.id === 'Buy') {
+                        return (
+                          <TableCell align="right">
+                            <BuySpan>{row['Buy']}</BuySpan>
+                          </TableCell>
+                        )
+                      }
+                      if (column.id === 'Sell') {
+                        return (
+                          <TableCell align="right">
+                            <SellSpan>{row['Sell']}</SellSpan>
+                          </TableCell>
+                        )
+                      }
+                      const value = row[column.id]
+                      return (
+                        <TableCell key={column.id} align={column.align as any}>
+                          {column.format && typeof value === 'number'
+                            ? column.format(value)
+                            : value}
+                        </TableCell>
+                      )
+                    })}
+                  </TableRow>
+                )
+              })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[10, 25, 100]}
+        component="div"
+        count={tableRows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+    </Paper>
   )
 }

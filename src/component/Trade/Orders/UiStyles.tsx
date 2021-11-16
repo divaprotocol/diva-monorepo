@@ -5,7 +5,6 @@ import InfoIcon from '@mui/icons-material/InfoOutlined'
 
 export const LabelGrayStyle = styled.label`
   font-size: 16px;
-  color: gray;
 `
 
 export const LabelStyle = styled.label`
@@ -20,7 +19,6 @@ export const IconLabel = styled.label`
 export const LabelStyleDiv = styled.div`
   width: 70%;
   height: 25px;
-  color: #282c34;
   padding: 10px;
   text-align: left;
 `
@@ -61,7 +59,6 @@ export const RightSideGrayLabel = styled.div`
   padding: 10px;
   text-align: right;
   font-size: 22px;
-  background-color: #f8f8f8;
 `
 
 export const FormControlDiv = styled.div`
@@ -80,14 +77,12 @@ export const CreateButtonWrapper = styled.div`
 
 export const LimitOrderExpiryDiv = styled.div`
   aligned: center;
-  color: #282c34;
   font-size: 18px;
 `
 
 export const SliderDiv = styled.div`
   width: 60%;
   height: 25px;
-  color: #282c34;
   font-size: 24px;
   text-align: left;
 `
@@ -111,8 +106,6 @@ export const useStyles = makeStyles((theme: any) => ({
 
 export const InfoTooltip = withStyles(() => ({
   tooltip: {
-    backgroundColor: '#f5f5f9',
-    color: 'rgba(0, 0, 0, 0.87)',
     maxWidth: 220,
     fontSize: 12,
     border: '1px solid #dadde9',
