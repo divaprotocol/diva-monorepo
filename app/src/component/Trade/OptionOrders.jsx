@@ -10,10 +10,8 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
-import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
-
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 
 const useStyles = makeStyles({
@@ -27,18 +25,8 @@ const PageDiv = styled.div`
   background-color: white;
 `
 
-const NoOrderTextDiv = styled.div`
-  font-size: 1.1rem;
-  color: black;
-  width: 100%;
-  margin-left: 120%;
-  margin-top: 10%;
-  margin-bottom: 10%;
-`
-
 const TableHeader = styled.h4`
   font-size: 1rem;
-  font: regular;
   color: black;
   padding-left: 15px;
   text-align: left;
@@ -88,13 +76,12 @@ function mapOrderData(records, selectedOption, account) {
 }
 
 let accounts
-export default function OpenOrdersNew() {
+export default function OpenOrdersMT() {
   const selectedOption = useSelector((state) => state.tradeOption.option)
 
   var responseBuy = useSelector((state) => state.tradeOption.responseBuy)
   var responseSell = useSelector((state) => state.tradeOption.responseSell)
-  const [page, setPage] = React.useState(0)
-  const [rowsPerPage, setRowsPerPage] = React.useState(5)
+
   const dispatch = useDispatch()
   const [orders, setOrders] = useState([])
 
@@ -163,16 +150,6 @@ export default function OpenOrdersNew() {
   }, [responseBuy, responseSell])
 
   const classes = useStyles()
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage)
-  }
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(+event.target.value))
-    setPage(0)
-  }
-
   return (
     <PageDiv>
       <TableHeader>Your Open Orders</TableHeader>
@@ -180,47 +157,28 @@ export default function OpenOrdersNew() {
         <Table className={classes.table} aria-label="simple table">
           <TableHeadStyle>
             <TableRow>
-              <TableHeaderCell>Type</TableHeaderCell>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
-              <TableHeaderCell align="center">Price</TableHeaderCell>
-              <TableHeaderCell align="center">Pay/Recei</TableHeaderCell>
+              <TableHeaderCell>Order Type</TableHeaderCell>
+              <TableHeaderCell align="center">Nbr Options</TableHeaderCell>
+              <TableHeaderCell align="center">Pay/Receive</TableHeaderCell>
+              <TableHeaderCell align="center">Price per Option</TableHeaderCell>
               <TableHeaderCell align="right">Cancel</TableHeaderCell>
             </TableRow>
           </TableHeadStyle>
           <TableBody>
-            {orders.length > 0 ? (
-              orders
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((order, index) => {
-                  return (
-                    <TableRow key={index} hover>
-                      <TableCell align="left" component="th" scope="row">
-                        {order.orderType}
-                      </TableCell>
-                      <TableCell align="center">{order.nbrOptions}</TableCell>
-                      <TableCell align="center">{order.payReceive}</TableCell>
-                      <TableCell align="center">
-                        {order.pricePerOption}
-                      </TableCell>
-                      <TableCell align="right">{order.cancel}</TableCell>
-                    </TableRow>
-                  )
-                })
-            ) : (
-              <NoOrderTextDiv>You don't have any orders</NoOrderTextDiv>
-            )}
+            {orders.map((order) => (
+              <TableRow key={orders.indexOf(order)}>
+                <TableCell align="left" component="th" scope="row">
+                  {order.orderType}
+                </TableCell>
+                <TableCell align="center">{order.nbrOptions}</TableCell>
+                <TableCell align="center">{order.payReceive}</TableCell>
+                <TableCell align="center">{order.pricePerOption}</TableCell>
+                <TableCell align="right">{order.cancel}</TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={orders.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
     </PageDiv>
   )
 }
