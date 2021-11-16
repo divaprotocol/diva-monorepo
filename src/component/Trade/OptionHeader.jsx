@@ -4,17 +4,14 @@ import '../../Util/Dates'
 import { useSelector } from 'react-redux'
 
 const AppHeader = styled.header`
-  background-color: white;
   min-height: 10vh;
   display: flex;
   flex-direction: row;
   align-items: center;
-  color: #f8f8f8;
 `
 
 const OptionTitle = styled.h2`
   font-size: 1rem;
-  color: black;
   padding: 15px;
 `
 

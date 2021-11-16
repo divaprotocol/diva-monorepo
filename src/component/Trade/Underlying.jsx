@@ -44,14 +44,12 @@ const LeftCompDiv = styled.div`
   margin: 25px;
   padding: 1%;
   border-radius: 15px;
-  background-color: white;
 `
 const RightCompDiv = styled.div`
   border: 1px solid rgba(224, 224, 224, 1);
   margin: 25px;
   padding: 1%;
   border-radius: 15px;
-  background-color: white;
 `
 export default function Underlying() {
   const w = 380

@@ -43,7 +43,6 @@ const LabelStyleDiv = styled.div`
   padding-top: 25px;
   padding-left: 50px;
   display: flex;
-  color: #282c34;
 `
 
 const LineSeriesDiv = styled.div`
