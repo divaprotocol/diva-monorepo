@@ -2,8 +2,7 @@ import React from 'react'
 import 'styled-components'
 import styled from 'styled-components'
 import { makeStyles, withStyles } from '@mui/styles'
-import { Typography } from '@material-ui/core'
-import Box from '@mui/material/Box'
+
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -16,7 +15,6 @@ import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
-
 const useStyles = makeStyles({
   table: {
     minWidth: 250,
@@ -25,16 +23,19 @@ const useStyles = makeStyles({
 
 const PageDiv = styled.div`
   width: 100%;
+  background-color: white;
 `
 
 const TableHeader = styled.h4`
   font-size: 1rem;
+  color: black;
   padding-left: 15px;
   text-align: left;
 `
 
 const NoOrderTextDiv = styled.div`
   font-size: 1.1rem;
+  color: black;
   width: 100%;
   margin-left: 100%;
   margin-top: 10%;
@@ -49,14 +50,8 @@ const TableHeadStyle = withStyles(() => ({
 
 const TableHeaderCell = withStyles(() => ({
   root: {
+    color: '#282c34',
     fontWeight: 'solid',
-  },
-}))(TableCell)
-
-const TableCellStyle = withStyles(() => ({
-  root: {
-    height: '10px',
-    padding: '10px',
   },
 }))(TableCell)
 
@@ -136,100 +131,6 @@ function mapOrderData(records, selectedOption, sortOrder) {
   return sortedRecords
 }
 
-function createTableData(buyOrders, sellOrders) {
-  //Temporary fake data table
-  console.log(buyOrders)
-  console.log(sellOrders)
-  var table = []
-  for (var i = 0; i < 5; i++) {
-    const row = {
-      buyExpiry: i,
-      buyQuantity: i + 1,
-      bid: i + 2,
-      sellExpiry: i + 3,
-      sellQuantity: i,
-      ask: i + 5,
-    }
-    table.push(row)
-  }
-  return table
-  //The code below is commented temporarily
-  /*const buyOrdersCount = buyOrders !== 'undefined' ? buyOrders.length : 0
-  const sellOrdersCount = sellOrders !== 'undefined' ? sellOrders.length : 0
-  var table = []
-  if (buyOrdersCount === 0 && sellOrdersCount === 0) {
-    return []
-  }
-  if (buyOrdersCount === 0) {
-    //var table = []
-    for (var i = 0; i < sellOrdersCount; i++) {
-      const sellOrder = sellOrders[i]
-      const row = {
-        buyExpiry: '',
-        buyQuantity: '',
-        bid: '',
-        sellExpiry: sellOrder.expiry,
-        sellQuantity: sellOrder.nbrOptions,
-        ask: sellOrder.ask,
-      }
-      table.push(row)
-    }
-    return table
-  }
-
-  if (sellOrdersCount === 0) {
-    //var table = []
-    for (var k = 0; k < buyOrdersCount; k++) {
-      const buyOrder = buyOrders[i]
-      const row = {
-        buyExpiry: buyOrder.expiry,
-        buyQuantity: buyOrder.nbrOptions,
-        bid: buyOrder.bid,
-        sellExpiry: '',
-        sellQuantity: '',
-        ask: '',
-      }
-      table.push(row)
-    }
-    return table
-  }
-
-  if (buyOrdersCount > 0 && sellOrdersCount > 0) {
-    //var table = []
-    var highestOrder = ''
-    var tableLength = 0
-
-    if (buyOrdersCount > sellOrdersCount) {
-      tableLength = buyOrders.length
-      highestOrder = 'buy'
-    }
-    if (buyOrdersCount < sellOrdersCount) {
-      tableLength = sellOrders.length
-      highestOrder = 'sell'
-    }
-    if (buyOrdersCount === sellOrdersCount) {
-      tableLength = sellOrders.length
-      highestOrder = 'sell'
-    }
-
-    for (var j = 0; j < tableLength; j++) {
-      const buyOrder = buyOrders[i]
-      const sellOrder = sellOrders[i]
-      const row = {
-        buyExpiry: buyOrder === undefined ? '' : buyOrder.expiry,
-        buyQuantity: buyOrder === undefined ? '' : buyOrder.nbrOptions,
-        bid: buyOrder === undefined ? '' : buyOrder.bid,
-        sellExpiry: sellOrder === undefined ? '' : sellOrder.expiry,
-        sellQuantity: sellOrder === undefined ? '' : sellOrder.nbrOptions,
-        ask: sellOrder === undefined ? '' : sellOrder.ask,
-      }
-      table.push(row)
-    }
-    return table
-  }
-  return []*/
-}
-
 export default function OrderBookNew() {
   const selectedOption = useSelector((state) => state.tradeOption.option)
   var responseBuy = useSelector((state) => state.tradeOption.responseBuy)
@@ -237,7 +138,6 @@ export default function OrderBookNew() {
   const [orderBook, setOrderBook] = useState([])
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
-  const classes = useStyles()
 
   const componentDidMount = async () => {
     const orders = []
@@ -247,9 +147,7 @@ export default function OrderBookNew() {
         selectedOption.TokenAddress,
         selectedOption.CollateralToken
       )
-      if (Object.keys(rSell).length > 0) {
-        responseSell = rSell.data.records
-      }
+      responseSell = rSell.data.records
     }
 
     if (responseBuy.length === 0) {
@@ -257,9 +155,7 @@ export default function OrderBookNew() {
         selectedOption.CollateralToken,
         selectedOption.TokenAddress
       )
-      if (Object.keys(rBuy).length > 0) {
-        responseBuy = rBuy.data.records
-      }
+      responseBuy = rBuy.data.records
     }
 
     const orderBookBuy = mapOrderData(responseBuy, selectedOption, 'desOrder')
@@ -268,15 +164,15 @@ export default function OrderBookNew() {
     orders.push(orderBookSell)
     //put both buy & sell orders in one array to simplify rendering
     //0 Index buy 1 Index sell need to refactor later
-    //const completeOrderBook = orders[0].concat(orders[1])
-    const completeOrderBook = createTableData(orders[0], orders[1])
+    const completeOrderBook = orders[0].concat(orders[1])
     setOrderBook(completeOrderBook)
   }
 
   useEffect(() => {
     componentDidMount()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [responseBuy, responseSell])
+
+  const classes = useStyles()
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage)
@@ -291,13 +187,17 @@ export default function OrderBookNew() {
     <PageDiv>
       <TableHeader>OrderBook</TableHeader>
       <TableContainer component={Paper}>
-        <Table aria-labelledby="tableTitle">
+        <Table className={classes.table} aria-labelledby="tableTitle">
           <TableHeadStyle>
             <TableRow>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
+              <TableHeaderCell align="left">Expires in Minutes</TableHeaderCell>
+              <TableHeaderCell align="center">Nbr Options</TableHeaderCell>
               <TableHeaderCell align="center">BID</TableHeaderCell>
               <TableHeaderCell align="center">ASK</TableHeaderCell>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
+              <TableHeaderCell align="center">Nbr Options</TableHeaderCell>
+              <TableHeaderCell align="right">
+                Expires in Minutes
+              </TableHeaderCell>
             </TableRow>
           </TableHeadStyle>
 
@@ -309,43 +209,30 @@ export default function OrderBookNew() {
                   const labelId = `enhanced-table-${index}`
 
                   return (
-                    <TableRow
-                      hover
-                      tabIndex={-1}
-                      key={orderBook.indexOf(row)}
-                      className={classes.tableRow}
-                    >
-                      <TableCellStyle
+                    <TableRow hover tabIndex={-1} key={orderBook.indexOf(row)}>
+                      <TableCell
                         component="th"
                         id={labelId}
                         scope="row"
-                        align="center"
+                        align="left"
                       >
-                        <Box paddingBottom="18px">
-                          <Typography>{row.buyQuantity}</Typography>
-                          <label> </label>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box>
-                          <Typography>{row.bid}</Typography>
-                          <span>{row.buyExpiry}</span>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box>
-                          <Typography>{row.ask}</Typography>
-                          <span>{row.sellExpiry}</span>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box paddingBottom="18px">
-                          <Typography>
-                            {row.sellQuantity}
-                            <label> </label>
-                          </Typography>
-                        </Box>
-                      </TableCellStyle>
+                        {row.orderType === 'buy' ? row.expiry : '-'}
+                      </TableCell>
+                      <TableCell align="center">
+                        {row.orderType == 'buy' ? row.nbrOptions : '-'}
+                      </TableCell>
+                      <TableCell align="center">
+                        {row.orderType === 'buy' ? row.bid : '-'}
+                      </TableCell>
+                      <TableCell align="center">
+                        {row.orderType === 'sell' ? row.ask : '-'}
+                      </TableCell>
+                      <TableCell align="center">
+                        {row.orderType === 'sell' ? row.nbrOptions : '-'}
+                      </TableCell>
+                      <TableCell align="right">
+                        {row.orderType === 'sell' ? row.expiry : '-'}
+                      </TableCell>
                     </TableRow>
                   )
                 })

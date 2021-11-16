@@ -24,12 +24,14 @@ const useStyles = makeStyles({
 
 const PageDiv = styled.div`
   width: 100%;
+  background-color: white;
 `
 
 const NoOrderTextDiv = styled.div`
   font-size: 1.1rem;
+  color: black;
   width: 100%;
-  margin-left: 120%;
+  margin-left: 65%;
   margin-top: 10%;
   margin-bottom: 10%;
 `
@@ -37,6 +39,7 @@ const NoOrderTextDiv = styled.div`
 const TableHeader = styled.h4`
   font-size: 1rem;
   font: regular;
+  color: black;
   padding-left: 15px;
   text-align: left;
 `
@@ -49,6 +52,7 @@ const TableHeadStyle = withStyles(() => ({
 
 const TableHeaderCell = withStyles(() => ({
   root: {
+    color: '#282c34',
     fontWeight: 'solid',
   },
 }))(TableCell)
@@ -176,10 +180,10 @@ export default function OpenOrdersNew() {
         <Table className={classes.table} aria-label="simple table">
           <TableHeadStyle>
             <TableRow>
-              <TableHeaderCell>Type</TableHeaderCell>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
-              <TableHeaderCell align="center">Price</TableHeaderCell>
-              <TableHeaderCell align="center">Pay/Recei</TableHeaderCell>
+              <TableHeaderCell>Order Type</TableHeaderCell>
+              <TableHeaderCell align="center">Nbr Options</TableHeaderCell>
+              <TableHeaderCell align="center">Pay/Receive</TableHeaderCell>
+              <TableHeaderCell align="center">Price per Option</TableHeaderCell>
               <TableHeaderCell align="right">Cancel</TableHeaderCell>
             </TableRow>
           </TableHeadStyle>
@@ -203,7 +207,9 @@ export default function OpenOrdersNew() {
                   )
                 })
             ) : (
-              <NoOrderTextDiv>You don't have any orders</NoOrderTextDiv>
+              <NoOrderTextDiv>
+                You don't have any orders for this option
+              </NoOrderTextDiv>
             )}
           </TableBody>
         </Table>

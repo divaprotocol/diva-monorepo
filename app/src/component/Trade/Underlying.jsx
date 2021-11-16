@@ -1,5 +1,5 @@
-import React from 'react'
 import { useEffect, useState } from 'react'
+import 'styled-components'
 import styled from 'styled-components'
 import OptionHeader from './OptionHeader'
 import OptionDetails from './OptionDetails'
@@ -10,7 +10,7 @@ import OrderBook from './OrderBookNew'
 import CreateOrder from './CreateOrder'
 // import LineSeries from '../Graphs/LineSeries';
 import TradeChart from '../Graphs/TradeChart'
-//import './Underlying.css';
+import './Underlying.css'
 import { useSelector, useDispatch } from 'react-redux'
 import { setTradingOption } from '../../Redux/TradeOption'
 import { useHistory } from 'react-router-dom'
@@ -21,6 +21,7 @@ import 'firebase/firestore'
 const PageDiv = styled.div`
   display: flex;
   justify-content: space-around;
+  aligh-items: flex-start;
   flex-basis: 80%;
   margin-left: 10%;
   margin-right: 10%;
@@ -30,11 +31,11 @@ const PageDiv = styled.div`
 `
 
 const PageLeftDiv = styled.div`
-  flex: 90%;
+  flex: 2;
 `
 
 const PageRightDiv = styled.div`
-  flex: 30%;
+  flex: 1;
   padding-left: 30px;
 `
 
@@ -43,35 +44,14 @@ const LeftCompDiv = styled.div`
   margin: 25px;
   padding: 1%;
   border-radius: 15px;
-<<<<<<< HEAD
-=======
-  background: white;
+  background-color: white;
 `
-
-const LeftCompFlexContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  flex-basis: 100%;
-`
-const LeftCompLeftDiv = styled.div`
-  width: 40%;
-  margin: 0.5%;
-  height: 100%;
-  align-items: stretch;
->>>>>>> #37 orderbook design work in progress, resolving the merge conflicts
-`
-const LeftCompRightDiv = styled.div`
-  width: 60%;
-  margin: 0.5%;
-  height: 100%;
-  align-items: stretch;
-`
-
 const RightCompDiv = styled.div`
   border: 1px solid rgba(224, 224, 224, 1);
   margin: 25px;
   padding: 1%;
   border-radius: 15px;
+  background-color: white;
 `
 export default function Underlying() {
   const w = 380
@@ -120,14 +100,10 @@ export default function Underlying() {
           <OptionDetails optionData={option} />
         </LeftCompDiv>
         <LeftCompDiv>
-          <LeftCompFlexContainer>
-            <LeftCompLeftDiv>
-              <OrderBook />
-            </LeftCompLeftDiv>
-            <LeftCompRightDiv>
-              <OpenOrdersNew />
-            </LeftCompRightDiv>
-          </LeftCompFlexContainer>
+          <OpenOrdersNew />
+        </LeftCompDiv>
+        <LeftCompDiv>
+          <OrderBook />
         </LeftCompDiv>
       </PageLeftDiv>
       <PageRightDiv>
