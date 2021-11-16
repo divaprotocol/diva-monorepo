@@ -43,9 +43,6 @@ const LeftCompDiv = styled.div`
   margin: 25px;
   padding: 1%;
   border-radius: 15px;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
   background: white;
 `
 
@@ -59,24 +56,9 @@ const LeftCompLeftDiv = styled.div`
   margin: 0.5%;
   height: 100%;
   align-items: stretch;
->>>>>>> #37 orderbook design work in progress, resolving the merge conflicts
-`
-=======
   background: white;
 `
 
-const LeftCompFlexContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  flex-basis: 100%;
-`
-const LeftCompLeftDiv = styled.div`
-  width: 40%;
-  margin: 0.5%;
-  height: 100%;
-  align-items: stretch;
-`
->>>>>>> #37 orderbook design work in progress, resolving the merge conflicts
 const LeftCompRightDiv = styled.div`
   width: 60%;
   margin: 0.5%;
