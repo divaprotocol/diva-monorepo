@@ -27,7 +27,6 @@ const WithProviders = () => {
         background: theme.palette.background.default,
         color: theme.palette.text.secondary,
         fill: theme.palette.text.secondary,
-        stroke: theme.palette.text.secondary,
         display: 'flex',
         minHeight: '100vh',
         flexDirection: 'column',
