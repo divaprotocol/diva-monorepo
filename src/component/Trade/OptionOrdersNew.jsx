@@ -29,7 +29,7 @@ const PageDiv = styled.div`
 const NoOrderTextDiv = styled.div`
   font-size: 1.1rem;
   width: 100%;
-  margin-left: 65%;
+  margin-left: 120%;
   margin-top: 10%;
   margin-bottom: 10%;
 `
@@ -176,10 +176,10 @@ export default function OpenOrdersNew() {
         <Table className={classes.table} aria-label="simple table">
           <TableHeadStyle>
             <TableRow>
-              <TableHeaderCell>Order Type</TableHeaderCell>
-              <TableHeaderCell align="center">Nbr Options</TableHeaderCell>
-              <TableHeaderCell align="center">Pay/Receive</TableHeaderCell>
-              <TableHeaderCell align="center">Price per Option</TableHeaderCell>
+              <TableHeaderCell>Type</TableHeaderCell>
+              <TableHeaderCell align="center">Quantity</TableHeaderCell>
+              <TableHeaderCell align="center">Price</TableHeaderCell>
+              <TableHeaderCell align="center">Pay/Recei</TableHeaderCell>
               <TableHeaderCell align="right">Cancel</TableHeaderCell>
             </TableRow>
           </TableHeadStyle>
@@ -203,9 +203,7 @@ export default function OpenOrdersNew() {
                   )
                 })
             ) : (
-              <NoOrderTextDiv>
-                You don't have any orders for this option
-              </NoOrderTextDiv>
+              <NoOrderTextDiv>You don't have any orders</NoOrderTextDiv>
             )}
           </TableBody>
         </Table>
