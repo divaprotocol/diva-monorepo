@@ -265,7 +265,7 @@ export default function OptionsList() {
   }, [])
 
   return (
-    <Paper>
+    <Paper sx={{ overflow: 'hidden', height: '100%' }}>
       <TableContainer>
         <Table stickyHeader aria-label="sticky table">
           <TableHead sx={{ pt: 10 }}>

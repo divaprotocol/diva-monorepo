@@ -15,6 +15,7 @@
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
     "moduleResolution": "node",
+    "types": ["@mui/x-data-grid"],
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
