@@ -7,6 +7,7 @@ import store from './Redux/Store'
 import { Provider } from 'react-redux'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { useMediaQuery } from '@mui/material'
+import { Box } from '@mui/system'
 
 const WithProviders = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
@@ -21,12 +22,16 @@ const WithProviders = () => {
     [prefersDarkMode]
   )
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         background: theme.palette.background.default,
         color: theme.palette.text.secondary,
         fill: theme.palette.text.secondary,
         stroke: theme.palette.text.secondary,
+        display: 'flex',
+        minHeight: '100vh',
+        flexDirection: 'column',
+        position: 'relative',
       }}
     >
       <ThemeProvider theme={theme}>
@@ -34,7 +39,7 @@ const WithProviders = () => {
           <App />
         </Provider>
       </ThemeProvider>
-    </div>
+    </Box>
   )
 }
 

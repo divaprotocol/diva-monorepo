@@ -1,15 +1,15 @@
 import { useD3 } from '../../hooks/useD3.js'
 import React, { useEffect, useState } from 'react'
 import * as d3 from 'd3'
-import generatePayoffChartData from '../../Graphs/DataGenerator.js'
+import { generatePayoffChartData } from '../../Graphs/DataGenerator.js'
 
-function MarketChart(data) {
-  console.log(data)
+function MarketChart(option) {
+  console.log(option)
 
-  const [myData, setMyData] = useState(data)
+  const [myData, setMyData] = useState(option)
 
   const ref = useD3(
-    Object.keys(data).length === 0
+    Object.keys(option).length === 0
       ? () => <svg />
       : (svg) => {
           const height = myData.targetHeight

@@ -14,7 +14,7 @@ import TradeChart from '../Graphs/TradeChart'
 import { useSelector, useDispatch } from 'react-redux'
 import { setTradingOption } from '../../Redux/TradeOption'
 import { useHistory } from 'react-router-dom'
-import generatePayoffChartData from '../../Graphs/DataGenerator.js'
+import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import 'firebase/database'
 import 'firebase/firestore'
 

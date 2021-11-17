@@ -23,9 +23,31 @@ const database = firebase.firestore()
 export const optionsCount = database.collection('T_Options_New')
 export const optionLiquidity = database.collection('T_Events_Liquidity_New')
 
-export const getAllOptions = async () => {
-  var oData = []
-  var oLiquidityData = []
+type DbToken = {
+  TokenAddress: string
+  Strike: number
+  BlockNumber: number
+  DecimalsCollateralToken: number
+  CollateralTokenName: string
+  DataFeedProviderIsWhitelisted: boolean
+  ExpiryDate: number
+  DataFeedProvider: string
+  SettlementFee: number
+  CollateralToken: string
+  OptionSetId: number
+  ReferenceAsset: string
+  RedemptionFee: number
+  IsLong: boolean
+  Cap: number
+  Inflection: number
+  DataFeedProviderName: string
+  OptionId: string
+  CollateralBalance: number
+}
+
+export const getAllOptions = async (): Promise<DbToken[]> => {
+  const options: DbToken[] = []
+  const oLiquidityData: any[] = []
   const optionsCount = database.collection('T_Options_New')
   const optionLiquidity = database.collection('T_Events_Liquidity_New')
 
@@ -37,9 +59,9 @@ export const getAllOptions = async () => {
 
   await optionsCount.get().then(function (responseData) {
     responseData.docs.forEach((doc) => {
-      var data = doc.data()
+      const data: any = doc.data()
       const optionId = data.OptionSetId
-      var collateralTotal = 0
+      let collateralTotal = 0
       oLiquidityData.forEach((option) => {
         if (option.OptionSetId === optionId) {
           collateralTotal += option.CollateralBalanceLong
@@ -47,37 +69,8 @@ export const getAllOptions = async () => {
         }
       })
       Object.assign(data, { CollateralBalance: collateralTotal })
-      oData.push(data)
+      options.push(data)
     })
   })
-  return oData
-}
-
-export const mapCollateralUpdate = (allOptions, change) => {
-  var newOptions = allOptions
-  const data = change
-  const index = allOptions.findIndex((option) => {
-    return option.OptionSetId === data.OptionSetId
-  })
-
-  var updatedOption = Object.assign({}, allOptions[index])
-  var collateralTotal = updatedOption.CollateralBalance
-  collateralTotal += data.CollateralBalanceLong
-  collateralTotal += data.CollateralBalanceShort
-  updatedOption.CollateralBalance = collateralTotal
-
-  const filter = allOptions.filter((option) => {
-    return option.OptionSetId === data.OptionSetId
-  })
-  filter.forEach((option) => {
-    const index = allOptions.indexOf(option)
-    var optionProps = JSON.parse(JSON.stringify(option))
-    optionProps.CollateralBalance = collateralTotal
-    newOptions = [
-      ...newOptions.slice(0, index),
-      optionProps,
-      ...newOptions.slice(index + 1),
-    ]
-  })
-  return newOptions
+  return options
 }

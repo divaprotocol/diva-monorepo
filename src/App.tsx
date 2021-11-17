@@ -1,9 +1,10 @@
 import Header from './component/Header/Header'
-import OptionsList from './component/Markets/OptionsList'
 import Underlying from './component/Trade/Underlying'
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { Create } from './component/Create'
+import OptionsList from './component/Markets/OptionsList'
+import Markets from './component/Markets/Markets'
 
 export const App = () => (
   <Router>
@@ -11,6 +12,9 @@ export const App = () => (
     <Switch>
       <Route exact path="/">
         <OptionsList />
+      </Route>
+      <Route exact path="/markets">
+        <Markets />
       </Route>
       <Route path="/trade/:id">
         <Underlying />
