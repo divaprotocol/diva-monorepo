@@ -42,9 +42,7 @@ const NoOrderTextDiv = styled.div`
 `
 
 const TableHeadStyle = withStyles(() => ({
-  root: {
-    backgroundColor: 'rgb(134,217,192)',
-  },
+  root: {},
 }))(TableHead)
 
 const TableHeaderCell = withStyles(() => ({
