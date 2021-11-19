@@ -2,6 +2,7 @@ import { AppBar, Box, Toolbar } from '@mui/material'
 import { Logo } from '../Logo'
 import MenuItems from './MenuItems'
 import ConnectWallet from '../Wallet/ConnectWalletButton'
+import Typography from '@mui/material/Typography'
 
 export default function Header() {
   return (
@@ -11,8 +12,14 @@ export default function Header() {
           <Logo />
         </Box>
         <MenuItems />
+        <Typography
+          variant="h5"
+          noWrap
+          component="div"
+          sx={{ flexGrow: 1, alignSelf: 'flex-end' }}
+        />
+        <ConnectWallet />
       </Toolbar>
-      <ConnectWallet />
     </AppBar>
   )
 }
