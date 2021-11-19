@@ -1,4 +1,3 @@
-import React from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import { Route, Link } from 'react-router-dom'
@@ -10,15 +9,13 @@ export default function MenuItems() {
         path="/"
         render={(history) => (
           <Tabs
-            indicatorColor="primary"
+            indicatorColor="secondary"
             textColor="inherit"
             value={
               history.location.pathname.includes('/trade')
                 ? false
                 : history.location.pathname
             }
-            aria-label=""
-            TabIndicatorProps={{ style: { backgroundColor: '#70D9BA' } }}
           >
             <Tab label="Markets" value={'/'} component={Link} to={'/'} />
             <Tab

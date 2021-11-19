@@ -5,21 +5,18 @@ import { App } from './App'
 import reportWebVitals from './reportWebVitals'
 import store from './Redux/Store'
 import { Provider } from 'react-redux'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
 import { useMediaQuery } from '@mui/material'
+import { createDivaTheme } from './lib/createDivaTheme'
 
 const WithProviders = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
 
   const theme = React.useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: prefersDarkMode ? 'dark' : 'light',
-        },
-      }),
+    () => createDivaTheme(prefersDarkMode),
     [prefersDarkMode]
   )
+
   return (
     <div
       style={{
