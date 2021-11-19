@@ -13,7 +13,7 @@ export default function ConnectWallet() {
       console.log(ex)
     }
   }
-  function truncate(string = '', start = 5, end = 3) {
+  function truncate(string = '', start = 6, end = 4) {
     if (start < 1 || end < 1) {
       return string
     }
