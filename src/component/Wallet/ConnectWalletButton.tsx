@@ -13,7 +13,15 @@ export default function ConnectWallet() {
       console.log(ex)
     }
   }
-
+  function truncate(string = '', start = 5, end = 3) {
+    if (start < 1 || end < 1) {
+      return string
+    }
+    if (string.length <= start + end) {
+      return string
+    }
+    return string.slice(0, start) + '...' + string.slice(-end)
+  }
   async function disconnect() {
     try {
       deactivate()
@@ -31,7 +39,7 @@ export default function ConnectWallet() {
       value="Submit"
       onClick={!active ? () => connect() : () => disconnect()}
     >
-      {!active ? 'Connect Wallet' : account}
+      {!active ? 'Connect Wallet' : truncate(account!)}
     </Button>
     // <div className="flex flex-col items-center justify-center">
     //   <button
