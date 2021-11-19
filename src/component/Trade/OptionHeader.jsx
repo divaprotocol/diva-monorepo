@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import '../../Util/Dates'
-import { useSelector } from 'react-redux'
+// import { useSelector } from 'react-redux'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -15,6 +15,7 @@ const OptionTitle = styled.h2`
   padding: 15px;
 `
 
+/*
 const Image = styled.img`
   height: 3.5vmin;
   width: 3.5vmin;
@@ -53,29 +54,30 @@ const refAssetImgs = [
     img1: '/images/coin-logos/DAI.png',
   },
 ]
+*/
 
-function renderRefImgs(assetName) {
-  if (assetName === 'ETH Gas Price') {
-    return <Image src={'/images/coin-logos/ETH.png'} alt="ReactApp" />
-  } else {
-    const asset = refAssetImgs.find((asset) => asset.refAsset === assetName)
-    return (
-      <ImgDiv>
-        <LeftAssetImg src={asset.img0} alt="ReactApp" />
-        <RightAssetImg src={asset.img1} alt="ReactApp" />
-      </ImgDiv>
-    )
-  }
-}
+// function renderRefImgs(assetName) {
+//   if (assetName === 'ETH Gas Price') {
+//     return <Image src={'/images/coin-logos/ETH.png'} alt="ReactApp" />
+//   } else {
+//     const asset = refAssetImgs.find((asset) => asset.refAsset === assetName)
+//     return (
+//       <ImgDiv>
+//         <LeftAssetImg src={asset.img0} alt="ReactApp" />
+//         <RightAssetImg src={asset.img1} alt="ReactApp" />
+//       </ImgDiv>
+//     )
+//   }
+// }
 
 export default function OptionHeader() {
   //const option = props.optionData
-  const selectedOption = useSelector((state) => state.tradeOption.option)
-  const headerTitle = selectedOption.ReferenceAsset
+  // const selectedOption = useSelector((state) => state.tradeOption.option)
+  // const headerTitle = selectedOption.ReferenceAsset
   return (
     <AppHeader>
-      {renderRefImgs(headerTitle)}
-      <OptionTitle>{headerTitle}</OptionTitle>
+      {/* renderRefImgs(headerTitle) */}
+      <OptionTitle>w{/* headerTitle */}</OptionTitle>
     </AppHeader>
   )
 }

@@ -1,8 +1,4 @@
-import React from 'react'
-import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import OptionHeader from './OptionHeader'
-import OptionDetails from './OptionDetails'
 //import OpenOrders from './OptionOrders'
 import OpenOrdersNew from './OptionOrdersNew'
 //import OrderBook from './OrderBook';
@@ -11,12 +7,11 @@ import CreateOrder from './CreateOrder'
 // import LineSeries from '../Graphs/LineSeries';
 import TradeChart from '../Graphs/TradeChart'
 //import './Underlying.css';
-import { useSelector, useDispatch } from 'react-redux'
-import { setTradingOption } from '../../Redux/TradeOption'
-import { useHistory } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import 'firebase/database'
-import 'firebase/firestore'
+import { useEffect } from 'react'
+import { getOption } from '../../DataService/FireStoreDB'
 
 const PageDiv = styled.div`
   display: flex;
@@ -73,9 +68,19 @@ const RightCompDiv = styled.div`
 export default function Underlying() {
   const w = 380
   const h = 200
-  const dispatch = useDispatch()
   const selectedOption = useSelector((state) => state.tradeOption.option)
-  const [option, setOption] = useState([])
+  const params = useParams()
+
+  console.log(params)
+  useEffect(() => {
+    const run = async () => {
+      getOption(params.id).then((val) => {
+        console.log(val)
+      })
+    }
+
+    run()
+  }, [])
 
   const OptionParams = {
     CollateralBalanceLong: 100,
@@ -93,28 +98,12 @@ export default function Underlying() {
   // const data = generatePayoffChartData(OptionParams)
   const data = generatePayoffChartData(OptionParams)
 
-  // breakEven: Take option payout as reference and not underlying
-
-  const history = useHistory()
-  if (Object.keys(selectedOption).length === 0) {
-    //Page refresh logic
-    const localOption = JSON.parse(window.localStorage.getItem('option'))
-    setOption(localOption)
-    dispatch(setTradingOption(localOption))
-    history.push(`/trade/${localOption.OptionId}`)
-  }
-
-  useEffect(() => {
-    //selected option stored in local browser storage to reference on page refresh.
-    window.localStorage.setItem('option', JSON.stringify(selectedOption))
-  })
-
   return (
     <PageDiv>
       <PageLeftDiv>
         <LeftCompDiv>
-          <OptionHeader />
-          <OptionDetails optionData={option} />
+          {/* <OptionHeader /> */}
+          {/*<OptionDetails optionData={option} />*/}
         </LeftCompDiv>
         <LeftCompDiv>
           <LeftCompFlexContainer>

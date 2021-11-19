@@ -23,7 +23,7 @@ const database = firebase.firestore()
 export const optionsCount = database.collection('T_Options_New')
 export const optionLiquidity = database.collection('T_Events_Liquidity_New')
 
-type DbToken = {
+type DbOption = {
   TokenAddress: string
   Strike: number
   BlockNumber: number
@@ -45,8 +45,21 @@ type DbToken = {
   CollateralBalance: number
 }
 
-export const getAllOptions = async (): Promise<DbToken[]> => {
-  const options: DbToken[] = []
+export const getOption = async (key: string): Promise<DbOption> => {
+  const doc = await optionsCount.doc(key)
+  const res = await doc.get()
+
+  console.log({
+    exists: res.exists,
+    data: res.data,
+    else: res.id,
+  })
+
+  return {} as any
+}
+
+export const getAllOptions = async (): Promise<DbOption[]> => {
+  const options: DbOption[] = []
   const oLiquidityData: any[] = []
   const optionsCount = database.collection('T_Options_New')
   const optionLiquidity = database.collection('T_Events_Liquidity_New')
