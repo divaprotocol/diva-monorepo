@@ -2,6 +2,8 @@ import React from 'react'
 import styled from 'styled-components'
 import logo_small from '../../Images/logo_small.svg'
 import MenuItems from './MenuItems'
+import ConnectWallet from '../Wallet/ConnectWalletButton'
+import Typography from '@mui/material/Typography'
 
 const Image = styled.img`
   height: 5vmin;
@@ -25,6 +27,13 @@ export default function Header() {
     <AppHeader>
       <Image src={logo_small} alt="ReactApp" />
       <MenuItems />
+      <Typography
+        variant="h5"
+        noWrap
+        component="div"
+        sx={{ flexGrow: 1, alignSelf: 'flex-end' }}
+      />
+      <ConnectWallet />
     </AppHeader>
   )
 }
