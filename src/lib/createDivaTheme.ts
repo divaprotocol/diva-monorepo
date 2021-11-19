@@ -1,5 +1,10 @@
 import { createTheme } from '@mui/material/styles'
 
+/**
+ * createDivaTheme
+ **
+ * Creates diva theme for material ui
+ */
 export function createDivaTheme(prefersDarkMode: boolean) {
   return createTheme({
     palette: {
