@@ -1,6 +1,7 @@
 import { AppBar, Box, Toolbar } from '@mui/material'
 import { Logo } from '../Logo'
 import MenuItems from './MenuItems'
+import { ConnectWalletButton } from '../Wallet/ConnectWalletButton'
 
 export default function Header() {
   return (
@@ -10,6 +11,7 @@ export default function Header() {
           <Logo />
         </Box>
         <MenuItems />
+        <ConnectWalletButton />
       </Toolbar>
     </AppBar>
   )
