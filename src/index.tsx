@@ -8,6 +8,12 @@ import { Provider } from 'react-redux'
 import { ThemeProvider } from '@mui/material/styles'
 import { useMediaQuery } from '@mui/material'
 import { createDivaTheme } from './lib/createDivaTheme'
+import Web3 from 'web3'
+import { Web3ReactProvider } from '@web3-react/core'
+
+function getLibrary(provider: any) {
+  return new Web3(provider)
+}
 
 const WithProviders = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
@@ -26,11 +32,13 @@ const WithProviders = () => {
         stroke: theme.palette.text.secondary,
       }}
     >
-      <ThemeProvider theme={theme}>
-        <Provider store={store}>
-          <App />
-        </Provider>
-      </ThemeProvider>
+      <Web3ReactProvider getLibrary={getLibrary}>
+        <ThemeProvider theme={theme}>
+          <Provider store={store}>
+            <App />
+          </Provider>
+        </ThemeProvider>
+      </Web3ReactProvider>
     </div>
   )
 }
