@@ -15,36 +15,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { setTradingOption } from '../../Redux/TradeOption'
 import { useHistory } from 'react-router-dom'
 import generatePayoffChartData from '../../Graphs/DataGenerator.js'
-import 'firebase/database'
-import 'firebase/firestore'
-
-const PageDiv = styled.div`
-  display: flex;
-  justify-content: space-around;
-  flex-basis: 80%;
-  margin-left: 10%;
-  margin-right: 10%;
-  padding: 10px;
-  margin-top: 2%;
-  border-radius: 1%;
-`
-
-const PageLeftDiv = styled.div`
-  flex: 90%;
-`
-
-const PageRightDiv = styled.div`
-  flex: 30%;
-  padding-left: 30px;
-`
-
-const LeftCompDiv = styled.div`
-  border: 1px solid rgba(224, 224, 224, 1);
-  margin: 25px;
-  padding: 1%;
-  border-radius: 15px;
-  background: white;
-`
+import { Paper, Stack } from '@mui/material'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -64,12 +35,6 @@ const LeftCompRightDiv = styled.div`
   align-items: stretch;
 `
 
-const RightCompDiv = styled.div`
-  border: 1px solid rgba(224, 224, 224, 1);
-  margin: 25px;
-  padding: 1%;
-  border-radius: 15px;
-`
 export default function Underlying() {
   const w = 380
   const h = 200
@@ -97,7 +62,7 @@ export default function Underlying() {
 
   const history = useHistory()
   if (Object.keys(selectedOption).length === 0) {
-    //Page refresh logic
+    // refresh logic
     const localOption = JSON.parse(window.localStorage.getItem('option'))
     setOption(localOption)
     dispatch(setTradingOption(localOption))
@@ -110,13 +75,14 @@ export default function Underlying() {
   })
 
   return (
-    <PageDiv>
-      <PageLeftDiv>
-        <LeftCompDiv>
+    <Stack direction="row" spacing={2}>
+      <Stack spacing={2}>
+        <Paper>
           <OptionHeader />
           <OptionDetails optionData={option} />
-        </LeftCompDiv>
-        <LeftCompDiv>
+        </Paper>
+
+        <Paper>
           <LeftCompFlexContainer>
             <LeftCompLeftDiv>
               <OrderBook />
@@ -125,13 +91,14 @@ export default function Underlying() {
               <OpenOrdersNew />
             </LeftCompRightDiv>
           </LeftCompFlexContainer>
-        </LeftCompDiv>
-      </PageLeftDiv>
-      <PageRightDiv>
-        <RightCompDiv>
+        </Paper>
+      </Stack>
+
+      <Stack spacing={2}>
+        <Paper>
           <CreateOrder />
-        </RightCompDiv>
-        <RightCompDiv>
+        </Paper>
+        <Paper>
           <TradeChart
             data={data}
             w={w}
@@ -139,8 +106,8 @@ export default function Underlying() {
             isLong={OptionParams.isLong}
             breakEven={breakEvenOptionPrice}
           />
-        </RightCompDiv>
-      </PageRightDiv>
-    </PageDiv>
+        </Paper>
+      </Stack>
+    </Stack>
   )
 }
