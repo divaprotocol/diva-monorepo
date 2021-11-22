@@ -37,7 +37,7 @@ export function ConnectWalletButton() {
       size="large"
       type="submit"
       value="Submit"
-      sx={{ marginLeft: 'auto' }}
+      sx={{ marginLeft: '10px' }}
       onClick={!active ? () => connect() : () => disconnect()}
     >
       {!active ? 'Connect Wallet' : truncate(account!)}
