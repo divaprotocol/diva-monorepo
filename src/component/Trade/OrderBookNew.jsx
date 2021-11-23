@@ -135,24 +135,7 @@ function mapOrderData(records, selectedOption, sortOrder) {
 }
 
 function createTableData(buyOrders, sellOrders) {
-  //Temporary fake data table
-  console.log(buyOrders)
-  console.log(sellOrders)
-  var table = []
-  for (var i = 0; i < 5; i++) {
-    const row = {
-      buyExpiry: i,
-      buyQuantity: i + 1,
-      bid: i + 2,
-      sellExpiry: i + 3,
-      sellQuantity: i,
-      ask: i + 5,
-    }
-    table.push(row)
-  }
-  return table
-  //The code below is commented temporarily
-  /*const buyOrdersCount = buyOrders !== 'undefined' ? buyOrders.length : 0
+  const buyOrdersCount = buyOrders !== 'undefined' ? buyOrders.length : 0
   const sellOrdersCount = sellOrders !== 'undefined' ? sellOrders.length : 0
   var table = []
   if (buyOrdersCount === 0 && sellOrdersCount === 0) {
@@ -166,7 +149,7 @@ function createTableData(buyOrders, sellOrders) {
         buyExpiry: '',
         buyQuantity: '',
         bid: '',
-        sellExpiry: sellOrder.expiry,
+        sellExpiry: sellOrder.expiry + ' mins',
         sellQuantity: sellOrder.nbrOptions,
         ask: sellOrder.ask,
       }
@@ -178,9 +161,9 @@ function createTableData(buyOrders, sellOrders) {
   if (sellOrdersCount === 0) {
     //var table = []
     for (var k = 0; k < buyOrdersCount; k++) {
-      const buyOrder = buyOrders[i]
+      const buyOrder = buyOrders[k]
       const row = {
-        buyExpiry: buyOrder.expiry,
+        buyExpiry: buyOrder.expiry + ' mins',
         buyQuantity: buyOrder.nbrOptions,
         bid: buyOrder.bid,
         sellExpiry: '',
@@ -193,31 +176,26 @@ function createTableData(buyOrders, sellOrders) {
   }
 
   if (buyOrdersCount > 0 && sellOrdersCount > 0) {
-    //var table = []
-    var highestOrder = ''
     var tableLength = 0
 
     if (buyOrdersCount > sellOrdersCount) {
       tableLength = buyOrders.length
-      highestOrder = 'buy'
     }
     if (buyOrdersCount < sellOrdersCount) {
       tableLength = sellOrders.length
-      highestOrder = 'sell'
     }
     if (buyOrdersCount === sellOrdersCount) {
       tableLength = sellOrders.length
-      highestOrder = 'sell'
     }
 
     for (var j = 0; j < tableLength; j++) {
-      const buyOrder = buyOrders[i]
-      const sellOrder = sellOrders[i]
+      const buyOrder = buyOrders[j]
+      const sellOrder = sellOrders[j]
       const row = {
-        buyExpiry: buyOrder === undefined ? '' : buyOrder.expiry,
+        buyExpiry: buyOrder === undefined ? '' : buyOrder.expiry + ' mins',
         buyQuantity: buyOrder === undefined ? '' : buyOrder.nbrOptions,
         bid: buyOrder === undefined ? '' : buyOrder.bid,
-        sellExpiry: sellOrder === undefined ? '' : sellOrder.expiry,
+        sellExpiry: sellOrder === undefined ? '' : sellOrder.expiry + ' mins',
         sellQuantity: sellOrder === undefined ? '' : sellOrder.nbrOptions,
         ask: sellOrder === undefined ? '' : sellOrder.ask,
       }
@@ -225,7 +203,7 @@ function createTableData(buyOrders, sellOrders) {
     }
     return table
   }
-  return []*/
+  return []
 }
 
 export default function OrderBookNew() {
@@ -319,28 +297,33 @@ export default function OrderBookNew() {
                         scope="row"
                         align="center"
                       >
-                        <Box paddingBottom="18px">
-                          <Typography>{row.buyQuantity}</Typography>
+                        <Box paddingBottom="20px">
+                          <Typography variant="h6">
+                            {row.buyQuantity}
+                          </Typography>
                           <label> </label>
                         </Box>
                       </TableCellStyle>
                       <TableCellStyle align="center">
                         <Box>
-                          <Typography>{row.bid}</Typography>
-                          <span>{row.buyExpiry}</span>
+                          <Typography variant="h6">{row.bid}</Typography>
+                          <Typography variant="caption" noWrap>
+                            {row.buyExpiry}
+                          </Typography>
                         </Box>
                       </TableCellStyle>
                       <TableCellStyle align="center">
                         <Box>
-                          <Typography>{row.ask}</Typography>
-                          <span>{row.sellExpiry}</span>
+                          <Typography variant="h6">{row.ask}</Typography>
+                          <Typography variant="caption" noWrap>
+                            {row.sellExpiry}
+                          </Typography>
                         </Box>
                       </TableCellStyle>
                       <TableCellStyle align="center">
-                        <Box paddingBottom="18px">
-                          <Typography>
+                        <Box paddingBottom="20px">
+                          <Typography variant="h6">
                             {row.sellQuantity}
-                            <label> </label>
                           </Typography>
                         </Box>
                       </TableCellStyle>
