@@ -64,13 +64,11 @@ const TableHeaderCell = withStyles(() => ({
 
 function mapOrderData(records, selectedOption, account) {
   const orderbook = records.map((record) => {
-    console.log('Record ' + JSON.stringify(record))
     const order = record.order
     const orderMaker = order.maker
     if (account === orderMaker) {
       const makerToken = order.makerToken
       const tokenAddress = selectedOption.TokenAddress.toLowerCase()
-
       const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
       const nbrOptions =
         (makerToken === tokenAddress ? order.makerAmount : order.takerAmount) /
@@ -203,7 +201,7 @@ export default function OpenOrdersNew() {
                 .map((order, index) => {
                   const labelId = `enhanced-table-${index}`
                   return (
-                    <TableRow key={index} hover className={classes.tableRow}>
+                    <TableRow key={index} hover>
                       <TableCellStyle
                         component="th"
                         id={labelId}
@@ -248,7 +246,7 @@ export default function OpenOrdersNew() {
                               startIcon={<DeleteIcon />}
                               size="small"
                             >
-                              Delete
+                              Cancel
                             </Button>
                           </Typography>
                         </Box>
@@ -257,7 +255,7 @@ export default function OpenOrdersNew() {
                   )
                 })
             ) : (
-              <NoOrderTextDiv>You don't have any orders</NoOrderTextDiv>
+              <NoOrderTextDiv>None</NoOrderTextDiv>
             )}
           </TableBody>
         </Table>
