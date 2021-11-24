@@ -227,14 +227,14 @@ export default function OpenOrdersNew() {
                       <TableCellStyle align="center">
                         <Box paddingBottom="20px">
                           <Typography variant="h6">
-                            {order.payReceive}
+                            {order.pricePerOption}
                           </Typography>
                         </Box>
                       </TableCellStyle>
                       <TableCellStyle align="center">
                         <Box paddingBottom="20px">
                           <Typography variant="h6">
-                            {order.pricePerOption}
+                            {order.payReceive}
                           </Typography>
                         </Box>
                       </TableCellStyle>
