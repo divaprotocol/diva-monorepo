@@ -11,6 +11,12 @@ import { useSelector } from 'react-redux'
 import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { setTradingOption } from '../../Redux/TradeOption'
+import { useHistory } from 'react-router-dom'
+import generatePayoffChartData from '../../Graphs/DataGenerator.js'
+import { Paper, Stack } from '@mui/material'
+
 import { getOption } from '../../DataService/FireStoreDB'
 
 const PageDiv = styled.div`
@@ -40,7 +46,6 @@ const LeftCompDiv = styled.div`
   border-radius: 15px;
   background: white;
 `
-
 const LeftCompFlexContainer = styled.div`
   display: flex;
   justify-content: space-between;
@@ -59,12 +64,6 @@ const LeftCompRightDiv = styled.div`
   align-items: stretch;
 `
 
-const RightCompDiv = styled.div`
-  border: 1px solid rgba(224, 224, 224, 1);
-  margin: 25px;
-  padding: 1%;
-  border-radius: 15px;
-`
 export default function Underlying() {
   const w = 380
   const h = 200
@@ -114,13 +113,14 @@ export default function Underlying() {
               <OpenOrdersNew />
             </LeftCompRightDiv>
           </LeftCompFlexContainer>
-        </LeftCompDiv>
-      </PageLeftDiv>
-      <PageRightDiv>
-        <RightCompDiv>
+        </PageLeft>
+      </Stack>
+
+      <Stack spacing={2}>
+        <Paper>
           <CreateOrder />
-        </RightCompDiv>
-        <RightCompDiv>
+        </Paper>
+        <Paper>
           <TradeChart
             data={data}
             w={w}
@@ -128,8 +128,8 @@ export default function Underlying() {
             isLong={OptionParams.isLong}
             breakEven={breakEvenOptionPrice}
           />
-        </RightCompDiv>
-      </PageRightDiv>
-    </PageDiv>
+        </Paper>
+      </Stack>
+    </Stack>
   )
 }

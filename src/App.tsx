@@ -2,24 +2,29 @@ import Header from './component/Header/Header'
 import Underlying from './component/Trade/Underlying'
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
-import { Create } from './component/Create'
 import Markets from './component/Markets/Markets'
+import { Create } from './component/Create'
+import { Container, useTheme } from '@mui/material'
 
 export const App = () => {
+  const theme = useTheme()
   return (
     <Router>
       <Header />
-      <Switch>
-        <Route exact path="/">
-          <Markets />
-        </Route>
-        <Route path="/trade/:id">
-          <Underlying />
-        </Route>
-        <Route path="/create">
-          <Create />
-        </Route>
-      </Switch>
+
+      <Container sx={{ minHeight: '100vh', paddingTop: theme.spacing(4) }}>
+        <Switch>
+          <Route exact path="/">
+            <Markets />
+          </Route>
+          <Route path="/trade/:id">
+            <Underlying />
+          </Route>
+          <Route path="/create">
+            <Create />
+          </Route>
+        </Switch>
+      </Container>
     </Router>
   )
 }

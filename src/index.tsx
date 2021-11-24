@@ -5,22 +5,25 @@ import { App } from './App'
 import reportWebVitals from './reportWebVitals'
 import store from './Redux/Store'
 import { Provider } from 'react-redux'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
 import { useMediaQuery } from '@mui/material'
 import { Box } from '@mui/system'
+import { createDivaTheme } from './lib/createDivaTheme'
+import Web3 from 'web3'
+import { Web3ReactProvider } from '@web3-react/core'
+
+function getLibrary(provider: any) {
+  return new Web3(provider)
+}
 
 const WithProviders = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
 
   const theme = React.useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: prefersDarkMode ? 'dark' : 'light',
-        },
-      }),
+    () => createDivaTheme(prefersDarkMode),
     [prefersDarkMode]
   )
+
   return (
     <Box
       sx={{
@@ -33,11 +36,13 @@ const WithProviders = () => {
         position: 'relative',
       }}
     >
-      <ThemeProvider theme={theme}>
-        <Provider store={store}>
-          <App />
-        </Provider>
-      </ThemeProvider>
+      <Web3ReactProvider getLibrary={getLibrary}>
+        <ThemeProvider theme={theme}>
+          <Provider store={store}>
+            <App />
+          </Provider>
+        </ThemeProvider>
+      </Web3ReactProvider>
     </Box>
   )
 }
