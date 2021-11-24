@@ -87,6 +87,8 @@ export default function OptionHeader() {
       <Link
         style={{ color: 'gray' }}
         underline={'none'}
+        rel="noopener noreferrer"
+        target="_blank"
         href={getEtherscanLink(
           chainId,
           selectedOption.TokenAddress,
