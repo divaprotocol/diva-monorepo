@@ -7,6 +7,7 @@ import store from './Redux/Store'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from '@mui/material/styles'
 import { useMediaQuery } from '@mui/material'
+import { Box } from '@mui/system'
 import { createDivaTheme } from './lib/createDivaTheme'
 import Web3 from 'web3'
 import { Web3ReactProvider } from '@web3-react/core'
@@ -24,12 +25,18 @@ const WithProviders = () => {
   )
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         background: theme.palette.background.default,
         color: theme.palette.text.secondary,
         fill: theme.palette.text.secondary,
-        stroke: theme.palette.text.secondary,
+        height: '100vh',
+        left: 0,
+        top: 0,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
       }}
     >
       <Web3ReactProvider getLibrary={getLibrary}>
@@ -39,7 +46,7 @@ const WithProviders = () => {
           </Provider>
         </ThemeProvider>
       </Web3ReactProvider>
-    </div>
+    </Box>
   )
 }
 

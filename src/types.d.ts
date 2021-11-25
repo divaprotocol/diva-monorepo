@@ -1,7 +1,5 @@
-import { BaseProvider } from '@metamask/providers'
+declare module '@mui/x-data-grid' {
+  import { DataGrid as _DataGrid } from '@mui/x-data-grid/x-data-grid'
 
-declare global {
-  interface Window {
-    ethereum: BaseProvider
-  }
+  export const DataGrid = _DataGrid
 }

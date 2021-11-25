@@ -1,8 +1,8 @@
 import Header from './component/Header/Header'
-import OptionsList from './component/Markets/OptionsList'
 import Underlying from './component/Trade/Underlying'
 
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import Markets from './component/Markets/Markets'
 import { Create } from './component/Create'
 import { Container, useTheme } from '@mui/material'
 
@@ -12,10 +12,10 @@ export const App = () => {
     <Router>
       <Header />
 
-      <Container sx={{ minHeight: '100vh', paddingTop: theme.spacing(4) }}>
+      <Container sx={{ height: '100%', paddingTop: theme.spacing(4) }}>
         <Switch>
           <Route exact path="/">
-            <OptionsList />
+            <Markets />
           </Route>
           <Route path="/trade/:id">
             <Underlying />

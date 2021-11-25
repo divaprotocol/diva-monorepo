@@ -153,13 +153,13 @@ export default function OpenOrdersNew() {
 
   useEffect(() => {
     if (responseBuy.length === 0 || responseSell === 0) {
-      componentDidMount()
+      console.log(componentDidMount)
     }
   }, [])
 
   useEffect(() => {
     if (responseBuy.length > 0 || responseSell > 0) {
-      componentDidMount()
+      console.log(componentDidMount)
     }
     return () => {
       if (responseBuy.length > 0 || responseSell > 0) {

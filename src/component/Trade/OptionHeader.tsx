@@ -1,13 +1,13 @@
 import React from 'react'
 import styled from 'styled-components'
 import '../../Util/Dates'
-import { useSelector } from 'react-redux'
 import { IconButton, Link } from '@mui/material'
 import {
   getEtherscanLink,
   EtherscanLinkType,
 } from '../../Util/getEtherscanLink'
 import { useWeb3React } from '@web3-react/core'
+import { DbOption } from '../../DataService/FireStoreDB'
 const AppHeader = styled.header`
   min-height: 10vh;
   display: flex;
@@ -59,25 +59,24 @@ const refAssetImgs = [
   },
 ]
 
-function renderRefImgs(assetName) {
+function renderRefImgs(assetName: string) {
   if (assetName === 'ETH Gas Price') {
     return <Image src={'/images/coin-logos/ETH.png'} alt="ReactApp" />
   } else {
     const asset = refAssetImgs.find((asset) => asset.refAsset === assetName)
     return (
       <ImgDiv>
-        <LeftAssetImg src={asset.img0} alt="ReactApp" />
-        <RightAssetImg src={asset.img1} alt="ReactApp" />
+        <LeftAssetImg src={asset?.img0} alt="ReactApp" />
+        <RightAssetImg src={asset?.img1} alt="ReactApp" />
       </ImgDiv>
     )
   }
 }
 
-export default function OptionHeader() {
+export default function OptionHeader({ optionData }: { optionData: DbOption }) {
   //const option = props.optionData
   const { chainId } = useWeb3React()
-  const selectedOption = useSelector((state) => state.tradeOption.option)
-  const headerTitle = selectedOption.ReferenceAsset
+  const headerTitle = optionData.ReferenceAsset
 
   return (
     <AppHeader>
@@ -90,16 +89,14 @@ export default function OptionHeader() {
         target="_blank"
         href={getEtherscanLink(
           chainId,
-          selectedOption.TokenAddress,
+          optionData.TokenAddress,
           EtherscanLinkType.ADDRESS
         )}
       >
-        {selectedOption.TokenAddress}
+        {optionData.TokenAddress}
       </Link>
       <IconButton
-        onClick={() =>
-          navigator.clipboard.writeText(selectedOption.TokenAddress)
-        }
+        onClick={() => navigator.clipboard.writeText(optionData.TokenAddress)}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
