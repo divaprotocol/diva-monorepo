@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
-import { useSelector } from 'react-redux'
+import { DbOption } from '../../DataService/FireStoreDB'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -87,12 +87,11 @@ const FlexBoxSecondLineData = styled.div`
   text-align: left;
 `
 
-function createData(option) {
-  console.log(option.ExpiryDate)
+function createData(option: DbOption) {
   return {
     expiry: getDateTime(option.ExpiryDate).slice(0, 10),
     Direction: 'TBD',
-    direction: option.isLong ? 'Up' : 'Down',
+    direction: option.IsLong ? 'Up' : 'Down',
     cap: option.Cap,
     strike: option.Strike,
     inflection: option.Inflection,
@@ -106,12 +105,16 @@ function createData(option) {
         : 'n/a',
   }
 }
-export default function OptionDetails() {
+
+export default function OptionDetails({
+  optionData,
+}: {
+  optionData: DbOption
+}) {
   //Instead of calling redux to get selected option at each component level
   //we can call at root component of trade that is underlying and pass as porps
   //to each child component.
-  const selectedOption = useSelector((state) => state.tradeOption.option)
-  const option = createData(selectedOption)
+  const option = createData(optionData)
 
   return (
     <PageDiv>

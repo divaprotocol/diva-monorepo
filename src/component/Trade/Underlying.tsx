@@ -1,21 +1,21 @@
-import React from 'react'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import OptionHeader from './OptionHeader'
-import OptionDetails from './OptionDetails'
+// import OptionHeader from './OptionHeader'
+// import OptionDetails from './OptionDetails'
 //import OpenOrders from './OptionOrders'
 import OpenOrdersNew from './OptionOrdersNew'
 //import OrderBook from './OrderBook';
 import OrderBook from './OrderBookNew'
 import CreateOrder from './CreateOrder'
 // import LineSeries from '../Graphs/LineSeries';
-import TradeChart from '../Graphs/TradeChart'
 //import './Underlying.css';
-import { useSelector, useDispatch } from 'react-redux'
-import { setTradingOption } from '../../Redux/TradeOption'
-import { useHistory } from 'react-router-dom'
-import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { Paper, Stack } from '@mui/material'
+import { DbOption, getOption } from '../../DataService/FireStoreDB'
+import { useParams } from 'react-router'
+import { generatePayoffChartData } from '../../Graphs/DataGenerator'
+import TradeChart from '../Graphs/TradeChart'
+import OptionDetails from './OptionDetails'
+import OptionHeader from './OptionHeader'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -36,49 +36,46 @@ const LeftCompRightDiv = styled.div`
 `
 
 export default function Underlying() {
-  const w = 380
-  const h = 200
-  const dispatch = useDispatch()
-  const selectedOption = useSelector((state) => state.tradeOption.option)
-  const [option, setOption] = useState([])
+  const params: { id: string } = useParams()
+  const [option, setOption] = useState<DbOption>()
+
+  // Temporarily
+  const breakEvenOptionPrice = 0
+
+  // breakEven: Take option payout as reference and not underlying
+
+  useEffect(() => {
+    getOption(params.id).then((val) => {
+      console.log(val)
+      if (val != null) {
+        setOption(val)
+      } else {
+        throw new Error(`option does not exist: ${params.id}`)
+      }
+    })
+  }, [])
+
+  if (option == null) {
+    return <div>Loading</div>
+  }
 
   const OptionParams = {
     CollateralBalanceLong: 100,
     CollateralBalanceShort: 100,
-    Strike: selectedOption.Strike,
-    Inflection: selectedOption.Inflection,
-    Cap: selectedOption.Cap,
+    Strike: option.Strike,
+    Inflection: option.Inflection,
+    Cap: option.Cap,
     TokenSupply: 200,
-    IsLong: selectedOption.IsLong,
+    IsLong: option.IsLong,
   }
 
-  // Temporarily
-  const breakEvenOptionPrice = 0
-  // Generate the data array
-  // const data = generatePayoffChartData(OptionParams)
   const data = generatePayoffChartData(OptionParams)
-
-  // breakEven: Take option payout as reference and not underlying
-
-  const history = useHistory()
-  if (Object.keys(selectedOption).length === 0) {
-    // refresh logic
-    const localOption = JSON.parse(window.localStorage.getItem('option'))
-    setOption(localOption)
-    dispatch(setTradingOption(localOption))
-    history.push(`/trade/${localOption.OptionId}`)
-  }
-
-  useEffect(() => {
-    //selected option stored in local browser storage to reference on page refresh.
-    window.localStorage.setItem('option', JSON.stringify(selectedOption))
-  })
 
   return (
     <Stack direction="row" spacing={2}>
       <Stack spacing={2}>
         <Paper>
-          <OptionHeader />
+          <OptionHeader optionData={option} />
           <OptionDetails optionData={option} />
         </Paper>
 
@@ -101,9 +98,9 @@ export default function Underlying() {
         <Paper>
           <TradeChart
             data={data}
-            w={w}
-            h={h}
-            isLong={OptionParams.isLong}
+            w={380}
+            h={200}
+            isLong={OptionParams.IsLong}
             breakEven={breakEvenOptionPrice}
           />
         </Paper>

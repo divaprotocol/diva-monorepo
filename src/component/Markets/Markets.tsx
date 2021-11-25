@@ -8,8 +8,6 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { LineSeries, XYPlot } from 'react-vis'
 import { LocalGasStation, Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { setTradingOption } from '../../Redux/TradeOption'
 
 const assetLogoPath = '/images/coin-logos/'
 
@@ -87,7 +85,6 @@ export default function App() {
   const [rows, setRows] = useState<GridRowModel[]>([])
   const history = useHistory()
   const [search, setSearch] = useState('')
-  const dispatch = useDispatch()
 
   useEffect(() => {
     const run = async () => {
@@ -162,7 +159,6 @@ export default function App() {
         rows={filteredRows}
         columns={columns}
         onRowClick={(row) => {
-          dispatch(setTradingOption(row.id))
           history.push(`trade/${row.id}`)
         }}
       />
