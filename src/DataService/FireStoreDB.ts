@@ -54,28 +54,25 @@ export const getOption = async (key: string): Promise<DbOption | void> => {
 }
 
 export const getAllOptions = async (): Promise<DbOption[]> => {
-  const optionsCount = database.collection('T_Options_New')
-  const optionLiquidity = database.collection('T_Events_Liquidity_New')
-
   const liquidityResponse = await optionLiquidity.get()
-  const oLiquidityData: any[] = liquidityResponse.docs
+  const oLiquidityData: any[] = liquidityResponse.docs.map((v) => v.data())
   const optionsResponse = await optionsCount.get()
 
   return optionsResponse.docs.map((doc) => {
     const data: any = doc.data()
     const optionId = data.OptionSetId
-    let collateralTotal = 0
 
-    oLiquidityData.forEach((option) => {
-      if (option.OptionSetId === optionId) {
-        collateralTotal += option.CollateralBalanceLong
-        collateralTotal += option.CollateralBalanceShort
-      }
-    })
+    const optionLiquidity = oLiquidityData.find(
+      (res) => res.OptionSetId === optionId
+    )
 
     return {
       ...data,
-      CollateralBalance: collateralTotal,
+      CollateralBalance:
+        optionLiquidity != null
+          ? optionLiquidity.CollateralBalanceLong +
+            optionLiquidity.CollateralBalanceShort
+          : 0,
     }
   })
 }
