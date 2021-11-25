@@ -20,8 +20,8 @@ if (!firebase.apps.length) {
 }
 
 const database = firebase.firestore()
-export const optionsCount = database.collection('T_Options_New')
-export const optionLiquidity = database.collection('T_Events_Liquidity_New')
+export const optionsCollection = database.collection('T_Options_New')
+export const liquidityCollection = database.collection('T_Events_Liquidity_New')
 
 export type DbOption = {
   TokenAddress: string
@@ -46,17 +46,16 @@ export type DbOption = {
 }
 
 export const getOption = async (key: string): Promise<DbOption | void> => {
-  const optionsCount = database.collection('T_Options_New')
-  const option = await optionsCount.where('OptionId', '==', key).get()
+  const option = await optionsCollection.where('OptionId', '==', key).get()
   if (!option.empty) {
     return option.docs[0].data() as DbOption
   }
 }
 
 export const getAllOptions = async (): Promise<DbOption[]> => {
-  const liquidityResponse = await optionLiquidity.get()
+  const liquidityResponse = await liquidityCollection.get()
   const oLiquidityData: any[] = liquidityResponse.docs.map((v) => v.data())
-  const optionsResponse = await optionsCount.get()
+  const optionsResponse = await optionsCollection.get()
 
   return optionsResponse.docs.map((doc) => {
     const data: any = doc.data()
