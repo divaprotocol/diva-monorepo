@@ -24,6 +24,7 @@
     "@web3-react/injected-connector": "^6.0.7",
     "axios": "^0.21.4",
     "d3": "^7.0.1",
+    "ethers": "^5.5.1",
     "firebase": "^8.7.1",
     "firebase-admin": "^9.11.0",
     "normalize.css": "^8.0.1",
