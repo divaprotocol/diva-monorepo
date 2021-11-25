@@ -77,6 +77,7 @@ export default function OptionHeader({ optionData }: { optionData: DbOption }) {
   //const option = props.optionData
   const { chainId } = useWeb3React()
   const headerTitle = optionData.ReferenceAsset
+
   return (
     <AppHeader>
       {renderRefImgs(headerTitle)}

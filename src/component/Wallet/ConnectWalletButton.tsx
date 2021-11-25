@@ -1,11 +1,25 @@
 import { useWeb3React } from '@web3-react/core'
 import { injected } from './connectors'
 import Button from '@mui/material/Button'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { ethers } from 'ethers'
 
 export function ConnectWalletButton() {
   const { active, account, activate, deactivate } = useWeb3React()
+  const [walletName, setWalletName] = useState('')
+  const provider = new ethers.providers.Web3Provider(window.ethereum)
 
+  useEffect(() => {
+    if (account) {
+      provider.lookupAddress(account).then((res) => {
+        if (res === null) {
+          setWalletName(truncate(account))
+        } else {
+          setWalletName(res)
+        }
+      })
+    }
+  }, [account])
   async function connect() {
     try {
       await activate(injected)
@@ -40,7 +54,7 @@ export function ConnectWalletButton() {
       sx={{ marginLeft: '10px' }}
       onClick={!active ? () => connect() : () => disconnect()}
     >
-      {!active ? 'Connect Wallet' : truncate(account!)}
+      {!active ? 'Connect Wallet' : walletName}
     </Button>
   )
 }
