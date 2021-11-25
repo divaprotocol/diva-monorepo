@@ -78,8 +78,7 @@ export default function OptionHeader() {
   const { chainId } = useWeb3React()
   const selectedOption = useSelector((state) => state.tradeOption.option)
   const headerTitle = selectedOption.ReferenceAsset
-  console.log('selectedOption')
-  console.log(selectedOption)
+
   return (
     <AppHeader>
       {renderRefImgs(headerTitle)}
