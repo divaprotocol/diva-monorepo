@@ -30,10 +30,13 @@ const WithProviders = () => {
         background: theme.palette.background.default,
         color: theme.palette.text.secondary,
         fill: theme.palette.text.secondary,
+        height: '100vh',
+        left: 0,
+        top: 0,
+        width: '100%',
         display: 'flex',
-        minHeight: '100vh',
         flexDirection: 'column',
-        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <Web3ReactProvider getLibrary={getLibrary}>

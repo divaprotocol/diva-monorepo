@@ -1,4 +1,8 @@
+import React from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import OptionHeader from './OptionHeader'
+import OptionDetails from './OptionDetails'
 //import OpenOrders from './OptionOrders'
 import OpenOrdersNew from './OptionOrdersNew'
 //import OrderBook from './OrderBook';
@@ -7,45 +11,12 @@ import CreateOrder from './CreateOrder'
 // import LineSeries from '../Graphs/LineSeries';
 import TradeChart from '../Graphs/TradeChart'
 //import './Underlying.css';
-import { useSelector } from 'react-redux'
-import { useParams } from 'react-router'
-import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { setTradingOption } from '../../Redux/TradeOption'
 import { useHistory } from 'react-router-dom'
-import generatePayoffChartData from '../../Graphs/DataGenerator.js'
+import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { Paper, Stack } from '@mui/material'
 
-import { getOption } from '../../DataService/FireStoreDB'
-
-const PageDiv = styled.div`
-  display: flex;
-  justify-content: space-around;
-  flex-basis: 80%;
-  margin-left: 10%;
-  margin-right: 10%;
-  padding: 10px;
-  margin-top: 2%;
-  border-radius: 1%;
-`
-
-const PageLeftDiv = styled.div`
-  flex: 90%;
-`
-
-const PageRightDiv = styled.div`
-  flex: 30%;
-  padding-left: 30px;
-`
-
-const LeftCompDiv = styled.div`
-  border: 1px solid rgba(224, 224, 224, 1);
-  margin: 25px;
-  padding: 1%;
-  border-radius: 15px;
-  background: white;
-`
 const LeftCompFlexContainer = styled.div`
   display: flex;
   justify-content: space-between;
@@ -67,19 +38,9 @@ const LeftCompRightDiv = styled.div`
 export default function Underlying() {
   const w = 380
   const h = 200
+  const dispatch = useDispatch()
   const selectedOption = useSelector((state) => state.tradeOption.option)
-  const params = useParams()
-
-  console.log(params)
-  useEffect(() => {
-    const run = async () => {
-      getOption(params.id).then((val) => {
-        console.log(val)
-      })
-    }
-
-    run()
-  }, [])
+  const [option, setOption] = useState([])
 
   const OptionParams = {
     CollateralBalanceLong: 100,
@@ -97,14 +58,31 @@ export default function Underlying() {
   // const data = generatePayoffChartData(OptionParams)
   const data = generatePayoffChartData(OptionParams)
 
+  // breakEven: Take option payout as reference and not underlying
+
+  const history = useHistory()
+  if (Object.keys(selectedOption).length === 0) {
+    // refresh logic
+    const localOption = JSON.parse(window.localStorage.getItem('option'))
+    setOption(localOption)
+    dispatch(setTradingOption(localOption))
+    history.push(`/trade/${localOption.OptionId}`)
+  }
+
+  useEffect(() => {
+    //selected option stored in local browser storage to reference on page refresh.
+    window.localStorage.setItem('option', JSON.stringify(selectedOption))
+  })
+
   return (
-    <PageDiv>
-      <PageLeftDiv>
-        <LeftCompDiv>
-          {/* <OptionHeader /> */}
-          {/*<OptionDetails optionData={option} />*/}
-        </LeftCompDiv>
-        <LeftCompDiv>
+    <Stack direction="row" spacing={2}>
+      <Stack spacing={2}>
+        <Paper>
+          <OptionHeader />
+          <OptionDetails optionData={option} />
+        </Paper>
+
+        <Paper>
           <LeftCompFlexContainer>
             <LeftCompLeftDiv>
               <OrderBook />
@@ -113,7 +91,7 @@ export default function Underlying() {
               <OpenOrdersNew />
             </LeftCompRightDiv>
           </LeftCompFlexContainer>
-        </PageLeft>
+        </Paper>
       </Stack>
 
       <Stack spacing={2}>

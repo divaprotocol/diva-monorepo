@@ -12,7 +12,7 @@ export const App = () => {
     <Router>
       <Header />
 
-      <Container sx={{ minHeight: '100vh', paddingTop: theme.spacing(4) }}>
+      <Container sx={{ height: '100%', paddingTop: theme.spacing(4) }}>
         <Switch>
           <Route exact path="/">
             <Markets />

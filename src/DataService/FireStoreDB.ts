@@ -45,45 +45,29 @@ type DbOption = {
   CollateralBalance: number
 }
 
-export const getOption = async (key: string): Promise<DbOption> => {
-  const doc = await optionsCount.doc(key)
-  const res = await doc.get()
-
-  console.log({
-    exists: res.exists,
-    data: res.data,
-    else: res.id,
-  })
-
-  return {} as any
-}
-
 export const getAllOptions = async (): Promise<DbOption[]> => {
-  const options: DbOption[] = []
-  const oLiquidityData: any[] = []
   const optionsCount = database.collection('T_Options_New')
   const optionLiquidity = database.collection('T_Events_Liquidity_New')
 
-  await optionLiquidity.get().then(function (responseData) {
-    responseData.docs.forEach((doc) => {
-      oLiquidityData.push(doc.data())
-    })
-  })
+  const liquidityResponse = await optionLiquidity.get()
+  const oLiquidityData: any[] = liquidityResponse.docs
+  const optionsResponse = await optionsCount.get()
 
-  await optionsCount.get().then(function (responseData) {
-    responseData.docs.forEach((doc) => {
-      const data: any = doc.data()
-      const optionId = data.OptionSetId
-      let collateralTotal = 0
-      oLiquidityData.forEach((option) => {
-        if (option.OptionSetId === optionId) {
-          collateralTotal += option.CollateralBalanceLong
-          collateralTotal += option.CollateralBalanceShort
-        }
-      })
-      Object.assign(data, { CollateralBalance: collateralTotal })
-      options.push(data)
+  return optionsResponse.docs.map((doc) => {
+    const data: any = doc.data()
+    const optionId = data.OptionSetId
+    let collateralTotal = 0
+
+    oLiquidityData.forEach((option) => {
+      if (option.OptionSetId === optionId) {
+        collateralTotal += option.CollateralBalanceLong
+        collateralTotal += option.CollateralBalanceShort
+      }
     })
+
+    return {
+      ...data,
+      CollateralBalance: collateralTotal,
+    }
   })
-  return options
 }

@@ -88,6 +88,7 @@ const FlexBoxSecondLineData = styled.div`
 `
 
 function createData(option) {
+  console.log(option.ExpiryDate)
   return {
     expiry: getDateTime(option.ExpiryDate).slice(0, 10),
     Direction: 'TBD',

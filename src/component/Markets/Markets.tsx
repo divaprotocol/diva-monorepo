@@ -3,11 +3,13 @@ import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import { getAllOptions } from '../../DataService/FireStoreDB'
 import { getDateTime } from '../../Util/Dates'
-import { Box, Input, InputAdornment, useTheme } from '@mui/material'
+import { Box, Input, InputAdornment } from '@mui/material'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { LineSeries, XYPlot } from 'react-vis'
 import { LocalGasStation, Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { setTradingOption } from '../../Redux/TradeOption'
 
 const assetLogoPath = '/images/coin-logos/'
 
@@ -85,13 +87,21 @@ export default function App() {
   const [rows, setRows] = useState<GridRowModel[]>([])
   const history = useHistory()
   const [search, setSearch] = useState('')
-  const theme = useTheme()
+  const dispatch = useDispatch()
 
   useEffect(() => {
     const run = async () => {
       const options = await getAllOptions()
+      const today = new Date()
+      /**
+       * Display only unexpired options
+       * TODO: This might change in the near future
+       */
+      const unExpiredOptions = options.filter(
+        (v) => new Date(v.ExpiryDate * 1000) < today
+      )
       setRows(
-        options.map((op) => ({
+        unExpiredOptions.map((op) => ({
           Icon: op.ReferenceAsset,
           id: op.OptionId,
           OptionId: op.OptionId,
@@ -111,8 +121,6 @@ export default function App() {
     run()
   }, [])
 
-  console.log(theme.spacing)
-
   const filteredRows =
     search != null && search.length > 0
       ? rows.filter((v) =>
@@ -123,8 +131,7 @@ export default function App() {
   return (
     <Box
       sx={{
-        padding: '1em',
-        height: '300px',
+        height: 'calc(100% - 1em)',
         display: 'flex',
         flexGrow: 1,
         flexDirection: 'column',
@@ -154,7 +161,10 @@ export default function App() {
       <DataGrid
         rows={filteredRows}
         columns={columns}
-        onRowClick={(row) => history.push(`trade/${row.id}`)}
+        onRowClick={(row) => {
+          dispatch(setTradingOption(row.id))
+          history.push(`trade/${row.id}`)
+        }}
       />
     </Box>
   )
