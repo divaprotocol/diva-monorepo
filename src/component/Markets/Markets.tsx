@@ -104,7 +104,6 @@ export default function App() {
     const run = async () => {
       const options = await getAllOptions()
       const today = new Date()
-      today.setDate(today.getDate() - 1)
       /**
        * Display only unexpired options
        * TODO: This might change in the near future
