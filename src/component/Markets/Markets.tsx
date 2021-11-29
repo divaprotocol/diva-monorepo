@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import { getAllOptions } from '../../DataService/FireStoreDB'
+import {
+  getAllOptions,
+  liquidityCollection,
+} from '../../DataService/FireStoreDB'
 import { getDateTime } from '../../Util/Dates'
 import { Box, Input, InputAdornment } from '@mui/material'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
@@ -58,27 +61,38 @@ const columns: GridColDef[] = [
   {
     field: 'Icon',
     align: 'right',
+    disableReorder: true,
+    disableColumnMenu: true,
     headerName: '',
     renderCell: (cell) => <OptionImageCell assetName={cell.value} />,
   },
   {
     field: 'Underlying',
     minWidth: 150,
+    flex: 1,
   },
   {
     field: 'PayoffProfile',
     headerName: 'Payoff Profile',
+    disableReorder: true,
+    disableColumnMenu: true,
     minWidth: 120,
     renderCell: (cell) => <PayoffCell data={cell.value} />,
   },
-  { field: 'Strike', align: 'right', headerAlign: 'right' },
-  { field: 'Inflection', align: 'right', headerAlign: 'right' },
-  { field: 'Cap', align: 'right', headerAlign: 'right' },
-  { field: 'Expiry', minWidth: 170, align: 'right', headerAlign: 'right' },
+  { field: 'Strike', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
+  {
+    field: 'Expiry',
+    minWidth: 170,
+    align: 'right',
+    headerAlign: 'right',
+    type: 'dateTime',
+  },
   { field: 'Sell', align: 'right', headerAlign: 'right' },
   { field: 'Buy', align: 'right', headerAlign: 'right' },
   { field: 'MaxYield', align: 'right', headerAlign: 'right' },
-  { field: 'TVL', align: 'right', headerAlign: 'right' },
+  { field: 'TVL', align: 'right', headerAlign: 'right', type: 'number' },
 ]
 
 export default function App() {
@@ -95,7 +109,7 @@ export default function App() {
        * TODO: This might change in the near future
        */
       const unExpiredOptions = options.filter(
-        (v) => new Date(v.ExpiryDate * 1000) < today
+        (v) => new Date(v.ExpiryDate * 1000) > today
       )
       setRows(
         unExpiredOptions.map((op) => ({
@@ -117,6 +131,30 @@ export default function App() {
     }
     run()
   }, [])
+
+  useEffect(() => {
+    liquidityCollection.onSnapshot((data) => {
+      const changes = data
+        .docChanges()
+        .filter((doc) => doc.type === 'added')
+        .map((change) => change.doc.data())
+
+      setRows((rows) => {
+        return rows.map((row) => {
+          const change = changes.find(
+            (change) => change.OptionSetId === row.OptionSetId
+          )
+          if (change != null) {
+            return {
+              ...row,
+              ...change,
+            }
+          }
+          return row
+        })
+      })
+    })
+  }, [rows])
 
   const filteredRows =
     search != null && search.length > 0
@@ -156,10 +194,18 @@ export default function App() {
         />
       </Box>
       <DataGrid
+        showColumnRightBorder={false}
         rows={filteredRows}
         columns={columns}
         onRowClick={(row) => {
           history.push(`trade/${row.id}`)
+        }}
+        componentsProps={{
+          row: {
+            style: {
+              cursor: 'pointer',
+            },
+          },
         }}
       />
     </Box>
