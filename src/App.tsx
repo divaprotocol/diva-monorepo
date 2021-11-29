@@ -1,26 +1,21 @@
-import './App.css'
-import 'styled-components'
-import styled from 'styled-components'
 import Header from './component/Header/Header'
-import OptionsList from './component/Markets/OptionsList'
 import Underlying from './component/Trade/Underlying'
 
+import { Container, useTheme } from '@mui/material'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { CreateOption } from './component/CreateOption/CreateOption'
+import Markets from './component/Markets/Markets'
 
-const AppPage = styled.div`
-  text-align: center;
-  background-color: #f8f8f8;
-`
-
-export default function App() {
+export const App = () => {
+  const theme = useTheme()
   return (
     <Router>
-      <AppPage>
-        <Header />
+      <Header />
+
+      <Container sx={{ height: '100%', paddingTop: theme.spacing(4) }}>
         <Switch>
           <Route exact path="/">
-            <OptionsList />
+            <Markets />
           </Route>
           <Route path="/trade/:id">
             <Underlying />
@@ -29,7 +24,7 @@ export default function App() {
             <CreateOption />
           </Route>
         </Switch>
-      </AppPage>
+      </Container>
     </Router>
   )
 }

@@ -5,6 +5,8 @@ import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
 import { makeStyles, withStyles } from '@mui/styles'
+import Typography from '@mui/material/Typography'
+import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -13,25 +15,32 @@ import TableHead from '@mui/material/TableHead'
 import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
-
+import Button from '@mui/material/Button'
+import DeleteIcon from '@mui/icons-material/Delete'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
-
+import { getDateTime } from '../../Util/Dates'
+import { getExpiryMinutesFromNow } from '../../Util/Dates'
 const useStyles = makeStyles({
   table: {
     minWidth: 250,
   },
 })
 
+const TableCellStyle = withStyles(() => ({
+  root: {
+    height: '10px',
+    padding: '10px',
+  },
+}))(TableCell)
+
 const PageDiv = styled.div`
   width: 100%;
-  background-color: white;
 `
 
 const NoOrderTextDiv = styled.div`
   font-size: 1.1rem;
-  color: black;
   width: 100%;
-  margin-left: 65%;
+  margin-left: 120%;
   margin-top: 10%;
   margin-bottom: 10%;
 `
@@ -39,20 +48,16 @@ const NoOrderTextDiv = styled.div`
 const TableHeader = styled.h4`
   font-size: 1rem;
   font: regular;
-  color: black;
   padding-left: 15px;
   text-align: left;
 `
 
 const TableHeadStyle = withStyles(() => ({
-  root: {
-    backgroundColor: 'rgb(134,217,192)',
-  },
+  root: {},
 }))(TableHead)
 
 const TableHeaderCell = withStyles(() => ({
   root: {
-    color: '#282c34',
     fontWeight: 'solid',
   },
 }))(TableCell)
@@ -64,7 +69,6 @@ function mapOrderData(records, selectedOption, account) {
     if (account === orderMaker) {
       const makerToken = order.makerToken
       const tokenAddress = selectedOption.TokenAddress.toLowerCase()
-
       const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
       const nbrOptions =
         (makerToken === tokenAddress ? order.makerAmount : order.takerAmount) /
@@ -73,13 +77,16 @@ function mapOrderData(records, selectedOption, account) {
         (makerToken === tokenAddress ? order.takerAmount : order.makerAmount) /
         10 ** selectedOption.DecimalsCollateralToken
       const pricePerOption = payReceive / nbrOptions
-
+      const expiry = getDateTime(order.expiry)
+      const expiryMins = getExpiryMinutesFromNow(order.expiry)
       var orders = {
         id: orderType + records.indexOf(record),
         orderType: orderType,
         nbrOptions: nbrOptions,
         payReceive: payReceive,
         pricePerOption: pricePerOption,
+        expiry: expiry,
+        expiryMins: expiryMins + ' mins',
       }
     }
     return orders
@@ -146,13 +153,13 @@ export default function OpenOrdersNew() {
 
   useEffect(() => {
     if (responseBuy.length === 0 || responseSell === 0) {
-      componentDidMount()
+      console.log(componentDidMount)
     }
   }, [])
 
   useEffect(() => {
     if (responseBuy.length > 0 || responseSell > 0) {
-      componentDidMount()
+      console.log(componentDidMount)
     }
     return () => {
       if (responseBuy.length > 0 || responseSell > 0) {
@@ -180,10 +187,10 @@ export default function OpenOrdersNew() {
         <Table className={classes.table} aria-label="simple table">
           <TableHeadStyle>
             <TableRow>
-              <TableHeaderCell>Order Type</TableHeaderCell>
-              <TableHeaderCell align="center">Nbr Options</TableHeaderCell>
-              <TableHeaderCell align="center">Pay/Receive</TableHeaderCell>
-              <TableHeaderCell align="center">Price per Option</TableHeaderCell>
+              <TableHeaderCell>Type</TableHeaderCell>
+              <TableHeaderCell align="center">Quantity</TableHeaderCell>
+              <TableHeaderCell align="center">Price</TableHeaderCell>
+              <TableHeaderCell align="center">Pay/Recei</TableHeaderCell>
               <TableHeaderCell align="right">Cancel</TableHeaderCell>
             </TableRow>
           </TableHeadStyle>
@@ -192,24 +199,63 @@ export default function OpenOrdersNew() {
               orders
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((order, index) => {
+                  const labelId = `enhanced-table-${index}`
                   return (
                     <TableRow key={index} hover>
-                      <TableCell align="left" component="th" scope="row">
-                        {order.orderType}
-                      </TableCell>
-                      <TableCell align="center">{order.nbrOptions}</TableCell>
-                      <TableCell align="center">{order.payReceive}</TableCell>
-                      <TableCell align="center">
-                        {order.pricePerOption}
-                      </TableCell>
-                      <TableCell align="right">{order.cancel}</TableCell>
+                      <TableCellStyle
+                        component="th"
+                        id={labelId}
+                        scope="row"
+                        align="left"
+                      >
+                        <Box>
+                          <Typography variant="h6">
+                            {order.orderType}
+                          </Typography>
+                          <Typography variant="caption" noWrap>
+                            {order.expiry}
+                          </Typography>
+                        </Box>
+                      </TableCellStyle>
+                      <TableCellStyle align="center">
+                        <Box paddingBottom="20px">
+                          <Typography variant="h6">
+                            {order.nbrOptions}
+                          </Typography>
+                        </Box>
+                      </TableCellStyle>
+                      <TableCellStyle align="center">
+                        <Box paddingBottom="20px">
+                          <Typography variant="h6">
+                            {order.pricePerOption}
+                          </Typography>
+                        </Box>
+                      </TableCellStyle>
+                      <TableCellStyle align="center">
+                        <Box paddingBottom="20px">
+                          <Typography variant="h6">
+                            {order.payReceive}
+                          </Typography>
+                        </Box>
+                      </TableCellStyle>
+                      <TableCellStyle align="right">
+                        <Box paddingBottom="20px">
+                          <Typography variant="h6">
+                            <Button
+                              variant="outlined"
+                              startIcon={<DeleteIcon />}
+                              size="small"
+                            >
+                              Cancel
+                            </Button>
+                          </Typography>
+                        </Box>
+                      </TableCellStyle>
                     </TableRow>
                   )
                 })
             ) : (
-              <NoOrderTextDiv>
-                You don't have any orders for this option
-              </NoOrderTextDiv>
+              <NoOrderTextDiv>None</NoOrderTextDiv>
             )}
           </TableBody>
         </Table>

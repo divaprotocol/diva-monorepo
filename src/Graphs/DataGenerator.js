@@ -1,4 +1,4 @@
-export default function generatePayoffChartData(data) {
+export function generatePayoffChartData(data) {
   const optionData = data
   const CollateralBalanceLong = 100 // temporarily hard-coded
   const CollateralBalanceShort = 100 // temporarily hard-coded
@@ -33,7 +33,6 @@ export default function generatePayoffChartData(data) {
       { x: optionData.Strike, y: 0 },
       { x: optionData.Strike * 1.15, y: 0 },
     ]
-    console.log('chart data: ' + chartData[0])
     return chartData
   }
 }

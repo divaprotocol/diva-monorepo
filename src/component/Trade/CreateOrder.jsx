@@ -31,7 +31,6 @@ function a11yProps(index) {
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    backgroundColor: theme.palette.background.paper,
   },
   tab: {
     width: 100,
@@ -75,6 +74,7 @@ const useTabsBorder = makeStyles(() => ({
 }))
 
 let accounts
+
 export default function CreateOrder() {
   const option = useSelector((state) => state.tradeOption.option)
   const dispatch = useDispatch()

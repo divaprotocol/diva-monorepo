@@ -6,7 +6,9 @@ We're using `yarn` for depdency management. It's features are pretty much the sa
 
 1. `npm install -g yarn` if you haven't got yarn on your machine yet.
 2. Run `yarn` in this repository to install all dependencies.
-3. Run `yarn start` to start the application and development server at localhost:3000
+3. Install VStudio plugins for Prettier & Eslint.
+4. Run `yarn fmt`
+5. Run `yarn start` to start the application and development server at localhost:3000
 
 ## scripts
 

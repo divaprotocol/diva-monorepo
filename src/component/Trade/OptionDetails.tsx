@@ -2,11 +2,10 @@ import React from 'react'
 import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
-import { useSelector } from 'react-redux'
+import { DbOption } from '../../DataService/FireStoreDB'
 
 const PageDiv = styled.div`
   width: 100%;
-  background-color: white;
 `
 
 const HeaderDiv = styled.div`
@@ -20,7 +19,6 @@ const HeaderLabel = styled.label`
   font-size: 1rem;
   font-weight: bold;
   margin-left: 15px;
-  color: #282c34;
 `
 
 const FlexBoxHeader = styled.div`
@@ -28,7 +26,6 @@ const FlexBoxHeader = styled.div`
   font-weight: solid;
   text-align: left;
   padding-left: 15px;
-  color: #282c34;
 `
 
 const FlexBoxData = styled.div`
@@ -36,7 +33,6 @@ const FlexBoxData = styled.div`
   font-size: 0.9rem;
   font-weight: bold;
   text-align: left;
-  color: #282c34;
 `
 
 const FlexDiv = styled.div`
@@ -78,7 +74,6 @@ const FlexToolTipBoxData = styled.div`
   font-size: 0.9rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #282c34;
   font-weight: bold;
   text-align: left;
 `
@@ -88,16 +83,15 @@ const FlexBoxSecondLineData = styled.div`
   font-size: 0.9rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #282c34;
   font-weight: bold;
   text-align: left;
 `
 
-function createData(option) {
+function createData(option: DbOption) {
   return {
     expiry: getDateTime(option.ExpiryDate).slice(0, 10),
     Direction: 'TBD',
-    direction: option.isLong ? 'Up' : 'Down',
+    direction: option.IsLong ? 'Up' : 'Down',
     cap: option.Cap,
     strike: option.Strike,
     inflection: option.Inflection,
@@ -111,12 +105,16 @@ function createData(option) {
         : 'n/a',
   }
 }
-export default function OptionDetails() {
+
+export default function OptionDetails({
+  optionData,
+}: {
+  optionData: DbOption
+}) {
   //Instead of calling redux to get selected option at each component level
   //we can call at root component of trade that is underlying and pass as porps
   //to each child component.
-  const selectedOption = useSelector((state) => state.tradeOption.option)
-  const option = createData(selectedOption)
+  const option = createData(optionData)
 
   return (
     <PageDiv>

@@ -1,26 +1,62 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
-import App from './App'
+import { App } from './App'
 import reportWebVitals from './reportWebVitals'
 import store from './Redux/Store'
 import { Provider } from 'react-redux'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import AdapterDateFns from '@mui/lab/AdapterDateFns'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
+import { useMediaQuery } from '@mui/material'
+import { Box } from '@mui/system'
+import { createDivaTheme } from './lib/createDivaTheme'
+import Web3 from 'web3'
+import { Web3ReactProvider } from '@web3-react/core'
 
-const theme = createTheme()
-console.log(theme)
+function getLibrary(provider: any) {
+  return new Web3(provider)
+}
+
+const WithProviders = () => {
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
+
+  const theme = React.useMemo(
+    () => createDivaTheme(prefersDarkMode),
+    [prefersDarkMode]
+  )
+
+  return (
+    <Box
+      sx={{
+        background: theme.palette.background.default,
+        color: theme.palette.text.secondary,
+        fill: theme.palette.text.secondary,
+        height: '100vh',
+        left: 0,
+        top: 0,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <Web3ReactProvider getLibrary={getLibrary}>
+          <ThemeProvider theme={theme}>
+            <Provider store={store}>
+              <App />
+            </Provider>
+          </ThemeProvider>
+        </Web3ReactProvider>
+      </LocalizationProvider>
+    </Box>
+  )
+}
 
 ReactDOM.render(
   <React.StrictMode>
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <ThemeProvider theme={theme}>
-        <Provider store={store}>
-          <App />
-        </Provider>
-      </ThemeProvider>
-    </LocalizationProvider>
+    <WithProviders />
   </React.StrictMode>,
   document.getElementById('root')
 )
