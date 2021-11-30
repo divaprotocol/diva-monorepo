@@ -14,7 +14,7 @@ import { useFormik } from 'formik'
 import { useState } from 'react'
 import { PayoffProfile } from './PayoffProfile'
 
-export function StepOne() {
+export function StepOne({ next }: { next: () => void }) {
   const today = new Date()
   const [expiryDate, setExpiryDate] = useState<Date | null>(null)
   const [floor, setFloor] = useState<number>()
@@ -29,7 +29,7 @@ export function StepOne() {
   const formik = useFormik({
     initialValues: {},
     onSubmit: () => {
-      console.log('submit')
+      next()
     },
   })
 
