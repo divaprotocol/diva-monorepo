@@ -7,20 +7,23 @@ import {
   Select,
   Grid,
   SelectChangeEvent,
-  Link,
+  IconButton,
+  Alert,
 } from '@mui/material'
 import Container from '@mui/material/Container'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { ethers } from 'ethers'
+import whitelistContract from '../../Util/abis/Whitelist.json'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { CopyToClipboardIcon } from '../shared/SvgIcons/CopyToClipboardIcon'
 
 type Oracle = {
   name: string
-  symbol: string
   whitelisted: boolean
   address: string
-  reputationScore: number
-  tvl: number
-  factSheet: string
+  reputationScore?: number
+  tvl?: number
 }
 
 const Whitelist = styled.div<{ whitelisted: boolean }>`
@@ -29,12 +32,6 @@ const Whitelist = styled.div<{ whitelisted: boolean }>`
 const OracleMenuItem = styled(MenuItem)`
   display: flex;
   justify-content: space-between;
-
-  &[aria-expanded='false'] {
-    ${Whitelist} {
-      display: none;
-    }
-  }
 `
 const ColumnName = styled.span`
   font-weight: bold;
@@ -42,34 +39,60 @@ const ColumnName = styled.span`
 const LeftColumn = styled(Grid)`
   text-align: right;
   overflow: overlay;
-  text-overflow: ellipsis;
 `
-const ReputationScore = styled.div<{ reputationScore: number }>`
-  color: ${({ reputationScore }) => (reputationScore > 90 ? 'green' : 'red')};
+const ReputationScore = styled.div<{
+  reputationScore: Oracle['reputationScore']
+}>`
+  color: ${({ reputationScore }) =>
+    reputationScore
+      ? reputationScore > 90
+        ? 'green'
+        : 'red'
+      : 'currentColor'};
 `
 
-const useOracles = (): [Oracle[]] => {
-  const oracles: Oracle[] = [
-    {
-      name: 'Chainlink',
-      symbol: 'LINK',
-      whitelisted: true,
-      address: '0x29D7d1dd5B6f9C864d9db560D72a247c178aE86B',
-      reputationScore: 99.9,
-      tvl: 1104478,
-      factSheet: 'http://chainlink.org/',
-    },
-    {
-      name: 'Binance',
-      symbol: 'BSC',
-      whitelisted: true,
-      address: '0x34d7d1dd5B6f9C864d9db560D72a247c178aE86B',
-      reputationScore: 97.4,
-      tvl: 2104478,
-      factSheet: 'http://binance.com/',
-    },
-  ]
-  return [oracles]
+const useOracles = (): [Oracle[], string | null] => {
+  const [oracles, setOracles] = useState<Oracle[]>([])
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    // TODO: Please review the approach for getting data from contract using ethers
+    const fetchOracles = async () => {
+      if (!window.ethereum) {
+        setError('No wallet found')
+        return
+      }
+
+      try {
+        // TODO: Improve error for when account is not connected
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        const signer = provider.getSigner()
+        const connectedContract = new ethers.Contract(
+          '0xa798494fC5d7b5F9225F1D35d73EF9c8E63fd2c1',
+          whitelistContract.abi,
+          signer
+        )
+
+        const fakeProviderName = ['Chainlink', 'Diva', 'Binance']
+        const providers: string[] = await connectedContract.getAllProviders()
+        const mapedProviders = providers.map((provider, i) => ({
+          name: fakeProviderName[i],
+          whitelisted: true,
+          address: provider,
+        }))
+
+        setOracles(mapedProviders)
+      } catch (e) {
+        const errorMessage =
+          e instanceof Error ? e.message : 'Something went wrong'
+        setError(errorMessage)
+      }
+    }
+
+    fetchOracles()
+  }, [])
+
+  return [oracles, error]
 }
 
 export function StepTwo({
@@ -79,7 +102,7 @@ export function StepTwo({
   next: () => void
   previous: () => void
 }) {
-  const [oracles] = useOracles()
+  const [oracles, error] = useOracles()
   const [selectedOracle, setSelectedOracle] = useState<Oracle | null>()
   const onSelectOracle = (event: SelectChangeEvent<string>) => {
     setSelectedOracle(oracles[0])
@@ -90,45 +113,60 @@ export function StepTwo({
     }
   }
 
-  const getFormattedNumber = (originalNumber: number) => {
+  const getFormattedNumber = (originalNumber: Oracle['tvl']) => {
+    if (!originalNumber) {
+      return 'N/A'
+    }
+
     return `$${originalNumber.toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`
   }
-  const getReputationScoreText = (score: number) =>
-    score > 90 ? `High (${score})%` : `Low (${score})%`
+  const getReputationScoreText = (score: Oracle['reputationScore']) => {
+    if (!score) {
+      return 'N/A'
+    }
+
+    return score > 90 ? `High (${score})%` : `Low (${score})%`
+  }
 
   const oracleInfo = selectedOracle && (
-    <Grid container spacing={2} columns={16}>
-      <Grid item xs={8}>
-        <ColumnName>Address</ColumnName>
-      </Grid>
-      <LeftColumn item xs={8}>
-        {selectedOracle.address}
-      </LeftColumn>
+    <Box>
+      <Grid container spacing={2} columns={16}>
+        <Grid item xs={8}>
+          <ColumnName>Address</ColumnName>
+        </Grid>
+        <LeftColumn item xs={8}>
+          {getShortenedAddress(selectedOracle.address)}
+          <IconButton
+            onClick={() =>
+              navigator.clipboard.writeText(selectedOracle.address)
+            }
+          >
+            <CopyToClipboardIcon />
+          </IconButton>
+        </LeftColumn>
 
-      <Grid item xs={8}>
-        <ColumnName>Reputation score</ColumnName>
-      </Grid>
-      <LeftColumn item xs={8}>
-        <ReputationScore reputationScore={selectedOracle.reputationScore}>
-          {getReputationScoreText(selectedOracle.reputationScore)}
-        </ReputationScore>
-      </LeftColumn>
+        <Grid item xs={8}>
+          <ColumnName>Reputation score</ColumnName>
+        </Grid>
+        <LeftColumn item xs={8}>
+          <ReputationScore
+            reputationScore={selectedOracle.reputationScore || 0}
+          >
+            {getReputationScoreText(selectedOracle.reputationScore)}
+          </ReputationScore>
+        </LeftColumn>
 
-      <Grid item xs={8}>
-        <ColumnName>Backing TVL</ColumnName>
+        <Grid item xs={8}>
+          <ColumnName>Backing TVL</ColumnName>
+        </Grid>
+        <LeftColumn item xs={8}>
+          {getFormattedNumber(selectedOracle.tvl)}
+        </LeftColumn>
       </Grid>
-      <LeftColumn item xs={8}>
-        {getFormattedNumber(selectedOracle.tvl)}
-      </LeftColumn>
-      <Grid item xs={16} style={{ textAlign: 'center' }}>
-        <Link target="_blank" rel="noreferrer" href={selectedOracle.factSheet}>
-          Data Fact Sheet
-        </Link>
-      </Grid>
-    </Grid>
+    </Box>
   )
 
   return (
@@ -143,9 +181,10 @@ export function StepTwo({
               value={selectedOracle ? selectedOracle.name : ''}
               renderValue={(value) => value}
               onChange={onSelectOracle}
+              disabled={!!error}
             >
-              {oracles.map(({ name, symbol, whitelisted }) => (
-                <OracleMenuItem key={symbol} value={name}>
+              {oracles.map(({ name, whitelisted }) => (
+                <OracleMenuItem key={name} value={name}>
                   {name}
                   <Whitelist whitelisted={whitelisted}>
                     {whitelisted ? 'Whitelisted' : 'Not whitelisted'}
@@ -155,7 +194,12 @@ export function StepTwo({
             </Select>
           </FormControl>
         </Box>
-        <Box>{oracleInfo}</Box>
+        {error && (
+          <Box>
+            <Alert severity="error">{error}</Alert>
+          </Box>
+        )}
+        {oracleInfo}
       </Box>
       <Box pb={3}>
         <Button onClick={() => previous()}>Back</Button>
