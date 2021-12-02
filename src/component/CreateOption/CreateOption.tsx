@@ -28,7 +28,7 @@ export function CreateOption() {
       <Box pt={5}>
         <Stepper activeStep={activeStep} alternativeLabel>
           <Step>
-            <StepLabel>Assets</StepLabel>
+            <StepLabel>Pool</StepLabel>
           </Step>
           <Step>
             <StepLabel>Oracle</StepLabel>
