@@ -1,10 +1,10 @@
 import { IconButton } from '@mui/material'
-import { CopyToClipboardIcon } from './SvgIcons/CopyToClipboardIcon'
+import Copy from '@mui/icons-material/ContentCopy'
 
 export function CopyToClipboard(textToCopy: string) {
   return (
     <IconButton onClick={() => navigator.clipboard.writeText(textToCopy)}>
-      <CopyToClipboardIcon />
+      <Copy />
     </IconButton>
   )
 }
