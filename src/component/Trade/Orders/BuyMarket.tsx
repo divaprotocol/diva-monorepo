@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography'
 import Slider from '@mui/material/Slider'
 import Input from '@mui/material/Input'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
-import { buylimitOrder } from '../../../Orders/BuyLimit'
+import { buyMarketOrder } from '../../../Orders/BuyMarket'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
@@ -18,16 +18,31 @@ import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
-import Web3 from 'web3'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { BigNumber } from '@0x/utils'
+import Web3 from 'web3'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ERC20 = require('../abi/ERC20.json')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const contractAddress = require('@0x/contract-addresses')
+const ERC20_ABI = ERC20.abi
+const CHAIN_ID = 3
 const web3 = new Web3(Web3.givenProvider)
-let accounts
+let accounts: any[]
 
 export default function BuyMarket(props: { option: any }) {
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(5)
   const [pricePerOption, _setPricePerOption] = React.useState(0)
+  const [isApproved, setIsApproved] = React.useState(false)
+  // eslint-disable-next-line prettier/prettier
+
+  const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+  const exchangeProxyAddress = address.exchangeProxy
+  const makerToken = option.TokenAddress
+  const maxApproval = new BigNumber(2).pow(256).minus(1)
 
   const handleNumberOfOptions = (value: string) => {
     setNumberOfOptions(parseInt(value))
@@ -35,18 +50,43 @@ export default function BuyMarket(props: { option: any }) {
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-
     accounts = await window.ethereum.enable()
-    const orderData = {
-      maker: accounts[0],
-      provider: web3,
-      isBuy: false,
-      nbrOptions: numberOfOptions,
-      limitPrice: pricePerOption,
-      collateralDecimals: option.DecimalsCollateralToken,
+    const takerTokenAddress = option.CollateralToken
+    if (!isApproved) {
+      //is ERC20_ABP correct? or should we use position token abi
+      //ERC20_ABI enough to use approval
+      const takerTokenContract = await new web3.eth.Contract(
+        ERC20_ABI,
+        takerTokenAddress
+      )
+      await takerTokenContract.methods
+        .approve(exchangeProxyAddress, maxApproval)
+        .send({ from: accounts[0] })
+      const approvedByTaker = await takerTokenContract.methods
+        .allowance(accounts[0], exchangeProxyAddress)
+        .call()
+      console.log('Approved by taker: ' + (await approvedByTaker.toString()))
+      alert(`Maker allowance for ${option.CollateralToken} successfully set`)
+      setIsApproved(true)
     }
 
-    buylimitOrder(orderData)
+    //const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
+    //await makerTokenContract.methods
+    //.approve(exchangeProxyAddress, maxApproval)
+    //.send({ from: accounts[0] })
+
+    const orderData = {
+      takerAccount: accounts[0],
+      provider: web3,
+      isBuy: true,
+      nbrOptions: numberOfOptions,
+      collateralDecimals: option.DecimalsCollateralToken,
+      makerToken: makerToken,
+      takerToken: option.CollateralToken,
+      ERC20_ABI: ERC20_ABI,
+    }
+
+    buyMarketOrder(orderData)
   }
 
   const handleSliderChange = (_event: any, newValue: any) => {
@@ -157,7 +197,7 @@ export default function BuyMarket(props: { option: any }) {
           type="submit"
           value="Submit"
         >
-          Create Order
+          {isApproved ? 'Create Order' : 'Approve'}
         </Button>
       </form>
     </div>

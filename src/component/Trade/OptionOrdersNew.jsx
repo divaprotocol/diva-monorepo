@@ -95,9 +95,9 @@ function mapOrderData(records, selectedOption, account) {
 }
 
 let accounts
-export default function OpenOrdersNew() {
-  const selectedOption = useSelector((state) => state.tradeOption.option)
-
+export default function OpenOrdersNew(props) {
+  //const selectedOption = useSelector((state) => state.tradeOption.option)
+  const selectedOption = props.option
   var responseBuy = useSelector((state) => state.tradeOption.responseBuy)
   var responseSell = useSelector((state) => state.tradeOption.responseSell)
   const [page, setPage] = React.useState(0)

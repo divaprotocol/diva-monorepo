@@ -16,9 +16,19 @@ import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import Web3 from 'web3'
-
+import { BigNumber } from '@0x/utils'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ERC20 = require('../abi/ERC20.json')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const contractAddress = require('@0x/contract-addresses')
+const ERC20_ABI = ERC20.abi
+const CHAIN_ID = 3
+const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+const exchangeProxyAddress = address.exchangeProxy
+const maxApproval = new BigNumber(2).pow(256).minus(1)
 const web3 = new Web3(Web3.givenProvider)
-let accounts
+let accounts: any[]
+
 export default function SellLimit(props: {
   option: any
   handleDisplayOrder: () => void
@@ -28,7 +38,8 @@ export default function SellLimit(props: {
   const [expiry, setExpiry] = React.useState(5)
   const [numberOfOptions, setNumberOfOptions] = React.useState(5)
   const [pricePerOption, setPricePerOption] = React.useState(0)
-
+  const [isApproved, setIsApproved] = React.useState(false)
+  const makerToken = option.TokenAddress
   const handleNumberOfOptions = (value: string) => {
     setNumberOfOptions(parseInt(value))
   }
@@ -39,6 +50,18 @@ export default function SellLimit(props: {
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (!isApproved) {
+      const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
+      await makerTokenContract.methods
+        .approve(exchangeProxyAddress, maxApproval)
+        .send({ from: accounts[0] })
+
+      const approvedByMaker = await makerTokenContract.methods
+        .allowance(accounts[0], exchangeProxyAddress)
+        .call()
+      console.log('Approved by maker: ' + (await approvedByMaker.toString()))
+      setIsApproved(true)
+    }
     accounts = await window.ethereum.enable()
     const orderData = {
       maker: accounts[0],
@@ -152,7 +175,7 @@ export default function SellLimit(props: {
           type="submit"
           value="Submit"
         >
-          Create Order
+          {isApproved ? 'Create Order' : 'Approve'}
         </Button>
       </form>
     </div>

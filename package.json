@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@0x/contract-addresses": "6.4.0",
-    "@0x/protocol-utils": "1.7.2",
+    "@0x/contract-addresses": "^6.8.0",
+    "@0x/contract-wrappers": "^13.18.1",
+    "@0x/protocol-utils": "^1.9.3",
+    "@metamask/onboarding": "^1.0.1",
     "@0x/subproviders": "6.5.4",
     "@emotion/react": "^11.5.0",
     "@emotion/styled": "^11.3.0",
@@ -16,6 +18,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+    "qs": "^6.10.1",
     "@types/jest": "^27.0.2",
     "@types/node": "^16.11.7",
     "@types/react": "^17.0.34",
@@ -41,7 +44,7 @@
     "styled-components": "^5.3.0",
     "typescript": "^4.4.4",
     "web-vitals": "^1.1.2",
-    "web3": "^1.5.2",
+    "web3": "^1.6.0",
     "ws": "^8.2.2"
   },
   "scripts": {
