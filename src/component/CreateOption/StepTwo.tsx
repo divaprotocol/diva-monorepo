@@ -7,7 +7,6 @@ import {
   Select,
   Grid,
   SelectChangeEvent,
-  IconButton,
   Alert,
   Theme,
 } from '@mui/material'
@@ -17,7 +16,7 @@ import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import whitelistContract from '../../Util/abis/Whitelist.json'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
-import { CopyToClipboardIcon } from '../shared/SvgIcons/CopyToClipboardIcon'
+import { CopyToClipboard } from '../shared/CopyToClipboard'
 
 type Oracle = {
   name: string
@@ -142,15 +141,8 @@ export function StepTwo({
         </Grid>
         <LeftColumn item xs={8}>
           {getShortenedAddress(selectedOracle.address)}
-          <IconButton
-            onClick={() =>
-              navigator.clipboard.writeText(selectedOracle.address)
-            }
-          >
-            <CopyToClipboardIcon />
-          </IconButton>
+          <CopyToClipboard textToCopy={selectedOracle.address} />
         </LeftColumn>
-
         <Grid item xs={8}>
           <ColumnName>Reputation score</ColumnName>
         </Grid>
