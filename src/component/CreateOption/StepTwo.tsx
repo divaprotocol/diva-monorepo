@@ -10,9 +10,9 @@ import {
   IconButton,
   Alert,
 } from '@mui/material'
+import styled from '@mui/styled-engine'
 import Container from '@mui/material/Container'
 import { useEffect, useState } from 'react'
-import styled from 'styled-components'
 import { ethers } from 'ethers'
 import whitelistContract from '../../Util/abis/Whitelist.json'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
@@ -26,21 +26,21 @@ type Oracle = {
   tvl?: number
 }
 
-const Whitelist = styled.div<{ whitelisted: boolean }>`
+const Whitelist = styled('div')<{ whitelisted: boolean }>`
   color: ${({ whitelisted }) => (whitelisted ? 'green' : 'red')};
 `
 const OracleMenuItem = styled(MenuItem)`
   display: flex;
   justify-content: space-between;
 `
-const ColumnName = styled.span`
+const ColumnName = styled('span')`
   font-weight: bold;
 `
 const LeftColumn = styled(Grid)`
   text-align: right;
   overflow: overlay;
 `
-const ReputationScore = styled.div<{
+const ReputationScore = styled('div')<{
   reputationScore: Oracle['reputationScore']
 }>`
   color: ${({ reputationScore }) =>
