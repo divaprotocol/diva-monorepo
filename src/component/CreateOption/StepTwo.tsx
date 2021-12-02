@@ -117,7 +117,7 @@ export function StepTwo({
   }
 
   const getFormattedNumber = (originalNumber: Oracle['tvl']) => {
-    if (!originalNumber) {
+    if (originalNumber === undefined) {
       return 'N/A'
     }
 
@@ -127,7 +127,7 @@ export function StepTwo({
     })}`
   }
   const getReputationScoreText = (score: Oracle['reputationScore']) => {
-    if (!score) {
+    if (score === undefined) {
       return 'N/A'
     }
 
