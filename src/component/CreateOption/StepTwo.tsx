@@ -9,6 +9,7 @@ import {
   SelectChangeEvent,
   IconButton,
   Alert,
+  Theme,
 } from '@mui/material'
 import styled from '@mui/styled-engine'
 import Container from '@mui/material/Container'
@@ -40,14 +41,16 @@ const LeftColumn = styled(Grid)`
   text-align: right;
   overflow: overlay;
 `
+
 const ReputationScore = styled('div')<{
   reputationScore: Oracle['reputationScore']
+  theme?: Theme
 }>`
-  color: ${({ reputationScore }) =>
+  color: ${({ reputationScore, theme }) =>
     reputationScore
       ? reputationScore > 90
-        ? 'green'
-        : 'red'
+        ? theme.palette.success.main
+        : theme.palette.warning.main
       : 'currentColor'};
 `
 
