@@ -18,7 +18,7 @@ import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
-
+import { Network } from '../../../Util/chainIdToName'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
@@ -27,7 +27,7 @@ const ERC20 = require('../abi/ERC20.json')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const ERC20_ABI = ERC20.abi
-const CHAIN_ID = 3
+const CHAIN_ID = Network.ROPSTEN
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -68,25 +68,25 @@ export default function BuyMarket(props: { option: any }) {
       console.log('Approved by taker: ' + (await approvedByTaker.toString()))
       alert(`Maker allowance for ${option.CollateralToken} successfully set`)
       setIsApproved(true)
+    } else {
+      //const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
+      //await makerTokenContract.methods
+      //.approve(exchangeProxyAddress, maxApproval)
+      //.send({ from: accounts[0] })
+
+      const orderData = {
+        takerAccount: accounts[0],
+        provider: web3,
+        isBuy: true,
+        nbrOptions: numberOfOptions,
+        collateralDecimals: option.DecimalsCollateralToken,
+        makerToken: makerToken,
+        takerToken: option.CollateralToken,
+        ERC20_ABI: ERC20_ABI,
+      }
+
+      buyMarketOrder(orderData)
     }
-
-    //const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
-    //await makerTokenContract.methods
-    //.approve(exchangeProxyAddress, maxApproval)
-    //.send({ from: accounts[0] })
-
-    const orderData = {
-      takerAccount: accounts[0],
-      provider: web3,
-      isBuy: true,
-      nbrOptions: numberOfOptions,
-      collateralDecimals: option.DecimalsCollateralToken,
-      makerToken: makerToken,
-      takerToken: option.CollateralToken,
-      ERC20_ABI: ERC20_ABI,
-    }
-
-    buyMarketOrder(orderData)
   }
 
   const handleSliderChange = (_event: any, newValue: any) => {
@@ -116,7 +116,7 @@ export default function BuyMarket(props: { option: any }) {
             <LabelStyle>Number of Options</LabelStyle>
           </LabelStyleDiv>
           <FormInput
-            type="text"
+            type="number"
             value={numberOfOptions}
             onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
