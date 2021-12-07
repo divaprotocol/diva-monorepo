@@ -1,10 +1,12 @@
 import React from 'react'
+import { useEffect } from 'react'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import Typography from '@mui/material/Typography'
 import Slider from '@mui/material/Slider'
 import Input from '@mui/material/Input'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
+import Box from '@mui/material/Box'
 import { buyMarketOrder } from '../../../Orders/BuyMarket'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyle } from './UiStyles'
@@ -34,7 +36,7 @@ let accounts: any[]
 export default function BuyMarket(props: { option: any }) {
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
-  const [numberOfOptions, setNumberOfOptions] = React.useState(5)
+  const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, _setPricePerOption] = React.useState(0)
   const [isApproved, setIsApproved] = React.useState(false)
   // eslint-disable-next-line prettier/prettier
@@ -44,8 +46,12 @@ export default function BuyMarket(props: { option: any }) {
   const makerToken = option.TokenAddress
   const maxApproval = new BigNumber(2).pow(256).minus(1)
 
+  const [collateralBalance, setCollateralBalance] = React.useState(0)
+  const takerToken = option.CollateralToken
+  const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
+
   const handleNumberOfOptions = (value: string) => {
-    setNumberOfOptions(parseInt(value))
+    setNumberOfOptions(parseFloat(value))
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -108,6 +114,27 @@ export default function BuyMarket(props: { option: any }) {
     }
   }
 
+  const getCollateralInWallet = async () => {
+    accounts = await window.ethereum.enable()
+    const takerAccount = accounts[0]
+    let balance = await takerTokenContract.methods
+      .balanceOf(takerAccount)
+      .call()
+    balance = balance / 10 ** option.DecimalsCollateralToken
+    return balance
+  }
+
+  useEffect(() => {
+    getCollateralInWallet().then((val) => {
+      console.log(JSON.stringify(val))
+      if (val != null) {
+        setCollateralBalance(Number(val))
+      } else {
+        throw new Error(`can not read wallet balance`)
+      }
+    })
+  }, [])
+
   return (
     <div>
       <form onSubmit={handleOrderSubmit}>
@@ -116,8 +143,7 @@ export default function BuyMarket(props: { option: any }) {
             <LabelStyle>Number of Options</LabelStyle>
           </LabelStyleDiv>
           <FormInput
-            type="number"
-            value={numberOfOptions}
+            type="text"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
         </FormDiv>
@@ -148,7 +174,7 @@ export default function BuyMarket(props: { option: any }) {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {pricePerOption} {option.CollateralTokenName}
+              {collateralBalance} {option.CollateralTokenName}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
@@ -189,16 +215,18 @@ export default function BuyMarket(props: { option: any }) {
           </FormControlDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          startIcon={<AddIcon />}
-          type="submit"
-          value="Submit"
-        >
-          {isApproved ? 'Create Order' : 'Approve'}
-        </Button>
+        <Box marginLeft="30%">
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<AddIcon />}
+            type="submit"
+            value="Submit"
+          >
+            {isApproved ? 'Fill Order' : 'Approve'}
+          </Button>
+        </Box>
       </form>
     </div>
   )

@@ -70,8 +70,8 @@ export const FormControlDiv = styled.div`
 `
 
 export const CreateButtonWrapper = styled.div`
-  margin-top: 40px;
-  margin-bottom: 20px;
+  margin-top: 30px;
+  margin-bottom: 10px;
   aligned: center;
 `
 

@@ -6,6 +6,7 @@ import { MenuItem } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
+import Box from '@mui/material/Box'
 import { sellLimitOrder } from '../../../Orders/SellLimit'
 import { LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
@@ -191,16 +192,18 @@ export default function SellLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          startIcon={<AddIcon />}
-          type="submit"
-          value="Submit"
-        >
-          {isApproved ? 'Create Order' : 'Approve'}
-        </Button>
+        <Box marginLeft="30%">
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<AddIcon />}
+            type="submit"
+            value="Submit"
+          >
+            {isApproved ? 'Create Order' : 'Approve'}
+          </Button>
+        </Box>
       </form>
     </div>
   )
