@@ -75,11 +75,6 @@ export default function BuyMarket(props: { option: any }) {
       alert(`Maker allowance for ${option.CollateralToken} successfully set`)
       setIsApproved(true)
     } else {
-      //const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
-      //await makerTokenContract.methods
-      //.approve(exchangeProxyAddress, maxApproval)
-      //.send({ from: accounts[0] })
-
       const orderData = {
         takerAccount: accounts[0],
         provider: web3,

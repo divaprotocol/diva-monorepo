@@ -1,23 +1,21 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
 import { BigNumber } from '@0x/utils'
 import * as qs from 'qs'
-//import * as ERC20 from './ERC20.json'
 import { CHAIN_ID } from './Config'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 
 export const buyMarketOrder = async (orderData) => {
   const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
-  const exchangeProxyAddress = address.exchangeProxy // 0xdef1c0ded9bec7f1a1670819833240f027b25eff (same for most chains including Mainnet, Ropsten and Polygon)
+  const exchangeProxyAddress = address.exchangeProxy
   // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
 
   const params = {
-    makerToken: orderData.makerToken, // Polygon ERC20: 0xc03ce38bc55836a4ef61ab570253cd7bfff3af44, Ropsten ERC20: 0x32de47Fc9bc48F4c56f9649440532081466036A2
-    takerToken: orderData.takerToken, // Collateral token: Polygon USDC: 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174, Ropsten DAI: 0xaD6D458402F60fD3Bd25163575031ACDce07538D
+    makerToken: orderData.makerToken,
+    takerToken: orderData.takerToken,
   }
 
-  // Issue API request and fetch JSON response
   const res = await fetch(
     `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
   )
@@ -29,7 +27,7 @@ export const buyMarketOrder = async (orderData) => {
   let responseOrder
   try {
     responseOrder = resJSON['records']
-    // Separate signature from the rest of the response object as they are required as separate inputs in fillLimitOrder (see below)
+    //remove signature from response
     const aux = responseOrder.map((item) => item.order)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     orders = aux.map(({ signature, ...rest }) => rest)
