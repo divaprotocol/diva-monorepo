@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
-import { DbOption } from '../../DataService/FireStoreDB'
+import { Pool } from '../../lib/queries'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -87,34 +87,16 @@ const FlexBoxSecondLineData = styled.div`
   text-align: left;
 `
 
-function createData(option: DbOption) {
-  return {
-    expiry: getDateTime(option.ExpiryDate).slice(0, 10),
-    Direction: 'TBD',
-    direction: option.IsLong ? 'Up' : 'Down',
-    cap: option.Cap,
-    strike: option.Strike,
-    inflection: option.Inflection,
-    collateral: option.CollateralBalance + ' ' + option.CollateralTokenName,
-    dataFeedProvider: option.DataFeedProvider,
-    dataFeedProviderAbbr:
-      option.DataFeedProvider.length > 0
-        ? String(option.DataFeedProvider).substring(0, 6) +
-          '...' +
-          String(option.DataFeedProvider).substring(38)
-        : 'n/a',
-  }
-}
-
 export default function OptionDetails({
-  optionData,
+  pool,
+  isLong,
 }: {
-  optionData: DbOption
+  pool: Pool
+  isLong: boolean
 }) {
   //Instead of calling redux to get selected option at each component level
   //we can call at root component of trade that is underlying and pass as porps
   //to each child component.
-  const option = createData(optionData)
 
   return (
     <PageDiv>
@@ -124,35 +106,45 @@ export default function OptionDetails({
       <FlexDiv>
         <FlexBox>
           <FlexBoxHeader>Expires at</FlexBoxHeader>
-          <FlexBoxData>{option.expiry}</FlexBoxData>
+          <FlexBoxData>{getDateTime(pool.expiryDate).slice(0, 10)}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Direction</FlexBoxHeader>
-          <FlexBoxData>{option.direction}</FlexBoxData>
+          <FlexBoxData>{isLong ? 'Up' : 'Down'}</FlexBoxData>
         </FlexBox>
         <FlexBox>
-          <FlexBoxHeader>Strike</FlexBoxHeader>
-          <FlexBoxData>{option.strike}</FlexBoxData>
+          <FlexBoxHeader>Floor</FlexBoxHeader>
+          <FlexBoxData>{pool.floor}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Inflection</FlexBoxHeader>
-          <FlexBoxData>{option.inflection}</FlexBoxData>
+          <FlexBoxData>{pool.inflection}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Cap</FlexBoxHeader>
-          <FlexBoxData>{option.cap}</FlexBoxData>
+          <FlexBoxData>{pool.cap}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Collateral</FlexBoxHeader>
-          <FlexBoxData>{option.collateral}</FlexBoxData>
+          <FlexBoxData>
+            {(isLong
+              ? pool.collateralBalanceLong
+              : pool.collateralBalanceShort) +
+              ' ' +
+              pool.collateralToken}
+          </FlexBoxData>
         </FlexBox>
       </FlexDiv>
       <FlexSecondLineDiv>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Data feed provider</FlexBoxHeader>
-          <Tooltip title={option.dataFeedProvider} arrow>
+          <Tooltip title={pool.dataFeedProvider} arrow>
             <FlexToolTipBoxData>
-              {option.dataFeedProviderAbbr}
+              {pool.dataFeedProvider.length > 0
+                ? String(pool.dataFeedProvider).substring(0, 6) +
+                  '...' +
+                  String(pool.dataFeedProvider).substring(38)
+                : 'n/a'}
             </FlexToolTipBoxData>
           </Tooltip>
         </FlexBoxSecondLine>

@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 // import OptionHeader from './OptionHeader'
 // import OptionDetails from './OptionDetails'
@@ -10,12 +9,14 @@ import CreateOrder from './CreateOrder'
 // import LineSeries from '../Graphs/LineSeries';
 //import './Underlying.css';
 import { Paper, Stack } from '@mui/material'
-import { DbOption, getOption } from '../../DataService/FireStoreDB'
 import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
 import OptionHeader from './OptionHeader'
+import { useQuery } from 'react-query'
+import { queryPool, Pool } from '../../lib/queries'
+import request from 'graphql-request'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -36,47 +37,46 @@ const LeftCompRightDiv = styled.div`
 `
 
 export default function Underlying() {
-  const params: { id: string } = useParams()
-  const [option, setOption] = useState<DbOption>()
-
-  // Temporarily
+  const params: { poolId: string; tokenType: string } = useParams()
   const breakEvenOptionPrice = 0
+  console.log(params.poolId)
+  const query = useQuery<{ pool: Pool }>('pool', () =>
+    request(
+      'https://api.thegraph.com/subgraphs/name/juliankrispel/diva',
+      queryPool(parseInt(params.poolId))
+    )
+  )
 
-  // breakEven: Take option payout as reference and not underlying
+  const pool = query.data?.pool
 
-  useEffect(() => {
-    getOption(params.id).then((val) => {
-      console.log(val)
-      if (val != null) {
-        setOption(val)
-      } else {
-        throw new Error(`option does not exist: ${params.id}`)
-      }
-    })
-  }, [])
-
-  if (option == null) {
+  if (pool == null) {
     return <div>Loading</div>
   }
+
+  const isLong = params.tokenType === 'long'
 
   const OptionParams = {
     CollateralBalanceLong: 100,
     CollateralBalanceShort: 100,
-    Strike: option.Strike,
-    Inflection: option.Inflection,
-    Cap: option.Cap,
+    Strike: parseFloat(pool.floor),
+    Inflection: parseFloat(pool.inflection),
+    Cap: pool.cap,
     TokenSupply: 200,
-    IsLong: option.IsLong,
+    IsLong: isLong,
   }
 
   const data = generatePayoffChartData(OptionParams)
+  const tokenAddress = isLong ? pool.longToken : pool.shortToken
 
   return (
     <Stack direction="row" spacing={2}>
       <Stack spacing={2}>
         <Paper>
-          <OptionHeader optionData={option} />
-          <OptionDetails optionData={option} />
+          <OptionHeader
+            ReferenceAsset={pool.referenceAsset}
+            TokenAddress={tokenAddress}
+          />
+          <OptionDetails pool={pool} isLong={isLong} />
         </Paper>
 
         <Paper>

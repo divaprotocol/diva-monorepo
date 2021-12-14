@@ -20,7 +20,7 @@ export const App = () => {
           <Route exact path="/">
             <Markets />
           </Route>
-          <Route path="/trade/:id">
+          <Route path="/:poolId/:tokenType">
             <Underlying />
           </Route>
           <Route path="/create">

@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import {
-  getAllOptions,
-  liquidityCollection,
-} from '../../DataService/FireStoreDB'
 import { getDateTime } from '../../Util/Dates'
 import { Box, Input, InputAdornment } from '@mui/material'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { LineSeries, XYPlot } from 'react-vis'
 import { LocalGasStation, Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
+import { Pool, queryPools } from '../../lib/queries'
+import { request } from 'graphql-request'
+import { useQuery } from 'react-query'
 
 const assetLogoPath = '/images/coin-logos/'
 
@@ -95,66 +94,60 @@ const columns: GridColDef[] = [
   { field: 'TVL', align: 'right', headerAlign: 'right', type: 'number' },
 ]
 
+console.log(queryPools)
+
 export default function App() {
-  const [rows, setRows] = useState<GridRowModel[]>([])
   const history = useHistory()
   const [search, setSearch] = useState('')
-
-  useEffect(() => {
-    const run = async () => {
-      const options = await getAllOptions()
-      const today = new Date()
-      /**
-       * Display only unexpired options
-       * TODO: This might change in the near future
-       */
-      const unExpiredOptions = options.filter(
-        (v) => new Date(v.ExpiryDate * 1000) > today
-      )
-      setRows(
-        unExpiredOptions.map((op) => ({
-          Icon: op.ReferenceAsset,
-          id: op.OptionId,
-          OptionId: op.OptionId,
-          PayoffProfile: generatePayoffChartData(op),
-          Underlying: op.ReferenceAsset,
-          Strike: op.Strike.toFixed(2),
-          Inflection: op.Inflection.toFixed(2),
-          Cap: op.Cap.toFixed(2),
-          Expiry: getDateTime(op.ExpiryDate),
-          Sell: 'TBD',
-          Buy: 'TBD',
-          MaxYield: 'TBD',
-          TVL: op.CollateralBalance + ' ' + op.CollateralTokenName,
-        }))
-      )
+  const query = useQuery<{ pools: Pool[] }>('pools', () =>
+    request(
+      'https://api.thegraph.com/subgraphs/name/juliankrispel/diva',
+      queryPools
+    )
+  )
+  const pools = query.data?.pools || ([] as Pool[])
+  console.log({ pools })
+  const rows: GridRowModel[] = pools.reduce((acc, val) => {
+    const shared = {
+      Icon: val.referenceAsset,
+      Underlying: val.referenceAsset,
+      Strike: parseFloat(val.floor).toFixed(2),
+      Infection: parseFloat(val.inflection).toFixed(2),
+      Cap: parseFloat(val.cap).toFixed(2),
+      Expiry: getDateTime(val.expiryDate),
+      Sell: 'TBD',
+      Buy: 'TBD',
+      MaxYield: 'TBD',
     }
-    run()
-  }, [])
 
-  useEffect(() => {
-    liquidityCollection.onSnapshot((data) => {
-      const changes = data
-        .docChanges()
-        .filter((doc) => doc.type === 'added')
-        .map((change) => change.doc.data())
-
-      setRows((rows) => {
-        return rows.map((row) => {
-          const change = changes.find(
-            (change) => change.OptionSetId === row.OptionSetId
-          )
-          if (change != null) {
-            return {
-              ...row,
-              ...change,
-            }
-          }
-          return row
-        })
-      })
-    })
-  }, [rows])
+    return [
+      ...acc,
+      {
+        ...shared,
+        id: `${val.id}/long`,
+        address: val.longToken,
+        PayoffProfile: generatePayoffChartData({
+          IsLong: true,
+          Strike: parseFloat(val.floor),
+          Infection: parseFloat(val.inflection),
+          Cap: parseFloat(val.cap),
+        }),
+        TVL: val.collateralBalanceLong + ' ' + val.collateralToken,
+      },
+      {
+        ...shared,
+        id: `${val.id}/short`,
+        address: val.shortToken,
+        PayoffProfile: generatePayoffChartData({
+          IsLong: false,
+          Strike: parseFloat(val.floor),
+          Infection: parseFloat(val.inflection),
+          Cap: parseFloat(val.cap),
+        }),
+        TVL: val.collateralBalanceShort + ' ' + val.collateralToken,
+      },
+    ]
+  }, [] as GridRowModel[])
 
   const filteredRows =
     search != null && search.length > 0
@@ -198,7 +191,7 @@ export default function App() {
         rows={filteredRows}
         columns={columns}
         onRowClick={(row) => {
-          history.push(`trade/${row.id}`)
+          history.push(`${row.id}`)
         }}
         componentsProps={{
           row: {
