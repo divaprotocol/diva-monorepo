@@ -82,10 +82,10 @@ export default function Underlying() {
         <Paper>
           <LeftCompFlexContainer>
             <LeftCompLeftDiv>
-              <OrderBook />
+              <OrderBook option={option} />
             </LeftCompLeftDiv>
             <LeftCompRightDiv>
-              <OpenOrdersNew />
+              <OpenOrdersNew option={option} />
             </LeftCompRightDiv>
           </LeftCompFlexContainer>
         </Paper>
@@ -93,7 +93,7 @@ export default function Underlying() {
 
       <Stack spacing={2}>
         <Paper>
-          <CreateOrder />
+          <CreateOrder option={option} />
         </Paper>
         <Paper>
           <TradeChart
