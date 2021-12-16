@@ -6,9 +6,8 @@ import {
   liquidityCollection,
 } from '../../DataService/FireStoreDB'
 import { getDateTime } from '../../Util/Dates'
-import { Box, Input, InputAdornment, Stack } from '@mui/material'
+import { Box, Button, Input, InputAdornment, Stack } from '@mui/material'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { LineSeries, XYPlot } from 'react-vis'
 import { LocalGasStation, Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
 import { useWeb3React } from '@web3-react/core'
@@ -50,14 +49,8 @@ const OptionImageCell = ({ assetName }: { assetName: string }) => {
   }
 }
 
-const PayoffCell = ({ data }: { data: any }) => {
-  return (
-    <Box height={50}>
-      <XYPlot width={100} height={80} style={{ fill: 'none' }}>
-        <LineSeries data={data} />
-      </XYPlot>
-    </Box>
-  )
+const SubmitCell = () => {
+  return <Button variant="contained">Submit value</Button>
 }
 
 const columns: GridColDef[] = [
@@ -71,16 +64,7 @@ const columns: GridColDef[] = [
   },
   {
     field: 'Underlying',
-    minWidth: 150,
     flex: 1,
-  },
-  {
-    field: 'PayoffProfile',
-    headerName: 'Payoff Profile',
-    disableReorder: true,
-    disableColumnMenu: true,
-    minWidth: 120,
-    renderCell: (cell) => <PayoffCell data={cell.value} />,
   },
   { field: 'Strike', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
@@ -92,10 +76,32 @@ const columns: GridColDef[] = [
     headerAlign: 'right',
     type: 'dateTime',
   },
-  { field: 'Sell', align: 'right', headerAlign: 'right' },
-  { field: 'Buy', align: 'right', headerAlign: 'right' },
-  { field: 'MaxYield', align: 'right', headerAlign: 'right' },
-  { field: 'TVL', align: 'right', headerAlign: 'right', type: 'number' },
+  {
+    field: 'finalValue',
+    align: 'right',
+    headerAlign: 'right',
+    headerName: 'Final Value',
+  },
+  {
+    field: 'Status',
+    align: 'right',
+    headerAlign: 'right',
+  },
+  {
+    field: 'subPeriod',
+    align: 'right',
+    headerAlign: 'right',
+    headerName: 'Submission period ends in',
+    minWidth: 200,
+  },
+  {
+    field: 'submitValue',
+    align: 'right',
+    headerAlign: 'right',
+    headerName: '',
+    minWidth: 200,
+    renderCell: SubmitCell,
+  },
 ]
 
 export function Dashboard() {
@@ -129,10 +135,10 @@ export function Dashboard() {
             Inflection: op.Inflection.toFixed(2),
             Cap: op.Cap.toFixed(2),
             Expiry: getDateTime(op.ExpiryDate),
-            Sell: 'TBD',
-            Buy: 'TBD',
-            MaxYield: 'TBD',
-            TVL: op.CollateralBalance + ' ' + op.CollateralTokenName,
+            finalValue: 'TBD',
+            Status: 'TBD',
+            subPeriod: 'TBD',
+            submitValue: SubmitCell,
           }))
         )
       }
