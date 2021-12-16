@@ -6,7 +6,7 @@ import {
   liquidityCollection,
 } from '../../DataService/FireStoreDB'
 import { getDateTime } from '../../Util/Dates'
-import { Box, Container, Input, InputAdornment, Stack } from '@mui/material'
+import { Box, Input, InputAdornment, Stack } from '@mui/material'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { LineSeries, XYPlot } from 'react-vis'
 import { LocalGasStation, Search } from '@mui/icons-material'
@@ -172,54 +172,51 @@ export function Dashboard() {
       : rows
 
   return account ? (
-    <Stack direction="row">
+    <Stack
+      direction="row"
+      sx={{
+        height: '100%',
+      }}
+    >
       <SideMenu />
-      <Container>
+      <Stack sx={{ height: '100%', width: '100%', paddingLeft: '1em' }}>
         <Box
           sx={{
-            height: 'calc(100%)',
-            flexGrow: 1,
+            display: 'flex',
+            alignItems: 'end',
             flexDirection: 'column',
+            paddingBottom: '1em',
           }}
         >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'end',
-              flexDirection: 'column',
-              paddingBottom: '1em',
-            }}
-          >
-            <Input
-              autoFocus
-              value={search}
-              placeholder="Filter asset"
-              aria-label="Filter asset"
-              onChange={(e) => setSearch(e.target.value)}
-              startAdornment={
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              }
-            />
-          </Box>
-          <DataGrid
-            showColumnRightBorder={false}
-            rows={filteredRows}
-            columns={columns}
-            onRowClick={(row) => {
-              history.push(`trade/${row.id}`)
-            }}
-            componentsProps={{
-              row: {
-                style: {
-                  cursor: 'pointer',
-                },
-              },
-            }}
+          <Input
+            autoFocus
+            value={search}
+            placeholder="Filter asset"
+            aria-label="Filter asset"
+            onChange={(e) => setSearch(e.target.value)}
+            startAdornment={
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            }
           />
         </Box>
-      </Container>
+        <DataGrid
+          showColumnRightBorder={false}
+          rows={filteredRows}
+          columns={columns}
+          onRowClick={(row) => {
+            history.push(`trade/${row.id}`)
+          }}
+          componentsProps={{
+            row: {
+              style: {
+                cursor: 'pointer',
+              },
+            },
+          }}
+        />
+      </Stack>
     </Stack>
   ) : (
     <ConnectWalletButton />
