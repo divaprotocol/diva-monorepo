@@ -80,9 +80,9 @@ export default function PoolsTable({ columns, filter }: Props) {
     const shared = {
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,
-      Strike: formatUnits(val.floor),
+      Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
-      Cap: formatUnits(val.cap),
+      Ceiling: formatUnits(val.cap),
       Expiry: getDateTime(val.expiryDate),
       Sell: 'TBD',
       Buy: 'TBD',
@@ -90,7 +90,7 @@ export default function PoolsTable({ columns, filter }: Props) {
     }
 
     const payOff = {
-      Strike: parseInt(val.floor) / 1e18,
+      Floor: parseInt(val.floor) / 1e18,
       Inflection: parseInt(val.inflection) / 1e18,
       Cap: parseInt(val.cap) / 1e18,
     }

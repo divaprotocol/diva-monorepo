@@ -58,7 +58,7 @@ export default function Underlying() {
   const OptionParams = {
     CollateralBalanceLong: 100,
     CollateralBalanceShort: 100,
-    Strike: parseInt(pool.floor) / 1e18,
+    Floor: parseInt(pool.floor) / 1e18,
     Inflection: parseInt(pool.inflection) / 1e18,
     Cap: parseInt(pool.cap) / 1e18,
     TokenSupply: 200,

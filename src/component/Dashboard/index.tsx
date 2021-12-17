@@ -22,9 +22,9 @@ const columns: GridColDef[] = [
     field: 'Underlying',
     flex: 1,
   },
-  { field: 'Strike', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Ceiling', align: 'right', headerAlign: 'right', type: 'number' },
   {
     field: 'Expiry',
     minWidth: 170,
