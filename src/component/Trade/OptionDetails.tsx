@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
 import { Pool } from '../../lib/queries'
+import { formatUnits } from 'ethers/lib/utils'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -127,11 +128,14 @@ export default function OptionDetails({
         <FlexBox>
           <FlexBoxHeader>Collateral</FlexBoxHeader>
           <FlexBoxData>
-            {(isLong
-              ? pool.collateralBalanceLong
-              : pool.collateralBalanceShort) +
-              ' ' +
-              pool.collateralToken}
+            {isLong
+              ? formatUnits(pool.collateralBalanceLong, pool.collateralDecimals)
+              : formatUnits(
+                  pool.collateralBalanceShort,
+                  pool.collateralDecimals
+                ) +
+                ' ' +
+                pool.collateralToken}
           </FlexBoxData>
         </FlexBox>
       </FlexDiv>

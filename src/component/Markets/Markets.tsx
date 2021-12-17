@@ -92,7 +92,13 @@ const columns: GridColDef[] = [
   { field: 'Sell', align: 'right', headerAlign: 'right' },
   { field: 'Buy', align: 'right', headerAlign: 'right' },
   { field: 'MaxYield', align: 'right', headerAlign: 'right' },
-  { field: 'TVL', align: 'right', headerAlign: 'right', type: 'number' },
+  {
+    field: 'TVL',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+    minWidth: 300,
+  },
 ]
 
 export default function App() {
@@ -134,7 +140,10 @@ export default function App() {
           IsLong: true,
           ...payOff,
         }),
-        TVL: formatUnits(val.collateralBalanceLong) + ' ' + val.collateralToken,
+        TVL:
+          formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
+          ' ' +
+          val.collateralSymbol,
       },
       {
         ...shared,
@@ -145,7 +154,9 @@ export default function App() {
           ...payOff,
         }),
         TVL:
-          formatUnits(val.collateralBalanceShort) + ' ' + val.collateralToken,
+          formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
+          ' ' +
+          val.collateralSymbol,
       },
     ]
   }, [] as GridRowModel[])

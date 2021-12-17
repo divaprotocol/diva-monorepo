@@ -7,6 +7,9 @@ export type Pool = {
   collateralBalanceShort: string
   collateralBalanceShortInitial: string
   collateralToken: string
+  collateralSymbol: string
+  collateralTokenName: string
+  collateralDecimals: number
   dataFeedProvider: string
   expiryDate: string
   finalReferenceValue: string
@@ -42,6 +45,9 @@ export const queryPools = gql`
       supplyLong
       expiryDate
       collateralToken
+      collateralSymbol
+      collateralTokenName
+      collateralDecimals
       collateralBalanceShortInitial
       collateralBalanceLongInitial
       collateralBalanceShort
