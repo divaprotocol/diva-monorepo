@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import {
-  getAllOptions,
-  liquidityCollection,
-} from '../../DataService/FireStoreDB'
 import { getDateTime } from '../../Util/Dates'
 import { Box, Button, Input, InputAdornment, Stack } from '@mui/material'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
