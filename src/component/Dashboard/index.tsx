@@ -1,0 +1,230 @@
+import React, { useEffect, useState } from 'react'
+import { DataGrid } from '@mui/x-data-grid'
+import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
+import {
+  getAllOptions,
+  liquidityCollection,
+} from '../../DataService/FireStoreDB'
+import { getDateTime } from '../../Util/Dates'
+import { Box, Button, Input, InputAdornment, Stack } from '@mui/material'
+import { generatePayoffChartData } from '../../Graphs/DataGenerator'
+import { LocalGasStation, Search } from '@mui/icons-material'
+import { useHistory } from 'react-router-dom'
+import { useWeb3React } from '@web3-react/core'
+import { ConnectWalletButton } from '../Wallet/ConnectWalletButton'
+import { SideMenu } from './SideMenu'
+
+const assetLogoPath = '/images/coin-logos/'
+
+const OptionImageCell = ({ assetName }: { assetName: string }) => {
+  const assets = assetName.split('/')
+
+  if (assets.length === 1 && assets[0].includes('Gas')) {
+    return <LocalGasStation />
+  } else if (assets.length === 1) {
+    return (
+      <img
+        alt={assets[0]}
+        src={assetLogoPath + assets[0] + '.png'}
+        style={{ height: 30 }}
+      />
+    )
+  } else if (assets.length === 2) {
+    return (
+      <>
+        <img
+          alt={`${assets[0]}`}
+          src={assetLogoPath + assets[0] + '.png'}
+          style={{ marginRight: '-.5em', height: 30 }}
+        />
+        <img
+          alt={assets[1]}
+          src={assetLogoPath + assets[1] + '.png'}
+          style={{ height: 30 }}
+        />
+      </>
+    )
+  } else {
+    return <>'n/a'</>
+  }
+}
+
+const SubmitCell = () => {
+  return <Button variant="contained">Submit value</Button>
+}
+
+const columns: GridColDef[] = [
+  {
+    field: 'Icon',
+    align: 'right',
+    disableReorder: true,
+    disableColumnMenu: true,
+    headerName: '',
+    renderCell: (cell) => <OptionImageCell assetName={cell.value} />,
+  },
+  {
+    field: 'Underlying',
+    flex: 1,
+  },
+  { field: 'Strike', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
+  {
+    field: 'Expiry',
+    minWidth: 170,
+    align: 'right',
+    headerAlign: 'right',
+    type: 'dateTime',
+  },
+  {
+    field: 'finalValue',
+    align: 'right',
+    headerAlign: 'right',
+    headerName: 'Final Value',
+  },
+  {
+    field: 'Status',
+    align: 'right',
+    headerAlign: 'right',
+  },
+  {
+    field: 'subPeriod',
+    align: 'right',
+    headerAlign: 'right',
+    headerName: 'Submission period ends in',
+    minWidth: 200,
+  },
+  {
+    field: 'submitValue',
+    align: 'right',
+    headerAlign: 'right',
+    headerName: '',
+    minWidth: 200,
+    renderCell: SubmitCell,
+  },
+]
+
+export function Dashboard() {
+  const [rows, setRows] = useState<GridRowModel[]>([])
+  const { account } = useWeb3React()
+  const history = useHistory()
+  const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    if (account) {
+      const run = async () => {
+        const options = await getAllOptions()
+        /**
+         * Display only unexpired options
+         * TODO: This might change in the near future
+         */
+        const selfProvidedOptions = options.filter(
+          (v) => v.DataFeedProvider === account
+        )
+        const onlyLong = selfProvidedOptions.filter((v) =>
+          v.OptionId.startsWith('L')
+        )
+        setRows(
+          onlyLong.map((op) => ({
+            Icon: op.ReferenceAsset,
+            id: op.OptionId,
+            OptionId: op.OptionId,
+            PayoffProfile: generatePayoffChartData(op),
+            Underlying: op.ReferenceAsset,
+            Strike: op.Strike.toFixed(2),
+            Inflection: op.Inflection.toFixed(2),
+            Cap: op.Cap.toFixed(2),
+            Expiry: getDateTime(op.ExpiryDate),
+            finalValue: 'TBD',
+            Status: 'TBD',
+            subPeriod: 'TBD',
+            submitValue: SubmitCell,
+          }))
+        )
+      }
+      run()
+    }
+  }, [account])
+
+  useEffect(() => {
+    liquidityCollection.onSnapshot((data) => {
+      const changes = data
+        .docChanges()
+        .filter((doc) => doc.type === 'added')
+        .map((change) => change.doc.data())
+
+      setRows((rows) => {
+        return rows.map((row) => {
+          const change = changes.find(
+            (change) => change.OptionSetId === row.OptionSetId
+          )
+          if (change != null) {
+            return {
+              ...row,
+              ...change,
+            }
+          }
+          return row
+        })
+      })
+    })
+  }, [rows, account])
+
+  const filteredRows =
+    search != null && search.length > 0
+      ? rows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      : rows
+
+  return account ? (
+    <Stack
+      direction="row"
+      sx={{
+        height: '100%',
+      }}
+    >
+      <SideMenu />
+      <Stack sx={{ height: '100%', width: '100%', paddingLeft: '1em' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'end',
+            flexDirection: 'column',
+            paddingBottom: '1em',
+          }}
+        >
+          <Input
+            autoFocus
+            value={search}
+            placeholder="Filter asset"
+            aria-label="Filter asset"
+            onChange={(e) => setSearch(e.target.value)}
+            startAdornment={
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            }
+          />
+        </Box>
+        <DataGrid
+          showColumnRightBorder={false}
+          rows={filteredRows}
+          columns={columns}
+          onRowClick={(row) => {
+            history.push(`trade/${row.id}`)
+          }}
+          componentsProps={{
+            row: {
+              style: {
+                cursor: 'pointer',
+              },
+            },
+          }}
+        />
+      </Stack>
+    </Stack>
+  ) : (
+    <ConnectWalletButton />
+  )
+}

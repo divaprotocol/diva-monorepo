@@ -1,10 +1,12 @@
 import React from 'react'
+import { useEffect } from 'react'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import Typography from '@mui/material/Typography'
 import Slider from '@mui/material/Slider'
 import Input from '@mui/material/Input'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
+import Box from '@mui/material/Box'
 import { LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
@@ -17,15 +19,24 @@ import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
+import Web3 from 'web3'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ERC20 = require('../abi/ERC20.json')
+const ERC20_ABI = ERC20.abi
+const web3 = new Web3(Web3.givenProvider)
+let accounts: any[]
 
 export default function SellMarket(props: { option: any }) {
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(5)
   const [pricePerOption, _setPricePerOption] = React.useState(0)
-
+  const [walletBalance, setWalletBalance] = React.useState(0)
+  const makerToken = option.TokenAddress
+  const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
   const handleNumberOfOptions = (newValue: string) => {
-    setNumberOfOptions(parseInt(newValue))
+    setNumberOfOptions(parseFloat(newValue))
+    console.log(numberOfOptions)
   }
 
   const handleOrderSubmit = async (_event: any) => {
@@ -51,6 +62,27 @@ export default function SellMarket(props: { option: any }) {
     }
   }
 
+  const getOptionsInWallet = async () => {
+    accounts = await window.ethereum.enable()
+    const makerAccount = accounts[0]
+    let balance = await makerTokenContract.methods
+      .balanceOf(makerAccount)
+      .call()
+    balance = balance / 10 ** option.DecimalsCollateralToken
+    return balance
+  }
+
+  useEffect(() => {
+    getOptionsInWallet().then((val) => {
+      console.log(JSON.stringify(val))
+      if (val != null) {
+        setWalletBalance(Number(val))
+      } else {
+        throw new Error(`can not read wallet balance`)
+      }
+    })
+  }, [])
+
   return (
     <div>
       <form onSubmit={handleOrderSubmit}>
@@ -60,7 +92,6 @@ export default function SellMarket(props: { option: any }) {
           </LabelStyleDiv>
           <FormInput
             type="text"
-            value={numberOfOptions}
             onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
         </FormDiv>
@@ -90,7 +121,7 @@ export default function SellMarket(props: { option: any }) {
             <LabelGrayStyle>Options in Wallet</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>{0}</LabelGrayStyle>
+            <LabelGrayStyle>{walletBalance}</LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -130,16 +161,18 @@ export default function SellMarket(props: { option: any }) {
           </FormControlDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          startIcon={<AddIcon />}
-          type="submit"
-          value="Submit"
-        >
-          Create Order
-        </Button>
+        <Box marginLeft="100px">
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<AddIcon />}
+            type="submit"
+            value="Submit"
+          >
+            Create Order
+          </Button>
+        </Box>
       </form>
     </div>
   )

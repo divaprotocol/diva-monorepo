@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import 'styled-components'
 import styled from 'styled-components'
 import { makeStyles } from '@mui/styles'
@@ -75,8 +75,9 @@ const useTabsBorder = makeStyles(() => ({
 
 let accounts
 
-export default function CreateOrder() {
-  const option = useSelector((state) => state.tradeOption.option)
+export default function CreateOrder(props) {
+  //const op = useSelector((state) => state.tradeOption.option)
+  const option = props.option
   const dispatch = useDispatch()
   const classes = useStyles()
   const dividerClass = useDividerStyle()
@@ -89,6 +90,7 @@ export default function CreateOrder() {
     accounts = await window.ethereum.enable()
     setUserAccount(accounts[0])
   }
+
   useEffect(() => {
     if (Object.keys(userAccount).length === 0) {
       componentDidMount()
