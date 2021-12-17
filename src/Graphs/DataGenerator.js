@@ -22,7 +22,7 @@ export function generatePayoffChartData(data) {
   } else {
     const chartData = [
       {
-        x: optionData.Cap - optionData.Strike * 0.15,
+        x: optionData.Cap * 1.15,
         y: (CollateralBalanceLong + CollateralBalanceShort) / TokenSupply,
       },
       {
@@ -31,7 +31,7 @@ export function generatePayoffChartData(data) {
       },
       { x: optionData.Inflection, y: CollateralBalanceShort / TokenSupply },
       { x: optionData.Strike, y: 0 },
-      { x: optionData.Strike * 1.15, y: 0 },
+      { x: optionData.Strike - optionData.Cap * 0.15, y: 0 },
     ]
     return chartData
   }

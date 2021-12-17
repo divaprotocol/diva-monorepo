@@ -39,7 +39,7 @@ const LeftCompRightDiv = styled.div`
 export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const breakEvenOptionPrice = 0
-  console.log(params.poolId)
+
   const query = useQuery<{ pool: Pool }>('pool', () =>
     request(
       'https://api.thegraph.com/subgraphs/name/juliankrispel/diva',
@@ -58,9 +58,9 @@ export default function Underlying() {
   const OptionParams = {
     CollateralBalanceLong: 100,
     CollateralBalanceShort: 100,
-    Strike: parseFloat(pool.floor),
-    Inflection: parseFloat(pool.inflection),
-    Cap: pool.cap,
+    Strike: parseInt(pool.floor) / 1e18,
+    Inflection: parseInt(pool.inflection) / 1e18,
+    Cap: parseInt(pool.cap) / 1e18,
     TokenSupply: 200,
     IsLong: isLong,
   }

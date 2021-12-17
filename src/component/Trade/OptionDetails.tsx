@@ -114,15 +114,15 @@ export default function OptionDetails({
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Floor</FlexBoxHeader>
-          <FlexBoxData>{pool.floor}</FlexBoxData>
+          <FlexBoxData>{parseInt(pool.floor) / 1e18}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Inflection</FlexBoxHeader>
-          <FlexBoxData>{pool.inflection}</FlexBoxData>
+          <FlexBoxData>{parseInt(pool.inflection) / 1e18}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Cap</FlexBoxHeader>
-          <FlexBoxData>{pool.cap}</FlexBoxData>
+          <FlexBoxData>{parseInt(pool.cap) / 1e18}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Collateral</FlexBoxHeader>

@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { useQuery } from 'react-query'
+import { formatUnits } from 'ethers/lib/utils'
 
 const assetLogoPath = '/images/coin-logos/'
 
@@ -94,8 +95,6 @@ const columns: GridColDef[] = [
   { field: 'TVL', align: 'right', headerAlign: 'right', type: 'number' },
 ]
 
-console.log(queryPools)
-
 export default function App() {
   const history = useHistory()
   const [search, setSearch] = useState('')
@@ -106,18 +105,23 @@ export default function App() {
     )
   )
   const pools = query.data?.pools || ([] as Pool[])
-  console.log({ pools })
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,
-      Strike: parseFloat(val.floor).toFixed(2),
-      Infection: parseFloat(val.inflection).toFixed(2),
-      Cap: parseFloat(val.cap).toFixed(2),
+      Strike: formatUnits(val.floor),
+      Inflection: formatUnits(val.inflection),
+      Cap: formatUnits(val.cap),
       Expiry: getDateTime(val.expiryDate),
       Sell: 'TBD',
       Buy: 'TBD',
       MaxYield: 'TBD',
+    }
+
+    const payOff = {
+      Strike: parseInt(val.floor) / 1e18,
+      Inflection: parseInt(val.inflection) / 1e18,
+      Cap: parseInt(val.cap) / 1e18,
     }
 
     return [
@@ -128,11 +132,9 @@ export default function App() {
         address: val.longToken,
         PayoffProfile: generatePayoffChartData({
           IsLong: true,
-          Strike: parseFloat(val.floor),
-          Infection: parseFloat(val.inflection),
-          Cap: parseFloat(val.cap),
+          ...payOff,
         }),
-        TVL: val.collateralBalanceLong + ' ' + val.collateralToken,
+        TVL: formatUnits(val.collateralBalanceLong) + ' ' + val.collateralToken,
       },
       {
         ...shared,
@@ -140,11 +142,10 @@ export default function App() {
         address: val.shortToken,
         PayoffProfile: generatePayoffChartData({
           IsLong: false,
-          Strike: parseFloat(val.floor),
-          Infection: parseFloat(val.inflection),
-          Cap: parseFloat(val.cap),
+          ...payOff,
         }),
-        TVL: val.collateralBalanceShort + ' ' + val.collateralToken,
+        TVL:
+          formatUnits(val.collateralBalanceShort) + ' ' + val.collateralToken,
       },
     ]
   }, [] as GridRowModel[])
