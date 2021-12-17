@@ -59,9 +59,10 @@ export const PayoffCell = ({ data }: { data: any }) => {
 
 type Props = {
   columns: GridColDef[]
+  filter?: (pool: Pool) => boolean
 }
 
-export default function PoolsTable({ columns }: Props) {
+export default function PoolsTable({ columns, filter }: Props) {
   const history = useHistory()
   const [search, setSearch] = useState('')
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
@@ -70,7 +71,11 @@ export default function PoolsTable({ columns }: Props) {
       queryPools
     )
   )
-  const pools = query.data?.pools || ([] as Pool[])
+  const pools =
+    query.data?.pools.filter((pool: Pool) =>
+      filter != null ? filter(pool) : pool
+    ) || ([] as Pool[])
+
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,
@@ -97,8 +102,8 @@ export default function PoolsTable({ columns }: Props) {
         id: `${val.id}/long`,
         address: val.longToken,
         PayoffProfile: generatePayoffChartData({
-          IsLong: true,
           ...payOff,
+          IsLong: true,
         }),
         TVL:
           formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
@@ -110,8 +115,8 @@ export default function PoolsTable({ columns }: Props) {
         id: `${val.id}/short`,
         address: val.shortToken,
         PayoffProfile: generatePayoffChartData({
-          IsLong: false,
           ...payOff,
+          IsLong: false,
         }),
         TVL:
           formatUnits(val.collateralBalanceShort, val.collateralDecimals) +

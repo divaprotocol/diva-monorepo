@@ -71,7 +71,10 @@ export function Dashboard() {
       }}
     >
       <SideMenu />
-      <PoolsTable columns={columns} />
+      <PoolsTable
+        filter={(pool) => pool.dataFeedProvider === account}
+        columns={columns}
+      />
     </Stack>
   ) : (
     <ConnectWalletButton />
