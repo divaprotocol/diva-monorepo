@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import Markets from './component/Markets/Markets'
 import { Create } from './component/Create'
 import { Container, useTheme } from '@mui/material'
+import { Dashboard } from './component/Dashboard'
 
 export const App = () => {
   const theme = useTheme()
@@ -19,6 +20,9 @@ export const App = () => {
         <Switch>
           <Route exact path="/">
             <Markets />
+          </Route>
+          <Route exact path="/dashboard">
+            <Dashboard />
           </Route>
           <Route path="/trade/:id">
             <Underlying />
