@@ -4,8 +4,10 @@ export function generatePayoffChartData(data) {
   const CollateralBalanceShort = 100 // temporarily hard-coded
   const TokenSupply = 200 // temporarily hard-coded
 
+  let chartData = []
+
   if (optionData.IsLong === true) {
-    const chartData = [
+    chartData = [
       { x: optionData.Strike - optionData.Cap * 0.15, y: 0 },
       { x: optionData.Strike, y: 0 },
       { x: optionData.Inflection, y: CollateralBalanceLong / TokenSupply },
@@ -18,9 +20,8 @@ export function generatePayoffChartData(data) {
         y: (CollateralBalanceLong + CollateralBalanceShort) / TokenSupply,
       },
     ]
-    return chartData
   } else {
-    const chartData = [
+    chartData = [
       {
         x: optionData.Cap - optionData.Strike * 0.15,
         y: (CollateralBalanceLong + CollateralBalanceShort) / TokenSupply,
@@ -33,6 +34,11 @@ export function generatePayoffChartData(data) {
       { x: optionData.Strike, y: 0 },
       { x: optionData.Strike * 1.15, y: 0 },
     ]
-    return chartData
   }
+
+  console.log({
+    data,
+    chartData,
+  })
+  return chartData
 }
