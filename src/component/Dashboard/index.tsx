@@ -72,7 +72,9 @@ export function Dashboard() {
     >
       <SideMenu />
       <PoolsTable
-        filter={(pool) => pool.dataFeedProvider === account}
+        filter={(pool) =>
+          pool.dataFeedProvider.toLowerCase() === account?.toLowerCase()
+        }
         columns={columns}
       />
     </Stack>
