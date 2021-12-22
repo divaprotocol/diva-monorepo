@@ -11,12 +11,12 @@ import { Pool, queryPools } from '../lib/queries'
 import { request } from 'graphql-request'
 import { useQuery } from 'react-query'
 import { formatUnits } from 'ethers/lib/utils'
+import { getIconSrc } from '../Util/getIconSrc'
 
 const assetLogoPath = '/images/coin-logos/'
 
 export const OptionImageCell = ({ assetName }: { assetName: string }) => {
   const assets = assetName.split('/')
-
   if (assets.length === 1 && assets[0].includes('Gas')) {
     return <LocalGasStation />
   } else if (assets.length === 1) {
@@ -32,12 +32,12 @@ export const OptionImageCell = ({ assetName }: { assetName: string }) => {
       <>
         <img
           alt={`${assets[0]}`}
-          src={assetLogoPath + assets[0] + '.png'}
+          src={getIconSrc(assets[0])}
           style={{ marginRight: '-.5em', height: 30 }}
         />
         <img
           alt={assets[1]}
-          src={assetLogoPath + assets[1] + '.png'}
+          src={getIconSrc(assets[1])}
           style={{ height: 30 }}
         />
       </>

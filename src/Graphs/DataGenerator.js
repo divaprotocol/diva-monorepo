@@ -35,10 +35,5 @@ export function generatePayoffChartData(data) {
       { x: optionData.Cap * 1.15, y: 0 },
     ]
   }
-
-  console.log({
-    data,
-    chartData,
-  })
   return chartData
 }
