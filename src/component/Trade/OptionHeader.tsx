@@ -7,7 +7,6 @@ import {
   EtherscanLinkType,
 } from '../../Util/getEtherscanLink'
 import { useWeb3React } from '@web3-react/core'
-import { DbOption } from '../../DataService/FireStoreDB'
 const AppHeader = styled.header`
   min-height: 10vh;
   display: flex;
@@ -73,7 +72,10 @@ function renderRefImgs(assetName: string) {
   }
 }
 
-export default function OptionHeader({ optionData }: { optionData: DbOption }) {
+export default function OptionHeader(optionData: {
+  TokenAddress: string
+  ReferenceAsset: string
+}) {
   //const option = props.optionData
   const { chainId } = useWeb3React()
   const headerTitle = optionData.ReferenceAsset

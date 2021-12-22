@@ -208,7 +208,6 @@ class DIVATradeChart extends Component {
         end = l[i].getTotalLength(),
         target = null,
         pos = null
-      console.log('end: ' + end)
 
       // eslint-disable-next-line
       while (true) {
@@ -226,8 +225,6 @@ class DIVATradeChart extends Component {
 
     var mousemove = function (event) {
       var mouse = d3.pointer(event)
-      // console.log("mouse[0]: " + x.invert(mouse[0]))
-      // console.log("mouse[1]: " + mouse[1])
       d3.select('.mouse-line')
         .attr('d', function () {
           var d = 'M' + mouse[0] + ',' + height

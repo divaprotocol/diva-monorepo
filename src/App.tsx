@@ -21,11 +21,11 @@ export const App = () => {
           <Route exact path="/">
             <Markets />
           </Route>
+          <Route path="/:poolId/:tokenType">
+            <Underlying />
+          </Route>
           <Route exact path="/dashboard">
             <Dashboard />
-          </Route>
-          <Route path="/trade/:id">
-            <Underlying />
           </Route>
           <Route path="/create">
             <Create />
