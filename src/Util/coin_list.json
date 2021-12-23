@@ -14066,5 +14066,6529 @@
   {
     "symbol": "pow",
     "platforms": { "ethereum": "0x66e714bfb21f255f57c0682ac1e20254a7821779" }
+  },
+  {
+    "symbol": "pipt",
+    "platforms": { "ethereum": "0x26607ac599266b21d13c7acf7942c7701a8b699c" }
+  },
+  {
+    "symbol": "powr",
+    "platforms": { "ethereum": "0x595832f8fc6bf59c85c527fec3740a1b7a361269" }
+  },
+  {
+    "symbol": "ptf",
+    "platforms": { "ethereum": "0xc57d533c50bc22247d49a368880fb49a1caa39f7" }
+  },
+  {
+    "symbol": "prcy",
+    "platforms": { "ethereum": "0xdfc3829b127761a3218bfcee7fc92e1232c9d116" }
+  },
+  {
+    "symbol": "pcpi",
+    "platforms": { "ethereum": "0x2925c2a312a4934fd695fab72b1e425cc41978f2" }
+  },
+  {
+    "symbol": "pcm",
+    "platforms": { "ethereum": "0x6096d2460cf5177e40b515223428dc005ad35123" }
+  },
+  {
+    "symbol": "prdz",
+    "platforms": { "ethereum": "0x4e085036a1b732cbe4ffb1c12ddfdd87e7c3664d" }
+  },
+  {
+    "symbol": "pqt",
+    "platforms": { "ethereum": "0xf8c17c840549974ec17c6573b3963f1e3046c0eb" }
+  },
+  {
+    "symbol": "prdx",
+    "platforms": { "ethereum": "0x556148562d5ddeb72545d7ec4b3ec8edc8f55ba7" }
+  },
+  {
+    "symbol": "premia",
+    "platforms": { "ethereum": "0x6399c842dd2be3de30bf99bc7d1bbf6fa3650e70" }
+  },
+  {
+    "symbol": "pre",
+    "platforms": { "ethereum": "0xec213f83defb583af3a000b1c0ada660b1902a0f" }
+  },
+  {
+    "symbol": "pria",
+    "platforms": { "ethereum": "0xb9871cb10738eada636432e86fc0cb920dc3de24" }
+  },
+  {
+    "symbol": "pst",
+    "platforms": { "ethereum": "0xe3fedaecd47aa8eab6b23227b0ee56f092c967a9" }
+  },
+  {
+    "symbol": "d2d",
+    "platforms": { "ethereum": "0x43d4a3cd90ddd2f8f4f693170c9c8098163502ad" }
+  },
+  {
+    "symbol": "pdai",
+    "platforms": { "ethereum": "0x9043d4d51c9d2e31e3f169de4551e416970c27ef" }
+  },
+  {
+    "symbol": "pwc",
+    "platforms": { "ethereum": "0xa3d93c0616dbc31fef1e112c7665a4ba4ddbf0be" }
+  },
+  {
+    "symbol": "prism",
+    "platforms": { "ethereum": "0xd46df541148932690b81092f600f35208afd4325" }
+  },
+  {
+    "symbol": "prix",
+    "platforms": { "ethereum": "0x3adfc4999f77d04c8341bac5f3a76f58dff5b37a" }
+  },
+  {
+    "symbol": "pn",
+    "platforms": { "ethereum": "0x61b5c3aee3a25f6f83531d548a4d2ee58450f5d9" }
+  },
+  {
+    "symbol": "prob",
+    "platforms": { "ethereum": "0xfb559ce67ff522ec0b9ba7f5dc9dc7ef6c139803" }
+  },
+  {
+    "symbol": "xiv",
+    "platforms": { "ethereum": "0x44f262622248027f8e2a8fb1090c4cf85072392c" }
+  },
+  {
+    "symbol": "senpai",
+    "platforms": { "ethereum": "0x5a705745373a780814c379ef17810630d529efe0" }
+  },
+  {
+    "symbol": "omx",
+    "platforms": { "ethereum": "0xb5dbc6d3cf380079df3b27135664b6bcf45d1869" }
+  },
+  {
+    "symbol": "diamnd",
+    "platforms": { "ethereum": "0x53109fe9e044f2c324d00ad85bfb0b13ce379480" }
+  },
+  {
+    "symbol": "gold",
+    "platforms": { "ethereum": "0xdfc628a33c18e856cd1c59583cb5ace8db706f14" }
+  },
+  {
+    "symbol": "prom",
+    "platforms": { "ethereum": "0xfc82bb4ba86045af6f327323a46e80412b91b27d" }
+  },
+  {
+    "symbol": "pmd",
+    "platforms": { "ethereum": "0xf5555732b3925356964695578fefcffcd31bcbb8" }
+  },
+  {
+    "symbol": "pc",
+    "platforms": { "ethereum": "0xa6714a2e5f0b1bdb97b895b0913b4fcd3a775e4d" }
+  },
+  {
+    "symbol": "pry",
+    "platforms": { "ethereum": "0x3c81d482172cc273c3b91dd9d8eb212023d00521" }
+  },
+  {
+    "symbol": "prophet",
+    "platforms": { "ethereum": "0x8d5db0c1f0681071cb38a382ae6704588d9da587" }
+  },
+  {
+    "symbol": "props",
+    "platforms": { "ethereum": "0x6fe56c0bcdd471359019fcbc48863d6c3e9d4f41" }
+  },
+  {
+    "symbol": "pro",
+    "platforms": { "ethereum": "0x226bb599a12c826476e3a771454697ea52e9e220" }
+  },
+  {
+    "symbol": "pros",
+    "platforms": { "ethereum": "0x8642a849d0dcb7a15a974794668adcfbe4794b56" }
+  },
+  {
+    "symbol": "prot",
+    "platforms": { "ethereum": "0x2341dd0a96a0dab62aa1efb93d59ff7f3bdb8932" }
+  },
+  {
+    "symbol": "pros",
+    "platforms": { "ethereum": "0x094f00cb5e31ab6164e3cacb654e8d6c2b3b471c" }
+  },
+  {
+    "symbol": "proge",
+    "platforms": { "ethereum": "0x282d0ad1fa03dfbdb88243b958e77349c73737d1" }
+  },
+  {
+    "symbol": "pfi",
+    "platforms": { "ethereum": "0x7b69d465c0f9fb22affae56aa86149973e9b0966" }
+  },
+  {
+    "symbol": "xpr",
+    "platforms": { "ethereum": "0xd7efb00d12c2c13131fd319336fdf952525da2af" }
+  },
+  {
+    "symbol": "prtn",
+    "platforms": { "ethereum": "0x6d10e0194400a04600881057787eb9e9c063dca0" }
+  },
+  {
+    "symbol": "ptt",
+    "platforms": { "ethereum": "0x4689a4e169eb39cc9078c0940e21ff1aa8a39b9c" }
+  },
+  {
+    "symbol": "pec",
+    "platforms": { "ethereum": "0x432bf73443909c33b545efed536a5246c9a722ca" }
+  },
+  {
+    "symbol": "voco",
+    "platforms": { "ethereum": "0xb5ca46cf1da09248126682a7bd72401fd7a6b151" }
+  },
+  {
+    "symbol": "xes",
+    "platforms": { "ethereum": "0xa017ac5fac5941f95010b12570b812c974469c2c" }
+  },
+  {
+    "symbol": "prxy",
+    "platforms": { "ethereum": "0x22acaee85ddb83a3a33b7f0928a0e2c3bfdb6a4f" }
+  },
+  {
+    "symbol": "stkatom",
+    "platforms": { "ethereum": "0x44017598f2af1bd733f9d87b5017b4e7c1b28dde" }
+  },
+  {
+    "symbol": "usd1",
+    "platforms": { "ethereum": "0xf6c0aa7ebfe9992200c67e5388e4f42da49e1783" }
+  },
+  {
+    "symbol": "pteria",
+    "platforms": { "ethereum": "0x02eca910cb3a7d43ebc7e8028652ed5c6b70259b" }
+  },
+  {
+    "symbol": "pbtc",
+    "platforms": { "ethereum": "0x5228a22e72ccc52d415ecfd199f99d0665e7733b" }
+  },
+  {
+    "symbol": "pltc",
+    "platforms": { "ethereum": "0x5979f50f1d4c08f9a53863c2f39a7b0492c38d0f" }
+  },
+  {
+    "symbol": "ore",
+    "platforms": { "ethereum": "0x4f640f2529ee0cf119a2881485845fa8e61a782a" }
+  },
+  {
+    "symbol": "pint",
+    "platforms": { "ethereum": "0xfecba472b2540c5a2d3700b2c9e06f0aa7dc6462" }
+  },
+  {
+    "symbol": "pin",
+    "platforms": { "ethereum": "0xc1f976b91217e240885536af8b63bc8b5269a9be" }
+  },
+  {
+    "symbol": "mint",
+    "platforms": { "ethereum": "0x0cdf9acd87e940837ff21bb40c9fd55f68bba059" }
+  },
+  {
+    "symbol": "pudgy",
+    "platforms": { "ethereum": "0xabea7663c472648d674bd3403d94c858dfeef728" }
+  },
+  {
+    "symbol": "pugl",
+    "platforms": { "ethereum": "0xdb69c3f8977f78952303987e87153c1988cf65a9" }
+  },
+  {
+    "symbol": "pulse",
+    "platforms": { "ethereum": "0x52a047ee205701895ee06a375492490ec9c597ce" }
+  },
+  {
+    "symbol": "pma",
+    "platforms": { "ethereum": "0x846c66cf71c43f80403b51fe3906b3599d63336f" }
+  },
+  {
+    "symbol": "npxs",
+    "platforms": { "ethereum": "0xa15c7ebe1f07caf6bff097d8a589fb8ac49ae5b3" }
+  },
+  {
+    "symbol": "pundix",
+    "platforms": { "ethereum": "0x0fd10b9899882a6f2fcb5c371e17e70fdee00c38" }
+  },
+  {
+    "symbol": "floor",
+    "platforms": { "ethereum": "0xb35ed5c39f371f2cd4bc2edab1f8da314168186a" }
+  },
+  {
+    "symbol": "punk",
+    "platforms": { "ethereum": "0x269616d549d7e8eaa82dfb17028d0b212d11232a" }
+  },
+  {
+    "symbol": "pup",
+    "platforms": { "ethereum": "0x81dbc1c8e40c3095071949eda9800c2209a7279a" }
+  },
+  {
+    "symbol": "ppn",
+    "platforms": { "ethereum": "0x95f49ae439537e50ced0374c1b52c42aa899741c" }
+  },
+  {
+    "symbol": "puppy",
+    "platforms": { "ethereum": "0x94e25fc8960dce26823afeebf8a82ebc13c8e439" }
+  },
+  {
+    "symbol": "pups",
+    "platforms": { "ethereum": "0xd53998c536fc8b59b38aa0b49dbd8170d5ebf4c2" }
+  },
+  {
+    "symbol": "ufi",
+    "platforms": { "ethereum": "0xcda4e840411c00a614ad9205caec807c7458a0e3" }
+  },
+  {
+    "symbol": "pgpay",
+    "platforms": { "ethereum": "0xc949fc82a15964fb5b97e5cf8f9ffed139086821" }
+  },
+  {
+    "symbol": "pure",
+    "platforms": { "ethereum": "0x2904b9b16652d7d0408eccfa23a19d4a3358230f" }
+  },
+  {
+    "symbol": "purr",
+    "platforms": { "ethereum": "0xe581f272706581f9dcc362df3c7934e99192c492" }
+  },
+  {
+    "symbol": "pussy",
+    "platforms": { "ethereum": "0x9196e18bc349b1f64bc08784eae259525329a1ad" }
+  },
+  {
+    "symbol": "pwrd",
+    "platforms": { "ethereum": "0xf0a93d4994b3d98fb5e3a2f90dbc2d69073cb86b" }
+  },
+  {
+    "symbol": "pylon",
+    "platforms": { "ethereum": "0xd7b7d3c0bda57723fb54ab95fd8f9ea033af37f2" }
+  },
+  {
+    "symbol": "pylnt",
+    "platforms": { "ethereum": "0xd8924385cd46e6af6f377871c732bde2f8e9dd18" }
+  },
+  {
+    "symbol": "pyro",
+    "platforms": { "ethereum": "0x14409b0fc5c7f87b5dad20754fe22d29a3de8217" }
+  },
+  {
+    "symbol": "q8e20",
+    "platforms": { "ethereum": "0xa31f7a32db329f270a0e6b59558823e64d8ef0a6" }
+  },
+  {
+    "symbol": "qanx",
+    "platforms": { "ethereum": "0xaaa7a10a8ee237ea61e8ac46c50a8db8bcc1baaa" }
+  },
+  {
+    "symbol": "&#127760;",
+    "platforms": { "ethereum": "0x3402e15b3ea0f1aec2679c4be4c6d051cef93953" }
+  },
+  {
+    "symbol": "qash",
+    "platforms": { "ethereum": "0x618e75ac90b12c6049ba3b27f5d5f8651b0037f6" }
+  },
+  {
+    "symbol": "qwla",
+    "platforms": { "ethereum": "0x1d96fd43ee07aa79f8fd003cbdf404fb5ce41ad2" }
+  },
+  {
+    "symbol": "qch",
+    "platforms": { "ethereum": "0x687bfc3e73f6af55f0ccca8450114d107e781a0e" }
+  },
+  {
+    "symbol": "qhc",
+    "platforms": { "ethereum": "0x5df94780f00140fe72d239d0d261f7797e3fbd1b" }
+  },
+  {
+    "symbol": "qdao",
+    "platforms": { "ethereum": "0x3166c570935a7d8554c8f4ea792ff965d2efe1f2" }
+  },
+  {
+    "symbol": "qdefi",
+    "platforms": { "ethereum": "0xfee4dbe2751bf8d1b1b861aaf9664961f19ce91a" }
+  },
+  {
+    "symbol": "qfi",
+    "platforms": { "ethereum": "0x6fe88a211863d0d818608036880c9a4b0ea86795" }
+  },
+  {
+    "symbol": "qbx",
+    "platforms": { "ethereum": "0x2467aa6b5a2351416fd4c3def8462d841feeecec" }
+  },
+  {
+    "symbol": "qob",
+    "platforms": { "ethereum": "0xbd1e7f594600dcaf7f483af55deacec0159a064e" }
+  },
+  {
+    "symbol": "qiq",
+    "platforms": { "ethereum": "0x98af2e926206f1eb5af46aeddd144727267d0487" }
+  },
+  {
+    "symbol": "qqq",
+    "platforms": { "ethereum": "0x2822f6d1b2f41f93f33d937bc7d84a8dfa4f4c21" }
+  },
+  {
+    "symbol": "qrdo",
+    "platforms": { "ethereum": "0x4123a133ae3c521fd134d7b13a2dec35b56c2463" }
+  },
+  {
+    "symbol": "equad",
+    "platforms": { "ethereum": "0xc28e931814725bbeb9e670676fabbcb694fe7df2" }
+  },
+  {
+    "symbol": "quai",
+    "platforms": { "ethereum": "0x40821cd074dfecb1524286923bc69315075b5c89" }
+  },
+  {
+    "symbol": "qbu",
+    "platforms": { "ethereum": "0x44dcf4dc9ec228b7748422c51b6c5c57f5f229ec" }
+  },
+  {
+    "symbol": "qtf",
+    "platforms": { "ethereum": "0x0fcbc31c503b4a9ed90e87f8ff46c318a4a14260" }
+  },
+  {
+    "symbol": "qnt",
+    "platforms": { "ethereum": "0x4a220e6096b25eadb88358cb44068a3248254675" }
+  },
+  {
+    "symbol": "qsp",
+    "platforms": { "ethereum": "0x99ea4db9ee77acd40b119bd1dc4e33e1c070b80d" }
+  },
+  {
+    "symbol": "qkc",
+    "platforms": { "ethereum": "0xea26c4ac16d4a5a106820bc8aee85fd0b7b2b664" }
+  },
+  {
+    "symbol": "qtech",
+    "platforms": { "ethereum": "0x00156e5524f3a53a55a3cc6e95e57397d39daa49" }
+  },
+  {
+    "symbol": "qbz",
+    "platforms": { "ethereum": "0x9bbc9286cdf6eefebf21df19bac71c6bdd7759d4" }
+  },
+  {
+    "symbol": "quick",
+    "platforms": { "ethereum": "0x6c28aef8977c9b773996d0e8376d2ee379446f2f" }
+  },
+  {
+    "symbol": "qm",
+    "platforms": { "ethereum": "0xb73404280697080da0116cfac0e577fafdf44b37" }
+  },
+  {
+    "symbol": "qcx",
+    "platforms": { "ethereum": "0xf9e5af7b42d31d51677c75bbbd37c1986ec79aee" }
+  },
+  {
+    "symbol": "quidd",
+    "platforms": { "ethereum": "0xda9fdab21bc4a5811134a6e0ba6ca06624e67c07" }
+  },
+  {
+    "symbol": "QUID",
+    "platforms": { "ethereum": "0x9d38f670d15c14716be1f109a4f453e966a2b6d4" }
+  },
+  {
+    "symbol": "quin",
+    "platforms": { "ethereum": "0x86e44543164d9b97b14ef7f6f3ab7ba670cab346" }
+  },
+  {
+    "symbol": "qrx",
+    "platforms": { "ethereum": "0x6e0dade58d2d89ebbe7afc384e3e4f15b70b14d8" }
+  },
+  {
+    "symbol": "qtcon",
+    "platforms": { "ethereum": "0x1bf7fd22709733ccd7c45ab27dd02c7ec8e50078" }
+  },
+  {
+    "symbol": "xqc",
+    "platforms": { "ethereum": "0x70da48f4b7e83c386ef983d4cef4e58c2c09d8ac" }
+  },
+  {
+    "symbol": "r34p",
+    "platforms": { "ethereum": "0xcaeaf8381d4b20b43afa42061d6f80319a8881f6" }
+  },
+  {
+    "symbol": "r64x",
+    "platforms": { "ethereum": "0xf3110b27f481f9ac3c1ba3c54de542accb2d913c" }
+  },
+  {
+    "symbol": "brb",
+    "platforms": { "ethereum": "0x61d24aabb3e5e800d8f3d3d43dcbd66ae6cab51e" }
+  },
+  {
+    "symbol": "rac",
+    "platforms": { "ethereum": "0xc22b30e4cce6b78aaaadae91e44e73593929a3e9" }
+  },
+  {
+    "symbol": "radar",
+    "platforms": { "ethereum": "0xf9fbe825bfb2bf3e387af0dc18cac8d87f29dea8" }
+  },
+  {
+    "symbol": "rad",
+    "platforms": { "ethereum": "0x31c8eacbffdd875c74b94b077895bd78cf1e64a3" }
+  },
+  {
+    "symbol": "raca",
+    "platforms": { "ethereum": "0x12bb890508c125661e03b09ec06e404bc9289040" }
+  },
+  {
+    "symbol": "rae",
+    "platforms": { "ethereum": "0xe5a3229ccb22b6484594973a03a3851dcd948756" }
+  },
+  {
+    "symbol": "rage",
+    "platforms": { "ethereum": "0x94804dc4948184ffd7355f62ccbb221c9765886f" }
+  },
+  {
+    "symbol": "rai",
+    "platforms": { "ethereum": "0x03ab458634910aad20ef5f1c8ee96f1d6ac54919" }
+  },
+  {
+    "symbol": "rdn",
+    "platforms": { "ethereum": "0x255aa6df07540cb5d3d297f0d0d4d84cb52bc8e6" }
+  },
+  {
+    "symbol": "raid",
+    "platforms": { "ethereum": "0x154e35c2b0024b3e079c5c5e4fc31c979c189ccb" }
+  },
+  {
+    "symbol": "rai",
+    "platforms": { "ethereum": "0xf30547ff2df1f1cbe5c8dd758b3dd098c856e38f" }
+  },
+  {
+    "symbol": "raijin",
+    "platforms": { "ethereum": "0xc87e2b27f7477668cc7b97e929953802590049f7" }
+  },
+  {
+    "symbol": "rail",
+    "platforms": { "ethereum": "0xe76c6c83af64e4c60245d8c7de953df673a7a33d" }
+  },
+  {
+    "symbol": "rnbw",
+    "platforms": { "ethereum": "0xe94b97b6b43639e238c851a7e693f50033efd75c" }
+  },
+  {
+    "symbol": "raini",
+    "platforms": { "ethereum": "0xeb953eda0dc65e3246f43dc8fa13f35623bdd5ed" }
+  },
+  {
+    "symbol": "rain",
+    "platforms": { "ethereum": "0x71fc1f555a39e0b698653ab0b475488ec3c34d57" }
+  },
+  {
+    "symbol": "rain",
+    "platforms": { "ethereum": "0x61cdb66e56fad942a7b5ce3f419ffe9375e31075" }
+  },
+  {
+    "symbol": "rai",
+    "platforms": { "ethereum": "0x4c9bbfc1fbd93dfb509e718400978fbeedf590e9" }
+  },
+  {
+    "symbol": "rajainu",
+    "platforms": { "ethereum": "0x77d64cb9b19228157a7628ca0d26f5d9656b3d03" }
+  },
+  {
+    "symbol": "rak",
+    "platforms": { "ethereum": "0xa8b0f154a688c22142e361707df64277e0a0be66" }
+  },
+  {
+    "symbol": "rkn",
+    "platforms": { "ethereum": "0x6e5a43db10b04701385a34afb670e404bc7ea597" }
+  },
+  {
+    "symbol": "rakuc",
+    "platforms": { "ethereum": "0x714599f7604144a3fe1737c440a70fc0fd6503ea" }
+  },
+  {
+    "symbol": "raku",
+    "platforms": { "ethereum": "0x51bc0deaf7bbe82bc9006b0c3531668a4206d27f" }
+  },
+  {
+    "symbol": "rly",
+    "platforms": { "ethereum": "0xf1f955016ecbcd7321c7266bccfb96c68ea5e49b" }
+  },
+  {
+    "symbol": "rammus",
+    "platforms": { "ethereum": "0xa4fabd195f6245437ab459f7597bfa4f9112ec9e" }
+  },
+  {
+    "symbol": "ramp",
+    "platforms": { "ethereum": "0x33d0568941c0c64ff7e0fb4fba0b11bd37deed9f" }
+  },
+  {
+    "symbol": "rpg",
+    "platforms": { "ethereum": "0x0e5c8c387c5eba2ecbc137ad012aed5fe729e251" }
+  },
+  {
+    "symbol": "rapdoge",
+    "platforms": { "ethereum": "0xd8dae35b487e3453cffd998c6754713c81b0f200" }
+  },
+  {
+    "symbol": "rrr",
+    "platforms": { "ethereum": "0x1306c7d95e59cfcdff7ae3c13db7f56acc543815" }
+  },
+  {
+    "symbol": "rpzx",
+    "platforms": { "ethereum": "0x68350d30d9f58c81aaaa41929f1bfc52fff4ea49" }
+  },
+  {
+    "symbol": "rare",
+    "platforms": { "ethereum": "0x81b1bfd6cb9ad42db395c2a27f73d4dcf5777e2d" }
+  },
+  {
+    "symbol": "rpepe",
+    "platforms": { "ethereum": "0x0e9b56d2233ea2b5883861754435f9c51dbca141" }
+  },
+  {
+    "symbol": "rari",
+    "platforms": { "ethereum": "0xfca59cd816ab1ead66534d82bc21e7515ce441cf" }
+  },
+  {
+    "symbol": "rgt",
+    "platforms": { "ethereum": "0xd291e7a03283640fdc51b121ac401383a46cc623" }
+  },
+  {
+    "symbol": "rte",
+    "platforms": { "ethereum": "0x436f0f3a982074c4a05084485d421466a994fe53" }
+  },
+  {
+    "symbol": "ratrace",
+    "platforms": { "ethereum": "0xd26c77d4f03dab3c61e87a233c624c5755c49bb3" }
+  },
+  {
+    "symbol": "raze",
+    "platforms": { "ethereum": "0x5eaa69b29f99c84fe5de8200340b4e9b4ab38eac" }
+  },
+  {
+    "symbol": "razor",
+    "platforms": { "ethereum": "0x50de6856358cc35f3a9a57eaaa34bd4cb707d2cd" }
+  },
+  {
+    "symbol": "rbx",
+    "platforms": { "ethereum": "0x8254e26e453eb5abd29b3c37ac9e8da32e5d3299" }
+  },
+  {
+    "symbol": "rccc",
+    "platforms": { "ethereum": "0x33bfd20660eeaf952e8d5bc3236e1918701f17d0" }
+  },
+  {
+    "symbol": "rtc",
+    "platforms": { "ethereum": "0x7f9a00e03c2e53a3af6031c17a150dbedaaab3dc" }
+  },
+  {
+    "symbol": "fevr",
+    "platforms": { "ethereum": "0x9fb83c0635de2e815fd1c21b3a292277540c2e8d" }
+  },
+  {
+    "symbol": "rio",
+    "platforms": { "ethereum": "0xf21661d0d1d76d3ecb8e1b9f1c923dbfffae4097" }
+  },
+  {
+    "symbol": "rld",
+    "platforms": { "ethereum": "0xd1632efa392925089785b43410c529f8959a8d9a" }
+  },
+  {
+    "symbol": "realm",
+    "platforms": { "ethereum": "0x464fdb8affc9bac185a7393fd4298137866dcfb8" }
+  },
+  {
+    "symbol": "ret",
+    "platforms": { "ethereum": "0xd7394087e1dbbe477fe4f1cf373b9ac9459565ff" }
+  },
+  {
+    "symbol": "reap",
+    "platforms": { "ethereum": "0x1fc5ef0337aea85c5f9198853a6e3a579a7a6987" }
+  },
+  {
+    "symbol": "reap",
+    "platforms": { "ethereum": "0xa20b44c001578e2c52665098ba62b00ebf8963cb" }
+  },
+  {
+    "symbol": "delta rlp",
+    "platforms": { "ethereum": "0xfcfc434ee5bff924222e084a8876eee74ea7cfba" }
+  },
+  {
+    "symbol": "keyt",
+    "platforms": { "ethereum": "0xce13abce0db5a8224616ef24d3979d466f19cf90" }
+  },
+  {
+    "symbol": "rebd",
+    "platforms": { "ethereum": "0x7fea8dda7462ac9f2ce62cf52ce9840e0e6a8c3b" }
+  },
+  {
+    "symbol": "rcg",
+    "platforms": { "ethereum": "0xe74be071f3b62f6a4ac23ca68e5e2a39797a3c30" }
+  },
+  {
+    "symbol": "r3fi",
+    "platforms": { "ethereum": "0x13572851103bed49ff743af4c4bb5ace88b22e2f" }
+  },
+  {
+    "symbol": "red",
+    "platforms": { "ethereum": "0x76960dccd5a1fe799f7c29be9f19ceb4627aeb2f" }
+  },
+  {
+    "symbol": "rfox",
+    "platforms": { "ethereum": "0xa1d6df714f91debf4e0802a542e13067f31b8262" }
+  },
+  {
+    "symbol": "redi",
+    "platforms": { "ethereum": "0xebdf9a7ae0009b958c6d09501eb9ac1dafeb31ab" }
+  },
+  {
+    "symbol": "redpanda",
+    "platforms": { "ethereum": "0x514cdb9cd8a2fb2bdcf7a3b8ddd098caf466e548" }
+  },
+  {
+    "symbol": "reef",
+    "platforms": { "ethereum": "0xfe3e6a25e6b192a42a44ecddcd13796471735acf" }
+  },
+  {
+    "symbol": "reeth",
+    "platforms": { "ethereum": "0xe804964c296e9fb666fbe67767838c1ff9ab3209" }
+  },
+  {
+    "symbol": "rfr",
+    "platforms": { "ethereum": "0xd0929d411954c47438dc1d871dd6081f5c5e149c" }
+  },
+  {
+    "symbol": "refi",
+    "platforms": { "ethereum": "0xa808b22ffd2c472ad1278088f16d4010e6a54d5f" }
+  },
+  {
+    "symbol": "xrm",
+    "platforms": { "ethereum": "0xe1329ebf8b719881549909d689987f746a8931d1" }
+  },
+  {
+    "symbol": "rfi",
+    "platforms": { "ethereum": "0xa1afffe3f4d611d252010e3eaf6f4d77088b0cd7" }
+  },
+  {
+    "symbol": "rfctr",
+    "platforms": { "ethereum": "0x16b1eb8b8e9058800bf0ba3684f805a6711a1d2c" }
+  },
+  {
+    "symbol": "rfx",
+    "platforms": { "ethereum": "0x159a1dfae19057de57dfffcbb3da1ae784678965" }
+  },
+  {
+    "symbol": "flx",
+    "platforms": { "ethereum": "0x6243d8cea23066d098a15582d81a598b4e8391f4" }
+  },
+  {
+    "symbol": "efk",
+    "platforms": { "ethereum": "0x6653c0d21507573cc39ead1e609d74d5e0ca16e2" }
+  },
+  {
+    "symbol": "rfr",
+    "platforms": { "ethereum": "0xe0bdaafd0aab238c55d68ad54e616305d4a21772" }
+  },
+  {
+    "symbol": "rkt",
+    "platforms": { "ethereum": "0x4cab0abc80fe1c0521cbb5e9810a1c88c3942f91" }
+  },
+  {
+    "symbol": "relay",
+    "platforms": { "ethereum": "0x5d843fa9495d23de997c394296ac7b4d721e841c" }
+  },
+  {
+    "symbol": "rel",
+    "platforms": { "ethereum": "0x61bfc979ea8160ede9b862798b7833a97bafa02a" }
+  },
+  {
+    "symbol": "rel",
+    "platforms": { "ethereum": "0xb6c4267c4877bb0d6b1685cfd85b0fbe82f105ec" }
+  },
+  {
+    "symbol": "rlx",
+    "platforms": { "ethereum": "0x4a42d2c580f83dce404acad18dab26db11a1750e" }
+  },
+  {
+    "symbol": "reli",
+    "platforms": { "ethereum": "0x0e58ed58e150dba5fd8e5d4a49f54c7e1e880124" }
+  },
+  {
+    "symbol": "rem",
+    "platforms": { "ethereum": "0x83984d6142934bb535793a82adb0a46ef0f66b6d" }
+  },
+  {
+    "symbol": "rena",
+    "platforms": { "ethereum": "0x56de8bc61346321d4f2211e3ac3c0a7f00db9b76" }
+  },
+  {
+    "symbol": "renbch",
+    "platforms": { "ethereum": "0x459086f2376525bdceba5bdda135e4e9d3fef5bf" }
+  },
+  {
+    "symbol": "renbtc",
+    "platforms": { "ethereum": "0xeb4c2781e4eba804ce9a9803c67d0893436bb27d" }
+  },
+  {
+    "symbol": "rndr",
+    "platforms": { "ethereum": "0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24" }
+  },
+  {
+    "symbol": "rendoge",
+    "platforms": { "ethereum": "0x3832d2f059e55934220881f831be501d180671a7" }
+  },
+  {
+    "symbol": "renfil",
+    "platforms": { "ethereum": "0xd5147bc8e386d91cc5dbe72099dac6c9b99276f5" }
+  },
+  {
+    "symbol": "berry",
+    "platforms": { "ethereum": "0x6aeb95f06cda84ca345c2de0f3b7f96923a44f4c" }
+  },
+  {
+    "symbol": "rnb",
+    "platforms": { "ethereum": "0x2a039b1d9bbdccbb91be28691b730ca893e5e743" }
+  },
+  {
+    "symbol": "renzec",
+    "platforms": { "ethereum": "0x1c5db575e2ff833e46a2e9864c22f4b22e0b37c2" }
+  },
+  {
+    "symbol": "rptc",
+    "platforms": { "ethereum": "0x3b08c03fa8278cf81b9043b228183760376fcdbb" }
+  },
+  {
+    "symbol": "ren",
+    "platforms": { "ethereum": "0x408e41876cccdc0f92210600ef50372656052a38" }
+  },
+  {
+    "symbol": "req",
+    "platforms": { "ethereum": "0x8f8221afbb33998d8584a2b05749ba73c37a938a" }
+  },
+  {
+    "symbol": "rsv",
+    "platforms": { "ethereum": "0x196f4727526ea7fb1e17b2071b3d8eaa38486988" }
+  },
+  {
+    "symbol": "rsr",
+    "platforms": { "ethereum": "0x8762db106b2c2a0bccb3a80d1ed41273552616e8" }
+  },
+  {
+    "symbol": "res",
+    "platforms": { "ethereum": "0x0a9f693fce6f00a51a8e0db4351b5a8078b4242e" }
+  },
+  {
+    "symbol": "mwat",
+    "platforms": { "ethereum": "0x6425c6be902d692ae2db752b3c268afadb099d3b" }
+  },
+  {
+    "symbol": "reth",
+    "platforms": { "ethereum": "0x9559aaa82d9649c7a7b220e7c461d2e74c9a3593" }
+  },
+  {
+    "symbol": "reth2",
+    "platforms": { "ethereum": "0x20bc832ca081b91433ff6c17f85701b6e92486c5" }
+  },
+  {
+    "symbol": "rok",
+    "platforms": { "ethereum": "0xe8689bcba2f6582c65c855b7b79fb4c4e6465af6" }
+  },
+  {
+    "symbol": "reu",
+    "platforms": { "ethereum": "0xa287fd349d80dfd2a8aee1c0d90f17281f24c061" }
+  },
+  {
+    "symbol": "rev",
+    "platforms": { "ethereum": "0x2ef52ed7de8c5ce03a4ef0efbe9b7450f2d7edc9" }
+  },
+  {
+    "symbol": "rev",
+    "platforms": { "ethereum": "0xe6be436df1ff96956dfe0b2b77fab84ede30236f" }
+  },
+  {
+    "symbol": "rvst",
+    "platforms": { "ethereum": "0x120a3879da835a5af037bb2d1456bebd6b54d4ba" }
+  },
+  {
+    "symbol": "rvp",
+    "platforms": { "ethereum": "0x17ef75aa22dd5f6c2763b8304ab24f40ee54d48a" }
+  },
+  {
+    "symbol": "revo",
+    "platforms": { "ethereum": "0x155040625d7ae3e9cada9a73e3e44f76d3ed1409" }
+  },
+  {
+    "symbol": "revv",
+    "platforms": { "ethereum": "0x557b933a7c2c45672b610f8954a3deb39a51a8ca" }
+  },
+  {
+    "symbol": "rew",
+    "platforms": { "ethereum": "0x3ffffa8f3cc943e43f9f17a83cbb18f4bbb9f4ac" }
+  },
+  {
+    "symbol": "rwd",
+    "platforms": { "ethereum": "0xd80f72a6558ec337e0d4cf76b8752b17fa770860" }
+  },
+  {
+    "symbol": "rex",
+    "platforms": { "ethereum": "0xf05a9382a4c3f29e2784502754293d88b835109c" }
+  },
+  {
+    "symbol": "rzrv",
+    "platforms": { "ethereum": "0xe70b94c2320fb0289db0cac0ccbd60dd8f51ff89" }
+  },
+  {
+    "symbol": "rfis",
+    "platforms": { "ethereum": "0xc82eb6dea0c93edb8b697b89ad1b13d19469d635" }
+  },
+  {
+    "symbol": "rhea",
+    "platforms": { "ethereum": "0xf7a219fffeade6cd98789da5642b687f743270eb" }
+  },
+  {
+    "symbol": "rhegic2",
+    "platforms": { "ethereum": "0xad7ca17e23f13982796d27d1e6406366def6ee5f" }
+  },
+  {
+    "symbol": "rbn",
+    "platforms": { "ethereum": "0x6123b0049f904d730db3c36a31167d9d4121fa6b" }
+  },
+  {
+    "symbol": "rice",
+    "platforms": { "ethereum": "0xbcd515d6c5de70d3a31d999a7fa6a299657de294" }
+  },
+  {
+    "symbol": "RICKMORTY",
+    "platforms": { "ethereum": "0x00b0e8d3d7a6275dea291111ff8480ea053cd719" }
+  },
+  {
+    "symbol": "rickmortydoxx",
+    "platforms": { "ethereum": "0x5d29011d843b0b1760c43e10d66f302174bccd1a" }
+  },
+  {
+    "symbol": "ridge",
+    "platforms": { "ethereum": "0x64609a845ad463d07ee51e91a88d1461c3dc3165" }
+  },
+  {
+    "symbol": "rdt",
+    "platforms": { "ethereum": "0x4740735aa98dc8aa232bd049f8f0210458e7fca3" }
+  },
+  {
+    "symbol": "rigel",
+    "platforms": { "ethereum": "0x4ca0654f4fc1025cf1a17b7459c20ac0479522ad" }
+  },
+  {
+    "symbol": "rgp",
+    "platforms": { "ethereum": "0x4af5ff1a60a6ef6c7c8f9c4e304cd9051fca3ec0" }
+  },
+  {
+    "symbol": "grg",
+    "platforms": { "ethereum": "0x4fbb350052bca5417566f188eb2ebce5b19bc964" }
+  },
+  {
+    "symbol": "rifi",
+    "platforms": { "ethereum": "0xc8ef1460277ea47d179dec66d1c5f8b7f7ae5a28" }
+  },
+  {
+    "symbol": "ringer",
+    "platforms": { "ethereum": "0x13edcc775f8895961b81db5c0205889b3afb3a16" }
+  },
+  {
+    "symbol": "ringx",
+    "platforms": { "ethereum": "0x7f86c782ec802ac402e0369d2e6d500256f7abc5" }
+  },
+  {
+    "symbol": "rfuel",
+    "platforms": { "ethereum": "0xaf9f549774ecedbd0966c52f250acc548d3f36e5" }
+  },
+  {
+    "symbol": "riot",
+    "platforms": { "ethereum": "0xf56408077487cb879c992909c5b5c66d68c02eb4" }
+  },
+  {
+    "symbol": "rcn",
+    "platforms": { "ethereum": "0xf970b8e36e23f7fc3fd752eea86f8be8d83375a6" }
+  },
+  {
+    "symbol": "rsct",
+    "platforms": { "ethereum": "0xc275865a6cce78398e94cb2af29fa0d787b7f7eb" }
+  },
+  {
+    "symbol": "rise",
+    "platforms": { "ethereum": "0x3fa807b6f8d4c407e6e605368f4372d14658b38c" }
+  },
+  {
+    "symbol": "ri",
+    "platforms": { "ethereum": "0x37e808f084101f75783612407e7c3f5f92d8ee3f" }
+  },
+  {
+    "symbol": "rvt",
+    "platforms": { "ethereum": "0x3d1ba9be9f66b8ee101911bc36d3fb562eac2244" }
+  },
+  {
+    "symbol": "rvx",
+    "platforms": { "ethereum": "0x91d6f6e9026e43240ce6f06af6a4b33129ebde94" }
+  },
+  {
+    "symbol": "rzn",
+    "platforms": { "ethereum": "0xd8c82fbc4d8ed0644a7ec04cf973e84c6153c1d7" }
+  },
+  {
+    "symbol": "robet",
+    "platforms": { "ethereum": "0x2344871f523cbb28a4f60045531184cf1f03ad24" }
+  },
+  {
+    "symbol": "robin",
+    "platforms": { "ethereum": "0x10b6bd5e0abab280ec1c5313ee04ccbe91a2ebae" }
+  },
+  {
+    "symbol": "rc20",
+    "platforms": { "ethereum": "0x61b2d3ea9f1c6b387c985c73d40e8fbfb284e5c7" }
+  },
+  {
+    "symbol": "rbif",
+    "platforms": { "ethereum": "0x7b32e70e8d73ac87c1b342e063528b2930b15ceb" }
+  },
+  {
+    "symbol": "xrt",
+    "platforms": { "ethereum": "0x7de91b204c1c737bcee6f000aaa6569cf7061cb7" }
+  },
+  {
+    "symbol": "rws",
+    "platforms": { "ethereum": "0x08ad83d779bdf2bbe1ad9cc0f78aa0d24ab97802" }
+  },
+  {
+    "symbol": "roboshib",
+    "platforms": { "ethereum": "0x0b48a744669767a3478293fd4eecb8fdc5d33cda" }
+  },
+  {
+    "symbol": "robot",
+    "platforms": { "ethereum": "0xfb5453340c03db5ade474b27e68b6a9c6b2823eb" }
+  },
+  {
+    "symbol": "rox",
+    "platforms": { "ethereum": "0x574f84108a98c575794f75483d801d1d5dc861a5" }
+  },
+  {
+    "symbol": "robo",
+    "platforms": { "ethereum": "0x6fc2f1044a3b9bb3e43a43ec8f840843ed753061" }
+  },
+  {
+    "symbol": "r3t",
+    "platforms": { "ethereum": "0x8c7424c3000942e5a93de4a01ce2ec86c06333cb" }
+  },
+  {
+    "symbol": "bunny",
+    "platforms": { "ethereum": "0x3ea50b7ef6a7eaf7e966e2cb72b519c16557497c" }
+  },
+  {
+    "symbol": "rpl",
+    "platforms": { "ethereum": "0xd33526068d116ce69f19a9ee46f0bd304f21a51f" }
+  },
+  {
+    "symbol": "rETH",
+    "platforms": { "ethereum": "0xae78736cd615f374d3085123a210448e74fc6393" }
+  },
+  {
+    "symbol": "rocketshib",
+    "platforms": { "ethereum": "0xfa3f495366c6f986cf178e198e71794c79822243" }
+  },
+  {
+    "symbol": "rckt",
+    "platforms": { "ethereum": "0x78571accaf24052795f98b11f093b488a2d9eaa4" }
+  },
+  {
+    "symbol": "rvf",
+    "platforms": { "ethereum": "0xdc8af07a7861bedd104b8093ae3e9376fc8596d2" }
+  },
+  {
+    "symbol": "rocki",
+    "platforms": { "ethereum": "0xff44b937788215eca197baaf9af69dbdc214aa04" }
+  },
+  {
+    "symbol": "roge",
+    "platforms": { "ethereum": "0x45734927fa2f616fbe19e65f42a0ef3d37d1c80a" }
+  },
+  {
+    "symbol": "rogue",
+    "platforms": { "ethereum": "0x6ac665c0de9a6ca72b85757b141aa9c428828aca" }
+  },
+  {
+    "symbol": "roobee",
+    "platforms": { "ethereum": "0xa31b1767e09f842ecfd4bc471fe44f830e3891aa" }
+  },
+  {
+    "symbol": "rook",
+    "platforms": { "ethereum": "0xfa5047c9c78b8877af97bdcb85db743fd7313d4a" }
+  },
+  {
+    "symbol": "rnx",
+    "platforms": { "ethereum": "0x72a6344185b383035d6665c3f44a9dfcc73873c8" }
+  },
+  {
+    "symbol": "root",
+    "platforms": { "ethereum": "0xcb5f72d37685c3d5ad0bb5f982443bc8fcdf570e" }
+  },
+  {
+    "symbol": "$rope",
+    "platforms": { "ethereum": "0x9d47894f8becb68b9cf3428d256311affe8b068b" }
+  },
+  {
+    "symbol": "rth",
+    "platforms": { "ethereum": "0x3fd8f39a962efda04956981c31ab89fab5fb8bc8" }
+  },
+  {
+    "symbol": "rot",
+    "platforms": { "ethereum": "0xd04785c4d8195e4a54d9dec3a9043872875ae9e2" }
+  },
+  {
+    "symbol": "xrge",
+    "platforms": { "ethereum": "0xa1c7d450130bb77c6a23ddfaecbc4a060215384b" }
+  },
+  {
+    "symbol": "route",
+    "platforms": { "ethereum": "0x16eccfdbb4ee1a85a33f3a9b21175cd7ae753db4" }
+  },
+  {
+    "symbol": "roya",
+    "platforms": { "ethereum": "0x7eaf9c89037e4814dc0d9952ac7f888c784548db" }
+  },
+  {
+    "symbol": "rbc",
+    "platforms": { "ethereum": "0xa4eed63db85311e22df4473f87ccfc3dadcfa3e3" }
+  },
+  {
+    "symbol": "rblx",
+    "platforms": { "ethereum": "0xfc2c4d8f95002c14ed0a7aa65102cac9e5953b5e" }
+  },
+  {
+    "symbol": "rbc",
+    "platforms": { "ethereum": "0x5590e22f78441da30463b55c3db0b5ea80cabcca" }
+  },
+  {
+    "symbol": "ruff",
+    "platforms": { "ethereum": "0xf278c1ca969095ffddded020290cf8b5c424ace2" }
+  },
+  {
+    "symbol": "rug",
+    "platforms": { "ethereum": "0xd0df3b1cf729a29b7404c40d61c750008e631ba7" }
+  },
+  {
+    "symbol": "rpt",
+    "platforms": { "ethereum": "0xa0bb0027c28ade4ac628b7f81e7b93ec71b4e020" }
+  },
+  {
+    "symbol": "rr",
+    "platforms": { "ethereum": "0x20d7089110c29498d17137f5d9656055105041d1" }
+  },
+  {
+    "symbol": "ruler",
+    "platforms": { "ethereum": "0x2aeccb42482cc64e087b6d2e5da39f5a7a7001f8" }
+  },
+  {
+    "symbol": "rtk",
+    "platforms": { "ethereum": "0x1f6deadcb526c4710cf941872b86dcdfbbbd9211" }
+  },
+  {
+    "symbol": "idrt",
+    "platforms": { "ethereum": "0x998ffe1e43facffb941dc337dd0468d52ba5b48a" }
+  },
+  {
+    "symbol": "ruc",
+    "platforms": { "ethereum": "0x395768aeb16484e5785612a98e9408e4cc1269ec" }
+  },
+  {
+    "symbol": "rush",
+    "platforms": { "ethereum": "0x5e17a18b3984f1d0db9efa8e13a1091ab7adcb30" }
+  },
+  {
+    "symbol": "ryip",
+    "platforms": { "ethereum": "0xd78e5b24aae1bd03a488af642770e2abb986f9d5" }
+  },
+  {
+    "symbol": "ryoshimoto",
+    "platforms": { "ethereum": "0xbe054615b779c7ca6249e4186252a95e4f6c52f4" }
+  },
+  {
+    "symbol": "ryoshi",
+    "platforms": { "ethereum": "0x777e2ae845272a2f540ebf6a3d03734a5a8f618e" }
+  },
+  {
+    "symbol": "$ryzeinu",
+    "platforms": { "ethereum": "0xa63deda2909a682ad6cc4558468cf2a64d90706e" }
+  },
+  {
+    "symbol": "s4f",
+    "platforms": { "ethereum": "0xaec7d1069e3a914a3eb50f0bfb1796751f2ce48a" }
+  },
+  {
+    "symbol": "saave",
+    "platforms": { "ethereum": "0xd2df355c19471c8bd7d8a3aa27ff4e26a21b4076" }
+  },
+  {
+    "symbol": "sacks",
+    "platforms": { "ethereum": "0xa6610ed604047e7b76c1da288172d15bcda57596" }
+  },
+  {
+    "symbol": "sada",
+    "platforms": { "ethereum": "0xe36e2d3c7c34281fa3bc737950a68571736880a1" }
+  },
+  {
+    "symbol": "scat",
+    "platforms": { "ethereum": "0x8424c5ac326834b404742de0067bcb654e86be30" }
+  },
+  {
+    "symbol": "sdl",
+    "platforms": { "ethereum": "0xf1dc500fde233a4055e25e5bbf516372bc4f6871" }
+  },
+  {
+    "symbol": "sfr",
+    "platforms": { "ethereum": "0x648d19d775a8d4bafba09e189090bdcbf8ef31c1" }
+  },
+  {
+    "symbol": "sbank",
+    "platforms": { "ethereum": "0x43acedd39ba4b0bfccd92897fce617fb90a971d8" }
+  },
+  {
+    "symbol": "safebtc",
+    "platforms": { "ethereum": "0x62d693fe5c13b5a5b24c9ec3f423e51c35f5624f" }
+  },
+  {
+    "symbol": "breast",
+    "platforms": { "ethereum": "0x77a2bf0bda9775fb3524a6720dd3b16bd455e2c2" }
+  },
+  {
+    "symbol": "safeearth",
+    "platforms": { "ethereum": "0xe6f1966d04cfcb9cd1b1dc4e8256d8b501b11cba" }
+  },
+  {
+    "symbol": "smi",
+    "platforms": { "ethereum": "0xcd7492db29e2ab436e819b249452ee1bbdf52214" }
+  },
+  {
+    "symbol": "sfshld",
+    "platforms": { "ethereum": "0x11a605d7e12b64d713e93c487277d819a1d14b99" }
+  },
+  {
+    "symbol": "ssgt",
+    "platforms": { "ethereum": "0x2ecc48ba346a73d7d55aa5a46b5e314d9daa6161" }
+  },
+  {
+    "symbol": "sfi",
+    "platforms": { "ethereum": "0xb753428af26e81097e7fd17f40c88aaa3e04902c" }
+  },
+  {
+    "symbol": "sai",
+    "platforms": { "ethereum": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359" }
+  },
+  {
+    "symbol": "saint",
+    "platforms": { "ethereum": "0x6fc5af63990aa9e5c5543f5cd8ed148bfa6d9d19" }
+  },
+  {
+    "symbol": "saitama",
+    "platforms": { "ethereum": "0x8b3192f5eebd8579568a2ed41e6feb402f93f73f" }
+  },
+  {
+    "symbol": "saitax",
+    "platforms": { "ethereum": "0xc795fba221f7920f1c6ac0f1598886742d8ea661" }
+  },
+  {
+    "symbol": "saito",
+    "platforms": { "ethereum": "0xfa14fa6958401314851a17d6c5360ca29f74b57b" }
+  },
+  {
+    "symbol": "saja",
+    "platforms": { "ethereum": "0x698c6ac9ca5f16cabc5a636d3a619329c0958cba" }
+  },
+  {
+    "symbol": "sak3",
+    "platforms": { "ethereum": "0xe9f84de264e91529af07fa2c746e934397810334" }
+  },
+  {
+    "symbol": "sakata",
+    "platforms": { "ethereum": "0xcfe6f0b007e817ca0ed2f1b7581d1dea213d07ae" }
+  },
+  {
+    "symbol": "sake",
+    "platforms": { "ethereum": "0x066798d9ef0833ccc719076dab77199ecbd178b0" }
+  },
+  {
+    "symbol": "SAHU",
+    "platforms": { "ethereum": "0x2b1fe2cea92436e8c34b7c215af66aaa2932a8b2" }
+  },
+  {
+    "symbol": "skb",
+    "platforms": { "ethereum": "0x4af328c52921706dcb739f25786210499169afe6" }
+  },
+  {
+    "symbol": "salt",
+    "platforms": { "ethereum": "0x4156d3342d5c385a87d264f90653733592000581" }
+  },
+  {
+    "symbol": "sam",
+    "platforms": { "ethereum": "0x53378825d95281737914a8a2ac0e5a9304ae5ed7" }
+  },
+  {
+    "symbol": "quartz",
+    "platforms": { "ethereum": "0xba8a621b4a54e61c442f5ec623687e2a942225ef" }
+  },
+  {
+    "symbol": "sanshu",
+    "platforms": { "ethereum": "0xc73c167e7a4ba109e4052f70d5466d0c312a344d" }
+  },
+  {
+    "symbol": "SC",
+    "platforms": { "ethereum": "0x9dcb90ac6e5ef95797233a49a7da903cc27aaf39" }
+  },
+  {
+    "symbol": "san",
+    "platforms": { "ethereum": "0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098" }
+  },
+  {
+    "symbol": "sap",
+    "platforms": { "ethereum": "0x91f529e972d6cf43d36abfa91c1118122ff7f16c" }
+  },
+  {
+    "symbol": "spn",
+    "platforms": { "ethereum": "0x20f7a3ddf244dc9299975b4da1c39f8d5d75f05a" }
+  },
+  {
+    "symbol": "sarco",
+    "platforms": { "ethereum": "0x7697b462a7c4ff5f8b55bdbc2f4076c2af9cf51a" }
+  },
+  {
+    "symbol": "sar",
+    "platforms": { "ethereum": "0xbd4a858139b155219e2c8d10135003fdef720b6b" }
+  },
+  {
+    "symbol": "sashimi",
+    "platforms": { "ethereum": "0xc28e27870558cf22add83540d2126da2e4b464c2" }
+  },
+  {
+    "symbol": "SINU",
+    "platforms": { "ethereum": "0xd32ed17bc769c7a252a64bd915d6db8f70ca5113" }
+  },
+  {
+    "symbol": "satx",
+    "platforms": { "ethereum": "0xe96f2c381e267a96c29bbb8ab05ab7d3527b45ab" }
+  },
+  {
+    "symbol": "stop",
+    "platforms": { "ethereum": "0x8c3ee4f778e282b59d42d693a97b80b1ed80f4ee" }
+  },
+  {
+    "symbol": "spy",
+    "platforms": { "ethereum": "0xe4883bcb919386bb5f48ef59b7c31c1d93a51a57" }
+  },
+  {
+    "symbol": "sao",
+    "platforms": { "ethereum": "0x3ef389f264e07fff3106a3926f2a166d1393086f" }
+  },
+  {
+    "symbol": "sato",
+    "platforms": { "ethereum": "0xaf6f6abf18d2cc611921e6a683164efaa9165b43" }
+  },
+  {
+    "symbol": "satt",
+    "platforms": { "ethereum": "0xdf49c9f599a0a9049d97cff34d0c30e468987389" }
+  },
+  {
+    "symbol": "saud",
+    "platforms": { "ethereum": "0xf48e200eaf9906362bb1442fca31e0835773b8b4" }
+  },
+  {
+    "symbol": "sav3",
+    "platforms": { "ethereum": "0x6e10aacb89a28d6fa0fe68790777fec7e7f01890" }
+  },
+  {
+    "symbol": "sbrt",
+    "platforms": { "ethereum": "0x606ce698aea1dca5a2627a4583da13a340667f09" }
+  },
+  {
+    "symbol": "save",
+    "platforms": { "ethereum": "0xc1eecf1f4af8eb9a2a19f6c26b434aa96ce859e1" }
+  },
+  {
+    "symbol": "svx",
+    "platforms": { "ethereum": "0xc434b27736a6882d33094d34792999702860a13c" }
+  },
+  {
+    "symbol": "sts",
+    "platforms": { "ethereum": "0x4c14114c107d6374ec31981f5f6cc27a13e22f9a" }
+  },
+  {
+    "symbol": "sbland",
+    "platforms": { "ethereum": "0x63aa9d05c025279f8e963ba784f1254814c1e12b" }
+  },
+  {
+    "symbol": "sbtc",
+    "platforms": { "ethereum": "0xfe18be6b3bd88a2d2a7f928d00292e7a9963cfc6" }
+  },
+  {
+    "symbol": "sca",
+    "platforms": { "ethereum": "0x1fbd3df007eb8a7477a1eab2c63483dcc24effd6" }
+  },
+  {
+    "symbol": "swc",
+    "platforms": { "ethereum": "0xadf8b8050639b6236915f7516d69de714672f0bf" }
+  },
+  {
+    "symbol": "scx",
+    "platforms": { "ethereum": "0x1b8568fbb47708e9e9d31ff303254f748805bf21" }
+  },
+  {
+    "symbol": "stt",
+    "platforms": { "ethereum": "0xac9bb427953ac7fddc562adca86cf42d988047fd" }
+  },
+  {
+    "symbol": "scha",
+    "platforms": { "ethereum": "0x2cad4991f62fc6fcd8ec219f37e7de52b688b75a" }
+  },
+  {
+    "symbol": "snood",
+    "platforms": { "ethereum": "0xd45740ab9ec920bedbd9bab2e863519e59731941" }
+  },
+  {
+    "symbol": "kitty dinger",
+    "platforms": { "ethereum": "0x2c33b28527a63cdf13c0b24ce4cf5bf9c9fb3bc6" }
+  },
+  {
+    "symbol": "scc",
+    "platforms": { "ethereum": "0x4a9f00de5d8a244944313faee23849ff725e680d" }
+  },
+  {
+    "symbol": "scifi",
+    "platforms": { "ethereum": "0xfdc4a3fc36df16a78edcaf1b837d3acaaedb2cb4" }
+  },
+  {
+    "symbol": "scoobi",
+    "platforms": { "ethereum": "0x06a87f6afec4a739c367bef69eefe383d27106bd" }
+  },
+  {
+    "symbol": "xd",
+    "platforms": { "ethereum": "0x24dcc881e7dd730546834452f21872d5cb4b5293" }
+  },
+  {
+    "symbol": "ddd",
+    "platforms": { "ethereum": "0x9f5f3cfd7a32700c93f971637407ff17b91c7342" }
+  },
+  {
+    "symbol": "sdefi",
+    "platforms": { "ethereum": "0xe1afe1fd76fd88f78cbf599ea1846231b8ba3b6b" }
+  },
+  {
+    "symbol": "sdot",
+    "platforms": { "ethereum": "0x1715ac0743102bf5cd58efbb6cf2dc2685d967b6" }
+  },
+  {
+    "symbol": "sead",
+    "platforms": { "ethereum": "0x936862d34b930b85272f65e94d5b6ec469f95ff7" }
+  },
+  {
+    "symbol": "snn",
+    "platforms": { "ethereum": "0xf5717f5df41ea67ef67dfd3c1d02f9940bcf5d08" }
+  },
+  {
+    "symbol": "wscrt",
+    "platforms": { "ethereum": "0x2b89bf8ba858cd2fcee1fada378d5cd6936968be" }
+  },
+  {
+    "symbol": "sefi",
+    "platforms": { "ethereum": "0x773258b03c730f84af10dfcb1bfaa7487558b8ac" }
+  },
+  {
+    "symbol": "sepa",
+    "platforms": { "ethereum": "0x10994aa2fb8e6ba5d9fb2bc127ff228c4fe6167f" }
+  },
+  {
+    "symbol": "sedo",
+    "platforms": { "ethereum": "0x0f00f1696218eaefa2d2330df3d6d1f94813b38f" }
+  },
+  {
+    "symbol": "snft",
+    "platforms": { "ethereum": "0xa3c4dc4a9ce2a6b40b57f25f8b50decc2c64dec2" }
+  },
+  {
+    "symbol": "seed",
+    "platforms": { "ethereum": "0xc969e16e63ff31ad4bcac3095c616644e6912d79" }
+  },
+  {
+    "symbol": "seele",
+    "platforms": { "ethereum": "0xb1e93236ab6073fdac58ada5564897177d4bcc43" }
+  },
+  {
+    "symbol": "seen",
+    "platforms": { "ethereum": "0xca3fe04c7ee111f0bbb02c328c699226acf9fd33" }
+  },
+  {
+    "symbol": "seer",
+    "platforms": { "ethereum": "0x0f1ed66c251bcb52ecf7e67ac64bb72482048adb" }
+  },
+  {
+    "symbol": "share",
+    "platforms": { "ethereum": "0x39795344cbcc76cc3fb94b9d1b15c23c2070c66d" }
+  },
+  {
+    "symbol": "skrt",
+    "platforms": { "ethereum": "0x887168120cb89fb06f3e74dc4af20d67df0977f6" }
+  },
+  {
+    "symbol": "slc",
+    "platforms": { "ethereum": "0x2ac22ebc138ff127566f68db600addad7df38d38" }
+  },
+  {
+    "symbol": "key",
+    "platforms": { "ethereum": "0x4cc19356f2d37338b9802aa8e8fc58b0373296e7" }
+  },
+  {
+    "symbol": "stor",
+    "platforms": { "ethereum": "0xa3ceac0aac5c5d868973e546ce4731ba90e873c2" }
+  },
+  {
+    "symbol": "semi",
+    "platforms": { "ethereum": "0x6d7917864003a9bb13cbbec8f1cdd4e36ddf6fc8" }
+  },
+  {
+    "symbol": "senate",
+    "platforms": { "ethereum": "0x34be5b8c30ee4fde069dc878989686abe9884470" }
+  },
+  {
+    "symbol": "karen",
+    "platforms": { "ethereum": "0x2881080650b782a48b03a1f5bd30df117b6a5bd5" }
+  },
+  {
+    "symbol": "sets",
+    "platforms": { "ethereum": "0x04e0af0af1b7f0023c6b12af5a94df59b0e8cf59" }
+  },
+  {
+    "symbol": "senso",
+    "platforms": { "ethereum": "0xc19b6a4ac7c7cc24459f08984bbd09664af17bd1" }
+  },
+  {
+    "symbol": "sent",
+    "platforms": { "ethereum": "0x97abee33cd075c58bfdd174e0885e08e8f03556f" }
+  },
+  {
+    "symbol": "senc",
+    "platforms": { "ethereum": "0xa13f0743951b4f6e3e3aa039f682e17279f52bc3" }
+  },
+  {
+    "symbol": "dvpn",
+    "platforms": { "ethereum": "0xa44e5137293e855b1b7bc7e2c6f8cd796ffcb037" }
+  },
+  {
+    "symbol": "upp",
+    "platforms": { "ethereum": "0xc86d054809623432210c107af2e3f619dcfbf652" }
+  },
+  {
+    "symbol": "sntvt",
+    "platforms": { "ethereum": "0x7865af71cf0b288b4e7f654f4f7851eb46a2b7f8" }
+  },
+  {
+    "symbol": "ser",
+    "platforms": { "ethereum": "0x8b7f304dcd5aa864e63994f4171bd0a151f0bfcf" }
+  },
+  {
+    "symbol": "serbiancavehermit",
+    "platforms": { "ethereum": "0xe71612d0a06d1fa03f581d601fea59710b467e51" }
+  },
+  {
+    "symbol": "srnt",
+    "platforms": { "ethereum": "0xbc7942054f77b82e8a71ace170e4b00ebae67eb6" }
+  },
+  {
+    "symbol": "ssl",
+    "platforms": { "ethereum": "0x0d9227f9c4ab3972f994fccc6eeba3213c0305c4" }
+  },
+  {
+    "symbol": "sergs",
+    "platforms": { "ethereum": "0x79ba92dda26fce15e1e9af47d5cfdfd2a093e000" }
+  },
+  {
+    "symbol": "srm",
+    "platforms": { "ethereum": "0x476c5e26a75bd202a9683ffd34359c0cc15be0ff" }
+  },
+  {
+    "symbol": "kicks",
+    "platforms": { "ethereum": "0xd91a6162f146ef85922d9a15ee6eb14a00344586" }
+  },
+  {
+    "symbol": "seth",
+    "platforms": { "ethereum": "0x5e74c9036fb86bd7ecdcb084a0673efc32ea31cb" }
+  },
+  {
+    "symbol": "seth2",
+    "platforms": { "ethereum": "0xfe2e637202056d30016725477c5da089ab0a043a" }
+  },
+  {
+    "symbol": "seth",
+    "platforms": { "ethereum": "0x78b039921e84e726eb72e7b1212bb35504c645ca" }
+  },
+  {
+    "symbol": "seur",
+    "platforms": { "ethereum": "0xd71ecff9342a5ced620049e616c5035f1db98620" }
+  },
+  {
+    "symbol": "chiz",
+    "platforms": { "ethereum": "0x5c761c1a21637362374204000e383204d347064c" }
+  },
+  {
+    "symbol": "sfcp",
+    "platforms": { "ethereum": "0x8b6cda5cc518c904e8844f445e1a7c7d2db0ff16" }
+  },
+  {
+    "symbol": "sfg",
+    "platforms": { "ethereum": "0x8a6aca71a218301c7081d4e96d64292d3b275ce0" }
+  },
+  {
+    "symbol": "sg20",
+    "platforms": { "ethereum": "0x91a7769afcf796a3c8fff879ed80b10dd76d3ccd" }
+  },
+  {
+    "symbol": "kobe",
+    "platforms": { "ethereum": "0xcb4e8cafeda995da5cedfda5205bd5664a12b848" }
+  },
+  {
+    "symbol": "dows",
+    "platforms": { "ethereum": "0x661ab0ed68000491d98c796146bcf28c20d7c559" }
+  },
+  {
+    "symbol": "shaman",
+    "platforms": { "ethereum": "0xf98e38c3f287304a1f2d4879e741d2bf55474e84" }
+  },
+  {
+    "symbol": "fox",
+    "platforms": { "ethereum": "0xc770eefad204b5180df6a14ee197d99d808ee52d" }
+  },
+  {
+    "symbol": "shard",
+    "platforms": { "ethereum": "0xbebdab6da046bc49ffbb61fbd7b33157eb270d05" }
+  },
+  {
+    "symbol": "ss",
+    "platforms": { "ethereum": "0xbbff862d906e348e9946bfb2132ecb157da3d4b4" }
+  },
+  {
+    "symbol": "shd",
+    "platforms": { "ethereum": "0x5845cd0205b5d43af695412a79cf7c1aeddb060f" }
+  },
+  {
+    "symbol": "ult",
+    "platforms": { "ethereum": "0x09617f6fd6cf8a71278ec86e23bbab29c04353a7" }
+  },
+  {
+    "symbol": "xat",
+    "platforms": { "ethereum": "0x01c8857057326b8f64dcb5cba6d802dcd132946e" }
+  },
+  {
+    "symbol": "sgtv2",
+    "platforms": { "ethereum": "0x24c19f7101c1731b85f1127eaa0407732e36ecdd" }
+  },
+  {
+    "symbol": "shr",
+    "platforms": { "ethereum": "0xd98f75b1a3261dab9eed4956c93f33749027a964" }
+  },
+  {
+    "symbol": "$shari",
+    "platforms": { "ethereum": "0x2df488b8a4270bac5c2ce5ff467a0c5fd2aa49d6" }
+  },
+  {
+    "symbol": "s",
+    "platforms": { "ethereum": "0x96b0bf939d9460095c15251f71fda11e41dcbddb" }
+  },
+  {
+    "symbol": "sbecom",
+    "platforms": { "ethereum": "0x888e88e71378133b7ada5a90c08bc97d772a0a28" }
+  },
+  {
+    "symbol": "shinu",
+    "platforms": { "ethereum": "0x71beff5533dd4c0a47b739da50c56a2dd28633fa" }
+  },
+  {
+    "symbol": "sheng",
+    "platforms": { "ethereum": "0x22ef3753e3658e81d5a0d0889ce078178fe66595" }
+  },
+  {
+    "symbol": "shoco",
+    "platforms": { "ethereum": "0x322080dae6752ee02f2fb8850bd4a75b9f3c1371" }
+  },
+  {
+    "symbol": "nimbus",
+    "platforms": { "ethereum": "0x645035d009182b480fe554d2926664105d62c309" }
+  },
+  {
+    "symbol": "shibco",
+    "platforms": { "ethereum": "0xc5c43ad81e6c76eaa1f2dd92cb6a11ff6b6d09ea" }
+  },
+  {
+    "symbol": "shib",
+    "platforms": { "ethereum": "0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce" }
+  },
+  {
+    "symbol": "shibaken",
+    "platforms": { "ethereum": "0xa4cf2afd3b165975afffbf7e487cdd40c894ab6b" }
+  },
+  {
+    "symbol": "shibal",
+    "platforms": { "ethereum": "0x77f39c61ddac121ca1b24fdea984fab734fdce8f" }
+  },
+  {
+    "symbol": "slink",
+    "platforms": { "ethereum": "0x3de7148c41e3b3233f3310e794f68d8e70ca69af" }
+  },
+  {
+    "symbol": "smax",
+    "platforms": { "ethereum": "0x8fa025e8342ead1037d2954b95333ff2bf57162b" }
+  },
+  {
+    "symbol": "shibamon",
+    "platforms": { "ethereum": "0x36b00c4c6ce3653a091c7940fc98c3acb0043871" }
+  },
+  {
+    "symbol": "shibaramen",
+    "platforms": { "ethereum": "0xb2e20502c7593674509b8384ed9240a03869faf3" }
+  },
+  {
+    "symbol": "sswim",
+    "platforms": { "ethereum": "0x6936f1dcd8c2e3a69469311a130858174f9f0a15" }
+  },
+  {
+    "symbol": "VERSE",
+    "platforms": { "ethereum": "0x7ae0d42f23c33338de15bfa89c7405c068d9dc0a" }
+  },
+  {
+    "symbol": "shibboo",
+    "platforms": { "ethereum": "0x2e1368fe7b9cbb3f777c2d85e9e804f8f67d7074" }
+  },
+  {
+    "symbol": "shibelon",
+    "platforms": { "ethereum": "0xef66f8c4224b423888a64f0157e56756459c2cf8" }
+  },
+  {
+    "symbol": "shiberus",
+    "platforms": { "ethereum": "0x2dfac6327dce9f88e31ff46de13049eca5a7dfcb" }
+  },
+  {
+    "symbol": "shibgf",
+    "platforms": { "ethereum": "0x505a84a03e382331a1be487b632cf357748b65d6" }
+  },
+  {
+    "symbol": "shibmerican",
+    "platforms": { "ethereum": "0x440238cc07186adea6653a2e8cb9a24737615609" }
+  },
+  {
+    "symbol": "shinja",
+    "platforms": { "ethereum": "0xab167e816e4d76089119900e941befdfa37d6b32" }
+  },
+  {
+    "symbol": "SRWD",
+    "platforms": { "ethereum": "0xa518c9f3724cced4715e6813858dc2ce9b21ed78" }
+  },
+  {
+    "symbol": "sld",
+    "platforms": { "ethereum": "0x1ef6a7e2c966fb7c5403efefde38338b1a95a084" }
+  },
+  {
+    "symbol": "shld",
+    "platforms": { "ethereum": "0xd49efa7bc0d339d74f487959c573d518ba3f8437" }
+  },
+  {
+    "symbol": "shih",
+    "platforms": { "ethereum": "0x841fb148863454a3b3570f515414759be9091465" }
+  },
+  {
+    "symbol": "shokk",
+    "platforms": { "ethereum": "0xec0bf0e934d092d31e769e8c9722ffbaa582db3b" }
+  },
+  {
+    "symbol": "posh",
+    "platforms": { "ethereum": "0x685aea4f02e39e5a5bb7f7117e88db1151f38364" }
+  },
+  {
+    "symbol": "shinnosuke",
+    "platforms": { "ethereum": "0xbaa9af8a83500ac4137c555b9e58ccb3e1f2269d" }
+  },
+  {
+    "symbol": "scoin",
+    "platforms": { "ethereum": "0x3f5df2f90df67e10974fbcb1729c00d3f87c0eb4" }
+  },
+  {
+    "symbol": "she",
+    "platforms": { "ethereum": "0x9064c91e51d7021a85ad96817e1432abf6624470" }
+  },
+  {
+    "symbol": "shn",
+    "platforms": { "ethereum": "0x1c7ede23b1361acc098a1e357c9085d131b34a01" }
+  },
+  {
+    "symbol": "shinu",
+    "platforms": { "ethereum": "0xa1ab427451f19df7445a22dea7073800ea3b687f" }
+  },
+  {
+    "symbol": "shiny",
+    "platforms": { "ethereum": "0xc150bac3cd3678acb2c093e433bed40a6ef08542" }
+  },
+  {
+    "symbol": "ship",
+    "platforms": { "ethereum": "0xe25b0bba01dc5630312b6a21927e578061a13f55" }
+  },
+  {
+    "symbol": "shpp",
+    "platforms": { "ethereum": "0x13b1e6b036ac0a1495f876313f92a0706cc10871" }
+  },
+  {
+    "symbol": "shr",
+    "platforms": { "ethereum": "0x04a5198063e45d84b1999516d3228167146417a6" }
+  },
+  {
+    "symbol": "shiryo-inu",
+    "platforms": { "ethereum": "0x1e2f15302b90edde696593607b6bd444b64e8f02" }
+  },
+  {
+    "symbol": "shit",
+    "platforms": { "ethereum": "0xaa7fb1c8ce6f18d4fd4aabb61a2193d4d441c54f" }
+  },
+  {
+    "symbol": "shitzuinu",
+    "platforms": { "ethereum": "0xddf825aa40aba689e040fd9be863573999314773" }
+  },
+  {
+    "symbol": "shkooby",
+    "platforms": { "ethereum": "0x29a5c1db7321c5c9eae57f9366ee8eef00ca11fb" }
+  },
+  {
+    "symbol": "shoe",
+    "platforms": { "ethereum": "0x0fd67b4ceb9b607ef206904ec73459c4880132c9" }
+  },
+  {
+    "symbol": "shokky",
+    "platforms": { "ethereum": "0xb02db7bd0cbc93a31f3c92349b4a206368174fc0" }
+  },
+  {
+    "symbol": "spi",
+    "platforms": { "ethereum": "0x9b02dd390a603add5c07f9fd9175b7dabe8d63b7" }
+  },
+  {
+    "symbol": "sho",
+    "platforms": { "ethereum": "0xcc0014ccb39f6e86b1be0f17859a783b6722722f" }
+  },
+  {
+    "symbol": "hand",
+    "platforms": { "ethereum": "0x48c1b2f3efa85fbafb2ab951bf4ba860a08cdbb7" }
+  },
+  {
+    "symbol": "shping",
+    "platforms": { "ethereum": "0x7c84e62859d0715eb77d1b1c4154ecd6abb21bec" }
+  },
+  {
+    "symbol": "shrimp",
+    "platforms": { "ethereum": "0x38c4102d11893351ced7ef187fcf43d33eb1abe6" }
+  },
+  {
+    "symbol": "shroom",
+    "platforms": { "ethereum": "0xed0439eacf4c4965ae4613d77a5c2efe10e5f183" }
+  },
+  {
+    "symbol": "shfl",
+    "platforms": { "ethereum": "0x8c9d0e9d27fb15a96cd8ad714929502f4f1995bf" }
+  },
+  {
+    "symbol": "shuf",
+    "platforms": { "ethereum": "0x3a9fff453d50d4ac52a6890647b823379ba36b9e" }
+  },
+  {
+    "symbol": "shunav",
+    "platforms": { "ethereum": "0x804b95789aed9f1a8e6907625c90f0d4a7b4c75d" }
+  },
+  {
+    "symbol": "shft",
+    "platforms": { "ethereum": "0xb17c88bda07d28b3838e0c1de6a30eafbcf52d85" }
+  },
+  {
+    "symbol": "si14",
+    "platforms": { "ethereum": "0x8b98df4dff429e64e9a56fc6eebe2380c6c3409c" }
+  },
+  {
+    "symbol": "scc",
+    "platforms": { "ethereum": "0x74fd51a98a4a1ecbef8cc43be801cce630e260bd" }
+  },
+  {
+    "symbol": "sbtc",
+    "platforms": { "ethereum": "0xb8e103b60a33597136ea9511f46b6dbeb643a3a5" }
+  },
+  {
+    "symbol": "shusky",
+    "platforms": { "ethereum": "0x236d53148f83706c3d670064809577385f923a75" }
+  },
+  {
+    "symbol": "xai",
+    "platforms": { "ethereum": "0x35e78b3982e87ecfd5b3f3265b601c046cdbe232" }
+  },
+  {
+    "symbol": "sidus",
+    "platforms": { "ethereum": "0x549020a9cb845220d66d3e9c6d9f9ef61c981102" }
+  },
+  {
+    "symbol": "wsienna",
+    "platforms": { "ethereum": "0x9b00e6e8d787b13756eb919786c9745054db64f9" }
+  },
+  {
+    "symbol": "erowan",
+    "platforms": { "ethereum": "0x07bac35846e5ed502aa91adf6a9e7aa210f2dcbe" }
+  },
+  {
+    "symbol": "sig",
+    "platforms": { "ethereum": "0x6888a16ea9792c15a4dcf2f6c623d055c8ede792" }
+  },
+  {
+    "symbol": "sata",
+    "platforms": { "ethereum": "0x3ebb4a4e91ad83be51f8d596533818b246f4bee1" }
+  },
+  {
+    "symbol": "ubsn",
+    "platforms": { "ethereum": "0x2859021ee7f2cb10162e67f33af2d22764b31aff" }
+  },
+  {
+    "symbol": "silk",
+    "platforms": { "ethereum": "0x4c1e085d8c2d2a8377834d0d7b38f12cc5b86898" }
+  },
+  {
+    "symbol": "silo",
+    "platforms": { "ethereum": "0x6f80310ca7f2c654691d1383149fa1a57d8ab1f8" }
+  },
+  {
+    "symbol": "slvt",
+    "platforms": { "ethereum": "0x652594082f97392a1703d80985ab575085f34a4e" }
+  },
+  {
+    "symbol": "slv",
+    "platforms": { "ethereum": "0x4c1c4957d22d8f373aed54d0853b090666f6f9de" }
+  },
+  {
+    "symbol": "sst",
+    "platforms": { "ethereum": "0x2863916c6ebdbbf0c6f02f87b7eb478509299868" }
+  },
+  {
+    "symbol": "simba",
+    "platforms": { "ethereum": "0x254417f7b56328a48f554b173dca7bdda7a2a0d2" }
+  },
+  {
+    "symbol": "smbswap",
+    "platforms": { "ethereum": "0x53bd789f2cdb846b227d8ffc7b46ed4263231fdf" }
+  },
+  {
+    "symbol": "sifi",
+    "platforms": { "ethereum": "0x4afb0aac9b862946837b2444566b8a914d6d0d97" }
+  },
+  {
+    "symbol": "ost",
+    "platforms": { "ethereum": "0x2c4e8f2d746113d0696ce89b35f0d8bf88e0aeca" }
+  },
+  {
+    "symbol": "src",
+    "platforms": { "ethereum": "0x16587cf43f044aba0165ffa00acf412631194e4b" }
+  },
+  {
+    "symbol": "sngls",
+    "platforms": { "ethereum": "0xaec2e87e0a235266d9c5adc9deb4b2e29b54d009" }
+  },
+  {
+    "symbol": "sdao",
+    "platforms": { "ethereum": "0x993864e43caa7f7f12953ad6feb1d1ca635b875f" }
+  },
+  {
+    "symbol": "agix",
+    "platforms": { "ethereum": "0x5b7533812759b45c2b44c19e320ba2cd2681b542" }
+  },
+  {
+    "symbol": "sipher",
+    "platforms": { "ethereum": "0x9f52c8ecbee10e00d9faaac5ee9ba0ff6550f511" }
+  },
+  {
+    "symbol": "si",
+    "platforms": { "ethereum": "0xd23ac27148af6a2f339bd82d0e3cff380b5093de" }
+  },
+  {
+    "symbol": "srn",
+    "platforms": { "ethereum": "0x68d57c9a1c35f63e2c83ee8e49a64e9d70528d25" }
+  },
+  {
+    "symbol": "skl",
+    "platforms": { "ethereum": "0x00c83aecc790e8a4453e5dd3b0b4b3680501a7a7" }
+  },
+  {
+    "symbol": "skey",
+    "platforms": { "ethereum": "0x06a01a4d579479dd5d884ebf61a31727a3d8d442" }
+  },
+  {
+    "symbol": "ski",
+    "platforms": { "ethereum": "0x996dc5dfc819408dd98cd92c9a76f64b0738dc3d" }
+  },
+  {
+    "symbol": "skc",
+    "platforms": { "ethereum": "0x0fe156436f203b114c6c562cb1a2a81aa2801090" }
+  },
+  {
+    "symbol": "skin",
+    "platforms": { "ethereum": "0x2bdc0d42996017fce214b21607a515da41a9e0c5" }
+  },
+  {
+    "symbol": "skrp",
+    "platforms": { "ethereum": "0xfdfe8b7ab6cf1bd1e3d14538ef40686296c42052" }
+  },
+  {
+    "symbol": "skm",
+    "platforms": { "ethereum": "0x048fe49be32adfc9ed68c37d32b5ec9df17b3603" }
+  },
+  {
+    "symbol": "skull",
+    "platforms": { "ethereum": "0xbcc66ed2ab491e9ae7bf8386541fb17421fa9d35" }
+  },
+  {
+    "symbol": "candy",
+    "platforms": { "ethereum": "0x50eb346fc29a80d97563a50146c3fcf9423b5538" }
+  },
+  {
+    "symbol": "skyrim",
+    "platforms": { "ethereum": "0x2610f0bfc21ef389fe4d03cfb7de9ac1e6c99d6e" }
+  },
+  {
+    "symbol": "sky",
+    "platforms": { "ethereum": "0xd4ff0c24285c48f748fcfff926f52a824f1df834" }
+  },
+  {
+    "symbol": "slash",
+    "platforms": { "ethereum": "0x755e83f560335e6bb8e45e44460ec4af598e24c9" }
+  },
+  {
+    "symbol": "sleepy-shib",
+    "platforms": { "ethereum": "0xf8e1d008a98350abb4241139fbc851aaad51eda6" }
+  },
+  {
+    "symbol": "slink",
+    "platforms": { "ethereum": "0xbbc455cb4f1b9e4bfc4b73970d360c8f032efee6" }
+  },
+  {
+    "symbol": "slab",
+    "platforms": { "ethereum": "0xeb494890465f49c2b94457d9b61811392e5b1fea" }
+  },
+  {
+    "symbol": "slt",
+    "platforms": { "ethereum": "0xe9f3cb0229eb8d0aaf03ec84883950134ed20ddc" }
+  },
+  {
+    "symbol": "sdog",
+    "platforms": { "ethereum": "0x537edd52ebcb9f48ff2f8a28c51fcdb9d6a6e0d4" }
+  },
+  {
+    "symbol": "smac",
+    "platforms": { "ethereum": "0xb9964c8b9c48800678e72b2fe7b9b365d3d0019d" }
+  },
+  {
+    "symbol": "smartcredit",
+    "platforms": { "ethereum": "0x72e9d9038ce484ee986fea183f8d8df93f9ada13" }
+  },
+  {
+    "symbol": "smc",
+    "platforms": { "ethereum": "0xb6eda82597808c96969c21a88bf6c749b441c44a" }
+  },
+  {
+    "symbol": "smt",
+    "platforms": { "ethereum": "0x21f15966e07a10554c364b988e91dab01d32794a" }
+  },
+  {
+    "symbol": "mfg",
+    "platforms": { "ethereum": "0x6710c63432a2de02954fc0f851db07146a6c0312" }
+  },
+  {
+    "symbol": "aog",
+    "platforms": { "ethereum": "0x8578530205cecbe5db83f7f29ecfeec860c297c2" }
+  },
+  {
+    "symbol": "pad",
+    "platforms": { "ethereum": "0x5067006f830224960fb419d7f25a3a53e9919bb0" }
+  },
+  {
+    "symbol": "ssp",
+    "platforms": { "ethereum": "0x624d520bab2e4ad83935fa503fb130614374e850" }
+  },
+  {
+    "symbol": "trade",
+    "platforms": { "ethereum": "0x40e45890dff79e7d533797d964e64a2c0121f49a" }
+  },
+  {
+    "symbol": "stn5",
+    "platforms": { "ethereum": "0x55150e8378b81f930f310d4b62ab7e1252c30b9b" }
+  },
+  {
+    "symbol": "valor",
+    "platforms": { "ethereum": "0x297e4e5e59ad72b1b0a2fd446929e76117be0e0a" }
+  },
+  {
+    "symbol": "sat",
+    "platforms": { "ethereum": "0x1f0f468ee03a6d99cd8a09dd071494a83dc1c0e5" }
+  },
+  {
+    "symbol": "sec",
+    "platforms": { "ethereum": "0x75d669c53142302c8826d16b5689bffad50a7e18" }
+  },
+  {
+    "symbol": "smol",
+    "platforms": { "ethereum": "0x2216e873ea4282ebef7a02ac5aea220be6391a7c" }
+  },
+  {
+    "symbol": "slp",
+    "platforms": { "ethereum": "0xcc8fa225d80b9c7d42f96e9570156c65d6caaa25" }
+  },
+  {
+    "symbol": "smty",
+    "platforms": { "ethereum": "0xbf776e4fca664d791c4ee3a71e2722990e003283" }
+  },
+  {
+    "symbol": "smsct",
+    "platforms": { "ethereum": "0x668f7dfb8c8d716839fa5dbea317d8723ebe6110" }
+  },
+  {
+    "symbol": "snap",
+    "platforms": { "ethereum": "0x57cd5a91c18d21dedd72d3bcf255b60aef290f53" }
+  },
+  {
+    "symbol": "snap",
+    "platforms": { "ethereum": "0x4c5813b8c6fbbac76caa148aaf8910f236b56fdf" }
+  },
+  {
+    "symbol": "snet",
+    "platforms": { "ethereum": "0xff19138b039d938db46bdda0067dc4ba132ec71c" }
+  },
+  {
+    "symbol": "sgt",
+    "platforms": { "ethereum": "0xc4199fb6ffdb30a829614beca030f9042f1c3992" }
+  },
+  {
+    "symbol": "snoop",
+    "platforms": { "ethereum": "0x8715ca97c5b464c1957cefbd18015b5567e52060" }
+  },
+  {
+    "symbol": "snoge",
+    "platforms": { "ethereum": "0x072c46f392e729c1f0d92a307c2c6dba06b5d078" }
+  },
+  {
+    "symbol": "snov",
+    "platforms": { "ethereum": "0xbdc5bac39dbe132b1e030e898ae3830017d7d969" }
+  },
+  {
+    "symbol": "SNOW",
+    "platforms": { "ethereum": "0xfe9a29ab92522d14fc65880d817214261d8479ae" }
+  },
+  {
+    "symbol": "soar",
+    "platforms": { "ethereum": "0xbae5f2d8a1299e5c4963eaff3312399253f27ccb" }
+  },
+  {
+    "symbol": "soba",
+    "platforms": { "ethereum": "0x65032604dab202aff9adf89300cdb4bd0d059f55" }
+  },
+  {
+    "symbol": "sofi",
+    "platforms": { "ethereum": "0xaea5e11e22e447fa9837738a0cd2848857748adf" }
+  },
+  {
+    "symbol": "sg",
+    "platforms": { "ethereum": "0xddf7fd345d54ff4b40079579d4c4670415dbfd0a" }
+  },
+  {
+    "symbol": "scl",
+    "platforms": { "ethereum": "0xd7631787b4dcc87b1254cfd1e5ce48e96823dee8" }
+  },
+  {
+    "symbol": "rocks",
+    "platforms": { "ethereum": "0x0829d2d5cc09d3d341e813c821b0cfae272d9fb2" }
+  },
+  {
+    "symbol": "sge",
+    "platforms": { "ethereum": "0xab456bdb0a373bbac6c4a76176e9f159cacd5752" }
+  },
+  {
+    "symbol": "sodium",
+    "platforms": { "ethereum": "0xc443930ecd59e55e42efe976b8a4ba0658f5c50a" }
+  },
+  {
+    "symbol": "sbtc",
+    "platforms": { "ethereum": "0x309013d55fb0e8c17363bcc79f25d92f711a5802" }
+  },
+  {
+    "symbol": "scc",
+    "platforms": { "ethereum": "0x86696431d6aca9bae5ce6536ecf5d437f2e6dba2" }
+  },
+  {
+    "symbol": "syfi",
+    "platforms": { "ethereum": "0x322124122df407b0d0d902cb713b3714fb2e2e1f" }
+  },
+  {
+    "symbol": "soge",
+    "platforms": { "ethereum": "0x41933422dc4a1cb8c822e06f12f7b52fa5e7e094" }
+  },
+  {
+    "symbol": "solace",
+    "platforms": { "ethereum": "0x501ace9c35e60f03a2af4d484f49f9b1efde9f40" }
+  },
+  {
+    "symbol": "sdao",
+    "platforms": { "ethereum": "0x646cec6ee42d258336165cbbd5deb4af14f0f476" }
+  },
+  {
+    "symbol": "slrm",
+    "platforms": { "ethereum": "0x56ee8c9bd1d445a3324ad83e86d8be309db8f85d" }
+  },
+  {
+    "symbol": "solarite",
+    "platforms": { "ethereum": "0x930ed81ad809603baf727117385d01f04354612e" }
+  },
+  {
+    "symbol": "solid",
+    "platforms": { "ethereum": "0x5011d48d4265b6fb8228600a111b2faa1fda3139" }
+  },
+  {
+    "symbol": "soliditylabs",
+    "platforms": { "ethereum": "0x368dd0d9a2e595a7a617c3768cdb9a464e06ea69" }
+  },
+  {
+    "symbol": "slm",
+    "platforms": { "ethereum": "0x07a0ad7a9dfc3854466f8f29a173bf04bba5686e" }
+  },
+  {
+    "symbol": "solo",
+    "platforms": { "ethereum": "0x32fb2a84af5515f77515806ea5addb54c923237d" }
+  },
+  {
+    "symbol": "solve",
+    "platforms": { "ethereum": "0x446c9033e7516d820cc9a2ce2d0b7328b579406f" }
+  },
+  {
+    "symbol": "sat",
+    "platforms": { "ethereum": "0xc9f1016d336ef77aee75fc11ad64c5ecf9121332" }
+  },
+  {
+    "symbol": "somee",
+    "platforms": { "ethereum": "0x65f9a292f1aeed5d755aa2fd2fb17ab2e9431447" }
+  },
+  {
+    "symbol": "ong",
+    "platforms": { "ethereum": "0xd341d1680eeee3255b8c4c75bcce7eb57f144dae" }
+  },
+  {
+    "symbol": "smdx",
+    "platforms": { "ethereum": "0x7e8539d1e5cb91d63e46b8e188403b3f262a949b" }
+  },
+  {
+    "symbol": "cube",
+    "platforms": { "ethereum": "0xdf801468a808a32656d2ed2d2d80b72a129739f4" }
+  },
+  {
+    "symbol": "sone",
+    "platforms": { "ethereum": "0xf5c771e0b749444eaec5c1f7ef5c0b93200bb0e4" }
+  },
+  {
+    "symbol": "snm",
+    "platforms": { "ethereum": "0x46d0dac0926fa16707042cadc23f1eb4141fe86b" }
+  },
+  {
+    "symbol": "sop",
+    "platforms": { "ethereum": "0x076641af1b8f06b7f8c92587156143c109002cbe" }
+  },
+  {
+    "symbol": "sphtx",
+    "platforms": { "ethereum": "0x3833dda0aeb6947b98ce454d89366cba8cc55528" }
+  },
+  {
+    "symbol": "xor",
+    "platforms": { "ethereum": "0x40fd72257597aa14c7231a7b1aaa29fce868f677" }
+  },
+  {
+    "symbol": "val",
+    "platforms": { "ethereum": "0xe88f8313e61a97cec1871ee37fbbe2a8bf3ed1e4" }
+  },
+  {
+    "symbol": "sota",
+    "platforms": { "ethereum": "0x0dde6f6e345bfd23f3f419f0dfe04e93143b44fb" }
+  },
+  {
+    "symbol": "xzar",
+    "platforms": { "ethereum": "0x48f07301e9e29c3c38a80ae8d9ae771f224f1054" }
+  },
+  {
+    "symbol": "reign",
+    "platforms": { "ethereum": "0x17f59dd7fefc2f276509eed2ad6b65271458177e" }
+  },
+  {
+    "symbol": "sov",
+    "platforms": { "ethereum": "0xbdab72602e9ad40fc6a6852caf43258113b8f7a5" }
+  },
+  {
+    "symbol": "balls",
+    "platforms": { "ethereum": "0x174ed6e64a5903b59ca7910081e1e3a2c551afc6" }
+  },
+  {
+    "symbol": "spc",
+    "platforms": { "ethereum": "0x86ed939b500e121c0c5f493f399084db596dad20" }
+  },
+  {
+    "symbol": "dawgs",
+    "platforms": { "ethereum": "0x9f8eef61b1ad834b44c089dbf33eb854746a6bf9" }
+  },
+  {
+    "symbol": "spacedoge",
+    "platforms": { "ethereum": "0xaa2409594dc0aef63c0f367e30f6b51149cbe613" }
+  },
+  {
+    "symbol": "spiz",
+    "platforms": { "ethereum": "0xa7a5c1058194af8f00c187adb7fcc0c95f1c6c2d" }
+  },
+  {
+    "symbol": "space",
+    "platforms": { "ethereum": "0xcc7ab8d78dba187dc95bf3bb86e65e0c26d0041f" }
+  },
+  {
+    "symbol": "splink",
+    "platforms": { "ethereum": "0x56a41eef4aba11292c58b39f61dabc82ed22c79b" }
+  },
+  {
+    "symbol": "spmk",
+    "platforms": { "ethereum": "0x51d3e4c0b2c83e62f5d517d250b3e856897d2052" }
+  },
+  {
+    "symbol": "pngn",
+    "platforms": { "ethereum": "0x469a8ea7683c27d31cd9b0de769151d8a8b66c5a" }
+  },
+  {
+    "symbol": "milk2",
+    "platforms": { "ethereum": "0x80c8c3dcfb854f9542567c8dac3f44d709ebc1de" }
+  },
+  {
+    "symbol": "shake",
+    "platforms": { "ethereum": "0x6006fc2a849fedaba8330ce36f5133de01f96189" }
+  },
+  {
+    "symbol": "spay",
+    "platforms": { "ethereum": "0x58fad9e3c3ae54c9ba98c3f0e4bf88ab3e8cf3c5" }
+  },
+  {
+    "symbol": "pasta",
+    "platforms": { "ethereum": "0xe54f9e6ab80ebc28515af8b8233c1aee6506a15e" }
+  },
+  {
+    "symbol": "spank",
+    "platforms": { "ethereum": "0x42d6622dece394b54999fbd73d108123806f6a18" }
+  },
+  {
+    "symbol": "sprkl",
+    "platforms": { "ethereum": "0x4b7ad3a56810032782afce12d7d27122bdb96eff" }
+  },
+  {
+    "symbol": "srk",
+    "platforms": { "ethereum": "0x0488401c3f535193fa8df029d9ffe615a06e74e6" }
+  },
+  {
+    "symbol": "300",
+    "platforms": { "ethereum": "0x167e2a574669b0eeb552aaf3da47c728cb348a41" }
+  },
+  {
+    "symbol": "sxdt",
+    "platforms": { "ethereum": "0x12b306fa98f4cbb8d4457fdff3a0a0a56f07ccdf" }
+  },
+  {
+    "symbol": "sxut",
+    "platforms": { "ethereum": "0x2c82c73d5b34aa015989462b2948cd616a37641f" }
+  },
+  {
+    "symbol": "spt",
+    "platforms": { "ethereum": "0x01cc4151fe5f00efb8df2f90ff833725d3a482a3" }
+  },
+  {
+    "symbol": "scs",
+    "platforms": { "ethereum": "0x81995ff7aee5c780192b47e0b42a7a86692d1415" }
+  },
+  {
+    "symbol": "sms",
+    "platforms": { "ethereum": "0xe5867608b51a2c9c78b9587355cc093140a49b0a" }
+  },
+  {
+    "symbol": "spell",
+    "platforms": { "ethereum": "0x090185f2135308bad17527004364ebcc2d37e5f6" }
+  },
+  {
+    "symbol": "spnd",
+    "platforms": { "ethereum": "0xddd460bbd9f79847ea08681563e8a9696867210c" }
+  },
+  {
+    "symbol": "spdx",
+    "platforms": { "ethereum": "0x2c756e74b7309d785b5e2960ef262c4f14a87930" }
+  },
+  {
+    "symbol": "spa",
+    "platforms": { "ethereum": "0xb4a3b0faf0ab53df58001804dda5bfc6a3d59008" }
+  },
+  {
+    "symbol": "sat",
+    "platforms": { "ethereum": "0xc56b13ebbcffa67cfb7979b900b736b3fb480d78" }
+  },
+  {
+    "symbol": "sphri",
+    "platforms": { "ethereum": "0x8a0cdfab62ed35b836dc0633482798421c81b3ec" }
+  },
+  {
+    "symbol": "sph",
+    "platforms": { "ethereum": "0xa0cf46eb152656c7090e769916eb44a138aaa406" }
+  },
+  {
+    "symbol": "spice",
+    "platforms": { "ethereum": "0x9b6db7597a74602a5a806e33408e7e2dafa58193" }
+  },
+  {
+    "symbol": "spice",
+    "platforms": { "ethereum": "0x1fdab294eda5112b7d066ed8f2e4e562d5bcc664" }
+  },
+  {
+    "symbol": "spdr",
+    "platforms": { "ethereum": "0xbcd4b7de6fde81025f74426d43165a5b0d790fdd" }
+  },
+  {
+    "symbol": "spidey inu",
+    "platforms": { "ethereum": "0x6ff952aef0c0f7c7e20cc396b798daddf6561f18" }
+  },
+  {
+    "symbol": "spki",
+    "platforms": { "ethereum": "0x0f3debf94483beecbfd20167c946a61ea62d000f" }
+  },
+  {
+    "symbol": "spike",
+    "platforms": { "ethereum": "0xa7fc5d2453e3f68af0cc1b78bcfee94a1b293650" }
+  },
+  {
+    "symbol": "spd",
+    "platforms": { "ethereum": "0x1dea979ae76f26071870f824088da78979eb91c8" }
+  },
+  {
+    "symbol": "care",
+    "platforms": { "ethereum": "0x988158213b7d0efce56d4f93fbb501cb7e068e3b" }
+  },
+  {
+    "symbol": "shopx",
+    "platforms": { "ethereum": "0x7bef710a5759d197ec0bf621c3df802c2d60d848" }
+  },
+  {
+    "symbol": "boo",
+    "platforms": { "ethereum": "0x55af5865807b196bd0197e0902746f31fbccfa58" }
+  },
+  {
+    "symbol": "spool",
+    "platforms": { "ethereum": "0x40803cea2b2a32bda1be61d3604af6a814e70976" }
+  },
+  {
+    "symbol": "spo",
+    "platforms": { "ethereum": "0xcbe771323587ea16dacb6016e269d7f08a7acc4e" }
+  },
+  {
+    "symbol": "snl",
+    "platforms": { "ethereum": "0xa806b3fed6891136940cf81c4085661500aa2709" }
+  },
+  {
+    "symbol": "$icons",
+    "platforms": { "ethereum": "0x3f68e7b44e9bcb486c2feadb7a2289d9cdfc9088" }
+  },
+  {
+    "symbol": "sprtz",
+    "platforms": { "ethereum": "0xc560984d8c4ced2a0eba5790b33b6f43afeef759" }
+  },
+  {
+    "symbol": "spunk",
+    "platforms": { "ethereum": "0x97aa8e14db0bc073cc7e2d42ac715427717d6042" }
+  },
+  {
+    "symbol": "sqgl",
+    "platforms": { "ethereum": "0x8d137e3337eb1b58a222fef2b2cc7c423903d9cf" }
+  },
+  {
+    "symbol": "SQUEEZE",
+    "platforms": { "ethereum": "0xabd4dc8fde9848cbc4ff2c0ee81d4a49f4803da4" }
+  },
+  {
+    "symbol": "squid",
+    "platforms": { "ethereum": "0x21ad647b8f4fe333212e735bfc1f36b4941e6ad2" }
+  },
+  {
+    "symbol": "srh",
+    "platforms": { "ethereum": "0xc350e846e2c57f9eece90febc253d14c8080871b" }
+  },
+  {
+    "symbol": "srune",
+    "platforms": { "ethereum": "0x0352557b007a4aae1511c114409b932f06f9e2f4" }
+  },
+  {
+    "symbol": "ssv",
+    "platforms": { "ethereum": "0x9d65ff81a3c488d585bbfb0bfe3c7707c7917f54" }
+  },
+  {
+    "symbol": "stol",
+    "platforms": { "ethereum": "0x4ff5253e2304e3f5ed6547ac5d9952a62b91e3e8" }
+  },
+  {
+    "symbol": "one1inch",
+    "platforms": { "ethereum": "0x853bb55c1f469902f088a629db8c8803a9be3857" }
+  },
+  {
+    "symbol": "sta",
+    "platforms": { "ethereum": "0xd7d05bda4bf5876ba1254b3eaaf8b47d2f5676eb" }
+  },
+  {
+    "symbol": "onefil",
+    "platforms": { "ethereum": "0x6d82017e55b1d24c53c7b33bbb770a86f2ca229d" }
+  },
+  {
+    "symbol": "onemph",
+    "platforms": { "ethereum": "0xbe3f88e18be3944fdda830695228adbb82fa125f" }
+  },
+  {
+    "symbol": "oneuni",
+    "platforms": { "ethereum": "0x8290d7a64f25e6b5002d98367e8367c1b532b534" }
+  },
+  {
+    "symbol": "USDS",
+    "platforms": { "ethereum": "0xa4bdb11dc0a2bec88d24a3aa1e6bb17201112ebe" }
+  },
+  {
+    "symbol": "stack",
+    "platforms": { "ethereum": "0xe0955f26515d22e347b17669993fcefcc73c3a0a" }
+  },
+  {
+    "symbol": "stack",
+    "platforms": { "ethereum": "0x56a86d648c435dc707c8405b78e2ae8eb4e60ba4" }
+  },
+  {
+    "symbol": "dsla",
+    "platforms": { "ethereum": "0x3affcca64c2a6f4e3b6bd9c64cd2c969efd1ecbe" }
+  },
+  {
+    "symbol": "stacy",
+    "platforms": { "ethereum": "0xf12ec0d3dab64ddefbdc96474bde25af3fe1b327" }
+  },
+  {
+    "symbol": "fis",
+    "platforms": { "ethereum": "0xef3a930e1ffffacd2fc13434ac81bd278b0ecc8d" }
+  },
+  {
+    "symbol": "ratom",
+    "platforms": { "ethereum": "0xd01cb3d113a864763dd3977fe1e725860013b0ed" }
+  },
+  {
+    "symbol": "standard",
+    "platforms": { "ethereum": "0xda0c94c73d127ee191955fb46bacd7ff999b2bcd" }
+  },
+  {
+    "symbol": "stkabpt",
+    "platforms": { "ethereum": "0xa1116930326d21fb917d5a27f1e9943a9595fb47" }
+  },
+  {
+    "symbol": "sdt",
+    "platforms": { "ethereum": "0x73968b9a57c6e53d41345fd57a6e6ae27d6cdb2f" }
+  },
+  {
+    "symbol": "steth",
+    "platforms": { "ethereum": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84" }
+  },
+  {
+    "symbol": "sohm",
+    "platforms": { "ethereum": "0x04f2694c8fcee23e8fd0dfea1d4f5bb8c352111f" }
+  },
+  {
+    "symbol": "stxem",
+    "platforms": { "ethereum": "0x0c63cae5fcc2ca3dde60a35e50362220651ebec8" }
+  },
+  {
+    "symbol": "stzen",
+    "platforms": { "ethereum": "0x31b595e7cfdb624d10a3e7a562ed98c3567e3865" }
+  },
+  {
+    "symbol": "stfiro",
+    "platforms": { "ethereum": "0x160b1e5aabfd70b2fc40af815014925d71ceed7e" }
+  },
+  {
+    "symbol": "steth",
+    "platforms": { "ethereum": "0xdfe66b14d37c77f4e9b180ceb433d1b164f0281d" }
+  },
+  {
+    "symbol": "str",
+    "platforms": { "ethereum": "0x426567f78e74577f8a6233b635970eb729631e05" }
+  },
+  {
+    "symbol": "stkr",
+    "platforms": { "ethereum": "0x89dcff5fd892f2bfc8b75dba12804b651f769579" }
+  },
+  {
+    "symbol": "swise",
+    "platforms": { "ethereum": "0x48c3399719b582dd63eb5aadf12a40b4c3f52fa2" }
+  },
+  {
+    "symbol": "stnd",
+    "platforms": { "ethereum": "0x9040e237c3bf18347bb00957dc22167d0f2b999d" }
+  },
+  {
+    "symbol": "tst",
+    "platforms": { "ethereum": "0xa0b93b9e90ab887e53f9fb8728c009746e989b53" }
+  },
+  {
+    "symbol": "sac",
+    "platforms": { "ethereum": "0xacd8f2523a4613eee78904354187c81bb05ae2b8" }
+  },
+  {
+    "symbol": "sas",
+    "platforms": { "ethereum": "0x4c38d0e726b6c86f64c1b281348e725973542043" }
+  },
+  {
+    "symbol": "star",
+    "platforms": { "ethereum": "0xf70a642bd387f94380ffb90451c2c81d4eb82cbc" }
+  },
+  {
+    "symbol": "stb",
+    "platforms": { "ethereum": "0xc48b1ac1417db27c4e2c2ed3dae5a3d2fbb07dc5" }
+  },
+  {
+    "symbol": "bugs",
+    "platforms": { "ethereum": "0xbc3ec4e491b835dce394a53e9a9a10ac19564839" }
+  },
+  {
+    "symbol": "starc",
+    "platforms": { "ethereum": "0x7f66ef4be2c128f121ca776888e6142ec0f3bd75" }
+  },
+  {
+    "symbol": "foxx",
+    "platforms": { "ethereum": "0x31d457e7bcff5bc9a5ef86e6a5ea1db5b5c3bfb0" }
+  },
+  {
+    "symbol": "stgz",
+    "platforms": { "ethereum": "0xa9a8377287ea9c6b8b4249dd502e75d34148fc5b" }
+  },
+  {
+    "symbol": "starl",
+    "platforms": { "ethereum": "0x8e6cd950ad6ba651f6dd608dc70e5886b1aa6b24" }
+  },
+  {
+    "symbol": "stpc",
+    "platforms": { "ethereum": "0x3fb8d8a28aff053ccf446bc075eecb7a0ef65d0c" }
+  },
+  {
+    "symbol": "STARSB",
+    "platforms": { "ethereum": "0x5f435cd858f71e42a3db4282231d1ed25ba07aed" }
+  },
+  {
+    "symbol": "stars",
+    "platforms": { "ethereum": "0x7ccfeef4f0ff48b0e0abd19bbbebae90939f180d" }
+  },
+  {
+    "symbol": "stfi",
+    "platforms": { "ethereum": "0xfd9cd8c0d18cd7e06958f3055e0ec3adbdba0b17" }
+  },
+  {
+    "symbol": "str",
+    "platforms": { "ethereum": "0x11c1a6b3ed6bb362954b29d3183cfa97a0c806aa" }
+  },
+  {
+    "symbol": "eurs",
+    "platforms": { "ethereum": "0xdb25f211ab05b1c97d595516f45794528a807ad8" }
+  },
+  {
+    "symbol": "str",
+    "platforms": { "ethereum": "0x84bb947fcedba6b9c7dcead42df07e113bb03007" }
+  },
+  {
+    "symbol": "sta",
+    "platforms": { "ethereum": "0xa7de087329bfcda5639247f96140f9dabe3deed1" }
+  },
+  {
+    "symbol": "SNT",
+    "platforms": { "ethereum": "0x744d70fdbe2ba4cf95131626614a1763df805b9e" }
+  },
+  {
+    "symbol": "steak",
+    "platforms": { "ethereum": "0xeed9e4f2450035d6426276a8aa2084966ee3b1bb" }
+  },
+  {
+    "symbol": "stellarinu",
+    "platforms": { "ethereum": "0xfde57fee4bcca80485714bd640d6e5afe8ac4d66" }
+  },
+  {
+    "symbol": "sti",
+    "platforms": { "ethereum": "0xb52bbd3d5bfa3836bf2b55fe3b7467219280bc2e" }
+  },
+  {
+    "symbol": "STIMMY",
+    "platforms": { "ethereum": "0xff7e285b87e7f9247f0953cf8cf5cb24eede4b9c" }
+  },
+  {
+    "symbol": "stn",
+    "platforms": { "ethereum": "0x592481a5f6b4f078cc303c2cde4337dfa2d76fa0" }
+  },
+  {
+    "symbol": "stk",
+    "platforms": { "ethereum": "0xae73b38d1c9a8b274127ec30160a4927c4d71824" }
+  },
+  {
+    "symbol": "stbu",
+    "platforms": { "ethereum": "0x212dd60d4bf0da8372fe8116474602d429e5735f" }
+  },
+  {
+    "symbol": "ston",
+    "platforms": { "ethereum": "0xdc47f2ba852669b178699449e50682d6ceaf8c07" }
+  },
+  {
+    "symbol": "stoge",
+    "platforms": { "ethereum": "0x1296a923cd4f39116e0297d921fe25fe228552c6" }
+  },
+  {
+    "symbol": "stn",
+    "platforms": { "ethereum": "0xe63d6b308bce0f6193aec6b7e6eba005f41e36ab" }
+  },
+  {
+    "symbol": "stonk",
+    "platforms": { "ethereum": "0x35b55c25731e9b05b1d8480ba39463d52c9d0211" }
+  },
+  {
+    "symbol": "stonk",
+    "platforms": { "ethereum": "0xb4058411967d5046f3510943103805be61f0600e" }
+  },
+  {
+    "symbol": "sbf",
+    "platforms": { "ethereum": "0x2697e0974e4fd348869d9cd414b7eaad8ee35c6e" }
+  },
+  {
+    "symbol": "stonk",
+    "platforms": { "ethereum": "0x60ca261e14f26e8daae8b1a7f8e783d64859126c" }
+  },
+  {
+    "symbol": "sana",
+    "platforms": { "ethereum": "0x87cdc02f0812f08cd50f946793706fad9c265e2d" }
+  },
+  {
+    "symbol": "sov",
+    "platforms": { "ethereum": "0x0afee744b6d9ff2b78f76fe10b3e0199c413fd34" }
+  },
+  {
+    "symbol": "sto",
+    "platforms": { "ethereum": "0xcb39c3502415152b2ec90ff07ee18cc94f681a72" }
+  },
+  {
+    "symbol": "tori",
+    "platforms": { "ethereum": "0xc71e20e54adfc415f79bf0a8f11122917920050e" }
+  },
+  {
+    "symbol": "stq",
+    "platforms": { "ethereum": "0x5c3a228510d246b78a3765c20221cbf3082b44a4" }
+  },
+  {
+    "symbol": "storj",
+    "platforms": { "ethereum": "0xb64ef51c888972c908cfacf59b47c1afbc0ab8ac" }
+  },
+  {
+    "symbol": "stmx",
+    "platforms": { "ethereum": "0xbe9375c6a420d2eeb258962efb95551a5b722803" }
+  },
+  {
+    "symbol": "stx",
+    "platforms": { "ethereum": "0x006bea43baa3f7a6f765f14f10a1a1b08334ef45" }
+  },
+  {
+    "symbol": "stpt",
+    "platforms": { "ethereum": "0xde7d85157d9714eadf595045cc12ca4a5f3e2adb" }
+  },
+  {
+    "symbol": "xidr",
+    "platforms": { "ethereum": "0xebf2096e01455108badcbaf86ce30b6e5a72aa52" }
+  },
+  {
+    "symbol": "strax",
+    "platforms": { "ethereum": "0xa3c22370de5f9544f0c4de126b1e46ceadf0a51b" }
+  },
+  {
+    "symbol": "stos",
+    "platforms": { "ethereum": "0x08c32b0726c5684024ea6e141c50ade9690bbdcc" }
+  },
+  {
+    "symbol": "stpl",
+    "platforms": { "ethereum": "0x9b5c2be869a19e84bdbcb1386dad83a2ec8dae82" }
+  },
+  {
+    "symbol": "data",
+    "platforms": { "ethereum": "0x8f693ca8d21b157107184d29d398a8d082b38b76" }
+  },
+  {
+    "symbol": "xdata",
+    "platforms": { "ethereum": "0x0cf0ee63788a0849fe5297f3407f701e122cc023" }
+  },
+  {
+    "symbol": "cred",
+    "platforms": { "ethereum": "0xed7fa212e100dfb3b13b834233e4b680332a3420" }
+  },
+  {
+    "symbol": "strk",
+    "platforms": { "ethereum": "0x74232704659ef37c08995e386a2e26cc27a8d7b1" }
+  },
+  {
+    "symbol": "strip",
+    "platforms": { "ethereum": "0xe9cb6838902ccf711f16a9ea5a1170f8e9853c02" }
+  },
+  {
+    "symbol": "strp",
+    "platforms": { "ethereum": "0x97872eafd79940c7b24f7bcc1eadb1457347adc9" }
+  },
+  {
+    "symbol": "strong",
+    "platforms": { "ethereum": "0x990f341946a3fdb507ae7e52d17851b87168017c" }
+  },
+  {
+    "symbol": "strng",
+    "platforms": { "ethereum": "0x350a6a30c79df3600c4e0e67deab0a64b645e2c2" }
+  },
+  {
+    "symbol": "sinu",
+    "platforms": { "ethereum": "0xcd31462b625ea4095914ab3aa8c6e17a228e2721" }
+  },
+  {
+    "symbol": "stf",
+    "platforms": { "ethereum": "0x1f4cb968b76931c494ff92ed80ccb169ad641cb1" }
+  },
+  {
+    "symbol": "trdl",
+    "platforms": { "ethereum": "0x297d33e17e61c2ddd812389c2105193f8348188a" }
+  },
+  {
+    "symbol": "shibli",
+    "platforms": { "ethereum": "0xb1a88c33091490218965787919fcc9862c1798ee" }
+  },
+  {
+    "symbol": "sgb",
+    "platforms": { "ethereum": "0x4b4eb5c44d50bfd44124688c6754633f7e258b01" }
+  },
+  {
+    "symbol": "sub",
+    "platforms": { "ethereum": "0x8d75959f1e61ec2571aa72798237101f084de63a" }
+  },
+  {
+    "symbol": "skt",
+    "platforms": { "ethereum": "0x012e0e6342308b247f36ee500ecb14dc77a7a8c1" }
+  },
+  {
+    "symbol": "SUKU",
+    "platforms": { "ethereum": "0x0763fdccf1ae541a5961815c0872a8c5bc6de4d7" }
+  },
+  {
+    "symbol": "sum",
+    "platforms": { "ethereum": "0x043c308bb8a5ae96d0093444be7f56459f1340b1" }
+  },
+  {
+    "symbol": "sun",
+    "platforms": { "ethereum": "0x7cc61e3ae6360e923e9296c802382ec7c9dd3652" }
+  },
+  {
+    "symbol": "snc",
+    "platforms": { "ethereum": "0xf4134146af2d511dd5ea8cdb1c4ac88c57d60404" }
+  },
+  {
+    "symbol": "sunder",
+    "platforms": { "ethereum": "0xbdbf245c690d54b67c6e610a28486a2c6de08be6" }
+  },
+  {
+    "symbol": "suni",
+    "platforms": { "ethereum": "0x4a22a69e45ab29f9f7276b0267797474daf1f27c" }
+  },
+  {
+    "symbol": "sunc",
+    "platforms": { "ethereum": "0x692accdd8b86692427e0aa4752ae917df01cc56f" }
+  },
+  {
+    "symbol": "sup8eme",
+    "platforms": { "ethereum": "0x47935edfb3cdd358c50f6c0add1cc24662e30f5f" }
+  },
+  {
+    "symbol": "superbid",
+    "platforms": { "ethereum": "0x0563dce613d559a47877ffd1593549fb9d3510d6" }
+  },
+  {
+    "symbol": "hole",
+    "platforms": { "ethereum": "0x03fb52d4ee633ab0d06c833e32efdd8d388f3e6a" }
+  },
+  {
+    "symbol": "$sbc",
+    "platforms": { "ethereum": "0x2f02be0c4021022b59e9436f335d69df95e5222a" }
+  },
+  {
+    "symbol": "super",
+    "platforms": { "ethereum": "0xe53ec727dbdeb9e2d5456c3be40cff031ab40a55" }
+  },
+  {
+    "symbol": "shb4",
+    "platforms": { "ethereum": "0xd0f57b427971ea60909a28648987141a81f8dc03" }
+  },
+  {
+    "symbol": "MARIO",
+    "platforms": { "ethereum": "0xc8cf9b8ccfb4c53c052427e98669ff28b6f7e301" }
+  },
+  {
+    "symbol": "smhdoge",
+    "platforms": { "ethereum": "0x5644bb2b594fcf6f74384d2ad26c68f02a47981c" }
+  },
+  {
+    "symbol": "rare",
+    "platforms": { "ethereum": "0xba5bde662c17e2adff1075610382b9b691296350" }
+  },
+  {
+    "symbol": "ssj",
+    "platforms": { "ethereum": "0xb4ae194a0dcf1b4080b164c1d775ee06e0817305" }
+  },
+  {
+    "symbol": "ssb",
+    "platforms": { "ethereum": "0x0c9ef4d58b12041779b8d2165f42a00cb362db81" }
+  },
+  {
+    "symbol": "ssn",
+    "platforms": { "ethereum": "0xa5b46ff9a887180c8fb2d97146398ddfc5fef1cd" }
+  },
+  {
+    "symbol": "stro",
+    "platforms": { "ethereum": "0xc2e343118f937f88ee1fc3150cdc0d6f3d11bba7" }
+  },
+  {
+    "symbol": "sur",
+    "platforms": { "ethereum": "0xe120c1ecbfdfea7f0a8f0ee30063491e8c26fedf" }
+  },
+  {
+    "symbol": "surf",
+    "platforms": { "ethereum": "0x46d473a0b3eeec9f55fade641bc576d5bc0b2246" }
+  },
+  {
+    "symbol": "surf",
+    "platforms": { "ethereum": "0xea319e87cf06203dae107dd8e5672175e3ee976c" }
+  },
+  {
+    "symbol": "sushi",
+    "platforms": { "ethereum": "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2" }
+  },
+  {
+    "symbol": "suter",
+    "platforms": { "ethereum": "0xaa2ce7ae64066175e0b90497ce7d9c190c315db4" }
+  },
+  {
+    "symbol": "swace",
+    "platforms": { "ethereum": "0x03b155af3f4459193a276395dd76e357bb472da1" }
+  },
+  {
+    "symbol": "swag",
+    "platforms": { "ethereum": "0x87edffde3e14c7a66c9b9724747a1c5696b742e6" }
+  },
+  {
+    "symbol": "swagg",
+    "platforms": { "ethereum": "0xa19a40fbd7375431fab013a4b08f00871b9a2791" }
+  },
+  {
+    "symbol": "sap",
+    "platforms": { "ethereum": "0xf6ed276a69270a895d6e419d99dcb5aaa2f3cb4a" }
+  },
+  {
+    "symbol": "spaz",
+    "platforms": { "ethereum": "0x810908b285f85af668f6348cd8b26d76b3ec12e1" }
+  },
+  {
+    "symbol": "sdx",
+    "platforms": { "ethereum": "0x041fdd6637ecfd96af8804278ac12660ac2d12c0" }
+  },
+  {
+    "symbol": "swfl",
+    "platforms": { "ethereum": "0xba21ef4c9f433ede00badefcc2754b8e74bd538a" }
+  },
+  {
+    "symbol": "swapp",
+    "platforms": { "ethereum": "0x8cb924583681cbfe487a62140a994a49f833c244" }
+  },
+  {
+    "symbol": "swpr",
+    "platforms": { "ethereum": "0x6cacdb97e3fc8136805a9e7c342d866ab77d0957" }
+  },
+  {
+    "symbol": "swsh",
+    "platforms": { "ethereum": "0x3ac2ab91ddf57e2385089202ca221c360ced0062" }
+  },
+  {
+    "symbol": "swm",
+    "platforms": { "ethereum": "0x3505f494c3f0fed0b594e01fa41dd3967645ca39" }
+  },
+  {
+    "symbol": "bzz",
+    "platforms": { "ethereum": "0x19062190b1925b5b6689d7073fdfc8c2976ef8cb" }
+  },
+  {
+    "symbol": "swt",
+    "platforms": { "ethereum": "0xb9e7f8568e08d5659f5d29c4997173d84cdf2607" }
+  },
+  {
+    "symbol": "smt",
+    "platforms": { "ethereum": "0xb17548c7b510427baac4e267bea62e800b247173" }
+  },
+  {
+    "symbol": "swash",
+    "platforms": { "ethereum": "0xa130e3a33a4d84b04c3918c4e5762223ae252f80" }
+  },
+  {
+    "symbol": "swd",
+    "platforms": { "ethereum": "0x1fd154b4d0e3753b714b511a53fe1fb72dc7ae1c" }
+  },
+  {
+    "symbol": "swrv",
+    "platforms": { "ethereum": "0xb8baa0e4287890a5f79863ab62b7f175cecbd433" }
+  },
+  {
+    "symbol": "swftc",
+    "platforms": { "ethereum": "0x0bb217e40f8a5cb79adf04e1aab60e5abd0dfc1e" }
+  },
+  {
+    "symbol": "swl",
+    "platforms": { "ethereum": "0x8cd480260a47f04589670a313d27a15b321ad266" }
+  },
+  {
+    "symbol": "SWINGBY",
+    "platforms": { "ethereum": "0x8287c7b963b405b7b8d467db9d79eec40625b13a" }
+  },
+  {
+    "symbol": "sxp",
+    "platforms": { "ethereum": "0x8ce9137d39326ad0cd6491fb5cc0cba0e089b6a9" }
+  },
+  {
+    "symbol": "swipe",
+    "platforms": { "ethereum": "0x13d71cfc90a83cd1cc0e59675c3f4b90d4162a8b" }
+  },
+  {
+    "symbol": "swgb",
+    "platforms": { "ethereum": "0x92ef4ffbfe0df030837b65d7fccfe1abd6549579" }
+  },
+  {
+    "symbol": "chsb",
+    "platforms": { "ethereum": "0xba9d4199fab4f26efe3551d490e3821486f135ba" }
+  },
+  {
+    "symbol": "swiss",
+    "platforms": { "ethereum": "0x692eb773e0b5b7a79efac5a015c8b36a2577f65c" }
+  },
+  {
+    "symbol": "esh",
+    "platforms": { "ethereum": "0xd6a55c63865affd67e2fb9f284f87b7a9e5ff3bd" }
+  },
+  {
+    "symbol": "swth",
+    "platforms": { "ethereum": "0xb4371da53140417cbb3362055374b10d97e420bb" }
+  },
+  {
+    "symbol": "swat",
+    "platforms": { "ethereum": "0xc0f1728d9513efc316d0e93a0758c992f88b0809" }
+  },
+  {
+    "symbol": "swusd",
+    "platforms": { "ethereum": "0x77c6e4a580c0dce4e5c7a17d0bc077188a83a059" }
+  },
+  {
+    "symbol": "swyftt",
+    "platforms": { "ethereum": "0xa1248c718d52752b2cc257eeb0eba900408daeb8" }
+  },
+  {
+    "symbol": "sxau",
+    "platforms": { "ethereum": "0x261efcdd24cea98652b9700800a13dfbca4103ff" }
+  },
+  {
+    "symbol": "sx",
+    "platforms": { "ethereum": "0x99fe3b1391503a1bc1788051347a1324bff41452" }
+  },
+  {
+    "symbol": "sybc",
+    "platforms": { "ethereum": "0xb74755f2896e088790f81205f7f3746e2a4b358b" }
+  },
+  {
+    "symbol": "sylo",
+    "platforms": { "ethereum": "0xf293d23bf2cdc05411ca0eddd588eb1977e8dcd4" }
+  },
+  {
+    "symbol": "sis",
+    "platforms": { "ethereum": "0xd38bb40815d2b0c2d2c866e0c72c5728ffc76dd9" }
+  },
+  {
+    "symbol": "symm",
+    "platforms": { "ethereum": "0x57db3ffca78dbbe0efa0ec745d55f62aa0cbd345" }
+  },
+  {
+    "symbol": "sym",
+    "platforms": { "ethereum": "0x2fd61567c29e7adb4ca17e60e1f4a3fcfe68acb8" }
+  },
+  {
+    "symbol": "syn",
+    "platforms": { "ethereum": "0x0f2d719407fdbeff09d87557abb7232601fd9f29" }
+  },
+  {
+    "symbol": "snp",
+    "platforms": { "ethereum": "0x6911f552842236bd9e8ea8ddbb3fb414e2c5fa9d" }
+  },
+  {
+    "symbol": "sdg",
+    "platforms": { "ethereum": "0xcf8829ae9384540c886a151fac3a865794cb9a01" }
+  },
+  {
+    "symbol": "snb",
+    "platforms": { "ethereum": "0x179e31fb25e433441a2839389a7b8ec9c4654b7b" }
+  },
+  {
+    "symbol": "syc",
+    "platforms": { "ethereum": "0xe49214e4c92dc9bcb3b56c1309afe0d626dd730e" }
+  },
+  {
+    "symbol": "sync",
+    "platforms": { "ethereum": "0xb6ff96b8a8d214544ca0dbc9b33f7ad6503efd32" }
+  },
+  {
+    "symbol": "srx",
+    "platforms": { "ethereum": "0x327d71fd153cbc1cfdeb2d7ff50f2b72cb2c611f" }
+  },
+  {
+    "symbol": "taco",
+    "platforms": { "ethereum": "0x00d1793d7c3aae506257ba985b34c76aaf642557" }
+  },
+  {
+    "symbol": "taco",
+    "platforms": { "ethereum": "0x41c028a4c1f461ebfc3af91619b240004ebad216" }
+  },
+  {
+    "symbol": "tad",
+    "platforms": { "ethereum": "0x9f7229af0c4b9740e207ea283b9094983f78ba04" }
+  },
+  {
+    "symbol": "tac",
+    "platforms": { "ethereum": "0xdeeb6091a5adc78fa0332bee5a38a8908b6b566e" }
+  },
+  {
+    "symbol": "tag",
+    "platforms": { "ethereum": "0xcc4ae94372da236e9b113132e0c46c68704246b9" }
+  },
+  {
+    "symbol": "tails",
+    "platforms": { "ethereum": "0x3d79abb948bc76794ff4a0bcd60170a741f26360" }
+  },
+  {
+    "symbol": "taiyo",
+    "platforms": { "ethereum": "0x13db9034c9ca6cb739887288fce790544a476f8c" }
+  },
+  {
+    "symbol": "tan",
+    "platforms": { "ethereum": "0x2c36204a0712a2a50e54a62f7c4f01867e78cb53" }
+  },
+  {
+    "symbol": "tlnt",
+    "platforms": { "ethereum": "0x9f300b4ac0bf94cad77e7e2d3f850352b8bb264c" }
+  },
+  {
+    "symbol": "ttx",
+    "platforms": { "ethereum": "0xef2e239b21a81719abaabc6239e2e90859b44d9b" }
+  },
+  {
+    "symbol": "talk",
+    "platforms": { "ethereum": "0xcaabcaa4ca42e1d86de1a201c818639def0ba7a7" }
+  },
+  {
+    "symbol": "tme",
+    "platforms": { "ethereum": "0x6e742e29395cf5736c358538f0f1372ab3dfe731" }
+  },
+  {
+    "symbol": "tmt",
+    "platforms": { "ethereum": "0xb9cb7905981198add8059114b3b7dc7042b52f7b" }
+  },
+  {
+    "symbol": "tngl",
+    "platforms": { "ethereum": "0x5af28eb9dec75e86cdfbd2e41a474b54b211c1c2" }
+  },
+  {
+    "symbol": "tanks",
+    "platforms": { "ethereum": "0xf604d1e51122592e0babe63ac334c0e647222f2d" }
+  },
+  {
+    "symbol": "xtp",
+    "platforms": { "ethereum": "0x6368e1e18c4c419ddfc608a0bed1ccb87b9250fc" }
+  },
+  {
+    "symbol": "tap",
+    "platforms": { "ethereum": "0x7f1f2d3dfa99678675ece1c243d3f7bc3746db5d" }
+  },
+  {
+    "symbol": "ttt",
+    "platforms": { "ethereum": "0x9f599410d207f3d2828a8712e5e543ac2e040382" }
+  },
+  {
+    "symbol": "tara",
+    "platforms": { "ethereum": "0xf001937650bb4f62b57521824b2c20f5b91bea05" }
+  },
+  {
+    "symbol": "trdg",
+    "platforms": { "ethereum": "0x92a42db88ed0f02c71d439e55962ca7cab0168b5" }
+  },
+  {
+    "symbol": "tar",
+    "platforms": { "ethereum": "0xc567bca531992352166252ea5121e535432e81ed" }
+  },
+  {
+    "symbol": "tat",
+    "platforms": { "ethereum": "0x37ee79e0b44866876de2fb7f416d0443dd5ae481" }
+  },
+  {
+    "symbol": "tavitt",
+    "platforms": { "ethereum": "0xdd690d8824c00c84d64606ffb12640e932c1af56" }
+  },
+  {
+    "symbol": "txt",
+    "platforms": { "ethereum": "0x547b2f82cecfab9c2b1d36fdda96ef9f58c63b8c" }
+  },
+  {
+    "symbol": "tbtc",
+    "platforms": { "ethereum": "0x8daebade922df735c38c80c7ebd708af50815faa" }
+  },
+  {
+    "symbol": "tcash",
+    "platforms": { "ethereum": "0x7051620d11042c4335069aaa4f10cd3b4290c681" }
+  },
+  {
+    "symbol": "tco",
+    "platforms": { "ethereum": "0x00ff902d4b2bfdbd0db38887412447c30b565aa0" }
+  },
+  {
+    "symbol": "teat",
+    "platforms": { "ethereum": "0x38d58b82cb24a3e0410a7991f255174c9fd8093b" }
+  },
+  {
+    "symbol": "tcs",
+    "platforms": { "ethereum": "0x592f77f18893c8657cbf7cfc93e3f7cf7b02662d" }
+  },
+  {
+    "symbol": "team",
+    "platforms": { "ethereum": "0xb05af453011d7ad68a92b0065ffd9d1277ed2741" }
+  },
+  {
+    "symbol": "tea",
+    "platforms": { "ethereum": "0x5dced3c2fab61e21b25177c6050d3f166f696110" }
+  },
+  {
+    "symbol": "tip",
+    "platforms": { "ethereum": "0x07de533cbc72395c32eb8981ddccd2cc6a6e1c4e" }
+  },
+  {
+    "symbol": "tcr",
+    "platforms": { "ethereum": "0xe38b72d6595fd3885d1d2f770aa23e94757f91a1" }
+  },
+  {
+    "symbol": "tone",
+    "platforms": { "ethereum": "0x2ab6bb8408ca3199b8fa6c92d5b455f820af03c4" }
+  },
+  {
+    "symbol": "tel",
+    "platforms": { "ethereum": "0x467bccd9d29f223bce8043b84e8c8b282827790f" }
+  },
+  {
+    "symbol": "trb",
+    "platforms": { "ethereum": "0x88df592f8eb5d7bd38bfef7deb0fbc02cf3778a0" }
+  },
+  {
+    "symbol": "tlos",
+    "platforms": { "ethereum": "0x7825e833d495f3d1c28872415a4aee339d26ac88" }
+  },
+  {
+    "symbol": "temco",
+    "platforms": { "ethereum": "0x2fc246aa66f0da5bb1368f688548ecbbe9bdee5d" }
+  },
+  {
+    "symbol": "temple",
+    "platforms": { "ethereum": "0x470ebf5f030ed85fc1ed4c2d36b9dd02e77cf1b7" }
+  },
+  {
+    "symbol": "temp",
+    "platforms": { "ethereum": "0xa36fdbbae3c9d55a1d67ee5821d53b50b63a1ab9" }
+  },
+  {
+    "symbol": "tena",
+    "platforms": { "ethereum": "0xe14a603f7c77d4101a87859b8736a04cfd85c688" }
+  },
+  {
+    "symbol": "tend",
+    "platforms": { "ethereum": "0x1453dbb8a29551ade11d89825ca812e05317eaeb" }
+  },
+  {
+    "symbol": "ten",
+    "platforms": { "ethereum": "0x74159651a992952e2bf340d7628459aa4593fc05" }
+  },
+  {
+    "symbol": "10set",
+    "platforms": { "ethereum": "0x7ff4169a6b5122b664c51c95727d87750ec07c84" }
+  },
+  {
+    "symbol": "tenshi",
+    "platforms": { "ethereum": "0x52662717e448be36cb54588499d5a8328bd95292" }
+  },
+  {
+    "symbol": "pay",
+    "platforms": { "ethereum": "0xb97048628db6b661d4c2aa833e95dbe1a905b280" }
+  },
+  {
+    "symbol": "txc",
+    "platforms": { "ethereum": "0xc11551bb497875050b69a2fdccc20a53a9a70263" }
+  },
+  {
+    "symbol": "tep",
+    "platforms": { "ethereum": "0x2e65e12b5f0fd1d58738c6f38da7d57f5f183d1c" }
+  },
+  {
+    "symbol": "tbc",
+    "platforms": { "ethereum": "0x9798df2f5d213a872c787bd03b2b91f54d0d04a1" }
+  },
+  {
+    "symbol": "tcnx",
+    "platforms": { "ethereum": "0x28d7f432d24ba6020d1cbd4f28bedc5a82f24320" }
+  },
+  {
+    "symbol": "trr",
+    "platforms": { "ethereum": "0x490e3f4af13e1616ec97a8c6600c1061a8d0253e" }
+  },
+  {
+    "symbol": "ust",
+    "platforms": { "ethereum": "0xa693b19d2931d498c5b318df961919bb4aee87a5" }
+  },
+  {
+    "symbol": "tvk",
+    "platforms": { "ethereum": "0xd084b83c305dafd76ae3e1b4e1f1fe2ecccb3988" }
+  },
+  {
+    "symbol": "teslf",
+    "platforms": { "ethereum": "0x2d5bed63b0fe325ed3b865ae2cdaa3649eb25461" }
+  },
+  {
+    "symbol": "tesinu",
+    "platforms": { "ethereum": "0xff69e48af1174da7f15d0c771861c33d3f19ed8a" }
+  },
+  {
+    "symbol": "tsr",
+    "platforms": { "ethereum": "0x58959e0c71080434f237bd42d07cd84b74cef438" }
+  },
+  {
+    "symbol": "tsla",
+    "platforms": { "ethereum": "0x110fe5f21c1edd4f03a6e0de0d96d0c2eed0b9cc" }
+  },
+  {
+    "symbol": "usdt",
+    "platforms": { "ethereum": "0xdac17f958d2ee523a2206206994597c13d831ec7" }
+  },
+  {
+    "symbol": "tetherdoom",
+    "platforms": { "ethereum": "0x0110ad3cf10a6d04993bec37bdccba6ee2c48a27" }
+  },
+  {
+    "symbol": "eurt",
+    "platforms": { "ethereum": "0xc581b735a1688071a1746c968e0798d642ede491" }
+  },
+  {
+    "symbol": "xaut",
+    "platforms": { "ethereum": "0x68749665ff8d2d112fa859aa293f07a622782f38" }
+  },
+  {
+    "symbol": "tetoinu",
+    "platforms": { "ethereum": "0x09dc17ad20e864f91951789c80785ae1ca024230" }
+  },
+  {
+    "symbol": "tetsu",
+    "platforms": { "ethereum": "0x1e9dae82fa136796d306695b8be1e151bc5365e8" }
+  },
+  {
+    "symbol": "thales",
+    "platforms": { "ethereum": "0x03e173ad8d1581a4802d3b532ace27a62c5b81dc" }
+  },
+  {
+    "symbol": "thanos",
+    "platforms": { "ethereum": "0xdb0c52980e66ef97ee2ab85f57f86cd53928ac93" }
+  },
+  {
+    "symbol": "four",
+    "platforms": { "ethereum": "0x4730fb1463a6f1f44aeb45f6c5c422427f37f4d0" }
+  },
+  {
+    "symbol": "abyss",
+    "platforms": { "ethereum": "0x0e8d6b471e332f140e7d9dbb99e5e3822f728da6" }
+  },
+  {
+    "symbol": "family",
+    "platforms": { "ethereum": "0x833e4c02c47b7e38f5b9a80b26eb07d23d1961f4" }
+  },
+  {
+    "symbol": "tch",
+    "platforms": { "ethereum": "0xcd475371e39c0d94e82fccc9dd0ea710d0dc0c0b" }
+  },
+  {
+    "symbol": "thecitadel",
+    "platforms": { "ethereum": "0x849ba2278cdae7fa7006c0661fea1c35d5af3336" }
+  },
+  {
+    "symbol": "tcp",
+    "platforms": { "ethereum": "0x06576eb3b212d605b797dc15523d9dc9f4f66db4" }
+  },
+  {
+    "symbol": "dog",
+    "platforms": { "ethereum": "0xbaac2b4491727d78d2b78815144570b9f2fe8899" }
+  },
+  {
+    "symbol": "tft",
+    "platforms": { "ethereum": "0xaef4f02e31cdbf007f8d98da4ae365188a0e9ecc" }
+  },
+  {
+    "symbol": "grt",
+    "platforms": { "ethereum": "0xc944e90c64b2c07662a292be6244bdf05cda44a7" }
+  },
+  {
+    "symbol": "husl",
+    "platforms": { "ethereum": "0xa2881f7f441267042f9778ffa0d4f834693426be" }
+  },
+  {
+    "symbol": "meta",
+    "platforms": { "ethereum": "0xc0bfeba72805f22dc18dde31467c5a55c16ff57b" }
+  },
+  {
+    "symbol": "tmtg",
+    "platforms": { "ethereum": "0x10086399dd8c1e3de736724af52587a2044c9fa2" }
+  },
+  {
+    "symbol": "mis",
+    "platforms": { "ethereum": "0xcd1cb16a67937ff8af5d726e2681010ce1e9891a" }
+  },
+  {
+    "symbol": "onez",
+    "platforms": { "ethereum": "0x12419eea0b053ffea92f9afcd7986a495e2cf0dd" }
+  },
+  {
+    "symbol": "the",
+    "platforms": { "ethereum": "0xb4a677b0e363c3815d46326954a4e4d2b1ace357" }
+  },
+  {
+    "symbol": "toncoin",
+    "platforms": { "ethereum": "0x582d872a1b094fc48f5de31d3b73f2d9be47def1" }
+  },
+  {
+    "symbol": "theos",
+    "platforms": { "ethereum": "0x9e10f61749c4952c320412a6b26901605ff6da1d" }
+  },
+  {
+    "symbol": "peeps",
+    "platforms": { "ethereum": "0xe1030b48b2033314979143766d7dc1f40ef8ce11" }
+  },
+  {
+    "symbol": "portal",
+    "platforms": { "ethereum": "0x1d9f8ab6dd1cf13874efce60fc35daf801c65d72" }
+  },
+  {
+    "symbol": "rat",
+    "platforms": { "ethereum": "0x6460b9954a05714a1a8d36bac6d8bc9b657352d7" }
+  },
+  {
+    "symbol": "ordr",
+    "platforms": { "ethereum": "0x69fe11b042789bc6e2fdaad064afd32bb298ae05" }
+  },
+  {
+    "symbol": "sand",
+    "platforms": { "ethereum": "0x3845badade8e6dff049820680d1f14bd3903a5d0" }
+  },
+  {
+    "symbol": "imbtc",
+    "platforms": { "ethereum": "0x3212b29e33587a00fb1c83346f5dbfa69a458923" }
+  },
+  {
+    "symbol": "ttt",
+    "platforms": { "ethereum": "0x2494a68c1484376fef880b4c24d91f049d29b02a" }
+  },
+  {
+    "symbol": "tic",
+    "platforms": { "ethereum": "0x72430a612adc007c50e3b6946dbb1bb0fd3101d1" }
+  },
+  {
+    "symbol": "tos",
+    "platforms": { "ethereum": "0xfb5a551374b656c6e39787b1d3a03feab7f3a98e" }
+  },
+  {
+    "symbol": "rune",
+    "platforms": { "ethereum": "0x3155ba85d5f96b2d030a4966af206230e46849cb" }
+  },
+  {
+    "symbol": "tch",
+    "platforms": { "ethereum": "0x9972a0f24194447e73a7e8b6cd26a52e02ddfad5" }
+  },
+  {
+    "symbol": "thex",
+    "platforms": { "ethereum": "0x3204dcde0c50b7b2e606587663a0fe2ee8dfb6bf" }
+  },
+  {
+    "symbol": "thx",
+    "platforms": { "ethereum": "0xf08c68bd5f4194d994fd70726746bf529ee5a617" }
+  },
+  {
+    "symbol": "thrn",
+    "platforms": { "ethereum": "0x35a735b7d1d811887966656855f870c05fd0a86d" }
+  },
+  {
+    "symbol": "xrune",
+    "platforms": { "ethereum": "0x69fa0fee221ad11012bab0fdb45d444d3d2ce71c" }
+  },
+  {
+    "symbol": "thor",
+    "platforms": { "ethereum": "0xa5f2211b9b8170f694421f2046281775e8468044" }
+  },
+  {
+    "symbol": "thn",
+    "platforms": { "ethereum": "0x2e95cea14dd384429eb3c4331b776c4cfbb6fcd9" }
+  },
+  {
+    "symbol": "thun",
+    "platforms": { "ethereum": "0x43a89815f33747edbecc588d6bb7e1c10dda5599" }
+  },
+  {
+    "symbol": "thx",
+    "platforms": { "ethereum": "0xa98ed1fd277ead2c00d143cbe1465f59e65a0066" }
+  },
+  {
+    "symbol": "thx",
+    "platforms": { "ethereum": "0xe632ea2ef2cfd8fc4a2731c76f99078aef6a4b31" }
+  },
+  {
+    "symbol": "tyt",
+    "platforms": { "ethereum": "0x614fd8f06ce4d93aa2361b342c86554eb5cb39f1" }
+  },
+  {
+    "symbol": "t2l",
+    "platforms": { "ethereum": "0xbe5d345d05dd62828ed61519ef9f7af76f092248" }
+  },
+  {
+    "symbol": "tidal",
+    "platforms": { "ethereum": "0x29cbd0510eec0327992cd6006e63f9fa8e7f33b7" }
+  },
+  {
+    "symbol": "tnt",
+    "platforms": { "ethereum": "0x08f5a9235b08173b7569f83645d2c7fb55e8ccd8" }
+  },
+  {
+    "symbol": "tie",
+    "platforms": { "ethereum": "0x999967e2ec8a74b7c8e9db19e039d920b31d39d0" }
+  },
+  {
+    "symbol": "tch",
+    "platforms": { "ethereum": "0x9b39a0b97319a9bd5fed217c1db7b030453bac91" }
+  },
+  {
+    "symbol": "tig",
+    "platforms": { "ethereum": "0x749826f1041caf0ea856a4b3578ba327b18335f8" }
+  },
+  {
+    "symbol": "tking",
+    "platforms": { "ethereum": "0x24e89bdf2f65326b94e36978a7edeac63623dafa" }
+  },
+  {
+    "symbol": "tlw",
+    "platforms": { "ethereum": "0x06f3cdabae564b0546529b4dd8fef1bcd4235753" }
+  },
+  {
+    "symbol": "tmcn",
+    "platforms": { "ethereum": "0x5d45aa01b73c971c65f3df409c9b3627b8fe2726" }
+  },
+  {
+    "symbol": "time",
+    "platforms": { "ethereum": "0xa54c67bd320da4f9725a6f585b7635a0c09b122e" }
+  },
+  {
+    "symbol": "tnb",
+    "platforms": { "ethereum": "0xf7920b0768ecb20a123fac32311d07d193381d6f" }
+  },
+  {
+    "symbol": "ipm",
+    "platforms": { "ethereum": "0x8feef860e9fa9326ff9d7e0058f637be8579cc29" }
+  },
+  {
+    "symbol": "tinku",
+    "platforms": { "ethereum": "0x47fa4b26c1c52bc35654f98d10cd61b9f3e10267" }
+  },
+  {
+    "symbol": "titan",
+    "platforms": { "ethereum": "0x3a8cccb969a61532d1e6005e2ce12c200caece87" }
+  },
+  {
+    "symbol": "tits",
+    "platforms": { "ethereum": "0x5831be7c2429e886013124fd119dcda7ec4c750e" }
+  },
+  {
+    "symbol": "txl",
+    "platforms": { "ethereum": "0x8eef5a82e6aa222a60f009ac18c24ee12dbf4b41" }
+  },
+  {
+    "symbol": "tknt",
+    "platforms": { "ethereum": "0xbce7bd79558dda90b261506768f265c5543a9f90" }
+  },
+  {
+    "symbol": "tmc",
+    "platforms": { "ethereum": "0x1c153badb7e54abcdcb65f0a09fcd6f10de36aa3" }
+  },
+  {
+    "symbol": "tmc",
+    "platforms": { "ethereum": "0xe13559cf6edf84bd04bf679e251f285000b9305e" }
+  },
+  {
+    "symbol": "togashi",
+    "platforms": { "ethereum": "0x5daa0cbe290e082dbfd6f595e2e53b678895f322" }
+  },
+  {
+    "symbol": "ton",
+    "platforms": { "ethereum": "0x2be5e8c109e2197d077d13a82daead6a9b3433c5" }
+  },
+  {
+    "symbol": "toke",
+    "platforms": { "ethereum": "0x2e9d63788249371f1dfc918a52f8d799f4a38c94" }
+  },
+  {
+    "symbol": "tkmn",
+    "platforms": { "ethereum": "0x2b5016cea1c425f915e13727f7657025de3208fe" }
+  },
+  {
+    "symbol": "ntb",
+    "platforms": { "ethereum": "0xbe393aa534f82c0ffac31bf06a23e283acb3352b" }
+  },
+  {
+    "symbol": "tbx",
+    "platforms": { "ethereum": "0x3a92bd396aef82af98ebc0aa9030d25a23b11c6b" }
+  },
+  {
+    "symbol": "tkn",
+    "platforms": { "ethereum": "0xaaaf91d9b90df800df4f55c205fd6989c977e73a" }
+  },
+  {
+    "symbol": "tcp",
+    "platforms": { "ethereum": "0x331a4589516eae384ea5f557853af6af73b9534e" }
+  },
+  {
+    "symbol": "tct",
+    "platforms": { "ethereum": "0x4824a7b64e3966b0133f4f4ffb1b9d6beb75fff7" }
+  },
+  {
+    "symbol": "tds",
+    "platforms": { "ethereum": "0x6295ab2be04a617747481b292c390bfca592cf28" }
+  },
+  {
+    "symbol": "gpt",
+    "platforms": { "ethereum": "0xa00425d3e2d3e9ff74f3e112b4d3a7978d7d88c2" }
+  },
+  {
+    "symbol": "tkx",
+    "platforms": { "ethereum": "0x667102bd3413bfeaa3dffb48fa8288819e480a88" }
+  },
+  {
+    "symbol": "lon",
+    "platforms": { "ethereum": "0x0000000000095413afc295d19edeb1ad7b71c952" }
+  },
+  {
+    "symbol": "top",
+    "platforms": { "ethereum": "0x0ebd5ec91680d3b0cedbb1d5bb61851154d3edb6" }
+  },
+  {
+    "symbol": "ten",
+    "platforms": { "ethereum": "0xdd16ec0f66e54d453e6756713e533355989040e4" }
+  },
+  {
+    "symbol": "tok",
+    "platforms": { "ethereum": "0x4fb721ef3bf99e0f2c193847afa296b9257d3c30" }
+  },
+  {
+    "symbol": "tp3",
+    "platforms": { "ethereum": "0x9f76ff3336597feab30f5a66a053ae4a4a7ebe13" }
+  },
+  {
+    "symbol": "tpt",
+    "platforms": { "ethereum": "0x4161725d019690a3e0de50f6be67b07a86a9fae1" }
+  },
+  {
+    "symbol": "tob",
+    "platforms": { "ethereum": "0x7777770f8a6632ff043c8833310e245eba9209e6" }
+  },
+  {
+    "symbol": "tuber",
+    "platforms": { "ethereum": "0xd1766a85b0d6f81185782dc07f15326d63c3cbaa" }
+  },
+  {
+    "symbol": "toko",
+    "platforms": { "ethereum": "0xa0f0546eb5e3ee7e8cfc5da12e5949f3ae622675" }
+  },
+  {
+    "symbol": "tok",
+    "platforms": { "ethereum": "0x9a49f02e128a8e989b443a8f94843c0918bf45e7" }
+  },
+  {
+    "symbol": "tkp",
+    "platforms": { "ethereum": "0xd31695a1d35e489252ce57b129fd4b1b05e6acac" }
+  },
+  {
+    "symbol": "tol",
+    "platforms": { "ethereum": "0xd07d9fe2d2cc067015e2b4917d24933804f42cfa" }
+  },
+  {
+    "symbol": "toll",
+    "platforms": { "ethereum": "0x609c711783295209d9f33f535a7ca55b8ff87af2" }
+  },
+  {
+    "symbol": "tomato",
+    "platforms": { "ethereum": "0x82bd290afa5cc1b75f46822fec415e2be51d7d46" }
+  },
+  {
+    "symbol": "tom",
+    "platforms": { "ethereum": "0xf7970499814654cd13cb7b6e7634a12a7a8a9abc" }
+  },
+  {
+    "symbol": "tinu",
+    "platforms": { "ethereum": "0x2d0e64b6bf13660a4c0de42a0b88144a7c10991f" }
+  },
+  {
+    "symbol": "tomoe",
+    "platforms": { "ethereum": "0x05d3606d5c81eb9b7b18530995ec9b29da05faba" }
+  },
+  {
+    "symbol": "tos",
+    "platforms": { "ethereum": "0x409c4d8cd5d2924b9bc5509230d16a61289c8153" }
+  },
+  {
+    "symbol": "ton",
+    "platforms": { "ethereum": "0x6a6c2ada3ce053561c2fbc3ee211f23d9b8c520a" }
+  },
+  {
+    "symbol": "topb",
+    "platforms": { "ethereum": "0xf6317dd9b04097a9e7b016cd23dcaa7cfe19d9c6" }
+  },
+  {
+    "symbol": "bid",
+    "platforms": { "ethereum": "0x00000000000045166c45af0fc6e4cf31d9e14b9a" }
+  },
+  {
+    "symbol": "tcat",
+    "platforms": { "ethereum": "0x0e84d86c3745a05d65f8051407249cd1c4970346" }
+  },
+  {
+    "symbol": "topc",
+    "platforms": { "ethereum": "0x1b6c5864375b34af3ff5bd2e5f40bc425b4a8d79" }
+  },
+  {
+    "symbol": "$TOPDOG",
+    "platforms": { "ethereum": "0x25bd12ae9bbac47dc730e2559feb5dbe8e226894" }
+  },
+  {
+    "symbol": "topdog",
+    "platforms": { "ethereum": "0xc57baa24f72037c21f9c0d345bb6f19f47407447" }
+  },
+  {
+    "symbol": "top",
+    "platforms": { "ethereum": "0xdcd85914b8ae28c1e62f1c488e1d968d5aaffe2b" }
+  },
+  {
+    "symbol": "tor",
+    "platforms": { "ethereum": "0x4f5f2eea4ed3485e5e23a39704d5fd9d0a423886" }
+  },
+  {
+    "symbol": "tor",
+    "platforms": { "ethereum": "0x9ea20fbfaa44efbc60c6728fcdba17f01b7e04fe" }
+  },
+  {
+    "symbol": "torg",
+    "platforms": { "ethereum": "0xcfa0885131f602d11d4da248d2c65a62063567a9" }
+  },
+  {
+    "symbol": "torn",
+    "platforms": { "ethereum": "0x77777feddddffc19ff86db637967013e6c6a116c" }
+  },
+  {
+    "symbol": "tcore",
+    "platforms": { "ethereum": "0x7a3d5d49d64e57dbd6fbb21df7202bd3ee7a2253" }
+  },
+  {
+    "symbol": "torocus",
+    "platforms": { "ethereum": "0x406ae253fb0aa898f9912fb192c1e6deb9623a07" }
+  },
+  {
+    "symbol": "torq",
+    "platforms": { "ethereum": "0x1c65c261cb89178b02cf2aee20058b992787d770" }
+  },
+  {
+    "symbol": "xtm",
+    "platforms": { "ethereum": "0xcd1faff6e578fa5cac469d2418c95671ba1a62fe" }
+  },
+  {
+    "symbol": "dis",
+    "platforms": { "ethereum": "0x220b71671b649c03714da9c621285943f3cbcdc6" }
+  },
+  {
+    "symbol": "YFT",
+    "platforms": { "ethereum": "0x9cd39da8f25ec50cf2ee260e464ac23ea23f6bb0" }
+  },
+  {
+    "symbol": "toshimon",
+    "platforms": { "ethereum": "0x1b9aa0b63e0f025cd544e4d350ed81429b43b724" }
+  },
+  {
+    "symbol": "toshinori",
+    "platforms": { "ethereum": "0xe0bcd056b6a8c7fd4983cb56c162799e498e85d3" }
+  },
+  {
+    "symbol": "toshi",
+    "platforms": { "ethereum": "0xf136d7b0b7ae5b86d21e7b78dfa95375a7360f19" }
+  },
+  {
+    "symbol": "tcap",
+    "platforms": { "ethereum": "0x16c52ceece2ed57dad87319d91b5e3637d50afa4" }
+  },
+  {
+    "symbol": "ctzn",
+    "platforms": { "ethereum": "0xa803778ab953d3ffe4fbd20cfa0042ecefe8319d" }
+  },
+  {
+    "symbol": "totm",
+    "platforms": { "ethereum": "0x6ff1bfa14a57594a5874b37ff6ac5efbd9f9599a" }
+  },
+  {
+    "symbol": "ttm",
+    "platforms": { "ethereum": "0x714b1fded61090a6c49eb0b4d088b8e5ebd64e61" }
+  },
+  {
+    "symbol": "totoro",
+    "platforms": { "ethereum": "0xfc09c7cfd9c175dd9423ca02ae1249579ab12f12" }
+  },
+  {
+    "symbol": "toc",
+    "platforms": { "ethereum": "0x549905519f9e06d55d7dfcd4d54817780f6b93e8" }
+  },
+  {
+    "symbol": "tst",
+    "platforms": { "ethereum": "0xd9bae39c725a1864b1133ad0ef1640d02f79b78c" }
+  },
+  {
+    "symbol": "toto",
+    "platforms": { "ethereum": "0xe3278df3eb2085ba9b6899812a99a10f9ca5e0df" }
+  },
+  {
+    "symbol": "tower",
+    "platforms": { "ethereum": "0x1c9922314ed1415c95b9fd453c3818fd41867d0b" }
+  },
+  {
+    "symbol": "town",
+    "platforms": { "ethereum": "0x3dd98c8a089dbcff7e8fc8d4f532bd493501ab7f" }
+  },
+  {
+    "symbol": "toz",
+    "platforms": { "ethereum": "0x29239242a83479a4074cb1c9e2a3e6705a4a4455" }
+  },
+  {
+    "symbol": "tcr",
+    "platforms": { "ethereum": "0x9c4a4204b79dd291d6b6571c5be8bbcd0622f050" }
+  },
+  {
+    "symbol": "trad",
+    "platforms": { "ethereum": "0xb09ad98524780228d2df4f34aa665d9dbb9999e4" }
+  },
+  {
+    "symbol": "tbb",
+    "platforms": { "ethereum": "0x4a7adcb083fe5e3d6b58edc3d260e2e61668e7a2" }
+  },
+  {
+    "symbol": "tsx",
+    "platforms": { "ethereum": "0x734c90044a0ba31b3f2e640c10dc5d3540499bfd" }
+  },
+  {
+    "symbol": "twi",
+    "platforms": { "ethereum": "0xdad26bce7dcf59cd03a2455558e4dd73e1c07b66" }
+  },
+  {
+    "symbol": "SLICE",
+    "platforms": { "ethereum": "0x0aee8703d34dd9ae107386d3eff22ae75dd616d1" }
+  },
+  {
+    "symbol": "tns",
+    "platforms": { "ethereum": "0xb0280743b44bf7db4b6be482b2ba7b75e5da096c" }
+  },
+  {
+    "symbol": "tsct",
+    "platforms": { "ethereum": "0x805ea9c07b49dd23ce11ec66dc6d8a2957385035" }
+  },
+  {
+    "symbol": "transparent",
+    "platforms": { "ethereum": "0x4ebe2c526ee3ed4791a02960f53f65645f404ed6" }
+  },
+  {
+    "symbol": "trat",
+    "platforms": { "ethereum": "0xe225aca29524bb65fd82c79a9602f3b4f9c6fe3f" }
+  },
+  {
+    "symbol": "tvnt",
+    "platforms": { "ethereum": "0x5635ddeabf9cdda686995fe90beb5411831563fc" }
+  },
+  {
+    "symbol": "tmt",
+    "platforms": { "ethereum": "0x3209f98bebf0149b769ce26d71f7aea8e435efea" }
+  },
+  {
+    "symbol": "trcl",
+    "platforms": { "ethereum": "0x0a9d68886a0d7db83a30ec00d62512483e5ad437" }
+  },
+  {
+    "symbol": "trn",
+    "platforms": { "ethereum": "0x70968feaf13299d0dbf78f66860bab9dbe3856bc" }
+  },
+  {
+    "symbol": "trnd",
+    "platforms": { "ethereum": "0xc3dd23a0a854b4f9ae80670f528094e9eb607ccb" }
+  },
+  {
+    "symbol": "trl",
+    "platforms": { "ethereum": "0x58f9102bf53cf186682bd9a281d3cd3c616eec41" }
+  },
+  {
+    "symbol": "trias",
+    "platforms": { "ethereum": "0x3a856d4effa670c54585a5d523e96513e148e95d" }
+  },
+  {
+    "symbol": "tribe",
+    "platforms": { "ethereum": "0xc7283b66eb1eb5fb86327f08e1b5816b0720212b" }
+  },
+  {
+    "symbol": "haka",
+    "platforms": { "ethereum": "0xd85ad783cc94bd04196a13dc042a3054a9b52210" }
+  },
+  {
+    "symbol": "tt",
+    "platforms": { "ethereum": "0xecacab6725ac1711d97e55df35d525b863b8b9f7" }
+  },
+  {
+    "symbol": "trip",
+    "platforms": { "ethereum": "0xae2fab175d20b7afa56f3bb32500b26dc62bf572" }
+  },
+  {
+    "symbol": "trio",
+    "platforms": { "ethereum": "0x8b40761142b9aa6dc8964e61d0585995425c3d94" }
+  },
+  {
+    "symbol": "trips",
+    "platforms": { "ethereum": "0x1350fbe8ce27762ec19134bf8fc405a427fe9bf1" }
+  },
+  {
+    "symbol": "trism",
+    "platforms": { "ethereum": "0x56b4f8c39e07d4d5d91692acf9d0f6d4d3493763" }
+  },
+  {
+    "symbol": "trix",
+    "platforms": { "ethereum": "0x056354f3ff20743aa4c0da365603871c7000b081" }
+  },
+  {
+    "symbol": "trolls",
+    "platforms": { "ethereum": "0x7d9ce0781a3592309657c06324d906032885bec5" }
+  },
+  {
+    "symbol": "trxc",
+    "platforms": { "ethereum": "0xad5fe5b0b8ec8ff4565204990e4405b2da117d8e" }
+  },
+  {
+    "symbol": "trp",
+    "platforms": { "ethereum": "0x9b1e1fc958b83e801d1342f9f9ba7da3a55ba1ef" }
+  },
+  {
+    "symbol": "taud",
+    "platforms": { "ethereum": "0x00006100f7090010005f1bd7ae6122c3c2cf0090" }
+  },
+  {
+    "symbol": "tru",
+    "platforms": { "ethereum": "0xf65b5c5104c4fafd4b709d9d60a185eae063276c" }
+  },
+  {
+    "symbol": "tdp",
+    "platforms": { "ethereum": "0x5b11aacb6bddb9ffab908fdce739bf4aed554327" }
+  },
+  {
+    "symbol": "tfbx",
+    "platforms": { "ethereum": "0x4057db5bd9f67a566aa10e5587b1a964affc6a16" }
+  },
+  {
+    "symbol": "tru",
+    "platforms": { "ethereum": "0x4c19596f5aaff459fa38b0f7ed92f11ae6543784" }
+  },
+  {
+    "symbol": "tfl",
+    "platforms": { "ethereum": "0xa7f976c360ebbed4465c2855684d1aae5271efa9" }
+  },
+  {
+    "symbol": "tgame",
+    "platforms": { "ethereum": "0xf8e06e4e4a80287fdca5b02dccecaa9d0954840f" }
+  },
+  {
+    "symbol": "tgbp",
+    "platforms": { "ethereum": "0x00000000441378008ea67f4284a57932b1c000a5" }
+  },
+  {
+    "symbol": "thkd",
+    "platforms": { "ethereum": "0x0000852600ceb001e08e00bc008be620d60031f2" }
+  },
+  {
+    "symbol": "pnl",
+    "platforms": { "ethereum": "0x9fc8f0ca1668e87294941b7f627e9c15ea06b459" }
+  },
+  {
+    "symbol": "tusd",
+    "platforms": { "ethereum": "0x0000000000085d4780b73119b644ae5ecd22b376" }
+  },
+  {
+    "symbol": "trust",
+    "platforms": { "ethereum": "0x57700244b20f84799a31c6c96dadff373ca9d6c5" }
+  },
+  {
+    "symbol": "tln",
+    "platforms": { "ethereum": "0x679131f591b4f369acb8cd8c51e68596806c3916" }
+  },
+  {
+    "symbol": "tmh",
+    "platforms": { "ethereum": "0x901fe080ee18383bf5494049538f1bca155f4d0b" }
+  },
+  {
+    "symbol": "swap",
+    "platforms": { "ethereum": "0xcc4304a31d09258b0029ea7fe63d032f52e44efe" }
+  },
+  {
+    "symbol": "trusd",
+    "platforms": { "ethereum": "0xdd436a0dce9244b36599ae7b22f0373b4e33992d" }
+  },
+  {
+    "symbol": "trv",
+    "platforms": { "ethereum": "0x72955ecff76e48f2c8abcce11d54e5734d6f3657" }
+  },
+  {
+    "symbol": "try",
+    "platforms": { "ethereum": "0xc12ecee46ed65d970ee5c899fcc7ae133aff9b03" }
+  },
+  {
+    "symbol": "tkinu",
+    "platforms": { "ethereum": "0xda23d301761e4e2bf474951f978f6dfb6f3c9f14" }
+  },
+  {
+    "symbol": "tzki",
+    "platforms": { "ethereum": "0xf527d24391c767b86b8e91385e1ce9c54d230a2b" }
+  },
+  {
+    "symbol": "tube2",
+    "platforms": { "ethereum": "0xda86006036540822e0cd2861dbd2fd7ff9caa0e8" }
+  },
+  {
+    "symbol": "turtle",
+    "platforms": { "ethereum": "0xf3afdc2525568ffe743801c8c54bdea1704c9adb" }
+  },
+  {
+    "symbol": "tuda",
+    "platforms": { "ethereum": "0x5e3002dff591c5e75bb9dedae268049742e6b13a" }
+  },
+  {
+    "symbol": "tvt",
+    "platforms": { "ethereum": "0x98e0438d3ee1404fea48e38e92853bb08cfa68bd" }
+  },
+  {
+    "symbol": "txa",
+    "platforms": { "ethereum": "0x4463e6a3ded0dbe3f6e15bc8420dfc55e5fea830" }
+  },
+  {
+    "symbol": "tyc",
+    "platforms": { "ethereum": "0x3a82d3111ab5faf39d847d46023d9090261a658f" }
+  },
+  {
+    "symbol": "type",
+    "platforms": { "ethereum": "0xeaf61fc150cd5c3bea75744e830d916e60ea5a9f" }
+  },
+  {
+    "symbol": "phoon",
+    "platforms": { "ethereum": "0x79256db1bdb6259315a1a3d7dd237f69cadfd8fc" }
+  },
+  {
+    "symbol": "ubex",
+    "platforms": { "ethereum": "0x6704b673c70de9bf74c8fba4b4bd748f0e2190e1" }
+  },
+  {
+    "symbol": "ubin",
+    "platforms": { "ethereum": "0xb9eceb9f717852ad0d936b46155cb0c0f43cbe8e" }
+  },
+  {
+    "symbol": "usns",
+    "platforms": { "ethereum": "0x2f766a83146f7eaee2c635c9f9a291e4b86f4108" }
+  },
+  {
+    "symbol": "ubq",
+    "platforms": { "ethereum": "0x4e38d89362f7e5db0096ce44ebd021c3962aa9a0" }
+  },
+  {
+    "symbol": "uad",
+    "platforms": { "ethereum": "0x0f644658510c95cb46955e55d7ba9dda9e9fbec6" }
+  },
+  {
+    "symbol": "ubx",
+    "platforms": { "ethereum": "0xf5b5efc906513b4344ebabcf47a04901f99f09f3" }
+  },
+  {
+    "symbol": "ubn",
+    "platforms": { "ethereum": "0xdb13025b219db5e4529f48b65ff009a26b6ae733" }
+  },
+  {
+    "symbol": "ubu",
+    "platforms": { "ethereum": "0x6b74dd5d01f8320081247f5cf1f7a48324700db6" }
+  },
+  {
+    "symbol": "ucash",
+    "platforms": { "ethereum": "0x92e52a1a235d9a103d970901066ce910aacefd37" }
+  },
+  {
+    "symbol": "ucn",
+    "platforms": { "ethereum": "0xaaf37055188feee4869de63464937e683d61b2a1" }
+  },
+  {
+    "symbol": "uct",
+    "platforms": { "ethereum": "0x3c4bea627039f0b7e7d21e34bb9c9fe962977518" }
+  },
+  {
+    "symbol": "ucm",
+    "platforms": { "ethereum": "0x722f97a435278b7383a1e3c47f41773bebf3232c" }
+  },
+  {
+    "symbol": "ucx",
+    "platforms": { "ethereum": "0x3d3af44cf092a49280e316f09c8f20ecf97bc933" }
+  },
+  {
+    "symbol": "ufo",
+    "platforms": { "ethereum": "0x249e38ea4102d0cf8264d3701f1a0e39c4f2dc3b" }
+  },
+  {
+    "symbol": "hve2",
+    "platforms": { "ethereum": "0xd487892bb4c57edbe7ab401d9fe801c8fe6473f5" }
+  },
+  {
+    "symbol": "uac",
+    "platforms": { "ethereum": "0x0af5855a348c58a8bbf65bcc7b9bbacd0e7e2238" }
+  },
+  {
+    "symbol": "uhp",
+    "platforms": { "ethereum": "0x9135d92e3a34e2a94e4474b74b9dc2d51118eed5" }
+  },
+  {
+    "symbol": "ult",
+    "platforms": { "ethereum": "0xe884cc2795b9c45beeac0607da9539fd571ccf85" }
+  },
+  {
+    "symbol": "unft",
+    "platforms": { "ethereum": "0xf442a73d52431eb39f3fca49b4a495d9ae99b1a2" }
+  },
+  {
+    "symbol": "uos",
+    "platforms": { "ethereum": "0xd13c7342e1ef687c5ad21b27c2b65d772cab5c8c" }
+  },
+  {
+    "symbol": "ugas",
+    "platforms": { "ethereum": "0x8716fc5da009d3a208f0178b637a50f4ef42400f" }
+  },
+  {
+    "symbol": "uat",
+    "platforms": { "ethereum": "0x01c0987e88f778df6640787226bc96354e1a9766" }
+  },
+  {
+    "symbol": "uma",
+    "platforms": { "ethereum": "0x04fa0d235c4abf4bcf4787af4cf447de572ef828" }
+  },
+  {
+    "symbol": "umbr",
+    "platforms": { "ethereum": "0xa4bbe66f151b22b167127c770016b15ff97dd35c" }
+  },
+  {
+    "symbol": "umc",
+    "platforms": { "ethereum": "0x190fb342aa6a15eb82903323ae78066ff8616746" }
+  },
+  {
+    "symbol": "umb",
+    "platforms": { "ethereum": "0x6fc13eace26590b80cccab1ba5d51890577d83b2" }
+  },
+  {
+    "symbol": "umi",
+    "platforms": { "ethereum": "0x46943113ae84e732bb510b5f7686d8b76ff56774" }
+  },
+  {
+    "symbol": "umi",
+    "platforms": { "ethereum": "0x61107a409fffe1965126aa456af679719695c69c" }
+  },
+  {
+    "symbol": "udai",
+    "platforms": { "ethereum": "0x4ad0b81f92b16624bbcf46fc0030cfbbf8d02376" }
+  },
+  {
+    "symbol": "ueth",
+    "platforms": { "ethereum": "0x77607588222e01bf892a29abab45796a2047fc7b" }
+  },
+  {
+    "symbol": "uusdt",
+    "platforms": { "ethereum": "0x178bf8fd04b47d2de3ef3f6b3d112106375ad584" }
+  },
+  {
+    "symbol": "uusdc",
+    "platforms": { "ethereum": "0xbc5991ccd8caceba01edc44c2bb9832712c29cab" }
+  },
+  {
+    "symbol": "uwbtc",
+    "platforms": { "ethereum": "0x3af5ba94c29a8407785f5f6d90ef5d69a8eb2436" }
+  },
+  {
+    "symbol": "unbnk",
+    "platforms": { "ethereum": "0x06b884e60794ce02aafab13791b59a2e6a07442f" }
+  },
+  {
+    "symbol": "und",
+    "platforms": { "ethereum": "0x0c0f2b41f758d66bb8e694693b0f9e6fae726499" }
+  },
+  {
+    "symbol": "unb",
+    "platforms": { "ethereum": "0x8db253a1943dddf1af9bcf8706ac9a0ce939d922" }
+  },
+  {
+    "symbol": "uba",
+    "platforms": { "ethereum": "0x817e2addceaa4907623666a7800b1553ca21192d" }
+  },
+  {
+    "symbol": "uncl",
+    "platforms": { "ethereum": "0x2f4eb47a1b1f4488c71fc10e39a4aa56af33dd49" }
+  },
+  {
+    "symbol": "uncle",
+    "platforms": { "ethereum": "0x2d94408f45b2e6fa9effe1068b75116187c4e388" }
+  },
+  {
+    "symbol": "crooge",
+    "platforms": { "ethereum": "0x1505c95a707348c2bcc75698be258891387f008b" }
+  },
+  {
+    "symbol": "uuu",
+    "platforms": { "ethereum": "0x3543638ed4a9006e4840b105944271bcea15605d" }
+  },
+  {
+    "symbol": "ersdl",
+    "platforms": { "ethereum": "0x5218e472cfcfe0b64a064f055b43b4cdc9efd3a6" }
+  },
+  {
+    "symbol": "uape",
+    "platforms": { "ethereum": "0x822808104e173cb4b21549d8e921cae9e4f655e9" }
+  },
+  {
+    "symbol": "undb",
+    "platforms": { "ethereum": "0xd03b6ae96cae26b743a6207dcee7cbe60a425c70" }
+  },
+  {
+    "symbol": "ubt",
+    "platforms": { "ethereum": "0x8400d94a5cb0fa0d041a3788e395285d61c9ee5e" }
+  },
+  {
+    "symbol": "ucd",
+    "platforms": { "ethereum": "0xb1db366890eeb8f28c2813c6a6084353e0b90713" }
+  },
+  {
+    "symbol": "ucap",
+    "platforms": { "ethereum": "0xbaa70614c7aafb568a93e62a98d55696bcc85dfe" }
+  },
+  {
+    "symbol": "unicat",
+    "platforms": { "ethereum": "0x87c0192b1b81b9550d495558aac9753972f6db0d" }
+  },
+  {
+    "symbol": "unic",
+    "platforms": { "ethereum": "0x94e0bab2f6ab1f19f4750e42d7349f2740513ad5" }
+  },
+  {
+    "symbol": "ugotchi",
+    "platforms": { "ethereum": "0x30c2a84aed6db30e31cf4d7059b1836c12c68068" }
+  },
+  {
+    "symbol": "uartb",
+    "platforms": { "ethereum": "0xf824402747e5142d04892fdc27c73e6460e80080" }
+  },
+  {
+    "symbol": "uAPE",
+    "platforms": { "ethereum": "0x17e347aad89b30b96557bcbfbff8a14e75cc88a1" }
+  },
+  {
+    "symbol": "ucm",
+    "platforms": { "ethereum": "0x5fb99a3593d7088e44377a1beb27739bd928f269" }
+  },
+  {
+    "symbol": "upunk",
+    "platforms": { "ethereum": "0x8d2bffcbb19ff14a698c424fbcdcfd17aab9b905" }
+  },
+  {
+    "symbol": "udoki",
+    "platforms": { "ethereum": "0x7e6c38d007740931e4b419bf15a68c79a0fb0c66" }
+  },
+  {
+    "symbol": "ufewo",
+    "platforms": { "ethereum": "0xcccf837f40d334f8602f031e64b52ad4cd2b6601" }
+  },
+  {
+    "symbol": "uunicly",
+    "platforms": { "ethereum": "0x3d9233f15bb93c78a4f07b5c5f7a018630217cb3" }
+  },
+  {
+    "symbol": "ugmc",
+    "platforms": { "ethereum": "0xd4f2249dd6c26446f1413f6d97f14fcaa7792545" }
+  },
+  {
+    "symbol": "ugone",
+    "platforms": { "ethereum": "0xc9df0ed2e9ef4357b51db171ff08297d10875280" }
+  },
+  {
+    "symbol": "umask",
+    "platforms": { "ethereum": "0x5872e64c3f93363822d2b1e4717be3398fdcea51" }
+  },
+  {
+    "symbol": "umoon",
+    "platforms": { "ethereum": "0x683239a4cab49642c6e025cf81d283f9c87bc07d" }
+  },
+  {
+    "symbol": "uaxie",
+    "platforms": { "ethereum": "0x68b1cadb8d5ab0c97fe9d9fbe0eb60acb329fe3f" }
+  },
+  {
+    "symbol": "upak",
+    "platforms": { "ethereum": "0xa46f33694f5b31a6ed27eda16ccd466e94c80f1a" }
+  },
+  {
+    "symbol": "uarc",
+    "platforms": { "ethereum": "0x44440bd68b5e4b1e0cb810669097e9573175601b" }
+  },
+  {
+    "symbol": "uwaifu",
+    "platforms": { "ethereum": "0x3ac7a71b97183e3db7722c75eaa8df2c1a0badfc" }
+  },
+  {
+    "symbol": "uncx",
+    "platforms": { "ethereum": "0xadb2437e6f65682b85f814fbc12fec0508a7b1d0" }
+  },
+  {
+    "symbol": "unidx",
+    "platforms": { "ethereum": "0x95b3497bbcccc46a8f45f5cf54b0878b39f8d96c" }
+  },
+  {
+    "symbol": "undg",
+    "platforms": { "ethereum": "0xa5959e9412d27041194c3c3bcbe855face2864f7" }
+  },
+  {
+    "symbol": "udo",
+    "platforms": { "ethereum": "0xea3983fc6d0fbbc41fb6f6091f68f3e08894dc06" }
+  },
+  {
+    "symbol": "uniusd",
+    "platforms": { "ethereum": "0x256845e721c0c46d54e6afbd4fa3b52cb72353ea" }
+  },
+  {
+    "symbol": "ufarm",
+    "platforms": { "ethereum": "0x40986a85b4cfcdb054a6cbfb1210194fee51af88" }
+  },
+  {
+    "symbol": "unifi",
+    "platforms": { "ethereum": "0x9e78b8274e1d6a76a0dbbf90418894df27cbceb5" }
+  },
+  {
+    "symbol": "unifi",
+    "platforms": { "ethereum": "0x0ef3b2024ae079e6dbc2b37435ce30d2731f0101" }
+  },
+  {
+    "symbol": "unfi",
+    "platforms": { "ethereum": "0x441761326490cacf7af299725b6292597ee822c2" }
+  },
+  {
+    "symbol": "nif",
+    "platforms": { "ethereum": "0x7e291890b01e5181f7ecc98d79ffbe12ad23df9e" }
+  },
+  {
+    "symbol": "ifund",
+    "platforms": { "ethereum": "0x04b5e13000c6e9a3255dc057091f3e3eeee7b0f0" }
+  },
+  {
+    "symbol": "ukg",
+    "platforms": { "ethereum": "0x24692791bc444c5cd0b81e3cbcaba4b04acd1f3b" }
+  },
+  {
+    "symbol": "layer",
+    "platforms": { "ethereum": "0x0ff6ffcfda92c53f615a4a75d982f399c989366b" }
+  },
+  {
+    "symbol": "layerx",
+    "platforms": { "ethereum": "0xfe56e974c1c85e9351325fb2d62963a022ad624f" }
+  },
+  {
+    "symbol": "unl",
+    "platforms": { "ethereum": "0x354e514c135c8603f840ffadb4c33cde6d2a37e0" }
+  },
+  {
+    "symbol": "peer",
+    "platforms": { "ethereum": "0x5dd115eb39a0fc5da9022e4bbb8e8679ca066a74" }
+  },
+  {
+    "symbol": "umx",
+    "platforms": { "ethereum": "0x10be9a8dae441d276a5027936c3aaded2d82bc15" }
+  },
+  {
+    "symbol": "ufc",
+    "platforms": { "ethereum": "0x995de3d961b40ec6cdee0009059d48768ccbdd48" }
+  },
+  {
+    "symbol": "unn",
+    "platforms": { "ethereum": "0x226f7b842e0f0120b7e194d05432b3fd14773a9d" }
+  },
+  {
+    "symbol": "pilot",
+    "platforms": { "ethereum": "0x37c997b35c619c21323f3518b9357914e8b99525" }
+  },
+  {
+    "symbol": "power",
+    "platforms": { "ethereum": "0xf2f9a7e93f845b3ce154efbeb64fb9346fcce509" }
+  },
+  {
+    "symbol": "uniq",
+    "platforms": { "ethereum": "0x3758e00b100876c854636ef8db61988931bb8025" }
+  },
+  {
+    "symbol": "fans",
+    "platforms": { "ethereum": "0xd33d0eb1c0c0295c3a2409a9101dd511823bf217" }
+  },
+  {
+    "symbol": "rare",
+    "platforms": { "ethereum": "0x93dfaf57d986b9ca77df9376c50878e013d9c7c8" }
+  },
+  {
+    "symbol": "foto",
+    "platforms": { "ethereum": "0xf6ea0e60cee427b90aa36f327ee61d1d4cabc49f" }
+  },
+  {
+    "symbol": "socks",
+    "platforms": { "ethereum": "0x23b608675a2b2fb1890d3abbd85c5775c51691d5" }
+  },
+  {
+    "symbol": "unistake",
+    "platforms": { "ethereum": "0x9ed8e7c9604790f7ec589f99b94361d8aab64e5e" }
+  },
+  {
+    "symbol": "uni",
+    "platforms": { "ethereum": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984" }
+  },
+  {
+    "symbol": "uct",
+    "platforms": { "ethereum": "0x6d1dc3928604b00180bb570bdae94b9698d33b79" }
+  },
+  {
+    "symbol": "udog",
+    "platforms": { "ethereum": "0x4a9d8b8fce0b6ec033932b13c4e24d24dc4113cd" }
+  },
+  {
+    "symbol": "utt",
+    "platforms": { "ethereum": "0x16f812be7fff02caf662b85d5d58a5da6572d4df" }
+  },
+  {
+    "symbol": "col",
+    "platforms": { "ethereum": "0xc76fb75950536d98fa62ea968e1d6b45ffea2a55" }
+  },
+  {
+    "symbol": "duck",
+    "platforms": { "ethereum": "0x92e187a03b6cd19cb6af293ba17f2745fd2357d5" }
+  },
+  {
+    "symbol": "trade",
+    "platforms": { "ethereum": "0x6f87d756daf0503d08eb8993686c7fc01dc44fb1" }
+  },
+  {
+    "symbol": "unt",
+    "platforms": { "ethereum": "0x8d610e20481f4c4f3acb87bba9c46bef7795fdfe" }
+  },
+  {
+    "symbol": "ubi",
+    "platforms": { "ethereum": "0xdd1ad9a21ce722c151a836373babe42c868ce9a4" }
+  },
+  {
+    "symbol": "ucoin",
+    "platforms": { "ethereum": "0xa918897bd10d6dee614470c24a061b78b021b3a9" }
+  },
+  {
+    "symbol": "upeur",
+    "platforms": { "ethereum": "0x6c103d85c15107dce19f5a75fc746227e610aabd" }
+  },
+  {
+    "symbol": "upxau",
+    "platforms": { "ethereum": "0x0557df767419296474c3f551bb0a0ed4c2dd3380" }
+  },
+  {
+    "symbol": "ulu",
+    "platforms": { "ethereum": "0x035bfe6057e15ea692c0dfdcab3bb41a64dd2ad4" }
+  },
+  {
+    "symbol": "upt",
+    "platforms": { "ethereum": "0x6ca88cc8d9288f5cad825053b6a1b179b05c76fc" }
+  },
+  {
+    "symbol": "upusd",
+    "platforms": { "ethereum": "0x86367c0e517622dacdab379f2de389c3c9524345" }
+  },
+  {
+    "symbol": "unis",
+    "platforms": { "ethereum": "0xedc87cab8bd12ca39088deaf9fdfb63503f19f85" }
+  },
+  {
+    "symbol": "xyz",
+    "platforms": { "ethereum": "0x618679df9efcd19694bb1daa8d00718eacfa2883" }
+  },
+  {
+    "symbol": "uwl",
+    "platforms": { "ethereum": "0xdbdd6f355a37b94e6c7d32fef548e98a280b8df5" }
+  },
+  {
+    "symbol": "unix",
+    "platforms": { "ethereum": "0xddd6a0ecc3c6f6c102e5ea3d8af7b801d1a77ac8" }
+  },
+  {
+    "symbol": "zcx",
+    "platforms": { "ethereum": "0xc52c326331e9ce41f04484d3b5e5648158028804" }
+  },
+  {
+    "symbol": "uft",
+    "platforms": { "ethereum": "0x0202be363b8a4820f3f4de7faf5224ff05943ab1" }
+  },
+  {
+    "symbol": "uffyi",
+    "platforms": { "ethereum": "0x021576770cb3729716ccfb687afdb4c6bf720cb6" }
+  },
+  {
+    "symbol": "uip",
+    "platforms": { "ethereum": "0x4290563c2d7c255b5eec87f2d3bd10389f991d68" }
+  },
+  {
+    "symbol": "udt",
+    "platforms": { "ethereum": "0x90de74265a416e1393a450752175aed98fe11517" }
+  },
+  {
+    "symbol": "marsh",
+    "platforms": { "ethereum": "0x5a666c7d92e5fa7edcb6390e4efd6d0cdd69cf37" }
+  },
+  {
+    "symbol": "uno",
+    "platforms": { "ethereum": "0x474021845c4643113458ea4414bdb7fb74a01a77" }
+  },
+  {
+    "symbol": "unos",
+    "platforms": { "ethereum": "0xd18a8abed9274edbeace4b12d86a8633283435da" }
+  },
+  {
+    "symbol": "ugt",
+    "platforms": { "ethereum": "0x9cf98eb8a8b28c83e8612046cf55701ce3eb0063" }
+  },
+  {
+    "symbol": "usf",
+    "platforms": { "ethereum": "0xe0e05c43c097b0982db6c9d626c4eb9e95c3b9ce" }
+  },
+  {
+    "symbol": "unv",
+    "platforms": { "ethereum": "0xf009f5531de69067435e32c4b9d36077f4c4a673" }
+  },
+  {
+    "symbol": "ubxt",
+    "platforms": { "ethereum": "0x8564653879a18c560e7c0ea0e084c516c62f5653" }
+  },
+  {
+    "symbol": "upr",
+    "platforms": { "ethereum": "0xf720e38f678b29b243f7d53b56acbf5de98f2385" }
+  },
+  {
+    "symbol": "ufr",
+    "platforms": { "ethereum": "0xea097a2b1db00627b2fa17460ad260c016016977" }
+  },
+  {
+    "symbol": "lift",
+    "platforms": { "ethereum": "0x513c3200f227ebb62e3b3d00b7a83779643a71cf" }
+  },
+  {
+    "symbol": "usdu",
+    "platforms": { "ethereum": "0x41a03e41ef555392c9f0ad60f4f61e263078bf10" }
+  },
+  {
+    "symbol": "euru",
+    "platforms": { "ethereum": "0x6c139349ee94ebaaff55ed52d382673c263b22d6" }
+  },
+  {
+    "symbol": "gbpu",
+    "platforms": { "ethereum": "0x27ed129c298c5df130364083f491e2920e5a2f29" }
+  },
+  {
+    "symbol": "chfu",
+    "platforms": { "ethereum": "0x430e705c7a90d380e9c2d9da4f547d221d6e88cb" }
+  },
+  {
+    "symbol": "up",
+    "platforms": { "ethereum": "0x6ba460ab75cd2c56343b3517ffeba60748654d26" }
+  },
+  {
+    "symbol": "1up",
+    "platforms": { "ethereum": "0x07597255910a51509ca469568b048f2597e72504" }
+  },
+  {
+    "symbol": "uqc",
+    "platforms": { "ethereum": "0x8806926ab68eb5a7b909dcaf6fdbe5d93271d6e2" }
+  },
+  {
+    "symbol": "urac",
+    "platforms": { "ethereum": "0xff8be4b22cedc440591dcb1e641eb2a0dd9d25a5" }
+  },
+  {
+    "symbol": "urqa",
+    "platforms": { "ethereum": "0x1735db6ab5baa19ea55d0adceed7bcdc008b3136" }
+  },
+  {
+    "symbol": "urus",
+    "platforms": { "ethereum": "0x6c5fbc90e4d78f70cc5025db005b39b03914fc0c" }
+  },
+  {
+    "symbol": "usda",
+    "platforms": { "ethereum": "0x3c7b464376db7c9927930cf50eefdea2eff3a66a" }
+  },
+  {
+    "symbol": "usdb",
+    "platforms": { "ethereum": "0x309627af60f0926daa6041b8279484312f2bf060" }
+  },
+  {
+    "symbol": "usdc",
+    "platforms": { "ethereum": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" }
+  },
+  {
+    "symbol": "usdfl",
+    "platforms": { "ethereum": "0x2b4200a8d373d484993c37d63ee14aee0096cd12" }
+  },
+  {
+    "symbol": "usdk",
+    "platforms": { "ethereum": "0x1c48f86ae57291f7686349f12601910bd8d470bb" }
+  },
+  {
+    "symbol": "usdl",
+    "platforms": { "ethereum": "0x3e991dbec296e00626e58c33b62e53bec9d54636" }
+  },
+  {
+    "symbol": "usdm",
+    "platforms": { "ethereum": "0x31d4eb09a216e181ec8a43ce79226a487d6f0ba9" }
+  },
+  {
+    "symbol": "usdp",
+    "platforms": { "ethereum": "0x1456688345527be1f37e9e627da0837d6f08c925" }
+  },
+  {
+    "symbol": "usdq",
+    "platforms": { "ethereum": "0x4954db6391f4feb5468b6b943d4935353596aec9" }
+  },
+  {
+    "symbol": "usdx",
+    "platforms": { "ethereum": "0xeb269732ab75a6fd61ea60b06fe994cd32a83549" }
+  },
+  {
+    "symbol": "use",
+    "platforms": { "ethereum": "0xd9485499499d66b175cf5ed54c0a19f1a6bcb61a" }
+  },
+  {
+    "symbol": "usopp",
+    "platforms": { "ethereum": "0x19a4a9eff50ddafd9faefd0b8d1f2d79ac8183f4" }
+  },
+  {
+    "symbol": "uop",
+    "platforms": { "ethereum": "0xe4ae84448db5cfe1daf1e6fb172b469c161cb85f" }
+  },
+  {
+    "symbol": "utrin",
+    "platforms": { "ethereum": "0x99f2b69ee2468c834a634ff50d930ae64e3e500f" }
+  },
+  {
+    "symbol": "utk",
+    "platforms": { "ethereum": "0xdc9ac3c20d1ed0b540df9b1fedc10039df13f99c" }
+  },
+  {
+    "symbol": "utu",
+    "platforms": { "ethereum": "0xa58a4f5c4bb043d2cc1e170613b74e767c94189b" }
+  },
+  {
+    "symbol": "uwu",
+    "platforms": { "ethereum": "0x5ce188b44266c7b4bbc67afa3d16b2eb24ed1065" }
+  },
+  {
+    "symbol": "uze",
+    "platforms": { "ethereum": "0xbdcd5fafe4336a844233ebb0aff845d6b2100899" }
+  },
+  {
+    "symbol": "uzumaki",
+    "platforms": { "ethereum": "0xd4c64f0fe38ecdaf0baefd7859e18185a73b9aa3" }
+  },
+  {
+    "symbol": "vrise",
+    "platforms": { "ethereum": "0x3e6a17e1913b2f49ceb6803e46094066ff5f9c78" }
+  },
+  {
+    "symbol": "vab",
+    "platforms": { "ethereum": "0xe7ae6d0c56cacaf007b7e4d312f9af686a9e9a04" }
+  },
+  {
+    "symbol": "vader",
+    "platforms": { "ethereum": "0x2602278ee1882889b946eb11dc0e810075650983" }
+  },
+  {
+    "symbol": "vai",
+    "platforms": { "ethereum": "0x9f801c1f02af03cc240546dadef8e56cd46ea2e9" }
+  },
+  {
+    "symbol": "vld",
+    "platforms": { "ethereum": "0x922ac473a3cc241fd3a0049ed14536452d58d73c" }
+  },
+  {
+    "symbol": "vlm",
+    "platforms": { "ethereum": "0x3989f36540052668c340a53aaeacb46d6cf0dd6c" }
+  },
+  {
+    "symbol": "vbit",
+    "platforms": { "ethereum": "0xb8366948b4a3f07bcbf14eb1739daa42a26b07c4" }
+  },
+  {
+    "symbol": "value",
+    "platforms": { "ethereum": "0x49e833337ece7afe375e44f4e3e8481029218e5c" }
+  },
+  {
+    "symbol": "vntw",
+    "platforms": { "ethereum": "0xd0f05d3d4e4d1243ac826d8c6171180c58eaa9bc" }
+  },
+  {
+    "symbol": "vsd",
+    "platforms": { "ethereum": "0x35de3eccaccb02e627062b5d63aa941b137288fe" }
+  },
+  {
+    "symbol": "vamp",
+    "platforms": { "ethereum": "0xb2c822a1b923e06dbd193d2cfc7ad15388ea09dd" }
+  },
+  {
+    "symbol": "vns",
+    "platforms": { "ethereum": "0x97941ff1962026955852e9609e202d1058bc0f48" }
+  },
+  {
+    "symbol": "vnl",
+    "platforms": { "ethereum": "0xbf900809f4c73e5a3476eb183d8b06a27e61f8e5" }
+  },
+  {
+    "symbol": "vnla",
+    "platforms": { "ethereum": "0xb97faf860045483e0c7f08c56acb31333084a988" }
+  },
+  {
+    "symbol": "vany",
+    "platforms": { "ethereum": "0x4edd66235349e353eb8cb8e40596599644bfe91c" }
+  },
+  {
+    "symbol": "vrn",
+    "platforms": { "ethereum": "0x72377f31e30a405282b522d588aebbea202b4f23" }
+  },
+  {
+    "symbol": "vsc",
+    "platforms": { "ethereum": "0x99bfe582a97f0ded07ee6fb5c1e5b6f1ff082243" }
+  },
+  {
+    "symbol": "vgt",
+    "platforms": { "ethereum": "0xcc394f10545aeef24483d2347b32a34a44f20e6f" }
+  },
+  {
+    "symbol": "vaultz",
+    "platforms": { "ethereum": "0x861b2456ac1a6ab5fb5c72aa456091f23ddec1cc" }
+  },
+  {
+    "symbol": "vbt",
+    "platforms": { "ethereum": "0x1ffe24629f1b3df74fc0f6e5d086f2fd09258ff2" }
+  },
+  {
+    "symbol": "vbzrx",
+    "platforms": { "ethereum": "0xb72b31907c1c95f3650b64b2469e08edacee5e8f" }
+  },
+  {
+    "symbol": "yve-crvdao",
+    "platforms": { "ethereum": "0xc5bddf9843308380375a611c18b50fb9341f502a" }
+  },
+  {
+    "symbol": "vxv",
+    "platforms": { "ethereum": "0x7d29a64504629172a429e64183d6673b9dacbfce" }
+  },
+  {
+    "symbol": "grnc",
+    "platforms": { "ethereum": "0x37d299ef5548bf19503cb72c085799e331f9097d" }
+  },
+  {
+    "symbol": "vega",
+    "platforms": { "ethereum": "0xcb84d72e61e383767c4dfeb2d8ff7f4fb89abc6e" }
+  },
+  {
+    "symbol": "vgw",
+    "platforms": { "ethereum": "0x94236591125e935f5ac128bb3d5062944c24958c" }
+  },
+  {
+    "symbol": "vegi",
+    "platforms": { "ethereum": "0x158c86d5f63fb97fa6c8f67d6a094f25cb60be67" }
+  },
+  {
+    "symbol": "vlx",
+    "platforms": { "ethereum": "0x8c543aed163909142695f2d2acd0d55791a9edb9" }
+  },
+  {
+    "symbol": "vlxpad",
+    "platforms": { "ethereum": "0xb8e3bb633f7276cc17735d86154e0ad5ec9928c0" }
+  },
+  {
+    "symbol": "vemp",
+    "platforms": { "ethereum": "0xcfeb09c3c5f0f78ad72166d55f9e6e9a60e96eec" }
+  },
+  {
+    "symbol": "vndt",
+    "platforms": { "ethereum": "0x5e9997684d061269564f94e5d11ba6ce6fa9528c" }
+  },
+  {
+    "symbol": "vjc",
+    "platforms": { "ethereum": "0x5c62da804298d5972a323c80b539b8e7517a0dde" }
+  },
+  {
+    "symbol": "vent",
+    "platforms": { "ethereum": "0x5f0bc16d50f72d10b719dbf6845de2e599eb5624" }
+  },
+  {
+    "symbol": "vera",
+    "platforms": { "ethereum": "0xd7f0cc50ad69408ae58be033f4f85d2367c2e468" }
+  },
+  {
+    "symbol": "vera",
+    "platforms": { "ethereum": "0x166f1a7ecae00bd43876a25b10a63c575e05c0e7" }
+  },
+  {
+    "symbol": "vro",
+    "platforms": { "ethereum": "0x10bc518c32fbae5e38ecb50a612160571bd81e44" }
+  },
+  {
+    "symbol": "vra",
+    "platforms": { "ethereum": "0xf411903cbc70a74d22900a5de66a2dda66507255" }
+  },
+  {
+    "symbol": "vdg",
+    "platforms": { "ethereum": "0x57c75eccc8557136d32619a191fbcdc88560d711" }
+  },
+  {
+    "symbol": "cred",
+    "platforms": { "ethereum": "0x672a1ad4f667fb18a333af13667aa0af1f5b5bdd" }
+  },
+  {
+    "symbol": "vsf",
+    "platforms": { "ethereum": "0xac9ce326e95f51b5005e9fe1dd8085a01f18450c" }
+  },
+  {
+    "symbol": "veri",
+    "platforms": { "ethereum": "0x8f3470a7388c05ee4e7af3d01d8c722b0ff52374" }
+  },
+  {
+    "symbol": "vrs",
+    "platforms": { "ethereum": "0xabc430136a4de71c9998242de8c1b4b97d2b9045" }
+  },
+  {
+    "symbol": "vrx",
+    "platforms": { "ethereum": "0x87de305311d5788e8da38d19bb427645b09cb4e5" }
+  },
+  {
+    "symbol": "verse",
+    "platforms": { "ethereum": "0xe18841d7a75866688e291703bde66c3378bd74a3" }
+  },
+  {
+    "symbol": "vvt",
+    "platforms": { "ethereum": "0x755be920943ea95e39ee2dc437b268917b580d6e" }
+  },
+  {
+    "symbol": "vsp",
+    "platforms": { "ethereum": "0x1b40183efb4dd766f11bda7a7c3ad8982e998421" }
+  },
+  {
+    "symbol": "vusd",
+    "platforms": { "ethereum": "0x677ddbd918637e5f2c79e164d402454de7da8619" }
+  },
+  {
+    "symbol": "vesta",
+    "platforms": { "ethereum": "0x3aef8e803bd9be47e69b9f36487748d30d940b96" }
+  },
+  {
+    "symbol": "vest",
+    "platforms": { "ethereum": "0x37f04d2c3ae075fad5483bb918491f656b12bdb6" }
+  },
+  {
+    "symbol": "veth",
+    "platforms": { "ethereum": "0x4ba6ddd7b89ed838fed25d208d4f644106e34279" }
+  },
+  {
+    "symbol": "vibe",
+    "platforms": { "ethereum": "0xe8ff5c9c75deb346acac493c463c8950be03dfba" }
+  },
+  {
+    "symbol": "vib",
+    "platforms": { "ethereum": "0x2c974b2d0ba1716e644c1fc59982a89ddd2ff724" }
+  },
+  {
+    "symbol": "vibe",
+    "platforms": { "ethereum": "0xe7fd8ab781bf7654cfcce2ace6eefabae0891996" }
+  },
+  {
+    "symbol": "vicex",
+    "platforms": { "ethereum": "0xdfd5bb6ce8716822b2c9b255560194ca3509bebc" }
+  },
+  {
+    "symbol": "vr",
+    "platforms": { "ethereum": "0x7d5121505149065b562c789a0145ed750e6e8cdd" }
+  },
+  {
+    "symbol": "vidt",
+    "platforms": { "ethereum": "0xfef4185594457050cc9c23980d301908fe057bb1" }
+  },
+  {
+    "symbol": "vid",
+    "platforms": { "ethereum": "0x2c9023bbc572ff8dc1228c7858a280046ea8c9e5" }
+  },
+  {
+    "symbol": "vida",
+    "platforms": { "ethereum": "0xe35f19e4457a114a951781aaf421ec5266ef25fe" }
+  },
+  {
+    "symbol": "vidy",
+    "platforms": { "ethereum": "0xc77b230f31b517f1ef362e59c173c2be6540b5e8" }
+  },
+  {
+    "symbol": "vidya",
+    "platforms": { "ethereum": "0x3d3d35bb9bec23b06ca00fe472b50e7a4c692c30" }
+  },
+  {
+    "symbol": "vikky",
+    "platforms": { "ethereum": "0xd2946be786f35c3cc402c29b323647abda799071" }
+  },
+  {
+    "symbol": "vinci",
+    "platforms": { "ethereum": "0x3db99ab08006aefcc9600972eca8c202396b4300" }
+  },
+  {
+    "symbol": "eViral",
+    "platforms": { "ethereum": "0x7cec018ceef82339ee583fd95446334f2685d24f" }
+  },
+  {
+    "symbol": "vxt",
+    "platforms": { "ethereum": "0x8ba009cad493c7646e31d69428ab9a54f47b3779" }
+  },
+  {
+    "symbol": "vgo",
+    "platforms": { "ethereum": "0x8e87f1811de0025d2335174dbc7338a43df6d7cc" }
+  },
+  {
+    "symbol": "vpp",
+    "platforms": { "ethereum": "0x5eeaa2dcb23056f4e8654a349e57ebe5e76b5e6e" }
+  },
+  {
+    "symbol": "vsn",
+    "platforms": { "ethereum": "0x456ae45c0ce901e2e7c99c0718031cec0a7a59ff" }
+  },
+  {
+    "symbol": "visr",
+    "platforms": { "ethereum": "0xf938424f7210f31df2aee3011291b658f872e91e" }
+  },
+  {
+    "symbol": "vita",
+    "platforms": { "ethereum": "0x81f8f0bb1cb2a06649e51913a151f0e7ef6fa321" }
+  },
+  {
+    "symbol": "vite",
+    "platforms": { "ethereum": "0xadd5e881984783dd432f80381fb52f45b53f3e70" }
+  },
+  {
+    "symbol": "vix",
+    "platforms": { "ethereum": "0x49bf0220c9ce17e52dcca3d217231746d676085b" }
+  },
+  {
+    "symbol": "vndc",
+    "platforms": { "ethereum": "0x1f3f677ecc58f6a1f9e2cf410df4776a8546b5de" }
+  },
+  {
+    "symbol": "vnt",
+    "platforms": { "ethereum": "0x69d2779533a4d2c780639713558b2cc98c46a9b7" }
+  },
+  {
+    "symbol": "vnxlu",
+    "platforms": { "ethereum": "0x00fc270c9cc13e878ab5363d00354bebf6f05c15" }
+  },
+  {
+    "symbol": "vdx",
+    "platforms": { "ethereum": "0x91e64f39c1fe14492e8fdf5a8b0f305bd218c8a1" }
+  },
+  {
+    "symbol": "vdr",
+    "platforms": { "ethereum": "0xed3d4e446a96dc3b181b64b75c3c70da41dc3cbe" }
+  },
+  {
+    "symbol": "voise",
+    "platforms": { "ethereum": "0x83eea00d838f92dec4d1475697b9f4d3537b56e3" }
+  },
+  {
+    "symbol": "vol",
+    "platforms": { "ethereum": "0x5166e09628b696285e3a151e84fb977736a83575" }
+  },
+  {
+    "symbol": "acdc",
+    "platforms": { "ethereum": "0xfc44ec51c80e35a87bc2140299b1636ec83dfb04" }
+  },
+  {
+    "symbol": "volt",
+    "platforms": { "ethereum": "0xffbf315f70e458e49229654dea4ce192d26f9b25" }
+  },
+  {
+    "symbol": "VOLT",
+    "platforms": { "ethereum": "0x3f7aff0ef20aa2e646290dfa4e67611b2220c597" }
+  },
+  {
+    "symbol": "volts",
+    "platforms": { "ethereum": "0x14d1c83df4decee9deb14ee851f109f0101a6631" }
+  },
+  {
+    "symbol": "voltz",
+    "platforms": { "ethereum": "0x60715e436c37444e29772c0d26a98ae1e8e1a989" }
+  },
+  {
+    "symbol": "vtx",
+    "platforms": { "ethereum": "0xceb286c9604c542d3cc08b41aa6c9675b078a832" }
+  },
+  {
+    "symbol": "vtx",
+    "platforms": { "ethereum": "0xd957e08ac5421e2c28510586b57d095e5094836a" }
+  },
+  {
+    "symbol": "veth",
+    "platforms": { "ethereum": "0xc3d088842dcf02c13699f936bb83dfbbc6f721ab" }
+  },
+  {
+    "symbol": "vow",
+    "platforms": { "ethereum": "0x1bbf25e71ec48b84d773809b4ba55b6f4be946fb" }
+  },
+  {
+    "symbol": "vxl",
+    "platforms": { "ethereum": "0x16cc8367055ae7e9157dbcb9d86fd6ce82522b31" }
+  },
+  {
+    "symbol": "vox",
+    "platforms": { "ethereum": "0x12d102f06da35cc0111eb58017fd2cd28537d0e1" }
+  },
+  {
+    "symbol": "vgr",
+    "platforms": { "ethereum": "0x16987c021c14ca1045cd0afebb33c124a58bf16c" }
+  },
+  {
+    "symbol": "pyr",
+    "platforms": { "ethereum": "0x9534ad65fb398e27ac8f4251dae1780b989d136e" }
+  },
+  {
+    "symbol": "vvsp",
+    "platforms": { "ethereum": "0xba4cfe5741b357fa371b506e5db0774abfecf8fc" }
+  },
+  {
+    "symbol": "vybe",
+    "platforms": { "ethereum": "0x3a1c1d1c06be03cddc4d3332f7c20e1b37c97ce9" }
+  },
+  {
+    "symbol": "vync",
+    "platforms": { "ethereum": "0xee1ae38be4ce0074c4a4a8dc821cc784778f378c" }
+  },
+  {
+    "symbol": "wabi",
+    "platforms": { "ethereum": "0x286bda1413a2df81731d4930ce2f862a35a609fe" }
+  },
+  {
+    "symbol": "wtk",
+    "platforms": { "ethereum": "0xdf9d4674a430bdcc096a3a403128357ab36844ba" }
+  },
+  {
+    "symbol": "wgr",
+    "platforms": { "ethereum": "0xc237868a9c5729bdf3173dddacaa336a0a5bb6e0" }
+  },
+  {
+    "symbol": "wagmi",
+    "platforms": { "ethereum": "0x9724f51e3afb6b2ae0a5d86fd3b88c73283bc38f" }
+  },
+  {
+    "symbol": "wagmi",
+    "platforms": { "ethereum": "0x1e987df68cc13d271e621ec82e050a1bbd62c180" }
+  },
+  {
+    "symbol": "waif",
+    "platforms": { "ethereum": "0xb2279b6769cfba691416f00609b16244c0cf4b20" }
+  },
+  {
+    "symbol": "waifu",
+    "platforms": { "ethereum": "0xe7f4c89032a2488d327323548ab0459676269331" }
+  },
+  {
+    "symbol": "wtn",
+    "platforms": { "ethereum": "0x0ea984e789302b7b612147e4e4144e64f21425eb" }
+  },
+  {
+    "symbol": "wpx",
+    "platforms": { "ethereum": "0xb3bace433288645114fe8e8aa91f87659cbf665b" }
+  },
+  {
+    "symbol": "wfair",
+    "platforms": { "ethereum": "0xc6065b9fc8171ad3d29bad510709249681758972" }
+  },
+  {
+    "symbol": "wsb",
+    "platforms": { "ethereum": "0x62f8dbdea37a4ed40ff3d2631001e4490c13218f" }
+  },
+  {
+    "symbol": "wsb",
+    "platforms": { "ethereum": "0xe1590a6fa0cff9c960181cb77d8a873601772f64" }
+  },
+  {
+    "symbol": "wallstreetinu",
+    "platforms": { "ethereum": "0xd68cb7a643079311b8645ed90f2d5267cfa6ea26" }
+  },
+  {
+    "symbol": "wtf",
+    "platforms": { "ethereum": "0x0501e7a02c285b9b520fdbf1badc74ae931ad75d" }
+  },
+  {
+    "symbol": "wtc",
+    "platforms": { "ethereum": "0xb7cb1c96db6b22b0d3d9536e0108d062bd488f74" }
+  },
+  {
+    "symbol": "warp",
+    "platforms": { "ethereum": "0xed40834a13129509a89be39a9be9c0e96a0ddd71" }
+  },
+  {
+    "symbol": "wasabi",
+    "platforms": { "ethereum": "0x896e145568624a498c5a909187363ae947631503" }
+  },
+  {
+    "symbol": "was",
+    "platforms": { "ethereum": "0x0c572544a4ee47904d54aaa6a970af96b6f00e1b" }
+  },
+  {
+    "symbol": "waco",
+    "platforms": { "ethereum": "0x910c4da718caf4ee38ce5c2490cddaeca689204e" }
+  },
+  {
+    "symbol": "waves",
+    "platforms": { "ethereum": "0x1cf4592ebffd730c7dc92c1bdffdfc3b9efcf29a" }
+  },
+  {
+    "symbol": "egg",
+    "platforms": { "ethereum": "0xc2708a3a4ba7f64bddc1a49f92f941bc77cad23a" }
+  },
+  {
+    "symbol": "waxe",
+    "platforms": { "ethereum": "0x7a2bc711e19ba6aff6ce8246c546e8c4b4944dfd" }
+  },
+  {
+    "symbol": "web",
+    "platforms": { "ethereum": "0xf344490abd414dafa97f34c8ca501b0aa5bf8873" }
+  },
+  {
+    "symbol": "wfx",
+    "platforms": { "ethereum": "0xba1ed22c69ad00739ee2b4abd70e270be9e87ee2" }
+  },
+  {
+    "symbol": "webn",
+    "platforms": { "ethereum": "0x15a664416e42766a6cc0a1221d9c088548a6e731" }
+  },
+  {
+    "symbol": "won",
+    "platforms": { "ethereum": "0x1eddee3fa21591a9637f88dab9615c33ee636b9d" }
+  },
+  {
+    "symbol": "wtp",
+    "platforms": { "ethereum": "0x1680cfdad75da2bb56ded4f36bb9423c86ffa7b7" }
+  },
+  {
+    "symbol": "wcx",
+    "platforms": { "ethereum": "0xc014186cf1ba36032aaec7f96088f09eb3934347" }
+  },
+  {
+    "symbol": "weld",
+    "platforms": { "ethereum": "0xdd2a36ae937bc134ea694d77fc7e2e36f5d86de0" }
+  },
+  {
+    "symbol": "wtl",
+    "platforms": { "ethereum": "0x9a0587eae7ef64b2b38a10442a44cfa43edd7d2a" }
+  },
+  {
+    "symbol": "gm",
+    "platforms": { "ethereum": "0x7f0693074f8064cfbcf9fa6e5a3fa0e4f58ccccf" }
+  },
+  {
+    "symbol": "wm",
+    "platforms": { "ethereum": "0x750c83707112e9acc452692c190cb55e30f42510" }
+  },
+  {
+    "symbol": "eurn",
+    "platforms": { "ethereum": "0x96dc9e0fe87eef0b48f88d6ac541ba4f9992aac6" }
+  },
+  {
+    "symbol": "jpyn",
+    "platforms": { "ethereum": "0x95e91a76f225612995043ab26a98e6a4e3e1999b" }
+  },
+  {
+    "symbol": "sharen",
+    "platforms": { "ethereum": "0x772c316e0a7ab5f1de6de5199a22c951254c5cd3" }
+  },
+  {
+    "symbol": "usdn",
+    "platforms": { "ethereum": "0x4bc831111b480f07b7f74dbe90726f3b11201033" }
+  },
+  {
+    "symbol": "wpr",
+    "platforms": { "ethereum": "0x4cf488387f035ff08c371515562cba712f9015d4" }
+  },
+  {
+    "symbol": "wwc",
+    "platforms": { "ethereum": "0x38118bdb3b480f570837a4c2e88fac6e83be6689" }
+  },
+  {
+    "symbol": "wsc",
+    "platforms": { "ethereum": "0x2dcd9b1a7ed408ff48bd4918a1f9c0535dc54ead" }
+  },
+  {
+    "symbol": "weth",
+    "platforms": { "ethereum": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2" }
+  },
+  {
+    "symbol": "trst",
+    "platforms": { "ethereum": "0xcb94be6f13a1182e4a4b6140cb7bf2025d28e41b" }
+  },
+  {
+    "symbol": "wgmi",
+    "platforms": { "ethereum": "0x20f6a313cb250062331fe70b9567e3ee5f01888b" }
+  },
+  {
+    "symbol": "wgp",
+    "platforms": { "ethereum": "0xdd94842c15abfe4c9bafe4222ade02896beb064c" }
+  },
+  {
+    "symbol": "whale",
+    "platforms": { "ethereum": "0x9355372396e3f6daf13359b7b607a3374cc638e0" }
+  },
+  {
+    "symbol": "whale",
+    "platforms": { "ethereum": "0x804e26c4eff0bb196b805bdfb5b29ab828cf0b1f" }
+  },
+  {
+    "symbol": "whl",
+    "platforms": { "ethereum": "0x2af72850c504ddd3c1876c66a914caee7ff8a46a" }
+  },
+  {
+    "symbol": "$hrimp",
+    "platforms": { "ethereum": "0x9077f9e1efe0ea72867ac89046b2a6264cbcaef5" }
+  },
+  {
+    "symbol": "whale",
+    "platforms": { "ethereum": "0x8b7c94bc9ec137d67fbddb203b2814f0f1f9b377" }
+  },
+  {
+    "symbol": "when",
+    "platforms": { "ethereum": "0xf4fe95603881d0e07954fd7605e0e9a916e42c44" }
+  },
+  {
+    "symbol": "whey",
+    "platforms": { "ethereum": "0xca5d29b3e74d59ebcdf09111495d86f319886a40" }
+  },
+  {
+    "symbol": "whis",
+    "platforms": { "ethereum": "0x95f95388d97002af8f5a5e4c2f308d91ee1914ec" }
+  },
+  {
+    "symbol": "white",
+    "platforms": { "ethereum": "0x5f0e628b693018f639d10e4a4f59bd4d8b2b6b44" }
+  },
+  {
+    "symbol": "wrc",
+    "platforms": { "ethereum": "0x7c9d8fb3bde3d9ea6e89170618c2dc3d16695d36" }
+  },
+  {
+    "symbol": "wec",
+    "platforms": { "ethereum": "0xcc1a8bd438bebc4b2a885a34475bb974f2124317" }
+  },
+  {
+    "symbol": "node",
+    "platforms": { "ethereum": "0x0c3ef32f802967db75b9d49fe1e76620151ccb81" }
+  },
+  {
+    "symbol": "wbx",
+    "platforms": { "ethereum": "0xbb97e381f1d1e94ffa2a5844f6875e6146981009" }
+  },
+  {
+    "symbol": "wick",
+    "platforms": { "ethereum": "0xbbe460dc4ac73f7c13a2a2feecf9acf6d5083f9b" }
+  },
+  {
+    "symbol": "wifi",
+    "platforms": { "ethereum": "0xe202873079913858f9ba8795ba957a4ad561ca24" }
+  },
+  {
+    "symbol": "wxc",
+    "platforms": { "ethereum": "0x86225481747c774b24c7c3bac4c1b7382f787c7f" }
+  },
+  {
+    "symbol": "wiki",
+    "platforms": { "ethereum": "0x66bad545596fb17a0b4ebdc003a85def10e8f6ae" }
+  },
+  {
+    "symbol": "wild",
+    "platforms": { "ethereum": "0x403d512ab96103562dcafe4635545e8ee2753f6e" }
+  },
+  {
+    "symbol": "wild",
+    "platforms": { "ethereum": "0x2a3bff78b79a009976eea096a51a948a3dc00e34" }
+  },
+  {
+    "symbol": "wco",
+    "platforms": { "ethereum": "0xd44bb6663936cab1310584a277f7daa6943d4904" }
+  },
+  {
+    "symbol": "lif",
+    "platforms": { "ethereum": "0x9c38688e5acb9ed6049c8502650db5ac8ef96465" }
+  },
+  {
+    "symbol": "wings",
+    "platforms": { "ethereum": "0x667088b212ce3d06a1b553a7221e1fd19000d9af" }
+  },
+  {
+    "symbol": "winry",
+    "platforms": { "ethereum": "0x1a87077c4f834884691b8ba4fc808d2ec93a9f30" }
+  },
+  {
+    "symbol": "wnl",
+    "platforms": { "ethereum": "0xcfbf70e33d5163e25b0dad73955c1bd9e8cd8ba2" }
+  },
+  {
+    "symbol": "wxt",
+    "platforms": { "ethereum": "0xa02120696c7b8fe16c09c749e4598819b2b0e915" }
+  },
+  {
+    "symbol": "wise",
+    "platforms": { "ethereum": "0x66a0f676479cee1d7373f3dc2e2952778bff5bd6" }
+  },
+  {
+    "symbol": "wit",
+    "platforms": { "ethereum": "0xe13ef257cf4d5df928ca11d230427c037666d466" }
+  },
+  {
+    "symbol": "winu",
+    "platforms": { "ethereum": "0x68f3062e07fd4d70ada23d97d5bda8a8f218d38f" }
+  },
+  {
+    "symbol": "witch",
+    "platforms": { "ethereum": "0xdc524e3c6910257744c1f93cf15e9f472b5bd236" }
+  },
+  {
+    "symbol": "wiva",
+    "platforms": { "ethereum": "0xa00055e6ee4d1f4169096ecb682f70caa8c29987" }
+  },
+  {
+    "symbol": "wix",
+    "platforms": { "ethereum": "0x7ba19b7f7d106a9a1e0985397b94f38eee0b555e" }
+  },
+  {
+    "symbol": "gp",
+    "platforms": { "ethereum": "0x38ec27c6f05a169e7ed03132bca7d0cfee93c2c5" }
+  },
+  {
+    "symbol": "wizard",
+    "platforms": { "ethereum": "0x87931e7ad81914e7898d07c68f145fc0a553d8fb" }
+  },
+  {
+    "symbol": "wliti",
+    "platforms": { "ethereum": "0x0b63128c40737b13647552e0c926bcfeccc35f93" }
+  },
+  {
+    "symbol": "wmpro",
+    "platforms": { "ethereum": "0x687a790e4e94a8abf9952aed635c80a5540d7e5c" }
+  },
+  {
+    "symbol": "wool",
+    "platforms": { "ethereum": "0x8355dbe8b0e275abad27eb843f3eaf3fc855e525" }
+  },
+  {
+    "symbol": "wolfy",
+    "platforms": { "ethereum": "0x7dbbcae15d4db168e01673400d7844870cc1e36f" }
+  },
+  {
+    "symbol": "wolverinu",
+    "platforms": { "ethereum": "0xca7b3ba66556c4da2e2a9afef9c64f909a59430a" }
+  },
+  {
+    "symbol": "wows",
+    "platforms": { "ethereum": "0x672ef7e4fe230b5ca1466c5fdd40588d30fdf90a" }
+  },
+  {
+    "symbol": "WEMP",
+    "platforms": { "ethereum": "0x79e52c8d2ca6ad34791899fcd19752a8bc51dea5" }
+  },
+  {
+    "symbol": "wom",
+    "platforms": { "ethereum": "0xbd356a39bff2cada8e9248532dd879147221cf76" }
+  },
+  {
+    "symbol": "woofy",
+    "platforms": { "ethereum": "0xd0660cd418a64a1d44e9214ad8e459324d8157f1" }
+  },
+  {
+    "symbol": "woo",
+    "platforms": { "ethereum": "0x4691937a7508860f876c9c0a2a617e7d9e945d4b" }
+  },
+  {
+    "symbol": "wqt",
+    "platforms": { "ethereum": "0x06677dc4fe12d3ba3c7ccfd0df8cd45e4d4095bf" }
+  },
+  {
+    "symbol": "wrc",
+    "platforms": { "ethereum": "0x72adadb447784dd7ab1f472467750fc485e4cb2d" }
+  },
+  {
+    "symbol": "wcdc",
+    "platforms": { "ethereum": "0xab51e836bdcbc7cc06d926c50d88328f1bb17148" }
+  },
+  {
+    "symbol": "wpt",
+    "platforms": { "ethereum": "0xe04491d64eaa464ec8fdf53c7a4c92bf5b2278cd" }
+  },
+  {
+    "symbol": "world",
+    "platforms": { "ethereum": "0xbf494f02ee3fde1f20bee6242bce2d1ed0c15e47" }
+  },
+  {
+    "symbol": "wow",
+    "platforms": { "ethereum": "0x3405a1bd46b85c5c029483fbecf2f3e611026e45" }
+  },
+  {
+    "symbol": "wyx",
+    "platforms": { "ethereum": "0x05edffbda103d90d5040829a105f687443e0ca3e" }
+  },
+  {
+    "symbol": "wozx",
+    "platforms": { "ethereum": "0x34950ff2b487d9e5282c5ab342d08a2f712eb79f" }
+  },
+  {
+    "symbol": "wpp",
+    "platforms": { "ethereum": "0x1955d744f9435522be508d1ba60e3c12d0690b6a" }
+  },
+  {
+    "symbol": "wampl",
+    "platforms": { "ethereum": "0xedb171c18ce90b633db442f2a6f72874093b49ef" }
+  },
+  {
+    "symbol": "wanatha",
+    "platforms": { "ethereum": "0x3383c5a8969dc413bfddc9656eb80a1408e4ba20" }
+  },
+  {
+    "symbol": "war",
+    "platforms": { "ethereum": "0x4fadc7a98f2dc96510e42dd1a74141eeae0c1543" }
+  },
+  {
+    "symbol": "wag8",
+    "platforms": { "ethereum": "0x0a8b16b27d5219c8c6b57d5442ce31d81573eee4" }
+  },
+  {
+    "symbol": "wbind",
+    "platforms": { "ethereum": "0x15334dcb171e8b65d6650321581dca83be870115" }
+  },
+  {
+    "symbol": "wbtc",
+    "platforms": { "ethereum": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599" }
+  },
+  {
+    "symbol": "wcelo",
+    "platforms": { "ethereum": "0xe452e6ea2ddeb012e20db73bf5d3863a3ac8d77a" }
+  },
+  {
+    "symbol": "wcusd",
+    "platforms": { "ethereum": "0xad3e3fc59dff318beceaab7d00eb4f68b1ecf195" }
+  },
+  {
+    "symbol": "wcfg",
+    "platforms": { "ethereum": "0xc221b7e65ffc80de234bbb6667abdd46593d34f0" }
+  },
+  {
+    "symbol": "wccx",
+    "platforms": { "ethereum": "0x21686f8ce003a95c99acd297e302faacf742f7d4" }
+  },
+  {
+    "symbol": "wck",
+    "platforms": { "ethereum": "0x09fe5f0236f0ea5d930197dce254d77b04128075" }
+  },
+  {
+    "symbol": "wdgld",
+    "platforms": { "ethereum": "0x123151402076fc819b7564510989e475c9cd93ca" }
+  },
+  {
+    "symbol": "womi",
+    "platforms": { "ethereum": "0x04969cd041c0cafb6ac462bd65b536a5bdb3a670" }
+  },
+  {
+    "symbol": "wfct",
+    "platforms": { "ethereum": "0x415acc3c6636211e67e248dc28400b452acefa68" }
+  },
+  {
+    "symbol": "wfil",
+    "platforms": { "ethereum": "0x6e1a19f235be7ed8e3369ef73b196c07257494de" }
+  },
+  {
+    "symbol": "wg0",
+    "platforms": { "ethereum": "0xa10740ff9ff6852eac84cdcff9184e1d6d27c057" }
+  },
+  {
+    "symbol": "wilc",
+    "platforms": { "ethereum": "0xc98a910ede52e7d5308525845f19e17470dbccf7" }
+  },
+  {
+    "symbol": "wiotx",
+    "platforms": { "ethereum": "0xa00744882684c3e4747faefd68d283ea44099d03" }
+  },
+  {
+    "symbol": "wkda",
+    "platforms": { "ethereum": "0x85d7bdfc9c3426b33a684241eeee70385bc42820" }
+  },
+  {
+    "symbol": "wleo",
+    "platforms": { "ethereum": "0x73a9fb46e228628f8f9bb9004eca4f4f529d3998" }
+  },
+  {
+    "symbol": "mcat20",
+    "platforms": { "ethereum": "0xf961a1fa7c781ecd23689fe1d0b7f3b6cbb2f972" }
+  },
+  {
+    "symbol": "wncg",
+    "platforms": { "ethereum": "0xf203ca1769ca8e9e8fe1da9d147db68b6c919817" }
+  },
+  {
+    "symbol": "wnxm",
+    "platforms": { "ethereum": "0x0d438f3b5175bebc262bf23753c1e53d03432bde" }
+  },
+  {
+    "symbol": "woa",
+    "platforms": { "ethereum": "0xec0a0915a7c3443862b678b0d4721c7ab133fdcf" }
+  },
+  {
+    "symbol": "polis",
+    "platforms": { "ethereum": "0x622f2962ae78e8686ecc1e30cf2f9a6e5ac35626" }
+  },
+  {
+    "symbol": "wsta",
+    "platforms": { "ethereum": "0xedeec5691f23e4914cf0183a4196bbeb30d027a0" }
+  },
+  {
+    "symbol": "wsteth",
+    "platforms": { "ethereum": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0" }
+  },
+  {
+    "symbol": "luna",
+    "platforms": { "ethereum": "0xd2877702675e6ceb975b4a1dff9fb7baf4c91ea9" }
+  },
+  {
+    "symbol": "wxtz",
+    "platforms": { "ethereum": "0x2a69655c22eda32ff48d315bb26ed45f150700b4" }
+  },
+  {
+    "symbol": "wusd",
+    "platforms": { "ethereum": "0x7c974104df9dd7fb91205ab3d66d15aff1049de8" }
+  },
+  {
+    "symbol": "ust",
+    "platforms": { "ethereum": "0xa47c8bf37f92abed4a126bda807a7b7498661acd" }
+  },
+  {
+    "symbol": "wvg0",
+    "platforms": { "ethereum": "0x25c7b64a93eb1261e130ec21a3e9918caa38b611" }
+  },
+  {
+    "symbol": "wwcn",
+    "platforms": { "ethereum": "0x54a3017754bfba73f71f37d893a368814cbff457" }
+  },
+  {
+    "symbol": "ewit",
+    "platforms": { "ethereum": "0x56ee175fe37cd461486ce3c3166e0cafccd9843f" }
+  },
+  {
+    "symbol": "bwrx",
+    "platforms": { "ethereum": "0xff0a024b66739357c4ed231fb3dbc0c8c22749f5" }
+  },
+  {
+    "symbol": "wxbtc",
+    "platforms": { "ethereum": "0x5592c5aa89492ea918d55b804e177b5ca7dccd5a" }
+  },
+  {
+    "symbol": "wxmr",
+    "platforms": { "ethereum": "0x465e07d6028830124be2e4aa551fbe12805db0f5" }
+  },
+  {
+    "symbol": "wxrp",
+    "platforms": { "ethereum": "0x39fbbabf11738317a448031930706cd3e612e1b9" }
+  },
+  {
+    "symbol": "wzec",
+    "platforms": { "ethereum": "0x4a64515e5e1d1073e83f30cb97bed20400b66e10" }
+  },
+  {
+    "symbol": "x22",
+    "platforms": { "ethereum": "0x41045282901e90bda7578d628e479e5421d1cdd5" }
+  },
+  {
+    "symbol": "x8x",
+    "platforms": { "ethereum": "0x910dfc18d6ea3d6a7124a6f8b5458f281060fa4c" }
+  },
+  {
+    "symbol": "xaavea",
+    "platforms": { "ethereum": "0x80dc468671316e50d4e9023d3db38d3105c1c146" }
+  },
+  {
+    "symbol": "xaaveb",
+    "platforms": { "ethereum": "0x704de5696df237c5b9ba0de9ba7e0c63da8ea0df" }
+  },
+  {
+    "symbol": "xaea12",
+    "platforms": { "ethereum": "0x1902882a8f6c7fb1402f83c434ea8e064b35bab3" }
+  },
+  {
+    "symbol": "xank",
+    "platforms": { "ethereum": "0x0e7f79e89ba8c4a13431129fb2db0d4f444b5b9a" }
+  },
+  {
+    "symbol": "xaur",
+    "platforms": { "ethereum": "0x4df812f6064def1e5e029f1ca858777cc98d2d81" }
+  },
+  {
+    "symbol": "xbe",
+    "platforms": { "ethereum": "0x5de7cc4bcbca31c473f6d2f27825cfb09cc0bb16" }
+  },
+  {
+    "symbol": "ix",
+    "platforms": { "ethereum": "0x53f0c9f1b6e283a59bcd672e80e2222b97e534cb" }
+  },
+  {
+    "symbol": "gold",
+    "platforms": { "ethereum": "0x670f9d9a26d3d42030794ff035d35a67aa092ead" }
+  },
+  {
+    "symbol": "xbx",
+    "platforms": { "ethereum": "0x46dceb1bb2c55531d12a4e769e8088f4af64d410" }
+  },
+  {
+    "symbol": "xcad",
+    "platforms": { "ethereum": "0x7659ce147d0e714454073a5dd7003544234b6aa0" }
+  },
+  {
+    "symbol": "xlab",
+    "platforms": { "ethereum": "0x8c4e7f814d40f8929f9112c5d09016f923d34472" }
+  },
+  {
+    "symbol": "xcf",
+    "platforms": { "ethereum": "0x010d14d36c3ea6570d240ae3ac9d660398f7c48e" }
+  },
+  {
+    "symbol": "game",
+    "platforms": { "ethereum": "0x882e5b370d595e50c24b2a0e7a94e87cc32adda1" }
+  },
+  {
+    "symbol": "stake",
+    "platforms": { "ethereum": "0x0ae055097c6d159879521c384f1d2123d1f195e6" }
+  },
+  {
+    "symbol": "xdef2",
+    "platforms": { "ethereum": "0x5166d4ce79b9bf7df477da110c560ce3045aa889" }
+  },
+  {
+    "symbol": "xdefi",
+    "platforms": { "ethereum": "0x72b886d09c117654ab7da13a14d603001de0b777" }
+  },
+  {
+    "symbol": "xdex",
+    "platforms": { "ethereum": "0x000000000000d0151e748d25b766e77efe2a6c83" }
+  },
+  {
+    "symbol": "xels",
+    "platforms": { "ethereum": "0xe748269494e76c1cec3f627bb1e561e607da9161" }
+  },
+  {
+    "symbol": "xend",
+    "platforms": { "ethereum": "0xe4cfe9eaa8cdb0942a80b7bc68fd8ab0f6d44903" }
+  },
+  {
+    "symbol": "xemx",
+    "platforms": { "ethereum": "0x59321ace77c8087ff8cb9f94c8384807e4fd8a3c" }
+  },
+  {
+    "symbol": "xen",
+    "platforms": { "ethereum": "0x5fbdb42bb048c685c990a37f2c87fe087c586655" }
+  },
+  {
+    "symbol": "xno",
+    "platforms": { "ethereum": "0x05bbe7240de66f6480c9aeda77c1376b13393f83" }
+  },
+  {
+    "symbol": "xsr",
+    "platforms": { "ethereum": "0x6bc1f3a1ae56231dbb64d3e82e070857eae86045" }
+  },
+  {
+    "symbol": "xns",
+    "platforms": { "ethereum": "0x79c71d3436f39ce382d0f58f1b011d88100b9d91" }
+  },
+  {
+    "symbol": "xeuro",
+    "platforms": { "ethereum": "0xe577e0b200d00ebdecbfc1cd3f7e8e04c70476be" }
+  },
+  {
+    "symbol": "xfi",
+    "platforms": { "ethereum": "0x5befbb272290dd5b8521d4a938f6c4757742c430" }
+  },
+  {
+    "symbol": "xfit",
+    "platforms": { "ethereum": "0x4aa41bc1649c9c3177ed16caaa11482295fc7441" }
+  },
+  {
+    "symbol": "xfund",
+    "platforms": { "ethereum": "0x892a6f9df0147e5f079b0993f486f9aca3c87881" }
+  },
+  {
+    "symbol": "xido",
+    "platforms": { "ethereum": "0xf6650117017ffd48b725b4ec5a00b414097108a7" }
+  },
+  {
+    "symbol": "xgc",
+    "platforms": { "ethereum": "0x89d3c0249307ae570a316030764d12f53bb191fd" }
+  },
+  {
+    "symbol": "xINCHa",
+    "platforms": { "ethereum": "0x8f6a193c8b3c949e1046f1547c3a3f0836944e4b" }
+  },
+  {
+    "symbol": "xio",
+    "platforms": { "ethereum": "0x0f7f961648ae6db43c75663ac7e5414eb79b5704" }
+  },
+  {
+    "symbol": "xiot",
+    "platforms": { "ethereum": "0x31024a4c3e9aeeb256b825790f5cb7ac645e7cd5" }
+  },
+  {
+    "symbol": "xi",
+    "platforms": { "ethereum": "0x295b42684f90c77da7ea46336001010f2791ec8c" }
+  },
+  {
+    "symbol": "xkawa",
+    "platforms": { "ethereum": "0xdc386452f9ffda7f0d2940e5c60dc0f9469b1097" }
+  },
+  {
+    "symbol": "xkncb",
+    "platforms": { "ethereum": "0x06890d4c65a4cb75be73d7ccb4a8ee7962819e81" }
+  },
+  {
+    "symbol": "xlshiba",
+    "platforms": { "ethereum": "0x443c31b525791b4bfb1cf67196475cb27b834b67" }
+  },
+  {
+    "symbol": "xmark",
+    "platforms": { "ethereum": "0x36b679bd64ed73dbfd88909cdcb892cb66bd4cbb" }
+  },
+  {
+    "symbol": "xmx",
+    "platforms": { "ethereum": "0x0f8c45b896784a1e408526b9300519ef8660209c" }
+  },
+  {
+    "symbol": "xmon",
+    "platforms": { "ethereum": "0x3aada3e213abf8529606924d8d1c55cbdc70bf74" }
+  },
+  {
+    "symbol": "xolo",
+    "platforms": { "ethereum": "0xc1122358ab7c92fc00e5ca01215bed394dae8fd7" }
+  },
+  {
+    "symbol": "xov",
+    "platforms": { "ethereum": "0x153ed9cc1b792979d2bde0bbf45cc2a7e436a5f9" }
+  },
+  {
+    "symbol": "xpo",
+    "platforms": { "ethereum": "0x1a3564852d8ede7c8249805e71718bd7aa93dd6d" }
+  },
+  {
+    "symbol": "xpt",
+    "platforms": { "ethereum": "0xf0814d0e47f2390a8082c4a1bd819fdde50f9bfc" }
+  },
+  {
+    "symbol": "xra",
+    "platforms": { "ethereum": "0x7025bab2ec90410de37f488d1298204cd4d6b29d" }
+  },
+  {
+    "symbol": "xri",
+    "platforms": { "ethereum": "0x9287aefe51047ef43f68612f80bac17745b23aec" }
+  },
+  {
+    "symbol": "xrpc",
+    "platforms": { "ethereum": "0xd4ca5c2aff1eefb0bea9e9eab16f88db2990c183" }
+  },
+  {
+    "symbol": "xsgd",
+    "platforms": { "ethereum": "0x70e8de73ce538da2beed35d14187f6959a8eca96" }
+  },
+  {
+    "symbol": "sig",
+    "platforms": { "ethereum": "0x7777777777697cfeecf846a76326da79cc606517" }
+  },
+  {
+    "symbol": "xsushi",
+    "platforms": { "ethereum": "0x8798249c2e607446efb7ad49ec89dd1865ff4272" }
+  },
+  {
+    "symbol": "xsp",
+    "platforms": { "ethereum": "0x9b06d48e0529ecf05905ff52dd426ebec0ea3011" }
+  },
+  {
+    "symbol": "xt",
+    "platforms": { "ethereum": "0x4be10da47a07716af28ad199fbe020501bddd7af" }
+  },
+  {
+    "symbol": "xtk",
+    "platforms": { "ethereum": "0x7f3edcdd180dbe4819bd98fee8929b5cedb3adeb" }
+  },
+  {
+    "symbol": "xtrd",
+    "platforms": { "ethereum": "0x9c794f933b4dd8b49031a79b0f924d68bef43992" }
+  },
+  {
+    "symbol": "xvix",
+    "platforms": { "ethereum": "0x4bae380b5d762d543d426331b8437926443ae9ec" }
+  },
+  {
+    "symbol": "xy",
+    "platforms": { "ethereum": "0x77777777772cf0455fb38ee0e75f38034dfa50de" }
+  },
+  {
+    "symbol": "xyo",
+    "platforms": { "ethereum": "0x55296f69f40ea6d20e478533c15a6b08b654e758" }
+  },
+  {
+    "symbol": "yam",
+    "platforms": { "ethereum": "0x0aacfbec6a24756c20d41914f2caba817c0d8521" }
+  },
+  {
+    "symbol": "YAMv2",
+    "platforms": { "ethereum": "0xaba8cac6866b83ae4eec97dd07ed254282f6ad8a" }
+  },
+  {
+    "symbol": "yansh",
+    "platforms": { "ethereum": "0xd19f9858de386c938d1b832a5b87f80a178fe28d" }
+  },
+  {
+    "symbol": "yap",
+    "platforms": { "ethereum": "0x245392ee7ce736ec6a0908b67dc5d0a218230005" }
+  },
+  {
+    "symbol": "yaxis",
+    "platforms": { "ethereum": "0x0ada190c81b814548ddc2f6adc4a689ce7c1fe73" }
+  },
+  {
+    "symbol": "yco",
+    "platforms": { "ethereum": "0x3d0293f06daf4311b482564330d57c8db6c10893" }
+  },
+  {
+    "symbol": "ydr",
+    "platforms": { "ethereum": "0x3757232b55e60da4a8793183ac030cfce4c3865d" }
+  },
+  {
+    "symbol": "yea",
+    "platforms": { "ethereum": "0x40b92fce37cefa03baf7603e7913c1d34dd1a4ec" }
+  },
+  {
+    "symbol": "ymf20",
+    "platforms": { "ethereum": "0x16be21c08eb27953273608629e4397556c561d26" }
+  },
+  {
+    "symbol": "yf4",
+    "platforms": { "ethereum": "0x38acefad338b870373fb8c810fe705569e1c7225" }
+  },
+  {
+    "symbol": "yeti",
+    "platforms": { "ethereum": "0xb4bebd34f6daafd808f73de0d10235a92fbb6c3d" }
+  },
+  {
+    "symbol": "yefi",
+    "platforms": { "ethereum": "0xcf282ba0bc91d2aa6e775bcfd90da6b7912f1b1a" }
+  },
+  {
+    "symbol": "yfi",
+    "platforms": { "ethereum": "0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e" }
+  },
+  {
+    "symbol": "yfb2",
+    "platforms": { "ethereum": "0x59e7b5db9be0bdd26fa048d39e01fee456ab674e" }
+  },
+  {
+    "symbol": "yfc",
+    "platforms": { "ethereum": "0xe8ed08a581777f112654e28de507e11613da0379" }
+  },
+  {
+    "symbol": "yfdt",
+    "platforms": { "ethereum": "0x1378ec93ab2b07ba5a0eaef19cf354a33f64b9fd" }
+  },
+  {
+    "symbol": "yfdot",
+    "platforms": { "ethereum": "0x2e6539edc3b76f1e21b71d214527faba875f70f3" }
+  },
+  {
+    "symbol": "yfiec",
+    "platforms": { "ethereum": "0x2e6e152d29053b6337e434bc9be17504170f8a5b" }
+  },
+  {
+    "symbol": "ylab",
+    "platforms": { "ethereum": "0x454cb9d0845bb4a28462f98c21a4fafd16ceb25f" }
+  },
+  {
+    "symbol": "yefim",
+    "platforms": { "ethereum": "0x4b34c0cbeef271f895d339c5f76322d71a60782b" }
+  },
+  {
+    "symbol": "yfn",
+    "platforms": { "ethereum": "0x3dd66732113af9981a861cf489431533aeba33b8" }
+  },
+  {
+    "symbol": "yfpi",
+    "platforms": { "ethereum": "0x05d27cdd23e22ca63e7f9c7c6d1b79ede9c4fcf5" }
+  },
+  {
+    "symbol": "yfp",
+    "platforms": { "ethereum": "0x96d62cdcd1cc49cb6ee99c867cb8812bea86b9fa" }
+  },
+  {
+    "symbol": "yfrm",
+    "platforms": { "ethereum": "0xbe685c5e06866cfb94a4242e3df8f2fa3e7c2b73" }
+  },
+  {
+    "symbol": "yfiv",
+    "platforms": { "ethereum": "0x519083fc539f23131c3b7046992584592772d12a" }
+  },
+  {
+    "symbol": "yhfi",
+    "platforms": { "ethereum": "0x5a143f78bb66294ff37c47b5164584475b932bab" }
+  },
+  {
+    "symbol": "yland",
+    "platforms": { "ethereum": "0xd0658324074d6249a51876438916f7c423075451" }
+  },
+  {
+    "symbol": "YLA",
+    "platforms": { "ethereum": "0x9ba60ba98413a60db4c651d4afe5c937bbd8044b" }
+  },
+  {
+    "symbol": "ysec",
+    "platforms": { "ethereum": "0xeea9ae787f3a620072d13b2cdc8cabffb9c0ab96" }
+  },
+  {
+    "symbol": "yee",
+    "platforms": { "ethereum": "0x922105fad8153f516bcfb829f56dc097a0e1d705" }
+  },
+  {
+    "symbol": "yeld",
+    "platforms": { "ethereum": "0x468ab3b1f63a1c14b361bc367c3cc92277588da1" }
+  },
+  {
+    "symbol": "yel",
+    "platforms": { "ethereum": "0x7815bda662050d84718b988735218cffd32f75ea" }
+  },
+  {
+    "symbol": "yetic",
+    "platforms": { "ethereum": "0xdf96bde075d59e9143b325c75af38e208c986e6f" }
+  },
+  {
+    "symbol": "yfarmer",
+    "platforms": { "ethereum": "0x7b0f66fa5cf5cc28280c1e7051af881e06579362" }
+  },
+  {
+    "symbol": "yfarm",
+    "platforms": { "ethereum": "0xf5d0fefaab749d8b14c27f0de60cc6e9e7f848d1" }
+  },
+  {
+    "symbol": "yfbeta",
+    "platforms": { "ethereum": "0x89ee58af4871b474c30001982c3d7439c933c838" }
+  },
+  {
+    "symbol": "yfbtc",
+    "platforms": { "ethereum": "0xff034d12353867fc4228f4ae3e689cd6dcaad120" }
+  },
+  {
+    "symbol": "yfc",
+    "platforms": { "ethereum": "0xc6ff7eac464c99ff0e1ad8bcfd0ab0cebe08c9a3" }
+  },
+  {
+    "symbol": "yf-dai",
+    "platforms": { "ethereum": "0xf4cd3d3fda8d7fd6c5a500203e38640a70bf9577" }
+  },
+  {
+    "symbol": "yfd",
+    "platforms": { "ethereum": "0x4f4f0ef7978737ce928bff395529161b44e27ad9" }
+  },
+  {
+    "symbol": "yfed",
+    "platforms": { "ethereum": "0x2dbd330bc9b7f3a822a9173ab52172bdddcace2a" }
+  },
+  {
+    "symbol": "YFE",
+    "platforms": { "ethereum": "0x33811d4edbcaed10a685254eb5d3c4e4398520d2" }
+  },
+  {
+    "symbol": "yfet",
+    "platforms": { "ethereum": "0xc151ca64d66ea44ee4be9d47c3ce7e031b2fccb7" }
+  },
+  {
+    "symbol": "yff",
+    "platforms": { "ethereum": "0x8be6a6158f6b8a19fe60569c757d16e546c2296d" }
+  },
+  {
+    "symbol": "yffi",
+    "platforms": { "ethereum": "0xcee1d3c3a02267e37e6b373060f79d5d7b9e1669" }
+  },
+  {
+    "symbol": "yffii",
+    "platforms": { "ethereum": "0x6c4b85cab20c13af72766025f0e17e0fe558a553" }
+  },
+  {
+    "symbol": "yffs",
+    "platforms": { "ethereum": "0x90d702f071d2af33032943137ad0ab4280705817" }
+  },
+  {
+    "symbol": "yfi3",
+    "platforms": { "ethereum": "0x09843b9137fc5935b7f3832152f9074db5d2d1ee" }
+  },
+  {
+    "symbol": "yfia",
+    "platforms": { "ethereum": "0xd778e4f5450ede47289fef874a37b79db77c4cf1" }
+  },
+  {
+    "symbol": "yfib",
+    "platforms": { "ethereum": "0x03829f5675f3b51d0f8c2a74417a757625acf22f" }
+  },
+  {
+    "symbol": "yfib",
+    "platforms": { "ethereum": "0x47632da9227e322eda59f9e7691eacc6430ac87c" }
+  },
+  {
+    "symbol": "yficg",
+    "platforms": { "ethereum": "0x9080e92296a176883aab1d7d1b7e50bc055b0caa" }
+  },
+  {
+    "symbol": "yfid",
+    "platforms": { "ethereum": "0x61266424b904d65ceb2945a1413ac322185187d5" }
+  },
+  {
+    "symbol": "yfii",
+    "platforms": { "ethereum": "0xa1d0e215a23d7030842fc67ce582a6afa3ccab83" }
+  },
+  {
+    "symbol": "yfiig",
+    "platforms": { "ethereum": "0xef8ba8cba86f81b3108f60186fce9c81b5096d5c" }
+  },
+  {
+    "symbol": "yfiking",
+    "platforms": { "ethereum": "0x5f7fa1a0ae94b5dd6bb6bd1708b5f3af01b57908" }
+  },
+  {
+    "symbol": "yfild",
+    "platforms": { "ethereum": "0xcec2387e04f9815bf12670dbf6cf03bba26df25f" }
+  },
+  {
+    "symbol": "yfim",
+    "platforms": { "ethereum": "0x2e2f3246b6c65ccc4239c9ee556ec143a7e5de2c" }
+  },
+  {
+    "symbol": "yfo",
+    "platforms": { "ethereum": "0xac0c8da4a4748d8d821a0973d00b157aa78c473d" }
+  },
+  {
+    "symbol": "yfis",
+    "platforms": { "ethereum": "0x86965a86539e2446f9e72634cefca7983cc21a81" }
+  },
+  {
+    "symbol": "yfive",
+    "platforms": { "ethereum": "0xd3e8695d2bef061eab38b5ef526c0f714108119c" }
+  },
+  {
+    "symbol": "yfix",
+    "platforms": { "ethereum": "0xa4f779074850d320b5553c9db5fc6a8ab15bd34a" }
+  },
+  {
+    "symbol": "yfl",
+    "platforms": { "ethereum": "0x28cb7e841ee97947a86b06fa4090c8451f64c0be" }
+  },
+  {
+    "symbol": "yfms",
+    "platforms": { "ethereum": "0xfef3bef71a5eb97e097039038776fd967ae5b106" }
+  },
+  {
+    "symbol": "YFOS",
+    "platforms": { "ethereum": "0xcd254568ebf88f088e40f456db9e17731243cb25" }
+  },
+  {
+    "symbol": "yfox",
+    "platforms": { "ethereum": "0x706cb9e741cbfee00ad5b3f5acc8bd44d1644a74" }
+  },
+  {
+    "symbol": "yfpro",
+    "platforms": { "ethereum": "0x0fdc5313333533cc0c00c22792bff7383d3055f2" }
+  },
+  {
+    "symbol": "yfsi",
+    "platforms": { "ethereum": "0x1df6f1bb7454e5e4ba3bca882d3148fbf9b5697a" }
+  },
+  {
+    "symbol": "yfte",
+    "platforms": { "ethereum": "0x94f31ac896c9823d81cf9c2c93feceed4923218f" }
+  },
+  {
+    "symbol": "YFU",
+    "platforms": { "ethereum": "0xa279dab6ec190ee4efce7da72896eb58ad533262" }
+  },
+  {
+    "symbol": "yfx",
+    "platforms": { "ethereum": "0xf55a93b613d172b86c2ba3981a849dae2aecde2f" }
+  },
+  {
+    "symbol": "yeed",
+    "platforms": { "ethereum": "0xca2796f9f61dc7b238aab043971e49c6164df375" }
+  },
+  {
+    "symbol": "yi12",
+    "platforms": { "ethereum": "0x03e4bdce611104289333f35c8177558b04cc99ff" }
+  },
+  {
+    "symbol": "yld",
+    "platforms": { "ethereum": "0xdcb01cc464238396e213a6fdd933e36796eaff9f" }
+  },
+  {
+    "symbol": "yld",
+    "platforms": { "ethereum": "0xf94b5c5651c888d928439ab6514b93944eee6f48" }
+  },
+  {
+    "symbol": "yfka",
+    "platforms": { "ethereum": "0x4086692d53262b2be0b13909d804f0491ff6ec3e" }
+  },
+  {
+    "symbol": "YFT",
+    "platforms": { "ethereum": "0x26b3038a7fc10b36c426846a9086ef87328da702" }
+  },
+  {
+    "symbol": "ygg",
+    "platforms": { "ethereum": "0x25f8087ead173b73d6e8b84329989a8eea16cf73" }
+  },
+  {
+    "symbol": "sea",
+    "platforms": { "ethereum": "0xff9fea2666ac0b074a1a53579ff95add4df0601a" }
+  },
+  {
+    "symbol": "yldy",
+    "platforms": { "ethereum": "0x88cb253d4c8cab8cdf7948a9251db85a13669e23" }
+  },
+  {
+    "symbol": "yop",
+    "platforms": { "ethereum": "0xae1eaae3f627aaca434127644371b67b18444051" }
+  },
+  {
+    "symbol": "yield",
+    "platforms": { "ethereum": "0xa8b61cff52564758a204f841e636265bebc8db9b" }
+  },
+  {
+    "symbol": "war",
+    "platforms": { "ethereum": "0xf4a81c18816c9b0ab98fac51b36dcb63b0e58fde" }
+  },
+  {
+    "symbol": "yieldx",
+    "platforms": { "ethereum": "0xe52d53c8c9aa7255f8c2fa9f7093fea7192d2933" }
+  },
+  {
+    "symbol": "yin",
+    "platforms": { "ethereum": "0x794baab6b878467f93ef17e2f2851ce04e3e34c8" }
+  },
+  {
+    "symbol": "ymen",
+    "platforms": { "ethereum": "0xd0c59798f986d333554688cd667033d469c2398e" }
+  },
+  {
+    "symbol": "yo",
+    "platforms": { "ethereum": "0xebf4ca5319f406602eeff68da16261f1216011b5" }
+  },
+  {
+    "symbol": "ynk",
+    "platforms": { "ethereum": "0x87c00817abe35ed4c093e59043fae488238d2f74" }
+  },
+  {
+    "symbol": "yokai",
+    "platforms": { "ethereum": "0xb499b5a97bdbc3e117d15b448daacc9305025689" }
+  },
+  {
+    "symbol": "yok",
+    "platforms": { "ethereum": "0x05fcc72cfb4150abae415c885f7a433ff523296f" }
+  },
+  {
+    "symbol": "ylc",
+    "platforms": { "ethereum": "0x21d5678a62dfe63a47062469ebb2fac2817d8832" }
+  },
+  {
+    "symbol": "yoo",
+    "platforms": { "ethereum": "0xc7596f3fc97ae603e1d7ffa61e6efb7b6a59bed2" }
+  },
+  {
+    "symbol": "youc",
+    "platforms": { "ethereum": "0x3d371413dd5489f3a04c07c0c2ce369c20986ceb" }
+  },
+  {
+    "symbol": "you",
+    "platforms": { "ethereum": "0x34364bee11607b1963d66bca665fde93fca666a8" }
+  },
+  {
+    "symbol": "yfr",
+    "platforms": { "ethereum": "0xd6940a1ffd9f3b025d1f1055abcfd9f7cda81ef9" }
+  },
+  {
+    "symbol": "uc",
+    "platforms": { "ethereum": "0xf84df2db2c87dd650641f8904af71ebfc3dde0ea" }
+  },
+  {
+    "symbol": "yoyow",
+    "platforms": { "ethereum": "0xcbeaec699431857fdb4d37addbbdc20e132d4903" }
+  },
+  {
+    "symbol": "yplt",
+    "platforms": { "ethereum": "0x40e7705254494a7e61d5b7c86da50225ddc3daae" }
+  },
+  {
+    "symbol": "yrise",
+    "platforms": { "ethereum": "0x6051c1354ccc51b4d561e43b02735deae64768b8" }
+  },
+  {
+    "symbol": "ysr",
+    "platforms": { "ethereum": "0xd9a947789974bad9be77e45c2b327174a9c59d71" }
+  },
+  {
+    "symbol": "ytho",
+    "platforms": { "ethereum": "0x48cf0e2eca22eae0ad33fee16a5cb6e62207a8ab" }
+  },
+  {
+    "symbol": "ytsla",
+    "platforms": { "ethereum": "0x5322a3556f979ce2180b30e689a9436fddcb1021" }
+  },
+  {
+    "symbol": "yuan",
+    "platforms": { "ethereum": "0x4a3e164684812dfb684ac36457e7fa805087c68e" }
+  },
+  {
+    "symbol": "ycc",
+    "platforms": { "ethereum": "0x37e1160184f7dd29f00b78c050bf13224780b0b0" }
+  },
+  {
+    "symbol": "yuang",
+    "platforms": { "ethereum": "0x8ae005c97aa6853478c7f373b1d0f72aa92880a7" }
+  },
+  {
+    "symbol": "yge",
+    "platforms": { "ethereum": "0x3850b506d082ecc25e14c0ac0e60db06a725b87f" }
+  },
+  {
+    "symbol": "yukon",
+    "platforms": { "ethereum": "0x724a4dbc096e8553120ec99d975ca62c1e4f9f51" }
+  },
+  {
+    "symbol": "yuno",
+    "platforms": { "ethereum": "0x4b4f5286e0f93e965292b922b9cd1677512f1222" }
+  },
+  {
+    "symbol": "yup",
+    "platforms": { "ethereum": "0x69bbc3f8787d573f1bbdd0a5f40c7ba0aee9bcc9" }
+  },
+  {
+    "symbol": "yvault-lp-ycurve",
+    "platforms": { "ethereum": "0x5dbcf33d8c2e976c6b560249878e6f1491bca25c" }
+  },
+  {
+    "symbol": "yvboost",
+    "platforms": { "ethereum": "0x9d409a0a012cfba9b15f6d4b36ac57a46966ab9a" }
+  },
+  {
+    "symbol": "yvs",
+    "platforms": { "ethereum": "0xec681f28f4561c2a9534799aa38e0d36a83cf478" }
+  },
+  {
+    "symbol": "yyfi",
+    "platforms": { "ethereum": "0xaf20b44c1c651d1d29cfb916ee2a0630b828eb7a" }
+  },
+  {
+    "symbol": "zam",
+    "platforms": { "ethereum": "0xd373576a9e738f37dc6882328358ff69c4caf4c6" }
+  },
+  {
+    "symbol": "zano",
+    "platforms": { "ethereum": "0xdb85f6685950e285b1e611037bebe5b34e2b7d78" }
+  },
+  {
+    "symbol": "zantepay",
+    "platforms": { "ethereum": "0xeffea57067e02999fdcd0bb45c0f1071a29472d9" }
+  },
+  {
+    "symbol": "zap",
+    "platforms": { "ethereum": "0x6781a0f84c7e9e846dcb84a9a5bd49333067b104" }
+  },
+  {
+    "symbol": "zap",
+    "platforms": { "ethereum": "0x7d7470bc321a60cb11c7989356ad66a161c56628" }
+  },
+  {
+    "symbol": "zbk",
+    "platforms": { "ethereum": "0x29257908879c5792f1bb25449a7209205434dc3f" }
+  },
+  {
+    "symbol": "zb",
+    "platforms": { "ethereum": "0xbd0793332e9fb844a52a205a233ef27a5b34b927" }
+  },
+  {
+    "symbol": "zcnox",
+    "platforms": { "ethereum": "0x8b83116e05f722554e1089b9850e731ee20dd692" }
+  },
+  {
+    "symbol": "zcon",
+    "platforms": { "ethereum": "0x4992d8ac40e55350330102abf2debed8864e7ba0" }
+  },
+  {
+    "symbol": "zco",
+    "platforms": { "ethereum": "0x2008e3057bd734e10ad13c9eae45ff132abc1722" }
+  },
+  {
+    "symbol": "zedxion",
+    "platforms": { "ethereum": "0xfbc4f3f645c4003a2e4f4e9b51077d2daa9a9341" }
+  },
+  {
+    "symbol": "zdex",
+    "platforms": { "ethereum": "0x5150956e082c748ca837a5dfa0a7c10ca4697f9c" }
+  },
+  {
+    "symbol": "zlw",
+    "platforms": { "ethereum": "0x5319e86f0e41a06e49eb37046b8c11d78bcad68c" }
+  },
+  {
+    "symbol": "zefu",
+    "platforms": { "ethereum": "0xb1e9157c2fdcc5a856c8da8b2d89b6c32b3c1229" }
+  },
+  {
+    "symbol": "zenith",
+    "platforms": { "ethereum": "0x0343131c0257ac21ea5a8dc83841f071efd9285c" }
+  },
+  {
+    "symbol": "zenx",
+    "platforms": { "ethereum": "0x67f7e5e9dbed6c52dc52d7a83ac3608ad2648e12" }
+  },
+  {
+    "symbol": "zeno",
+    "platforms": { "ethereum": "0x7d2ee0a3856cffd58fb0963c0e24bf1277a0be0e" }
+  },
+  {
+    "symbol": "znt",
+    "platforms": { "ethereum": "0xe95990825aab1a7f0af4cc648f76a3bcc99f25b2" }
+  },
+  {
+    "symbol": "zeon",
+    "platforms": { "ethereum": "0xe5b826ca2ca02f09c1725e9bd98d9a8874c30532" }
+  },
+  {
+    "symbol": "zptc",
+    "platforms": { "ethereum": "0x39ae6d231d831756079ec23589d2d37a739f2e89" }
+  },
+  {
+    "symbol": "zai",
+    "platforms": { "ethereum": "0x9d1233cc46795e94029fda81aaadc1455d510f15" }
+  },
+  {
+    "symbol": "zero",
+    "platforms": { "ethereum": "0xf0939011a9bb95c3b791f0cb546377ed2693a574" }
+  },
+  {
+    "symbol": "rei",
+    "platforms": { "ethereum": "0x011864d37035439e078d64630777ec518138af05" }
+  },
+  {
+    "symbol": "zusd",
+    "platforms": { "ethereum": "0x76417e660df3e5c90c0361674c192da152a806e4" }
+  },
+  {
+    "symbol": "zht",
+    "platforms": { "ethereum": "0x4b13a8a95da56773312ca0d4e0670530aa700fcf" }
+  },
+  {
+    "symbol": "zee",
+    "platforms": { "ethereum": "0x2edf094db69d6dcd487f1b3db9febe2eec0dd4c5" }
+  },
+  {
+    "symbol": "zero",
+    "platforms": { "ethereum": "0x0ec78ed49c2d27b315d462d43b5bab94d2c79bf8" }
+  },
+  {
+    "symbol": "zut",
+    "platforms": { "ethereum": "0x83f873388cd14b83a9f47fabde3c9850b5c74548" }
+  },
+  {
+    "symbol": "zsc",
+    "platforms": { "ethereum": "0x7a41e0517a5eca4fdbc7fbeba4d4c47b9ff6dc63" }
+  },
+  {
+    "symbol": "zuc",
+    "platforms": { "ethereum": "0x6b4689e4514957699edeb2ee91c947f18e439806" }
+  },
+  {
+    "symbol": "zhegic",
+    "platforms": { "ethereum": "0x837010619aeb2ae24141605afc8f66577f6fb2e7" }
+  },
+  {
+    "symbol": "zig",
+    "platforms": { "ethereum": "0xb2617246d0c6c0087f18703d576831899ca94f01" }
+  },
+  {
+    "symbol": "zild",
+    "platforms": { "ethereum": "0x006699d34aa3013605d468d2755a2fe59a16b12b" }
+  },
+  {
+    "symbol": "zla",
+    "platforms": { "ethereum": "0xfd8971d5e8e1740ce2d0a84095fca4de729d0c16" }
+  },
+  {
+    "symbol": "Zin",
+    "platforms": { "ethereum": "0x033e223870f766644f7f7a4b7dc2e91573707d06" }
+  },
+  {
+    "symbol": "ziot",
+    "platforms": { "ethereum": "0xfb22ced41b1267da411f68c879f4defd0bd4796a" }
+  },
+  {
+    "symbol": "zip",
+    "platforms": { "ethereum": "0xa9d2927d3a04309e008b6af6e2e282ae2952e7fd" }
+  },
+  {
+    "symbol": "zmt",
+    "platforms": { "ethereum": "0xaa602de53347579f86b996d2add74bb6f79462b2" }
+  },
+  {
+    "symbol": "zipt",
+    "platforms": { "ethereum": "0xedd7c94fd7b4971b916d15067bc454b9e1bad980" }
+  },
+  {
+    "symbol": "ziti",
+    "platforms": { "ethereum": "0x8dd4228605e467671941ffb4cae15cf7959c8d9d" }
+  },
+  {
+    "symbol": "zjlt",
+    "platforms": { "ethereum": "0xbc34985b4d345aea933d5cac19f3a86bd1fb398f" }
+  },
+  {
+    "symbol": "chaos",
+    "platforms": { "ethereum": "0xb53de031602cd825febe9f2eedf962cd8cc3805d" }
+  },
+  {
+    "symbol": "zks",
+    "platforms": { "ethereum": "0xe4815ae53b124e7263f08dcdbbb757d41ed658c6" }
+  },
+  {
+    "symbol": "zkt",
+    "platforms": { "ethereum": "0x07c52c2537d84e532a9f15d32e152c8b94d2b232" }
+  },
+  {
+    "symbol": "zdr",
+    "platforms": { "ethereum": "0xbdfa65533074b0b23ebc18c7190be79fa74b30c2" }
+  },
+  {
+    "symbol": "zlot",
+    "platforms": { "ethereum": "0xa8e7ad77c60ee6f30bac54e2e7c0617bd7b5a03e" }
+  },
+  {
+    "symbol": "zdc",
+    "platforms": { "ethereum": "0x1cf402135d7bd27dc9d21c03ae2d8375bc43e9ec" }
+  },
+  {
+    "symbol": "zinu",
+    "platforms": { "ethereum": "0xc50ef449171a51fbeafd7c562b064b6471c36caa" }
+  },
+  {
+    "symbol": "zom",
+    "platforms": { "ethereum": "0x1a231e75538a931c395785ef5d1a5581ec622b0e" }
+  },
+  {
+    "symbol": "zoot",
+    "platforms": { "ethereum": "0x1341a2257fa7b770420ef70616f888056f90926c" }
+  },
+  {
+    "symbol": "zora",
+    "platforms": { "ethereum": "0xd8e3fb3b08eba982f2754988d70d57edc0055ae6" }
+  },
+  {
+    "symbol": "zoro",
+    "platforms": { "ethereum": "0xf2410b769d695b27e7bfc9ad4506b899f1b98a04" }
+  },
+  {
+    "symbol": "zort",
+    "platforms": { "ethereum": "0x825cd4201f8a2bbb1a69668eac4e5fa71283273d" }
+  },
+  {
+    "symbol": "zpr",
+    "platforms": { "ethereum": "0xb5b8f5616fe42d5ceca3e87f3fddbdd8f496d760" }
+  },
+  {
+    "symbol": "zcor",
+    "platforms": { "ethereum": "0x83ff572a1757b9e4508cb08f13a79ed162c756c4" }
+  },
+  {
+    "symbol": "zt",
+    "platforms": { "ethereum": "0xfe39e6a32acd2af7955cb3d406ba2b55c901f247" }
+  },
+  {
+    "symbol": "zeus",
+    "platforms": { "ethereum": "0xe7e4279b80d319ede2889855135a22021baf0907" }
+  },
+  {
+    "symbol": "zug",
+    "platforms": { "ethereum": "0xfee5f54e1070e7ed31be341e0a5b1e847f6a84ab" }
+  },
+  {
+    "symbol": "zuki",
+    "platforms": { "ethereum": "0xe561c5973a3ef6aec52b8b1b10eb529c69e1bfc8" }
+  },
+  {
+    "symbol": "zum",
+    "platforms": { "ethereum": "0xe0b9bcd54bf8a730ea5d3f1ffce0885e911a502c" }
+  },
+  {
+    "symbol": "zlp",
+    "platforms": { "ethereum": "0x94d8db14831c2c08943798542c450df2844913e5" }
+  },
+  {
+    "symbol": "zusd",
+    "platforms": { "ethereum": "0xc56c2b7e71b54d38aab6d52e94a04cbfa8f604fa" }
+  },
+  {
+    "symbol": "zuz",
+    "platforms": { "ethereum": "0x202f1877e1db1120ca3e9a98c5d505e7f035c249" }
+  },
+  {
+    "symbol": "zyn",
+    "platforms": { "ethereum": "0xe65ee7c03bbb3c950cfd4895c24989afa233ef01" }
+  },
+  {
+    "symbol": "zusd",
+    "platforms": { "ethereum": "0xbf0f3ccb8fa385a287106fba22e6bb722f94d686" }
+  },
+  {
+    "symbol": "zyx",
+    "platforms": { "ethereum": "0xf974b5f9ac9c6632fee8b76c61b0242ce69c839d" }
+  },
+  {
+    "symbol": "zzz",
+    "platforms": { "ethereum": "0xc75f15ada581219c95485c578e124df3985e4ce0" }
+  },
+  {
+    "symbol": "zzzv2",
+    "platforms": { "ethereum": "0x93ed140172ff226dad1f7f3650489b8daa07ae7f" }
   }
 ]
