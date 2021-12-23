@@ -85242,14 +85242,6 @@
     }
   },
   {
-    "id": "uniswap-state-dollar",
-    "symbol": "usd",
-    "name": "unified Stable Dollar",
-    "platforms": {
-      "ethereum": "0x44086035439e676c02d411880fccb9837ce37c57"
-    }
-  },
-  {
     "id": "united-bitcoin",
     "symbol": "ubtc",
     "name": "United Bitcoin",

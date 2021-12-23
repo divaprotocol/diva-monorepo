@@ -12,36 +12,95 @@ import { request } from 'graphql-request'
 import { useQuery } from 'react-query'
 import { formatUnits } from 'ethers/lib/utils'
 import { getIconSrc } from '../Util/getIconSrc'
+import { existsSync } from 'fs'
 
 const assetLogoPath = '/images/coin-logos/'
+
+const circlePlaceholder = (asset: string) => {
+  return (
+    <svg width="30" height="30">
+      <circle cx="15" cy="15" r="15" fill="#060" />
+      <text
+        x="50%"
+        y="50%"
+        text-anchor="middle"
+        fill="white"
+        font-size="20px"
+        font-family="Arial"
+        dy=".3em"
+      >
+        {asset.charAt(0)}
+      </text>
+    </svg>
+  )
+}
 
 export const OptionImageCell = ({ assetName }: { assetName: string }) => {
   const assets = assetName.split('/')
   if (assets.length === 1 && assets[0].includes('Gas')) {
     return <LocalGasStation />
   } else if (assets.length === 1) {
-    return (
-      <img
-        alt={assets[0]}
-        src={assetLogoPath + assets[0] + '.png'}
-        style={{ height: 30 }}
-      />
-    )
-  } else if (assets.length === 2) {
-    return (
-      <>
+    if (existsSync(assetLogoPath + assets[0] + '.png')) {
+      return (
         <img
-          alt={`${assets[0]}`}
-          src={getIconSrc(assets[0])}
-          style={{ marginRight: '-.5em', height: 30 }}
-        />
-        <img
-          alt={assets[1]}
-          src={getIconSrc(assets[1])}
+          alt={assets[0]}
+          src={assetLogoPath + assets[0] + '.png'}
           style={{ height: 30 }}
         />
-      </>
-    )
+      )
+    } else {
+      return circlePlaceholder(assets[0])
+    }
+  } else if (assets.length === 2) {
+    if (getIconSrc(assets[0]) === '') {
+      if (getIconSrc(assets[1]) === '') {
+        return (
+          <>
+            {circlePlaceholder(assets[0])}
+            {circlePlaceholder(assets[1])}
+          </>
+        )
+      } else {
+        return (
+          <>
+            {circlePlaceholder(assets[0])}
+            <img
+              alt={assets[1]}
+              src={getIconSrc(assets[1])}
+              style={{ height: 30 }}
+            />
+          </>
+        )
+      }
+    } else {
+      if (getIconSrc(assets[1]) === '') {
+        return (
+          <>
+            <img
+              alt={assets[0]}
+              src={getIconSrc(assets[0])}
+              style={{ height: 30 }}
+            />
+            {circlePlaceholder(assets[1])}
+          </>
+        )
+      } else {
+        return (
+          <>
+            <img
+              alt={`${assets[0]}`}
+              src={getIconSrc(assets[0])}
+              style={{ marginRight: '-.5em', height: 30 }}
+            />
+            <img
+              alt={assets[1]}
+              src={getIconSrc(assets[1])}
+              style={{ height: 30 }}
+            />
+          </>
+        )
+      }
+    }
   } else {
     return <>'n/a'</>
   }
