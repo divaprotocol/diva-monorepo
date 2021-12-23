@@ -57,7 +57,7 @@ export const OptionImageCell = ({ assetName }: { assetName: string }) => {
         return (
           <>
             <svg width="60" height="30">
-              <circle cx="20" cy="15" r="15" fill="#060" />
+              <circle cx="20" cy="15" r="15" stroke="black" fill="#060" />
               <text
                 x="33%"
                 y="55%"
@@ -69,7 +69,7 @@ export const OptionImageCell = ({ assetName }: { assetName: string }) => {
               >
                 {assets[0].charAt(0)}
               </text>
-              <circle cx="40" cy="15" r="15" fill="#060" />
+              <circle cx="40" cy="15" r="15" stroke="black" fill="#060" />
               <text
                 x="66%"
                 y="55%"
