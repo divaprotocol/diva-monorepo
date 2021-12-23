@@ -79,10 +79,35 @@ export default function OptionHeader(optionData: {
   //const option = props.optionData
   const { chainId } = useWeb3React()
   const headerTitle = optionData.ReferenceAsset
-
+  const assets = headerTitle.split('/')
   return (
     <AppHeader>
-      {renderRefImgs(headerTitle)}
+      <svg width="60" height="30">
+        <circle cx="20" cy="15" r="15" stroke="black" fill="#060" />
+        <text
+          x="33%"
+          y="55%"
+          text-anchor="middle"
+          fill="white"
+          font-size="20px"
+          font-family="Arial"
+          dy=".3em"
+        >
+          {assets[0].charAt(0)}
+        </text>
+        <circle cx="40" cy="15" r="15" stroke="black" fill="#060" />
+        <text
+          x="66%"
+          y="55%"
+          text-anchor="middle"
+          fill="white"
+          font-size="20px"
+          font-family="Arial"
+          dy=".3em"
+        >
+          {assets[1].charAt(0)}
+        </text>
+      </svg>
       <OptionTitle>{headerTitle}</OptionTitle>
       <Link
         style={{ color: 'gray' }}
