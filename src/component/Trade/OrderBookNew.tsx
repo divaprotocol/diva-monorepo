@@ -13,9 +13,10 @@ import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from '../../Redux/hooks'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
+import { Pool } from '../../lib/queries'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -41,7 +42,7 @@ const TableHeadStyle = withStyles(() => ({
 
 const TableHeaderCell = withStyles(() => ({
   root: {
-    fontWeight: 'solid',
+    fontWeight: 100,
   },
 }))(TableCell)
 
@@ -52,73 +53,84 @@ const TableCellStyle = withStyles(() => ({
   },
 }))(TableCell)
 
-function descendingComparator(a, b, orderBy) {
+function descendingComparator(a: [], b: [], orderBy: any) {
+  let comparator = 0
   console.log(orderBy + ' b ' + b[orderBy] + ' a ' + a[orderBy])
   if (b[orderBy] < a[orderBy]) {
-    return -1
+    comparator = -1
   }
   if (b[orderBy] > a[orderBy]) {
-    return 1
+    comparator = 1
   }
-  return 0
+  return comparator
 }
 
-function getComparator(order, orderBy) {
+function getComparator(
+  order: string,
+  orderBy: string
+): (a: string, b: string) => number {
   if (order === 'ascOrder') {
-    return (a, b) => -descendingComparator(a, b, orderBy)
+    return (a: any, b: any) => -descendingComparator(a, b, orderBy)
   }
   if (order === 'desOrder') {
-    return (a, b) => descendingComparator(a, b, orderBy)
+    return (a: any, b: any): number => descendingComparator(a, b, orderBy)
   }
+  return (a: any, b: any): number => descendingComparator(a, b, orderBy)
 }
 
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index])
-  stabilizedThis.sort((a, b) => {
+function stableSort(array: any, comparator: (a: string, b: string) => number) {
+  const stabilizedThis: any = array.map((el: any, index: number) => [el, index])
+  stabilizedThis.sort((a: any, b: any) => {
     const order = comparator(a[0], b[0])
     if (order !== 0) {
       return order
     }
     return a[1] - b[1]
   })
-  return stabilizedThis.map((el) => el[0])
+  return stabilizedThis.map((el: any) => el[0])
 }
 
-function mapOrderData(records, selectedOption, sortOrder) {
-  var orderBy = ''
-  var sortedRecords = []
-  const orderbook = records.map((record) => {
+function mapOrderData(
+  records: [],
+  option: Pool,
+  optionTokenAddress: string,
+  sortOrder: string
+) {
+  let orderBy: string
+  let sortedRecords: any = []
+  const orderbook: any = records.map((record: any) => {
     const order = record.order
     const makerToken = order.makerToken
     const takerToken = order.takerToken
-    const collateralToken = selectedOption.CollateralToken.toLowerCase()
-    const tokenAddress = selectedOption.TokenAddress.toLowerCase()
-    var orders = {}
+    const collateralToken = option.collateralToken.toLowerCase()
+    const tokenAddress = optionTokenAddress.toLowerCase()
+    const orders: any = {}
 
     if (makerToken === collateralToken && takerToken === tokenAddress) {
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
-      orders.id = 'buy' + records.indexOf(record)
+      orders.id = 'buy' + records.indexOf(record as never)
       orders.nbrOptions = order.takerAmount / 10 ** 18
       orders.bid =
         (order.makerAmount / order.takerAmount) *
-        10 ** (18 - selectedOption.DecimalsCollateralToken)
+        10 ** (18 - option.collateralDecimals)
     }
     if (makerToken === tokenAddress && takerToken === collateralToken) {
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'sell'
-      orders.id = 'sell' + records.indexOf(record)
+      orders.id = 'sell' + records.indexOf(record as never)
       orders.nbrOptions = order.makerAmount / 10 ** 18
       orders.ask =
         (order.takerAmount / order.makerAmount) *
-        10 ** (18 - selectedOption.DecimalsCollateralToken)
+        10 ** (18 - option.collateralDecimals)
     }
     return orders
   })
 
   if (sortOrder === 'ascOrder') {
     orderBy = 'ask'
-    sortedRecords = stableSort(orderbook, getComparator(sortOrder, orderBy))
+    const comparator = getComparator(sortOrder, orderBy)
+    sortedRecords = stableSort(orderbook, comparator)
   }
   if (sortOrder === 'desOrder') {
     orderBy = 'bid'
@@ -128,7 +140,7 @@ function mapOrderData(records, selectedOption, sortOrder) {
   return sortedRecords
 }
 
-function getTableLength(buyOrdersCount, sellOrdersCount) {
+function getTableLength(buyOrdersCount: number, sellOrdersCount: number) {
   if (buyOrdersCount === 0 && sellOrdersCount === 0) {
     return 0
   }
@@ -149,15 +161,15 @@ function getTableLength(buyOrdersCount, sellOrdersCount) {
   return 0
 }
 
-function createTable(buyOrders, sellOrders) {
+function createTable(buyOrders: any, sellOrders: any) {
   const buyOrdersCount = buyOrders !== 'undefined' ? buyOrders.length : 0
   const sellOrdersCount = sellOrders !== 'undefined' ? sellOrders.length : 0
   const tableLength = getTableLength(buyOrdersCount, sellOrdersCount)
-  var table = []
+  const table: any = []
   if (tableLength === 0) {
     return table
   } else {
-    for (var j = 0; j < tableLength; j++) {
+    for (let j = 0; j < tableLength; j++) {
       const buyOrder = buyOrders[j]
       const sellOrder = sellOrders[j]
       const row = {
@@ -174,12 +186,16 @@ function createTable(buyOrders, sellOrders) {
   }
 }
 
-export default function OrderBookNew(props) {
+export default function OrderBookNew(props: {
+  option: Pool
+  tokenAddress: string
+}) {
   //const selectedOption = useSelector((state) => state.tradeOption.option)
-  const selectedOption = props.option
-  var responseBuy = useSelector((state) => state.tradeOption.responseBuy)
-  var responseSell = useSelector((state) => state.tradeOption.responseSell)
-  const [orderBook, setOrderBook] = useState([])
+  const option = props.option
+  const optionTokenAddress = props.tokenAddress
+  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
+  const [orderBook, setOrderBook] = useState([] as any)
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const OrderType = {
@@ -192,27 +208,37 @@ export default function OrderBookNew(props) {
 
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
-        selectedOption.TokenAddress,
-        selectedOption.CollateralToken
+        optionTokenAddress,
+        option.collateralToken
       )
-      if (Object.keys(rSell).length > 0) {
-        responseSell = rSell.data.records
+      if (rSell.length > 0) {
+        responseSell = rSell
       }
     }
 
     if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
-        selectedOption.CollateralToken,
-        selectedOption.TokenAddress
+        option.collateralToken,
+        optionTokenAddress
       )
-      if (Object.keys(rBuy).length > 0) {
-        responseBuy = rBuy.data.records
+      if (rBuy.length > 0) {
+        responseBuy = rBuy
       }
     }
 
-    const orderBookBuy = mapOrderData(responseBuy, selectedOption, 'desOrder')
+    const orderBookBuy = mapOrderData(
+      responseBuy,
+      option,
+      optionTokenAddress,
+      'desOrder'
+    )
     orders.push(orderBookBuy)
-    const orderBookSell = mapOrderData(responseSell, selectedOption, 'ascOrder')
+    const orderBookSell = mapOrderData(
+      responseSell,
+      option,
+      optionTokenAddress,
+      'ascOrder'
+    )
     orders.push(orderBookSell)
     //put both buy & sell orders in one array to simplify rendering
     const completeOrderBook = createTable(
@@ -227,12 +253,12 @@ export default function OrderBookNew(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [responseBuy, responseSell])
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (event: any, newPage: number) => {
     setPage(newPage)
   }
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(+event.target.value))
+  const handleChangeRowsPerPage = (event: any) => {
+    setRowsPerPage(parseInt(event.target.value))
     setPage(0)
   }
 
@@ -254,7 +280,7 @@ export default function OrderBookNew(props) {
             {orderBook.length > 0 ? (
               orderBook
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
+                .map((row: any, index: number) => {
                   const labelId = `table-${index}`
 
                   return (

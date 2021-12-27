@@ -20,10 +20,12 @@ import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
+import { Pool } from '../../../lib/queries'
 import { Network } from '../../../Util/chainIdToName'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
+import * as qs from 'qs'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20 = require('../abi/ERC20.json')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -33,31 +35,74 @@ const CHAIN_ID = Network.ROPSTEN
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
-export default function BuyMarket(props: { option: any }) {
+function descendingComparator(a: any, b: any, orderBy: any) {
+  console.log(orderBy + ' b ' + b[orderBy] + ' a ' + a[orderBy])
+  if (b[orderBy] < a[orderBy]) {
+    return -1
+  }
+  if (b[orderBy] > a[orderBy]) {
+    return 1
+  }
+  return 0
+}
+
+function getComparator(order: any, orderBy: any) {
+  if (order === 'ascOrder') {
+    return (a: any, b: any) => -descendingComparator(a, b, orderBy)
+  }
+  if (order === 'desOrder') {
+    return (a: any, b: any) => descendingComparator(a, b, orderBy)
+  }
+}
+
+function stableSort(array: any, comparator: any) {
+  const stabilizedThis = array.map((el: any, index: any) => [el, index])
+  stabilizedThis.sort((a: any, b: any) => {
+    const order = comparator(a[0], b[0])
+    if (order !== 0) {
+      return order
+    }
+    return a[1] - b[1]
+  })
+  return stabilizedThis.map((el: any) => el[0])
+}
+
+export default function BuyMarket(props: {
+  option: Pool
+  handleDisplayOrder: () => void
+  tokenAddress: string
+}) {
   const option = props.option
+  const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
-  const [pricePerOption, _setPricePerOption] = React.useState(0)
+  const [expectedRate, setExpectedRate] = React.useState(0.0)
+  const [youPay, setYouPay] = React.useState(0.0)
+  const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
   // eslint-disable-next-line prettier/prettier
 
   const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
   const exchangeProxyAddress = address.exchangeProxy
-  const makerToken = option.TokenAddress
+  const makerToken = optionTokenAddress
   const maxApproval = new BigNumber(2).pow(256).minus(1)
-
   const [collateralBalance, setCollateralBalance] = React.useState(0)
-  const takerToken = option.CollateralToken
+  const takerToken = option.collateralToken
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
-
+  const params = {
+    makerToken: makerToken,
+    takerToken: takerToken,
+  }
   const handleNumberOfOptions = (value: string) => {
-    setNumberOfOptions(parseFloat(value))
+    const nbrOptions = parseFloat(value)
+    setNumberOfOptions(nbrOptions)
+    setYouPay(expectedRate * nbrOptions)
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     accounts = await window.ethereum.enable()
-    const takerTokenAddress = option.CollateralToken
+    const takerTokenAddress = option.collateralToken
     if (!isApproved) {
       //is ERC20_ABP correct? or should we use position token abi
       //ERC20_ABI enough to use approval
@@ -72,7 +117,7 @@ export default function BuyMarket(props: { option: any }) {
         .allowance(accounts[0], exchangeProxyAddress)
         .call()
       console.log('Approved by taker: ' + (await approvedByTaker.toString()))
-      alert(`Maker allowance for ${option.CollateralToken} successfully set`)
+      alert(`Maker allowance for ${option.collateralToken} successfully set`)
       setIsApproved(true)
     } else {
       const orderData = {
@@ -80,13 +125,15 @@ export default function BuyMarket(props: { option: any }) {
         provider: web3,
         isBuy: true,
         nbrOptions: numberOfOptions,
-        collateralDecimals: option.DecimalsCollateralToken,
+        collateralDecimals: option.collateralDecimals,
         makerToken: makerToken,
-        takerToken: option.CollateralToken,
+        takerToken: option.collateralToken,
         ERC20_ABI: ERC20_ABI,
+        existingLimitOrders: existingLimitOrders,
       }
 
-      buyMarketOrder(orderData)
+      const fillOrder = buyMarketOrder(orderData)
+      console.log('Order filled ' + fillOrder)
     }
   }
 
@@ -115,8 +162,40 @@ export default function BuyMarket(props: { option: any }) {
     let balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
-    balance = balance / 10 ** option.DecimalsCollateralToken
+    balance = balance / 10 ** option.collateralDecimals
     return balance
+  }
+
+  const getLimitOrders = async () => {
+    let orders = []
+    let responseOrder
+    const res = await fetch(
+      `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
+    )
+    const resJSON = await res.json()
+    try {
+      responseOrder = resJSON['records']
+      const aux = responseOrder.map((item: { order: any }) => item.order)
+      orders = aux.map(function (order: { signature: any }) {
+        //signatures.push(order.signature)
+        //delete order.signature
+        return order
+      })
+      //setLimitOrdersSignatures(signatures)
+      orders.forEach((order: any) => {
+        const expectedRate = order.takerAmount / order.makerAmount
+        order.expectedRate = expectedRate
+      })
+    } catch (err) {
+      alert('No orders found')
+      console.log(err)
+      return
+    }
+
+    const sortOrder = 'ascOrder'
+    const orderBy = 'expectedRate'
+    const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
+    return sortedRecords
   }
 
   useEffect(() => {
@@ -127,6 +206,14 @@ export default function BuyMarket(props: { option: any }) {
       } else {
         throw new Error(`can not read wallet balance`)
       }
+    })
+    getLimitOrders().then((orders) => {
+      setExistingLimitOrders(orders)
+      const rate =
+        orders.length > 0
+          ? orders[orders.length - 1].expectedRate
+          : orders.expectedRate
+      setExpectedRate(rate)
     })
   }, [])
 
@@ -152,7 +239,7 @@ export default function BuyMarket(props: { option: any }) {
             </LabelStyleDiv>
           </InfoTooltip>
           <RightSideLabel>
-            {pricePerOption} {option.CollateralTokenName}
+            {expectedRate} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -160,7 +247,7 @@ export default function BuyMarket(props: { option: any }) {
             <LabelStyle>You Pay</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption} {option.CollateralTokenName}
+            {youPay} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -169,7 +256,7 @@ export default function BuyMarket(props: { option: any }) {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {collateralBalance} {option.CollateralTokenName}
+              {collateralBalance.toFixed(4)} {option.collateralTokenName}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>

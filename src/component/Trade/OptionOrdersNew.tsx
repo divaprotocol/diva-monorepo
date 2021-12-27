@@ -1,6 +1,7 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+//import { useSelector, useDispatch } from 'react-redux'
+import { useAppSelector, useAppDispatch } from '../../Redux/hooks'
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
@@ -20,6 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getDateTime } from '../../Util/Dates'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
+import { Pool } from '../../lib/queries'
 const useStyles = makeStyles({
   table: {
     minWidth: 250,
@@ -58,29 +60,34 @@ const TableHeadStyle = withStyles(() => ({
 
 const TableHeaderCell = withStyles(() => ({
   root: {
-    fontWeight: 'solid',
+    fontWeight: 100,
   },
 }))(TableCell)
 
-function mapOrderData(records, selectedOption, account) {
-  const orderbook = records.map((record) => {
+function mapOrderData(
+  records: [],
+  option: Pool,
+  optionTokenAddress: string,
+  account: string
+) {
+  const orderbook: any = records.map((record: any) => {
     const order = record.order
     const orderMaker = order.maker
     if (account === orderMaker) {
       const makerToken = order.makerToken
-      const tokenAddress = selectedOption.TokenAddress.toLowerCase()
+      const tokenAddress = optionTokenAddress.toLowerCase()
       const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
       const nbrOptions =
         (makerToken === tokenAddress ? order.makerAmount : order.takerAmount) /
         10 ** 18
       const payReceive =
         (makerToken === tokenAddress ? order.takerAmount : order.makerAmount) /
-        10 ** selectedOption.DecimalsCollateralToken
+        10 ** option.collateralDecimals
       const pricePerOption = payReceive / nbrOptions
       const expiry = getDateTime(order.expiry)
       const expiryMins = getExpiryMinutesFromNow(order.expiry)
-      var orders = {
-        id: orderType + records.indexOf(record),
+      const orders = {
+        id: orderType + records.indexOf(record as never),
         orderType: orderType,
         nbrOptions: nbrOptions,
         payReceive: payReceive,
@@ -88,30 +95,35 @@ function mapOrderData(records, selectedOption, account) {
         expiry: expiry,
         expiryMins: expiryMins + ' mins',
       }
+      return orders
     }
-    return orders
   })
   return orderbook
 }
 
 let accounts
-export default function OpenOrdersNew(props) {
+export default function OpenOrdersNew(props: {
+  option: Pool
+  tokenAddress: string
+}) {
   //const selectedOption = useSelector((state) => state.tradeOption.option)
-  const selectedOption = props.option
-  var responseBuy = useSelector((state) => state.tradeOption.responseBuy)
-  var responseSell = useSelector((state) => state.tradeOption.responseSell)
+  //const selectedOption = props.option
+  const option = props.option
+  const optionTokenAddress = props.tokenAddress
+  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const [orders, setOrders] = useState([])
 
   const componentDidMount = async () => {
     accounts = await window.ethereum.enable()
-    var orderBook = []
+    const orderBook: any = []
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
-        selectedOption.TokenAddress,
-        selectedOption.CollateralToken
+        optionTokenAddress,
+        option.collateralToken
       )
       responseSell = rSell.data.records
       dispatch(setResponseSell(responseSell))
@@ -119,22 +131,28 @@ export default function OpenOrdersNew(props) {
 
     if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
-        selectedOption.CollateralToken,
-        selectedOption.TokenAddress
+        option.collateralToken,
+        optionTokenAddress
       )
       responseBuy = rBuy.data.records
       dispatch(setResponseBuy(responseBuy))
     }
 
-    const orderBookBuy = mapOrderData(responseBuy, selectedOption, accounts[0])
+    const orderBookBuy = mapOrderData(
+      responseBuy,
+      option,
+      optionTokenAddress,
+      accounts[0]
+    )
     const orderBookSell = mapOrderData(
       responseSell,
-      selectedOption,
+      option,
+      optionTokenAddress,
       accounts[0]
     )
 
     if (orderBookSell.length > 0) {
-      orderBookSell.forEach((order) => {
+      orderBookSell.forEach((order: any) => {
         if (order) {
           orderBook.push(order)
         }
@@ -142,7 +160,7 @@ export default function OpenOrdersNew(props) {
     }
 
     if (Object.keys(orderBookBuy).length > 0) {
-      orderBookBuy.forEach((order) => {
+      orderBookBuy.forEach((order: any) => {
         if (order) {
           orderBook.push(order)
         }
@@ -152,17 +170,17 @@ export default function OpenOrdersNew(props) {
   }
 
   useEffect(() => {
-    if (responseBuy.length === 0 || responseSell === 0) {
+    if (responseBuy.length === 0 || responseSell.length === 0) {
       console.log(componentDidMount)
     }
   }, [])
 
   useEffect(() => {
-    if (responseBuy.length > 0 || responseSell > 0) {
+    if (responseBuy.length > 0 || responseSell.length > 0) {
       console.log(componentDidMount)
     }
     return () => {
-      if (responseBuy.length > 0 || responseSell > 0) {
+      if (responseBuy.length > 0 || responseSell.length > 0) {
         dispatch(setResponseSell([]))
         dispatch(setResponseBuy([]))
       }
@@ -171,12 +189,12 @@ export default function OpenOrdersNew(props) {
 
   const classes = useStyles()
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (event: any, newPage: number) => {
     setPage(newPage)
   }
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(+event.target.value))
+  const handleChangeRowsPerPage = (event: any) => {
+    setRowsPerPage(parseInt(event.target.value))
     setPage(0)
   }
 
@@ -198,7 +216,7 @@ export default function OpenOrdersNew(props) {
             {orders.length > 0 ? (
               orders
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((order, index) => {
+                .map((order: any, index: number) => {
                   const labelId = `enhanced-table-${index}`
                   return (
                     <TableRow key={index} hover>

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
+import { useAppDispatch } from '../../Redux/hooks'
 import 'styled-components'
 import styled from 'styled-components'
 import { makeStyles } from '@mui/styles'
@@ -15,20 +15,20 @@ import {
   setResponseSell,
 } from '../../Redux/TradeOption'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
-
+import { Pool } from '../../lib/queries'
 const PageDiv = styled.div`
   width: 400px;
   height: 420px;
 `
 
-function a11yProps(index) {
+function a11yProps(index: number) {
   return {
     id: `tab-${index}`,
     'aria-controls': `tabpanel-${index}`,
   }
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {
     flexGrow: 1,
   },
@@ -36,15 +36,7 @@ const useStyles = makeStyles((theme) => ({
     width: 100,
     minWidth: 50,
   },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 200,
-  },
-  selectEmpty: {
-    marginTop: theme.spacing(1),
-  },
 }))
-
 const TabsDiv = styled.div`
   display: flex;
   justify-content: space-around;
@@ -75,10 +67,14 @@ const useTabsBorder = makeStyles(() => ({
 
 let accounts
 
-export default function CreateOrder(props) {
+export default function CreateOrder(props: {
+  option: Pool
+  tokenAddress: string
+}) {
   //const op = useSelector((state) => state.tradeOption.option)
   const option = props.option
-  const dispatch = useDispatch()
+  const optionTokenAddress = props.tokenAddress
+  const dispatch = useAppDispatch()
   const classes = useStyles()
   const dividerClass = useDividerStyle()
   const tabsClass = useTabsBorder()
@@ -97,28 +93,28 @@ export default function CreateOrder(props) {
     }
     dispatch(setMetamaskAccount(userAccount))
   })
-  const handleOrderTypeChange = (event, newValue) => {
+  const handleOrderTypeChange = (event: any, newValue: number) => {
     setOrderTypeValue(newValue)
   }
 
-  const handlePriceTypeChange = (event, newValue) => {
+  const handlePriceTypeChange = (event: any, newValue: number) => {
     setPriceTypeValue(newValue)
   }
 
   const handleDisplayOrder = async () => {
-    const responseSell = await get0xOpenOrders(
-      option.TokenAddress,
-      option.CollateralToken
+    const responseSell: any = await get0xOpenOrders(
+      optionTokenAddress,
+      option.collateralToken
     )
-    const responseBuy = await get0xOpenOrders(
-      option.CollateralToken,
-      option.TokenAddress
+    const responseBuy: any = await get0xOpenOrders(
+      option.collateralToken,
+      optionTokenAddress
     )
     if (Object.keys(responseSell).length > 0) {
-      dispatch(setResponseSell(responseSell.data.records))
+      dispatch(setResponseSell(responseSell))
     }
     if (Object.keys(responseBuy).length > 0) {
-      dispatch(setResponseBuy(responseBuy.data.records))
+      dispatch(setResponseBuy(responseBuy))
     }
   }
 
@@ -126,25 +122,41 @@ export default function CreateOrder(props) {
     if (orderType === 0 && priceType === 0) {
       //Buy Market
       return (
-        <BuyMarket option={option} handleDisplayOrder={handleDisplayOrder} />
+        <BuyMarket
+          option={option}
+          tokenAddress={optionTokenAddress}
+          handleDisplayOrder={handleDisplayOrder}
+        />
       )
     }
     if (orderType === 0 && priceType === 1) {
       //Buy Limit
       return (
-        <BuyLimit option={option} handleDisplayOrder={handleDisplayOrder} />
+        <BuyLimit
+          option={option}
+          tokenAddress={optionTokenAddress}
+          handleDisplayOrder={handleDisplayOrder}
+        />
       )
     }
     if (orderType === 1 && priceType === 0) {
       //Sell Market
       return (
-        <SellMarket option={option} handleDisplayOrder={handleDisplayOrder} />
+        <SellMarket
+          option={option}
+          tokenAddress={optionTokenAddress}
+          handleDisplayOrder={handleDisplayOrder}
+        />
       )
     }
     if (orderType === 1 && priceType === 1) {
       //Sell Limit
       return (
-        <SellLimit option={option} handleDisplayOrder={handleDisplayOrder} />
+        <SellLimit
+          option={option}
+          tokenAddress={optionTokenAddress}
+          handleDisplayOrder={handleDisplayOrder}
+        />
       )
     }
   }

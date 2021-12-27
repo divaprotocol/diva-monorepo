@@ -18,6 +18,7 @@ import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import { Network } from '../../../Util/chainIdToName'
+import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -33,17 +34,19 @@ const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
 export default function SellLimit(props: {
-  option: any
+  option: Pool
   handleDisplayOrder: () => void
+  tokenAddress: string
 }) {
-  const classes = useStyles()
   const option = props.option
+  const optionTokenAddress = props.tokenAddress
+  const classes = useStyles()
   const [expiry, setExpiry] = React.useState(5)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
   const [isApproved, setIsApproved] = React.useState(false)
   const [walletBalance, setWalletBalance] = React.useState(0)
-  const makerToken = option.TokenAddress
+  const makerToken = optionTokenAddress
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
   const handleNumberOfOptions = (value: string) => {
     setNumberOfOptions(parseFloat(value))
@@ -53,13 +56,22 @@ export default function SellLimit(props: {
     setPricePerOption(parseFloat(value))
   }
 
+  const handleFormReset = () => {
+    Array.from(document.querySelectorAll('input')).forEach(
+      (input) => (input.value = '')
+    )
+    setIsApproved(false)
+    setNumberOfOptions(parseFloat('0.0'))
+    setPricePerOption(parseFloat('0.0'))
+  }
+
   const getOptionsInWallet = async () => {
     accounts = await window.ethereum.enable()
     const makerAccount = accounts[0]
     let balance = await makerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
-    balance = balance / 10 ** option.DecimalsCollateralToken
+    balance = balance / 10 ** option.collateralDecimals
     return balance
   }
 
@@ -80,13 +92,13 @@ export default function SellLimit(props: {
     } else {
       const orderData = {
         maker: makerAccount,
-        makerToken: option.TokenAddress,
-        takerToken: option.CollateralToken,
+        makerToken: optionTokenAddress,
+        takerToken: option.collateralToken,
         provider: web3,
         isBuy: false,
         nbrOptions: numberOfOptions,
         limitPrice: pricePerOption,
-        collateralDecimals: option.DecimalsCollateralToken,
+        collateralDecimals: option.collateralDecimals,
         orderExpiry: expiry,
       }
 
@@ -94,6 +106,7 @@ export default function SellLimit(props: {
         .then(function (response) {
           console.log('Response ' + response)
           props.handleDisplayOrder()
+          handleFormReset()
         })
         .catch(function (error) {
           console.log('Error' + error)
@@ -112,11 +125,11 @@ export default function SellLimit(props: {
 
   useEffect(() => {
     getOptionsInWallet().then((val) => {
-      console.log(JSON.stringify(val))
-      if (val != null) {
+      console.log(' Wallet balance ' + JSON.stringify(val))
+      if (!Number.isNaN(val)) {
         setWalletBalance(Number(val))
       } else {
-        throw new Error(`can not read wallet balance`)
+        setWalletBalance(0)
       }
     })
   }, [])
@@ -147,7 +160,10 @@ export default function SellLimit(props: {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption * numberOfOptions} {option.CollateralTokenName}
+            {pricePerOption * numberOfOptions > 0
+              ? (pricePerOption * numberOfOptions).toFixed(2)
+              : 0.0}
+            {' ' + option.collateralSymbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -155,7 +171,7 @@ export default function SellLimit(props: {
             <LabelGrayStyle>Options in Wallet</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>{walletBalance}</LabelGrayStyle>
+            <LabelGrayStyle>{walletBalance.toFixed(4)}</LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
