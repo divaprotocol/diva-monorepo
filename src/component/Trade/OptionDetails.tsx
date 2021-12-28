@@ -135,7 +135,7 @@ export default function OptionDetails({
                   pool.collateralDecimals
                 ) +
                 ' ' +
-                pool.collateralToken}
+                pool.collateralSymbol}
           </FlexBoxData>
         </FlexBox>
       </FlexDiv>
