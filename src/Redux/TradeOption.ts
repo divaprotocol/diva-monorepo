@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Pool } from '../lib/queries'
-import type { RootState } from './Store'
 import { Option } from './Option'
 
 interface TradeOptionState {

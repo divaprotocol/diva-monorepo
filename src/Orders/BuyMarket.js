@@ -1,6 +1,5 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
 import { BigNumber } from '@0x/utils'
-//import * as qs from 'qs'
 import { CHAIN_ID } from './Config'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
