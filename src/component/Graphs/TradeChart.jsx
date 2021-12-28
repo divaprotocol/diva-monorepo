@@ -16,7 +16,7 @@ class DIVATradeChart extends Component {
   }
 
   componentDidMount() {
-    const { data, w, h, breakEven } = this.props
+    const { data, w, h, refAsset, payOut, breakEven } = this.props
 
     // Set the dimensions and margins of the graph
     // var margin = {top: 50, right: 20, bottom: 30, left: 50},
@@ -147,7 +147,7 @@ class DIVATradeChart extends Component {
       .attr('x', 18)
       .attr('y', 22)
       .attr('font-size', '14')
-      .text('WBTC/USDT at Expiry:')
+      .text(refAsset + ' at Expiry:')
 
     tooltipPerLine
       .append('text')
@@ -162,7 +162,7 @@ class DIVATradeChart extends Component {
       .attr('x', 18)
       .attr('y', 44)
       .attr('font-size', '14')
-      .text('Option Payout (DAI):')
+      .text('Option Payout (' + payOut + ' ):')
 
     tooltipPerLine
       .append('text')

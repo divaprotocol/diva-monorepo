@@ -1,6 +1,5 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
-//import { useSelector, useDispatch } from 'react-redux'
 import { useAppSelector, useAppDispatch } from '../../Redux/hooks'
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
@@ -102,12 +101,10 @@ function mapOrderData(
 }
 
 let accounts
-export default function OpenOrdersNew(props: {
+export default function OpenOrders(props: {
   option: Pool
   tokenAddress: string
 }) {
-  //const selectedOption = useSelector((state) => state.tradeOption.option)
-  //const selectedOption = props.option
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
@@ -125,8 +122,9 @@ export default function OpenOrdersNew(props: {
         optionTokenAddress,
         option.collateralToken
       )
-      responseSell = rSell.data.records
-      dispatch(setResponseSell(responseSell))
+      if (rSell.length > 0) {
+        responseSell = rSell
+      }
     }
 
     if (responseBuy.length === 0) {
@@ -134,8 +132,9 @@ export default function OpenOrdersNew(props: {
         option.collateralToken,
         optionTokenAddress
       )
-      responseBuy = rBuy.data.records
-      dispatch(setResponseBuy(responseBuy))
+      if (rBuy.length > 0) {
+        responseBuy = rBuy
+      }
     }
 
     const orderBookBuy = mapOrderData(
@@ -171,13 +170,13 @@ export default function OpenOrdersNew(props: {
 
   useEffect(() => {
     if (responseBuy.length === 0 || responseSell.length === 0) {
-      console.log(componentDidMount)
+      componentDidMount()
     }
   }, [])
 
   useEffect(() => {
     if (responseBuy.length > 0 || responseSell.length > 0) {
-      console.log(componentDidMount)
+      componentDidMount()
     }
     return () => {
       if (responseBuy.length > 0 || responseSell.length > 0) {

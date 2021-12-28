@@ -12,18 +12,12 @@ export const buyMarketOrder = async (orderData) => {
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
   const orders = orderData.existingLimitOrders
   let signatures = []
-  //const signatures = orderData.limitOrderSignatures
-  //const takerFillNbrOptions = new BigNumber(orderData.nbrOptions * 10 ** 18)
-  //const str = JSON.stringify([takerFillNbrOptions])
-  //const takerAssetFillAmounts = JSON.parse(str, function (key, val) {
-  //  return key === '' ? val : new BigNumber(val)
-  //})
-
   const result = async (takerAssetFillAmounts) => {
-    await exchange
+    const response = await exchange
       .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true)
       .awaitTransactionSuccessAsync({ from: orderData.takerAccount })
       .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
+    return response
   }
 
   if (orderData.existingLimitOrders.length === 1) {
@@ -41,7 +35,15 @@ export const buyMarketOrder = async (orderData) => {
         delete order.signature
         return order
       })
-      return result(takerAssetFillAmounts)
+      const filledOrder = await result(takerAssetFillAmounts)
+      console.log('Response ' + JSON.stringify(filledOrder))
+      if ('logs' in filledOrder) {
+        const logs = filledOrder.logs
+        const event = logs.map((eventData) => {
+          return eventData.event
+        })
+        return event
+      }
     }
 
     if (orderData.existingLimitOrders.length > 1) {
@@ -65,53 +67,6 @@ export const buyMarketOrder = async (orderData) => {
       }
     }
   }
-
-  /**
-   * orderData.existingLimitOrders.map(function (order) {
-      signatures.push(order.signature)
-      delete order.signature
-      return order
-    })
-   */
-  /*const params = {
-    makerToken: orderData.makerToken,
-    takerToken: orderData.takerToken,
-  }
-
-  const res = await fetch(
-    `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
-  )
-  const resJSON = await res.json()
-  console.log('Response ' + JSON.stringify(resJSON))
-  // Fetch first order object in records JSON object array
-  let orders = []
-  let signatures = []
-  let responseOrder
-  try {
-    responseOrder = resJSON['records']
-    //remove signature from response
-    const aux = responseOrder.map((item) => item.order)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    orders = aux.map(({ signature, ...rest }) => rest)
-    signatures = aux.map(({ signature }) => signature)
-  } catch (err) {
-    alert('No orders found')
-    console.log(err)
-    return
-  }
-
-  //expected rate
-  //const expectedRate = takerAmount / makerAmount
-  //const youPay = expectedRate * orderData.nbrOptions
-  const takerFillNbrOptions = new BigNumber(orderData.nbrOptions * 10 ** 18)
-  const str = JSON.stringify([takerFillNbrOptions])
-  // Return an array of three BigNumbers
-  const takerAssetFillAmounts = JSON.parse(str, function (key, val) {
-    return key === '' ? val : new BigNumber(val)
-  })*/
-
-  //console.log('taker asset fill amounts' + takerAssetFillAmounts)
-
   // TODO Handle sum(takerAssetAmountFillAmounts) > remainingFillable amount
   console.log('Orders ' + JSON.stringify(orders))
   console.log('signatures ' + JSON.stringify(orderData.limitOrderSignatures))

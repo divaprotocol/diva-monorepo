@@ -128,7 +128,7 @@ export default function SellMarket(props: {
             <LabelGrayStyle>Options in Wallet</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>{walletBalance}</LabelGrayStyle>
+            <LabelGrayStyle>{walletBalance.toFixed(4)}</LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>

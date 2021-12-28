@@ -138,7 +138,7 @@ export default function BuyLimit(props: {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {collateralBalance} {option.collateralTokenName}
+              {collateralBalance.toFixed(4)} {option.collateralTokenName}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>

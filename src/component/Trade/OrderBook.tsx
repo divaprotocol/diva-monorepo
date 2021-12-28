@@ -75,6 +75,7 @@ function getComparator(
   if (order === 'desOrder') {
     return (a: any, b: any): number => descendingComparator(a, b, orderBy)
   }
+  //this step will never reached however need it to silent typescript
   return (a: any, b: any): number => descendingComparator(a, b, orderBy)
 }
 
@@ -186,11 +187,10 @@ function createTable(buyOrders: any, sellOrders: any) {
   }
 }
 
-export default function OrderBookNew(props: {
+export default function OrderBook(props: {
   option: Pool
   tokenAddress: string
 }) {
-  //const selectedOption = useSelector((state) => state.tradeOption.option)
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)

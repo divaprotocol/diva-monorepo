@@ -81,7 +81,6 @@ export default function BuyMarket(props: {
   const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
   // eslint-disable-next-line prettier/prettier
-
   const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
   const exchangeProxyAddress = address.exchangeProxy
   const makerToken = optionTokenAddress
@@ -132,8 +131,10 @@ export default function BuyMarket(props: {
         existingLimitOrders: existingLimitOrders,
       }
 
-      const fillOrder = buyMarketOrder(orderData)
-      console.log('Order filled ' + fillOrder)
+      buyMarketOrder(orderData).then((orderFillEvent) => {
+        console.log(' OrderFillResponse ' + JSON.stringify(orderFillEvent))
+        props.handleDisplayOrder()
+      })
     }
   }
 
@@ -177,11 +178,8 @@ export default function BuyMarket(props: {
       responseOrder = resJSON['records']
       const aux = responseOrder.map((item: { order: any }) => item.order)
       orders = aux.map(function (order: { signature: any }) {
-        //signatures.push(order.signature)
-        //delete order.signature
         return order
       })
-      //setLimitOrdersSignatures(signatures)
       orders.forEach((order: any) => {
         const expectedRate = order.takerAmount / order.makerAmount
         order.expectedRate = expectedRate
@@ -191,7 +189,6 @@ export default function BuyMarket(props: {
       console.log(err)
       return
     }
-
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))

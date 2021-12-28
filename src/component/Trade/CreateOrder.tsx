@@ -110,10 +110,10 @@ export default function CreateOrder(props: {
       option.collateralToken,
       optionTokenAddress
     )
-    if (Object.keys(responseSell).length > 0) {
+    if (responseSell.length > 0) {
       dispatch(setResponseSell(responseSell))
     }
-    if (Object.keys(responseBuy).length > 0) {
+    if (responseBuy.length > 0) {
       dispatch(setResponseBuy(responseBuy))
     }
   }
