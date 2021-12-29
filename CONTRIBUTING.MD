@@ -4,4 +4,16 @@ When contributing to this repository, please first discuss the change you wish t
 
 Please note we have a code of conduct which we ask all contributors to observe 🙏
 
-## Pull Request Process
+## Basics
+
+- Every change in this repository is made via pull request.
+- Every change must be reviewed and tested by others.
+- 
+
+## Making changes to this repoistory 
+
+All pull requests must be reviewed by someone else. As soon as a pull request is approved, it can be merged, by anyone.
+
+## How to review a pull request
+
+A complete code review is 
