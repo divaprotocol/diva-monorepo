@@ -11,10 +11,13 @@ import { Box } from '@mui/system'
 import { createDivaTheme } from './lib/createDivaTheme'
 import Web3 from 'web3'
 import { Web3ReactProvider } from '@web3-react/core'
+import { QueryClient, QueryClientProvider } from 'react-query'
 
 function getLibrary(provider: any) {
   return new Web3(provider)
 }
+
+const queryClient = new QueryClient()
 
 const WithProviders = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
@@ -39,13 +42,15 @@ const WithProviders = () => {
         overflow: 'hidden',
       }}
     >
-      <Web3ReactProvider getLibrary={getLibrary}>
-        <ThemeProvider theme={theme}>
-          <Provider store={store}>
-            <App />
-          </Provider>
-        </ThemeProvider>
-      </Web3ReactProvider>
+      <QueryClientProvider client={queryClient}>
+        <Web3ReactProvider getLibrary={getLibrary}>
+          <ThemeProvider theme={theme}>
+            <Provider store={store}>
+              <App />
+            </Provider>
+          </ThemeProvider>
+        </Web3ReactProvider>
+      </QueryClientProvider>
     </Box>
   )
 }
