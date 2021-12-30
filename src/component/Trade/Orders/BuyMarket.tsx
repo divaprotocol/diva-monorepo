@@ -186,7 +186,6 @@ export default function BuyMarket(props: {
 
   useEffect(() => {
     getCollateralInWallet().then((val) => {
-      console.log(JSON.stringify(val))
       if (val != null) {
         setCollateralBalance(Number(val))
       } else {
