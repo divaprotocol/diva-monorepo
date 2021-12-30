@@ -169,26 +169,15 @@ export default function BuyMarket(props: {
 
   const getLimitOrders = async () => {
     let orders = []
-    let responseOrder
     const res = await fetch(
       `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
     )
     const resJSON = await res.json()
-    try {
-      responseOrder = resJSON['records']
-      const aux = responseOrder.map((item: { order: any }) => item.order)
-      orders = aux.map(function (order: { signature: any }) {
-        return order
-      })
-      orders.forEach((order: any) => {
-        const expectedRate = order.takerAmount / order.makerAmount
-        order.expectedRate = expectedRate
-      })
-    } catch (err) {
-      alert('No orders found')
-      console.log(err)
-      return
-    }
+    const responseOrder: any = resJSON['records']
+    orders = responseOrder.map(({ order }: { order: any }) => ({
+      ...order,
+      expectedRate: order.takerAmount / order.makerAmount,
+    }))
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))

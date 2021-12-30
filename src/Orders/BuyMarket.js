@@ -10,8 +10,8 @@ export const buyMarketOrder = async (orderData) => {
   // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
   const orders = orderData.existingLimitOrders
-  let signatures = []
-  const result = async (takerAssetFillAmounts) => {
+  const signatures = []
+  const fillOrderResponse = async (takerAssetFillAmounts) => {
     const response = await exchange
       .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true)
       .awaitTransactionSuccessAsync({ from: orderData.takerAccount })
@@ -34,8 +34,7 @@ export const buyMarketOrder = async (orderData) => {
         delete order.signature
         return order
       })
-      const filledOrder = await result(takerAssetFillAmounts)
-      console.log('Response ' + JSON.stringify(filledOrder))
+      const filledOrder = await fillOrderResponse(takerAssetFillAmounts)
       if ('logs' in filledOrder) {
         const logs = filledOrder.logs
         const event = logs.map((eventData) => {
@@ -44,30 +43,7 @@ export const buyMarketOrder = async (orderData) => {
         return event
       }
     }
-
-    if (orderData.existingLimitOrders.length > 1) {
-      if (orderData.nbrOptions === 1) {
-        orders.map(function (order) {
-          signatures.push(order.signature)
-          delete order.signature
-          return order
-        })
-        result()
-      }
-      if (orderData.nbrOptions <= orders.length) {
-        for (let i = 0; i < orderData.nbrOptions; i++) {
-          orders[i].map(function (order) {
-            signatures.push(order.signature)
-            delete order.signature
-            return order
-          })
-          result()
-        }
-      }
-    }
   }
   // TODO Handle sum(takerAssetAmountFillAmounts) > remainingFillable amount
-  console.log('Orders ' + JSON.stringify(orders))
-  console.log('signatures ' + JSON.stringify(orderData.limitOrderSignatures))
   // Batch fill limit order
 }

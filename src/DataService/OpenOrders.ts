@@ -1,5 +1,4 @@
-import axios, { AxiosError } from 'axios'
-
+import axios from 'axios'
 const ordersUrl = 'https://ropsten.api.0x.org/sra/v4/orders?makerToken='
 
 export const get0xOpenOrders = (
