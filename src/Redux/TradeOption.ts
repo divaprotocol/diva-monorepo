@@ -1,11 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Pool } from '../lib/queries'
-import { Option } from './Option'
 
 interface TradeOptionState {
   allOptions: []
   allOptionsLiquidity: []
-  option: Pool
   userAccount: string
   responseBuy: []
   responseSell: []
@@ -14,7 +11,6 @@ interface TradeOptionState {
 const initialState: TradeOptionState = {
   allOptions: [],
   allOptionsLiquidity: [],
-  option: Option,
   userAccount: '',
   responseBuy: [],
   responseSell: [],
@@ -43,15 +39,10 @@ export const tradeOptionSlice = createSlice({
     setAllOptionsLiquidity: (state, action: PayloadAction<[]>) => {
       state.allOptionsLiquidity = action.payload
     },
-
-    setTradingOption: (state, action: PayloadAction<Pool>) => {
-      state.option = action.payload
-    },
   },
 })
 
 // Action creators are generated for each case reducer function
-export const { setTradingOption } = tradeOptionSlice.actions
 export const { setAllOptions } = tradeOptionSlice.actions
 export const { setMetamaskAccount } = tradeOptionSlice.actions
 export const { setResponseBuy } = tradeOptionSlice.actions
