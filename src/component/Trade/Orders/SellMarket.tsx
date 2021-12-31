@@ -33,7 +33,6 @@ export default function SellMarket(props: {
   tokenAddress: string
 }) {
   const option = props.option
-  console.log('symbol ' + option.collateralSymbol)
   const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(5)
