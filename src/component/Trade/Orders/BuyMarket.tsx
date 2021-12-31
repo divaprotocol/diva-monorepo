@@ -24,6 +24,7 @@ import { Network } from '../../../Util/chainIdToName'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
+import { Pool } from '../../../lib/queries'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20 = require('../abi/ERC20.json')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -33,7 +34,10 @@ const CHAIN_ID = Network.ROPSTEN
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
-export default function BuyMarket(props: { option: any }) {
+export default function BuyMarket(props: {
+  option: Pool
+  tokenAddress: string
+}) {
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
@@ -43,11 +47,11 @@ export default function BuyMarket(props: { option: any }) {
 
   const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
   const exchangeProxyAddress = address.exchangeProxy
-  const makerToken = option.TokenAddress
+  const makerToken = props.tokenAddress
   const maxApproval = new BigNumber(2).pow(256).minus(1)
 
   const [collateralBalance, setCollateralBalance] = React.useState(0)
-  const takerToken = option.CollateralToken
+  const takerToken = option.collateralToken
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
 
   const handleNumberOfOptions = (value: string) => {
@@ -57,7 +61,7 @@ export default function BuyMarket(props: { option: any }) {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     accounts = await window.ethereum.enable()
-    const takerTokenAddress = option.CollateralToken
+    const takerTokenAddress = option.collateralToken
     if (!isApproved) {
       //is ERC20_ABP correct? or should we use position token abi
       //ERC20_ABI enough to use approval
@@ -72,7 +76,7 @@ export default function BuyMarket(props: { option: any }) {
         .allowance(accounts[0], exchangeProxyAddress)
         .call()
       console.log('Approved by taker: ' + (await approvedByTaker.toString()))
-      alert(`Maker allowance for ${option.CollateralToken} successfully set`)
+      alert(`Maker allowance for ${option.collateralToken} successfully set`)
       setIsApproved(true)
     } else {
       const orderData = {
@@ -80,9 +84,9 @@ export default function BuyMarket(props: { option: any }) {
         provider: web3,
         isBuy: true,
         nbrOptions: numberOfOptions,
-        collateralDecimals: option.DecimalsCollateralToken,
+        collateralDecimals: option.collateralDecimals,
         makerToken: makerToken,
-        takerToken: option.CollateralToken,
+        takerToken: option.collateralToken,
         ERC20_ABI: ERC20_ABI,
       }
 
@@ -115,7 +119,7 @@ export default function BuyMarket(props: { option: any }) {
     let balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
-    balance = balance / 10 ** option.DecimalsCollateralToken
+    balance = balance / 10 ** option.collateralDecimals
     return balance
   }
 
@@ -152,7 +156,7 @@ export default function BuyMarket(props: { option: any }) {
             </LabelStyleDiv>
           </InfoTooltip>
           <RightSideLabel>
-            {pricePerOption} {option.CollateralTokenName}
+            {pricePerOption} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -160,7 +164,7 @@ export default function BuyMarket(props: { option: any }) {
             <LabelStyle>You Pay</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption} {option.CollateralTokenName}
+            {pricePerOption} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -169,7 +173,7 @@ export default function BuyMarket(props: { option: any }) {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {collateralBalance} {option.CollateralTokenName}
+              {collateralBalance} {option.collateralTokenName}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>

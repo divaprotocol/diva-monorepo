@@ -18,6 +18,7 @@ import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import Web3 from 'web3'
+import { Pool } from '../../../lib/queries'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20 = require('../abi/ERC20.json')
 const ERC20_ABI = ERC20.abi
@@ -25,8 +26,9 @@ const web3 = new Web3(Web3.givenProvider)
 let accounts
 
 export default function BuyLimit(props: {
-  option: any
+  option: Pool
   handleDisplayOrder: () => void
+  tokenAddress: string
 }) {
   const classes = useStyles()
   const option = props.option
@@ -34,7 +36,7 @@ export default function BuyLimit(props: {
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
   const [collateralBalance, setCollateralBalance] = React.useState(0)
-  const takerToken = option.CollateralToken
+  const takerToken = option.collateralToken
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
 
   const handleNumberOfOptions = (value: string) => {
@@ -59,13 +61,13 @@ export default function BuyLimit(props: {
     accounts = await window.ethereum.enable()
     const orderData = {
       maker: accounts[0],
-      makerToken: option.CollateralToken,
-      takerToken: option.TokenAddress,
+      makerToken: option.collateralToken,
+      takerToken: props.tokenAddress,
       provider: web3,
       isBuy: true,
       nbrOptions: numberOfOptions,
       limitPrice: pricePerOption,
-      collateralDecimals: option.DecimalsCollateralToken,
+      collateralDecimals: option.collateralDecimals,
       orderExpiry: expiry,
     }
 
@@ -85,7 +87,7 @@ export default function BuyLimit(props: {
     let balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
-    balance = balance / 10 ** option.DecimalsCollateralToken
+    balance = balance / 10 ** option.collateralDecimals
     return balance
   }
 
@@ -126,7 +128,7 @@ export default function BuyLimit(props: {
             <LabelStyle>You Pay</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption * numberOfOptions} {option.CollateralTokenName}
+            {pricePerOption * numberOfOptions} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -135,7 +137,7 @@ export default function BuyLimit(props: {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {collateralBalance} {option.CollateralTokenName}
+              {collateralBalance} {option.collateralTokenName}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>

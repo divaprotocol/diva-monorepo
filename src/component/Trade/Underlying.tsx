@@ -93,7 +93,7 @@ export default function Underlying() {
 
       <Stack spacing={2}>
         <Paper>
-          <CreateOrder option={pool} />
+          <CreateOrder option={pool} tokenAddress={tokenAddress} />
         </Paper>
         <Paper>
           <TradeChart
