@@ -124,7 +124,6 @@ export default function SellLimit(props: {
 
   useEffect(() => {
     getOptionsInWallet().then((val) => {
-      console.log(' Wallet balance ' + JSON.stringify(val))
       if (!Number.isNaN(val)) {
         setWalletBalance(Number(val))
       } else {
