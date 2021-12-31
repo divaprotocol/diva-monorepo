@@ -36,9 +36,5 @@ export function generatePayoffChartData(data) {
     ]
   }
 
-  console.log({
-    data,
-    chartData,
-  })
   return chartData
 }
