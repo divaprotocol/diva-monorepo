@@ -104,7 +104,6 @@ export default function SellLimit(props: {
 
       sellLimitOrder(orderData)
         .then(function (response) {
-          console.log('Response ' + response)
           props.handleDisplayOrder()
           handleFormReset()
         })
