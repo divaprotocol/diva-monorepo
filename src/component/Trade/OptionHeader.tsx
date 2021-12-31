@@ -7,8 +7,10 @@ import {
   EtherscanLinkType,
 } from '../../Util/getEtherscanLink'
 import { useWeb3React } from '@web3-react/core'
+import { CoinImage } from '../PoolsTable'
 const AppHeader = styled.header`
   min-height: 10vh;
+  padding-left: 1em;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -58,20 +60,6 @@ const refAssetImgs = [
   },
 ]
 
-function renderRefImgs(assetName: string) {
-  if (assetName === 'ETH Gas Price') {
-    return <Image src={'/images/coin-logos/ETH.png'} alt="ReactApp" />
-  } else {
-    const asset = refAssetImgs.find((asset) => asset.refAsset === assetName)
-    return (
-      <ImgDiv>
-        <LeftAssetImg src={asset?.img0} alt="ReactApp" />
-        <RightAssetImg src={asset?.img1} alt="ReactApp" />
-      </ImgDiv>
-    )
-  }
-}
-
 export default function OptionHeader(optionData: {
   TokenAddress: string
   ReferenceAsset: string
@@ -79,35 +67,9 @@ export default function OptionHeader(optionData: {
   //const option = props.optionData
   const { chainId } = useWeb3React()
   const headerTitle = optionData.ReferenceAsset
-  const assets = headerTitle.split('/')
   return (
     <AppHeader>
-      <svg width="60" height="30">
-        <circle cx="20" cy="15" r="15" stroke="black" fill="#060" />
-        <text
-          x="33%"
-          y="55%"
-          text-anchor="middle"
-          fill="white"
-          font-size="20px"
-          font-family="Arial"
-          dy=".3em"
-        >
-          {assets[0].charAt(0)}
-        </text>
-        <circle cx="40" cy="15" r="15" stroke="black" fill="#060" />
-        <text
-          x="66%"
-          y="55%"
-          text-anchor="middle"
-          fill="white"
-          font-size="20px"
-          font-family="Arial"
-          dy=".3em"
-        >
-          {assets[1].charAt(0)}
-        </text>
-      </svg>
+      <CoinImage assetName={headerTitle} />
       <OptionTitle>{headerTitle}</OptionTitle>
       <Link
         style={{ color: 'gray' }}

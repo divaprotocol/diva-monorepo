@@ -3,7 +3,7 @@ import { Button, Stack } from '@mui/material'
 import { useWeb3React } from '@web3-react/core'
 import { ConnectWalletButton } from '../Wallet/ConnectWalletButton'
 import { SideMenu } from './SideMenu'
-import PoolsTable, { OptionImageCell } from '../PoolsTable'
+import PoolsTable, { CoinImage } from '../PoolsTable'
 
 const SubmitCell = () => {
   return <Button variant="contained">Submit value</Button>
@@ -16,7 +16,7 @@ const columns: GridColDef[] = [
     disableReorder: true,
     disableColumnMenu: true,
     headerName: '',
-    renderCell: (cell) => <OptionImageCell assetName={cell.value} />,
+    renderCell: (cell) => <CoinImage assetName={cell.value} />,
   },
   {
     field: 'Underlying',

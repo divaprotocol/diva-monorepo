@@ -38,7 +38,7 @@ const CoinPlaceHolder = (asset: string) => {
 
 const existsLocally = (file: string) => localCoinImages.includes(file)
 
-export const OptionImageCell = ({ assetName }: { assetName: string }) => {
+export const CoinImage = ({ assetName }: { assetName: string }) => {
   const assets = assetName.split('/')
   const coinIconLeft = useCoinIcon(assets[0])
   const coinIconRight = useCoinIcon(assets[1])
