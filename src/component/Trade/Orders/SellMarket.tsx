@@ -40,7 +40,6 @@ export default function SellMarket(props: {
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
   const handleNumberOfOptions = (newValue: string) => {
     setNumberOfOptions(parseFloat(newValue))
-    console.log(numberOfOptions)
   }
 
   const handleOrderSubmit = async (_event: any) => {

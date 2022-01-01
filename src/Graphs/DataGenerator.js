@@ -35,6 +35,5 @@ export function generatePayoffChartData(data) {
       { x: optionData.Cap * 1.15, y: 0 },
     ]
   }
-
   return chartData
 }
