@@ -80,9 +80,11 @@ export const queryPool = (poolId: number) => gql`
       supplyLong
       expiryDate
       collateralToken
+      collateralSymbol
       collateralBalanceShortInitial
       collateralBalanceLongInitial
       collateralBalanceShort
+      collateralDecimals
       collateralBalanceLong
       shortToken
       longToken

@@ -126,25 +126,41 @@ export default function CreateOrder(props) {
     if (orderType === 0 && priceType === 0) {
       //Buy Market
       return (
-        <BuyMarket option={option} handleDisplayOrder={handleDisplayOrder} />
+        <BuyMarket
+          option={option}
+          handleDisplayOrder={handleDisplayOrder}
+          tokenAddress={props.tokenAddress}
+        />
       )
     }
     if (orderType === 0 && priceType === 1) {
       //Buy Limit
       return (
-        <BuyLimit option={option} handleDisplayOrder={handleDisplayOrder} />
+        <BuyLimit
+          handleDisplayOrder={handleDisplayOrder}
+          option={option}
+          tokenAddress={props.tokenAddress}
+        />
       )
     }
     if (orderType === 1 && priceType === 0) {
       //Sell Market
       return (
-        <SellMarket option={option} handleDisplayOrder={handleDisplayOrder} />
+        <SellMarket
+          option={option}
+          handleDisplayOrder={handleDisplayOrder}
+          tokenAddress={props.tokenAddress}
+        />
       )
     }
     if (orderType === 1 && priceType === 1) {
       //Sell Limit
       return (
-        <SellLimit option={option} handleDisplayOrder={handleDisplayOrder} />
+        <SellLimit
+          option={option}
+          handleDisplayOrder={handleDisplayOrder}
+          tokenAddress={props.tokenAddress}
+        />
       )
     }
   }

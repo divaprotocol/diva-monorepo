@@ -11,12 +11,13 @@ import { Pool, queryPools } from '../lib/queries'
 import { request } from 'graphql-request'
 import { useQuery } from 'react-query'
 import { formatUnits } from 'ethers/lib/utils'
-import { getIconSrc } from '../Util/getIconSrc'
-import { existsSync } from 'fs'
+import { useCoinIcon } from '../hooks/useCoinIcon'
+
+import localCoinImages from '../Util/localCoinImages.json'
 
 const assetLogoPath = '/images/coin-logos/'
 
-const circlePlaceholder = (asset: string) => {
+const CoinPlaceHolder = (asset: string) => {
   return (
     <svg width="30" height="30">
       <circle cx="15" cy="15" r="15" fill="#060" />
@@ -35,12 +36,17 @@ const circlePlaceholder = (asset: string) => {
   )
 }
 
-export const OptionImageCell = ({ assetName }: { assetName: string }) => {
+const existsLocally = (file: string) => localCoinImages.includes(file)
+
+export const CoinImage = ({ assetName }: { assetName: string }) => {
   const assets = assetName.split('/')
+  const coinIconLeft = useCoinIcon(assets[0])
+  const coinIconRight = useCoinIcon(assets[1])
+
   if (assets.length === 1 && assets[0].includes('Gas')) {
     return <LocalGasStation />
   } else if (assets.length === 1) {
-    if (existsSync(assetLogoPath + assets[0] + '.png')) {
+    if (existsLocally(assets[0] + '.png')) {
       return (
         <img
           alt={assets[0]}
@@ -49,11 +55,11 @@ export const OptionImageCell = ({ assetName }: { assetName: string }) => {
         />
       )
     } else {
-      return circlePlaceholder(assets[0])
+      return CoinPlaceHolder(assets[0])
     }
   } else if (assets.length === 2) {
-    if (getIconSrc(assets[0]) === '') {
-      if (getIconSrc(assets[1]) === '') {
+    if (coinIconLeft === '') {
+      if (coinIconRight === '') {
         return (
           <>
             <svg width="60" height="30">
@@ -87,25 +93,17 @@ export const OptionImageCell = ({ assetName }: { assetName: string }) => {
       } else {
         return (
           <>
-            {circlePlaceholder(assets[0])}
-            <img
-              alt={assets[1]}
-              src={getIconSrc(assets[1])}
-              style={{ height: 30 }}
-            />
+            {CoinPlaceHolder(assets[0])}
+            <img alt={assets[1]} src={coinIconRight} style={{ height: 30 }} />
           </>
         )
       }
     } else {
-      if (getIconSrc(assets[1]) === '') {
+      if (coinIconLeft === '') {
         return (
           <>
-            <img
-              alt={assets[0]}
-              src={getIconSrc(assets[0])}
-              style={{ height: 30 }}
-            />
-            {circlePlaceholder(assets[1])}
+            <img alt={assets[0]} src={coinIconLeft} style={{ height: 30 }} />
+            {CoinPlaceHolder(assets[1])}
           </>
         )
       } else {
@@ -113,14 +111,10 @@ export const OptionImageCell = ({ assetName }: { assetName: string }) => {
           <>
             <img
               alt={`${assets[0]}`}
-              src={getIconSrc(assets[0])}
+              src={coinIconLeft}
               style={{ marginRight: '-.5em', height: 30 }}
             />
-            <img
-              alt={assets[1]}
-              src={getIconSrc(assets[1])}
-              style={{ height: 30 }}
-            />
+            <img alt={assets[1]} src={coinIconRight} style={{ height: 30 }} />
           </>
         )
       }

@@ -20,6 +20,7 @@ import { useStyles } from './UiStyles'
 import { Network } from '../../../Util/chainIdToName'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
+import { Pool } from '../../../lib/queries'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20 = require('../abi/ERC20.json')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -33,8 +34,9 @@ const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
 export default function SellLimit(props: {
-  option: any
+  option: Pool
   handleDisplayOrder: () => void
+  tokenAddress: string
 }) {
   const classes = useStyles()
   const option = props.option
@@ -43,7 +45,7 @@ export default function SellLimit(props: {
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
   const [isApproved, setIsApproved] = React.useState(false)
   const [walletBalance, setWalletBalance] = React.useState(0)
-  const makerToken = option.TokenAddress
+  const makerToken = props.tokenAddress
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
   const handleNumberOfOptions = (value: string) => {
     setNumberOfOptions(parseFloat(value))
@@ -59,7 +61,7 @@ export default function SellLimit(props: {
     let balance = await makerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
-    balance = balance / 10 ** option.DecimalsCollateralToken
+    balance = balance / 10 ** option.collateralDecimals
     return balance
   }
 
@@ -80,13 +82,13 @@ export default function SellLimit(props: {
     } else {
       const orderData = {
         maker: makerAccount,
-        makerToken: option.TokenAddress,
-        takerToken: option.CollateralToken,
+        makerToken: props.tokenAddress,
+        takerToken: option.collateralToken,
         provider: web3,
         isBuy: false,
         nbrOptions: numberOfOptions,
         limitPrice: pricePerOption,
-        collateralDecimals: option.DecimalsCollateralToken,
+        collateralDecimals: option.collateralDecimals,
         orderExpiry: expiry,
       }
 
@@ -147,7 +149,7 @@ export default function SellLimit(props: {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption * numberOfOptions} {option.CollateralTokenName}
+            {pricePerOption * numberOfOptions} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>

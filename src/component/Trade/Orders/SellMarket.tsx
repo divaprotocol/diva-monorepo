@@ -20,19 +20,23 @@ import { InfoTooltip } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
+import { Pool } from '../../../lib/queries'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20 = require('../abi/ERC20.json')
 const ERC20_ABI = ERC20.abi
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
-export default function SellMarket(props: { option: any }) {
+export default function SellMarket(props: {
+  option: Pool
+  tokenAddress: string
+}) {
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(5)
   const [pricePerOption, _setPricePerOption] = React.useState(0)
   const [walletBalance, setWalletBalance] = React.useState(0)
-  const makerToken = option.TokenAddress
+  const makerToken = props.tokenAddress
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
   const handleNumberOfOptions = (newValue: string) => {
     setNumberOfOptions(parseFloat(newValue))
@@ -67,7 +71,7 @@ export default function SellMarket(props: { option: any }) {
     let balance = await makerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
-    balance = balance / 10 ** option.DecimalsCollateralToken
+    balance = balance / 10 ** option.collateralDecimals
     return balance
   }
 
@@ -104,7 +108,7 @@ export default function SellMarket(props: { option: any }) {
             </LabelStyleDiv>
           </InfoTooltip>
           <RightSideLabel>
-            {pricePerOption} {option.CollateralTokenName}
+            {pricePerOption} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -112,7 +116,7 @@ export default function SellMarket(props: { option: any }) {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption} {option.CollateralTokenName}
+            {pricePerOption} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
