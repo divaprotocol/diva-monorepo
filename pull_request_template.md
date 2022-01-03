@@ -10,10 +10,6 @@ to issues and any information you think relevant -->
 - [ ] Has all feedback been addressed?
 - [ ] Are all tests and linters running without error?
 
-<!-- TODO: Future requirements will likely be:
-- [ ] Have unit and integration tests been added / updated to provide adequate coverage for this change.
--->
-
 ### Screenshots / Screen-recordings
 
 <!-- Add any relevant screenshots or screen-recordings as supporting material. -->
