@@ -110,4 +110,6 @@ Then:
   speed up getting the pull request into a mergable state. If you do this, ask the
   author to review your patch and let them merge the pull request.
 - If the pull request has been tested and you're confident that it can be merged,
-  approve it.
+  you can approve it. By approving something you are saying that you have sufficiently
+  reviewed and tested it. If you are not confident that this is the case, don't approve
+  the PR.
