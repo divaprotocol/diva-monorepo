@@ -1,5 +1,5 @@
 import { GridColDef } from '@mui/x-data-grid/x-data-grid'
-import PoolsTable, { OptionImageCell, PayoffCell } from '../PoolsTable'
+import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
 
 const columns: GridColDef[] = [
   {
@@ -8,7 +8,7 @@ const columns: GridColDef[] = [
     disableReorder: true,
     disableColumnMenu: true,
     headerName: '',
-    renderCell: (cell) => <OptionImageCell assetName={cell.value} />,
+    renderCell: (cell) => <CoinImage assetName={cell.value} />,
   },
   {
     field: 'Underlying',

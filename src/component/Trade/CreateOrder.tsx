@@ -124,8 +124,8 @@ export default function CreateOrder(props: {
       return (
         <BuyMarket
           option={option}
-          tokenAddress={optionTokenAddress}
           handleDisplayOrder={handleDisplayOrder}
+          tokenAddress={props.tokenAddress}
         />
       )
     }
@@ -133,9 +133,9 @@ export default function CreateOrder(props: {
       //Buy Limit
       return (
         <BuyLimit
-          option={option}
-          tokenAddress={optionTokenAddress}
           handleDisplayOrder={handleDisplayOrder}
+          option={option}
+          tokenAddress={props.tokenAddress}
         />
       )
     }
@@ -144,8 +144,8 @@ export default function CreateOrder(props: {
       return (
         <SellMarket
           option={option}
-          tokenAddress={optionTokenAddress}
           handleDisplayOrder={handleDisplayOrder}
+          tokenAddress={props.tokenAddress}
         />
       )
     }
@@ -154,8 +154,8 @@ export default function CreateOrder(props: {
       return (
         <SellLimit
           option={option}
-          tokenAddress={optionTokenAddress}
           handleDisplayOrder={handleDisplayOrder}
+          tokenAddress={props.tokenAddress}
         />
       )
     }
