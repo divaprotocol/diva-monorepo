@@ -25,13 +25,11 @@ const SubmitCell = (props: any) => {
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
   )
-
   const diva = new ethers.Contract(
-    addresses[3].divaAddress,
+    addresses[chainId!].divaAddress,
     DIVA_ABI,
     provider.getSigner()
   )
-
   const [open, setOpen] = React.useState(false)
   const [btnDisabled, setBtnDisabled] = React.useState(true)
   const [textFieldValue, setTextFieldValue] = React.useState('')
@@ -77,7 +75,7 @@ const SubmitCell = (props: any) => {
             onClick={() => {
               diva.setFinalReferenceValueById(
                 props.id.split('/')[0],
-                textFieldValue,
+                ethers.utils.parseEther(textFieldValue),
                 true
               )
               handleClose()
@@ -103,6 +101,7 @@ const columns: GridColDef[] = [
   {
     field: 'Underlying',
     flex: 1,
+    minWidth: 100,
   },
   { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
@@ -137,7 +136,7 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     headerName: '',
-    minWidth: 200,
+    minWidth: 150,
     renderCell: SubmitCell,
   },
 ]
@@ -162,6 +161,6 @@ export function Dashboard() {
       />
     </Stack>
   ) : (
-    <ConnectWalletButton />
+    <div>Please Connect your wallet </div>
   )
 }

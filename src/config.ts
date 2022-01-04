@@ -1,4 +1,4 @@
-export const addresses = {
+export const addresses: { [key: number]: any } = {
   //Ropsten
   3: {
     divaAddress: '0x849b3B2eb813d6d5C70214326B412c6f67feaC03',

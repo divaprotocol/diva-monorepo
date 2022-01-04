@@ -12,10 +12,18 @@ import { request } from 'graphql-request'
 import { useQuery } from 'react-query'
 import { formatUnits } from 'ethers/lib/utils'
 import { useCoinIcon } from '../hooks/useCoinIcon'
-
+import { makeStyles } from '@mui/styles'
 import localCoinImages from '../Util/localCoinImages.json'
 
 const assetLogoPath = '/images/coin-logos/'
+
+const useStyles = makeStyles({
+  root: {
+    '&.MuiDataGrid-root .MuiDataGrid-cell:focus': {
+      outline: 'none',
+    },
+  },
+})
 
 const CoinPlaceHolder = (asset: string) => {
   return (
@@ -172,6 +180,29 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
       Inflection: parseInt(val.inflection) / 1e18,
       Cap: parseInt(val.cap) / 1e18,
     }
+    if (isDashboard) {
+      return [
+        ...acc,
+        {
+          ...shared,
+          id: `${val.id}/long`,
+          address: val.longToken,
+          PayoffProfile: generatePayoffChartData({
+            ...payOff,
+            IsLong: true,
+          }),
+          TVL:
+            formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
+            ' ' +
+            val.collateralSymbol,
+          Status: val.statusFinalReferenceValue,
+          finalValue:
+            val.statusFinalReferenceValue === 'Open'
+              ? '-'
+              : formatUnits(val.finalReferenceValue),
+        },
+      ]
+    }
 
     return [
       ...acc,
@@ -188,7 +219,10 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
           ' ' +
           val.collateralSymbol,
         Status: val.statusFinalReferenceValue,
-        finalValue: val.finalReferenceValue,
+        finalValue:
+          val.statusFinalReferenceValue === 'Open'
+            ? '-'
+            : formatUnits(val.finalReferenceValue),
       },
       {
         ...shared,
@@ -203,7 +237,10 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
           ' ' +
           val.collateralSymbol,
         Status: val.statusFinalReferenceValue,
-        finalValue: val.finalReferenceValue,
+        finalValue:
+          val.statusFinalReferenceValue === 'Open'
+            ? '-'
+            : formatUnits(val.finalReferenceValue),
       },
     ]
   }, [] as GridRowModel[])
@@ -214,7 +251,7 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
           v.Underlying.toLowerCase().includes(search.toLowerCase())
         )
       : rows
-
+  const classes = useStyles()
   return (
     <Box
       sx={{
@@ -246,6 +283,7 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
         />
       </Box>
       <DataGrid
+        className={classes.root}
         showColumnRightBorder={false}
         rows={filteredRows}
         columns={columns}

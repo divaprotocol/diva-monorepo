@@ -18,7 +18,7 @@ export function useCoinIcon(_symbol?: string) {
     } else if (symbol === 'btc') {
       address = tokens.data['wbtc']
     }
-
+    if (address === undefined) return ''
     return `https://tokens.1inch.exchange/${address}.png`
   }
 
