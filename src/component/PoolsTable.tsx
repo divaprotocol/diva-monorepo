@@ -137,9 +137,10 @@ export const PayoffCell = ({ data }: { data: any }) => {
 type Props = {
   columns: GridColDef[]
   filter?: (pool: Pool) => boolean
+  isDashboard?: boolean
 }
 
-export default function PoolsTable({ columns, filter }: Props) {
+export default function PoolsTable({ columns, filter, isDashboard }: Props) {
   const history = useHistory()
   const [search, setSearch] = useState('')
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
@@ -186,6 +187,8 @@ export default function PoolsTable({ columns, filter }: Props) {
           formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
           ' ' +
           val.collateralSymbol,
+        Status: val.statusFinalReferenceValue,
+        finalValue: val.finalReferenceValue,
       },
       {
         ...shared,
@@ -199,6 +202,8 @@ export default function PoolsTable({ columns, filter }: Props) {
           formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
           ' ' +
           val.collateralSymbol,
+        Status: val.statusFinalReferenceValue,
+        finalValue: val.finalReferenceValue,
       },
     ]
   }, [] as GridRowModel[])
@@ -244,9 +249,13 @@ export default function PoolsTable({ columns, filter }: Props) {
         showColumnRightBorder={false}
         rows={filteredRows}
         columns={columns}
-        onRowClick={(row) => {
-          history.push(`${row.id}`)
-        }}
+        onRowClick={
+          isDashboard
+            ? undefined
+            : (row) => {
+                history.push(`${row.id}`)
+              }
+        }
         componentsProps={{
           row: {
             style: {

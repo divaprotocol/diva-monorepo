@@ -1,12 +1,94 @@
 import { GridColDef } from '@mui/x-data-grid/x-data-grid'
-import { Button, Stack } from '@mui/material'
+import {
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  Stack,
+  TextField,
+} from '@mui/material'
 import { useWeb3React } from '@web3-react/core'
 import { ConnectWalletButton } from '../Wallet/ConnectWalletButton'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
+import { ethers } from 'ethers'
+import DIVA_ABI from '../../contracts/abis/DIVA.json'
+import { addresses } from '../../config'
+import React from 'react'
+import { chainIdtoName } from '../../Util/chainIdToName'
 
-const SubmitCell = () => {
-  return <Button variant="contained">Submit value</Button>
+const SubmitCell = (props: any) => {
+  const { chainId } = useWeb3React()
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum,
+    chainIdtoName(chainId).toLowerCase()
+  )
+
+  const diva = new ethers.Contract(
+    addresses[3].divaAddress,
+    DIVA_ABI,
+    provider.getSigner()
+  )
+
+  const [open, setOpen] = React.useState(false)
+  const [btnDisabled, setBtnDisabled] = React.useState(true)
+  const [textFieldValue, setTextFieldValue] = React.useState('')
+  const handleOpen = () => {
+    setOpen(true)
+  }
+
+  const handleClose = () => {
+    setOpen(false)
+  }
+
+  diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
+    setBtnDisabled(
+      props.row.Status === 'Submitted' ||
+        props.row.Status === 'Confirmed' ||
+        pool.expiryDate.toNumber() * 1000 > Date.now()
+    )
+  })
+
+  return (
+    <Container>
+      <Button variant="contained" onClick={handleOpen} disabled={btnDisabled}>
+        Submit value
+      </Button>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogContent>
+          <DialogContentText>
+            Please provide a value for this option
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <TextField
+            value={textFieldValue}
+            onChange={(e) => {
+              e.stopPropagation()
+              setTextFieldValue(e.target.value)
+            }}
+          />
+          <Button
+            color="primary"
+            type="submit"
+            onClick={() => {
+              diva.setFinalReferenceValueById(
+                props.id.split('/')[0],
+                textFieldValue,
+                true
+              )
+              handleClose()
+            }}
+          >
+            Submit value
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
+  )
 }
 
 const columns: GridColDef[] = [
@@ -76,6 +158,7 @@ export function Dashboard() {
           pool.dataFeedProvider.toLowerCase() === account?.toLowerCase()
         }
         columns={columns}
+        isDashboard={true}
       />
     </Stack>
   ) : (
