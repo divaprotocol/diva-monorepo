@@ -254,12 +254,14 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
   const classes = useStyles()
   return (
     <Box
-      // maxWidth="xl"
       sx={{
         height: 'calc(100% - 1em)',
         display: 'flex',
         flexGrow: 1,
         flexDirection: 'column',
+        paddingTop: '2em',
+        paddingLeft: '4em',
+        paddingRight: '4em',
       }}
     >
       <Box
