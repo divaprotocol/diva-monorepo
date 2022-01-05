@@ -9,6 +9,7 @@ export function StepThree({
   next: () => void
   previous: () => void
 }) {
+  const contract = useDivaContract()
   return (
     <Container maxWidth="xs">
       <div>Placeholder</div>
