@@ -1,11 +1,13 @@
 import React from 'react'
+import { useEffect } from 'react'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import Typography from '@mui/material/Typography'
 import Slider from '@mui/material/Slider'
 import Input from '@mui/material/Input'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
-import { buylimitOrder } from '../../../Orders/BuyLimit'
+import Box from '@mui/material/Box'
+import { buyMarketOrder } from '../../../Orders/BuyMarket'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
@@ -18,35 +20,78 @@ import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
+import { Network } from '../../../Util/chainIdToName'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
-
+import { Pool } from '../../../lib/queries'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ERC20 = require('../abi/ERC20.json')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const contractAddress = require('@0x/contract-addresses')
+const ERC20_ABI = ERC20.abi
+const CHAIN_ID = Network.ROPSTEN
 const web3 = new Web3(Web3.givenProvider)
-let accounts
+let accounts: any[]
 
-export default function BuyMarket(props: { option: any }) {
+export default function BuyMarket(props: {
+  option: Pool
+  tokenAddress: string
+}) {
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
-  const [numberOfOptions, setNumberOfOptions] = React.useState(5)
+  const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, _setPricePerOption] = React.useState(0)
+  const [isApproved, setIsApproved] = React.useState(false)
+  // eslint-disable-next-line prettier/prettier
+
+  const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+  const exchangeProxyAddress = address.exchangeProxy
+  const makerToken = props.tokenAddress
+  const maxApproval = new BigNumber(2).pow(256).minus(1)
+
+  const [collateralBalance, setCollateralBalance] = React.useState(0)
+  const takerToken = option.collateralToken
+  const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
 
   const handleNumberOfOptions = (value: string) => {
-    setNumberOfOptions(parseInt(value))
+    setNumberOfOptions(parseFloat(value))
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-
     accounts = await window.ethereum.enable()
-    const orderData = {
-      maker: accounts[0],
-      provider: web3,
-      isBuy: false,
-      nbrOptions: numberOfOptions,
-      limitPrice: pricePerOption,
-      collateralDecimals: option.DecimalsCollateralToken,
-    }
+    const takerTokenAddress = option.collateralToken
+    if (!isApproved) {
+      //is ERC20_ABP correct? or should we use position token abi
+      //ERC20_ABI enough to use approval
+      const takerTokenContract = await new web3.eth.Contract(
+        ERC20_ABI,
+        takerTokenAddress
+      )
+      await takerTokenContract.methods
+        .approve(exchangeProxyAddress, maxApproval)
+        .send({ from: accounts[0] })
+      const approvedByTaker = await takerTokenContract.methods
+        .allowance(accounts[0], exchangeProxyAddress)
+        .call()
+      console.log('Approved by taker: ' + (await approvedByTaker.toString()))
+      alert(`Maker allowance for ${option.collateralToken} successfully set`)
+      setIsApproved(true)
+    } else {
+      const orderData = {
+        takerAccount: accounts[0],
+        provider: web3,
+        isBuy: true,
+        nbrOptions: numberOfOptions,
+        collateralDecimals: option.collateralDecimals,
+        makerToken: makerToken,
+        takerToken: option.collateralToken,
+        ERC20_ABI: ERC20_ABI,
+      }
 
-    buylimitOrder(orderData)
+      buyMarketOrder(orderData)
+    }
   }
 
   const handleSliderChange = (_event: any, newValue: any) => {
@@ -68,6 +113,27 @@ export default function BuyMarket(props: { option: any }) {
     }
   }
 
+  const getCollateralInWallet = async () => {
+    accounts = await window.ethereum.enable()
+    const takerAccount = accounts[0]
+    let balance = await takerTokenContract.methods
+      .balanceOf(takerAccount)
+      .call()
+    balance = balance / 10 ** option.collateralDecimals
+    return balance
+  }
+
+  useEffect(() => {
+    getCollateralInWallet().then((val) => {
+      console.log(JSON.stringify(val))
+      if (val != null) {
+        setCollateralBalance(Number(val))
+      } else {
+        throw new Error(`can not read wallet balance`)
+      }
+    })
+  }, [])
+
   return (
     <div>
       <form onSubmit={handleOrderSubmit}>
@@ -77,7 +143,6 @@ export default function BuyMarket(props: { option: any }) {
           </LabelStyleDiv>
           <FormInput
             type="text"
-            value={numberOfOptions}
             onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
         </FormDiv>
@@ -91,7 +156,7 @@ export default function BuyMarket(props: { option: any }) {
             </LabelStyleDiv>
           </InfoTooltip>
           <RightSideLabel>
-            {pricePerOption} {option.CollateralTokenName}
+            {pricePerOption} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -99,7 +164,7 @@ export default function BuyMarket(props: { option: any }) {
             <LabelStyle>You Pay</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption} {option.CollateralTokenName}
+            {pricePerOption} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -108,7 +173,7 @@ export default function BuyMarket(props: { option: any }) {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {pricePerOption} {option.CollateralTokenName}
+              {collateralBalance} {option.collateralTokenName}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
@@ -149,16 +214,18 @@ export default function BuyMarket(props: { option: any }) {
           </FormControlDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          startIcon={<AddIcon />}
-          type="submit"
-          value="Submit"
-        >
-          Create Order
-        </Button>
+        <Box marginLeft="30%">
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<AddIcon />}
+            type="submit"
+            value="Submit"
+          >
+            {isApproved ? 'Fill Order' : 'Approve'}
+          </Button>
+        </Box>
       </form>
     </div>
   )

@@ -7,10 +7,11 @@ import {
   EtherscanLinkType,
 } from '../../Util/getEtherscanLink'
 import { useWeb3React } from '@web3-react/core'
-import { DbOption } from '../../DataService/FireStoreDB'
 import { CopyToClipboard } from '../shared/CopyToClipboard'
+import { CoinImage } from '../PoolsTable'
 const AppHeader = styled.header`
   min-height: 10vh;
+  padding-left: 1em;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -60,28 +61,16 @@ const refAssetImgs = [
   },
 ]
 
-function renderRefImgs(assetName: string) {
-  if (assetName === 'ETH Gas Price') {
-    return <Image src={'/images/coin-logos/ETH.png'} alt="ReactApp" />
-  } else {
-    const asset = refAssetImgs.find((asset) => asset.refAsset === assetName)
-    return (
-      <ImgDiv>
-        <LeftAssetImg src={asset?.img0} alt="ReactApp" />
-        <RightAssetImg src={asset?.img1} alt="ReactApp" />
-      </ImgDiv>
-    )
-  }
-}
-
-export default function OptionHeader({ optionData }: { optionData: DbOption }) {
+export default function OptionHeader(optionData: {
+  TokenAddress: string
+  ReferenceAsset: string
+}) {
   //const option = props.optionData
   const { chainId } = useWeb3React()
   const headerTitle = optionData.ReferenceAsset
-
   return (
     <AppHeader>
-      {renderRefImgs(headerTitle)}
+      <CoinImage assetName={headerTitle} />
       <OptionTitle>{headerTitle}</OptionTitle>
       <Link
         style={{ color: 'gray' }}

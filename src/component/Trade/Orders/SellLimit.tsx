@@ -1,10 +1,12 @@
 import React from 'react'
+import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import { MenuItem } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
+import Box from '@mui/material/Box'
 import { sellLimitOrder } from '../../../Orders/SellLimit'
 import { LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
@@ -15,51 +17,90 @@ import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
+import { Network } from '../../../Util/chainIdToName'
 import Web3 from 'web3'
-
+import { BigNumber } from '@0x/utils'
+import { Pool } from '../../../lib/queries'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ERC20 = require('../abi/ERC20.json')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const contractAddress = require('@0x/contract-addresses')
+const ERC20_ABI = ERC20.abi
+const CHAIN_ID = Network.ROPSTEN
+const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+const exchangeProxyAddress = address.exchangeProxy
+const maxApproval = new BigNumber(2).pow(256).minus(1)
 const web3 = new Web3(Web3.givenProvider)
-let accounts
+let accounts: any[]
+
 export default function SellLimit(props: {
-  option: any
+  option: Pool
   handleDisplayOrder: () => void
+  tokenAddress: string
 }) {
   const classes = useStyles()
   const option = props.option
   const [expiry, setExpiry] = React.useState(5)
-  const [numberOfOptions, setNumberOfOptions] = React.useState(5)
-  const [pricePerOption, setPricePerOption] = React.useState(0)
-
+  const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
+  const [pricePerOption, setPricePerOption] = React.useState(0.0)
+  const [isApproved, setIsApproved] = React.useState(false)
+  const [walletBalance, setWalletBalance] = React.useState(0)
+  const makerToken = props.tokenAddress
+  const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
   const handleNumberOfOptions = (value: string) => {
-    setNumberOfOptions(parseInt(value))
+    setNumberOfOptions(parseFloat(value))
   }
 
   const handlePricePerOptions = (value: string) => {
-    setPricePerOption(parseInt(value))
+    setPricePerOption(parseFloat(value))
+  }
+
+  const getOptionsInWallet = async () => {
+    accounts = await window.ethereum.enable()
+    const makerAccount = accounts[0]
+    let balance = await makerTokenContract.methods
+      .balanceOf(makerAccount)
+      .call()
+    balance = balance / 10 ** option.collateralDecimals
+    return balance
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     accounts = await window.ethereum.enable()
-    const orderData = {
-      maker: accounts[0],
-      makerToken: option.TokenAddress,
-      takerToken: option.CollateralToken,
-      provider: web3,
-      isBuy: false,
-      nbrOptions: numberOfOptions,
-      limitPrice: pricePerOption,
-      collateralDecimals: option.DecimalsCollateralToken,
-      orderExpiry: expiry,
-    }
+    const makerAccount = accounts[0]
+    if (!isApproved) {
+      await makerTokenContract.methods
+        .approve(exchangeProxyAddress, maxApproval)
+        .send({ from: makerAccount })
 
-    sellLimitOrder(orderData)
-      .then(function (response) {
-        console.log('Response ' + response)
-        props.handleDisplayOrder()
-      })
-      .catch(function (error) {
-        console.log('Error' + error)
-      })
+      const approvedByMaker = await makerTokenContract.methods
+        .allowance(makerAccount, exchangeProxyAddress)
+        .call()
+      console.log('Approved by maker: ' + (await approvedByMaker.toString()))
+      setIsApproved(true)
+    } else {
+      const orderData = {
+        maker: makerAccount,
+        makerToken: props.tokenAddress,
+        takerToken: option.collateralToken,
+        provider: web3,
+        isBuy: false,
+        nbrOptions: numberOfOptions,
+        limitPrice: pricePerOption,
+        collateralDecimals: option.collateralDecimals,
+        orderExpiry: expiry,
+      }
+
+      sellLimitOrder(orderData)
+        .then(function (response) {
+          console.log('Response ' + response)
+          props.handleDisplayOrder()
+        })
+        .catch(function (error) {
+          console.log('Error' + error)
+        })
+    }
   }
 
   const handleExpirySelection = (event: SelectChangeEvent<number>) => {
@@ -71,6 +112,17 @@ export default function SellLimit(props: {
     )
   }
 
+  useEffect(() => {
+    getOptionsInWallet().then((val) => {
+      console.log(JSON.stringify(val))
+      if (val != null) {
+        setWalletBalance(Number(val))
+      } else {
+        throw new Error(`can not read wallet balance`)
+      }
+    })
+  }, [])
+
   return (
     <div>
       <form onSubmit={handleOrderSubmit}>
@@ -80,7 +132,6 @@ export default function SellLimit(props: {
           </LabelStyleDiv>
           <FormInput
             type="text"
-            value={numberOfOptions}
             onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
         </FormDiv>
@@ -90,7 +141,6 @@ export default function SellLimit(props: {
           </LabelStyleDiv>
           <FormInput
             type="text"
-            value={pricePerOption}
             onChange={(event) => handlePricePerOptions(event.target.value)}
           />
         </FormDiv>
@@ -99,7 +149,7 @@ export default function SellLimit(props: {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption * numberOfOptions} {option.CollateralTokenName}
+            {pricePerOption * numberOfOptions} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -107,7 +157,7 @@ export default function SellLimit(props: {
             <LabelGrayStyle>Options in Wallet</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>{0}</LabelGrayStyle>
+            <LabelGrayStyle>{walletBalance}</LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -144,16 +194,18 @@ export default function SellLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          startIcon={<AddIcon />}
-          type="submit"
-          value="Submit"
-        >
-          Create Order
-        </Button>
+        <Box marginLeft="30%">
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<AddIcon />}
+            type="submit"
+            value="Submit"
+          >
+            {isApproved ? 'Create Order' : 'Approve'}
+          </Button>
+        </Box>
       </form>
     </div>
   )

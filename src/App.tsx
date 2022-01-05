@@ -5,6 +5,7 @@ import { Container, useTheme } from '@mui/material'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { CreateOption } from './component/CreateOption/CreateOption'
 import Markets from './component/Markets/Markets'
+import { Dashboard } from './component/Dashboard'
 
 export const App = () => {
   const theme = useTheme()
@@ -12,13 +13,19 @@ export const App = () => {
     <Router>
       <Header />
 
-      <Container sx={{ height: '100%', paddingTop: theme.spacing(4) }}>
+      <Container
+        sx={{ height: '100%', paddingTop: theme.spacing(4) }}
+        maxWidth="xl"
+      >
         <Switch>
           <Route exact path="/">
             <Markets />
           </Route>
-          <Route path="/trade/:id">
+          <Route path="/:poolId/:tokenType">
             <Underlying />
+          </Route>
+          <Route exact path="/dashboard">
+            <Dashboard />
           </Route>
           <Route path="/create">
             <CreateOption />

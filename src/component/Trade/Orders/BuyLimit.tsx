@@ -1,10 +1,12 @@
 import React, { FormEvent } from 'react'
+import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import { MenuItem } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
+import Box from '@mui/material/Box'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
 import { LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
@@ -16,25 +18,33 @@ import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import Web3 from 'web3'
-
+import { Pool } from '../../../lib/queries'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ERC20 = require('../abi/ERC20.json')
+const ERC20_ABI = ERC20.abi
 const web3 = new Web3(Web3.givenProvider)
 let accounts
+
 export default function BuyLimit(props: {
-  option: any
+  option: Pool
   handleDisplayOrder: () => void
+  tokenAddress: string
 }) {
   const classes = useStyles()
   const option = props.option
   const [expiry, setExpiry] = React.useState(5)
-  const [numberOfOptions, setNumberOfOptions] = React.useState(5)
-  const [pricePerOption, setPricePerOption] = React.useState(0)
+  const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
+  const [pricePerOption, setPricePerOption] = React.useState(0.0)
+  const [collateralBalance, setCollateralBalance] = React.useState(0)
+  const takerToken = option.collateralToken
+  const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
 
-  const handleNumberOfOptions = (value: number) => {
-    setNumberOfOptions(value)
+  const handleNumberOfOptions = (value: string) => {
+    setNumberOfOptions(parseFloat(value))
   }
 
-  const handlePricePerOptions = (value: number) => {
-    setPricePerOption(value)
+  const handlePricePerOptions = (value: string) => {
+    setPricePerOption(parseFloat(value))
   }
 
   const handleExpirySelection = (event: SelectChangeEvent<number>) => {
@@ -51,13 +61,13 @@ export default function BuyLimit(props: {
     accounts = await window.ethereum.enable()
     const orderData = {
       maker: accounts[0],
-      makerToken: option.CollateralToken,
-      takerToken: option.TokenAddress,
+      makerToken: option.collateralToken,
+      takerToken: props.tokenAddress,
       provider: web3,
       isBuy: true,
       nbrOptions: numberOfOptions,
       limitPrice: pricePerOption,
-      collateralDecimals: option.DecimalsCollateralToken,
+      collateralDecimals: option.collateralDecimals,
       orderExpiry: expiry,
     }
 
@@ -71,6 +81,27 @@ export default function BuyLimit(props: {
       })
   }
 
+  const getCollateralInWallet = async () => {
+    accounts = await window.ethereum.enable()
+    const takerAccount = accounts[0]
+    let balance = await takerTokenContract.methods
+      .balanceOf(takerAccount)
+      .call()
+    balance = balance / 10 ** option.collateralDecimals
+    return balance
+  }
+
+  useEffect(() => {
+    getCollateralInWallet().then((val) => {
+      console.log(JSON.stringify(val))
+      if (val != null) {
+        setCollateralBalance(Number(val))
+      } else {
+        throw new Error(`can not read wallet balance`)
+      }
+    })
+  }, [])
+
   return (
     <div>
       <form onSubmit={(event) => handleOrderSubmit(event)}>
@@ -80,10 +111,7 @@ export default function BuyLimit(props: {
           </LabelStyleDiv>
           <FormInput
             type="text"
-            value={numberOfOptions}
-            onChange={(event) =>
-              handleNumberOfOptions(parseInt(event.target.value))
-            }
+            onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
         </FormDiv>
         <FormDiv>
@@ -92,10 +120,7 @@ export default function BuyLimit(props: {
           </LabelStyleDiv>
           <FormInput
             type="text"
-            value={pricePerOption}
-            onChange={(event) =>
-              handlePricePerOptions(parseInt(event.target.value))
-            }
+            onChange={(event) => handlePricePerOptions(event.target.value)}
           />
         </FormDiv>
         <FormDiv>
@@ -103,7 +128,7 @@ export default function BuyLimit(props: {
             <LabelStyle>You Pay</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption * numberOfOptions} {option.CollateralTokenName}
+            {pricePerOption * numberOfOptions} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -112,7 +137,7 @@ export default function BuyLimit(props: {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {} {option.CollateralTokenName}
+              {collateralBalance} {option.collateralTokenName}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
@@ -150,16 +175,18 @@ export default function BuyLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          startIcon={<AddIcon />}
-          type="submit"
-          value="Submit"
-        >
-          Create Order
-        </Button>
+        <Box marginLeft="30%">
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<AddIcon />}
+            type="submit"
+            value="Submit"
+          >
+            Fill order
+          </Button>
+        </Box>
       </form>
     </div>
   )

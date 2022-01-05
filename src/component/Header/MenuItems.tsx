@@ -19,6 +19,12 @@ export default function MenuItems() {
           >
             <Tab label="Markets" value={'/'} component={Link} to={'/'} />
             <Tab
+              label="My Dashboard"
+              value={'/dashboard'}
+              component={Link}
+              to={'/dashboard'}
+            />
+            <Tab
               label="Request"
               value={'/Request'}
               component={Link}

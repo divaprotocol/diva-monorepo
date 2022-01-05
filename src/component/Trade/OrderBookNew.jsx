@@ -174,8 +174,9 @@ function createTable(buyOrders, sellOrders) {
   }
 }
 
-export default function OrderBookNew() {
-  const selectedOption = useSelector((state) => state.tradeOption.option)
+export default function OrderBookNew(props) {
+  //const selectedOption = useSelector((state) => state.tradeOption.option)
+  const selectedOption = props.option
   var responseBuy = useSelector((state) => state.tradeOption.responseBuy)
   var responseSell = useSelector((state) => state.tradeOption.responseSell)
   const [orderBook, setOrderBook] = useState([])

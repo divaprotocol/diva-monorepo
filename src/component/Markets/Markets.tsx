@@ -1,167 +1,50 @@
-import React, { useEffect, useState } from 'react'
-import { DataGrid } from '@mui/x-data-grid'
-import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import { getAllOptions } from '../../DataService/FireStoreDB'
-import { getDateTime } from '../../Util/Dates'
-import { Box, Input, InputAdornment } from '@mui/material'
-import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { LineSeries, XYPlot } from 'react-vis'
-import { LocalGasStation, Search } from '@mui/icons-material'
-import { useHistory } from 'react-router-dom'
-
-const assetLogoPath = '/images/coin-logos/'
-
-const OptionImageCell = ({ assetName }: { assetName: string }) => {
-  const assets = assetName.split('/')
-
-  if (assets.length === 1 && assets[0].includes('Gas')) {
-    return <LocalGasStation />
-  } else if (assets.length === 1) {
-    return (
-      <img
-        alt={assets[0]}
-        src={assetLogoPath + assets[0] + '.png'}
-        style={{ height: 30 }}
-      />
-    )
-  } else if (assets.length === 2) {
-    return (
-      <>
-        <img
-          alt={`${assets[0]}`}
-          src={assetLogoPath + assets[0] + '.png'}
-          style={{ marginRight: '-.5em', height: 30 }}
-        />
-        <img
-          alt={assets[1]}
-          src={assetLogoPath + assets[1] + '.png'}
-          style={{ height: 30 }}
-        />
-      </>
-    )
-  } else {
-    return <>'n/a'</>
-  }
-}
-
-const PayoffCell = ({ data }: { data: any }) => {
-  return (
-    <Box height={50}>
-      <XYPlot width={100} height={80} style={{ fill: 'none' }}>
-        <LineSeries data={data} />
-      </XYPlot>
-    </Box>
-  )
-}
+import { GridColDef } from '@mui/x-data-grid/x-data-grid'
+import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
 
 const columns: GridColDef[] = [
   {
     field: 'Icon',
     align: 'right',
+    disableReorder: true,
+    disableColumnMenu: true,
     headerName: '',
-    renderCell: (cell) => <OptionImageCell assetName={cell.value} />,
+    renderCell: (cell) => <CoinImage assetName={cell.value} />,
   },
   {
     field: 'Underlying',
     minWidth: 150,
+    flex: 1,
   },
   {
     field: 'PayoffProfile',
     headerName: 'Payoff Profile',
+    disableReorder: true,
+    disableColumnMenu: true,
     minWidth: 120,
     renderCell: (cell) => <PayoffCell data={cell.value} />,
   },
-  { field: 'Strike', align: 'right', headerAlign: 'right' },
-  { field: 'Inflection', align: 'right', headerAlign: 'right' },
-  { field: 'Cap', align: 'right', headerAlign: 'right' },
-  { field: 'Expiry', minWidth: 170, align: 'right', headerAlign: 'right' },
+  { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Ceiling', align: 'right', headerAlign: 'right', type: 'number' },
+  {
+    field: 'Expiry',
+    minWidth: 170,
+    align: 'right',
+    headerAlign: 'right',
+    type: 'dateTime',
+  },
   { field: 'Sell', align: 'right', headerAlign: 'right' },
   { field: 'Buy', align: 'right', headerAlign: 'right' },
   { field: 'MaxYield', align: 'right', headerAlign: 'right' },
-  { field: 'TVL', align: 'right', headerAlign: 'right' },
+  {
+    field: 'TVL',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+    minWidth: 300,
+  },
 ]
 
 export default function App() {
-  const [rows, setRows] = useState<GridRowModel[]>([])
-  const history = useHistory()
-  const [search, setSearch] = useState('')
-
-  useEffect(() => {
-    const run = async () => {
-      const options = await getAllOptions()
-      const today = new Date()
-      /**
-       * Display only unexpired options
-       * TODO: This might change in the near future
-       */
-      const unExpiredOptions = options.filter(
-        (v) => new Date(v.ExpiryDate * 1000) < today
-      )
-      setRows(
-        unExpiredOptions.map((op) => ({
-          Icon: op.ReferenceAsset,
-          id: op.OptionId,
-          OptionId: op.OptionId,
-          PayoffProfile: generatePayoffChartData(op),
-          Underlying: op.ReferenceAsset,
-          Strike: op.Strike.toFixed(2),
-          Inflection: op.Inflection.toFixed(2),
-          Cap: op.Cap.toFixed(2),
-          Expiry: getDateTime(op.ExpiryDate),
-          Sell: 'TBD',
-          Buy: 'TBD',
-          MaxYield: 'TBD',
-          TVL: op.CollateralBalance + ' ' + op.CollateralTokenName,
-        }))
-      )
-    }
-    run()
-  }, [])
-
-  const filteredRows =
-    search != null && search.length > 0
-      ? rows.filter((v) =>
-          v.Underlying.toLowerCase().includes(search.toLowerCase())
-        )
-      : rows
-
-  return (
-    <Box
-      sx={{
-        height: 'calc(100% - 1em)',
-        display: 'flex',
-        flexGrow: 1,
-        flexDirection: 'column',
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'end',
-          flexDirection: 'column',
-          paddingBottom: '1em',
-        }}
-      >
-        <Input
-          autoFocus
-          value={search}
-          placeholder="Filter asset"
-          aria-label="Filter asset"
-          onChange={(e) => setSearch(e.target.value)}
-          startAdornment={
-            <InputAdornment position="start">
-              <Search />
-            </InputAdornment>
-          }
-        />
-      </Box>
-      <DataGrid
-        rows={filteredRows}
-        columns={columns}
-        onRowClick={(row) => {
-          history.push(`trade/${row.id}`)
-        }}
-      />
-    </Box>
-  )
+  return <PoolsTable columns={columns} />
 }
