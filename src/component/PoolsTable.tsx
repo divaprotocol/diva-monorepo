@@ -32,10 +32,10 @@ const CoinPlaceHolder = (asset: string) => {
       <text
         x="50%"
         y="55%"
-        text-anchor="middle"
+        textAnchor="middle"
         fill="white"
-        font-size="20px"
-        font-family="Arial"
+        fontSize="20px"
+        fontFamily="Arial"
         dy=".3em"
       >
         {asset.charAt(0)}
@@ -75,10 +75,10 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
               <text
                 x="33%"
                 y="55%"
-                text-anchor="middle"
+                textAnchor="middle"
                 fill="white"
-                font-size="20px"
-                font-family="Arial"
+                fontSize="20px"
+                fontFamily="Arial"
                 dy=".3em"
               >
                 {assets[0].charAt(0)}
@@ -87,10 +87,10 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
               <text
                 x="66%"
                 y="55%"
-                text-anchor="middle"
+                textAnchor="middle"
                 fill="white"
-                font-size="20px"
-                font-family="Arial"
+                fontSize="20px"
+                fontFamily="Arial"
                 dy=".3em"
               >
                 {assets[1].charAt(0)}
@@ -270,7 +270,6 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
         }}
       >
         <Input
-          autoFocus
           value={search}
           placeholder="Filter asset"
           aria-label="Filter asset"

@@ -9,15 +9,15 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
+import React, { useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
-import { ConnectWalletButton } from '../Wallet/ConnectWalletButton'
+import { ethers } from 'ethers'
+
+import { addresses } from '../../config'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
-import { ethers } from 'ethers'
-import DIVA_ABI from '../../contracts/abis/DIVA.json'
-import { addresses } from '../../config'
-import React from 'react'
 import { chainIdtoName } from '../../Util/chainIdToName'
+import DIVA_ABI from '../../contracts/abis/DIVA.json'
 
 const SubmitCell = (props: any) => {
   const { chainId } = useWeb3React()
@@ -30,9 +30,9 @@ const SubmitCell = (props: any) => {
     DIVA_ABI,
     provider.getSigner()
   )
-  const [open, setOpen] = React.useState(false)
-  const [btnDisabled, setBtnDisabled] = React.useState(true)
-  const [textFieldValue, setTextFieldValue] = React.useState('')
+  const [open, setOpen] = useState(false)
+  const [btnDisabled, setBtnDisabled] = useState(true)
+  const [textFieldValue, setTextFieldValue] = useState('')
   const handleOpen = () => {
     setOpen(true)
   }
@@ -41,14 +41,15 @@ const SubmitCell = (props: any) => {
     setOpen(false)
   }
 
-  diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
-    setBtnDisabled(
-      props.row.Status === 'Submitted' ||
-        props.row.Status === 'Confirmed' ||
-        pool.expiryDate.toNumber() * 1000 > Date.now()
-    )
+  useEffect(() => {
+    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
+      setBtnDisabled(
+        props.row.Status === 'Submitted' ||
+          props.row.Status === 'Confirmed' ||
+          pool.expiryDate.toNumber() * 1000 > Date.now()
+      )
+    }, [])
   })
-
   return (
     <Container>
       <Button variant="contained" onClick={handleOpen} disabled={btnDisabled}>
@@ -63,9 +64,9 @@ const SubmitCell = (props: any) => {
 
         <DialogActions>
           <TextField
-            value={textFieldValue}
+            defaultValue={textFieldValue}
             onChange={(e) => {
-              e.stopPropagation()
+              // e.stopPropagation()
               setTextFieldValue(e.target.value)
             }}
           />
@@ -137,7 +138,7 @@ const columns: GridColDef[] = [
     headerAlign: 'right',
     headerName: '',
     minWidth: 150,
-    renderCell: SubmitCell,
+    renderCell: (props) => <SubmitCell {...props} />,
   },
 ]
 
