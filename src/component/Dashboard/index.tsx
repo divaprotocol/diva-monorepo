@@ -1,12 +1,93 @@
 import { GridColDef } from '@mui/x-data-grid/x-data-grid'
-import { Button, Stack } from '@mui/material'
+import {
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  Stack,
+  TextField,
+} from '@mui/material'
+import React, { useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
-import { ConnectWalletButton } from '../Wallet/ConnectWalletButton'
+import { ethers } from 'ethers'
+
+import { addresses } from '../../config'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
+import { chainIdtoName } from '../../Util/chainIdToName'
+import DIVA_ABI from '../../contracts/abis/DIVA.json'
 
-const SubmitCell = () => {
-  return <Button variant="contained">Submit value</Button>
+const SubmitCell = (props: any) => {
+  const { chainId } = useWeb3React()
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum,
+    chainIdtoName(chainId).toLowerCase()
+  )
+  const diva = new ethers.Contract(
+    addresses[chainId!].divaAddress,
+    DIVA_ABI,
+    provider.getSigner()
+  )
+  const [open, setOpen] = useState(false)
+  const [btnDisabled, setBtnDisabled] = useState(true)
+  const [textFieldValue, setTextFieldValue] = useState('')
+  const handleOpen = () => {
+    setOpen(true)
+  }
+
+  const handleClose = () => {
+    setOpen(false)
+  }
+
+  useEffect(() => {
+    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
+      setBtnDisabled(
+        props.row.Status === 'Submitted' ||
+          props.row.Status === 'Confirmed' ||
+          pool.expiryDate.toNumber() * 1000 > Date.now()
+      )
+    }, [])
+  })
+  return (
+    <Container>
+      <Button variant="contained" onClick={handleOpen} disabled={btnDisabled}>
+        Submit value
+      </Button>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogContent>
+          <DialogContentText>
+            Please provide a value for this option
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <TextField
+            defaultValue={textFieldValue}
+            onChange={(e) => {
+              // e.stopPropagation()
+              setTextFieldValue(e.target.value)
+            }}
+          />
+          <Button
+            color="primary"
+            type="submit"
+            onClick={() => {
+              diva.setFinalReferenceValueById(
+                props.id.split('/')[0],
+                ethers.utils.parseEther(textFieldValue),
+                true
+              )
+              handleClose()
+            }}
+          >
+            Submit value
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
+  )
 }
 
 const columns: GridColDef[] = [
@@ -21,6 +102,7 @@ const columns: GridColDef[] = [
   {
     field: 'Underlying',
     flex: 1,
+    minWidth: 100,
   },
   { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
@@ -55,8 +137,8 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     headerName: '',
-    minWidth: 200,
-    renderCell: SubmitCell,
+    minWidth: 150,
+    renderCell: (props) => <SubmitCell {...props} />,
   },
 ]
 
@@ -76,9 +158,10 @@ export function Dashboard() {
           pool.dataFeedProvider.toLowerCase() === account?.toLowerCase()
         }
         columns={columns}
+        isDashboard={true}
       />
     </Stack>
   ) : (
-    <ConnectWalletButton />
+    <div>Please Connect your wallet </div>
   )
 }
