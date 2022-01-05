@@ -254,6 +254,7 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
   const classes = useStyles()
   return (
     <Box
+      // maxWidth="xl"
       sx={{
         height: 'calc(100% - 1em)',
         display: 'flex',
@@ -283,7 +284,6 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
       </Box>
       <DataGrid
         className={classes.root}
-        showColumnRightBorder={false}
         rows={filteredRows}
         columns={columns}
         onRowClick={

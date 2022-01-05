@@ -18,7 +18,112 @@ import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
 import DIVA_ABI from '../../contracts/abis/DIVA.json'
+import { getExpiryMinutesFromNow } from '../../Util/Dates'
 
+const DueInCell = (props: any) => {
+  const { chainId } = useWeb3React()
+  const [expTimestamp, setExpTimestamp] = useState(0)
+  const [statusTimestamp, setStatusTimestamp] = useState(0)
+
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum,
+    chainIdtoName(chainId).toLowerCase()
+  )
+  const diva = new ethers.Contract(
+    addresses[chainId!].divaAddress,
+    DIVA_ABI,
+    provider.getSigner()
+  )
+  useEffect(() => {
+    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
+      setExpTimestamp(pool.expiryDate.toNumber())
+    }, [])
+
+    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
+      setStatusTimestamp(pool.statusTimeStamp.toNumber())
+    }, [])
+  })
+
+  if (props.row.Status === 'Open') {
+    const minUntilExp = getExpiryMinutesFromNow(
+      expTimestamp + 24 * 3600 - 5 * 60
+    )
+    if (minUntilExp < 24 * 60 - 5) {
+      return minUntilExp <= 1 ? (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '150vh',
+          }}
+        >
+          {'<1m'}
+        </div>
+      ) : (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '150vh',
+          }}
+        >
+          {(minUntilExp - (minUntilExp % 60)) / 60 +
+            'h ' +
+            (minUntilExp % 60) +
+            'm '}
+        </div>
+      )
+    }
+  }
+  if (props.row.Status === 'Challenged') {
+    const minUntilExp = getExpiryMinutesFromNow(
+      statusTimestamp + 48 * 3600 - 5 * 60
+    )
+    if (minUntilExp > 48 * 60 - 5) {
+      return minUntilExp <= 1 ? (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '150vh',
+          }}
+        >
+          {'<1m'}
+        </div>
+      ) : (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '150vh',
+          }}
+        >
+          {(minUntilExp - (minUntilExp % 60)) / 60 +
+            'h ' +
+            (minUntilExp % 60) +
+            'm '}
+        </div>
+      )
+    }
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '150vh',
+      }}
+    >
+      {'-'}
+    </div>
+  )
+}
 const SubmitCell = (props: any) => {
   const { chainId } = useWeb3React()
   const provider = new ethers.providers.Web3Provider(
@@ -129,15 +234,16 @@ const columns: GridColDef[] = [
     field: 'subPeriod',
     align: 'right',
     headerAlign: 'right',
-    headerName: 'Submission period ends in',
-    minWidth: 200,
+    headerName: 'Due in',
+    minWidth: 100,
+    renderCell: (props) => <DueInCell {...props} />,
   },
   {
     field: 'submitValue',
     align: 'right',
     headerAlign: 'right',
     headerName: '',
-    minWidth: 150,
+    minWidth: 200,
     renderCell: (props) => <SubmitCell {...props} />,
   },
 ]
@@ -162,6 +268,15 @@ export function Dashboard() {
       />
     </Stack>
   ) : (
-    <div>Please Connect your wallet </div>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '75vh',
+      }}
+    >
+      Please Connect your wallet{' '}
+    </div>
   )
 }
