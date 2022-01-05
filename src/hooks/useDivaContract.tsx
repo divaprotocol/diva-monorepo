@@ -1,5 +1,5 @@
 import { useWeb3React } from '@web3-react/core'
-import { ethers, Contract } from 'ethers'
+import { ethers, Contract, BigNumber } from 'ethers'
 import { addresses } from '../config'
 import { chainIdtoName } from '../Util/chainIdToName'
 import DIVA_ABI from '../contracts/abis/DIVA.json'
@@ -7,18 +7,20 @@ import { Pool } from '../lib/queries'
 
 type DivaContract = Contract & {
   createContingentPool: (
-    inflection: number,
-    cap: number,
-    floor: number,
-    collateralBalanceShort: number,
-    collateralBalanceLong: number,
-    expiryDate: number,
-    supplyShort: number,
-    supplyLong: number,
-    referenceAsset: string,
-    collateralToken: string,
-    dataFeedProvider: string
-  ) => void
+    params: [
+      inflection: BigNumber,
+      cap: BigNumber,
+      floor: BigNumber,
+      collateralBalanceShort: BigNumber,
+      collateralBalanceLong: BigNumber,
+      expiryDate: BigNumber,
+      supplyShort: BigNumber,
+      supplyLong: BigNumber,
+      referenceAsset: string,
+      collateralToken: string,
+      dataFeedProvider: string
+    ]
+  ) => Promise<void>
   getPoolParametersById: (id: string) => Promise<Pool>
   setFinalReferenceValueById: (
     poolId: string,
