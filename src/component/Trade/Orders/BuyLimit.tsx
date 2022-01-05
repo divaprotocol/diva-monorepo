@@ -37,7 +37,7 @@ export default function BuyLimit(props: {
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
   const [collateralBalance, setCollateralBalance] = React.useState(0)
-  const takerToken = optionTokenAddress
+  const takerToken = option.collateralToken
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
 
   const handleNumberOfOptions = (value: string) => {
@@ -62,8 +62,8 @@ export default function BuyLimit(props: {
     accounts = await window.ethereum.enable()
     const orderData = {
       maker: accounts[0],
-      makerToken: optionTokenAddress,
-      takerToken: option.collateralToken,
+      makerToken: option.collateralToken,
+      takerToken: props.tokenAddress,
       provider: web3,
       isBuy: true,
       nbrOptions: numberOfOptions,

@@ -19,8 +19,8 @@ import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
-import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
+import { Pool } from '../../../lib/queries'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20 = require('../abi/ERC20.json')
 const ERC20_ABI = ERC20.abi
@@ -42,7 +42,6 @@ export default function SellMarket(props: {
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
   const handleNumberOfOptions = (newValue: string) => {
     setNumberOfOptions(parseFloat(newValue))
-    console.log(numberOfOptions)
   }
 
   const handleOrderSubmit = async (_event: any) => {

@@ -83,7 +83,7 @@ export default function BuyMarket(props: {
   // eslint-disable-next-line prettier/prettier
   const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
   const exchangeProxyAddress = address.exchangeProxy
-  const makerToken = optionTokenAddress
+  const makerToken = props.tokenAddress
   const maxApproval = new BigNumber(2).pow(256).minus(1)
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken
