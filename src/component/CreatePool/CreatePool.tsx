@@ -5,7 +5,7 @@ import { StepOne } from './StepOne'
 import { StepTwo } from './StepTwo'
 import { StepThree } from './StepThree'
 
-export function CreateOption() {
+export function CreatePool() {
   const [activeStep, setActiveStep] = useState(0)
   const next = () => setActiveStep((prevActiveStep) => prevActiveStep + 1)
   const previous = () => setActiveStep((prevActiveStep) => prevActiveStep - 1)

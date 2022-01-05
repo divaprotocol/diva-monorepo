@@ -3,7 +3,7 @@ import Underlying from './component/Trade/Underlying'
 
 import { Container, useTheme } from '@mui/material'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
-import { CreateOption } from './component/CreateOption/CreateOption'
+import { CreatePool } from './component/CreatePool/CreatePool'
 import Markets from './component/Markets/Markets'
 import { Dashboard } from './component/Dashboard'
 
@@ -14,7 +14,7 @@ export const App = () => {
       <Header />
 
       <Container
-        sx={{ height: '100%', paddingTop: theme.spacing(4) }}
+        sx={{ height: '100%', overflow: 'auto', paddingTop: theme.spacing(4) }}
         maxWidth="xl"
       >
         <Switch>
@@ -28,7 +28,7 @@ export const App = () => {
             <Dashboard />
           </Route>
           <Route path="/create">
-            <CreateOption />
+            <CreatePool />
           </Route>
         </Switch>
       </Container>
