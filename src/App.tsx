@@ -14,8 +14,9 @@ export const App = () => {
       <Header />
 
       <Container
-        sx={{ height: '100%', paddingTop: theme.spacing(4) }}
-        maxWidth="xl"
+        disableGutters
+        sx={{ alignItems: 'left', height: '100%' }}
+        maxWidth={false}
       >
         <Switch>
           <Route exact path="/">

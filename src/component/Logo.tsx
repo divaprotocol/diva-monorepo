@@ -16,7 +16,7 @@ export function Logo(props: React.SVGProps<SVGSVGElement>) {
       <g
         id="Page-1"
         stroke="none"
-        stroke-width="1"
+        strokeWidth="1"
         fill="none"
         fillRule="evenodd"
         strokeLinecap="square"

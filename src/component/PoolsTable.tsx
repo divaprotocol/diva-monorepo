@@ -12,10 +12,18 @@ import { request } from 'graphql-request'
 import { useQuery } from 'react-query'
 import { formatUnits } from 'ethers/lib/utils'
 import { useCoinIcon } from '../hooks/useCoinIcon'
-
+import { makeStyles } from '@mui/styles'
 import localCoinImages from '../Util/localCoinImages.json'
 
 const assetLogoPath = '/images/coin-logos/'
+
+const useStyles = makeStyles({
+  root: {
+    '&.MuiDataGrid-root .MuiDataGrid-cell:focus': {
+      outline: 'none',
+    },
+  },
+})
 
 const CoinPlaceHolder = (asset: string) => {
   return (
@@ -24,10 +32,10 @@ const CoinPlaceHolder = (asset: string) => {
       <text
         x="50%"
         y="55%"
-        text-anchor="middle"
+        textAnchor="middle"
         fill="white"
-        font-size="20px"
-        font-family="Arial"
+        fontSize="20px"
+        fontFamily="Arial"
         dy=".3em"
       >
         {asset.charAt(0)}
@@ -67,10 +75,10 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
               <text
                 x="33%"
                 y="55%"
-                text-anchor="middle"
+                textAnchor="middle"
                 fill="white"
-                font-size="20px"
-                font-family="Arial"
+                fontSize="20px"
+                fontFamily="Arial"
                 dy=".3em"
               >
                 {assets[0].charAt(0)}
@@ -79,10 +87,10 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
               <text
                 x="66%"
                 y="55%"
-                text-anchor="middle"
+                textAnchor="middle"
                 fill="white"
-                font-size="20px"
-                font-family="Arial"
+                fontSize="20px"
+                fontFamily="Arial"
                 dy=".3em"
               >
                 {assets[1].charAt(0)}
@@ -137,9 +145,10 @@ export const PayoffCell = ({ data }: { data: any }) => {
 type Props = {
   columns: GridColDef[]
   filter?: (pool: Pool) => boolean
+  isDashboard?: boolean
 }
 
-export default function PoolsTable({ columns, filter }: Props) {
+export default function PoolsTable({ columns, filter, isDashboard }: Props) {
   const history = useHistory()
   const [search, setSearch] = useState('')
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
@@ -171,6 +180,29 @@ export default function PoolsTable({ columns, filter }: Props) {
       Inflection: parseInt(val.inflection) / 1e18,
       Cap: parseInt(val.cap) / 1e18,
     }
+    if (isDashboard) {
+      return [
+        ...acc,
+        {
+          ...shared,
+          id: `${val.id}/long`,
+          address: val.longToken,
+          PayoffProfile: generatePayoffChartData({
+            ...payOff,
+            IsLong: true,
+          }),
+          TVL:
+            formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
+            ' ' +
+            val.collateralSymbol,
+          Status: val.statusFinalReferenceValue,
+          finalValue:
+            val.statusFinalReferenceValue === 'Open'
+              ? '-'
+              : formatUnits(val.finalReferenceValue),
+        },
+      ]
+    }
 
     return [
       ...acc,
@@ -186,6 +218,11 @@ export default function PoolsTable({ columns, filter }: Props) {
           formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
           ' ' +
           val.collateralSymbol,
+        Status: val.statusFinalReferenceValue,
+        finalValue:
+          val.statusFinalReferenceValue === 'Open'
+            ? '-'
+            : formatUnits(val.finalReferenceValue),
       },
       {
         ...shared,
@@ -199,6 +236,11 @@ export default function PoolsTable({ columns, filter }: Props) {
           formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
           ' ' +
           val.collateralSymbol,
+        Status: val.statusFinalReferenceValue,
+        finalValue:
+          val.statusFinalReferenceValue === 'Open'
+            ? '-'
+            : formatUnits(val.finalReferenceValue),
       },
     ]
   }, [] as GridRowModel[])
@@ -209,7 +251,7 @@ export default function PoolsTable({ columns, filter }: Props) {
           v.Underlying.toLowerCase().includes(search.toLowerCase())
         )
       : rows
-
+  const classes = useStyles()
   return (
     <Box
       sx={{
@@ -217,6 +259,9 @@ export default function PoolsTable({ columns, filter }: Props) {
         display: 'flex',
         flexGrow: 1,
         flexDirection: 'column',
+        paddingTop: '2em',
+        paddingLeft: '4em',
+        paddingRight: '4em',
       }}
     >
       <Box
@@ -228,7 +273,6 @@ export default function PoolsTable({ columns, filter }: Props) {
         }}
       >
         <Input
-          autoFocus
           value={search}
           placeholder="Filter asset"
           aria-label="Filter asset"
@@ -241,12 +285,16 @@ export default function PoolsTable({ columns, filter }: Props) {
         />
       </Box>
       <DataGrid
-        showColumnRightBorder={false}
+        className={classes.root}
         rows={filteredRows}
         columns={columns}
-        onRowClick={(row) => {
-          history.push(`${row.id}`)
-        }}
+        onRowClick={
+          isDashboard
+            ? undefined
+            : (row) => {
+                history.push(`${row.id}`)
+              }
+        }
         componentsProps={{
           row: {
             style: {

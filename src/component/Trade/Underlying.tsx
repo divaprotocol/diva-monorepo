@@ -8,7 +8,7 @@ import OrderBook from './OrderBookNew'
 import CreateOrder from './CreateOrder'
 // import LineSeries from '../Graphs/LineSeries';
 //import './Underlying.css';
-import { Paper, Stack } from '@mui/material'
+import { Container, Paper, Stack } from '@mui/material'
 import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import TradeChart from '../Graphs/TradeChart'
@@ -69,42 +69,44 @@ export default function Underlying() {
   const tokenAddress = isLong ? pool.longToken : pool.shortToken
 
   return (
-    <Stack direction="row" spacing={2}>
-      <Stack spacing={2}>
-        <Paper>
-          <OptionHeader
-            ReferenceAsset={pool.referenceAsset}
-            TokenAddress={tokenAddress}
-          />
-          <OptionDetails pool={pool} isLong={isLong} />
-        </Paper>
+    <Container sx={{ paddingTop: '4em' }}>
+      <Stack direction="row" spacing={2}>
+        <Stack spacing={2}>
+          <Paper>
+            <OptionHeader
+              ReferenceAsset={pool.referenceAsset}
+              TokenAddress={tokenAddress}
+            />
+            <OptionDetails pool={pool} isLong={isLong} />
+          </Paper>
 
-        <Paper>
-          <LeftCompFlexContainer>
-            <LeftCompLeftDiv>
-              <OrderBook option={pool} />
-            </LeftCompLeftDiv>
-            <LeftCompRightDiv>
-              <OpenOrdersNew option={pool} />
-            </LeftCompRightDiv>
-          </LeftCompFlexContainer>
-        </Paper>
-      </Stack>
+          <Paper>
+            <LeftCompFlexContainer>
+              <LeftCompLeftDiv>
+                <OrderBook option={pool} />
+              </LeftCompLeftDiv>
+              <LeftCompRightDiv>
+                <OpenOrdersNew option={pool} />
+              </LeftCompRightDiv>
+            </LeftCompFlexContainer>
+          </Paper>
+        </Stack>
 
-      <Stack spacing={2}>
-        <Paper>
-          <CreateOrder option={pool} tokenAddress={tokenAddress} />
-        </Paper>
-        <Paper>
-          <TradeChart
-            data={data}
-            w={380}
-            h={200}
-            isLong={OptionParams.IsLong}
-            breakEven={breakEvenOptionPrice}
-          />
-        </Paper>
+        <Stack spacing={2}>
+          <Paper>
+            <CreateOrder option={pool} tokenAddress={tokenAddress} />
+          </Paper>
+          <Paper>
+            <TradeChart
+              data={data}
+              w={380}
+              h={200}
+              isLong={OptionParams.IsLong}
+              breakEven={breakEvenOptionPrice}
+            />
+          </Paper>
+        </Stack>
       </Stack>
-    </Stack>
+    </Container>
   )
 }
