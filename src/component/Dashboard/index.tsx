@@ -48,8 +48,8 @@ const DueInCell = (props: any) => {
     const minUntilExp = getExpiryMinutesFromNow(
       expTimestamp + 24 * 3600 - 5 * 60
     )
-    if (minUntilExp < 24 * 60 - 5) {
-      return minUntilExp <= 1 ? (
+    if (minUntilExp < 24 * 60 - 5 && minUntilExp > 0) {
+      return minUntilExp === 1 ? (
         <div
           style={{
             display: 'flex',
@@ -81,8 +81,8 @@ const DueInCell = (props: any) => {
     const minUntilExp = getExpiryMinutesFromNow(
       statusTimestamp + 48 * 3600 - 5 * 60
     )
-    if (minUntilExp > 48 * 60 - 5) {
-      return minUntilExp <= 1 ? (
+    if (minUntilExp < 48 * 60 - 5 && minUntilExp > 0) {
+      return minUntilExp === 1 ? (
         <div
           style={{
             display: 'flex',
@@ -151,7 +151,8 @@ const SubmitCell = (props: any) => {
       setBtnDisabled(
         props.row.Status === 'Submitted' ||
           props.row.Status === 'Confirmed' ||
-          pool.expiryDate.toNumber() * 1000 > Date.now()
+          pool.expiryDate.toNumber() * 1000 > Date.now() ||
+          getExpiryMinutesFromNow(pool.expiryDate.toNumber() + 24 * 3600) < 0
       )
     }, [])
   })
@@ -276,7 +277,7 @@ export function Dashboard() {
         height: '75vh',
       }}
     >
-      Please Connect your wallet{' '}
+      Please connect your wallet{' '}
     </div>
   )
 }
