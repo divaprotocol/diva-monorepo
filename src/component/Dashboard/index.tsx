@@ -18,6 +18,7 @@ import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
 import DIVA_ABI from '../../contracts/abis/DIVA.json'
+import { Pool } from '../../lib/queries'
 
 const SubmitCell = (props: any) => {
   const { chainId } = useWeb3React()

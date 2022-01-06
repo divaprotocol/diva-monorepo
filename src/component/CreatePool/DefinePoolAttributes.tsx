@@ -9,11 +9,15 @@ import {
   TextField,
   Button,
   Autocomplete,
+  Accordion,
   Slider,
   Stack,
+  AccordionSummary,
+  AccordionDetails,
+  Typography,
 } from '@mui/material'
-import { useFormik } from 'formik'
-import { useState } from 'react'
+import { FormikConsumer, useFormik } from 'formik'
+import { useEffect, useState } from 'react'
 import { useQuery } from 'react-query'
 
 import { PayoffProfile } from './PayoffProfile'
@@ -21,6 +25,85 @@ import referenceAssets from './referenceAssets.json'
 import { Tokens } from '../../lib/types'
 import { useCreatePoolFormik } from './formik'
 import { useErc20Balance } from '../../hooks/useErc20Balance'
+
+function DefineAdvanced({
+  formik,
+}: {
+  formik: ReturnType<typeof useCreatePoolFormik>
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const {
+    referenceAsset,
+    expiryDate,
+    collateralBalanceShort,
+    shortTokenSupply,
+    inflection,
+    cap,
+    floor,
+    longTokenSupply,
+    collateralBalanceLong,
+  } = formik.values
+
+  return (
+    <Accordion expanded={expanded} onChange={() => setExpanded(!expanded)}>
+      <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
+        <Typography>Advanced Settings</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <Box pb={3}>
+          <FormControl fullWidth>
+            <TextField
+              name="collateralBalanceShort"
+              id="collateralBalanceShort"
+              label="Short Pool Balance"
+              inputProps={{ min: 0 }}
+              value={collateralBalanceShort}
+              type="number"
+              onChange={formik.handleChange}
+            />
+          </FormControl>
+        </Box>
+        <Box pb={3}>
+          <FormControl fullWidth>
+            <TextField
+              name="collateralBalanceLong"
+              id="collateralBalanceLong"
+              label="Long Pool Balance"
+              inputProps={{ min: 0 }}
+              value={collateralBalanceLong}
+              type="number"
+              onChange={formik.handleChange}
+            />
+          </FormControl>
+        </Box>
+        <Box pb={3}>
+          <FormControl fullWidth>
+            <TextField
+              name="shortTokenSupply"
+              id="shortTokenSupply"
+              label="Short Token Supply"
+              value={shortTokenSupply}
+              type="number"
+              onChange={formik.handleChange}
+            />
+          </FormControl>
+        </Box>
+        <Box pb={3}>
+          <FormControl fullWidth>
+            <TextField
+              name="longTokenSupply"
+              id="longTokenSupply"
+              label="Long Token Supply"
+              value={longTokenSupply}
+              type="number"
+              onChange={formik.handleChange}
+            />
+          </FormControl>
+        </Box>
+      </AccordionDetails>
+    </Accordion>
+  )
+}
 
 export function DefinePoolAttributes({
   next,
@@ -31,30 +114,35 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-  const [referenceAssetValue, setReferenceAssetValue] = useState<string | null>(
-    null
-  )
-
-  useErc20Balance(formik.values.collateralToken)
 
   const tokensQuery = useQuery<Tokens>('tokens', () =>
     fetch('/tokenSymbols.json').then((res) => res.json())
   )
 
   const collateralTokenAssets = tokensQuery.data || {}
+  const collateralTokenAddress =
+    collateralTokenAssets[formik.values.collateralTokenSymbol as string]
+  console.log(formik.values.collateralTokenSymbol)
+  const collateralWalletBalance = useErc20Balance(collateralTokenAddress)
+
+  useEffect(() => {
+    formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
+  }, [collateralWalletBalance])
 
   const possibleOptions = ['ETH'].concat(
     Object.keys(collateralTokenAssets).filter((v) =>
-      v.startsWith(referenceAssetSearch)
+      referenceAssetSearch.trim().length > 0
+        ? v.startsWith(referenceAssetSearch.trim())
+        : true
     )
   )
 
   const {
     referenceAsset,
     expiryDate,
+    collateralTokenSymbol,
     collateralBalanceShort,
     shortTokenSupply,
-    amount,
     inflection,
     cap,
     floor,
@@ -62,8 +150,23 @@ export function DefinePoolAttributes({
     collateralBalanceLong,
   } = formik.values
 
+  const setCollateralBalance = (num: number) => {
+    let long = 0
+    let short = 0
+
+    if (num > 0) {
+      const half = num / 2
+      long = short = half
+    }
+    formik.setFieldValue('collateralBalanceLong', long)
+    formik.setFieldValue('collateralBalanceShort', short)
+  }
+
+  const hasCollateralWalletBalanceError =
+    (formik.errors.collateralWalletBalance || '').length > 0
+
   return (
-    <Box>
+    <Box pb={10}>
       <Box pb={3} pt={4}>
         <FormControl fullWidth>
           <InputLabel>Reference Asset</InputLabel>
@@ -78,7 +181,9 @@ export function DefinePoolAttributes({
             value={referenceAsset}
           >
             {referenceAssets.map((v) => (
-              <MenuItem value={v}>{v}</MenuItem>
+              <MenuItem key={v} value={v}>
+                {v}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
@@ -104,37 +209,59 @@ export function DefinePoolAttributes({
       <Box>
         <h3>Collateral</h3>
 
-        <Box pb={3}>
-          <FormControl fullWidth style={{ paddingRight: '3em' }}>
+        <Stack pb={3} spacing={2} direction="row">
+          <FormControl fullWidth>
             <Autocomplete
               options={possibleOptions.slice(0, 100)}
-              value={referenceAssetValue}
+              value={collateralTokenSymbol || 'ETH'}
               onChange={(event, newValue) => {
-                formik.setFieldValue('collateralToken', newValue)
+                formik.setFieldValue('collateralTokenSymbol', newValue)
               }}
               onInputChange={(event) => {
                 if (event != null && event.target != null) {
-                  setReferenceAssetSearch((event.target as any).value)
+                  setReferenceAssetSearch((event.target as any).value || '')
                 }
               }}
-              renderInput={(params) => <TextField {...params} label="Asset" />}
+              renderInput={(params) => (
+                <TextField {...params} label="Collateral Asset" />
+              )}
             />
+            {collateralWalletBalance != null && (
+              <FormHelperText>
+                Your balance: {collateralWalletBalance} {collateralTokenSymbol}
+              </FormHelperText>
+            )}
           </FormControl>
-        </Box>
-
-        <Box pb={3}>
           <FormControl fullWidth>
             <TextField
-              id="amount"
-              name="amount"
-              label="Amount"
+              id="collateralAmount"
+              name="collateralAmount"
+              label="Collateral Amount"
               inputProps={{ min: 0 }}
-              value={amount}
+              error={hasCollateralWalletBalanceError}
+              value={collateralBalanceLong + collateralBalanceShort}
               type="number"
-              onChange={formik.handleChange}
+              onChange={(event) => {
+                const num = parseFloat(event.target.value)
+                setCollateralBalance(num)
+              }}
             />
+            {hasCollateralWalletBalanceError && (
+              <FormHelperText>
+                {formik.errors.collateralWalletBalance}{' '}
+                <Button
+                  onClick={() => {
+                    if (collateralWalletBalance != null) {
+                      setCollateralBalance(parseFloat(collateralWalletBalance))
+                    }
+                  }}
+                >
+                  Set max
+                </Button>
+              </FormHelperText>
+            )}
           </FormControl>
-        </Box>
+        </Stack>
       </Box>
       {floor != null &&
         cap != null &&
@@ -164,7 +291,7 @@ export function DefinePoolAttributes({
       </Box>
       <Box pb={3}>
         <FormControl fullWidth>
-          <Stack direction="row" spacing={2}>
+          <Stack direction="row" spacing={4}>
             <TextField
               id="inflection"
               name="inflection"
@@ -173,38 +300,33 @@ export function DefinePoolAttributes({
                 min: floor,
                 max: cap,
               }}
+              InputProps={{
+                endAdornment: (
+                  <Box sx={{ width: '100%' }}>
+                    <Slider
+                      aria-label="inflection"
+                      name="inflection"
+                      step={(cap - floor) / 20}
+                      value={inflection}
+                      min={floor}
+                      max={cap}
+                      onChange={(event) => {
+                        formik.setFieldValue(
+                          'inflection',
+                          (event.target as any).value
+                        )
+                      }}
+                      valueLabelDisplay="auto"
+                    />
+                  </Box>
+                ),
+              }}
               sx={{
-                minWidth: '80px',
+                width: '100%',
               }}
               onChange={formik.handleChange}
               value={inflection}
             />
-            <Box sx={{ width: '100%' }}>
-              <Slider
-                aria-label="inflection"
-                name="inflection"
-                step={(cap - floor) / 20}
-                value={inflection}
-                max={cap}
-                marks={[
-                  {
-                    value: floor,
-                    label: floor,
-                  },
-                  {
-                    value: cap,
-                    label: cap,
-                  },
-                ]}
-                onChange={(event) => {
-                  formik.setFieldValue(
-                    'inflection',
-                    (event.target as any).value
-                  )
-                }}
-                valueLabelDisplay="auto"
-              />
-            </Box>
           </Stack>
         </FormControl>
       </Box>
@@ -222,58 +344,12 @@ export function DefinePoolAttributes({
         </FormControl>
       </Box>
 
-      <Box pb={3}>
-        <FormControl fullWidth>
-          <TextField
-            name="collateralBalanceShort"
-            id="collateralBalanceShort"
-            label="Short Pool Balance"
-            inputProps={{ min: 0 }}
-            value={collateralBalanceShort}
-            type="number"
-            onChange={formik.handleChange}
-          />
-        </FormControl>
-      </Box>
-      <Box pb={3}>
-        <FormControl fullWidth>
-          <TextField
-            name="collateralBalanceLong"
-            id="collateralBalanceLong"
-            label="Long Pool Balance"
-            inputProps={{ min: 0 }}
-            value={collateralBalanceLong}
-            type="number"
-            onChange={formik.handleChange}
-          />
-        </FormControl>
-      </Box>
-      <Box pb={3}>
-        <FormControl fullWidth>
-          <TextField
-            name="shortTokenSupply"
-            id="shortTokenSupply"
-            label="Short Token Supply"
-            value={shortTokenSupply}
-            type="number"
-            onChange={formik.handleChange}
-          />
-        </FormControl>
-      </Box>
-      <Box pb={3}>
-        <FormControl fullWidth>
-          <TextField
-            name="longTokenSupply"
-            id="longTokenSupply"
-            label="Long Token Supply"
-            value={longTokenSupply}
-            type="number"
-            onChange={formik.handleChange}
-          />
-        </FormControl>
-      </Box>
-      <Box pb={3}>
-        <Button onClick={() => formik.handleSubmit()}>Next</Button>
+      <DefineAdvanced formik={formik} />
+
+      <Box pb={3} pt={5}>
+        <Button size="medium" onClick={() => formik.handleSubmit()}>
+          Next
+        </Button>
       </Box>
     </Box>
   )

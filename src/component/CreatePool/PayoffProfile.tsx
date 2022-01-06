@@ -1,4 +1,6 @@
-import { Box } from '@mui/material'
+import { Box, BoxTypeMap } from '@mui/material'
+import { OverridableComponent } from '@mui/material/OverridableComponent'
+import { useEffect, useRef, useState } from 'react'
 import { XYPlot, XAxis, YAxis, LineSeries, LineSeriesPoint } from 'react-vis'
 
 export function PayoffProfile({
@@ -63,12 +65,27 @@ export function PayoffProfile({
       y: 1,
     },
   ]
+  const ref = useRef<HTMLElement>()
+  const [width, setWidth] = useState(300)
+  useEffect(() => {
+    if (ref.current != null) {
+      const callback = () => {
+        const rect = ref.current?.getBoundingClientRect()
+        setWidth(rect?.width || 0)
+      }
+      window.addEventListener('resize', callback)
+      callback()
+      return () => {
+        window.removeEventListener('resize', callback)
+      }
+    }
+  }, [ref.current])
 
   return (
-    <Box pb={3}>
+    <Box pb={3} ref={ref}>
       <h3>Payoff Profile</h3>
       <XYPlot
-        width={396}
+        width={width}
         height={300}
         fill={'none'}
         style={{ fontSize: 12 }}

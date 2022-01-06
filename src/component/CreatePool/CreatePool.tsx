@@ -33,7 +33,7 @@ export function CreatePool() {
   }
 
   return (
-    <Container maxWidth="xs">
+    <Container maxWidth="sm">
       <Box pt={5}>
         <Stepper activeStep={activeStep} alternativeLabel>
           <Step>

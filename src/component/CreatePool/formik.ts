@@ -4,11 +4,11 @@ import referenceAssets from './referenceAssets.json'
 export const initialValues = {
   referenceAsset: referenceAssets[0],
   expiryDate: new Date(),
-  amount: 1,
   floor: 1,
   cap: 3,
   inflection: 2,
-  collateralToken: undefined as string | undefined,
+  collateralTokenSymbol: undefined as string | undefined,
+  collateralWalletBalance: 0,
   collateralBalanceShort: 100,
   collateralBalanceLong: 100,
   shortTokenSupply: 100,
@@ -23,6 +23,18 @@ export const useCreatePoolFormik = () => {
       console.log('on submit')
     },
     validate: (values) => {
+      const errors = {
+        collateralWalletBalance: '',
+      }
+
+      const collateralBalance =
+        values.collateralBalanceLong + values.collateralBalanceShort
+
+      console.log(values, collateralBalance)
+
+      if (values.collateralWalletBalance <= collateralBalance) {
+        errors.collateralWalletBalance = 'Your balance is too low'
+      }
       // validate expiry date, - today in 2 hrs? 12 hrs, 48 hrs?
       // validate other vars
       // floor can't be higher than inflection
@@ -31,7 +43,7 @@ export const useCreatePoolFormik = () => {
       // validate oracle
       // validate step
 
-      return {}
+      return errors
     },
   })
 }
