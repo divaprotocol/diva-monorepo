@@ -11,7 +11,6 @@ import {
   Autocomplete,
   Slider,
   Stack,
-  Typography,
 } from '@mui/material'
 import { useFormik } from 'formik'
 import { useState } from 'react'
@@ -20,47 +19,29 @@ import { useQuery } from 'react-query'
 import { PayoffProfile } from './PayoffProfile'
 import referenceAssets from './referenceAssets.json'
 import { Tokens } from '../../lib/types'
+import { useCreatePoolFormik } from './formik'
+import { useErc20Balance } from '../../hooks/useErc20Balance'
 
-export function StepOne({ next }: { next: () => void }) {
+export function DefinePoolAttributes({
+  next,
+  formik,
+}: {
+  next: () => void
+  formik: ReturnType<typeof useCreatePoolFormik>
+}) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
   const [referenceAssetValue, setReferenceAssetValue] = useState<string | null>(
     null
   )
 
+  useErc20Balance(formik.values.collateralToken)
+
   const tokensQuery = useQuery<Tokens>('tokens', () =>
     fetch('/tokenSymbols.json').then((res) => res.json())
   )
 
   const collateralTokenAssets = tokensQuery.data || {}
-
-  const formik = useFormik({
-    initialValues: {
-      referenceAsset: referenceAssets[0],
-      expiryDate: new Date(),
-      amount: 1,
-      floor: 0,
-      cap: 2,
-      strike: 1,
-      collateral: null,
-      shortPool: 10,
-      longPool: 10,
-      shortToken: 10,
-      longToken: 10,
-    },
-    onSubmit: () => {
-      next()
-    },
-    validate: (values) => {
-      // validate expiry date, - today in 2 hrs? 12 hrs, 48 hrs?
-      // validate other vars
-      // floor can't be higher than strike
-      // strike can't be lower than floor or higher than cap
-      // cap can't be lower than strike
-
-      return {}
-    },
-  })
 
   const possibleOptions = ['ETH'].concat(
     Object.keys(collateralTokenAssets).filter((v) =>
@@ -71,14 +52,14 @@ export function StepOne({ next }: { next: () => void }) {
   const {
     referenceAsset,
     expiryDate,
-    shortPool,
-    shortToken,
+    collateralBalanceShort,
+    shortTokenSupply,
     amount,
-    strike,
+    inflection,
     cap,
     floor,
-    longToken,
-    longPool,
+    longTokenSupply,
+    collateralBalanceLong,
   } = formik.values
 
   return (
@@ -89,6 +70,7 @@ export function StepOne({ next }: { next: () => void }) {
           <Select
             name="referenceAsset"
             id="referenceAsset"
+            error={formik.errors.referenceAsset != null}
             label="Reference Asset"
             onChange={(event) => {
               formik.setFieldValue('referenceAsset', event.target.value)
@@ -99,7 +81,6 @@ export function StepOne({ next }: { next: () => void }) {
               <MenuItem value={v}>{v}</MenuItem>
             ))}
           </Select>
-          <FormHelperText>Current value: 1234</FormHelperText>
         </FormControl>
       </Box>
       <Box pb={3}>
@@ -129,7 +110,7 @@ export function StepOne({ next }: { next: () => void }) {
               options={possibleOptions.slice(0, 100)}
               value={referenceAssetValue}
               onChange={(event, newValue) => {
-                setReferenceAssetValue(newValue)
+                formik.setFieldValue('collateralToken', newValue)
               }}
               onInputChange={(event) => {
                 if (event != null && event.target != null) {
@@ -157,21 +138,21 @@ export function StepOne({ next }: { next: () => void }) {
       </Box>
       {floor != null &&
         cap != null &&
-        strike != null &&
-        shortToken != null &&
-        longToken != null && (
+        inflection != null &&
+        shortTokenSupply != null &&
+        longTokenSupply != null && (
           <PayoffProfile
             floor={floor}
             cap={cap}
-            strike={strike}
-            shortTokenAmount={shortToken}
-            longTokenAmount={longToken}
+            strike={inflection}
+            shortTokenAmount={shortTokenSupply}
+            longTokenAmount={longTokenSupply}
           />
         )}
       <Box pb={3}>
         <FormControl fullWidth>
           <TextField
-            inputProps={{ min: 0, max: strike }}
+            inputProps={{ min: 0, max: inflection }}
             name="floor"
             id="floor"
             label="Floor"
@@ -185,9 +166,9 @@ export function StepOne({ next }: { next: () => void }) {
         <FormControl fullWidth>
           <Stack direction="row" spacing={2}>
             <TextField
-              id="strike"
-              name="strike"
-              label="Strike"
+              id="inflection"
+              name="inflection"
+              label="inflection"
               inputProps={{
                 min: floor,
                 max: cap,
@@ -196,14 +177,14 @@ export function StepOne({ next }: { next: () => void }) {
                 minWidth: '80px',
               }}
               onChange={formik.handleChange}
-              value={strike}
+              value={inflection}
             />
             <Box sx={{ width: '100%' }}>
               <Slider
-                aria-label="Strike"
-                name="Strike"
+                aria-label="inflection"
+                name="inflection"
                 step={(cap - floor) / 20}
-                value={strike}
+                value={inflection}
                 max={cap}
                 marks={[
                   {
@@ -216,7 +197,10 @@ export function StepOne({ next }: { next: () => void }) {
                   },
                 ]}
                 onChange={(event) => {
-                  formik.setFieldValue('strike', (event.target as any).value)
+                  formik.setFieldValue(
+                    'inflection',
+                    (event.target as any).value
+                  )
                 }}
                 valueLabelDisplay="auto"
               />
@@ -227,7 +211,7 @@ export function StepOne({ next }: { next: () => void }) {
       <Box pb={3}>
         <FormControl fullWidth>
           <TextField
-            inputProps={{ min: strike }}
+            inputProps={{ min: inflection }}
             name="cap"
             id="cap"
             label="Cap"
@@ -241,11 +225,11 @@ export function StepOne({ next }: { next: () => void }) {
       <Box pb={3}>
         <FormControl fullWidth>
           <TextField
-            name="shortPool"
-            id="shortPool"
+            name="collateralBalanceShort"
+            id="collateralBalanceShort"
             label="Short Pool Balance"
             inputProps={{ min: 0 }}
-            value={shortPool}
+            value={collateralBalanceShort}
             type="number"
             onChange={formik.handleChange}
           />
@@ -254,11 +238,11 @@ export function StepOne({ next }: { next: () => void }) {
       <Box pb={3}>
         <FormControl fullWidth>
           <TextField
-            name="longPool"
-            id="longPool"
+            name="collateralBalanceLong"
+            id="collateralBalanceLong"
             label="Long Pool Balance"
             inputProps={{ min: 0 }}
-            value={longPool}
+            value={collateralBalanceLong}
             type="number"
             onChange={formik.handleChange}
           />
@@ -267,10 +251,10 @@ export function StepOne({ next }: { next: () => void }) {
       <Box pb={3}>
         <FormControl fullWidth>
           <TextField
-            name="shortToken"
-            id="shortToken"
-            label="Short Token Amount"
-            value={shortToken}
+            name="shortTokenSupply"
+            id="shortTokenSupply"
+            label="Short Token Supply"
+            value={shortTokenSupply}
             type="number"
             onChange={formik.handleChange}
           />
@@ -279,10 +263,10 @@ export function StepOne({ next }: { next: () => void }) {
       <Box pb={3}>
         <FormControl fullWidth>
           <TextField
-            name="longToken"
-            id="longToken"
-            label="Long Token Amount"
-            value={longToken}
+            name="longTokenSupply"
+            id="longTokenSupply"
+            label="Long Token Supply"
+            value={longTokenSupply}
             type="number"
             onChange={formik.handleChange}
           />

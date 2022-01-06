@@ -17,6 +17,7 @@ import { ethers } from 'ethers'
 import whitelistContract from '../../Util/abis/Whitelist.json'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { CopyToClipboard } from '../shared/CopyToClipboard'
+import { useCreatePoolFormik } from './formik'
 
 type Oracle = {
   name: string
@@ -97,10 +98,11 @@ const useOracles = (): [Oracle[], string | null] => {
   return [oracles, error]
 }
 
-export function StepTwo({
+export function SelectDataFeedProvider({
   next,
   previous,
 }: {
+  formik: ReturnType<typeof useCreatePoolFormik>
   next: () => void
   previous: () => void
 }) {

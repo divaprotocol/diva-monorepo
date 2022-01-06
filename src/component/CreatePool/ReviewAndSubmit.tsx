@@ -6,15 +6,16 @@ import { parseEther } from 'ethers/lib/utils'
 
 import ERC20 from '../../contracts/abis/ERC20.json'
 import { useDivaContract } from '../../hooks/useDivaContract'
+import { useCreatePoolFormik } from './formik'
 
 const getExpiryInSeconds = (offsetInSeconds: number) =>
   BigNumber.from(Math.floor(Date.now() / 1000 + offsetInSeconds))
 
-export function StepThree({
-  next,
+export function ReviewAndSubmit({
   previous,
 }: {
   next: () => void
+  formik: ReturnType<typeof useCreatePoolFormik>
   previous: () => void
 }) {
   const contract = useDivaContract()
