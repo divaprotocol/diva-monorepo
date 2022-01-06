@@ -8,6 +8,7 @@ import {
   DialogContentText,
   Stack,
   TextField,
+  Tooltip,
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
@@ -225,6 +226,11 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     headerName: 'Final Value',
+    renderCell: (cell: any) => (
+      <Tooltip title={cell.value}>
+        <span className="table-cell-trucate">{cell.value}</span>
+      </Tooltip>
+    ),
   },
   {
     field: 'Status',
