@@ -14,11 +14,11 @@ export function CreatePool() {
   const formik = useCreatePoolFormik()
 
   let step = null
-  switch (activeStep) {
-    case 0:
+  switch (formik.values.step) {
+    case 1:
       step = <DefinePoolAttributes formik={formik} next={next} />
       break
-    case 1:
+    case 2:
       step = (
         <SelectDataFeedProvider
           formik={formik}
@@ -27,7 +27,7 @@ export function CreatePool() {
         />
       )
       break
-    case 2:
+    case 3:
       step = <ReviewAndSubmit formik={formik} next={next} previous={previous} />
       break
   }

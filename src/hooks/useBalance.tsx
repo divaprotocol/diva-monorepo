@@ -10,7 +10,13 @@ type Erc20Contract = Contract & {
   balanceOf: (address: string) => Promise<BigNumber>
 }
 
-export function useErc20Balance(address?: string) {
+/**
+ * useBalance
+ ****
+ * returns the balance of a token. If no token address is provided,
+ * it'll return your eth balance
+ */
+export function useBalance(address?: string) {
   const { chainId } = useWeb3React()
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
@@ -20,22 +26,23 @@ export function useErc20Balance(address?: string) {
 
   useEffect(() => {
     const run = async () => {
+      const signer = provider.getSigner()
       if (chainId != null && address != null) {
         try {
-          const signer = provider.getSigner()
           const contract = new ethers.Contract(
             address,
             ERC20,
             signer
           ) as Erc20Contract
           const myAddress = await signer.getAddress()
-          console.log('run 2', { address, myAddress })
           const _balance = await contract.balanceOf(myAddress)
           setBalance(formatEther(_balance))
-          console.log({ balance: _balance.toString() })
         } catch (err) {
           console.error(err)
         }
+      } else if (chainId != null && address == null) {
+        const _balance = await signer.getBalance()
+        setBalance(formatEther(_balance))
       }
     }
 

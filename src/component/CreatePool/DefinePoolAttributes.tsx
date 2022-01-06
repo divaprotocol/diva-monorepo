@@ -1,4 +1,4 @@
-import { DatePicker } from '@mui/lab'
+import { DateTimePicker } from '@mui/lab'
 import {
   Box,
   FormControl,
@@ -15,16 +15,16 @@ import {
   AccordionSummary,
   AccordionDetails,
   Typography,
+  debounce,
 } from '@mui/material'
-import { FormikConsumer, useFormik } from 'formik'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useQuery } from 'react-query'
 
 import { PayoffProfile } from './PayoffProfile'
 import referenceAssets from './referenceAssets.json'
 import { Tokens } from '../../lib/types'
 import { useCreatePoolFormik } from './formik'
-import { useErc20Balance } from '../../hooks/useErc20Balance'
+import { useBalance } from '../../hooks/useBalance'
 
 function DefineAdvanced({
   formik,
@@ -33,13 +33,8 @@ function DefineAdvanced({
 }) {
   const [expanded, setExpanded] = useState(false)
   const {
-    referenceAsset,
-    expiryDate,
     collateralBalanceShort,
     shortTokenSupply,
-    inflection,
-    cap,
-    floor,
     longTokenSupply,
     collateralBalanceLong,
   } = formik.values
@@ -122,8 +117,7 @@ export function DefinePoolAttributes({
   const collateralTokenAssets = tokensQuery.data || {}
   const collateralTokenAddress =
     collateralTokenAssets[formik.values.collateralTokenSymbol as string]
-  console.log(formik.values.collateralTokenSymbol)
-  const collateralWalletBalance = useErc20Balance(collateralTokenAddress)
+  const collateralWalletBalance = useBalance(collateralTokenAddress)
 
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
@@ -142,12 +136,12 @@ export function DefinePoolAttributes({
     expiryDate,
     collateralTokenSymbol,
     collateralBalanceShort,
+    collateralBalanceLong,
     shortTokenSupply,
     inflection,
     cap,
     floor,
     longTokenSupply,
-    collateralBalanceLong,
   } = formik.values
 
   const setCollateralBalance = (num: number) => {
@@ -158,9 +152,22 @@ export function DefinePoolAttributes({
       const half = num / 2
       long = short = half
     }
-    formik.setFieldValue('collateralBalanceLong', long)
-    formik.setFieldValue('collateralBalanceShort', short)
+    formik.setValues(
+      {
+        ...formik.values,
+        collateralBalanceLong: long,
+        collateralBalanceShort: short,
+      },
+      true
+    )
   }
+
+  const onChangeSlide = useCallback(
+    debounce((event) => {
+      formik.setFieldValue('inflection', (event.target as any).value)
+    }),
+    []
+  )
 
   const hasCollateralWalletBalanceError =
     (formik.errors.collateralWalletBalance || '').length > 0
@@ -190,10 +197,11 @@ export function DefinePoolAttributes({
       </Box>
       <Box pb={3}>
         <FormControl fullWidth>
-          <DatePicker
+          <DateTimePicker
             InputProps={{
               name: 'expiryDate',
               id: 'expiryDate',
+              error: formik.errors.expiryDate != null,
             }}
             label="Expiry Date"
             onChange={(event) => {
@@ -203,7 +211,11 @@ export function DefinePoolAttributes({
             value={expiryDate}
             renderInput={(params) => <TextField {...params} />}
           />
-          <FormHelperText>8:00 pm local time (CET)</FormHelperText>
+          {formik.errors.expiryDate != null && (
+            <FormHelperText sx={{ color: 'red' }}>
+              {formik.errors.expiryDate}
+            </FormHelperText>
+          )}
         </FormControl>
       </Box>
       <Box>
@@ -228,7 +240,8 @@ export function DefinePoolAttributes({
             />
             {collateralWalletBalance != null && (
               <FormHelperText>
-                Your balance: {collateralWalletBalance} {collateralTokenSymbol}
+                Your balance: {parseFloat(collateralWalletBalance).toFixed(6)}{' '}
+                {collateralTokenSymbol}
               </FormHelperText>
             )}
           </FormControl>
@@ -259,6 +272,10 @@ export function DefinePoolAttributes({
                   Set max
                 </Button>
               </FormHelperText>
+            )}
+
+            {formik.errors.collateralBalance != null && (
+              <FormHelperText>{formik.errors.collateralBalance}</FormHelperText>
             )}
           </FormControl>
         </Stack>
@@ -310,12 +327,7 @@ export function DefinePoolAttributes({
                       value={inflection}
                       min={floor}
                       max={cap}
-                      onChange={(event) => {
-                        formik.setFieldValue(
-                          'inflection',
-                          (event.target as any).value
-                        )
-                      }}
+                      onChange={onChangeSlide}
                       valueLabelDisplay="auto"
                     />
                   </Box>
@@ -347,7 +359,13 @@ export function DefinePoolAttributes({
       <DefineAdvanced formik={formik} />
 
       <Box pb={3} pt={5}>
-        <Button size="medium" onClick={() => formik.handleSubmit()}>
+        <Button
+          size="medium"
+          onClick={() => {
+            formik.setFieldValue('step', 2)
+          }}
+          disabled={!formik.isValid}
+        >
           Next
         </Button>
       </Box>

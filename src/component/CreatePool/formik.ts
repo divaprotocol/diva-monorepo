@@ -1,19 +1,30 @@
 import { FormikConfig, useFormik } from 'formik'
 import referenceAssets from './referenceAssets.json'
 
+const defaultDate = new Date()
+defaultDate.setMinutes(defaultDate.getMinutes() + 10)
+
 export const initialValues = {
+  step: 1,
   referenceAsset: referenceAssets[0],
-  expiryDate: new Date(),
+  expiryDate: defaultDate,
   floor: 1,
   cap: 3,
   inflection: 2,
   collateralTokenSymbol: undefined as string | undefined,
-  collateralWalletBalance: 0,
+  collateralWalletBalance: '0',
+  collateralBalance: 200,
   collateralBalanceShort: 100,
   collateralBalanceLong: 100,
   shortTokenSupply: 100,
   longTokenSupply: 100,
   dataFeedProvider: null,
+}
+
+type Errors = {
+  collateralWalletBalance?: string
+  collateralBalance?: string
+  expiryDate?: string
 }
 
 export const useCreatePoolFormik = () => {
@@ -23,17 +34,26 @@ export const useCreatePoolFormik = () => {
       console.log('on submit')
     },
     validate: (values) => {
-      const errors = {
-        collateralWalletBalance: '',
-      }
+      const errors: Errors = {}
+
+      const threshold = 30000
 
       const collateralBalance =
         values.collateralBalanceLong + values.collateralBalanceShort
+      const walletBalance = parseFloat(values.collateralWalletBalance)
 
-      console.log(values, collateralBalance)
+      if (walletBalance < collateralBalance) {
+        errors.collateralWalletBalance = 'Balance lower than collateral'
+      }
 
-      if (values.collateralWalletBalance <= collateralBalance) {
-        errors.collateralWalletBalance = 'Your balance is too low'
+      if (collateralBalance <= 0) {
+        errors.collateralBalance = 'Collateral can not be 0'
+      }
+
+      if (values.expiryDate.getTime() - Date.now() < threshold) {
+        errors.expiryDate = `Expiry Date cannot be later earlier than ${
+          threshold / 1000
+        } seconds from now`
       }
       // validate expiry date, - today in 2 hrs? 12 hrs, 48 hrs?
       // validate other vars
