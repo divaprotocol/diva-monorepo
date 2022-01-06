@@ -116,7 +116,7 @@ export function DefinePoolAttributes({
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
 
   const tokensQuery = useQuery<Tokens>('tokens', () =>
-    fetch('/tokenSymbols.json').then((res) => res.json())
+    fetch('/ropstenTokens.json').then((res) => res.json())
   )
 
   const collateralTokenAssets = tokensQuery.data || {}
