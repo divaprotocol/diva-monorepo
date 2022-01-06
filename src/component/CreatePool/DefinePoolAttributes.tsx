@@ -101,10 +101,8 @@ function DefineAdvanced({
 }
 
 export function DefinePoolAttributes({
-  next,
   formik,
 }: {
-  next: () => void
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const today = new Date()

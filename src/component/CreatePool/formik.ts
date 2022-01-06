@@ -1,4 +1,7 @@
+import { useWeb3React } from '@web3-react/core'
+import { ethers } from 'ethers'
 import { FormikConfig, useFormik } from 'formik'
+import { chainIdtoName } from '../../Util/chainIdToName'
 import referenceAssets from './referenceAssets.json'
 
 const defaultDate = new Date()
@@ -18,22 +21,29 @@ export const initialValues = {
   collateralBalanceLong: 100,
   shortTokenSupply: 100,
   longTokenSupply: 100,
-  dataFeedProvider: null,
+  dataFeedProvider: '',
 }
 
 type Errors = {
   collateralWalletBalance?: string
+  dataFeedProvider?: string
   collateralBalance?: string
   expiryDate?: string
 }
 
 export const useCreatePoolFormik = () => {
+  const { chainId } = useWeb3React()
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum,
+    chainIdtoName(chainId).toLowerCase()
+  )
+
   return useFormik({
     initialValues,
     onSubmit: () => {
       console.log('on submit')
     },
-    validate: (values) => {
+    validate: async (values) => {
       const errors: Errors = {}
 
       const threshold = 30000
@@ -55,6 +65,15 @@ export const useCreatePoolFormik = () => {
           threshold / 1000
         } seconds from now`
       }
+
+      if (values.step > 1 && values.dataFeedProvider) {
+        try {
+          await provider.getSigner(values.dataFeedProvider)
+        } catch (err) {
+          errors.dataFeedProvider = 'Invalid address'
+        }
+      }
+
       // validate expiry date, - today in 2 hrs? 12 hrs, 48 hrs?
       // validate other vars
       // floor can't be higher than inflection

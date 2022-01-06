@@ -73,19 +73,21 @@ export function useDiva(): DivaApi | null {
   ) as DivaContract
 
   return {
-    createContingentPool: async ({
-      cap,
-      collateralBalanceLong: _collateralBalanceLong,
-      collateralBalanceShort: _collateralBalanceShort,
-      collateralToken,
-      dataFeedProvider,
-      expiryDate,
-      floor,
-      inflection,
-      referenceAsset,
-      supplyLong,
-      supplyShort,
-    }) => {
+    createContingentPool: async (props) => {
+      console.log({ props })
+      const {
+        cap,
+        collateralBalanceLong: _collateralBalanceLong,
+        collateralBalanceShort: _collateralBalanceShort,
+        collateralToken,
+        dataFeedProvider,
+        expiryDate,
+        floor,
+        inflection,
+        referenceAsset,
+        supplyLong,
+        supplyShort,
+      } = props
       const erc20 = new ethers.Contract(collateralToken, ERC20, signer)
       const collateralBalanceShort = BigNumber.from(_collateralBalanceShort)
       const collateralBalanceLong = BigNumber.from(_collateralBalanceLong)
