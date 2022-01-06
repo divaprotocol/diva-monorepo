@@ -259,6 +259,9 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
         display: 'flex',
         flexGrow: 1,
         flexDirection: 'column',
+        paddingTop: '2em',
+        paddingLeft: '4em',
+        paddingRight: '4em',
       }}
     >
       <Box
@@ -283,7 +286,6 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
       </Box>
       <DataGrid
         className={classes.root}
-        showColumnRightBorder={false}
         rows={filteredRows}
         columns={columns}
         onRowClick={
