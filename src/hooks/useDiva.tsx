@@ -5,6 +5,7 @@ import { chainIdtoName } from '../Util/chainIdToName'
 import DIVA_ABI from '../contracts/abis/DIVA.json'
 import ERC20 from '../contracts/abis/ERC20.json'
 import { Pool } from '../lib/queries'
+import { parseEther } from 'ethers/lib/utils'
 
 /**
  * Note: The order of parameters matter in this case,
@@ -18,14 +19,14 @@ type DivaContract = Contract & {
       floor: BigNumber,
       collateralBalanceShort: BigNumber,
       collateralBalanceLong: BigNumber,
-      expiryDate: BigNumber,
+      expiryDate: string,
       supplyShort: BigNumber,
       supplyLong: BigNumber,
       referenceAsset: string,
       collateralToken: string,
       dataFeedProvider: string
     ]
-  ) => Promise<void>
+  ) => Promise<any>
   getPoolParametersById: (id: string) => Promise<Pool>
   setFinalReferenceValueById: (
     poolId: string,
@@ -91,8 +92,12 @@ export function useDiva(): DivaApi | null {
         supplyShort,
       } = props
       const erc20 = new ethers.Contract(collateralToken, ERC20, signer)
-      const collateralBalanceShort = BigNumber.from(_collateralBalanceShort)
-      const collateralBalanceLong = BigNumber.from(_collateralBalanceLong)
+      const collateralBalanceShort = parseEther(
+        _collateralBalanceShort.toString()
+      )
+      const collateralBalanceLong = parseEther(
+        _collateralBalanceLong.toString()
+      )
 
       const creatorAddress = await signer.getAddress()
       console.info('approve', {
@@ -107,20 +112,35 @@ export function useDiva(): DivaApi | null {
       console.log('allowance', { creatorAddress, divaAddress })
       await erc20.allowance(creatorAddress, divaAddress)
 
-      console.log('createContingentPool', props)
-      return contract.createContingentPool([
-        BigNumber.from(inflection),
-        BigNumber.from(cap),
-        BigNumber.from(floor),
-        collateralBalanceShort,
-        collateralBalanceLong,
-        BigNumber.from(expiryDate),
-        BigNumber.from(supplyShort),
-        BigNumber.from(supplyLong),
+      console.log('createContingentPool', [
+        parseEther(inflection.toString()).toString(),
+        parseEther(cap.toString()).toString(),
+        parseEther(floor.toString()).toString(),
+        collateralBalanceShort.toString(),
+        collateralBalanceLong.toString(),
+        Math.round(expiryDate / 1000).toString(),
+        parseEther(supplyShort.toString()).toString(),
+        parseEther(supplyLong.toString()).toString(),
         referenceAsset,
         collateralToken,
         dataFeedProvider,
       ])
+
+      const tx = await contract.createContingentPool([
+        parseEther(inflection.toString()),
+        parseEther(cap.toString()),
+        parseEther(floor.toString()),
+        collateralBalanceShort,
+        collateralBalanceLong,
+        Math.round(expiryDate / 1000).toString(),
+        parseEther(supplyShort.toString()),
+        parseEther(supplyLong.toString()),
+        referenceAsset,
+        collateralToken,
+        dataFeedProvider,
+      ])
+      const pool = await tx
+      console.log(pool)
     },
     getPoolParametersById: (id: string) => {
       return contract.getPoolParametersById(id).then((val) => {

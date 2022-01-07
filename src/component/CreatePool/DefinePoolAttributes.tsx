@@ -121,12 +121,10 @@ export function DefinePoolAttributes({
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
 
-  const possibleOptions = ['ETH'].concat(
-    Object.keys(collateralTokenAssets).filter((v) =>
-      referenceAssetSearch.trim().length > 0
-        ? v.startsWith(referenceAssetSearch.trim())
-        : true
-    )
+  const possibleOptions = Object.keys(collateralTokenAssets).filter((v) =>
+    referenceAssetSearch.trim().length > 0
+      ? v.startsWith(referenceAssetSearch.trim())
+      : true
   )
 
   const {
@@ -224,7 +222,7 @@ export function DefinePoolAttributes({
           <FormControl fullWidth>
             <Autocomplete
               options={possibleOptions.slice(0, 100)}
-              value={collateralTokenSymbol || 'ETH'}
+              value={collateralTokenSymbol}
               onChange={(event, newValue) => {
                 formik.setFieldValue('collateralTokenSymbol', newValue)
               }}
