@@ -104,13 +104,15 @@ export function useDiva(): DivaApi | null {
         collateralToken,
         amount: collateralBalanceLong.add(collateralBalanceShort).toString(),
       })
-      await erc20.approve(
+      const tx = await erc20.approve(
         collateralToken,
         collateralBalanceLong.add(collateralBalanceShort)
       )
+      await tx.wait()
 
       console.log('allowance', { creatorAddress, divaAddress })
-      await erc20.allowance(creatorAddress, divaAddress)
+      const tx2 = await erc20.allowance(creatorAddress, divaAddress)
+      await tx2
 
       console.log('createContingentPool', [
         parseEther(inflection.toString()).toString(),
@@ -126,7 +128,7 @@ export function useDiva(): DivaApi | null {
         dataFeedProvider,
       ])
 
-      const tx = await contract.createContingentPool([
+      return contract.createContingentPool([
         parseEther(inflection.toString()),
         parseEther(cap.toString()),
         parseEther(floor.toString()),
@@ -139,8 +141,6 @@ export function useDiva(): DivaApi | null {
         collateralToken,
         dataFeedProvider,
       ])
-      const pool = await tx
-      console.log(pool)
     },
     getPoolParametersById: (id: string) => {
       return contract.getPoolParametersById(id).then((val) => {
