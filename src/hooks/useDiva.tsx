@@ -69,6 +69,8 @@ export function useDiva(): DivaApi | null {
 
   const signer = provider.getSigner()
 
+  console.log({ divaAddress })
+
   const contract = new ethers.Contract(
     divaAddress,
     DIVA_ABI,
@@ -104,15 +106,15 @@ export function useDiva(): DivaApi | null {
         collateralToken,
         amount: collateralBalanceLong.add(collateralBalanceShort).toString(),
       })
+
       const tx = await erc20.approve(
-        collateralToken,
+        divaAddress,
         collateralBalanceLong.add(collateralBalanceShort)
       )
       await tx.wait()
 
       console.log('allowance', { creatorAddress, divaAddress })
-      const tx2 = await erc20.allowance(creatorAddress, divaAddress)
-      await tx2
+      await erc20.allowance(creatorAddress, divaAddress)
 
       console.log('createContingentPool', [
         parseEther(inflection.toString()).toString(),
