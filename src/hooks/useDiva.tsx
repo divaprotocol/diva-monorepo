@@ -69,8 +69,6 @@ export function useDiva(): DivaApi | null {
 
   const signer = provider.getSigner()
 
-  console.log({ divaAddress })
-
   const contract = new ethers.Contract(
     divaAddress,
     DIVA_ABI,
@@ -78,8 +76,10 @@ export function useDiva(): DivaApi | null {
   ) as DivaContract
 
   return {
+    /***
+     * Proxy method for contract method of same name
+     */
     createContingentPool: async (props) => {
-      console.log(props)
       const {
         cap,
         collateralBalanceLong: _collateralBalanceLong,
@@ -102,34 +102,13 @@ export function useDiva(): DivaApi | null {
       )
 
       const creatorAddress = await signer.getAddress()
-      console.info('approve', {
-        collateralToken,
-        amount: collateralBalanceLong.add(collateralBalanceShort).toString(),
-      })
-
       const tx = await erc20.approve(
         divaAddress,
         collateralBalanceLong.add(collateralBalanceShort)
       )
       await tx.wait()
 
-      console.log('allowance', { creatorAddress, divaAddress })
       await erc20.allowance(creatorAddress, divaAddress)
-
-      console.log('createContingentPool', [
-        parseEther(inflection.toString()).toString(),
-        parseEther(cap.toString()).toString(),
-        parseEther(floor.toString()).toString(),
-        collateralBalanceShort.toString(),
-        collateralBalanceLong.toString(),
-        Math.round(expiryDate / 1000).toString(),
-        parseEther(supplyShort.toString()).toString(),
-        parseEther(supplyLong.toString()).toString(),
-        referenceAsset,
-        collateralToken,
-        dataFeedProvider,
-      ])
-
       return contract.createContingentPool([
         parseEther(inflection.toString()),
         parseEther(cap.toString()),
