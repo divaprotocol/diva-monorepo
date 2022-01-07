@@ -5,13 +5,20 @@ import { CHAIN_ID } from './Config'
 const contractAddress = require('@0x/contract-addresses')
 
 export const buyMarketOrder = async (orderData) => {
+  let filledOrder = {}
   const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
   const exchangeProxyAddress = address.exchangeProxy
   // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
   const orders = orderData.existingLimitOrders
+  console.log(' orders ' + JSON.stringify(orders))
   const signatures = []
   const fillOrderResponse = async (takerAssetFillAmounts) => {
+    orders.map(function (order) {
+      signatures.push(order.signature)
+      delete order.signature
+      return order
+    })
     const response = await exchange
       .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true)
       .awaitTransactionSuccessAsync({ from: orderData.takerAccount })
@@ -19,31 +26,29 @@ export const buyMarketOrder = async (orderData) => {
     return response
   }
 
-  if (orderData.existingLimitOrders.length === 1) {
-    const order = orderData.existingLimitOrders[0]
-    const takerFillNbrOptions = new BigNumber(orderData.nbrOptions * 10 ** 18)
-    const expectedRate = new BigNumber(order.takerAmount / order.makerAmount)
-    const takerFillAmount = takerFillNbrOptions.multipliedBy(expectedRate)
+  const order = orderData.existingLimitOrders[0]
+  const takerFillNbrOptions = new BigNumber(orderData.nbrOptions * 10 ** 18)
+  const expectedRate = new BigNumber(order.expectedRate)
+  const takerFillAmount = takerFillNbrOptions.multipliedBy(expectedRate)
+  const remainingFillableTakerAmount = order.remainingFillableTakerAmount
+  const takerAssetAmount = (takerFillAmount) => {
     const str = JSON.stringify([takerFillAmount])
     const takerAssetFillAmounts = JSON.parse(str, function (key, val) {
       return key === '' ? val : new BigNumber(val)
     })
-    if (orderData.nbrOptions === 1) {
-      orders.map(function (order) {
-        signatures.push(order.signature)
-        delete order.signature
-        return order
-      })
-      const filledOrder = await fillOrderResponse(takerAssetFillAmounts)
-      if ('logs' in filledOrder) {
-        const logs = filledOrder.logs
-        const event = logs.map((eventData) => {
-          return eventData.event
-        })
-        return event
-      }
-    }
+    return takerAssetFillAmounts
   }
+
+  if (takerFillAmount <= remainingFillableTakerAmount) {
+    const takerAssetFillAmount = takerAssetAmount(takerFillAmount)
+    filledOrder = await fillOrderResponse(takerAssetFillAmount)
+  } else {
+    const takerAssetFillAmount = takerAssetAmount(remainingFillableTakerAmount)
+    filledOrder = await fillOrderResponse(takerAssetFillAmount)
+  }
+
+  return filledOrder
+
   // TODO Handle sum(takerAssetAmountFillAmounts) > remainingFillable amount
   // Batch fill limit order
 }

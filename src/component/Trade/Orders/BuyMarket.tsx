@@ -131,9 +131,23 @@ export default function BuyMarket(props: {
         existingLimitOrders: existingLimitOrders,
       }
 
-      buyMarketOrder(orderData).then((orderFillEvent) => {
-        console.log(' OrderFillResponse ' + JSON.stringify(orderFillEvent))
-        props.handleDisplayOrder()
+      buyMarketOrder(orderData).then((orderFillStatus: any) => {
+        if (!('logs' in orderFillStatus)) {
+          return
+        } else {
+          orderFillStatus.logs.forEach((eventData: any) => {
+            if (!('event' in eventData)) {
+              return
+            } else {
+              if (eventData.event === 'LimitOrderFilled') {
+                alert('Order successfully filled')
+                props.handleDisplayOrder()
+              } else {
+                alert('Order could not be filled')
+              }
+            }
+          })
+        }
       })
     }
   }
@@ -168,16 +182,23 @@ export default function BuyMarket(props: {
   }
 
   const getLimitOrders = async () => {
-    let orders = []
+    const orders: any = []
     const res = await fetch(
       `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
     )
     const resJSON = await res.json()
+    console.log('limit order response ' + JSON.stringify(resJSON))
     const responseOrder: any = resJSON['records']
-    orders = responseOrder.map(({ order }: { order: any }) => ({
-      ...order,
-      expectedRate: order.takerAmount / order.makerAmount,
-    }))
+    console.log('response order ' + JSON.stringify(responseOrder))
+    responseOrder.forEach((data: any) => {
+      const order = data.order
+      order['expectedRate'] = data.order.takerAmount / data.order.makerAmount
+      order['remainingFillableTakerAmount'] =
+        data.metaData.remainingFillableTakerAmount
+      orders.push(order)
+    })
+
+    console.log('orders' + JSON.stringify(orders))
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
