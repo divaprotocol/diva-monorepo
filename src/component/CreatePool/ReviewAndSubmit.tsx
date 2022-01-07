@@ -53,9 +53,10 @@ export function ReviewAndSubmit({
     fetch('/ropstenTokens.json').then((res) => res.json())
   )
 
+  console.log({ values })
+
   const collateralTokenAssets = tokensQuery.data || {}
-  const collateralToken =
-    collateralTokenAssets[formik.values.collateralTokenSymbol as string]
+  const collateralToken = collateralTokenAssets[collateralTokenSymbol as string]
 
   return (
     <Container maxWidth="xs">
@@ -67,6 +68,7 @@ export function ReviewAndSubmit({
                 .filter(
                   (v) =>
                     ![
+                      'collateralBalance',
                       'collateralWalletBalance',
                       'step',
                       'collateralTokenSymbol',
@@ -85,6 +87,13 @@ export function ReviewAndSubmit({
         </TableContainer>
       </Box>
       <Box pt={5} pb={3}>
+        <Button
+          onClick={() => {
+            formik.setFieldValue('step', 2)
+          }}
+        >
+          Back
+        </Button>
         <Button
           size="large"
           disabled={!formik.isValid}

@@ -8,7 +8,6 @@ import Markets from './component/Markets/Markets'
 import { Dashboard } from './component/Dashboard'
 
 export const App = () => {
-  const theme = useTheme()
   return (
     <Router>
       <Header />

@@ -35,7 +35,7 @@ export function SelectDataFeedProvider({
             formik.setFieldValue('step', 1)
           }}
         >
-          Previous
+          Back
         </Button>
 
         <Button

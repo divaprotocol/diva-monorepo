@@ -150,6 +150,7 @@ export function DefinePoolAttributes({
       const half = num / 2
       long = short = half
     }
+    console.log({ long, short })
     formik.setValues(
       {
         ...formik.values,

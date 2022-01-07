@@ -2,16 +2,11 @@ import { useState } from 'react'
 import { Box, Step, StepLabel, Stepper } from '@mui/material'
 import Container from '@mui/material/Container'
 import { DefinePoolAttributes } from './DefinePoolAttributes'
-import { SelectOracle } from './SelectOracle'
 import { ReviewAndSubmit } from './ReviewAndSubmit'
 import { useCreatePoolFormik } from './formik'
 import { SelectDataFeedProvider } from './SelectDataFeedProvider'
 
 export function CreatePool() {
-  const [activeStep, setActiveStep] = useState(0)
-  const next = () => setActiveStep((prevActiveStep) => prevActiveStep + 1)
-  const previous = () => setActiveStep((prevActiveStep) => prevActiveStep - 1)
-
   const formik = useCreatePoolFormik()
 
   let step = null
@@ -30,7 +25,7 @@ export function CreatePool() {
   return (
     <Container maxWidth="sm">
       <Box pt={5}>
-        <Stepper activeStep={activeStep} alternativeLabel>
+        <Stepper activeStep={formik.values.step - 1} alternativeLabel>
           <Step>
             <StepLabel>Pool</StepLabel>
           </Step>

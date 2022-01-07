@@ -64,17 +64,19 @@ export function useDiva(): DivaApi | null {
   )
   if (chainId == null) return null
 
+  const divaAddress = addresses[chainId].divaAddress
+
   const signer = provider.getSigner()
 
   const contract = new ethers.Contract(
-    addresses[chainId].divaAddress,
+    divaAddress,
     DIVA_ABI,
     signer
   ) as DivaContract
 
   return {
     createContingentPool: async (props) => {
-      console.log({ props })
+      console.log(props)
       const {
         cap,
         collateralBalanceLong: _collateralBalanceLong,
@@ -93,20 +95,19 @@ export function useDiva(): DivaApi | null {
       const collateralBalanceLong = BigNumber.from(_collateralBalanceLong)
 
       const creatorAddress = await signer.getAddress()
+      console.info('approve', {
+        collateralToken,
+        amount: collateralBalanceLong.add(collateralBalanceShort).toString(),
+      })
+      await erc20.approve(
+        collateralToken,
+        collateralBalanceLong.add(collateralBalanceShort)
+      )
 
-      erc20
-        .approve(
-          collateralToken,
-          collateralBalanceLong.add(collateralBalanceShort)
-        )
-        .then(() => {
-          console.log('approved')
-          return erc20.allowance(
-            creatorAddress,
-            '0x849b3B2eb813d6d5C70214326B412c6f67feaC03'
-          )
-        })
+      console.log('allowance', { creatorAddress, divaAddress })
+      await erc20.allowance(creatorAddress, divaAddress)
 
+      console.log('createContingentPool', props)
       return contract.createContingentPool([
         BigNumber.from(inflection),
         BigNumber.from(cap),
@@ -123,12 +124,10 @@ export function useDiva(): DivaApi | null {
     },
     getPoolParametersById: (id: string) => {
       return contract.getPoolParametersById(id).then((val) => {
-        console.log({ val })
         return val
       })
     },
     setFinalReferenceValueById: () => {
-      console.log('2')
       return Promise.resolve()
     },
   }
