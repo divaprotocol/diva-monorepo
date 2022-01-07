@@ -83,7 +83,6 @@ export function PayoffProfile({
 
   return (
     <Box pb={3} ref={ref}>
-      <h3>Payoff Profile</h3>
       <XYPlot
         width={width}
         height={300}

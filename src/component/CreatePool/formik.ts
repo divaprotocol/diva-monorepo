@@ -1,6 +1,10 @@
 import { useWeb3React } from '@web3-react/core'
 import { ethers } from 'ethers'
-import { FormikConfig, useFormik } from 'formik'
+import { useFormik } from 'formik'
+import { useCallback } from 'react'
+import { useQuery } from 'react-query'
+import { useDiva } from '../../hooks/useDiva'
+import { Tokens } from '../../lib/types'
 import { chainIdtoName } from '../../Util/chainIdToName'
 import referenceAssets from './referenceAssets.json'
 
@@ -16,32 +20,88 @@ export const initialValues = {
   inflection: 2,
   collateralTokenSymbol: undefined as string | undefined,
   collateralWalletBalance: '0',
-  collateralBalance: 200,
-  collateralBalanceShort: 100,
-  collateralBalanceLong: 100,
+  /**
+   * collateralBalance is only defined here to satisfy
+   * a type constraint in formik :/
+   */
+  collateralBalance: 2,
+  collateralBalanceShort: 1,
+  collateralBalanceLong: 1,
   shortTokenSupply: 100,
   longTokenSupply: 100,
   dataFeedProvider: '',
 }
 
 type Errors = {
-  collateralWalletBalance?: string
-  dataFeedProvider?: string
-  collateralBalance?: string
+  referenceAsset?: string
   expiryDate?: string
+  floor?: string
+  cap?: string
+  inflection?: string
+  collateralTokenSymbol?: string
+  collateralWalletBalance?: string
+  collateralBalance?: string
+  collateralBalanceShort?: string
+  collateralBalanceLong?: string
+  shortTokenSupply?: string
+  longTokenSupply?: string
+  dataFeedProvider?: string
 }
 
 export const useCreatePoolFormik = () => {
   const { chainId } = useWeb3React()
+  const contract = useDiva()
+
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
   )
 
-  return useFormik({
+  const tokensQuery = useQuery<Tokens>('tokens', () =>
+    fetch('/ropstenTokens.json').then((res) => res.json())
+  )
+
+  const _formik = useFormik({
     initialValues,
-    onSubmit: () => {
-      console.log('on submit')
+    onSubmit: (values, formik) => {
+      const {
+        inflection,
+        cap,
+        floor,
+        collateralBalanceLong,
+        collateralBalanceShort,
+        expiryDate,
+        shortTokenSupply,
+        longTokenSupply,
+        referenceAsset,
+        collateralTokenSymbol,
+        dataFeedProvider,
+      } = values
+      const collateralTokenAssets = tokensQuery.data || {}
+      const collateralToken =
+        collateralTokenAssets[collateralTokenSymbol as string]
+
+      if (collateralToken != null && dataFeedProvider != null) {
+        contract
+          ?.createContingentPool({
+            inflection,
+            cap,
+            floor,
+            collateralBalanceShort,
+            collateralBalanceLong,
+            expiryDate: expiryDate.getTime(),
+            supplyShort: shortTokenSupply,
+            supplyLong: longTokenSupply,
+            referenceAsset,
+            collateralToken,
+            dataFeedProvider,
+          })
+          .then((val) => {
+            console.info('created continent pool', val)
+            formik.resetForm()
+            formik.setStatus('successfully created')
+          })
+      }
     },
     validate: async (values) => {
       const errors: Errors = {}
@@ -66,6 +126,24 @@ export const useCreatePoolFormik = () => {
         } seconds from now`
       }
 
+      // validate other vars
+      // floor can't be higher than inflection
+      if (values.floor > values.inflection) {
+        errors.floor = 'Must be lower than inflection'
+        errors.inflection = 'Must be higher than floor'
+      }
+
+      if (values.floor > values.cap) {
+        errors.cap = 'Must be higher than floor'
+        errors.floor = 'Must be lower than cap'
+      }
+
+      if (values.inflection > values.cap) {
+        errors.inflection = 'Must be lower than cap'
+        errors.cap = 'Must be higher than inflection'
+      }
+
+      // validate data feed provider
       if (values.step > 1 && values.dataFeedProvider) {
         try {
           await provider.getSigner(values.dataFeedProvider)
@@ -74,17 +152,29 @@ export const useCreatePoolFormik = () => {
         }
       }
 
-      // validate expiry date, - today in 2 hrs? 12 hrs, 48 hrs?
-      // validate other vars
-      // floor can't be higher than inflection
-      // inflection can't be lower than floor or higher than cap
-      // cap can't be lower than inflection
-      // validate oracle
-      // validate step
+      // short token balance
+      if (values.shortTokenSupply <= 0) {
+        errors.shortTokenSupply = 'Must be higher than 0'
+      }
+
+      if (/[0-9]+\./.test(values.shortTokenSupply.toString())) {
+        console.log({
+          v: values.shortTokenSupply.toString().replace(/[0-9]+\./, ''),
+        })
+        errors.shortTokenSupply = 'Number cannot have decimal places'
+      }
+
+      if (values.longTokenSupply <= 0) {
+        errors.longTokenSupply = 'Must be higher than 0 0'
+      }
+
+      if (/[0-9]+\./.test(values.longTokenSupply.toString())) {
+        errors.longTokenSupply = 'Number cannot have decimal places'
+      }
 
       return errors
     },
   })
-}
 
-// export type CreatePoolFormik = ReturnType<typeof useFormik>
+  return _formik
+}

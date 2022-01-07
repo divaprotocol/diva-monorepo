@@ -16,6 +16,7 @@ import {
   AccordionDetails,
   Typography,
   debounce,
+  useTheme,
 } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import { useQuery } from 'react-query'
@@ -46,53 +47,79 @@ function DefineAdvanced({
       </AccordionSummary>
       <AccordionDetails>
         <Box pb={3}>
-          <FormControl fullWidth>
+          <FormControl
+            fullWidth
+            error={formik.errors.collateralBalanceShort != null}
+          >
             <TextField
               name="collateralBalanceShort"
               id="collateralBalanceShort"
               label="Short Pool Balance"
+              error={formik.errors.collateralBalanceShort != null}
               inputProps={{ min: 0 }}
               value={collateralBalanceShort}
               type="number"
               onChange={formik.handleChange}
             />
+            {formik.errors.collateralBalanceShort != null && (
+              <FormHelperText>
+                {formik.errors.collateralBalanceShort}
+              </FormHelperText>
+            )}
           </FormControl>
         </Box>
         <Box pb={3}>
-          <FormControl fullWidth>
+          <FormControl
+            fullWidth
+            error={formik.errors.collateralBalanceLong != null}
+          >
             <TextField
               name="collateralBalanceLong"
               id="collateralBalanceLong"
               label="Long Pool Balance"
+              error={formik.errors.collateralBalanceLong != null}
               inputProps={{ min: 0 }}
               value={collateralBalanceLong}
               type="number"
               onChange={formik.handleChange}
             />
+            {formik.errors.collateralBalanceLong != null && (
+              <FormHelperText>
+                {formik.errors.collateralBalanceLong}
+              </FormHelperText>
+            )}
           </FormControl>
         </Box>
         <Box pb={3}>
-          <FormControl fullWidth>
+          <FormControl fullWidth error={formik.errors.shortTokenSupply != null}>
             <TextField
               name="shortTokenSupply"
               id="shortTokenSupply"
+              error={formik.errors.shortTokenSupply != null}
               label="Short Token Supply"
               value={shortTokenSupply}
               type="number"
               onChange={formik.handleChange}
             />
+            {formik.errors.shortTokenSupply != null && (
+              <FormHelperText>{formik.errors.shortTokenSupply}</FormHelperText>
+            )}
           </FormControl>
         </Box>
         <Box pb={3}>
-          <FormControl fullWidth>
+          <FormControl fullWidth error={formik.errors.longTokenSupply != null}>
             <TextField
               name="longTokenSupply"
+              error={formik.errors.longTokenSupply != null}
               id="longTokenSupply"
               label="Long Token Supply"
               value={longTokenSupply}
               type="number"
               onChange={formik.handleChange}
             />
+            {formik.errors.longTokenSupply != null && (
+              <FormHelperText>{formik.errors.longTokenSupply}</FormHelperText>
+            )}
           </FormControl>
         </Box>
       </AccordionDetails>
@@ -121,6 +148,8 @@ export function DefinePoolAttributes({
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
 
+  const theme = useTheme()
+
   const possibleOptions = Object.keys(collateralTokenAssets).filter((v) =>
     referenceAssetSearch.trim().length > 0
       ? v.startsWith(referenceAssetSearch.trim())
@@ -148,7 +177,6 @@ export function DefinePoolAttributes({
       const half = num / 2
       long = short = half
     }
-    console.log({ long, short })
     formik.setValues(
       {
         ...formik.values,
@@ -171,7 +199,7 @@ export function DefinePoolAttributes({
 
   return (
     <Box pb={10}>
-      <Box pb={3} pt={4}>
+      <Box pb={3} pt={3}>
         <FormControl fullWidth>
           <InputLabel>Reference Asset</InputLabel>
           <Select
@@ -277,37 +305,30 @@ export function DefinePoolAttributes({
           </FormControl>
         </Stack>
       </Box>
-      {floor != null &&
-        cap != null &&
-        inflection != null &&
-        shortTokenSupply != null &&
-        longTokenSupply != null && (
-          <PayoffProfile
-            floor={floor}
-            cap={cap}
-            strike={inflection}
-            shortTokenAmount={shortTokenSupply}
-            longTokenAmount={longTokenSupply}
-          />
-        )}
       <Box pb={3}>
-        <FormControl fullWidth>
+        <FormControl fullWidth error={formik.errors.floor != null}>
           <TextField
             inputProps={{ min: 0, max: inflection }}
             name="floor"
+            error={formik.errors.floor != null}
             id="floor"
             label="Floor"
             value={floor}
             type="number"
             onChange={formik.handleChange}
           />
+          {formik.errors.floor != null && (
+            <FormHelperText>{formik.errors.floor}</FormHelperText>
+          )}
         </FormControl>
       </Box>
       <Box pb={3}>
-        <FormControl fullWidth>
+        <h3>Payoff Profile</h3>
+        <FormControl fullWidth error={formik.errors.inflection != null}>
           <Stack direction="row" spacing={4}>
             <TextField
               id="inflection"
+              error={formik.errors.inflection != null}
               name="inflection"
               label="inflection"
               inputProps={{
@@ -315,7 +336,7 @@ export function DefinePoolAttributes({
                 max: cap,
               }}
               InputProps={{
-                endAdornment: (
+                endAdornment: formik.errors.inflection == null && (
                   <Box sx={{ width: '100%' }}>
                     <Slider
                       aria-label="inflection"
@@ -337,11 +358,15 @@ export function DefinePoolAttributes({
               value={inflection}
             />
           </Stack>
+          {formik.errors.inflection != null && (
+            <FormHelperText>{formik.errors.inflection}</FormHelperText>
+          )}
         </FormControl>
       </Box>
       <Box pb={3}>
-        <FormControl fullWidth>
+        <FormControl fullWidth error={formik.errors.cap != null}>
           <TextField
+            error={formik.errors.cap != null}
             inputProps={{ min: inflection }}
             name="cap"
             id="cap"
@@ -350,8 +375,26 @@ export function DefinePoolAttributes({
             type="number"
             onChange={formik.handleChange}
           />
+          {formik.errors.cap != null && (
+            <FormHelperText>{formik.errors.cap}</FormHelperText>
+          )}
         </FormControl>
       </Box>
+
+      {formik.isValid &&
+        floor != null &&
+        cap != null &&
+        inflection != null &&
+        shortTokenSupply != null &&
+        longTokenSupply != null && (
+          <PayoffProfile
+            floor={floor}
+            cap={cap}
+            strike={inflection}
+            shortTokenAmount={shortTokenSupply}
+            longTokenAmount={longTokenSupply}
+          />
+        )}
 
       <DefineAdvanced formik={formik} />
 

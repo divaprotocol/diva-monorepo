@@ -1,5 +1,12 @@
-import { useState } from 'react'
-import { Box, Step, StepLabel, Stepper } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Step,
+  StepLabel,
+  Stepper,
+} from '@mui/material'
 import Container from '@mui/material/Container'
 import { DefinePoolAttributes } from './DefinePoolAttributes'
 import { ReviewAndSubmit } from './ReviewAndSubmit'
@@ -36,6 +43,21 @@ export function CreatePool() {
             <StepLabel>Review</StepLabel>
           </Step>
         </Stepper>
+        {formik.status != null && (
+          <Alert severity="success">{formik.status}</Alert>
+        )}
+        {!formik.isValid && (
+          <Box pb={3} pt={2}>
+            {Object.keys(formik.errors).map((key) => (
+              <Box pt={2}>
+                <Alert severity="error" key={key}>
+                  {key} : {(formik.errors as any)[key]}
+                </Alert>
+              </Box>
+            ))}
+          </Box>
+        )}
+
         {step}
       </Box>
     </Container>
