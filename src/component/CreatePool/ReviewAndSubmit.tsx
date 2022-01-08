@@ -109,7 +109,7 @@ export function ReviewAndSubmit({
                 formik.handleSubmit(e)
               }}
             >
-              Submit input
+              Create Pool
             </Button>
           </CardActions>
         </Card>
