@@ -80,6 +80,7 @@ export const useCreatePoolFormik = () => {
       } else if (values.step === 2) {
         formik.setFieldValue('step', 3)
       } else if (values.step === 3) {
+        formik.setStatus('Creating Pool')
         const {
           inflection,
           cap,

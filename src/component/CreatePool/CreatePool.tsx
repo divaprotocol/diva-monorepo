@@ -1,12 +1,4 @@
-import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  Step,
-  StepLabel,
-  Stepper,
-} from '@mui/material'
+import { Alert, Box, Step, StepLabel, Stepper } from '@mui/material'
 import Container from '@mui/material/Container'
 import { DefinePoolAttributes } from './DefinePoolAttributes'
 import { ReviewAndSubmit } from './ReviewAndSubmit'
@@ -43,9 +35,6 @@ export function CreatePool() {
             <StepLabel>Review</StepLabel>
           </Step>
         </Stepper>
-        {formik.status != null && (
-          <Alert severity="success">{formik.status}</Alert>
-        )}
         {!formik.isValid && (
           <Box pb={3} pt={2}>
             {Object.keys(formik.errors).map((key) => (
@@ -58,7 +47,10 @@ export function CreatePool() {
           </Box>
         )}
 
-        <Box pt={5} pb={10}>
+        <Box pt={3} pb={10}>
+          {formik.status != null && (
+            <Alert severity="info">{formik.status}</Alert>
+          )}
           {step}
         </Box>
       </Box>
