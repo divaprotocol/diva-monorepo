@@ -22,9 +22,15 @@ export function SelectDataFeedProvider({
       <Card variant="outlined">
         <CardContent>
           <Typography pb={1} variant="subtitle1">
-            Select a trusted Data Feed Provider for this pool.
+            Select a <strong>trusted</strong> Data Feed Provider for this pool.
           </Typography>
-          <FormControl fullWidth sx={{ paddingTop: theme.spacing(2) }}>
+          <FormControl
+            fullWidth
+            sx={{
+              paddingTop: theme.spacing(5),
+              paddingBottom: theme.spacing(5),
+            }}
+          >
             <TextField
               name="dataFeedProvider"
               error={formik.errors.dataFeedProvider != null}
@@ -37,7 +43,7 @@ export function SelectDataFeedProvider({
             />
           </FormControl>
         </CardContent>
-        <CardActions>
+        <CardActions sx={{ justifyContent: 'space-between' }}>
           <Button
             onClick={() => {
               formik.setFieldValue('step', 1, true)

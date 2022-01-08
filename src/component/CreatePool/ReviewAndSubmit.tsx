@@ -9,6 +9,7 @@ import {
   TableContainer,
   TableRow,
   Typography,
+  useTheme,
 } from '@mui/material'
 import { Box } from '@mui/material'
 import Container from '@mui/material/Container'
@@ -51,6 +52,7 @@ export function ReviewAndSubmit({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const { values } = formik
+  const theme = useTheme()
 
   return (
     <Container maxWidth="md">
@@ -88,7 +90,11 @@ export function ReviewAndSubmit({
               </Table>
             </TableContainer>
           </CardContent>
-          <CardActions>
+          <CardActions
+            sx={{
+              justifyContent: 'space-between',
+            }}
+          >
             <Button
               onClick={() => {
                 formik.setFieldValue('step', 2)

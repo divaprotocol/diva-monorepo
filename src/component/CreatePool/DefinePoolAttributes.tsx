@@ -207,8 +207,8 @@ export function DefinePoolAttributes({
   return (
     <Card variant="outlined">
       <CardContent>
-        <Typography pb={1} variant="subtitle1">
-          Please define all the parameters for your Contingent Pool below.
+        <Typography pb={theme.spacing(5)} variant="subtitle1">
+          Define all the parameters for your Contingent Pool below.
         </Typography>
         <Box pb={3} pt={1}>
           <FormControl fullWidth>
