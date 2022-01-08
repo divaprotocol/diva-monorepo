@@ -21,4 +21,4 @@ assignees: ''
 ## Screenshots / Sreen recording
 
 <!-- Screenshots and/or screen recordings really go a long way to explain
-something and help us to tackle the issue. -->
+something and help us to tackle the issue. (We use loom for this https://www.loom.com/) -->
