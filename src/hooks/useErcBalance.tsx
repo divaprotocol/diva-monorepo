@@ -14,9 +14,9 @@ type Erc20Contract = Contract & {
  * useBalance
  ****
  * returns the balance of a token. If no token address is provided,
- * it'll return your eth balance
+ * no balance is returned
  */
-export function useBalance(address?: string) {
+export function useErcBalance(address?: string) {
   const { chainId } = useWeb3React()
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
@@ -40,9 +40,6 @@ export function useBalance(address?: string) {
         } catch (err) {
           console.error(err)
         }
-      } else if (chainId != null && address == null) {
-        const _balance = await signer.getBalance()
-        setBalance(formatEther(_balance))
       }
     }
 

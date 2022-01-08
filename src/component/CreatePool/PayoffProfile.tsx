@@ -1,23 +1,19 @@
-import { Box, BoxTypeMap } from '@mui/material'
-import { OverridableComponent } from '@mui/material/OverridableComponent'
+import { Box } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { XYPlot, XAxis, YAxis, LineSeries, LineSeriesPoint } from 'react-vis'
 
 export function PayoffProfile({
   floor,
   cap,
-  strike,
+  inflection: strike,
 }: {
   floor: number
   cap: number
-  strike: number
+  inflection: number
   longTokenAmount: number
   shortTokenAmount: number
 }) {
   const padding = cap * 0.1
-  const fullLength = cap - floor
-  const strikeLength = strike - floor
-  const inflectionPoint = strikeLength / fullLength
   const start = Math.max(floor - padding, 0)
 
   const short: LineSeriesPoint[] = [
@@ -31,7 +27,7 @@ export function PayoffProfile({
     },
     {
       x: strike,
-      y: inflectionPoint,
+      y: 0.5,
     },
     {
       x: cap,
@@ -54,7 +50,7 @@ export function PayoffProfile({
     },
     {
       x: strike,
-      y: inflectionPoint,
+      y: 0.5,
     },
     {
       x: cap,
@@ -92,8 +88,8 @@ export function PayoffProfile({
       >
         <XAxis tickValues={[floor, strike, cap]} />
         <YAxis />
-        <LineSeries style={{ fill: 'none' }} data={short} />
-        <LineSeries style={{ fill: 'none' }} data={long} />
+        <LineSeries style={{ fill: 'none', strokeWidth: '3px' }} data={short} />
+        <LineSeries style={{ fill: 'none', strokeWidth: '3px' }} data={long} />
       </XYPlot>
     </Box>
   )

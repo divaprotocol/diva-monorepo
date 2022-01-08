@@ -30,7 +30,7 @@ export function CreatePool() {
   }
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="md">
       <Box pt={5}>
         <Stepper activeStep={formik.values.step - 1} alternativeLabel>
           <Step>
@@ -58,7 +58,9 @@ export function CreatePool() {
           </Box>
         )}
 
-        {step}
+        <Box pt={5} pb={10}>
+          {step}
+        </Box>
       </Box>
     </Container>
   )

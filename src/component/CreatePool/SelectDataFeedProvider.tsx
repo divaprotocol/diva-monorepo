@@ -1,10 +1,13 @@
 import {
-  Box,
   Button,
+  Card,
+  CardActions,
+  CardContent,
   Container,
   FormControl,
-  Stack,
   TextField,
+  Typography,
+  useTheme,
 } from '@mui/material'
 import { useCreatePoolFormik } from './formik'
 
@@ -13,40 +16,46 @@ export function SelectDataFeedProvider({
 }: {
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
+  const theme = useTheme()
   return (
-    <Container maxWidth="sm">
-      <Box pt={5}>
-        <FormControl fullWidth>
-          <TextField
-            name="dataFeedProvider"
-            error={formik.errors.dataFeedProvider != null}
-            helperText={formik.errors.dataFeedProvider}
-            id="dataFeedProvider"
-            label="Data Feed Provider"
-            value={formik.values.dataFeedProvider}
-            type="string"
-            onChange={formik.handleChange}
-          />
-        </FormControl>
-      </Box>
-      <Stack pb={3} pt={5} direction="row" spacing={4}>
-        <Button
-          onClick={() => {
-            formik.setFieldValue('step', 1)
-          }}
-        >
-          Back
-        </Button>
+    <Container maxWidth="md">
+      <Card variant="outlined">
+        <CardContent>
+          <Typography pb={1} variant="subtitle1">
+            Select a trusted Data Feed Provider for this pool.
+          </Typography>
+          <FormControl fullWidth sx={{ paddingTop: theme.spacing(2) }}>
+            <TextField
+              name="dataFeedProvider"
+              error={formik.errors.dataFeedProvider != null}
+              helperText={formik.errors.dataFeedProvider}
+              id="dataFeedProvider"
+              label="Data Feed Provider"
+              value={formik.values.dataFeedProvider}
+              type="string"
+              onChange={formik.handleChange}
+            />
+          </FormControl>
+        </CardContent>
+        <CardActions>
+          <Button
+            onClick={() => {
+              formik.setFieldValue('step', 1, true)
+            }}
+          >
+            Back
+          </Button>
 
-        <Button
-          onClick={() => {
-            formik.setFieldValue('step', 3)
-          }}
-          disabled={!formik.isValid}
-        >
-          Next
-        </Button>
-      </Stack>
+          <Button
+            onClick={(event: any) => {
+              formik.handleSubmit(event)
+            }}
+            disabled={!formik.isValid}
+          >
+            Next
+          </Button>
+        </CardActions>
+      </Card>
     </Container>
   )
 }

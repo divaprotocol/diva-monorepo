@@ -1,10 +1,14 @@
 import {
   Button,
+  Card,
+  CardActions,
+  CardContent,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableRow,
+  Typography,
 } from '@mui/material'
 import { Box } from '@mui/material'
 import Container from '@mui/material/Container'
@@ -25,6 +29,22 @@ const stringifyValue = (val: unknown) => {
   return ''
 }
 
+const dict: {
+  [key: string]: any
+} = {
+  referenceAsset: 'Reference Asset',
+  expiryDate: 'Expiry Date',
+  floor: 'Floor',
+  cap: 'Ceiling',
+  inflection: 'Inflection',
+  collateralBalanceShort: 'CollateralBalance (Short)',
+  collateralBalanceLong: 'CollateralBalance (Long)',
+  shortTokenSupply: 'Token Supply (Short)',
+  longTokenSupply: 'Token Supply (Long)',
+  dataFeedProvider: 'Data Feed Provider',
+  collateralTokenSymbol: 'Collateral Token',
+}
+
 export function ReviewAndSubmit({
   formik,
 }: {
@@ -33,50 +53,60 @@ export function ReviewAndSubmit({
   const { values } = formik
 
   return (
-    <Container maxWidth="xs">
+    <Container maxWidth="md">
       <Box pt={5}>
-        <TableContainer>
-          <Table size="small">
-            <TableBody>
-              {Object.keys(values)
-                .filter(
-                  (v) =>
-                    ![
-                      'collateralBalance',
-                      'collateralWalletBalance',
-                      'step',
-                      'collateralTokenSymbol',
-                    ].includes(v)
-                )
-                .map((key: any) => (
-                  <TableRow key={key}>
-                    <TableCell>{key}</TableCell>
-                    <TableCell align="right">
-                      {stringifyValue((values as any)[key])}
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
-      <Box pt={5} pb={3}>
-        <Button
-          onClick={() => {
-            formik.setFieldValue('step', 2)
-          }}
-        >
-          Back
-        </Button>
-        <Button
-          size="large"
-          disabled={!formik.isValid}
-          onClick={(e: any) => {
-            formik.handleSubmit(e)
-          }}
-        >
-          Submit input
-        </Button>
+        <Card variant="outlined">
+          <CardContent>
+            <Typography pb={1} variant="subtitle1">
+              Please review the configuration before creating the pool
+            </Typography>
+          </CardContent>
+          <CardContent sx={{ padding: 0 }}>
+            <TableContainer sx={{ padding: 0, margin: 0 }}>
+              <Table>
+                <TableBody>
+                  {Object.keys(values)
+                    .filter(
+                      (v) =>
+                        ![
+                          'collateralBalance',
+                          'collateralWalletBalance',
+                          'step',
+                        ].includes(v)
+                    )
+                    .map((key: any) => (
+                      <TableRow key={key}>
+                        <TableCell>
+                          <strong>{dict[key] || key}</strong>
+                        </TableCell>
+                        <TableCell align="right">
+                          {stringifyValue((values as any)[key])}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+          <CardActions>
+            <Button
+              onClick={() => {
+                formik.setFieldValue('step', 2)
+              }}
+            >
+              Go Back
+            </Button>
+            <Button
+              size="large"
+              disabled={!formik.isValid}
+              onClick={(e: any) => {
+                formik.handleSubmit(e)
+              }}
+            >
+              Submit input
+            </Button>
+          </CardActions>
+        </Card>
       </Box>
     </Container>
   )
