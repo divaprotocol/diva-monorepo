@@ -1,7 +1,7 @@
 import Header from './component/Header/Header'
 import Underlying from './component/Trade/Underlying'
 
-import { Container, useTheme } from '@mui/material'
+import { Container } from '@mui/material'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { CreatePool } from './component/CreatePool/CreatePool'
 import Markets from './component/Markets/Markets'

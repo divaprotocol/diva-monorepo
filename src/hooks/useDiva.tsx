@@ -109,6 +109,7 @@ export function useDiva(): DivaApi | null {
       await tx.wait()
 
       await erc20.allowance(creatorAddress, divaAddress)
+
       return contract.createContingentPool([
         parseEther(inflection.toString()),
         parseEther(cap.toString()),

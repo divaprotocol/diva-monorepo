@@ -80,6 +80,7 @@ export const useCreatePoolFormik = () => {
       } else if (values.step === 2) {
         formik.setFieldValue('step', 3)
       } else if (values.step === 3) {
+        console.info('creating pool')
         formik.setStatus('Creating Pool')
         const {
           inflection,
@@ -96,7 +97,9 @@ export const useCreatePoolFormik = () => {
         } = values
         const collateralTokenAssets = tokensQuery.data || {}
         const collateralToken =
-          collateralTokenAssets[collateralTokenSymbol as string]
+          collateralTokenAssets[
+            (collateralTokenSymbol as string)?.toLowerCase()
+          ]
 
         if (collateralToken != null && dataFeedProvider != null) {
           contract
@@ -116,6 +119,10 @@ export const useCreatePoolFormik = () => {
             .then((val) => {
               formik.resetForm()
               formik.setStatus('successfully created')
+            })
+            .catch((error) => {
+              console.error(error)
+              formik.setStatus('Could not create pool')
             })
         }
       }
