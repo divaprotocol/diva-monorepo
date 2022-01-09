@@ -76,6 +76,9 @@ export default function Underlying() {
             <OptionHeader
               ReferenceAsset={pool.referenceAsset}
               TokenAddress={tokenAddress}
+              isLong={isLong}
+              poolId={pool.id}
+              tokenDecimals={pool.collateralDecimals}
             />
             <OptionDetails pool={pool} isLong={isLong} />
           </Paper>
