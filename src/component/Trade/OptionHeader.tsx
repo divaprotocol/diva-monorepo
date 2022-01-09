@@ -93,11 +93,13 @@ export default function OptionHeader(optionData: {
             address: TokenAddress,
             symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
             decimals: tokenDecimals,
+            image:
+              'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
           },
         },
       })
     } catch (error) {
-      console.log('Error in HandleAddMetaMask' + error)
+      console.error('Error in HandleAddMetaMask', error)
     }
   }
 
