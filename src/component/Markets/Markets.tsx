@@ -46,7 +46,6 @@ const columns: GridColDef[] = [
     field: 'TVL',
     align: 'right',
     headerAlign: 'right',
-    type: 'number',
     minWidth: 300,
   },
 ]
