@@ -9,6 +9,8 @@ import {
 import { useWeb3React } from '@web3-react/core'
 import { CopyToClipboard } from '../shared/CopyToClipboard'
 import { CoinImage } from '../PoolsTable'
+import Tooltip from '@mui/material/Tooltip'
+
 const AppHeader = styled.header`
   min-height: 10vh;
   padding-left: 1em;
@@ -47,6 +49,11 @@ const RightAssetImg = styled.img`
   width: 3.5vmin;
   margin-left: 1px;
 `
+const MetaMaskImage = styled.img`
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+`
 
 const refAssetImgs = [
   {
@@ -64,10 +71,39 @@ const refAssetImgs = [
 export default function OptionHeader(optionData: {
   TokenAddress: string
   ReferenceAsset: string
+  isLong: boolean
+  poolId: string
+  tokenDecimals: number
 }) {
   //const option = props.optionData
   const { chainId } = useWeb3React()
   const headerTitle = optionData.ReferenceAsset
+
+  const handleAddMetaMask = async () => {
+    const { TokenAddress, isLong, tokenDecimals } = optionData
+    const tokenSymbol = isLong
+      ? `L-${optionData.poolId}`
+      : `S-${optionData.poolId}`
+
+    try {
+      await window.ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: TokenAddress,
+            symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
+            decimals: tokenDecimals,
+            image:
+              'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
+          },
+        },
+      })
+    } catch (error) {
+      console.error('Error in HandleAddMetaMask', error)
+    }
+  }
+
   return (
     <AppHeader>
       <CoinImage assetName={headerTitle} />
@@ -85,7 +121,26 @@ export default function OptionHeader(optionData: {
       >
         {optionData.TokenAddress}
       </Link>
-      <CopyToClipboard textToCopy={optionData.TokenAddress} />
+      <IconButton
+        onClick={() => navigator.clipboard.writeText(optionData.TokenAddress)}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="14"
+          viewBox="0 0 24 24"
+          width="14"
+        >
+          <path d="M0 0h24v24H0z" fill="none" />
+          <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+        </svg>
+      </IconButton>
+      <Tooltip title="Add to Metamask">
+        <MetaMaskImage
+          src="/images/metamask.svg"
+          alt="metamask"
+          onClick={handleAddMetaMask}
+        />
+      </Tooltip>
     </AppHeader>
   )
 }
