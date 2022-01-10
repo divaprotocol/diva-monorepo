@@ -14,6 +14,7 @@ import { formatUnits } from 'ethers/lib/utils'
 import { useCoinIcon } from '../hooks/useCoinIcon'
 import { makeStyles } from '@mui/styles'
 import localCoinImages from '../Util/localCoinImages.json'
+import { theGraphUrl } from '../constants'
 
 const assetLogoPath = '/images/coin-logos/'
 
@@ -152,10 +153,7 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
   const history = useHistory()
   const [search, setSearch] = useState('')
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(
-      'https://api.thegraph.com/subgraphs/name/juliankrispel/diva',
-      queryPools
-    )
+    request(theGraphUrl, queryPools)
   )
   const pools =
     query.data?.pools.filter((pool: Pool) =>

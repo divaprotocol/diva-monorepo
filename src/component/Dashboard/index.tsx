@@ -14,7 +14,7 @@ import React, { useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { ethers } from 'ethers'
 
-import { addresses } from '../../config'
+import { addresses } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
@@ -41,7 +41,7 @@ const DueInCell = (props: any) => {
     }, [])
 
     diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
-      setStatusTimestamp(pool.statusTimeStamp.toNumber())
+      setStatusTimestamp(pool.statusTimestamp.toNumber())
     }, [])
   })
 
