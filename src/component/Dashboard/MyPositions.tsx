@@ -1,20 +1,6 @@
-import {
-  GridColDef,
-  GridColumnMenuProps,
-  GridRowModel,
-} from '@mui/x-data-grid/x-data-grid'
-import {
-  Button,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  Stack,
-  TextField,
-  Tooltip,
-} from '@mui/material'
-import React, { useEffect, useMemo, useState } from 'react'
+import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
+import { Button, Container, Stack, Tooltip } from '@mui/material'
+import React, { useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { BigNumber, ethers } from 'ethers'
 
@@ -31,12 +17,11 @@ import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import ERC20 from '../../contracts/abis/ERC20.json'
 import { useCheckTokenBalances } from '../../hooks/useCheckTokenBalances'
+import { useHistory } from 'react-router-dom'
 
-const DueInCell = (props: any) => {
+const StatusCell = (props: any) => {
   const { chainId } = useWeb3React()
-  const [expTimestamp, setExpTimestamp] = useState(0)
-  const [statusTimestamp, setStatusTimestamp] = useState(0)
-
+  const [status, setStatus] = useState(props.row.Status)
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
@@ -48,96 +33,20 @@ const DueInCell = (props: any) => {
   )
   useEffect(() => {
     diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
-      setExpTimestamp(pool.expiryDate.toNumber())
-    }, [])
+      if (
+        getExpiryMinutesFromNow(pool.expiryDate.toNumber()) + 24 * 60 - 5 < 0 &&
+        props.row.Status === 'Open'
+      ) {
+        setStatus('Expired')
+      }
+    })
+  }, [])
 
-    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
-      setStatusTimestamp(pool.statusTimeStamp.toNumber())
-    }, [])
-  })
-
-  if (props.row.Status === 'Open') {
-    const minUntilExp = getExpiryMinutesFromNow(
-      expTimestamp + 24 * 3600 - 5 * 60
-    )
-    if (minUntilExp < 24 * 60 - 5 && minUntilExp > 0) {
-      return minUntilExp === 1 ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {'<1m'}
-        </div>
-      ) : (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {(minUntilExp - (minUntilExp % 60)) / 60 +
-            'h ' +
-            (minUntilExp % 60) +
-            'm '}
-        </div>
-      )
-    }
-  }
-  if (props.row.Status === 'Challenged') {
-    const minUntilExp = getExpiryMinutesFromNow(
-      statusTimestamp + 48 * 3600 - 5 * 60
-    )
-    if (minUntilExp < 48 * 60 - 5 && minUntilExp > 0) {
-      return minUntilExp === 1 ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {'<1m'}
-        </div>
-      ) : (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {(minUntilExp - (minUntilExp % 60)) / 60 +
-            'h ' +
-            (minUntilExp % 60) +
-            'm '}
-        </div>
-      )
-    }
-  }
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '150vh',
-      }}
-    >
-      {'-'}
-    </div>
-  )
+  return <div>{status}</div>
 }
-const SubmitCell = (props: any) => {
-  const { chainId } = useWeb3React()
+
+const SubmitButton = (props: any) => {
+  const { chainId, account } = useWeb3React()
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
@@ -147,63 +56,45 @@ const SubmitCell = (props: any) => {
     DIVA_ABI,
     provider.getSigner()
   )
-  const [open, setOpen] = useState(false)
-  const [btnDisabled, setBtnDisabled] = useState(true)
-  const [textFieldValue, setTextFieldValue] = useState('')
-  const handleOpen = () => {
-    setOpen(true)
+  const token = new ethers.Contract(props.row.address, ERC20, provider)
+  const [redeemBtn, setRedeemBtn] = useState('Trade')
+  const history = useHistory()
+  const handleRedeem = () => {
+    token.balanceOf(account).then((bal: BigNumber) => {
+      diva.redeemPositionToken(props.row.address, bal)
+    })
   }
-
-  const handleClose = () => {
-    setOpen(false)
-  }
-
   useEffect(() => {
     diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
-      setBtnDisabled(
-        props.row.Status === 'Submitted' ||
-          props.row.Status === 'Confirmed' ||
-          pool.expiryDate.toNumber() * 1000 > Date.now() ||
-          getExpiryMinutesFromNow(pool.expiryDate.toNumber() + 24 * 3600) < 0
+      const statusExpMin = getExpiryMinutesFromNow(
+        pool.statusTimeStamp.toNumber()
       )
+      if (props.row.Status === 'Submitted' && statusExpMin + 24 * 60 + 5 < 0) {
+        setRedeemBtn('Redeem')
+      } else if (
+        props.row.Status === 'Challenged ' &&
+        statusExpMin + 48 * 60 + 5 < 0
+      ) {
+        setRedeemBtn('Redeem')
+      } else if (props.row.Status === 'Confirmed') {
+        setRedeemBtn('Redeem')
+      }
     }, [])
   })
   return (
     <Container>
-      <Button variant="contained" onClick={handleOpen} disabled={btnDisabled}>
-        Trade
+      <Button
+        variant="contained"
+        onClick={
+          redeemBtn === 'Redeem'
+            ? handleRedeem
+            : () => {
+                history.push('../' + `${props.id}`)
+              }
+        }
+      >
+        {redeemBtn}
       </Button>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogContent>
-          <DialogContentText>
-            Please provide a value for this option
-          </DialogContentText>
-        </DialogContent>
-
-        <DialogActions>
-          <TextField
-            defaultValue={textFieldValue}
-            onChange={(e) => {
-              // e.stopPropagation()
-              setTextFieldValue(e.target.value)
-            }}
-          />
-          <Button
-            color="primary"
-            type="submit"
-            onClick={() => {
-              diva.setFinalReferenceValueById(
-                props.id.split('/')[0],
-                ethers.utils.parseEther(textFieldValue),
-                true
-              )
-              handleClose()
-            }}
-          >
-            Submit value
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Container>
   )
 }
@@ -255,6 +146,7 @@ const columns: GridColDef[] = [
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
+    renderCell: (props) => <StatusCell {...props} />,
   },
   {
     field: 'submitValue',
@@ -262,16 +154,12 @@ const columns: GridColDef[] = [
     headerAlign: 'right',
     headerName: '',
     minWidth: 200,
-    renderCell: (props) => <SubmitCell {...props} />,
+    renderCell: (props) => <SubmitButton {...props} />,
   },
 ]
 
-const CustomRow = (props: GridColumnMenuProps & { color: string }) => {
-  return <tr>{props.children}</tr>
-}
-
 export function MyPositions() {
-  const { account, chainId } = useWeb3React()
+  const { account } = useWeb3React()
 
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
     request(
@@ -319,29 +207,33 @@ export function MyPositions() {
             ? '-'
             : formatUnits(val.finalReferenceValue),
       },
+      {
+        ...shared,
+        id: `${val.id}/short`,
+        address: val.shortToken,
+        PayoffProfile: generatePayoffChartData({
+          ...payOff,
+          IsLong: false,
+        }),
+        TVL:
+          formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
+          ' ' +
+          val.collateralSymbol,
+        Status: val.statusFinalReferenceValue,
+        finalValue:
+          val.statusFinalReferenceValue === 'Open'
+            ? '-'
+            : formatUnits(val.finalReferenceValue),
+      },
     ]
   }, [] as GridRowModel[])
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
-  const userTokens: string[] = []
 
   const tokenBalances = useCheckTokenBalances(rows.map((v) => v.address))
 
   const filteredRows = rows.filter((v) => {
-    // const contract = new ethers.Contract(v.address, ERC20, provider)
-    // contract.balanceOf(account).then((balance: BigNumber) => {
-
-    // return useCheckTokenBalance(v.address) > 0
-    return true
-    // })
+    return tokenBalances?.includes(v.address)
   })
-  // if (userTokens.length > 0){
-  //
-  // }
-  console.log('filteredRows')
-  console.log(filteredRows)
+
   return account ? (
     <Stack
       direction="row"
@@ -350,14 +242,7 @@ export function MyPositions() {
       }}
     >
       <SideMenu />
-      <PoolsTable
-        components={{
-          Row: CustomRow,
-        }}
-        rows={filteredRows}
-        columns={columns}
-        disableRowClick
-      />
+      <PoolsTable rows={filteredRows} columns={columns} disableRowClick />
     </Stack>
   ) : (
     <div

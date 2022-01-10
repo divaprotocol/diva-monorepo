@@ -26,6 +26,32 @@ import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 
+const StatusCell = (props: any) => {
+  const { chainId } = useWeb3React()
+  const [status, setStatus] = useState(props.row.Status)
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum,
+    chainIdtoName(chainId).toLowerCase()
+  )
+  const diva = new ethers.Contract(
+    addresses[chainId!].divaAddress,
+    DIVA_ABI,
+    provider.getSigner()
+  )
+  useEffect(() => {
+    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
+      if (
+        getExpiryMinutesFromNow(pool.expiryDate.toNumber()) + 24 * 60 - 5 < 0 &&
+        props.row.Status === 'Open'
+      ) {
+        setStatus('Expired')
+      }
+    })
+  }, [])
+
+  return <div>{status}</div>
+}
+
 const DueInCell = (props: any) => {
   const { chainId } = useWeb3React()
   const [expTimestamp, setExpTimestamp] = useState(0)
@@ -241,6 +267,7 @@ const columns: GridColDef[] = [
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
+    renderCell: (props) => <StatusCell {...props} />,
   },
   {
     field: 'subPeriod',

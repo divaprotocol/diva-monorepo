@@ -11,20 +11,27 @@ export function useCheckTokenBalances(tokenAddresses: string[]) {
     chainIdtoName(chainId).toLowerCase()
   )
 
-  const query = useQuery<BigNumber[]>('balance', async () => {
-    const balances = await Promise.all(
-      tokenAddresses.map(async (tokenAddress) => {
-        const contract = new ethers.Contract(tokenAddress, ERC20, provider)
-
-        try {
-          const res = await contract.balanceOf(account)
-          return res
-        } catch (error) {
-          console.error(error)
-        }
-      })
-    )
-    return balances
-  })
-  return query
+  const balances = useQuery<string[]>(
+    'balance',
+    async () => {
+      const balances: any[] = await Promise.all(
+        tokenAddresses.map(async (tokenAddress) => {
+          const contract = new ethers.Contract(tokenAddress, ERC20, provider)
+          try {
+            const res = await contract.balanceOf(account)
+            if (res.gt(BigNumber.from(0))) {
+              return tokenAddress
+            }
+          } catch (error) {
+            console.error(error)
+          }
+        })
+      )
+      return balances
+    },
+    { cacheTime: 5 }
+  )
+  if (balances.isSuccess) {
+    return balances.data.filter((bal) => bal !== undefined)
+  }
 }
