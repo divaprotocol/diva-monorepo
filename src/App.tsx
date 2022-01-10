@@ -5,7 +5,8 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import Markets from './component/Markets/Markets'
 import { Create } from './component/Create'
 import { Container, useTheme } from '@mui/material'
-import { Dashboard } from './component/Dashboard'
+import { MyDataFeeds } from './component/Dashboard/MyDataFeeds'
+import { MyPositions } from './component/Dashboard/MyPositions'
 
 export const App = () => {
   const theme = useTheme()
@@ -22,11 +23,10 @@ export const App = () => {
           <Route exact path="/">
             <Markets />
           </Route>
+          <Route exact path="/dashboard/mydatafeeds" component={MyDataFeeds} />
+          <Route exact path="/dashboard/mypositions" component={MyPositions} />
           <Route path="/:poolId/:tokenType">
             <Underlying />
-          </Route>
-          <Route exact path="/dashboard">
-            <Dashboard />
           </Route>
           <Route path="/create">
             <Create />

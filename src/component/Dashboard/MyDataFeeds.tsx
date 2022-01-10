@@ -1,4 +1,4 @@
-import { GridColDef } from '@mui/x-data-grid/x-data-grid'
+import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import {
   Button,
   Container,
@@ -19,7 +19,12 @@ import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
 import DIVA_ABI from '../../contracts/abis/DIVA.json'
-import { getExpiryMinutesFromNow } from '../../Util/Dates'
+import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
+import { formatUnits } from 'ethers/lib/utils'
+import { generatePayoffChartData } from '../../Graphs/DataGenerator'
+import { useQuery } from 'react-query'
+import { Pool, queryPools } from '../../lib/queries'
+import { request } from 'graphql-request'
 
 const DueInCell = (props: any) => {
   const { chainId } = useWeb3React()
@@ -255,8 +260,59 @@ const columns: GridColDef[] = [
   },
 ]
 
-export function Dashboard() {
+export function MyDataFeeds() {
   const { account } = useWeb3React()
+  const query = useQuery<{ pools: Pool[] }>('pools', () =>
+    request(
+      'https://api.thegraph.com/subgraphs/name/juliankrispel/diva',
+      queryPools
+    )
+  )
+  const pools =
+    query.data?.pools.filter(
+      (pool: Pool) =>
+        pool.dataFeedProvider.toLowerCase() === account?.toLowerCase()
+    ) || ([] as Pool[])
+  const rows: GridRowModel[] = pools.reduce((acc, val) => {
+    const shared = {
+      Icon: val.referenceAsset,
+      Underlying: val.referenceAsset,
+      Floor: formatUnits(val.floor),
+      Inflection: formatUnits(val.inflection),
+      Ceiling: formatUnits(val.cap),
+      Expiry: getDateTime(val.expiryDate),
+      Sell: 'TBD',
+      Buy: 'TBD',
+      MaxYield: 'TBD',
+    }
+
+    const payOff = {
+      Floor: parseInt(val.floor) / 1e18,
+      Inflection: parseInt(val.inflection) / 1e18,
+      Cap: parseInt(val.cap) / 1e18,
+    }
+    return [
+      ...acc,
+      {
+        ...shared,
+        id: `${val.id}/long`,
+        address: val.longToken,
+        PayoffProfile: generatePayoffChartData({
+          ...payOff,
+          IsLong: true,
+        }),
+        TVL:
+          formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
+          ' ' +
+          val.collateralSymbol,
+        Status: val.statusFinalReferenceValue,
+        finalValue:
+          val.statusFinalReferenceValue === 'Open'
+            ? '-'
+            : formatUnits(val.finalReferenceValue),
+      },
+    ]
+  }, [] as GridRowModel[])
 
   return account ? (
     <Stack
@@ -271,7 +327,8 @@ export function Dashboard() {
           pool.dataFeedProvider.toLowerCase() === account?.toLowerCase()
         }
         columns={columns}
-        isDashboard={true}
+        rows={rows}
+        longOnly={true}
       />
     </Stack>
   ) : (

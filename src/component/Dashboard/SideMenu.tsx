@@ -1,6 +1,7 @@
 import { Box, Button, Container, Stack, useMediaQuery } from '@mui/material'
 import React from 'react'
 import { createDivaTheme } from '../../lib/createDivaTheme'
+import { Link } from 'react-router-dom'
 
 const ButtonProps = () => {
   return {
@@ -37,7 +38,12 @@ export function SideMenu() {
           alignItems: 'left',
         }}
       >
-        <Button variant="contained" style={ButtonProps()}>
+        <Button
+          component={Link}
+          to="/dashboard/mypositions"
+          variant="contained"
+          style={ButtonProps()}
+        >
           My Positions
         </Button>
         <Button variant="contained" style={ButtonProps()}>
@@ -46,7 +52,12 @@ export function SideMenu() {
         <Button variant="contained" style={ButtonProps()}>
           My Requests
         </Button>
-        <Button variant="contained" style={ButtonProps()}>
+        <Button
+          component={Link}
+          to="/dashboard/mydatafeeds"
+          variant="contained"
+          style={ButtonProps()}
+        >
           My Data Feeds
         </Button>
 
