@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
-import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
+import {
+  GridColDef,
+  GridColumnMenuProps,
+  GridRowModel,
+} from '@mui/x-data-grid/x-data-grid'
 import { getDateTime } from '../Util/Dates'
 import { Box, Input, InputAdornment } from '@mui/material'
 import { generatePayoffChartData } from '../Graphs/DataGenerator'
@@ -151,6 +155,9 @@ type Props = {
   filter?: (pool: Pool) => boolean
   longOnly?: boolean
   disableRowClick?: boolean
+  components?: {
+    Row?: React.JSXElementConstructor<any>
+  }
   rows: GridRowModel[]
 }
 
@@ -158,6 +165,7 @@ export default function PoolsTable({
   columns,
   filter,
   longOnly,
+  components,
   disableRowClick,
   rows,
 }: Props) {
@@ -208,6 +216,7 @@ export default function PoolsTable({
         className={classes.root}
         rows={filteredRows}
         columns={columns}
+        components={components}
         onRowClick={
           disableRowClick
             ? undefined

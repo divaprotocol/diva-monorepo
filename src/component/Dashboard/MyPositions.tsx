@@ -1,4 +1,8 @@
-import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
+import {
+  GridColDef,
+  GridColumnMenuProps,
+  GridRowModel,
+} from '@mui/x-data-grid/x-data-grid'
 import {
   Button,
   Container,
@@ -26,7 +30,7 @@ import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import ERC20 from '../../contracts/abis/ERC20.json'
-import { useCheckTokenBalance } from '../../hooks/useCheckTokenBalance'
+import { useCheckTokenBalances } from '../../hooks/useCheckTokenBalances'
 
 const DueInCell = (props: any) => {
   const { chainId } = useWeb3React()
@@ -262,6 +266,10 @@ const columns: GridColDef[] = [
   },
 ]
 
+const CustomRow = (props: GridColumnMenuProps & { color: string }) => {
+  return <tr>{props.children}</tr>
+}
+
 export function MyPositions() {
   const { account, chainId } = useWeb3React()
 
@@ -318,23 +326,8 @@ export function MyPositions() {
     chainIdtoName(chainId).toLowerCase()
   )
   const userTokens: string[] = []
-  if (account) {
-    for (const row of rows) {
-      const contract = new ethers.Contract(row.address, ERC20, provider)
-      contract.balanceOf(account).then((balance: BigNumber) => {
-        console.log(row.id)
-        console.log(row.address)
-        console.log(balance.toString())
-        if (balance.toString() !== '0') {
-          console.log('aloooo')
-          console.log(typeof row.address)
-          userTokens.push(row.addres)
-        }
-      })
-    }
-    console.log('userTokens')
-    console.log(userTokens)
-  }
+
+  const tokenBalances = useCheckTokenBalances(rows.map((v) => v.address))
 
   const filteredRows = rows.filter((v) => {
     // const contract = new ethers.Contract(v.address, ERC20, provider)
@@ -349,7 +342,7 @@ export function MyPositions() {
   // }
   console.log('filteredRows')
   console.log(filteredRows)
-  return account && userTokens.length > 0 ? (
+  return account ? (
     <Stack
       direction="row"
       sx={{
@@ -357,7 +350,14 @@ export function MyPositions() {
       }}
     >
       <SideMenu />
-      <PoolsTable rows={filteredRows} columns={columns} disableRowClick />
+      <PoolsTable
+        components={{
+          Row: CustomRow,
+        }}
+        rows={filteredRows}
+        columns={columns}
+        disableRowClick
+      />
     </Stack>
   ) : (
     <div
