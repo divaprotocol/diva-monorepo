@@ -22,7 +22,7 @@ import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const ERC20 = require('../abi/ERC20.json')
+const ERC20 = require('../../abi/ERC20.json')
 const ERC20_ABI = ERC20.abi
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
