@@ -1,7 +1,7 @@
 export const addresses: { [key: number]: any } = {
   //Ropsten
   3: {
-    divaAddress: '0x849b3B2eb813d6d5C70214326B412c6f67feaC03',
+    divaAddress: '0x6455A2Ae3c828c4B505b9217b51161f6976bE7cf',
   },
   //Rinkeby
   4: {
@@ -16,3 +16,6 @@ export const addresses: { [key: number]: any } = {
     divaAddress: '0x93640bd8fEa53919A102ad2EEA4c503E640eDDAd',
   },
 }
+
+export const theGraphUrl =
+  'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten'
