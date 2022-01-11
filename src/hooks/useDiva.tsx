@@ -1,9 +1,9 @@
 import { useWeb3React } from '@web3-react/core'
 import { ethers, Contract, BigNumber } from 'ethers'
-import { addresses } from '../config'
+import { addresses } from '../constants'
 import { chainIdtoName } from '../Util/chainIdToName'
-import DIVA_ABI from '../contracts/abis/DIVA.json'
-import ERC20 from '../contracts/abis/ERC20.json'
+import DIVA_ABI from '../abi/DIVA.json'
+import ERC20 from '../abi/ERC20.json'
 import { Pool } from '../lib/queries'
 import { parseEther } from 'ethers/lib/utils'
 

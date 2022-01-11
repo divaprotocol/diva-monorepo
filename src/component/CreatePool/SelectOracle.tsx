@@ -14,7 +14,7 @@ import styled from '@mui/styled-engine'
 import Container from '@mui/material/Container'
 import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
-import whitelistContract from '../../Util/abis/Whitelist.json'
+import whitelistContract from '../../abi/Whitelist.json'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { CopyToClipboard } from '../shared/CopyToClipboard'
 import { useCreatePoolFormik } from './formik'
@@ -57,6 +57,7 @@ const ReputationScore = styled('div')<{
 const useOracles = (): [Oracle[], string | null] => {
   const [oracles, setOracles] = useState<Oracle[]>([])
   const [error, setError] = useState<string | null>(null)
+  console.log('hello')
 
   useEffect(() => {
     // TODO: Please review the approach for getting data from contract using ethers

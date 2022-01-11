@@ -8,7 +8,6 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
-import { useEffect } from 'react'
 import { useCreatePoolFormik } from './formik'
 
 export function SelectDataFeedProvider({
@@ -17,10 +16,6 @@ export function SelectDataFeedProvider({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const theme = useTheme()
-  // useEffect(() => {
-  //   formik.setFieldTouched('dataFeedProvider', false, false)
-  // }, [formik.touched])
-
   return (
     <Card variant="outlined">
       <CardContent>
