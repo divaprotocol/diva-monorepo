@@ -11,7 +11,9 @@ export const buyMarketOrder = async (orderData) => {
   // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
   const orders = orderData.existingLimitOrders
-  console.log(' orders ' + JSON.stringify(orders))
+  let takerFillNbrOptions = new BigNumber(orderData.nbrOptions * 10 ** 18)
+  let takerAssetAmounts = []
+
   const signatures = []
   const fillOrderResponse = async (takerAssetFillAmounts) => {
     orders.map(function (order) {
@@ -26,29 +28,58 @@ export const buyMarketOrder = async (orderData) => {
     return response
   }
 
-  const order = orderData.existingLimitOrders[0]
-  const takerFillNbrOptions = new BigNumber(orderData.nbrOptions * 10 ** 18)
-  const expectedRate = new BigNumber(order.expectedRate)
-  const takerFillAmount = takerFillNbrOptions.multipliedBy(expectedRate)
-  const remainingFillableTakerAmount = order.remainingFillableTakerAmount
-  const takerAssetAmount = (takerFillAmount) => {
-    const str = JSON.stringify([takerFillAmount])
-    const takerAssetFillAmounts = JSON.parse(str, function (key, val) {
+  const takerAssetAmount = (takerFillAmounts) => {
+    const str = JSON.stringify(takerFillAmounts)
+    const takerAssetFillAmount = JSON.parse(str, function (key, val) {
       return key === '' ? val : new BigNumber(val)
     })
-    return takerAssetFillAmounts
+    return takerAssetFillAmount
   }
 
-  if (takerFillAmount <= remainingFillableTakerAmount) {
-    const takerAssetFillAmount = takerAssetAmount(takerFillAmount)
-    filledOrder = await fillOrderResponse(takerAssetFillAmount)
-  } else {
-    const takerAssetFillAmount = takerAssetAmount(remainingFillableTakerAmount)
-    filledOrder = await fillOrderResponse(takerAssetFillAmount)
-  }
+  orders.forEach((order, index) => {
+    console.log(
+      index +
+        ' ' +
+        order.expectedRate +
+        ' nbr options - ' +
+        takerFillNbrOptions +
+        ' remaining amount' +
+        order.remainingFillableTakerAmount
+    )
+    if (takerFillNbrOptions > 0) {
+      const expectedRate = new BigNumber(order.expectedRate)
+      const takerFillAmount = takerFillNbrOptions.multipliedBy(expectedRate)
+      const remainingFillableTakerAmount = new BigNumber(
+        order.remainingFillableTakerAmount
+      )
 
+      if (takerFillAmount <= remainingFillableTakerAmount) {
+        takerAssetAmounts.push(takerFillAmount)
+        const nbrOptionsFilled =
+          remainingFillableTakerAmount.dividedBy(expectedRate)
+        takerFillNbrOptions = new BigNumber(
+          takerFillNbrOptions - nbrOptionsFilled
+        )
+        console.log('remaining options to fill ' + takerFillNbrOptions)
+      } else {
+        takerAssetAmounts.push(remainingFillableTakerAmount)
+        const nbrOptionsFilled =
+          remainingFillableTakerAmount.dividedBy(expectedRate)
+        takerFillNbrOptions = new BigNumber(
+          takerFillNbrOptions - nbrOptionsFilled
+        )
+        console.log('remaining options to fill ' + takerFillNbrOptions)
+      }
+    } else {
+      const takerFillAmount = new BigNumber(0)
+      takerAssetAmounts.push(takerFillAmount)
+    }
+  })
+
+  const totalTakerAssetAmount = takerAssetAmount(takerAssetAmounts)
+  console.log('total taker asset amount ' + totalTakerAssetAmount)
+  filledOrder = await fillOrderResponse(totalTakerAssetAmount)
   return filledOrder
-
   // TODO Handle sum(takerAssetAmountFillAmounts) > remainingFillable amount
   // Batch fill limit order
 }

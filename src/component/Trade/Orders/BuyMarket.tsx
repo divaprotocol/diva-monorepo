@@ -76,7 +76,7 @@ export default function BuyMarket(props: {
   const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
-  const [expectedRate, setExpectedRate] = React.useState(0.0)
+  const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
   const [youPay, setYouPay] = React.useState(0.0)
   const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
@@ -95,7 +95,7 @@ export default function BuyMarket(props: {
   const handleNumberOfOptions = (value: string) => {
     const nbrOptions = parseFloat(value)
     setNumberOfOptions(nbrOptions)
-    setYouPay(expectedRate * nbrOptions)
+    setYouPay(avgExpectedRate * nbrOptions)
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -128,6 +128,7 @@ export default function BuyMarket(props: {
         makerToken: makerToken,
         takerToken: option.collateralToken,
         ERC20_ABI: ERC20_ABI,
+        avgExpectedRate: avgExpectedRate,
         existingLimitOrders: existingLimitOrders,
       }
 
@@ -183,22 +184,28 @@ export default function BuyMarket(props: {
 
   const getLimitOrders = async () => {
     const orders: any = []
+    let avgExpectedRate = 0
     const res = await fetch(
       `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
     )
     const resJSON = await res.json()
-    console.log('limit order response ' + JSON.stringify(resJSON))
-    const responseOrder: any = resJSON['records']
-    console.log('response order ' + JSON.stringify(responseOrder))
-    responseOrder.forEach((data: any) => {
+    console.log('resJSON ' + JSON.stringify(resJSON))
+    const responseOrders: any = resJSON['records']
+    let totalTakerAmount = 0
+    let totalMakerAmount = 0
+    responseOrders.forEach((data: any) => {
       const order = data.order
-      order['expectedRate'] = data.order.takerAmount / data.order.makerAmount
+      order['expectedRate'] = order.takerAmount / order.makerAmount
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
+      totalTakerAmount = totalTakerAmount + parseFloat(order.takerAmount)
+      totalMakerAmount = totalMakerAmount + parseFloat(order.makerAmount)
       orders.push(order)
     })
-
-    console.log('orders' + JSON.stringify(orders))
+    avgExpectedRate = totalTakerAmount / totalMakerAmount
+    if (avgExpectedRate > 0) {
+      setAvgExpectedRate(avgExpectedRate)
+    }
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
@@ -213,13 +220,9 @@ export default function BuyMarket(props: {
         throw new Error(`can not read wallet balance`)
       }
     })
+    setAvgExpectedRate(avgExpectedRate)
     getLimitOrders().then((orders) => {
       setExistingLimitOrders(orders)
-      const rate =
-        orders.length > 0
-          ? orders[orders.length - 1].expectedRate
-          : orders.expectedRate
-      setExpectedRate(rate)
     })
   }, [])
 
@@ -245,7 +248,7 @@ export default function BuyMarket(props: {
             </LabelStyleDiv>
           </InfoTooltip>
           <RightSideLabel>
-            {expectedRate} {option.collateralTokenName}
+            {avgExpectedRate.toFixed(4)} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -253,7 +256,7 @@ export default function BuyMarket(props: {
             <LabelStyle>You Pay</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youPay} {option.collateralTokenName}
+            {youPay.toFixed(4)} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
