@@ -59,7 +59,8 @@ export function ReviewAndSubmit({
       <Card variant="outlined">
         <CardContent>
           <Typography pb={1} variant="subtitle1">
-            Please review the configuration before creating the pool
+            Please review the correctness of the pool's parameters before
+            creating it
           </Typography>
         </CardContent>
         <CardContent sx={{ padding: 0 }}>

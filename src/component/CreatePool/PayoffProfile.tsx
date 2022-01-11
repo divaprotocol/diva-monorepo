@@ -6,28 +6,50 @@ export function PayoffProfile({
   floor,
   cap,
   inflection: strike,
+  longTokenAmount,
+  shortTokenAmount,
+  collateralBalanceShort,
+  collateralBalanceLong,
 }: {
   floor: number
   cap: number
   inflection: number
+  collateralBalanceShort: number
+  collateralBalanceLong: number
   longTokenAmount: number
   shortTokenAmount: number
 }) {
   const padding = cap * 0.1
   const start = Math.max(floor - padding, 0)
+  const biggestTokenAmount = Math.max(longTokenAmount, shortTokenAmount)
+  const largestCollateral = Math.max(
+    collateralBalanceLong,
+    collateralBalanceShort
+  )
+
+  const collateralBalanceFractionShort =
+    collateralBalanceShort / largestCollateral
+  const collateralBalanceFractionLong =
+    collateralBalanceLong / largestCollateral
 
   const short: LineSeriesPoint[] = [
     {
       x: start,
-      y: 1,
+      y:
+        (biggestTokenAmount / shortTokenAmount) *
+        (collateralBalanceFractionLong + collateralBalanceFractionShort),
     },
     {
       x: floor,
-      y: 1,
+      y:
+        (biggestTokenAmount / shortTokenAmount) *
+        (collateralBalanceFractionLong + collateralBalanceFractionShort),
     },
     {
       x: strike,
-      y: 0.5,
+      y:
+        (biggestTokenAmount / shortTokenAmount) *
+        collateralBalanceFractionShort,
     },
     {
       x: cap,
@@ -50,19 +72,24 @@ export function PayoffProfile({
     },
     {
       x: strike,
-      y: 0.5,
+      y: (biggestTokenAmount / longTokenAmount) * collateralBalanceFractionLong,
     },
     {
       x: cap,
-      y: 1,
+      y:
+        (biggestTokenAmount / longTokenAmount) *
+        (collateralBalanceFractionLong + collateralBalanceFractionShort),
     },
     {
       x: cap + padding,
-      y: 1,
+      y:
+        (biggestTokenAmount / longTokenAmount) *
+        (collateralBalanceFractionLong + collateralBalanceFractionShort),
     },
   ]
   const ref = useRef<HTMLElement>()
   const [width, setWidth] = useState(300)
+
   useEffect(() => {
     if (ref.current != null) {
       const callback = () => {

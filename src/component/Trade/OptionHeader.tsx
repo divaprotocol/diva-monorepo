@@ -1,13 +1,12 @@
 import React from 'react'
 import styled from 'styled-components'
 import '../../Util/Dates'
-import { Link } from '@mui/material'
+import { IconButton, Link } from '@mui/material'
 import {
   getEtherscanLink,
   EtherscanLinkType,
 } from '../../Util/getEtherscanLink'
 import { useWeb3React } from '@web3-react/core'
-import { CopyToClipboard } from '../shared/CopyToClipboard'
 import { CoinImage } from '../PoolsTable'
 import Tooltip from '@mui/material/Tooltip'
 

@@ -8,7 +8,7 @@ import { chainIdtoName } from '../../Util/chainIdToName'
 import referenceAssets from './referenceAssets.json'
 
 const defaultDate = new Date()
-defaultDate.setMinutes(defaultDate.getMinutes() + 10)
+defaultDate.setHours(defaultDate.getHours() + 24)
 
 export const initialValues = {
   step: 1,
@@ -17,7 +17,7 @@ export const initialValues = {
   floor: 1,
   cap: 3,
   inflection: 2,
-  collateralTokenSymbol: undefined as string | undefined,
+  collateralTokenSymbol: 'DAI',
   collateralWalletBalance: '0',
   /**
    * collateralBalance is only defined here to satisfy
@@ -63,24 +63,11 @@ export const useCreatePoolFormik = () => {
   const _formik = useFormik({
     initialValues,
     onSubmit: async (values, formik) => {
-      formik.setTouched(
-        Object.keys(initialValues).reduce(
-          (acc, key) => ({
-            ...acc,
-            [key]: true,
-          }),
-          {}
-        ),
-        true
-      )
-      await formik.validateForm(values)
-
       if (values.step === 1) {
-        formik.setFieldValue('step', 2)
+        formik.setFieldValue('step', 2, false)
       } else if (values.step === 2) {
-        formik.setFieldValue('step', 3)
+        formik.setFieldValue('step', 3, false)
       } else if (values.step === 3) {
-        console.info('creating pool')
         formik.setStatus('Creating Pool')
         const {
           inflection,

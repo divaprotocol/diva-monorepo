@@ -29,6 +29,14 @@ import referenceAssets from './referenceAssets.json'
 import { Tokens } from '../../lib/types'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
+import styled from '@emotion/styled'
+
+const MaxCollateral = styled.u`
+  cursor: pointer;
+  &:hover {
+    color: ${(props) => (props.theme as any).palette.primary.main};
+  }
+`
 
 function DefineAdvanced({
   formik,
@@ -42,6 +50,8 @@ function DefineAdvanced({
     longTokenSupply,
     collateralBalanceLong,
   } = formik.values
+
+  console.log('touched', formik.touched)
 
   return (
     <Accordion expanded={expanded} onChange={() => setExpanded(!expanded)}>
@@ -288,10 +298,9 @@ export function DefinePoolAttributes({
               )}
               {collateralWalletBalance != null && (
                 <FormHelperText>
-                  Your balance: {parseFloat(collateralWalletBalance).toFixed(6)}{' '}
-                  {collateralTokenSymbol}
-                  <br />
-                  <u
+                  Your balance: {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
+                  {collateralTokenSymbol}{' '}
+                  <MaxCollateral
                     role="button"
                     onClick={() => {
                       if (collateralWalletBalance != null) {
@@ -301,8 +310,8 @@ export function DefinePoolAttributes({
                       }
                     }}
                   >
-                    Set Max Collateral
-                  </u>
+                    (Max)
+                  </MaxCollateral>
                 </FormHelperText>
               )}
             </FormControl>
@@ -359,7 +368,7 @@ export function DefinePoolAttributes({
                 id="inflection"
                 error={formik.errors.inflection != null}
                 name="inflection"
-                label="inflection"
+                label="Inflection"
                 inputProps={{
                   min: floor,
                   max: cap,
@@ -421,6 +430,8 @@ export function DefinePoolAttributes({
               floor={floor}
               cap={cap}
               inflection={inflection}
+              collateralBalanceLong={collateralBalanceLong}
+              collateralBalanceShort={collateralBalanceShort}
               shortTokenAmount={shortTokenSupply}
               longTokenAmount={longTokenSupply}
             />
