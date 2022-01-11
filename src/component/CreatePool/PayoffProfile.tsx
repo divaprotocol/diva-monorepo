@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box, useTheme } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
 import { XYPlot, XAxis, YAxis, LineSeries, LineSeriesPoint } from 'react-vis'
 
@@ -21,35 +21,24 @@ export function PayoffProfile({
 }) {
   const padding = cap * 0.1
   const start = Math.max(floor - padding, 0)
-  const biggestTokenAmount = Math.max(longTokenAmount, shortTokenAmount)
-  const largestCollateral = Math.max(
-    collateralBalanceLong,
-    collateralBalanceShort
-  )
+  const totalCollateral = collateralBalanceLong + collateralBalanceShort
 
-  const collateralBalanceFractionShort =
-    collateralBalanceShort / largestCollateral
-  const collateralBalanceFractionLong =
-    collateralBalanceLong / largestCollateral
+  const maxPayoutLong = totalCollateral / longTokenAmount
+  const maxPayoutShort = totalCollateral / shortTokenAmount
+  const theme = useTheme()
 
   const short: LineSeriesPoint[] = [
     {
       x: start,
-      y:
-        (biggestTokenAmount / shortTokenAmount) *
-        (collateralBalanceFractionLong + collateralBalanceFractionShort),
+      y: maxPayoutShort,
     },
     {
       x: floor,
-      y:
-        (biggestTokenAmount / shortTokenAmount) *
-        (collateralBalanceFractionLong + collateralBalanceFractionShort),
+      y: maxPayoutShort,
     },
     {
       x: strike,
-      y:
-        (biggestTokenAmount / shortTokenAmount) *
-        collateralBalanceFractionShort,
+      y: collateralBalanceShort / shortTokenAmount,
     },
     {
       x: cap,
@@ -72,19 +61,15 @@ export function PayoffProfile({
     },
     {
       x: strike,
-      y: (biggestTokenAmount / longTokenAmount) * collateralBalanceFractionLong,
+      y: collateralBalanceLong / longTokenAmount,
     },
     {
       x: cap,
-      y:
-        (biggestTokenAmount / longTokenAmount) *
-        (collateralBalanceFractionLong + collateralBalanceFractionShort),
+      y: maxPayoutLong,
     },
     {
       x: cap + padding,
-      y:
-        (biggestTokenAmount / longTokenAmount) *
-        (collateralBalanceFractionLong + collateralBalanceFractionShort),
+      y: maxPayoutLong,
     },
   ]
   const ref = useRef<HTMLElement>()
@@ -110,7 +95,7 @@ export function PayoffProfile({
         width={width}
         height={300}
         fill={'none'}
-        style={{ fontSize: 12 }}
+        style={{ fontSize: 12, padding: theme.spacing(2) }}
         animation
       >
         <XAxis tickValues={[floor, strike, cap]} />
