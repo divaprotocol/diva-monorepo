@@ -18,7 +18,51 @@ import { request } from 'graphql-request'
 import ERC20 from '../../contracts/abis/ERC20.json'
 import { useCheckTokenBalances } from '../../hooks/useCheckTokenBalances'
 import { useHistory } from 'react-router-dom'
+import styled from 'styled-components'
 
+const MetaMaskImage = styled.img`
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+`
+
+const AddToMetamask = (props: any) => {
+  const handleAddMetaMask = async () => {
+    const tokenSymbol =
+      props.row.id.split('/')[1][0].toUpperCase() +
+      '-' +
+      props.row.id.split('/')[0]
+    console.log(tokenSymbol)
+    try {
+      await window.ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: props.row.address,
+            symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
+            decimals: 18,
+            image:
+              'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
+          },
+        },
+      })
+    } catch (error) {
+      console.error('Error in HandleAddMetaMask', error)
+    }
+  }
+  return (
+    <>
+      <Tooltip title="Add to Metamask">
+        <MetaMaskImage
+          src="/images/metamask.svg"
+          alt="metamask"
+          onClick={handleAddMetaMask}
+        />
+      </Tooltip>
+    </>
+  )
+}
 const StatusCell = (props: any) => {
   const { chainId } = useWeb3React()
   const [status, setStatus] = useState(props.row.Status)
@@ -44,7 +88,27 @@ const StatusCell = (props: any) => {
 
   return <div>{status}</div>
 }
+const BalanceCell = (props: any) => {
+  const { account, chainId } = useWeb3React()
+  const [balance, setBalance] = useState('-')
 
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum,
+    chainIdtoName(chainId).toLowerCase()
+  )
+  useEffect(() => {
+    const contract = new ethers.Contract(props.row.address, ERC20, provider)
+    contract.balanceOf(account).then((bal: BigNumber) => {
+      if (parseInt(ethers.utils.formatUnits(bal)) < 0.01) {
+        setBalance('<0.01')
+      } else {
+        setBalance(ethers.utils.formatUnits(bal).toString())
+      }
+    })
+  }, [])
+
+  return <div>{balance}</div>
+}
 const SubmitButton = (props: any) => {
   const { chainId, account } = useWeb3React()
   const provider = new ethers.providers.Web3Provider(
@@ -78,6 +142,8 @@ const SubmitButton = (props: any) => {
         setRedeemBtn('Redeem')
       } else if (props.row.Status === 'Confirmed') {
         setRedeemBtn('Redeem')
+      } else {
+        setRedeemBtn('Trade')
       }
     }, [])
   })
@@ -85,6 +151,7 @@ const SubmitButton = (props: any) => {
     <Container>
       <Button
         variant="contained"
+        color={redeemBtn === 'Redeem' ? 'success' : 'primary'}
         onClick={
           redeemBtn === 'Redeem'
             ? handleRedeem
@@ -100,6 +167,10 @@ const SubmitButton = (props: any) => {
 }
 
 const columns: GridColDef[] = [
+  {
+    field: 'Id',
+    align: 'right',
+  },
   {
     field: 'Icon',
     align: 'right',
@@ -149,12 +220,27 @@ const columns: GridColDef[] = [
     renderCell: (props) => <StatusCell {...props} />,
   },
   {
+    field: 'Balance',
+    align: 'right',
+    headerAlign: 'right',
+    renderCell: (props) => <BalanceCell {...props} />,
+  },
+  {
     field: 'submitValue',
     align: 'right',
     headerAlign: 'right',
     headerName: '',
     minWidth: 200,
     renderCell: (props) => <SubmitButton {...props} />,
+  },
+
+  {
+    field: 'addToMetamask',
+    align: 'left',
+    headerAlign: 'right',
+    headerName: '',
+    minWidth: 100,
+    renderCell: (props) => <AddToMetamask {...props} />,
   },
 ]
 
@@ -171,6 +257,7 @@ export function MyPositions() {
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
+      Id: val.id,
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,
       Floor: formatUnits(val.floor),

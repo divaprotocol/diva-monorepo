@@ -353,6 +353,7 @@ export function MyDataFeeds() {
         filter={(pool) =>
           pool.dataFeedProvider.toLowerCase() === account?.toLowerCase()
         }
+        disableRowClick
         columns={columns}
         rows={rows}
         longOnly={true}
