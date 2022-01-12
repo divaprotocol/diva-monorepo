@@ -138,17 +138,11 @@ export const PayoffCell = ({ data }: { data: any }) => {
 
 type Props = {
   columns: GridColDef[]
-  filter?: (pool: Pool) => boolean
   disableRowClick?: boolean
   rows: GridRowModel[]
 }
 
-export default function PoolsTable({
-  columns,
-  filter,
-  disableRowClick,
-  rows,
-}: Props) {
+export default function PoolsTable({ columns, disableRowClick, rows }: Props) {
   const history = useHistory()
   const [search, setSearch] = useState('')
   const filteredRows =

@@ -343,14 +343,7 @@ export function MyDataFeeds() {
       }}
     >
       <SideMenu />
-      <PoolsTable
-        filter={(pool) =>
-          pool.dataFeedProvider.toLowerCase() === account?.toLowerCase()
-        }
-        disableRowClick
-        columns={columns}
-        rows={rows}
-      />
+      <PoolsTable disableRowClick columns={columns} rows={rows} />
     </Stack>
   ) : (
     <div
