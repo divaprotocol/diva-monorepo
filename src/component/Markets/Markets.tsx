@@ -6,6 +6,7 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
+import { theGraphUrl } from '../../constants'
 
 const columns: GridColDef[] = [
   {
@@ -52,10 +53,7 @@ const columns: GridColDef[] = [
 
 export default function App() {
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(
-      'https://api.thegraph.com/subgraphs/name/juliankrispel/diva',
-      queryPools
-    )
+    request(theGraphUrl, queryPools)
   )
   const pools = query.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {

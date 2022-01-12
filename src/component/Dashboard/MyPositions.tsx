@@ -4,22 +4,22 @@ import React, { useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { BigNumber, ethers } from 'ethers'
 
-import { addresses } from '../../config'
+import { addresses, theGraphUrl } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
-import DIVA_ABI from '../../contracts/abis/DIVA.json'
+import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatUnits } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
-import ERC20 from '../../contracts/abis/ERC20.json'
+import ERC20_JSON from '../../abi/ERC20.json'
 import { useCheckTokenBalances } from '../../hooks/useCheckTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
-
+const ERC20 = ERC20_JSON.abi
 const MetaMaskImage = styled.img`
   width: 20px;
   height: 20px;
@@ -76,7 +76,7 @@ const StatusCell = (props: any) => {
     provider.getSigner()
   )
   useEffect(() => {
-    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
+    diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
       if (
         getExpiryMinutesFromNow(pool.expiryDate.toNumber()) + 24 * 60 - 5 < 0 &&
         props.row.Status === 'Open'
@@ -129,7 +129,7 @@ const SubmitButton = (props: any) => {
     })
   }
   useEffect(() => {
-    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
+    diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
       const statusExpMin = getExpiryMinutesFromNow(
         pool.statusTimeStamp.toNumber()
       )
@@ -248,10 +248,7 @@ export function MyPositions() {
   const { account } = useWeb3React()
 
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(
-      'https://api.thegraph.com/subgraphs/name/juliankrispel/diva',
-      queryPools
-    )
+    request(theGraphUrl, queryPools)
   )
   const pools = query.data?.pools || ([] as Pool[])
 

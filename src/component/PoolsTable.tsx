@@ -21,9 +21,9 @@ import localCoinImages from '../Util/localCoinImages.json'
 import { theGraphUrl } from '../constants'
 import { BigNumber, ethers } from 'ethers'
 import { chainIdtoName } from '../Util/chainIdToName'
-import ERC20 from '../contracts/abis/ERC20.json'
+import ERC20_JSON from '../abi/ERC20.json'
 import { useWeb3React } from '@web3-react/core'
-
+const ERC20 = ERC20_JSON.abi
 const assetLogoPath = '/images/coin-logos/'
 
 const useStyles = makeStyles({

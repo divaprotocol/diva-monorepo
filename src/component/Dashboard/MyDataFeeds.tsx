@@ -14,13 +14,11 @@ import React, { useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { ethers } from 'ethers'
 
-import { addresses } from '../../constants'
+import { addresses, theGraphUrl } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
 import DIVA_ABI from '../../abi/DIVA.json'
-import { getExpiryMinutesFromNow } from '../../Util/Dates'
-import DIVA_ABI from '../../contracts/abis/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatUnits } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
@@ -41,7 +39,7 @@ const StatusCell = (props: any) => {
     provider.getSigner()
   )
   useEffect(() => {
-    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
+    diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
       if (
         getExpiryMinutesFromNow(pool.expiryDate.toNumber()) + 24 * 60 - 5 < 0 &&
         props.row.Status === 'Open'
@@ -69,11 +67,8 @@ const DueInCell = (props: any) => {
     provider.getSigner()
   )
   useEffect(() => {
-    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
+    diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
       setExpTimestamp(pool.expiryDate.toNumber())
-    }, [])
-
-    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
       setStatusTimestamp(pool.statusTimestamp.toNumber())
     }, [])
   })
@@ -181,7 +176,7 @@ const SubmitCell = (props: any) => {
   }
 
   useEffect(() => {
-    diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
+    diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
       setBtnDisabled(
         props.row.Status === 'Submitted' ||
           props.row.Status === 'Confirmed' ||
@@ -214,7 +209,7 @@ const SubmitCell = (props: any) => {
             color="primary"
             type="submit"
             onClick={() => {
-              diva.setFinalReferenceValueById(
+              diva.setFinalReferenceValue(
                 props.id.split('/')[0],
                 ethers.utils.parseEther(textFieldValue),
                 true
@@ -292,10 +287,7 @@ const columns: GridColDef[] = [
 export function MyDataFeeds() {
   const { account } = useWeb3React()
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(
-      'https://api.thegraph.com/subgraphs/name/juliankrispel/diva',
-      queryPools
-    )
+    request(theGraphUrl, queryPools)
   )
   const pools =
     query.data?.pools.filter(
