@@ -350,7 +350,6 @@ export function MyDataFeeds() {
         disableRowClick
         columns={columns}
         rows={rows}
-        longOnly={true}
       />
     </Stack>
   ) : (

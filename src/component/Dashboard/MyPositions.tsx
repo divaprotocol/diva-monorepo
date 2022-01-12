@@ -3,7 +3,6 @@ import { Button, Container, Stack, Tooltip } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { BigNumber, ethers } from 'ethers'
-
 import { addresses, theGraphUrl } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
@@ -19,6 +18,7 @@ import ERC20_JSON from '../../abi/ERC20.json'
 import { useCheckTokenBalances } from '../../hooks/useCheckTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
+
 const ERC20 = ERC20_JSON.abi
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -32,7 +32,6 @@ const AddToMetamask = (props: any) => {
       props.row.id.split('/')[1][0].toUpperCase() +
       '-' +
       props.row.id.split('/')[0]
-    console.log(tokenSymbol)
     try {
       await window.ethereum.request({
         method: 'wallet_watchAsset',
@@ -131,7 +130,7 @@ const SubmitButton = (props: any) => {
   useEffect(() => {
     diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
       const statusExpMin = getExpiryMinutesFromNow(
-        pool.statusTimeStamp.toNumber()
+        pool.statusTimestamp.toNumber()
       )
       if (props.row.Status === 'Submitted' && statusExpMin + 24 * 60 + 5 < 0) {
         setRedeemBtn('Redeem')

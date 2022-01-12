@@ -1,29 +1,14 @@
 import React, { useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
-import {
-  GridColDef,
-  GridColumnMenuProps,
-  GridRowModel,
-} from '@mui/x-data-grid/x-data-grid'
-import { getDateTime } from '../Util/Dates'
+import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import { Box, Input, InputAdornment } from '@mui/material'
-import { generatePayoffChartData } from '../Graphs/DataGenerator'
 import { LineSeries, XYPlot } from 'react-vis'
 import { LocalGasStation, Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
-import { Pool, queryPools } from '../lib/queries'
-import { request } from 'graphql-request'
-import { useQuery } from 'react-query'
-import { formatUnits } from 'ethers/lib/utils'
+import { Pool } from '../lib/queries'
 import { useCoinIcon } from '../hooks/useCoinIcon'
 import { makeStyles } from '@mui/styles'
 import localCoinImages from '../Util/localCoinImages.json'
-import { theGraphUrl } from '../constants'
-import { BigNumber, ethers } from 'ethers'
-import { chainIdtoName } from '../Util/chainIdToName'
-import ERC20_JSON from '../abi/ERC20.json'
-import { useWeb3React } from '@web3-react/core'
-const ERC20 = ERC20_JSON.abi
 const assetLogoPath = '/images/coin-logos/'
 
 const useStyles = makeStyles({
@@ -154,25 +139,18 @@ export const PayoffCell = ({ data }: { data: any }) => {
 type Props = {
   columns: GridColDef[]
   filter?: (pool: Pool) => boolean
-  longOnly?: boolean
   disableRowClick?: boolean
-  components?: {
-    Row?: React.JSXElementConstructor<any>
-  }
   rows: GridRowModel[]
 }
 
 export default function PoolsTable({
   columns,
   filter,
-  longOnly,
-  components,
   disableRowClick,
   rows,
 }: Props) {
   const history = useHistory()
   const [search, setSearch] = useState('')
-  const { chainId, account } = useWeb3React()
   const filteredRows =
     search != null && search.length > 0
       ? rows.filter((v) =>
@@ -217,7 +195,6 @@ export default function PoolsTable({
         className={classes.root}
         rows={filteredRows}
         columns={columns}
-        components={components}
         onRowClick={
           disableRowClick
             ? undefined
