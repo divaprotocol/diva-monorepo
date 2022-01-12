@@ -14,10 +14,12 @@ import React, { useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { ethers } from 'ethers'
 
-import { addresses } from '../../config'
+import { addresses } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
+import DIVA_ABI from '../../abi/DIVA.json'
+import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import DIVA_ABI from '../../contracts/abis/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatUnits } from 'ethers/lib/utils'
@@ -72,7 +74,7 @@ const DueInCell = (props: any) => {
     }, [])
 
     diva.getPoolParametersById(props.id.split('/')[0]).then((pool: any) => {
-      setStatusTimestamp(pool.statusTimeStamp.toNumber())
+      setStatusTimestamp(pool.statusTimestamp.toNumber())
     }, [])
   })
 
