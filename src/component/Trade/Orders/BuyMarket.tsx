@@ -93,9 +93,15 @@ export default function BuyMarket(props: {
     takerToken: takerToken,
   }
   const handleNumberOfOptions = (value: string) => {
-    const nbrOptions = parseFloat(value)
-    setNumberOfOptions(nbrOptions)
-    setYouPay(avgExpectedRate * nbrOptions)
+    console.log('Number of options' + value + '-')
+    if (value !== '') {
+      const nbrOptions = parseFloat(value)
+      setNumberOfOptions(nbrOptions)
+      const youPay = avgExpectedRate * nbrOptions
+      setYouPay(youPay)
+    } else {
+      setYouPay(0.0)
+    }
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -184,31 +190,26 @@ export default function BuyMarket(props: {
 
   const getLimitOrders = async () => {
     const orders: any = []
-    let avgExpectedRate = 0
     const res = await fetch(
       `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
     )
     const resJSON = await res.json()
     console.log('resJSON ' + JSON.stringify(resJSON))
     const responseOrders: any = resJSON['records']
-    let totalTakerAmount = 0
-    let totalMakerAmount = 0
     responseOrders.forEach((data: any) => {
       const order = data.order
       order['expectedRate'] = order.takerAmount / order.makerAmount
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
-      totalTakerAmount = totalTakerAmount + parseFloat(order.takerAmount)
-      totalMakerAmount = totalMakerAmount + parseFloat(order.makerAmount)
       orders.push(order)
     })
-    avgExpectedRate = totalTakerAmount / totalMakerAmount
-    if (avgExpectedRate > 0) {
-      setAvgExpectedRate(avgExpectedRate)
-    }
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
+    if (sortedRecords.length) {
+      const bestRate = sortedRecords[0].expectedRate
+      setAvgExpectedRate(bestRate)
+    }
     return sortedRecords
   }
 
@@ -221,10 +222,39 @@ export default function BuyMarket(props: {
       }
     })
     setAvgExpectedRate(avgExpectedRate)
-    getLimitOrders().then((orders) => {
+    getLimitOrders().then((orders: []) => {
       setExistingLimitOrders(orders)
     })
   }, [])
+
+  useEffect(() => {
+    if (numberOfOptions > 0) {
+      let count = numberOfOptions
+      let cumulativeAvg = 0
+      let cumulativeTaker = 0
+      let cumulativeMaker = 0
+      existingLimitOrders.forEach((order: any) => {
+        if (count > 0) {
+          if (count <= order.makerAmount / 10 ** 18) {
+            cumulativeTaker =
+              cumulativeTaker + count * order.expectedRate * 10 ** 18
+            cumulativeMaker = cumulativeMaker + count * 10 ** 18
+            count = 0
+          } else {
+            //count is greater than current order maker amount so add entire order take amount in
+            //cumulative taker
+            cumulativeTaker = cumulativeTaker + parseFloat(order.takerAmount)
+            cumulativeMaker = cumulativeMaker + parseFloat(order.makerAmount)
+            count = count - order.makerAmount / 10 ** 18
+          }
+        }
+      })
+      cumulativeAvg = cumulativeTaker / cumulativeMaker
+      if (cumulativeAvg > 0) {
+        setAvgExpectedRate(cumulativeAvg)
+      }
+    }
+  }, [numberOfOptions])
 
   return (
     <div>
