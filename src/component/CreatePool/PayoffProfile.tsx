@@ -1,24 +1,34 @@
 import { Box, useTheme } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
-import { XYPlot, XAxis, YAxis, LineSeries, LineSeriesPoint } from 'react-vis'
+import { useLayoutEffect, useRef, useState } from 'react'
+import {
+  XYPlot,
+  XAxis,
+  YAxis,
+  LineSeries,
+  LineSeriesPoint,
+  DiscreteColorLegend,
+} from 'react-vis'
 
-export function PayoffProfile({
-  floor,
-  cap,
-  inflection: strike,
-  longTokenAmount,
-  shortTokenAmount,
-  collateralBalanceShort,
-  collateralBalanceLong,
-}: {
+export function PayoffProfile(props: {
   floor: number
   cap: number
   inflection: number
+  hasError?: boolean
   collateralBalanceShort: number
   collateralBalanceLong: number
   longTokenAmount: number
   shortTokenAmount: number
 }) {
+  const {
+    floor,
+    cap,
+    inflection: strike,
+    longTokenAmount,
+    shortTokenAmount,
+    hasError,
+    collateralBalanceShort,
+    collateralBalanceLong,
+  } = props
   const padding = cap * 0.1
   const start = Math.max(floor - padding, 0)
   const totalCollateral = collateralBalanceLong + collateralBalanceShort
@@ -75,7 +85,7 @@ export function PayoffProfile({
   const ref = useRef<HTMLElement>()
   const [width, setWidth] = useState(300)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (ref.current != null) {
       const callback = () => {
         const rect = ref.current?.getBoundingClientRect()
@@ -89,20 +99,63 @@ export function PayoffProfile({
     }
   }, [ref.current])
 
+  const lineSeriesStyle: any = { strokeWidth: '3px' }
+
+  if (hasError) lineSeriesStyle.stroke = theme.palette.error.main
+
   return (
     <Box pb={3} ref={ref}>
-      <XYPlot
-        width={width}
-        height={300}
-        fill={'none'}
-        style={{ fontSize: 12, padding: theme.spacing(2) }}
-        animation
+      <Box ref={ref} pr={1}>
+        <XYPlot
+          width={width}
+          height={300}
+          style={{
+            fill: 'none',
+            fontFamily: theme.typography.fontFamily,
+            paddingRight: theme.spacing(4),
+            fontSize: theme.typography.caption.fontSize,
+            fontWeight: theme.typography.fontWeightLight,
+            stroke: theme.palette.text.disabled,
+            padding: theme.spacing(2),
+          }}
+          animation
+        >
+          <XAxis
+            tickValues={[floor, strike, cap]}
+            style={{ stroke: theme.palette.text.disabled }}
+          />
+          <YAxis style={{ stroke: theme.palette.text.disabled }} />
+          <LineSeries style={lineSeriesStyle} data={short} />
+          <LineSeries style={lineSeriesStyle} data={long} />
+        </XYPlot>
+      </Box>
+      <Box
+        sx={{
+          '.rv-discrete-color-legend-item__title': {
+            color: theme.palette.text.secondary,
+          },
+          display: 'flex',
+          justifyContent: 'end',
+          '.rv-discrete-color-legend-item': {
+            paddingRight: 0,
+            paddingLeft: theme.spacing(3),
+          },
+        }}
       >
-        <XAxis tickValues={[floor, strike, cap]} />
-        <YAxis />
-        <LineSeries style={{ fill: 'none', strokeWidth: '3px' }} data={short} />
-        <LineSeries style={{ fill: 'none', strokeWidth: '3px' }} data={long} />
-      </XYPlot>
+        <DiscreteColorLegend
+          orientation="horizontal"
+          items={[
+            {
+              title: 'Long',
+              color: theme.palette.primary.main,
+            },
+            {
+              title: 'Short',
+              color: theme.palette.secondary.main,
+            },
+          ]}
+        />
+      </Box>
     </Box>
   )
 }

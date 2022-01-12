@@ -17,7 +17,7 @@ type Erc20Contract = Contract & {
  * no balance is returned
  */
 export function useErcBalance(address?: string) {
-  const { chainId } = useWeb3React()
+  const { chainId, account } = useWeb3React()
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
@@ -44,7 +44,7 @@ export function useErcBalance(address?: string) {
     }
 
     run()
-  }, [address, chainId])
+  }, [address, chainId, account != null])
 
   return balance
 }

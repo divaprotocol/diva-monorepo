@@ -14,6 +14,7 @@ import { createDivaTheme } from './lib/createDivaTheme'
 import Web3 from 'web3'
 import { Web3ReactProvider } from '@web3-react/core'
 import { QueryClient, QueryClientProvider } from 'react-query'
+import 'react-vis/dist/style.css'
 
 function getLibrary(provider: any) {
   return new Web3(provider)

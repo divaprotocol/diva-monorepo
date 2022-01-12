@@ -19,15 +19,11 @@ export const initialValues = {
   inflection: 2,
   collateralTokenSymbol: 'DAI',
   collateralWalletBalance: '0',
-  /**
-   * collateralBalance is only defined here to satisfy
-   * a type constraint in formik :/
-   */
   collateralBalance: 2,
   collateralBalanceShort: 1,
   collateralBalanceLong: 1,
-  shortTokenSupply: 100,
-  longTokenSupply: 100,
+  shortTokenSupply: 1,
+  longTokenSupply: 1,
   dataFeedProvider: '',
 }
 
@@ -48,7 +44,7 @@ type Errors = {
 }
 
 export const useCreatePoolFormik = () => {
-  const { chainId } = useWeb3React()
+  const { chainId, account } = useWeb3React()
   const contract = useDiva()
 
   const provider = new ethers.providers.Web3Provider(
@@ -102,14 +98,21 @@ export const useCreatePoolFormik = () => {
               referenceAsset,
               collateralToken,
               dataFeedProvider,
+              capacity: 0,
             })
             .then((val) => {
               formik.resetForm()
               formik.setStatus('successfully created')
+              setTimeout(() => {
+                formik.setStatus(null)
+              }, 5000)
             })
             .catch((error) => {
               console.error(error)
-              formik.setStatus('Could not create pool')
+              formik.setStatus(`Error: ${error.message}`)
+              setTimeout(() => {
+                formik.setStatus(null)
+              }, 5000)
             })
         }
       }
@@ -127,12 +130,13 @@ export const useCreatePoolFormik = () => {
         errors.collateralTokenSymbol = 'You must choose a collateral token'
       }
 
-      if (walletBalance < collateralBalance) {
+      if (account == null) {
+        errors.collateralWalletBalance =
+          'Your wallet must be connected before you can proceed'
+      } else if (walletBalance < collateralBalance) {
         errors.collateralWalletBalance =
           'Collateral cannot be higher than your balance'
-      }
-
-      if (collateralBalance <= 0) {
+      } else if (collateralBalance <= 0) {
         errors.collateralBalance = 'Collateral can not be 0'
       }
 
@@ -181,16 +185,8 @@ export const useCreatePoolFormik = () => {
         errors.shortTokenSupply = 'Must be higher than 0'
       }
 
-      if (/[0-9]+\./.test(values.shortTokenSupply.toString())) {
-        errors.shortTokenSupply = 'Number cannot have decimal places'
-      }
-
       if (values.longTokenSupply <= 0) {
         errors.longTokenSupply = 'Must be higher than 0 0'
-      }
-
-      if (/[0-9]+\./.test(values.longTokenSupply.toString())) {
-        errors.longTokenSupply = 'Number cannot have decimal places'
       }
 
       return errors

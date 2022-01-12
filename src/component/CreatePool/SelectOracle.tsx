@@ -57,7 +57,6 @@ const ReputationScore = styled('div')<{
 const useOracles = (): [Oracle[], string | null] => {
   const [oracles, setOracles] = useState<Oracle[]>([])
   const [error, setError] = useState<string | null>(null)
-  console.log('hello')
 
   useEffect(() => {
     // TODO: Please review the approach for getting data from contract using ethers

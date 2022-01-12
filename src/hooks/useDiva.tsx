@@ -24,7 +24,8 @@ type DivaContract = Contract & {
       supplyLong: BigNumber,
       referenceAsset: string,
       collateralToken: string,
-      dataFeedProvider: string
+      dataFeedProvider: string,
+      capacity: BigNumber
     ]
   ) => Promise<any>
   getPoolParametersById: (id: string) => Promise<Pool>
@@ -48,6 +49,7 @@ type DivaApi = {
     referenceAsset: string
     collateralToken: string
     dataFeedProvider: string
+    capacity: number
   }) => Promise<void>
   getPoolParametersById: (id: string) => Promise<Pool>
   setFinalReferenceValueById: (props: {
@@ -92,6 +94,7 @@ export function useDiva(): DivaApi | null {
         referenceAsset,
         supplyLong,
         supplyShort,
+        capacity,
       } = props
       const erc20 = new ethers.Contract(collateralToken, ERC20, signer)
       const collateralBalanceShort = parseEther(
@@ -100,17 +103,35 @@ export function useDiva(): DivaApi | null {
       const collateralBalanceLong = parseEther(
         _collateralBalanceLong.toString()
       )
+      console.log(1, [
+        parseEther(inflection.toString()).toString(),
+        parseEther(cap.toString()).toString(),
+        parseEther(floor.toString()).toString(),
+        collateralBalanceShort.toString(),
+        collateralBalanceLong.toString(),
+        Math.round(expiryDate / 1000).toString(),
+        parseEther(supplyShort.toString()).toString(),
+        parseEther(supplyLong.toString()).toString(),
+        referenceAsset,
+        collateralToken,
+        dataFeedProvider,
+      ])
 
       const creatorAddress = await signer.getAddress()
       const tx = await erc20.approve(
         divaAddress,
         collateralBalanceLong.add(collateralBalanceShort)
       )
+      console.log(2)
       await tx.wait()
+
+      console.log(3)
 
       await erc20.allowance(creatorAddress, divaAddress)
 
-      return contract.createContingentPool([
+      console.log(4)
+
+      const val = await contract.createContingentPool([
         parseEther(inflection.toString()),
         parseEther(cap.toString()),
         parseEther(floor.toString()),
@@ -122,7 +143,10 @@ export function useDiva(): DivaApi | null {
         referenceAsset,
         collateralToken,
         dataFeedProvider,
+        parseEther(capacity.toString()),
       ])
+
+      return val
     },
     getPoolParametersById: (id: string) => {
       return contract.getPoolParametersById(id).then((val) => {

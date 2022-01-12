@@ -1,8 +1,5 @@
-import { LoadingButton } from '@mui/lab'
 import {
-  Button,
   Card,
-  CardActions,
   CardContent,
   Table,
   TableBody,
@@ -52,7 +49,6 @@ export function ReviewAndSubmit({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const { values } = formik
-  const theme = useTheme()
 
   return (
     <Box pt={5}>
@@ -90,31 +86,6 @@ export function ReviewAndSubmit({
             </Table>
           </TableContainer>
         </CardContent>
-        <CardActions
-          sx={{
-            justifyContent: 'space-between',
-          }}
-        >
-          <Button
-            onClick={() => {
-              formik.setFieldValue('step', 2)
-            }}
-          >
-            Go Back
-          </Button>
-          <LoadingButton
-            size="large"
-            disabled={!formik.isValid}
-            loadingPosition="start"
-            loading={formik.status === 'Creating Pool'}
-            sx={{ paddingLeft: theme.spacing(6) }}
-            onClick={(e: any) => {
-              formik.handleSubmit(e)
-            }}
-          >
-            {formik.status === 'Creating Pool' ? formik.status : 'Create Pool'}
-          </LoadingButton>
-        </CardActions>
       </Card>
     </Box>
   )
