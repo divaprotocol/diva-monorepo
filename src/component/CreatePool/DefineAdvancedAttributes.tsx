@@ -8,6 +8,11 @@ import {
   FormControl,
   TextField,
   FormHelperText,
+  Checkbox,
+  Stack,
+  FormLabel,
+  FormControlLabel,
+  FormGroup,
 } from '@mui/material'
 import { useState } from 'react'
 import { useCreatePoolFormik } from './formik'
@@ -23,6 +28,7 @@ export function DefineAdvanced({
     shortTokenSupply,
     longTokenSupply,
     collateralBalanceLong,
+    capacity,
   } = formik.values
 
   return (
@@ -56,6 +62,7 @@ export function DefineAdvanced({
               name="collateralBalanceShort"
               id="collateralBalanceShort"
               label="Short Pool Balance"
+              onBlur={formik.handleBlur}
               error={formik.errors.collateralBalanceShort != null}
               inputProps={{ min: 0 }}
               value={collateralBalanceShort}
@@ -78,6 +85,7 @@ export function DefineAdvanced({
               name="collateralBalanceLong"
               id="collateralBalanceLong"
               label="Long Pool Balance"
+              onBlur={formik.handleBlur}
               error={formik.errors.collateralBalanceLong != null}
               inputProps={{ min: 0 }}
               value={collateralBalanceLong}
@@ -96,6 +104,7 @@ export function DefineAdvanced({
             <TextField
               name="shortTokenSupply"
               id="shortTokenSupply"
+              onBlur={formik.handleBlur}
               error={formik.errors.shortTokenSupply != null}
               label="Short Token Supply"
               value={shortTokenSupply}
@@ -112,6 +121,7 @@ export function DefineAdvanced({
             <TextField
               name="longTokenSupply"
               error={formik.errors.longTokenSupply != null}
+              onBlur={formik.handleBlur}
               id="longTokenSupply"
               label="Long Token Supply"
               value={longTokenSupply}
@@ -120,6 +130,29 @@ export function DefineAdvanced({
             />
             {formik.errors.longTokenSupply != null && (
               <FormHelperText>{formik.errors.longTokenSupply}</FormHelperText>
+            )}
+          </FormControl>
+        </Box>
+        <Box pb={3}>
+          <FormControl fullWidth error={formik.errors.capacity != null}>
+            <TextField
+              name="capacity"
+              error={formik.errors.capacity != null}
+              onBlur={formik.handleBlur}
+              id="capacity"
+              label="Token Capacity"
+              value={capacity}
+              helperText={
+                <>
+                  Maximum token amount for pool. <br />A value of 0 means no
+                  limit is imposed.
+                </>
+              }
+              type="number"
+              onChange={formik.handleChange}
+            />
+            {formik.errors.capacity != null && (
+              <FormHelperText>{formik.errors.capacity}</FormHelperText>
             )}
           </FormControl>
         </Box>

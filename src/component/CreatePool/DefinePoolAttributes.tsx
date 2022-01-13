@@ -22,7 +22,6 @@ import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
-import { useWeb3React } from '@web3-react/core'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -81,6 +80,27 @@ export function DefinePoolAttributes({
       }))
     }
   }, [formik.values.collateralBalance, formik.touched])
+
+  useEffect(() => {
+    const totalBalance =
+      formik.values.collateralBalanceLong + formik.values.collateralBalanceShort
+    if (
+      (formik.touched.collateralBalanceLong ||
+        formik.touched.collateralBalanceShort) &&
+      totalBalance !== formik.values.collateralBalance
+    ) {
+      formik.setValues((values) => ({
+        ...values,
+        collateralBalance: totalBalance,
+        longTokenSupply: totalBalance,
+        shortTokenSupply: totalBalance,
+      }))
+    }
+  }, [
+    formik.touched,
+    formik.values.collateralBalanceLong,
+    formik.values.collateralBalanceShort,
+  ])
 
   const theme = useTheme()
 
@@ -240,7 +260,7 @@ export function DefinePoolAttributes({
       <h3>Payoff</h3>
 
       <Stack pb={3} spacing={2} direction="row">
-        <Box pt={2} width="100%">
+        <Box pt={2} width="50%">
           <FormControl fullWidth error={hasPaymentProfileError}>
             {hasPaymentProfileError && (
               <FormHelperText
@@ -302,7 +322,7 @@ export function DefinePoolAttributes({
           longTokenSupply != null &&
           shortTokenSupply > 0 &&
           longTokenSupply > 0 && (
-            <Box width="100%">
+            <Box width="50%">
               <PayoffProfile
                 floor={floor}
                 cap={cap}

@@ -1,4 +1,4 @@
-import { Box, useTheme } from '@mui/material'
+import { Box, Typography, useTheme } from '@mui/material'
 import { useLayoutEffect, useRef, useState } from 'react'
 import {
   XYPlot,

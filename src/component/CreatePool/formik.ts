@@ -24,23 +24,12 @@ export const initialValues = {
   collateralBalanceLong: 1,
   shortTokenSupply: 1,
   longTokenSupply: 1,
+  capacity: 0,
   dataFeedProvider: '',
 }
 
 type Errors = {
-  referenceAsset?: string
-  expiryDate?: string
-  floor?: string
-  cap?: string
-  inflection?: string
-  collateralTokenSymbol?: string
-  collateralWalletBalance?: string
-  collateralBalance?: string
-  collateralBalanceShort?: string
-  collateralBalanceLong?: string
-  shortTokenSupply?: string
-  longTokenSupply?: string
-  dataFeedProvider?: string
+  [P in keyof typeof initialValues]?: string
 }
 
 export const useCreatePoolFormik = () => {
@@ -162,6 +151,10 @@ export const useCreatePoolFormik = () => {
       if (values.inflection > values.cap) {
         errors.inflection = 'Must be lower than cap'
         errors.cap = 'Must be higher than inflection'
+      }
+
+      if (values.capacity < 0) {
+        errors.capacity = 'Capacity cannot be negative'
       }
 
       // validate data feed provider

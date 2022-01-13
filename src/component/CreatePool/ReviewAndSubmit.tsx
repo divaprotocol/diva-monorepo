@@ -41,6 +41,7 @@ const dict: {
   longTokenSupply: 'Token Supply (Long)',
   dataFeedProvider: 'Data Feed Provider',
   collateralTokenSymbol: 'Collateral Token',
+  capacity: 'Token Capacity',
 }
 
 export function ReviewAndSubmit({
@@ -49,44 +50,46 @@ export function ReviewAndSubmit({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const { values } = formik
+  const theme = useTheme()
 
   return (
     <Box pt={5}>
-      <Card variant="outlined">
-        <CardContent>
-          <Typography pb={1} variant="subtitle1">
-            Please review the correctness of the pool's parameters before
-            creating it
-          </Typography>
-        </CardContent>
-        <CardContent sx={{ padding: 0 }}>
-          <TableContainer sx={{ padding: 0, margin: 0 }}>
-            <Table>
-              <TableBody>
-                {Object.keys(values)
-                  .filter(
-                    (v) =>
-                      ![
-                        'collateralBalance',
-                        'collateralWalletBalance',
-                        'step',
-                      ].includes(v)
-                  )
-                  .map((key: any) => (
-                    <TableRow key={key}>
-                      <TableCell>
-                        <strong>{dict[key] || key}</strong>
-                      </TableCell>
-                      <TableCell align="right">
-                        {stringifyValue((values as any)[key])}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
+      <Typography pb={3} variant="subtitle1">
+        Please review the correctness of the pool's parameters before creating
+        it
+      </Typography>
+
+      <TableContainer
+        sx={{
+          padding: 0,
+          margin: 0,
+          marginBottom: theme.spacing(3),
+        }}
+      >
+        <Table>
+          <TableBody>
+            {Object.keys(values)
+              .filter(
+                (v) =>
+                  ![
+                    'collateralBalance',
+                    'collateralWalletBalance',
+                    'step',
+                  ].includes(v)
+              )
+              .map((key: any) => (
+                <TableRow key={key}>
+                  <TableCell>
+                    <strong>{dict[key] || key}</strong>
+                  </TableCell>
+                  <TableCell align="right">
+                    {stringifyValue((values as any)[key])}
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   )
 }
