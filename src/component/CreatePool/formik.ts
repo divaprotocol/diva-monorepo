@@ -89,11 +89,10 @@ export const useCreatePoolFormik = () => {
               dataFeedProvider,
               capacity: 0,
             })
-            .then((val) => {
-              formik.resetForm()
+            .then(() => {
               formik.setStatus('successfully created')
               setTimeout(() => {
-                formik.setStatus(null)
+                formik.resetForm()
               }, 5000)
             })
             .catch((error) => {

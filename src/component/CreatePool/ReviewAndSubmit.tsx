@@ -41,7 +41,7 @@ const dict: {
   longTokenSupply: 'Token Supply (Long)',
   dataFeedProvider: 'Data Feed Provider',
   collateralTokenSymbol: 'Collateral Token',
-  capacity: 'Token Capacity',
+  capacity: 'Maximum Pool Capacity',
 }
 
 export function ReviewAndSubmit({

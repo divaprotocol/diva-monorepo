@@ -140,14 +140,9 @@ export function DefineAdvanced({
               error={formik.errors.capacity != null}
               onBlur={formik.handleBlur}
               id="capacity"
-              label="Token Capacity"
+              label="Maximum Pool Capacity"
               value={capacity}
-              helperText={
-                <>
-                  Maximum token amount for pool. <br />A value of 0 means no
-                  limit is imposed.
-                </>
-              }
+              helperText="A value of 0 means no limit is imposed."
               type="number"
               onChange={formik.handleChange}
             />

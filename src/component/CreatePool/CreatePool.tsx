@@ -89,7 +89,9 @@ export function CreatePool() {
               paddingLeft: formik.status != null ? theme.spacing(6) : undefined,
             }}
             loading={
-              formik.status != null && !formik.status.startsWith('Error:')
+              formik.status != null &&
+              !formik.status.startsWith('Error:') &&
+              !formik.status.includes('Success')
             }
             disabled={!formik.isValid}
           >
