@@ -9,17 +9,6 @@ export function ConnectWalletButton() {
   const [walletName, setWalletName] = useState('')
   const provider = new ethers.providers.Web3Provider(window.ethereum)
 
-  useEffect(() => {
-    if (account) {
-      provider.lookupAddress(account).then((res) => {
-        if (res === null) {
-          setWalletName(truncate(account))
-        } else {
-          setWalletName(res)
-        }
-      })
-    }
-  }, [account])
   async function connect() {
     try {
       await activate(injected)
@@ -27,6 +16,23 @@ export function ConnectWalletButton() {
       console.error(ex)
     }
   }
+
+  useEffect(() => {
+    const run = async () => {
+      if (account) {
+        const res = await provider.lookupAddress(account)
+        if (res === null) {
+          setWalletName(truncate(account))
+        } else {
+          setWalletName(res)
+        }
+      }
+      await connect()
+    }
+
+    run()
+  }, [account])
+
   function truncate(string = '', start = 6, end = 4) {
     if (start < 1 || end < 1) {
       return string
