@@ -18,6 +18,7 @@ import { addresses } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
+import { Pool } from '../../lib/queries'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 

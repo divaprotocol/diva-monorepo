@@ -1,21 +1,20 @@
 import Header from './component/Header/Header'
 import Underlying from './component/Trade/Underlying'
 
+import { Container } from '@mui/material'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import { CreatePool } from './component/CreatePool/CreatePool'
 import Markets from './component/Markets/Markets'
-import { Create } from './component/Create'
-import { Container, useTheme } from '@mui/material'
 import { Dashboard } from './component/Dashboard'
 
 export const App = () => {
-  const theme = useTheme()
   return (
     <Router>
       <Header />
 
       <Container
         disableGutters
-        sx={{ alignItems: 'left', height: '100%' }}
+        sx={{ alignItems: 'left', height: '100%', overflow: 'auto' }}
         maxWidth={false}
       >
         <Switch>
@@ -29,7 +28,7 @@ export const App = () => {
             <Dashboard />
           </Route>
           <Route path="/create">
-            <Create />
+            <CreatePool />
           </Route>
         </Switch>
       </Container>
