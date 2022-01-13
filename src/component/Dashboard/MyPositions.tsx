@@ -1,5 +1,11 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import { Button, Container, Stack, Tooltip } from '@mui/material'
+import {
+  Button,
+  CircularProgress,
+  Container,
+  Stack,
+  Tooltip,
+} from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { BigNumber, ethers } from 'ethers'
@@ -8,7 +14,11 @@ import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
 import DIVA_ABI from '../../abi/DIVA.json'
-import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
+import {
+  getDateTime,
+  getExpiryMinutesFromNow,
+  isExpired,
+} from '../../Util/Dates'
 import { formatUnits } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
@@ -62,16 +72,16 @@ const AddToMetamask = (props: any) => {
     </>
   )
 }
+
 const StatusCell = (props: any) => {
   const { chainId } = useWeb3React()
-  const [status, setStatus] = useState('-')
+  const [status, setStatus] = useState<string>()
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
   )
   useEffect(() => {
     let mounted = true
-    if (mounted) setStatus(props.row.Status)
     const diva = new ethers.Contract(
       addresses[chainId!].divaAddress,
       DIVA_ABI,
@@ -80,12 +90,13 @@ const StatusCell = (props: any) => {
 
     diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
       if (
-        getExpiryMinutesFromNow(pool.expiryDate.toNumber()) + 24 * 60 - 5 < 0 &&
-        props.row.Status === 'Open'
+        isExpired(pool.expiryDate) &&
+        props.row.Status === 'Open' &&
+        mounted
       ) {
-        if (mounted) {
-          setStatus('Expired')
-        }
+        setStatus('Expired')
+      } else if (mounted) {
+        setStatus(props.row.Status)
       }
     })
     return () => {
@@ -93,11 +104,12 @@ const StatusCell = (props: any) => {
     }
   }, [props.row.Status])
 
-  return <>{status}</>
+  return <>{status == null ? <CircularProgress /> : status}</>
 }
+
 const BalanceCell = (props: any) => {
   const { account, chainId } = useWeb3React()
-  const [balance, setBalance] = useState('-')
+  const [balance, setBalance] = useState<string>()
 
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
@@ -118,7 +130,7 @@ const BalanceCell = (props: any) => {
     }
   }, [chainId])
 
-  return <>{balance}</>
+  return <>{balance == null ? <CircularProgress /> : balance}</>
 }
 const SubmitButton = (props: any) => {
   const { chainId, account } = useWeb3React()
