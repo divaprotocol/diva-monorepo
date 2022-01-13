@@ -64,28 +64,36 @@ const AddToMetamask = (props: any) => {
 }
 const StatusCell = (props: any) => {
   const { chainId } = useWeb3React()
-  const [status, setStatus] = useState(props.row.Status)
+  const [status, setStatus] = useState('-')
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
   )
-  const diva = new ethers.Contract(
-    addresses[chainId!].divaAddress,
-    DIVA_ABI,
-    provider.getSigner()
-  )
   useEffect(() => {
+    let mounted = true
+    if (mounted) setStatus(props.row.Status)
+    const diva = new ethers.Contract(
+      addresses[chainId!].divaAddress,
+      DIVA_ABI,
+      provider.getSigner()
+    )
+
     diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
       if (
         getExpiryMinutesFromNow(pool.expiryDate.toNumber()) + 24 * 60 - 5 < 0 &&
         props.row.Status === 'Open'
       ) {
-        setStatus('Expired')
+        if (mounted) {
+          setStatus('Expired')
+        }
       }
     })
-  }, [])
+    return () => {
+      mounted = false
+    }
+  }, [props.row.Status])
 
-  return <div>{status}</div>
+  return <>{status}</>
 }
 const BalanceCell = (props: any) => {
   const { account, chainId } = useWeb3React()
@@ -96,17 +104,21 @@ const BalanceCell = (props: any) => {
     chainIdtoName(chainId).toLowerCase()
   )
   useEffect(() => {
+    let mounted = true
     const contract = new ethers.Contract(props.row.address, ERC20, provider)
     contract.balanceOf(account).then((bal: BigNumber) => {
       if (parseInt(ethers.utils.formatUnits(bal)) < 0.01) {
-        setBalance('<0.01')
+        if (mounted) setBalance('<0.01')
       } else {
-        setBalance(ethers.utils.formatUnits(bal).toString())
+        if (mounted) setBalance(ethers.utils.formatUnits(bal).toString())
       }
     })
-  }, [])
+    return () => {
+      mounted = false
+    }
+  }, [chainId])
 
-  return <div>{balance}</div>
+  return <>{balance}</>
 }
 const SubmitButton = (props: any) => {
   const { chainId, account } = useWeb3React()

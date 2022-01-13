@@ -39,14 +39,18 @@ const StatusCell = (props: any) => {
     provider.getSigner()
   )
   useEffect(() => {
+    let mounted = true
     diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
       if (
         getExpiryMinutesFromNow(pool.expiryDate.toNumber()) + 24 * 60 - 5 < 0 &&
         props.row.Status === 'Open'
       ) {
-        setStatus('Expired')
+        if (mounted) setStatus('Expired')
       }
     })
+    return () => {
+      mounted = false
+    }
   }, [])
 
   return <div>{status}</div>
@@ -176,14 +180,19 @@ const SubmitCell = (props: any) => {
   }
 
   useEffect(() => {
+    let mounted = true
     diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
-      setBtnDisabled(
-        props.row.Status === 'Submitted' ||
-          props.row.Status === 'Confirmed' ||
-          pool.expiryDate.toNumber() * 1000 > Date.now() ||
-          getExpiryMinutesFromNow(pool.expiryDate.toNumber() + 24 * 3600) < 0
-      )
+      if (mounted)
+        setBtnDisabled(
+          props.row.Status === 'Submitted' ||
+            props.row.Status === 'Confirmed' ||
+            pool.expiryDate.toNumber() * 1000 > Date.now() ||
+            getExpiryMinutesFromNow(pool.expiryDate.toNumber() + 24 * 3600) < 0
+        )
     }, [])
+    return () => {
+      mounted = false
+    }
   })
   return (
     <Container>
