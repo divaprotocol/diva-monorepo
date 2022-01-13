@@ -18,6 +18,14 @@ jobs:
       - name: Build app
         run: yarn build
 
+      - name: Copy wallet
+        env:
+          WALLET: ${{ secrets.ARWEAVE_WALLET }}
+        run: echo $WALLET > ./ARWEAVE_WALLET.json
+
+      - name: deploy
+        run: arkb deploy folder --use-bundler http://bundler.arweave.net --wallet ./ARWEAVE_WALLET.json
+
       # TODO: Enable when we actually have tests
       # - name: Run tests
       #   run: yarn test
