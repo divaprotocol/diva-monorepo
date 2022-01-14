@@ -1,6 +1,7 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import {
   Button,
+  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -19,7 +20,11 @@ import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
 import DIVA_ABI from '../../abi/DIVA.json'
-import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
+import {
+  getDateTime,
+  getExpiryMinutesFromNow,
+  isExpired,
+} from '../../Util/Dates'
 import { formatUnits } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
@@ -28,7 +33,7 @@ import { request } from 'graphql-request'
 
 const StatusCell = (props: any) => {
   const { chainId } = useWeb3React()
-  const [status, setStatus] = useState(props.row.Status)
+  const [status, setStatus] = useState<string>()
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
@@ -39,21 +44,26 @@ const StatusCell = (props: any) => {
     provider.getSigner()
   )
   useEffect(() => {
-    let mounted = true
-    diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
-      if (
-        getExpiryMinutesFromNow(pool.expiryDate.toNumber()) + 24 * 60 - 5 < 0 &&
-        props.row.Status === 'Open'
-      ) {
-        if (mounted) setStatus('Expired')
+    if (props) {
+      let mounted = true
+      diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
+        if (
+          isExpired(pool.expiryDate) &&
+          props.row.Status === 'Open' &&
+          mounted
+        ) {
+          setStatus('Expired')
+        } else if (mounted) {
+          setStatus(props.row.Status)
+        }
+      })
+      return () => {
+        mounted = false
       }
-    })
-    return () => {
-      mounted = false
     }
-  }, [])
+  }, [props.row.Status])
 
-  return <div>{status}</div>
+  return <>{status === undefined ? <CircularProgress /> : status}</>
 }
 
 const DueInCell = (props: any) => {
@@ -71,11 +81,19 @@ const DueInCell = (props: any) => {
     provider.getSigner()
   )
   useEffect(() => {
-    diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
-      setExpTimestamp(pool.expiryDate.toNumber())
-      setStatusTimestamp(pool.statusTimestamp.toNumber())
-    }, [])
-  })
+    if (props) {
+      let mounted = true
+      diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
+        if (mounted) {
+          setExpTimestamp(pool.expiryDate.toNumber())
+          setStatusTimestamp(pool.statusTimestamp.toNumber())
+        }
+      })
+      return () => {
+        mounted = false
+      }
+    }
+  }, [props.id])
 
   if (props.row.Status === 'Open') {
     const minUntilExp = getExpiryMinutesFromNow(

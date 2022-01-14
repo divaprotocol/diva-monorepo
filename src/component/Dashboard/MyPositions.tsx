@@ -106,7 +106,7 @@ const StatusCell = (props: any) => {
     }
   }, [props.row.Status])
 
-  return <>{status == null ? <CircularProgress /> : status}</>
+  return <>{status === undefined ? <CircularProgress /> : status}</>
 }
 
 const BalanceCell = (props: any) => {
@@ -132,9 +132,9 @@ const BalanceCell = (props: any) => {
         mounted = false
       }
     }
-  }, [chainId])
+  }, [props])
 
-  return <>{balance == null ? <CircularProgress /> : balance}</>
+  return <>{balance === undefined ? <CircularProgress /> : balance}</>
 }
 const SubmitButton = (props: any) => {
   const { chainId, account } = useWeb3React()
