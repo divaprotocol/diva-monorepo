@@ -81,26 +81,28 @@ const StatusCell = (props: any) => {
     chainIdtoName(chainId).toLowerCase()
   )
   useEffect(() => {
-    let mounted = true
-    const diva = new ethers.Contract(
-      addresses[chainId!].divaAddress,
-      DIVA_ABI,
-      provider.getSigner()
-    )
+    if (props) {
+      let mounted = true
+      const diva = new ethers.Contract(
+        addresses[chainId!].divaAddress,
+        DIVA_ABI,
+        provider.getSigner()
+      )
 
-    diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
-      if (
-        isExpired(pool.expiryDate) &&
-        props.row.Status === 'Open' &&
-        mounted
-      ) {
-        setStatus('Expired')
-      } else if (mounted) {
-        setStatus(props.row.Status)
+      diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
+        if (
+          isExpired(pool.expiryDate) &&
+          props.row.Status === 'Open' &&
+          mounted
+        ) {
+          setStatus('Expired')
+        } else if (mounted) {
+          setStatus(props.row.Status)
+        }
+      })
+      return () => {
+        mounted = false
       }
-    })
-    return () => {
-      mounted = false
     }
   }, [props.row.Status])
 
@@ -116,17 +118,19 @@ const BalanceCell = (props: any) => {
     chainIdtoName(chainId).toLowerCase()
   )
   useEffect(() => {
-    let mounted = true
-    const contract = new ethers.Contract(props.row.address, ERC20, provider)
-    contract.balanceOf(account).then((bal: BigNumber) => {
-      if (parseInt(ethers.utils.formatUnits(bal)) < 0.01) {
-        if (mounted) setBalance('<0.01')
-      } else {
-        if (mounted) setBalance(ethers.utils.formatUnits(bal).toString())
+    if (props) {
+      let mounted = true
+      const contract = new ethers.Contract(props.row.address, ERC20, provider)
+      contract.balanceOf(account).then((bal: BigNumber) => {
+        if (parseInt(ethers.utils.formatUnits(bal)) < 0.01) {
+          if (mounted) setBalance('<0.01')
+        } else {
+          if (mounted) setBalance(ethers.utils.formatUnits(bal).toString())
+        }
+      })
+      return () => {
+        mounted = false
       }
-    })
-    return () => {
-      mounted = false
     }
   }, [chainId])
 
