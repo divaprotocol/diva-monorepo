@@ -19,13 +19,13 @@ import {
   getExpiryMinutesFromNow,
   isExpired,
 } from '../../Util/Dates'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatEther, formatUnits } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import ERC20_JSON from '../../abi/ERC20.json'
-import { useCheckTokenBalances } from '../../hooks/useCheckTokenBalances'
+import { useTokenBalances } from '../../hooks/useTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -73,69 +73,6 @@ const AddToMetamask = (props: any) => {
   )
 }
 
-const StatusCell = (props: any) => {
-  const { chainId } = useWeb3React()
-  const [status, setStatus] = useState<string>()
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
-  useEffect(() => {
-    if (props) {
-      let mounted = true
-      const diva = new ethers.Contract(
-        addresses[chainId!].divaAddress,
-        DIVA_ABI,
-        provider.getSigner()
-      )
-
-      diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
-        if (
-          isExpired(pool.expiryDate) &&
-          props.row.Status === 'Open' &&
-          mounted
-        ) {
-          setStatus('Expired')
-        } else if (mounted) {
-          setStatus(props.row.Status)
-        }
-      })
-      return () => {
-        mounted = false
-      }
-    }
-  }, [props.row.Status])
-
-  return <>{status === undefined ? <CircularProgress /> : status}</>
-}
-
-const BalanceCell = (props: any) => {
-  const { account, chainId } = useWeb3React()
-  const [balance, setBalance] = useState<string>()
-
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
-  useEffect(() => {
-    if (props) {
-      let mounted = true
-      const contract = new ethers.Contract(props.row.address, ERC20, provider)
-      contract.balanceOf(account).then((bal: BigNumber) => {
-        if (parseInt(ethers.utils.formatUnits(bal)) < 0.01) {
-          if (mounted) setBalance('<0.01')
-        } else {
-          if (mounted) setBalance(ethers.utils.formatUnits(bal).toString())
-        }
-      })
-      return () => {
-        mounted = false
-      }
-    }
-  }, [props])
-
-  return <>{balance === undefined ? <CircularProgress /> : balance}</>
-}
 const SubmitButton = (props: any) => {
   const { chainId, account } = useWeb3React()
   const provider = new ethers.providers.Web3Provider(
@@ -244,13 +181,11 @@ const columns: GridColDef[] = [
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
-    renderCell: (props) => <StatusCell {...props} />,
   },
   {
     field: 'Balance',
     align: 'right',
     headerAlign: 'right',
-    renderCell: (props) => <BalanceCell {...props} />,
   },
   {
     field: 'submitValue',
@@ -274,10 +209,11 @@ const columns: GridColDef[] = [
 export function MyPositions() {
   const { account } = useWeb3React()
 
-  const query = useQuery<{ pools: Pool[] }>('pools', () =>
+  const poolsQuery = useQuery<{ pools: Pool[] }>('pools', () =>
     request(theGraphUrl, queryPools)
   )
-  const pools = query.data?.pools || ([] as Pool[])
+
+  const pools = poolsQuery.data?.pools || ([] as Pool[])
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
@@ -298,6 +234,15 @@ export function MyPositions() {
       Inflection: parseInt(val.inflection) / 1e18,
       Cap: parseInt(val.cap) / 1e18,
     }
+
+    const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
+    const now = new Date()
+    const Status =
+      expiryDate.getTime() <= now.getTime() &&
+      val.statusFinalReferenceValue.toLowerCase() === 'open'
+        ? 'Expired'
+        : val.statusFinalReferenceValue
+
     return [
       ...acc,
       {
@@ -312,7 +257,7 @@ export function MyPositions() {
           formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
           ' ' +
           val.collateralSymbol,
-        Status: val.statusFinalReferenceValue,
+        Status,
         finalValue:
           val.statusFinalReferenceValue === 'Open'
             ? '-'
@@ -330,7 +275,7 @@ export function MyPositions() {
           formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
           ' ' +
           val.collateralSymbol,
-        Status: val.statusFinalReferenceValue,
+        Status,
         finalValue:
           val.statusFinalReferenceValue === 'Open'
             ? '-'
@@ -339,11 +284,29 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
-  const tokenBalances = useCheckTokenBalances(rows.map((v) => v.address))
+  const tokenBalances = useTokenBalances(rows.map((v) => v.address))
 
-  const filteredRows = rows.filter((v) => {
-    return tokenBalances?.includes(v.address)
-  })
+  // if (balances.isSuccess) {
+  //   balances.data.filter((bal) => bal !== undefined)
+  // }
+
+  const filteredRows =
+    tokenBalances != null
+      ? rows
+          .filter(
+            (v) =>
+              tokenBalances[v.address] != null && tokenBalances[v.address].gt(0)
+          )
+          .map((v) => ({
+            ...v,
+            Balance:
+              parseInt(formatUnits(tokenBalances[v.address])) < 0.01
+                ? '<0.01'
+                : formatUnits(tokenBalances[v.address]).toString(),
+          }))
+      : []
+
+  console.log({ filteredRows })
 
   return account ? (
     <Stack

@@ -5,34 +5,37 @@ import { chainIdtoName } from '../Util/chainIdToName'
 import { useQuery } from 'react-query'
 const ERC20 = ERC20_JSON.abi
 
-export function useCheckTokenBalances(tokenAddresses: string[]) {
+type Response = {
+  [token: string]: BigNumber
+}
+
+export function useTokenBalances(tokenAddresses: string[]) {
   const { account, chainId } = useWeb3React()
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
   )
 
-  const balances = useQuery<string[]>(
+  const balances = useQuery<Response>(
     'balance',
     async () => {
-      const balances: any[] = await Promise.all(
+      const response: Response = {}
+      await Promise.all(
         tokenAddresses.map(async (tokenAddress) => {
           const contract = new ethers.Contract(tokenAddress, ERC20, provider)
           try {
-            const res = await contract.balanceOf(account)
-            if (res.gt(BigNumber.from(0))) {
-              return tokenAddress
-            }
+            const res: BigNumber = await contract.balanceOf(account)
+            response[tokenAddress] = res
           } catch (error) {
             console.error(error)
           }
         })
       )
-      return balances
+
+      return response
     },
     { cacheTime: 5 }
   )
-  if (balances.isSuccess) {
-    return balances.data.filter((bal) => bal !== undefined)
-  }
+
+  return balances.data
 }
