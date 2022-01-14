@@ -129,7 +129,12 @@ export default function OptionDetails({
           <FlexBoxHeader>Collateral</FlexBoxHeader>
           <FlexBoxData>
             {isLong
-              ? formatUnits(pool.collateralBalanceLong, pool.collateralDecimals)
+              ? formatUnits(
+                  pool.collateralBalanceLong,
+                  pool.collateralDecimals
+                ) +
+                ' ' +
+                pool.collateralSymbol
               : formatUnits(
                   pool.collateralBalanceShort,
                   pool.collateralDecimals
@@ -141,7 +146,7 @@ export default function OptionDetails({
       </FlexDiv>
       <FlexSecondLineDiv>
         <FlexBoxSecondLine>
-          <FlexBoxHeader>Data feed provider</FlexBoxHeader>
+          <FlexBoxHeader>Data provider</FlexBoxHeader>
           <Tooltip title={pool.dataFeedProvider} arrow>
             <FlexToolTipBoxData>
               {pool.dataFeedProvider.length > 0

@@ -101,12 +101,12 @@ function mapOrderData(
   let sortedRecords: any = []
   const orderbook: any = records.map((record: any) => {
     const order = record.order
+    const metaData = record.metaData
     const makerToken = order.makerToken
     const takerToken = order.takerToken
     const collateralToken = option.collateralToken.toLowerCase()
     const tokenAddress = optionTokenAddress.toLowerCase()
     const orders: any = {}
-
     if (makerToken === collateralToken && takerToken === tokenAddress) {
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
@@ -120,10 +120,17 @@ function mapOrderData(
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'sell'
       orders.id = 'sell' + records.indexOf(record as never)
-      orders.nbrOptions = order.makerAmount / 10 ** 18
       orders.ask =
         (order.takerAmount / order.makerAmount) *
         10 ** (18 - option.collateralDecimals)
+      const remainingTakerAmount =
+        metaData.remainingFillableTakerAmount / 10 ** 18
+      const orderQuantity = order.makerAmount / 10 ** 18
+      if (remainingTakerAmount === orderQuantity) {
+        orders.nbrOptions = orderQuantity
+      } else {
+        orders.nbrOptions = remainingTakerAmount / orders.ask
+      }
     }
     return orders
   })
@@ -205,7 +212,6 @@ export default function OrderBook(props: {
 
   const componentDidMount = async () => {
     const orders = []
-
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
@@ -240,7 +246,7 @@ export default function OrderBook(props: {
       'ascOrder'
     )
     orders.push(orderBookSell)
-    //put both buy & sell orders in one array to simplify rendering
+    //put both buy & sell orders in one array to format table rows
     const completeOrderBook = createTable(
       orders[OrderType.BUY],
       orders[OrderType.SELL]
@@ -293,14 +299,16 @@ export default function OrderBook(props: {
                       >
                         <Box paddingBottom="20px">
                           <Typography variant="h6">
-                            {row.buyQuantity}
+                            {row.buyQuantity.toFixed(4)}
                           </Typography>
                           <label> </label>
                         </Box>
                       </TableCellStyle>
                       <TableCellStyle align="center">
                         <Box>
-                          <Typography variant="h6">{row.bid}</Typography>
+                          <Typography variant="h6">
+                            {row.bid.toFixed(4)}
+                          </Typography>
                           <Typography variant="caption" noWrap>
                             {row.buyExpiry}
                           </Typography>
@@ -308,7 +316,9 @@ export default function OrderBook(props: {
                       </TableCellStyle>
                       <TableCellStyle align="center">
                         <Box>
-                          <Typography variant="h6">{row.ask}</Typography>
+                          <Typography variant="h6">
+                            {row.ask.toFixed(4)}
+                          </Typography>
                           <Typography variant="caption" noWrap>
                             {row.sellExpiry}
                           </Typography>
@@ -317,7 +327,7 @@ export default function OrderBook(props: {
                       <TableCellStyle align="center">
                         <Box paddingBottom="20px">
                           <Typography variant="h6">
-                            {row.sellQuantity}
+                            {row.sellQuantity.toFixed(4)}
                           </Typography>
                         </Box>
                       </TableCellStyle>

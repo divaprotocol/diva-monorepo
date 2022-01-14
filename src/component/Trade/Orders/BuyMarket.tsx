@@ -73,7 +73,7 @@ export default function BuyMarket(props: {
   tokenAddress: string
 }) {
   const option = props.option
-  const optionTokenAddress = props.tokenAddress
+  //const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
@@ -88,17 +88,15 @@ export default function BuyMarket(props: {
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
+
   const params = {
     makerToken: makerToken,
     takerToken: takerToken,
   }
   const handleNumberOfOptions = (value: string) => {
-    console.log('Number of options' + value + '-')
     if (value !== '') {
       const nbrOptions = parseFloat(value)
       setNumberOfOptions(nbrOptions)
-      const youPay = avgExpectedRate * nbrOptions
-      setYouPay(youPay)
     } else {
       setYouPay(0.0)
     }
@@ -142,13 +140,30 @@ export default function BuyMarket(props: {
         if (!('logs' in orderFillStatus)) {
           return
         } else {
-          orderFillStatus.logs.forEach((eventData: any) => {
+          orderFillStatus.logs.forEach(async (eventData: any) => {
             if (!('event' in eventData)) {
               return
             } else {
               if (eventData.event === 'LimitOrderFilled') {
+                //reset fill order button to approve
+                setIsApproved(false)
+                //get updated wallet balance
+                getCollateralInWallet().then((val) => {
+                  if (val != null) {
+                    setCollateralBalance(Number(val))
+                  }
+                })
+                //reset input & you pay fields
+                Array.from(document.querySelectorAll('input')).forEach(
+                  (input) => (input.value = '')
+                )
+                setNumberOfOptions(0.0)
+                setYouPay(0.0)
                 alert('Order successfully filled')
+                //wait for a sec for 0x to update orders then handle order book display
+                await new Promise((resolve) => setTimeout(resolve, 4000))
                 props.handleDisplayOrder()
+                return
               } else {
                 alert('Order could not be filled')
               }
@@ -252,6 +267,8 @@ export default function BuyMarket(props: {
       cumulativeAvg = cumulativeTaker / cumulativeMaker
       if (cumulativeAvg > 0) {
         setAvgExpectedRate(cumulativeAvg)
+        const youPay = cumulativeAvg * numberOfOptions
+        setYouPay(youPay)
       }
     }
   }, [numberOfOptions])
@@ -286,7 +303,7 @@ export default function BuyMarket(props: {
             <LabelStyle>You Pay</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youPay.toFixed(4)} {option.collateralTokenName}
+            {youPay.toFixed(4)} {option.collateralSymbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -295,7 +312,7 @@ export default function BuyMarket(props: {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {collateralBalance.toFixed(4)} {option.collateralTokenName}
+              {collateralBalance.toFixed(4)} {option.collateralSymbol}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>

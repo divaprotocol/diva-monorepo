@@ -36,24 +36,14 @@ export const buyMarketOrder = async (orderData) => {
     return takerAssetFillAmount
   }
 
-  orders.forEach((order, index) => {
-    console.log(
-      index +
-        ' ' +
-        order.expectedRate +
-        ' nbr options - ' +
-        takerFillNbrOptions +
-        ' remaining amount' +
-        order.remainingFillableTakerAmount
-    )
+  orders.forEach((order) => {
     if (takerFillNbrOptions > 0) {
       const expectedRate = new BigNumber(order.expectedRate)
       const takerFillAmount = takerFillNbrOptions.multipliedBy(expectedRate)
       const remainingFillableTakerAmount = new BigNumber(
         order.remainingFillableTakerAmount
       )
-
-      if (takerFillAmount <= remainingFillableTakerAmount) {
+      if (takerFillAmount.isLessThanOrEqualTo(remainingFillableTakerAmount)) {
         takerAssetAmounts.push(takerFillAmount)
         const nbrOptionsFilled =
           remainingFillableTakerAmount.dividedBy(expectedRate)
@@ -77,9 +67,6 @@ export const buyMarketOrder = async (orderData) => {
   })
 
   const totalTakerAssetAmount = takerAssetAmount(takerAssetAmounts)
-  console.log('total taker asset amount ' + totalTakerAssetAmount)
   filledOrder = await fillOrderResponse(totalTakerAssetAmount)
   return filledOrder
-  // TODO Handle sum(takerAssetAmountFillAmounts) > remainingFillable amount
-  // Batch fill limit order
 }
