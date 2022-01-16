@@ -226,7 +226,7 @@ export default function OpenOrders(props: {
                         align="left"
                       >
                         <Box>
-                          <Typography variant="h6">
+                          <Typography variant="subtitle1">
                             {order.orderType}
                           </Typography>
                           <Typography variant="caption" noWrap>
@@ -236,28 +236,28 @@ export default function OpenOrders(props: {
                       </TableCellStyle>
                       <TableCellStyle align="center">
                         <Box paddingBottom="20px">
-                          <Typography variant="h6">
+                          <Typography variant="subtitle1">
                             {order.nbrOptions}
                           </Typography>
                         </Box>
                       </TableCellStyle>
                       <TableCellStyle align="center">
                         <Box paddingBottom="20px">
-                          <Typography variant="h6">
-                            {order.pricePerOption}
+                          <Typography variant="subtitle1">
+                            {order.pricePerOption.toFixed(2)}
                           </Typography>
                         </Box>
                       </TableCellStyle>
                       <TableCellStyle align="center">
                         <Box paddingBottom="20px">
-                          <Typography variant="h6">
-                            {order.payReceive}
+                          <Typography variant="subtitle1">
+                            {order.payReceive.toFixed(2)}
                           </Typography>
                         </Box>
                       </TableCellStyle>
                       <TableCellStyle align="right">
                         <Box paddingBottom="20px">
-                          <Typography variant="h6">
+                          <Typography variant="subtitle1">
                             <Button
                               variant="outlined"
                               startIcon={<DeleteIcon />}

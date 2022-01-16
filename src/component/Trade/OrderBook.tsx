@@ -181,10 +181,11 @@ function createTable(buyOrders: any, sellOrders: any) {
       const buyOrder = buyOrders[j]
       const sellOrder = sellOrders[j]
       const row = {
-        buyExpiry: buyOrder === undefined ? '' : buyOrder.expiry + ' mins',
+        buyExpiry:
+          buyOrder === undefined ? '0 mins' : buyOrder.expiry + ' mins',
         buyQuantity: buyOrder === undefined ? '' : buyOrder.nbrOptions,
         bid: buyOrder === undefined ? '' : buyOrder.bid,
-        sellExpiry: sellOrder === undefined ? '' : sellOrder.expiry + ' mins',
+        sellExpiry: sellOrder === undefined ? ' ' : sellOrder.expiry + ' mins',
         sellQuantity: sellOrder === undefined ? '' : sellOrder.nbrOptions,
         ask: sellOrder === undefined ? '' : sellOrder.ask,
       }
@@ -298,16 +299,16 @@ export default function OrderBook(props: {
                         align="center"
                       >
                         <Box paddingBottom="20px">
-                          <Typography variant="h6">
-                            {row.buyQuantity.toFixed(4)}
+                          <Typography variant="subtitle1">
+                            {Number(row.buyQuantity).toFixed(2)}
                           </Typography>
                           <label> </label>
                         </Box>
                       </TableCellStyle>
                       <TableCellStyle align="center">
                         <Box>
-                          <Typography variant="h6">
-                            {row.bid.toFixed(4)}
+                          <Typography variant="subtitle1">
+                            {Number(row.bid).toFixed(2)}
                           </Typography>
                           <Typography variant="caption" noWrap>
                             {row.buyExpiry}
@@ -316,8 +317,8 @@ export default function OrderBook(props: {
                       </TableCellStyle>
                       <TableCellStyle align="center">
                         <Box>
-                          <Typography variant="h6">
-                            {row.ask.toFixed(4)}
+                          <Typography variant="subtitle1">
+                            {Number(row.ask).toFixed(2)}
                           </Typography>
                           <Typography variant="caption" noWrap>
                             {row.sellExpiry}
@@ -326,8 +327,8 @@ export default function OrderBook(props: {
                       </TableCellStyle>
                       <TableCellStyle align="center">
                         <Box paddingBottom="20px">
-                          <Typography variant="h6">
-                            {row.sellQuantity.toFixed(4)}
+                          <Typography variant="subtitle1">
+                            {Number(row.sellQuantity).toFixed(2)}
                           </Typography>
                         </Box>
                       </TableCellStyle>
