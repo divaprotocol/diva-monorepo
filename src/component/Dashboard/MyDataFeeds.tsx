@@ -11,7 +11,7 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { ethers } from 'ethers'
 
@@ -31,74 +31,15 @@ import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 
-const StatusCell = (props: any) => {
-  const { chainId } = useWeb3React()
-  const [status, setStatus] = useState<string>()
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
-  const diva = new ethers.Contract(
-    addresses[chainId!].divaAddress,
-    DIVA_ABI,
-    provider.getSigner()
-  )
-  useEffect(() => {
-    if (props) {
-      let mounted = true
-      diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
-        if (
-          isExpired(pool.expiryDate) &&
-          props.row.Status === 'Open' &&
-          mounted
-        ) {
-          setStatus('Expired')
-        } else if (mounted) {
-          setStatus(props.row.Status)
-        }
-      })
-      return () => {
-        mounted = false
-      }
-    }
-  }, [props.row.Status])
-
-  return <>{status === undefined ? <CircularProgress /> : status}</>
-}
-
 const DueInCell = (props: any) => {
-  const { chainId } = useWeb3React()
-  const [expTimestamp, setExpTimestamp] = useState(0)
-  const [statusTimestamp, setStatusTimestamp] = useState(0)
+  const expTimestamp = parseInt(props.row.Expiry)
+  const statusTimestamp = parseInt(props.row.statusTimestamp)
 
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
-  const diva = new ethers.Contract(
-    addresses[chainId!].divaAddress,
-    DIVA_ABI,
-    provider.getSigner()
-  )
-  useEffect(() => {
-    if (props) {
-      let mounted = true
-      diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
-        if (mounted) {
-          setExpTimestamp(pool.expiryDate.toNumber())
-          setStatusTimestamp(pool.statusTimestamp.toNumber())
-        }
-      })
-      return () => {
-        mounted = false
-      }
-    }
-  }, [props.id])
-
-  if (props.row.Status === 'Open') {
+  if (props.row.Status === 'Expired') {
     const minUntilExp = getExpiryMinutesFromNow(
       expTimestamp + 24 * 3600 - 5 * 60
     )
+
     if (minUntilExp < 24 * 60 - 5 && minUntilExp > 0) {
       return minUntilExp === 1 ? (
         <div
@@ -187,7 +128,6 @@ const SubmitCell = (props: any) => {
     provider.getSigner()
   )
   const [open, setOpen] = useState(false)
-  const [btnDisabled, setBtnDisabled] = useState(true)
   const [textFieldValue, setTextFieldValue] = useState('')
   const handleOpen = () => {
     setOpen(true)
@@ -197,24 +137,15 @@ const SubmitCell = (props: any) => {
     setOpen(false)
   }
 
-  useEffect(() => {
-    let mounted = true
-    diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
-      if (mounted)
-        setBtnDisabled(
-          props.row.Status === 'Submitted' ||
-            props.row.Status === 'Confirmed' ||
-            pool.expiryDate.toNumber() * 1000 > Date.now() ||
-            getExpiryMinutesFromNow(pool.expiryDate.toNumber() + 24 * 3600) < 0
-        )
-    }, [])
-    return () => {
-      mounted = false
-    }
-  })
+  const enabled =
+    (props.row.Status === 'Expired' &&
+      getExpiryMinutesFromNow(props.row.Expiry) + 24 * 60 - 5 > 0) ||
+    (props.row.Status === 'Challenged' &&
+      getExpiryMinutesFromNow(props.row.StatusTimestamp) + 48 * 60 - 5 > 0)
+
   return (
     <Container>
-      <Button variant="contained" onClick={handleOpen} disabled={btnDisabled}>
+      <Button variant="contained" onClick={handleOpen} disabled={!enabled}>
         Submit value
       </Button>
       <Dialog open={open} onClose={handleClose}>
@@ -228,7 +159,6 @@ const SubmitCell = (props: any) => {
           <TextField
             defaultValue={textFieldValue}
             onChange={(e) => {
-              // e.stopPropagation()
               setTextFieldValue(e.target.value)
             }}
           />
@@ -275,6 +205,9 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     type: 'dateTime',
+    renderCell: (props) => {
+      return <div>{getDateTime(props.row.Expiry)}</div>
+    },
   },
   {
     field: 'finalValue',
@@ -291,7 +224,6 @@ const columns: GridColDef[] = [
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
-    renderCell: (props) => <StatusCell {...props} />,
   },
   {
     field: 'subPeriod',
@@ -328,7 +260,7 @@ export function MyDataFeeds() {
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
       Ceiling: formatUnits(val.cap),
-      Expiry: getDateTime(val.expiryDate),
+      Expiry: val.expiryDate,
       Sell: 'TBD',
       Buy: 'TBD',
       MaxYield: 'TBD',
@@ -339,6 +271,13 @@ export function MyDataFeeds() {
       Inflection: parseInt(val.inflection) / 1e18,
       Cap: parseInt(val.cap) / 1e18,
     }
+    const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
+    const now = new Date()
+    const Status =
+      expiryDate.getTime() <= now.getTime() &&
+      val.statusFinalReferenceValue.toLowerCase() === 'open'
+        ? 'Expired'
+        : val.statusFinalReferenceValue
     return [
       ...acc,
       {
@@ -353,7 +292,8 @@ export function MyDataFeeds() {
           formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
           ' ' +
           val.collateralSymbol,
-        Status: val.statusFinalReferenceValue,
+        Status,
+        StatusTimestamp: val.statusTimestamp,
         finalValue:
           val.statusFinalReferenceValue === 'Open'
             ? '-'

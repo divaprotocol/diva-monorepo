@@ -101,7 +101,7 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
         )
       }
     } else {
-      if (coinIconLeft === '') {
+      if (coinIconRight === '') {
         return (
           <>
             <img alt={assets[0]} src={coinIconLeft} style={{ height: 30 }} />
