@@ -79,52 +79,52 @@ const SubmitButton = (props: any) => {
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
   )
+
   const diva = new ethers.Contract(
     addresses[chainId!].divaAddress,
     DIVA_ABI,
     provider.getSigner()
   )
   const token = new ethers.Contract(props.row.address, ERC20, provider)
-  const [redeemBtn, setRedeemBtn] = useState('Trade')
   const history = useHistory()
   const handleRedeem = () => {
     token.balanceOf(account).then((bal: BigNumber) => {
       diva.redeemPositionToken(props.row.address, bal)
     })
   }
-  useEffect(() => {
-    diva.getPoolParameters(props.id.split('/')[0]).then((pool: any) => {
-      const statusExpMin = getExpiryMinutesFromNow(
-        pool.statusTimestamp.toNumber()
-      )
-      if (props.row.Status === 'Submitted' && statusExpMin + 24 * 60 + 5 < 0) {
-        setRedeemBtn('Redeem')
-      } else if (
-        props.row.Status === 'Challenged ' &&
-        statusExpMin + 48 * 60 + 5 < 0
-      ) {
-        setRedeemBtn('Redeem')
-      } else if (props.row.Status === 'Confirmed') {
-        setRedeemBtn('Redeem')
-      } else {
-        setRedeemBtn('Trade')
-      }
-    }, [])
-  })
+
+  let buttonName: string
+
+  console.log(props)
+  const statusExpMin = getExpiryMinutesFromNow(Number(props.StatusTimestamp))
+
+  if (props.row.Status === 'Submitted' && statusExpMin + 24 * 60 + 5 < 0) {
+    buttonName = 'Redeem'
+  } else if (
+    props.row.Status === 'Challenged ' &&
+    statusExpMin + 48 * 60 + 5 < 0
+  ) {
+    buttonName = 'Redeem'
+  } else if (props.row.Status === 'Confirmed') {
+    buttonName = 'Redeem'
+  } else {
+    buttonName = 'Trade'
+  }
+
   return (
     <Container>
       <Button
         variant="contained"
-        color={redeemBtn === 'Redeem' ? 'success' : 'primary'}
+        color={buttonName === 'Redeem' ? 'success' : 'primary'}
         onClick={
-          redeemBtn === 'Redeem'
+          buttonName === 'Redeem'
             ? handleRedeem
             : () => {
                 history.push('../' + `${props.id}`)
               }
         }
       >
-        {redeemBtn}
+        {buttonName}
       </Button>
     </Container>
   )
@@ -193,7 +193,7 @@ const columns: GridColDef[] = [
     headerAlign: 'right',
     headerName: '',
     minWidth: 200,
-    renderCell: (props) => <SubmitButton {...props} />,
+    renderCell: (props) => <SubmitButton {...props} buttonName="yolo" />,
   },
 
   {
@@ -227,6 +227,7 @@ export function MyPositions() {
       Sell: 'TBD',
       Buy: 'TBD',
       MaxYield: 'TBD',
+      StatusTimestamp: val.statusTimestamp,
     }
 
     const payOff = {
@@ -286,10 +287,6 @@ export function MyPositions() {
 
   const tokenBalances = useTokenBalances(rows.map((v) => v.address))
 
-  // if (balances.isSuccess) {
-  //   balances.data.filter((bal) => bal !== undefined)
-  // }
-
   const filteredRows =
     tokenBalances != null
       ? rows
@@ -305,8 +302,6 @@ export function MyPositions() {
                 : formatUnits(tokenBalances[v.address]).toString(),
           }))
       : []
-
-  console.log({ filteredRows })
 
   return account ? (
     <Stack
