@@ -1,8 +1,5 @@
 import { useQuery } from 'react-query'
-
-type Tokens = {
-  [key: string]: string
-}
+import { Tokens } from '../lib/types'
 
 export function useCoinIcon(_symbol?: string) {
   const symbol = _symbol?.toLowerCase()

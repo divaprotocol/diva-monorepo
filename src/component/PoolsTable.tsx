@@ -29,7 +29,6 @@ const CoinPlaceHolder = (asset: string) => {
         textAnchor="middle"
         fill="white"
         fontSize="20px"
-        fontFamily="Arial"
         dy=".3em"
       >
         {asset.charAt(0)}
@@ -72,7 +71,6 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
                 textAnchor="middle"
                 fill="white"
                 fontSize="20px"
-                fontFamily="Arial"
                 dy=".3em"
               >
                 {assets[0].charAt(0)}
@@ -84,7 +82,6 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
                 textAnchor="middle"
                 fill="white"
                 fontSize="20px"
-                fontFamily="Arial"
                 dy=".3em"
               >
                 {assets[1].charAt(0)}

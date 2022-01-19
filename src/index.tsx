@@ -5,6 +5,8 @@ import { App } from './App'
 import reportWebVitals from './reportWebVitals'
 import store from './Redux/Store'
 import { Provider } from 'react-redux'
+import LocalizationProvider from '@mui/lab/LocalizationProvider'
+import AdapterDateFns from '@mui/lab/AdapterDateFns'
 import { ThemeProvider } from '@mui/material/styles'
 import { useMediaQuery } from '@mui/material'
 import { Box } from '@mui/system'
@@ -12,6 +14,7 @@ import { createDivaTheme } from './lib/createDivaTheme'
 import Web3 from 'web3'
 import { Web3ReactProvider } from '@web3-react/core'
 import { QueryClient, QueryClientProvider } from 'react-query'
+import 'react-vis/dist/style.css'
 
 function getLibrary(provider: any) {
   return new Web3(provider)
@@ -43,13 +46,15 @@ const WithProviders = () => {
       }}
     >
       <QueryClientProvider client={queryClient}>
-        <Web3ReactProvider getLibrary={getLibrary}>
-          <ThemeProvider theme={theme}>
-            <Provider store={store}>
-              <App />
-            </Provider>
-          </ThemeProvider>
-        </Web3ReactProvider>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Web3ReactProvider getLibrary={getLibrary}>
+            <ThemeProvider theme={theme}>
+              <Provider store={store}>
+                <App />
+              </Provider>
+            </ThemeProvider>
+          </Web3ReactProvider>
+        </LocalizationProvider>
       </QueryClientProvider>
     </Box>
   )
