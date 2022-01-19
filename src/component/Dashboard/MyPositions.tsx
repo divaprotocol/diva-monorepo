@@ -1,12 +1,5 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import {
-  Button,
-  CircularProgress,
-  Container,
-  Stack,
-  Tooltip,
-} from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import { Button, Container, Stack, Tooltip } from '@mui/material'
 import { useWeb3React } from '@web3-react/core'
 import { BigNumber, ethers } from 'ethers'
 import { addresses, theGraphUrl } from '../../constants'
@@ -14,22 +7,17 @@ import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
 import DIVA_ABI from '../../abi/DIVA.json'
-import {
-  getDateTime,
-  getExpiryMinutesFromNow,
-  isExpired,
-} from '../../Util/Dates'
-import { formatEther, formatUnits } from 'ethers/lib/utils'
+import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
+import { formatUnits } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
-import ERC20_JSON from '../../abi/ERC20.json'
+import ERC20 from '../../abi/ERC20.json'
 import { useTokenBalances } from '../../hooks/useTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
-const ERC20 = ERC20_JSON.abi
 const MetaMaskImage = styled.img`
   width: 20px;
   height: 20px;

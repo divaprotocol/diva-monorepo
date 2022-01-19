@@ -1,9 +1,8 @@
 import { useWeb3React } from '@web3-react/core'
 import { BigNumber, ethers } from 'ethers'
-import ERC20_JSON from '../abi/ERC20.json'
+import ERC20 from '../abi/ERC20.json'
 import { chainIdtoName } from '../Util/chainIdToName'
 import { useQuery } from 'react-query'
-const ERC20 = ERC20_JSON.abi
 
 type Response = {
   [token: string]: BigNumber

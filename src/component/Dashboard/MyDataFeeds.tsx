@@ -1,7 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import {
   Button,
-  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -19,13 +18,8 @@ import { addresses, theGraphUrl } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
-import { Pool } from '../../lib/queries'
 import DIVA_ABI from '../../abi/DIVA.json'
-import {
-  getDateTime,
-  getExpiryMinutesFromNow,
-  isExpired,
-} from '../../Util/Dates'
+import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatUnits } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
