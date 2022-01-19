@@ -1,11 +1,12 @@
 import Header from './component/Header/Header'
 import Underlying from './component/Trade/Underlying'
 
-import { Container } from '@mui/material'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { CreatePool } from './component/CreatePool/CreatePool'
 import Markets from './component/Markets/Markets'
-import { Dashboard } from './component/Dashboard'
+import { Container } from '@mui/material'
+import { MyDataFeeds } from './component/Dashboard/MyDataFeeds'
+import { MyPositions } from './component/Dashboard/MyPositions'
 
 export const App = () => {
   return (
@@ -21,11 +22,10 @@ export const App = () => {
           <Route exact path="/">
             <Markets />
           </Route>
+          <Route exact path="/dashboard/mydatafeeds" component={MyDataFeeds} />
+          <Route exact path="/dashboard/mypositions" component={MyPositions} />
           <Route path="/:poolId/:tokenType">
             <Underlying />
-          </Route>
-          <Route exact path="/dashboard">
-            <Dashboard />
           </Route>
           <Route path="/create">
             <CreatePool />

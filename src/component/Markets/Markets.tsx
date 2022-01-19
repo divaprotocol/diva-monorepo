@@ -1,5 +1,12 @@
-import { GridColDef } from '@mui/x-data-grid/x-data-grid'
+import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
+import { formatUnits } from 'ethers/lib/utils'
+import { getDateTime } from '../../Util/Dates'
+import { generatePayoffChartData } from '../../Graphs/DataGenerator'
+import { useQuery } from 'react-query'
+import { Pool, queryPools } from '../../lib/queries'
+import { request } from 'graphql-request'
+import { theGraphUrl } from '../../constants'
 
 const columns: GridColDef[] = [
   {
@@ -45,5 +52,69 @@ const columns: GridColDef[] = [
 ]
 
 export default function App() {
-  return <PoolsTable columns={columns} />
+  const query = useQuery<{ pools: Pool[] }>('pools', () =>
+    request(theGraphUrl, queryPools)
+  )
+  const pools = query.data?.pools || ([] as Pool[])
+  const rows: GridRowModel[] = pools.reduce((acc, val) => {
+    const shared = {
+      Icon: val.referenceAsset,
+      Underlying: val.referenceAsset,
+      Floor: formatUnits(val.floor),
+      Inflection: formatUnits(val.inflection),
+      Ceiling: formatUnits(val.cap),
+      Expiry: getDateTime(val.expiryDate),
+      Sell: 'TBD',
+      Buy: 'TBD',
+      MaxYield: 'TBD',
+    }
+
+    const payOff = {
+      Floor: parseInt(val.floor) / 1e18,
+      Inflection: parseInt(val.inflection) / 1e18,
+      Cap: parseInt(val.cap) / 1e18,
+    }
+
+    return [
+      ...acc,
+      {
+        ...shared,
+        id: `${val.id}/long`,
+        address: val.longToken,
+        PayoffProfile: generatePayoffChartData({
+          ...payOff,
+          IsLong: true,
+        }),
+        TVL:
+          formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
+          ' ' +
+          val.collateralSymbol,
+        Status: val.statusFinalReferenceValue,
+        finalValue:
+          val.statusFinalReferenceValue === 'Open'
+            ? '-'
+            : formatUnits(val.finalReferenceValue),
+      },
+      {
+        ...shared,
+        id: `${val.id}/short`,
+        address: val.shortToken,
+        PayoffProfile: generatePayoffChartData({
+          ...payOff,
+          IsLong: false,
+        }),
+        TVL:
+          formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
+          ' ' +
+          val.collateralSymbol,
+        Status: val.statusFinalReferenceValue,
+        finalValue:
+          val.statusFinalReferenceValue === 'Open'
+            ? '-'
+            : formatUnits(val.finalReferenceValue),
+      },
+    ]
+  }, [] as GridRowModel[])
+
+  return <PoolsTable columns={columns} rows={rows} />
 }

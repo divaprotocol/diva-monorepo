@@ -1,21 +1,14 @@
 import React, { useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import { getDateTime } from '../Util/Dates'
 import { Box, Input, InputAdornment } from '@mui/material'
-import { generatePayoffChartData } from '../Graphs/DataGenerator'
 import { LineSeries, XYPlot } from 'react-vis'
 import { LocalGasStation, Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
-import { Pool, queryPools } from '../lib/queries'
-import { request } from 'graphql-request'
-import { useQuery } from 'react-query'
-import { formatUnits } from 'ethers/lib/utils'
+import { Pool } from '../lib/queries'
 import { useCoinIcon } from '../hooks/useCoinIcon'
 import { makeStyles } from '@mui/styles'
 import localCoinImages from '../Util/localCoinImages.json'
-import { theGraphUrl } from '../constants'
-
 const assetLogoPath = '/images/coin-logos/'
 
 const useStyles = makeStyles({
@@ -105,7 +98,7 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
         )
       }
     } else {
-      if (coinIconLeft === '') {
+      if (coinIconRight === '') {
         return (
           <>
             <img alt={assets[0]} src={coinIconLeft} style={{ height: 30 }} />
@@ -142,104 +135,13 @@ export const PayoffCell = ({ data }: { data: any }) => {
 
 type Props = {
   columns: GridColDef[]
-  filter?: (pool: Pool) => boolean
-  isDashboard?: boolean
+  disableRowClick?: boolean
+  rows: GridRowModel[]
 }
 
-export default function PoolsTable({ columns, filter, isDashboard }: Props) {
+export default function PoolsTable({ columns, disableRowClick, rows }: Props) {
   const history = useHistory()
   const [search, setSearch] = useState('')
-  const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(theGraphUrl, queryPools)
-  )
-  const pools =
-    query.data?.pools.filter((pool: Pool) =>
-      filter != null ? filter(pool) : pool
-    ) || ([] as Pool[])
-
-  const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const shared = {
-      Icon: val.referenceAsset,
-      Underlying: val.referenceAsset,
-      Floor: formatUnits(val.floor),
-      Inflection: formatUnits(val.inflection),
-      Ceiling: formatUnits(val.cap),
-      Expiry: getDateTime(val.expiryDate),
-      Sell: 'TBD',
-      Buy: 'TBD',
-      MaxYield: 'TBD',
-    }
-
-    const payOff = {
-      Floor: parseInt(val.floor) / 1e18,
-      Inflection: parseInt(val.inflection) / 1e18,
-      Cap: parseInt(val.cap) / 1e18,
-    }
-    if (isDashboard) {
-      return [
-        ...acc,
-        {
-          ...shared,
-          id: `${val.id}/long`,
-          address: val.longToken,
-          PayoffProfile: generatePayoffChartData({
-            ...payOff,
-            IsLong: true,
-          }),
-          TVL:
-            formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
-            ' ' +
-            val.collateralSymbol,
-          Status: val.statusFinalReferenceValue,
-          finalValue:
-            val.statusFinalReferenceValue === 'Open'
-              ? '-'
-              : formatUnits(val.finalReferenceValue),
-        },
-      ]
-    }
-
-    return [
-      ...acc,
-      {
-        ...shared,
-        id: `${val.id}/long`,
-        address: val.longToken,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: true,
-        }),
-        TVL:
-          formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
-          ' ' +
-          val.collateralSymbol,
-        Status: val.statusFinalReferenceValue,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : formatUnits(val.finalReferenceValue),
-      },
-      {
-        ...shared,
-        id: `${val.id}/short`,
-        address: val.shortToken,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: false,
-        }),
-        TVL:
-          formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
-          ' ' +
-          val.collateralSymbol,
-        Status: val.statusFinalReferenceValue,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : formatUnits(val.finalReferenceValue),
-      },
-    ]
-  }, [] as GridRowModel[])
-
   const filteredRows =
     search != null && search.length > 0
       ? rows.filter((v) =>
@@ -247,6 +149,7 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
         )
       : rows
   const classes = useStyles()
+
   return (
     <Box
       sx={{
@@ -284,7 +187,7 @@ export default function PoolsTable({ columns, filter, isDashboard }: Props) {
         rows={filteredRows}
         columns={columns}
         onRowClick={
-          isDashboard
+          disableRowClick
             ? undefined
             : (row) => {
                 history.push(`${row.id}`)
