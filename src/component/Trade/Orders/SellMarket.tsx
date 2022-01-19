@@ -20,12 +20,52 @@ import { InfoTooltip } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
+import * as qs from 'qs'
 import { Pool } from '../../../lib/queries'
+import { Network } from '../../../Util/chainIdToName'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { BigNumber } from '@0x/utils'
+import { sellMarketOrder } from '../../../Orders/SellMarket'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20 = require('../abi/ERC20.json')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const contractAddress = require('@0x/contract-addresses')
 const ERC20_ABI = ERC20.abi
+const CHAIN_ID = Network.ROPSTEN
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
+
+function descendingComparator(a: any, b: any, orderBy: any) {
+  console.log(orderBy + ' b ' + b[orderBy] + ' a ' + a[orderBy])
+  if (b[orderBy] < a[orderBy]) {
+    return -1
+  }
+  if (b[orderBy] > a[orderBy]) {
+    return 1
+  }
+  return 0
+}
+
+function getComparator(order: any, orderBy: any) {
+  if (order === 'ascOrder') {
+    return (a: any, b: any) => -descendingComparator(a, b, orderBy)
+  }
+  if (order === 'desOrder') {
+    return (a: any, b: any) => descendingComparator(a, b, orderBy)
+  }
+}
+
+function stableSort(array: any, comparator: any) {
+  const stabilizedThis = array.map((el: any, index: any) => [el, index])
+  stabilizedThis.sort((a: any, b: any) => {
+    const order = comparator(a[0], b[0])
+    if (order !== 0) {
+      return order
+    }
+    return a[1] - b[1]
+  })
+  return stabilizedThis.map((el: any) => el[0])
+}
 
 export default function SellMarket(props: {
   option: Pool
@@ -35,17 +75,97 @@ export default function SellMarket(props: {
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)
-  const [numberOfOptions, setNumberOfOptions] = React.useState(5)
-  const [pricePerOption, _setPricePerOption] = React.useState(0)
+  const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
+  const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
+  const [youReceive, setYouReceive] = React.useState(0.0)
+  const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
+  const [isApproved, setIsApproved] = React.useState(false)
+  // eslint-disable-next-line prettier/prettier
+  const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+  const exchangeProxyAddress = address.exchangeProxy
+  const maxApproval = new BigNumber(2).pow(256).minus(1)
   const [walletBalance, setWalletBalance] = React.useState(0)
-  const makerToken = optionTokenAddress
-  const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
-  const handleNumberOfOptions = (newValue: string) => {
-    setNumberOfOptions(parseFloat(newValue))
+  const makerToken = option.collateralToken
+  const takerToken = props.tokenAddress
+  const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
+
+  const params = {
+    makerToken: makerToken,
+    takerToken: takerToken,
   }
 
-  const handleOrderSubmit = async (_event: any) => {
-    /** TODO */
+  const handleNumberOfOptions = (value: string) => {
+    if (value !== '') {
+      const nbrOptions = parseFloat(value)
+      setNumberOfOptions(nbrOptions)
+    } else {
+      setYouReceive(0.0)
+    }
+  }
+
+  const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    accounts = await window.ethereum.enable()
+    const makerAccount = accounts[0]
+    if (!isApproved) {
+      await takerTokenContract.methods
+        .approve(exchangeProxyAddress, maxApproval)
+        .send({ from: makerAccount })
+
+      const approvedByMaker = await takerTokenContract.methods
+        .allowance(makerAccount, exchangeProxyAddress)
+        .call()
+      console.log('Approved by maker: ' + (await approvedByMaker.toString()))
+      setIsApproved(true)
+    } else {
+      const orderData = {
+        maker: makerAccount,
+        provider: web3,
+        isBuy: false,
+        nbrOptions: numberOfOptions,
+        collateralDecimals: option.collateralDecimals,
+        makerToken: optionTokenAddress,
+        takerToken: option.collateralToken,
+        ERC20_ABI: ERC20_ABI,
+        avgExpectedRate: avgExpectedRate,
+        existingLimitOrders: existingLimitOrders,
+      }
+      sellMarketOrder(orderData).then((orderFillStatus: any) => {
+        if (!('logs' in orderFillStatus)) {
+          return
+        } else {
+          orderFillStatus.logs.forEach(async (eventData: any) => {
+            if (!('event' in eventData)) {
+              return
+            } else {
+              if (eventData.event === 'LimitOrderFilled') {
+                //reset fill order button to approve
+                setIsApproved(false)
+                //get updated wallet balance
+                getOptionsInWallet().then((val) => {
+                  if (val != null) {
+                    setWalletBalance(Number(val))
+                  }
+                })
+                //reset input & you pay fields
+                Array.from(document.querySelectorAll('input')).forEach(
+                  (input) => (input.value = '')
+                )
+                setNumberOfOptions(0.0)
+                setYouReceive(0.0)
+                alert('Order successfully filled')
+                //wait for a sec for 0x to update orders then handle order book display
+                await new Promise((resolve) => setTimeout(resolve, 4000))
+                props.handleDisplayOrder()
+                return
+              } else {
+                alert('Order could not be filled')
+              }
+            }
+          })
+        }
+      })
+    }
   }
 
   const handleSliderChange = (_event: any, newValue: any) => {
@@ -70,23 +190,84 @@ export default function SellMarket(props: {
   const getOptionsInWallet = async () => {
     accounts = await window.ethereum.enable()
     const makerAccount = accounts[0]
-    let balance = await makerTokenContract.methods
+    let balance = await takerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
     balance = balance / 10 ** option.collateralDecimals
     return balance
   }
 
+  const getLimitOrders = async () => {
+    const orders: any = []
+    console.log('maker ' + params.makerToken)
+    console.log('taker ' + params.takerToken)
+    const res = await fetch(
+      `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
+    )
+    const resJSON = await res.json()
+    console.log('resJSON ' + JSON.stringify(resJSON))
+    const responseOrders: any = resJSON['records']
+    responseOrders.forEach((data: any) => {
+      const order = data.order
+      order['expectedRate'] = order.makerAmount / order.takerAmount
+      order['remainingFillableTakerAmount'] =
+        data.metaData.remainingFillableTakerAmount
+      orders.push(order)
+    })
+    const sortOrder = 'desOrder'
+    const orderBy = 'expectedRate'
+    const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
+    if (sortedRecords.length) {
+      const bestRate = sortedRecords[0].expectedRate
+      setAvgExpectedRate(bestRate)
+    }
+    return sortedRecords
+  }
+
   useEffect(() => {
     getOptionsInWallet().then((val) => {
-      console.log(JSON.stringify(val))
       if (val != null) {
         setWalletBalance(Number(val))
       } else {
         throw new Error(`can not read wallet balance`)
       }
     })
+    setAvgExpectedRate(avgExpectedRate)
+    getLimitOrders().then((orders: []) => {
+      setExistingLimitOrders(orders)
+    })
   }, [])
+
+  useEffect(() => {
+    if (numberOfOptions > 0) {
+      let count = numberOfOptions
+      let cumulativeAvg = 0
+      let cumulativeTaker = 0
+      let cumulativeMaker = 0
+      existingLimitOrders.forEach((order: any) => {
+        if (count > 0) {
+          if (count <= order.takerAmount / 10 ** 18) {
+            cumulativeMaker =
+              cumulativeMaker + count * order.expectedRate * 10 ** 18
+            cumulativeTaker = cumulativeTaker + count * 10 ** 18
+            count = 0
+          } else {
+            //count is greater than current order taker amount so add entire order taker amount in
+            //cumulative taker
+            cumulativeTaker = cumulativeTaker + parseFloat(order.takerAmount)
+            cumulativeMaker = cumulativeMaker + parseFloat(order.makerAmount)
+            count = count - order.takerAmount / 10 ** 18
+          }
+        }
+      })
+      cumulativeAvg = cumulativeMaker / cumulativeTaker
+      if (cumulativeAvg > 0) {
+        setAvgExpectedRate(cumulativeAvg)
+        const youPay = cumulativeAvg * numberOfOptions
+        setYouReceive(youPay)
+      }
+    }
+  }, [numberOfOptions])
 
   return (
     <div>
@@ -110,7 +291,7 @@ export default function SellMarket(props: {
             </LabelStyleDiv>
           </InfoTooltip>
           <RightSideLabel>
-            {pricePerOption} {option.collateralTokenName}
+            {avgExpectedRate.toFixed(4)} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -118,7 +299,7 @@ export default function SellMarket(props: {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption} {option.collateralTokenName}
+            {youReceive.toFixed(4)} {option.collateralSymbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -175,7 +356,7 @@ export default function SellMarket(props: {
             type="submit"
             value="Submit"
           >
-            Create Order
+            {isApproved ? 'Fill Order' : 'Approve'}
           </Button>
         </Box>
       </form>

@@ -17,13 +17,21 @@ import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
+import { Network } from '../../../Util/chainIdToName'
 import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
+import { BigNumber } from '@0x/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20 = require('../abi/ERC20.json')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const contractAddress = require('@0x/contract-addresses')
 const ERC20_ABI = ERC20.abi
 const web3 = new Web3(Web3.givenProvider)
-let accounts
+const CHAIN_ID = Network.ROPSTEN
+const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+const exchangeProxyAddress = address.exchangeProxy
+const maxApproval = new BigNumber(2).pow(256).minus(1)
+let accounts: any[]
 
 export default function BuyLimit(props: {
   option: Pool
@@ -31,11 +39,12 @@ export default function BuyLimit(props: {
   tokenAddress: string
 }) {
   const option = props.option
-  const optionTokenAddress = props.tokenAddress
+  const makerToken = props.tokenAddress
   const classes = useStyles()
   const [expiry, setExpiry] = React.useState(5)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
+  const [isApproved, setIsApproved] = React.useState(false)
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
@@ -46,6 +55,15 @@ export default function BuyLimit(props: {
 
   const handlePricePerOptions = (value: string) => {
     setPricePerOption(parseFloat(value))
+  }
+
+  const handleFormReset = () => {
+    Array.from(document.querySelectorAll('input')).forEach(
+      (input) => (input.value = '')
+    )
+    setIsApproved(false)
+    setNumberOfOptions(parseFloat('0.0'))
+    setPricePerOption(parseFloat('0.0'))
   }
 
   const handleExpirySelection = (event: SelectChangeEvent<number>) => {
@@ -60,26 +78,45 @@ export default function BuyLimit(props: {
   const handleOrderSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     accounts = await window.ethereum.enable()
-    const orderData = {
-      maker: accounts[0],
-      makerToken: option.collateralToken,
-      takerToken: props.tokenAddress,
-      provider: web3,
-      isBuy: true,
-      nbrOptions: numberOfOptions,
-      limitPrice: pricePerOption,
-      collateralDecimals: option.collateralDecimals,
-      orderExpiry: expiry,
-    }
+    const takerTokenAddress = option.collateralToken
+    if (!isApproved) {
+      const takerTokenContract = await new web3.eth.Contract(
+        ERC20_ABI,
+        takerTokenAddress
+      )
+      await takerTokenContract.methods
+        .approve(exchangeProxyAddress, maxApproval)
+        .send({ from: accounts[0] })
+      const approvedByTaker = await takerTokenContract.methods
+        .allowance(accounts[0], exchangeProxyAddress)
+        .call()
+      console.log('Approved by taker: ' + (await approvedByTaker.toString()))
+      alert(`Maker allowance for ${option.collateralToken} successfully set`)
+      setIsApproved(true)
+    } else {
+      const orderData = {
+        makerAccount: accounts[0],
+        makerToken: option.collateralToken,
+        takerToken: makerToken,
+        provider: web3,
+        isBuy: true,
+        chainId: CHAIN_ID,
+        nbrOptions: numberOfOptions,
+        collateralDecimals: option.collateralDecimals,
+        limitPrice: pricePerOption,
+        orderExpiry: expiry,
+      }
 
-    buylimitOrder(orderData)
-      .then(function (response) {
-        console.log('Response ' + response)
-        props.handleDisplayOrder()
-      })
-      .catch(function (error) {
-        console.log('Error' + error)
-      })
+      buylimitOrder(orderData)
+        .then(function (response) {
+          console.log('Response ' + response)
+          props.handleDisplayOrder()
+          handleFormReset()
+        })
+        .catch(function (error) {
+          console.log('Error' + error)
+        })
+    }
   }
 
   const getCollateralInWallet = async () => {
@@ -185,7 +222,7 @@ export default function BuyLimit(props: {
             type="submit"
             value="Submit"
           >
-            Fill order
+            {isApproved ? 'Create Order' : 'Approve'}
           </Button>
         </Box>
       </form>

@@ -115,7 +115,7 @@ export default function CreateOrder(props: {
       dispatch(setResponseSell(responseSell))
     }
     if (responseBuy.length > 0) {
-      console.log('response sell ' + JSON.stringify(responseBuy))
+      console.log('response Buy ' + JSON.stringify(responseBuy))
       dispatch(setResponseBuy(responseBuy))
     }
   }

@@ -111,10 +111,17 @@ function mapOrderData(
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
-      orders.nbrOptions = order.takerAmount / 10 ** 18
       orders.bid =
         (order.makerAmount / order.takerAmount) *
         10 ** (18 - option.collateralDecimals)
+      const remainingFillableTakerAmount = metaData.remainingFillableTakerAmount
+      console.log('remaining ' + remainingFillableTakerAmount)
+      console.log('taker amount' + order.takerAmount)
+      if (remainingFillableTakerAmount < order.takerAmount) {
+        orders.nbrOptions = remainingFillableTakerAmount / 10 ** 18
+      } else {
+        orders.nbrOptions = order.takerAmount / 10 ** 18
+      }
     }
     if (makerToken === tokenAddress && takerToken === collateralToken) {
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
@@ -181,11 +188,10 @@ function createTable(buyOrders: any, sellOrders: any) {
       const buyOrder = buyOrders[j]
       const sellOrder = sellOrders[j]
       const row = {
-        buyExpiry:
-          buyOrder === undefined ? '0 mins' : buyOrder.expiry + ' mins',
+        buyExpiry: buyOrder === undefined ? '-' : buyOrder.expiry + ' mins',
         buyQuantity: buyOrder === undefined ? '' : buyOrder.nbrOptions,
         bid: buyOrder === undefined ? '' : buyOrder.bid,
-        sellExpiry: sellOrder === undefined ? ' ' : sellOrder.expiry + ' mins',
+        sellExpiry: sellOrder === undefined ? '-' : sellOrder.expiry + ' mins',
         sellQuantity: sellOrder === undefined ? '' : sellOrder.nbrOptions,
         ask: sellOrder === undefined ? '' : sellOrder.ask,
       }
@@ -300,7 +306,9 @@ export default function OrderBook(props: {
                       >
                         <Box paddingBottom="20px">
                           <Typography variant="subtitle1">
-                            {Number(row.buyQuantity).toFixed(2)}
+                            {row.buyQuantity != ''
+                              ? Number(row.buyQuantity).toFixed(2)
+                              : '-'}
                           </Typography>
                           <label> </label>
                         </Box>
@@ -308,7 +316,7 @@ export default function OrderBook(props: {
                       <TableCellStyle align="center">
                         <Box>
                           <Typography variant="subtitle1">
-                            {Number(row.bid).toFixed(2)}
+                            {row.bid != '' ? Number(row.bid).toFixed(2) : '-'}
                           </Typography>
                           <Typography variant="caption" noWrap>
                             {row.buyExpiry}
@@ -318,7 +326,7 @@ export default function OrderBook(props: {
                       <TableCellStyle align="center">
                         <Box>
                           <Typography variant="subtitle1">
-                            {Number(row.ask).toFixed(2)}
+                            {row.ask != '' ? Number(row.ask).toFixed(2) : '-'}
                           </Typography>
                           <Typography variant="caption" noWrap>
                             {row.sellExpiry}
@@ -328,7 +336,9 @@ export default function OrderBook(props: {
                       <TableCellStyle align="center">
                         <Box paddingBottom="20px">
                           <Typography variant="subtitle1">
-                            {Number(row.sellQuantity).toFixed(2)}
+                            {row.sellQuantity != ''
+                              ? Number(row.sellQuantity).toFixed(2)
+                              : '-'}
                           </Typography>
                         </Box>
                       </TableCellStyle>

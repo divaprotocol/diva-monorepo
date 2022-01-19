@@ -207,7 +207,7 @@ export default function OpenOrders(props: {
               <TableHeaderCell>Type</TableHeaderCell>
               <TableHeaderCell align="center">Quantity</TableHeaderCell>
               <TableHeaderCell align="center">Price</TableHeaderCell>
-              <TableHeaderCell align="center">Pay/Recei</TableHeaderCell>
+              <TableHeaderCell align="center">Pay/Receive</TableHeaderCell>
               <TableHeaderCell align="right">Cancel</TableHeaderCell>
             </TableRow>
           </TableHeadStyle>

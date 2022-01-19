@@ -26,6 +26,7 @@ import { Network } from '../../../Util/chainIdToName'
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import * as qs from 'qs'
+import { formatUnits } from 'ethers/lib/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20 = require('../abi/ERC20.json')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -73,7 +74,6 @@ export default function BuyMarket(props: {
   tokenAddress: string
 }) {
   const option = props.option
-  //const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
@@ -199,7 +199,10 @@ export default function BuyMarket(props: {
     let balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
-    balance = balance / 10 ** option.collateralDecimals
+    balance = formatUnits(balance.toString(), option.collateralDecimals)
+    console.log('balance - ' + balance)
+    //balance = balance / 10 ** option.collateralDecimals
+    //console.log('balance old' + balance)
     return balance
   }
 
@@ -209,7 +212,6 @@ export default function BuyMarket(props: {
       `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
     )
     const resJSON = await res.json()
-    console.log('resJSON ' + JSON.stringify(resJSON))
     const responseOrders: any = resJSON['records']
     responseOrders.forEach((data: any) => {
       const order = data.order

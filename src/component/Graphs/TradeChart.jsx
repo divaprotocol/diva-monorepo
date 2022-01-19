@@ -162,7 +162,7 @@ class DIVATradeChart extends Component {
       .attr('x', 18)
       .attr('y', 44)
       .attr('font-size', '14')
-      .text('Option Payout (' + payOut + ' ):')
+      .text('Option Payout (' + payOut + '):')
 
     tooltipPerLine
       .append('text')

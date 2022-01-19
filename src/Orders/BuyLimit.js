@@ -19,13 +19,14 @@ export const buylimitOrder = async (orderData) => {
       10 ** orderData.collateralDecimals
     ).toString(), // NOTE: This is 1 WEI, 1 ETH would be 1000000000000000000
     takerAmount: (orderData.nbrOptions * 10 ** 18).toString(), // NOTE this is 0.001 ZRX. 1 ZRX would be 1000000000000000000
-    maker: orderData.maker,
+    maker: orderData.makerAccount,
     sender: NULL_ADDRESS,
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
-    chainId: CHAIN_ID,
+    chainId: orderData.chainId,
     verifyingContract: contractAddresses.exchangeProxy,
   })
+  console.log('order ' + JSON.stringify(order))
 
   try {
     const signature = await order.getSignatureWithProviderAsync(
@@ -54,6 +55,7 @@ export const buylimitOrder = async (orderData) => {
       )
     }
   } catch (error) {
+    console.log('error ' + JSON.stringify(error))
     alert('You need to sign the order')
   }
 }
