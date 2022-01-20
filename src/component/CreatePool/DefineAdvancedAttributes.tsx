@@ -8,11 +8,6 @@ import {
   FormControl,
   TextField,
   FormHelperText,
-  Checkbox,
-  Stack,
-  FormLabel,
-  FormControlLabel,
-  FormGroup,
 } from '@mui/material'
 import { useState } from 'react'
 import { useCreatePoolFormik } from './formik'

@@ -14,7 +14,7 @@ import React, { useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { ethers } from 'ethers'
 
-import { addresses, theGraphUrl } from '../../constants'
+import { addresses, divaEndpoint } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
@@ -241,7 +241,7 @@ const columns: GridColDef[] = [
 export function MyDataFeeds() {
   const { account } = useWeb3React()
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(theGraphUrl, queryPools)
+    request(divaEndpoint, queryPools)
   )
   const pools =
     query.data?.pools.filter(

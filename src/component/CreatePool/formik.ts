@@ -5,14 +5,13 @@ import { useQuery } from 'react-query'
 import { useDiva } from '../../hooks/useDiva'
 import { Tokens } from '../../lib/types'
 import { chainIdtoName } from '../../Util/chainIdToName'
-import referenceAssets from './referenceAssets.json'
 
 const defaultDate = new Date()
-defaultDate.setHours(defaultDate.getHours() + 24)
+defaultDate.setHours(defaultDate.getHours() + 25)
 
 export const initialValues = {
   step: 1,
-  referenceAsset: referenceAssets[0],
+  referenceAsset: '',
   expiryDate: defaultDate,
   floor: 1,
   cap: 3,

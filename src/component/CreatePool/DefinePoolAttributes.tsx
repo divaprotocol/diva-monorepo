@@ -2,9 +2,6 @@ import { DateTimePicker } from '@mui/lab'
 import {
   Box,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   FormHelperText,
   TextField,
   Autocomplete,
@@ -16,12 +13,16 @@ import { useEffect, useState } from 'react'
 import { useQuery } from 'react-query'
 
 import { PayoffProfile } from './PayoffProfile'
-import referenceAssets from './referenceAssets.json'
+// import referenceAssets from './referenceAssets.json'
 import { Tokens } from '../../lib/types'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
+import request from 'graphql-request'
+import { whiteListEndpoint } from '../../constants'
+import { queryWhitelist, WhitelistQueryResponse } from '../../lib/queries'
+import { CheckCircle, Report } from '@mui/icons-material'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -37,6 +38,14 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
+
+  const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
+    request(whiteListEndpoint, queryWhitelist)
+  )
+
+  const referenceAssets = (whitelistQuery?.data?.dataFeeds || []).map(
+    (v) => v.referenceAsset
+  )
 
   const tokensQuery = useQuery<Tokens>('tokens', () =>
     fetch('/ropstenTokens.json').then((res) => res.json())
@@ -67,6 +76,12 @@ export function DefinePoolAttributes({
       formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
     }
   }, [collateralWalletBalance])
+
+  useEffect(() => {
+    if (referenceAssets.length > 0) {
+      formik.setFieldValue('referenceAsset', referenceAssets[0], false)
+    }
+  }, [referenceAssets.length])
 
   useEffect(() => {
     if (formik.touched.collateralBalance) {
@@ -135,30 +150,64 @@ export function DefinePoolAttributes({
     formik.errors.cap != null ||
     formik.errors.inflection != null
 
+  const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
+
   return (
     <Box>
       <Typography pb={theme.spacing(5)} variant="subtitle1">
         Define all the parameters for your Contingent Pool below.
       </Typography>
       <Box pb={3} pt={1}>
-        <FormControl fullWidth>
-          <InputLabel>Reference Asset</InputLabel>
-          <Select
-            name="referenceAsset"
+        <FormControl fullWidth error={formik.errors.referenceAsset != null}>
+          <Autocomplete
             id="referenceAsset"
-            error={formik.errors.referenceAsset != null}
-            label="Reference Asset"
-            onChange={(event) => {
-              formik.setFieldValue('referenceAsset', event.target.value)
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Reference Asset"
+                name="referenceAsset"
+                id="referenceAsset"
+                onBlur={formik.handleBlur}
+                helperText={
+                  isCustomReferenceAsset ? (
+                    <Stack direction="row" alignContent="center">
+                      <CheckCircle
+                        fontSize="small"
+                        color="success"
+                        sx={{ marginRight: theme.spacing(0.5) }}
+                      />
+                      <span>This reference asset is whitelisted</span>
+                    </Stack>
+                  ) : (
+                    <Stack direction="row" alignItems="center">
+                      <Report
+                        color="warning"
+                        fontSize="small"
+                        sx={{ marginRight: theme.spacing(0.5) }}
+                      />
+                      <span>
+                        This reference asset is custom and not on our whitelist
+                      </span>
+                    </Stack>
+                  )
+                }
+                error={formik.errors.referenceAsset != null}
+              />
+            )}
+            onInputChange={(event) => {
+              if (event != null && event.target != null) {
+                formik.setFieldValue(
+                  'referenceAsset',
+                  (event.target as any).value || ''
+                )
+              }
+            }}
+            onChange={(event, option) => {
+              formik.setFieldValue('referenceAsset', option)
             }}
             value={referenceAsset}
-          >
-            {referenceAssets.map((v) => (
-              <MenuItem key={v} value={v}>
-                {v}
-              </MenuItem>
-            ))}
-          </Select>
+            options={referenceAssets}
+          />
         </FormControl>
       </Box>
       <Box pb={3}>
@@ -294,6 +343,7 @@ export function DefinePoolAttributes({
                   min: floor,
                   max: cap,
                 }}
+                type="number"
                 onChange={formik.handleChange}
                 value={inflection}
                 sx={{ width: '100%' }}

@@ -17,5 +17,8 @@ export const addresses: { [key: number]: any } = {
   },
 }
 
-export const theGraphUrl =
+export const divaEndpoint =
   'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten'
+
+export const whiteListEndpoint =
+  'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten'

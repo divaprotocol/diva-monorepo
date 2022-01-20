@@ -17,7 +17,7 @@ import OptionHeader from './OptionHeader'
 import { useQuery } from 'react-query'
 import { queryPool, Pool } from '../../lib/queries'
 import request from 'graphql-request'
-import { theGraphUrl } from '../../constants'
+import { divaEndpoint } from '../../constants'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -42,7 +42,7 @@ export default function Underlying() {
   const breakEvenOptionPrice = 0
 
   const query = useQuery<{ pool: Pool }>('pool', () =>
-    request(theGraphUrl, queryPool(parseInt(params.poolId)))
+    request(divaEndpoint, queryPool(parseInt(params.poolId)))
   )
 
   const pool = query.data?.pool

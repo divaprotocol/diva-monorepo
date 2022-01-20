@@ -2,7 +2,7 @@ import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import { Button, Container, Stack, Tooltip } from '@mui/material'
 import { useWeb3React } from '@web3-react/core'
 import { BigNumber, ethers } from 'ethers'
-import { addresses, theGraphUrl } from '../../constants'
+import { addresses, divaEndpoint } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
@@ -198,7 +198,7 @@ export function MyPositions() {
   const { account } = useWeb3React()
 
   const poolsQuery = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(theGraphUrl, queryPools)
+    request(divaEndpoint, queryPools)
   )
 
   const pools = poolsQuery.data?.pools || ([] as Pool[])

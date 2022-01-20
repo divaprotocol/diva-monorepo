@@ -99,3 +99,44 @@ export const queryPool = (poolId: number) => gql`
     }
   }
 `
+
+export type DataFeed = {
+  dataProvider: {
+    id: string
+  }
+  id: string
+  referenceAsset: string
+  referenceAssetUnified: string
+}
+
+export type DataProvider = {
+  dataFeeds: { id: string }[]
+  id: string
+  name: string
+}
+
+export type WhitelistQueryResponse = {
+  dataProviders: DataProvider[]
+  dataFeeds: DataFeed[]
+}
+
+export const queryWhitelist = gql`
+  {
+    dataProviders {
+      id
+      name
+      dataFeeds {
+        id
+      }
+    }
+    dataFeeds {
+      id
+      referenceAsset
+      referenceAssetUnified
+      active
+      dataProvider {
+        id
+      }
+    }
+  }
+`
