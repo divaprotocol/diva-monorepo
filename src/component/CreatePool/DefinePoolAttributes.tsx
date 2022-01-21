@@ -42,6 +42,8 @@ export function DefinePoolAttributes({
     fetch('/ropstenTokens.json').then((res) => res.json())
   )
 
+  const [isAdvanced, setIsAdvanced] = useState(false)
+
   const collateralTokenAssets = tokensQuery.data || {}
   const collateralTokenAddress =
     collateralTokenAssets[
@@ -68,9 +70,13 @@ export function DefinePoolAttributes({
     }
   }, [collateralWalletBalance])
 
+  /**
+   * Updates dependend form inputs, if advanced settings are active
+   */
   useEffect(() => {
-    if (formik.touched.collateralBalance) {
+    if (formik.touched.collateralBalance && !isAdvanced) {
       const half = formik.values.collateralBalance / 2
+
       formik.setValues((values) => ({
         ...values,
         collateralBalanceShort: half,
@@ -79,25 +85,25 @@ export function DefinePoolAttributes({
         shortTokenSupply: formik.values.collateralBalance,
       }))
     }
-  }, [formik.values.collateralBalance, formik.touched])
+  }, [
+    formik.values.collateralBalance,
+    formik.touched.collateralBalance,
+    isAdvanced,
+  ])
 
   useEffect(() => {
-    const totalBalance =
-      formik.values.collateralBalanceLong + formik.values.collateralBalanceShort
     if (
-      (formik.touched.collateralBalanceLong ||
-        formik.touched.collateralBalanceShort) &&
-      totalBalance !== formik.values.collateralBalance
+      formik.touched.collateralBalanceLong ||
+      formik.touched.collateralBalanceShort
     ) {
-      formik.setValues((values) => ({
-        ...values,
-        collateralBalance: totalBalance,
-        longTokenSupply: totalBalance,
-        shortTokenSupply: totalBalance,
-      }))
+      const collateralBalance =
+        formik.values.collateralBalanceLong +
+        formik.values.collateralBalanceShort
+      formik.setFieldValue('collateralBalance', collateralBalance)
     }
   }, [
-    formik.touched,
+    formik.touched.collateralBalanceLong,
+    formik.touched.collateralBalanceShort,
     formik.values.collateralBalanceLong,
     formik.values.collateralBalanceShort,
   ])
@@ -244,6 +250,7 @@ export function DefinePoolAttributes({
               name="collateralBalance"
               label="Collateral Balance"
               inputProps={{ min: 0 }}
+              disabled={isAdvanced}
               onBlur={formik.handleBlur}
               error={formik.errors.collateralBalance != null}
               value={formik.values.collateralBalance}
@@ -310,7 +317,11 @@ export function DefinePoolAttributes({
                 type="number"
                 onChange={formik.handleChange}
               />
-              <DefineAdvanced formik={formik} />
+              <DefineAdvanced
+                formik={formik}
+                expanded={isAdvanced}
+                setExpanded={setIsAdvanced}
+              />
             </Stack>
           </FormControl>
         </Box>

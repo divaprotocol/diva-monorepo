@@ -8,21 +8,18 @@ import {
   FormControl,
   TextField,
   FormHelperText,
-  Checkbox,
-  Stack,
-  FormLabel,
-  FormControlLabel,
-  FormGroup,
 } from '@mui/material'
-import { useState } from 'react'
 import { useCreatePoolFormik } from './formik'
 
 export function DefineAdvanced({
   formik,
+  expanded,
+  setExpanded,
 }: {
+  expanded: boolean
+  setExpanded: (isExpanded: boolean) => void
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
-  const [expanded, setExpanded] = useState(false)
   const {
     collateralBalanceShort,
     shortTokenSupply,
@@ -65,9 +62,9 @@ export function DefineAdvanced({
               onBlur={formik.handleBlur}
               error={formik.errors.collateralBalanceShort != null}
               inputProps={{ min: 0 }}
+              onChange={formik.handleChange}
               value={collateralBalanceShort}
               type="number"
-              onChange={formik.handleChange}
             />
             {formik.errors.collateralBalanceShort != null && (
               <FormHelperText>
