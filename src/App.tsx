@@ -7,6 +7,7 @@ import Markets from './component/Markets/Markets'
 import { Container } from '@mui/material'
 import { MyDataFeeds } from './component/Dashboard/MyDataFeeds'
 import { MyPositions } from './component/Dashboard/MyPositions'
+import { Liquidity } from './component/Liquidity/Liquidity'
 
 export const App = () => {
   return (
@@ -21,6 +22,9 @@ export const App = () => {
         <Switch>
           <Route exact path="/">
             <Markets />
+          </Route>
+          <Route path="/:poolId/liquidity">
+            <Liquidity />
           </Route>
           <Route exact path="/dashboard/mydatafeeds" component={MyDataFeeds} />
           <Route exact path="/dashboard/mypositions" component={MyPositions} />
