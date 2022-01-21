@@ -1,6 +1,4 @@
 import {
-  Card,
-  CardContent,
   Table,
   TableBody,
   TableCell,
@@ -10,6 +8,10 @@ import {
   useTheme,
 } from '@mui/material'
 import { Box } from '@mui/material'
+import request from 'graphql-request'
+import { useQuery } from 'react-query'
+import { whiteListEndpoint } from '../../constants'
+import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useCreatePoolFormik } from './formik'
 
@@ -51,6 +53,24 @@ export function ReviewAndSubmit({
 }) {
   const { values } = formik
   const theme = useTheme()
+
+  const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
+    request(whiteListEndpoint, queryWhitelist)
+  )
+
+  const matchingDataFeedProviders =
+    whitelistQuery.data?.dataProviders.filter((v) =>
+      v.dataFeeds.some(
+        (f) => f.referenceAssetUnified === formik.values.referenceAsset
+      )
+    ) || []
+
+
+  const isWhitelistedDataFeed =
+    matchingDataFeedProviders.length > 0 &&
+    matchingDataFeedProviders.some(
+      (v) => formik.values.dataFeedProvider === v.id
+    )
 
   return (
     <Box pt={5}>

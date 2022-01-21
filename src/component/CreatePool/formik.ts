@@ -166,7 +166,8 @@ export const useCreatePoolFormik = () => {
           try {
             await provider.getSigner(values.dataFeedProvider)
           } catch (err) {
-            errors.dataFeedProvider = 'Invalid address'
+            errors.dataFeedProvider =
+              'You must specify a valid address as the data feed provider'
           }
         }
       }

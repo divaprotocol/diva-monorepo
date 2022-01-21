@@ -19,10 +19,8 @@ import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
-import request from 'graphql-request'
-import { whiteListEndpoint } from '../../constants'
-import { queryWhitelist, WhitelistQueryResponse } from '../../lib/queries'
 import { CheckCircle, Report } from '@mui/icons-material'
+import { useWhitelist } from '../../hooks/useWhitelist'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -39,13 +37,7 @@ export function DefinePoolAttributes({
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
 
-  const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
-    request(whiteListEndpoint, queryWhitelist)
-  )
-
-  const referenceAssets = (whitelistQuery?.data?.dataFeeds || []).map(
-    (v) => v.referenceAsset
-  )
+  const { referenceAssets } = useWhitelist()
 
   const tokensQuery = useQuery<Tokens>('tokens', () =>
     fetch('/ropstenTokens.json').then((res) => res.json())
@@ -111,6 +103,7 @@ export function DefinePoolAttributes({
         shortTokenSupply: totalBalance,
       }))
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     formik.touched,
     formik.values.collateralBalanceLong,

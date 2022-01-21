@@ -110,7 +110,7 @@ export type DataFeed = {
 }
 
 export type DataProvider = {
-  dataFeeds: { id: string }[]
+  dataFeeds: { id: string; referenceAssetUnified: string }[]
   id: string
   name: string
 }
@@ -127,6 +127,7 @@ export const queryWhitelist = gql`
       name
       dataFeeds {
         id
+        referenceAssetUnified
       }
     }
     dataFeeds {
