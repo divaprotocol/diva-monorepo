@@ -9,17 +9,16 @@ import {
   TextField,
   FormHelperText,
 } from '@mui/material'
+import { useState } from 'react'
 import { useCreatePoolFormik } from './formik'
 
 export function DefineAdvanced({
   formik,
-  expanded,
-  setExpanded,
 }: {
-  expanded: boolean
-  setExpanded: (isExpanded: boolean) => void
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
+  const [expanded, setExpanded] = useState(false)
+
   const {
     collateralBalanceShort,
     shortTokenSupply,
