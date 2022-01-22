@@ -18,14 +18,13 @@ import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import { Network } from '../../../Util/chainIdToName'
-import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
+import { Pool } from '../../../lib/queries'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const ERC20 = require('../abi/ERC20.json')
+const ERC20_ABI = require('../../../abi/ERC20.json')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-const ERC20_ABI = ERC20.abi
 const CHAIN_ID = Network.ROPSTEN
 const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
 const exchangeProxyAddress = address.exchangeProxy

@@ -7,13 +7,13 @@ export function getDateTime(dateData) {
   return date + ' ' + time
 }
 
-export function getExpiryMinutesFromNow(timeStamp) {
-  const expiryDate = new Date(timeStamp * 1000)
+export function getExpiryMinutesFromNow(Timestamp) {
+  const expiryDate = new Date(Timestamp * 1000)
   const date = new Date()
   const mins = parseInt((expiryDate.getTime() - date.getTime()) / 1000 / 60)
   return mins
 }
 
-export const isExpired = (timeStamp) => {
-  return getExpiryMinutesFromNow(timeStamp) < 0 ? true : false
+export const isExpired = (Timestamp) => {
+  return getExpiryMinutesFromNow(Timestamp) < 0 ? true : false
 }

@@ -27,11 +27,9 @@ import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import * as qs from 'qs'
 import { formatUnits } from 'ethers/lib/utils'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ERC20 = require('../abi/ERC20.json')
+import ERC20_ABI from '../../../abi/ERC20.json'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-const ERC20_ABI = ERC20.abi
 const CHAIN_ID = Network.ROPSTEN
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
@@ -87,7 +85,8 @@ export default function BuyMarket(props: {
   const maxApproval = new BigNumber(2).pow(256).minus(1)
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken
-  const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
+  // TODO: check again why we need to use "any" here
+  const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
   const params = {
     makerToken: makerToken,
@@ -110,7 +109,8 @@ export default function BuyMarket(props: {
       //is ERC20_ABP correct? or should we use position token abi
       //ERC20_ABI enough to use approval
       const takerTokenContract = await new web3.eth.Contract(
-        ERC20_ABI,
+        // TODO: check again why we need to use "any" here
+        ERC20_ABI as any,
         takerTokenAddress
       )
       await takerTokenContract.methods

@@ -1,21 +1,23 @@
 import React, { useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import { getDateTime } from '../Util/Dates'
 import { Box, Input, InputAdornment } from '@mui/material'
-import { generatePayoffChartData } from '../Graphs/DataGenerator'
 import { LineSeries, XYPlot } from 'react-vis'
 import { LocalGasStation, Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
-import { Pool, queryPools } from '../lib/queries'
-import { request } from 'graphql-request'
-import { useQuery } from 'react-query'
-import { formatUnits } from 'ethers/lib/utils'
+import { Pool } from '../lib/queries'
 import { useCoinIcon } from '../hooks/useCoinIcon'
-
+import { makeStyles } from '@mui/styles'
 import localCoinImages from '../Util/localCoinImages.json'
-
 const assetLogoPath = '/images/coin-logos/'
+
+const useStyles = makeStyles({
+  root: {
+    '&.MuiDataGrid-root .MuiDataGrid-cell:focus': {
+      outline: 'none',
+    },
+  },
+})
 
 const CoinPlaceHolder = (asset: string) => {
   return (
@@ -24,10 +26,9 @@ const CoinPlaceHolder = (asset: string) => {
       <text
         x="50%"
         y="55%"
-        text-anchor="middle"
+        textAnchor="middle"
         fill="white"
-        font-size="20px"
-        font-family="Arial"
+        fontSize="20px"
         dy=".3em"
       >
         {asset.charAt(0)}
@@ -67,10 +68,9 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
               <text
                 x="33%"
                 y="55%"
-                text-anchor="middle"
+                textAnchor="middle"
                 fill="white"
-                font-size="20px"
-                font-family="Arial"
+                fontSize="20px"
                 dy=".3em"
               >
                 {assets[0].charAt(0)}
@@ -79,10 +79,9 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
               <text
                 x="66%"
                 y="55%"
-                text-anchor="middle"
+                textAnchor="middle"
                 fill="white"
-                font-size="20px"
-                font-family="Arial"
+                fontSize="20px"
                 dy=".3em"
               >
                 {assets[1].charAt(0)}
@@ -99,7 +98,7 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
         )
       }
     } else {
-      if (coinIconLeft === '') {
+      if (coinIconRight === '') {
         return (
           <>
             <img alt={assets[0]} src={coinIconLeft} style={{ height: 30 }} />
@@ -136,79 +135,20 @@ export const PayoffCell = ({ data }: { data: any }) => {
 
 type Props = {
   columns: GridColDef[]
-  filter?: (pool: Pool) => boolean
+  disableRowClick?: boolean
+  rows: GridRowModel[]
 }
 
-export default function PoolsTable({ columns, filter }: Props) {
+export default function PoolsTable({ columns, disableRowClick, rows }: Props) {
   const history = useHistory()
   const [search, setSearch] = useState('')
-  const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(
-      'https://api.thegraph.com/subgraphs/name/juliankrispel/diva',
-      queryPools
-    )
-  )
-  const pools =
-    query.data?.pools.filter((pool: Pool) =>
-      filter != null ? filter(pool) : pool
-    ) || ([] as Pool[])
-
-  const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const shared = {
-      Icon: val.referenceAsset,
-      Underlying: val.referenceAsset,
-      Floor: formatUnits(val.floor),
-      Inflection: formatUnits(val.inflection),
-      Ceiling: formatUnits(val.cap),
-      Expiry: getDateTime(val.expiryDate),
-      Sell: 'TBD',
-      Buy: 'TBD',
-      MaxYield: 'TBD',
-    }
-
-    const payOff = {
-      Floor: parseInt(val.floor) / 1e18,
-      Inflection: parseInt(val.inflection) / 1e18,
-      Cap: parseInt(val.cap) / 1e18,
-    }
-
-    return [
-      ...acc,
-      {
-        ...shared,
-        id: `${val.id}/long`,
-        address: val.longToken,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: true,
-        }),
-        TVL:
-          formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
-          ' ' +
-          val.collateralSymbol,
-      },
-      {
-        ...shared,
-        id: `${val.id}/short`,
-        address: val.shortToken,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: false,
-        }),
-        TVL:
-          formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
-          ' ' +
-          val.collateralSymbol,
-      },
-    ]
-  }, [] as GridRowModel[])
-
   const filteredRows =
     search != null && search.length > 0
       ? rows.filter((v) =>
           v.Underlying.toLowerCase().includes(search.toLowerCase())
         )
       : rows
+  const classes = useStyles()
 
   return (
     <Box
@@ -217,6 +157,9 @@ export default function PoolsTable({ columns, filter }: Props) {
         display: 'flex',
         flexGrow: 1,
         flexDirection: 'column',
+        paddingTop: '2em',
+        paddingLeft: '4em',
+        paddingRight: '4em',
       }}
     >
       <Box
@@ -228,7 +171,6 @@ export default function PoolsTable({ columns, filter }: Props) {
         }}
       >
         <Input
-          autoFocus
           value={search}
           placeholder="Filter asset"
           aria-label="Filter asset"
@@ -241,12 +183,16 @@ export default function PoolsTable({ columns, filter }: Props) {
         />
       </Box>
       <DataGrid
-        showColumnRightBorder={false}
+        className={classes.root}
         rows={filteredRows}
         columns={columns}
-        onRowClick={(row) => {
-          history.push(`${row.id}`)
-        }}
+        onRowClick={
+          disableRowClick
+            ? undefined
+            : (row) => {
+                history.push(`${row.id}`)
+              }
+        }
         componentsProps={{
           row: {
             style: {

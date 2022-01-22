@@ -24,7 +24,7 @@ export type Pool = {
   settlementFee: string
   shortToken: string
   statusFinalReferenceValue: string
-  statusTimeStamp: string
+  statusTimestamp: string
   supplyLong: string
   supplyLongInitial: string
   supplyShort: string
@@ -58,7 +58,7 @@ export const queryPools = gql`
       statusFinalReferenceValue
       redemptionAmountLongToken
       redemptionAmountShortToken
-      statusTimeStamp
+      statusTimestamp
       dataFeedProvider
       redemptionFee
       settlementFee
@@ -93,7 +93,7 @@ export const queryPool = (poolId: number) => gql`
       statusFinalReferenceValue
       redemptionAmountLongToken
       redemptionAmountShortToken
-      statusTimeStamp
+      statusTimestamp
       dataFeedProvider
       redemptionFee
       settlementFee

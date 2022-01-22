@@ -22,10 +22,9 @@ import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const ERC20 = require('../abi/ERC20.json')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-const ERC20_ABI = ERC20.abi
+
+import ERC20_ABI from '../../../abi/ERC20.json'
 const web3 = new Web3(Web3.givenProvider)
 const CHAIN_ID = Network.ROPSTEN
 const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
@@ -47,7 +46,9 @@ export default function BuyLimit(props: {
   const [isApproved, setIsApproved] = React.useState(false)
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken
-  const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
+
+  // TODO: Check why any is required
+  const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
   const handleNumberOfOptions = (value: string) => {
     setNumberOfOptions(parseFloat(value))
@@ -81,7 +82,8 @@ export default function BuyLimit(props: {
     const takerTokenAddress = option.collateralToken
     if (!isApproved) {
       const takerTokenContract = await new web3.eth.Contract(
-        ERC20_ABI,
+        // TODO: Check why any is required
+        ERC20_ABI as any,
         takerTokenAddress
       )
       await takerTokenContract.methods

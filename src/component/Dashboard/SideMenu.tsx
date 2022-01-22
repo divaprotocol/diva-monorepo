@@ -1,13 +1,6 @@
 import { Box, Button, Stack } from '@mui/material'
+import { Link } from 'react-router-dom'
 
-const ButtonProps = () => {
-  return {
-    maxWidth: '220px',
-    maxHeight: '40px',
-    minWidth: '220px',
-    minHeight: '30px',
-  }
-}
 export function SideMenu() {
   return (
     <Stack
@@ -15,19 +8,19 @@ export function SideMenu() {
       flexDirection="column"
       spacing={2}
       sx={{
+        paddingLeft: '2em',
         paddingTop: '3em',
+        alignItems: 'left',
       }}
     >
-      <Button variant="contained" style={ButtonProps()}>
+      <Button component={Link} to="/dashboard/mypositions" variant="contained">
         My Positions
       </Button>
-      <Button variant="contained" style={ButtonProps()}>
+      <Button fullWidth variant="contained">
         My Orders
       </Button>
-      <Button variant="contained" style={ButtonProps()}>
-        My Requests
-      </Button>
-      <Button variant="contained" style={ButtonProps()}>
+      <Button variant="contained">My Requests</Button>
+      <Button component={Link} to="/dashboard/mydatafeeds" variant="contained">
         My Data Feeds
       </Button>
 
