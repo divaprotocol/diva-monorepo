@@ -154,6 +154,8 @@ export const useCreatePoolFormik = () => {
 
       if (values.capacity < 0) {
         errors.capacity = 'Capacity cannot be negative'
+      } else if (values.capacity !== 0 && collateralBalance > values.capacity) {
+        errors.capacity = `Capacity must be larger than ${collateralBalance}. For unlimited capacity, set to 0`
       }
 
       // validate data feed provider

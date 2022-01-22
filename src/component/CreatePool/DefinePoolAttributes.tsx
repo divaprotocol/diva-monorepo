@@ -240,8 +240,8 @@ export function DefinePoolAttributes({
                   collateralBalance,
                   collateralBalanceShort: half,
                   collateralBalanceLong: half,
-                  longTokenSupply: formik.values.collateralBalance,
-                  shortTokenSupply: formik.values.collateralBalance,
+                  longTokenSupply: collateralBalance,
+                  shortTokenSupply: collateralBalance,
                 }))
               }}
             />

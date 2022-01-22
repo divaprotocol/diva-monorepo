@@ -138,13 +138,14 @@ export function DefineAdvanced({
               id="capacity"
               label="Maximum Pool Capacity"
               value={capacity}
-              helperText="A value of 0 means no limit is imposed."
+              helperText={
+                formik.errors.capacity != null
+                  ? formik.errors.capacity
+                  : 'A value of 0 means no limit is imposed.'
+              }
               type="number"
               onChange={formik.handleChange}
             />
-            {formik.errors.capacity != null && (
-              <FormHelperText>{formik.errors.capacity}</FormHelperText>
-            )}
           </FormControl>
         </Box>
       </AccordionDetails>
