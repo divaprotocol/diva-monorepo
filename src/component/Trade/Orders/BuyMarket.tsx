@@ -26,7 +26,7 @@ import { Network } from '../../../Util/chainIdToName'
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import * as qs from 'qs'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatUnits, parseEther } from 'ethers/lib/utils'
 import ERC20_ABI from '../../../abi/ERC20.json'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
@@ -35,7 +35,6 @@ const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
 function descendingComparator(a: any, b: any, orderBy: any) {
-  console.log(orderBy + ' b ' + b[orderBy] + ' a ' + a[orderBy])
   if (b[orderBy] < a[orderBy]) {
     return -1
   }
@@ -74,7 +73,7 @@ export default function BuyMarket(props: {
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
-  const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
+  const [avgExpectedRate, setAvgExpectedRate] = React.useState(parseEther('0'))
   const [youPay, setYouPay] = React.useState(0.0)
   const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
@@ -119,7 +118,6 @@ export default function BuyMarket(props: {
       const approvedByTaker = await takerTokenContract.methods
         .allowance(accounts[0], exchangeProxyAddress)
         .call()
-      console.log('Approved by taker: ' + (await approvedByTaker.toString()))
       alert(`Maker allowance for ${option.collateralToken} successfully set`)
       setIsApproved(true)
     } else {
@@ -200,9 +198,7 @@ export default function BuyMarket(props: {
       .balanceOf(takerAccount)
       .call()
     balance = formatUnits(balance.toString(), option.collateralDecimals)
-    console.log('balance - ' + balance)
     //balance = balance / 10 ** option.collateralDecimals
-    //console.log('balance old' + balance)
     return balance
   }
 
@@ -215,15 +211,18 @@ export default function BuyMarket(props: {
     const responseOrders: any = resJSON['records']
     responseOrders.forEach((data: any) => {
       const order = data.order
-      order['expectedRate'] = order.takerAmount / order.makerAmount
+      const takerAmount = new BigNumber(order.takerAmount)
+      const makerAmount = new BigNumber(order.makerAmount)
+      order['expectedRate'] = takerAmount.dividedBy(makerAmount)
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
     })
+
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
-    if (sortedRecords.length) {
+    if (sortedRecords.length > 0) {
       const bestRate = sortedRecords[0].expectedRate
       setAvgExpectedRate(bestRate)
     }
@@ -247,30 +246,47 @@ export default function BuyMarket(props: {
   useEffect(() => {
     if (numberOfOptions > 0) {
       let count = numberOfOptions
-      let cumulativeAvg = 0
-      let cumulativeTaker = 0
-      let cumulativeMaker = 0
+      let cumulativeAvg = parseEther('0')
+      let cumulativeTaker = parseEther('0')
+      let cumulativeMaker = parseEther('0')
       existingLimitOrders.forEach((order: any) => {
+        const makerAmount = Number(
+          formatUnits(order.makerAmount.toString(), option.collateralDecimals)
+        )
+        const expectedRate = order.expectedRate
         if (count > 0) {
-          if (count <= order.makerAmount / 10 ** 18) {
-            cumulativeTaker =
-              cumulativeTaker + count * order.expectedRate * 10 ** 18
-            cumulativeMaker = cumulativeMaker + count * 10 ** 18
+          if (count <= makerAmount) {
+            const orderTotalAmount = parseEther(expectedRate.toString()).mul(
+              parseEther(count.toString())
+            )
+            cumulativeTaker = cumulativeTaker.add(orderTotalAmount)
+            cumulativeMaker = cumulativeMaker.add(parseEther(count.toString()))
             count = 0
           } else {
-            //count is greater than current order maker amount so add entire order take amount in
-            //cumulative taker
-            cumulativeTaker = cumulativeTaker + parseFloat(order.takerAmount)
-            cumulativeMaker = cumulativeMaker + parseFloat(order.makerAmount)
-            count = count - order.makerAmount / 10 ** 18
+            //nbrOfOptions entered are greater than current order maker amount
+            //so add entire order taker amount in cumulative taker
+            cumulativeTaker = cumulativeTaker.add(
+              parseEther(order.takerAmount.toString())
+            )
+            cumulativeMaker = cumulativeMaker.add(
+              parseEther(makerAmount.toString())
+            )
+            count = count - makerAmount
           }
         }
       })
-      cumulativeAvg = cumulativeTaker / cumulativeMaker
-      if (cumulativeAvg > 0) {
+      cumulativeAvg = cumulativeTaker.div(cumulativeMaker)
+      cumulativeAvg = cumulativeAvg.div(parseEther('1'))
+      if (cumulativeAvg.gt(0)) {
         setAvgExpectedRate(cumulativeAvg)
-        const youPay = cumulativeAvg * numberOfOptions
-        setYouPay(youPay)
+        let youPayAmount = cumulativeAvg.mul(
+          parseEther(numberOfOptions.toString())
+        )
+        youPayAmount = youPayAmount.div(parseEther('1'))
+        const pay = Number(
+          formatUnits(youPayAmount.toString(), option.collateralDecimals)
+        )
+        setYouPay(pay)
       }
     }
   }, [numberOfOptions])
@@ -297,7 +313,8 @@ export default function BuyMarket(props: {
             </LabelStyleDiv>
           </InfoTooltip>
           <RightSideLabel>
-            {avgExpectedRate.toFixed(4)} {option.collateralTokenName}
+            {formatUnits(avgExpectedRate.toString())}{' '}
+            {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>

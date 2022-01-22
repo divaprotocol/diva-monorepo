@@ -21,6 +21,7 @@ import { Network } from '../../../Util/chainIdToName'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 import { Pool } from '../../../lib/queries'
+import { parseEther } from 'ethers/lib/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20_ABI = require('../../../abi/ERC20.json')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -106,7 +107,7 @@ export default function SellLimit(props: {
           handleFormReset()
         })
         .catch(function (error) {
-          console.error('Error' + error)
+          console.error(error)
         })
     }
   }

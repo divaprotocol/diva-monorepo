@@ -1,4 +1,5 @@
 import { contractAddresses } from './Config'
+import { parseEther } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { CHAIN_ID } from './Config'
 import { utils } from './Config'
@@ -10,15 +11,15 @@ export const sellLimitOrder = async (orderData) => {
     return Math.floor(Date.now() / 1000 + orderData.orderExpiry * 60).toString()
   }
 
+  const makerAmount = parseEther(orderData.nbrOptions.toString())
+  const limitPrice = parseEther(orderData.limitPrice.toString())
+  const takerAmount = makerAmount.mul(limitPrice)
+
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
-    makerAmount: (orderData.nbrOptions * 10 ** 18).toString(),
-    takerAmount: (
-      orderData.nbrOptions *
-      orderData.limitPrice *
-      10 ** orderData.collateralDecimals
-    ).toString(),
+    makerAmount: makerAmount.toString(),
+    takerAmount: takerAmount.toString(),
     maker: orderData.maker,
     sender: NULL_ADDRESS,
     expiry: getFutureExpiryInSeconds(),
