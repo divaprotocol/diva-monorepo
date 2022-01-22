@@ -15,7 +15,6 @@ export const Liquidity = () => {
   const [value, setValue] = React.useState(0)
   const [pool, setPool] = React.useState<Pool>()
   const [diva, setDiva] = React.useState<Contract>()
-  console.log(window.location.pathname.split('/')[1])
   const { chainId, account } = useWeb3React()
 
   useEffect(() => {
@@ -24,7 +23,6 @@ export const Liquidity = () => {
         window.ethereum,
         chainIdtoName(chainId).toLowerCase()
       )
-      console.log(chainId)
       const diva = new ethers.Contract(
         addresses[chainId!].divaAddress,
         DIVA_ABI,

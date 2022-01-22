@@ -17,7 +17,7 @@ const MaxCollateral = styled.u`
 `
 
 type Props = {
-  pool?: Pool
+  pool?: any
   diva?: Contract
 }
 
@@ -25,14 +25,91 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
   const { chainId, account } = useWeb3React()
   const [textFieldValue, setTextFieldValue] = useState('')
   const [balance, setBalance] = useState('')
+  const [longTokens, setLongTokens] = useState('')
+  const [shortTokens, setShortTokens] = useState('')
+  const [poolShare, setPoolShare] = useState('')
   const tokenBalance = useErcBalance(pool ? pool!.collateralToken : undefined)
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId!).toLowerCase()
   )
+
   useEffect(() => {
+    if (pool && textFieldValue !== '') {
+      setLongTokens(
+        ethers.utils.formatEther(
+          pool.supplyLongInitial
+            .div(
+              pool.collateralBalanceLongInitial.add(
+                pool.collateralBalanceShortInitial
+              )
+            )
+            .mul(ethers.utils.parseEther(textFieldValue))
+        )
+      )
+      setShortTokens(
+        ethers.utils.formatEther(
+          pool.supplyShortInitial
+            .div(
+              pool.collateralBalanceLongInitial.add(
+                pool.collateralBalanceShortInitial
+              )
+            )
+            .mul(ethers.utils.parseEther(textFieldValue))
+        )
+      )
+      // setPoolShare(
+      //   ethers.utils.formatEther(
+      //     ethers.utils
+      //       .parseEther(textFieldValue)
+      //       .div(
+      //         ethers.utils
+      //           .parseEther(textFieldValue)
+      //           .add(pool.collateralBalanceLong)
+      //           .add(pool.collateralBalanceShort)
+      //       )
+      //   )
+      // )
+      // console.log(
+      //   ethers.utils.formatEther(
+      //     ethers.utils
+      //       .parseEther(textFieldValue)
+      //       .div(
+      //         ethers.utils
+      //           .parseEther(textFieldValue)
+      //           .add(
+      //             pool.collateralBalanceLong.add(pool.collateralBalanceShort)
+      //           )
+      //       )
+      //   )
+      //   // .add(pool.collateralBalanceLong.add(pool.collateralBalanceShort))
+      // )
+      // console.log(
+      //   ethers.utils
+      //     .parseEther(textFieldValue)
+      //     .div(
+      //       ethers.utils
+      //         .parseEther(textFieldValue)
+      //         .add(pool.collateralBalanceLong.add(pool.collateralBalanceShort))
+      //     )
+      //     .toString()
+      // )
+      console.log(
+        ethers.utils.formatEther(
+          ethers.utils
+            .parseEther(textFieldValue)
+            .div(
+              ethers.utils
+                .parseEther(textFieldValue)
+                .add(
+                  pool.collateralBalanceLong.add(pool.collateralBalanceShort)
+                )
+            )
+        )
+      )
+    }
     setBalance(tokenBalance!)
-  }, [tokenBalance])
+  }, [tokenBalance, pool, account, textFieldValue])
   return (
     <Stack
       direction="column"
@@ -98,15 +175,15 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
           />
           <Stack direction="row">
             <Container sx={{ minWidth: '100px' }}>
-              <Typography>10.00</Typography>
+              <Typography>{longTokens}</Typography>
               <Typography>Long Tokens</Typography>
             </Container>
             <Container sx={{ minWidth: '100px' }}>
-              <Typography>10.00</Typography>
+              <Typography>{shortTokens}</Typography>
               <Typography>Short Tokens</Typography>
             </Container>
             <Container sx={{ minWidth: '100px' }}>
-              <Typography>NaN%</Typography>
+              <Typography>{poolShare}</Typography>
               <Typography>Share of Pool</Typography>
             </Container>
           </Stack>

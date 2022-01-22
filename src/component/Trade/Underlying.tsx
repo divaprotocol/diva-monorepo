@@ -18,6 +18,10 @@ import { useQuery } from 'react-query'
 import { queryPool, Pool } from '../../lib/queries'
 import request from 'graphql-request'
 import { theGraphUrl } from '../../constants'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
+import React from 'react'
+import { Liquidity } from '../Liquidity/Liquidity'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -39,6 +43,7 @@ const LeftCompRightDiv = styled.div`
 
 export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
+  const [value, setValue] = React.useState(0)
   const breakEvenOptionPrice = 0
 
   const query = useQuery<{ pool: Pool }>('pool', () =>
@@ -66,48 +71,59 @@ export default function Underlying() {
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken : pool.shortToken
 
+  const handleChange = (event: any, newValue: any) => {
+    setValue(newValue)
+  }
   return (
     <Container sx={{ paddingTop: '4em' }}>
-      <Stack direction="row" spacing={2}>
-        <Stack spacing={2}>
-          <Paper>
-            <OptionHeader
-              ReferenceAsset={pool.referenceAsset}
-              TokenAddress={tokenAddress}
-              isLong={isLong}
-              poolId={pool.id}
-              tokenDecimals={pool.collateralDecimals}
-            />
-            <OptionDetails pool={pool} isLong={isLong} />
-          </Paper>
+      <Tabs value={value} onChange={handleChange} variant="fullWidth">
+        <Tab label="Trade" />
+        <Tab label="Liquidity" />
+      </Tabs>
+      {value ? (
+        <Liquidity />
+      ) : (
+        <Stack direction="row" spacing={2}>
+          <Stack spacing={2}>
+            <Paper>
+              <OptionHeader
+                ReferenceAsset={pool.referenceAsset}
+                TokenAddress={tokenAddress}
+                isLong={isLong}
+                poolId={pool.id}
+                tokenDecimals={pool.collateralDecimals}
+              />
+              <OptionDetails pool={pool} isLong={isLong} />
+            </Paper>
 
-          <Paper>
-            <LeftCompFlexContainer>
-              <LeftCompLeftDiv>
-                <OrderBook option={pool} />
-              </LeftCompLeftDiv>
-              <LeftCompRightDiv>
-                <OpenOrdersNew option={pool} />
-              </LeftCompRightDiv>
-            </LeftCompFlexContainer>
-          </Paper>
-        </Stack>
+            <Paper>
+              <LeftCompFlexContainer>
+                <LeftCompLeftDiv>
+                  <OrderBook option={pool} />
+                </LeftCompLeftDiv>
+                <LeftCompRightDiv>
+                  <OpenOrdersNew option={pool} />
+                </LeftCompRightDiv>
+              </LeftCompFlexContainer>
+            </Paper>
+          </Stack>
 
-        <Stack spacing={2}>
-          <Paper>
-            <CreateOrder option={pool} tokenAddress={tokenAddress} />
-          </Paper>
-          <Paper>
-            <TradeChart
-              data={data}
-              w={380}
-              h={200}
-              isLong={OptionParams.IsLong}
-              breakEven={breakEvenOptionPrice}
-            />
-          </Paper>
+          <Stack spacing={2}>
+            <Paper>
+              <CreateOrder option={pool} tokenAddress={tokenAddress} />
+            </Paper>
+            <Paper>
+              <TradeChart
+                data={data}
+                w={380}
+                h={200}
+                isLong={OptionParams.IsLong}
+                breakEven={breakEvenOptionPrice}
+              />
+            </Paper>
+          </Stack>
         </Stack>
-      </Stack>
+      )}
     </Container>
   )
 }
