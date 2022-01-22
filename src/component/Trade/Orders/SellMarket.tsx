@@ -37,7 +37,6 @@ const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
 function descendingComparator(a: any, b: any, orderBy: any) {
-  console.log(orderBy + ' b ' + b[orderBy] + ' a ' + a[orderBy])
   if (b[orderBy] < a[orderBy]) {
     return -1
   }
@@ -116,7 +115,6 @@ export default function SellMarket(props: {
       const approvedByMaker = await takerTokenContract.methods
         .allowance(makerAccount, exchangeProxyAddress)
         .call()
-      console.log('Approved by maker: ' + (await approvedByMaker.toString()))
       setIsApproved(true)
     } else {
       const orderData = {
@@ -200,13 +198,10 @@ export default function SellMarket(props: {
 
   const getLimitOrders = async () => {
     const orders: any = []
-    console.log('maker ' + params.makerToken)
-    console.log('taker ' + params.takerToken)
     const res = await fetch(
       `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
     )
     const resJSON = await res.json()
-    console.log('resJSON ' + JSON.stringify(resJSON))
     const responseOrders: any = resJSON['records']
     responseOrders.forEach((data: any) => {
       const order = data.order

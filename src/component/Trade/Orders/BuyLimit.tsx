@@ -92,7 +92,6 @@ export default function BuyLimit(props: {
       const approvedByTaker = await takerTokenContract.methods
         .allowance(accounts[0], exchangeProxyAddress)
         .call()
-      console.log('Approved by taker: ' + (await approvedByTaker.toString()))
       alert(`Maker allowance for ${option.collateralToken} successfully set`)
       setIsApproved(true)
     } else {
@@ -111,12 +110,11 @@ export default function BuyLimit(props: {
 
       buylimitOrder(orderData)
         .then(function (response) {
-          console.log('Response ' + response)
           props.handleDisplayOrder()
           handleFormReset()
         })
         .catch(function (error) {
-          console.log('Error' + error)
+          console.error('Error' + error)
         })
     }
   }
@@ -133,7 +131,6 @@ export default function BuyLimit(props: {
 
   useEffect(() => {
     getCollateralInWallet().then((val) => {
-      console.log(JSON.stringify(val))
       if (val != null) {
         setCollateralBalance(Number(val))
       } else {

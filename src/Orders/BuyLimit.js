@@ -1,6 +1,5 @@
 import { contractAddresses } from './Config'
 import { NULL_ADDRESS } from './Config'
-import { CHAIN_ID } from './Config'
 import { utils } from './Config'
 import { metamaskProvider } from './Config'
 import { ROPSTEN } from './Config'
@@ -26,7 +25,6 @@ export const buylimitOrder = async (orderData) => {
     chainId: orderData.chainId,
     verifyingContract: contractAddresses.exchangeProxy,
   })
-  console.log('order ' + JSON.stringify(order))
 
   try {
     const signature = await order.getSignatureWithProviderAsync(
@@ -55,7 +53,7 @@ export const buylimitOrder = async (orderData) => {
       )
     }
   } catch (error) {
-    console.log('error ' + JSON.stringify(error))
+    console.error('error ' + JSON.stringify(error))
     alert('You need to sign the order')
   }
 }

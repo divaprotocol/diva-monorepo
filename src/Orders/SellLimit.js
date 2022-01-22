@@ -27,7 +27,6 @@ export const sellLimitOrder = async (orderData) => {
     verifyingContract: contractAddresses.exchangeProxy,
   })
 
-  console.log('Sell ' + JSON.stringify(order))
   try {
     const signature = await order.getSignatureWithProviderAsync(
       metamaskProvider,

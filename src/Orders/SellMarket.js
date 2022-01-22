@@ -47,7 +47,6 @@ export const sellMarketOrder = async (orderData) => {
       makerAssetAmounts.push('0')
     }
   })
-  console.log('maker asset amount ' + JSON.stringify(makerAssetAmounts))
   filledOrder = await fillOrderResponse(makerAssetAmounts)
   return filledOrder
 }

@@ -111,11 +111,9 @@ export default function CreateOrder(props: {
       optionTokenAddress
     )
     if (responseSell.length > 0) {
-      console.log('response sell ' + JSON.stringify(responseSell))
       dispatch(setResponseSell(responseSell))
     }
     if (responseBuy.length > 0) {
-      console.log('response Buy ' + JSON.stringify(responseBuy))
       dispatch(setResponseBuy(responseBuy))
     }
   }

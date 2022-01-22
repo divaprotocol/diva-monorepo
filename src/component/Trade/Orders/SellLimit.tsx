@@ -86,7 +86,6 @@ export default function SellLimit(props: {
       const approvedByMaker = await makerTokenContract.methods
         .allowance(makerAccount, exchangeProxyAddress)
         .call()
-      console.log('Approved by maker: ' + (await approvedByMaker.toString()))
       setIsApproved(true)
     } else {
       const orderData = {
@@ -107,7 +106,7 @@ export default function SellLimit(props: {
           handleFormReset()
         })
         .catch(function (error) {
-          console.log('Error' + error)
+        console.error('Error' + error)
         })
     }
   }
