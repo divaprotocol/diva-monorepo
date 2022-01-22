@@ -1,14 +1,22 @@
-import { Container, Divider, Stack, TextField } from '@mui/material'
+import {
+  Alert,
+  Collapse,
+  Container,
+  Divider,
+  IconButton,
+  Stack,
+  TextField,
+} from '@mui/material'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import React, { useEffect, useState } from 'react'
-import { Pool } from '../../lib/queries'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import { Contract, ethers } from 'ethers'
 import styled from '@emotion/styled'
 import ERC20 from '../../abi/ERC20.json'
 import { chainIdtoName } from '../../Util/chainIdToName'
 import { useWeb3React } from '@web3-react/core'
+import { formatEther } from 'ethers/lib/utils'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -28,6 +36,8 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
   const [longTokens, setLongTokens] = useState('')
   const [shortTokens, setShortTokens] = useState('')
   const [poolShare, setPoolShare] = useState('')
+  const [openAlert, setOpenAlert] = React.useState(false)
+
   const tokenBalance = useErcBalance(pool ? pool!.collateralToken : undefined)
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
@@ -58,65 +68,33 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
             .mul(ethers.utils.parseEther(textFieldValue))
         )
       )
-      // setPoolShare(
-      //   ethers.utils.formatEther(
-      //     ethers.utils
-      //       .parseEther(textFieldValue)
-      //       .div(
-      //         ethers.utils
-      //           .parseEther(textFieldValue)
-      //           .add(pool.collateralBalanceLong)
-      //           .add(pool.collateralBalanceShort)
-      //       )
-      //   )
-      // )
-      // console.log(
-      //   ethers.utils.formatEther(
-      //     ethers.utils
-      //       .parseEther(textFieldValue)
-      //       .div(
-      //         ethers.utils
-      //           .parseEther(textFieldValue)
-      //           .add(
-      //             pool.collateralBalanceLong.add(pool.collateralBalanceShort)
-      //           )
-      //       )
-      //   )
-      //   // .add(pool.collateralBalanceLong.add(pool.collateralBalanceShort))
-      // )
-      // console.log(
-      //   ethers.utils
-      //     .parseEther(textFieldValue)
-      //     .div(
-      //       ethers.utils
-      //         .parseEther(textFieldValue)
-      //         .add(pool.collateralBalanceLong.add(pool.collateralBalanceShort))
-      //     )
-      //     .toString()
-      // )
-      console.log(
-        ethers.utils.formatEther(
-          ethers.utils
-            .parseEther(textFieldValue)
-            .div(
-              ethers.utils
-                .parseEther(textFieldValue)
-                .add(
-                  pool.collateralBalanceLong.add(pool.collateralBalanceShort)
-                )
-            )
-        )
+      const collateralSum = formatEther(
+        ethers.utils
+          .parseEther(textFieldValue)
+          .add(pool.collateralBalanceLong.add(pool.collateralBalanceShort))
+      )
+      setPoolShare(
+        (
+          Math.round(
+            ((parseFloat(textFieldValue) * 100) / parseFloat(collateralSum) +
+              Number.EPSILON) *
+              100
+          ) / 100
+        ).toString() + ' %'
       )
     }
     setBalance(tokenBalance!)
+    if (tokenBalance && textFieldValue > tokenBalance!) {
+      setOpenAlert(true)
+    } else {
+      setOpenAlert(false)
+    }
   }, [tokenBalance, pool, account, textFieldValue])
   return (
     <Stack
       direction="column"
       sx={{
         mt: '2em',
-        // mr: '2em',
-        // ml: '2em',
       }}
     >
       <Stack direction="row" justifyContent="space-between">
@@ -149,6 +127,26 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
           Please connect your wallet
         </Typography>
       )}
+      <Collapse in={openAlert} sx={{ mt: '1em' }}>
+        <Alert
+          severity="error"
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setOpenAlert(false)
+              }}
+            >
+              {'X'}
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          Insufficient wallet balance
+        </Alert>
+      </Collapse>
       <Container
         sx={{
           mt: '1em',
@@ -163,8 +161,6 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
           sx={{
             mt: '2em',
             paddingRight: '40px',
-            // width: 240,
-            // height: 120,
             backgroundColor: 'darkgray',
           }}
         >
@@ -209,8 +205,6 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
             value="Submit"
             disabled={!pool}
             onClick={() => {
-              console.log(ethers.utils.parseEther(textFieldValue))
-
               const token = new ethers.Contract(
                 pool!.collateralToken,
                 ERC20,
@@ -228,26 +222,6 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
                     })
                   })
                 })
-              // tx!.wait().then(() => {
-              //   const tx = token.allowance(account, diva?.address)
-              //   tx!.wait().then(() => {
-              //     diva!.addLiquidity(
-              //       window.location.pathname.split('/')[1],
-              //       ethers.utils.parseEther(textFieldValue)
-              //     )
-              //   })
-              // })
-              // token
-              //   .approve(diva?.address, ethers.utils.parseEther(textFieldValue))
-              //   .then(() => {
-              //     token.allowance(account, diva?.address)
-              //   })
-              //   .then(() => {
-              //     diva!.addLiquidity(
-              //       window.location.pathname.split('/')[1],
-              //       ethers.utils.parseEther(textFieldValue)
-              //     )
-              //   })
             }}
             style={{
               maxWidth: '300px',

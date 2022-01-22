@@ -10,12 +10,13 @@ import { chainIdtoName } from '../../Util/chainIdToName'
 import { addresses } from '../../constants'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { Pool } from '../../lib/queries'
+import { RemoveLiquidity } from './RemoveLiquidity'
 
 export const Liquidity = () => {
   const [value, setValue] = React.useState(0)
   const [pool, setPool] = React.useState<Pool>()
   const [diva, setDiva] = React.useState<Contract>()
-  const { chainId, account } = useWeb3React()
+  const { chainId } = useWeb3React()
 
   useEffect(() => {
     if (chainId) {
@@ -32,7 +33,6 @@ export const Liquidity = () => {
       diva
         .getPoolParameters(window.location.pathname.split('/')[1])
         .then((pool: Pool) => {
-          console.log(pool)
           setPool(pool)
         })
     }
@@ -47,18 +47,18 @@ export const Liquidity = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '60vh',
+        height: '80vh',
       }}
     >
       <Stack direction={'column'}>
-        <Card sx={{ minWidth: '600px', borderRadius: '16px' }}>
+        <Card sx={{ maxWidth: '600px', borderRadius: '16px' }}>
           <Tabs value={value} onChange={handleChange} variant="fullWidth">
             <Tab label="Add" />
             <Tab label="Remove" />
           </Tabs>
           <CardContent>
             {value ? (
-              <div>{'asd'}</div>
+              <RemoveLiquidity pool={pool!} diva={diva} />
             ) : (
               <AddLiquidity pool={pool!} diva={diva} />
             )}
@@ -74,6 +74,31 @@ export const Liquidity = () => {
             <Typography>NaN</Typography>
           </Stack>
         </Container>
+        <Card sx={{ maxWidth: '600px', borderRadius: '16px' }}>
+          <Container sx={{ mt: '1em', mb: '1em' }}>
+            {value ? (
+              <Typography>
+                By removing liquidity you are giving back long and short
+                position tokens proportional to the pool balance and recieve
+                collateral in return
+              </Typography>
+            ) : (
+              <Stack direction="column">
+                <Typography>
+                  By adding liquidity you receive long and short position tokens
+                  in return which represent a claim against the collateral you
+                  deposited
+                </Typography>
+                <Typography sx={{ mt: '1em' }}>
+                  Bullish? Keep the long tokens and sell the short tokens
+                </Typography>
+                <Typography sx={{ mt: '1em' }}>
+                  Bearish? Keep the short tokens and sell the long tokens
+                </Typography>
+              </Stack>
+            )}
+          </Container>
+        </Card>
       </Stack>
     </div>
   )

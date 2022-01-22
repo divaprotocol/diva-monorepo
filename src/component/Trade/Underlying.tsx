@@ -1,13 +1,7 @@
 import styled from 'styled-components'
-// import OptionHeader from './OptionHeader'
-// import OptionDetails from './OptionDetails'
-//import OpenOrders from './OptionOrders'
 import OpenOrdersNew from './OptionOrdersNew'
-//import OrderBook from './OrderBook';
 import OrderBook from './OrderBookNew'
 import CreateOrder from './CreateOrder'
-// import LineSeries from '../Graphs/LineSeries';
-//import './Underlying.css';
 import { Container, Paper, Stack } from '@mui/material'
 import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
@@ -15,7 +9,7 @@ import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
 import OptionHeader from './OptionHeader'
 import { useQuery } from 'react-query'
-import { queryPool, Pool } from '../../lib/queries'
+import { Pool, queryPool } from '../../lib/queries'
 import request from 'graphql-request'
 import { theGraphUrl } from '../../constants'
 import Tab from '@mui/material/Tab'
@@ -70,7 +64,6 @@ export default function Underlying() {
 
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken : pool.shortToken
-
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
   }
@@ -78,7 +71,10 @@ export default function Underlying() {
     <Container sx={{ paddingTop: '4em' }}>
       <Tabs value={value} onChange={handleChange} variant="fullWidth">
         <Tab label="Trade" />
-        <Tab label="Liquidity" />
+        <Tab
+          label="Liquidity"
+          disabled={Date.now() > 1000 * parseInt(pool.expiryDate)}
+        />
       </Tabs>
       {value ? (
         <Liquidity />
