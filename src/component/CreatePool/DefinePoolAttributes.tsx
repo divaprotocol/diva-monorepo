@@ -76,7 +76,12 @@ export function DefinePoolAttributes({
       const collateralBalance =
         formik.values.collateralBalanceLong +
         formik.values.collateralBalanceShort
-      formik.setFieldValue('collateralBalance', collateralBalance)
+      formik.setValues((_values) => ({
+        ..._values,
+        collateralBalance: `${collateralBalance}`,
+        shortTokenSupply: parseFloat(collateralBalance.toString()),
+        longTokenSupply: parseFloat(collateralBalance.toString()),
+      }))
     }
   }, [
     formik.touched.collateralBalanceLong,
@@ -232,16 +237,19 @@ export function DefinePoolAttributes({
               value={formik.values.collateralBalance}
               type="number"
               onChange={(event) => {
-                const collateralBalance = Number(event.target.value)
-                const half = collateralBalance / 2
+                const collateralBalance = event.target.value
+                const half =
+                  collateralBalance != null
+                    ? parseFloat(collateralBalance) / 2
+                    : 0
 
                 formik.setValues((values) => ({
                   ...values,
                   collateralBalance,
                   collateralBalanceShort: half,
                   collateralBalanceLong: half,
-                  longTokenSupply: collateralBalance,
-                  shortTokenSupply: collateralBalance,
+                  longTokenSupply: parseFloat(collateralBalance),
+                  shortTokenSupply: parseFloat(collateralBalance),
                 }))
               }}
             />
