@@ -69,35 +69,23 @@ export function DefinePoolAttributes({
   }, [collateralWalletBalance])
 
   useEffect(() => {
-    if (formik.touched.collateralBalance) {
-      const half = formik.values.collateralBalance / 2
-      formik.setValues((values) => ({
-        ...values,
-        collateralBalanceShort: half,
-        collateralBalanceLong: half,
-        longTokenSupply: formik.values.collateralBalance,
-        shortTokenSupply: formik.values.collateralBalance,
-      }))
-    }
-  }, [formik.values.collateralBalance, formik.touched])
-
-  useEffect(() => {
-    const totalBalance =
-      formik.values.collateralBalanceLong + formik.values.collateralBalanceShort
     if (
-      (formik.touched.collateralBalanceLong ||
-        formik.touched.collateralBalanceShort) &&
-      totalBalance !== formik.values.collateralBalance
+      formik.touched.collateralBalanceLong ||
+      formik.touched.collateralBalanceShort
     ) {
-      formik.setValues((values) => ({
-        ...values,
-        collateralBalance: totalBalance,
-        longTokenSupply: totalBalance,
-        shortTokenSupply: totalBalance,
+      const collateralBalance =
+        formik.values.collateralBalanceLong +
+        formik.values.collateralBalanceShort
+      formik.setValues((_values) => ({
+        ..._values,
+        collateralBalance: `${collateralBalance}`,
+        shortTokenSupply: parseFloat(collateralBalance.toString()),
+        longTokenSupply: parseFloat(collateralBalance.toString()),
       }))
     }
   }, [
-    formik.touched,
+    formik.touched.collateralBalanceLong,
+    formik.touched.collateralBalanceShort,
     formik.values.collateralBalanceLong,
     formik.values.collateralBalanceShort,
   ])
@@ -248,7 +236,22 @@ export function DefinePoolAttributes({
               error={formik.errors.collateralBalance != null}
               value={formik.values.collateralBalance}
               type="number"
-              onChange={formik.handleChange}
+              onChange={(event) => {
+                const collateralBalance = event.target.value
+                const half =
+                  collateralBalance != null
+                    ? parseFloat(collateralBalance) / 2
+                    : 0
+
+                formik.setValues((values) => ({
+                  ...values,
+                  collateralBalance,
+                  collateralBalanceShort: half,
+                  collateralBalanceLong: half,
+                  longTokenSupply: parseFloat(collateralBalance),
+                  shortTokenSupply: parseFloat(collateralBalance),
+                }))
+              }}
             />
             {formik.errors.collateralBalance != null && (
               <FormHelperText>{formik.errors.collateralBalance}</FormHelperText>
