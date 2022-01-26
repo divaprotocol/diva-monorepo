@@ -17,7 +17,8 @@ import OptionHeader from './OptionHeader'
 import { useQuery } from 'react-query'
 import { queryPool, Pool } from '../../lib/queries'
 import request from 'graphql-request'
-import { theGraphUrl } from '../../constants'
+import { config } from '../../constants'
+import { useWeb3React } from '@web3-react/core'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -40,9 +41,13 @@ const LeftCompRightDiv = styled.div`
 export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const breakEvenOptionPrice = 0
+  const { chainId } = useWeb3React()
 
   const query = useQuery<{ pool: Pool }>('pool', () =>
-    request(theGraphUrl, queryPool(parseInt(params.poolId)))
+    request(
+      config[chainId as number].divaSubgraph,
+      queryPool(parseInt(params.poolId))
+    )
   )
 
   const pool = query.data?.pool

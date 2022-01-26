@@ -14,7 +14,7 @@ import React, { useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { ethers } from 'ethers'
 
-import { addresses, theGraphUrl } from '../../constants'
+import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
@@ -118,7 +118,7 @@ const SubmitCell = (props: any) => {
     chainIdtoName(chainId).toLowerCase()
   )
   const diva = new ethers.Contract(
-    addresses[chainId!].divaAddress,
+    config[chainId!].divaAddress,
     DIVA_ABI,
     provider.getSigner()
   )
@@ -239,9 +239,10 @@ const columns: GridColDef[] = [
 ]
 
 export function MyDataFeeds() {
-  const { account } = useWeb3React()
+  const { account, chainId } = useWeb3React()
+
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(theGraphUrl, queryPools)
+    request(config[chainId as number].divaSubgraph, queryPools)
   )
   const pools =
     query.data?.pools.filter(

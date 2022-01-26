@@ -2,7 +2,7 @@ import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import { Button, Container, Stack, Tooltip } from '@mui/material'
 import { useWeb3React } from '@web3-react/core'
 import { BigNumber, ethers } from 'ethers'
-import { addresses, theGraphUrl } from '../../constants'
+import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
 import { chainIdtoName } from '../../Util/chainIdToName'
@@ -69,7 +69,7 @@ const SubmitButton = (props: any) => {
   )
 
   const diva = new ethers.Contract(
-    addresses[chainId!].divaAddress,
+    config[chainId!].divaAddress,
     DIVA_ABI,
     provider.getSigner()
   )
@@ -194,10 +194,10 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const { account } = useWeb3React()
+  const { account, chainId } = useWeb3React()
 
   const poolsQuery = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(theGraphUrl, queryPools)
+    request(config[chainId as number].divaSubgraph, queryPools)
   )
 
   const pools = poolsQuery.data?.pools || ([] as Pool[])

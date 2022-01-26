@@ -1,6 +1,6 @@
 import { useWeb3React } from '@web3-react/core'
 import { ethers, Contract, BigNumber } from 'ethers'
-import { addresses } from '../constants'
+import { config } from '../constants'
 import { chainIdtoName } from '../Util/chainIdToName'
 import DIVA_ABI from '../abi/DIVA.json'
 import ERC20 from '../abi/ERC20.json'
@@ -67,7 +67,7 @@ export function useDiva(): DivaApi | null {
   )
   if (chainId == null) return null
 
-  const divaAddress = addresses[chainId].divaAddress
+  const divaAddress = config[chainId].divaAddress
 
   const signer = provider.getSigner()
 
