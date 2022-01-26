@@ -227,15 +227,18 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
               token
                 .approve(diva?.address, parseEther(textFieldValue))
                 .then((tx: any) => {
-                  tx.wait().then(() => {
-                    token.allowance(account, diva?.address).then((tx: any) => {
-                      diva!.addLiquidity(
-                        window.location.pathname.split('/')[1],
-                        parseEther(textFieldValue)
-                      )
-                    })
-                  })
+                  return tx.wait()
                 })
+                .then(() => {
+                  return token.allowance(account, diva?.address)
+                })
+                .then(() => {
+                  diva!.addLiquidity(
+                    window.location.pathname.split('/')[1],
+                    parseEther(textFieldValue)
+                  )
+                })
+                .catch((err: any) => console.error(err))
             }}
             style={{
               maxWidth: theme.spacing(38),
