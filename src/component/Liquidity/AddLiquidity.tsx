@@ -6,38 +6,42 @@ import {
   IconButton,
   Stack,
   TextField,
+  useTheme,
 } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
-import { Contract, ethers } from 'ethers'
+import { BigNumber, Contract, ethers } from 'ethers'
 import styled from '@emotion/styled'
 import ERC20 from '../../abi/ERC20.json'
 import { chainIdtoName } from '../../Util/chainIdToName'
 import { useWeb3React } from '@web3-react/core'
-import { formatEther } from 'ethers/lib/utils'
+import { formatEther, parseEther } from 'ethers/lib/utils'
+import { withStyles } from '@mui/styles'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
     color: ${(props) => (props.theme as any).palette.primary.main};
   }
 `
+const BlackTextTypography = withStyles({
+  root: {
+    color: '#000000',
+  },
+})(Typography)
 
 type Props = {
   pool?: any
   diva?: Contract
+  symbol?: string
 }
 
-export const AddLiquidity = ({ pool, diva }: Props) => {
+export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
   const { chainId, account } = useWeb3React()
   const [textFieldValue, setTextFieldValue] = useState('')
-  const [balance, setBalance] = useState('')
-  const [longTokens, setLongTokens] = useState('')
-  const [shortTokens, setShortTokens] = useState('')
-  const [poolShare, setPoolShare] = useState('')
+  const theme = useTheme()
   const [openAlert, setOpenAlert] = React.useState(false)
-
   const tokenBalance = useErcBalance(pool ? pool!.collateralToken : undefined)
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
@@ -45,60 +49,21 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
   )
 
   useEffect(() => {
-    if (pool && textFieldValue !== '') {
-      setLongTokens(
-        ethers.utils.formatEther(
-          pool.supplyLongInitial
-            .div(
-              pool.collateralBalanceLongInitial.add(
-                pool.collateralBalanceShortInitial
-              )
-            )
-            .mul(ethers.utils.parseEther(textFieldValue))
-        )
-      )
-      setShortTokens(
-        ethers.utils.formatEther(
-          pool.supplyShortInitial
-            .div(
-              pool.collateralBalanceLongInitial.add(
-                pool.collateralBalanceShortInitial
-              )
-            )
-            .mul(ethers.utils.parseEther(textFieldValue))
-        )
-      )
-      const collateralSum = formatEther(
-        ethers.utils
-          .parseEther(textFieldValue)
-          .add(pool.collateralBalanceLong.add(pool.collateralBalanceShort))
-      )
-      setPoolShare(
-        (
-          Math.round(
-            ((parseFloat(textFieldValue) * 100) / parseFloat(collateralSum) +
-              Number.EPSILON) *
-              100
-          ) / 100
-        ).toString() + ' %'
-      )
-    }
-    setBalance(tokenBalance!)
-    if (tokenBalance && textFieldValue > tokenBalance!) {
+    if (tokenBalance && parseInt(textFieldValue) > parseInt(tokenBalance!)) {
       setOpenAlert(true)
     } else {
       setOpenAlert(false)
     }
-  }, [tokenBalance, pool, account, textFieldValue])
+  }, [tokenBalance, textFieldValue])
   return (
     <Stack
       direction="column"
       sx={{
-        mt: '2em',
+        mt: theme.spacing(2),
       }}
     >
       <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: '1em' }}>Amount</Typography>
+        <Typography sx={{ mt: theme.spacing(2) }}>Amount</Typography>
         <TextField
           value={textFieldValue}
           onChange={(e) => {
@@ -109,7 +74,7 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
       {tokenBalance ? (
         <>
           <Typography variant="subtitle2" color="text.secondary">
-            Your Balance: {balance}
+            Your balance: {parseFloat(tokenBalance!).toFixed(4)} {symbol!}{' '}
             <MaxCollateral
               role="button"
               onClick={() => {
@@ -127,7 +92,7 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
           Please connect your wallet
         </Typography>
       )}
-      <Collapse in={openAlert} sx={{ mt: '1em' }}>
+      <Collapse in={openAlert} sx={{ mt: theme.spacing(2) }}>
         <Alert
           severity="error"
           action={
@@ -149,38 +114,87 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
       </Collapse>
       <Container
         sx={{
-          mt: '1em',
+          mt: theme.spacing(2),
           borderRadius: '16px',
-          width: 450,
-          height: 200,
-          backgroundColor: 'darkgray',
+          width: theme.spacing(56),
+          height: theme.spacing(25),
+          backgroundColor: 'lightgray',
           alignSelf: 'center',
         }}
       >
         <Container
           sx={{
-            mt: '2em',
-            paddingRight: '40px',
-            backgroundColor: 'darkgray',
+            mt: theme.spacing(4),
+            paddingRight: theme.spacing(5),
+            backgroundColor: 'lightgray',
           }}
         >
-          <Typography>You Recieve</Typography>
+          <BlackTextTypography>You Receive</BlackTextTypography>
           <Divider
             variant={'fullWidth'}
-            sx={{ background: 'white', mt: '1em', mb: '1em' }}
+            sx={{
+              background: 'black',
+              mt: theme.spacing(2),
+              mb: theme.spacing(2),
+            }}
           />
           <Stack direction="row">
-            <Container sx={{ minWidth: '100px' }}>
-              <Typography>{longTokens}</Typography>
-              <Typography>Long Tokens</Typography>
+            <Container sx={{ minWidth: theme.spacing(12) }}>
+              <BlackTextTypography>
+                {pool &&
+                  textFieldValue !== '' &&
+                  (
+                    (parseFloat(formatEther(pool.supplyLongInitial)) /
+                      (parseFloat(
+                        formatEther(pool.collateralBalanceLongInitial)
+                      ) +
+                        parseFloat(
+                          formatEther(pool.collateralBalanceShortInitial)
+                        ))) *
+                    parseFloat(formatEther(parseEther(textFieldValue)))
+                  ).toFixed(4)}
+              </BlackTextTypography>
+              <BlackTextTypography>Long Tokens</BlackTextTypography>
             </Container>
             <Container sx={{ minWidth: '100px' }}>
-              <Typography>{shortTokens}</Typography>
-              <Typography>Short Tokens</Typography>
+              <BlackTextTypography>
+                {pool &&
+                  textFieldValue !== '' &&
+                  (
+                    (parseFloat(formatEther(pool.supplyShortInitial)) /
+                      (parseFloat(
+                        formatEther(pool.collateralBalanceLongInitial)
+                      ) +
+                        parseFloat(
+                          formatEther(pool.collateralBalanceShortInitial)
+                        ))) *
+                    parseFloat(formatEther(parseEther(textFieldValue)))
+                  ).toFixed(4)}
+              </BlackTextTypography>
+              <BlackTextTypography>Short Tokens</BlackTextTypography>
             </Container>
             <Container sx={{ minWidth: '100px' }}>
-              <Typography>{poolShare}</Typography>
-              <Typography>Share of Pool</Typography>
+              <BlackTextTypography>
+                {pool &&
+                  textFieldValue !== '' &&
+                  (
+                    Math.round(
+                      ((parseFloat(textFieldValue) * 100) /
+                        parseFloat(
+                          formatEther(
+                            parseEther(textFieldValue).add(
+                              pool.collateralBalanceLong.add(
+                                pool.collateralBalanceShort
+                              )
+                            )
+                          )
+                        ) +
+                        Number.EPSILON) *
+                        100
+                    ) / 100
+                  ).toString() + ' %'}
+              </BlackTextTypography>
+              <BlackTextTypography>Share of Pool</BlackTextTypography>
             </Container>
           </Stack>
         </Container>
@@ -203,7 +217,7 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
             size="large"
             type="submit"
             value="Submit"
-            disabled={!pool}
+            disabled={!pool || Date.now() > 1000 * parseInt(pool.expiryDate)}
             onClick={() => {
               const token = new ethers.Contract(
                 pool!.collateralToken,
@@ -211,23 +225,23 @@ export const AddLiquidity = ({ pool, diva }: Props) => {
                 provider.getSigner()
               )
               token
-                .approve(diva?.address, ethers.utils.parseEther(textFieldValue))
+                .approve(diva?.address, parseEther(textFieldValue))
                 .then((tx: any) => {
                   tx.wait().then(() => {
                     token.allowance(account, diva?.address).then((tx: any) => {
                       diva!.addLiquidity(
                         window.location.pathname.split('/')[1],
-                        ethers.utils.parseEther(textFieldValue)
+                        parseEther(textFieldValue)
                       )
                     })
                   })
                 })
             }}
             style={{
-              maxWidth: '300px',
-              maxHeight: '40px',
-              minWidth: '300px',
-              minHeight: '40px',
+              maxWidth: theme.spacing(38),
+              maxHeight: theme.spacing(5),
+              minWidth: theme.spacing(38),
+              minHeight: theme.spacing(5),
             }}
           >
             Add

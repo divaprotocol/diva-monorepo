@@ -71,10 +71,7 @@ export default function Underlying() {
     <Container sx={{ paddingTop: '4em' }}>
       <Tabs value={value} onChange={handleChange} variant="fullWidth">
         <Tab label="Trade" />
-        <Tab
-          label="Liquidity"
-          disabled={Date.now() > 1000 * parseInt(pool.expiryDate)}
-        />
+        <Tab label="Liquidity" />
       </Tabs>
       {value ? (
         <Liquidity />

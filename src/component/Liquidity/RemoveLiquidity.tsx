@@ -8,11 +8,12 @@ import {
   Stack,
   TextField,
   Typography,
+  useTheme,
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
-import { formatEther } from 'ethers/lib/utils'
+import { formatEther, parseEther } from 'ethers/lib/utils'
 import { useCoinIcon } from '../../hooks/useCoinIcon'
 import ERC20 from '../../abi/ERC20.json'
 import Button from '@mui/material/Button'
@@ -31,13 +32,15 @@ const CoinIcon = (address: any) => {
 type Props = {
   pool?: any
   diva?: Contract
+  symbol?: string
 }
 
-export const RemoveLiquidity = ({ pool, diva }: Props) => {
+export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
   const [longBalance, setLongBalance] = useState('')
   const [shortBalance, setShortBalance] = useState('')
   const tokenBalanceLong = useErcBalance(pool ? pool!.longToken : undefined)
+  const tokenBalanceShort = useErcBalance(pool ? pool!.shortToken : undefined)
   const [receiving, setReceiving] = useState('')
   const [openAlert, setOpenAlert] = React.useState(false)
   const { chainId, account } = useWeb3React()
@@ -45,46 +48,62 @@ export const RemoveLiquidity = ({ pool, diva }: Props) => {
     window.ethereum,
     chainIdtoName(chainId!).toLowerCase()
   )
+  const theme = useTheme()
   useEffect(() => {
-    if (tokenBalanceLong && textFieldValue > tokenBalanceLong!) {
-      setOpenAlert(true)
-    } else {
-      setOpenAlert(false)
-    }
     if (pool) {
-      console.log(pool)
       setLongBalance(tokenBalanceLong!)
       if (textFieldValue) {
+        // setShortBalance(
+        //   formatEther(
+        //     pool.supplyShortInitial
+        //       .div(pool.supplyLongInitial)
+        //       .mul(parseEther(textFieldValue))
+        //   )
+        // )
         setShortBalance(
-          formatEther(
-            pool.supplyShortInitial
-              .div(pool.supplyLongInitial)
-              .mul(ethers.utils.parseEther(textFieldValue))
-          )
+          (
+            (parseFloat(formatEther(pool.supplyShortInitial)) /
+              parseFloat(formatEther(pool.supplyLongInitial))) *
+            parseFloat(formatEther(parseEther(textFieldValue)))
+          ).toString()
         )
-        console.log(pool.collateralToken)
         setReceiving(
           formatEther(
-            pool.collateralBalanceShortInitial
-              .add(pool.collateralBalanceLongInitial)
-              .mul(ethers.utils.parseEther(textFieldValue))
+            parseEther(textFieldValue)
+              .mul(pool.collateralBalanceLongInitial)
               .div(pool.supplyLongInitial)
-              .sub(pool.settlementFee)
-              .sub(pool.redemptionFee)
+              .add(
+                pool.supplyShortInitial
+                  .div(pool.supplyLongInitial)
+                  .mul(parseEther(textFieldValue))
+              )
+              .mul(pool.collateralBalanceShortInitial)
+              .div(pool.supplyShortInitial)
           )
         )
       }
+    }
+    if (
+      tokenBalanceLong &&
+      parseInt(textFieldValue) > parseInt(tokenBalanceLong!)
+    ) {
+      console.log(textFieldValue > tokenBalanceLong)
+      console.log(tokenBalanceLong)
+      console.log(pool!.longToken)
+      setOpenAlert(true)
+    } else {
+      setOpenAlert(false)
     }
   }, [tokenBalanceLong, textFieldValue, pool])
   return (
     <Stack
       direction="column"
       sx={{
-        mt: '2em',
+        mt: theme.spacing(4),
       }}
     >
       <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: '1em' }}>Long Token</Typography>
+        <Typography sx={{ mt: theme.spacing(2) }}>Long Token</Typography>
         <TextField
           inputProps={{ style: { textAlign: 'right' } }}
           value={textFieldValue}
@@ -96,7 +115,7 @@ export const RemoveLiquidity = ({ pool, diva }: Props) => {
       {tokenBalanceLong ? (
         <>
           <Typography variant="subtitle2" color="text.secondary">
-            Your Balance: {longBalance}
+            Your balance: {longBalance}
             <MaxCollateral
               role="button"
               onClick={() => {
@@ -105,7 +124,7 @@ export const RemoveLiquidity = ({ pool, diva }: Props) => {
                 }
               }}
             >
-              {' Max'}
+              {' (Max)'}
             </MaxCollateral>
           </Typography>
         </>
@@ -115,10 +134,21 @@ export const RemoveLiquidity = ({ pool, diva }: Props) => {
         </Typography>
       )}
       <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: '1em' }}>Short Token</Typography>
-        <Typography sx={{ mt: '1em' }}>{shortBalance}</Typography>
+        <Typography sx={{ mt: theme.spacing(2) }}>Short Token</Typography>
+        <Typography sx={{ mt: theme.spacing(2) }}>{shortBalance}</Typography>
       </Stack>
-      <Collapse in={openAlert} sx={{ mt: '1em' }}>
+      {tokenBalanceShort ? (
+        <>
+          <Typography variant="subtitle2" color="text.secondary">
+            Your balance: {tokenBalanceShort}
+          </Typography>
+        </>
+      ) : (
+        <Typography variant="subtitle2" color="text.secondary">
+          Please connect your wallet
+        </Typography>
+      )}
+      <Collapse in={openAlert} sx={{ mt: theme.spacing(2) }}>
         <Alert
           severity="error"
           action={
@@ -139,8 +169,10 @@ export const RemoveLiquidity = ({ pool, diva }: Props) => {
         </Alert>
       </Collapse>
       <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: '1em' }}>You Receive</Typography>
-        <Typography sx={{ mt: '1em' }}>{receiving}</Typography>
+        <Typography sx={{ mt: theme.spacing(2) }}>You Receive</Typography>
+        <Typography sx={{ mt: theme.spacing(2) }}>
+          {receiving + ' ' + symbol}
+        </Typography>
       </Stack>
       <div
         style={{
@@ -170,37 +202,41 @@ export const RemoveLiquidity = ({ pool, diva }: Props) => {
             )
 
             longToken
-              .approve(diva?.address, ethers.utils.parseEther(textFieldValue))
+              .approve(diva?.address, parseEther(textFieldValue))
               .then((tx: any) => {
-                tx.wait().then(() => {
-                  longToken.allowance(account, diva?.address)
-                })
+                // tx.wait().then(() => {
+                //   longToken.allowance(account, diva?.address)
+                // })
+                return tx.wait()
               })
               .then(() => {
-                shortToken
-                  .approve(
-                    diva?.address,
-                    ethers.utils.parseEther(textFieldValue)
-                  )
-                  .then((tx: any) => {
-                    tx.wait().then(() => {
-                      shortToken
-                        .allowance(account, diva?.address)
-                        .then(
-                          diva!.removeLiquidity(
-                            window.location.pathname.split('/')[1],
-                            ethers.utils.parseEther(textFieldValue)
-                          )
-                        )
-                    })
-                  })
+                return longToken.allowance(account, diva?.address)
               })
+              .then(() => {
+                return shortToken.approve(
+                  diva?.address,
+                  parseEther(textFieldValue)
+                )
+              })
+              .then((tx: any) => {
+                return tx.wait()
+              })
+              .then(() => {
+                return shortToken.allowance(account, diva?.address)
+              })
+              .then(
+                diva!.removeLiquidity(
+                  window.location.pathname.split('/')[1],
+                  parseEther(textFieldValue)
+                )
+              )
+              .catch((err: any) => console.error(err))
           }}
           style={{
-            maxWidth: '300px',
-            maxHeight: '40px',
-            minWidth: '300px',
-            minHeight: '40px',
+            maxWidth: theme.spacing(38),
+            maxHeight: theme.spacing(5),
+            minWidth: theme.spacing(38),
+            minHeight: theme.spacing(5),
           }}
         >
           Remove
