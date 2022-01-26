@@ -1,6 +1,13 @@
-import { Card, CardContent, Container, Stack } from '@mui/material'
+import {
+  Box,
+  Card,
+  CardContent,
+  Container,
+  Stack,
+  useTheme,
+} from '@mui/material'
 import Typography from '@mui/material/Typography'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect } from 'react'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import { AddLiquidity } from './AddLiquidity'
@@ -17,6 +24,7 @@ export const Liquidity = () => {
   const [pool, setPool] = React.useState<Pool>()
   const [diva, setDiva] = React.useState<Contract>()
   const { chainId } = useWeb3React()
+  const theme = useTheme()
 
   useEffect(() => {
     if (chainId) {
@@ -41,17 +49,17 @@ export const Liquidity = () => {
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
   }
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '80vh',
-      }}
-    >
-      <Stack direction={'column'}>
-        <Card sx={{ maxWidth: '600px', borderRadius: '16px' }}>
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Stack
+        direction={'column'}
+        sx={{
+          paddingTop: theme.spacing(3),
+          maxWidth: theme.spacing(82),
+        }}
+      >
+        <Card sx={{ borderRadius: '16px' }}>
           <Tabs value={value} onChange={handleChange} variant="fullWidth">
             <Tab label="Add" />
             <Tab label="Remove" />
@@ -74,7 +82,7 @@ export const Liquidity = () => {
             <Typography>NaN</Typography>
           </Stack>
         </Container>
-        <Card sx={{ maxWidth: '600px', borderRadius: '16px' }}>
+        <Card sx={{ borderRadius: '16px' }}>
           <Container sx={{ mt: '1em', mb: '1em' }}>
             {value ? (
               <Typography>
@@ -100,6 +108,6 @@ export const Liquidity = () => {
           </Container>
         </Card>
       </Stack>
-    </div>
+    </Box>
   )
 }
