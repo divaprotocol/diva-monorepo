@@ -17,7 +17,7 @@ import { useAppSelector } from '../../Redux/hooks'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 import { BigNumber } from '@0x/utils'
 const PageDiv = styled.div`
   width: 100%;
@@ -56,7 +56,6 @@ const TableCellStyle = withStyles(() => ({
 
 function descendingComparator(a: [], b: [], orderBy: any) {
   let comparator = 0
-  console.log(orderBy + ' b ' + b[orderBy] + ' a ' + a[orderBy])
   if (b[orderBy] < a[orderBy]) {
     comparator = -1
   }
@@ -101,15 +100,12 @@ function mapOrderData(
   let orderBy: string
   let sortedRecords: any = []
   const orderbook: any = records.map((record: any) => {
-    console.log('records ' + JSON.stringify(records))
     const order = record.order
     const metaData = record.metaData
     const makerToken = order.makerToken
     const takerToken = order.takerToken
     const collateralToken = option.collateralToken.toLowerCase()
     const tokenAddress = optionTokenAddress.toLowerCase()
-    //const makerAmount = parseEther(order.makerAmount.toString())
-    //const takerAmount = parseEther(order.takerAmount.toString())
     const makerAmount = new BigNumber(order.makerAmount)
     const takerAmount = new BigNumber(order.takerAmount)
     const orders: any = {}
@@ -117,28 +113,11 @@ function mapOrderData(
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
-      //orders.bid =
-      //  (order.makerAmount / order.takerAmount) *
-      //  10 ** (18 - option.collateralDecimals)
-      //const bidAmount = makerAmount.div(takerAmount)
       const bidAmount = makerAmount.dividedBy(takerAmount)
-      //const bidAmountEther = parseEther(bidAmount.toString()).div(
-      //  parseEther('1')
-      //)
-      //const bid = Number(
-      //  formatUnits(bidAmountEther.toString(), option.collateralDecimals)
-      //)
-      //orders.bid = bid
       orders.bid = bidAmount
-      //const remainingFillableTakerAmount = metaData.remainingFillableTakerAmount
-      //const remainingTakerAmount = parseEther(
-      //  metaData.remainingFillableTakerAmount.toString()
-      //)
       const remainingTakerAmount = new BigNumber(
         metaData.remainingFillableTakerAmount.toString()
       )
-      console.log('remaining ' + remainingTakerAmount)
-      console.log('taker amount' + order.takerAmount)
       if (remainingTakerAmount.lt(takerAmount)) {
         const nbrOptions = Number(
           formatUnits(
@@ -146,15 +125,11 @@ function mapOrderData(
             option.collateralDecimals
           )
         )
-        //orders.nbrOptions = remainingTakerAmount.div(parseEther('1'))
         orders.nbrOptions = nbrOptions
       } else {
         const nbrOptions = Number(
           formatUnits(takerAmount.toString(), option.collateralDecimals)
         )
-        //orders.nbrOptions = parseEther(takerAmount.toString()).div(
-        //  parseEther('1')
-        //)
         orders.nbrOptions = nbrOptions
       }
     }
@@ -162,43 +137,21 @@ function mapOrderData(
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'sell'
       orders.id = 'sell' + records.indexOf(record as never)
-      //orders.ask =
-      //  (order.takerAmount / order.makerAmount) *
-      //  10 ** (18 - option.collateralDecimals)
-      //const askAmount = takerAmount.div(makerAmount)
       const askAmount = takerAmount.dividedBy(makerAmount)
-      //const ask = Number(
-      //formatUnits(askAmount.toString(), option.collateralDecimals)
-      //)
       orders.ask = askAmount
-      //const remainingTakerAmount =
-      //  metaData.remainingFillableTakerAmount / 10 ** 18
-      //const remainingTakerAmount = parseEther(
-      //  metaData.remainingFillableTakerAmount.toString()
-      //)
-      console.log(
-        'remaining fillable amount ' + metaData.remainingFillableTakerAmount
-      )
       const remainingTakerAmount = new BigNumber(
         metaData.remainingFillableTakerAmount
       )
-      //const orderQuantity = order.makerAmount / 10 ** 18
       if (remainingTakerAmount.eq(makerAmount)) {
-        //orders.nbrOptions = parseEther(makerAmount.toString()).div(
-        //  parseEther('1')
-        //)
         const nbrOptions = Number(
           formatUnits(makerAmount.toString(), option.collateralDecimals)
         )
-        console.log('if ' + nbrOptions)
         orders.nbrOptions = nbrOptions
       } else {
         const quantity = remainingTakerAmount.dividedBy(askAmount)
-        //quantity = quantity.div(parseEther('1'))
         const nbrOptions = Number(
           formatUnits(quantity.toString(), option.collateralDecimals)
         )
-        console.log('else ' + nbrOptions)
         orders.nbrOptions = nbrOptions
       }
     }

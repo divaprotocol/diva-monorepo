@@ -71,7 +71,6 @@ export default function SellLimit(props: {
     let balance = await makerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
-    //balance = balance / 10 ** option.collateralDecimals
     balance = Number(formatUnits(balance.toString(), option.collateralDecimals))
     return balance
   }

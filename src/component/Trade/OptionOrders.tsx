@@ -74,26 +74,16 @@ function mapOrderData(
   const orderbook: any = records.map((record: any) => {
     const order = record.order
     const orderMaker = order.maker
-    //const makerAmount = parseEther(order.makerAmount.toString())
-    //const takerAmount = parseEther(order.takerAmount.toString()).div(
-    //  parseEther('1')
-    //)
     const makerAmount = new BigNumber(order.makerAmount)
     const takerAmount = new BigNumber(order.takerAmount)
     if (account === orderMaker) {
       const makerToken = order.makerToken
       const tokenAddress = optionTokenAddress.toLowerCase()
       const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
-      //const nbrOptions =
-      //  (makerToken === tokenAddress ? order.makerAmount : order.takerAmount) /
-      //  10 ** 18
       const amount = makerToken === tokenAddress ? makerAmount : takerAmount
       const nbrOptions = Number(
         formatUnits(amount.toString(), option.collateralDecimals)
       )
-      //const payReceive =
-      //  (makerToken === tokenAddress ? order.takerAmount : order.makerAmount) /
-      //  10 ** option.collateralDecimals
       const receiveAmount =
         makerToken === tokenAddress ? takerAmount : makerAmount
       const payReceive = Number(

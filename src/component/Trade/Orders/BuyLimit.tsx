@@ -90,10 +90,12 @@ export default function BuyLimit(props: {
       await takerTokenContract.methods
         .approve(exchangeProxyAddress, maxApproval)
         .send({ from: accounts[0] })
-      //const approvedByTaker = await takerTokenContract.methods
-      //  .allowance(accounts[0], exchangeProxyAddress)
-      //  .call()
-      alert(`Maker allowance for ${option.collateralToken} successfully set`)
+      const approvedByTaker = await takerTokenContract.methods
+        .allowance(accounts[0], exchangeProxyAddress)
+        .call()
+      alert(
+        `Maker allowance for ${option.collateralToken} successfully set by ${approvedByTaker}`
+      )
       setIsApproved(true)
     } else {
       const orderData = {
@@ -126,7 +128,6 @@ export default function BuyLimit(props: {
     let balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
-    //balance = balance / 10 ** option.collateralDecimals
     balance = Number(formatUnits(balance.toString(), option.collateralDecimals))
     return balance
   }

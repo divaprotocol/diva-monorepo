@@ -9,24 +9,12 @@ export const buylimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
     return Math.floor(Date.now() / 1000 + orderData.orderExpiry * 60).toString()
   }
-  /**
-   * const makerAmount = parseEther(orderData.nbrOptions.toString())
-  //const limitPrice = parseEther(orderData.limitPrice.toString())
-  const amount = orderData.nbrOptions * orderData.limitPrice
-  const takerAmount = parseEther(amount.toString())
-   */
   const amount = orderData.nbrOptions * orderData.limitPrice
   const makerAmount = parseEther(amount.toString())
   const takerAmount = parseEther(orderData.nbrOptions.toString())
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
-    //makerAmount: (
-    //  orderData.nbrOptions *
-    //  orderData.limitPrice *
-    //  10 ** orderData.collateralDecimals
-    //).toString(), // NOTE: This is 1 WEI, 1 ETH would be 1000000000000000000
-    //takerAmount: (orderData.nbrOptions * 10 ** 18).toString(), // NOTE this is 0.001 ZRX. 1 ZRX would be 1000000000000000000
     makerAmount: makerAmount.toString(),
     takerAmount: takerAmount.toString(),
     maker: orderData.makerAccount,

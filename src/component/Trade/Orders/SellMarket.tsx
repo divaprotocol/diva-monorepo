@@ -116,6 +116,9 @@ export default function SellMarket(props: {
       const approvedByMaker = await takerTokenContract.methods
         .allowance(makerAccount, exchangeProxyAddress)
         .call()
+      alert(
+        `Maker allowance for ${option.referenceAsset} successfully set by ${approvedByMaker}`
+      )
       setIsApproved(true)
     } else {
       const orderData = {
@@ -193,7 +196,7 @@ export default function SellMarket(props: {
     let balance = await takerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
-    balance = balance / 10 ** option.collateralDecimals
+    balance = formatUnits(balance.toString(), option.collateralDecimals)
     return balance
   }
 
@@ -208,7 +211,6 @@ export default function SellMarket(props: {
       const order = data.order
       const takerAmount = new BigNumber(order.takerAmount)
       const makerAmount = new BigNumber(order.makerAmount)
-      //order['expectedRate'] = order.makerAmount / order.takerAmount
       order['expectedRate'] = makerAmount.dividedBy(takerAmount)
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
@@ -219,8 +221,7 @@ export default function SellMarket(props: {
     const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
     if (sortedRecords.length) {
       const bestRate = sortedRecords[0].expectedRate
-      const rate = Number(bestRate)
-      setAvgExpectedRate(rate)
+      setAvgExpectedRate(Number(bestRate))
     }
     return sortedRecords
   }
@@ -241,10 +242,6 @@ export default function SellMarket(props: {
 
   useEffect(() => {
     if (numberOfOptions > 0) {
-      //let count = numberOfOptions
-      //let cumulativeAvg = 0
-      //let cumulativeTaker = 0
-      //let cumulativeMaker = 0
       let count = numberOfOptions
       let cumulativeAvg = parseEther('0')
       let cumulativeTaker = parseEther('0')
@@ -259,16 +256,10 @@ export default function SellMarket(props: {
             const orderTotalAmount = parseEther(expectedRate.toString()).mul(
               parseEther(count.toString())
             )
-            //cumulativeMaker =
-            //  cumulativeMaker + count * order.expectedRate * 10 ** 18
             cumulativeMaker = cumulativeMaker.add(orderTotalAmount)
             cumulativeTaker = cumulativeTaker.add(parseEther(count.toString()))
             count = 0
           } else {
-            //count is greater than current order taker amount so add entire order taker amount in
-            //cumulative taker
-            //cumulativeTaker = cumulativeTaker + parseFloat(order.takerAmount)
-            //cumulativeMaker = cumulativeMaker + parseFloat(order.makerAmount)
             cumulativeTaker = cumulativeTaker.add(
               parseEther(takerAmount.toString())
             )
@@ -279,7 +270,6 @@ export default function SellMarket(props: {
           }
         }
       })
-      //cumulativeAvg = cumulativeMaker / cumulativeTaker
       cumulativeAvg = cumulativeMaker.div(cumulativeTaker)
       if (cumulativeAvg.gt(0)) {
         const avg = Number(formatUnits(cumulativeAvg))

@@ -115,10 +115,12 @@ export default function BuyMarket(props: {
       await takerTokenContract.methods
         .approve(exchangeProxyAddress, maxApproval)
         .send({ from: accounts[0] })
-      //const approvedByTaker = await takerTokenContract.methods
-      //  .allowance(accounts[0], exchangeProxyAddress)
-      //  .call()
-      alert(`Maker allowance for ${option.collateralToken} successfully set`)
+      const approvedByTaker = await takerTokenContract.methods
+        .allowance(accounts[0], exchangeProxyAddress)
+        .call()
+      alert(
+        `Taker allowance for ${option.collateralToken} successfully set by ${approvedByTaker}`
+      )
       setIsApproved(true)
     } else {
       const orderData = {
@@ -158,7 +160,7 @@ export default function BuyMarket(props: {
                 setNumberOfOptions(0.0)
                 setYouPay(0.0)
                 alert('Order successfully filled')
-                //wait for a sec for 0x to update orders then handle order book display
+                //wait for 4 secs for 0x to update orders then handle order book display
                 await new Promise((resolve) => setTimeout(resolve, 4000))
                 props.handleDisplayOrder()
                 return
@@ -198,7 +200,6 @@ export default function BuyMarket(props: {
       .balanceOf(takerAccount)
       .call()
     balance = formatUnits(balance.toString(), option.collateralDecimals)
-    //balance = balance / 10 ** option.collateralDecimals
     return balance
   }
 
@@ -214,9 +215,6 @@ export default function BuyMarket(props: {
       const takerAmount = new BigNumber(order.takerAmount)
       const makerAmount = new BigNumber(order.makerAmount)
       order['expectedRate'] = takerAmount.dividedBy(makerAmount)
-      //const takerAmount = parseEther(order.takerAmount.toString())
-      //const makerAmount = parseEther(order.makerAmount.toString())
-      //order['expectedRate'] = takerAmount.div(makerAmount)
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
@@ -254,9 +252,6 @@ export default function BuyMarket(props: {
       let cumulativeAvg = parseEther('0')
       let cumulativeTaker = parseEther('0')
       let cumulativeMaker = parseEther('0')
-      //let cumulativeAvg = new BigNumber(0)
-      //let cumulativeTaker = new BigNumber(0)
-      //let cumulativeMaker = new BigNumber(0)
       existingLimitOrders.forEach((order: any) => {
         const makerAmount = Number(
           formatUnits(order.makerAmount.toString(), option.collateralDecimals)
@@ -267,13 +262,8 @@ export default function BuyMarket(props: {
             const orderTotalAmount = parseEther(expectedRate.toString()).mul(
               parseEther(count.toString())
             )
-            //const orderTotalAmount = expectedRate.multipliedBy(
-            //new BigNumber(count)
-            //)
             cumulativeTaker = cumulativeTaker.add(orderTotalAmount)
             cumulativeMaker = cumulativeMaker.add(parseEther(count.toString()))
-            //cumulativeTaker = cumulativeTaker.plus(orderTotalAmount)
-            //cumulativeMaker = cumulativeMaker.plus(new BigNumber(count))
             count = 0
           } else {
             //nbrOfOptions entered are greater than current order maker amount
@@ -282,27 +272,17 @@ export default function BuyMarket(props: {
             cumulativeMaker = cumulativeMaker.add(
               parseEther(makerAmount.toString())
             )
-            //cumulativeMaker = cumulativeMaker.plus(order.makerAmount)
             count = count - makerAmount
           }
         }
       })
       cumulativeAvg = cumulativeTaker.div(cumulativeMaker)
-      //cumulativeAvg = cumulativeAvg.div(parseEther('1'))
       if (cumulativeAvg.gt(0)) {
         const avg = Number(
           formatUnits(cumulativeAvg, option.collateralDecimals)
         )
-        //const avg = cumulativeAvg.toNumber()
         setAvgExpectedRate(avg)
         const youPayAmount = avg * numberOfOptions
-        //const pay = Number(
-        //  formatUnits(
-        //    parseEther(youPayAmount.toString()),
-        //    option.collateralDecimals
-        //  )
-        //)
-        //const pay = youPayAmount.toNumber()
         setYouPay(youPayAmount)
       }
     }
