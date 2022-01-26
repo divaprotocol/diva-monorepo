@@ -37,11 +37,8 @@ type Props = {
 
 export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
-  const [longBalance, setLongBalance] = useState('')
-  const [shortBalance, setShortBalance] = useState('')
   const tokenBalanceLong = useErcBalance(pool ? pool!.longToken : undefined)
   const tokenBalanceShort = useErcBalance(pool ? pool!.shortToken : undefined)
-  const [receiving, setReceiving] = useState('')
   const [openAlert, setOpenAlert] = React.useState(false)
   const { chainId, account } = useWeb3React()
   const provider = new ethers.providers.Web3Provider(
@@ -50,46 +47,10 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
   )
   const theme = useTheme()
   useEffect(() => {
-    if (pool) {
-      setLongBalance(tokenBalanceLong!)
-      if (textFieldValue) {
-        // setShortBalance(
-        //   formatEther(
-        //     pool.supplyShortInitial
-        //       .div(pool.supplyLongInitial)
-        //       .mul(parseEther(textFieldValue))
-        //   )
-        // )
-        setShortBalance(
-          (
-            (parseFloat(formatEther(pool.supplyShortInitial)) /
-              parseFloat(formatEther(pool.supplyLongInitial))) *
-            parseFloat(formatEther(parseEther(textFieldValue)))
-          ).toString()
-        )
-        setReceiving(
-          formatEther(
-            parseEther(textFieldValue)
-              .mul(pool.collateralBalanceLongInitial)
-              .div(pool.supplyLongInitial)
-              .add(
-                pool.supplyShortInitial
-                  .div(pool.supplyLongInitial)
-                  .mul(parseEther(textFieldValue))
-              )
-              .mul(pool.collateralBalanceShortInitial)
-              .div(pool.supplyShortInitial)
-          )
-        )
-      }
-    }
     if (
       tokenBalanceLong &&
       parseInt(textFieldValue) > parseInt(tokenBalanceLong!)
     ) {
-      console.log(textFieldValue > tokenBalanceLong)
-      console.log(tokenBalanceLong)
-      console.log(pool!.longToken)
       setOpenAlert(true)
     } else {
       setOpenAlert(false)
@@ -115,7 +76,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
       {tokenBalanceLong ? (
         <>
           <Typography variant="subtitle2" color="text.secondary">
-            Your balance: {longBalance}
+            Your balance: {tokenBalanceLong!}
             <MaxCollateral
               role="button"
               onClick={() => {
@@ -135,7 +96,15 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
       )}
       <Stack direction="row" justifyContent="space-between">
         <Typography sx={{ mt: theme.spacing(2) }}>Short Token</Typography>
-        <Typography sx={{ mt: theme.spacing(2) }}>{shortBalance}</Typography>
+        <Typography sx={{ mt: theme.spacing(2) }}>
+          {pool &&
+            textFieldValue !== '' &&
+            (
+              (parseFloat(formatEther(pool.supplyShortInitial)) /
+                parseFloat(formatEther(pool.supplyLongInitial))) *
+              parseFloat(formatEther(parseEther(textFieldValue)))
+            ).toString()}
+        </Typography>
       </Stack>
       {tokenBalanceShort ? (
         <>
@@ -171,7 +140,20 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
       <Stack direction="row" justifyContent="space-between">
         <Typography sx={{ mt: theme.spacing(2) }}>You Receive</Typography>
         <Typography sx={{ mt: theme.spacing(2) }}>
-          {receiving + ' ' + symbol}
+          {pool &&
+            textFieldValue !== '' &&
+            (
+              (parseFloat(formatEther(parseEther(textFieldValue))) *
+                parseFloat(formatEther(pool.collateralBalanceLongInitial))) /
+                parseFloat(formatEther(pool.supplyLongInitial)) +
+              ((parseFloat(formatEther(pool.supplyShortInitial)) /
+                parseFloat(formatEther(pool.supplyLongInitial))) *
+                parseFloat(formatEther(parseEther(textFieldValue))) *
+                parseFloat(formatEther(pool.collateralBalanceShortInitial))) /
+                parseFloat(formatEther(pool.supplyShortInitial))
+            ).toString() +
+              ' ' +
+              symbol}
         </Typography>
       </Stack>
       <div
