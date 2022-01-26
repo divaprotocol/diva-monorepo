@@ -1,6 +1,5 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import { Button, Container, Stack, Tooltip } from '@mui/material'
-import { useWeb3React } from '@web3-react/core'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
@@ -17,6 +16,7 @@ import ERC20 from '../../abi/ERC20.json'
 import { useTokenBalances } from '../../hooks/useTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
+import { useWallet } from '@web3-ui/core'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -62,7 +62,12 @@ const AddToMetamask = (props: any) => {
 }
 
 const SubmitButton = (props: any) => {
-  const { chainId, account } = useWeb3React()
+  const {
+    connection: { network },
+  } = useWallet()
+  console.log({ network })
+
+  const chainId = 80001
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
@@ -73,6 +78,7 @@ const SubmitButton = (props: any) => {
     DIVA_ABI,
     provider.getSigner()
   )
+  const account = ''
   const token = new ethers.Contract(props.row.address, ERC20, provider)
   const history = useHistory()
   const handleRedeem = () => {
@@ -194,7 +200,14 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const { account, chainId } = useWeb3React()
+  const {
+    connection: { network },
+  } = useWallet()
+
+  console.log({ network })
+
+  const chainId = 80001
+  // const { account } = useWeb3React()
 
   const poolsQuery = useQuery<{ pools: Pool[] }>('pools', () =>
     request(config[chainId as number].divaSubgraph, queryPools)

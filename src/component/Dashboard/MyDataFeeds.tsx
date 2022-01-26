@@ -11,7 +11,6 @@ import {
   Tooltip,
 } from '@mui/material'
 import React, { useState } from 'react'
-import { useWeb3React } from '@web3-react/core'
 import { ethers } from 'ethers'
 
 import { config } from '../../constants'
@@ -25,6 +24,7 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
+import { useWallet } from '@web3-ui/core'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -112,7 +112,13 @@ const DueInCell = (props: any) => {
   )
 }
 const SubmitCell = (props: any) => {
-  const { chainId } = useWeb3React()
+  const {
+    connection: { network },
+  } = useWallet()
+  console.log({ network })
+
+  const chainId = 80001
+
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId).toLowerCase()
@@ -240,7 +246,7 @@ const columns: GridColDef[] = [
 
 export function MyDataFeeds() {
   const { account, chainId } = useWeb3React()
-
+  
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
     request(config[chainId as number].divaSubgraph, queryPools)
   )

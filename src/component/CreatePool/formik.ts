@@ -1,10 +1,10 @@
-import { useWeb3React } from '@web3-react/core'
 import { ethers } from 'ethers'
 import { useFormik } from 'formik'
 import { useQuery } from 'react-query'
 import { useDiva } from '../../hooks/useDiva'
 import { Tokens } from '../../lib/types'
 import { chainIdtoName } from '../../Util/chainIdToName'
+import { useWallet } from '@web3-ui/core'
 import referenceAssets from './referenceAssets.json'
 
 const defaultDate = new Date()
@@ -33,7 +33,12 @@ type Errors = {
 }
 
 export const useCreatePoolFormik = () => {
-  const { chainId, account } = useWeb3React()
+  // const { chainId, account } = useWeb3React()
+  const {
+    connection: { network },
+  } = useWallet()
+  console.log({ network })
+  const chainId = 80001
   const contract = useDiva()
 
   const provider = new ethers.providers.Web3Provider(
