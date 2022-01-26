@@ -83,7 +83,6 @@ const SubmitButton = (props: any) => {
 
   let buttonName: string
 
-  console.log(props)
   const statusExpMin = getExpiryMinutesFromNow(Number(props.StatusTimestamp))
 
   if (props.row.Status === 'Submitted' && statusExpMin + 24 * 60 + 5 < 0) {

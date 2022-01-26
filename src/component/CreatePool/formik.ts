@@ -19,11 +19,11 @@ export const initialValues = {
   inflection: 2,
   collateralTokenSymbol: 'DAI',
   collateralWalletBalance: '0',
-  collateralBalance: 2,
+  collateralBalance: '2',
   collateralBalanceShort: 1,
   collateralBalanceLong: 1,
-  shortTokenSupply: 1,
-  longTokenSupply: 1,
+  shortTokenSupply: 2,
+  longTokenSupply: 2,
   capacity: 0,
   dataFeedProvider: '',
 }
@@ -154,6 +154,8 @@ export const useCreatePoolFormik = () => {
 
       if (values.capacity < 0) {
         errors.capacity = 'Capacity cannot be negative'
+      } else if (values.capacity !== 0 && collateralBalance > values.capacity) {
+        errors.capacity = `Capacity must be larger than ${collateralBalance}. For unlimited capacity, set to 0`
       }
 
       // validate data feed provider
