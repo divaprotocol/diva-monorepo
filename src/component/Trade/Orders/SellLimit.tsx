@@ -21,7 +21,7 @@ import { Network } from '../../../Util/chainIdToName'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 import { Pool } from '../../../lib/queries'
-import { parseEther } from 'ethers/lib/utils'
+import { formatUnits, parseEther } from 'ethers/lib/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20_ABI = require('../../../abi/ERC20.json')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -71,7 +71,8 @@ export default function SellLimit(props: {
     let balance = await makerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
-    balance = balance / 10 ** option.collateralDecimals
+    //balance = balance / 10 ** option.collateralDecimals
+    balance = Number(formatUnits(balance.toString(), option.collateralDecimals))
     return balance
   }
 

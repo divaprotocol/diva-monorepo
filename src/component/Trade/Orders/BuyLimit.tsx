@@ -25,6 +25,7 @@ import { BigNumber } from '@0x/utils'
 const contractAddress = require('@0x/contract-addresses')
 
 import ERC20_ABI from '../../../abi/ERC20.json'
+import { formatUnits } from 'ethers/lib/utils'
 const web3 = new Web3(Web3.givenProvider)
 const CHAIN_ID = Network.ROPSTEN
 const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
@@ -89,9 +90,9 @@ export default function BuyLimit(props: {
       await takerTokenContract.methods
         .approve(exchangeProxyAddress, maxApproval)
         .send({ from: accounts[0] })
-      const approvedByTaker = await takerTokenContract.methods
-        .allowance(accounts[0], exchangeProxyAddress)
-        .call()
+      //const approvedByTaker = await takerTokenContract.methods
+      //  .allowance(accounts[0], exchangeProxyAddress)
+      //  .call()
       alert(`Maker allowance for ${option.collateralToken} successfully set`)
       setIsApproved(true)
     } else {
@@ -125,7 +126,8 @@ export default function BuyLimit(props: {
     let balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
-    balance = balance / 10 ** option.collateralDecimals
+    //balance = balance / 10 ** option.collateralDecimals
+    balance = Number(formatUnits(balance.toString(), option.collateralDecimals))
     return balance
   }
 

@@ -30,6 +30,7 @@ import { sellMarketOrder } from '../../../Orders/SellMarket'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 
 import ERC20_ABI from '../../../abi/ERC20.json'
+import { formatUnits, parseEther } from 'ethers/lib/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const CHAIN_ID = Network.ROPSTEN
@@ -205,7 +206,10 @@ export default function SellMarket(props: {
     const responseOrders: any = resJSON['records']
     responseOrders.forEach((data: any) => {
       const order = data.order
-      order['expectedRate'] = order.makerAmount / order.takerAmount
+      const takerAmount = new BigNumber(order.takerAmount)
+      const makerAmount = new BigNumber(order.makerAmount)
+      //order['expectedRate'] = order.makerAmount / order.takerAmount
+      order['expectedRate'] = makerAmount.dividedBy(takerAmount)
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
@@ -215,7 +219,8 @@ export default function SellMarket(props: {
     const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
     if (sortedRecords.length) {
       const bestRate = sortedRecords[0].expectedRate
-      setAvgExpectedRate(bestRate)
+      const rate = Number(bestRate)
+      setAvgExpectedRate(rate)
     }
     return sortedRecords
   }
@@ -236,30 +241,50 @@ export default function SellMarket(props: {
 
   useEffect(() => {
     if (numberOfOptions > 0) {
+      //let count = numberOfOptions
+      //let cumulativeAvg = 0
+      //let cumulativeTaker = 0
+      //let cumulativeMaker = 0
       let count = numberOfOptions
-      let cumulativeAvg = 0
-      let cumulativeTaker = 0
-      let cumulativeMaker = 0
+      let cumulativeAvg = parseEther('0')
+      let cumulativeTaker = parseEther('0')
+      let cumulativeMaker = parseEther('0')
       existingLimitOrders.forEach((order: any) => {
+        const takerAmount = Number(
+          formatUnits(order.takerAmount.toString(), option.collateralDecimals)
+        )
+        const expectedRate = order.expectedRate
         if (count > 0) {
-          if (count <= order.takerAmount / 10 ** 18) {
-            cumulativeMaker =
-              cumulativeMaker + count * order.expectedRate * 10 ** 18
-            cumulativeTaker = cumulativeTaker + count * 10 ** 18
+          if (count <= takerAmount) {
+            const orderTotalAmount = parseEther(expectedRate.toString()).mul(
+              parseEther(count.toString())
+            )
+            //cumulativeMaker =
+            //  cumulativeMaker + count * order.expectedRate * 10 ** 18
+            cumulativeMaker = cumulativeMaker.add(orderTotalAmount)
+            cumulativeTaker = cumulativeTaker.add(parseEther(count.toString()))
             count = 0
           } else {
             //count is greater than current order taker amount so add entire order taker amount in
             //cumulative taker
-            cumulativeTaker = cumulativeTaker + parseFloat(order.takerAmount)
-            cumulativeMaker = cumulativeMaker + parseFloat(order.makerAmount)
-            count = count - order.takerAmount / 10 ** 18
+            //cumulativeTaker = cumulativeTaker + parseFloat(order.takerAmount)
+            //cumulativeMaker = cumulativeMaker + parseFloat(order.makerAmount)
+            cumulativeTaker = cumulativeTaker.add(
+              parseEther(takerAmount.toString())
+            )
+            cumulativeMaker = cumulativeMaker.add(
+              parseEther(order.makerAmount.toString())
+            )
+            count = count - takerAmount
           }
         }
       })
-      cumulativeAvg = cumulativeMaker / cumulativeTaker
-      if (cumulativeAvg > 0) {
-        setAvgExpectedRate(cumulativeAvg)
-        const youPay = cumulativeAvg * numberOfOptions
+      //cumulativeAvg = cumulativeMaker / cumulativeTaker
+      cumulativeAvg = cumulativeMaker.div(cumulativeTaker)
+      if (cumulativeAvg.gt(0)) {
+        const avg = Number(formatUnits(cumulativeAvg))
+        setAvgExpectedRate(avg)
+        const youPay = avg * numberOfOptions
         setYouReceive(youPay)
       }
     }

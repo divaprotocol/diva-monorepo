@@ -12,8 +12,9 @@ export const sellLimitOrder = async (orderData) => {
   }
 
   const makerAmount = parseEther(orderData.nbrOptions.toString())
-  const limitPrice = parseEther(orderData.limitPrice.toString())
-  const takerAmount = makerAmount.mul(limitPrice)
+  //const limitPrice = parseEther(orderData.limitPrice.toString())
+  const amount = orderData.nbrOptions * orderData.limitPrice
+  const takerAmount = parseEther(amount.toString())
 
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,

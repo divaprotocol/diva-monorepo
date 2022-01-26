@@ -1,5 +1,5 @@
 ---
-name: Bug report 
+name: Bug report
 about: A bug that occurs in a specific browser or platform
 title: '[Untitled Bug]'
 labels: bugs, triage

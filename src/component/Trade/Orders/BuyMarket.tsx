@@ -73,7 +73,7 @@ export default function BuyMarket(props: {
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
-  const [avgExpectedRate, setAvgExpectedRate] = React.useState(parseEther('0'))
+  const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
   const [youPay, setYouPay] = React.useState(0.0)
   const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
@@ -115,9 +115,9 @@ export default function BuyMarket(props: {
       await takerTokenContract.methods
         .approve(exchangeProxyAddress, maxApproval)
         .send({ from: accounts[0] })
-      const approvedByTaker = await takerTokenContract.methods
-        .allowance(accounts[0], exchangeProxyAddress)
-        .call()
+      //const approvedByTaker = await takerTokenContract.methods
+      //  .allowance(accounts[0], exchangeProxyAddress)
+      //  .call()
       alert(`Maker allowance for ${option.collateralToken} successfully set`)
       setIsApproved(true)
     } else {
@@ -214,6 +214,9 @@ export default function BuyMarket(props: {
       const takerAmount = new BigNumber(order.takerAmount)
       const makerAmount = new BigNumber(order.makerAmount)
       order['expectedRate'] = takerAmount.dividedBy(makerAmount)
+      //const takerAmount = parseEther(order.takerAmount.toString())
+      //const makerAmount = parseEther(order.makerAmount.toString())
+      //order['expectedRate'] = takerAmount.div(makerAmount)
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
@@ -224,8 +227,10 @@ export default function BuyMarket(props: {
     const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
     if (sortedRecords.length > 0) {
       const bestRate = sortedRecords[0].expectedRate
-      setAvgExpectedRate(bestRate)
+      const rate = Number(bestRate)
+      setAvgExpectedRate(rate)
     }
+    console.log('sorted order ' + JSON.stringify(sortedRecords))
     return sortedRecords
   }
 
@@ -249,6 +254,9 @@ export default function BuyMarket(props: {
       let cumulativeAvg = parseEther('0')
       let cumulativeTaker = parseEther('0')
       let cumulativeMaker = parseEther('0')
+      //let cumulativeAvg = new BigNumber(0)
+      //let cumulativeTaker = new BigNumber(0)
+      //let cumulativeMaker = new BigNumber(0)
       existingLimitOrders.forEach((order: any) => {
         const makerAmount = Number(
           formatUnits(order.makerAmount.toString(), option.collateralDecimals)
@@ -259,34 +267,43 @@ export default function BuyMarket(props: {
             const orderTotalAmount = parseEther(expectedRate.toString()).mul(
               parseEther(count.toString())
             )
+            //const orderTotalAmount = expectedRate.multipliedBy(
+            //new BigNumber(count)
+            //)
             cumulativeTaker = cumulativeTaker.add(orderTotalAmount)
             cumulativeMaker = cumulativeMaker.add(parseEther(count.toString()))
+            //cumulativeTaker = cumulativeTaker.plus(orderTotalAmount)
+            //cumulativeMaker = cumulativeMaker.plus(new BigNumber(count))
             count = 0
           } else {
             //nbrOfOptions entered are greater than current order maker amount
             //so add entire order taker amount in cumulative taker
-            cumulativeTaker = cumulativeTaker.add(
-              parseEther(order.takerAmount.toString())
-            )
+            cumulativeTaker = cumulativeTaker.add(parseEther(order.takerAmount))
             cumulativeMaker = cumulativeMaker.add(
               parseEther(makerAmount.toString())
             )
+            //cumulativeMaker = cumulativeMaker.plus(order.makerAmount)
             count = count - makerAmount
           }
         }
       })
       cumulativeAvg = cumulativeTaker.div(cumulativeMaker)
-      cumulativeAvg = cumulativeAvg.div(parseEther('1'))
+      //cumulativeAvg = cumulativeAvg.div(parseEther('1'))
       if (cumulativeAvg.gt(0)) {
-        setAvgExpectedRate(cumulativeAvg)
-        let youPayAmount = cumulativeAvg.mul(
-          parseEther(numberOfOptions.toString())
+        const avg = Number(
+          formatUnits(cumulativeAvg, option.collateralDecimals)
         )
-        youPayAmount = youPayAmount.div(parseEther('1'))
-        const pay = Number(
-          formatUnits(youPayAmount.toString(), option.collateralDecimals)
-        )
-        setYouPay(pay)
+        //const avg = cumulativeAvg.toNumber()
+        setAvgExpectedRate(avg)
+        const youPayAmount = avg * numberOfOptions
+        //const pay = Number(
+        //  formatUnits(
+        //    parseEther(youPayAmount.toString()),
+        //    option.collateralDecimals
+        //  )
+        //)
+        //const pay = youPayAmount.toNumber()
+        setYouPay(youPayAmount)
       }
     }
   }, [numberOfOptions])
@@ -313,8 +330,7 @@ export default function BuyMarket(props: {
             </LabelStyleDiv>
           </InfoTooltip>
           <RightSideLabel>
-            {formatUnits(avgExpectedRate.toString())}{' '}
-            {option.collateralTokenName}
+            {avgExpectedRate.toFixed(4)} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
