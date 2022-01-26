@@ -18,7 +18,7 @@ import { useQuery } from 'react-query'
 import { queryPool, Pool } from '../../lib/queries'
 import request from 'graphql-request'
 import { config } from '../../constants'
-import { useWeb3React } from '@web3-react/core'
+import { useWallet } from '@web3-ui/core'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -41,7 +41,11 @@ const LeftCompRightDiv = styled.div`
 export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const breakEvenOptionPrice = 0
-  const { chainId } = useWeb3React()
+  const {
+    connection: { network },
+  } = useWallet()
+  console.log({ network })
+  const chainId = 80001
 
   const query = useQuery<{ pool: Pool }>('pool', () =>
     request(

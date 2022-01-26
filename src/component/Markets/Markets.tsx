@@ -6,7 +6,6 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
-import { useWeb3React } from '@web3-react/core'
 import { config } from '../../constants'
 import { useWallet } from '@web3-ui/core'
 
@@ -54,10 +53,11 @@ const columns: GridColDef[] = [
 ]
 
 export default function Markets() {
-  const {
-    connection: { network },
-  } = useWallet()
-  console.log({ network })
+  // const {
+  //   connection: { network },
+  // } = useWallet()
+  // console.log({ network })
+  console.log('what')
 
   const chainId = 80001
 

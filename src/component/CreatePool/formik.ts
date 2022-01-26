@@ -123,7 +123,7 @@ export const useCreatePoolFormik = () => {
         errors.collateralTokenSymbol = 'You must choose a collateral token'
       }
 
-      if (account == null) {
+      if (network == null) {
         errors.collateralWalletBalance =
           'Your wallet must be connected before you can proceed'
       } else if (walletBalance < collateralBalance) {

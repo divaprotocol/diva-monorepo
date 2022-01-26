@@ -6,9 +6,9 @@ import {
   getEtherscanLink,
   EtherscanLinkType,
 } from '../../Util/getEtherscanLink'
-import { useWeb3React } from '@web3-react/core'
 import { CoinImage } from '../PoolsTable'
 import Tooltip from '@mui/material/Tooltip'
+import { useWallet } from '@web3-ui/core'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -75,7 +75,12 @@ export default function OptionHeader(optionData: {
   tokenDecimals: number
 }) {
   //const option = props.optionData
-  const { chainId } = useWeb3React()
+  const {
+    connection: { network },
+  } = useWallet()
+  console.log({ network })
+  const chainId = 80001
+
   const headerTitle = optionData.ReferenceAsset
 
   const handleAddMetaMask = async () => {

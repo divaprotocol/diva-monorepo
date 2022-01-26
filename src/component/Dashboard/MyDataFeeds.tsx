@@ -245,8 +245,10 @@ const columns: GridColDef[] = [
 ]
 
 export function MyDataFeeds() {
-  const { account, chainId } = useWeb3React()
-  
+  const wallet = useWallet()
+  const account = wallet.connection.userAddress
+  const chainId = wallet.connection.network
+
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
     request(config[chainId as number].divaSubgraph, queryPools)
   )

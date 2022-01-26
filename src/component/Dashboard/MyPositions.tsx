@@ -63,26 +63,21 @@ const AddToMetamask = (props: any) => {
 
 const SubmitButton = (props: any) => {
   const {
-    connection: { network },
+    connection: { network, userAddress },
+    provider,
   } = useWallet()
-  console.log({ network })
 
-  const chainId = 80001
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
-
+  const chainId = network
   const diva = new ethers.Contract(
-    config[chainId!].divaAddress,
+    config[chainId].divaAddress,
     DIVA_ABI,
-    provider.getSigner()
+    provider?.getSigner()
   )
-  const account = ''
-  const token = new ethers.Contract(props.row.address, ERC20, provider)
+  const token =
+    provider && new ethers.Contract(props.row.address, ERC20, provider)
   const history = useHistory()
   const handleRedeem = () => {
-    token.balanceOf(account).then((bal: BigNumber) => {
+    token?.balanceOf(userAddress).then((bal: BigNumber) => {
       diva.redeemPositionToken(props.row.address, bal)
     })
   }
@@ -201,12 +196,13 @@ const columns: GridColDef[] = [
 
 export function MyPositions() {
   const {
-    connection: { network },
+    connection: { network, userAddress },
   } = useWallet()
 
   console.log({ network })
 
-  const chainId = 80001
+  const account = userAddress
+  const chainId = network
   // const { account } = useWeb3React()
 
   const poolsQuery = useQuery<{ pools: Pool[] }>('pools', () =>
