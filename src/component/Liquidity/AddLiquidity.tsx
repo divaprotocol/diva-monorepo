@@ -17,7 +17,7 @@ import styled from '@emotion/styled'
 import ERC20 from '../../abi/ERC20.json'
 import { chainIdtoName } from '../../Util/chainIdToName'
 import { useWeb3React } from '@web3-react/core'
-import { formatEther, parseEther } from 'ethers/lib/utils'
+import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { withStyles } from '@mui/styles'
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -42,6 +42,8 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
   const theme = useTheme()
   const [openAlert, setOpenAlert] = React.useState(false)
+  const [openCapacityAlert, setOpenCapacityAlert] = React.useState(false)
+  const [decimal, setDecimal] = React.useState(18)
   const tokenBalance = useErcBalance(pool ? pool!.collateralToken : undefined)
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
@@ -49,12 +51,35 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
   )
 
   useEffect(() => {
+    if (pool) {
+      const token = new ethers.Contract(
+        pool!.collateralToken,
+        ERC20,
+        provider.getSigner()
+      )
+      token.decimals().then((decimals: number) => {
+        setDecimal(decimals)
+      })
+    }
+    if (
+      pool! &&
+      formatUnits(pool!.capacity, decimal!) !== '0' &&
+      textFieldValue !== '' &&
+      parseFloat(formatEther(parseEther(textFieldValue))) +
+        parseFloat(formatUnits(pool!.collateralBalanceLong, decimal!)) +
+        parseFloat(formatUnits(pool!.collateralBalanceShort, decimal!)) >
+        parseFloat(formatUnits(pool!.capacity, decimal!))
+    ) {
+      setOpenCapacityAlert(true)
+    } else {
+      setOpenCapacityAlert(false)
+    }
     if (tokenBalance && parseInt(textFieldValue) > parseInt(tokenBalance!)) {
       setOpenAlert(true)
     } else {
       setOpenAlert(false)
     }
-  }, [tokenBalance, textFieldValue])
+  }, [tokenBalance, textFieldValue, pool])
   return (
     <Stack
       direction="column"
@@ -112,6 +137,26 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
           Insufficient wallet balance
         </Alert>
       </Collapse>
+      <Collapse in={openCapacityAlert} sx={{ mt: theme.spacing(2) }}>
+        <Alert
+          severity="error"
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setOpenCapacityAlert(false)
+              }}
+            >
+              {'X'}
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          Exceeds pool capacity
+        </Alert>
+      </Collapse>
       <Container
         sx={{
           mt: theme.spacing(2),
@@ -146,10 +191,13 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                   (
                     (parseFloat(formatEther(pool.supplyLongInitial)) /
                       (parseFloat(
-                        formatEther(pool.collateralBalanceLongInitial)
+                        formatUnits(pool.collateralBalanceLongInitial, decimal)
                       ) +
                         parseFloat(
-                          formatEther(pool.collateralBalanceShortInitial)
+                          formatUnits(
+                            pool.collateralBalanceShortInitial,
+                            decimal
+                          )
                         ))) *
                     parseFloat(formatEther(parseEther(textFieldValue)))
                   ).toFixed(4)}
@@ -163,10 +211,13 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                   (
                     (parseFloat(formatEther(pool.supplyShortInitial)) /
                       (parseFloat(
-                        formatEther(pool.collateralBalanceLongInitial)
+                        formatUnits(pool.collateralBalanceLongInitial, decimal)
                       ) +
                         parseFloat(
-                          formatEther(pool.collateralBalanceShortInitial)
+                          formatUnits(
+                            pool.collateralBalanceShortInitial,
+                            decimal
+                          )
                         ))) *
                     parseFloat(formatEther(parseEther(textFieldValue)))
                   ).toFixed(4)}
