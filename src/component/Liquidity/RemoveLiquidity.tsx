@@ -83,7 +83,6 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           value={textFieldValue}
           onChange={(e) => {
             setTextFieldValue(e.target.value)
-            console.log(parseFloat(formatEther(parseEther(textFieldValue))))
           }}
         />
       </Stack>
@@ -152,7 +151,9 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
         </Alert>
       </Collapse>
       <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(2) }}>You Receive</Typography>
+        <Typography sx={{ mt: theme.spacing(2) }}>
+          You Receive (after fees)
+        </Typography>
         <Typography sx={{ mt: theme.spacing(2) }}>
           {pool &&
             textFieldValue !== '' &&
@@ -168,7 +169,11 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
                 parseFloat(
                   formatUnits(pool.collateralBalanceShortInitial, decimal)
                 )) /
-                parseFloat(formatEther(pool.supplyShortInitial))
+                parseFloat(formatEther(pool.supplyShortInitial)) -
+              parseFloat(formatEther(pool!.redemptionFee)) *
+                parseFloat(formatEther(parseEther(textFieldValue))) -
+              parseFloat(formatEther(pool!.settlementFee)) *
+                parseFloat(formatEther(parseEther(textFieldValue)))
             ).toString() +
               ' ' +
               symbol}
@@ -220,7 +225,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
             {pool &&
               textFieldValue !== '' &&
               parseFloat(formatEther(pool!.redemptionFee)) *
-                parseFloat(formatUnits(parseEther(textFieldValue), decimal))}
+                parseFloat(formatEther(parseEther(textFieldValue)))}
           </Typography>
         </Stack>
         <Stack direction="row" justifyContent="space-between">
