@@ -42,6 +42,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
   const tokenBalanceShort = useErcBalance(pool ? pool!.shortToken : undefined)
   const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
+  const [impliedCollateral, setImpliedCollateral] = React.useState(0)
   const { chainId, account } = useWeb3React()
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
@@ -49,8 +50,24 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
   )
 
   const theme = useTheme()
+
   useEffect(() => {
     if (pool) {
+      if (textFieldValue !== '')
+        setImpliedCollateral(
+          (parseFloat(formatEther(parseEther(textFieldValue))) *
+            parseFloat(
+              formatUnits(pool.collateralBalanceLongInitial, decimal)
+            )) /
+            parseFloat(formatEther(pool.supplyLongInitial)) +
+            ((parseFloat(formatEther(pool.supplyShortInitial)) /
+              parseFloat(formatEther(pool.supplyLongInitial))) *
+              parseFloat(formatEther(parseEther(textFieldValue))) *
+              parseFloat(
+                formatUnits(pool.collateralBalanceShortInitial, decimal)
+              )) /
+              parseFloat(formatEther(pool.supplyShortInitial))
+        )
       const token = new ethers.Contract(
         pool!.collateralToken,
         ERC20,
@@ -158,22 +175,9 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           {pool &&
             textFieldValue !== '' &&
             (
-              (parseFloat(formatEther(parseEther(textFieldValue))) *
-                parseFloat(
-                  formatUnits(pool.collateralBalanceLongInitial, decimal)
-                )) /
-                parseFloat(formatEther(pool.supplyLongInitial)) +
-              ((parseFloat(formatEther(pool.supplyShortInitial)) /
-                parseFloat(formatEther(pool.supplyLongInitial))) *
-                parseFloat(formatEther(parseEther(textFieldValue))) *
-                parseFloat(
-                  formatUnits(pool.collateralBalanceShortInitial, decimal)
-                )) /
-                parseFloat(formatEther(pool.supplyShortInitial)) -
-              parseFloat(formatEther(pool!.redemptionFee)) *
-                parseFloat(formatEther(parseEther(textFieldValue))) -
-              parseFloat(formatEther(pool!.settlementFee)) *
-                parseFloat(formatEther(parseEther(textFieldValue)))
+              impliedCollateral -
+              parseFloat(formatEther(pool!.redemptionFee)) * impliedCollateral -
+              parseFloat(formatEther(pool!.settlementFee)) * impliedCollateral
             ).toString() +
               ' ' +
               symbol}
