@@ -21,13 +21,14 @@ import { addresses } from '../../constants'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { Pool } from '../../lib/queries'
 import { RemoveLiquidity } from './RemoveLiquidity'
-import { formatEther } from 'ethers/lib/utils'
+import { formatEther, formatUnits } from 'ethers/lib/utils'
 import ERC20 from '../../abi/ERC20.json'
 
 export const Liquidity = () => {
   const [value, setValue] = React.useState(0)
   const [pool, setPool] = React.useState<Pool>()
   const [diva, setDiva] = React.useState<Contract>()
+  const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
   const [symbol, setSymbol] = React.useState('')
   const { chainId } = useWeb3React()
@@ -56,6 +57,9 @@ export const Liquidity = () => {
           )
           token.symbol().then((symbol: string) => {
             setSymbol(symbol)
+          })
+          token.decimals().then((decimals: number) => {
+            setDecimal(decimals)
           })
           setOpenAlert(Date.now() > 1000 * parseInt(pool.expiryDate))
         })
@@ -113,20 +117,22 @@ export const Liquidity = () => {
               <Typography>Current Pool Size</Typography>
               <Typography>
                 {pool &&
-                  parseFloat(formatEther(pool.collateralBalanceLong)) +
-                    parseFloat(formatEther(pool.collateralBalanceShort))}
+                  parseFloat(formatUnits(pool.collateralBalanceLong, decimal)) +
+                    parseFloat(
+                      formatUnits(pool.collateralBalanceShort, decimal)
+                    )}
               </Typography>
             </Stack>
             <Stack direction="row" justifyContent="space-between">
               <Typography>Redemption Fee</Typography>
               <Typography>
-                {pool && formatEther(pool!.redemptionFee)}
+                {pool && formatUnits(pool!.redemptionFee, decimal)}
               </Typography>
             </Stack>
             <Stack direction="row" justifyContent="space-between">
               <Typography>Settlement Fee</Typography>
               <Typography>
-                {pool && formatEther(pool!.settlementFee)}
+                {pool && formatUnits(pool!.settlementFee, decimal)}
               </Typography>
             </Stack>
           </Container>
@@ -136,17 +142,19 @@ export const Liquidity = () => {
               <Typography>Pool capacity</Typography>
               <Typography>
                 {pool &&
-                  (formatEther(pool!.capacity) === '0.0'
+                  (formatUnits(pool!.capacity, decimal) === '0.0'
                     ? 'Unlimited'
-                    : pool!.capacity)}
+                    : formatUnits(pool!.capacity, decimal))}
               </Typography>
             </Stack>
             <Stack direction="row" justifyContent="space-between">
               <Typography>Currently utilized</Typography>
               <Typography>
                 {pool &&
-                  parseFloat(formatEther(pool.collateralBalanceLong)) +
-                    parseFloat(formatEther(pool.collateralBalanceShort))}
+                  parseFloat(formatUnits(pool.collateralBalanceLong, decimal)) +
+                    parseFloat(
+                      formatUnits(pool.collateralBalanceShort, decimal)
+                    )}
               </Typography>
             </Stack>
           </Container>

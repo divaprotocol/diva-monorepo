@@ -13,7 +13,7 @@ import {
 import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
-import { formatEther, parseEther } from 'ethers/lib/utils'
+import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { useCoinIcon } from '../../hooks/useCoinIcon'
 import ERC20 from '../../abi/ERC20.json'
 import Button from '@mui/material/Button'
@@ -39,14 +39,23 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
   const tokenBalanceLong = useErcBalance(pool ? pool!.longToken : undefined)
   const tokenBalanceShort = useErcBalance(pool ? pool!.shortToken : undefined)
+  const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
   const { chainId, account } = useWeb3React()
   const provider = new ethers.providers.Web3Provider(
     window.ethereum,
     chainIdtoName(chainId!).toLowerCase()
   )
+  const token = new ethers.Contract(
+    pool!.collateralToken,
+    ERC20,
+    provider.getSigner()
+  )
   const theme = useTheme()
   useEffect(() => {
+    token.decimals().then((decimals: number) => {
+      setDecimal(decimals)
+    })
     if (
       tokenBalanceLong &&
       parseInt(textFieldValue) > parseInt(tokenBalanceLong!)
@@ -144,13 +153,17 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
             textFieldValue !== '' &&
             (
               (parseFloat(formatEther(parseEther(textFieldValue))) *
-                parseFloat(formatEther(pool.collateralBalanceLongInitial))) /
-                parseFloat(formatEther(pool.supplyLongInitial)) +
-              ((parseFloat(formatEther(pool.supplyShortInitial)) /
-                parseFloat(formatEther(pool.supplyLongInitial))) *
-                parseFloat(formatEther(parseEther(textFieldValue))) *
-                parseFloat(formatEther(pool.collateralBalanceShortInitial))) /
-                parseFloat(formatEther(pool.supplyShortInitial))
+                parseFloat(
+                  formatUnits(pool.collateralBalanceLongInitial, decimal)
+                )) /
+                parseFloat(formatUnits(pool.supplyLongInitial, decimal)) +
+              ((parseFloat(formatUnits(pool.supplyShortInitial, decimal)) /
+                parseFloat(formatUnits(pool.supplyLongInitial, decimal))) *
+                parseFloat(formatUnits(parseEther(textFieldValue), decimal)) *
+                parseFloat(
+                  formatUnits(pool.collateralBalanceShortInitial, decimal)
+                )) /
+                parseFloat(formatUnits(pool.supplyShortInitial, decimal))
             ).toString() +
               ' ' +
               symbol}
