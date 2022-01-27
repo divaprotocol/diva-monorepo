@@ -228,8 +228,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           <Typography>
             {pool &&
               textFieldValue !== '' &&
-              parseFloat(formatEther(pool!.redemptionFee)) *
-                parseFloat(formatEther(parseEther(textFieldValue)))}
+              parseFloat(formatEther(pool!.redemptionFee)) * impliedCollateral}
           </Typography>
         </Stack>
         <Stack direction="row" justifyContent="space-between">
@@ -237,8 +236,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           <Typography>
             {pool &&
               textFieldValue !== '' &&
-              parseFloat(formatEther(pool!.settlementFee)) *
-                parseFloat(formatUnits(parseEther(textFieldValue), decimal))}
+              parseFloat(formatEther(pool!.settlementFee)) * impliedCollateral}
           </Typography>
         </Stack>
       </Box>
