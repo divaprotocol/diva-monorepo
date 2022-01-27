@@ -4,7 +4,6 @@ import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
-import { chainIdtoName } from '../../Util/chainIdToName'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatUnits } from 'ethers/lib/utils'
@@ -16,7 +15,7 @@ import ERC20 from '../../abi/ERC20.json'
 import { useTokenBalances } from '../../hooks/useTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
-import { useWallet } from '@web3-ui/core'
+import { useWallet } from '@web3-ui/hooks'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -63,11 +62,14 @@ const AddToMetamask = (props: any) => {
 
 const SubmitButton = (props: any) => {
   const {
-    connection: { network, userAddress },
+    connection: { userAddress },
     provider,
   } = useWallet()
+  const history = useHistory()
 
-  const chainId = network
+  const chainId = provider?.network?.chainId
+  if (chainId == null) return null
+
   const diva = new ethers.Contract(
     config[chainId].divaAddress,
     DIVA_ABI,
@@ -75,7 +77,6 @@ const SubmitButton = (props: any) => {
   )
   const token =
     provider && new ethers.Contract(props.row.address, ERC20, provider)
-  const history = useHistory()
   const handleRedeem = () => {
     token?.balanceOf(userAddress).then((bal: BigNumber) => {
       diva.redeemPositionToken(props.row.address, bal)
@@ -197,16 +198,16 @@ const columns: GridColDef[] = [
 export function MyPositions() {
   const {
     connection: { network, userAddress },
+    provider,
   } = useWallet()
 
-  console.log({ network })
-
   const account = userAddress
-  const chainId = network
-  // const { account } = useWeb3React()
+  const chainId = provider?.network?.chainId
 
   const poolsQuery = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(config[chainId as number].divaSubgraph, queryPools)
+    chainId != null
+      ? request(config[chainId as number].divaSubgraph, queryPools)
+      : Promise.resolve()
   )
 
   const pools = poolsQuery.data?.pools || ([] as Pool[])

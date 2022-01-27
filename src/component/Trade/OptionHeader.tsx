@@ -8,7 +8,7 @@ import {
 } from '../../Util/getEtherscanLink'
 import { CoinImage } from '../PoolsTable'
 import Tooltip from '@mui/material/Tooltip'
-import { useWallet } from '@web3-ui/core'
+import { useWallet } from '@web3-ui/hooks'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -23,49 +23,11 @@ const OptionTitle = styled.h2`
   padding: 15px;
 `
 
-const Image = styled.img`
-  height: 3.5vmin;
-  width: 3.5vmin;
-  pointer-events: none;
-  justify-content: center;
-  margin-left: 10px;
-`
-
-const ImgDiv = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  margin-left: 15px;
-`
-const LeftAssetImg = styled.img`
-  flex: 1;
-  height: 3.5vmin;
-  width: 3.5vmin;
-`
-const RightAssetImg = styled.img`
-  flex: 1;
-  height: 3.5vmin;
-  width: 3.5vmin;
-  margin-left: 1px;
-`
 const MetaMaskImage = styled.img`
   width: 20px;
   height: 20px;
   cursor: pointer;
 `
-
-const refAssetImgs = [
-  {
-    refAsset: 'ETH/USDT',
-    img0: '/images/coin-logos/ETH.png',
-    img1: '/images/coin-logos/USDT.png',
-  },
-  {
-    refAsset: 'UNI/DAI',
-    img0: '/images/coin-logos/UNI.png',
-    img1: '/images/coin-logos/DAI.png',
-  },
-]
 
 export default function OptionHeader(optionData: {
   TokenAddress: string
@@ -74,13 +36,8 @@ export default function OptionHeader(optionData: {
   poolId: string
   tokenDecimals: number
 }) {
-  //const option = props.optionData
-  const {
-    connection: { network },
-  } = useWallet()
-  console.log({ network })
-  const chainId = 80001
-
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId
   const headerTitle = optionData.ReferenceAsset
 
   const handleAddMetaMask = async () => {

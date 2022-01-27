@@ -1,10 +1,8 @@
-import { ethers } from 'ethers'
 import { useFormik } from 'formik'
 import { useQuery } from 'react-query'
 import { useDiva } from '../../hooks/useDiva'
 import { Tokens } from '../../lib/types'
-import { chainIdtoName } from '../../Util/chainIdToName'
-import { useWallet } from '@web3-ui/core'
+import { useWallet } from '@web3-ui/hooks'
 import referenceAssets from './referenceAssets.json'
 
 const defaultDate = new Date()
@@ -33,18 +31,12 @@ type Errors = {
 }
 
 export const useCreatePoolFormik = () => {
-  // const { chainId, account } = useWeb3React()
   const {
     connection: { network },
+    provider,
   } = useWallet()
-  console.log({ network })
-  const chainId = 80001
-  const contract = useDiva()
 
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
+  const contract = useDiva()
 
   const tokensQuery = useQuery<Tokens>('tokens', () =>
     fetch('/ropstenTokens.json').then((res) => res.json())
@@ -164,7 +156,11 @@ export const useCreatePoolFormik = () => {
       }
 
       // validate data feed provider
-      if (values.step > 1 && values.dataFeedProvider !== null) {
+      if (
+        values.step > 1 &&
+        values.dataFeedProvider !== null &&
+        provider != null
+      ) {
         if (
           values.dataFeedProvider == null ||
           values.dataFeedProvider.trim().length === 0

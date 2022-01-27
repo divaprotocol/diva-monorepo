@@ -1,8 +1,7 @@
 import { BigNumber, ethers } from 'ethers'
 import ERC20 from '../abi/ERC20.json'
-import { chainIdtoName } from '../Util/chainIdToName'
 import { useQuery } from 'react-query'
-import { useWallet } from '@web3-ui/core'
+import { useWallet } from '@web3-ui/hooks'
 
 type Response = {
   [token: string]: BigNumber
@@ -10,32 +9,27 @@ type Response = {
 
 export function useTokenBalances(tokenAddresses: string[]) {
   const {
-    connection: { network, userAddress },
+    connection: { userAddress },
+    provider,
   } = useWallet()
-  console.log({ network })
-  const chainId = 80001
-
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
 
   const balances = useQuery<Response>(
     'balance',
     async () => {
       const response: Response = {}
-      await Promise.all(
-        tokenAddresses.map(async (tokenAddress) => {
-          const contract = new ethers.Contract(tokenAddress, ERC20, provider)
-          try {
-            const res: BigNumber = await contract.balanceOf(userAddress)
-            response[tokenAddress] = res
-          } catch (error) {
-            console.error(error)
-          }
-        })
-      )
-
+      if (provider != null) {
+        await Promise.all(
+          tokenAddresses.map(async (tokenAddress) => {
+            const contract = new ethers.Contract(tokenAddress, ERC20, provider)
+            try {
+              const res: BigNumber = await contract.balanceOf(userAddress)
+              response[tokenAddress] = res
+            } catch (error) {
+              console.error(error)
+            }
+          })
+        )
+      }
       return response
     },
     { cacheTime: 5 }

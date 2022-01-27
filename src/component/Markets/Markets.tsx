@@ -7,7 +7,7 @@ import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { config } from '../../constants'
-import { useWallet } from '@web3-ui/core'
+import { useWallet } from '@web3-ui/hooks'
 
 const columns: GridColDef[] = [
   {
@@ -53,16 +53,13 @@ const columns: GridColDef[] = [
 ]
 
 export default function Markets() {
-  // const {
-  //   connection: { network },
-  // } = useWallet()
-  // console.log({ network })
-  console.log('what')
-
-  const chainId = 80001
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId
 
   const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(config[chainId as number].divaSubgraph, queryPools)
+    chainId != null
+      ? request(config[chainId as number].divaSubgraph, queryPools)
+      : Promise.resolve()
   )
   const pools = query.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {

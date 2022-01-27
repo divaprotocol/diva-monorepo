@@ -1,6 +1,6 @@
 import Button from '@mui/material/Button'
 import { useCallback, useEffect, useState } from 'react'
-import { useWallet } from '@web3-ui/core'
+import { useWallet } from '@web3-ui/hooks'
 
 export function ConnectWalletButton() {
   const { connected, connectWallet, connection, provider, disconnectWallet } =
@@ -19,15 +19,14 @@ export function ConnectWalletButton() {
 
   useEffect(() => {
     const run = async () => {
-      if (connection && provider != null) {
-        const res = await provider.lookupAddress(connection.userAddress || '')
+      if (connection && provider != null && connection.userAddress != null) {
+        const res = await provider.lookupAddress(connection.userAddress)
         if (res === null) {
-          setWalletName(truncate(connection.userAddress || ''))
+          setWalletName(truncate(connection.userAddress))
         } else {
           setWalletName(res)
         }
       }
-      await connect()
     }
 
     run()

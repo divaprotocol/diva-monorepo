@@ -1,10 +1,9 @@
 import { ethers, Contract, BigNumber } from 'ethers'
-import { chainIdtoName } from '../Util/chainIdToName'
 import ERC20 from '../abi/ERC20.json'
 
 import { useEffect, useState } from 'react'
 import { formatEther } from 'ethers/lib/utils'
-import { useWallet } from '@web3-ui/core'
+import { useWallet } from '@web3-ui/hooks'
 
 type Erc20Contract = Contract & {
   balanceOf: (address: string) => Promise<BigNumber>
@@ -17,20 +16,17 @@ type Erc20Contract = Contract & {
  * no balance is returned
  */
 export function useErcBalance(address?: string) {
-  const wallet = useWallet()
-  const chainId = wallet.connection.network
-  const account = wallet.connection.userAddress
+  const { connection, provider } = useWallet()
+  const chainId = provider?.network?.chainId
+  const account = connection.userAddress
 
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
   const [balance, setBalance] = useState<string>()
 
   useEffect(() => {
     const run = async () => {
-      const signer = provider.getSigner()
-      if (chainId != null && address != null) {
+      if (provider != null && chainId != null && address != null) {
+        const signer = provider.getSigner()
+        console.log({ address, signer })
         try {
           const contract = new ethers.Contract(
             address,

@@ -16,7 +16,6 @@ import { ethers } from 'ethers'
 import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
-import { chainIdtoName } from '../../Util/chainIdToName'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatUnits } from 'ethers/lib/utils'
@@ -24,7 +23,7 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
-import { useWallet } from '@web3-ui/core'
+import { useWallet } from '@web3-ui/hooks'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -112,22 +111,19 @@ const DueInCell = (props: any) => {
   )
 }
 const SubmitCell = (props: any) => {
-  const {
-    connection: { network },
-  } = useWallet()
-  console.log({ network })
+  const { provider, connection } = useWallet()
 
-  const chainId = 80001
+  const chainId = provider?.network?.chainId
 
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
-  const diva = new ethers.Contract(
-    config[chainId!].divaAddress,
-    DIVA_ABI,
-    provider.getSigner()
-  )
+  const diva =
+    provider != null
+      ? new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider.getSigner()
+        )
+      : null
+
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
   const handleOpen = () => {
@@ -167,11 +163,13 @@ const SubmitCell = (props: any) => {
             color="primary"
             type="submit"
             onClick={() => {
-              diva.setFinalReferenceValue(
-                props.id.split('/')[0],
-                ethers.utils.parseEther(textFieldValue),
-                true
-              )
+              if (diva != null) {
+                diva.setFinalReferenceValue(
+                  props.id.split('/')[0],
+                  ethers.utils.parseEther(textFieldValue),
+                  true
+                )
+              }
               handleClose()
             }}
           >
