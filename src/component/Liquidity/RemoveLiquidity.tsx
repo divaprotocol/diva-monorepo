@@ -1,6 +1,7 @@
 import { Contract, ethers } from 'ethers'
 import {
   Alert,
+  Box,
   Card,
   Collapse,
   Container,
@@ -46,16 +47,19 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
     window.ethereum,
     chainIdtoName(chainId!).toLowerCase()
   )
-  const token = new ethers.Contract(
-    pool!.collateralToken,
-    ERC20,
-    provider.getSigner()
-  )
+
   const theme = useTheme()
   useEffect(() => {
-    token.decimals().then((decimals: number) => {
-      setDecimal(decimals)
-    })
+    if (pool) {
+      const token = new ethers.Contract(
+        pool!.collateralToken,
+        ERC20,
+        provider.getSigner()
+      )
+      token.decimals().then((decimals: number) => {
+        setDecimal(decimals)
+      })
+    }
     if (
       tokenBalanceLong &&
       parseInt(textFieldValue) > parseInt(tokenBalanceLong!)
@@ -64,7 +68,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
     } else {
       setOpenAlert(false)
     }
-  }, [tokenBalanceLong, textFieldValue, pool])
+  }, [tokenBalanceLong, textFieldValue, chainId, pool])
   return (
     <Stack
       direction="column"
@@ -79,6 +83,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           value={textFieldValue}
           onChange={(e) => {
             setTextFieldValue(e.target.value)
+            console.log(parseFloat(formatEther(parseEther(textFieldValue))))
           }}
         />
       </Stack>
@@ -156,14 +161,14 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
                 parseFloat(
                   formatUnits(pool.collateralBalanceLongInitial, decimal)
                 )) /
-                parseFloat(formatUnits(pool.supplyLongInitial, decimal)) +
-              ((parseFloat(formatUnits(pool.supplyShortInitial, decimal)) /
-                parseFloat(formatUnits(pool.supplyLongInitial, decimal))) *
-                parseFloat(formatUnits(parseEther(textFieldValue), decimal)) *
+                parseFloat(formatEther(pool.supplyLongInitial)) +
+              ((parseFloat(formatEther(pool.supplyShortInitial)) /
+                parseFloat(formatEther(pool.supplyLongInitial))) *
+                parseFloat(formatEther(parseEther(textFieldValue))) *
                 parseFloat(
                   formatUnits(pool.collateralBalanceShortInitial, decimal)
                 )) /
-                parseFloat(formatUnits(pool.supplyShortInitial, decimal))
+                parseFloat(formatEther(pool.supplyShortInitial))
             ).toString() +
               ' ' +
               symbol}
@@ -185,47 +190,10 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           value="Submit"
           disabled={!pool}
           onClick={() => {
-            const longToken = new ethers.Contract(
-              pool!.longToken,
-              ERC20,
-              provider.getSigner()
+            diva!.removeLiquidity(
+              window.location.pathname.split('/')[1],
+              parseEther(textFieldValue)
             )
-            const shortToken = new ethers.Contract(
-              pool!.longToken,
-              ERC20,
-              provider.getSigner()
-            )
-
-            longToken
-              .approve(diva?.address, parseEther(textFieldValue))
-              .then((tx: any) => {
-                // tx.wait().then(() => {
-                //   longToken.allowance(account, diva?.address)
-                // })
-                return tx.wait()
-              })
-              .then(() => {
-                return longToken.allowance(account, diva?.address)
-              })
-              .then(() => {
-                return shortToken.approve(
-                  diva?.address,
-                  parseEther(textFieldValue)
-                )
-              })
-              .then((tx: any) => {
-                return tx.wait()
-              })
-              .then(() => {
-                return shortToken.allowance(account, diva?.address)
-              })
-              .then(
-                diva!.removeLiquidity(
-                  window.location.pathname.split('/')[1],
-                  parseEther(textFieldValue)
-                )
-              )
-              .catch((err: any) => console.error(err))
           }}
           style={{
             maxWidth: theme.spacing(38),
@@ -237,6 +205,34 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           Remove
         </Button>
       </div>
+      <Box>
+        <Stack direction="row" justifyContent="space-between">
+          <Typography>Current Pool Size</Typography>
+          <Typography>
+            {pool &&
+              parseFloat(formatUnits(pool.collateralBalanceLong, decimal)) +
+                parseFloat(formatUnits(pool.collateralBalanceShort, decimal))}
+          </Typography>
+        </Stack>
+        <Stack direction="row" justifyContent="space-between">
+          <Typography>Redemption Fee</Typography>
+          <Typography>
+            {pool &&
+              textFieldValue !== '' &&
+              parseFloat(formatEther(pool!.redemptionFee)) *
+                parseFloat(formatUnits(parseEther(textFieldValue), decimal))}
+          </Typography>
+        </Stack>
+        <Stack direction="row" justifyContent="space-between">
+          <Typography>Settlement Fee</Typography>
+          <Typography>
+            {pool &&
+              textFieldValue !== '' &&
+              parseFloat(formatEther(pool!.settlementFee)) *
+                parseFloat(formatUnits(parseEther(textFieldValue), decimal))}
+          </Typography>
+        </Stack>
+      </Box>
     </Stack>
   )
 }

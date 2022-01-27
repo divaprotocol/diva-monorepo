@@ -111,32 +111,7 @@ export const Liquidity = () => {
             )}
           </CardContent>
         </Card>
-        {value ? (
-          <Container>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography>Current Pool Size</Typography>
-              <Typography>
-                {pool &&
-                  parseFloat(formatUnits(pool.collateralBalanceLong, decimal)) +
-                    parseFloat(
-                      formatUnits(pool.collateralBalanceShort, decimal)
-                    )}
-              </Typography>
-            </Stack>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography>Redemption Fee</Typography>
-              <Typography>
-                {pool && formatUnits(pool!.redemptionFee, decimal)}
-              </Typography>
-            </Stack>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography>Settlement Fee</Typography>
-              <Typography>
-                {pool && formatUnits(pool!.settlementFee, decimal)}
-              </Typography>
-            </Stack>
-          </Container>
-        ) : (
+        {!value && (
           <Container>
             <Stack direction="row" justifyContent="space-between">
               <Typography>Pool capacity</Typography>
