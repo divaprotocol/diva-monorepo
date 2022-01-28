@@ -1,37 +1,36 @@
-import { useWeb3React } from '@web3-react/core'
-import { injected } from './connectors'
 import Button from '@mui/material/Button'
-import React, { useEffect, useState } from 'react'
-import { ethers } from 'ethers'
+import { useCallback, useEffect, useState } from 'react'
+import { useWallet } from '@web3-ui/hooks'
 
 export function ConnectWalletButton() {
-  const { active, account, activate, deactivate } = useWeb3React()
+  const { connected, connectWallet, connection, provider, disconnectWallet } =
+    useWallet()
+  // const { active, account, activate, deactivate } = useWeb3React()
   const [walletName, setWalletName] = useState('')
-  const provider = new ethers.providers.Web3Provider(window.ethereum)
 
-  async function connect() {
+  const connect = useCallback(async () => {
     try {
-      await activate(injected)
+      connectWallet?.()
+      // await activate(injected)
     } catch (ex) {
       console.error(ex)
     }
-  }
+  }, [connectWallet])
 
   useEffect(() => {
     const run = async () => {
-      if (account) {
-        const res = await provider.lookupAddress(account)
+      if (connection && provider != null && connection.userAddress != null) {
+        const res = await provider.lookupAddress(connection.userAddress)
         if (res === null) {
-          setWalletName(truncate(account))
+          setWalletName(truncate(connection.userAddress))
         } else {
           setWalletName(res)
         }
       }
-      await connect()
     }
 
     run()
-  }, [account])
+  }, [connect, connection, provider])
 
   function truncate(string = '', start = 6, end = 4) {
     if (start < 1 || end < 1) {
@@ -42,13 +41,14 @@ export function ConnectWalletButton() {
     }
     return string.slice(0, start) + '...' + string.slice(-end)
   }
-  function disconnect() {
-    try {
-      deactivate()
-    } catch (ex) {
-      console.error(ex)
+
+  const toggleConnect = useCallback(() => {
+    if (connected) {
+      disconnectWallet?.()
+    } else {
+      connectWallet?.()
     }
-  }
+  }, [connected, connectWallet, disconnectWallet])
 
   return (
     <Button
@@ -58,9 +58,9 @@ export function ConnectWalletButton() {
       type="submit"
       value="Submit"
       sx={{ marginLeft: '10px' }}
-      onClick={!active ? () => connect() : () => disconnect()}
+      onClick={toggleConnect}
     >
-      {!active ? 'Connect Wallet' : walletName}
+      {!connected ? 'Connect Wallet' : walletName}
     </Button>
   )
 }

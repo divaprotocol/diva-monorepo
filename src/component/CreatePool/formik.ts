@@ -1,10 +1,9 @@
-import { useWeb3React } from '@web3-react/core'
-import { ethers } from 'ethers'
 import { useFormik } from 'formik'
 import { useQuery } from 'react-query'
 import { useDiva } from '../../hooks/useDiva'
 import { Tokens } from '../../lib/types'
-import { chainIdtoName } from '../../Util/chainIdToName'
+import { useWallet } from '@web3-ui/hooks'
+import referenceAssets from './referenceAssets.json'
 
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
@@ -18,11 +17,11 @@ export const initialValues = {
   inflection: 2,
   collateralTokenSymbol: 'DAI',
   collateralWalletBalance: '0',
-  collateralBalance: 2,
+  collateralBalance: '2',
   collateralBalanceShort: 1,
   collateralBalanceLong: 1,
-  shortTokenSupply: 1,
-  longTokenSupply: 1,
+  shortTokenSupply: 2,
+  longTokenSupply: 2,
   capacity: 0,
   dataFeedProvider: '',
 }
@@ -32,13 +31,12 @@ type Errors = {
 }
 
 export const useCreatePoolFormik = () => {
-  const { chainId, account } = useWeb3React()
-  const contract = useDiva()
+  const {
+    connection: { network },
+    provider,
+  } = useWallet()
 
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
+  const contract = useDiva()
 
   const tokensQuery = useQuery<Tokens>('tokens', () =>
     fetch('/ropstenTokens.json').then((res) => res.json())
@@ -117,7 +115,7 @@ export const useCreatePoolFormik = () => {
         errors.collateralTokenSymbol = 'You must choose a collateral token'
       }
 
-      if (account == null) {
+      if (network == null) {
         errors.collateralWalletBalance =
           'Your wallet must be connected before you can proceed'
       } else if (walletBalance < collateralBalance) {
@@ -153,10 +151,16 @@ export const useCreatePoolFormik = () => {
 
       if (values.capacity < 0) {
         errors.capacity = 'Capacity cannot be negative'
+      } else if (values.capacity !== 0 && collateralBalance > values.capacity) {
+        errors.capacity = `Capacity must be larger than ${collateralBalance}. For unlimited capacity, set to 0`
       }
 
       // validate data feed provider
-      if (values.step > 1 && values.dataFeedProvider !== null) {
+      if (
+        values.step > 1 &&
+        values.dataFeedProvider !== null &&
+        provider != null
+      ) {
         if (
           values.dataFeedProvider == null ||
           values.dataFeedProvider.trim().length === 0

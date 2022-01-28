@@ -17,7 +17,8 @@ import OptionHeader from './OptionHeader'
 import { useQuery } from 'react-query'
 import { queryPool, Pool } from '../../lib/queries'
 import request from 'graphql-request'
-import { divaEndpoint } from '../../constants'
+import { config } from '../../constants'
+import { useWallet } from '@web3-ui/hooks'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -40,9 +41,14 @@ const LeftCompRightDiv = styled.div`
 export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const breakEvenOptionPrice = 0
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId
 
   const query = useQuery<{ pool: Pool }>('pool', () =>
-    request(divaEndpoint, queryPool(parseInt(params.poolId)))
+    request(
+      config[chainId as number].divaSubgraph,
+      queryPool(parseInt(params.poolId))
+    )
   )
 
   const pool = query.data?.pool

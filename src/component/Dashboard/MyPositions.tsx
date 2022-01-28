@@ -1,11 +1,9 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import { Button, Container, Stack, Tooltip } from '@mui/material'
-import { useWeb3React } from '@web3-react/core'
 import { BigNumber, ethers } from 'ethers'
-import { addresses, divaEndpoint } from '../../constants'
+import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
-import { chainIdtoName } from '../../Util/chainIdToName'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatUnits } from 'ethers/lib/utils'
@@ -17,6 +15,7 @@ import ERC20 from '../../abi/ERC20.json'
 import { useTokenBalances } from '../../hooks/useTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
+import { useWallet } from '@web3-ui/hooks'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -62,28 +61,30 @@ const AddToMetamask = (props: any) => {
 }
 
 const SubmitButton = (props: any) => {
-  const { chainId, account } = useWeb3React()
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
+  const {
+    connection: { userAddress },
+    provider,
+  } = useWallet()
+  const history = useHistory()
+
+  const chainId = provider?.network?.chainId
+  if (chainId == null) return null
 
   const diva = new ethers.Contract(
-    addresses[chainId!].divaAddress,
+    config[chainId].divaAddress,
     DIVA_ABI,
-    provider.getSigner()
+    provider?.getSigner()
   )
-  const token = new ethers.Contract(props.row.address, ERC20, provider)
-  const history = useHistory()
+  const token =
+    provider && new ethers.Contract(props.row.address, ERC20, provider)
   const handleRedeem = () => {
-    token.balanceOf(account).then((bal: BigNumber) => {
+    token?.balanceOf(userAddress).then((bal: BigNumber) => {
       diva.redeemPositionToken(props.row.address, bal)
     })
   }
 
   let buttonName: string
 
-  console.log(props)
   const statusExpMin = getExpiryMinutesFromNow(Number(props.StatusTimestamp))
 
   if (props.row.Status === 'Submitted' && statusExpMin + 24 * 60 + 5 < 0) {
@@ -195,10 +196,18 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const { account } = useWeb3React()
+  const {
+    connection: { userAddress },
+    provider,
+  } = useWallet()
+
+  const account = userAddress
+  const chainId = provider?.network?.chainId
 
   const poolsQuery = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(divaEndpoint, queryPools)
+    chainId != null
+      ? request(config[chainId as number].divaSubgraph, queryPools)
+      : Promise.resolve()
   )
 
   const pools = poolsQuery.data?.pools || ([] as Pool[])

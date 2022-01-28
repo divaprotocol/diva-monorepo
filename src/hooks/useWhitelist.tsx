@@ -1,10 +1,10 @@
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
-import { whiteListEndpoint } from '../constants'
 import { WhitelistQueryResponse, queryWhitelist } from '../lib/queries'
 
 export function useWhitelist() {
-  // return [...new Set(data.map(item => item.group))]
+  const { provider } = useWallet()
+
   const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
     request(whiteListEndpoint, queryWhitelist)
   )

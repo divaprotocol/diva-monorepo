@@ -17,15 +17,15 @@ import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
-import { Network } from '../../../Util/chainIdToName'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 import { Pool } from '../../../lib/queries'
+import { NETWORKS } from '@web3-ui/hooks'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20_ABI = require('../../../abi/ERC20.json')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-const CHAIN_ID = Network.ROPSTEN
+const CHAIN_ID = NETWORKS.ropsten
 const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
 const exchangeProxyAddress = address.exchangeProxy
 const maxApproval = new BigNumber(2).pow(256).minus(1)

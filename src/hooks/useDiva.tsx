@@ -1,11 +1,10 @@
-import { useWeb3React } from '@web3-react/core'
 import { ethers, Contract, BigNumber } from 'ethers'
-import { addresses } from '../constants'
-import { chainIdtoName } from '../Util/chainIdToName'
+import { config } from '../constants'
 import DIVA_ABI from '../abi/DIVA.json'
 import ERC20 from '../abi/ERC20.json'
 import { Pool } from '../lib/queries'
 import { parseEther } from 'ethers/lib/utils'
+import { useWallet } from '@web3-ui/hooks'
 
 /**
  * Note: The order of parameters matter in this case,
@@ -60,14 +59,12 @@ type DivaApi = {
 }
 
 export function useDiva(): DivaApi | null {
-  const { chainId } = useWeb3React()
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
-  if (chainId == null) return null
+  const { provider } = useWallet()
+  const chainId = provider?.network?.chainId
 
-  const divaAddress = addresses[chainId].divaAddress
+  if (chainId == null || provider == null) return null
+
+  const divaAddress = config[chainId].divaAddress
 
   const signer = provider.getSigner()
 
