@@ -18,8 +18,7 @@ import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { useCoinIcon } from '../../hooks/useCoinIcon'
 import ERC20 from '../../abi/ERC20.json'
 import Button from '@mui/material/Button'
-import { chainIdtoName } from '../../Util/chainIdToName'
-import { useWeb3React } from '@web3-react/core'
+import { useWallet } from '@web3-ui/hooks'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -43,11 +42,8 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
   const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
   const [impliedCollateral, setImpliedCollateral] = React.useState(0)
-  const { chainId, account } = useWeb3React()
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId!).toLowerCase()
-  )
+  const { provider } = useWallet()
+  const chainId = provider?.network?.chainId
 
   const theme = useTheme()
 

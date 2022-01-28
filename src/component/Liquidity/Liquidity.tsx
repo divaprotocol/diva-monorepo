@@ -14,15 +14,14 @@ import React, { useEffect } from 'react'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import { AddLiquidity } from './AddLiquidity'
-import { useWeb3React } from '@web3-react/core'
 import { Contract, ethers } from 'ethers'
-import { chainIdtoName } from '../../Util/chainIdToName'
-import { addresses } from '../../constants'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { Pool } from '../../lib/queries'
 import { RemoveLiquidity } from './RemoveLiquidity'
-import { formatEther, formatUnits } from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 import ERC20 from '../../abi/ERC20.json'
+import { config } from '../../constants'
+import { useWallet } from '@web3-ui/hooks'
 
 export const Liquidity = () => {
   const [value, setValue] = React.useState(0)
@@ -31,17 +30,16 @@ export const Liquidity = () => {
   const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
   const [symbol, setSymbol] = React.useState('')
-  const { chainId } = useWeb3React()
+  const { provider } = useWallet()
+
+  const chainId = provider?.network?.chainId
+
   const theme = useTheme()
 
   useEffect(() => {
     if (chainId) {
-      const provider = new ethers.providers.Web3Provider(
-        window.ethereum,
-        chainIdtoName(chainId).toLowerCase()
-      )
       const diva = new ethers.Contract(
-        addresses[chainId!].divaAddress,
+        config[chainId!].divaAddress,
         DIVA_ABI,
         provider.getSigner()
       )

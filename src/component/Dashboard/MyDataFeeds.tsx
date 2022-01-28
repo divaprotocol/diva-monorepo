@@ -111,7 +111,7 @@ const DueInCell = (props: any) => {
   )
 }
 const SubmitCell = (props: any) => {
-  const { provider, connection } = useWallet()
+  const { provider } = useWallet()
 
   const chainId = provider?.network?.chainId
 

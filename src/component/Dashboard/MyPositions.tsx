@@ -197,7 +197,7 @@ const columns: GridColDef[] = [
 
 export function MyPositions() {
   const {
-    connection: { network, userAddress },
+    connection: { userAddress },
     provider,
   } = useWallet()
 
