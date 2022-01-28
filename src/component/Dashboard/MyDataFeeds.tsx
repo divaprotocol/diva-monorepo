@@ -18,7 +18,7 @@ import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
@@ -166,7 +166,7 @@ const SubmitCell = (props: any) => {
               if (diva != null) {
                 diva.setFinalReferenceValue(
                   props.id.split('/')[0],
-                  ethers.utils.parseEther(textFieldValue),
+                  parseEther(textFieldValue),
                   true
                 )
               }

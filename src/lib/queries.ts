@@ -1,7 +1,9 @@
 import gql from 'graphql-tag'
+import { BigNumber } from 'ethers'
 
 export type Pool = {
   cap: string
+  capacity: BigNumber
   collateralBalanceLong: string
   collateralBalanceLongInitial: string
   collateralBalanceShort: string
