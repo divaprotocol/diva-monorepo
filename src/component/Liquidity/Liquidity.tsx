@@ -111,7 +111,7 @@ export const Liquidity = () => {
             )}
           </CardContent>
         </Card>
-        {!value && (
+        {!value && pool && (
           <Container>
             {pool && formatUnits(pool!.capacity, decimal!) !== '0.0' ? (
               <>
@@ -139,6 +139,10 @@ export const Liquidity = () => {
               </>
             ) : (
               <>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Pool capacity</Typography>
+                  <Typography>Unlimited</Typography>
+                </Stack>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Current pool size</Typography>
                   <Typography>
