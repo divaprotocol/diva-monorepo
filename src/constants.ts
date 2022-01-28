@@ -10,7 +10,7 @@ export const config: { [key: number]: SingleConfig } = {
   3: {
     name: 'Ropsten',
     divaAddress: '0x6455A2Ae3c828c4B505b9217b51161f6976bE7cf',
-    whitelistAddress: '0x50D327C638B09d0A434185d63E7193060E6271B2',
+    whitelistAddress: '0xc7B292b054A53C661dCEbC704F6fc2b1D8073cf7',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
     whitelistSubgraph:
@@ -37,7 +37,7 @@ export const config: { [key: number]: SingleConfig } = {
   42: {
     name: 'Kovan',
     divaAddress: '0xa8450f6cDbC80a07Eb593E514b9Bd5503c3812Ba',
-    whitelistAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
+    whitelistAddress: '0xe3343218CAa73AE523D40936D64E7f335AfDe8f9',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-kovan',
     whitelistSubgraph:
