@@ -113,25 +113,46 @@ export const Liquidity = () => {
         </Card>
         {!value && (
           <Container>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography>Pool capacity</Typography>
-              <Typography>
-                {pool &&
-                  (formatUnits(pool!.capacity, decimal) === '0.0'
-                    ? 'Unlimited'
-                    : formatUnits(pool!.capacity, decimal))}
-              </Typography>
-            </Stack>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography>Currently utilized</Typography>
-              <Typography>
-                {pool &&
-                  parseFloat(formatUnits(pool.collateralBalanceLong, decimal)) +
-                    parseFloat(
-                      formatUnits(pool.collateralBalanceShort, decimal)
-                    )}
-              </Typography>
-            </Stack>
+            {pool && formatUnits(pool!.capacity, decimal!) !== '0.0' ? (
+              <>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Pool capacity</Typography>
+                  <Typography>
+                    {pool &&
+                      (formatUnits(pool!.capacity, decimal) === '0.0'
+                        ? 'Unlimited'
+                        : formatUnits(pool!.capacity, decimal))}
+                  </Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Currently utilized</Typography>
+                  <Typography>
+                    {pool &&
+                      parseFloat(
+                        formatUnits(pool.collateralBalanceLong, decimal)
+                      ) +
+                        parseFloat(
+                          formatUnits(pool.collateralBalanceShort, decimal)
+                        )}
+                  </Typography>
+                </Stack>
+              </>
+            ) : (
+              <>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Current pool size</Typography>
+                  <Typography>
+                    {pool &&
+                      parseFloat(
+                        formatUnits(pool.collateralBalanceLong, decimal)
+                      ) +
+                        parseFloat(
+                          formatUnits(pool.collateralBalanceShort, decimal)
+                        )}
+                  </Typography>
+                </Stack>
+              </>
+            )}
           </Container>
         )}
         <Card sx={{ maxWidth: '600px', borderRadius: '16px' }}>
