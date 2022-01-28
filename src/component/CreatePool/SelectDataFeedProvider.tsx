@@ -7,9 +7,10 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
+import { useWallet } from '@web3-ui/hooks'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
-import { whiteListEndpoint } from '../../constants'
+import { config } from '../../constants'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { useCreatePoolFormik } from './formik'
 
@@ -18,8 +19,11 @@ export function SelectDataFeedProvider({
 }: {
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
+  const { provider } = useWallet()
+  const chainId = provider?.network?.chainId
+
   const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
-    request(whiteListEndpoint, queryWhitelist)
+    request(config[chainId].whitelistSubgraph, queryWhitelist)
   )
 
   const matchingDataFeedProviders =

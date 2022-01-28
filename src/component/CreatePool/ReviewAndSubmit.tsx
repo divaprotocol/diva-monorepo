@@ -8,9 +8,10 @@ import {
   useTheme,
 } from '@mui/material'
 import { Box } from '@mui/material'
+import { useWallet } from '@web3-ui/hooks'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
-import { whiteListEndpoint } from '../../constants'
+import { config } from '../../constants'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useCreatePoolFormik } from './formik'
@@ -53,9 +54,11 @@ export function ReviewAndSubmit({
 }) {
   const { values } = formik
   const theme = useTheme()
+  const { provider } = useWallet()
+  const chainId = provider?.network?.chainId
 
   const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
-    request(whiteListEndpoint, queryWhitelist)
+    request(config[chainId].whitelistSubgraph, queryWhitelist)
   )
 
   const matchingDataFeedProviders =
@@ -64,7 +67,6 @@ export function ReviewAndSubmit({
         (f) => f.referenceAssetUnified === formik.values.referenceAsset
       )
     ) || []
-
 
   const isWhitelistedDataFeed =
     matchingDataFeedProviders.length > 0 &&
