@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import OpenOrdersNew from './OptionOrdersNew'
 import OrderBook from './OrderBookNew'
 import CreateOrder from './CreateOrder'
-import { Container, Paper, Stack } from '@mui/material'
+import { Container, Paper, Stack, useTheme } from '@mui/material'
 import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import TradeChart from '../Graphs/TradeChart'
@@ -39,7 +39,7 @@ export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const [value, setValue] = React.useState(0)
   const breakEvenOptionPrice = 0
-
+  const theme = useTheme()
   const query = useQuery<{ pool: Pool }>('pool', () =>
     request(theGraphUrl, queryPool(parseInt(params.poolId)))
   )
@@ -67,9 +67,16 @@ export default function Underlying() {
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
   }
+
   return (
-    <Container sx={{ paddingTop: '4em' }}>
-      <Tabs value={value} onChange={handleChange} variant="fullWidth">
+    <Container sx={{ paddingTop: '1em' }}>
+      <Tabs
+        value={value}
+        onChange={handleChange}
+        variant="standard"
+        centered
+        sx={{ mb: theme.spacing(4) }}
+      >
         <Tab label="Trade" />
         <Tab label="Liquidity" />
       </Tabs>

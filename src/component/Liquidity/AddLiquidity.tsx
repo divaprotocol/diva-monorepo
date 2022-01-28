@@ -63,7 +63,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
     }
     if (
       pool! &&
-      formatUnits(pool!.capacity, decimal!) !== '0' &&
+      formatUnits(pool!.capacity, decimal!) !== '0.0' &&
       textFieldValue !== '' &&
       parseFloat(formatEther(parseEther(textFieldValue))) +
         parseFloat(formatUnits(pool!.collateralBalanceLong, decimal!)) +
