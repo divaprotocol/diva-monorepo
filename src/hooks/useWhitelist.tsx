@@ -1,12 +1,15 @@
+import { useWallet } from '@web3-ui/hooks'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
+import { config } from '../constants'
 import { WhitelistQueryResponse, queryWhitelist } from '../lib/queries'
 
 export function useWhitelist() {
   const { provider } = useWallet()
+  const chainId = provider?.network?.chainId
 
   const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
-    request(whiteListEndpoint, queryWhitelist)
+    request(config[chainId].whitelistSubgraph, queryWhitelist)
   )
 
   const dataFeeds = whitelistQuery.data?.dataFeeds
@@ -20,13 +23,10 @@ export function useWhitelist() {
       p.dataFeeds.some((f) => f.referenceAssetUnified === referenceAssetUnified)
     )
 
-  const isWhitelistedDataFeed = () => {
+  const isWhitelistedDataFeed = () => {}
 
-  }
-
-  const isWhitelistedDataProvider = () => {
-
-  }
+  const isWhitelistedDataProvider = () => {}
+  console.log('use whitelist ')
 
   return {
     dataFeeds,
