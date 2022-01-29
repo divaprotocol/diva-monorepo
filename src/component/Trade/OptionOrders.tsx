@@ -80,10 +80,13 @@ function mapOrderData(
       const makerToken = order.makerToken
       const tokenAddress = optionTokenAddress.toLowerCase()
       const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
-      const amount = makerToken === tokenAddress ? makerAmount : takerAmount
-      const nbrOptions = Number(
-        formatUnits(amount.toString(), option.collateralDecimals)
-      )
+      const amount =
+        makerToken === tokenAddress
+          ? Number(formatUnits(makerAmount.toString()))
+          : Number(
+              formatUnits(takerAmount.toString(), option.collateralDecimals)
+            )
+      const nbrOptions = amount
       const receiveAmount =
         makerToken === tokenAddress ? takerAmount : makerAmount
       const payReceive = Number(

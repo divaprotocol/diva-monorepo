@@ -21,7 +21,7 @@ import { Network } from '../../../Util/chainIdToName'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 import { Pool } from '../../../lib/queries'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20_ABI = require('../../../abi/ERC20.json')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -71,7 +71,9 @@ export default function SellLimit(props: {
     let balance = await makerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
-    balance = Number(formatUnits(balance.toString(), option.collateralDecimals))
+    console.log('balance ' + balance)
+    balance = Number(formatUnits(balance.toString(), 18))
+    console.log('balance number' + balance)
     return balance
   }
 
@@ -80,14 +82,20 @@ export default function SellLimit(props: {
     accounts = await window.ethereum.enable()
     const makerAccount = accounts[0]
     if (!isApproved) {
-      await makerTokenContract.methods
-        .approve(exchangeProxyAddress, maxApproval)
-        .send({ from: makerAccount })
+      console.log('wallet balance ' + walletBalance)
+      console.log('numberOfOptions ' + numberOfOptions)
+      if (numberOfOptions <= walletBalance) {
+        setIsApproved(true)
+      } else {
+        await makerTokenContract.methods
+          .approve(exchangeProxyAddress, maxApproval)
+          .send({ from: makerAccount })
 
-      await makerTokenContract.methods
-        .allowance(makerAccount, exchangeProxyAddress)
-        .call()
-      setIsApproved(true)
+        await makerTokenContract.methods
+          .allowance(makerAccount, exchangeProxyAddress)
+          .call()
+        setIsApproved(true)
+      }
     } else {
       const orderData = {
         maker: makerAccount,

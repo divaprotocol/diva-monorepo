@@ -82,21 +82,27 @@ export default function BuyLimit(props: {
     accounts = await window.ethereum.enable()
     const takerTokenAddress = option.collateralToken
     if (!isApproved) {
-      const takerTokenContract = await new web3.eth.Contract(
-        // TODO: Check why any is required
-        ERC20_ABI as any,
-        takerTokenAddress
-      )
-      await takerTokenContract.methods
-        .approve(exchangeProxyAddress, maxApproval)
-        .send({ from: accounts[0] })
-      const approvedByTaker = await takerTokenContract.methods
-        .allowance(accounts[0], exchangeProxyAddress)
-        .call()
-      alert(
-        `Maker allowance for ${option.collateralToken} successfully set by ${approvedByTaker}`
-      )
-      setIsApproved(true)
+      const youPay = pricePerOption * numberOfOptions
+      const youPayAmount = new BigNumber(youPay)
+      if (youPayAmount.lte(maxApproval)) {
+        setIsApproved(true)
+      } else {
+        const takerTokenContract = await new web3.eth.Contract(
+          // TODO: Check why any is required
+          ERC20_ABI as any,
+          takerTokenAddress
+        )
+        await takerTokenContract.methods
+          .approve(exchangeProxyAddress, maxApproval)
+          .send({ from: accounts[0] })
+        const approvedByTaker = await takerTokenContract.methods
+          .allowance(accounts[0], exchangeProxyAddress)
+          .call()
+        alert(
+          `Maker allowance for ${option.collateralToken} successfully set by ${approvedByTaker}`
+        )
+        setIsApproved(true)
+      }
     } else {
       const orderData = {
         makerAccount: accounts[0],
@@ -168,7 +174,8 @@ export default function BuyLimit(props: {
             <LabelStyle>You Pay</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption * numberOfOptions} {option.collateralTokenName}
+            {(pricePerOption * numberOfOptions).toFixed(4)}{' '}
+            {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>

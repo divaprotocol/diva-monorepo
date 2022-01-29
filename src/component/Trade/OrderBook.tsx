@@ -293,7 +293,7 @@ export default function OrderBook(props: {
 
   return (
     <PageDiv>
-      <TableHeader>OrderBook</TableHeader>
+      <TableHeader>Order Book</TableHeader>
       <TableContainer component={Paper}>
         <Table aria-labelledby="tableTitle">
           <TableHeadStyle>
@@ -323,7 +323,7 @@ export default function OrderBook(props: {
                         <Box paddingBottom="20px">
                           <Typography variant="subtitle1">
                             {row.buyQuantity != ''
-                              ? Number(row.buyQuantity).toFixed(2)
+                              ? row.buyQuantity.toFixed(2).toString()
                               : '-'}
                           </Typography>
                           <label> </label>
@@ -342,7 +342,9 @@ export default function OrderBook(props: {
                       <TableCellStyle align="center">
                         <Box>
                           <Typography variant="subtitle1">
-                            {row.ask != '' ? Number(row.ask).toFixed(2) : '-'}
+                            {row.ask != ''
+                              ? row.ask.toFixed(2).toString()
+                              : '-'}
                           </Typography>
                           <Typography variant="caption" noWrap>
                             {row.sellExpiry}
@@ -353,7 +355,7 @@ export default function OrderBook(props: {
                         <Box paddingBottom="20px">
                           <Typography variant="subtitle1">
                             {row.sellQuantity != ''
-                              ? Number(row.sellQuantity).toFixed(2)
+                              ? row.sellQuantity.toFixed(2).toString()
                               : '-'}
                           </Typography>
                         </Box>
