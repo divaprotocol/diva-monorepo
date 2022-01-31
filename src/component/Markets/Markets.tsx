@@ -8,6 +8,7 @@ import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { config } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
+import { Alert } from '@mui/material'
 
 const columns: GridColDef[] = [
   {
@@ -56,10 +57,11 @@ export default function Markets() {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId
 
-  const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    chainId != null
-      ? request(config[chainId as number].divaSubgraph, queryPools)
-      : Promise.resolve()
+  const query = useQuery<{ pools: Pool[] }>(
+    `pools-${chainId}`,
+    () =>
+      chainId != null &&
+      request(config[chainId as number].divaSubgraph, queryPools)
   )
   const pools = query.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
@@ -122,5 +124,9 @@ export default function Markets() {
     ]
   }, [] as GridRowModel[])
 
-  return <PoolsTable columns={columns} rows={rows} />
+  return wallet.connected ? (
+    <PoolsTable columns={columns} rows={rows} />
+  ) : (
+    <Alert severity="info">Please connect to use the app</Alert>
+  )
 }

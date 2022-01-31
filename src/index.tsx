@@ -11,9 +11,10 @@ import { ThemeProvider } from '@mui/material/styles'
 import { useMediaQuery } from '@mui/material'
 import { Box } from '@mui/system'
 import { createDivaTheme } from './lib/createDivaTheme'
-import { NETWORKS, Provider as Web3Provider } from '@web3-ui/hooks'
+import { Provider as Web3Provider } from '@web3-ui/hooks'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import 'react-vis/dist/style.css'
+import { infuraId } from './constants'
 
 const queryClient = new QueryClient()
 
@@ -40,7 +41,7 @@ const WithProviders = () => {
         overflow: 'hidden',
       }}
     >
-      <Web3Provider network={undefined as any}>
+      <Web3Provider network={undefined as any} infuraId={infuraId}>
         <QueryClientProvider client={queryClient}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <ThemeProvider theme={theme}>

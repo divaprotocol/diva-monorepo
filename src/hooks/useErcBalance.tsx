@@ -2,8 +2,8 @@ import { ethers, Contract, BigNumber } from 'ethers'
 import ERC20 from '../abi/ERC20.json'
 
 import { useEffect, useState } from 'react'
-import { formatEther } from 'ethers/lib/utils'
 import { useWallet } from '@web3-ui/hooks'
+import { formatUnits } from 'ethers/lib/utils'
 
 type Erc20Contract = Contract & {
   balanceOf: (address: string) => Promise<BigNumber>
@@ -35,7 +35,7 @@ export function useErcBalance(address?: string) {
           ) as Erc20Contract
           const myAddress = await signer.getAddress()
           const _balance = await contract.balanceOf(myAddress)
-          setBalance(formatEther(_balance))
+          setBalance(formatUnits(_balance, await contract.decimals()))
         } catch (err) {
           console.error(err)
         }
