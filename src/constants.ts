@@ -6,6 +6,8 @@ type SingleConfig = {
   whitelistSubgraph: string
 }
 
+export const infuraId = 'e3ea5575a42b4de7be15d7c197c12045'
+
 export const config: { [key: number]: SingleConfig } = {
   3: {
     name: 'Ropsten',

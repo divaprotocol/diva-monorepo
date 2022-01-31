@@ -116,7 +116,7 @@ const SubmitCell = (props: any) => {
   const chainId = provider?.network?.chainId
 
   const diva =
-    provider != null
+    chainId != null
       ? new ethers.Contract(
           config[chainId!].divaAddress,
           DIVA_ABI,
@@ -244,16 +244,20 @@ const columns: GridColDef[] = [
 
 export function MyDataFeeds() {
   const wallet = useWallet()
-  const account = wallet.connection.userAddress
-  const chainId = wallet.connection.network
+  const chainId = wallet?.provider?.network?.chainId
+  const userAddress = wallet?.connection?.userAddress
 
-  const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(config[chainId as number].divaSubgraph, queryPools)
+  const query = useQuery<{ pools: Pool[] }>(
+    'pools',
+    () =>
+      chainId != null &&
+      request(config[chainId as number].divaSubgraph, queryPools)
   )
+
   const pools =
-    query.data?.pools.filter(
+    query?.data?.pools?.filter(
       (pool: Pool) =>
-        pool.dataFeedProvider.toLowerCase() === account?.toLowerCase()
+        pool.dataFeedProvider.toLowerCase() === userAddress?.toLowerCase()
     ) || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
@@ -304,7 +308,7 @@ export function MyDataFeeds() {
     ]
   }, [] as GridRowModel[])
 
-  return account ? (
+  return userAddress ? (
     <Stack
       direction="row"
       sx={{
