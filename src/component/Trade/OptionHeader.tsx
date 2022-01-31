@@ -133,7 +133,7 @@ export default function OptionHeader(optionData: {
         <OptionTitle>{headerTitle}</OptionTitle>
       </Container>
       {underlyingAssetPrice && (
-        <AssetPriceUsd>$ {underlyingAssetPrice}</AssetPriceUsd>
+        <AssetPriceUsd>{underlyingAssetPrice}</AssetPriceUsd>
       )}
       <Container>
         <Link

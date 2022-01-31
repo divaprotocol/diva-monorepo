@@ -19,7 +19,6 @@ export const getUnderlyingPrice = async (underlyingAssets: string) => {
     COIN_GECKO_IGNORE_ASSETS.includes(asset) ||
     COIN_GECKO_IGNORE_ASSETS.includes(vsAssets)
   ) {
-    console.log('This run')
     return undefined
   }
 
