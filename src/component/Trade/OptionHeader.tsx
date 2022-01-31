@@ -9,7 +9,7 @@ import {
 import { useWeb3React } from '@web3-react/core'
 import { CoinImage } from '../PoolsTable'
 import Tooltip from '@mui/material/Tooltip'
-import { getUnderlyingPrice } from '../../Util'
+import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
 
 const AppHeader = styled.header`
   min-height: 10vh;
