@@ -10,11 +10,8 @@ import {
   useTheme,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
-import { useQuery } from 'react-query'
 
 import { PayoffProfile } from './PayoffProfile'
-// import referenceAssets from './referenceAssets.json'
-import { Tokens } from '../../lib/types'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
@@ -37,23 +34,12 @@ export function DefinePoolAttributes({
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
 
-  const { referenceAssets } = useWhitelist()
-
-  const tokensQuery = useQuery<Tokens>('tokens', () =>
-    fetch('/ropstenTokens.json').then((res) => res.json())
-  )
-
-  const collateralTokenAssets = tokensQuery.data || {}
-  const collateralTokenAddress =
-    collateralTokenAssets[
-      (formik.values.collateralTokenSymbol as string)?.toLowerCase()
-    ]
-  const collateralWalletBalance = useErcBalance(collateralTokenAddress)
+  const { referenceAssets, collateralTokens } = useWhitelist()
 
   const {
     referenceAsset,
     expiryDate,
-    collateralTokenSymbol,
+    collateralToken,
     collateralBalanceShort,
     collateralBalanceLong,
     shortTokenSupply,
@@ -62,6 +48,8 @@ export function DefinePoolAttributes({
     floor,
     longTokenSupply,
   } = formik.values
+
+  const collateralWalletBalance = useErcBalance(collateralToken?.id)
 
   useEffect(() => {
     if (collateralWalletBalance != null) {
@@ -100,13 +88,10 @@ export function DefinePoolAttributes({
 
   const theme = useTheme()
 
-  const possibleOptions = Object.keys(collateralTokenAssets)
-    .filter((v) =>
-      referenceAssetSearch.trim().length > 0
-        ? v.startsWith(referenceAssetSearch.trim())
-        : true
-    )
-    .map((v) => v.toUpperCase())
+  const possibleOptions =
+    collateralTokens
+      ?.filter((v) => v.name.includes(referenceAssetSearch.trim()))
+      .map((v) => v) || []
 
   const setCollateralBalance = (num: number) => {
     let long = 0
@@ -143,24 +128,35 @@ export function DefinePoolAttributes({
           <Autocomplete
             id="referenceAsset"
             renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Reference Asset"
-                name="referenceAsset"
-                id="referenceAsset"
-                onBlur={formik.handleBlur}
-                helperText={
-                  isCustomReferenceAsset ? (
-                    <Stack direction="row" alignContent="center">
+              <>
+                <TextField
+                  {...params}
+                  label="Reference Asset"
+                  name="referenceAsset"
+                  id="referenceAsset"
+                  onBlur={formik.handleBlur}
+                  error={formik.errors.referenceAsset != null}
+                />
+                <Typography
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}
+                  pt={2}
+                  pb={4}
+                >
+                  {isCustomReferenceAsset ? (
+                    <>
                       <CheckCircle
                         fontSize="small"
                         color="success"
                         sx={{ marginRight: theme.spacing(0.5) }}
                       />
                       <span>This reference asset is whitelisted</span>
-                    </Stack>
+                    </>
                   ) : (
-                    <Stack direction="row" alignItems="center">
+                    <>
                       <Report
                         color="warning"
                         fontSize="small"
@@ -169,11 +165,10 @@ export function DefinePoolAttributes({
                       <span>
                         This reference asset is custom and not on our whitelist
                       </span>
-                    </Stack>
-                  )
-                }
-                error={formik.errors.referenceAsset != null}
-              />
+                    </>
+                  )}
+                </Typography>
+              </>
             )}
             onInputChange={(event) => {
               if (event != null && event.target != null) {
@@ -219,16 +214,14 @@ export function DefinePoolAttributes({
         <h3>Collateral</h3>
 
         <Stack pb={3} spacing={2} direction="row">
-          <FormControl
-            fullWidth
-            error={formik.errors.collateralTokenSymbol != null}
-          >
+          <FormControl fullWidth error={formik.errors.collateralToken != null}>
             <Autocomplete
-              options={possibleOptions.slice(0, 100)}
-              value={collateralTokenSymbol}
-              onChange={(event, newValue) => {
-                formik.setFieldValue('collateralTokenSymbol', newValue)
+              options={possibleOptions}
+              value={collateralToken || null}
+              onChange={(_, newValue) => {
+                formik.setFieldValue('collateralToken', newValue)
               }}
+              getOptionLabel={(option) => option?.name || 'Nothing'}
               onInputChange={(event) => {
                 if (event != null && event.target != null) {
                   setReferenceAssetSearch((event.target as any).value || '')
@@ -236,22 +229,20 @@ export function DefinePoolAttributes({
               }}
               renderInput={(params) => (
                 <TextField
-                  error={formik.errors.collateralTokenSymbol != null}
+                  error={formik.errors.collateralToken != null}
                   onBlur={formik.handleBlur}
                   {...params}
                   label="Collateral Asset"
                 />
               )}
             />
-            {formik.errors.collateralTokenSymbol != null && (
-              <FormHelperText>
-                {formik.errors.collateralTokenSymbol}
-              </FormHelperText>
+            {formik.errors.collateralToken != null && (
+              <FormHelperText>{formik.errors.collateralToken}</FormHelperText>
             )}
             {collateralWalletBalance != null && (
               <FormHelperText>
                 Your balance: {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
-                {collateralTokenSymbol}{' '}
+                {collateralToken?.symbol}{' '}
                 <MaxCollateral
                   role="button"
                   onClick={() => {

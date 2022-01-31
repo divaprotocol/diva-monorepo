@@ -1,21 +1,37 @@
 import { useFormik } from 'formik'
-import { useQuery } from 'react-query'
 import { useDiva } from '../../hooks/useDiva'
-import { Tokens } from '../../lib/types'
 import { useWallet } from '@web3-ui/hooks'
-import referenceAssets from './referenceAssets.json'
+import { CollateralToken } from '../../lib/queries'
 
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
 
-export const initialValues = {
+type Values = {
+  step: number
+  referenceAsset: string
+  expiryDate: Date
+  floor: number
+  cap: number
+  inflection: number
+  collateralToken?: CollateralToken
+  collateralWalletBalance: string
+  collateralBalance: string
+  collateralBalanceShort: number
+  collateralBalanceLong: number
+  shortTokenSupply: number
+  longTokenSupply: number
+  capacity: number
+  dataFeedProvider: string
+}
+
+export const initialValues: Values = {
   step: 1,
   referenceAsset: '',
   expiryDate: defaultDate,
   floor: 1,
   cap: 3,
   inflection: 2,
-  collateralTokenSymbol: 'DAI',
+  collateralToken: undefined,
   collateralWalletBalance: '0',
   collateralBalance: '2',
   collateralBalanceShort: 1,
@@ -38,10 +54,6 @@ export const useCreatePoolFormik = () => {
 
   const contract = useDiva()
 
-  const tokensQuery = useQuery<Tokens>('tokens', () =>
-    fetch('/ropstenTokens.json').then((res) => res.json())
-  )
-
   const _formik = useFormik({
     initialValues,
     onSubmit: async (values, formik) => {
@@ -61,14 +73,9 @@ export const useCreatePoolFormik = () => {
           shortTokenSupply,
           longTokenSupply,
           referenceAsset,
-          collateralTokenSymbol,
+          collateralToken,
           dataFeedProvider,
         } = values
-        const collateralTokenAssets = tokensQuery.data || {}
-        const collateralToken =
-          collateralTokenAssets[
-            (collateralTokenSymbol as string)?.toLowerCase()
-          ]
 
         if (collateralToken != null && dataFeedProvider != null) {
           contract
@@ -82,7 +89,7 @@ export const useCreatePoolFormik = () => {
               supplyShort: shortTokenSupply,
               supplyLong: longTokenSupply,
               referenceAsset,
-              collateralToken,
+              collateralToken: collateralToken.id,
               dataFeedProvider,
               capacity: 0,
             })
@@ -111,8 +118,8 @@ export const useCreatePoolFormik = () => {
         values.collateralBalanceLong + values.collateralBalanceShort
       const walletBalance = parseFloat(values.collateralWalletBalance)
 
-      if (values.collateralTokenSymbol == null) {
-        errors.collateralTokenSymbol = 'You must choose a collateral token'
+      if (values.collateralToken == null) {
+        errors.collateralToken = 'You must choose a collateral asset'
       }
 
       if (network == null) {

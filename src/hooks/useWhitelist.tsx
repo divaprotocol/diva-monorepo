@@ -8,12 +8,15 @@ export function useWhitelist() {
   const { provider } = useWallet()
   const chainId = provider?.network?.chainId
 
-  const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
-    request(config[chainId].whitelistSubgraph, queryWhitelist)
+  const whitelistQuery = useQuery<WhitelistQueryResponse>(
+    `whitelist-${chainId}`,
+    () => request(config[chainId].whitelistSubgraph, queryWhitelist)
   )
 
   const dataFeeds = whitelistQuery.data?.dataFeeds
   const dataProviders = whitelistQuery.data?.dataProviders
+  const collateralTokens = whitelistQuery.data?.collateralTokens
+
   const referenceAssets = (dataFeeds || [])
     .map((v) => v.referenceAssetUnified)
     .filter((value, index, self) => self.indexOf(value) === index)
@@ -26,11 +29,11 @@ export function useWhitelist() {
   const isWhitelistedDataFeed = () => true
 
   const isWhitelistedDataProvider = () => true
-  console.log('use whitelist ')
 
   return {
     dataFeeds,
     dataProviders,
+    collateralTokens,
     referenceAssets,
     getProvidersByAsset,
     isWhitelistedDataFeed,
