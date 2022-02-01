@@ -30,7 +30,7 @@ export const buyMarketOrder = async (orderData) => {
   orders.forEach((order) => {
     if (takerFillNbrOptions > 0) {
       const expectedRate = parseEther(order.expectedRate.toString())
-      let takerFillAmount = expectedRate.mul(takerFillNbrOptions)
+      const takerFillAmount = expectedRate.mul(takerFillNbrOptions)
       const takerFillAmountNumber = Number(
         formatUnits(takerFillAmount, orderData.collateralDecimals)
       )

@@ -71,9 +71,7 @@ export default function SellLimit(props: {
     let balance = await makerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
-    console.log('balance ' + balance)
     balance = Number(formatUnits(balance.toString(), 18))
-    console.log('balance number' + balance)
     return balance
   }
 
@@ -82,8 +80,6 @@ export default function SellLimit(props: {
     accounts = await window.ethereum.enable()
     const makerAccount = accounts[0]
     if (!isApproved) {
-      console.log('wallet balance ' + walletBalance)
-      console.log('numberOfOptions ' + numberOfOptions)
       if (numberOfOptions <= walletBalance) {
         setIsApproved(true)
       } else {

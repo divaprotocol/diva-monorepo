@@ -75,29 +75,24 @@ export default function BuyMarket(props: {
     const takerTokenAddress = option.collateralToken
     if (!isApproved) {
       const maxApproval = new BigNumber(2).pow(256).minus(1)
-      //const maxApproval = new BigNumber(collateralBalance)
-      const youPayAmount = new BigNumber(youPay)
-      if (youPayAmount.lte(maxApproval)) {
-        setIsApproved(true)
-      } else {
-        //is ERC20_ABP correct? or should we use position token abi
-        //ERC20_ABI enough to use approval
-        const takerTokenContract = await new web3.eth.Contract(
-          // TODO: check again why we need to use "any" here
-          ERC20_ABI as any,
-          takerTokenAddress
-        )
-        await takerTokenContract.methods
-          .approve(exchangeProxyAddress, maxApproval)
-          .send({ from: accounts[0] })
-        const approvedByTaker = await takerTokenContract.methods
-          .allowance(accounts[0], exchangeProxyAddress)
-          .call()
-        alert(
-          `Taker allowance for ${option.collateralToken} successfully set by ${approvedByTaker}`
-        )
-        setIsApproved(true)
-      }
+
+      //is ERC20_ABP correct? or should we use position token abi
+      //ERC20_ABI enough to use approval
+      const takerTokenContract = await new web3.eth.Contract(
+        // TODO: check again why we need to use "any" here
+        ERC20_ABI as any,
+        takerTokenAddress
+      )
+      await takerTokenContract.methods
+        .approve(exchangeProxyAddress, maxApproval)
+        .send({ from: accounts[0] })
+      const approvedByTaker = await takerTokenContract.methods
+        .allowance(accounts[0], exchangeProxyAddress)
+        .call()
+      alert(
+        `Taker allowance for ${option.collateralToken} successfully set by ${approvedByTaker}`
+      )
+      setIsApproved(true)
     } else {
       const orderData = {
         takerAccount: accounts[0],
@@ -113,7 +108,6 @@ export default function BuyMarket(props: {
       }
 
       buyMarketOrder(orderData).then((orderFillStatus: any) => {
-        console.log('order fill status ' + JSON.stringify(orderFillStatus))
         if (!(orderFillStatus === undefined)) {
           if (!('logs' in orderFillStatus)) {
             alert('Order could not be filled logs not found')

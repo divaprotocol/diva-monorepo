@@ -79,21 +79,17 @@ export default function SellMarket(props: {
     accounts = await window.ethereum.enable()
     const makerAccount = accounts[0]
     if (!isApproved) {
-      if (numberOfOptions <= walletBalance) {
-        setIsApproved(true)
-      } else {
-        await takerTokenContract.methods
-          .approve(exchangeProxyAddress, maxApproval)
-          .send({ from: makerAccount })
+      await takerTokenContract.methods
+        .approve(exchangeProxyAddress, maxApproval)
+        .send({ from: makerAccount })
 
-        const approvedByMaker = await takerTokenContract.methods
-          .allowance(makerAccount, exchangeProxyAddress)
-          .call()
-        alert(
-          `Maker allowance for ${option.referenceAsset} successfully set by ${approvedByMaker}`
-        )
-        setIsApproved(true)
-      }
+      const approvedByMaker = await takerTokenContract.methods
+        .allowance(makerAccount, exchangeProxyAddress)
+        .call()
+      alert(
+        `Maker allowance for ${option.referenceAsset} successfully set by ${approvedByMaker}`
+      )
+      setIsApproved(true)
     } else {
       const orderData = {
         maker: makerAccount,
@@ -190,8 +186,6 @@ export default function SellMarket(props: {
       const order = data.order
       const takerAmount = new BigNumber(order.takerAmount)
       const makerAmount = new BigNumber(order.makerAmount)
-      console.log('taker amount ' + order.takerAmount)
-      console.log('maker amount ' + order.makerAmount)
       order['expectedRate'] = makerAmount.dividedBy(takerAmount)
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
