@@ -11,6 +11,7 @@ import { useWallet } from '@web3-ui/hooks'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
 import { config } from '../../constants'
+import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { useCreatePoolFormik } from './formik'
 
@@ -19,25 +20,14 @@ export function SelectDataFeedProvider({
 }: {
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
-  const { provider } = useWallet()
-  const chainId = provider?.network?.chainId
+  const { referenceAsset } = formik.values
+  const whitelist = useWhitelist()
 
-  const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
-    request(config[chainId].whitelistSubgraph, queryWhitelist)
+  const matchingDataFeedProviders = whitelist.dataProviders.filter((p) =>
+    p.dataFeeds.some((f) => f.referenceAssetUnified === referenceAsset)
   )
 
-  const matchingDataFeedProviders =
-    whitelistQuery.data?.dataProviders.filter((v) =>
-      v.dataFeeds.some(
-        (f) => f.referenceAssetUnified === formik.values.referenceAsset
-      )
-    ) || []
-
-  const isWhitelistedDataFeed =
-    matchingDataFeedProviders.length > 0 &&
-    matchingDataFeedProviders.some(
-      (v) => formik.values.dataFeedProvider === v.id
-    )
+  const isWhitelistedDataFeed = matchingDataFeedProviders.length
 
   const theme = useTheme()
 
@@ -102,7 +92,6 @@ export function SelectDataFeedProvider({
           )}
           onInputChange={(event) => {
             if (event != null && event.target != null) {
-              console.log('on input change', (event.target as any).value || '')
               formik.setFieldValue(
                 'dataFeedProvider',
                 (event.target as any).value || '',
@@ -111,7 +100,6 @@ export function SelectDataFeedProvider({
             }
           }}
           onChange={(event, option) => {
-            console.log(option)
             formik.setFieldValue('dataFeedProvider', option || '')
           }}
           getOptionLabel={(option) =>

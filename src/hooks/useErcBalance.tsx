@@ -26,7 +26,6 @@ export function useErcBalance(address?: string) {
     const run = async () => {
       if (provider != null && chainId != null && address != null) {
         const signer = provider.getSigner()
-        console.log({ address, signer })
         try {
           const contract = new ethers.Contract(
             address,

@@ -6,7 +6,7 @@ import { WhitelistQueryResponse, queryWhitelist } from '../lib/queries'
 
 export function useWhitelist() {
   const { provider } = useWallet()
-  const chainId = provider?.network?.chainId
+  const chainId = provider?.network?.chainId || 3
 
   const whitelistQuery = useQuery<WhitelistQueryResponse>(
     `whitelist-${chainId}`,
