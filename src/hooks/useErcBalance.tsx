@@ -37,7 +37,7 @@ export function useErcBalance(address?: string) {
           const _balance = await contract.balanceOf(myAddress)
           setBalance(formatUnits(_balance, await contract.decimals()))
         } catch (err) {
-          console.error(err)
+          console.warn(err)
         }
       }
     }

@@ -9,18 +9,27 @@ export function ConnectWalletButton() {
 
   useEffect(() => {
     const run = async () => {
-      if (connection && provider != null && connection.userAddress != null) {
-        const res = await provider.lookupAddress(connection.userAddress)
-        if (res === null) {
-          setWalletName(truncate(connection.userAddress))
-        } else {
-          setWalletName(res)
+      if (
+        connection &&
+        provider != null &&
+        connection.userAddress != null &&
+        connected
+      ) {
+        try {
+          const res = await provider.lookupAddress(connection.userAddress)
+          if (res === null) {
+            setWalletName(truncate(connection.userAddress))
+          } else {
+            setWalletName(res)
+          }
+        } catch (err) {
+          console.warn(err)
         }
       }
     }
 
     run()
-  }, [connection, provider])
+  }, [connection, provider, connected])
 
   function truncate(string = '', start = 6, end = 4) {
     if (start < 1 || end < 1) {
