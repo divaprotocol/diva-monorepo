@@ -26,17 +26,11 @@ export function useWhitelist() {
       p.dataFeeds.some((f) => f.referenceAssetUnified === referenceAssetUnified)
     )
 
-  const isWhitelistedDataFeed = () => true
-
-  const isWhitelistedDataProvider = () => true
-
   return {
     dataFeeds,
     dataProviders,
     collateralTokens,
     referenceAssets,
     getProvidersByAsset,
-    isWhitelistedDataFeed,
-    isWhitelistedDataProvider,
   }
 }

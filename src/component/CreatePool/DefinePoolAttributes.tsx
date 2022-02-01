@@ -89,9 +89,9 @@ export function DefinePoolAttributes({
   const theme = useTheme()
 
   const possibleOptions =
-    collateralTokens
-      ?.filter((v) => v.name.includes(referenceAssetSearch.trim()))
-      .map((v) => v) || []
+    collateralTokens?.filter((v) =>
+      v.name.includes(referenceAssetSearch.trim())
+    ) || []
 
   const setCollateralBalance = (num: number) => {
     let long = 0
@@ -217,7 +217,7 @@ export function DefinePoolAttributes({
           <FormControl fullWidth error={formik.errors.collateralToken != null}>
             <Autocomplete
               options={possibleOptions}
-              value={collateralToken || null}
+              value={collateralToken?.name || null}
               onChange={(_, newValue) => {
                 formik.setFieldValue('collateralToken', newValue)
               }}
