@@ -7,6 +7,6 @@ export function NetworkTag() {
   if (connected) {
     return <Chip label={connection.network} sx={{ marginLeft: 'auto' }} />
   } else {
-    return <Chip label={'Not Connected'} sx={{ marginLeft: 'auto' }} />
+    return <Chip label={'Preview (ropsten)'} sx={{ marginLeft: 'auto' }} />
   }
 }
