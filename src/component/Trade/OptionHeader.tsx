@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import '../../Util/Dates'
 import { IconButton, Link } from '@mui/material'
@@ -9,12 +9,19 @@ import {
 import { useWeb3React } from '@web3-react/core'
 import { CoinImage } from '../PoolsTable'
 import Tooltip from '@mui/material/Tooltip'
+import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
 
 const AppHeader = styled.header`
   min-height: 10vh;
   padding-left: 1em;
   display: flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`
+
+const Container = styled.div`
+  display: flex;
   align-items: center;
 `
 
@@ -52,6 +59,11 @@ const MetaMaskImage = styled.img`
   width: 20px;
   height: 20px;
   cursor: pointer;
+  margin-right: 10px;
+`
+
+const AssetPriceUsd = styled.div`
+  font-weight: bold;
 `
 
 const refAssetImgs = [
@@ -77,6 +89,9 @@ export default function OptionHeader(optionData: {
   //const option = props.optionData
   const { chainId } = useWeb3React()
   const headerTitle = optionData.ReferenceAsset
+  const [underlyingAssetPrice, setUnderlyingAssetPrice] = useState<
+    string | undefined
+  >(undefined)
 
   const handleAddMetaMask = async () => {
     const { TokenAddress, isLong, tokenDecimals } = optionData
@@ -103,43 +118,58 @@ export default function OptionHeader(optionData: {
     }
   }
 
+  useEffect(() => {
+    getUnderlyingPrice(optionData.ReferenceAsset).then((data) => {
+      setUnderlyingAssetPrice(data)
+    })
+
+    return () => setUnderlyingAssetPrice(undefined)
+  }, [optionData.ReferenceAsset])
+
   return (
     <AppHeader>
-      <CoinImage assetName={headerTitle} />
-      <OptionTitle>{headerTitle}</OptionTitle>
-      <Link
-        style={{ color: 'gray' }}
-        underline={'none'}
-        rel="noopener noreferrer"
-        target="_blank"
-        href={getEtherscanLink(
-          chainId,
-          optionData.TokenAddress,
-          EtherscanLinkType.ADDRESS
-        )}
-      >
-        {optionData.TokenAddress}
-      </Link>
-      <IconButton
-        onClick={() => navigator.clipboard.writeText(optionData.TokenAddress)}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          height="14"
-          viewBox="0 0 24 24"
-          width="14"
+      <Container>
+        <CoinImage assetName={headerTitle} />
+        <OptionTitle>{headerTitle}</OptionTitle>
+      </Container>
+      {underlyingAssetPrice && (
+        <AssetPriceUsd>{underlyingAssetPrice}</AssetPriceUsd>
+      )}
+      <Container>
+        <Link
+          style={{ color: 'gray' }}
+          underline={'none'}
+          rel="noopener noreferrer"
+          target="_blank"
+          href={getEtherscanLink(
+            chainId,
+            optionData.TokenAddress,
+            EtherscanLinkType.ADDRESS
+          )}
         >
-          <path d="M0 0h24v24H0z" fill="none" />
-          <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
-        </svg>
-      </IconButton>
-      <Tooltip title="Add to Metamask">
-        <MetaMaskImage
-          src="/images/metamask.svg"
-          alt="metamask"
-          onClick={handleAddMetaMask}
-        />
-      </Tooltip>
+          {optionData.TokenAddress}
+        </Link>
+        <IconButton
+          onClick={() => navigator.clipboard.writeText(optionData.TokenAddress)}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="14"
+            viewBox="0 0 24 24"
+            width="14"
+          >
+            <path d="M0 0h24v24H0z" fill="none" />
+            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+          </svg>
+        </IconButton>
+        <Tooltip title="Add to Metamask">
+          <MetaMaskImage
+            src="/images/metamask.svg"
+            alt="metamask"
+            onClick={handleAddMetaMask}
+          />
+        </Tooltip>
+      </Container>
     </AppHeader>
   )
 }
