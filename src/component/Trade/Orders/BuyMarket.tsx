@@ -20,16 +20,16 @@ import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
-import { Network } from '../../../Util/chainIdToName'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
+import { NETWORKS } from '@web3-ui/hooks'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ERC20_ABI = require('../../../abi/ERC20.json')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-const CHAIN_ID = Network.ROPSTEN
+const CHAIN_ID = NETWORKS.ropsten
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 

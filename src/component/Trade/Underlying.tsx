@@ -11,7 +11,8 @@ import OptionHeader from './OptionHeader'
 import { useQuery } from 'react-query'
 import { Pool, queryPool } from '../../lib/queries'
 import request from 'graphql-request'
-import { theGraphUrl } from '../../constants'
+import { config } from '../../constants'
+import { useWallet } from '@web3-ui/hooks'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import React from 'react'
@@ -39,9 +40,14 @@ export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const [value, setValue] = React.useState(0)
   const breakEvenOptionPrice = 0
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId
   const theme = useTheme()
   const query = useQuery<{ pool: Pool }>('pool', () =>
-    request(theGraphUrl, queryPool(parseInt(params.poolId)))
+    request(
+      config[chainId as number].divaSubgraph,
+      queryPool(parseInt(params.poolId))
+    )
   )
 
   const pool = query.data?.pool

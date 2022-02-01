@@ -1,10 +1,8 @@
-import { useWeb3React } from '@web3-react/core'
-import { ethers } from 'ethers'
 import { useFormik } from 'formik'
 import { useQuery } from 'react-query'
 import { useDiva } from '../../hooks/useDiva'
 import { Tokens } from '../../lib/types'
-import { chainIdtoName } from '../../Util/chainIdToName'
+import { useWallet } from '@web3-ui/hooks'
 import referenceAssets from './referenceAssets.json'
 
 const defaultDate = new Date()
@@ -33,13 +31,12 @@ type Errors = {
 }
 
 export const useCreatePoolFormik = () => {
-  const { chainId, account } = useWeb3React()
-  const contract = useDiva()
+  const {
+    connection: { network },
+    provider,
+  } = useWallet()
 
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
+  const contract = useDiva()
 
   const tokensQuery = useQuery<Tokens>('tokens', () =>
     fetch('/ropstenTokens.json').then((res) => res.json())
@@ -118,7 +115,7 @@ export const useCreatePoolFormik = () => {
         errors.collateralTokenSymbol = 'You must choose a collateral token'
       }
 
-      if (account == null) {
+      if (network == null) {
         errors.collateralWalletBalance =
           'Your wallet must be connected before you can proceed'
       } else if (walletBalance < collateralBalance) {
@@ -159,7 +156,11 @@ export const useCreatePoolFormik = () => {
       }
 
       // validate data feed provider
-      if (values.step > 1 && values.dataFeedProvider !== null) {
+      if (
+        values.step > 1 &&
+        values.dataFeedProvider !== null &&
+        provider != null
+      ) {
         if (
           values.dataFeedProvider == null ||
           values.dataFeedProvider.trim().length === 0

@@ -12,13 +12,12 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
-import { BigNumber, Contract, ethers } from 'ethers'
+import { Contract, ethers } from 'ethers'
 import styled from '@emotion/styled'
 import ERC20 from '../../abi/ERC20.json'
-import { chainIdtoName } from '../../Util/chainIdToName'
-import { useWeb3React } from '@web3-react/core'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { withStyles } from '@mui/styles'
+import { useWallet } from '@web3-ui/hooks'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -38,17 +37,17 @@ type Props = {
 }
 
 export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
-  const { chainId, account } = useWeb3React()
   const [textFieldValue, setTextFieldValue] = useState('')
   const theme = useTheme()
   const [openAlert, setOpenAlert] = React.useState(false)
   const [openCapacityAlert, setOpenCapacityAlert] = React.useState(false)
   const [decimal, setDecimal] = React.useState(18)
   const tokenBalance = useErcBalance(pool ? pool!.collateralToken : undefined)
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId!).toLowerCase()
-  )
+
+  const {
+    provider,
+    connection: { userAddress: account },
+  } = useWallet()
 
   useEffect(() => {
     if (pool) {
