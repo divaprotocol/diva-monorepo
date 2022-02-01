@@ -89,7 +89,7 @@ export const useCreatePoolFormik = () => {
               supplyShort: shortTokenSupply,
               supplyLong: longTokenSupply,
               referenceAsset,
-              collateralToken: collateralToken.id,
+              collateralToken,
               dataFeedProvider,
               capacity: 0,
             })

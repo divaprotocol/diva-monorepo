@@ -27,7 +27,11 @@ export function SelectDataFeedProvider({
     p.dataFeeds.some((f) => f.referenceAssetUnified === referenceAsset)
   )
 
-  const isWhitelistedDataFeed = matchingDataFeedProviders.length
+  const isWhitelistedDataFeed =
+    matchingDataFeedProviders.length > 0 &&
+    matchingDataFeedProviders.some(
+      (v) => formik.values.dataFeedProvider === v.id
+    )
 
   const theme = useTheme()
 
@@ -92,6 +96,7 @@ export function SelectDataFeedProvider({
           )}
           onInputChange={(event) => {
             if (event != null && event.target != null) {
+              console.log('on input change', (event.target as any).value || '')
               formik.setFieldValue(
                 'dataFeedProvider',
                 (event.target as any).value || '',
@@ -100,6 +105,7 @@ export function SelectDataFeedProvider({
             }
           }}
           onChange={(event, option) => {
+            console.log(option)
             formik.setFieldValue('dataFeedProvider', option || '')
           }}
           getOptionLabel={(option) =>

@@ -16,7 +16,8 @@ import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useCreatePoolFormik } from './formik'
 
-const stringifyValue = (val: unknown) => {
+const stringifyValue = (val: any) => {
+  if (val?.name) return val.name
   if (val instanceof Date) {
     return val.toDateString()
   } else if (typeof val === 'string') {
@@ -43,7 +44,7 @@ const dict: {
   shortTokenSupply: 'Token Supply (Short)',
   longTokenSupply: 'Token Supply (Long)',
   dataFeedProvider: 'Data Feed Provider',
-  collateralTokenSymbol: 'Collateral Token',
+  collateralToken: 'Collateral Token',
   capacity: 'Maximum Pool Capacity',
 }
 
