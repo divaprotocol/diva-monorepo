@@ -52,9 +52,7 @@ export function DefinePoolAttributes({
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
 
   useEffect(() => {
-    if (collateralWalletBalance != null) {
-      formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
-    }
+    formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
 
   useEffect(() => {
@@ -217,11 +215,11 @@ export function DefinePoolAttributes({
           <FormControl fullWidth error={formik.errors.collateralToken != null}>
             <Autocomplete
               options={possibleOptions}
-              value={collateralToken?.name || null}
+              value={collateralToken}
               onChange={(_, newValue) => {
                 formik.setFieldValue('collateralToken', newValue)
               }}
-              getOptionLabel={(option) => option?.name || 'Nothing'}
+              getOptionLabel={(option) => option?.name || ''}
               onInputChange={(event) => {
                 if (event != null && event.target != null) {
                   setReferenceAssetSearch((event.target as any).value || '')
@@ -239,7 +237,7 @@ export function DefinePoolAttributes({
             {formik.errors.collateralToken != null && (
               <FormHelperText>{formik.errors.collateralToken}</FormHelperText>
             )}
-            {collateralWalletBalance != null && (
+            {collateralWalletBalance != null && collateralToken != null && (
               <FormHelperText>
                 Your balance: {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
                 {collateralToken?.symbol}{' '}
