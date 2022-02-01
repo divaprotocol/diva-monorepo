@@ -14,7 +14,7 @@ import { createDivaTheme } from './lib/createDivaTheme'
 import { Provider as Web3Provider } from '@web3-ui/hooks'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import 'react-vis/dist/style.css'
-import { infuraId } from './constants'
+import { projectId } from './constants'
 
 const queryClient = new QueryClient()
 
@@ -41,7 +41,7 @@ const WithProviders = () => {
         overflow: 'hidden',
       }}
     >
-      <Web3Provider network={undefined as any} infuraId={infuraId}>
+      <Web3Provider network={undefined as any} infuraId={projectId}>
         <QueryClientProvider client={queryClient}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <ThemeProvider theme={theme}>

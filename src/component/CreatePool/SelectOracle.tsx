@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import whitelistContract from '../../abi/Whitelist.json'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
-import { CopyToClipboard } from '../shared/CopyToClipboard'
+import { CopyToClipboard } from '../CopyToClipboard'
 import { useCreatePoolFormik } from './formik'
 
 type Oracle = {

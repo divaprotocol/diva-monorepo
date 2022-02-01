@@ -5,32 +5,31 @@ import { useWallet } from '@web3-ui/hooks'
 export function ConnectWalletButton() {
   const { connected, connectWallet, connection, provider, disconnectWallet } =
     useWallet()
-  // const { active, account, activate, deactivate } = useWeb3React()
   const [walletName, setWalletName] = useState('')
-
-  const connect = useCallback(async () => {
-    try {
-      connectWallet?.()
-      // await activate(injected)
-    } catch (ex) {
-      console.error(ex)
-    }
-  }, [connectWallet])
 
   useEffect(() => {
     const run = async () => {
-      if (connection && provider != null && connection.userAddress != null) {
-        const res = await provider.lookupAddress(connection.userAddress)
-        if (res === null) {
-          setWalletName(truncate(connection.userAddress))
-        } else {
-          setWalletName(res)
+      if (
+        connection &&
+        provider != null &&
+        connection.userAddress != null &&
+        connected
+      ) {
+        try {
+          const res = await provider.lookupAddress(connection.userAddress)
+          if (res === null) {
+            setWalletName(truncate(connection.userAddress))
+          } else {
+            setWalletName(res)
+          }
+        } catch (err) {
+          console.warn(err)
         }
       }
     }
 
     run()
-  }, [connect, connection, provider])
+  }, [connection, provider, connected])
 
   function truncate(string = '', start = 6, end = 4) {
     if (start < 1 || end < 1) {
@@ -46,7 +45,10 @@ export function ConnectWalletButton() {
     if (connected) {
       disconnectWallet?.()
     } else {
-      connectWallet?.()
+      const _connectWallet = connectWallet as any
+      _connectWallet?.()?.catch((err) => {
+        console.warn(err)
+      })
     }
   }, [connected, connectWallet, disconnectWallet])
 

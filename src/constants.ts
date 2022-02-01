@@ -6,9 +6,18 @@ type SingleConfig = {
   whitelistSubgraph: string
 }
 
-export const infuraId = 'e3ea5575a42b4de7be15d7c197c12045'
+export const projectId = 'e3ea5575a42b4de7be15d7c197c12045'
 
 export const config: { [key: number]: SingleConfig } = {
+  1: {
+    name: 'Ropsten',
+    divaAddress: '0x6455A2Ae3c828c4B505b9217b51161f6976bE7cf',
+    whitelistAddress: '0xc7B292b054A53C661dCEbC704F6fc2b1D8073cf7',
+    divaSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
+    whitelistSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
+  },
   3: {
     name: 'Ropsten',
     divaAddress: '0x6455A2Ae3c828c4B505b9217b51161f6976bE7cf',

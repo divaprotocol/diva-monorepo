@@ -55,7 +55,7 @@ const columns: GridColDef[] = [
 
 export default function Markets() {
   const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
+  const chainId = wallet?.provider?.network?.chainId || 3
 
   const query = useQuery<{ pools: Pool[] }>(
     `pools-${chainId}`,
@@ -124,9 +124,5 @@ export default function Markets() {
     ]
   }, [] as GridRowModel[])
 
-  return wallet.connected ? (
-    <PoolsTable columns={columns} rows={rows} />
-  ) : (
-    <Alert severity="info">Please connect to use the app</Alert>
-  )
+  return <PoolsTable columns={columns} rows={rows} />
 }
