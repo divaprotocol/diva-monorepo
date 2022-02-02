@@ -23,7 +23,6 @@ import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
 import * as qs from 'qs'
 import { Pool } from '../../../lib/queries'
-import { Network } from '../../../Util/chainIdToName'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BigNumber } from '@0x/utils'
 import { sellMarketOrder } from '../../../Orders/SellMarket'
@@ -32,9 +31,9 @@ import { sellMarketOrder } from '../../../Orders/SellMarket'
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { getComparator, stableSort } from './OrderHelper'
+import { useWallet } from '@web3-ui/hooks'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-const CHAIN_ID = Network.ROPSTEN
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -43,6 +42,8 @@ export default function SellMarket(props: {
   handleDisplayOrder: () => void
   tokenAddress: string
 }) {
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)
@@ -52,7 +53,7 @@ export default function SellMarket(props: {
   const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
   // eslint-disable-next-line prettier/prettier
-  const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
   const maxApproval = new BigNumber(2).pow(256).minus(1)
   const [walletBalance, setWalletBalance] = React.useState(0)

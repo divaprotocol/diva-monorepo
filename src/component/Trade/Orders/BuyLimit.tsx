@@ -17,7 +17,6 @@ import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
-import { Network } from '../../../Util/chainIdToName'
 import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
@@ -26,10 +25,8 @@ const contractAddress = require('@0x/contract-addresses')
 
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { formatUnits } from 'ethers/lib/utils'
+import { useWallet } from '@web3-ui/hooks'
 const web3 = new Web3(Web3.givenProvider)
-const CHAIN_ID = Network.ROPSTEN
-const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
-const exchangeProxyAddress = address.exchangeProxy
 const maxApproval = new BigNumber(2).pow(256).minus(1)
 let accounts: any[]
 
@@ -38,6 +35,10 @@ export default function BuyLimit(props: {
   handleDisplayOrder: () => void
   tokenAddress: string
 }) {
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId
+  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
+  const exchangeProxyAddress = address.exchangeProxy
   const option = props.option
   const makerToken = props.tokenAddress
   const classes = useStyles()
@@ -82,9 +83,6 @@ export default function BuyLimit(props: {
     accounts = await window.ethereum.enable()
     const takerTokenAddress = option.collateralToken
     if (!isApproved) {
-      const youPay = pricePerOption * numberOfOptions
-      const youPayAmount = new BigNumber(youPay)
-
       const takerTokenContract = await new web3.eth.Contract(
         // TODO: Check why any is required
         ERC20_ABI as any,
@@ -107,7 +105,7 @@ export default function BuyLimit(props: {
         takerToken: makerToken,
         provider: web3,
         isBuy: true,
-        chainId: CHAIN_ID,
+        chainId,
         nbrOptions: numberOfOptions,
         collateralDecimals: option.collateralDecimals,
         limitPrice: pricePerOption,
@@ -115,7 +113,7 @@ export default function BuyLimit(props: {
       }
 
       buylimitOrder(orderData)
-        .then(function (response) {
+        .then(function () {
           props.handleDisplayOrder()
           handleFormReset()
         })
@@ -125,17 +123,19 @@ export default function BuyLimit(props: {
     }
   }
 
-  const getCollateralInWallet = async () => {
-    accounts = await window.ethereum.enable()
-    const takerAccount = accounts[0]
-    let balance = await takerTokenContract.methods
-      .balanceOf(takerAccount)
-      .call()
-    balance = Number(formatUnits(balance.toString(), option.collateralDecimals))
-    return balance
-  }
-
   useEffect(() => {
+    const getCollateralInWallet = async () => {
+      accounts = await window.ethereum.enable()
+      const takerAccount = accounts[0]
+      let balance = await takerTokenContract.methods
+        .balanceOf(takerAccount)
+        .call()
+      balance = Number(
+        formatUnits(balance.toString(), option.collateralDecimals)
+      )
+      return balance
+    }
+
     getCollateralInWallet().then((val) => {
       if (val != null) {
         setCollateralBalance(Number(val))
