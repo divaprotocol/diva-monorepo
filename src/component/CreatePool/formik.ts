@@ -1,29 +1,43 @@
-import { useWeb3React } from '@web3-react/core'
-import { ethers } from 'ethers'
 import { useFormik } from 'formik'
-import { useQuery } from 'react-query'
 import { useDiva } from '../../hooks/useDiva'
-import { Tokens } from '../../lib/types'
-import { chainIdtoName } from '../../Util/chainIdToName'
-import referenceAssets from './referenceAssets.json'
+import { useWallet } from '@web3-ui/hooks'
+import { CollateralToken } from '../../lib/queries'
 
 const defaultDate = new Date()
-defaultDate.setHours(defaultDate.getHours() + 24)
+defaultDate.setHours(defaultDate.getHours() + 25)
 
-export const initialValues = {
+type Values = {
+  step: number
+  referenceAsset: string
+  expiryDate: Date
+  floor: number
+  cap: number
+  inflection: number
+  collateralToken?: CollateralToken
+  collateralWalletBalance: string
+  collateralBalance: string
+  collateralBalanceShort: number
+  collateralBalanceLong: number
+  shortTokenSupply: number
+  longTokenSupply: number
+  capacity: number
+  dataFeedProvider: string
+}
+
+export const initialValues: Values = {
   step: 1,
-  referenceAsset: referenceAssets[0],
+  referenceAsset: '',
   expiryDate: defaultDate,
   floor: 1,
   cap: 3,
   inflection: 2,
-  collateralTokenSymbol: 'DAI',
+  collateralToken: undefined,
   collateralWalletBalance: '0',
-  collateralBalance: 2,
+  collateralBalance: '2',
   collateralBalanceShort: 1,
   collateralBalanceLong: 1,
-  shortTokenSupply: 1,
-  longTokenSupply: 1,
+  shortTokenSupply: 2,
+  longTokenSupply: 2,
   capacity: 0,
   dataFeedProvider: '',
 }
@@ -33,17 +47,12 @@ type Errors = {
 }
 
 export const useCreatePoolFormik = () => {
-  const { chainId, account } = useWeb3React()
+  const {
+    connection: { network },
+    provider,
+  } = useWallet()
+
   const contract = useDiva()
-
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
-
-  const tokensQuery = useQuery<Tokens>('tokens', () =>
-    fetch('/ropstenTokens.json').then((res) => res.json())
-  )
 
   const _formik = useFormik({
     initialValues,
@@ -64,14 +73,9 @@ export const useCreatePoolFormik = () => {
           shortTokenSupply,
           longTokenSupply,
           referenceAsset,
-          collateralTokenSymbol,
+          collateralToken,
           dataFeedProvider,
         } = values
-        const collateralTokenAssets = tokensQuery.data || {}
-        const collateralToken =
-          collateralTokenAssets[
-            (collateralTokenSymbol as string)?.toLowerCase()
-          ]
 
         if (collateralToken != null && dataFeedProvider != null) {
           contract
@@ -114,11 +118,11 @@ export const useCreatePoolFormik = () => {
         values.collateralBalanceLong + values.collateralBalanceShort
       const walletBalance = parseFloat(values.collateralWalletBalance)
 
-      if (values.collateralTokenSymbol == null) {
-        errors.collateralTokenSymbol = 'You must choose a collateral token'
+      if (values.collateralToken == null) {
+        errors.collateralToken = 'You must choose a collateral asset'
       }
 
-      if (account == null) {
+      if (network == null) {
         errors.collateralWalletBalance =
           'Your wallet must be connected before you can proceed'
       } else if (walletBalance < collateralBalance) {
@@ -154,10 +158,16 @@ export const useCreatePoolFormik = () => {
 
       if (values.capacity < 0) {
         errors.capacity = 'Capacity cannot be negative'
+      } else if (values.capacity !== 0 && collateralBalance > values.capacity) {
+        errors.capacity = `Capacity must be larger than ${collateralBalance}. For unlimited capacity, set to 0`
       }
 
       // validate data feed provider
-      if (values.step > 1 && values.dataFeedProvider !== null) {
+      if (
+        values.step > 1 &&
+        values.dataFeedProvider !== null &&
+        provider != null
+      ) {
         if (
           values.dataFeedProvider == null ||
           values.dataFeedProvider.trim().length === 0
@@ -167,7 +177,8 @@ export const useCreatePoolFormik = () => {
           try {
             await provider.getSigner(values.dataFeedProvider)
           } catch (err) {
-            errors.dataFeedProvider = 'Invalid address'
+            errors.dataFeedProvider =
+              'You must specify a valid address as the data feed provider'
           }
         }
       }

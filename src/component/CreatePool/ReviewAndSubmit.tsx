@@ -1,6 +1,4 @@
 import {
-  Card,
-  CardContent,
   Table,
   TableBody,
   TableCell,
@@ -10,10 +8,16 @@ import {
   useTheme,
 } from '@mui/material'
 import { Box } from '@mui/material'
+import { useWallet } from '@web3-ui/hooks'
+import request from 'graphql-request'
+import { useQuery } from 'react-query'
+import { config } from '../../constants'
+import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useCreatePoolFormik } from './formik'
 
-const stringifyValue = (val: unknown) => {
+const stringifyValue = (val: any) => {
+  if (val?.name) return val.name
   if (val instanceof Date) {
     return val.toDateString()
   } else if (typeof val === 'string') {
@@ -40,7 +44,7 @@ const dict: {
   shortTokenSupply: 'Token Supply (Short)',
   longTokenSupply: 'Token Supply (Long)',
   dataFeedProvider: 'Data Feed Provider',
-  collateralTokenSymbol: 'Collateral Token',
+  collateralToken: 'Collateral Token',
   capacity: 'Maximum Pool Capacity',
 }
 
@@ -51,6 +55,25 @@ export function ReviewAndSubmit({
 }) {
   const { values } = formik
   const theme = useTheme()
+  const { provider } = useWallet()
+  const chainId = provider?.network?.chainId
+
+  const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
+    request(config[chainId].whitelistSubgraph, queryWhitelist)
+  )
+
+  const matchingDataFeedProviders =
+    whitelistQuery.data?.dataProviders.filter((v) =>
+      v.dataFeeds.some(
+        (f) => f.referenceAssetUnified === formik.values.referenceAsset
+      )
+    ) || []
+
+  const isWhitelistedDataFeed =
+    matchingDataFeedProviders.length > 0 &&
+    matchingDataFeedProviders.some(
+      (v) => formik.values.dataFeedProvider === v.id
+    )
 
   return (
     <Box pt={5}>

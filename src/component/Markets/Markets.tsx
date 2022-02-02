@@ -6,7 +6,9 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
-import { theGraphUrl } from '../../constants'
+import { config } from '../../constants'
+import { useWallet } from '@web3-ui/hooks'
+import { Alert } from '@mui/material'
 
 const columns: GridColDef[] = [
   {
@@ -51,9 +53,15 @@ const columns: GridColDef[] = [
   },
 ]
 
-export default function App() {
-  const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(theGraphUrl, queryPools)
+export default function Markets() {
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId || 3
+
+  const query = useQuery<{ pools: Pool[] }>(
+    `pools-${chainId}`,
+    () =>
+      chainId != null &&
+      request(config[chainId as number].divaSubgraph, queryPools)
   )
   const pools = query.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
