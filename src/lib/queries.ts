@@ -88,6 +88,7 @@ export const queryPool = (poolId: number) => gql`
       collateralBalanceShort
       collateralDecimals
       collateralBalanceLong
+      collateralDecimals
       shortToken
       longToken
       finalReferenceValue

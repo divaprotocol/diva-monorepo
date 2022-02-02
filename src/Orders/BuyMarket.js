@@ -1,60 +1,61 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
-import { BigNumber } from '@0x/utils'
-import * as qs from 'qs'
+import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { CHAIN_ID } from './Config'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 
 export const buyMarketOrder = async (orderData) => {
+  let filledOrder = {}
   const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
   const exchangeProxyAddress = address.exchangeProxy
   // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
-
-  const params = {
-    makerToken: orderData.makerToken,
-    takerToken: orderData.takerToken,
+  const orders = orderData.existingLimitOrders
+  let takerFillNbrOptions = parseEther(orderData.nbrOptions.toString())
+  let takerAssetAmounts = []
+  const signatures = []
+  const fillOrderResponse = async (takerAssetFillAmounts) => {
+    orders.map(function (order) {
+      signatures.push(order.signature)
+      delete order.signature
+      return order
+    })
+    const response = await exchange
+      .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true)
+      .awaitTransactionSuccessAsync({ from: orderData.takerAccount })
+      .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
+    return response
   }
 
-  const res = await fetch(
-    `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
-  )
-  const resJSON = await res.json()
-  console.log('Response ' + JSON.stringify(resJSON))
-  // Fetch first order object in records JSON object array
-  let orders = []
-  let signatures = []
-  let responseOrder
-  try {
-    responseOrder = resJSON['records']
-    //remove signature from response
-    const aux = responseOrder.map((item) => item.order)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    orders = aux.map(({ signature, ...rest }) => rest)
-    signatures = aux.map(({ signature }) => signature)
-  } catch (err) {
-    alert('No orders found')
-    console.log(err)
-    return
-  }
-
-  //expected rate
-  //const expectedRate = takerAmount / makerAmount
-  //const youPay = expectedRate * orderData.nbrOptions
-  const takerFillNbrOptions = new BigNumber(orderData.nbrOptions * 10 ** 18)
-  const str = JSON.stringify([takerFillNbrOptions])
-  // Return an array of three BigNumbers
-  const takerAssetFillAmounts = JSON.parse(str, function (key, val) {
-    return key === '' ? val : new BigNumber(val)
+  orders.forEach((order) => {
+    if (takerFillNbrOptions > 0) {
+      const expectedRate = parseEther(order.expectedRate.toString())
+      const takerFillAmount = expectedRate.mul(takerFillNbrOptions)
+      const takerFillAmountNumber = Number(
+        formatUnits(takerFillAmount, orderData.collateralDecimals)
+      )
+      const remainingFillableTakerAmount = parseEther(
+        order.remainingFillableTakerAmount.toString()
+      )
+      if (takerFillAmount.lte(remainingFillableTakerAmount)) {
+        takerAssetAmounts.push(takerFillAmountNumber)
+        const nbrOptionsFilled = remainingFillableTakerAmount.div(expectedRate)
+        takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled)
+      } else {
+        const remainingAmountNumber = Number(
+          formatUnits(
+            remainingFillableTakerAmount,
+            orderData.collateralDecimals
+          )
+        )
+        takerAssetAmounts.push(remainingAmountNumber)
+        const nbrOptionsFilled = remainingFillableTakerAmount.div(expectedRate)
+        takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled)
+      }
+    } else {
+      takerAssetAmounts.push('0')
+    }
   })
-
-  console.log('taker asset fill amounts' + takerAssetFillAmounts)
-
-  // TODO Handle sum(takerAssetAmountFillAmounts) > remainingFillable amount
-
-  // Batch fill limit order
-  await exchange
-    .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true)
-    .awaitTransactionSuccessAsync({ from: orderData.takerAccount })
-    .catch((err) => console.error(err))
+  filledOrder = await fillOrderResponse(takerAssetAmounts)
+  return filledOrder
 }

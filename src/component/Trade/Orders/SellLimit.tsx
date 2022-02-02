@@ -20,9 +20,9 @@ import { useStyles } from './UiStyles'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 import { Pool } from '../../../lib/queries'
+import { formatUnits } from 'ethers/lib/utils'
 import { NETWORKS } from '@web3-ui/hooks'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ERC20_ABI = require('../../../abi/ERC20.json')
+import ERC20_ABI from '../../../abi/ERC20.json'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const CHAIN_ID = NETWORKS.ropsten
@@ -37,15 +37,16 @@ export default function SellLimit(props: {
   handleDisplayOrder: () => void
   tokenAddress: string
 }) {
-  const classes = useStyles()
   const option = props.option
+  const optionTokenAddress = props.tokenAddress
+  const classes = useStyles()
   const [expiry, setExpiry] = React.useState(5)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
   const [isApproved, setIsApproved] = React.useState(false)
   const [walletBalance, setWalletBalance] = React.useState(0)
-  const makerToken = props.tokenAddress
-  const makerTokenContract = new web3.eth.Contract(ERC20_ABI, makerToken)
+  const makerToken = optionTokenAddress
+  const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const handleNumberOfOptions = (value: string) => {
     setNumberOfOptions(parseFloat(value))
   }
@@ -54,13 +55,22 @@ export default function SellLimit(props: {
     setPricePerOption(parseFloat(value))
   }
 
+  const handleFormReset = () => {
+    Array.from(document.querySelectorAll('input')).forEach(
+      (input) => (input.value = '')
+    )
+    setIsApproved(false)
+    setNumberOfOptions(parseFloat('0.0'))
+    setPricePerOption(parseFloat('0.0'))
+  }
+
   const getOptionsInWallet = async () => {
     accounts = await window.ethereum.enable()
     const makerAccount = accounts[0]
     let balance = await makerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
-    balance = balance / 10 ** option.collateralDecimals
+    balance = Number(formatUnits(balance.toString(), 18))
     return balance
   }
 
@@ -73,15 +83,14 @@ export default function SellLimit(props: {
         .approve(exchangeProxyAddress, maxApproval)
         .send({ from: makerAccount })
 
-      const approvedByMaker = await makerTokenContract.methods
+      await makerTokenContract.methods
         .allowance(makerAccount, exchangeProxyAddress)
         .call()
-      console.log('Approved by maker: ' + (await approvedByMaker.toString()))
       setIsApproved(true)
     } else {
       const orderData = {
         maker: makerAccount,
-        makerToken: props.tokenAddress,
+        makerToken: optionTokenAddress,
         takerToken: option.collateralToken,
         provider: web3,
         isBuy: false,
@@ -90,14 +99,13 @@ export default function SellLimit(props: {
         collateralDecimals: option.collateralDecimals,
         orderExpiry: expiry,
       }
-
       sellLimitOrder(orderData)
         .then(function (response) {
-          console.log('Response ' + response)
           props.handleDisplayOrder()
+          handleFormReset()
         })
         .catch(function (error) {
-          console.log('Error' + error)
+          console.error(error)
         })
     }
   }
@@ -113,11 +121,10 @@ export default function SellLimit(props: {
 
   useEffect(() => {
     getOptionsInWallet().then((val) => {
-      console.log(JSON.stringify(val))
-      if (val != null) {
+      if (!Number.isNaN(val)) {
         setWalletBalance(Number(val))
       } else {
-        throw new Error(`can not read wallet balance`)
+        setWalletBalance(0)
       }
     })
   }, [])
@@ -148,7 +155,10 @@ export default function SellLimit(props: {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption * numberOfOptions} {option.collateralTokenName}
+            {pricePerOption * numberOfOptions > 0
+              ? (pricePerOption * numberOfOptions).toFixed(2)
+              : 0.0}
+            {' ' + option.collateralSymbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -156,7 +166,7 @@ export default function SellLimit(props: {
             <LabelGrayStyle>Options in Wallet</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>{walletBalance}</LabelGrayStyle>
+            <LabelGrayStyle>{walletBalance.toFixed(4)}</LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>

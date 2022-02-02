@@ -1,8 +1,8 @@
 import styled from 'styled-components'
-import OpenOrdersNew from './OptionOrdersNew'
-import OrderBook from './OrderBookNew'
-import CreateOrder from './CreateOrder'
+import OptionOrders from './OptionOrders'
+import OrderBook from './OrderBook'
 import { Container, Paper, Stack, useTheme } from '@mui/material'
+import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import TradeChart from '../Graphs/TradeChart'
@@ -105,10 +105,10 @@ export default function Underlying() {
             <Paper>
               <LeftCompFlexContainer>
                 <LeftCompLeftDiv>
-                  <OrderBook option={pool} />
+                  <OrderBook option={pool} tokenAddress={tokenAddress} />
                 </LeftCompLeftDiv>
                 <LeftCompRightDiv>
-                  <OpenOrdersNew option={pool} />
+                  <OptionOrders option={pool} tokenAddress={tokenAddress} />
                 </LeftCompRightDiv>
               </LeftCompFlexContainer>
             </Paper>
@@ -121,6 +121,8 @@ export default function Underlying() {
             <Paper>
               <TradeChart
                 data={data}
+                refAsset={pool.referenceAsset}
+                payOut={pool.collateralSymbol}
                 w={380}
                 h={200}
                 isLong={OptionParams.IsLong}
