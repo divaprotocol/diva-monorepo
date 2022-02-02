@@ -121,6 +121,8 @@ export default function Underlying() {
             <Paper>
               <TradeChart
                 data={data}
+                refAsset={pool.referenceAsset}
+                payOut={pool.collateralSymbol}
                 w={380}
                 h={200}
                 isLong={OptionParams.IsLong}
