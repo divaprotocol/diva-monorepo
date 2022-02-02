@@ -101,3 +101,59 @@ export const queryPool = (poolId: number) => gql`
     }
   }
 `
+
+export type DataFeed = {
+  dataProvider: {
+    id: string
+  }
+  id: string
+  referenceAsset: string
+  referenceAssetUnified: string
+}
+
+export type DataProvider = {
+  dataFeeds: { id: string; referenceAssetUnified: string }[]
+  id: string
+  name: string
+}
+
+export type CollateralToken = {
+  id: string
+  name: string
+  symbol: string
+  decimals: number
+}
+
+export type WhitelistQueryResponse = {
+  dataProviders: DataProvider[]
+  dataFeeds: DataFeed[]
+  collateralTokens: CollateralToken[]
+}
+
+export const queryWhitelist = gql`
+  {
+    dataProviders {
+      id
+      name
+      dataFeeds {
+        id
+        referenceAssetUnified
+      }
+    }
+    dataFeeds {
+      id
+      referenceAsset
+      referenceAssetUnified
+      active
+      dataProvider {
+        id
+      }
+    }
+    collateralTokens {
+      id
+      name
+      decimals
+      symbol
+    }
+  }
+`
