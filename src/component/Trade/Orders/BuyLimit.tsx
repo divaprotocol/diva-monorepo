@@ -84,25 +84,22 @@ export default function BuyLimit(props: {
     if (!isApproved) {
       const youPay = pricePerOption * numberOfOptions
       const youPayAmount = new BigNumber(youPay)
-      if (youPayAmount.lte(maxApproval)) {
-        setIsApproved(true)
-      } else {
-        const takerTokenContract = await new web3.eth.Contract(
-          // TODO: Check why any is required
-          ERC20_ABI as any,
-          takerTokenAddress
-        )
-        await takerTokenContract.methods
-          .approve(exchangeProxyAddress, maxApproval)
-          .send({ from: accounts[0] })
-        const approvedByTaker = await takerTokenContract.methods
-          .allowance(accounts[0], exchangeProxyAddress)
-          .call()
-        alert(
-          `Maker allowance for ${option.collateralToken} successfully set by ${approvedByTaker}`
-        )
-        setIsApproved(true)
-      }
+
+      const takerTokenContract = await new web3.eth.Contract(
+        // TODO: Check why any is required
+        ERC20_ABI as any,
+        takerTokenAddress
+      )
+      await takerTokenContract.methods
+        .approve(exchangeProxyAddress, maxApproval)
+        .send({ from: accounts[0] })
+      const approvedByTaker = await takerTokenContract.methods
+        .allowance(accounts[0], exchangeProxyAddress)
+        .call()
+      alert(
+        `Maker allowance for ${option.collateralToken} successfully set by ${approvedByTaker}`
+      )
+      setIsApproved(true)
     } else {
       const orderData = {
         makerAccount: accounts[0],

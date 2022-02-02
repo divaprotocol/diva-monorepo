@@ -80,18 +80,14 @@ export default function SellLimit(props: {
     accounts = await window.ethereum.enable()
     const makerAccount = accounts[0]
     if (!isApproved) {
-      if (numberOfOptions <= walletBalance) {
-        setIsApproved(true)
-      } else {
-        await makerTokenContract.methods
-          .approve(exchangeProxyAddress, maxApproval)
-          .send({ from: makerAccount })
+      await makerTokenContract.methods
+        .approve(exchangeProxyAddress, maxApproval)
+        .send({ from: makerAccount })
 
-        await makerTokenContract.methods
-          .allowance(makerAccount, exchangeProxyAddress)
-          .call()
-        setIsApproved(true)
-      }
+      await makerTokenContract.methods
+        .allowance(makerAccount, exchangeProxyAddress)
+        .call()
+      setIsApproved(true)
     } else {
       const orderData = {
         maker: makerAccount,
@@ -104,7 +100,6 @@ export default function SellLimit(props: {
         collateralDecimals: option.collateralDecimals,
         orderExpiry: expiry,
       }
-
       sellLimitOrder(orderData)
         .then(function (response) {
           props.handleDisplayOrder()
