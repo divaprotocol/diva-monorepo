@@ -41,7 +41,7 @@ export default function Underlying() {
   const [value, setValue] = React.useState(0)
   const breakEvenOptionPrice = 0
   const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
+  const chainId = wallet?.provider?.network?.chainId || 3
   const theme = useTheme()
   const query = useQuery<{ pool: Pool }>('pool', () =>
     request(
