@@ -18,4 +18,5 @@ jobs:
       - name: Run tests
         run: yarn test:e2e
         env: 
+          NETWORK_NAME: ropsten
           SECRET_WORDS: ${{ secrets.TEST_WALLET_SECRET }}
