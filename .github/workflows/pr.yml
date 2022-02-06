@@ -16,4 +16,8 @@ jobs:
         run: yarn lint
 
       - name: Run tests
-        run: yarn test:e2e
+        run: |
+          export SECRET_WORDS="$TEST_WALLET_SECRET"
+          yarn test:e2e
+        env: 
+          TESTWALLET_SECRET: ${{ secrets.TEST_WALLET_SECRET }}
