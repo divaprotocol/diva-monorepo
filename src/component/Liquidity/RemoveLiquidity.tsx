@@ -90,6 +90,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
       <Stack direction="row" justifyContent="space-between">
         <Typography sx={{ mt: theme.spacing(2) }}>Long Token</Typography>
         <Input
+          type="number"
           inputProps={{ style: { textAlign: 'right' } }}
           value={textFieldValue}
           onChange={(e) => {
