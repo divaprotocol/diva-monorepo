@@ -4,8 +4,8 @@ import {
   Container,
   Divider,
   IconButton,
+  Input,
   Stack,
-  TextField,
   useTheme,
 } from '@mui/material'
 import Typography from '@mui/material/Typography'
@@ -88,10 +88,14 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
     >
       <Stack direction="row" justifyContent="space-between">
         <Typography sx={{ mt: theme.spacing(2) }}>Amount</Typography>
-        <TextField
+        <Input
+          type="number"
           value={textFieldValue}
           onChange={(e) => {
-            setTextFieldValue(e.target.value)
+            const amount = e.target.value
+            if (!amount || amount.match(/^\d{1,}(\.\d{0,18})?$/)) {
+              setTextFieldValue(amount)
+            }
           }}
         />
       </Stack>
