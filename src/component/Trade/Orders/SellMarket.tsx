@@ -43,7 +43,7 @@ export default function SellMarket(props: {
   tokenAddress: string
 }) {
   const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
+  const chainId = wallet?.provider?.network?.chainId || 3
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)

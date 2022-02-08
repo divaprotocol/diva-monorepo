@@ -76,23 +76,55 @@ function mapOrderData(
     const orderMaker = order.maker
     const makerAmount = new BigNumber(order.makerAmount)
     const takerAmount = new BigNumber(order.takerAmount)
+    const metaData = record.metaData
     if (account === orderMaker) {
       const makerToken = order.makerToken
       const tokenAddress = optionTokenAddress.toLowerCase()
       const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
-      const amount =
-        makerToken === tokenAddress
-          ? Number(formatUnits(makerAmount.toString()))
-          : Number(
-              formatUnits(takerAmount.toString(), option.collateralDecimals)
+      let nbrOptions = 0
+      let pricePerOption = 0
+      let payReceive = 0
+      if (makerToken === tokenAddress) {
+        const askAmount = takerAmount.dividedBy(makerAmount)
+        const remainingTakerAmount = new BigNumber(
+          metaData.remainingFillableTakerAmount
+        )
+        if (remainingTakerAmount.eq(makerAmount)) {
+          nbrOptions = Number(
+            formatUnits(makerAmount.toString(), option.collateralDecimals)
+          )
+        } else {
+          const quantity = remainingTakerAmount.dividedBy(askAmount)
+          nbrOptions = Number(
+            formatUnits(quantity.toString(), option.collateralDecimals)
+          )
+        }
+        const receiveAmount = metaData.remainingFillableTakerAmount
+        payReceive = Number(
+          formatUnits(receiveAmount.toString(), option.collateralDecimals)
+        )
+        pricePerOption = payReceive / nbrOptions
+      } else {
+        const remainingTakerAmount = new BigNumber(
+          metaData.remainingFillableTakerAmount
+        )
+        if (remainingTakerAmount.lt(takerAmount)) {
+          nbrOptions = Number(
+            formatUnits(
+              remainingTakerAmount.toString(),
+              option.collateralDecimals
             )
-      const nbrOptions = amount
-      const receiveAmount =
-        makerToken === tokenAddress ? takerAmount : makerAmount
-      const payReceive = Number(
-        formatUnits(receiveAmount.toString(), option.collateralDecimals)
-      )
-      const pricePerOption = payReceive / nbrOptions
+          )
+        } else {
+          nbrOptions = Number(
+            formatUnits(takerAmount.toString(), option.collateralDecimals)
+          )
+        }
+        payReceive = Number(
+          formatUnits(makerAmount.toString(), option.collateralDecimals)
+        )
+        pricePerOption = makerAmount.dividedBy(takerAmount).toNumber()
+      }
       const expiry = getDateTime(order.expiry)
       const expiryMins = getExpiryMinutesFromNow(order.expiry)
       const orders = {
