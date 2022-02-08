@@ -21,13 +21,10 @@ import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 import { Pool } from '../../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { NETWORKS } from '@web3-ui/hooks'
+import { NETWORKS, useWallet } from '@web3-ui/hooks'
 import ERC20_ABI from '../../../abi/ERC20.json'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-const CHAIN_ID = NETWORKS.ropsten
-const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
-const exchangeProxyAddress = address.exchangeProxy
 const maxApproval = new BigNumber(2).pow(256).minus(1)
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
@@ -37,6 +34,10 @@ export default function SellLimit(props: {
   handleDisplayOrder: () => void
   tokenAddress: string
 }) {
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId || 3
+  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
+  const exchangeProxyAddress = address.exchangeProxy
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const classes = useStyles()

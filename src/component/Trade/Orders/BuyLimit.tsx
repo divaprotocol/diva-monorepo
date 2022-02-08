@@ -36,7 +36,7 @@ export default function BuyLimit(props: {
   tokenAddress: string
 }) {
   const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
+  const chainId = wallet?.provider?.network?.chainId || 3
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
   const option = props.option
