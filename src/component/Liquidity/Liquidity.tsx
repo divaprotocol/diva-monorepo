@@ -31,7 +31,9 @@ export const Liquidity = () => {
   const [openAlert, setOpenAlert] = React.useState(false)
   const [symbol, setSymbol] = React.useState('')
   const { provider } = useWallet()
-
+  console.log('liquidity')
+  console.log(pool)
+  console.log(decimal)
   const chainId = provider?.network?.chainId
 
   const theme = useTheme()
@@ -110,7 +112,7 @@ export const Liquidity = () => {
           </CardContent>
         </Card>
         {!value && pool && (
-          <Container>
+          <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(2) }}>
             {pool && formatUnits(pool!.capacity, decimal!) !== '0.0' ? (
               <>
                 <Stack direction="row" justifyContent="space-between">
@@ -119,19 +121,22 @@ export const Liquidity = () => {
                     {pool &&
                       (formatUnits(pool!.capacity, decimal) === '0.0'
                         ? 'Unlimited'
-                        : formatUnits(pool!.capacity, decimal))}
+                        : formatUnits(pool!.capacity, decimal))}{' '}
+                    {symbol!}{' '}
                   </Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Currently utilized</Typography>
                   <Typography>
                     {pool &&
-                      parseFloat(
-                        formatUnits(pool.collateralBalanceLong, decimal)
-                      ) +
+                      '1% / ' +
+                        parseFloat(
+                          formatUnits(pool.collateralBalanceLong, decimal)
+                        ) +
                         parseFloat(
                           formatUnits(pool.collateralBalanceShort, decimal)
-                        )}
+                        )}{' '}
+                    {symbol!}{' '}
                   </Typography>
                 </Stack>
               </>
@@ -150,7 +155,8 @@ export const Liquidity = () => {
                       ) +
                         parseFloat(
                           formatUnits(pool.collateralBalanceShort, decimal)
-                        )}
+                        )}{' '}
+                    {symbol!}{' '}
                   </Typography>
                 </Stack>
               </>

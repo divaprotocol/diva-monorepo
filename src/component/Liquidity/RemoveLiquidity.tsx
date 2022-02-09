@@ -44,7 +44,9 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
   const [impliedCollateral, setImpliedCollateral] = React.useState(0)
   const { provider } = useWallet()
   const chainId = provider?.network?.chainId
-
+  console.log('remove')
+  console.log(pool)
+  console.log(decimal)
   const theme = useTheme()
 
   useEffect(() => {
@@ -216,7 +218,9 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           <Typography>
             {pool &&
               parseFloat(formatUnits(pool.collateralBalanceLong, decimal)) +
-                parseFloat(formatUnits(pool.collateralBalanceShort, decimal))}
+                parseFloat(
+                  formatUnits(pool.collateralBalanceShort, decimal)
+                )}{' '}
           </Typography>
         </Stack>
         <Stack direction="row" justifyContent="space-between">

@@ -89,6 +89,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
       <Stack direction="row" justifyContent="space-between">
         <Typography sx={{ mt: theme.spacing(2) }}>Amount</Typography>
         <TextField
+          inputProps={{ min: 0, style: { textAlign: 'right' } }}
           value={textFieldValue}
           onChange={(e) => {
             setTextFieldValue(e.target.value)
@@ -160,7 +161,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
         sx={{
           mt: theme.spacing(2),
           borderRadius: '16px',
-          width: theme.spacing(56),
+          width: theme.spacing(69),
           height: theme.spacing(25),
           backgroundColor: 'lightgray',
           alignSelf: 'center',
@@ -184,7 +185,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
           />
           <Stack direction="row">
             <Container sx={{ minWidth: theme.spacing(12) }}>
-              <BlackTextTypography>
+              <BlackTextTypography sx={{ fontWeight: 'bold', fontSize: 18 }}>
                 {pool &&
                   textFieldValue !== '' &&
                   (
@@ -204,7 +205,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
               <BlackTextTypography>Long Tokens</BlackTextTypography>
             </Container>
             <Container sx={{ minWidth: '100px' }}>
-              <BlackTextTypography>
+              <BlackTextTypography sx={{ fontWeight: 'bold', fontSize: 18 }}>
                 {pool &&
                   textFieldValue !== '' &&
                   (
