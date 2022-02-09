@@ -2,12 +2,10 @@ import { Contract, ethers } from 'ethers'
 import {
   Alert,
   Box,
-  Card,
   Collapse,
-  Container,
   IconButton,
+  Input,
   Stack,
-  TextField,
   Typography,
   useTheme,
 } from '@mui/material'
@@ -91,11 +89,15 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
     >
       <Stack direction="row" justifyContent="space-between">
         <Typography sx={{ mt: theme.spacing(2) }}>Long Token</Typography>
-        <TextField
+        <Input
+          type="number"
           inputProps={{ style: { textAlign: 'right' } }}
           value={textFieldValue}
           onChange={(e) => {
-            setTextFieldValue(e.target.value)
+            const amount = e.target.value
+            if (!amount || amount.match(/^\d{1,}(\.\d{0,18})?$/)) {
+              setTextFieldValue(amount)
+            }
           }}
         />
       </Stack>
