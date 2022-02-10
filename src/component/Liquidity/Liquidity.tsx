@@ -169,74 +169,107 @@ export const Liquidity = () => {
           </Container>
         )}
         {value ? (
-          <Container>
-            <Card sx={{ mt: theme.spacing(2), borderRadius: '16px' }}>
+          <Container
+            sx={{
+              minWidth: '600px',
+            }}
+          >
+            <Card
+              sx={{
+                ml: theme.spacing(7),
+                mt: theme.spacing(2),
+                borderRadius: '16px',
+                maxWidth: '450px',
+              }}
+            >
               <Container
                 sx={{
                   mt: theme.spacing(2),
                   mb: theme.spacing(2),
                 }}
               >
-                <Typography style={{ color: 'gray' }}>
+                <Stack direction="row">
                   <Star
                     style={{
-                      height: theme.spacing(4),
-                      width: theme.spacing(4),
+                      paddingTop: theme.spacing(0.1),
+                      paddingRight: theme.spacing(1),
+                      height: theme.spacing(2.5),
+                      width: theme.spacing(2.5),
                     }}
-                  />{' '}
-                  By removing liquidity you are giving back long and short
-                  position tokens proportional to the pool balance and receive
-                  collateral in return
-                </Typography>
+                  />
+                  <Typography fontSize={'0.8rem'} style={{ color: 'gray' }}>
+                    {' '}
+                    By removing liquidity you are giving back long and short
+                    position tokens proportional to the pool balance and receive
+                    collateral in return
+                  </Typography>
+                </Stack>
               </Container>
             </Card>
           </Container>
         ) : (
           <Container
             sx={{
-              minWidth: '100px',
+              maxWidth: '450px',
               borderRadius: '16px',
               mb: theme.spacing(4),
             }}
           >
-            <Card sx={{ minWidth: '100px', borderRadius: '16px' }}>
+            <Card sx={{ borderRadius: '16px' }}>
               <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(2) }}>
                 <Stack direction="column">
-                  <Typography style={{ color: 'gray' }}>
+                  <Stack direction="row">
                     <Star
                       style={{
-                        height: theme.spacing(4),
-                        width: theme.spacing(4),
+                        paddingTop: theme.spacing(0.1),
+                        paddingRight: theme.spacing(1),
+                        height: theme.spacing(2.5),
+                        width: theme.spacing(2.5),
                       }}
-                    />{' '}
-                    By adding liquidity you receive long and short position
-                    tokens in return which represent a claim against the
-                    collateral you deposited
-                  </Typography>
-                  <Typography
-                    sx={{ mt: theme.spacing(2) }}
-                    style={{ color: 'gray' }}
-                  >
+                    />
+                    <Typography fontSize={'0.8rem'} style={{ color: 'gray' }}>
+                      {'    '}
+                      By adding liquidity you receive long and short position
+                      tokens in return which represent a claim against the
+                      collateral you deposited
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row">
                     <Bullish
                       style={{
-                        height: theme.spacing(4),
-                        width: theme.spacing(4),
+                        paddingTop: theme.spacing(2),
+                        paddingRight: theme.spacing(1),
+                        height: theme.spacing(2.5),
+                        width: theme.spacing(2.5),
                       }}
-                    />{' '}
-                    Bullish? Keep the long tokens and sell the short tokens
-                  </Typography>
-                  <Typography
-                    sx={{ mt: theme.spacing(2) }}
-                    style={{ color: 'gray' }}
-                  >
+                    />
+                    <Typography
+                      fontSize={'0.8rem'}
+                      sx={{ mt: theme.spacing(2) }}
+                      style={{ color: 'gray' }}
+                    >
+                      {' '}
+                      Bullish? Keep the long tokens and sell the short tokens
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row">
                     <Bearish
                       style={{
-                        height: theme.spacing(4),
-                        width: theme.spacing(4),
+                        paddingTop: theme.spacing(2),
+                        paddingRight: theme.spacing(1),
+                        height: theme.spacing(2.5),
+                        width: theme.spacing(2.5),
                       }}
-                    />{' '}
-                    Bearish? Keep the short tokens and sell the long tokens
-                  </Typography>
+                    />
+                    <Typography
+                      fontSize={'0.8rem'}
+                      sx={{ mt: theme.spacing(2) }}
+                      style={{ color: 'gray' }}
+                    >
+                      {' '}
+                      Bearish? Keep the short tokens and sell the long tokens
+                    </Typography>
+                  </Stack>
                 </Stack>
               </Container>
             </Card>
