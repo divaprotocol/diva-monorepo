@@ -1,5 +1,6 @@
 import {
   Alert,
+  Card,
   Collapse,
   Container,
   Divider,
@@ -80,228 +81,243 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
     }
   }, [tokenBalance, textFieldValue, pool])
   return (
-    <Stack
-      direction="column"
-      sx={{
-        mt: theme.spacing(2),
-      }}
-    >
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(2) }}>Amount</Typography>
-        <TextField
-          inputProps={{ min: 0, style: { textAlign: 'right' } }}
-          value={textFieldValue}
-          onChange={(e) => {
-            setTextFieldValue(e.target.value)
-          }}
-        />
-      </Stack>
-      {tokenBalance ? (
-        <>
-          <Typography variant="subtitle2" color="text.secondary">
-            Your balance: {parseFloat(tokenBalance!).toFixed(4)} {symbol!}{' '}
-            <MaxCollateral
-              role="button"
-              onClick={() => {
-                if (tokenBalance != null) {
-                  setTextFieldValue(tokenBalance)
-                }
-              }}
-            >
-              (Max)
-            </MaxCollateral>
-          </Typography>
-        </>
-      ) : (
-        <Typography variant="subtitle2" color="text.secondary">
-          Please connect your wallet
-        </Typography>
-      )}
-      <Collapse in={openAlert} sx={{ mt: theme.spacing(2) }}>
-        <Alert
-          severity="error"
-          action={
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={() => {
-                setOpenAlert(false)
-              }}
-            >
-              {'X'}
-            </IconButton>
-          }
-          sx={{ mb: 2 }}
-        >
-          Insufficient wallet balance
-        </Alert>
-      </Collapse>
-      <Collapse in={openCapacityAlert} sx={{ mt: theme.spacing(2) }}>
-        <Alert
-          severity="error"
-          action={
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={() => {
-                setOpenCapacityAlert(false)
-              }}
-            >
-              {'X'}
-            </IconButton>
-          }
-          sx={{ mb: 2 }}
-        >
-          Exceeds pool capacity
-        </Alert>
-      </Collapse>
-      <Container
-        sx={{
-          mt: theme.spacing(2),
-          borderRadius: '16px',
-          width: theme.spacing(69),
-          height: theme.spacing(25),
-          backgroundColor: 'lightgray',
-          alignSelf: 'center',
-        }}
-      >
-        <Container
+    <Card sx={{ borderRadius: '16px', minWidth: theme.spacing(69) }}>
+      <Container>
+        <Stack
+          direction="column"
           sx={{
-            mt: theme.spacing(4),
-            paddingRight: theme.spacing(5),
-            backgroundColor: 'lightgray',
+            mt: theme.spacing(2),
           }}
         >
-          <BlackTextTypography>You Receive</BlackTextTypography>
-          <Divider
-            variant={'fullWidth'}
-            sx={{
-              background: 'black',
-              mt: theme.spacing(2),
-              mb: theme.spacing(2),
-            }}
-          />
-          <Stack direction="row">
-            <Container sx={{ minWidth: theme.spacing(12) }}>
-              <BlackTextTypography sx={{ fontWeight: 'bold', fontSize: 18 }}>
-                {pool &&
-                  textFieldValue !== '' &&
-                  (
-                    (parseFloat(formatEther(pool.supplyLongInitial)) /
-                      (parseFloat(
-                        formatUnits(pool.collateralBalanceLongInitial, decimal)
-                      ) +
-                        parseFloat(
-                          formatUnits(
-                            pool.collateralBalanceShortInitial,
-                            decimal
-                          )
-                        ))) *
-                    parseFloat(formatEther(parseEther(textFieldValue)))
-                  ).toFixed(4)}
-              </BlackTextTypography>
-              <BlackTextTypography>Long Tokens</BlackTextTypography>
-            </Container>
-            <Container sx={{ minWidth: '100px' }}>
-              <BlackTextTypography sx={{ fontWeight: 'bold', fontSize: 18 }}>
-                {pool &&
-                  textFieldValue !== '' &&
-                  (
-                    (parseFloat(formatEther(pool.supplyShortInitial)) /
-                      (parseFloat(
-                        formatUnits(pool.collateralBalanceLongInitial, decimal)
-                      ) +
-                        parseFloat(
-                          formatUnits(
-                            pool.collateralBalanceShortInitial,
-                            decimal
-                          )
-                        ))) *
-                    parseFloat(formatEther(parseEther(textFieldValue)))
-                  ).toFixed(4)}
-              </BlackTextTypography>
-              <BlackTextTypography>Short Tokens</BlackTextTypography>
-            </Container>
-            <Container sx={{ minWidth: '100px' }}>
-              <BlackTextTypography>
-                {pool &&
-                  textFieldValue !== '' &&
-                  (
-                    Math.round(
-                      ((parseFloat(textFieldValue) * 100) /
-                        parseFloat(
-                          formatEther(
-                            parseEther(textFieldValue).add(
-                              pool.collateralBalanceLong.add(
-                                pool.collateralBalanceShort
-                              )
-                            )
-                          )
-                        ) +
-                        Number.EPSILON) *
-                        100
-                    ) / 100
-                  ).toString() + ' %'}
-              </BlackTextTypography>
-              <BlackTextTypography>Share of Pool</BlackTextTypography>
-            </Container>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography sx={{ mt: theme.spacing(2) }}>Amount</Typography>
+            <TextField
+              inputProps={{ min: 0, style: { textAlign: 'right' } }}
+              value={textFieldValue}
+              onChange={(e) => {
+                setTextFieldValue(e.target.value)
+              }}
+            />
           </Stack>
-        </Container>
-      </Container>
-      <Container
-        sx={{
-          mt: '2em',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            type="submit"
-            value="Submit"
-            disabled={!pool || Date.now() > 1000 * parseInt(pool.expiryDate)}
-            onClick={() => {
-              const token = new ethers.Contract(
-                pool!.collateralToken,
-                ERC20,
-                provider.getSigner()
-              )
-              token
-                .approve(diva?.address, parseEther(textFieldValue))
-                .then((tx: any) => {
-                  return tx.wait()
-                })
-                .then(() => {
-                  return token.allowance(account, diva?.address)
-                })
-                .then(() => {
-                  diva!.addLiquidity(
-                    window.location.pathname.split('/')[1],
-                    parseEther(textFieldValue)
-                  )
-                })
-                .catch((err: any) => console.error(err))
-            }}
-            style={{
-              maxWidth: theme.spacing(38),
-              maxHeight: theme.spacing(5),
-              minWidth: theme.spacing(38),
-              minHeight: theme.spacing(5),
+          {tokenBalance ? (
+            <>
+              <Typography variant="subtitle2" color="text.secondary">
+                Your balance: {parseFloat(tokenBalance!).toFixed(4)} {symbol!}{' '}
+                <MaxCollateral
+                  role="button"
+                  onClick={() => {
+                    if (tokenBalance != null) {
+                      setTextFieldValue(tokenBalance)
+                    }
+                  }}
+                >
+                  (Max)
+                </MaxCollateral>
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="subtitle2" color="text.secondary">
+              Please connect your wallet
+            </Typography>
+          )}
+          <Collapse in={openAlert} sx={{ mt: theme.spacing(2) }}>
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setOpenAlert(false)
+                  }}
+                >
+                  {'X'}
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              Insufficient wallet balance
+            </Alert>
+          </Collapse>
+          <Collapse in={openCapacityAlert} sx={{ mt: theme.spacing(2) }}>
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setOpenCapacityAlert(false)
+                  }}
+                >
+                  {'X'}
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              Exceeds pool capacity
+            </Alert>
+          </Collapse>
+          <Container
+            sx={{
+              mt: theme.spacing(2),
+              borderRadius: '16px',
+              width: theme.spacing(60),
+              height: theme.spacing(25),
+              backgroundColor: 'lightgray',
+              alignSelf: 'center',
             }}
           >
-            Add
-          </Button>
-        </div>
+            <Container
+              sx={{
+                mt: theme.spacing(4),
+                backgroundColor: 'lightgray',
+              }}
+            >
+              <BlackTextTypography>You Receive</BlackTextTypography>
+              <Divider
+                variant={'fullWidth'}
+                sx={{
+                  background: 'black',
+                  mt: theme.spacing(2),
+                  mb: theme.spacing(2),
+                }}
+              />
+              <Stack direction="row" sx={{ mr: theme.spacing(50) }}>
+                <Container sx={{ minWidth: theme.spacing(18) }}>
+                  <BlackTextTypography
+                    sx={{ fontWeight: 'bold', fontSize: 18 }}
+                  >
+                    {pool &&
+                      textFieldValue !== '' &&
+                      (
+                        (parseFloat(formatEther(pool.supplyLongInitial)) /
+                          (parseFloat(
+                            formatUnits(
+                              pool.collateralBalanceLongInitial,
+                              decimal
+                            )
+                          ) +
+                            parseFloat(
+                              formatUnits(
+                                pool.collateralBalanceShortInitial,
+                                decimal
+                              )
+                            ))) *
+                        parseFloat(formatEther(parseEther(textFieldValue)))
+                      ).toFixed(4)}
+                  </BlackTextTypography>
+                  <BlackTextTypography>Long Tokens</BlackTextTypography>
+                </Container>
+                <Container sx={{ minWidth: theme.spacing(18) }}>
+                  <BlackTextTypography
+                    sx={{ fontWeight: 'bold', fontSize: 18 }}
+                  >
+                    {pool &&
+                      textFieldValue !== '' &&
+                      (
+                        (parseFloat(formatEther(pool.supplyShortInitial)) /
+                          (parseFloat(
+                            formatUnits(
+                              pool.collateralBalanceLongInitial,
+                              decimal
+                            )
+                          ) +
+                            parseFloat(
+                              formatUnits(
+                                pool.collateralBalanceShortInitial,
+                                decimal
+                              )
+                            ))) *
+                        parseFloat(formatEther(parseEther(textFieldValue)))
+                      ).toFixed(4)}
+                  </BlackTextTypography>
+                  <BlackTextTypography>Short Tokens</BlackTextTypography>
+                </Container>
+                <Container sx={{ minWidth: theme.spacing(35) }}>
+                  <BlackTextTypography>
+                    {pool &&
+                      textFieldValue !== '' &&
+                      (
+                        Math.round(
+                          ((parseFloat(textFieldValue) * 100) /
+                            parseFloat(
+                              formatEther(
+                                parseEther(textFieldValue).add(
+                                  pool.collateralBalanceLong.add(
+                                    pool.collateralBalanceShort
+                                  )
+                                )
+                              )
+                            ) +
+                            Number.EPSILON) *
+                            100
+                        ) / 100
+                      ).toString() + ' %'}
+                  </BlackTextTypography>
+                  <BlackTextTypography>Share of Pool</BlackTextTypography>
+                </Container>
+              </Stack>
+            </Container>
+          </Container>
+          <Container
+            sx={{
+              mt: '2em',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                type="submit"
+                value="Submit"
+                disabled={
+                  !pool || Date.now() > 1000 * parseInt(pool.expiryDate)
+                }
+                onClick={() => {
+                  const token = new ethers.Contract(
+                    pool!.collateralToken,
+                    ERC20,
+                    provider.getSigner()
+                  )
+                  token
+                    .approve(diva?.address, parseEther(textFieldValue))
+                    .then((tx: any) => {
+                      return tx.wait()
+                    })
+                    .then(() => {
+                      return token.allowance(account, diva?.address)
+                    })
+                    .then(() => {
+                      diva!.addLiquidity(
+                        window.location.pathname.split('/')[1],
+                        parseEther(textFieldValue)
+                      )
+                    })
+                    .catch((err: any) => console.error(err))
+                }}
+                style={{
+                  maxWidth: theme.spacing(38),
+                  maxHeight: theme.spacing(5),
+                  minWidth: theme.spacing(38),
+                  minHeight: theme.spacing(5),
+                }}
+              >
+                Add
+              </Button>
+            </div>
+          </Container>
+        </Stack>
       </Container>
-    </Stack>
+    </Card>
   )
 }

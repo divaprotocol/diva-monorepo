@@ -22,7 +22,9 @@ import { formatUnits } from 'ethers/lib/utils'
 import ERC20 from '../../abi/ERC20.json'
 import { config } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
-
+import { ReactComponent as Bullish } from '../../Images/bullish-svgrepo-com.svg'
+import { ReactComponent as Bearish } from '../../Images/bearish-svgrepo-com.svg'
+import { ReactComponent as Star } from '../../Images/star-svgrepo-com.svg'
 export const Liquidity = () => {
   const [value, setValue] = React.useState(0)
   const [pool, setPool] = React.useState<Pool>()
@@ -31,9 +33,6 @@ export const Liquidity = () => {
   const [openAlert, setOpenAlert] = React.useState(false)
   const [symbol, setSymbol] = React.useState('')
   const { provider } = useWallet()
-  console.log('liquidity')
-  console.log(pool)
-  console.log(decimal)
   const chainId = provider?.network?.chainId
 
   const theme = useTheme()
@@ -98,23 +97,21 @@ export const Liquidity = () => {
             Pool expired. Addition/removal of liquidity is no longer possible
           </Alert>
         </Collapse>
-        <Card sx={{ borderRadius: '16px' }}>
+        <Container sx={{ borderRadius: '16px' }}>
           <Tabs value={value} onChange={handleChange} variant="fullWidth">
             <Tab label="Add" />
             <Tab label="Remove" />
           </Tabs>
-          <CardContent>
-            {value ? (
-              <RemoveLiquidity pool={pool!} diva={diva} symbol={symbol} />
-            ) : (
-              <AddLiquidity pool={pool!} diva={diva} symbol={symbol} />
-            )}
-          </CardContent>
-        </Card>
+          {value ? (
+            <RemoveLiquidity pool={pool!} diva={diva} symbol={symbol} />
+          ) : (
+            <AddLiquidity pool={pool!} diva={diva} symbol={symbol} />
+          )}
+        </Container>
         {!value && pool && (
-          <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(2) }}>
+          <Container sx={{ mt: theme.spacing(4), mb: theme.spacing(4) }}>
             {pool && formatUnits(pool!.capacity, decimal!) !== '0.0' ? (
-              <>
+              <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(4) }}>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Pool capacity</Typography>
                   <Typography>
@@ -129,19 +126,27 @@ export const Liquidity = () => {
                   <Typography>Currently utilized</Typography>
                   <Typography>
                     {pool &&
-                      '1% / ' +
-                        parseFloat(
+                      (100 *
+                        (parseFloat(
                           formatUnits(pool.collateralBalanceLong, decimal)
                         ) +
-                        parseFloat(
-                          formatUnits(pool.collateralBalanceShort, decimal)
-                        )}{' '}
+                          parseFloat(
+                            formatUnits(pool.collateralBalanceShort, decimal)
+                          ))) /
+                        parseFloat(formatUnits(pool.capacity)) +
+                        '% / ' +
+                        (parseFloat(
+                          formatUnits(pool.collateralBalanceLong, decimal)
+                        ) +
+                          parseFloat(
+                            formatUnits(pool.collateralBalanceShort, decimal)
+                          ))}{' '}
                     {symbol!}{' '}
                   </Typography>
                 </Stack>
-              </>
+              </Container>
             ) : (
-              <>
+              <Container>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Pool capacity</Typography>
                   <Typography>Unlimited</Typography>
@@ -159,35 +164,84 @@ export const Liquidity = () => {
                     {symbol!}{' '}
                   </Typography>
                 </Stack>
-              </>
+              </Container>
             )}
           </Container>
         )}
-        <Card sx={{ maxWidth: '600px', borderRadius: '16px' }}>
-          <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(2) }}>
-            {value ? (
-              <Typography>
-                By removing liquidity you are giving back long and short
-                position tokens proportional to the pool balance and receive
-                collateral in return
-              </Typography>
-            ) : (
-              <Stack direction="column">
-                <Typography>
-                  By adding liquidity you receive long and short position tokens
-                  in return which represent a claim against the collateral you
-                  deposited
+        {value ? (
+          <Container>
+            <Card sx={{ mt: theme.spacing(2), borderRadius: '16px' }}>
+              <Container
+                sx={{
+                  mt: theme.spacing(2),
+                  mb: theme.spacing(2),
+                }}
+              >
+                <Typography style={{ color: 'gray' }}>
+                  <Star
+                    style={{
+                      height: theme.spacing(4),
+                      width: theme.spacing(4),
+                    }}
+                  />{' '}
+                  By removing liquidity you are giving back long and short
+                  position tokens proportional to the pool balance and receive
+                  collateral in return
                 </Typography>
-                <Typography sx={{ mt: theme.spacing(2) }}>
-                  Bullish? Keep the long tokens and sell the short tokens
-                </Typography>
-                <Typography sx={{ mt: theme.spacing(2) }}>
-                  Bearish? Keep the short tokens and sell the long tokens
-                </Typography>
-              </Stack>
-            )}
+              </Container>
+            </Card>
           </Container>
-        </Card>
+        ) : (
+          <Container
+            sx={{
+              minWidth: '100px',
+              borderRadius: '16px',
+              mb: theme.spacing(4),
+            }}
+          >
+            <Card sx={{ minWidth: '100px', borderRadius: '16px' }}>
+              <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(2) }}>
+                <Stack direction="column">
+                  <Typography style={{ color: 'gray' }}>
+                    <Star
+                      style={{
+                        height: theme.spacing(4),
+                        width: theme.spacing(4),
+                      }}
+                    />{' '}
+                    By adding liquidity you receive long and short position
+                    tokens in return which represent a claim against the
+                    collateral you deposited
+                  </Typography>
+                  <Typography
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'gray' }}
+                  >
+                    <Bullish
+                      style={{
+                        height: theme.spacing(4),
+                        width: theme.spacing(4),
+                      }}
+                    />{' '}
+                    Bullish? Keep the long tokens and sell the short tokens
+                  </Typography>
+                  <Typography
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'gray' }}
+                  >
+                    <Bearish
+                      style={{
+                        height: theme.spacing(4),
+                        width: theme.spacing(4),
+                      }}
+                    />{' '}
+                    Bearish? Keep the short tokens and sell the long tokens
+                  </Typography>
+                </Stack>
+              </Container>
+            </Card>
+          </Container>
+        )}
       </Stack>
     </Box>
   )
