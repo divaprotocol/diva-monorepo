@@ -74,7 +74,7 @@ export const Liquidity = () => {
         direction={'column'}
         sx={{
           paddingTop: theme.spacing(3),
-          maxWidth: theme.spacing(82),
+          minWidth: theme.spacing(82),
         }}
       >
         <Collapse in={openAlert}>
@@ -113,7 +113,7 @@ export const Liquidity = () => {
             {pool && formatUnits(pool!.capacity, decimal!) !== '0.0' ? (
               <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(4) }}>
                 <Stack direction="row" justifyContent="space-between">
-                  <Typography>Pool capacity</Typography>
+                  <Typography>Pool Capacity</Typography>
                   <Typography>
                     {pool &&
                       (formatUnits(pool!.capacity, decimal) === '0.0'
@@ -123,7 +123,7 @@ export const Liquidity = () => {
                   </Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
-                  <Typography>Currently utilized</Typography>
+                  <Typography>Currently Utilized</Typography>
                   <Typography>
                     {pool &&
                       (100 *
@@ -148,11 +148,11 @@ export const Liquidity = () => {
             ) : (
               <Container>
                 <Stack direction="row" justifyContent="space-between">
-                  <Typography>Pool capacity</Typography>
+                  <Typography>Pool Capacity</Typography>
                   <Typography>Unlimited</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
-                  <Typography>Current pool size</Typography>
+                  <Typography>Current Pool Size</Typography>
                   <Typography>
                     {pool &&
                       parseFloat(
@@ -169,17 +169,19 @@ export const Liquidity = () => {
           </Container>
         )}
         {value ? (
-          <Container
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
             sx={{
-              minWidth: '600px',
+              minWidth: theme.spacing(82),
             }}
           >
             <Card
               sx={{
-                ml: theme.spacing(7),
                 mt: theme.spacing(2),
                 borderRadius: '16px',
-                maxWidth: '450px',
+                width: '450px',
               }}
             >
               <Container
@@ -191,13 +193,13 @@ export const Liquidity = () => {
                 <Stack direction="row">
                   <Star
                     style={{
-                      paddingTop: theme.spacing(0.1),
+                      marginTop: theme.spacing(-1),
                       paddingRight: theme.spacing(1),
-                      height: theme.spacing(2.5),
-                      width: theme.spacing(2.5),
+                      height: theme.spacing(4),
+                      width: theme.spacing(4),
                     }}
                   />
-                  <Typography fontSize={'0.8rem'} style={{ color: 'gray' }}>
+                  <Typography fontSize={'0.85rem'} style={{ color: 'gray' }}>
                     {' '}
                     By removing liquidity you are giving back long and short
                     position tokens proportional to the pool balance and receive
@@ -206,28 +208,35 @@ export const Liquidity = () => {
                 </Stack>
               </Container>
             </Card>
-          </Container>
+          </Box>
         ) : (
-          <Container
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
             sx={{
-              maxWidth: '450px',
-              borderRadius: '16px',
+              minWidth: theme.spacing(82),
               mb: theme.spacing(4),
             }}
           >
-            <Card sx={{ borderRadius: '16px' }}>
+            <Card
+              sx={{
+                width: '450px',
+                borderRadius: '16px',
+              }}
+            >
               <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(2) }}>
                 <Stack direction="column">
                   <Stack direction="row">
                     <Star
                       style={{
-                        paddingTop: theme.spacing(0.1),
-                        paddingRight: theme.spacing(1),
-                        height: theme.spacing(2.5),
-                        width: theme.spacing(2.5),
+                        marginTop: theme.spacing(-1),
+                        paddingRight: theme.spacing(1.8),
+                        height: theme.spacing(4),
+                        width: theme.spacing(4),
                       }}
                     />
-                    <Typography fontSize={'0.8rem'} style={{ color: 'gray' }}>
+                    <Typography fontSize={'0.85rem'} style={{ color: 'gray' }}>
                       {'    '}
                       By adding liquidity you receive long and short position
                       tokens in return which represent a claim against the
@@ -244,7 +253,7 @@ export const Liquidity = () => {
                       }}
                     />
                     <Typography
-                      fontSize={'0.8rem'}
+                      fontSize={'0.85rem'}
                       sx={{ mt: theme.spacing(2) }}
                       style={{ color: 'gray' }}
                     >
@@ -262,7 +271,7 @@ export const Liquidity = () => {
                       }}
                     />
                     <Typography
-                      fontSize={'0.8rem'}
+                      fontSize={'0.85rem'}
                       sx={{ mt: theme.spacing(2) }}
                       style={{ color: 'gray' }}
                     >
@@ -273,7 +282,7 @@ export const Liquidity = () => {
                 </Stack>
               </Container>
             </Card>
-          </Container>
+          </Box>
         )}
       </Stack>
     </Box>

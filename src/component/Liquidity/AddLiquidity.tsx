@@ -88,7 +88,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
       }}
     >
       <Card sx={{ minWidth: '100px', borderRadius: '16px' }}>
-        <Container>
+        <Container sx={{ mt: theme.spacing(2) }}>
           <Stack direction="row" justifyContent="space-between">
             <Typography sx={{ mt: theme.spacing(2) }}>Amount</Typography>
             <Input
@@ -166,18 +166,17 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
           </Collapse>
           <Container
             sx={{
-              mt: theme.spacing(2),
               borderRadius: '16px',
-              width: theme.spacing(56),
-              height: theme.spacing(25),
+              width: theme.spacing(60),
+              height: theme.spacing(22),
               backgroundColor: 'lightgray',
               alignSelf: 'center',
             }}
           >
             <Container
               sx={{
-                mt: theme.spacing(4),
-                paddingRight: theme.spacing(5),
+                mt: theme.spacing(2),
+                paddingTop: theme.spacing(4),
                 backgroundColor: 'lightgray',
               }}
             >
@@ -191,7 +190,12 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                 }}
               />
               <Stack direction="row">
-                <Container sx={{ minWidth: theme.spacing(12) }}>
+                <Container
+                  sx={{
+                    ml: theme.spacing(-2),
+                    minWidth: theme.spacing(18),
+                  }}
+                >
                   <BlackTextTypography>
                     {pool &&
                       textFieldValue !== '' &&
@@ -214,7 +218,12 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                   </BlackTextTypography>
                   <BlackTextTypography>Long Tokens</BlackTextTypography>
                 </Container>
-                <Container sx={{ minWidth: '100px' }}>
+                <Container
+                  sx={{
+                    ml: theme.spacing(-2),
+                    minWidth: theme.spacing(18),
+                  }}
+                >
                   <BlackTextTypography>
                     {pool &&
                       textFieldValue !== '' &&
@@ -237,7 +246,12 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                   </BlackTextTypography>
                   <BlackTextTypography>Short Tokens</BlackTextTypography>
                 </Container>
-                <Container sx={{ minWidth: '100px' }}>
+                <Container
+                  sx={{
+                    ml: theme.spacing(-2),
+                    minWidth: theme.spacing(20),
+                  }}
+                >
                   <BlackTextTypography>
                     {pool &&
                       textFieldValue !== '' &&
@@ -270,6 +284,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
           >
             <div
               style={{
+                height: '100px',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',

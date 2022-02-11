@@ -83,9 +83,13 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
     }
   }, [tokenBalanceLong, textFieldValue, chainId, pool])
   return (
-    <Container>
+    <Container
+      sx={{
+        mt: theme.spacing(2),
+      }}
+    >
       <Card sx={{ borderRadius: '16px' }}>
-        <Container>
+        <Container sx={{ mt: theme.spacing(2) }}>
           <Stack direction="row" justifyContent="space-between">
             <Typography sx={{ mt: theme.spacing(2) }}>Long Token</Typography>
             <Input
@@ -217,7 +221,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           </div>
         </Container>
       </Card>
-      <Container sx={{ mt: theme.spacing(6), mb: theme.spacing(6) }}>
+      <Container sx={{ mt: theme.spacing(4), mb: theme.spacing(2) }}>
         <Stack direction="row" justifyContent="space-between">
           <Typography>Current Pool Size</Typography>
           <Typography>
