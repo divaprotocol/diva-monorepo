@@ -85,8 +85,9 @@ const SubmitButton = (props: any) => {
 
   let buttonName: string
 
-  const statusExpMin = getExpiryMinutesFromNow(Number(props.StatusTimestamp))
-
+  const statusExpMin = getExpiryMinutesFromNow(
+    Number(props.row.StatusTimestamp)
+  )
   if (props.row.Status === 'Submitted' && statusExpMin + 24 * 60 + 5 < 0) {
     buttonName = 'Redeem'
   } else if (
@@ -94,7 +95,12 @@ const SubmitButton = (props: any) => {
     statusExpMin + 48 * 60 + 5 < 0
   ) {
     buttonName = 'Redeem'
-  } else if (props.row.Status === 'Confirmed') {
+  } else if (props.row.Status.startsWith('Confirmed')) {
+    buttonName = 'Redeem'
+  } else if (
+    props.row.Status === 'Expired' &&
+    statusExpMin + 24 * 60 * 5 + 5 < 0
+  ) {
     buttonName = 'Redeem'
   } else {
     buttonName = 'Trade'
@@ -211,8 +217,37 @@ export function MyPositions() {
   )
 
   const pools = poolsQuery.data?.pools || ([] as Pool[])
-
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
+    const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
+    const now = new Date()
+    const fallbackPeriod = expiryDate.setMinutes(
+      expiryDate.getMinutes() + 24 * 60 + 5
+    )
+    const unchallengedPeriod = expiryDate.setMinutes(
+      expiryDate.getMinutes() + 5 * 24 * 60 + 5
+    )
+    const challengedPeriod = expiryDate.setMinutes(
+      expiryDate.getMinutes() + 2 * 24 * 60 + 5
+    )
+    let finalValue = ''
+    let status = val.statusFinalReferenceValue
+    if (Date.now() > fallbackPeriod) {
+      status = 'Fallback'
+    }
+    if (now < expiryDate) {
+      finalValue = '-'
+    } else if (Date.now() > unchallengedPeriod) {
+      finalValue = formatUnits(val.inflection)
+      status = 'Confirmed*'
+    } else if (
+      val.statusFinalReferenceValue === 'Challenged' &&
+      Date.now() > challengedPeriod
+    ) {
+      finalValue = formatUnits(val.inflection)
+      status = 'Confirmed*'
+    } else {
+      finalValue = formatUnits(val.finalReferenceValue)
+    }
     const shared = {
       Id: val.id,
       Icon: val.referenceAsset,
@@ -233,8 +268,6 @@ export function MyPositions() {
       Cap: parseInt(val.cap) / 1e18,
     }
 
-    const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
-    const now = new Date()
     const Status =
       expiryDate.getTime() <= now.getTime() &&
       val.statusFinalReferenceValue.toLowerCase() === 'open'
@@ -255,11 +288,8 @@ export function MyPositions() {
           formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
           ' ' +
           val.collateralSymbol,
-        Status,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : formatUnits(val.finalReferenceValue),
+        Status: status,
+        finalValue: finalValue,
       },
       {
         ...shared,
@@ -273,11 +303,8 @@ export function MyPositions() {
           formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
           ' ' +
           val.collateralSymbol,
-        Status,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : formatUnits(val.finalReferenceValue),
+        Status: status,
+        finalValue: finalValue,
       },
     ]
   }, [] as GridRowModel[])
