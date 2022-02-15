@@ -15,6 +15,8 @@ jobs:
       - name: Run eslint and typescript to check for errors
         run: yarn lint
 
-      # TODO: Enable when we actually have tests
-      # - name: Run tests
-      #   run: yarn test
+      - name: Run tests
+        run: yarn test:e2e
+        env: 
+          NETWORK_NAME: ropsten
+          SECRET_WORDS: ${{ secrets.TEST_WALLET_SECRET }}
