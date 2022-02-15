@@ -16,5 +16,6 @@
     "prettier": "^2.5.1",
     "turbo": "*"
   },
+  "nohoist": ["**/@synthetixio"],
   "packageManager": "yarn@1.22.17"
 }
