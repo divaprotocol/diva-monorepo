@@ -58,7 +58,7 @@
   "scripts": {
     "dev": "react-scripts start",
     "build": "react-scripts build",
-    "test": "start-server-and-test 'yarn start' http-get://localhost:3000 'synpress run --configFile synpress.json'",
+    "test": "start-server-and-test 'yarn dev' http-get://localhost:3000 'synpress run --configFile synpress.json'",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx && tsc --noEmit",
     "fmt": "prettier . -w"
   },
