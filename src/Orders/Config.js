@@ -7,7 +7,7 @@ export const CHAIN_ID = 3
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 export const contractAddresses =
   ContractAddresses.getContractAddressesForChainOrThrow(CHAIN_ID)
-export const ROPSTEN = 'https://ropsten.api.0x.org/sra/v4/order'
+export const ROPSTEN = 'https://ropsten.api.0x.org/orderbook/v1/order'
 export const metamaskProvider = new MetamaskSubprovider(
   window.web3.currentProvider
 )

@@ -11,13 +11,11 @@ import {
   Tooltip,
 } from '@mui/material'
 import React, { useState } from 'react'
-import { useWeb3React } from '@web3-react/core'
 import { ethers } from 'ethers'
 
-import { addresses, theGraphUrl } from '../../constants'
+import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
-import { chainIdtoName } from '../../Util/chainIdToName'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
@@ -25,6 +23,7 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
+import { useWallet } from '@web3-ui/hooks'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -112,16 +111,19 @@ const DueInCell = (props: any) => {
   )
 }
 const SubmitCell = (props: any) => {
-  const { chainId } = useWeb3React()
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId).toLowerCase()
-  )
-  const diva = new ethers.Contract(
-    addresses[chainId!].divaAddress,
-    DIVA_ABI,
-    provider.getSigner()
-  )
+  const { provider } = useWallet()
+
+  const chainId = provider?.network?.chainId
+
+  const diva =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider.getSigner()
+        )
+      : null
+
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
   const handleOpen = () => {
@@ -161,11 +163,13 @@ const SubmitCell = (props: any) => {
             color="primary"
             type="submit"
             onClick={() => {
-              diva.setFinalReferenceValue(
-                props.id.split('/')[0],
-                parseEther(textFieldValue),
-                true
-              )
+              if (diva != null) {
+                diva.setFinalReferenceValue(
+                  props.id.split('/')[0],
+                  parseEther(textFieldValue),
+                  true
+                )
+              }
               handleClose()
             }}
           >
@@ -239,14 +243,21 @@ const columns: GridColDef[] = [
 ]
 
 export function MyDataFeeds() {
-  const { account } = useWeb3React()
-  const query = useQuery<{ pools: Pool[] }>('pools', () =>
-    request(theGraphUrl, queryPools)
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId
+  const userAddress = wallet?.connection?.userAddress
+
+  const query = useQuery<{ pools: Pool[] }>(
+    'pools',
+    () =>
+      chainId != null &&
+      request(config[chainId as number].divaSubgraph, queryPools)
   )
+
   const pools =
-    query.data?.pools.filter(
+    query?.data?.pools?.filter(
       (pool: Pool) =>
-        pool.dataFeedProvider.toLowerCase() === account?.toLowerCase()
+        pool.dataFeedProvider.toLowerCase() === userAddress?.toLowerCase()
     ) || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
@@ -297,7 +308,7 @@ export function MyDataFeeds() {
     ]
   }, [] as GridRowModel[])
 
-  return account ? (
+  return userAddress ? (
     <Stack
       direction="row"
       sx={{

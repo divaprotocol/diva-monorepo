@@ -12,7 +12,6 @@ export const App = () => {
   return (
     <Router>
       <Header />
-
       <Container
         disableGutters
         sx={{ alignItems: 'left', height: '100%', overflow: 'auto' }}

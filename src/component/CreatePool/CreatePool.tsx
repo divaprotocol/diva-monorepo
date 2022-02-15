@@ -55,10 +55,8 @@ export function CreatePool() {
         {!formik.isValid && (
           <Box pb={3} pt={2}>
             {Object.keys(formik.errors).map((key) => (
-              <Box pt={2}>
-                <Alert severity="error" key={key}>
-                  {(formik.errors as any)[key]}
-                </Alert>
+              <Box pt={2} key={key}>
+                <Alert severity="error">{(formik.errors as any)[key]}</Alert>
               </Box>
             ))}
           </Box>
@@ -84,7 +82,6 @@ export function CreatePool() {
             onClick={() => {
               formik.handleSubmit()
             }}
-            loadingPosition="start"
             sx={{
               paddingLeft: formik.status != null ? theme.spacing(6) : undefined,
             }}

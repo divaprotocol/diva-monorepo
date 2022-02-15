@@ -20,41 +20,52 @@ import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
-import { Network } from '../../../Util/chainIdToName'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as qs from 'qs'
+import { formatUnits, parseEther } from 'ethers/lib/utils'
+import ERC20_ABI from '../../../abi/ERC20.json'
+import { getComparator, stableSort } from './OrderHelper'
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ERC20_ABI = require('../../../abi/ERC20.json')
+import { NETWORKS } from '@web3-ui/hooks'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-const CHAIN_ID = Network.ROPSTEN
+const CHAIN_ID = NETWORKS.ropsten
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
 export default function BuyMarket(props: {
   option: Pool
+  handleDisplayOrder: () => void
   tokenAddress: string
 }) {
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
-  const [pricePerOption, _setPricePerOption] = React.useState(0)
+  const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
+  const [youPay, setYouPay] = React.useState(0.0)
+  const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
   // eslint-disable-next-line prettier/prettier
-
   const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
   const exchangeProxyAddress = address.exchangeProxy
   const makerToken = props.tokenAddress
-  const maxApproval = new BigNumber(2).pow(256).minus(1)
-
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken
-  const takerTokenContract = new web3.eth.Contract(ERC20_ABI, takerToken)
+  // TODO: check again why we need to use "any" here
+  const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
+  const params = {
+    makerToken: makerToken,
+    takerToken: takerToken,
+  }
   const handleNumberOfOptions = (value: string) => {
-    setNumberOfOptions(parseFloat(value))
+    if (value !== '') {
+      const nbrOptions = parseFloat(value)
+      setNumberOfOptions(nbrOptions)
+    } else {
+      setYouPay(0.0)
+    }
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -62,10 +73,13 @@ export default function BuyMarket(props: {
     accounts = await window.ethereum.enable()
     const takerTokenAddress = option.collateralToken
     if (!isApproved) {
+      const maxApproval = new BigNumber(2).pow(256).minus(1)
+
       //is ERC20_ABP correct? or should we use position token abi
       //ERC20_ABI enough to use approval
       const takerTokenContract = await new web3.eth.Contract(
-        ERC20_ABI,
+        // TODO: check again why we need to use "any" here
+        ERC20_ABI as any,
         takerTokenAddress
       )
       await takerTokenContract.methods
@@ -74,8 +88,9 @@ export default function BuyMarket(props: {
       const approvedByTaker = await takerTokenContract.methods
         .allowance(accounts[0], exchangeProxyAddress)
         .call()
-      console.log('Approved by taker: ' + (await approvedByTaker.toString()))
-      alert(`Maker allowance for ${option.collateralToken} successfully set`)
+      alert(
+        `Taker allowance for ${option.collateralToken} successfully set by ${approvedByTaker}`
+      )
       setIsApproved(true)
     } else {
       const orderData = {
@@ -87,9 +102,50 @@ export default function BuyMarket(props: {
         makerToken: makerToken,
         takerToken: option.collateralToken,
         ERC20_ABI: ERC20_ABI,
+        avgExpectedRate: avgExpectedRate,
+        existingLimitOrders: existingLimitOrders,
       }
 
-      buyMarketOrder(orderData)
+      buyMarketOrder(orderData).then((orderFillStatus: any) => {
+        if (!(orderFillStatus === undefined)) {
+          if (!('logs' in orderFillStatus)) {
+            alert('Order could not be filled logs not found')
+            return
+          } else {
+            orderFillStatus.logs.forEach(async (eventData: any) => {
+              if (!('event' in eventData)) {
+                return
+              } else {
+                if (eventData.event === 'LimitOrderFilled') {
+                  //reset fill order button to approve
+                  setIsApproved(false)
+                  //get updated wallet balance
+                  getCollateralInWallet().then((val) => {
+                    if (val != null) {
+                      setCollateralBalance(Number(val))
+                    }
+                  })
+                  //reset input & you pay fields
+                  Array.from(document.querySelectorAll('input')).forEach(
+                    (input) => (input.value = '')
+                  )
+                  setNumberOfOptions(0.0)
+                  setYouPay(0.0)
+                  alert('Order successfully filled')
+                  //wait for 4 secs for 0x to update orders then handle order book display
+                  await new Promise((resolve) => setTimeout(resolve, 4000))
+                  props.handleDisplayOrder()
+                  return
+                } else {
+                  alert('Order could not be filled')
+                }
+              }
+            })
+          }
+        } else {
+          alert('order could not be filled response is not defined')
+        }
+      })
     }
   }
 
@@ -118,20 +174,96 @@ export default function BuyMarket(props: {
     let balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
-    balance = balance / 10 ** option.collateralDecimals
+    balance = formatUnits(balance.toString(), option.collateralDecimals)
     return balance
+  }
+
+  const getLimitOrders = async () => {
+    const orders: any = []
+    const res = await fetch(
+      `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
+    )
+    const resJSON = await res.json()
+    const responseOrders: any = resJSON['records']
+    responseOrders.forEach((data: any) => {
+      const order = data.order
+      const takerAmount = new BigNumber(order.takerAmount)
+      const makerAmount = new BigNumber(order.makerAmount)
+      order['expectedRate'] = takerAmount
+        .dividedBy(makerAmount)
+        .decimalPlaces(option.collateralDecimals)
+      order['remainingFillableTakerAmount'] =
+        data.metaData.remainingFillableTakerAmount
+      orders.push(order)
+    })
+
+    const sortOrder = 'ascOrder'
+    const orderBy = 'expectedRate'
+    const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
+    if (sortedRecords.length > 0) {
+      const bestRate = sortedRecords[0].expectedRate
+      const rate = Number(bestRate)
+      setAvgExpectedRate(rate)
+    }
+    console.log('sorted order ' + JSON.stringify(sortedRecords))
+    return sortedRecords
   }
 
   useEffect(() => {
     getCollateralInWallet().then((val) => {
-      console.log(JSON.stringify(val))
       if (val != null) {
         setCollateralBalance(Number(val))
       } else {
         throw new Error(`can not read wallet balance`)
       }
     })
+    setAvgExpectedRate(avgExpectedRate)
+    getLimitOrders().then((orders: []) => {
+      setExistingLimitOrders(orders)
+    })
   }, [])
+
+  useEffect(() => {
+    if (numberOfOptions > 0 && existingLimitOrders.length > 0) {
+      let count = numberOfOptions
+      let cumulativeAvg = parseEther('0')
+      let cumulativeTaker = parseEther('0')
+      let cumulativeMaker = parseEther('0')
+      existingLimitOrders.forEach((order: any) => {
+        const makerAmount = Number(
+          formatUnits(order.makerAmount.toString(), option.collateralDecimals)
+        )
+        const expectedRate = order.expectedRate
+        if (count > 0) {
+          if (count <= makerAmount) {
+            const orderTotalAmount = parseEther(expectedRate.toString()).mul(
+              parseEther(count.toString())
+            )
+            cumulativeTaker = cumulativeTaker.add(orderTotalAmount)
+            cumulativeMaker = cumulativeMaker.add(parseEther(count.toString()))
+            count = 0
+          } else {
+            //nbrOfOptions entered are greater than current order maker amount
+            //so add entire order taker amount in cumulative taker
+            cumulativeTaker = cumulativeTaker.add(parseEther(order.takerAmount))
+            cumulativeMaker = cumulativeMaker.add(
+              parseEther(makerAmount.toString())
+            )
+            count = count - makerAmount
+          }
+        }
+      })
+      cumulativeAvg = cumulativeTaker.div(cumulativeMaker)
+      if (cumulativeAvg.gt(0)) {
+        const avg = Number(
+          formatUnits(cumulativeAvg, option.collateralDecimals)
+        )
+        setAvgExpectedRate(avg)
+        const youPayAmount = avg * numberOfOptions
+        setYouPay(youPayAmount)
+      }
+    }
+  }, [numberOfOptions])
 
   return (
     <div>
@@ -155,7 +287,7 @@ export default function BuyMarket(props: {
             </LabelStyleDiv>
           </InfoTooltip>
           <RightSideLabel>
-            {pricePerOption} {option.collateralTokenName}
+            {avgExpectedRate.toFixed(4)} {option.collateralTokenName}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -163,7 +295,7 @@ export default function BuyMarket(props: {
             <LabelStyle>You Pay</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption} {option.collateralTokenName}
+            {youPay.toFixed(4)} {option.collateralSymbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -172,7 +304,7 @@ export default function BuyMarket(props: {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {collateralBalance} {option.collateralTokenName}
+              {collateralBalance.toFixed(4)} {option.collateralSymbol}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
@@ -221,6 +353,7 @@ export default function BuyMarket(props: {
             startIcon={<AddIcon />}
             type="submit"
             value="Submit"
+            disabled={existingLimitOrders.length > 0 ? false : true}
           >
             {isApproved ? 'Fill Order' : 'Approve'}
           </Button>

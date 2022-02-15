@@ -1,13 +1,13 @@
 import { Contract, ethers } from 'ethers'
 import {
   Alert,
-  Box,
   Card,
+  Box,
   Collapse,
   Container,
   IconButton,
+  Input,
   Stack,
-  TextField,
   Typography,
   useTheme,
 } from '@mui/material'
@@ -18,8 +18,7 @@ import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { useCoinIcon } from '../../hooks/useCoinIcon'
 import ERC20 from '../../abi/ERC20.json'
 import Button from '@mui/material/Button'
-import { chainIdtoName } from '../../Util/chainIdToName'
-import { useWeb3React } from '@web3-react/core'
+import { useWallet } from '@web3-ui/hooks'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -43,11 +42,8 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
   const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
   const [impliedCollateral, setImpliedCollateral] = React.useState(0)
-  const { chainId, account } = useWeb3React()
-  const provider = new ethers.providers.Web3Provider(
-    window.ethereum,
-    chainIdtoName(chainId!).toLowerCase()
-  )
+  const { provider } = useWallet()
+  const chainId = provider?.network?.chainId
 
   const theme = useTheme()
 
@@ -87,140 +83,154 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
     }
   }, [tokenBalanceLong, textFieldValue, chainId, pool])
   return (
-    <Stack
-      direction="column"
+    <Container
       sx={{
-        mt: theme.spacing(4),
+        mt: theme.spacing(2),
       }}
     >
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(2) }}>Long Token</Typography>
-        <TextField
-          inputProps={{ style: { textAlign: 'right' } }}
-          value={textFieldValue}
-          onChange={(e) => {
-            setTextFieldValue(e.target.value)
-          }}
-        />
-      </Stack>
-      {tokenBalanceLong ? (
-        <>
-          <Typography variant="subtitle2" color="text.secondary">
-            Your balance: {tokenBalanceLong!}
-            <MaxCollateral
-              role="button"
-              onClick={() => {
-                if (tokenBalanceLong != null) {
-                  setTextFieldValue(tokenBalanceLong)
+      <Card sx={{ borderRadius: '16px' }}>
+        <Container sx={{ mt: theme.spacing(2) }}>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography sx={{ mt: theme.spacing(2) }}>Long Token</Typography>
+            <Input
+              type="number"
+              inputProps={{ style: { textAlign: 'right' } }}
+              value={textFieldValue}
+              onChange={(e) => {
+                const amount = e.target.value
+                if (!amount || amount.match(/^\d{1,}(\.\d{0,18})?$/)) {
+                  setTextFieldValue(amount)
                 }
               }}
+            />
+          </Stack>
+          {tokenBalanceLong ? (
+            <>
+              <Typography variant="subtitle2" color="text.secondary">
+                Your balance: {tokenBalanceLong!}
+                <MaxCollateral
+                  role="button"
+                  onClick={() => {
+                    if (tokenBalanceLong != null) {
+                      setTextFieldValue(tokenBalanceLong)
+                    }
+                  }}
+                >
+                  {' (Max)'}
+                </MaxCollateral>
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="subtitle2" color="text.secondary">
+              Please connect your wallet
+            </Typography>
+          )}
+          <Stack direction="row" justifyContent="space-between">
+            <Typography sx={{ mt: theme.spacing(2) }}>Short Token</Typography>
+            <Typography sx={{ mt: theme.spacing(2) }}>
+              {pool &&
+                textFieldValue !== '' &&
+                (
+                  (parseFloat(formatEther(pool.supplyShortInitial)) /
+                    parseFloat(formatEther(pool.supplyLongInitial))) *
+                  parseFloat(formatEther(parseEther(textFieldValue)))
+                ).toString()}
+            </Typography>
+          </Stack>
+          {tokenBalanceShort ? (
+            <>
+              <Typography variant="subtitle2" color="text.secondary">
+                Your balance: {tokenBalanceShort}
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="subtitle2" color="text.secondary">
+              Please connect your wallet
+            </Typography>
+          )}
+          <Collapse in={openAlert} sx={{ mt: theme.spacing(2) }}>
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setOpenAlert(false)
+                  }}
+                >
+                  {'X'}
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
             >
-              {' (Max)'}
-            </MaxCollateral>
-          </Typography>
-        </>
-      ) : (
-        <Typography variant="subtitle2" color="text.secondary">
-          Please connect your wallet
-        </Typography>
-      )}
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(2) }}>Short Token</Typography>
-        <Typography sx={{ mt: theme.spacing(2) }}>
-          {pool &&
-            textFieldValue !== '' &&
-            (
-              (parseFloat(formatEther(pool.supplyShortInitial)) /
-                parseFloat(formatEther(pool.supplyLongInitial))) *
-              parseFloat(formatEther(parseEther(textFieldValue)))
-            ).toString()}
-        </Typography>
-      </Stack>
-      {tokenBalanceShort ? (
-        <>
-          <Typography variant="subtitle2" color="text.secondary">
-            Your balance: {tokenBalanceShort}
-          </Typography>
-        </>
-      ) : (
-        <Typography variant="subtitle2" color="text.secondary">
-          Please connect your wallet
-        </Typography>
-      )}
-      <Collapse in={openAlert} sx={{ mt: theme.spacing(2) }}>
-        <Alert
-          severity="error"
-          action={
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
+              Insufficient wallet balance
+            </Alert>
+          </Collapse>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography sx={{ mt: theme.spacing(2) }}>
+              You Receive (after fees)
+            </Typography>
+            <Typography sx={{ mt: theme.spacing(2) }}>
+              {pool &&
+                textFieldValue !== '' &&
+                (
+                  impliedCollateral -
+                  parseFloat(formatEther(pool!.redemptionFee)) *
+                    impliedCollateral -
+                  parseFloat(formatEther(pool!.settlementFee)) *
+                    impliedCollateral
+                )
+                  .toPrecision(4)
+                  .toString() +
+                  ' ' +
+                  symbol}
+            </Typography>
+          </Stack>
+          <div
+            style={{
+              height: '100px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              type="submit"
+              value="Submit"
+              disabled={!pool}
               onClick={() => {
-                setOpenAlert(false)
+                diva!.removeLiquidity(
+                  window.location.pathname.split('/')[1],
+                  parseEther(textFieldValue)
+                )
+              }}
+              style={{
+                maxWidth: theme.spacing(38),
+                maxHeight: theme.spacing(5),
+                minWidth: theme.spacing(38),
+                minHeight: theme.spacing(5),
               }}
             >
-              {'X'}
-            </IconButton>
-          }
-          sx={{ mb: 2 }}
-        >
-          Insufficient wallet balance
-        </Alert>
-      </Collapse>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(2) }}>
-          You Receive (after fees)
-        </Typography>
-        <Typography sx={{ mt: theme.spacing(2) }}>
-          {pool &&
-            textFieldValue !== '' &&
-            (
-              impliedCollateral -
-              parseFloat(formatEther(pool!.redemptionFee)) * impliedCollateral -
-              parseFloat(formatEther(pool!.settlementFee)) * impliedCollateral
-            ).toString() +
-              ' ' +
-              symbol}
-        </Typography>
-      </Stack>
-      <div
-        style={{
-          height: '100px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          type="submit"
-          value="Submit"
-          disabled={!pool}
-          onClick={() => {
-            diva!.removeLiquidity(
-              window.location.pathname.split('/')[1],
-              parseEther(textFieldValue)
-            )
-          }}
-          style={{
-            maxWidth: theme.spacing(38),
-            maxHeight: theme.spacing(5),
-            minWidth: theme.spacing(38),
-            minHeight: theme.spacing(5),
-          }}
-        >
-          Remove
-        </Button>
-      </div>
-      <Box>
+              Remove
+            </Button>
+          </div>
+        </Container>
+      </Card>
+      <Container sx={{ mt: theme.spacing(4), mb: theme.spacing(2) }}>
         <Stack direction="row" justifyContent="space-between">
           <Typography>Current Pool Size</Typography>
           <Typography>
             {pool &&
               parseFloat(formatUnits(pool.collateralBalanceLong, decimal)) +
-                parseFloat(formatUnits(pool.collateralBalanceShort, decimal))}
+                parseFloat(
+                  formatUnits(pool.collateralBalanceShort, decimal)
+                )}{' '}
+            {symbol!}{' '}
           </Typography>
         </Stack>
         <Stack direction="row" justifyContent="space-between">
@@ -230,7 +240,8 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
               textFieldValue !== '' &&
               (
                 parseFloat(formatEther(pool!.redemptionFee)) * impliedCollateral
-              ).toPrecision(4)}
+              ).toPrecision(4)}{' '}
+            {symbol!}{' '}
           </Typography>
         </Stack>
         <Stack direction="row" justifyContent="space-between">
@@ -240,10 +251,11 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
               textFieldValue !== '' &&
               (
                 parseFloat(formatEther(pool!.settlementFee)) * impliedCollateral
-              ).toPrecision(4)}
+              ).toPrecision(4)}{' '}
+            {symbol!}{' '}
           </Typography>
         </Stack>
-      </Box>
-    </Stack>
+      </Container>
+    </Container>
   )
 }

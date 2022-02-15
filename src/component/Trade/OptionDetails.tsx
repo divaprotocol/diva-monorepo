@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
 import { Pool } from '../../lib/queries'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatEther, formatUnits } from 'ethers/lib/utils'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -123,25 +123,28 @@ export default function OptionDetails({
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Cap</FlexBoxHeader>
-          <FlexBoxData>{parseInt(pool.cap) / 1e18}</FlexBoxData>
+          <FlexBoxData>{Number(formatEther(pool.cap))}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Collateral</FlexBoxHeader>
           <FlexBoxData>
-            {isLong
-              ? formatUnits(pool.collateralBalanceLong, pool.collateralDecimals)
-              : formatUnits(
+            {Number(
+              formatUnits(pool.collateralBalanceLong, pool.collateralDecimals)
+            ) +
+              Number(
+                formatUnits(
                   pool.collateralBalanceShort,
                   pool.collateralDecimals
-                ) +
-                ' ' +
-                pool.collateralToken}
+                )
+              ) +
+              ' ' +
+              pool.collateralSymbol}
           </FlexBoxData>
         </FlexBox>
       </FlexDiv>
       <FlexSecondLineDiv>
         <FlexBoxSecondLine>
-          <FlexBoxHeader>Data feed provider</FlexBoxHeader>
+          <FlexBoxHeader>Data provider</FlexBoxHeader>
           <Tooltip title={pool.dataFeedProvider} arrow>
             <FlexToolTipBoxData>
               {pool.dataFeedProvider.length > 0

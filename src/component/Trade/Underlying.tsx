@@ -1,8 +1,8 @@
 import styled from 'styled-components'
-import OpenOrdersNew from './OptionOrdersNew'
-import OrderBook from './OrderBookNew'
-import CreateOrder from './CreateOrder'
+import OptionOrders from './OptionOrders'
+import OrderBook from './OrderBook'
 import { Container, Paper, Stack, useTheme } from '@mui/material'
+import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import TradeChart from '../Graphs/TradeChart'
@@ -11,7 +11,8 @@ import OptionHeader from './OptionHeader'
 import { useQuery } from 'react-query'
 import { Pool, queryPool } from '../../lib/queries'
 import request from 'graphql-request'
-import { theGraphUrl } from '../../constants'
+import { config } from '../../constants'
+import { useWallet } from '@web3-ui/hooks'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import React from 'react'
@@ -39,9 +40,14 @@ export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const [value, setValue] = React.useState(0)
   const breakEvenOptionPrice = 0
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId || 3
   const theme = useTheme()
   const query = useQuery<{ pool: Pool }>('pool', () =>
-    request(theGraphUrl, queryPool(parseInt(params.poolId)))
+    request(
+      config[chainId as number].divaSubgraph,
+      queryPool(parseInt(params.poolId))
+    )
   )
 
   const pool = query.data?.pool
@@ -99,10 +105,10 @@ export default function Underlying() {
             <Paper>
               <LeftCompFlexContainer>
                 <LeftCompLeftDiv>
-                  <OrderBook option={pool} />
+                  <OrderBook option={pool} tokenAddress={tokenAddress} />
                 </LeftCompLeftDiv>
                 <LeftCompRightDiv>
-                  <OpenOrdersNew option={pool} />
+                  <OptionOrders option={pool} tokenAddress={tokenAddress} />
                 </LeftCompRightDiv>
               </LeftCompFlexContainer>
             </Paper>
@@ -115,6 +121,8 @@ export default function Underlying() {
             <Paper>
               <TradeChart
                 data={data}
+                refAsset={pool.referenceAsset}
+                payOut={pool.collateralSymbol}
                 w={380}
                 h={200}
                 isLong={OptionParams.IsLong}
