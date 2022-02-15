@@ -3,12 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "workspaces": {
-    "nohoist": [
-      "**/@synthetixio/**"
-    ],
     "packages": [
       "packages/*"
-    ]
+    ],
+    "nohoist": ["**/@synthetixio/synpress"]
   },
   "scripts": {
     "build": "turbo run build",
