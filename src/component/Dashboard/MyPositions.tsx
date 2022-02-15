@@ -236,7 +236,11 @@ export function MyPositions() {
     }
     if (now < expiryDate) {
       finalValue = '-'
-    } else if (Date.now() > unchallengedPeriod) {
+    } else if (
+      val.statusFinalReferenceValue === 'Open' &&
+      Date.now() > unchallengedPeriod
+    ) {
+      console.log(val.statusFinalReferenceValue)
       finalValue = formatUnits(val.inflection)
       status = 'Confirmed*'
     } else if (
@@ -247,6 +251,7 @@ export function MyPositions() {
       status = 'Confirmed*'
     } else {
       finalValue = formatUnits(val.finalReferenceValue)
+      status = val.statusFinalReferenceValue
     }
     const shared = {
       Id: val.id,
