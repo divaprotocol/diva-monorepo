@@ -16,6 +16,7 @@
     "@mui/styles": "^5.1.0",
     "@mui/x-data-grid": "^5.2.1",
     "@reduxjs/toolkit": "^1.6.1",
+    "@synthetixio/synpress": "^1.1.1",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
@@ -29,6 +30,7 @@
     "coingecko-api": "^1.0.10",
     "d3": "^7.0.1",
     "date-fns": "^2.25.0",
+    "dotenv": "^16.0.0",
     "ethers": "^5.5.1",
     "firebase": "^8.7.1",
     "firebase-admin": "^9.11.0",
@@ -57,6 +59,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:e2e": "start-server-and-test 'yarn start' http-get://localhost:3000 'synpress run --configFile synpress.json'",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx && tsc --noEmit",
     "eject": "react-scripts eject",
     "fmt": "prettier . -w"
