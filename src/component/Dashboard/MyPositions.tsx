@@ -6,7 +6,7 @@ import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
@@ -78,9 +78,26 @@ const SubmitButton = (props: any) => {
   const token =
     provider && new ethers.Contract(props.row.address, ERC20, provider)
   const handleRedeem = () => {
-    token?.balanceOf(userAddress).then((bal: BigNumber) => {
-      diva.redeemPositionToken(props.row.address, bal)
-    })
+    if (props.row.Status === 'Confirmed*') {
+      console.log(props.row.Inflection)
+      token?.balanceOf(userAddress).then((bal: BigNumber) => {
+        diva
+          .setFinalReferenceValue(
+            props.id.split('/')[0],
+            parseEther(props.row.Inflection),
+            false
+          )
+          .then((tx) => {
+            tx.wait().then(() => {
+              diva.redeemPositionToken(props.row.address, bal)
+            })
+          })
+      })
+    } else {
+      token?.balanceOf(userAddress).then((bal: BigNumber) => {
+        diva.redeemPositionToken(props.row.address, bal)
+      })
+    }
   }
 
   let buttonName: string
