@@ -7,7 +7,7 @@ import Slider from '@mui/material/Slider'
 import Input from '@mui/material/Input'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
-import { LabelStyle } from './UiStyles'
+import { LabelStyle, SubLabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -29,7 +29,7 @@ import { sellMarketOrder } from '../../../Orders/SellMarket'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 
 import ERC20_ABI from '../../../abi/ERC20.json'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import { getComparator, stableSort } from './OrderHelper'
 import { useWallet } from '@web3-ui/hooks'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -52,6 +52,8 @@ export default function SellMarket(props: {
   const [youReceive, setYouReceive] = React.useState(0.0)
   const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
+  const [approvalAmount, setApprovalAmount] = React.useState(0.0)
+  const [makerAccount, setMakerAccount] = React.useState('')
   // eslint-disable-next-line prettier/prettier
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
@@ -60,11 +62,6 @@ export default function SellMarket(props: {
   const makerToken = option.collateralToken
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
-
-  const params = {
-    makerToken: makerToken,
-    takerToken: takerToken,
-  }
 
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
@@ -77,73 +74,98 @@ export default function SellMarket(props: {
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    accounts = await window.ethereum.enable()
-    const makerAccount = accounts[0]
     if (!isApproved) {
-      await takerTokenContract.methods
-        .approve(exchangeProxyAddress, maxApproval)
-        .send({ from: makerAccount })
+      if (numberOfOptions > 0) {
+        if (numberOfOptions > walletBalance) {
+          alert('amount entered is greater than available balance')
+        } else {
+          const amount = parseUnits(numberOfOptions.toString())
+          await takerTokenContract.methods
+            .approve(exchangeProxyAddress, amount)
+            .send({ from: makerAccount })
 
-      const approvedByMaker = await takerTokenContract.methods
-        .allowance(makerAccount, exchangeProxyAddress)
-        .call()
-      alert(
-        `Maker allowance for ${option.referenceAsset} successfully set by ${approvedByMaker}`
-      )
-      setIsApproved(true)
-    } else {
-      const orderData = {
-        maker: makerAccount,
-        provider: web3,
-        isBuy: false,
-        nbrOptions: numberOfOptions,
-        collateralDecimals: option.collateralDecimals,
-        makerToken: optionTokenAddress,
-        takerToken: option.collateralToken,
-        ERC20_ABI: ERC20_ABI,
-        avgExpectedRate: avgExpectedRate,
-        existingLimitOrders: existingLimitOrders,
+          const approvedByMaker = await takerTokenContract.methods
+            .allowance(makerAccount, exchangeProxyAddress)
+            .call()
+          alert(
+            `Maker allowance for ${option.referenceAsset} successfully set by ${approvedByMaker}`
+          )
+          setIsApproved(true)
+        }
+      } else {
+        alert('please enter positive balance for approval')
       }
-      sellMarketOrder(orderData).then((orderFillStatus: any) => {
-        if (!(orderFillStatus == undefined)) {
-          if (!('logs' in orderFillStatus)) {
-            alert('order could not be filled')
-            return
-          } else {
-            orderFillStatus.logs.forEach(async (eventData: any) => {
-              if (!('event' in eventData)) {
-                return
-              } else {
-                if (eventData.event === 'LimitOrderFilled') {
-                  //reset fill order button to approve
-                  setIsApproved(false)
-                  //get updated wallet balance
-                  getOptionsInWallet().then((val) => {
-                    if (val != null) {
-                      setWalletBalance(Number(val))
-                    }
-                  })
-                  //reset input & you pay fields
-                  Array.from(document.querySelectorAll('input')).forEach(
-                    (input) => (input.value = '')
-                  )
-                  setNumberOfOptions(0.0)
-                  setYouReceive(0.0)
-                  alert('Order successfully filled')
-                  //wait for a sec for 0x to update orders then handle order book display
-                  await new Promise((resolve) => setTimeout(resolve, 4000))
-                  props.handleDisplayOrder()
+    } else {
+      if (numberOfOptions > approvalAmount) {
+        if (
+          confirm(
+            'options to sell exceeds approval limit, approve more options '
+          )
+        ) {
+          setIsApproved(false)
+        } else {
+          //TBD discuss this case
+          console.log('nothing done')
+        }
+      } else {
+        const orderData = {
+          maker: makerAccount,
+          provider: web3,
+          isBuy: false,
+          nbrOptions: numberOfOptions,
+          collateralDecimals: option.collateralDecimals,
+          makerToken: optionTokenAddress,
+          takerToken: option.collateralToken,
+          ERC20_ABI: ERC20_ABI,
+          avgExpectedRate: avgExpectedRate,
+          existingLimitOrders: existingLimitOrders,
+        }
+        sellMarketOrder(orderData).then((orderFillStatus: any) => {
+          if (!(orderFillStatus == undefined)) {
+            if (!('logs' in orderFillStatus)) {
+              alert('order could not be filled')
+              return
+            } else {
+              orderFillStatus.logs.forEach(async (eventData: any) => {
+                if (!('event' in eventData)) {
                   return
                 } else {
-                  alert('Order could not be filled')
+                  if (eventData.event === 'LimitOrderFilled') {
+                    props.handleDisplayOrder()
+                    let totalSellAmount = approvalAmount
+                    totalSellAmount -= numberOfOptions
+                    setApprovalAmount(totalSellAmount)
+                    const isApproved = totalSellAmount <= 0 ? false : true
+                    //reset fill order button to approve
+                    setIsApproved(isApproved)
+                    //get updated wallet balance
+                    getOptionsInWallet().then((val) => {
+                      if (val.balance != null) {
+                        setWalletBalance(Number(val.balance))
+                      }
+                    })
+                    //reset input & you pay fields
+                    Array.from(document.querySelectorAll('input')).forEach(
+                      (input) => (input.value = '')
+                    )
+                    setNumberOfOptions(0.0)
+                    setYouReceive(0.0)
+                    alert('Order successfully filled')
+                    //wait for a sec for 0x to update orders then handle order book display
+                    await new Promise((resolve) => setTimeout(resolve, 4000))
+                    props.handleDisplayOrder()
+                    return
+                  } else {
+                    alert('Order could not be filled')
+                  }
                 }
-              }
-            })
+              })
+            }
+          } else {
+            alert('order could not be filled')
           }
-        } else {
-          alert('order could not be filled')
-        }
-      })
+        })
+      }
     }
   }
 
@@ -167,17 +189,38 @@ export default function SellMarket(props: {
   }
 
   const getOptionsInWallet = async () => {
-    accounts = await window.ethereum.enable()
+    /*accounts = await window.ethereum.enable()
     const makerAccount = accounts[0]
     let balance = await takerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
     balance = Number(formatUnits(balance.toString(), 18))
-    return balance
+    return balance*/
+    accounts = await window.ethereum.enable()
+    const makerAccount = accounts[0]
+    let allowance = await takerTokenContract.methods
+      .allowance(makerAccount, exchangeProxyAddress)
+      .call()
+    console.log('allowance before' + allowance)
+    let balance = await takerTokenContract.methods
+      .balanceOf(makerAccount)
+      .call()
+    balance = Number(formatUnits(balance.toString(), 18))
+    allowance = Number(formatUnits(allowance.toString(), 18))
+    return {
+      balance: balance,
+      account: makerAccount,
+      approvalAmount: allowance,
+    }
   }
 
-  const getLimitOrders = async () => {
+  const getLimitOrders = async (maker) => {
     const orders: any = []
+    let existingOrdersAmount = 0
+    const params = {
+      makerToken: makerToken,
+      takerToken: takerToken,
+    }
     const res = await fetch(
       `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
     )
@@ -191,20 +234,27 @@ export default function SellMarket(props: {
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
+      if (maker == order.maker) {
+        existingOrdersAmount += Number(formatUnits(order.makerAmount, 18))
+        console.log('existing order amount ' + existingOrdersAmount)
+      }
     })
     const sortOrder = 'desOrder'
     const orderBy = 'expectedRate'
-    const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
-    if (sortedRecords.length) {
-      const bestRate = sortedRecords[0].expectedRate
+    const sortedOrders = stableSort(orders, getComparator(sortOrder, orderBy))
+    if (sortedOrders.length) {
+      const bestRate = sortedOrders[0].expectedRate
       console.log('best rate ' + bestRate)
       setAvgExpectedRate(Number(bestRate))
     }
-    console.log('sorted records ' + JSON.stringify(sortedRecords))
-    return sortedRecords
+    console.log('sorted records ' + JSON.stringify(sortedOrders))
+    return {
+      sortedOrders: sortedOrders,
+      existingOrdersAmount: existingOrdersAmount,
+    }
   }
 
-  useEffect(() => {
+  /*useEffect(() => {
     getOptionsInWallet().then((val) => {
       if (val != null) {
         setWalletBalance(Number(val))
@@ -215,6 +265,23 @@ export default function SellMarket(props: {
     setAvgExpectedRate(avgExpectedRate)
     getLimitOrders().then((orders: []) => {
       setExistingLimitOrders(orders)
+    })
+  }, [])*/
+  useEffect(() => {
+    getOptionsInWallet().then((val) => {
+      !Number.isNaN(val.balance)
+        ? setWalletBalance(Number(val.balance))
+        : setWalletBalance(0)
+      setMakerAccount(val.account)
+      setAvgExpectedRate(avgExpectedRate)
+      getLimitOrders(val.account).then((data) => {
+        setExistingLimitOrders(data.sortedOrders)
+        const remainingAmount = val.approvalAmount - data.existingOrdersAmount
+        console.log('approval amount ' + val.approvalAmount)
+        setApprovalAmount(remainingAmount)
+        console.log('remaining approval ' + remainingAmount)
+        remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+      })
     })
   }, [])
 
@@ -254,6 +321,7 @@ export default function SellMarket(props: {
         const avg = Number(formatUnits(cumulativeAvg))
         setAvgExpectedRate(avg)
         const youPay = avg * numberOfOptions
+        console.log('You Pay ' + youPay)
         setYouReceive(youPay)
       }
     }
@@ -264,7 +332,10 @@ export default function SellMarket(props: {
       <form onSubmit={handleOrderSubmit}>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Number of Options</LabelStyle>
+            <Box>
+              <LabelStyle>Number of Options</LabelStyle>
+              <SubLabelStyle>Approved Balance {approvalAmount}</SubLabelStyle>
+            </Box>
           </LabelStyleDiv>
           <FormInput
             type="text"

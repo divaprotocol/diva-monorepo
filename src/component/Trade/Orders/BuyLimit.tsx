@@ -96,23 +96,22 @@ export default function BuyLimit(props: {
           alert('expected collateral payment greater than available balance')
         } else {
           const amount = parseUnits(youPay.toString())
-          // const takerTokenContract = await new web3.eth.Contract(
-          //   // TODO: Check why any is required
-          //   ERC20_ABI as any,
-          //   takerTokenAddress
-          // )
           await takerTokenContract.methods
             .approve(exchangeProxyAddress, amount)
             .send({ from: accounts[0] })
-          const collateralApproved = await takerTokenContract.methods
+          let collateralAllowance = await takerTokenContract.methods
             .allowance(accounts[0], exchangeProxyAddress)
             .call()
+          collateralAllowance = Number(
+            formatUnits(collateralAllowance, option.collateralDecimals)
+          )
           alert(
             `Taker allowance for ${
               option.collateralToken + ' '
-            } ${collateralApproved} successfully set by ${takerAccount}`
+            } ${collateralAllowance} successfully set by ${takerAccount}`
           )
           setIsApproved(true)
+          setApprovalAmount(collateralAllowance)
         }
       } else {
         alert('Please enter number of options you want to buy')
@@ -126,6 +125,7 @@ export default function BuyLimit(props: {
         ) {
           setIsApproved(false)
         } else {
+          //TBD discuss this case
           console.log('nothing done')
         }
       } else {
@@ -147,7 +147,7 @@ export default function BuyLimit(props: {
             if (response.status === 200) {
               props.handleDisplayOrder()
               let totalBuyAmount = approvalAmount
-              totalBuyAmount -= numberOfOptions
+              totalBuyAmount -= youPay
               setApprovalAmount(totalBuyAmount)
               const isApproved = totalBuyAmount <= 0 ? false : true
               handleFormReset(isApproved)
@@ -191,9 +191,7 @@ export default function BuyLimit(props: {
       let allowance = await takerTokenContract.methods
         .allowance(takerAccount, exchangeProxyAddress)
         .call()
-      console.log('allowance before' + allowance)
       allowance = Number(formatUnits(allowance, option.collateralDecimals))
-      console.log('allowance ' + allowance)
       let balance = await takerTokenContract.methods
         .balanceOf(takerAccount)
         .call()

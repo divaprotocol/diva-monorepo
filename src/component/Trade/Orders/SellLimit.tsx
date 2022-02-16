@@ -100,6 +100,7 @@ export default function SellLimit(props: {
         ) {
           setIsApproved(false)
         } else {
+          //TBD discuss this case
           console.log('nothing done')
         }
       } else {
@@ -179,10 +180,11 @@ export default function SellLimit(props: {
         ? setWalletBalance(Number(val.balance))
         : setWalletBalance(0)
       setMakerAccount(val.account)
-      setApprovalAmount(val.approvalAmount)
       getLimitOrders(val.account).then((existingOrdersAmount) => {
         const remainingAmount = val.approvalAmount - existingOrdersAmount
+        console.log('approval amount ' + val.approvalAmount)
         setApprovalAmount(remainingAmount)
+        console.log('remaining approval ' + remainingAmount)
         remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
       })
     })
