@@ -1,14 +1,15 @@
-import { IZeroExContract } from '@0x/contract-wrappers'
+// import { IZeroExContract } from '@0x/contract-wrappers'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { CHAIN_ID } from './Config'
-import contractAddress from '@0x/contract-addresses'
+// Does not compile
+// import contractAddress from '@0x/contract-addresses'
 
 export const buyMarketOrder = async (orderData) => {
   let filledOrder = {}
-  const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
-  const exchangeProxyAddress = address.exchangeProxy
+  // const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+  const exchangeProxyAddress = ''
   // Connect to 0x exchange contract
-  const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
+  const exchange = {} // new IZeroExContract(exchangeProxyAddress, window.ethereum)
   const orders = orderData.existingLimitOrders
   let takerFillNbrOptions = parseEther(orderData.nbrOptions.toString())
   let takerAssetAmounts = []

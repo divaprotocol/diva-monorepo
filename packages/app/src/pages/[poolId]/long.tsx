@@ -1,12 +1,16 @@
 import { useRouter } from 'next/router'
 import Underlying from '../../component/Trade/Underlying'
 
-export function getInitialProps() {
-  return { props: {} }
-}
-
-export default function Lon() {
+export default function Long() {
   const router = useRouter()
   const { poolId } = router.query
-  return <Underlying isLong poolId={poolId as string} />
+  console.log(typeof window !== 'undefined')
+  return typeof window !== 'undefined' ? (
+    <Underlying isLong poolId={poolId as string} />
+  ) : (
+    'No'
+  )
+  // return typeof window !== 'undefined' ? (
+  //   <Underlying isLong poolId={poolId as string} />
+  // ) : null
 }

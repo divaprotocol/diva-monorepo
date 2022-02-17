@@ -1,5 +1,4 @@
 import { parseEther, parseUnits } from 'ethers/lib/utils'
-import { contractAddresses } from './Config'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { metamaskProvider } from './Config'
@@ -49,7 +48,7 @@ export const buylimitOrder = async (orderData) => {
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
     chainId: orderData.chainId,
-    verifyingContract: contractAddresses.exchangeProxy,
+    verifyingContract: '', // contractAddresses.exchangeProxy,
   })
 
   try {

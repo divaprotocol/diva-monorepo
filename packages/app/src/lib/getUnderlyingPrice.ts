@@ -1,4 +1,4 @@
-import CoinGecko from 'coingecko-api'
+// import CoinGecko from 'coingecko-api'
 
 interface coin {
   id: string
@@ -10,7 +10,8 @@ interface coin {
 const COIN_GECKO_IGNORE_ASSETS = ['GOLD', 'TSLA', 'Dom', 'BYAC', 'MEMES']
 
 export const getUnderlyingPrice = async (underlyingAssets: string) => {
-  const CoinGeckoClient = new CoinGecko()
+  // const CoinGeckoClient = new CoinGecko()
+  const CoinGeckoClient = {} as any
   const [asset, vsAssets] = underlyingAssets.split('/')
   let assetPriceUsd: any
   let vsAssetPriceUsd: any
@@ -34,17 +35,17 @@ export const getUnderlyingPrice = async (underlyingAssets: string) => {
 
       return id
     }
-    const assetPriceData = await CoinGeckoClient.simple.price({
+    const assetPriceData = await CoinGeckoClient?.simple?.price({
       ids: getCoinIdFromSymbol(asset),
       vs_currencies: 'usd',
     })
 
-    const vsAssetPriceData = await CoinGeckoClient.simple.price({
+    const vsAssetPriceData = await CoinGeckoClient?.simple?.price({
       ids: getCoinIdFromSymbol(vsAssets),
       vs_currencies: 'usd',
     })
 
-    if (assetPriceData.data && vsAssetPriceData.data) {
+    if (assetPriceData?.data && vsAssetPriceData?.data) {
       Object.keys(assetPriceData.data).map(
         (k) => (assetPriceUsd = assetPriceData.data[k].usd)
       )

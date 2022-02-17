@@ -24,7 +24,7 @@ import Web3 from 'web3'
 import * as qs from 'qs'
 import { Pool } from '../../../lib/queries'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { BigNumber } from '@0x/utils'
+// import { BigNumber } from '@0x/utils'
 import { sellMarketOrder } from '../../../Orders/SellMarket'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 
@@ -32,7 +32,8 @@ import ERC20_ABI from '../../../abi/ERC20.json'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { getComparator, stableSort } from './OrderHelper'
 import { useWallet } from '@web3-ui/hooks'
-import contractAddress from '@0x/contract-addresses'
+import { BigNumber } from 'ethers'
+// import contractAddress from '@0x/contract-addresses'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -52,9 +53,9 @@ export default function SellMarket(props: {
   const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
   // eslint-disable-next-line prettier/prettier
-  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxyAddress = address.exchangeProxy
-  const maxApproval = new BigNumber(2).pow(256).minus(1)
+  // const address = '' //contractAddress.getContractAddressesForChainOrThrow(chainId)
+  const exchangeProxyAddress = '' //address.exchangeProxy
+  const maxApproval = BigNumber.from(2).pow(256).sub(1)
   const [walletBalance, setWalletBalance] = React.useState(0)
   const makerToken = option.collateralToken
   const takerToken = props.tokenAddress
@@ -184,9 +185,9 @@ export default function SellMarket(props: {
     const responseOrders: any = resJSON['records']
     responseOrders.forEach((data: any) => {
       const order = data.order
-      const takerAmount = new BigNumber(order.takerAmount)
-      const makerAmount = new BigNumber(order.makerAmount)
-      order['expectedRate'] = makerAmount.dividedBy(takerAmount)
+      const takerAmount = BigNumber.from(order.takerAmount)
+      const makerAmount = BigNumber.from(order.makerAmount)
+      order['expectedRate'] = makerAmount.div(takerAmount)
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)

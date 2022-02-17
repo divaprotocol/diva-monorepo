@@ -22,7 +22,8 @@ import { getDateTime } from '../../Util/Dates'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
-import { BigNumber } from '@0x/utils'
+import { BigNumber } from 'ethers'
+// import { BigNumber } from '@0x/utils'
 const useStyles = makeStyles({
   table: {
     minWidth: 250,
@@ -74,8 +75,8 @@ function mapOrderData(
   const orderbook: any = records.map((record: any) => {
     const order = record.order
     const orderMaker = order.maker
-    const makerAmount = new BigNumber(order.makerAmount)
-    const takerAmount = new BigNumber(order.takerAmount)
+    const makerAmount = BigNumber.from(order.makerAmount)
+    const takerAmount = BigNumber.from(order.takerAmount)
     const metaData = record.metaData
     if (account === orderMaker) {
       const makerToken = order.makerToken
@@ -85,8 +86,8 @@ function mapOrderData(
       let pricePerOption = 0
       let payReceive = 0
       if (makerToken === tokenAddress) {
-        const askAmount = takerAmount.dividedBy(makerAmount)
-        const remainingTakerAmount = new BigNumber(
+        const askAmount = takerAmount.div(makerAmount)
+        const remainingTakerAmount = BigNumber.from(
           metaData.remainingFillableTakerAmount
         )
         if (remainingTakerAmount.eq(makerAmount)) {
@@ -94,7 +95,7 @@ function mapOrderData(
             formatUnits(makerAmount.toString(), option.collateralDecimals)
           )
         } else {
-          const quantity = remainingTakerAmount.dividedBy(askAmount)
+          const quantity = remainingTakerAmount.div(askAmount)
           nbrOptions = Number(
             formatUnits(quantity.toString(), option.collateralDecimals)
           )
@@ -105,7 +106,7 @@ function mapOrderData(
         )
         pricePerOption = payReceive / nbrOptions
       } else {
-        const remainingTakerAmount = new BigNumber(
+        const remainingTakerAmount = BigNumber.from(
           metaData.remainingFillableTakerAmount
         )
         if (remainingTakerAmount.lt(takerAmount)) {
@@ -123,7 +124,7 @@ function mapOrderData(
         payReceive = Number(
           formatUnits(makerAmount.toString(), option.collateralDecimals)
         )
-        pricePerOption = makerAmount.dividedBy(takerAmount).toNumber()
+        pricePerOption = makerAmount.div(takerAmount).toNumber()
       }
       const expiry = getDateTime(order.expiry)
       const expiryMins = getExpiryMinutesFromNow(order.expiry)

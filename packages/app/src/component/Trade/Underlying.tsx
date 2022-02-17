@@ -43,15 +43,18 @@ type Props = {
 export default function Underlying({ isLong, poolId }: Props) {
   const [value, setValue] = useState(0)
   const breakEvenOptionPrice = 0
-  const wallet = null //useWallet()
+  const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
   const theme = useTheme()
-  const query = useQuery<{ pool: Pool }>('pool', () =>
-    request(
-      config[chainId as number].divaSubgraph,
-      queryPool(parseInt(poolId as string))
-    )
+  const query = useQuery<{ pool: Pool }>(`pool-${poolId}`, () =>
+    poolId != null
+      ? request(
+          config[chainId as number].divaSubgraph,
+          queryPool(parseInt(poolId as string))
+        )
+      : Promise.resolve({})
   )
+  console.log({ query, chainId, poolId })
 
   const pool = query.data?.pool
 

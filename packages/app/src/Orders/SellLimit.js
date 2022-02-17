@@ -1,4 +1,3 @@
-import { contractAddresses } from './Config'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { CHAIN_ID } from './Config'
@@ -6,7 +5,7 @@ import { utils } from './Config'
 import { metamaskProvider } from './Config'
 import { ROPSTEN } from './Config'
 import { ethers } from 'ethers'
-import { BigNumber } from '@0x/utils'
+// import { BigNumber } from '@0x/utils'
 export const sellLimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
     return Math.floor(Date.now() / 1000 + orderData.orderExpiry * 60).toString()
@@ -52,7 +51,7 @@ export const sellLimitOrder = async (orderData) => {
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
     chainId: CHAIN_ID,
-    verifyingContract: contractAddresses.exchangeProxy,
+    verifyingContract: '', // TODO contractAddresses.exchangeProxy,
   })
 
   try {

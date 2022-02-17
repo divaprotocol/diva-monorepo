@@ -24,11 +24,12 @@ import * as qs from 'qs'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { getComparator, stableSort } from './OrderHelper'
-import { BigNumber } from '@0x/utils'
+// import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
 import { NETWORKS } from '@web3-ui/hooks'
-import contractAddress from '@0x/contract-addresses'
+import { BigNumber } from 'ethers'
+// import contractAddress from '@0x/contract-addresses'
 const CHAIN_ID = NETWORKS.ropsten
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
@@ -46,8 +47,8 @@ export default function BuyMarket(props: {
   const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
   // eslint-disable-next-line prettier/prettier
-  const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
-  const exchangeProxyAddress = address.exchangeProxy
+  // const address = // contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+  const exchangeProxyAddress = '' //address.exchangeProxy
   const makerToken = props.tokenAddress
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken
@@ -72,7 +73,7 @@ export default function BuyMarket(props: {
     accounts = await window.ethereum.enable()
     const takerTokenAddress = option.collateralToken
     if (!isApproved) {
-      const maxApproval = new BigNumber(2).pow(256).minus(1)
+      const maxApproval = BigNumber.from(2).pow(256).sub(1)
 
       //is ERC20_ABP correct? or should we use position token abi
       //ERC20_ABI enough to use approval
@@ -186,11 +187,11 @@ export default function BuyMarket(props: {
     const responseOrders: any = resJSON['records']
     responseOrders.forEach((data: any) => {
       const order = data.order
-      const takerAmount = new BigNumber(order.takerAmount)
-      const makerAmount = new BigNumber(order.makerAmount)
-      order['expectedRate'] = takerAmount
-        .dividedBy(makerAmount)
-        .decimalPlaces(option.collateralDecimals)
+      const takerAmount = BigNumber.from(order.takerAmount)
+      const makerAmount = BigNumber.from(order.makerAmount)
+      order['expectedRate'] = takerAmount.div(makerAmount)
+      // TODO: .decimalPlaces(option.collateralDecimals)
+
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)

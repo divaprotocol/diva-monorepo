@@ -19,14 +19,16 @@ import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
-import { BigNumber } from '@0x/utils'
-import contractAddress from '@0x/contract-addresses'
+// import { BigNumber } from '@0x/utils'
+// import contractAddress from '@0x/contract-addresses'
 
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { formatUnits } from 'ethers/lib/utils'
 import { useWallet } from '@web3-ui/hooks'
+import { BigNumber } from 'ethers'
+
 const web3 = new Web3(Web3.givenProvider)
-const maxApproval = new BigNumber(2).pow(256).minus(1)
+const maxApproval = BigNumber.from(2).pow(256).sub(1)
 let accounts: any[]
 
 export default function BuyLimit(props: {
@@ -36,8 +38,7 @@ export default function BuyLimit(props: {
 }) {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
-  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxyAddress = address.exchangeProxy
+  const exchangeProxyAddress = '' // address.exchangeProxy
   const option = props.option
   const makerToken = props.tokenAddress
   const classes = useStyles()

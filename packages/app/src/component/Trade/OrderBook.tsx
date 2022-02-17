@@ -18,7 +18,8 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { BigNumber } from '@0x/utils'
+import { BigNumber } from 'ethers'
+// import { BigNumber } from '@0x/utils'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -106,16 +107,16 @@ function mapOrderData(
     const takerToken = order.takerToken
     const collateralToken = option.collateralToken.toLowerCase()
     const tokenAddress = optionTokenAddress.toLowerCase()
-    const makerAmount = new BigNumber(order.makerAmount)
-    const takerAmount = new BigNumber(order.takerAmount)
+    const makerAmount = BigNumber.from(order.makerAmount)
+    const takerAmount = BigNumber.from(order.takerAmount)
     const orders: any = {}
     if (makerToken === collateralToken && takerToken === tokenAddress) {
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
-      const bidAmount = makerAmount.dividedBy(takerAmount)
+      const bidAmount = makerAmount.div(takerAmount)
       orders.bid = bidAmount
-      const remainingTakerAmount = new BigNumber(
+      const remainingTakerAmount = BigNumber.from(
         metaData.remainingFillableTakerAmount.toString()
       )
       if (remainingTakerAmount.lt(takerAmount)) {
@@ -137,9 +138,9 @@ function mapOrderData(
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'sell'
       orders.id = 'sell' + records.indexOf(record as never)
-      const askAmount = takerAmount.dividedBy(makerAmount)
+      const askAmount = takerAmount.div(makerAmount)
       orders.ask = askAmount
-      const remainingTakerAmount = new BigNumber(
+      const remainingTakerAmount = BigNumber.from(
         metaData.remainingFillableTakerAmount
       )
       if (remainingTakerAmount.eq(makerAmount)) {
@@ -148,7 +149,7 @@ function mapOrderData(
         )
         orders.nbrOptions = nbrOptions
       } else {
-        const quantity = remainingTakerAmount.dividedBy(askAmount)
+        const quantity = remainingTakerAmount.div(askAmount)
         const nbrOptions = Number(
           formatUnits(quantity.toString(), option.collateralDecimals)
         )
