@@ -12,7 +12,7 @@ import { useQuery } from 'react-query'
 import { Pool, queryPool } from '../../lib/queries'
 import request from 'graphql-request'
 import { config } from '../../constants'
-import Web3Ui, { useWallet } from '@web3-ui/hooks'
+import { useWallet } from '@web3-ui/hooks'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import { Liquidity } from '../Liquidity/Liquidity'
@@ -41,10 +41,9 @@ type Props = {
 }
 
 export default function Underlying({ isLong, poolId }: Props) {
-  console.log({ React })
   const [value, setValue] = useState(0)
   const breakEvenOptionPrice = 0
-  const wallet = useWallet()
+  const wallet = null //useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
   const theme = useTheme()
   const query = useQuery<{ pool: Pool }>('pool', () =>
