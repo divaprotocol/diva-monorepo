@@ -1,8 +1,7 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { CHAIN_ID } from './Config'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const contractAddress = require('@0x/contract-addresses')
+import contractAddress from '@0x/contract-addresses'
 
 export const sellMarketOrder = async (orderData) => {
   let filledOrder = {}

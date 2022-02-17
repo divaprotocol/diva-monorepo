@@ -25,4 +25,4 @@ yarn-error.log*
 **/tests/e2e/screenshots/
 
 .turbo
-
+.next

@@ -13,9 +13,9 @@ import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import ERC20 from '../../abi/ERC20.json'
 import { useTokenBalances } from '../../hooks/useTokenBalances'
-import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { useWallet } from '@web3-ui/hooks'
+import { useRouter } from 'next/dist/client/router'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -65,7 +65,7 @@ const SubmitButton = (props: any) => {
     connection: { userAddress },
     provider,
   } = useWallet()
-  const history = useHistory()
+  const router = useRouter()
 
   const chainId = provider?.network?.chainId
   if (chainId == null) return null
@@ -109,7 +109,7 @@ const SubmitButton = (props: any) => {
           buttonName === 'Redeem'
             ? handleRedeem
             : () => {
-                history.push('../' + `${props.id}`)
+                router.replace('../' + `${props.id}`)
               }
         }
       >

@@ -4,11 +4,10 @@ import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import { Box, Input, InputAdornment } from '@mui/material'
 import { LineSeries, XYPlot } from 'react-vis'
 import { LocalGasStation, Search } from '@mui/icons-material'
-import { useHistory } from 'react-router-dom'
-import { Pool } from '../lib/queries'
 import { useCoinIcon } from '../hooks/useCoinIcon'
 import { makeStyles } from '@mui/styles'
 import localCoinImages from '../Util/localCoinImages.json'
+import { useRouter } from 'next/dist/client/router'
 const assetLogoPath = '/images/coin-logos/'
 
 const useStyles = makeStyles({
@@ -140,7 +139,7 @@ type Props = {
 }
 
 export default function PoolsTable({ columns, disableRowClick, rows }: Props) {
-  const history = useHistory()
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const filteredRows =
     search != null && search.length > 0
@@ -190,7 +189,7 @@ export default function PoolsTable({ columns, disableRowClick, rows }: Props) {
           disableRowClick
             ? undefined
             : (row) => {
-                history.push(`${row.id}`)
+                router.replace(`${row.id}`)
               }
         }
         componentsProps={{

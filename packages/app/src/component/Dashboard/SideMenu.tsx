@@ -1,5 +1,4 @@
-import { Box, Button, Stack } from '@mui/material'
-import { Link } from 'react-router-dom'
+import { Box, Button, Link, Stack } from '@mui/material'
 
 export function SideMenu() {
   return (
@@ -13,17 +12,16 @@ export function SideMenu() {
         alignItems: 'left',
       }}
     >
-      <Button component={Link} to="/dashboard/mypositions" variant="contained">
-        My Positions
-      </Button>
-      <Button fullWidth variant="contained">
-        My Orders
-      </Button>
-      <Button variant="contained">My Requests</Button>
-      <Button component={Link} to="/dashboard/mydatafeeds" variant="contained">
-        My Data Feeds
-      </Button>
-
+      <Link href="/dashboard/mypositions">
+        <Button component={'a'} variant="contained">
+          My Positions
+        </Button>
+      </Link>
+      <Link href="/dashboard/mydatafeeds">
+        <Button component={'a'} variant="contained">
+          My Data Feeds
+        </Button>
+      </Link>
       <Box
         sx={{
           display: 'flex',

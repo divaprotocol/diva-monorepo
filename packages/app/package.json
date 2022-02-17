@@ -1,5 +1,5 @@
 {
-  "name": "my-app",
+  "name": "diva-webapp",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -37,6 +37,7 @@
     "formik": "^2.2.9",
     "graphql": "^16.1.0",
     "graphql-tag": "^2.12.6",
+    "next": "^12.0.10",
     "normalize.css": "^8.0.1",
     "parcel-bundler": "^1.6.1",
     "qs": "^6.10.1",
@@ -44,8 +45,6 @@
     "react-dom": "^17.0.2",
     "react-query": "^3.34.2",
     "react-redux": "^7.2.4",
-    "react-router-dom": "^5.3.0",
-    "react-scripts": "^4.0.3",
     "react-swipeable-views": "^0.14.0",
     "react-vis": "^1.11.7",
     "socket.io-client": "^4.2.0",
@@ -56,8 +55,9 @@
     "ws": "^8.2.2"
   },
   "scripts": {
-    "dev": "react-scripts start",
-    "build": "react-scripts build",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
     "test": "start-server-and-test 'yarn dev' http-get://localhost:3000 'synpress run --configFile synpress.json'",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx && tsc --noEmit",
     "fmt": "prettier . -w"
@@ -82,7 +82,6 @@
   },
   "devDependencies": {
     "@types/coingecko-api": "^1.0.10",
-    "@types/react-router-dom": "^5.3.2",
     "@types/styled-components": "^5.1.15",
     "@typescript-eslint/eslint-plugin": "^5.3.1",
     "@typescript-eslint/parser": "^5.3.1",

@@ -1,9 +1,9 @@
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import OptionOrders from './OptionOrders'
 import OrderBook from './OrderBook'
 import { Container, Paper, Stack, useTheme } from '@mui/material'
 import CreateOrder from './CreateOrder'
-import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
@@ -12,10 +12,9 @@ import { useQuery } from 'react-query'
 import { Pool, queryPool } from '../../lib/queries'
 import request from 'graphql-request'
 import { config } from '../../constants'
-import { useWallet } from '@web3-ui/hooks'
+import Web3Ui, { useWallet } from '@web3-ui/hooks'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import React from 'react'
 import { Liquidity } from '../Liquidity/Liquidity'
 
 const LeftCompFlexContainer = styled.div`
@@ -36,9 +35,14 @@ const LeftCompRightDiv = styled.div`
   align-items: stretch;
 `
 
-export default function Underlying() {
-  const params: { poolId: string; tokenType: string } = useParams()
-  const [value, setValue] = React.useState(0)
+type Props = {
+  isLong?: boolean
+  poolId: string
+}
+
+export default function Underlying({ isLong, poolId }: Props) {
+  console.log({ React })
+  const [value, setValue] = useState(0)
   const breakEvenOptionPrice = 0
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
@@ -46,7 +50,7 @@ export default function Underlying() {
   const query = useQuery<{ pool: Pool }>('pool', () =>
     request(
       config[chainId as number].divaSubgraph,
-      queryPool(parseInt(params.poolId))
+      queryPool(parseInt(poolId as string))
     )
   )
 
@@ -55,8 +59,6 @@ export default function Underlying() {
   if (pool == null) {
     return <div>Loading</div>
   }
-
-  const isLong = params.tokenType === 'long'
 
   const OptionParams = {
     CollateralBalanceLong: 100,

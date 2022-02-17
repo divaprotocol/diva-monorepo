@@ -32,8 +32,7 @@ import ERC20_ABI from '../../../abi/ERC20.json'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { getComparator, stableSort } from './OrderHelper'
 import { useWallet } from '@web3-ui/hooks'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const contractAddress = require('@0x/contract-addresses')
+import contractAddress from '@0x/contract-addresses'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 

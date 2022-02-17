@@ -20,8 +20,7 @@ import { useStyles } from './UiStyles'
 import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const contractAddress = require('@0x/contract-addresses')
+import contractAddress from '@0x/contract-addresses'
 
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { formatUnits } from 'ethers/lib/utils'

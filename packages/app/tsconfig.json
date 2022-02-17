@@ -20,10 +20,11 @@
     "isolatedModules": true,
     "noImplicitAny": false,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "preserve",
+    "incremental": true
   },
   "exclude": [
-    "node_modules",
+    "node_modules"
   ],
   "include": [
     "src"

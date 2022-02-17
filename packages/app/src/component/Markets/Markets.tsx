@@ -8,7 +8,6 @@ import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { config } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
-import { Alert } from '@mui/material'
 
 const columns: GridColDef[] = [
   {
