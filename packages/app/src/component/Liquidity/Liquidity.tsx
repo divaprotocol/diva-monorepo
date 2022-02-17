@@ -22,9 +22,9 @@ import { formatUnits } from 'ethers/lib/utils'
 import ERC20 from '../../abi/ERC20.json'
 import { config } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
-import { ReactComponent as Bullish } from '../../Images/bullish-svgrepo-com.svg'
-import { ReactComponent as Bearish } from '../../Images/bearish-svgrepo-com.svg'
-import { ReactComponent as Star } from '../../Images/star-svgrepo-com.svg'
+import Bullish from '../../Images/bullish-svgrepo-com.svg'
+import Bearish from '../../Images/bearish-svgrepo-com.svg'
+import Star from '../../Images/star-svgrepo-com.svg'
 export const Liquidity = () => {
   const [value, setValue] = React.useState(0)
   const [pool, setPool] = React.useState<Pool>()

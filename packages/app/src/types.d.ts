@@ -3,3 +3,7 @@ declare module '@mui/x-data-grid' {
 
   export const DataGrid = _DataGrid
 }
+declare module '*.svg' {
+  const content: any
+  export default content
+}

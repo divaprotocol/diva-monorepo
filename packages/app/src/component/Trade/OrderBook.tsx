@@ -3,7 +3,6 @@ import 'styled-components'
 import styled from 'styled-components'
 import { withStyles } from '@mui/styles'
 import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -19,6 +18,7 @@ import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
+import { useTheme } from '@mui/material'
 // import { BigNumber } from '@0x/utils'
 const PageDiv = styled.div`
   width: 100%;
@@ -28,14 +28,6 @@ const TableHeader = styled.h4`
   font-size: 1rem;
   padding-left: 15px;
   text-align: left;
-`
-
-const NoOrderTextDiv = styled.div`
-  font-size: 1.1rem;
-  width: 100%;
-  margin-left: 100%;
-  margin-top: 10%;
-  margin-bottom: 10%;
 `
 
 const TableHeadStyle = withStyles(() => ({
@@ -278,6 +270,8 @@ export default function OrderBook(props: {
     setOrderBook(completeOrderBook)
   }
 
+  const theme = useTheme()
+
   useEffect(() => {
     componentDidMount()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -294,54 +288,54 @@ export default function OrderBook(props: {
 
   return (
     <PageDiv>
-      <TableHeader>Order Book</TableHeader>
-      <TableContainer component={Paper}>
-        <Table aria-labelledby="tableTitle">
-          <TableHeadStyle>
-            <TableRow>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
-              <TableHeaderCell align="center">BID</TableHeaderCell>
-              <TableHeaderCell align="center">ASK</TableHeaderCell>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
-            </TableRow>
-          </TableHeadStyle>
+      {orderBook.length > 0 ? (
+        <>
+          <TableHeader>Order Book</TableHeader>
+          <TableContainer component={Paper}>
+            <Table aria-labelledby="tableTitle">
+              <TableHeadStyle>
+                <TableRow>
+                  <TableHeaderCell align="center">Quantity</TableHeaderCell>
+                  <TableHeaderCell align="center">BID</TableHeaderCell>
+                  <TableHeaderCell align="center">ASK</TableHeaderCell>
+                  <TableHeaderCell align="center">Quantity</TableHeaderCell>
+                </TableRow>
+              </TableHeadStyle>
 
-          <TableBody>
-            {orderBook.length > 0 ? (
-              orderBook
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row: any, index: number) => {
-                  const labelId = `table-${index}`
+              <TableBody>
+                {orderBook
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row: any, index: number) => {
+                    const labelId = `table-${index}`
 
-                  return (
-                    <TableRow hover tabIndex={-1} key={orderBook.indexOf(row)}>
-                      <TableCellStyle
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        align="center"
+                    return (
+                      <TableRow
+                        hover
+                        tabIndex={-1}
+                        key={orderBook.indexOf(row)}
                       >
-                        <Box paddingBottom="20px">
+                        <TableCellStyle
+                          component="th"
+                          id={labelId}
+                          scope="row"
+                          align="center"
+                          sx={{ paddingBottom: 20 }}
+                        >
                           <Typography variant="subtitle1">
                             {row.buyQuantity != ''
                               ? row.buyQuantity.toFixed(2).toString()
                               : '-'}
                           </Typography>
-                          <label> </label>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box>
+                        </TableCellStyle>
+                        <TableCellStyle align="center">
                           <Typography variant="subtitle1">
                             {row.bid != '' ? Number(row.bid).toFixed(2) : '-'}
                           </Typography>
                           <Typography variant="caption" noWrap>
                             {row.buyExpiry}
                           </Typography>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box>
+                        </TableCellStyle>
+                        <TableCellStyle align="center">
                           <Typography variant="subtitle1">
                             {row.ask != ''
                               ? row.ask.toFixed(2).toString()
@@ -350,35 +344,36 @@ export default function OrderBook(props: {
                           <Typography variant="caption" noWrap>
                             {row.sellExpiry}
                           </Typography>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box paddingBottom="20px">
+                        </TableCellStyle>
+                        <TableCellStyle
+                          align="center"
+                          sx={{ paddingBottom: 20 }}
+                        >
                           <Typography variant="subtitle1">
                             {row.sellQuantity != ''
                               ? row.sellQuantity.toFixed(2).toString()
                               : '-'}
                           </Typography>
-                        </Box>
-                      </TableCellStyle>
-                    </TableRow>
-                  )
-                })
-            ) : (
-              <NoOrderTextDiv>None</NoOrderTextDiv>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={orderBook.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+                        </TableCellStyle>
+                      </TableRow>
+                    )
+                  })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={orderBook.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </>
+      ) : (
+        <Typography sx={{ padding: theme.spacing(2) }}>None</Typography>
+      )}
     </PageDiv>
   )
 }

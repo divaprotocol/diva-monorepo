@@ -311,7 +311,7 @@ export function MyPositions() {
       <PoolsTable rows={filteredRows} columns={columns} disableRowClick />
     </Stack>
   ) : (
-    <div
+    <span
       style={{
         display: 'flex',
         justifyContent: 'center',
@@ -320,6 +320,6 @@ export function MyPositions() {
       }}
     >
       Please connect your wallet{' '}
-    </div>
+    </span>
   )
 }

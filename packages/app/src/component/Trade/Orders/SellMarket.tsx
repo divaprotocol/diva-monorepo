@@ -197,10 +197,8 @@ export default function SellMarket(props: {
     const sortedRecords = stableSort(orders, getComparator(sortOrder, orderBy))
     if (sortedRecords.length) {
       const bestRate = sortedRecords[0].expectedRate
-      console.log('best rate ' + bestRate)
       setAvgExpectedRate(Number(bestRate))
     }
-    console.log('sorted records ' + JSON.stringify(sortedRecords))
     return sortedRecords
   }
 
@@ -229,7 +227,6 @@ export default function SellMarket(props: {
           formatUnits(order.takerAmount.toString(), option.collateralDecimals)
         )
         const expectedRate = order.expectedRate
-        console.log('expected rate ' + expectedRate)
         if (count > 0) {
           if (count <= takerAmount) {
             const orderTotalAmount = parseEther(expectedRate.toString()).mul(

@@ -36,7 +36,7 @@ const DueInCell = (props: any) => {
 
     if (minUntilExp < 24 * 60 - 5 && minUntilExp > 0) {
       return minUntilExp === 1 ? (
-        <div
+        <span
           style={{
             display: 'flex',
             justifyContent: 'center',
@@ -45,9 +45,9 @@ const DueInCell = (props: any) => {
           }}
         >
           {'<1m'}
-        </div>
+        </span>
       ) : (
-        <div
+        <span
           style={{
             display: 'flex',
             justifyContent: 'center',
@@ -59,7 +59,7 @@ const DueInCell = (props: any) => {
             'h ' +
             (minUntilExp % 60) +
             'm '}
-        </div>
+        </span>
       )
     }
   }
@@ -69,7 +69,7 @@ const DueInCell = (props: any) => {
     )
     if (minUntilExp < 48 * 60 - 5 && minUntilExp > 0) {
       return minUntilExp === 1 ? (
-        <div
+        <span
           style={{
             display: 'flex',
             justifyContent: 'center',
@@ -78,9 +78,9 @@ const DueInCell = (props: any) => {
           }}
         >
           {'<1m'}
-        </div>
+        </span>
       ) : (
-        <div
+        <span
           style={{
             display: 'flex',
             justifyContent: 'center',
@@ -92,13 +92,13 @@ const DueInCell = (props: any) => {
             'h ' +
             (minUntilExp % 60) +
             'm '}
-        </div>
+        </span>
       )
     }
   }
 
   return (
-    <div
+    <span
       style={{
         display: 'flex',
         justifyContent: 'center',
@@ -107,7 +107,7 @@ const DueInCell = (props: any) => {
       }}
     >
       {'-'}
-    </div>
+    </span>
   )
 }
 const SubmitCell = (props: any) => {
@@ -115,7 +115,7 @@ const SubmitCell = (props: any) => {
 
   const chainId = provider?.network?.chainId
 
-  const diva =
+  const spana =
     chainId != null
       ? new ethers.Contract(
           config[chainId!].divaAddress,
@@ -163,8 +163,8 @@ const SubmitCell = (props: any) => {
             color="primary"
             type="submit"
             onClick={() => {
-              if (diva != null) {
-                diva.setFinalReferenceValue(
+              if (spana != null) {
+                spana.setFinalReferenceValue(
                   props.id.split('/')[0],
                   parseEther(textFieldValue),
                   true
@@ -205,7 +205,7 @@ const columns: GridColDef[] = [
     headerAlign: 'right',
     type: 'dateTime',
     renderCell: (props) => {
-      return <div>{getDateTime(props.row.Expiry)}</div>
+      return <span>{getDateTime(props.row.Expiry)}</span>
     },
   },
   {
@@ -319,7 +319,7 @@ export function MyDataFeeds() {
       <PoolsTable disableRowClick columns={columns} rows={rows} />
     </Stack>
   ) : (
-    <div
+    <span
       style={{
         display: 'flex',
         justifyContent: 'center',
@@ -328,6 +328,6 @@ export function MyDataFeeds() {
       }}
     >
       Please connect your wallet{' '}
-    </div>
+    </span>
   )
 }

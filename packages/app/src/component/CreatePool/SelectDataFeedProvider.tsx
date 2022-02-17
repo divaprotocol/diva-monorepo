@@ -96,7 +96,6 @@ export function SelectDataFeedProvider({
           )}
           onInputChange={(event) => {
             if (event != null && event.target != null) {
-              console.log('on input change', (event.target as any).value || '')
               formik.setFieldValue(
                 'dataFeedProvider',
                 (event.target as any).value || '',
@@ -105,7 +104,6 @@ export function SelectDataFeedProvider({
             }
           }}
           onChange={(event, option) => {
-            console.log(option)
             formik.setFieldValue('dataFeedProvider', option || '')
           }}
           getOptionLabel={(option) =>

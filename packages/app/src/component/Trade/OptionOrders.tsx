@@ -6,7 +6,6 @@ import 'styled-components'
 import styled from 'styled-components'
 import { makeStyles, withStyles } from '@mui/styles'
 import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -23,6 +22,7 @@ import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
+import { useTheme } from '@mui/material'
 // import { BigNumber } from '@0x/utils'
 const useStyles = makeStyles({
   table: {
@@ -39,14 +39,6 @@ const TableCellStyle = withStyles(() => ({
 
 const PageDiv = styled.div`
   width: 100%;
-`
-
-const NoOrderTextDiv = styled.div`
-  font-size: 1.1rem;
-  width: 100%;
-  margin-left: 120%;
-  margin-top: 10%;
-  margin-bottom: 10%;
 `
 
 const TableHeader = styled.h4`
@@ -156,6 +148,7 @@ export default function OpenOrders(props: {
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const dispatch = useAppDispatch()
   const [orders, setOrders] = useState([])
+  const theme = useTheme()
 
   const componentDidMount = async () => {
     accounts = await window.ethereum.enable()
@@ -242,64 +235,68 @@ export default function OpenOrders(props: {
 
   return (
     <PageDiv>
-      <TableHeader>Your Open Orders</TableHeader>
-      <TableContainer component={Paper}>
-        <Table className={classes.table} aria-label="simple table">
-          <TableHeadStyle>
-            <TableRow>
-              <TableHeaderCell>Type</TableHeaderCell>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
-              <TableHeaderCell align="center">Price</TableHeaderCell>
-              <TableHeaderCell align="center">Pay/Receive</TableHeaderCell>
-              <TableHeaderCell align="right">Cancel</TableHeaderCell>
-            </TableRow>
-          </TableHeadStyle>
-          <TableBody>
-            {orders.length > 0 ? (
-              orders
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((order: any, index: number) => {
-                  const labelId = `enhanced-table-${index}`
-                  return (
-                    <TableRow key={index} hover>
-                      <TableCellStyle
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        align="left"
-                      >
-                        <Box>
+      {orders.length > 0 ? (
+        <>
+          <TableHeader>Your Open Orders</TableHeader>
+          <TableContainer component={Paper}>
+            <Table className={classes.table} aria-label="simple table">
+              <TableHeadStyle>
+                <TableRow>
+                  <TableHeaderCell>Type</TableHeaderCell>
+                  <TableHeaderCell align="center">Quantity</TableHeaderCell>
+                  <TableHeaderCell align="center">Price</TableHeaderCell>
+                  <TableHeaderCell align="center">Pay/Receive</TableHeaderCell>
+                  <TableHeaderCell align="right">Cancel</TableHeaderCell>
+                </TableRow>
+              </TableHeadStyle>
+              <TableBody>
+                {orders
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((order: any, index: number) => {
+                    const labelId = `enhanced-table-${index}`
+                    return (
+                      <TableRow key={index} hover>
+                        <TableCellStyle
+                          component="th"
+                          id={labelId}
+                          scope="row"
+                          align="left"
+                        >
                           <Typography variant="subtitle1">
                             {order.orderType}
                           </Typography>
                           <Typography variant="caption" noWrap>
                             {order.expiry}
                           </Typography>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box paddingBottom="20px">
+                        </TableCellStyle>
+                        <TableCellStyle
+                          align="center"
+                          sx={{ paddingBottom: 20 }}
+                        >
                           <Typography variant="subtitle1">
                             {order.nbrOptions}
                           </Typography>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box paddingBottom="20px">
+                        </TableCellStyle>
+                        <TableCellStyle
+                          align="center"
+                          sx={{ paddingBottom: 20 }}
+                        >
                           <Typography variant="subtitle1">
                             {order.pricePerOption.toFixed(2)}
                           </Typography>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box paddingBottom="20px">
+                        </TableCellStyle>
+                        <TableCellStyle
+                          align="center"
+                          sx={{ paddingBottom: 20 }}
+                        >
                           <Typography variant="subtitle1">
                             {order.payReceive.toFixed(2)}
                           </Typography>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="right">
-                        <Box paddingBottom="20px">
+                        </TableCellStyle>
+                        <TableCellStyle
+                          align="right"
+                          sx={{ paddingBottom: 20 }}
+                        >
                           <Typography variant="subtitle1">
                             <Button
                               variant="outlined"
@@ -309,26 +306,26 @@ export default function OpenOrders(props: {
                               Cancel
                             </Button>
                           </Typography>
-                        </Box>
-                      </TableCellStyle>
-                    </TableRow>
-                  )
-                })
-            ) : (
-              <NoOrderTextDiv>None</NoOrderTextDiv>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={orders.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+                        </TableCellStyle>
+                      </TableRow>
+                    )
+                  })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={orders.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />{' '}
+        </>
+      ) : (
+        <Typography sx={{ padding: theme.spacing(2) }}>None</Typography>
+      )}
     </PageDiv>
   )
 }

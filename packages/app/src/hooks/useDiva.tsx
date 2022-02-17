@@ -112,20 +112,6 @@ export function useDiva(): DivaApi | null {
 
       await erc20.allowance(creatorAddress, divaAddress)
 
-      console.log([
-        parseEther(inflection.toString()).toString(),
-        parseEther(cap.toString()).toString(),
-        parseEther(floor.toString()).toString(),
-        collateralBalanceShort,
-        collateralBalanceLong,
-        Math.round(expiryDate / 1000),
-        parseEther(supplyShort.toString()).toString(),
-        parseEther(supplyLong.toString()).toString(),
-        referenceAsset,
-        collateralToken,
-        dataFeedProvider,
-        parseEther(capacity.toString()).toString(),
-      ])
       const tx2 = await contract.createContingentPool([
         parseEther(inflection.toString()),
         parseEther(cap.toString()),

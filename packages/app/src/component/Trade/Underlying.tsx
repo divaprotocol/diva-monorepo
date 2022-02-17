@@ -54,7 +54,6 @@ export default function Underlying({ isLong, poolId }: Props) {
         )
       : Promise.resolve({})
   )
-  console.log({ query, chainId, poolId })
 
   const pool = query.data?.pool
 

@@ -1,28 +1,26 @@
 import { LocalizationProvider } from '@mui/lab'
 import AdapterDateFns from '@mui/lab/AdapterDateFns'
-import { Box, Container, useMediaQuery } from '@mui/material'
+import { Box, Container, ThemeProvider } from '@mui/material'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { Provider } from 'react-redux'
 import { Provider as Web3Provider } from '@web3-ui/hooks'
-import { ThemeProvider } from 'styled-components'
 import Header from '../component/Header/Header'
 import { projectId } from '../constants'
 import store from '../Redux/Store'
 import { useMemo } from 'react'
 import { createDivaTheme } from '../lib/createDivaTheme'
 import '../index.css'
+import 'react-vis/dist/style.css'
 
 const queryClient = new QueryClient()
 
 const App = ({ Component, pageProps }) => {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
+  const prefersDarkMode = true // useMediaQuery('(prefers-color-scheme: dark)')
 
   const theme = useMemo(
     () => createDivaTheme(prefersDarkMode),
     [prefersDarkMode]
   )
-
-  console.log(theme)
 
   return (
     <Box

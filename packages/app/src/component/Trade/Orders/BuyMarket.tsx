@@ -205,7 +205,6 @@ export default function BuyMarket(props: {
       const rate = Number(bestRate)
       setAvgExpectedRate(rate)
     }
-    console.log('sorted order ' + JSON.stringify(sortedRecords))
     return sortedRecords
   }
 

@@ -1,5 +1,5 @@
 import { Box, Typography, useTheme } from '@mui/material'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   XYPlot,
   XAxis,
@@ -85,7 +85,7 @@ export function PayoffProfile(props: {
   const ref = useRef<HTMLElement>()
   const [width, setWidth] = useState(300)
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (ref.current != null) {
       const callback = () => {
         const rect = ref.current?.getBoundingClientRect()
