@@ -1,13 +1,12 @@
 // import { IZeroExContract } from '@0x/contract-wrappers'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
-import { CHAIN_ID } from './Config'
-// Does not compile
-import _0xAddresses from '@0x/contract-addresses'
+import zeroXAdresses from '@0x/contract-addresses'
 
-export const buyMarketOrder = async (orderData: any, chainId) => {
+export const buyMarketOrder = async (orderData: any, chainId: string) => {
   let filledOrder = {}
   // Connect to 0x exchange contract
-  const exchange = {} as any // new IZeroExContract(exchangeProxyAddress, window.ethereum)
+  const exchangeProxyAddress = zeroXAdresses[chainId].exchangeProxy
+  const exchange = {} as any // TODO: replace new IZeroExContract(exchangeProxyAddress, window.ethereum)
   const orders = orderData.existingLimitOrders
   let takerFillNbrOptions = parseEther(orderData.nbrOptions.toString())
   const takerAssetAmounts = []
@@ -21,7 +20,10 @@ export const buyMarketOrder = async (orderData: any, chainId) => {
     const response = await exchange
       .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true)
       .awaitTransactionSuccessAsync({ from: orderData.takerAccount })
-      .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
+      .catch((err) => {
+        console.error('Error logged ' + JSON.stringify(err))
+        return null
+      })
     return response
   }
 
