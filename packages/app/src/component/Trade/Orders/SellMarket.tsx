@@ -23,17 +23,14 @@ import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
 import * as qs from 'qs'
 import { Pool } from '../../../lib/queries'
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// import { BigNumber } from '@0x/utils'
 import { sellMarketOrder } from '../../../Orders/SellMarket'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { getComparator, stableSort } from './OrderHelper'
 import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
-// import contractAddress from '@0x/contract-addresses'
+import _0xAddresses from '@0x/contract-addresses'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -52,9 +49,7 @@ export default function SellMarket(props: {
   const [youReceive, setYouReceive] = React.useState(0.0)
   const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
-  // eslint-disable-next-line prettier/prettier
-  // const address = '' //contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxyAddress = '' //address.exchangeProxy
+  const exchangeProxyAddress = _0xAddresses[chainId].exchangeProxy
   const maxApproval = BigNumber.from(2).pow(256).sub(1)
   const [walletBalance, setWalletBalance] = React.useState(0)
   const makerToken = option.collateralToken
@@ -104,46 +99,48 @@ export default function SellMarket(props: {
         avgExpectedRate: avgExpectedRate,
         existingLimitOrders: existingLimitOrders,
       }
-      sellMarketOrder(orderData).then((orderFillStatus: any) => {
-        if (!(orderFillStatus == undefined)) {
-          if (!('logs' in orderFillStatus)) {
-            alert('order could not be filled')
-            return
-          } else {
-            orderFillStatus.logs.forEach(async (eventData: any) => {
-              if (!('event' in eventData)) {
-                return
-              } else {
-                if (eventData.event === 'LimitOrderFilled') {
-                  //reset fill order button to approve
-                  setIsApproved(false)
-                  //get updated wallet balance
-                  getOptionsInWallet().then((val) => {
-                    if (val != null) {
-                      setWalletBalance(Number(val))
-                    }
-                  })
-                  //reset input & you pay fields
-                  Array.from(document.querySelectorAll('input')).forEach(
-                    (input) => (input.value = '')
-                  )
-                  setNumberOfOptions(0.0)
-                  setYouReceive(0.0)
-                  alert('Order successfully filled')
-                  //wait for a sec for 0x to update orders then handle order book display
-                  await new Promise((resolve) => setTimeout(resolve, 4000))
-                  props.handleDisplayOrder()
+      sellMarketOrder(orderData, String(chainId)).then(
+        (orderFillStatus: any) => {
+          if (!(orderFillStatus == undefined)) {
+            if (!('logs' in orderFillStatus)) {
+              alert('order could not be filled')
+              return
+            } else {
+              orderFillStatus.logs.forEach(async (eventData: any) => {
+                if (!('event' in eventData)) {
                   return
                 } else {
-                  alert('Order could not be filled')
+                  if (eventData.event === 'LimitOrderFilled') {
+                    //reset fill order button to approve
+                    setIsApproved(false)
+                    //get updated wallet balance
+                    getOptionsInWallet().then((val) => {
+                      if (val != null) {
+                        setWalletBalance(Number(val))
+                      }
+                    })
+                    //reset input & you pay fields
+                    Array.from(document.querySelectorAll('input')).forEach(
+                      (input) => (input.value = '')
+                    )
+                    setNumberOfOptions(0.0)
+                    setYouReceive(0.0)
+                    alert('Order successfully filled')
+                    //wait for a sec for 0x to update orders then handle order book display
+                    await new Promise((resolve) => setTimeout(resolve, 4000))
+                    props.handleDisplayOrder()
+                    return
+                  } else {
+                    alert('Order could not be filled')
+                  }
                 }
-              }
-            })
+              })
+            }
+          } else {
+            alert('order could not be filled')
           }
-        } else {
-          alert('order could not be filled')
         }
-      })
+      )
     }
   }
 

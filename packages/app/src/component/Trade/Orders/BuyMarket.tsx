@@ -24,13 +24,11 @@ import * as qs from 'qs'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { getComparator, stableSort } from './OrderHelper'
-// import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
-import { NETWORKS } from '@web3-ui/hooks'
+import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
-// import contractAddress from '@0x/contract-addresses'
-const CHAIN_ID = NETWORKS.ropsten
+import ContractAddresses from '@0x/contract-addresses/addresses.json'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -39,6 +37,7 @@ export default function BuyMarket(props: {
   handleDisplayOrder: () => void
   tokenAddress: string
 }) {
+  const wallet = useWallet()
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
@@ -46,9 +45,9 @@ export default function BuyMarket(props: {
   const [youPay, setYouPay] = React.useState(0.0)
   const [existingLimitOrders, setExistingLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
-  // eslint-disable-next-line prettier/prettier
-  // const address = // contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
-  const exchangeProxyAddress = '' //address.exchangeProxy
+  const chainId = wallet?.provider?.network?.chainId || 3
+
+  const exchangeProxyAddress = ContractAddresses[chainId].exchangeProxy
   const makerToken = props.tokenAddress
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken
@@ -106,7 +105,7 @@ export default function BuyMarket(props: {
         existingLimitOrders: existingLimitOrders,
       }
 
-      buyMarketOrder(orderData).then((orderFillStatus: any) => {
+      buyMarketOrder(orderData, chainId).then((orderFillStatus: any) => {
         if (!(orderFillStatus === undefined)) {
           if (!('logs' in orderFillStatus)) {
             alert('Order could not be filled logs not found')

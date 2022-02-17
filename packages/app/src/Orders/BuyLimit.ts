@@ -2,9 +2,10 @@ import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { metamaskProvider } from './Config'
-import { ROPSTEN } from './Config'
+import { API0X } from './Config'
+import zeroXAddresses from '@0x/contract-addresses/addresses.json'
 
-export const buylimitOrder = async (orderData) => {
+export const buylimitOrder = async (orderData: any, chainId: string) => {
   const getFutureExpiryInSeconds = () => {
     return Math.floor(Date.now() / 1000 + orderData.orderExpiry * 60).toString()
   }
@@ -41,23 +42,23 @@ export const buylimitOrder = async (orderData) => {
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
-    makerAmount: makerAmount.toString(),
-    takerAmount: takerAmount.toString(),
+    makerAmount: makerAmount.toString() as any,
+    takerAmount: takerAmount.toString() as any,
     maker: orderData.makerAccount,
     sender: NULL_ADDRESS,
-    expiry: getFutureExpiryInSeconds(),
-    salt: Date.now().toString(),
+    expiry: getFutureExpiryInSeconds() as any,
+    salt: Date.now().toString() as any,
     chainId: orderData.chainId,
-    verifyingContract: '', // contractAddresses.exchangeProxy,
+    verifyingContract: zeroXAddresses[chainId].exchangeProxy,
   })
 
   try {
     const signature = await order.getSignatureWithProviderAsync(
-      metamaskProvider,
+      orderData.provider,
       utils.SignatureType.EIP712 // Optional
     )
     const signedOrder = { ...order, signature }
-    const resp = await fetch(ROPSTEN, {
+    const resp = await fetch(API0X, {
       method: 'POST',
       body: JSON.stringify(signedOrder),
       headers: {

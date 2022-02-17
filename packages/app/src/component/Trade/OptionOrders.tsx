@@ -20,10 +20,9 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getDateTime } from '../../Util/Dates'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
 import { useTheme } from '@mui/material'
-// import { BigNumber } from '@0x/utils'
 const useStyles = makeStyles({
   table: {
     minWidth: 250,

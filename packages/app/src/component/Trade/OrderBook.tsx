@@ -19,7 +19,6 @@ import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
 import { useTheme } from '@mui/material'
-// import { BigNumber } from '@0x/utils'
 const PageDiv = styled.div`
   width: 100%;
 `

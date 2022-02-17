@@ -1,15 +1,16 @@
 // import { IZeroExContract } from '@0x/contract-wrappers'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
+import zeroXAddresses from '@0x/contract-addresses/addresses.json'
 
-export const sellMarketOrder = async (orderData) => {
+export const sellMarketOrder = async (orderData: any, chainId: string) => {
   let filledOrder = {}
   // const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
-  const exchangeProxyAddress = '' // address.exchangeProxy
+  const exchangeProxyAddress = zeroXAddresses[chainId].exchangeProxy
   // Connect to 0x exchange contract
-  const exchange = {} // new IZeroExContract(exchangeProxyAddress, window.ethereum)
+  const exchange = {} as any // TODO: new IZeroExContract(exchangeProxyAddress, window.ethereum)
   const orders = orderData.existingLimitOrders
   let makerFillNbrOptions = parseEther(orderData.nbrOptions.toString())
-  let makerAssetAmounts = []
+  const makerAssetAmounts = []
   const signatures = []
 
   const fillOrderResponse = async (takerAssetFillAmounts) => {
@@ -26,7 +27,7 @@ export const sellMarketOrder = async (orderData) => {
   }
 
   orders.forEach((order) => {
-    if (makerFillNbrOptions > 0) {
+    if (makerFillNbrOptions.gt(0)) {
       const makerFillOptions = makerFillNbrOptions.mul(parseEther('1'))
       const makerFillOptionsNumber = Number(
         formatUnits(makerFillOptions, orderData.collateralDecimals)

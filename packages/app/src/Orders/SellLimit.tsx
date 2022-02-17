@@ -2,14 +2,15 @@ import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { CHAIN_ID } from './Config'
 import { utils } from './Config'
-import { metamaskProvider } from './Config'
-import { ROPSTEN } from './Config'
-import { ethers } from 'ethers'
-// import { BigNumber } from '@0x/utils'
-export const sellLimitOrder = async (orderData) => {
+import { API0X } from './Config'
+import zeroXAddresses from '@0x/contract-addresses/addresses.json'
+
+export const sellLimitOrder = async (orderData: any, chainId: string) => {
   const getFutureExpiryInSeconds = () => {
     return Math.floor(Date.now() / 1000 + orderData.orderExpiry * 60).toString()
   }
+
+  const exchangeProxy = zeroXAddresses[chainId].exchangeProxy
 
   const isFloat = (number) => {
     return number != '' && !isNaN(number) && Math.round(number) != number
@@ -44,23 +45,23 @@ export const sellLimitOrder = async (orderData) => {
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
-    makerAmount: makerAmount.toString(),
-    takerAmount: takerAmount.toString(),
+    makerAmount: makerAmount as any,
+    takerAmount: takerAmount as any,
     maker: orderData.maker,
     sender: NULL_ADDRESS,
-    expiry: getFutureExpiryInSeconds(),
-    salt: Date.now().toString(),
+    expiry: getFutureExpiryInSeconds() as any,
+    salt: Date.now().toString() as any,
     chainId: CHAIN_ID,
-    verifyingContract: '', // TODO contractAddresses.exchangeProxy,
+    verifyingContract: exchangeProxy,
   })
 
   try {
     const signature = await order.getSignatureWithProviderAsync(
-      metamaskProvider,
+      orderData.provider,
       utils.SignatureType.EIP712 // Optional
     )
     const signedOrder = { ...order, signature }
-    const resp = await fetch(ROPSTEN, {
+    const resp = await fetch(API0X, {
       method: 'POST',
       body: JSON.stringify(signedOrder),
       headers: {

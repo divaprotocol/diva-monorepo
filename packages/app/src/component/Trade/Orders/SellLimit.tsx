@@ -20,15 +20,13 @@ import { useStyles } from './UiStyles'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { NETWORKS, useWallet } from '@web3-ui/hooks'
+import { useWallet } from '@web3-ui/hooks'
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { BigNumber } from 'ethers'
-// import contractAddress from '@0x/contract-addresses'
+import _0xAddresses from '@0x/contract-addresses'
 const maxApproval = BigNumber.from(2).pow(256).sub(1)
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
-
-const contractAddress = ''
 
 export default function SellLimit(props: {
   option: Pool
@@ -37,8 +35,7 @@ export default function SellLimit(props: {
 }) {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
-  // const address = '' //contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxyAddress = '' // address.exchangeProxy
+  const exchangeProxyAddress = _0xAddresses[chainId].exchangeProxy
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const classes = useStyles()
@@ -101,7 +98,8 @@ export default function SellLimit(props: {
         collateralDecimals: option.collateralDecimals,
         orderExpiry: expiry,
       }
-      sellLimitOrder(orderData)
+
+      sellLimitOrder(orderData, String(chainId))
         .then(function (response) {
           props.handleDisplayOrder()
           handleFormReset()

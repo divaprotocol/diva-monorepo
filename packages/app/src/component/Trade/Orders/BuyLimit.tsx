@@ -19,8 +19,7 @@ import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
-// import { BigNumber } from '@0x/utils'
-// import contractAddress from '@0x/contract-addresses'
+import _0xAddresses from '@0x/contract-addresses'
 
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { formatUnits } from 'ethers/lib/utils'
@@ -38,7 +37,7 @@ export default function BuyLimit(props: {
 }) {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
-  const exchangeProxyAddress = '' // address.exchangeProxy
+  const exchangeProxyAddress = _0xAddresses[chainId].exchangeProxy
   const option = props.option
   const makerToken = props.tokenAddress
   const classes = useStyles()
@@ -112,7 +111,7 @@ export default function BuyLimit(props: {
         orderExpiry: expiry,
       }
 
-      buylimitOrder(orderData)
+      buylimitOrder(orderData, String(chainId))
         .then(function () {
           props.handleDisplayOrder()
           handleFormReset()

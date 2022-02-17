@@ -2,17 +2,15 @@
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { CHAIN_ID } from './Config'
 // Does not compile
-// import contractAddress from '@0x/contract-addresses'
+import _0xAddresses from '@0x/contract-addresses'
 
-export const buyMarketOrder = async (orderData) => {
+export const buyMarketOrder = async (orderData: any, chainId) => {
   let filledOrder = {}
-  // const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
-  const exchangeProxyAddress = ''
   // Connect to 0x exchange contract
-  const exchange = {} // new IZeroExContract(exchangeProxyAddress, window.ethereum)
+  const exchange = {} as any // new IZeroExContract(exchangeProxyAddress, window.ethereum)
   const orders = orderData.existingLimitOrders
   let takerFillNbrOptions = parseEther(orderData.nbrOptions.toString())
-  let takerAssetAmounts = []
+  const takerAssetAmounts = []
   const signatures = []
   const fillOrderResponse = async (takerAssetFillAmounts) => {
     orders.map(function (order) {
@@ -28,7 +26,7 @@ export const buyMarketOrder = async (orderData) => {
   }
 
   orders.forEach((order) => {
-    if (takerFillNbrOptions > 0) {
+    if (takerFillNbrOptions != null && takerFillNbrOptions.gt(0)) {
       const expectedRate = parseEther(order.expectedRate.toString())
       const takerFillAmount = expectedRate.mul(takerFillNbrOptions)
       const takerFillAmountNumber = Number(

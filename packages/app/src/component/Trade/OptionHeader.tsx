@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import '../../Util/Dates'
 import { IconButton, Link } from '@mui/material'
@@ -8,8 +8,9 @@ import {
 } from '../../Util/getEtherscanLink'
 import { CoinImage } from '../PoolsTable'
 import Tooltip from '@mui/material/Tooltip'
+import { useCoingeckoPrice } from '@usedapp/coingecko'
 import { useWallet } from '@web3-ui/hooks'
-import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
+import { useQuery } from 'react-query'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -51,9 +52,6 @@ export default function OptionHeader(optionData: {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId
   const headerTitle = optionData.ReferenceAsset
-  const [underlyingAssetPrice, setUnderlyingAssetPrice] = useState<
-    string | undefined
-  >(undefined)
 
   const handleAddMetaMask = async () => {
     const { TokenAddress, isLong, tokenDecimals } = optionData
@@ -79,14 +77,26 @@ export default function OptionHeader(optionData: {
       console.error('Error in HandleAddMetaMask', error)
     }
   }
+  const assets = headerTitle
+    .toLowerCase()
+    .split('/')
+    .map((v) => (v === 'usdc' ? 'usd' : v))
 
-  useEffect(() => {
-    getUnderlyingPrice(optionData.ReferenceAsset).then((data) => {
-      setUnderlyingAssetPrice(data)
-    })
+  const coinListQuery = useQuery<
+    { id: string; symbol: string; name: string }[]
+  >('coinGeckoCoins', () =>
+    fetch('https://api.coingecko.com/api/v3/coins/list').then((v) => v.json())
+  )
 
-    return () => setUnderlyingAssetPrice(undefined)
-  }, [optionData.ReferenceAsset])
+  const coinlistAssets =
+    coinListQuery.data?.filter((v) => assets.some((a) => a === v.symbol)) || []
+
+  console.log(coinlistAssets)
+
+  const underlyingAssetPrice = useCoingeckoPrice(
+    coinlistAssets[0]?.id,
+    coinlistAssets[coinlistAssets.length - 1]?.symbol
+  )
 
   return (
     <AppHeader>
