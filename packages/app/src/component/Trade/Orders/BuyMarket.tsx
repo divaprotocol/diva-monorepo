@@ -7,7 +7,7 @@ import Slider from '@mui/material/Slider'
 import Input from '@mui/material/Input'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
-import { buyMarketOrder } from '../../../Orders/BuyMarket'
+import { buyMarketOrder } from '../../../Orders/buyMarket'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
@@ -105,46 +105,48 @@ export default function BuyMarket(props: {
         existingLimitOrders: existingLimitOrders,
       }
 
-      buyMarketOrder(orderData, chainId).then((orderFillStatus: any) => {
-        if (!(orderFillStatus === undefined)) {
-          if (!('logs' in orderFillStatus)) {
-            alert('Order could not be filled logs not found')
-            return
-          } else {
-            orderFillStatus.logs.forEach(async (eventData: any) => {
-              if (!('event' in eventData)) {
-                return
-              } else {
-                if (eventData.event === 'LimitOrderFilled') {
-                  //reset fill order button to approve
-                  setIsApproved(false)
-                  //get updated wallet balance
-                  getCollateralInWallet().then((val) => {
-                    if (val != null) {
-                      setCollateralBalance(Number(val))
-                    }
-                  })
-                  //reset input & you pay fields
-                  Array.from(document.querySelectorAll('input')).forEach(
-                    (input) => (input.value = '')
-                  )
-                  setNumberOfOptions(0.0)
-                  setYouPay(0.0)
-                  alert('Order successfully filled')
-                  //wait for 4 secs for 0x to update orders then handle order book display
-                  await new Promise((resolve) => setTimeout(resolve, 4000))
-                  props.handleDisplayOrder()
+      buyMarketOrder(orderData, String(chainId), wallet.provider).then(
+        (orderFillStatus: any) => {
+          if (!(orderFillStatus === undefined)) {
+            if (!('logs' in orderFillStatus)) {
+              alert('Order could not be filled logs not found')
+              return
+            } else {
+              orderFillStatus.logs.forEach(async (eventData: any) => {
+                if (!('event' in eventData)) {
                   return
                 } else {
-                  alert('Order could not be filled')
+                  if (eventData.event === 'LimitOrderFilled') {
+                    //reset fill order button to approve
+                    setIsApproved(false)
+                    //get updated wallet balance
+                    getCollateralInWallet().then((val) => {
+                      if (val != null) {
+                        setCollateralBalance(Number(val))
+                      }
+                    })
+                    //reset input & you pay fields
+                    Array.from(document.querySelectorAll('input')).forEach(
+                      (input) => (input.value = '')
+                    )
+                    setNumberOfOptions(0.0)
+                    setYouPay(0.0)
+                    alert('Order successfully filled')
+                    //wait for 4 secs for 0x to update orders then handle order book display
+                    await new Promise((resolve) => setTimeout(resolve, 4000))
+                    props.handleDisplayOrder()
+                    return
+                  } else {
+                    alert('Order could not be filled')
+                  }
                 }
-              }
-            })
+              })
+            }
+          } else {
+            alert('order could not be filled response is not defined')
           }
-        } else {
-          alert('order could not be filled response is not defined')
         }
-      })
+      )
     }
   }
 

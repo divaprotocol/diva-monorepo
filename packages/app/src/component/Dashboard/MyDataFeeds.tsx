@@ -115,7 +115,7 @@ const SubmitCell = (props: any) => {
 
   const chainId = provider?.network?.chainId
 
-  const spana =
+  const diva =
     chainId != null
       ? new ethers.Contract(
           config[chainId!].divaAddress,
@@ -163,8 +163,8 @@ const SubmitCell = (props: any) => {
             color="primary"
             type="submit"
             onClick={() => {
-              if (spana != null) {
-                spana.setFinalReferenceValue(
+              if (diva != null) {
+                diva.setFinalReferenceValue(
                   props.id.split('/')[0],
                   parseEther(textFieldValue),
                   true

@@ -79,7 +79,6 @@ const SubmitButton = (props: any) => {
     provider && new ethers.Contract(props.row.address, ERC20, provider)
   const handleRedeem = () => {
     if (props.row.Status === 'Confirmed*') {
-      console.log(props.row.Inflection)
       token?.balanceOf(userAddress).then((bal: BigNumber) => {
         diva
           .setFinalReferenceValue(
@@ -257,7 +256,6 @@ export function MyPositions() {
       val.statusFinalReferenceValue === 'Open' &&
       Date.now() > unchallengedPeriod
     ) {
-      console.log(val.statusFinalReferenceValue)
       finalValue = formatUnits(val.inflection)
       status = 'Confirmed*'
     } else if (

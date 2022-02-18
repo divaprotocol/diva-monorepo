@@ -1,14 +1,27 @@
-// import { IZeroExContract } from '@0x/contract-wrappers'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
-import zeroXAdresses from '@0x/contract-addresses'
+import zeroXAdresses from '@0x/contract-addresses/addresses.json'
+import ZERO_X_ABI from '../abi/ZERO_X.json'
+import { ethers, FixedNumber } from 'ethers'
 
-export const buyMarketOrder = async (orderData: any, chainId: string) => {
+export const buyMarketOrder = async (
+  orderData: any,
+  chainId: string,
+  provider: any
+) => {
   let filledOrder = {}
+
   // Connect to 0x exchange contract
+  const signer = provider.getSigner()
   const exchangeProxyAddress = zeroXAdresses[chainId].exchangeProxy
-  const exchange = {} as any // TODO: replace new IZeroExContract(exchangeProxyAddress, window.ethereum)
+  const contract = new ethers.Contract(
+    exchangeProxyAddress,
+    ZERO_X_ABI as any,
+    signer
+  )
+
+  console.log(orderData)
+
   const orders = orderData.existingLimitOrders
-  let takerFillNbrOptions = parseEther(orderData.nbrOptions.toString())
+  let takerFillNbrOptions = FixedNumber.from(String(orderData.nbrOptions))
   const takerAssetAmounts = []
   const signatures = []
   const fillOrderResponse = async (takerAssetFillAmounts) => {
@@ -17,45 +30,51 @@ export const buyMarketOrder = async (orderData: any, chainId: string) => {
       delete order.signature
       return order
     })
-    const response = await exchange
-      .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true)
-      .awaitTransactionSuccessAsync({ from: orderData.takerAccount })
-      .catch((err) => {
-        console.error('Error logged ' + JSON.stringify(err))
-        return null
-      })
-    return response
+    console.log({ orders, signatures, takerAssetFillAmounts })
+    const tx = await contract.batchFillLimitOrders(
+      orders,
+      signatures,
+      takerAssetFillAmounts,
+      true
+    )
+
+    const val = await tx.wait()
+
+    return val
   }
 
   orders.forEach((order) => {
-    if (takerFillNbrOptions != null && takerFillNbrOptions.gt(0)) {
-      const expectedRate = parseEther(order.expectedRate.toString())
-      const takerFillAmount = expectedRate.mul(takerFillNbrOptions)
-      const takerFillAmountNumber = Number(
-        formatUnits(takerFillAmount, orderData.collateralDecimals)
+    if (takerFillNbrOptions != null) {
+      console.log(order)
+      const expectedRate = FixedNumber.from(order.expectedRate.toString())
+      const takerFillAmount = expectedRate.mulUnsafe(
+        FixedNumber.from(takerFillNbrOptions.toString())
       )
-      const remainingFillableTakerAmount = parseEther(
+      const remainingFillableTakerAmount = FixedNumber.from(
         order.remainingFillableTakerAmount.toString()
       )
-      if (takerFillAmount.lte(remainingFillableTakerAmount)) {
-        takerAssetAmounts.push(takerFillAmountNumber)
-        const nbrOptionsFilled = remainingFillableTakerAmount.div(expectedRate)
-        takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled)
-      } else {
-        const remainingAmountNumber = Number(
-          formatUnits(
-            remainingFillableTakerAmount,
-            orderData.collateralDecimals
-          )
+      if (takerFillAmount > remainingFillableTakerAmount) {
+        takerAssetAmounts.push(takerFillAmount)
+        const nbrOptionsFilled =
+          remainingFillableTakerAmount.divUnsafe(expectedRate)
+        takerFillNbrOptions = takerFillNbrOptions.subUnsafe(
+          FixedNumber.from(String(nbrOptionsFilled))
         )
-        takerAssetAmounts.push(remainingAmountNumber)
-        const nbrOptionsFilled = remainingFillableTakerAmount.div(expectedRate)
-        takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled)
+      } else {
+        takerAssetAmounts.push(remainingFillableTakerAmount)
+        const nbrOptionsFilled =
+          remainingFillableTakerAmount.divUnsafe(expectedRate)
+        takerFillNbrOptions = takerFillNbrOptions.subUnsafe(
+          FixedNumber.from(String(nbrOptionsFilled))
+        )
       }
-    } else {
-      takerAssetAmounts.push('0')
     }
   })
-  filledOrder = await fillOrderResponse(takerAssetAmounts)
+  try {
+    filledOrder = await fillOrderResponse(takerAssetAmounts)
+  } catch (err) {
+    console.error(err)
+  }
+
   return filledOrder
 }

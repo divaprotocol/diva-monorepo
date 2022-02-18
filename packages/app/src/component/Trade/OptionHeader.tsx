@@ -91,8 +91,6 @@ export default function OptionHeader(optionData: {
   const coinlistAssets =
     coinListQuery.data?.filter((v) => assets.some((a) => a === v.symbol)) || []
 
-  console.log(coinlistAssets)
-
   const underlyingAssetPrice = useCoingeckoPrice(
     coinlistAssets[0]?.id,
     coinlistAssets[coinlistAssets.length - 1]?.symbol

@@ -7,7 +7,7 @@ import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
-import { sellLimitOrder } from '../../../Orders/SellLimit'
+import { sellLimitOrder } from '../../../Orders/sellLimit'
 import { LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
@@ -23,7 +23,7 @@ import { formatUnits } from 'ethers/lib/utils'
 import { useWallet } from '@web3-ui/hooks'
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { BigNumber } from 'ethers'
-import _0xAddresses from '@0x/contract-addresses'
+import _0xAddresses from '@0x/contract-addresses/addresses.json'
 const maxApproval = BigNumber.from(2).pow(256).sub(1)
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]

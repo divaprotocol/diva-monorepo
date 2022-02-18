@@ -23,14 +23,14 @@ import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
 import * as qs from 'qs'
 import { Pool } from '../../../lib/queries'
-import { sellMarketOrder } from '../../../Orders/SellMarket'
+import { sellMarketOrder } from '../../../Orders/sellMarket'
 
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { getComparator, stableSort } from './OrderHelper'
 import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
-import _0xAddresses from '@0x/contract-addresses'
+import _0xAddresses from '@0x/contract-addresses/addresses.json'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 

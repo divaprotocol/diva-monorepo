@@ -1,8 +1,8 @@
 import { parseEther, parseUnits } from 'ethers/lib/utils'
-import { NULL_ADDRESS } from './Config'
-import { CHAIN_ID } from './Config'
-import { utils } from './Config'
-import { API0X } from './Config'
+import { NULL_ADDRESS } from './config'
+import { CHAIN_ID } from './config'
+import { utils } from './config'
+import { API0X } from './config'
 import zeroXAddresses from '@0x/contract-addresses/addresses.json'
 
 export const sellLimitOrder = async (orderData: any, chainId: string) => {

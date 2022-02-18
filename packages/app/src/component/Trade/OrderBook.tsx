@@ -253,6 +253,7 @@ export default function OrderBook(props: {
       optionTokenAddress,
       'desOrder'
     )
+
     orders.push(orderBookBuy)
     const orderBookSell = mapOrderData(
       responseSell,
@@ -337,7 +338,7 @@ export default function OrderBook(props: {
                         <TableCellStyle align="center">
                           <Typography variant="subtitle1">
                             {row.ask != ''
-                              ? row.ask.toFixed(2).toString()
+                              ? Number(row.ask).toFixed(2).toString()
                               : '-'}
                           </Typography>
                           <Typography variant="caption" noWrap>
