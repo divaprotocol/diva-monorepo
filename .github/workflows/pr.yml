@@ -20,8 +20,8 @@ jobs:
       - name: Run eslint and typescript to check for errors
         run: yarn lint
 
-#      - name: Run tests
-#        run: yarn test:e2e
-#        env: 
-#          NETWORK_NAME: ropsten
-#          SECRET_WORDS: ${{ secrets.TEST_WALLET_SECRET }}
+      # - name: Run tests
+      #   run: yarn test
+      #   env: 
+      #     NETWORK_NAME: ropsten
+      #     SECRET_WORDS: ${{ secrets.TEST_WALLET_SECRET }}
