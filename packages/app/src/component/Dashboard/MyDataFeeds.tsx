@@ -23,7 +23,8 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
-import { useWallet } from '@web3-ui/hooks'
+import { useWeb3React } from '@web3-react/core'
+import { chainIdtoName } from '../../Util/chainIdtoName'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -111,18 +112,16 @@ const DueInCell = (props: any) => {
   )
 }
 const SubmitCell = (props: any) => {
-  const { provider } = useWallet()
-
-  const chainId = provider?.network?.chainId
-
-  const diva =
-    chainId != null
-      ? new ethers.Contract(
-          config[chainId!].divaAddress,
-          DIVA_ABI,
-          provider.getSigner()
-        )
-      : null
+  const { chainId = 3 } = useWeb3React()
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum,
+    chainIdtoName(chainId).toLowerCase()
+  )
+  const diva = new ethers.Contract(
+    config[chainId!].divaAddress,
+    DIVA_ABI,
+    provider.getSigner()
+  )
 
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
@@ -243,9 +242,7 @@ const columns: GridColDef[] = [
 ]
 
 export function MyDataFeeds() {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
-  const userAddress = wallet?.connection?.userAddress
+  const { account, chainId = 3 } = useWeb3React()
 
   const query = useQuery<{ pools: Pool[] }>(
     'pools',
@@ -257,7 +254,7 @@ export function MyDataFeeds() {
   const pools =
     query?.data?.pools?.filter(
       (pool: Pool) =>
-        pool.dataFeedProvider.toLowerCase() === userAddress?.toLowerCase()
+        pool.dataFeedProvider.toLowerCase() === account?.toLowerCase()
     ) || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
@@ -308,7 +305,7 @@ export function MyDataFeeds() {
     ]
   }, [] as GridRowModel[])
 
-  return userAddress ? (
+  return account ? (
     <Stack
       direction="row"
       sx={{

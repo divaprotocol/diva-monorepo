@@ -8,8 +8,8 @@ import {
 } from '../../Util/getEtherscanLink'
 import { CoinImage } from '../PoolsTable'
 import Tooltip from '@mui/material/Tooltip'
-import { useWallet } from '@web3-ui/hooks'
 import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
+import { useWeb3React } from '@web3-react/core'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -48,8 +48,7 @@ export default function OptionHeader(optionData: {
   poolId: string
   tokenDecimals: number
 }) {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
+  const { chainId = 3 } = useWeb3React()
   const headerTitle = optionData.ReferenceAsset
   const [underlyingAssetPrice, setUnderlyingAssetPrice] = useState<
     string | undefined

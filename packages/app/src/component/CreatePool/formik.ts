@@ -1,7 +1,9 @@
 import { useFormik } from 'formik'
 import { useDiva } from '../../hooks/useDiva'
-import { useWallet } from '@web3-ui/hooks'
 import { CollateralToken } from '../../lib/queries'
+import { useWeb3React } from '@web3-react/core'
+import { ethers } from 'ethers'
+import { chainIdtoName } from '../../Util/chainIdtoName'
 
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
@@ -47,13 +49,12 @@ type Errors = {
 }
 
 export const useCreatePoolFormik = () => {
-  const {
-    connection: { network },
-    provider,
-  } = useWallet()
-
+  const { chainId = 3, account } = useWeb3React()
   const contract = useDiva()
-
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum,
+    chainIdtoName(chainId).toLowerCase()
+  )
   const _formik = useFormik({
     initialValues,
     onSubmit: async (values, formik) => {
@@ -122,7 +123,7 @@ export const useCreatePoolFormik = () => {
         errors.collateralToken = 'You must choose a collateral asset'
       }
 
-      if (network == null) {
+      if (account == null) {
         errors.collateralWalletBalance =
           'Your wallet must be connected before you can proceed'
       } else if (walletBalance < collateralBalance) {

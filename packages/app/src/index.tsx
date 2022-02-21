@@ -11,13 +11,15 @@ import { ThemeProvider } from '@mui/material/styles'
 import { useMediaQuery } from '@mui/material'
 import { Box } from '@mui/system'
 import { createDivaTheme } from './lib/createDivaTheme'
-import { Provider as Web3Provider } from '@web3-ui/hooks'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import 'react-vis/dist/style.css'
-import { projectId } from './constants'
+import Web3 from 'web3'
+import { Web3ReactProvider } from '@web3-react/core'
 
 const queryClient = new QueryClient()
-
+function getLibrary(provider: any) {
+  return new Web3(provider)
+}
 const WithProviders = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
 
@@ -41,7 +43,7 @@ const WithProviders = () => {
         overflow: 'hidden',
       }}
     >
-      <Web3Provider network={undefined as any} infuraId={projectId}>
+      <Web3ReactProvider getLibrary={getLibrary}>
         <QueryClientProvider client={queryClient}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <ThemeProvider theme={theme}>
@@ -51,7 +53,7 @@ const WithProviders = () => {
             </ThemeProvider>
           </LocalizationProvider>
         </QueryClientProvider>
-      </Web3Provider>
+      </Web3ReactProvider>
     </Box>
   )
 }

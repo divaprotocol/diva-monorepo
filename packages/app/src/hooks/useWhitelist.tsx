@@ -1,12 +1,11 @@
-import { useWallet } from '@web3-ui/hooks'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
 import { config } from '../constants'
 import { WhitelistQueryResponse, queryWhitelist } from '../lib/queries'
+import { useWeb3React } from '@web3-react/core'
 
 export function useWhitelist() {
-  const { provider } = useWallet()
-  const chainId = provider?.network?.chainId || 3
+  const { chainId = 3 } = useWeb3React()
 
   const whitelistQuery = useQuery<WhitelistQueryResponse>(
     `whitelist-${chainId}`,

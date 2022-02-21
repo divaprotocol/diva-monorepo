@@ -18,7 +18,8 @@ import styled from '@emotion/styled'
 import ERC20 from '../../abi/ERC20.json'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { withStyles } from '@mui/styles'
-import { useWallet } from '@web3-ui/hooks'
+import { useWeb3React } from '@web3-react/core'
+import { chainIdtoName } from '../../Util/chainIdtoName'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -38,6 +39,7 @@ type Props = {
 }
 
 export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
+  const { chainId = 3, account } = useWeb3React()
   const [textFieldValue, setTextFieldValue] = useState('')
   const theme = useTheme()
   const [openAlert, setOpenAlert] = React.useState(false)
@@ -45,10 +47,10 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
   const [decimal, setDecimal] = React.useState(18)
   const tokenBalance = useErcBalance(pool ? pool!.collateralToken : undefined)
 
-  const {
-    provider,
-    connection: { userAddress: account },
-  } = useWallet()
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum,
+    chainIdtoName(chainId!).toLowerCase()
+  )
 
   useEffect(() => {
     if (pool) {

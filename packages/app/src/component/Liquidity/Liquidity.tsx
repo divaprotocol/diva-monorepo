@@ -21,10 +21,11 @@ import { RemoveLiquidity } from './RemoveLiquidity'
 import { formatUnits } from 'ethers/lib/utils'
 import ERC20 from '../../abi/ERC20.json'
 import { config } from '../../constants'
-import { useWallet } from '@web3-ui/hooks'
 import { ReactComponent as Bullish } from '../../Images/bullish-svgrepo-com.svg'
 import { ReactComponent as Bearish } from '../../Images/bearish-svgrepo-com.svg'
 import { ReactComponent as Star } from '../../Images/star-svgrepo-com.svg'
+import { useWeb3React } from '@web3-react/core'
+import { chainIdtoName } from '../../Util/chainIdtoName'
 export const Liquidity = () => {
   const [value, setValue] = React.useState(0)
   const [pool, setPool] = React.useState<Pool>()
@@ -32,13 +33,16 @@ export const Liquidity = () => {
   const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
   const [symbol, setSymbol] = React.useState('')
-  const { provider } = useWallet()
-  const chainId = provider?.network?.chainId
+  const { chainId = 3 } = useWeb3React()
 
   const theme = useTheme()
 
   useEffect(() => {
     if (chainId) {
+      const provider = new ethers.providers.Web3Provider(
+        window.ethereum,
+        chainIdtoName(chainId).toLowerCase()
+      )
       const diva = new ethers.Contract(
         config[chainId!].divaAddress,
         DIVA_ABI,

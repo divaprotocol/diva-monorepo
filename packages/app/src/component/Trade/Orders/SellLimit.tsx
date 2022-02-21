@@ -21,8 +21,8 @@ import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 import { Pool } from '../../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { NETWORKS, useWallet } from '@web3-ui/hooks'
 import ERC20_ABI from '../../../abi/ERC20.json'
+import { useWeb3React } from '@web3-react/core'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const maxApproval = new BigNumber(2).pow(256).minus(1)
@@ -34,8 +34,7 @@ export default function SellLimit(props: {
   handleDisplayOrder: () => void
   tokenAddress: string
 }) {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const { chainId = 3 } = useWeb3React()
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
   const option = props.option

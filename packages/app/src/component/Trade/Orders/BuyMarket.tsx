@@ -27,10 +27,10 @@ import { getComparator, stableSort } from './OrderHelper'
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
-import { NETWORKS } from '@web3-ui/hooks'
+import { Network } from '../../../Util/chainIdtoName'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-const CHAIN_ID = NETWORKS.ropsten
+const CHAIN_ID = Network.ROPSTEN
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 

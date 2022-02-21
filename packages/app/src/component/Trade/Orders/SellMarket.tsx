@@ -31,7 +31,7 @@ import { sellMarketOrder } from '../../../Orders/SellMarket'
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { getComparator, stableSort } from './OrderHelper'
-import { useWallet } from '@web3-ui/hooks'
+import { useWeb3React } from '@web3-react/core'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const web3 = new Web3(Web3.givenProvider)
@@ -42,8 +42,7 @@ export default function SellMarket(props: {
   handleDisplayOrder: () => void
   tokenAddress: string
 }) {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const { chainId = 3 } = useWeb3React()
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)

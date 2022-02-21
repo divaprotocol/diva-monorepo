@@ -1,11 +1,12 @@
 import { Chip } from '@mui/material'
-import { useWallet } from '@web3-ui/hooks'
+import { chainIdtoName } from '../../Util/chainIdtoName'
+import { useWeb3React } from '@web3-react/core'
 
 export function NetworkTag() {
-  const { connection, connected } = useWallet()
+  const { active, chainId = 3 } = useWeb3React()
 
-  if (connected) {
-    return <Chip label={connection.network} sx={{ marginLeft: 'auto' }} />
+  if (active) {
+    return <Chip label={chainIdtoName(chainId)} sx={{ marginLeft: 'auto' }} />
   } else {
     return <Chip label={'Preview (ropsten)'} sx={{ marginLeft: 'auto' }} />
   }

@@ -15,7 +15,8 @@ import ERC20 from '../../abi/ERC20.json'
 import { useTokenBalances } from '../../hooks/useTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
-import { useWallet } from '@web3-ui/hooks'
+import { chainIdtoName } from '../../Util/chainIdtoName'
+import { useWeb3React } from '@web3-react/core'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -61,13 +62,13 @@ const AddToMetamask = (props: any) => {
 }
 
 const SubmitButton = (props: any) => {
-  const {
-    connection: { userAddress },
-    provider,
-  } = useWallet()
+  const { chainId = 3, account } = useWeb3React()
+  const provider = new ethers.providers.Web3Provider(
+    window.ethereum,
+    chainIdtoName(chainId).toLowerCase()
+  )
   const history = useHistory()
 
-  const chainId = provider?.network?.chainId
   if (chainId == null) return null
 
   const diva = new ethers.Contract(
@@ -79,8 +80,7 @@ const SubmitButton = (props: any) => {
     provider && new ethers.Contract(props.row.address, ERC20, provider)
   const handleRedeem = () => {
     if (props.row.Status === 'Confirmed*') {
-      console.log(props.row.Inflection)
-      token?.balanceOf(userAddress).then((bal: BigNumber) => {
+      token?.balanceOf(account).then((bal: BigNumber) => {
         diva
           .setFinalReferenceValue(
             props.id.split('/')[0],
@@ -94,7 +94,7 @@ const SubmitButton = (props: any) => {
           })
       })
     } else {
-      token?.balanceOf(userAddress).then((bal: BigNumber) => {
+      token?.balanceOf(account).then((bal: BigNumber) => {
         diva.redeemPositionToken(props.row.address, bal)
       })
     }
@@ -219,13 +219,7 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const {
-    connection: { userAddress },
-    provider,
-  } = useWallet()
-
-  const account = userAddress
-  const chainId = provider?.network?.chainId
+  const { account, chainId = 3 } = useWeb3React()
 
   const poolsQuery = useQuery<{ pools: Pool[] }>('pools', () =>
     chainId != null
@@ -257,7 +251,6 @@ export function MyPositions() {
       val.statusFinalReferenceValue === 'Open' &&
       Date.now() > unchallengedPeriod
     ) {
-      console.log(val.statusFinalReferenceValue)
       finalValue = formatUnits(val.inflection)
       status = 'Confirmed*'
     } else if (

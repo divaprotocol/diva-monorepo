@@ -25,7 +25,7 @@ const contractAddress = require('@0x/contract-addresses')
 
 import ERC20_ABI from '../../../abi/ERC20.json'
 import { formatUnits } from 'ethers/lib/utils'
-import { useWallet } from '@web3-ui/hooks'
+import { useWeb3React } from '@web3-react/core'
 const web3 = new Web3(Web3.givenProvider)
 const maxApproval = new BigNumber(2).pow(256).minus(1)
 let accounts: any[]
@@ -35,8 +35,7 @@ export default function BuyLimit(props: {
   handleDisplayOrder: () => void
   tokenAddress: string
 }) {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const { chainId = 3 } = useWeb3React()
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
   const option = props.option

@@ -7,7 +7,6 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
-import { useWallet } from '@web3-ui/hooks'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
 import { config } from '../../constants'
