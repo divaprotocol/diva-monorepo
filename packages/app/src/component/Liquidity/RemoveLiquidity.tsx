@@ -14,7 +14,12 @@ import {
 import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
-import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import { useCoinIcon } from '../../hooks/useCoinIcon'
 import ERC20 from '../../abi/ERC20.json'
 import Button from '@mui/material/Button'
@@ -39,9 +44,11 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
   const tokenBalanceLong = useErcBalance(pool ? pool!.longToken : undefined)
   const tokenBalanceShort = useErcBalance(pool ? pool!.shortToken : undefined)
+  const [longToken, setLongToken] = React.useState('')
+  const [shortToken, setShortToken] = React.useState('')
   const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
-  const [impliedCollateral, setImpliedCollateral] = React.useState(0)
+  const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
   const { provider } = useWallet()
   const chainId = provider?.network?.chainId
 
@@ -49,21 +56,6 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
 
   useEffect(() => {
     if (pool) {
-      if (textFieldValue !== '')
-        setImpliedCollateral(
-          (parseFloat(formatEther(parseEther(textFieldValue))) *
-            parseFloat(
-              formatUnits(pool.collateralBalanceLongInitial, decimal)
-            )) /
-            parseFloat(formatEther(pool.supplyLongInitial)) +
-            ((parseFloat(formatEther(pool.supplyShortInitial)) /
-              parseFloat(formatEther(pool.supplyLongInitial))) *
-              parseFloat(formatEther(parseEther(textFieldValue))) *
-              parseFloat(
-                formatUnits(pool.collateralBalanceShortInitial, decimal)
-              )) /
-              parseFloat(formatEther(pool.supplyShortInitial))
-        )
       const token = new ethers.Contract(
         pool!.collateralToken,
         ERC20,
@@ -72,16 +64,74 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
       token.decimals().then((decimals: number) => {
         setDecimal(decimals)
       })
+      if (tokenBalanceLong && tokenBalanceShort && decimal) {
+        const colLong =
+          ((parseFloat(tokenBalanceLong) *
+            (parseFloat(
+              formatUnits(pool.collateralBalanceLongInitial, decimal)
+            ) +
+              parseFloat(formatUnits(pool.collateralBalanceShortInitial)))) /
+            parseFloat(formatEther(pool.supplyLongInitial))) *
+          (1.0 -
+            parseFloat(formatEther(pool.settlementFee)) -
+            parseFloat(formatEther(pool.redemptionFee)))
+        const colShort =
+          ((parseFloat(tokenBalanceShort) *
+            (parseFloat(
+              formatUnits(pool.collateralBalanceLongInitial, decimal)
+            ) +
+              parseFloat(formatUnits(pool.collateralBalanceShortInitial)))) /
+            parseFloat(formatEther(pool.supplyShortInitial))) *
+          (1.0 -
+            parseFloat(formatEther(pool.settlementFee)) -
+            parseFloat(formatEther(pool.redemptionFee)))
+        {
+          colLong < colShort
+            ? setMaxCollateral(colLong)
+            : setMaxCollateral(colShort)
+        }
+      }
+      if (textFieldValue !== '') {
+        setLongToken(
+          (
+            ((parseFloat(
+              formatUnits(parseUnits(textFieldValue, decimal), decimal)
+            ) /
+              (1.0 -
+                parseFloat(formatEther(pool.redemptionFee)) -
+                parseFloat(formatEther(pool.settlementFee)))) *
+              parseFloat(formatEther(pool.supplyLongInitial))) /
+            (parseFloat(formatUnits(pool.collateralBalanceLongInitial)) +
+              parseFloat(formatUnits(pool.collateralBalanceShortInitial)))
+          ).toString()
+        )
+
+        setShortToken(
+          (
+            ((parseFloat(
+              formatUnits(parseUnits(textFieldValue, decimal), decimal)
+            ) /
+              (1.0 -
+                parseFloat(formatEther(pool.redemptionFee)) -
+                parseFloat(formatEther(pool.settlementFee)))) *
+              parseFloat(formatEther(pool.supplyShortInitial))) /
+            (parseFloat(formatUnits(pool.collateralBalanceLongInitial)) +
+              parseFloat(formatUnits(pool.collateralBalanceShortInitial)))
+          ).toString()
+        )
+      }
     }
     if (
       tokenBalanceLong &&
-      parseInt(textFieldValue) > parseInt(tokenBalanceLong!)
+      textFieldValue !== '' &&
+      parseFloat(formatUnits(parseUnits(textFieldValue, decimal), decimal)) >
+        maxCollateral!
     ) {
       setOpenAlert(true)
     } else {
       setOpenAlert(false)
     }
-  }, [tokenBalanceLong, textFieldValue, chainId, pool])
+  }, [tokenBalanceLong, tokenBalanceShort, textFieldValue, chainId, pool])
   return (
     <Container
       sx={{
@@ -91,7 +141,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
       <Card sx={{ borderRadius: '16px' }}>
         <Container sx={{ mt: theme.spacing(2) }}>
           <Stack direction="row" justifyContent="space-between">
-            <Typography sx={{ mt: theme.spacing(2) }}>Long Token</Typography>
+            <Typography sx={{ mt: theme.spacing(2) }}>Amount</Typography>
             <Input
               type="number"
               inputProps={{ style: { textAlign: 'right' } }}
@@ -107,12 +157,12 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           {tokenBalanceLong ? (
             <>
               <Typography variant="subtitle2" color="text.secondary">
-                Your balance: {tokenBalanceLong!}
+                You can remove up to {maxCollateral} {symbol}
                 <MaxCollateral
                   role="button"
                   onClick={() => {
-                    if (tokenBalanceLong != null) {
-                      setTextFieldValue(tokenBalanceLong)
+                    if (maxCollateral != 0) {
+                      setTextFieldValue(maxCollateral.toString())
                     }
                   }}
                 >
@@ -126,16 +176,23 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
             </Typography>
           )}
           <Stack direction="row" justifyContent="space-between">
-            <Typography sx={{ mt: theme.spacing(2) }}>Short Token</Typography>
-            <Typography sx={{ mt: theme.spacing(2) }}>
-              {pool &&
-                textFieldValue !== '' &&
-                (
-                  (parseFloat(formatEther(pool.supplyShortInitial)) /
-                    parseFloat(formatEther(pool.supplyLongInitial))) *
-                  parseFloat(formatEther(parseEther(textFieldValue)))
-                ).toString()}
+            <Typography sx={{ mt: theme.spacing(2) }}>Long Token</Typography>
+            <Typography sx={{ mt: theme.spacing(2) }}>{longToken}</Typography>
+          </Stack>
+          {tokenBalanceLong ? (
+            <>
+              <Typography variant="subtitle2" color="text.secondary">
+                Your balance: {tokenBalanceLong}
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="subtitle2" color="text.secondary">
+              Please connect your wallet
             </Typography>
+          )}
+          <Stack direction="row" justifyContent="space-between">
+            <Typography sx={{ mt: theme.spacing(2) }}>Short Token</Typography>
+            <Typography sx={{ mt: theme.spacing(2) }}>{shortToken}</Typography>
           </Stack>
           {tokenBalanceShort ? (
             <>
@@ -176,11 +233,17 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
               {pool &&
                 textFieldValue !== '' &&
                 (
-                  impliedCollateral -
+                  parseFloat(
+                    formatUnits(parseUnits(textFieldValue, decimal), decimal)
+                  ) -
                   parseFloat(formatEther(pool!.redemptionFee)) *
-                    impliedCollateral -
+                    parseFloat(
+                      formatUnits(parseUnits(textFieldValue, decimal), decimal)
+                    ) -
                   parseFloat(formatEther(pool!.settlementFee)) *
-                    impliedCollateral
+                    parseFloat(
+                      formatUnits(parseUnits(textFieldValue, decimal), decimal)
+                    )
                 )
                   .toPrecision(4)
                   .toString() +
@@ -206,7 +269,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
               onClick={() => {
                 diva!.removeLiquidity(
                   window.location.pathname.split('/')[1],
-                  parseEther(textFieldValue)
+                  parseEther(longToken)
                 )
               }}
               style={{
@@ -239,7 +302,10 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
             {pool &&
               textFieldValue !== '' &&
               (
-                parseFloat(formatEther(pool!.redemptionFee)) * impliedCollateral
+                parseFloat(formatEther(pool!.redemptionFee)) *
+                parseFloat(
+                  formatUnits(parseUnits(textFieldValue, decimal), decimal)
+                )
               ).toPrecision(4)}{' '}
             {symbol!}{' '}
           </Typography>
@@ -250,7 +316,10 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
             {pool &&
               textFieldValue !== '' &&
               (
-                parseFloat(formatEther(pool!.settlementFee)) * impliedCollateral
+                parseFloat(formatEther(pool!.settlementFee)) *
+                parseFloat(
+                  formatUnits(parseUnits(textFieldValue, decimal), decimal)
+                )
               ).toPrecision(4)}{' '}
             {symbol!}{' '}
           </Typography>
