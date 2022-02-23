@@ -252,12 +252,13 @@ export function MyPositions() {
     }
     if (now < expiryDate) {
       finalValue = '-'
-    } else if (
-      val.statusFinalReferenceValue === 'Open' &&
-      Date.now() > unchallengedPeriod
-    ) {
-      finalValue = formatUnits(val.inflection)
-      status = 'Confirmed*'
+    } else if (val.statusFinalReferenceValue === 'Open') {
+      if (Date.now() > unchallengedPeriod) {
+        finalValue = formatUnits(val.inflection)
+        status = 'Confirmed*'
+      } else {
+        status = '-'
+      }
     } else if (
       val.statusFinalReferenceValue === 'Challenged' &&
       Date.now() > challengedPeriod
