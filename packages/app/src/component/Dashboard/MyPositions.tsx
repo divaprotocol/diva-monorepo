@@ -79,7 +79,6 @@ const SubmitButton = (props: any) => {
     provider && new ethers.Contract(props.row.address, ERC20, provider)
   const handleRedeem = () => {
     if (props.row.Status === 'Confirmed*') {
-      console.log(props.row.Inflection)
       token?.balanceOf(userAddress).then((bal: BigNumber) => {
         diva
           .setFinalReferenceValue(
@@ -237,15 +236,15 @@ export function MyPositions() {
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
     const now = new Date()
-    const fallbackPeriod = expiryDate.setMinutes(
+    const fallbackPeriod = new Date(parseInt(val.expiryDate) * 1000).setMinutes(
       expiryDate.getMinutes() + 24 * 60 + 5
     )
-    const unchallengedPeriod = expiryDate.setMinutes(
-      expiryDate.getMinutes() + 5 * 24 * 60 + 5
-    )
-    const challengedPeriod = expiryDate.setMinutes(
-      expiryDate.getMinutes() + 2 * 24 * 60 + 5
-    )
+    const unchallengedPeriod = new Date(
+      parseInt(val.expiryDate) * 1000
+    ).setMinutes(expiryDate.getMinutes() + 5 * 24 * 60 + 5)
+    const challengedPeriod = new Date(
+      parseInt(val.expiryDate) * 1000
+    ).setMinutes(expiryDate.getMinutes() + 2 * 24 * 60 + 5)
     let finalValue = ''
     let status = val.statusFinalReferenceValue
     if (Date.now() > fallbackPeriod) {
@@ -257,7 +256,6 @@ export function MyPositions() {
       val.statusFinalReferenceValue === 'Open' &&
       Date.now() > unchallengedPeriod
     ) {
-      console.log(val.statusFinalReferenceValue)
       finalValue = formatUnits(val.inflection)
       status = 'Confirmed*'
     } else if (
