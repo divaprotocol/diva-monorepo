@@ -112,7 +112,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
                 formatUnits(pool.collateralBalanceShortInitial, decimal)
               ))
           )
-            .toPrecision(6)
+            .toFixed(4)
             .toString()
         )
 
@@ -132,7 +132,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
                 formatUnits(pool.collateralBalanceShortInitial, decimal)
               ))
           )
-            .toPrecision(6)
+            .toFixed(4)
             .toString()
         )
       }
@@ -164,7 +164,12 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
               value={textFieldValue}
               onChange={(e) => {
                 const amount = e.target.value
-                if (!amount || amount.match(/^\d{1,}(\.\d{0,18})?$/)) {
+                if (
+                  amount.split('.')[1] != null &&
+                  amount.split('.')[1]!.length <= decimal
+                ) {
+                  setTextFieldValue(amount)
+                } else if (amount.split('.')[1] == null) {
                   setTextFieldValue(amount)
                 }
               }}
@@ -173,7 +178,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           {tokenBalanceLong ? (
             <>
               <Typography variant="subtitle2" color="text.secondary">
-                You can remove up to {maxCollateral.toPrecision(4)} {symbol}
+                You can remove up to {maxCollateral.toFixed(4)} {symbol}
                 {' (after fees) '}
                 <MaxCollateral
                   role="button"
@@ -199,7 +204,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           {tokenBalanceLong ? (
             <>
               <Typography variant="subtitle2" color="text.secondary">
-                Your balance: {parseFloat(tokenBalanceLong).toPrecision(6)}
+                Your balance: {parseFloat(tokenBalanceLong).toFixed(4)}
               </Typography>
             </>
           ) : (
@@ -214,7 +219,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           {tokenBalanceShort ? (
             <>
               <Typography variant="subtitle2" color="text.secondary">
-                Your balance: {parseFloat(tokenBalanceShort).toPrecision(6)}
+                Your balance: {parseFloat(tokenBalanceShort).toFixed(4)}
               </Typography>
             </>
           ) : (
@@ -280,10 +285,10 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
           <Typography>Current Pool Size</Typography>
           <Typography>
             {pool &&
-              parseFloat(formatUnits(pool.collateralBalanceLong, decimal)) +
-                parseFloat(
-                  formatUnits(pool.collateralBalanceShort, decimal)
-                )}{' '}
+              (
+                parseFloat(formatUnits(pool.collateralBalanceLong, decimal)) +
+                parseFloat(formatUnits(pool.collateralBalanceShort, decimal))
+              ).toFixed(4)}{' '}
             {symbol!}{' '}
           </Typography>
         </Stack>
@@ -300,7 +305,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
                 (1.0 -
                   parseFloat(formatEther(pool.redemptionFee)) -
                   parseFloat(formatEther(pool.settlementFee)))
-              ).toPrecision(4)}{' '}
+              ).toFixed(4)}{' '}
             {symbol!}{' '}
           </Typography>
         </Stack>
@@ -317,7 +322,7 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
                 (1.0 -
                   parseFloat(formatEther(pool.redemptionFee)) -
                   parseFloat(formatEther(pool.settlementFee)))
-              ).toPrecision(4)}{' '}
+              ).toFixed(4)}{' '}
             {symbol!}{' '}
           </Typography>
         </Stack>

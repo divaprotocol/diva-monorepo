@@ -155,12 +155,14 @@ export const Liquidity = () => {
                   <Typography>Current Pool Size</Typography>
                   <Typography>
                     {pool &&
-                      parseFloat(
-                        formatUnits(pool.collateralBalanceLong, decimal)
-                      ) +
+                      (
+                        parseFloat(
+                          formatUnits(pool.collateralBalanceLong, decimal)
+                        ) +
                         parseFloat(
                           formatUnits(pool.collateralBalanceShort, decimal)
-                        )}{' '}
+                        )
+                      ).toFixed(4)}{' '}
                     {symbol!}{' '}
                   </Typography>
                 </Stack>
