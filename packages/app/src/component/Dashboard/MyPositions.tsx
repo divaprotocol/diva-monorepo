@@ -257,7 +257,7 @@ export function MyPositions() {
         finalValue = formatUnits(val.inflection)
         status = 'Confirmed*'
       } else {
-        status = '-'
+        finalValue = '-'
       }
     } else if (
       val.statusFinalReferenceValue === 'Challenged' &&
