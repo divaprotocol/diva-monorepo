@@ -250,12 +250,18 @@ export function MyPositions() {
     if (Date.now() > fallbackPeriod) {
       status = 'Fallback'
     }
-    if (now < expiryDate) {
+    if (now.getTime() < expiryDate.getTime()) {
       finalValue = '-'
     } else if (val.statusFinalReferenceValue === 'Open') {
-      if (Date.now() > unchallengedPeriod) {
+      if (now.getTime() > unchallengedPeriod) {
         finalValue = formatUnits(val.inflection)
         status = 'Confirmed*'
+      } else if (
+        now.getTime() > expiryDate.getTime() &&
+        now.getTime() < unchallengedPeriod
+      ) {
+        status = 'Expired'
+        finalValue = '-'
       } else {
         finalValue = '-'
       }
