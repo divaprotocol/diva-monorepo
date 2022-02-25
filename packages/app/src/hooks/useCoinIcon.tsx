@@ -17,8 +17,16 @@ export function useCoinIcon(_symbol?: string) {
     }
 
     if (address === undefined) return ''
-    return `https://tokens.1inch.exchange/${address}.png`
-  }
 
-  return ''
+    const request = new XMLHttpRequest()
+    request.open('GET', `https://tokens.1inch.exchange/${address}.png`, false)
+    request.send()
+    if (request.status === 200) {
+      return `https://tokens.1inch.exchange/${address}.png`
+    } else {
+      return ''
+    }
+  } else {
+    return ''
+  }
 }

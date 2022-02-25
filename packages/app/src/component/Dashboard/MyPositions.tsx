@@ -179,6 +179,12 @@ const columns: GridColDef[] = [
     type: 'dateTime',
   },
   {
+    field: 'TVL',
+    align: 'right',
+    headerAlign: 'right',
+    minWidth: 100,
+  },
+  {
     field: 'finalValue',
     align: 'right',
     headerAlign: 'right',
@@ -257,7 +263,6 @@ export function MyPositions() {
       val.statusFinalReferenceValue === 'Open' &&
       Date.now() > unchallengedPeriod
     ) {
-      console.log(val.statusFinalReferenceValue)
       finalValue = formatUnits(val.inflection)
       status = 'Confirmed*'
     } else if (
@@ -302,14 +307,19 @@ export function MyPositions() {
         ...shared,
         id: `${val.id}/long`,
         address: val.longToken,
+        TVL:
+          formatUnits(
+            BigNumber.from(val.collateralBalanceLong).add(
+              val.collateralBalanceShort
+            ),
+            val.collateralDecimals
+          ) +
+          ' ' +
+          val.collateralSymbol,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
           IsLong: true,
         }),
-        TVL:
-          formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
-          ' ' +
-          val.collateralSymbol,
         Status: status,
         finalValue: finalValue,
       },
@@ -317,14 +327,19 @@ export function MyPositions() {
         ...shared,
         id: `${val.id}/short`,
         address: val.shortToken,
+        TVL:
+          formatUnits(
+            BigNumber.from(val.collateralBalanceLong).add(
+              val.collateralBalanceShort
+            ),
+            val.collateralDecimals
+          ) +
+          ' ' +
+          val.collateralSymbol,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
           IsLong: false,
         }),
-        TVL:
-          formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
-          ' ' +
-          val.collateralSymbol,
         Status: status,
         finalValue: finalValue,
       },
