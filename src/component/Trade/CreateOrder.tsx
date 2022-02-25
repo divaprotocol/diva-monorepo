@@ -92,7 +92,9 @@ export default function CreateOrder(props: {
       componentDidMount()
     }
     dispatch(setMetamaskAccount(userAccount))
+    getExistingOrders()
   })
+
   const handleOrderTypeChange = (event: any, newValue: number) => {
     setOrderTypeValue(newValue)
   }
@@ -101,7 +103,8 @@ export default function CreateOrder(props: {
     setPriceTypeValue(newValue)
   }
 
-  const handleDisplayOrder = async () => {
+  const getExistingOrders = async () => {
+    const ordersResponse = {}
     const responseSell: any = await get0xOpenOrders(
       optionTokenAddress,
       option.collateralToken
@@ -116,6 +119,11 @@ export default function CreateOrder(props: {
     if (responseBuy.length > 0) {
       dispatch(setResponseBuy(responseBuy))
     }
+
+    return {
+      responseSell: responseSell.length > 0 ? responseSell : [],
+      responseBuy: responseBuy.length > 0 ? responseBuy : [],
+    }
   }
 
   const renderOrderInfo = () => {
@@ -124,7 +132,7 @@ export default function CreateOrder(props: {
       return (
         <BuyMarket
           option={option}
-          handleDisplayOrder={handleDisplayOrder}
+          handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
         />
       )
@@ -133,7 +141,7 @@ export default function CreateOrder(props: {
       //Buy Limit
       return (
         <BuyLimit
-          handleDisplayOrder={handleDisplayOrder}
+          handleDisplayOrder={getExistingOrders}
           option={option}
           tokenAddress={props.tokenAddress}
         />
@@ -144,7 +152,7 @@ export default function CreateOrder(props: {
       return (
         <SellMarket
           option={option}
-          handleDisplayOrder={handleDisplayOrder}
+          handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
         />
       )
@@ -154,7 +162,7 @@ export default function CreateOrder(props: {
       return (
         <SellLimit
           option={option}
-          handleDisplayOrder={handleDisplayOrder}
+          handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
         />
       )

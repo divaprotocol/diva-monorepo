@@ -17,13 +17,13 @@ import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
-import * as qs from 'qs'
+import { useAppSelector } from '../../../Redux/hooks'
 import Web3 from 'web3'
-import { BigNumber } from '@0x/utils'
 import { Pool } from '../../../lib/queries'
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
-import { NETWORKS, useWallet } from '@web3-ui/hooks'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { useWallet } from '@web3-ui/hooks'
 import ERC20_ABI from '../../../abi/ERC20.json'
+import { totalDecimals } from './OrderHelper'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const web3 = new Web3(Web3.givenProvider)
@@ -31,9 +31,10 @@ let accounts: any[]
 
 export default function SellLimit(props: {
   option: Pool
-  handleDisplayOrder: () => void
+  handleDisplayOrder: () => any
   tokenAddress: string
 }) {
+  const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const wallet = useWallet()
   const classes = useStyles()
   const chainId = wallet?.provider?.network?.chainId || 3
@@ -45,10 +46,13 @@ export default function SellLimit(props: {
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
   const [isApproved, setIsApproved] = React.useState(false)
-  const [approvalAmount, setApprovalAmount] = React.useState(0.0)
+  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(false)
+  const [remainingApprovalAmount, setRemainingApprovalAmount] =
+    React.useState(0.0)
+  const [allowance, setAllowance] = React.useState(0.0)
   const [makerAccount, setMakerAccount] = React.useState('')
   const [walletBalance, setWalletBalance] = React.useState(0)
-  const [remainingAmount, setRemainingAmount] = React.useState(0.0)
+  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const makerToken = optionTokenAddress
   const takerToken = option.collateralToken
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
@@ -69,6 +73,17 @@ export default function SellLimit(props: {
     setPricePerOption(parseFloat('0.0'))
   }
 
+  const approveSellAmount = async (amount) => {
+    const amountBigNumber = parseUnits(amount.toString())
+    await makerTokenContract.methods
+      .approve(exchangeProxyAddress, amountBigNumber)
+      .send({ from: makerAccount })
+
+    const allowance = await makerTokenContract.methods
+      .allowance(makerAccount, exchangeProxyAddress)
+      .call()
+    return allowance
+  }
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
@@ -76,32 +91,54 @@ export default function SellLimit(props: {
         if (numberOfOptions > walletBalance) {
           alert('amount entered is greater than available balance')
         } else {
-          const amount = parseUnits(numberOfOptions.toString())
-          await makerTokenContract.methods
-            .approve(exchangeProxyAddress, amount)
-            .send({ from: makerAccount })
-
-          let allowance = await makerTokenContract.methods
-            .allowance(makerAccount, exchangeProxyAddress)
-            .call()
+          let allowance = await approveSellAmount(numberOfOptions)
           allowance = Number(formatUnits(allowance.toString(), 18))
-          setApprovalAmount(allowance)
+          setRemainingApprovalAmount(allowance)
+          setAllowance(allowance)
           setIsApproved(true)
         }
       } else {
         alert('please enter positive balance for approval')
       }
     } else {
-      if (numberOfOptions > approvalAmount) {
-        if (
-          confirm(
-            'options to sell exceeds approval limit, approve more options '
-          )
-        ) {
-          setIsApproved(false)
+      const totalAmount = numberOfOptions + existingOrdersAmount
+      if (numberOfOptions > remainingApprovalAmount) {
+        if (totalAmount > walletBalance) {
+          alert('Not sufficiant balance')
         } else {
-          //TBD discuss this case
-          console.log('nothing done')
+          const additionalApproval = Number(
+            (numberOfOptions - remainingApprovalAmount).toFixed(
+              totalDecimals(numberOfOptions, remainingApprovalAmount)
+            )
+          )
+          if (
+            confirm(
+              'options to sell exceeds approval limit, do you want to approve additional ' +
+                additionalApproval +
+                ' to complete this order?'
+            )
+          ) {
+            setOrderBtnDisabled(true)
+            let newAllowance = Number(
+              (additionalApproval + allowance).toFixed(
+                totalDecimals(additionalApproval, allowance)
+              )
+            )
+            newAllowance = await approveSellAmount(newAllowance)
+            newAllowance = Number(formatUnits(newAllowance.toString(), 18))
+            const remainigApproval = Number(
+              (newAllowance - existingOrdersAmount).toFixed(
+                totalDecimals(newAllowance, existingOrdersAmount)
+              )
+            )
+            setRemainingApprovalAmount(remainigApproval)
+            setAllowance(newAllowance)
+            setOrderBtnDisabled(false)
+          } else {
+            //TBD discuss this case
+            setIsApproved(true)
+            console.log('nothing done')
+          }
         }
       } else {
         const orderData = {
@@ -118,12 +155,36 @@ export default function SellLimit(props: {
         sellLimitOrder(orderData)
           .then(async (response) => {
             if (response.status === 200) {
-              props.handleDisplayOrder()
-              let totalSellAmount = approvalAmount
-              totalSellAmount -= numberOfOptions
-              setApprovalAmount(totalSellAmount)
-              const isApproved = totalSellAmount <= 0 ? false : true
+              let allowance = await makerTokenContract.methods
+                .allowance(makerAccount, exchangeProxyAddress)
+                .call()
+              allowance = Number(formatUnits(allowance.toString(), 18))
+              await new Promise((resolve) => setTimeout(resolve, 2000))
+              const ordersData = await props.handleDisplayOrder()
+              let totalAmount = 0
+              const sellOrders = ordersData.responseSell
+              sellOrders.forEach((data: any) => {
+                const order = data.order
+                if (makerAccount == order.maker) {
+                  const orderMakerAmount = Number(
+                    formatUnits(order.makerAmount, 18)
+                  )
+                  totalAmount = Number(
+                    (totalAmount + orderMakerAmount).toFixed(
+                      totalDecimals(totalAmount, orderMakerAmount)
+                    )
+                  )
+                }
+              })
+              allowance = Number(
+                (allowance - totalAmount).toFixed(
+                  totalDecimals(allowance, totalAmount)
+                )
+              )
+              setRemainingApprovalAmount(allowance)
+              const isApproved = allowance <= 0 ? false : true
               handleFormReset(isApproved)
+              setExistingOrdersAmount(totalAmount)
             }
           })
           .catch(function (error) {
@@ -133,25 +194,16 @@ export default function SellLimit(props: {
     }
   }
 
-  const getLimitOrders = async (maker) => {
+  const getMakerOrdersTotalAmount = async (maker) => {
     let existingOrderAmount = 0
-    const params = {
-      makerToken: makerToken,
-      takerToken: takerToken,
+    if (responseSell.length > 0) {
+      responseSell.forEach((data: any) => {
+        const order = data.order
+        if (maker == order.maker) {
+          existingOrderAmount += Number(formatUnits(order.makerAmount, 18))
+        }
+      })
     }
-    const res = await fetch(
-      `https://ropsten.api.0x.org/orderbook/v1/orders?${qs.stringify(params)}`
-    )
-    const resJSON = await res.json()
-    const responseOrders: any = resJSON['records']
-    console.log('response orders ' + JSON.stringify(responseOrders))
-    responseOrders.forEach((data: any) => {
-      const order = data.order
-      if (maker == order.maker) {
-        existingOrderAmount += Number(formatUnits(order.makerAmount, 18))
-        console.log('existing order amount ' + existingOrderAmount)
-      }
-    })
     return existingOrderAmount
   }
 
@@ -161,7 +213,6 @@ export default function SellLimit(props: {
     let allowance = await makerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()
-    console.log('allowance before' + allowance)
     let balance = await makerTokenContract.methods
       .balanceOf(makerAccount)
       .call()
@@ -180,11 +231,15 @@ export default function SellLimit(props: {
         ? setWalletBalance(Number(val.balance))
         : setWalletBalance(0)
       setMakerAccount(val.account)
-      getLimitOrders(val.account).then((existingOrdersAmount) => {
-        const remainingAmount = val.approvalAmount - existingOrdersAmount
-        console.log('approval amount ' + val.approvalAmount)
-        setApprovalAmount(remainingAmount)
-        console.log('remaining approval ' + remainingAmount)
+      getMakerOrdersTotalAmount(val.account).then((existingOrdersAmount) => {
+        setExistingOrdersAmount(existingOrdersAmount)
+        setAllowance(val.approvalAmount)
+        const remainingAmount = Number(
+          (val.approvalAmount - existingOrdersAmount).toFixed(
+            totalDecimals(val.approvalAmount, existingOrdersAmount)
+          )
+        )
+        setRemainingApprovalAmount(remainingAmount)
         remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
       })
     })
@@ -206,7 +261,7 @@ export default function SellLimit(props: {
           <LabelStyleDiv>
             <Box>
               <LabelStyle>Number of Options</LabelStyle>
-              <SubLabelStyle>Approved Balance {approvalAmount}</SubLabelStyle>
+              <SubLabelStyle>Remaining {remainingApprovalAmount}</SubLabelStyle>
             </Box>
           </LabelStyleDiv>
           <FormInput
@@ -284,6 +339,7 @@ export default function SellLimit(props: {
             startIcon={<AddIcon />}
             type="submit"
             value="Submit"
+            disabled={orderBtnDisabled}
           >
             {isApproved ? 'Create Order' : 'Approve'}
           </Button>
