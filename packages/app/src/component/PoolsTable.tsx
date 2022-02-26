@@ -22,7 +22,7 @@ const useStyles = makeStyles({
 const CoinPlaceHolderFirst = (asset: string) => {
   return (
     <svg width="30" height="30" overflow="visible">
-      <circle cx="20" cy="15" z="1" r="15" stroke="black" fill="#060" />
+      <circle cx="20" cy="15" z="1" r="15" stroke="black" fill="#00CCF3" />
       <text
         x="33%"
         y="55%"
@@ -48,7 +48,7 @@ const CoinPlaceHolderSecond = (asset: string) => {
         z="2"
         r="15"
         stroke="black"
-        fill="#060"
+        fill="#00CCF3"
       />
       <text
         x="66%"
@@ -91,7 +91,14 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
         return (
           <>
             <svg width="60" height="30">
-              <circle cx="20" cy="15" z="1" r="15" stroke="black" fill="#060" />
+              <circle
+                cx="20"
+                cy="15"
+                z="1"
+                r="15"
+                stroke="black"
+                fill="#00CCF3"
+              />
               <text
                 x="33%"
                 y="55%"
@@ -102,7 +109,14 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
               >
                 {assets[0].charAt(0)}
               </text>
-              <circle cx="45" cy="15" z="2" r="15" stroke="black" fill="#060" />
+              <circle
+                cx="45"
+                cy="15"
+                z="2"
+                r="15"
+                stroke="black"
+                fill="#00CCF3"
+              />
               <text
                 x="75%"
                 y="55%"

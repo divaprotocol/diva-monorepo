@@ -24,6 +24,11 @@ import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { useWallet } from '@web3-ui/hooks'
+import {
+  GrayText,
+  LabelGrayStyle,
+  LabelStyleDiv,
+} from '../Trade/Orders/UiStyles'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -183,6 +188,11 @@ const SubmitCell = (props: any) => {
 
 const columns: GridColDef[] = [
   {
+    field: 'Id',
+    align: 'left',
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
     field: 'Icon',
     align: 'right',
     disableReorder: true,
@@ -289,6 +299,7 @@ export function MyDataFeeds() {
       {
         ...shared,
         id: `${val.id}/long`,
+        Id: 'L-' + val.id,
         address: val.longToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,

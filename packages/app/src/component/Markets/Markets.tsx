@@ -9,11 +9,14 @@ import { request } from 'graphql-request'
 import { config } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
+import { GrayText } from '../Trade/Orders/UiStyles'
+import React from 'react'
 
 const columns: GridColDef[] = [
   {
     field: 'Id',
-    align: 'right',
+    align: 'left',
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
   },
   {
     field: 'Icon',
@@ -58,7 +61,7 @@ const columns: GridColDef[] = [
     field: 'TVL',
     align: 'right',
     headerAlign: 'right',
-    minWidth: 300,
+    minWidth: 200,
   },
 ]
 
