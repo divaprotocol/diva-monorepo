@@ -210,7 +210,7 @@ export function DefinePoolAttributes({
           )}
         </FormControl>
       </Stack>
-      <Box>
+      <Box pb={4}>
         <h3>Collateral</h3>
 
         <Stack pb={3} spacing={2} direction="row">
