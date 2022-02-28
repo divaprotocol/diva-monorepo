@@ -16,6 +16,7 @@ const columns: GridColDef[] = [
   {
     field: 'Id',
     align: 'left',
+    renderHeader: (header) => <GrayText>{header.field}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
   },
   {
@@ -134,12 +135,14 @@ export default function Markets() {
           IsLong: true,
         }),
         TVL:
-          formatUnits(
-            BigNumber.from(val.collateralBalanceLong).add(
-              val.collateralBalanceShort
-            ),
-            val.collateralDecimals
-          ) +
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
           ' ' +
           val.collateralSymbol,
         Status: status,
@@ -158,12 +161,14 @@ export default function Markets() {
           IsLong: false,
         }),
         TVL:
-          formatUnits(
-            BigNumber.from(val.collateralBalanceLong).add(
-              val.collateralBalanceShort
-            ),
-            val.collateralDecimals
-          ) +
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
           ' ' +
           val.collateralSymbol,
         Status: status,
