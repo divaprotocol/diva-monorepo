@@ -39,8 +39,17 @@ const MetaMaskImage = styled.img`
 
 const AssetPriceUsd = styled.div`
   font-weight: bold;
+  padding-left:15px;
 `
-
+function truncate(string = '', start = 6, end = 4) {
+  if (start < 1 || end < 1) {
+    return string
+  }
+  if (string.length <= start + end) {
+    return string
+  }
+  return string.slice(0, start) + '...' + string.slice(-end)
+}
 export default function OptionHeader(optionData: {
   TokenAddress: string
   ReferenceAsset: string
@@ -75,10 +84,12 @@ export default function OptionHeader(optionData: {
           },
         },
       })
+
     } catch (error) {
       console.error('Error in HandleAddMetaMask', error)
     }
   }
+  
 
   useEffect(() => {
     getUnderlyingPrice(optionData.ReferenceAsset).then((data) => {
@@ -87,16 +98,18 @@ export default function OptionHeader(optionData: {
 
     return () => setUnderlyingAssetPrice(undefined)
   }, [optionData.ReferenceAsset])
+const shortenTokenAddress = truncate(optionData.TokenAddress) ; 
 
   return (
     <AppHeader>
       <Container>
         <CoinImage assetName={headerTitle} />
         <OptionTitle>{headerTitle}</OptionTitle>
-      </Container>
+      
       {underlyingAssetPrice && (
         <AssetPriceUsd>{underlyingAssetPrice}</AssetPriceUsd>
       )}
+      </Container>
       <Container>
         <Link
           style={{ color: 'gray' }}
@@ -105,11 +118,11 @@ export default function OptionHeader(optionData: {
           target="_blank"
           href={getEtherscanLink(
             chainId,
-            optionData.TokenAddress,
+            shortenTokenAddress,
             EtherscanLinkType.ADDRESS
           )}
         >
-          {optionData.TokenAddress}
+          {shortenTokenAddress}
         </Link>
         <IconButton
           onClick={() => navigator.clipboard.writeText(optionData.TokenAddress)}
