@@ -16,6 +16,8 @@ import { useTokenBalances } from '../../hooks/useTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { useWallet } from '@web3-ui/hooks'
+import { GrayText } from '../Trade/Orders/UiStyles'
+import React from 'react'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -144,7 +146,9 @@ const SubmitButton = (props: any) => {
 const columns: GridColDef[] = [
   {
     field: 'Id',
-    align: 'right',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{header.field}</GrayText>,
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
   },
   {
     field: 'Icon',
@@ -176,6 +180,12 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     type: 'dateTime',
+  },
+  {
+    field: 'TVL',
+    align: 'right',
+    headerAlign: 'right',
+    minWidth: 200,
   },
   {
     field: 'finalValue',
@@ -306,30 +316,46 @@ export function MyPositions() {
       {
         ...shared,
         id: `${val.id}/long`,
+        Id: 'L-' + val.id,
         address: val.longToken,
+        TVL:
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
+          ' ' +
+          val.collateralSymbol,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
           IsLong: true,
         }),
-        TVL:
-          formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
-          ' ' +
-          val.collateralSymbol,
         Status: status,
         finalValue: finalValue,
       },
       {
         ...shared,
         id: `${val.id}/short`,
+        Id: 'L-' + val.id,
         address: val.shortToken,
+        TVL:
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
+          ' ' +
+          val.collateralSymbol,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
           IsLong: false,
         }),
-        TVL:
-          formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
-          ' ' +
-          val.collateralSymbol,
         Status: status,
         finalValue: finalValue,
       },
@@ -350,7 +376,7 @@ export function MyPositions() {
             Balance:
               parseInt(formatUnits(tokenBalances[v.address])) < 0.01
                 ? '<0.01'
-                : formatUnits(tokenBalances[v.address]).toString(),
+                : parseFloat(formatUnits(tokenBalances[v.address])).toFixed(4),
           }))
       : []
 

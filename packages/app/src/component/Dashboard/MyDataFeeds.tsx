@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from '@mui/material'
 import React, { useState } from 'react'
-import { ethers } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 
 import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
@@ -24,6 +24,11 @@ import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { useWallet } from '@web3-ui/hooks'
+import {
+  GrayText,
+  LabelGrayStyle,
+  LabelStyleDiv,
+} from '../Trade/Orders/UiStyles'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -183,6 +188,12 @@ const SubmitCell = (props: any) => {
 
 const columns: GridColDef[] = [
   {
+    field: 'Id',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{header.field}</GrayText>,
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
     field: 'Icon',
     align: 'right',
     disableReorder: true,
@@ -289,13 +300,21 @@ export function MyDataFeeds() {
       {
         ...shared,
         id: `${val.id}/long`,
+        Id: 'L-' + val.id,
         address: val.longToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
           IsLong: true,
         }),
         TVL:
-          formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
           ' ' +
           val.collateralSymbol,
         Status,

@@ -8,9 +8,17 @@ import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { config } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
-import { Alert } from '@mui/material'
+import { BigNumber } from 'ethers'
+import { GrayText } from '../Trade/Orders/UiStyles'
+import React from 'react'
 
 const columns: GridColDef[] = [
+  {
+    field: 'Id',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{header.field}</GrayText>,
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
   {
     field: 'Icon',
     align: 'right',
@@ -46,10 +54,15 @@ const columns: GridColDef[] = [
   { field: 'Buy', align: 'right', headerAlign: 'right' },
   { field: 'MaxYield', align: 'right', headerAlign: 'right' },
   {
+    field: 'Status',
+    align: 'right',
+    headerAlign: 'right',
+  },
+  {
     field: 'TVL',
     align: 'right',
     headerAlign: 'right',
-    minWidth: 300,
+    minWidth: 200,
   },
 ]
 
@@ -65,6 +78,33 @@ export default function Markets() {
   )
   const pools = query.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
+    const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
+    const fallbackPeriod = expiryDate.setMinutes(
+      expiryDate.getMinutes() + 24 * 60 + 5
+    )
+    const unchallengedPeriod = expiryDate.setMinutes(
+      expiryDate.getMinutes() + 5 * 24 * 60 + 5
+    )
+    const challengedPeriod = expiryDate.setMinutes(
+      expiryDate.getMinutes() + 2 * 24 * 60 + 5
+    )
+    let status = val.statusFinalReferenceValue
+    if (Date.now() > fallbackPeriod) {
+      status = 'Fallback'
+    }
+    if (
+      val.statusFinalReferenceValue === 'Open' &&
+      Date.now() > unchallengedPeriod
+    ) {
+      status = 'Confirmed*'
+    } else if (
+      val.statusFinalReferenceValue === 'Challenged' &&
+      Date.now() > challengedPeriod
+    ) {
+      status = 'Confirmed*'
+    } else {
+      status = val.statusFinalReferenceValue
+    }
     const shared = {
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,
@@ -88,16 +128,24 @@ export default function Markets() {
       {
         ...shared,
         id: `${val.id}/long`,
+        Id: 'L-' + val.id,
         address: val.longToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
           IsLong: true,
         }),
         TVL:
-          formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
           ' ' +
           val.collateralSymbol,
-        Status: val.statusFinalReferenceValue,
+        Status: status,
         finalValue:
           val.statusFinalReferenceValue === 'Open'
             ? '-'
@@ -106,16 +154,24 @@ export default function Markets() {
       {
         ...shared,
         id: `${val.id}/short`,
+        Id: 'S-' + val.id,
         address: val.shortToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
           IsLong: false,
         }),
         TVL:
-          formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
           ' ' +
           val.collateralSymbol,
-        Status: val.statusFinalReferenceValue,
+        Status: status,
         finalValue:
           val.statusFinalReferenceValue === 'Open'
             ? '-'
@@ -123,6 +179,8 @@ export default function Markets() {
       },
     ]
   }, [] as GridRowModel[])
-
-  return <PoolsTable columns={columns} rows={rows} />
+  const filteredRows = rows.filter(
+    (v) => v.Status && !v.Status.startsWith('Confirmed')
+  )
+  return <PoolsTable columns={columns} rows={filteredRows} />
 }

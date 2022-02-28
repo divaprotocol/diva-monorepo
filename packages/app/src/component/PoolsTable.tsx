@@ -19,12 +19,39 @@ const useStyles = makeStyles({
   },
 })
 
-const CoinPlaceHolder = (asset: string) => {
+const CoinPlaceHolderFirst = (asset: string) => {
   return (
-    <svg width="30" height="30">
-      <circle cx="15" cy="15" r="15" fill="#060" />
+    <svg width="30" height="30" overflow="visible">
+      <circle cx="20" cy="15" z="1" r="15" stroke="black" fill="#00CCF3" />
       <text
-        x="50%"
+        x="33%"
+        y="55%"
+        textAnchor="middle"
+        fill="white"
+        fontSize="20px"
+        dy=".2em"
+        dx=".4em"
+      >
+        {asset.charAt(0)}
+      </text>
+    </svg>
+  )
+}
+
+const CoinPlaceHolderSecond = (asset: string) => {
+  return (
+    <svg width="30" height="30" overflow="visible">
+      <circle
+        cx="20"
+        cy="15"
+        dx="-0.5em"
+        z="2"
+        r="15"
+        stroke="black"
+        fill="#00CCF3"
+      />
+      <text
+        x="66%"
         y="55%"
         textAnchor="middle"
         fill="white"
@@ -56,7 +83,7 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
         />
       )
     } else {
-      return CoinPlaceHolder(assets[0])
+      return CoinPlaceHolderFirst(assets[0])
     }
   } else if (assets.length === 2) {
     if (coinIconLeft === '') {
@@ -64,7 +91,14 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
         return (
           <>
             <svg width="60" height="30">
-              <circle cx="20" cy="15" r="15" stroke="black" fill="#060" />
+              <circle
+                cx="20"
+                cy="15"
+                z="1"
+                r="15"
+                stroke="black"
+                fill="#00CCF3"
+              />
               <text
                 x="33%"
                 y="55%"
@@ -75,9 +109,16 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
               >
                 {assets[0].charAt(0)}
               </text>
-              <circle cx="40" cy="15" r="15" stroke="black" fill="#060" />
+              <circle
+                cx="45"
+                cy="15"
+                z="2"
+                r="15"
+                stroke="black"
+                fill="#00CCF3"
+              />
               <text
-                x="66%"
+                x="75%"
                 y="55%"
                 textAnchor="middle"
                 fill="white"
@@ -92,8 +133,15 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
       } else {
         return (
           <>
-            {CoinPlaceHolder(assets[0])}
-            <img alt={assets[1]} src={coinIconRight} style={{ height: 30 }} />
+            {CoinPlaceHolderFirst(assets[0])}
+            <img
+              alt={assets[1]}
+              src={coinIconRight}
+              style={{
+                // overflow: 'visible',
+                height: 30,
+              }}
+            />
           </>
         )
       }
@@ -101,8 +149,12 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
       if (coinIconRight === '') {
         return (
           <>
-            <img alt={assets[0]} src={coinIconLeft} style={{ height: 30 }} />
-            {CoinPlaceHolder(assets[1])}
+            <img
+              alt={assets[0]}
+              src={coinIconLeft}
+              style={{ marginRight: '-0.5em', height: 30 }}
+            />
+            {CoinPlaceHolderSecond(assets[1])}
           </>
         )
       } else {
@@ -111,7 +163,11 @@ export const CoinImage = ({ assetName }: { assetName: string }) => {
             <img
               alt={`${assets[0]}`}
               src={coinIconLeft}
-              style={{ marginRight: '-.5em', height: 30 }}
+              style={{
+                marginRight: '-0.5em',
+                // paddingRight: '-.5em',
+                height: 30,
+              }}
             />
             <img alt={assets[1]} src={coinIconRight} style={{ height: 30 }} />
           </>
