@@ -1,4 +1,5 @@
 import { DateTimePicker } from '@mui/lab'
+import ClockIcon from '@mui/icons-material/AccessTime'
 import {
   Box,
   FormControl,
@@ -121,7 +122,7 @@ export function DefinePoolAttributes({
       <Typography pb={theme.spacing(5)} variant="subtitle1">
         Define all the parameters for your Contingent Pool below.
       </Typography>
-      <Box pb={3} pt={1}>
+      <Stack pb={3} pt={1} spacing={2} direction="row">
         <FormControl fullWidth error={formik.errors.referenceAsset != null}>
           <Autocomplete
             id="referenceAsset"
@@ -183,8 +184,6 @@ export function DefinePoolAttributes({
             options={referenceAssets}
           />
         </FormControl>
-      </Box>
-      <Box pb={3}>
         <FormControl fullWidth>
           <DateTimePicker
             InputProps={{
@@ -193,12 +192,15 @@ export function DefinePoolAttributes({
               onBlur: formik.handleBlur,
               error: formik.errors.expiryDate != null,
             }}
-            label="Expiry Date"
+            label="Expiry Time"
             onChange={(event) => {
               formik.setFieldValue('expiryDate', event)
             }}
             minDate={today}
             value={expiryDate}
+            components={{
+              OpenPickerIcon: ClockIcon,
+            }}
             renderInput={(params) => <TextField {...params} />}
           />
           {formik.errors.expiryDate != null && (
@@ -207,8 +209,8 @@ export function DefinePoolAttributes({
             </FormHelperText>
           )}
         </FormControl>
-      </Box>
-      <Box>
+      </Stack>
+      <Box pb={4}>
         <h3>Collateral</h3>
 
         <Stack pb={3} spacing={2} direction="row">

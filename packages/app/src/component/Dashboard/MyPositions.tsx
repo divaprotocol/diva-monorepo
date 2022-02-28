@@ -81,7 +81,6 @@ const SubmitButton = (props: any) => {
     provider && new ethers.Contract(props.row.address, ERC20, provider)
   const handleRedeem = () => {
     if (props.row.Status === 'Confirmed*') {
-      console.log(props.row.Inflection)
       token?.balanceOf(userAddress).then((bal: BigNumber) => {
         diva
           .setFinalReferenceValue(
@@ -247,28 +246,35 @@ export function MyPositions() {
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
     const now = new Date()
-    const fallbackPeriod = expiryDate.setMinutes(
+    const fallbackPeriod = new Date(parseInt(val.expiryDate) * 1000).setMinutes(
       expiryDate.getMinutes() + 24 * 60 + 5
     )
-    const unchallengedPeriod = expiryDate.setMinutes(
-      expiryDate.getMinutes() + 5 * 24 * 60 + 5
-    )
-    const challengedPeriod = expiryDate.setMinutes(
-      expiryDate.getMinutes() + 2 * 24 * 60 + 5
-    )
+    const unchallengedPeriod = new Date(
+      parseInt(val.expiryDate) * 1000
+    ).setMinutes(expiryDate.getMinutes() + 5 * 24 * 60 + 5)
+    const challengedPeriod = new Date(
+      parseInt(val.expiryDate) * 1000
+    ).setMinutes(expiryDate.getMinutes() + 2 * 24 * 60 + 5)
     let finalValue = ''
     let status = val.statusFinalReferenceValue
     if (Date.now() > fallbackPeriod) {
       status = 'Fallback'
     }
-    if (now < expiryDate) {
+    if (now.getTime() < expiryDate.getTime()) {
       finalValue = '-'
-    } else if (
-      val.statusFinalReferenceValue === 'Open' &&
-      Date.now() > unchallengedPeriod
-    ) {
-      finalValue = formatUnits(val.inflection)
-      status = 'Confirmed*'
+    } else if (val.statusFinalReferenceValue === 'Open') {
+      if (now.getTime() > unchallengedPeriod) {
+        finalValue = formatUnits(val.inflection)
+        status = 'Confirmed*'
+      } else if (
+        now.getTime() > expiryDate.getTime() &&
+        now.getTime() < unchallengedPeriod
+      ) {
+        status = 'Expired'
+        finalValue = '-'
+      } else {
+        finalValue = '-'
+      }
     } else if (
       val.statusFinalReferenceValue === 'Challenged' &&
       Date.now() > challengedPeriod
