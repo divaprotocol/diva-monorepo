@@ -370,7 +370,7 @@ export function MyPositions() {
             Balance:
               parseInt(formatUnits(tokenBalances[v.address])) < 0.01
                 ? '<0.01'
-                : formatUnits(tokenBalances[v.address]).toString(),
+                : parseFloat(formatUnits(tokenBalances[v.address])).toFixed(4),
           }))
       : []
 
