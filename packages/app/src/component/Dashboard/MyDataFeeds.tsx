@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from '@mui/material'
 import React, { useState } from 'react'
-import { ethers } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 
 import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
@@ -190,6 +190,7 @@ const columns: GridColDef[] = [
   {
     field: 'Id',
     align: 'left',
+    renderHeader: (header) => <GrayText>{header.field}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
   },
   {
@@ -306,7 +307,14 @@ export function MyDataFeeds() {
           IsLong: true,
         }),
         TVL:
-          formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
           ' ' +
           val.collateralSymbol,
         Status,

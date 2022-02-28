@@ -148,6 +148,7 @@ const columns: GridColDef[] = [
   {
     field: 'Id',
     align: 'left',
+    renderHeader: (header) => <GrayText>{header.field}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
   },
   {
@@ -312,12 +313,14 @@ export function MyPositions() {
         Id: 'L-' + val.id,
         address: val.longToken,
         TVL:
-          formatUnits(
-            BigNumber.from(val.collateralBalanceLong).add(
-              val.collateralBalanceShort
-            ),
-            val.collateralDecimals
-          ) +
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
           ' ' +
           val.collateralSymbol,
         PayoffProfile: generatePayoffChartData({
@@ -333,12 +336,14 @@ export function MyPositions() {
         Id: 'L-' + val.id,
         address: val.shortToken,
         TVL:
-          formatUnits(
-            BigNumber.from(val.collateralBalanceLong).add(
-              val.collateralBalanceShort
-            ),
-            val.collateralDecimals
-          ) +
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
           ' ' +
           val.collateralSymbol,
         PayoffProfile: generatePayoffChartData({
