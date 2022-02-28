@@ -122,7 +122,7 @@ export function DefinePoolAttributes({
       <Typography pb={theme.spacing(5)} variant="subtitle1">
         Define all the parameters for your Contingent Pool below.
       </Typography>
-      <Stack pb={3} pt={1} spacing={2} direction="row">
+      <Stack spacing={2} direction="row">
         <FormControl fullWidth error={formik.errors.referenceAsset != null}>
           <Autocomplete
             id="referenceAsset"
@@ -210,7 +210,7 @@ export function DefinePoolAttributes({
           )}
         </FormControl>
       </Stack>
-      <Box pb={4}>
+      <Box>
         <h3>Collateral</h3>
 
         <Stack pb={3} spacing={2} direction="row">
