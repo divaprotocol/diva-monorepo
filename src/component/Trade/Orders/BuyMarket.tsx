@@ -416,7 +416,7 @@ export default function BuyMarket(props: {
             </Box>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youPay.toFixed(4) + ' '} {option.collateralTokenName}
+            {youPay.toFixed(4) + ' '} {option.collateralSymbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>

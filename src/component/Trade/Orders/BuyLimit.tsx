@@ -276,6 +276,7 @@ export default function BuyLimit(props: {
         )
         setRemainingApprovalAmount(remainingAmount)
         remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+        setExistingOrdersAmount(existingOrdersAmount)
       })
     })
   }, [responseBuy])
@@ -303,15 +304,13 @@ export default function BuyLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <Box>
-              <LabelStyle>You Pay</LabelStyle>
-              <SubLabelStyle>
-                Remaining balance {remainingApprovalAmount}
-              </SubLabelStyle>
-            </Box>
+            <LabelStyle>You Pay</LabelStyle>
+            <SubLabelStyle>
+              Remaining balance {remainingApprovalAmount}
+            </SubLabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youPay.toFixed(4) + ' '} {option.collateralTokenName}
+            {youPay.toFixed(4) + ' '} {option.collateralSymbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -320,7 +319,7 @@ export default function BuyLimit(props: {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {collateralBalance.toFixed(4)} {option.collateralTokenName}
+              {collateralBalance.toFixed(4)} {option.collateralSymbol}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
