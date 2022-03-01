@@ -7,7 +7,7 @@
     "codegen": "graph codegen ropsten.subgraph.yaml",
     "build": "yarn codegen && graph build ropsten.subgraph.yaml",
     "auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
-    "deploy": "yarn auth && run-s deploy-ropsten deploy-mumbai deploy-rinkeby deploy-kovan",
+    "deploy": "run-s deploy-ropsten deploy-mumbai deploy-rinkeby deploy-kovan",
     "deploy-ropsten": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-whitelist-ropsten ropsten.subgraph.yaml",
     "deploy-mumbai": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-whitelist-mumbai mumbai.subgraph.yaml",
     "deploy-rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-whitelist-rinkeby rinkeby.subgraph.yaml",

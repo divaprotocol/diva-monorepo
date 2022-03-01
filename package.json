@@ -18,7 +18,8 @@
   },
   "devDependencies": {
     "prettier": "^2.5.1",
-    "turbo": "*"
+    "turbo": "*",
+    "@graphprotocol/graph-cli": "*"
   },
   "packageManager": "yarn@1.22.17"
 }
