@@ -1,5 +1,5 @@
 {
-  "name": "@diva/diva-subgraph",
+  "name": "@diva/diva-whitelist-subgraph",
   "license": "UNLICENSED",
   "version": "0.0.1",
   "scripts": {
