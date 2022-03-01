@@ -30,7 +30,6 @@ export const tradeOptionSlice = createSlice({
 
     setResponseSell: (state, action: PayloadAction<[]>) => {
       state.responseSell = action.payload
-      console.log('state ' + JSON.stringify(state))
     },
 
     setMetamaskAccount: (state, action: PayloadAction<string>) => {
