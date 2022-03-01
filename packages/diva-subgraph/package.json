@@ -1,11 +1,11 @@
 {
-  "name": "api",
+  "name": "@diva/diva-subgraph",
   "license": "UNLICENSED",
   "version": "0.0.1",
   "scripts": {
     "lint": "yarn codegen && yarn build",
     "codegen": "graph codegen ropsten.subgraph.yaml",
-    "build": "graph build ropsten.subgraph.yaml",
+    "build": "yarn codegen && graph build ropsten.subgraph.yaml",
     "auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
     "deploy": "yarn auth && run-s deploy-ropsten deploy-mumbai deploy-rinkeby deploy-kovan",
     "deploy-ropsten": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-ropsten ropsten.subgraph.yaml",
