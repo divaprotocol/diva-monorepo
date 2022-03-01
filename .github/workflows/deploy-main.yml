@@ -1,0 +1,25 @@
+on:
+  push:
+    branches:
+      - main
+name: Deploy the graph
+jobs:
+  pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Install and run codegen
+        run: |
+          yarn
+          yarn workspaces run codegen
+
+      - name: Authenticate the graph and deploy
+        env: 
+          ACCESS_TOKEN: ${{ secrets.THEGRAPH_ACCESS_TOKEN_TEST }}
+        run: |
+          yarn workspaces run graph auth --product hosted-service $ACCESS_TOKEN
+          yarn workspaces run deploy
