@@ -56,6 +56,7 @@
     "ws": "^8.2.2"
   },
   "scripts": {
+    "deploy": "",
     "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "start-server-and-test 'yarn dev' http-get://localhost:3000 'synpress run --configFile synpress.json'",

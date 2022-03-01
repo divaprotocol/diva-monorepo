@@ -1,7 +1,7 @@
-on:
-  push:
-    branches:
-      - main
+on: push
+#:
+#    branches:
+#      - main
 name: Deploy the graph
 jobs:
   pr:
@@ -12,14 +12,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Install and run codegen
-        run: |
-          yarn
-          yarn workspaces run codegen
-
       - name: Authenticate the graph and deploy
         env: 
-          ACCESS_TOKEN: ${{ secrets.THEGRAPH_ACCESS_TOKEN_TEST }}
+          THEGRAPH_ACCESS_TOKEN: ${{ secrets.THEGRAPH_ACCESS_TOKEN_TEST }}
         run: |
-          yarn workspaces run graph auth --product hosted-service $ACCESS_TOKEN
-          yarn workspaces run deploy
+          yarn
+          yarn build
+          yarn deploy
