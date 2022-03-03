@@ -1,5 +1,15 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import { Button, Container, Stack, Tooltip } from '@mui/material'
+import {
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  Stack,
+  TextField,
+  Tooltip,
+} from '@mui/material'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
@@ -17,7 +27,7 @@ import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React from 'react'
+import React, { useState } from 'react'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -63,6 +73,8 @@ const AddToMetamask = (props: any) => {
 }
 
 const SubmitButton = (props: any) => {
+  const [open, setOpen] = React.useState(false)
+  const [textFieldValue, setTextFieldValue] = useState('')
   const {
     connection: { userAddress },
     provider,
@@ -70,6 +82,13 @@ const SubmitButton = (props: any) => {
   const history = useHistory()
 
   const chainId = provider?.network?.chainId
+  const query = useQuery<{ pools: Pool[] }>(
+    'challenges',
+    () =>
+      chainId != null &&
+      request(config[chainId as number].divaSubgraph, queryPools)
+  )
+
   if (chainId == null) return null
 
   const diva = new ethers.Contract(
@@ -106,13 +125,18 @@ const SubmitButton = (props: any) => {
   const statusExpMin = getExpiryMinutesFromNow(
     Number(props.row.StatusTimestamp)
   )
-  if (props.row.Status === 'Submitted' && statusExpMin + 24 * 60 + 5 < 0) {
-    buttonName = 'Redeem'
-  } else if (
-    props.row.Status === 'Challenged ' &&
-    statusExpMin + 48 * 60 + 5 < 0
-  ) {
-    buttonName = 'Redeem'
+  if (props.row.Status === 'Submitted') {
+    if (statusExpMin + 24 * 60 + 5 < 0) {
+      buttonName = 'Redeem'
+    } else {
+      buttonName = 'Challenge'
+    }
+  } else if (props.row.Status === 'Challenged') {
+    if (statusExpMin + 48 * 60 + 5 < 0) {
+      buttonName = 'Redeem'
+    } else {
+      buttonName = 'Challenge'
+    }
   } else if (props.row.Status.startsWith('Confirmed')) {
     buttonName = 'Redeem'
   } else if (
@@ -120,27 +144,75 @@ const SubmitButton = (props: any) => {
     statusExpMin + 24 * 60 * 5 + 5 < 0
   ) {
     buttonName = 'Redeem'
-  } else {
-    buttonName = 'Trade'
+  }
+  const handleOpen = () => {
+    setOpen(true)
   }
 
-  return (
-    <Container>
-      <Button
-        variant="contained"
-        color={buttonName === 'Redeem' ? 'success' : 'primary'}
-        onClick={
-          buttonName === 'Redeem'
-            ? handleRedeem
-            : () => {
-                history.push('../' + `${props.id}`)
-              }
-        }
-      >
-        {buttonName}
-      </Button>
-    </Container>
-  )
+  const handleClose = () => {
+    setOpen(false)
+  }
+
+  if (buttonName === 'Redeem') {
+    return (
+      <Container>
+        <Button
+          variant="contained"
+          color={buttonName === 'Redeem' ? 'success' : 'primary'}
+          onClick={handleRedeem}
+        >
+          {buttonName}
+        </Button>
+      </Container>
+    )
+  } else if (buttonName === 'Challenge') {
+    return (
+      <Container>
+        <Button
+          variant="contained"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleOpen()
+          }}
+        >
+          Challenge
+        </Button>
+        <Dialog open={open} onClose={handleClose}>
+          <DialogContent>
+            <DialogContentText>
+              Please provide a value for this option
+            </DialogContentText>
+          </DialogContent>
+
+          <DialogActions>
+            <TextField
+              defaultValue={textFieldValue}
+              onChange={(e) => {
+                setTextFieldValue(e.target.value)
+              }}
+            />
+            <Button
+              color="primary"
+              type="submit"
+              onClick={(e) => {
+                if (diva != null) {
+                  diva.challengeFinalReferenceValue(
+                    props.id.split('/')[0],
+                    parseEther(textFieldValue)
+                  )
+                }
+                handleClose()
+              }}
+            >
+              Challenge
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    )
+  } else {
+    return <></>
+  }
 }
 
 const columns: GridColDef[] = [
@@ -388,7 +460,7 @@ export function MyPositions() {
       }}
     >
       <SideMenu />
-      <PoolsTable rows={filteredRows} columns={columns} disableRowClick />
+      <PoolsTable rows={filteredRows} columns={columns} />
     </Stack>
   ) : (
     <div
