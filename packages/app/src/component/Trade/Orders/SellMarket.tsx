@@ -115,8 +115,9 @@ export default function SellMarket(props: {
         alert('please enter positive balance for approval')
       }
     } else {
+      const totalAmount = numberOfOptions + existingOrdersAmount
       if (numberOfOptions > remainingApprovalAmount) {
-        if (numberOfOptions > walletBalance) {
+        if (totalAmount > walletBalance) {
           alert('Not sufficiant balance')
         } else {
           const additionalApproval = Number(
@@ -286,6 +287,7 @@ export default function SellMarket(props: {
         })
       }
       getMakerOrdersTotalAmount(val.account).then((amount) => {
+        setExistingOrdersAmount(amount)
         const remainingAmount = Number(
           (val.approvalAmount - amount).toFixed(
             totalDecimals(val.approvalAmount, amount)

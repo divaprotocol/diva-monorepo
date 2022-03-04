@@ -94,25 +94,18 @@ export default function BuyMarket(props: {
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
-        if (amount > collateralBalance) {
-          alert('expected collateral payment greater than available balance')
-        } else {
-          let collateralAllowance = await approveBuyAmount(amount)
-          collateralAllowance = Number(
-            formatUnits(
-              collateralAllowance.toString(),
-              option.collateralDecimals
-            )
-          )
-          setRemainingApprovalAmount(collateralAllowance)
-          setAllowance(collateralAllowance)
-          setIsApproved(true)
-          alert(
-            `Taker allowance for ${
-              option.collateralToken + ' '
-            } ${collateralAllowance} successfully set by ${takerAccount}`
-          )
-        }
+        let collateralAllowance = await approveBuyAmount(amount)
+        collateralAllowance = Number(
+          formatUnits(collateralAllowance.toString(), option.collateralDecimals)
+        )
+        setRemainingApprovalAmount(collateralAllowance)
+        setAllowance(collateralAllowance)
+        setIsApproved(true)
+        alert(
+          `Taker allowance for ${
+            option.collateralToken + ' '
+          } ${collateralAllowance} successfully set by ${takerAccount}`
+        )
       } else {
         alert('Please enter number of options you want to buy')
       }

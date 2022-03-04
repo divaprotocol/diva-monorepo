@@ -90,20 +90,16 @@ export default function SellLimit(props: {
     event.preventDefault()
     if (!isApproved) {
       if (numberOfOptions > 0) {
-        if (numberOfOptions > walletBalance) {
-          alert('amount entered is greater than available balance')
-        } else {
-          let allowance = await approveSellAmount(numberOfOptions)
-          allowance = Number(formatUnits(allowance.toString(), 18))
-          setRemainingApprovalAmount(allowance)
-          setAllowance(allowance)
-          setIsApproved(true)
-          alert(
-            `Total allowance` +
-              allowance +
-              `for ${option.referenceAsset} successfully set by`
-          )
-        }
+        let allowance = await approveSellAmount(numberOfOptions)
+        allowance = Number(formatUnits(allowance.toString(), 18))
+        setRemainingApprovalAmount(allowance)
+        setAllowance(allowance)
+        setIsApproved(true)
+        alert(
+          `Total allowance` +
+            allowance +
+            `for ${option.referenceAsset} successfully set by`
+        )
       } else {
         alert('please enter positive balance for approval')
       }

@@ -110,30 +110,23 @@ export default function BuyLimit(props: {
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
-        if (amount > collateralBalance) {
-          alert('expected collateral payment greater than available balance')
-        } else {
-          let collateralAllowance = await approveBuyAmount(amount)
-          collateralAllowance = Number(
-            formatUnits(
-              collateralAllowance.toString(),
-              option.collateralDecimals
-            )
+        let collateralAllowance = await approveBuyAmount(amount)
+        collateralAllowance = Number(
+          formatUnits(collateralAllowance.toString(), option.collateralDecimals)
+        )
+        const remainingApproval = Number(
+          (collateralAllowance - existingOrdersAmount).toFixed(
+            totalDecimals(collateralAllowance, existingOrdersAmount)
           )
-          const remainingApproval = Number(
-            (collateralAllowance - existingOrdersAmount).toFixed(
-              totalDecimals(collateralAllowance, existingOrdersAmount)
-            )
-          )
-          setRemainingApprovalAmount(remainingApproval)
-          setAllowance(collateralAllowance)
-          setIsApproved(true)
-          alert(
-            `Taker allowance for ${
-              option.collateralToken + ' '
-            } ${collateralAllowance} successfully set by ${takerAccount}`
-          )
-        }
+        )
+        setRemainingApprovalAmount(remainingApproval)
+        setAllowance(collateralAllowance)
+        setIsApproved(true)
+        alert(
+          `Taker allowance for ${
+            option.collateralToken + ' '
+          } ${collateralAllowance} successfully set by ${takerAccount}`
+        )
       } else {
         alert('Please enter number of options you want to buy')
       }
