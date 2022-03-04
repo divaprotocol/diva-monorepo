@@ -108,9 +108,9 @@ export default function SellLimit(props: {
         setAllowance(approvedAllowance)
         setIsApproved(true)
         alert(
-          `Total allowance` +
-            allowance +
-            `for ${option.referenceAsset} successfully set by`
+          `Total allowance ` +
+            approvedAllowance +
+            ` for ${option.referenceAsset} successfully set by`
         )
       } else {
         alert('please enter positive balance for approval')

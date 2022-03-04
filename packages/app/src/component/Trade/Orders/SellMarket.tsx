@@ -111,9 +111,9 @@ export default function SellMarket(props: {
         setAllowance(allowance)
         setIsApproved(true)
         alert(
-          'Total allowance' +
-            allowance +
-            `for ${option.referenceAsset} successfully set`
+          'Total allowance ' +
+            approvedAllowance +
+            ` for ${option.referenceAsset} successfully set`
         )
       } else {
         alert('please enter positive balance for approval')
@@ -175,10 +175,6 @@ export default function SellMarket(props: {
                   return
                 } else {
                   if (eventData.event === 'LimitOrderFilled') {
-                    let allowance = await takerTokenContract.methods
-                      .allowance(makerAccount, exchangeProxyAddress)
-                      .call()
-                    allowance = Number(formatUnits(allowance.toString(), 18))
                     //wait for 4 secs for 0x to update orders then handle order book display
                     await new Promise((resolve) => setTimeout(resolve, 4000))
                     await props.handleDisplayOrder()

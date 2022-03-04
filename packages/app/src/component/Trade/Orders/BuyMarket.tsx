@@ -173,15 +173,6 @@ export default function BuyMarket(props: {
                   return
                 } else {
                   if (eventData.event === 'LimitOrderFilled') {
-                    let collateralAllowance = await takerTokenContract.methods
-                      .allowance(accounts[0], exchangeProxyAddress)
-                      .call()
-                    collateralAllowance = Number(
-                      formatUnits(
-                        collateralAllowance.toString(),
-                        option.collateralDecimals
-                      )
-                    )
                     //wait for 4 secs for 0x to update orders then handle order book display
                     await new Promise((resolve) => setTimeout(resolve, 4000))
                     await props.handleDisplayOrder()
