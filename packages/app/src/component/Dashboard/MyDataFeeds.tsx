@@ -21,10 +21,7 @@ import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
-import {
-  Pool,
-  queryPools,
-} from '../../lib/queries'
+import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { useWallet } from '@web3-ui/hooks'
 import {
@@ -35,7 +32,7 @@ import {
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
-  const statusTimestamp = parseInt(props.row.statusTimestamp)
+  const statusTimestamp = parseInt(props.row.StatusTimestamp)
   const expiryDate = new Date(parseInt(props.row.Expiry) * 1000)
   const now = new Date()
   if (
