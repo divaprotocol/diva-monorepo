@@ -97,20 +97,24 @@ export default function SellMarket(props: {
             totalDecimals(allowance, numberOfOptions)
           )
         )
-        if (amount > walletBalance) {
-          alert('amount entered is greater than available balance')
-        } else {
-          let allowance = await approveSellAmount(numberOfOptions)
-          allowance = Number(formatUnits(allowance.toString(), 18))
-          setRemainingApprovalAmount(allowance)
-          setAllowance(allowance)
-          setIsApproved(true)
-          alert(
-            'Total allowance' +
-              allowance +
-              `for ${option.referenceAsset} successfully set`
+
+        let approvedAllowance = await approveSellAmount(amount)
+        approvedAllowance = Number(
+          formatUnits(approvedAllowance.toString(), 18)
+        )
+        const remainingApproval = Number(
+          (approvedAllowance - existingOrdersAmount).toFixed(
+            totalDecimals(approvedAllowance, existingOrdersAmount)
           )
-        }
+        )
+        setRemainingApprovalAmount(remainingApproval)
+        setAllowance(allowance)
+        setIsApproved(true)
+        alert(
+          'Total allowance' +
+            allowance +
+            `for ${option.referenceAsset} successfully set`
+        )
       } else {
         alert('please enter positive balance for approval')
       }
@@ -218,7 +222,7 @@ export default function SellMarket(props: {
     }
   }
 
-  const getBuyLimitOrders = async (maker) => {
+  const getBuyLimitOrders = async () => {
     const orders: any = []
     responseBuy.forEach((data: any) => {
       const order = JSON.parse(JSON.stringify(data.order))
@@ -282,7 +286,7 @@ export default function SellMarket(props: {
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
       if (responseBuy.length > 0) {
-        getBuyLimitOrders(val.account).then((orders) => {
+        getBuyLimitOrders().then((orders) => {
           setExistingBuyLimitOrders(orders)
         })
       }

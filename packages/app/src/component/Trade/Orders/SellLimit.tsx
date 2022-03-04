@@ -90,10 +90,22 @@ export default function SellLimit(props: {
     event.preventDefault()
     if (!isApproved) {
       if (numberOfOptions > 0) {
-        let allowance = await approveSellAmount(numberOfOptions)
-        allowance = Number(formatUnits(allowance.toString(), 18))
-        setRemainingApprovalAmount(allowance)
-        setAllowance(allowance)
+        const amount = Number(
+          (allowance + numberOfOptions).toFixed(
+            totalDecimals(allowance, numberOfOptions)
+          )
+        )
+        let approvedAllowance = await approveSellAmount(amount)
+        approvedAllowance = Number(
+          formatUnits(approvedAllowance.toString(), 18)
+        )
+        const remainingApproval = Number(
+          (approvedAllowance - existingOrdersAmount).toFixed(
+            totalDecimals(approvedAllowance, existingOrdersAmount)
+          )
+        )
+        setRemainingApprovalAmount(remainingApproval)
+        setAllowance(approvedAllowance)
         setIsApproved(true)
         alert(
           `Total allowance` +

@@ -50,7 +50,6 @@ export default function BuyLimit(props: {
   const [youPay, setYouPay] = React.useState(0.0)
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(false)
-  const [approvalAmount, setApprovalAmount] = React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
