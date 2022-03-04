@@ -35,13 +35,8 @@ export default function SellLimit(props: {
   option: Pool
   handleDisplayOrder: () => any
   tokenAddress: string
-  getMakerOrdersTotalAmount: (
-    makerAccount: string,
-    responseSell: any,
-    makerToken: string
-  ) => any
 }) {
-  const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
+  let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const wallet = useWallet()
   const classes = useStyles()
   const chainId = wallet?.provider?.network?.chainId || 3
@@ -167,7 +162,7 @@ export default function SellLimit(props: {
         sellLimitOrder(orderData)
           .then(async (response) => {
             if (response.status === 200) {
-              await new Promise((resolve) => setTimeout(resolve, 4000))
+              await new Promise((resolve) => setTimeout(resolve, 2000))
               await props.handleDisplayOrder()
               handleFormReset()
             }
@@ -179,7 +174,7 @@ export default function SellLimit(props: {
     }
   }
 
-  /*const getMakerOrdersTotalAmount = async (maker) => {
+  const getMakerOrdersTotalAmount = async (maker) => {
     let existingOrderAmount = new BigNumber(0)
     if (responseSell.length == 0) {
       //Double check any limit orders exists
@@ -209,7 +204,7 @@ export default function SellLimit(props: {
     })
     //return existingOrderAmount
     return Number(formatUnits(existingOrderAmount.toString(), 18))
-  }*/
+  }
 
   const getOptionsInWallet = async () => {
     accounts = await window.ethereum.enable()
@@ -230,7 +225,7 @@ export default function SellLimit(props: {
   }
 
   useEffect(() => {
-    getOptionsInWallet().then(async (val) => {
+    getOptionsInWallet().then((val) => {
       !Number.isNaN(val.balance)
         ? setWalletBalance(Number(val.balance))
         : setWalletBalance(0)
@@ -238,18 +233,17 @@ export default function SellLimit(props: {
       setAllowance(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
-      await props
-        .getMakerOrdersTotalAmount(val.account, responseSell, makerToken)
-        .then((existingOrdersAmount) => {
-          setExistingOrdersAmount(existingOrdersAmount)
-          const remainingAmount = Number(
-            (val.approvalAmount - existingOrdersAmount).toFixed(
-              totalDecimals(val.approvalAmount, existingOrdersAmount)
-            )
+      getMakerOrdersTotalAmount(val.account).then((existingOrdersAmount) => {
+        setExistingOrdersAmount(existingOrdersAmount)
+        const remainingAmount = Number(
+          (val.approvalAmount - existingOrdersAmount).toFixed(
+            totalDecimals(val.approvalAmount, existingOrdersAmount)
           )
-          setRemainingApprovalAmount(remainingAmount)
-          remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
-        })
+        )
+        setRemainingApprovalAmount(remainingAmount)
+        remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+      })
+      //}
     })
   }, [responseSell])
 
