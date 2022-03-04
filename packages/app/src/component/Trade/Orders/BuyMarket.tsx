@@ -39,9 +39,14 @@ export default function BuyMarket(props: {
   option: Pool
   handleDisplayOrder: () => any
   tokenAddress: string
+  getTakerOrdersTotalAmount: (
+    takerAccount: string,
+    buyOrders: any,
+    makerToken: string
+  ) => any
 }) {
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
@@ -180,15 +185,6 @@ export default function BuyMarket(props: {
                   return
                 } else {
                   if (eventData.event === 'LimitOrderFilled') {
-                    let collateralAllowance = await takerTokenContract.methods
-                      .allowance(accounts[0], exchangeProxyAddress)
-                      .call()
-                    collateralAllowance = Number(
-                      formatUnits(
-                        collateralAllowance.toString(),
-                        option.collateralDecimals
-                      )
-                    )
                     //wait for 4 secs for 0x to update orders then handle order book display
                     await new Promise((resolve) => setTimeout(resolve, 4000))
                     await props.handleDisplayOrder()
@@ -260,7 +256,7 @@ export default function BuyMarket(props: {
     }
   }
 
-  const getTakerOrdersTotalAmount = async (taker) => {
+  /*const getTakerOrdersTotalAmount = async (taker) => {
     let existingOrdersAmount = new BigNumber(0)
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
@@ -290,10 +286,10 @@ export default function BuyMarket(props: {
     return Number(
       formatUnits(existingOrdersAmount.toString(), option.collateralDecimals)
     )
-  }
+  }*/
 
   useEffect(() => {
-    getCollateralInWallet().then((val) => {
+    getCollateralInWallet().then(async (val) => {
       !Number.isNaN(val.balance)
         ? setCollateralBalance(Number(val.balance))
         : setCollateralBalance(0)
@@ -307,15 +303,17 @@ export default function BuyMarket(props: {
           setExistingSellLimitOrders(data.sortedOrders)
         })
       }
-      getTakerOrdersTotalAmount(val.account).then((amount) => {
-        const remainingAmount = Number(
-          (val.approvalAmount - amount).toFixed(
-            totalDecimals(val.approvalAmount, amount)
+      await props
+        .getTakerOrdersTotalAmount(val.account, responseBuy, makerToken)
+        .then((amount) => {
+          const remainingAmount = Number(
+            (val.approvalAmount - amount).toFixed(
+              totalDecimals(val.approvalAmount, amount)
+            )
           )
-        )
-        setRemainingApprovalAmount(remainingAmount)
-        remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
-      })
+          setRemainingApprovalAmount(remainingAmount)
+          remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+        })
       //}
     })
   }, [responseSell, responseBuy])

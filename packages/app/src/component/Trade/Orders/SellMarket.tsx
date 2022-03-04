@@ -40,9 +40,14 @@ export default function SellMarket(props: {
   option: Pool
   handleDisplayOrder: () => any
   tokenAddress: string
+  getMakerOrdersTotalAmount: (
+    makerAccount: string,
+    responseSell: any,
+    makerToken: string
+  ) => any
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
+  const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
   const option = props.option
@@ -170,10 +175,6 @@ export default function SellMarket(props: {
                   return
                 } else {
                   if (eventData.event === 'LimitOrderFilled') {
-                    let allowance = await takerTokenContract.methods
-                      .allowance(makerAccount, exchangeProxyAddress)
-                      .call()
-                    allowance = Number(formatUnits(allowance.toString(), 18))
                     //wait for 4 secs for 0x to update orders then handle order book display
                     await new Promise((resolve) => setTimeout(resolve, 4000))
                     await props.handleDisplayOrder()
@@ -239,7 +240,7 @@ export default function SellMarket(props: {
     return sortedOrders
   }
 
-  const getMakerOrdersTotalAmount = async (maker) => {
+  /*const getMakerOrdersTotalAmount = async (maker) => {
     let existingOrderAmount = new BigNumber('0')
     if (responseSell.length == 0) {
       //Double check the any limit orders exists
@@ -268,10 +269,10 @@ export default function SellMarket(props: {
       }
     })
     return Number(formatUnits(existingOrderAmount.toString(), 18))
-  }
+  }*/
 
   useEffect(() => {
-    getOptionsInWallet().then((val) => {
+    getOptionsInWallet().then(async (val) => {
       !Number.isNaN(val.balance)
         ? setWalletBalance(Number(val.balance))
         : setWalletBalance(0)
@@ -285,15 +286,17 @@ export default function SellMarket(props: {
           setExistingBuyLimitOrders(orders)
         })
       }
-      getMakerOrdersTotalAmount(val.account).then((amount) => {
-        const remainingAmount = Number(
-          (val.approvalAmount - amount).toFixed(
-            totalDecimals(val.approvalAmount, amount)
+      await props
+        .getMakerOrdersTotalAmount(val.account, responseSell, makerToken)
+        .then((amount) => {
+          const remainingAmount = Number(
+            (val.approvalAmount - amount).toFixed(
+              totalDecimals(val.approvalAmount, amount)
+            )
           )
-        )
-        setRemainingApprovalAmount(remainingAmount)
-        remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
-      })
+          setRemainingApprovalAmount(remainingAmount)
+          remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+        })
     })
   }, [responseBuy, responseSell])
 

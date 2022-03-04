@@ -16,6 +16,8 @@ import {
 } from '../../Redux/TradeOption'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
+import { formatUnits } from 'ethers/lib/utils'
+import { BigNumber } from '@0x/utils'
 const PageDiv = styled.div`
   width: 400px;
   height: 420px;
@@ -103,8 +105,80 @@ export default function CreateOrder(props: {
     setPriceTypeValue(newValue)
   }
 
+  //Get Existing sell orders for account
+  const getMakerOrdersTotalAmount = async (
+    makerAccount: string,
+    sellOrders: any,
+    makerToken
+  ) => {
+    let existingOrderAmount = new BigNumber('0')
+    if (sellOrders.length == 0) {
+      //Double check the any limit orders exists
+      const rSell: any = await get0xOpenOrders(
+        makerToken,
+        option.collateralToken
+      )
+      sellOrders = rSell
+    }
+    sellOrders.forEach((data: any) => {
+      const order = data.order
+      if (makerAccount == order.maker) {
+        const metaData = data.metaData
+        const remainingTakerAmount = new BigNumber(
+          metaData.remainingFillableTakerAmount.toString()
+        )
+        if (remainingTakerAmount == order.makerAmount) {
+          existingOrderAmount = existingOrderAmount.plus(order.makerAmount)
+        } else {
+          const makerAmount = new BigNumber(order.makerAmount)
+          const takerAmount = new BigNumber(order.takerAmount)
+          const askAmount = takerAmount.dividedBy(makerAmount)
+          const quantity = remainingTakerAmount.dividedBy(askAmount)
+          existingOrderAmount = existingOrderAmount.plus(quantity)
+        }
+      }
+    })
+    return Number(formatUnits(existingOrderAmount.toString(), 18))
+  }
+
+  //Get Existing buy orders for account
+  const getTakerOrdersTotalAmount = async (
+    takerAccount: string,
+    buyOrders: any,
+    makerToken: string
+  ) => {
+    let existingOrdersAmount = new BigNumber(0)
+    if (buyOrders.length == 0) {
+      //Double check any limit orders exists
+      const rBuy = await get0xOpenOrders(option.collateralToken, makerToken)
+      if (rBuy.length > 0) {
+        buyOrders = rBuy
+      }
+    }
+    buyOrders.forEach((data: any) => {
+      const order = data.order
+      const metaData = data.metaData
+      if (takerAccount == order.maker) {
+        const remainingFillableTakerAmount = new BigNumber(
+          metaData.remainingFillableTakerAmount.toString()
+        )
+        if (remainingFillableTakerAmount < order.takerAmount) {
+          const makerAmount = new BigNumber(order.makerAmount)
+          const takerAmount = new BigNumber(order.takerAmount)
+          const bidAmount = makerAmount.dividedBy(takerAmount)
+          const youPay = bidAmount.multipliedBy(remainingFillableTakerAmount)
+          existingOrdersAmount = existingOrdersAmount.plus(youPay)
+        } else {
+          existingOrdersAmount = existingOrdersAmount.plus(order.makerAmount)
+        }
+      }
+    })
+    return Number(
+      formatUnits(existingOrdersAmount.toString(), option.collateralDecimals)
+    )
+  }
+
   const getExistingOrders = async () => {
-    const ordersResponse = {}
     const responseSell: any = await get0xOpenOrders(
       optionTokenAddress,
       option.collateralToken
@@ -119,11 +193,6 @@ export default function CreateOrder(props: {
     if (responseBuy.length > 0) {
       dispatch(setResponseBuy(responseBuy))
     }
-
-    return {
-      responseSell: responseSell.length > 0 ? responseSell : [],
-      responseBuy: responseBuy.length > 0 ? responseBuy : [],
-    }
   }
 
   const renderOrderInfo = () => {
@@ -134,6 +203,7 @@ export default function CreateOrder(props: {
           option={option}
           handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
+          getTakerOrdersTotalAmount={getTakerOrdersTotalAmount}
         />
       )
     }
@@ -144,6 +214,7 @@ export default function CreateOrder(props: {
           handleDisplayOrder={getExistingOrders}
           option={option}
           tokenAddress={props.tokenAddress}
+          getTakerOrdersTotalAmount={getTakerOrdersTotalAmount}
         />
       )
     }
@@ -154,6 +225,7 @@ export default function CreateOrder(props: {
           option={option}
           handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
+          getMakerOrdersTotalAmount={getMakerOrdersTotalAmount}
         />
       )
     }
@@ -164,6 +236,7 @@ export default function CreateOrder(props: {
           option={option}
           handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
+          getMakerOrdersTotalAmount={getMakerOrdersTotalAmount}
         />
       )
     }

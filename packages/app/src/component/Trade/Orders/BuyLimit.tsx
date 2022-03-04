@@ -35,8 +35,13 @@ export default function BuyLimit(props: {
   option: Pool
   handleDisplayOrder: () => any
   tokenAddress: string
+  getTakerOrdersTotalAmount: (
+    takerAccount: string,
+    buyOrders: any,
+    makerToken: string
+  ) => any
 }) {
-  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
@@ -50,7 +55,6 @@ export default function BuyLimit(props: {
   const [youPay, setYouPay] = React.useState(0.0)
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(false)
-  const [approvalAmount, setApprovalAmount] = React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
@@ -195,7 +199,7 @@ export default function BuyLimit(props: {
         buylimitOrder(orderData)
           .then(async (response) => {
             if (response.status === 200) {
-              await new Promise((resolve) => setTimeout(resolve, 2000))
+              await new Promise((resolve) => setTimeout(resolve, 4000))
               await props.handleDisplayOrder()
               handleFormReset()
             }
@@ -207,7 +211,7 @@ export default function BuyLimit(props: {
     }
   }
 
-  const getTakerOrdersTotalAmount = async (taker) => {
+  /*const getTakerOrdersTotalAmount = async (taker) => {
     let existingOrdersAmount = new BigNumber(0)
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
@@ -237,7 +241,7 @@ export default function BuyLimit(props: {
     return Number(
       formatUnits(existingOrdersAmount.toString(), option.collateralDecimals)
     )
-  }
+  }*/
 
   useEffect(() => {
     const getCollateralInWallet = async () => {
@@ -260,7 +264,7 @@ export default function BuyLimit(props: {
       }
     }
 
-    getCollateralInWallet().then((val) => {
+    getCollateralInWallet().then(async (val) => {
       !Number.isNaN(val.balance)
         ? setCollateralBalance(Number(val.balance))
         : setCollateralBalance(0)
@@ -268,16 +272,20 @@ export default function BuyLimit(props: {
       setAllowance(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
-      getTakerOrdersTotalAmount(val.account).then((existingOrdersAmount) => {
-        const remainingAmount = Number(
-          (val.approvalAmount - existingOrdersAmount).toFixed(
-            totalDecimals(val.approvalAmount, existingOrdersAmount)
+      await props
+        .getTakerOrdersTotalAmount(val.account, responseBuy, makerToken)
+        .then((existingOrdersAmount) => {
+          console.log('existing orders amount ' + existingOrdersAmount)
+          console.log('approval amount ' + val.approvalAmount)
+          const remainingAmount = Number(
+            (val.approvalAmount - existingOrdersAmount).toFixed(
+              totalDecimals(val.approvalAmount, existingOrdersAmount)
+            )
           )
-        )
-        setRemainingApprovalAmount(remainingAmount)
-        remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
-        setExistingOrdersAmount(existingOrdersAmount)
-      })
+          setRemainingApprovalAmount(remainingAmount)
+          remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+          setExistingOrdersAmount(existingOrdersAmount)
+        })
     })
   }, [responseBuy])
 
