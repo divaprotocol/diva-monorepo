@@ -118,11 +118,6 @@ export default function CreateOrder(props: {
     if (responseBuy.length > 0) {
       dispatch(setResponseBuy(responseBuy))
     }
-
-    return {
-      responseSell: responseSell.length > 0 ? responseSell : [],
-      responseBuy: responseBuy.length > 0 ? responseBuy : [],
-    }
   }
 
   const renderOrderInfo = () => {
