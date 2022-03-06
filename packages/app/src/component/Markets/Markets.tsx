@@ -6,11 +6,14 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
-import { config } from '../../constants'
+import { config, createdByFilterAddressForMarket } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
+import styled from '@emotion/styled'
 
 const columns: GridColDef[] = [
   {
@@ -69,6 +72,10 @@ const columns: GridColDef[] = [
 export default function Markets() {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
+  const [value, setValue] = useState(0)
+  const [mainPools, setMainPools] = useState<Pool[]>([])
+  const [otherPools, setOtherPools] = useState<Pool[]>([])
+  const [pools, setPools] = useState<Pool[]>([])
 
   const query = useQuery<{ pools: Pool[] }>(
     `pools-${chainId}`,
@@ -76,7 +83,32 @@ export default function Markets() {
       chainId != null &&
       request(config[chainId as number].divaSubgraph, queryPools)
   )
-  const pools = query.data?.pools || ([] as Pool[])
+
+  useEffect(() => {
+    if (query.data?.pools) {
+      const poolsData = query.data?.pools || ([] as Pool[])
+
+      const mainPoolsData = poolsData.filter(
+        (p) => p.createdBy === createdByFilterAddressForMarket
+      )
+      const otherPoolsData = poolsData.filter(
+        (p) => p.createdBy !== createdByFilterAddressForMarket
+      )
+
+      setMainPools(mainPoolsData)
+      setOtherPools(otherPoolsData)
+    }
+  }, [query.data?.pools])
+
+  useEffect(() => {
+    if (value === 0) setPools(mainPools)
+    if (value === 1) setPools(otherPools)
+  }, [value])
+
+  const handleChange = (event: any, newValue: any) => {
+    setValue(newValue)
+  }
+
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
     const fallbackPeriod = expiryDate.setMinutes(
@@ -182,5 +214,22 @@ export default function Markets() {
   const filteredRows = rows.filter(
     (v) => v.Status && !v.Status.startsWith('Confirmed')
   )
-  return <PoolsTable columns={columns} rows={filteredRows} />
+
+  return (
+    <>
+      <Container>
+        <Tabs value={value} onChange={handleChange} variant="standard">
+          <Tab label="Main" />
+          <Tab label="Other" />
+        </Tabs>
+      </Container>
+      <PoolsTable columns={columns} rows={filteredRows} />
+    </>
+  )
 }
+
+const Container = styled.div`
+  position: absolute;
+  left: 70px;
+  top: 80px;
+`

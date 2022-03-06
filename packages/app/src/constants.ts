@@ -64,3 +64,6 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-mumbai',
   },
 }
+
+export const createdByFilterAddressForMarket =
+  '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E'
