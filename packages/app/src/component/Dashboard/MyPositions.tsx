@@ -96,23 +96,32 @@ const SubmitButton = (props: any) => {
     DIVA_ABI,
     provider?.getSigner()
   )
+
   const token =
     provider && new ethers.Contract(props.row.address, ERC20, provider)
   const handleRedeem = (e) => {
     e.stopPropagation()
     if (props.row.Status === 'Confirmed*') {
-      token?.balanceOf(userAddress).then((bal: BigNumber) => {
-        diva
-          .setFinalReferenceValue(
-            props.id.split('/')[0],
-            parseEther(props.row.Inflection),
-            false
-          )
-          .then((tx) => {
-            tx.wait().then(() => {
-              diva.redeemPositionToken(props.row.address, bal)
-            })
+      diva.getPoolParameters(props.id.split('/')[0]).then((pool) => {
+        if (pool.statusFinalReferenceValue === 0) {
+          token?.balanceOf(userAddress).then((bal: BigNumber) => {
+            diva
+              .setFinalReferenceValue(
+                props.id.split('/')[0],
+                parseEther(props.row.Inflection),
+                false
+              )
+              .then((tx) => {
+                tx.wait().then(() => {
+                  diva.redeemPositionToken(props.row.address, bal)
+                })
+              })
           })
+        } else {
+          token?.balanceOf(userAddress).then((bal: BigNumber) => {
+            diva.redeemPositionToken(props.row.address, bal)
+          })
+        }
       })
     } else {
       token?.balanceOf(userAddress).then((bal: BigNumber) => {

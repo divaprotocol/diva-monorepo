@@ -24,11 +24,7 @@ import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { useWallet } from '@web3-ui/hooks'
-import {
-  GrayText,
-  LabelGrayStyle,
-  LabelStyleDiv,
-} from '../Trade/Orders/UiStyles'
+import { GrayText } from '../Trade/Orders/UiStyles'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
