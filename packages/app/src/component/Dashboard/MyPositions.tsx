@@ -336,7 +336,7 @@ export function MyPositions() {
       finalValue = '-'
     } else if (val.statusFinalReferenceValue === 'Open') {
       if (now.getTime() > unchallengedPeriod) {
-        finalValue = formatEther(val.inflection)
+        finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
         status = 'Confirmed*'
       } else if (
         now.getTime() > expiryDate.getTime() &&
@@ -351,10 +351,10 @@ export function MyPositions() {
       val.statusFinalReferenceValue === 'Challenged' &&
       Date.now() > challengedPeriod
     ) {
-      finalValue = formatEther(val.inflection)
+      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
       status = 'Confirmed*'
     } else {
-      finalValue = formatEther(val.finalReferenceValue)
+      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
       status = val.statusFinalReferenceValue
     }
     const shared = {
@@ -406,12 +406,12 @@ export function MyPositions() {
           IsLong: true,
         }),
         Status: status,
-        finalValue: parseFloat(finalValue).toFixed(4),
+        finalValue: finalValue,
       },
       {
         ...shared,
         id: `${val.id}/short`,
-        Id: 'L-' + val.id,
+        Id: 'S-' + val.id,
         address: val.shortToken,
         TVL:
           parseFloat(
