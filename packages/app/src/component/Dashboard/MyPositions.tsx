@@ -36,7 +36,8 @@ const MetaMaskImage = styled.img`
 `
 
 const AddToMetamask = (props: any) => {
-  const handleAddMetaMask = async () => {
+  const handleAddMetaMask = async (e) => {
+    e.stopPropagation()
     const tokenSymbol =
       props.row.id.split('/')[1][0].toUpperCase() +
       '-' +
@@ -337,7 +338,7 @@ export function MyPositions() {
     const challengedPeriod = new Date(
       parseInt(val.expiryDate) * 1000
     ).setMinutes(expiryDate.getMinutes() + 2 * 24 * 60 + 5)
-    let finalValue = ''
+    let finalValue = '-'
     let status = val.statusFinalReferenceValue
     if (Date.now() > fallbackPeriod) {
       status = 'Fallback'
@@ -346,7 +347,7 @@ export function MyPositions() {
       finalValue = '-'
     } else if (val.statusFinalReferenceValue === 'Open') {
       if (now.getTime() > unchallengedPeriod) {
-        finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
+        finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
         status = 'Confirmed*'
       } else if (
         now.getTime() > expiryDate.getTime() &&
