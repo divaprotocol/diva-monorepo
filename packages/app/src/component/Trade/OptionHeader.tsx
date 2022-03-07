@@ -39,7 +39,7 @@ const MetaMaskImage = styled.img`
 
 const AssetPriceUsd = styled.div`
   font-weight: bold;
-  padding-left:15px;
+  padding-left: 15px;
 `
 function truncate(string = '', start = 6, end = 4) {
   if (start < 1 || end < 1) {
@@ -84,12 +84,10 @@ export default function OptionHeader(optionData: {
           },
         },
       })
-
     } catch (error) {
       console.error('Error in HandleAddMetaMask', error)
     }
   }
-  
 
   useEffect(() => {
     getUnderlyingPrice(optionData.ReferenceAsset).then((data) => {
@@ -98,17 +96,17 @@ export default function OptionHeader(optionData: {
 
     return () => setUnderlyingAssetPrice(undefined)
   }, [optionData.ReferenceAsset])
-const shortenTokenAddress = truncate(optionData.TokenAddress) ; 
+  const shortenTokenAddress = truncate(optionData.TokenAddress)
 
   return (
     <AppHeader>
       <Container>
         <CoinImage assetName={headerTitle} />
         <OptionTitle>{headerTitle}</OptionTitle>
-      
-      {underlyingAssetPrice && (
-        <AssetPriceUsd>{underlyingAssetPrice}</AssetPriceUsd>
-      )}
+
+        {underlyingAssetPrice && (
+          <AssetPriceUsd>{underlyingAssetPrice}</AssetPriceUsd>
+        )}
       </Container>
       <Container>
         <Link
