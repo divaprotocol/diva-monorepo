@@ -98,7 +98,8 @@ const SubmitButton = (props: any) => {
   )
   const token =
     provider && new ethers.Contract(props.row.address, ERC20, provider)
-  const handleRedeem = () => {
+  const handleRedeem = (e) => {
+    e.stopPropagation()
     if (props.row.Status === 'Confirmed*') {
       token?.balanceOf(userAddress).then((bal: BigNumber) => {
         diva
