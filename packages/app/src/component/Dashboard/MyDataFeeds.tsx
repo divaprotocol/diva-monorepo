@@ -333,7 +333,7 @@ export function MyDataFeeds() {
         finalValue:
           val.statusFinalReferenceValue === 'Open'
             ? '-'
-            : formatUnits(val.finalReferenceValue),
+            : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
       },
     ]
   }, [] as GridRowModel[])

@@ -16,7 +16,7 @@ import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
@@ -336,7 +336,7 @@ export function MyPositions() {
       finalValue = '-'
     } else if (val.statusFinalReferenceValue === 'Open') {
       if (now.getTime() > unchallengedPeriod) {
-        finalValue = formatUnits(val.inflection)
+        finalValue = formatEther(val.inflection)
         status = 'Confirmed*'
       } else if (
         now.getTime() > expiryDate.getTime() &&
@@ -351,10 +351,10 @@ export function MyPositions() {
       val.statusFinalReferenceValue === 'Challenged' &&
       Date.now() > challengedPeriod
     ) {
-      finalValue = formatUnits(val.inflection)
+      finalValue = formatEther(val.inflection)
       status = 'Confirmed*'
     } else {
-      finalValue = formatUnits(val.finalReferenceValue)
+      finalValue = formatEther(val.finalReferenceValue)
       status = val.statusFinalReferenceValue
     }
     const shared = {
@@ -406,7 +406,7 @@ export function MyPositions() {
           IsLong: true,
         }),
         Status: status,
-        finalValue: finalValue,
+        finalValue: parseFloat(finalValue).toFixed(4),
       },
       {
         ...shared,
