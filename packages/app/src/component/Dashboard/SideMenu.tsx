@@ -19,7 +19,6 @@ export function SideMenu() {
       <Button fullWidth variant="contained">
         My Orders
       </Button>
-      <Button variant="contained">My Requests</Button>
       <Button component={Link} to="/dashboard/mydatafeeds" variant="contained">
         My Data Feeds
       </Button>

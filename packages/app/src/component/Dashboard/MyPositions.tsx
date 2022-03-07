@@ -16,6 +16,8 @@ import { useTokenBalances } from '../../hooks/useTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { useWallet } from '@web3-ui/hooks'
+import { GrayText } from '../Trade/Orders/UiStyles'
+import React from 'react'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -79,7 +81,6 @@ const SubmitButton = (props: any) => {
     provider && new ethers.Contract(props.row.address, ERC20, provider)
   const handleRedeem = () => {
     if (props.row.Status === 'Confirmed*') {
-      console.log(props.row.Inflection)
       token?.balanceOf(userAddress).then((bal: BigNumber) => {
         diva
           .setFinalReferenceValue(
@@ -145,7 +146,9 @@ const SubmitButton = (props: any) => {
 const columns: GridColDef[] = [
   {
     field: 'Id',
-    align: 'right',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{header.field}</GrayText>,
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
   },
   {
     field: 'Icon',
@@ -177,6 +180,12 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     type: 'dateTime',
+  },
+  {
+    field: 'TVL',
+    align: 'right',
+    headerAlign: 'right',
+    minWidth: 200,
   },
   {
     field: 'finalValue',
@@ -237,29 +246,35 @@ export function MyPositions() {
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
     const now = new Date()
-    const fallbackPeriod = expiryDate.setMinutes(
+    const fallbackPeriod = new Date(parseInt(val.expiryDate) * 1000).setMinutes(
       expiryDate.getMinutes() + 24 * 60 + 5
     )
-    const unchallengedPeriod = expiryDate.setMinutes(
-      expiryDate.getMinutes() + 5 * 24 * 60 + 5
-    )
-    const challengedPeriod = expiryDate.setMinutes(
-      expiryDate.getMinutes() + 2 * 24 * 60 + 5
-    )
+    const unchallengedPeriod = new Date(
+      parseInt(val.expiryDate) * 1000
+    ).setMinutes(expiryDate.getMinutes() + 5 * 24 * 60 + 5)
+    const challengedPeriod = new Date(
+      parseInt(val.expiryDate) * 1000
+    ).setMinutes(expiryDate.getMinutes() + 2 * 24 * 60 + 5)
     let finalValue = ''
     let status = val.statusFinalReferenceValue
     if (Date.now() > fallbackPeriod) {
       status = 'Fallback'
     }
-    if (now < expiryDate) {
+    if (now.getTime() < expiryDate.getTime()) {
       finalValue = '-'
-    } else if (
-      val.statusFinalReferenceValue === 'Open' &&
-      Date.now() > unchallengedPeriod
-    ) {
-      console.log(val.statusFinalReferenceValue)
-      finalValue = formatUnits(val.inflection)
-      status = 'Confirmed*'
+    } else if (val.statusFinalReferenceValue === 'Open') {
+      if (now.getTime() > unchallengedPeriod) {
+        finalValue = formatUnits(val.inflection)
+        status = 'Confirmed*'
+      } else if (
+        now.getTime() > expiryDate.getTime() &&
+        now.getTime() < unchallengedPeriod
+      ) {
+        status = 'Expired'
+        finalValue = '-'
+      } else {
+        finalValue = '-'
+      }
     } else if (
       val.statusFinalReferenceValue === 'Challenged' &&
       Date.now() > challengedPeriod
@@ -301,30 +316,46 @@ export function MyPositions() {
       {
         ...shared,
         id: `${val.id}/long`,
+        Id: 'L-' + val.id,
         address: val.longToken,
+        TVL:
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
+          ' ' +
+          val.collateralSymbol,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
           IsLong: true,
         }),
-        TVL:
-          formatUnits(val.collateralBalanceLong, val.collateralDecimals) +
-          ' ' +
-          val.collateralSymbol,
         Status: status,
         finalValue: finalValue,
       },
       {
         ...shared,
         id: `${val.id}/short`,
+        Id: 'L-' + val.id,
         address: val.shortToken,
+        TVL:
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalanceLong).add(
+                val.collateralBalanceShort
+              ),
+              val.collateralDecimals
+            )
+          ).toFixed(4) +
+          ' ' +
+          val.collateralSymbol,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
           IsLong: false,
         }),
-        TVL:
-          formatUnits(val.collateralBalanceShort, val.collateralDecimals) +
-          ' ' +
-          val.collateralSymbol,
         Status: status,
         finalValue: finalValue,
       },
@@ -345,7 +376,7 @@ export function MyPositions() {
             Balance:
               parseInt(formatUnits(tokenBalances[v.address])) < 0.01
                 ? '<0.01'
-                : formatUnits(tokenBalances[v.address]).toString(),
+                : parseFloat(formatUnits(tokenBalances[v.address])).toFixed(4),
           }))
       : []
 

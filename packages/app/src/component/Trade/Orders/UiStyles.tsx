@@ -124,3 +124,9 @@ export const ExpectedRateInfoText =
   'Rate is based on the current orderbook and may change at the time of execution. Use the slippage parameter to define your tolerance level.'
 export const MaxSlippageText =
   'The maximum allowable change in price between order creation and execution.'
+
+export const GrayText = styled.div`
+  aligned: left;
+  font-size: 16px;
+  color: dimgray;
+`

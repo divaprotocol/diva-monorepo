@@ -25,12 +25,6 @@ export default function MenuItems() {
               to={'/dashboard/mydatafeeds'}
             />
             <Tab
-              label="Request"
-              value={'/Request'}
-              component={Link}
-              to={'/Request'}
-            />
-            <Tab
               label="Create"
               value={'/Create'}
               component={Link}
