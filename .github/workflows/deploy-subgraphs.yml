@@ -26,6 +26,7 @@ jobs:
         run: yarn
       - name: Authenticate the graph and deploy
         env: 
-          HELLO: ${{ secrets.THEGRAPH_ACCESS_TOKEN_TEST }}
           THEGRAPH_ACCESS_TOKEN: ${{ secrets.THEGRAPH_ACCESS_TOKEN_TEST }}
-        run: yarn turbo run deploy --scope="@diva/*-subgraph"
+        run: |
+          yarn graph:auth
+          yarn turbo run deploy --scope="@diva/*-subgraph"
