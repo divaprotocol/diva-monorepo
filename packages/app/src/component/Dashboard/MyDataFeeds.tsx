@@ -262,7 +262,7 @@ export function MyDataFeeds() {
     'pools',
     () =>
       chainId != null &&
-      request(config[chainId as number].divaSubgraph, queryPools)
+      request(config[chainId as number].divaSubgraph, queryPools(0))
   )
 
   const pools =
@@ -335,7 +335,7 @@ export function MyDataFeeds() {
       }}
     >
       <SideMenu />
-      <PoolsTable disableRowClick columns={columns} rows={rows} />
+      <PoolsTable page={0} disableRowClick columns={columns} rows={rows} />
     </Stack>
   ) : (
     <div

@@ -10,7 +10,7 @@ import { config } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React from 'react'
+import React, { useState } from 'react'
 
 const columns: GridColDef[] = [
   {
@@ -69,12 +69,14 @@ const columns: GridColDef[] = [
 export default function Markets() {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
+  const rowCount = 200 // TODO: hard coded until we update the graph
+  const [page, setPage] = useState(0)
 
   const query = useQuery<{ pools: Pool[] }>(
-    `pools-${chainId}`,
+    `pools-${chainId}-${page}`,
     () =>
       chainId != null &&
-      request(config[chainId as number].divaSubgraph, queryPools)
+      request(config[chainId as number].divaSubgraph, queryPools(page))
   )
   const pools = query.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
@@ -182,5 +184,13 @@ export default function Markets() {
   const filteredRows = rows.filter(
     (v) => v.Status && !v.Status.startsWith('Confirmed')
   )
-  return <PoolsTable columns={columns} rows={filteredRows} />
+  return (
+    <PoolsTable
+      columns={columns}
+      rows={filteredRows}
+      page={page}
+      rowCount={rowCount}
+      onPageChange={(page) => setPage(page)}
+    />
+  )
 }

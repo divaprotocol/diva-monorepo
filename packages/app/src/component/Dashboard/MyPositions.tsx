@@ -238,7 +238,7 @@ export function MyPositions() {
 
   const poolsQuery = useQuery<{ pools: Pool[] }>('pools', () =>
     chainId != null
-      ? request(config[chainId as number].divaSubgraph, queryPools)
+      ? request(config[chainId as number].divaSubgraph, queryPools(0))
       : Promise.resolve()
   )
 
@@ -388,7 +388,12 @@ export function MyPositions() {
       }}
     >
       <SideMenu />
-      <PoolsTable rows={filteredRows} columns={columns} disableRowClick />
+      <PoolsTable
+        page={0}
+        rows={filteredRows}
+        columns={columns}
+        disableRowClick
+      />
     </Stack>
   ) : (
     <div

@@ -33,9 +33,9 @@ export type Pool = {
   supplyShortInitial: string
 }
 
-export const queryPools = gql`
+export const queryPools = (page: number) => gql`
   {
-    pools {
+    pools(skip: ${page * 100}) {
       id
       referenceAsset
       inflection
