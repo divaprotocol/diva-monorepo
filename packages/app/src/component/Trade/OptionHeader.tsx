@@ -10,6 +10,7 @@ import { CoinImage } from '../PoolsTable'
 import Tooltip from '@mui/material/Tooltip'
 import { useWallet } from '@web3-ui/hooks'
 import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -41,15 +42,6 @@ const AssetPriceUsd = styled.div`
   font-weight: bold;
   padding-left: 15px;
 `
-function truncate(string = '', start = 6, end = 4) {
-  if (start < 1 || end < 1) {
-    return string
-  }
-  if (string.length <= start + end) {
-    return string
-  }
-  return string.slice(0, start) + '...' + string.slice(-end)
-}
 export default function OptionHeader(optionData: {
   TokenAddress: string
   ReferenceAsset: string
@@ -96,7 +88,7 @@ export default function OptionHeader(optionData: {
 
     return () => setUnderlyingAssetPrice(undefined)
   }, [optionData.ReferenceAsset])
-  const shortenTokenAddress = truncate(optionData.TokenAddress)
+  const shortenTokenAddress = getShortenedAddress(optionData.TokenAddress)
 
   return (
     <AppHeader>
