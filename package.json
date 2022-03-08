@@ -6,7 +6,9 @@
     "packages": [
       "packages/*"
     ],
-    "nohoist": ["**/@synthetixio/synpress"]
+    "nohoist": [
+      "**/@synthetixio/synpress"
+    ]
   },
   "scripts": {
     "graph:auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
@@ -18,9 +20,9 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
+    "@graphprotocol/graph-cli": "*",
     "prettier": "^2.5.1",
-    "turbo": "*",
-    "@graphprotocol/graph-cli": "*"
+    "turbo": "^1.1.5"
   },
   "packageManager": "yarn@1.22.17"
 }
