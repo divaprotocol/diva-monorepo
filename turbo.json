@@ -14,7 +14,8 @@
     },
     "deploy": {
       "dependsOn": [
-        "build"
+        "build",
+        "graph:auth"
       ]
     },
     "test": {},

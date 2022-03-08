@@ -15,6 +15,4 @@ jobs:
       - name: Authenticate the graph and deploy
         env: 
           THEGRAPH_ACCESS_TOKEN: ${{ secrets.THEGRAPH_ACCESS_TOKEN_TEST }}
-        run: |
-          yarn graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN
-          yarn turbo run deploy --scope="@diva/*-subgraph"
+        run: yarn turbo run deploy --scope="@diva/*-subgraph"

@@ -9,6 +9,7 @@
     "nohoist": ["**/@synthetixio/synpress"]
   },
   "scripts": {
+    "graph:auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
     "deploy": "turbo run deploy",
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
