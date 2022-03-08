@@ -12,10 +12,11 @@
     "lint": {
       "outputs": []
     },
+    "graph:auth": {},
     "deploy": {
       "dependsOn": [
         "build",
-        "^graph:auth"
+        "graph:auth"
       ]
     },
     "test": {},
