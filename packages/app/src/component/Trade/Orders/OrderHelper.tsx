@@ -28,3 +28,16 @@ export function stableSort(array: any, comparator: any) {
   })
   return stabilizedThis.map((el: any) => el[0])
 }
+
+const isFloat = (number) => {
+  return number != '' && !isNaN(number) && Math.round(number) != number
+}
+const decimalPlaces = (number) => {
+  return number.toString().split('.')[1].length
+}
+
+export const totalDecimals = (a: number, b: number) => {
+  const aDecimals = isFloat(a) ? decimalPlaces(a) : 0
+  const bDecimals = isFloat(b) ? decimalPlaces(b) : 0
+  return aDecimals + bDecimals
+}
