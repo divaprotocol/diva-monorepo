@@ -228,17 +228,15 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const {
-    connection: { userAddress },
-    provider,
-  } = useWallet()
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId
+  const userAddress = wallet?.connection?.userAddress
 
-  const chainId = provider?.network?.chainId
-
-  const poolsQuery = useQuery<{ pools: Pool[] }>('pools', () =>
-    chainId != null
-      ? request(config[chainId as number].divaSubgraph, queryPools)
-      : Promise.resolve()
+  const poolsQuery = useQuery<{ pools: Pool[] }>(
+    `pools`,
+    () =>
+      chainId != null &&
+      request(config[chainId as number].divaSubgraph, queryPools)
   )
 
   const pools = poolsQuery.data?.pools || ([] as Pool[])
@@ -290,7 +288,7 @@ export function MyPositions() {
       Underlying: val.referenceAsset,
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
-      Ceiling: formatUnits(val.cap),
+      Cap: formatUnits(val.cap),
       Expiry: getDateTime(val.expiryDate),
       Sell: 'TBD',
       Buy: 'TBD',
@@ -338,7 +336,7 @@ export function MyPositions() {
       {
         ...shared,
         id: `${val.id}/short`,
-        Id: 'L-' + val.id,
+        Id: 'S-' + val.id,
         address: val.shortToken,
         TVL:
           parseFloat(

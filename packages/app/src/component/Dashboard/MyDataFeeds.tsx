@@ -10,7 +10,7 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 
 import { config } from '../../constants'
@@ -264,7 +264,9 @@ export function MyDataFeeds() {
       chainId != null &&
       request(config[chainId as number].divaSubgraph, queryPools)
   )
-
+  useEffect(() => {
+    query.refetch()
+  }, [chainId])
   const pools =
     query?.data?.pools?.filter(
       (pool: Pool) =>
@@ -276,7 +278,7 @@ export function MyDataFeeds() {
       Underlying: val.referenceAsset,
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
-      Ceiling: formatUnits(val.cap),
+      Cap: formatUnits(val.cap),
       Expiry: val.expiryDate,
       Sell: 'TBD',
       Buy: 'TBD',
