@@ -20,9 +20,9 @@ export default function MenuItems() {
             <Tab label="Markets" value={'/'} component={Link} to={'/'} />
             <Tab
               label="My Dashboard"
-              value={'/dashboard/mydatafeeds'}
+              value={'/dashboard/mypositions'}
               component={Link}
-              to={'/dashboard/mydatafeeds'}
+              to={'/dashboard/mypositions'}
             />
             <Tab
               label="Create"

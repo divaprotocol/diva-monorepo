@@ -190,7 +190,7 @@ const columns: GridColDef[] = [
   {
     field: 'Id',
     align: 'left',
-    renderHeader: (header) => <GrayText>{header.field}</GrayText>,
+    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
   },
   {
@@ -208,7 +208,7 @@ const columns: GridColDef[] = [
   },
   { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Ceiling', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
   {
     field: 'Expiry',
     minWidth: 170,
