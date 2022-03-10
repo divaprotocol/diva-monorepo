@@ -103,31 +103,64 @@ const SubmitButton = (props: any) => {
   const handleRedeem = (e) => {
     e.stopPropagation()
     if (props.row.Status === 'Confirmed*') {
-      diva.getPoolParameters(props.id.split('/')[0]).then((pool) => {
-        if (pool.statusFinalReferenceValue === 0) {
-          token?.balanceOf(userAddress).then((bal: BigNumber) => {
-            diva
-              .setFinalReferenceValue(
-                props.id.split('/')[0],
-                parseEther(props.row.Inflection),
-                false
-              )
-              .then((tx) => {
-                tx.wait().then(() => {
-                  diva.redeemPositionToken(props.row.address, bal)
-                })
+      diva
+        .getPoolParameters(props.id.split('/')[0])
+        .then((pool) => {
+          if (pool.statusFinalReferenceValue === 0) {
+            token
+              ?.balanceOf(userAddress)
+              .then((bal: BigNumber) => {
+                diva
+                  .setFinalReferenceValue(
+                    props.id.split('/')[0],
+                    parseEther(props.row.Inflection),
+                    false
+                  )
+                  .then((tx) => {
+                    tx.wait().then(() => {
+                      diva
+                        .redeemPositionToken(props.row.address, bal)
+                        .catch((err) => {
+                          console.error(err)
+                        })
+                    })
+                  })
+                  .catch((err) => {
+                    console.error(err)
+                  })
               })
-          })
-        } else {
-          token?.balanceOf(userAddress).then((bal: BigNumber) => {
-            diva.redeemPositionToken(props.row.address, bal)
-          })
-        }
-      })
+              .catch((err) => {
+                console.error(err)
+              })
+          } else {
+            token
+              ?.balanceOf(userAddress)
+              .then((bal: BigNumber) => {
+                diva
+                  .redeemPositionToken(props.row.address, bal)
+                  .catch((err) => {
+                    console.error(err)
+                  })
+              })
+              .catch((err) => {
+                console.error(err)
+              })
+          }
+        })
+        .catch((err) => {
+          console.error(err)
+        })
     } else {
-      token?.balanceOf(userAddress).then((bal: BigNumber) => {
-        diva.redeemPositionToken(props.row.address, bal)
-      })
+      token
+        ?.balanceOf(userAddress)
+        .then((bal: BigNumber) => {
+          diva.redeemPositionToken(props.row.address, bal).catch((err) => {
+            console.error(err)
+          })
+        })
+        .catch((err) => {
+          console.error(err)
+        })
     }
   }
 
@@ -207,10 +240,14 @@ const SubmitButton = (props: any) => {
               type="submit"
               onClick={(e) => {
                 if (diva != null) {
-                  diva.challengeFinalReferenceValue(
-                    props.id.split('/')[0],
-                    parseEther(textFieldValue)
-                  )
+                  diva
+                    .challengeFinalReferenceValue(
+                      props.id.split('/')[0],
+                      parseEther(textFieldValue)
+                    )
+                    .catch((err) => {
+                      console.error(err)
+                    })
                 }
                 handleClose()
               }}

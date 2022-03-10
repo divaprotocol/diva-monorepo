@@ -171,11 +171,15 @@ const SubmitCell = (props: any) => {
             type="submit"
             onClick={() => {
               if (diva != null) {
-                diva.setFinalReferenceValue(
-                  props.id.split('/')[0],
-                  parseEther(textFieldValue),
-                  true
-                )
+                diva
+                  .setFinalReferenceValue(
+                    props.id.split('/')[0],
+                    parseEther(textFieldValue),
+                    true
+                  )
+                  .catch((err) => {
+                    console.error(err)
+                  })
               }
               handleClose()
             }}
