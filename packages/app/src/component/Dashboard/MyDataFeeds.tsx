@@ -300,7 +300,7 @@ export function MyDataFeeds() {
       {
         ...shared,
         id: `${val.id}/long`,
-        Id: 'L-' + val.id,
+        Id: val.id,
         address: val.longToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
