@@ -279,12 +279,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                     .catch((err: any) => {
                       console.error(err)
                       setLoading(false)
-                      if (err.code === 4001) {
-                        setRemove('transaction denied')
-                        setTimeout(() => {
-                          setRemove(remove)
-                        }, 3000)
-                      }
                     })
                 }}
                 style={{
