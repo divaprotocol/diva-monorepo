@@ -329,12 +329,6 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                       .catch((err: any) => {
                         console.error(err)
                         setLoading(false)
-                        if (err.code === 4001) {
-                          setAdd('transaction denied')
-                          setTimeout(() => {
-                            setAdd(add)
-                          }, 3000)
-                        }
                       })
                   }}
                   style={{
