@@ -8,6 +8,7 @@ import {
   Input,
   Stack,
   useTheme,
+  CircularProgress,
 } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
@@ -45,12 +46,12 @@ type Props = {
 export const AddLiquidity = ({ pool }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
   const theme = useTheme()
-  const [openAlert, setOpenAlert] = React.useState(false)
-  const [openCapacityAlert, setOpenCapacityAlert] = React.useState(false)
-  const [decimal, setDecimal] = React.useState(18)
-  const tokenBalance = useErcBalance(
-    pool ? pool!.collateralToken.id : undefined
-  )
+  const [openAlert, setOpenAlert] = useState(false)
+  const [openCapacityAlert, setOpenCapacityAlert] = useState(false)
+  const [decimal, setDecimal] = useState(18)
+  const tokenBalance = useErcBalance(pool ? pool!.collateralToken : undefined)
+  const [loading, setLoading] = useState(false)
+  const [add, setAdd] = useState('ADD')
 
   const {
     provider,
@@ -299,57 +300,61 @@ export const AddLiquidity = ({ pool }: Props) => {
                 alignItems: 'center',
               }}
             >
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                type="submit"
-                value="Submit"
-                disabled={
-                  !pool || Date.now() > 1000 * parseInt(pool.expiryTime)
-                }
-                onClick={() => {
-                  const token = new ethers.Contract(
-                    pool!.collateralToken.id,
-                    ERC20,
-                    provider.getSigner()
-                  )
-                  token
-                    .approve(
-                      config[chainId!].divaAddress,
-                      parseUnits(textFieldValue, decimal)
+              {loading ? (
+                <CircularProgress />
+              ) : (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  type="submit"
+                  value="Submit"
+                  disabled={
+                    !pool || Date.now() > 1000 * parseInt(pool.expiryDate)
+                  }
+                  onClick={() => {
+                    setLoading(true)
+                    const token = new ethers.Contract(
+                      pool!.collateralToken,
+                      ERC20,
+                      provider.getSigner()
                     )
-                    .then((tx: any) => {
-                      return tx.wait()
-                    })
-                    .then(() => {
-                      return token.allowance(
-                        account,
-                        config[chainId!].divaAddress
-                      )
-                    })
-                    .then(() => {
-                      const diva = new ethers.Contract(
-                        config[chainId!].divaAddress,
-                        DIVA_ABI,
-                        provider?.getSigner()
-                      )
-                      diva!.addLiquidity(
-                        window.location.pathname.split('/')[1],
-                        parseUnits(textFieldValue, decimal)
-                      )
-                    })
-                    .catch((err: any) => console.error(err))
-                }}
-                style={{
-                  maxWidth: theme.spacing(38),
-                  maxHeight: theme.spacing(5),
-                  minWidth: theme.spacing(38),
-                  minHeight: theme.spacing(5),
-                }}
-              >
-                Add
-              </Button>
+                    token
+                      .approve(diva?.address, parseEther(textFieldValue))
+                      .then((tx: any) => {
+                        console.log('transaction is ', tx)
+                        return tx.wait()
+                      }, setLoading(false))
+                      .then(() => {
+                        return token.allowance(account, diva?.address)
+                      })
+                      .then(() => {
+                        diva!.addLiquidity(
+                          window.location.pathname.split('/')[1],
+                          parseEther(textFieldValue)
+                        )
+                      })
+                      .catch((err: any) => {
+                        console.error(err)
+                        setLoading(false)
+                        if (err.code === 4001) {
+                          setAdd('transaction denied')
+                          setTimeout(() => {
+                            setAdd(add)
+                          }, 3000)
+                        }
+                      })
+                  }}
+                  style={{
+                    maxWidth: theme.spacing(38),
+                    maxHeight: theme.spacing(5),
+                    minWidth: theme.spacing(38),
+                    minHeight: theme.spacing(5),
+                  }}
+                >
+                  {add}
+                </Button>
+              )}
             </div>
           </Container>
         </Container>
