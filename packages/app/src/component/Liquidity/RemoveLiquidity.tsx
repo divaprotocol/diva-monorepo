@@ -9,6 +9,7 @@ import {
   Stack,
   Typography,
   useTheme,
+  CircularProgress,
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
@@ -48,6 +49,8 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
   const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
   const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
+  const [loading, setLoading] = useState(false)
+  const [remove, setRemove] = useState('REMOVE')
   const { provider } = useWallet()
   const chainId = provider?.network?.chainId
 
@@ -254,28 +257,44 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
               alignItems: 'center',
             }}
           >
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              type="submit"
-              value="Submit"
-              disabled={!pool}
-              onClick={() => {
-                diva!.removeLiquidity(
-                  window.location.pathname.split('/')[1],
-                  parseEther(longToken)
-                )
-              }}
-              style={{
-                maxWidth: theme.spacing(38),
-                maxHeight: theme.spacing(5),
-                minWidth: theme.spacing(38),
-                minHeight: theme.spacing(5),
-              }}
-            >
-              Remove
-            </Button>
+            {loading ? (
+              <CircularProgress />
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                type="submit"
+                value="Submit"
+                disabled={!pool}
+                onClick={() => {
+                  setLoading(true)
+                  diva!
+                    .removeLiquidity(
+                      window.location.pathname.split('/')[1],
+                      parseEther(longToken)
+                    )
+                    .catch((err: any) => {
+                      console.error(err)
+                      setLoading(false)
+                      if (err.code === 4001) {
+                        setRemove('transaction denied')
+                        setTimeout(() => {
+                          setRemove(remove)
+                        }, 3000)
+                      }
+                    })
+                }}
+                style={{
+                  maxWidth: theme.spacing(38),
+                  maxHeight: theme.spacing(5),
+                  minWidth: theme.spacing(38),
+                  minHeight: theme.spacing(5),
+                }}
+              >
+                {remove}
+              </Button>
+            )}
           </div>
         </Container>
       </Card>
