@@ -322,7 +322,6 @@ export const AddLiquidity = ({ pool }: Props) => {
                     token
                       .approve(diva?.address, parseEther(textFieldValue))
                       .then((tx: any) => {
-                        console.log('transaction is ', tx)
                         return tx.wait()
                       }, setLoading(false))
                       .then(() => {
