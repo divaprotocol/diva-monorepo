@@ -10,6 +10,9 @@ export const LabelGrayStyle = styled.label`
 export const LabelStyle = styled.label`
   font-size: 16px;
 `
+export const SubLabelStyle = styled.label`
+  font-size: 8px;
+`
 
 export const IconLabel = styled.label`
   width: 10px;
