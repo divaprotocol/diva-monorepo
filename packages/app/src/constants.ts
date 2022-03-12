@@ -66,4 +66,4 @@ export const config: { [key: number]: SingleConfig } = {
 }
 
 export const createdByFilterAddressForMarket =
-  '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E'
+  '0x47566c6c8f70e4f16aa3e7d8eed4a2bdb3f4925b'

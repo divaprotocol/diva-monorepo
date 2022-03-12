@@ -77,7 +77,7 @@ export default function Markets() {
   const [otherPools, setOtherPools] = useState<Pool[]>([])
   const [pools, setPools] = useState<Pool[]>([])
 
-  const query = useQuery<{ pools: Pool[] }>(
+  const { isLoading, data } = useQuery<{ pools: Pool[] }>(
     `pools-${chainId}`,
     () =>
       chainId != null &&
@@ -85,8 +85,8 @@ export default function Markets() {
   )
 
   useEffect(() => {
-    if (query.data?.pools) {
-      const poolsData = query.data?.pools || ([] as Pool[])
+    const updatePools = async () => {
+      const poolsData = data?.pools || ([] as Pool[])
 
       const mainPoolsData = poolsData.filter(
         (p) => p.createdBy === createdByFilterAddressForMarket
@@ -97,8 +97,10 @@ export default function Markets() {
 
       setMainPools(mainPoolsData)
       setOtherPools(otherPoolsData)
+      setPools(mainPoolsData)
     }
-  }, [query.data?.pools])
+    updatePools()
+  }, [data?.pools])
 
   useEffect(() => {
     if (value === 0) setPools(mainPools)
