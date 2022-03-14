@@ -19,6 +19,12 @@
         "graph:auth"
       ]
     },
+    "deploy-staging": {
+      "dependsOn": [
+        "build",
+        "graph:auth"
+      ]
+    },
     "test": {},
     "dev": {
       "cache": false
