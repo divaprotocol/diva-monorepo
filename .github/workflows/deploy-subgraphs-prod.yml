@@ -1,8 +1,8 @@
-on: push
-#:
-#    branches:
-#      - main
-name: Deploy the graph
+on:
+  push:
+    branches:
+      - main
+name: Deploy production subgraph
 jobs:
   pr:
     runs-on: ubuntu-latest
