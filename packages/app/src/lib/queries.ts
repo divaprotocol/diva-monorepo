@@ -32,6 +32,7 @@ export type Pool = {
   supplyLongInitial: string
   supplyShort: string
   supplyShortInitial: string
+  createdBy: string
 }
 
 export const queryPools = gql`
@@ -68,6 +69,7 @@ export const queryPools = gql`
       dataFeedProvider
       redemptionFee
       settlementFee
+      createdBy
     }
   }
 `
