@@ -10,7 +10,7 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 
 import { config } from '../../constants'
@@ -196,7 +196,7 @@ const columns: GridColDef[] = [
   {
     field: 'Id',
     align: 'left',
-    renderHeader: (header) => <GrayText>{header.field}</GrayText>,
+    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
   },
   {
@@ -214,7 +214,7 @@ const columns: GridColDef[] = [
   },
   { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Ceiling', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
   {
     field: 'Expiry',
     minWidth: 170,
@@ -279,7 +279,9 @@ export function MyDataFeeds() {
       chainId != null &&
       request(config[chainId as number].divaSubgraph, queryPools)
   )
-
+  useEffect(() => {
+    query.refetch()
+  }, [chainId])
   const pools =
     query?.data?.pools?.filter(
       (pool: Pool) =>
@@ -291,7 +293,7 @@ export function MyDataFeeds() {
       Underlying: val.referenceAsset,
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
-      Ceiling: formatUnits(val.cap),
+      Cap: formatUnits(val.cap),
       Expiry: val.expiryDate,
       Sell: 'TBD',
       Buy: 'TBD',
@@ -311,7 +313,7 @@ export function MyDataFeeds() {
       {
         ...shared,
         id: `${val.id}/long`,
-        Id: 'L-' + val.id,
+        Id: val.id,
         address: val.longToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,

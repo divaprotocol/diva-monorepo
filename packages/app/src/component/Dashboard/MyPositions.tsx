@@ -267,7 +267,7 @@ const columns: GridColDef[] = [
   {
     field: 'Id',
     align: 'left',
-    renderHeader: (header) => <GrayText>{header.field}</GrayText>,
+    renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
   },
   {
@@ -293,7 +293,7 @@ const columns: GridColDef[] = [
   },
   { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Ceiling', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
   {
     field: 'Expiry',
     minWidth: 170,
@@ -348,18 +348,15 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const {
-    connection: { userAddress },
-    provider,
-  } = useWallet()
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId
+  const userAddress = wallet?.connection?.userAddress
 
-  const account = userAddress
-  const chainId = provider?.network?.chainId
-
-  const poolsQuery = useQuery<{ pools: Pool[] }>('pools', () =>
-    chainId != null
-      ? request(config[chainId as number].divaSubgraph, queryPools)
-      : Promise.resolve()
+  const poolsQuery = useQuery<{ pools: Pool[] }>(
+    `pools`,
+    () =>
+      chainId != null &&
+      request(config[chainId as number].divaSubgraph, queryPools)
   )
 
   const pools = poolsQuery.data?.pools || ([] as Pool[])
@@ -411,7 +408,7 @@ export function MyPositions() {
       Underlying: val.referenceAsset,
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
-      Ceiling: formatUnits(val.cap),
+      Cap: formatUnits(val.cap),
       Expiry: getDateTime(val.expiryDate),
       Sell: 'TBD',
       Buy: 'TBD',
@@ -500,7 +497,7 @@ export function MyPositions() {
           }))
       : []
 
-  return account ? (
+  return userAddress ? (
     <Stack
       direction="row"
       sx={{
