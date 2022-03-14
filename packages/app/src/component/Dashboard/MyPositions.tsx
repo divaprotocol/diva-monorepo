@@ -353,7 +353,7 @@ export function MyPositions() {
   const userAddress = wallet?.connection?.userAddress
 
   const poolsQuery = useQuery<{ pools: Pool[] }>(
-    `pools`,
+    `pools-${userAddress}`,
     () =>
       chainId != null &&
       request(config[chainId as number].divaSubgraph, queryPools)

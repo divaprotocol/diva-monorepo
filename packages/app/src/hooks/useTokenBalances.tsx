@@ -14,7 +14,7 @@ export function useTokenBalances(tokenAddresses: string[]) {
   } = useWallet()
 
   const balances = useQuery<Response>(
-    'balance',
+    `balance-${userAddress}`,
     async () => {
       const response: Response = {}
       if (provider != null) {
