@@ -1,0 +1,42 @@
+type Challenge @entity {
+  id: ID!
+  challengedBy: Bytes!
+  proposedFinalReferenceValue: BigInt!
+  pool: Pool!
+}
+
+type Pool @entity {
+  id: ID! # original -> poolId
+  referenceAsset: String!
+  inflection: BigInt!
+  cap: BigInt!
+  floor: BigInt!
+  supplyShortInitial: BigInt!
+  supplyLongInitial: BigInt!
+  supplyShort: BigInt!
+  supplyLong: BigInt!
+  expiryDate: BigInt!
+  collateralToken: Bytes!
+  collateralTokenName: String!
+  collateralDecimals: Int!
+  collateralSymbol: String!
+  collateralBalanceShortInitial: BigInt!
+  collateralBalanceLongInitial: BigInt!
+  collateralBalanceShort: BigInt!
+  collateralBalanceLong: BigInt!
+
+  shortToken: Bytes!
+  longToken: Bytes!
+  finalReferenceValue: BigInt!
+  statusFinalReferenceValue: String!
+  redemptionAmountLongToken: BigInt!
+  redemptionAmountShortToken: BigInt!
+  statusTimestamp: BigInt!
+  dataFeedProvider: Bytes!
+  redemptionFee: BigInt!
+  settlementFee: BigInt!
+
+  createdBy: Bytes!
+  capacity: BigInt!
+  challenges: [Challenge!] @derivedFrom(field: "pool")
+}
