@@ -1,5 +1,5 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
+import PoolsTable, { PayoffCell } from '../PoolsTable'
 import { formatUnits } from 'ethers/lib/utils'
 import { getDateTime } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
@@ -14,6 +14,7 @@ import React, { useEffect, useState } from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import styled from '@emotion/styled'
+import { CoinIconPair } from '../CoinIcon'
 
 const columns: GridColDef[] = [
   {
@@ -28,7 +29,7 @@ const columns: GridColDef[] = [
     disableReorder: true,
     disableColumnMenu: true,
     headerName: '',
-    renderCell: (cell) => <CoinImage assetName={cell.value} />,
+    renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
   },
   {
     field: 'Underlying',

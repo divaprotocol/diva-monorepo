@@ -15,7 +15,7 @@ import { BigNumber, ethers } from 'ethers'
 
 import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
-import PoolsTable, { CoinImage } from '../PoolsTable'
+import PoolsTable from '../PoolsTable'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
@@ -25,6 +25,7 @@ import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
+import { CoinIconPair } from '../CoinIcon'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -205,7 +206,7 @@ const columns: GridColDef[] = [
     disableReorder: true,
     disableColumnMenu: true,
     headerName: '',
-    renderCell: (cell) => <CoinImage assetName={cell.value} />,
+    renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
   },
   {
     field: 'Underlying',

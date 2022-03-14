@@ -13,7 +13,7 @@ import {
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
-import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
+import PoolsTable, { PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
@@ -28,6 +28,7 @@ import styled from 'styled-components'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useState } from 'react'
+import { CoinIconPair } from '../CoinIcon'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -276,7 +277,7 @@ const columns: GridColDef[] = [
     disableReorder: true,
     disableColumnMenu: true,
     headerName: '',
-    renderCell: (cell) => <CoinImage assetName={cell.value} />,
+    renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
   },
   {
     field: 'Underlying',

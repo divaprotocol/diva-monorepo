@@ -6,11 +6,11 @@ import {
   getEtherscanLink,
   EtherscanLinkType,
 } from '../../Util/getEtherscanLink'
-import { CoinImage } from '../PoolsTable'
 import Tooltip from '@mui/material/Tooltip'
 import { useWallet } from '@web3-ui/hooks'
 import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { CoinIconPair } from '../CoinIcon'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -93,7 +93,7 @@ export default function OptionHeader(optionData: {
   return (
     <AppHeader>
       <Container>
-        <CoinImage assetName={headerTitle} />
+        <CoinIconPair assetName={headerTitle} />
         <OptionTitle>{headerTitle}</OptionTitle>
 
         {underlyingAssetPrice && (
