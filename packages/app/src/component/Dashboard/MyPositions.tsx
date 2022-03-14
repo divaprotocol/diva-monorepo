@@ -1,12 +1,22 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import { Button, Container, Stack, Tooltip } from '@mui/material'
+import {
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  Stack,
+  TextField,
+  Tooltip,
+} from '@mui/material'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
@@ -17,7 +27,7 @@ import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React from 'react'
+import React, { useState } from 'react'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -26,7 +36,8 @@ const MetaMaskImage = styled.img`
 `
 
 const AddToMetamask = (props: any) => {
-  const handleAddMetaMask = async () => {
+  const handleAddMetaMask = async (e) => {
+    e.stopPropagation()
     const tokenSymbol =
       props.row.id.split('/')[1][0].toUpperCase() +
       '-' +
@@ -63,6 +74,8 @@ const AddToMetamask = (props: any) => {
 }
 
 const SubmitButton = (props: any) => {
+  const [open, setOpen] = React.useState(false)
+  const [textFieldValue, setTextFieldValue] = useState('')
   const {
     connection: { userAddress },
     provider,
@@ -70,6 +83,13 @@ const SubmitButton = (props: any) => {
   const history = useHistory()
 
   const chainId = provider?.network?.chainId
+  const query = useQuery<{ pools: Pool[] }>(
+    'challenges',
+    () =>
+      chainId != null &&
+      request(config[chainId as number].divaSubgraph, queryPools)
+  )
+
   if (chainId == null) return null
 
   const diva = new ethers.Contract(
@@ -77,27 +97,70 @@ const SubmitButton = (props: any) => {
     DIVA_ABI,
     provider?.getSigner()
   )
+
   const token =
     provider && new ethers.Contract(props.row.address, ERC20, provider)
-  const handleRedeem = () => {
+  const handleRedeem = (e) => {
+    e.stopPropagation()
     if (props.row.Status === 'Confirmed*') {
-      token?.balanceOf(userAddress).then((bal: BigNumber) => {
-        diva
-          .setFinalReferenceValue(
-            props.id.split('/')[0],
-            parseEther(props.row.Inflection),
-            false
-          )
-          .then((tx) => {
-            tx.wait().then(() => {
-              diva.redeemPositionToken(props.row.address, bal)
-            })
-          })
-      })
+      diva
+        .getPoolParameters(props.id.split('/')[0])
+        .then((pool) => {
+          if (pool.statusFinalReferenceValue === 0) {
+            token
+              ?.balanceOf(userAddress)
+              .then((bal: BigNumber) => {
+                diva
+                  .setFinalReferenceValue(
+                    props.id.split('/')[0],
+                    parseEther(props.row.Inflection),
+                    false
+                  )
+                  .then((tx) => {
+                    tx.wait().then(() => {
+                      diva
+                        .redeemPositionToken(props.row.address, bal)
+                        .catch((err) => {
+                          console.error(err)
+                        })
+                    })
+                  })
+                  .catch((err) => {
+                    console.error(err)
+                  })
+              })
+              .catch((err) => {
+                console.error(err)
+              })
+          } else {
+            token
+              ?.balanceOf(userAddress)
+              .then((bal: BigNumber) => {
+                diva
+                  .redeemPositionToken(props.row.address, bal)
+                  .catch((err) => {
+                    console.error(err)
+                  })
+              })
+              .catch((err) => {
+                console.error(err)
+              })
+          }
+        })
+        .catch((err) => {
+          console.error(err)
+        })
     } else {
-      token?.balanceOf(userAddress).then((bal: BigNumber) => {
-        diva.redeemPositionToken(props.row.address, bal)
-      })
+      token
+        ?.balanceOf(userAddress)
+        .then((bal: BigNumber) => {
+          diva.redeemPositionToken(props.row.address, bal).catch((err) => {
+            console.error(err)
+          })
+        })
+        .catch((err) => {
+          console.error(err)
+        })
     }
   }
 
@@ -106,13 +169,18 @@ const SubmitButton = (props: any) => {
   const statusExpMin = getExpiryMinutesFromNow(
     Number(props.row.StatusTimestamp)
   )
-  if (props.row.Status === 'Submitted' && statusExpMin + 24 * 60 + 5 < 0) {
-    buttonName = 'Redeem'
-  } else if (
-    props.row.Status === 'Challenged ' &&
-    statusExpMin + 48 * 60 + 5 < 0
-  ) {
-    buttonName = 'Redeem'
+  if (props.row.Status === 'Submitted') {
+    if (statusExpMin + 24 * 60 + 5 < 0) {
+      buttonName = 'Redeem'
+    } else {
+      buttonName = 'Challenge'
+    }
+  } else if (props.row.Status === 'Challenged') {
+    if (statusExpMin + 48 * 60 + 5 < 0) {
+      buttonName = 'Redeem'
+    } else {
+      buttonName = 'Challenge'
+    }
   } else if (props.row.Status.startsWith('Confirmed')) {
     buttonName = 'Redeem'
   } else if (
@@ -120,27 +188,79 @@ const SubmitButton = (props: any) => {
     statusExpMin + 24 * 60 * 5 + 5 < 0
   ) {
     buttonName = 'Redeem'
-  } else {
-    buttonName = 'Trade'
+  }
+  const handleOpen = () => {
+    setOpen(true)
   }
 
-  return (
-    <Container>
-      <Button
-        variant="contained"
-        color={buttonName === 'Redeem' ? 'success' : 'primary'}
-        onClick={
-          buttonName === 'Redeem'
-            ? handleRedeem
-            : () => {
-                history.push('../' + `${props.id}`)
-              }
-        }
-      >
-        {buttonName}
-      </Button>
-    </Container>
-  )
+  const handleClose = () => {
+    setOpen(false)
+  }
+
+  if (buttonName === 'Redeem') {
+    return (
+      <Container>
+        <Button
+          variant="contained"
+          color={buttonName === 'Redeem' ? 'success' : 'primary'}
+          onClick={handleRedeem}
+        >
+          {buttonName}
+        </Button>
+      </Container>
+    )
+  } else if (buttonName === 'Challenge') {
+    return (
+      <Container>
+        <Button
+          variant="contained"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleOpen()
+          }}
+        >
+          Challenge
+        </Button>
+        <Dialog open={open} onClose={handleClose}>
+          <DialogContent>
+            <DialogContentText>
+              Please provide a value for this option
+            </DialogContentText>
+          </DialogContent>
+
+          <DialogActions>
+            <TextField
+              defaultValue={textFieldValue}
+              onChange={(e) => {
+                setTextFieldValue(e.target.value)
+              }}
+            />
+            <Button
+              color="primary"
+              type="submit"
+              onClick={(e) => {
+                if (diva != null) {
+                  diva
+                    .challengeFinalReferenceValue(
+                      props.id.split('/')[0],
+                      parseEther(textFieldValue)
+                    )
+                    .catch((err) => {
+                      console.error(err)
+                    })
+                }
+                handleClose()
+              }}
+            >
+              Challenge
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    )
+  } else {
+    return <></>
+  }
 }
 
 const columns: GridColDef[] = [
@@ -255,7 +375,7 @@ export function MyPositions() {
     const challengedPeriod = new Date(
       parseInt(val.expiryDate) * 1000
     ).setMinutes(expiryDate.getMinutes() + 2 * 24 * 60 + 5)
-    let finalValue = ''
+    let finalValue = '-'
     let status = val.statusFinalReferenceValue
     if (Date.now() > fallbackPeriod) {
       status = 'Fallback'
@@ -264,7 +384,7 @@ export function MyPositions() {
       finalValue = '-'
     } else if (val.statusFinalReferenceValue === 'Open') {
       if (now.getTime() > unchallengedPeriod) {
-        finalValue = formatUnits(val.inflection)
+        finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
         status = 'Confirmed*'
       } else if (
         now.getTime() > expiryDate.getTime() &&
@@ -279,10 +399,10 @@ export function MyPositions() {
       val.statusFinalReferenceValue === 'Challenged' &&
       Date.now() > challengedPeriod
     ) {
-      finalValue = formatUnits(val.inflection)
+      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
       status = 'Confirmed*'
     } else {
-      finalValue = formatUnits(val.finalReferenceValue)
+      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
       status = val.statusFinalReferenceValue
     }
     const shared = {
@@ -339,7 +459,7 @@ export function MyPositions() {
       {
         ...shared,
         id: `${val.id}/short`,
-        Id: 'L-' + val.id,
+        Id: 'S-' + val.id,
         address: val.shortToken,
         TVL:
           parseFloat(
@@ -388,7 +508,7 @@ export function MyPositions() {
       }}
     >
       <SideMenu />
-      <PoolsTable rows={filteredRows} columns={columns} disableRowClick />
+      <PoolsTable rows={filteredRows} columns={columns} />
     </Stack>
   ) : (
     <div

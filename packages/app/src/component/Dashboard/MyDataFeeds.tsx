@@ -18,23 +18,23 @@ import { SideMenu } from './SideMenu'
 import PoolsTable, { CoinImage } from '../PoolsTable'
 import DIVA_ABI from '../../abi/DIVA.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { useWallet } from '@web3-ui/hooks'
-import {
-  GrayText,
-  LabelGrayStyle,
-  LabelStyleDiv,
-} from '../Trade/Orders/UiStyles'
+import { GrayText } from '../Trade/Orders/UiStyles'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
-  const statusTimestamp = parseInt(props.row.statusTimestamp)
-
-  if (props.row.Status === 'Expired') {
+  const statusTimestamp = parseInt(props.row.StatusTimestamp)
+  const expiryDate = new Date(parseInt(props.row.Expiry) * 1000)
+  const now = new Date()
+  if (
+    expiryDate.getTime() <= now.getTime() &&
+    props.row.Status.toLowerCase() === 'open'
+  ) {
     const minUntilExp = getExpiryMinutesFromNow(
       expTimestamp + 24 * 3600 - 5 * 60
     )
@@ -138,9 +138,11 @@ const SubmitCell = (props: any) => {
   const handleClose = () => {
     setOpen(false)
   }
-
+  const expiryDate = new Date(parseInt(props.row.Expiry) * 1000)
+  const now = new Date()
   const enabled =
-    (props.row.Status === 'Expired' &&
+    (expiryDate.getTime() <= now.getTime() &&
+      props.row.Status.toLowerCase() === 'open' &&
       getExpiryMinutesFromNow(props.row.Expiry) + 24 * 60 - 5 > 0) ||
     (props.row.Status === 'Challenged' &&
       getExpiryMinutesFromNow(props.row.StatusTimestamp) + 48 * 60 - 5 > 0)
@@ -169,11 +171,15 @@ const SubmitCell = (props: any) => {
             type="submit"
             onClick={() => {
               if (diva != null) {
-                diva.setFinalReferenceValue(
-                  props.id.split('/')[0],
-                  parseEther(textFieldValue),
-                  true
-                )
+                diva
+                  .setFinalReferenceValue(
+                    props.id.split('/')[0],
+                    parseEther(textFieldValue),
+                    true
+                  )
+                  .catch((err) => {
+                    console.error(err)
+                  })
               }
               handleClose()
             }}
@@ -234,6 +240,15 @@ const columns: GridColDef[] = [
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
+    renderCell: (props: any) => (
+      <Tooltip
+        title={props.row.Challenges.map((challenge) => {
+          return '[' + formatEther(challenge.proposedFinalReferenceValue) + '] '
+        })}
+      >
+        <span className="table-cell-trucate">{props.row.Status}</span>
+      </Tooltip>
+    ),
   },
   {
     field: 'subPeriod',
@@ -281,6 +296,7 @@ export function MyDataFeeds() {
       Sell: 'TBD',
       Buy: 'TBD',
       MaxYield: 'TBD',
+      Challenges: val.challenges,
     }
 
     const payOff = {
@@ -288,13 +304,8 @@ export function MyDataFeeds() {
       Inflection: parseInt(val.inflection) / 1e18,
       Cap: parseInt(val.cap) / 1e18,
     }
-    const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
-    const now = new Date()
-    const Status =
-      expiryDate.getTime() <= now.getTime() &&
-      val.statusFinalReferenceValue.toLowerCase() === 'open'
-        ? 'Expired'
-        : val.statusFinalReferenceValue
+
+    const Status = val.statusFinalReferenceValue
     return [
       ...acc,
       {
@@ -322,7 +333,7 @@ export function MyDataFeeds() {
         finalValue:
           val.statusFinalReferenceValue === 'Open'
             ? '-'
-            : formatUnits(val.finalReferenceValue),
+            : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
       },
     ]
   }, [] as GridRowModel[])
