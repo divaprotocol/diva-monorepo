@@ -1,7 +1,4 @@
-on:
-  pull_request:
-    paths:
-      - packages/*-subgraph/**
+on: pull_request
 name: Deploy Staging subgraph
 jobs:
   pr:
