@@ -323,7 +323,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                       .approve(diva?.address, parseEther(textFieldValue))
                       .then((tx: any) => {
                         return tx.wait()
-                      }, setLoading(false))
+                      })
                       .then(() => {
                         return token.allowance(account, diva?.address)
                       })
