@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: ropsten
     source:
-      address: "0x6455A2Ae3c828c4B505b9217b51161f6976bE7cf"
+      address: "0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf"
       abi: DivaDiamond
-      startBlock: 11784187
+      startBlock: 12085615
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -16,11 +16,17 @@ dataSources:
       entities:
         - Pool
         - Challenge
+        - CollateralToken
+        - FeeRecipient
+        - FeeRecipientCollateralToken
+        - PositionToken
       abis:
         - name: DivaDiamond
           file: ./abis/DivaDiamond.json
         - name: Erc20Token
           file: ./abis/Erc20Token.json
+        - name: PositionTokenABI
+          file: ./abis/PositionTokenABI.json
       eventHandlers:
         - event: LiquidityAdded(indexed uint256,indexed address,uint256)
           handler: handleLiquidityAdded
@@ -30,4 +36,10 @@ dataSources:
           handler: handlePoolIssued
         - event: StatusChanged(indexed uint8,indexed address,indexed uint256,uint256)
           handler: handleStatusChanged
+        - event: FeeClaimAllocated(indexed uint256,indexed address,uint256)
+          handler: handleFeeClaimAllocated
+        - event: FeesClaimed(indexed address,indexed address,uint256)
+          handler: handleFeesClaimed
+        - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
+          handler: handleFeeClaimTransferred
       file: ./src/mapping.ts

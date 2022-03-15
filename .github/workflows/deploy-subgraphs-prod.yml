@@ -2,6 +2,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - packages/*-subgraph/**
+
 name: Deploy production subgraph
 jobs:
   pr:
