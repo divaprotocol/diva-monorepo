@@ -316,7 +316,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                       .approve(diva?.address, parseEther(textFieldValue))
                       .then((tx: any) => {
                         return tx.wait()
-                      }, setLoading(false))
+                      })
                       .then(() => {
                         return token.allowance(account, diva?.address)
                       })
