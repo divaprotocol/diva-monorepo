@@ -68,6 +68,76 @@ export const queryPools = (page: number) => gql`
   }
 `
 
+export const queryMarkets = (id: string) => gql`
+  {
+    pools( where: { statusFinalReferenceValue_not:"Confirmed" id_gt: "${id}" } ) {
+      id
+      referenceAsset
+      inflection
+      cap
+      floor
+      supplyShortInitial
+      supplyLongInitial
+      supplyShort
+      supplyLong
+      expiryDate
+      collateralToken
+      collateralSymbol
+      collateralTokenName
+      collateralDecimals
+      collateralBalanceShortInitial
+      collateralBalanceLongInitial
+      collateralBalanceShort
+      collateralBalanceLong
+      shortToken
+      longToken
+      finalReferenceValue
+      statusFinalReferenceValue
+      redemptionAmountLongToken
+      redemptionAmountShortToken
+      statusTimestamp
+      dataFeedProvider
+      redemptionFee
+      settlementFee
+    }
+  }
+`
+
+export const queryDatafeed = (address: string, id: string) => gql`
+  {
+    pools(where: { dataFeedProvider: "${address}" id_gt: "${id}" } ) {
+      id
+      referenceAsset
+      inflection
+      cap
+      floor
+      supplyShortInitial
+      supplyLongInitial
+      supplyShort
+      supplyLong
+      expiryDate
+      collateralToken
+      collateralSymbol
+      collateralTokenName
+      collateralDecimals
+      collateralBalanceShortInitial
+      collateralBalanceLongInitial
+      collateralBalanceShort
+      collateralBalanceLong
+      shortToken
+      longToken
+      finalReferenceValue
+      statusFinalReferenceValue
+      redemptionAmountLongToken
+      redemptionAmountShortToken
+      statusTimestamp
+      dataFeedProvider
+      redemptionFee
+      settlementFee
+    }
+  }
+`
+
 export const queryPool = (poolId: number) => gql`
   {
     pool(id: ${poolId}) {

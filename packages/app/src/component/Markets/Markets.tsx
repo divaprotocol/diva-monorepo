@@ -4,7 +4,7 @@ import { formatUnits } from 'ethers/lib/utils'
 import { getDateTime } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
-import { Pool, queryPools } from '../../lib/queries'
+import { Pool, queryMarkets } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { config } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
@@ -69,15 +69,28 @@ const columns: GridColDef[] = [
 export default function Markets() {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
-  const rowCount = 200 // TODO: hard coded until we update the graph
   const [page, setPage] = useState(0)
+  const query = useQuery<{ pools: Pool[] }>(`pools-${chainId}`, async () => {
+    let res: Pool[] = []
+    if (chainId != null) {
+      let lastId = '0'
+      let lastRes: Pool[]
+      while (lastRes == null || lastRes.length > 0) {
+        const result = await request(
+          config[chainId as number].divaSubgraph,
+          queryMarkets(lastId)
+        )
 
-  const query = useQuery<{ pools: Pool[] }>(
-    `pools-${chainId}-${page}`,
-    () =>
-      chainId != null &&
-      request(config[chainId as number].divaSubgraph, queryPools(page))
-  )
+        if (result.pools.length > 0)
+          lastId = result.pools[result.pools?.length - 1].id
+
+        lastRes = result.pools
+        res = res.concat(lastRes)
+      }
+    }
+    return { pools: res }
+  })
+
   const pools = query.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
@@ -189,7 +202,7 @@ export default function Markets() {
       columns={columns}
       rows={filteredRows}
       page={page}
-      rowCount={rowCount}
+      rowCount={filteredRows.length}
       onPageChange={(page) => setPage(page)}
     />
   )

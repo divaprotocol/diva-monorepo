@@ -21,7 +21,10 @@ import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
-import { Pool, queryPools } from '../../lib/queries'
+import {
+  Pool,
+  queryDatafeed,
+} from '../../lib/queries'
 import { request } from 'graphql-request'
 import { useWallet } from '@web3-ui/hooks'
 import {
@@ -257,19 +260,33 @@ export function MyDataFeeds() {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId
   const userAddress = wallet?.connection?.userAddress
+  const [page, setPage] = useState(0)
 
   const query = useQuery<{ pools: Pool[] }>(
-    'pools',
-    () =>
-      chainId != null &&
-      request(config[chainId as number].divaSubgraph, queryPools(0))
+    `pools-${userAddress}`,
+    async () => {
+      let res: Pool[] = []
+      if (chainId != null) {
+        let lastId = '0'
+        let lastRes: Pool[]
+        while (lastRes == null || lastRes.length > 0) {
+          const result = await request(
+            config[chainId as number].divaSubgraph,
+            queryDatafeed(userAddress, lastId)
+          )
+
+          if (result.pools.length > 0)
+            lastId = result.pools[result.pools?.length - 1].id
+
+          lastRes = result.pools
+          res = res.concat(lastRes)
+        }
+      }
+      return { pools: res }
+    }
   )
 
-  const pools =
-    query?.data?.pools?.filter(
-      (pool: Pool) =>
-        pool.dataFeedProvider.toLowerCase() === userAddress?.toLowerCase()
-    ) || ([] as Pool[])
+  const pools = query?.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,
@@ -335,7 +352,13 @@ export function MyDataFeeds() {
       }}
     >
       <SideMenu />
-      <PoolsTable page={0} disableRowClick columns={columns} rows={rows} />
+      <PoolsTable
+        page={page}
+        disableRowClick
+        columns={columns}
+        rows={rows}
+        onPageChange={(page) => setPage(page)}
+      />
     </Stack>
   ) : (
     <div
