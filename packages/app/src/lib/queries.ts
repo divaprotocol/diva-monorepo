@@ -4,6 +4,7 @@ import { BigNumber } from 'ethers'
 export type Pool = {
   cap: string
   capacity: BigNumber
+  challenges: Challenge[]
   collateralBalanceLong: string
   collateralBalanceLongInitial: string
   collateralBalanceShort: string
@@ -31,6 +32,7 @@ export type Pool = {
   supplyLongInitial: string
   supplyShort: string
   supplyShortInitial: string
+  createdBy: string
 }
 
 export const queryPools = (page: number) => gql`
@@ -111,6 +113,9 @@ export const queryDatafeed = (address: string, id: string) => gql`
       inflection
       cap
       floor
+      challenges {
+        proposedFinalReferenceValue
+      }
       supplyShortInitial
       supplyLongInitial
       supplyShort
@@ -134,6 +139,7 @@ export const queryDatafeed = (address: string, id: string) => gql`
       dataFeedProvider
       redemptionFee
       settlementFee
+      createdBy
     }
   }
 `
@@ -228,3 +234,17 @@ export const queryWhitelist = gql`
     }
   }
 `
+export const queryChallenge = (poolId: number) => gql`
+  {
+    challenges(where: { pool: "${poolId}" }) {
+      proposedFinalReferenceValue
+    }
+  }
+`
+export type Challenges = {
+  challenges: Challenge[]
+}
+
+export type Challenge = {
+  proposedFinalReferenceValue: BigNumber
+}

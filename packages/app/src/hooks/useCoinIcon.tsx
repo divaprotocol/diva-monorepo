@@ -16,17 +16,6 @@ export function useCoinIcon(_symbol?: string) {
       address = tokens.data['wbtc']
     }
 
-    if (address === undefined) return ''
-
-    const request = new XMLHttpRequest()
-    request.open('GET', `https://tokens.1inch.exchange/${address}.png`, false)
-    request.send()
-    if (request.status === 200) {
-      return `https://tokens.1inch.exchange/${address}.png`
-    } else {
-      return ''
-    }
-  } else {
-    return ''
+    if (address != null) return `https://tokens.1inch.exchange/${address}.png`
   }
 }

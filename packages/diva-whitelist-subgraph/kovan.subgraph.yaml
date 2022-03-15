@@ -1,0 +1,47 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: DIVAWhitelist
+    network: kovan
+    source:
+      address: "0xe3343218CAa73AE523D40936D64E7f335AfDe8f9"
+      abi: DIVAWhitelist
+      startBlock: 29502316
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - DataProviderAdded
+        - DataProviderDeleted
+        - DataProviderNameUpdated
+        - DataFeedAdded
+        - DataFeedDeactivated
+        - DataFeedActivated
+        - CollateralTokenAdded
+        - CollateralTokenDeleted
+      abis:
+        - name: DIVAWhitelist
+          file: ./abis/DIVAWhitelist.json
+        - name: Erc20Token
+          file: ./abis/Erc20Token.json
+      eventHandlers:
+        - event: DataProviderAdded(indexed address)
+          handler: handleDataProviderAdded
+        - event: DataProviderDeleted(indexed address)
+          handler: handleDataProviderDeleted
+        - event: DataProviderNameUpdated(indexed address)
+          handler: handleDataProviderNameUpdated
+        - event: DataFeedAdded(indexed address,indexed uint256)
+          handler: handleDataFeedAdded
+        - event: DataFeedDeactivated(indexed address,indexed uint256)
+          handler: handleDataFeedDeactivated
+        - event: DataFeedActivated(indexed address,indexed uint256)
+          handler: handleDataFeedActivated   
+        - event: CollateralTokenAdded(indexed address)
+          handler: handleCollateralTokenAdded
+        - event: CollateralTokenDeleted(indexed address)
+          handler: handleCollateralTokenDeleted                 
+      file: ./src/mapping.ts

@@ -6,10 +6,11 @@ import {
   getEtherscanLink,
   EtherscanLinkType,
 } from '../../Util/getEtherscanLink'
-import { CoinImage } from '../PoolsTable'
 import Tooltip from '@mui/material/Tooltip'
 import { useWallet } from '@web3-ui/hooks'
 import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { CoinIconPair } from '../CoinIcon'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -39,8 +40,8 @@ const MetaMaskImage = styled.img`
 
 const AssetPriceUsd = styled.div`
   font-weight: bold;
+  padding-left: 15px;
 `
-
 export default function OptionHeader(optionData: {
   TokenAddress: string
   ReferenceAsset: string
@@ -87,16 +88,18 @@ export default function OptionHeader(optionData: {
 
     return () => setUnderlyingAssetPrice(undefined)
   }, [optionData.ReferenceAsset])
+  const shortenTokenAddress = getShortenedAddress(optionData.TokenAddress)
 
   return (
     <AppHeader>
       <Container>
-        <CoinImage assetName={headerTitle} />
+        <CoinIconPair assetName={headerTitle} />
         <OptionTitle>{headerTitle}</OptionTitle>
+
+        {underlyingAssetPrice && (
+          <AssetPriceUsd>{underlyingAssetPrice}</AssetPriceUsd>
+        )}
       </Container>
-      {underlyingAssetPrice && (
-        <AssetPriceUsd>{underlyingAssetPrice}</AssetPriceUsd>
-      )}
       <Container>
         <Link
           style={{ color: 'gray' }}
@@ -105,11 +108,11 @@ export default function OptionHeader(optionData: {
           target="_blank"
           href={getEtherscanLink(
             chainId,
-            optionData.TokenAddress,
+            shortenTokenAddress,
             EtherscanLinkType.ADDRESS
           )}
         >
-          {optionData.TokenAddress}
+          {shortenTokenAddress}
         </Link>
         <IconButton
           onClick={() => navigator.clipboard.writeText(optionData.TokenAddress)}

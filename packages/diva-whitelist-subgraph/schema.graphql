@@ -1,0 +1,21 @@
+# Includes only whitelisted data providers
+type DataProvider @entity {
+  id: ID! # data provider address
+  name: String!
+  dataFeeds: [DataFeed!] @derivedFrom(field: "dataProvider")
+}
+
+type DataFeed @entity {
+  id: ID!
+  referenceAsset: String!
+  referenceAssetUnified: String! # BTC/USD for XBT/USD and BTC-USD, for instance 
+  dataProvider: DataProvider! 
+  active: Boolean!
+}
+
+type CollateralToken @entity {
+  id: ID!
+  name: String!
+  symbol: String!
+  decimals: Int!
+}

@@ -78,6 +78,7 @@ export const buylimitOrder = async (orderData) => {
         )}`
       )
     }
+    return resp
   } catch (error) {
     console.error('error ' + JSON.stringify(error))
     alert('You need to sign the order')

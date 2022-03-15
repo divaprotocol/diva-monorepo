@@ -6,6 +6,8 @@ interface TradeOptionState {
   userAccount: string
   responseBuy: []
   responseSell: []
+  optionSellOrdersTotal: number
+  optionBuyOrdersTotal: number
 }
 
 const initialState: TradeOptionState = {
@@ -14,6 +16,8 @@ const initialState: TradeOptionState = {
   userAccount: '',
   responseBuy: [],
   responseSell: [],
+  optionSellOrdersTotal: 0.0,
+  optionBuyOrdersTotal: 0.0,
 }
 
 export const tradeOptionSlice = createSlice({
@@ -39,6 +43,14 @@ export const tradeOptionSlice = createSlice({
     setAllOptionsLiquidity: (state, action: PayloadAction<[]>) => {
       state.allOptionsLiquidity = action.payload
     },
+
+    setOptionSellOrdersTotal: (state, action: PayloadAction<number>) => {
+      state.optionSellOrdersTotal = action.payload
+    },
+
+    setOptionBuyOrdersTotal: (state, action: PayloadAction<number>) => {
+      state.optionBuyOrdersTotal = action.payload
+    },
   },
 })
 
@@ -48,4 +60,6 @@ export const { setMetamaskAccount } = tradeOptionSlice.actions
 export const { setResponseBuy } = tradeOptionSlice.actions
 export const { setResponseSell } = tradeOptionSlice.actions
 export const { setAllOptionsLiquidity } = tradeOptionSlice.actions
+export const { setOptionSellOrdersTotal } = tradeOptionSlice.actions
+export const { setOptionBuyOrdersTotal } = tradeOptionSlice.actions
 export default tradeOptionSlice.reducer

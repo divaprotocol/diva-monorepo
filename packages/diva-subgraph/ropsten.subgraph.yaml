@@ -1,0 +1,33 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: DivaDiamond
+    network: ropsten
+    source:
+      address: "0x6455A2Ae3c828c4B505b9217b51161f6976bE7cf"
+      abi: DivaDiamond
+      startBlock: 11784187
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Challenge
+      abis:
+        - name: DivaDiamond
+          file: ./abis/DivaDiamond.json
+        - name: Erc20Token
+          file: ./abis/Erc20Token.json
+      eventHandlers:
+        - event: LiquidityAdded(indexed uint256,indexed address,uint256)
+          handler: handleLiquidityAdded
+        - event: LiquidityRemoved(indexed uint256,indexed address,uint256)
+          handler: handleLiquidityRemoved
+        - event: PoolIssued(indexed uint256,indexed address,uint256)
+          handler: handlePoolIssued
+        - event: StatusChanged(indexed uint8,indexed address,indexed uint256,uint256)
+          handler: handleStatusChanged
+      file: ./src/mapping.ts

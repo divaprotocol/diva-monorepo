@@ -1,0 +1,32 @@
+on:
+  push:
+    branches:
+      - main
+name: Deploy production subgraph
+jobs:
+  pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Cache Modules
+        id: cache-modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+            node_modules
+          key: ${{ hashFiles('**/yarn.lock', '**/package.json', 'yarn.lock') }}
+
+      - name: Install dependencies
+        if: steps.cache-modules.outputs.cache-hit != 'true'
+        run: yarn
+      - name: Authenticate the graph and deploy
+        env: 
+          THEGRAPH_ACCESS_TOKEN: ${{ secrets.THEGRAPH_ACCESS_TOKEN_TEST }}
+        run: |
+          yarn graph:auth
+          yarn turbo run deploy --scope="@diva/*-subgraph"
