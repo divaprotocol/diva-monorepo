@@ -8,35 +8,60 @@ type Challenge @entity {
 type Pool @entity {
   id: ID! # original -> poolId
   referenceAsset: String!
+  floor: BigInt!
   inflection: BigInt!
   cap: BigInt!
-  floor: BigInt!
-  supplyShortInitial: BigInt!
-  supplyLongInitial: BigInt!
+  supplyInitial: BigInt!
   supplyShort: BigInt!
   supplyLong: BigInt!
-  expiryDate: BigInt!
-  collateralToken: Bytes!
-  collateralTokenName: String!
-  collateralDecimals: Int!
-  collateralSymbol: String!
+  expiryTime: BigInt!
+  collateralToken: CollateralToken!
   collateralBalanceShortInitial: BigInt!
   collateralBalanceLongInitial: BigInt!
-  collateralBalanceShort: BigInt!
-  collateralBalanceLong: BigInt!
+  collateralBalance: BigInt!
 
-  shortToken: Bytes!
-  longToken: Bytes!
+  shortToken: PositionToken!
+  longToken: PositionToken!
   finalReferenceValue: BigInt!
   statusFinalReferenceValue: String!
   redemptionAmountLongToken: BigInt!
   redemptionAmountShortToken: BigInt!
   statusTimestamp: BigInt!
-  dataFeedProvider: Bytes!
+  dataProvider: Bytes!
   redemptionFee: BigInt!
   settlementFee: BigInt!
 
   createdBy: Bytes!
+  createdAt: BigInt!
   capacity: BigInt!
   challenges: [Challenge!] @derivedFrom(field: "pool")
+}
+
+type CollateralToken @entity {
+  id: ID! # original -> collateral token address
+  name: String!
+  decimals: Int!
+  symbol: String!
+  feeRecipients: [FeeRecipientCollateralToken!] @derivedFrom(field: "collateralToken")
+}
+
+type FeeRecipient @entity {
+  id: ID! # feeRecipient address
+  collateralTokens: [FeeRecipientCollateralToken!] @derivedFrom(field: "feeRecipient")
+}
+
+type FeeRecipientCollateralToken @entity {
+  id: ID! # Set to `${feeRecipient.id}-${collateralToken.id}`
+  feeRecipient: FeeRecipient!
+  collateralToken: CollateralToken!
+  amount: BigInt!
+}
+
+type PositionToken @entity {
+  id: ID! # Address
+  name: String!
+  symbol: String!
+  decimals: Int!
+  pool: Pool!
+  owner: Bytes!
 }
