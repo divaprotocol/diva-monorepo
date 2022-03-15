@@ -35,9 +35,9 @@ export type Pool = {
   createdBy: string
 }
 
-export const queryPools = (page: number) => gql`
+export const queryPools = () => gql`
   {
-    pools(skip: ${page * 100}) {
+    pools {
       id
       referenceAsset
       inflection

@@ -84,13 +84,6 @@ const SubmitButton = (props: any) => {
   const history = useHistory()
 
   const chainId = provider?.network?.chainId
-  const query = useQuery<{ pools: Pool[] }>(
-    'challenges',
-    () =>
-      chainId != null &&
-      request(config[chainId as number].divaSubgraph, queryPools)
-  )
-
   if (chainId == null) return null
 
   const diva = new ethers.Contract(
