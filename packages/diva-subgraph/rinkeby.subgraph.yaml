@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: rinkeby
     source:
-      address: "0xa1fa77354D7810A6355583b566E5adB29C3f7733"
+      address: "0x5EB926AdbE39029be962acD8D27130073C50A0e5"
       abi: DivaDiamond
-      startBlock: 10328465
+      startBlock: 9967015
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -16,17 +16,11 @@ dataSources:
       entities:
         - Pool
         - Challenge
-        - CollateralToken
-        - FeeRecipient
-        - FeeRecipientCollateralToken
-        - PositionToken
       abis:
         - name: DivaDiamond
           file: ./abis/DivaDiamond.json
         - name: Erc20Token
           file: ./abis/Erc20Token.json
-        - name: PositionTokenABI
-          file: ./abis/PositionTokenABI.json
       eventHandlers:
         - event: LiquidityAdded(indexed uint256,indexed address,uint256)
           handler: handleLiquidityAdded
@@ -36,10 +30,4 @@ dataSources:
           handler: handlePoolIssued
         - event: StatusChanged(indexed uint8,indexed address,indexed uint256,uint256)
           handler: handleStatusChanged
-        - event: FeeClaimAllocated(indexed uint256,indexed address,uint256)
-          handler: handleFeeClaimAllocated
-        - event: FeesClaimed(indexed address,indexed address,uint256)
-          handler: handleFeesClaimed
-        - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
-          handler: handleFeeClaimTransferred
       file: ./src/mapping.ts
