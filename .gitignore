@@ -28,3 +28,11 @@ yarn-error.log*
 
 
 generated
+
+## hardhat specific
+
+cache
+artifacts
+.env
+coverage.json
+coverage
