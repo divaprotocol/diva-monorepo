@@ -25,7 +25,7 @@ import { Pool } from '../../../lib/queries'
 import { BigNumber } from '@0x/utils'
 import { sellMarketOrder } from '../../../Orders/SellMarket'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import ERC20_ABI from '../../../abi/ERC20.json'
+import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { useWallet } from '@web3-ui/hooks'

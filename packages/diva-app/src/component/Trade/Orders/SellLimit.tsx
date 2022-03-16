@@ -22,7 +22,7 @@ import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
 import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import { useWallet } from '@web3-ui/hooks'
-import ERC20_ABI from '../../../abi/ERC20.json'
+import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 // eslint-disable-next-line @typescript-eslint/no-var-requires

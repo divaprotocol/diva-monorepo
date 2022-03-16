@@ -20,7 +20,7 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { useCoinIcon } from '../../hooks/useCoinIcon'
-import ERC20 from '../../abi/ERC20.json'
+import ERC20 from '@diva/contracts/abis/erc20.json'
 import Button from '@mui/material/Button'
 import { useWallet } from '@web3-ui/hooks'
 
