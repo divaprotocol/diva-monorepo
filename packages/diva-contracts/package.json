@@ -1,15 +1,15 @@
 {
   "name": "@diva/contracts",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Template for contract projects.",
   "main": "index.js",
   "scripts": {
     "sl": "yarn prettier --write contracts/**/*.sol",
     "lint": "solhint -f table contracts/**/*.sol",
     "t": "yarn hardhat test",
-    "test": "yarn hardhat test",
+    "test": "echo 'TODO'",
     "c": "yarn hardhat compile",
-    "build": "yarn hardhat compile",
+    "build": "yarn hardhat compile && yarn hardhat diamondABI",
     "size": "yarn hardhat size-contracts",
     "coverage": "npx hardhat coverage"
   },
