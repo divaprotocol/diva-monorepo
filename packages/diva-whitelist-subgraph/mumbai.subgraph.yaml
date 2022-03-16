@@ -6,9 +6,9 @@ dataSources:
     name: DIVAWhitelist
     network: mumbai
     source:
-      address: "0xcA65fcD37fA8BA5f79f5CB3E68F4fCD426ccE5ef"
+      address: "0x2A5c18f001719f4663ab8d3E65E3E54182376B20"
       abi: DIVAWhitelist
-      startBlock: 24255214
+      startBlock: 25521196
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5

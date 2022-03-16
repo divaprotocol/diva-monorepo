@@ -144,7 +144,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_address",
+        "name": "_dataProvider",
         "type": "address"
       },
       {
@@ -175,7 +175,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_address",
+        "name": "_dataProvider",
         "type": "address"
       },
       {
@@ -220,13 +220,25 @@
     "inputs": [
       {
         "internalType": "address[]",
-        "name": "_address",
+        "name": "_dataProvider",
         "type": "address[]"
       },
       {
-        "internalType": "string[]",
-        "name": "_name",
-        "type": "string[]"
+        "components": [
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "publicTrigger",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct IWhitelist.DataProvider[]",
+        "name": "_dataProviderInfo",
+        "type": "tuple[]"
       }
     ],
     "name": "addDataProviders",
@@ -314,7 +326,7 @@
       },
       {
         "internalType": "bool",
-        "name": "whitelisted",
+        "name": "publicTrigger",
         "type": "bool"
       }
     ],
@@ -325,7 +337,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_address",
+        "name": "_dataProvider",
         "type": "address"
       },
       {
@@ -356,7 +368,7 @@
     "inputs": [
       {
         "internalType": "address[]",
-        "name": "_address",
+        "name": "_dataProvider",
         "type": "address[]"
       }
     ],
@@ -388,7 +400,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_address",
+        "name": "_dataProvider",
         "type": "address"
       },
       {
@@ -439,7 +451,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_address",
+        "name": "_dataProvider",
         "type": "address"
       }
     ],
@@ -485,7 +497,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_address",
+        "name": "_dataProvider",
         "type": "address"
       }
     ],
@@ -500,7 +512,7 @@
           },
           {
             "internalType": "bool",
-            "name": "whitelisted",
+            "name": "publicTrigger",
             "type": "bool"
           }
         ],
@@ -549,7 +561,7 @@
     "inputs": [
       {
         "internalType": "address[]",
-        "name": "_address",
+        "name": "_dataProvider",
         "type": "address[]"
       },
       {

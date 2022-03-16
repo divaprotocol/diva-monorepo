@@ -6,9 +6,9 @@ dataSources:
     name: DIVAWhitelist
     network: ropsten
     source:
-      address: "0xc7B292b054A53C661dCEbC704F6fc2b1D8073cf7"
+      address: "0x2A5c18f001719f4663ab8d3E65E3E54182376B20"
       abi: DIVAWhitelist
-      startBlock: 11882216
+      startBlock: 12088068
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
