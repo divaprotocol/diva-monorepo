@@ -26,6 +26,7 @@ yarn-error.log*
 
 .turbo
 
+**/abis/*
 
 
 generated
