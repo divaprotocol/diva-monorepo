@@ -23,10 +23,10 @@ dataSources:
         - CollateralTokenAdded
         - CollateralTokenDeleted
       abis:
-        - name: DIVAWhitelist
-          file: ./abis/DIVAWhitelist.json
         - name: Erc20Token
-          file: ./abis/Erc20Token.json
+          file: ../diva-contracts/abis/erc20.json
+        - name: DIVAWhitelist
+          file: ./DIVAWhitelist.json
       eventHandlers:
         - event: DataProviderAdded(indexed address)
           handler: handleDataProviderAdded

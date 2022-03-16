@@ -31,6 +31,9 @@ yarn-error.log*
 
 generated
 
+!.gitignore
+!.gitkeep
+
 ## hardhat specific
 
 cache

@@ -22,11 +22,11 @@ dataSources:
         - PositionToken
       abis:
         - name: DivaDiamond
-          file: ./abis/DivaDiamond.json
+          file: ../diva-contracts/abis/diamond.json
         - name: Erc20Token
-          file: ./abis/Erc20Token.json
+          file: ../diva-contracts/abis/erc20.json
         - name: PositionTokenABI
-          file: ./abis/PositionTokenABI.json
+          file: ../diva-contracts/abis/position-token.json
       eventHandlers:
         - event: LiquidityAdded(indexed uint256,indexed address,uint256)
           handler: handleLiquidityAdded
