@@ -2,6 +2,7 @@
 type DataProvider @entity {
   id: ID! # data provider address
   name: String!
+  publicTrigger: Boolean!
   dataFeeds: [DataFeed!] @derivedFrom(field: "dataProvider")
 }
 
