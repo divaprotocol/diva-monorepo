@@ -51,7 +51,6 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [decimal, setDecimal] = useState(18)
   const tokenBalance = useErcBalance(pool ? pool!.collateralToken : undefined)
   const [loading, setLoading] = useState(false)
-  const [add, setAdd] = useState('ADD')
 
   const {
     provider,
@@ -333,6 +332,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                           parseEther(textFieldValue)
                         )
                       })
+                      .then(setLoading(false))
                       .catch((err: any) => {
                         console.error(err)
                         setLoading(false)
@@ -345,7 +345,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                     minHeight: theme.spacing(5),
                   }}
                 >
-                  {add}
+                  ADD
                 </Button>
               )}
             </div>
