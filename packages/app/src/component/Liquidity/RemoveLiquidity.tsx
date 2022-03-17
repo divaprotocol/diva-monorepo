@@ -274,6 +274,10 @@ export const RemoveLiquidity = ({ pool, diva, symbol }: Props) => {
                       window.location.pathname.split('/')[1],
                       parseEther(longToken)
                     )
+                    .then((tx: any) => {
+                      setLoading(false)
+                      return tx.wait()
+                    })
                     .catch((err: any) => {
                       console.error(err)
                       setLoading(false)
