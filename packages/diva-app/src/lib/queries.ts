@@ -54,11 +54,8 @@ export const queryPools = gql`
       collateralToken
       collateralSymbol
       collateralTokenName
-      collateralDecimals
       collateralBalanceShortInitial
       collateralBalanceLongInitial
-      collateralBalanceShort
-      collateralBalanceLong
       shortToken
       longToken
       finalReferenceValue
