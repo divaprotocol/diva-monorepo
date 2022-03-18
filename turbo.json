@@ -2,10 +2,28 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "build/**",
+        "generated/**"
+      ]
     },
     "lint": {
       "outputs": []
+    },
+    "graph:auth": {},
+    "deploy": {
+      "dependsOn": [
+        "build",
+        "graph:auth"
+      ]
+    },
+    "deploy-staging": {
+      "dependsOn": [
+        "build",
+        "graph:auth"
+      ]
     },
     "test": {},
     "dev": {

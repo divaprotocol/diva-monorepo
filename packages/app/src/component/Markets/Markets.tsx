@@ -1,22 +1,26 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
-import PoolsTable, { CoinImage, PayoffCell } from '../PoolsTable'
+import PoolsTable, { PayoffCell } from '../PoolsTable'
 import { formatUnits } from 'ethers/lib/utils'
 import { getDateTime } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import { Pool, queryPools } from '../../lib/queries'
 import { request } from 'graphql-request'
-import { config } from '../../constants'
+import { config, createdByFilterAddressForMarket } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
+import styled from '@emotion/styled'
+import { CoinIconPair } from '../CoinIcon'
 
 const columns: GridColDef[] = [
   {
     field: 'Id',
     align: 'left',
-    renderHeader: (header) => <GrayText>{header.field}</GrayText>,
+    renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
   },
   {
@@ -25,7 +29,7 @@ const columns: GridColDef[] = [
     disableReorder: true,
     disableColumnMenu: true,
     headerName: '',
-    renderCell: (cell) => <CoinImage assetName={cell.value} />,
+    renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
   },
   {
     field: 'Underlying',
@@ -42,7 +46,7 @@ const columns: GridColDef[] = [
   },
   { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Ceiling', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
   {
     field: 'Expiry',
     minWidth: 170,
@@ -69,14 +73,45 @@ const columns: GridColDef[] = [
 export default function Markets() {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
+  const [value, setValue] = useState(0)
+  const [mainPools, setMainPools] = useState<Pool[]>([])
+  const [otherPools, setOtherPools] = useState<Pool[]>([])
+  const [pools, setPools] = useState<Pool[]>([])
 
-  const query = useQuery<{ pools: Pool[] }>(
+  const { isLoading, data } = useQuery<{ pools: Pool[] }>(
     `pools-${chainId}`,
     () =>
       chainId != null &&
       request(config[chainId as number].divaSubgraph, queryPools)
   )
-  const pools = query.data?.pools || ([] as Pool[])
+
+  useEffect(() => {
+    const updatePools = async () => {
+      const poolsData = data?.pools || ([] as Pool[])
+
+      const mainPoolsData = poolsData.filter(
+        (p) => p.createdBy === createdByFilterAddressForMarket
+      )
+      const otherPoolsData = poolsData.filter(
+        (p) => p.createdBy !== createdByFilterAddressForMarket
+      )
+
+      setMainPools(mainPoolsData)
+      setOtherPools(otherPoolsData)
+      setPools(mainPoolsData)
+    }
+    updatePools()
+  }, [data?.pools])
+
+  useEffect(() => {
+    if (value === 0) setPools(mainPools)
+    if (value === 1) setPools(otherPools)
+  }, [value])
+
+  const handleChange = (event: any, newValue: any) => {
+    setValue(newValue)
+  }
+
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
     const fallbackPeriod = expiryDate.setMinutes(
@@ -110,7 +145,7 @@ export default function Markets() {
       Underlying: val.referenceAsset,
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
-      Ceiling: formatUnits(val.cap),
+      Cap: formatUnits(val.cap),
       Expiry: getDateTime(val.expiryDate),
       Sell: 'TBD',
       Buy: 'TBD',
@@ -182,5 +217,22 @@ export default function Markets() {
   const filteredRows = rows.filter(
     (v) => v.Status && !v.Status.startsWith('Confirmed')
   )
-  return <PoolsTable columns={columns} rows={filteredRows} />
+
+  return (
+    <>
+      <Container>
+        <Tabs value={value} onChange={handleChange} variant="standard">
+          <Tab label="Main" />
+          <Tab label="Other" />
+        </Tabs>
+      </Container>
+      <PoolsTable columns={columns} rows={filteredRows} />
+    </>
+  )
 }
+
+const Container = styled.div`
+  position: absolute;
+  left: 70px;
+  top: 80px;
+`

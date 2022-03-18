@@ -8,7 +8,7 @@ import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
-import { LabelStyle } from './UiStyles'
+import { LabelStyle, SubLabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -22,19 +22,21 @@ import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-
 import ERC20_ABI from '../../../abi/ERC20.json'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useWallet } from '@web3-ui/hooks'
+import { useAppSelector } from '../../../Redux/hooks'
+import { totalDecimals } from './OrderHelper'
+import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 const web3 = new Web3(Web3.givenProvider)
-const maxApproval = new BigNumber(2).pow(256).minus(1)
 let accounts: any[]
 
 export default function BuyLimit(props: {
   option: Pool
-  handleDisplayOrder: () => void
+  handleDisplayOrder: () => any
   tokenAddress: string
 }) {
+  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
@@ -45,7 +47,14 @@ export default function BuyLimit(props: {
   const [expiry, setExpiry] = React.useState(5)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
+  const [youPay, setYouPay] = React.useState(0.0)
   const [isApproved, setIsApproved] = React.useState(false)
+  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(false)
+  const [allowance, setAllowance] = React.useState(0.0)
+  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
+  const [remainingApprovalAmount, setRemainingApprovalAmount] =
+    React.useState(0.0)
+  const [takerAccount, setTakerAccount] = React.useState('')
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken
 
@@ -54,17 +63,20 @@ export default function BuyLimit(props: {
 
   const handleNumberOfOptions = (value: string) => {
     setNumberOfOptions(parseFloat(value))
+    const youPay = pricePerOption > 0 ? pricePerOption * parseFloat(value) : 0
+    setYouPay(youPay)
   }
 
   const handlePricePerOptions = (value: string) => {
     setPricePerOption(parseFloat(value))
+    const youPay = numberOfOptions > 0 ? numberOfOptions * parseFloat(value) : 0
+    setYouPay(youPay)
   }
 
   const handleFormReset = () => {
     Array.from(document.querySelectorAll('input')).forEach(
       (input) => (input.value = '')
     )
-    setIsApproved(false)
     setNumberOfOptions(parseFloat('0.0'))
     setPricePerOption(parseFloat('0.0'))
   }
@@ -78,72 +90,188 @@ export default function BuyLimit(props: {
     )
   }
 
+  const approveBuyAmount = async (amount) => {
+    const amountBigNumber = parseUnits(amount.toString())
+    await takerTokenContract.methods
+      .approve(exchangeProxyAddress, amountBigNumber)
+      .send({ from: accounts[0] })
+
+    const collateralAllowance = await takerTokenContract.methods
+      .allowance(accounts[0], exchangeProxyAddress)
+      .call()
+    return collateralAllowance
+  }
+
   const handleOrderSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    accounts = await window.ethereum.enable()
-    const takerTokenAddress = option.collateralToken
     if (!isApproved) {
-      const takerTokenContract = await new web3.eth.Contract(
-        // TODO: Check why any is required
-        ERC20_ABI as any,
-        takerTokenAddress
-      )
-      await takerTokenContract.methods
-        .approve(exchangeProxyAddress, maxApproval)
-        .send({ from: accounts[0] })
-      const approvedByTaker = await takerTokenContract.methods
-        .allowance(accounts[0], exchangeProxyAddress)
-        .call()
-      alert(
-        `Maker allowance for ${option.collateralToken} successfully set by ${approvedByTaker}`
-      )
-      setIsApproved(true)
-    } else {
-      const orderData = {
-        makerAccount: accounts[0],
-        makerToken: option.collateralToken,
-        takerToken: makerToken,
-        provider: web3,
-        isBuy: true,
-        chainId,
-        nbrOptions: numberOfOptions,
-        collateralDecimals: option.collateralDecimals,
-        limitPrice: pricePerOption,
-        orderExpiry: expiry,
+      if (numberOfOptions > 0) {
+        const amount = Number(
+          (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
+        )
+        let collateralAllowance = await approveBuyAmount(amount)
+        collateralAllowance = Number(
+          formatUnits(collateralAllowance.toString(), option.collateralDecimals)
+        )
+        const remainingApproval = Number(
+          (collateralAllowance - existingOrdersAmount).toFixed(
+            totalDecimals(collateralAllowance, existingOrdersAmount)
+          )
+        )
+        setRemainingApprovalAmount(remainingApproval)
+        setAllowance(collateralAllowance)
+        setIsApproved(true)
+        alert(
+          `Taker allowance for ${
+            option.collateralToken + ' '
+          } ${collateralAllowance} successfully set by ${takerAccount}`
+        )
+      } else {
+        alert('Please enter number of options you want to buy')
       }
+    } else {
+      const totalAmount = youPay + existingOrdersAmount
+      if (youPay > remainingApprovalAmount) {
+        if (totalAmount > collateralBalance) {
+          alert('Not sufficient balance')
+        } else {
+          const additionalApproval = Number(
+            (youPay - remainingApprovalAmount).toFixed(
+              totalDecimals(youPay, remainingApprovalAmount)
+            )
+          )
+          if (
+            confirm(
+              'Required collateral balance exceeds approval limit, do you want to approve additioal ' +
+                additionalApproval +
+                ' to complete this order'
+            )
+          ) {
+            setOrderBtnDisabled(true)
+            let newAllowance = Number(
+              (additionalApproval + allowance).toFixed(
+                totalDecimals(additionalApproval, allowance)
+              )
+            )
+            newAllowance = await approveBuyAmount(newAllowance)
+            newAllowance = Number(
+              formatUnits(newAllowance.toString(), option.collateralDecimals)
+            )
+            const remainingApproval = Number(
+              (newAllowance - existingOrdersAmount).toFixed(
+                totalDecimals(newAllowance, existingOrdersAmount)
+              )
+            )
+            setRemainingApprovalAmount(remainingApproval)
+            setAllowance(newAllowance)
+            setOrderBtnDisabled(false)
+          } else {
+            //TBD discuss this case
+            console.log('nothing done')
+          }
+        }
+      } else {
+        const orderData = {
+          makerAccount: accounts[0],
+          makerToken: option.collateralToken,
+          takerToken: makerToken,
+          provider: web3,
+          isBuy: true,
+          chainId,
+          nbrOptions: numberOfOptions,
+          collateralDecimals: option.collateralDecimals,
+          limitPrice: pricePerOption,
+          orderExpiry: expiry,
+        }
 
-      buylimitOrder(orderData)
-        .then(function () {
-          props.handleDisplayOrder()
-          handleFormReset()
-        })
-        .catch(function (error) {
-          console.error('Error' + error)
-        })
+        buylimitOrder(orderData)
+          .then(async (response) => {
+            if (response.status === 200) {
+              await new Promise((resolve) => setTimeout(resolve, 2000))
+              await props.handleDisplayOrder()
+              handleFormReset()
+            }
+          })
+          .catch(function (error) {
+            console.error('Error' + error)
+          })
+      }
     }
+  }
+
+  const getTakerOrdersTotalAmount = async (taker) => {
+    let existingOrdersAmount = new BigNumber(0)
+    if (responseBuy.length == 0) {
+      //Double check any limit orders exists
+      const rBuy = await get0xOpenOrders(option.collateralToken, makerToken)
+      if (rBuy.length > 0) {
+        responseBuy = rBuy
+      }
+    }
+    responseBuy.forEach((data: any) => {
+      const order = data.order
+      const metaData = data.metaData
+      if (taker == order.maker) {
+        const remainingFillableTakerAmount = new BigNumber(
+          metaData.remainingFillableTakerAmount.toString()
+        )
+        if (remainingFillableTakerAmount < order.takerAmount) {
+          const makerAmount = new BigNumber(order.makerAmount)
+          const takerAmount = new BigNumber(order.takerAmount)
+          const bidAmount = makerAmount.dividedBy(takerAmount)
+          const youPay = bidAmount.multipliedBy(remainingFillableTakerAmount)
+          existingOrdersAmount = existingOrdersAmount.plus(youPay)
+        } else {
+          existingOrdersAmount = existingOrdersAmount.plus(order.makerAmount)
+        }
+      }
+    })
+    return Number(
+      formatUnits(existingOrdersAmount.toString(), option.collateralDecimals)
+    )
   }
 
   useEffect(() => {
     const getCollateralInWallet = async () => {
       accounts = await window.ethereum.enable()
       const takerAccount = accounts[0]
+      let allowance = await takerTokenContract.methods
+        .allowance(takerAccount, exchangeProxyAddress)
+        .call()
+      allowance = Number(formatUnits(allowance, option.collateralDecimals))
       let balance = await takerTokenContract.methods
         .balanceOf(takerAccount)
         .call()
       balance = Number(
         formatUnits(balance.toString(), option.collateralDecimals)
       )
-      return balance
+      return {
+        balance: balance,
+        account: takerAccount,
+        approvalAmount: allowance,
+      }
     }
 
     getCollateralInWallet().then((val) => {
-      if (val != null) {
-        setCollateralBalance(Number(val))
-      } else {
-        throw new Error(`can not read wallet balance`)
-      }
+      !Number.isNaN(val.balance)
+        ? setCollateralBalance(Number(val.balance))
+        : setCollateralBalance(0)
+      setTakerAccount(val.account)
+      setAllowance(val.approvalAmount)
+      setRemainingApprovalAmount(val.approvalAmount)
+      val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+      getTakerOrdersTotalAmount(val.account).then((existingOrdersAmount) => {
+        const remainingAmount = Number(
+          (val.approvalAmount - existingOrdersAmount).toFixed(
+            totalDecimals(val.approvalAmount, existingOrdersAmount)
+          )
+        )
+        setRemainingApprovalAmount(remainingAmount)
+        remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+        setExistingOrdersAmount(existingOrdersAmount)
+      })
     })
-  }, [])
+  }, [responseBuy])
 
   return (
     <div>
@@ -169,10 +297,12 @@ export default function BuyLimit(props: {
         <FormDiv>
           <LabelStyleDiv>
             <LabelStyle>You Pay</LabelStyle>
+            <SubLabelStyle>
+              Remaining balance {remainingApprovalAmount}
+            </SubLabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {(pricePerOption * numberOfOptions).toFixed(4)}{' '}
-            {option.collateralTokenName}
+            {youPay.toFixed(4) + ' '} {option.collateralSymbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -181,7 +311,7 @@ export default function BuyLimit(props: {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {collateralBalance.toFixed(4)} {option.collateralTokenName}
+              {collateralBalance.toFixed(4)} {option.collateralSymbol}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>
@@ -227,6 +357,7 @@ export default function BuyLimit(props: {
             startIcon={<AddIcon />}
             type="submit"
             value="Submit"
+            disabled={orderBtnDisabled}
           >
             {isApproved ? 'Create Order' : 'Approve'}
           </Button>

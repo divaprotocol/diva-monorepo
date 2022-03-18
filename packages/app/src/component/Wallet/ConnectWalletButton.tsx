@@ -1,6 +1,7 @@
 import Button from '@mui/material/Button'
 import { useCallback, useEffect, useState } from 'react'
 import { useWallet } from '@web3-ui/hooks'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 export function ConnectWalletButton() {
   const { connected, connectWallet, connection, provider, disconnectWallet } =
@@ -18,7 +19,7 @@ export function ConnectWalletButton() {
         try {
           const res = await provider.lookupAddress(connection.userAddress)
           if (res === null) {
-            setWalletName(truncate(connection.userAddress))
+            setWalletName(getShortenedAddress(connection.userAddress))
           } else {
             setWalletName(res)
           }
@@ -30,17 +31,6 @@ export function ConnectWalletButton() {
 
     run()
   }, [connection, provider, connected])
-
-  function truncate(string = '', start = 6, end = 4) {
-    if (start < 1 || end < 1) {
-      return string
-    }
-    if (string.length <= start + end) {
-      return string
-    }
-    return string.slice(0, start) + '...' + string.slice(-end)
-  }
-
   const toggleConnect = useCallback(() => {
     if (connected) {
       disconnectWallet?.()
