@@ -17,11 +17,18 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import React from 'react'
 import { Liquidity } from '../Liquidity/Liquidity'
+import OrdersPanel from './OrdersPanel'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
   justify-content: space-between;
   flex-basis: 100%;
+`
+const LeftDiv = styled.div`
+  width: 60%;
+`
+const RightDiv = styled.div`
+  width: 40%;
 `
 const LeftCompLeftDiv = styled.div`
   width: 40%;
@@ -90,46 +97,44 @@ export default function Underlying() {
         <Liquidity />
       ) : (
         <Stack direction="row" spacing={2}>
-          <Stack spacing={2}>
-            <Paper>
-              <OptionHeader
-                ReferenceAsset={pool.referenceAsset}
-                TokenAddress={tokenAddress}
-                isLong={isLong}
-                poolId={pool.id}
-                tokenDecimals={pool.collateralDecimals}
-              />
-              <OptionDetails pool={pool} isLong={isLong} />
-            </Paper>
+          <LeftDiv>
+            <Stack spacing={2}>
+              <Paper>
+                <OptionHeader
+                  ReferenceAsset={pool.referenceAsset}
+                  TokenAddress={tokenAddress}
+                  isLong={isLong}
+                  poolId={pool.id}
+                  tokenDecimals={pool.collateralDecimals}
+                />
+                <OptionDetails pool={pool} isLong={isLong} />
+              </Paper>
 
-            <Paper>
-              <LeftCompFlexContainer>
-                <LeftCompLeftDiv>
-                  <OrderBook option={pool} tokenAddress={tokenAddress} />
-                </LeftCompLeftDiv>
-                <LeftCompRightDiv>
-                  <OptionOrders option={pool} tokenAddress={tokenAddress} />
-                </LeftCompRightDiv>
-              </LeftCompFlexContainer>
-            </Paper>
-          </Stack>
-
-          <Stack spacing={2}>
-            <Paper>
-              <CreateOrder option={pool} tokenAddress={tokenAddress} />
-            </Paper>
-            <Paper>
-              <TradeChart
-                data={data}
-                refAsset={pool.referenceAsset}
-                payOut={pool.collateralSymbol}
-                w={380}
-                h={200}
-                isLong={OptionParams.IsLong}
-                breakEven={breakEvenOptionPrice}
-              />
-            </Paper>
-          </Stack>
+              <Paper>
+                <LeftCompFlexContainer>
+                  <OrdersPanel option={pool} tokenAddress={tokenAddress} />
+                </LeftCompFlexContainer>
+              </Paper>
+            </Stack>
+          </LeftDiv>
+          <RightDiv>
+            <Stack spacing={2}>
+              <Paper>
+                <CreateOrder option={pool} tokenAddress={tokenAddress} />
+              </Paper>
+              <Paper>
+                <TradeChart
+                  data={data}
+                  refAsset={pool.referenceAsset}
+                  payOut={pool.collateralSymbol}
+                  w={380}
+                  h={200}
+                  isLong={OptionParams.IsLong}
+                  breakEven={breakEvenOptionPrice}
+                />
+              </Paper>
+            </Stack>
+          </RightDiv>
         </Stack>
       )}
     </Container>

@@ -2,7 +2,7 @@ import React from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { MenuItem } from '@mui/material'
+import { MenuItem, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
@@ -28,6 +28,7 @@ import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 import { BigNumber } from '@0x/utils'
+import { useParams } from 'react-router-dom'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -58,6 +59,7 @@ export default function SellLimit(props: {
   const makerToken = optionTokenAddress
   const takerToken = option.collateralToken
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
+  const params: { tokenType: string } = useParams()
   const handleNumberOfOptions = (value: string) => {
     setNumberOfOptions(parseFloat(value))
   }
@@ -107,10 +109,13 @@ export default function SellLimit(props: {
         setRemainingApprovalAmount(remainingApproval)
         setAllowance(approvedAllowance)
         setIsApproved(true)
+        //Allowance for 0x exchange contract [address 0xdef1c] successfully updated to 80 DAI
         alert(
-          `Total allowance ` +
+          `Allowance for 0x exchange contract ` +
+            { exchangeProxyAddress } +
+            ` successfully updated to ` +
             approvedAllowance +
-            ` for ${option.referenceAsset} successfully set by`
+            `position token`
         )
       } else {
         alert('please enter positive balance for approval')
@@ -269,10 +274,14 @@ export default function SellLimit(props: {
       <form onSubmit={handleOrderSubmit}>
         <FormDiv>
           <LabelStyleDiv>
-            <Box>
-              <LabelStyle>Number of Options</LabelStyle>
-              <SubLabelStyle>Remaining {remainingApprovalAmount}</SubLabelStyle>
-            </Box>
+            <Stack spacing={0.5}>
+              <LabelStyle>
+                Number of {params.tokenType.toUpperCase()}
+              </LabelStyle>
+              <SubLabelStyle>
+                Remaining allowance: {remainingApprovalAmount}
+              </SubLabelStyle>
+            </Stack>
           </LabelStyleDiv>
           <FormInput
             type="text"
@@ -341,7 +350,7 @@ export default function SellLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="30%">
+        <Box marginLeft="35%">
           <Button
             variant="contained"
             color="primary"

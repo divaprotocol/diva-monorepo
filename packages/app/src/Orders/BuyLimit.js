@@ -67,7 +67,7 @@ export const buylimitOrder = async (orderData) => {
     })
 
     if (resp.status === 200) {
-      alert('Successfully posted order to SRA')
+      alert('Order successfully created')
     } else {
       const body = await resp.json()
       alert(

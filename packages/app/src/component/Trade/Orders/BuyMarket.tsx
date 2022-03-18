@@ -29,6 +29,8 @@ import { Pool } from '../../../lib/queries'
 import { NETWORKS } from '@web3-ui/hooks'
 import { useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
+import { Stack } from '@mui/material'
+import { useParams } from 'react-router-dom'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const CHAIN_ID = NETWORKS.ropsten
@@ -65,6 +67,7 @@ export default function BuyMarket(props: {
   const takerToken = option.collateralToken
   // TODO: check again why we need to use "any" here
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
+  const params: { tokenType: string } = useParams()
 
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
@@ -163,6 +166,7 @@ export default function BuyMarket(props: {
         }
 
         buyMarketOrder(orderData).then((orderFillStatus: any) => {
+          let orderFilled = false
           if (!(orderFillStatus === undefined)) {
             if (!('logs' in orderFillStatus)) {
               alert('Order could not be filled logs not found')
@@ -182,7 +186,8 @@ export default function BuyMarket(props: {
                     )
                     setNumberOfOptions(0.0)
                     setYouPay(0.0)
-                    alert('Order successfully filled')
+                    //alert('Order successfully filled')
+                    orderFilled = true
                     return
                   } else {
                     alert('Order could not be filled')
@@ -192,6 +197,9 @@ export default function BuyMarket(props: {
             }
           } else {
             alert('order could not be filled response is not defined')
+          }
+          if (orderFilled) {
+            alert('Order successfully filled')
           }
         })
       }
@@ -370,7 +378,7 @@ export default function BuyMarket(props: {
       <form onSubmit={handleOrderSubmit}>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Number of Options</LabelStyle>
+            <LabelStyle>Number of {params.tokenType.toUpperCase()}</LabelStyle>
           </LabelStyleDiv>
           <FormInput
             type="text"
@@ -382,7 +390,7 @@ export default function BuyMarket(props: {
             title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
           >
             <LabelStyleDiv>
-              <LabelStyle>Expected Rate </LabelStyle>
+              <LabelStyle>Expected Price </LabelStyle>
               <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
             </LabelStyleDiv>
           </InfoTooltip>
@@ -392,12 +400,13 @@ export default function BuyMarket(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <Box>
+            <Stack spacing={0.5}>
               <LabelStyle>You Pay</LabelStyle>
               <SubLabelStyle>
-                remaining Balance {remainingApprovalAmount}
+                Remaining allowance: {remainingApprovalAmount}{' '}
+                {option.collateralSymbol}
               </SubLabelStyle>
-            </Box>
+            </Stack>
           </LabelStyleDiv>
           <RightSideLabel>
             {youPay.toFixed(4) + ' '} {option.collateralSymbol}
@@ -450,7 +459,7 @@ export default function BuyMarket(props: {
           </FormControlDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="30%">
+        <Box marginLeft="35%" marginTop="15%">
           <Button
             variant="contained"
             color="primary"

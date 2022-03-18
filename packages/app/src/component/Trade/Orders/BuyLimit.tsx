@@ -2,7 +2,7 @@ import React, { FormEvent } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { MenuItem } from '@mui/material'
+import { MenuItem, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
@@ -28,6 +28,7 @@ import { useWallet } from '@web3-ui/hooks'
 import { useAppSelector } from '../../../Redux/hooks'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
+import { useParams } from 'react-router-dom'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -57,7 +58,7 @@ export default function BuyLimit(props: {
   const [takerAccount, setTakerAccount] = React.useState('')
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken
-
+  const params: { tokenType: string } = useParams()
   // TODO: Check why any is required
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
@@ -122,9 +123,11 @@ export default function BuyLimit(props: {
         setAllowance(collateralAllowance)
         setIsApproved(true)
         alert(
-          `Taker allowance for ${
+          `Allowance for ${
             option.collateralToken + ' '
-          } ${collateralAllowance} successfully set by ${takerAccount}`
+          } successfully updated to  ${collateralAllowance} + ' ' ${
+            option.collateralSymbol
+          }`
         )
       } else {
         alert('Please enter number of options you want to buy')
@@ -278,7 +281,7 @@ export default function BuyLimit(props: {
       <form onSubmit={(event) => handleOrderSubmit(event)}>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Number of Options</LabelStyle>
+            <LabelStyle>Number of {params.tokenType.toUpperCase()}</LabelStyle>
           </LabelStyleDiv>
           <FormInput
             type="text"
@@ -296,10 +299,13 @@ export default function BuyLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>You Pay</LabelStyle>
-            <SubLabelStyle>
-              Remaining balance {remainingApprovalAmount}
-            </SubLabelStyle>
+            <Stack spacing={0.5}>
+              <LabelStyle>You Pay </LabelStyle>
+              <SubLabelStyle>
+                Remaining allowance: {remainingApprovalAmount}{' '}
+                {option.collateralSymbol}
+              </SubLabelStyle>
+            </Stack>
           </LabelStyleDiv>
           <RightSideLabel>
             {youPay.toFixed(4) + ' '} {option.collateralSymbol}
@@ -349,7 +355,7 @@ export default function BuyLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="30%">
+        <Box marginLeft="35%">
           <Button
             variant="contained"
             color="primary"

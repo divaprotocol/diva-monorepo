@@ -31,6 +31,8 @@ import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { useWallet } from '@web3-ui/hooks'
 import { useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
+import { Stack } from '@mui/material'
+import { useParams } from 'react-router-dom'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const web3 = new Web3(Web3.givenProvider)
@@ -66,7 +68,7 @@ export default function SellMarket(props: {
   const makerToken = option.collateralToken
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
-
+  const params: { tokenType: string } = useParams()
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseFloat(value)
@@ -165,6 +167,7 @@ export default function SellMarket(props: {
           existingLimitOrders: existingBuyLimitOrders,
         }
         sellMarketOrder(orderData).then((orderFillStatus: any) => {
+          let orderFilled = false
           if (!(orderFillStatus == undefined)) {
             if (!('logs' in orderFillStatus)) {
               alert('order could not be filled')
@@ -184,7 +187,8 @@ export default function SellMarket(props: {
                     )
                     setNumberOfOptions(0.0)
                     setYouReceive(0.0)
-                    alert('Order successfully filled')
+                    //alert('Order successfully filled')
+                    orderFilled = true
                     return
                   } else {
                     alert('Order could not be filled')
@@ -194,6 +198,9 @@ export default function SellMarket(props: {
             }
           } else {
             alert('order could not be filled')
+          }
+          if (orderFilled) {
+            alert('Order successfully filled')
           }
         })
       }
@@ -363,10 +370,14 @@ export default function SellMarket(props: {
       <form onSubmit={handleOrderSubmit}>
         <FormDiv>
           <LabelStyleDiv>
-            <Box>
-              <LabelStyle>Number of Options</LabelStyle>
-              <SubLabelStyle>Remaining {remainingApprovalAmount}</SubLabelStyle>
-            </Box>
+            <Stack spacing={0.5}>
+              <LabelStyle>
+                Number of {params.tokenType.toUpperCase()}
+              </LabelStyle>
+              <SubLabelStyle>
+                Remaining allowance: {remainingApprovalAmount}
+              </SubLabelStyle>
+            </Stack>
           </LabelStyleDiv>
           <FormInput
             type="text"
@@ -378,7 +389,7 @@ export default function SellMarket(props: {
             title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
           >
             <LabelStyleDiv>
-              <LabelStyle>Expected Rate </LabelStyle>
+              <LabelStyle>Expected Price </LabelStyle>
               <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
             </LabelStyleDiv>
           </InfoTooltip>
@@ -439,7 +450,7 @@ export default function SellMarket(props: {
           </FormControlDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="100px">
+        <Box marginLeft="35%" marginTop="15%">
           <Button
             variant="contained"
             color="primary"

@@ -12,7 +12,6 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
-import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
@@ -21,8 +20,9 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getDateTime } from '../../Util/Dates'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 import { BigNumber } from '@0x/utils'
+
 const useStyles = makeStyles({
   table: {
     minWidth: 250,
@@ -43,21 +43,10 @@ const PageDiv = styled.div`
 const NoOrderTextDiv = styled.div`
   font-size: 1.1rem;
   width: 100%;
-  margin-left: 120%;
-  margin-top: 10%;
-  margin-bottom: 10%;
+  margin-left: 267%;
+  margin-top: 8%;
+  margin-bottom: 8%;
 `
-
-const TableHeader = styled.h4`
-  font-size: 1rem;
-  font: regular;
-  padding-left: 15px;
-  text-align: left;
-`
-
-const TableHeadStyle = withStyles(() => ({
-  root: {},
-}))(TableHead)
 
 const TableHeaderCell = withStyles(() => ({
   root: {
@@ -151,8 +140,6 @@ export default function OpenOrders(props: {
   const optionTokenAddress = props.tokenAddress
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const [page, setPage] = React.useState(0)
-  const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const dispatch = useAppDispatch()
   const [orders, setOrders] = useState([])
 
@@ -230,21 +217,11 @@ export default function OpenOrders(props: {
 
   const classes = useStyles()
 
-  const handleChangePage = (event: any, newPage: number) => {
-    setPage(newPage)
-  }
-
-  const handleChangeRowsPerPage = (event: any) => {
-    setRowsPerPage(parseInt(event.target.value))
-    setPage(0)
-  }
-
   return (
     <PageDiv>
-      <TableHeader>Your Open Orders</TableHeader>
-      <TableContainer component={Paper}>
-        <Table className={classes.table} aria-label="simple table">
-          <TableHeadStyle>
+      <TableContainer component={Paper} sx={{ maxHeight: 340 }}>
+        <Table stickyHeader aria-label="sticky table">
+          <TableHead>
             <TableRow>
               <TableHeaderCell>Type</TableHeaderCell>
               <TableHeaderCell align="center">Quantity</TableHeaderCell>
@@ -252,11 +229,11 @@ export default function OpenOrders(props: {
               <TableHeaderCell align="center">Pay/Receive</TableHeaderCell>
               <TableHeaderCell align="right">Cancel</TableHeaderCell>
             </TableRow>
-          </TableHeadStyle>
+          </TableHead>
           <TableBody>
             {orders.length > 0 ? (
               orders
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((order: any, index: number) => {
                   const labelId = `enhanced-table-${index}`
                   return (
@@ -319,15 +296,6 @@ export default function OpenOrders(props: {
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={orders.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
     </PageDiv>
   )
 }
