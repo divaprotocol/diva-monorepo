@@ -297,7 +297,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                 type="submit"
                 value="Submit"
                 disabled={
-                  !pool || Date.now() > 1000 * parseInt(pool.expiryDate)
+                  !pool || Date.now() > 1000 * parseInt(pool.expiryTime)
                 }
                 onClick={() => {
                   const token = new ethers.Contract(

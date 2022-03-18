@@ -362,30 +362,30 @@ export function MyPositions() {
 
   const pools = poolsQuery.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
+    const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
     const now = new Date()
-    const fallbackPeriod = new Date(parseInt(val.expiryDate) * 1000).setMinutes(
-      expiryDate.getMinutes() + 24 * 60 + 5
+    const fallbackPeriod = new Date(parseInt(val.expiryTime) * 1000).setMinutes(
+      expiryTime.getMinutes() + 24 * 60 + 5
     )
     const unchallengedPeriod = new Date(
-      parseInt(val.expiryDate) * 1000
-    ).setMinutes(expiryDate.getMinutes() + 5 * 24 * 60 + 5)
+      parseInt(val.expiryTime) * 1000
+    ).setMinutes(expiryTime.getMinutes() + 5 * 24 * 60 + 5)
     const challengedPeriod = new Date(
-      parseInt(val.expiryDate) * 1000
-    ).setMinutes(expiryDate.getMinutes() + 2 * 24 * 60 + 5)
+      parseInt(val.expiryTime) * 1000
+    ).setMinutes(expiryTime.getMinutes() + 2 * 24 * 60 + 5)
     let finalValue = '-'
     let status = val.statusFinalReferenceValue
     if (Date.now() > fallbackPeriod) {
       status = 'Fallback'
     }
-    if (now.getTime() < expiryDate.getTime()) {
+    if (now.getTime() < expiryTime.getTime()) {
       finalValue = '-'
     } else if (val.statusFinalReferenceValue === 'Open') {
       if (now.getTime() > unchallengedPeriod) {
         finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
         status = 'Confirmed*'
       } else if (
-        now.getTime() > expiryDate.getTime() &&
+        now.getTime() > expiryTime.getTime() &&
         now.getTime() < unchallengedPeriod
       ) {
         status = 'Expired'
@@ -410,7 +410,7 @@ export function MyPositions() {
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
       Cap: formatUnits(val.cap),
-      Expiry: getDateTime(val.expiryDate),
+      Expiry: getDateTime(val.expiryTime),
       Sell: 'TBD',
       Buy: 'TBD',
       MaxYield: 'TBD',
@@ -424,7 +424,7 @@ export function MyPositions() {
     }
 
     const Status =
-      expiryDate.getTime() <= now.getTime() &&
+      expiryTime.getTime() <= now.getTime() &&
       val.statusFinalReferenceValue.toLowerCase() === 'open'
         ? 'Expired'
         : val.statusFinalReferenceValue
@@ -439,14 +439,12 @@ export function MyPositions() {
         TVL:
           parseFloat(
             formatUnits(
-              BigNumber.from(val.collateralBalanceLong).add(
-                val.collateralBalanceShort
-              ),
-              val.collateralDecimals
+              BigNumber.from(val.collateralBalance),
+              val.collateralToken.decimals
             )
           ).toFixed(4) +
           ' ' +
-          val.collateralSymbol,
+          val.collateralToken.symbol,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
           IsLong: true,
@@ -462,14 +460,12 @@ export function MyPositions() {
         TVL:
           parseFloat(
             formatUnits(
-              BigNumber.from(val.collateralBalanceLong).add(
-                val.collateralBalanceShort
-              ),
-              val.collateralDecimals
+              BigNumber.from(val.collateralBalance),
+              val.collateralToken.decimals
             )
           ).toFixed(4) +
           ' ' +
-          val.collateralSymbol,
+          val.collateralToken.symbol,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
           IsLong: false,

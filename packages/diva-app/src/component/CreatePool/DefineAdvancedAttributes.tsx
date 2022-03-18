@@ -21,8 +21,7 @@ export function DefineAdvanced({
 
   const {
     collateralBalanceShort,
-    shortTokenSupply,
-    longTokenSupply,
+    tokenSupply,
     collateralBalanceLong,
     capacity,
   } = formik.values
@@ -96,36 +95,19 @@ export function DefineAdvanced({
           </FormControl>
         </Box>
         <Box pb={3}>
-          <FormControl fullWidth error={formik.errors.shortTokenSupply != null}>
+          <FormControl fullWidth error={formik.errors.tokenSupply != null}>
             <TextField
-              name="shortTokenSupply"
-              id="shortTokenSupply"
+              name="tokenSupply"
+              id="tokenSupply"
               onBlur={formik.handleBlur}
-              error={formik.errors.shortTokenSupply != null}
-              label="Short Token Supply"
-              value={shortTokenSupply}
+              error={formik.errors.tokenSupply != null}
+              label="Position Token Supply"
+              value={tokenSupply}
               type="number"
               onChange={formik.handleChange}
             />
-            {formik.errors.shortTokenSupply != null && (
-              <FormHelperText>{formik.errors.shortTokenSupply}</FormHelperText>
-            )}
-          </FormControl>
-        </Box>
-        <Box pb={3}>
-          <FormControl fullWidth error={formik.errors.longTokenSupply != null}>
-            <TextField
-              name="longTokenSupply"
-              error={formik.errors.longTokenSupply != null}
-              onBlur={formik.handleBlur}
-              id="longTokenSupply"
-              label="Long Token Supply"
-              value={longTokenSupply}
-              type="number"
-              onChange={formik.handleChange}
-            />
-            {formik.errors.longTokenSupply != null && (
-              <FormHelperText>{formik.errors.longTokenSupply}</FormHelperText>
+            {formik.errors.tokenSupply != null && (
+              <FormHelperText>{formik.errors.tokenSupply}</FormHelperText>
             )}
           </FormControl>
         </Box>

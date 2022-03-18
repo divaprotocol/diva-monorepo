@@ -107,7 +107,7 @@ export default function OptionDetails({
       <FlexDiv>
         <FlexBox>
           <FlexBoxHeader>Expires at</FlexBoxHeader>
-          <FlexBoxData>{getDateTime(pool.expiryDate).slice(0, 10)}</FlexBoxData>
+          <FlexBoxData>{getDateTime(pool.expiryTime).slice(0, 10)}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Direction</FlexBoxHeader>
@@ -129,28 +129,22 @@ export default function OptionDetails({
           <FlexBoxHeader>Collateral</FlexBoxHeader>
           <FlexBoxData>
             {Number(
-              formatUnits(pool.collateralBalanceLong, pool.collateralDecimals)
+              formatUnits(pool.collateralBalance, pool.collateralToken.decimals)
             ) +
-              Number(
-                formatUnits(
-                  pool.collateralBalanceShort,
-                  pool.collateralDecimals
-                )
-              ) +
               ' ' +
-              pool.collateralSymbol}
+              pool.collateralToken.symbol}
           </FlexBoxData>
         </FlexBox>
       </FlexDiv>
       <FlexSecondLineDiv>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Data provider</FlexBoxHeader>
-          <Tooltip title={pool.dataFeedProvider} arrow>
+          <Tooltip title={pool.dataProvider} arrow>
             <FlexToolTipBoxData>
-              {pool.dataFeedProvider.length > 0
-                ? String(pool.dataFeedProvider).substring(0, 6) +
+              {pool.dataProvider.length > 0
+                ? String(pool.dataProvider).substring(0, 6) +
                   '...' +
-                  String(pool.dataFeedProvider).substring(38)
+                  String(pool.dataProvider).substring(38)
                 : 'n/a'}
             </FlexToolTipBoxData>
           </Tooltip>

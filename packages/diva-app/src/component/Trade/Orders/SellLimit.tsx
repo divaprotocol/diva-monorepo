@@ -164,7 +164,7 @@ export default function SellLimit(props: {
           isBuy: false,
           nbrOptions: numberOfOptions,
           limitPrice: pricePerOption,
-          collateralDecimals: option.collateralDecimals,
+          collateralDecimals: option.collateralToken.decimals,
           orderExpiry: expiry,
         }
         sellLimitOrder(orderData)
@@ -188,7 +188,7 @@ export default function SellLimit(props: {
       //Double check any limit orders exists
       const rSell: any = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken
+        option.collateralToken.id
       )
       responseSell = rSell
     }
@@ -296,7 +296,7 @@ export default function SellLimit(props: {
             {pricePerOption * numberOfOptions > 0
               ? (pricePerOption * numberOfOptions).toFixed(2)
               : 0.0}
-            {' ' + option.collateralSymbol}
+            {' ' + option.collateralToken.symbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>

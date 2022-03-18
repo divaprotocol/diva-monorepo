@@ -106,10 +106,10 @@ export default function CreateOrder(props: {
   const getExistingOrders = async () => {
     const responseSell: any = await get0xOpenOrders(
       optionTokenAddress,
-      option.collateralToken
+      option.collateralToken.id
     )
     const responseBuy: any = await get0xOpenOrders(
-      option.collateralToken,
+      option.collateralToken.id,
       optionTokenAddress
     )
     if (responseSell.length > 0) {

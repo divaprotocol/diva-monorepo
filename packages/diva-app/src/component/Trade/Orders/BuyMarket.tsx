@@ -62,7 +62,7 @@ export default function BuyMarket(props: {
   const exchangeProxyAddress = address.exchangeProxy
   const makerToken = props.tokenAddress
   const [collateralBalance, setCollateralBalance] = React.useState(0)
-  const takerToken = option.collateralToken
+  const takerToken = option.collateralToken.id
   // TODO: check again why we need to use "any" here
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
@@ -96,7 +96,10 @@ export default function BuyMarket(props: {
         )
         let collateralAllowance = await approveBuyAmount(amount)
         collateralAllowance = Number(
-          formatUnits(collateralAllowance.toString(), option.collateralDecimals)
+          formatUnits(
+            collateralAllowance.toString(),
+            option.collateralToken.decimals
+          )
         )
         setRemainingApprovalAmount(collateralAllowance)
         setAllowance(collateralAllowance)
@@ -134,7 +137,10 @@ export default function BuyMarket(props: {
             )
             newAllowance = await approveBuyAmount(newAllowance)
             newAllowance = Number(
-              formatUnits(newAllowance.toString(), option.collateralDecimals)
+              formatUnits(
+                newAllowance.toString(),
+                option.collateralToken.decimals
+              )
             )
             const remainingApproval = Number(
               (newAllowance - existingOrdersAmount).toFixed(
@@ -154,7 +160,7 @@ export default function BuyMarket(props: {
           provider: web3,
           isBuy: true,
           nbrOptions: numberOfOptions,
-          collateralDecimals: option.collateralDecimals,
+          collateralDecimals: option.collateralToken.decimals,
           makerToken: makerToken,
           takerToken: option.collateralToken,
           ERC20_ABI: ERC20_ABI,
@@ -204,11 +210,13 @@ export default function BuyMarket(props: {
     let allowance = await takerTokenContract.methods
       .allowance(takerAccount, exchangeProxyAddress)
       .call()
-    allowance = Number(formatUnits(allowance, option.collateralDecimals))
+    allowance = Number(formatUnits(allowance, option.collateralToken.decimals))
     let balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
-    balance = Number(formatUnits(balance.toString(), option.collateralDecimals))
+    balance = Number(
+      formatUnits(balance.toString(), option.collateralToken.decimals)
+    )
     return {
       balance: balance,
       account: takerAccount,
@@ -224,7 +232,7 @@ export default function BuyMarket(props: {
       const makerAmount = new BigNumber(order.makerAmount)
       order['expectedRate'] = takerAmount
         .dividedBy(makerAmount)
-        .decimalPlaces(option.collateralDecimals)
+        .decimalPlaces(option.collateralToken.decimals)
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
@@ -248,7 +256,7 @@ export default function BuyMarket(props: {
     let existingOrdersAmount = new BigNumber(0)
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
-      const rBuy = await get0xOpenOrders(option.collateralToken, makerToken)
+      const rBuy = await get0xOpenOrders(option.collateralToken.id, makerToken)
       if (rBuy.length > 0) {
         responseBuy = rBuy
       }
@@ -272,7 +280,10 @@ export default function BuyMarket(props: {
       }
     })
     return Number(
-      formatUnits(existingOrdersAmount.toString(), option.collateralDecimals)
+      formatUnits(
+        existingOrdersAmount.toString(),
+        option.collateralToken.decimals
+      )
     )
   }
 
@@ -312,7 +323,10 @@ export default function BuyMarket(props: {
       let cumulativeMaker = parseEther('0')
       existingSellLimitOrders.forEach((order: any) => {
         const makerAmount = Number(
-          formatUnits(order.makerAmount.toString(), option.collateralDecimals)
+          formatUnits(
+            order.makerAmount.toString(),
+            option.collateralToken.decimals
+          )
         )
         const expectedRate = order.expectedRate
         if (count > 0) {
@@ -337,7 +351,7 @@ export default function BuyMarket(props: {
       cumulativeAvg = cumulativeTaker.div(cumulativeMaker)
       if (cumulativeAvg.gt(0)) {
         const avg = Number(
-          formatUnits(cumulativeAvg, option.collateralDecimals)
+          formatUnits(cumulativeAvg, option.collateralToken.decimals)
         )
         setAvgExpectedRate(avg)
         const youPayAmount = avg * numberOfOptions
@@ -387,7 +401,7 @@ export default function BuyMarket(props: {
             </LabelStyleDiv>
           </InfoTooltip>
           <RightSideLabel>
-            {avgExpectedRate.toFixed(4)} {option.collateralTokenName}
+            {avgExpectedRate.toFixed(4)} {option.collateralToken.name}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -400,7 +414,7 @@ export default function BuyMarket(props: {
             </Box>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youPay.toFixed(4) + ' '} {option.collateralSymbol}
+            {youPay.toFixed(4) + ' '} {option.collateralToken.symbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -409,7 +423,7 @@ export default function BuyMarket(props: {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {collateralBalance.toFixed(4)} {option.collateralSymbol}
+              {collateralBalance.toFixed(4)} {option.collateralToken.symbol}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>

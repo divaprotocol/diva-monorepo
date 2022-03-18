@@ -91,17 +91,17 @@ function mapOrderData(
         )
         if (remainingTakerAmount.eq(makerAmount)) {
           nbrOptions = Number(
-            formatUnits(makerAmount.toString(), option.collateralDecimals)
+            formatUnits(makerAmount.toString(), option.collateralToken.decimals)
           )
         } else {
           const quantity = remainingTakerAmount.dividedBy(askAmount)
           nbrOptions = Number(
-            formatUnits(quantity.toString(), option.collateralDecimals)
+            formatUnits(quantity.toString(), option.collateralToken.decimals)
           )
         }
         const receiveAmount = metaData.remainingFillableTakerAmount
         payReceive = Number(
-          formatUnits(receiveAmount.toString(), option.collateralDecimals)
+          formatUnits(receiveAmount.toString(), option.collateralToken.decimals)
         )
         pricePerOption = payReceive / nbrOptions
       } else {
@@ -112,16 +112,16 @@ function mapOrderData(
           nbrOptions = Number(
             formatUnits(
               remainingTakerAmount.toString(),
-              option.collateralDecimals
+              option.collateralToken.decimals
             )
           )
         } else {
           nbrOptions = Number(
-            formatUnits(takerAmount.toString(), option.collateralDecimals)
+            formatUnits(takerAmount.toString(), option.collateralToken.decimals)
           )
         }
         payReceive = Number(
-          formatUnits(makerAmount.toString(), option.collateralDecimals)
+          formatUnits(makerAmount.toString(), option.collateralToken.decimals)
         )
         pricePerOption = makerAmount.dividedBy(takerAmount).toNumber()
       }
@@ -162,7 +162,7 @@ export default function OpenOrders(props: {
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken
+        option.collateralToken.id
       )
       if (rSell.length > 0) {
         responseSell = rSell
@@ -171,7 +171,7 @@ export default function OpenOrders(props: {
 
     if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
-        option.collateralToken,
+        option.collateralToken.id,
         optionTokenAddress
       )
       if (rBuy.length > 0) {

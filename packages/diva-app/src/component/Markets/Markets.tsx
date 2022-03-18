@@ -113,15 +113,15 @@ export default function Markets() {
   }
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const expiryDate = new Date(parseInt(val.expiryDate) * 1000)
-    const fallbackPeriod = expiryDate.setMinutes(
-      expiryDate.getMinutes() + 24 * 60 + 5
+    const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
+    const fallbackPeriod = expiryTime.setMinutes(
+      expiryTime.getMinutes() + 24 * 60 + 5
     )
-    const unchallengedPeriod = expiryDate.setMinutes(
-      expiryDate.getMinutes() + 5 * 24 * 60 + 5
+    const unchallengedPeriod = expiryTime.setMinutes(
+      expiryTime.getMinutes() + 5 * 24 * 60 + 5
     )
-    const challengedPeriod = expiryDate.setMinutes(
-      expiryDate.getMinutes() + 2 * 24 * 60 + 5
+    const challengedPeriod = expiryTime.setMinutes(
+      expiryTime.getMinutes() + 2 * 24 * 60 + 5
     )
     let status = val.statusFinalReferenceValue
     if (Date.now() > fallbackPeriod) {
@@ -146,7 +146,7 @@ export default function Markets() {
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
       Cap: formatUnits(val.cap),
-      Expiry: getDateTime(val.expiryDate),
+      Expiry: getDateTime(val.expiryTime),
       Sell: 'TBD',
       Buy: 'TBD',
       MaxYield: 'TBD',
@@ -172,14 +172,12 @@ export default function Markets() {
         TVL:
           parseFloat(
             formatUnits(
-              BigNumber.from(val.collateralBalanceLong).add(
-                val.collateralBalanceShort
-              ),
-              val.collateralDecimals
+              BigNumber.from(val.collateralBalance),
+              val.collateralToken.decimals
             )
           ).toFixed(4) +
           ' ' +
-          val.collateralSymbol,
+          val.collateralToken.symbol,
         Status: status,
         finalValue:
           val.statusFinalReferenceValue === 'Open'
@@ -198,14 +196,12 @@ export default function Markets() {
         TVL:
           parseFloat(
             formatUnits(
-              BigNumber.from(val.collateralBalanceLong).add(
-                val.collateralBalanceShort
-              ),
-              val.collateralDecimals
+              BigNumber.from(val.collateralBalance),
+              val.collateralToken.decimals
             )
           ).toFixed(4) +
           ' ' +
-          val.collateralSymbol,
+          val.collateralToken.symbol,
         Status: status,
         finalValue:
           val.statusFinalReferenceValue === 'Open'

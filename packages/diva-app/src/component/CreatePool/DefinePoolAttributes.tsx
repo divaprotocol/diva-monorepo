@@ -39,15 +39,14 @@ export function DefinePoolAttributes({
 
   const {
     referenceAsset,
-    expiryDate,
+    expiryTime,
     collateralToken,
     collateralBalanceShort,
     collateralBalanceLong,
-    shortTokenSupply,
+    tokenSupply,
     inflection,
     cap,
     floor,
-    longTokenSupply,
   } = formik.values
 
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
@@ -73,8 +72,7 @@ export function DefinePoolAttributes({
       formik.setValues((_values) => ({
         ..._values,
         collateralBalance: `${collateralBalance}`,
-        shortTokenSupply: parseFloat(collateralBalance.toString()),
-        longTokenSupply: parseFloat(collateralBalance.toString()),
+        tokenSupply: parseFloat(collateralBalance.toString()),
       }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -187,25 +185,25 @@ export function DefinePoolAttributes({
         <FormControl fullWidth>
           <DateTimePicker
             InputProps={{
-              name: 'expiryDate',
-              id: 'expiryDate',
+              name: 'expiryTime',
+              id: 'expiryTime',
               onBlur: formik.handleBlur,
-              error: formik.errors.expiryDate != null,
+              error: formik.errors.expiryTime != null,
             }}
             label="Expiry Time"
             onChange={(event) => {
-              formik.setFieldValue('expiryDate', event)
+              formik.setFieldValue('expiryTime', event)
             }}
             minDate={today}
-            value={expiryDate}
+            value={expiryTime}
             components={{
               OpenPickerIcon: ClockIcon,
             }}
             renderInput={(params) => <TextField {...params} />}
           />
-          {formik.errors.expiryDate != null && (
+          {formik.errors.expiryTime != null && (
             <FormHelperText sx={{ color: 'red' }}>
-              {formik.errors.expiryDate}
+              {formik.errors.expiryTime}
             </FormHelperText>
           )}
         </FormControl>
@@ -281,8 +279,7 @@ export function DefinePoolAttributes({
                   collateralBalance,
                   collateralBalanceShort: half,
                   collateralBalanceLong: half,
-                  longTokenSupply: parseFloat(collateralBalance),
-                  shortTokenSupply: parseFloat(collateralBalance),
+                  tokenSupply: parseFloat(collateralBalance),
                 }))
               }}
             />
@@ -355,10 +352,8 @@ export function DefinePoolAttributes({
         {floor != null &&
           cap != null &&
           inflection != null &&
-          shortTokenSupply != null &&
-          longTokenSupply != null &&
-          shortTokenSupply > 0 &&
-          longTokenSupply > 0 && (
+          tokenSupply != null &&
+          tokenSupply > 0 && (
             <Box width="50%">
               <PayoffProfile
                 floor={floor}
@@ -367,8 +362,7 @@ export function DefinePoolAttributes({
                 hasError={hasPaymentProfileError}
                 collateralBalanceLong={collateralBalanceLong}
                 collateralBalanceShort={collateralBalanceShort}
-                shortTokenAmount={shortTokenSupply}
-                longTokenAmount={longTokenSupply}
+                tokenSupply={tokenSupply}
               />
             </Box>
           )}

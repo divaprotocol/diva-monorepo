@@ -69,7 +69,7 @@ export default function Underlying() {
   }
 
   const data = generatePayoffChartData(OptionParams)
-  const tokenAddress = isLong ? pool.longToken : pool.shortToken
+  const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
   }
@@ -97,7 +97,7 @@ export default function Underlying() {
                 TokenAddress={tokenAddress}
                 isLong={isLong}
                 poolId={pool.id}
-                tokenDecimals={pool.collateralDecimals}
+                tokenDecimals={pool.collateralToken.decimals}
               />
               <OptionDetails pool={pool} isLong={isLong} />
             </Paper>
@@ -122,7 +122,7 @@ export default function Underlying() {
               <TradeChart
                 data={data}
                 refAsset={pool.referenceAsset}
-                payOut={pool.collateralSymbol}
+                payOut={pool.collateralToken.symbol}
                 w={380}
                 h={200}
                 isLong={OptionParams.IsLong}

@@ -1,7 +1,7 @@
 import { useFormik } from 'formik'
 import { useDiva } from '../../hooks/useDiva'
 import { useWallet } from '@web3-ui/hooks'
-import { CollateralToken } from '../../lib/queries'
+import { WhitelistCollateralToken } from '../../lib/queries'
 
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
@@ -9,25 +9,24 @@ defaultDate.setHours(defaultDate.getHours() + 25)
 type Values = {
   step: number
   referenceAsset: string
-  expiryDate: Date
+  expiryTime: Date
   floor: number
   cap: number
   inflection: number
-  collateralToken?: CollateralToken
+  collateralToken?: WhitelistCollateralToken
   collateralWalletBalance: string
   collateralBalance: string
   collateralBalanceShort: number
   collateralBalanceLong: number
-  shortTokenSupply: number
-  longTokenSupply: number
+  tokenSupply: number
   capacity: number
-  dataFeedProvider: string
+  dataProvider: string
 }
 
 export const initialValues: Values = {
   step: 1,
   referenceAsset: '',
-  expiryDate: defaultDate,
+  expiryTime: defaultDate,
   floor: 1,
   cap: 3,
   inflection: 2,
@@ -36,10 +35,9 @@ export const initialValues: Values = {
   collateralBalance: '2',
   collateralBalanceShort: 1,
   collateralBalanceLong: 1,
-  shortTokenSupply: 2,
-  longTokenSupply: 2,
+  tokenSupply: 4,
   capacity: 0,
-  dataFeedProvider: '',
+  dataProvider: '',
 }
 
 type Errors = {
@@ -69,15 +67,14 @@ export const useCreatePoolFormik = () => {
           floor,
           collateralBalanceLong,
           collateralBalanceShort,
-          expiryDate,
-          shortTokenSupply,
-          longTokenSupply,
+          expiryTime,
+          tokenSupply,
           referenceAsset,
           collateralToken,
-          dataFeedProvider,
+          dataProvider,
         } = values
 
-        if (collateralToken != null && dataFeedProvider != null) {
+        if (collateralToken != null && dataProvider != null) {
           contract
             ?.createContingentPool({
               inflection,
@@ -85,12 +82,11 @@ export const useCreatePoolFormik = () => {
               floor,
               collateralBalanceShort,
               collateralBalanceLong,
-              expiryDate: expiryDate.getTime(),
-              supplyShort: shortTokenSupply,
-              supplyLong: longTokenSupply,
+              expiryTime: expiryTime.getTime(),
+              supplyPositionToken: tokenSupply,
               referenceAsset,
               collateralToken,
-              dataFeedProvider,
+              dataProvider,
               capacity: 0,
             })
             .then(() => {
@@ -132,8 +128,8 @@ export const useCreatePoolFormik = () => {
         errors.collateralBalance = 'Collateral can not be 0'
       }
 
-      if (values.expiryDate.getTime() - Date.now() < threshold) {
-        errors.expiryDate = `Expiry Date cannot be later earlier than ${
+      if (values.expiryTime.getTime() - Date.now() < threshold) {
+        errors.expiryTime = `Expiry Date cannot be later earlier than ${
           threshold / 1000
         } seconds from now`
       }
@@ -163,33 +159,25 @@ export const useCreatePoolFormik = () => {
       }
 
       // validate data feed provider
-      if (
-        values.step > 1 &&
-        values.dataFeedProvider !== null &&
-        provider != null
-      ) {
+      if (values.step > 1 && values.dataProvider !== null && provider != null) {
         if (
-          values.dataFeedProvider == null ||
-          values.dataFeedProvider.trim().length === 0
+          values.dataProvider == null ||
+          values.dataProvider.trim().length === 0
         ) {
-          errors.dataFeedProvider = 'Must define dataFeedProvider'
+          errors.dataProvider = 'Must define dataProvider'
         } else {
           try {
-            await provider.getSigner(values.dataFeedProvider)
+            await provider.getSigner(values.dataProvider)
           } catch (err) {
-            errors.dataFeedProvider =
+            errors.dataProvider =
               'You must specify a valid address as the data feed provider'
           }
         }
       }
 
       // short token balance
-      if (values.shortTokenSupply <= 0) {
-        errors.shortTokenSupply = 'Must be higher than 0'
-      }
-
-      if (values.longTokenSupply <= 0) {
-        errors.longTokenSupply = 'Must be higher than 0 0'
+      if (values.tokenSupply <= 0) {
+        errors.tokenSupply = 'Must be higher than 0'
       }
 
       return errors

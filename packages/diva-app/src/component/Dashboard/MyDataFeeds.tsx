@@ -30,10 +30,10 @@ import { CoinIconPair } from '../CoinIcon'
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
   const statusTimestamp = parseInt(props.row.StatusTimestamp)
-  const expiryDate = new Date(parseInt(props.row.Expiry) * 1000)
+  const expiryTime = new Date(parseInt(props.row.Expiry) * 1000)
   const now = new Date()
   if (
-    expiryDate.getTime() <= now.getTime() &&
+    expiryTime.getTime() <= now.getTime() &&
     props.row.Status.toLowerCase() === 'open'
   ) {
     const minUntilExp = getExpiryMinutesFromNow(
@@ -139,10 +139,10 @@ const SubmitCell = (props: any) => {
   const handleClose = () => {
     setOpen(false)
   }
-  const expiryDate = new Date(parseInt(props.row.Expiry) * 1000)
+  const expiryTime = new Date(parseInt(props.row.Expiry) * 1000)
   const now = new Date()
   const enabled =
-    (expiryDate.getTime() <= now.getTime() &&
+    (expiryTime.getTime() <= now.getTime() &&
       props.row.Status.toLowerCase() === 'open' &&
       getExpiryMinutesFromNow(props.row.Expiry) + 24 * 60 - 5 > 0) ||
     (props.row.Status === 'Challenged' &&
@@ -286,7 +286,7 @@ export function MyDataFeeds() {
   const pools =
     query?.data?.pools?.filter(
       (pool: Pool) =>
-        pool.dataFeedProvider.toLowerCase() === userAddress?.toLowerCase()
+        pool.dataProvider.toLowerCase() === userAddress?.toLowerCase()
     ) || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
@@ -295,7 +295,7 @@ export function MyDataFeeds() {
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
       Cap: formatUnits(val.cap),
-      Expiry: val.expiryDate,
+      Expiry: val.expiryTime,
       Sell: 'TBD',
       Buy: 'TBD',
       MaxYield: 'TBD',
@@ -323,14 +323,12 @@ export function MyDataFeeds() {
         TVL:
           parseFloat(
             formatUnits(
-              BigNumber.from(val.collateralBalanceLong).add(
-                val.collateralBalanceShort
-              ),
-              val.collateralDecimals
+              BigNumber.from(val.collateralBalance),
+              val.collateralToken.decimals
             )
           ).toFixed(4) +
           ' ' +
-          val.collateralSymbol,
+          val.collateralToken.symbol,
         Status,
         StatusTimestamp: val.statusTimestamp,
         finalValue:

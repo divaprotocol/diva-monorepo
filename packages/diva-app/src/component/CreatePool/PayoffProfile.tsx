@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from '@mui/material'
+import { Box, useTheme } from '@mui/material'
 import { useLayoutEffect, useRef, useState } from 'react'
 import {
   XYPlot,
@@ -16,15 +16,13 @@ export function PayoffProfile(props: {
   hasError?: boolean
   collateralBalanceShort: number
   collateralBalanceLong: number
-  longTokenAmount: number
-  shortTokenAmount: number
+  tokenSupply: number
 }) {
   const {
     floor,
     cap,
     inflection: strike,
-    longTokenAmount,
-    shortTokenAmount,
+    tokenSupply,
     hasError,
     collateralBalanceShort,
     collateralBalanceLong,
@@ -33,8 +31,8 @@ export function PayoffProfile(props: {
   const start = Math.max(floor - padding, 0)
   const totalCollateral = collateralBalanceLong + collateralBalanceShort
 
-  const maxPayoutLong = totalCollateral / longTokenAmount
-  const maxPayoutShort = totalCollateral / shortTokenAmount
+  const maxPayoutLong = totalCollateral / tokenSupply
+  const maxPayoutShort = totalCollateral / tokenSupply
   const theme = useTheme()
 
   const short: LineSeriesPoint[] = [
@@ -48,7 +46,7 @@ export function PayoffProfile(props: {
     },
     {
       x: strike,
-      y: collateralBalanceShort / shortTokenAmount,
+      y: collateralBalanceShort / tokenSupply,
     },
     {
       x: cap,
@@ -71,7 +69,7 @@ export function PayoffProfile(props: {
     },
     {
       x: strike,
-      y: collateralBalanceLong / longTokenAmount,
+      y: collateralBalanceLong / tokenSupply,
     },
     {
       x: cap,

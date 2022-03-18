@@ -2,7 +2,7 @@ import { ethers, Contract, BigNumber } from 'ethers'
 import { config } from '../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import ERC20 from '@diva/contracts/abis/erc20.json'
-import { CollateralToken, Pool } from '../lib/queries'
+import { WhitelistCollateralToken, Pool } from '../lib/queries'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { useWallet } from '@web3-ui/hooks'
 
@@ -13,17 +13,16 @@ import { useWallet } from '@web3-ui/hooks'
 type DivaContract = Contract & {
   createContingentPool: (
     params: [
+      referenceAsset: string,
+      expiryTime: string,
+      floor: BigNumber,
       inflection: BigNumber,
       cap: BigNumber,
-      floor: BigNumber,
       collateralBalanceShort: BigNumber,
       collateralBalanceLong: BigNumber,
-      expiryDate: string,
-      supplyShort: BigNumber,
-      supplyLong: BigNumber,
-      referenceAsset: string,
+      supplyPositionToken: BigNumber,
       collateralToken: string,
-      dataFeedProvider: string,
+      dataProvider: string,
       capacity: BigNumber
     ]
   ) => Promise<any>
@@ -50,12 +49,11 @@ type DivaApi = {
     floor: number
     collateralBalanceShort: number
     collateralBalanceLong: number
-    expiryDate: number
-    supplyShort: number
-    supplyLong: number
+    expiryTime: number
+    supplyPositionToken: number
     referenceAsset: string
-    collateralToken: CollateralToken
-    dataFeedProvider: string
+    collateralToken: WhitelistCollateralToken
+    dataProvider: string
     capacity: number
   }) => Promise<void>
   getPoolParametersById: (id: string) => Promise<Pool>
@@ -92,13 +90,12 @@ export function useDiva(): DivaApi | null {
         collateralBalanceLong: _collateralBalanceLong,
         collateralBalanceShort: _collateralBalanceShort,
         collateralToken,
-        dataFeedProvider,
-        expiryDate,
+        dataProvider,
+        expiryTime,
         floor,
         inflection,
         referenceAsset,
-        supplyLong,
-        supplyShort,
+        supplyPositionToken,
         capacity,
       } = props
       const erc20 = new ethers.Contract(collateralToken.id, ERC20, signer)
@@ -120,32 +117,17 @@ export function useDiva(): DivaApi | null {
 
       await erc20.allowance(creatorAddress, divaAddress)
 
-      console.log([
-        parseEther(inflection.toString()).toString(),
-        parseEther(cap.toString()).toString(),
-        parseEther(floor.toString()).toString(),
-        collateralBalanceShort,
-        collateralBalanceLong,
-        Math.round(expiryDate / 1000),
-        parseEther(supplyShort.toString()).toString(),
-        parseEther(supplyLong.toString()).toString(),
-        referenceAsset,
-        collateralToken,
-        dataFeedProvider,
-        parseEther(capacity.toString()).toString(),
-      ])
       const tx2 = await contract.createContingentPool([
+        referenceAsset,
+        Math.round(expiryTime / 1000).toString(),
+        parseEther(floor.toString()),
         parseEther(inflection.toString()),
         parseEther(cap.toString()),
-        parseEther(floor.toString()),
         collateralBalanceShort,
         collateralBalanceLong,
-        Math.round(expiryDate / 1000).toString(),
-        parseEther(supplyShort.toString()),
-        parseEther(supplyLong.toString()),
-        referenceAsset,
+        parseEther(supplyPositionToken.toString()),
         collateralToken.id,
-        dataFeedProvider,
+        dataProvider,
         parseEther(capacity.toString()),
       ])
 

@@ -8,9 +8,9 @@ export function getDateTime(dateData) {
 }
 
 export function getExpiryMinutesFromNow(Timestamp) {
-  const expiryDate = new Date(Timestamp * 1000)
+  const expiryTime = new Date(Timestamp * 1000)
   const date = new Date()
-  const mins = parseInt((expiryDate.getTime() - date.getTime()) / 1000 / 60)
+  const mins = parseInt((expiryTime.getTime() - date.getTime()) / 1000 / 60)
   return mins
 }
 

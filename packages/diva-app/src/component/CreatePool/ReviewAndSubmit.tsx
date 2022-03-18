@@ -35,7 +35,7 @@ const dict: {
   [key: string]: any
 } = {
   referenceAsset: 'Reference Asset',
-  expiryDate: 'Expiry Date',
+  expiryTime: 'Expiry Date',
   floor: 'Floor',
   cap: 'Ceiling',
   inflection: 'Inflection',
@@ -43,7 +43,7 @@ const dict: {
   collateralBalanceLong: 'CollateralBalance (Long)',
   shortTokenSupply: 'Token Supply (Short)',
   longTokenSupply: 'Token Supply (Long)',
-  dataFeedProvider: 'Data Feed Provider',
+  dataProvider: 'Data Feed Provider',
   collateralToken: 'Collateral Token',
   capacity: 'Maximum Pool Capacity',
 }
@@ -71,9 +71,7 @@ export function ReviewAndSubmit({
 
   const isWhitelistedDataFeed =
     matchingDataFeedProviders.length > 0 &&
-    matchingDataFeedProviders.some(
-      (v) => formik.values.dataFeedProvider === v.id
-    )
+    matchingDataFeedProviders.some((v) => formik.values.dataProvider === v.id)
 
   return (
     <Box pt={5}>

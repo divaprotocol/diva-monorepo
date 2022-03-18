@@ -157,7 +157,7 @@ export default function SellMarket(props: {
           provider: web3,
           isBuy: false,
           nbrOptions: numberOfOptions,
-          collateralDecimals: option.collateralDecimals,
+          collateralDecimals: option.collateralToken.decimals,
           makerToken: optionTokenAddress,
           takerToken: option.collateralToken,
           ERC20_ABI: ERC20_ABI,
@@ -246,7 +246,7 @@ export default function SellMarket(props: {
       //Double check the any limit orders exists
       const rSell: any = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken
+        option.collateralToken.id
       )
       responseSell = rSell
     }
@@ -307,7 +307,10 @@ export default function SellMarket(props: {
       let cumulativeMaker = parseEther('0')
       existingBuyLimitOrders.forEach((order: any) => {
         const takerAmount = Number(
-          formatUnits(order.takerAmount.toString(), option.collateralDecimals)
+          formatUnits(
+            order.takerAmount.toString(),
+            option.collateralToken.decimals
+          )
         )
         const expectedRate = order.expectedRate
         if (count > 0) {
@@ -383,7 +386,7 @@ export default function SellMarket(props: {
             </LabelStyleDiv>
           </InfoTooltip>
           <RightSideLabel>
-            {avgExpectedRate.toFixed(4)} {option.collateralTokenName}
+            {avgExpectedRate.toFixed(4)} {option.collateralToken.name}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -391,7 +394,7 @@ export default function SellMarket(props: {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youReceive.toFixed(4)} {option.collateralSymbol}
+            {youReceive.toFixed(4)} {option.collateralToken.symbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>

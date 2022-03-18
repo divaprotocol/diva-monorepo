@@ -29,9 +29,7 @@ export function SelectDataFeedProvider({
 
   const isWhitelistedDataFeed =
     matchingDataFeedProviders.length > 0 &&
-    matchingDataFeedProviders.some(
-      (v) => formik.values.dataFeedProvider === v.id
-    )
+    matchingDataFeedProviders.some((v) => formik.values.dataProvider === v.id)
 
   const theme = useTheme()
 
@@ -49,8 +47,8 @@ export function SelectDataFeedProvider({
       </Stack>
     )
   } else if (
-    formik.touched.dataFeedProvider != null &&
-    formik.errors.dataFeedProvider == null &&
+    formik.touched.dataProvider != null &&
+    formik.errors.dataProvider == null &&
     !isWhitelistedDataFeed
   ) {
     helperText = (
@@ -75,21 +73,21 @@ export function SelectDataFeedProvider({
       </Typography>
       <FormControl
         fullWidth
-        error={formik.errors.dataFeedProvider != null}
+        error={formik.errors.dataProvider != null}
         sx={{
           paddingTop: theme.spacing(5),
           paddingBottom: theme.spacing(5),
         }}
       >
         <Autocomplete
-          id="dataFeedProvider"
+          id="dataProvider"
           renderInput={(params) => (
             <TextField
               {...params}
               label="Data Feed Provider"
-              name="dataFeedProvider"
-              id="dataFeedProvider"
-              error={formik.errors.dataFeedProvider != null}
+              name="dataProvider"
+              id="dataProvider"
+              error={formik.errors.dataProvider != null}
               onBlur={formik.handleBlur}
               helperText={helperText}
             />
@@ -98,7 +96,7 @@ export function SelectDataFeedProvider({
             if (event != null && event.target != null) {
               console.log('on input change', (event.target as any).value || '')
               formik.setFieldValue(
-                'dataFeedProvider',
+                'dataProvider',
                 (event.target as any).value || '',
                 false
               )
@@ -106,13 +104,13 @@ export function SelectDataFeedProvider({
           }}
           onChange={(event, option) => {
             console.log(option)
-            formik.setFieldValue('dataFeedProvider', option || '')
+            formik.setFieldValue('dataProvider', option || '')
           }}
           getOptionLabel={(option) =>
             matchingDataFeedProviders.find((v) => v.id === option)?.name ||
             option
           }
-          value={formik.values.dataFeedProvider}
+          value={formik.values.dataProvider}
           options={matchingDataFeedProviders.map((v) => v.id || '')}
         />
       </FormControl>

@@ -56,7 +56,7 @@ export default function BuyLimit(props: {
     React.useState(0.0)
   const [takerAccount, setTakerAccount] = React.useState('')
   const [collateralBalance, setCollateralBalance] = React.useState(0)
-  const takerToken = option.collateralToken
+  const takerToken = option.collateralToken.id
 
   // TODO: Check why any is required
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
@@ -111,7 +111,10 @@ export default function BuyLimit(props: {
         )
         let collateralAllowance = await approveBuyAmount(amount)
         collateralAllowance = Number(
-          formatUnits(collateralAllowance.toString(), option.collateralDecimals)
+          formatUnits(
+            collateralAllowance.toString(),
+            option.collateralToken.decimals
+          )
         )
         const remainingApproval = Number(
           (collateralAllowance - existingOrdersAmount).toFixed(
@@ -155,7 +158,10 @@ export default function BuyLimit(props: {
             )
             newAllowance = await approveBuyAmount(newAllowance)
             newAllowance = Number(
-              formatUnits(newAllowance.toString(), option.collateralDecimals)
+              formatUnits(
+                newAllowance.toString(),
+                option.collateralToken.decimals
+              )
             )
             const remainingApproval = Number(
               (newAllowance - existingOrdersAmount).toFixed(
@@ -179,7 +185,7 @@ export default function BuyLimit(props: {
           isBuy: true,
           chainId,
           nbrOptions: numberOfOptions,
-          collateralDecimals: option.collateralDecimals,
+          collateralDecimals: option.collateralToken.decimals,
           limitPrice: pricePerOption,
           orderExpiry: expiry,
         }
@@ -203,7 +209,7 @@ export default function BuyLimit(props: {
     let existingOrdersAmount = new BigNumber(0)
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
-      const rBuy = await get0xOpenOrders(option.collateralToken, makerToken)
+      const rBuy = await get0xOpenOrders(option.collateralToken.id, makerToken)
       if (rBuy.length > 0) {
         responseBuy = rBuy
       }
@@ -227,7 +233,10 @@ export default function BuyLimit(props: {
       }
     })
     return Number(
-      formatUnits(existingOrdersAmount.toString(), option.collateralDecimals)
+      formatUnits(
+        existingOrdersAmount.toString(),
+        option.collateralToken.decimals
+      )
     )
   }
 
@@ -238,12 +247,14 @@ export default function BuyLimit(props: {
       let allowance = await takerTokenContract.methods
         .allowance(takerAccount, exchangeProxyAddress)
         .call()
-      allowance = Number(formatUnits(allowance, option.collateralDecimals))
+      allowance = Number(
+        formatUnits(allowance, option.collateralToken.decimals)
+      )
       let balance = await takerTokenContract.methods
         .balanceOf(takerAccount)
         .call()
       balance = Number(
-        formatUnits(balance.toString(), option.collateralDecimals)
+        formatUnits(balance.toString(), option.collateralToken.decimals)
       )
       return {
         balance: balance,
@@ -302,7 +313,7 @@ export default function BuyLimit(props: {
             </SubLabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youPay.toFixed(4) + ' '} {option.collateralSymbol}
+            {youPay.toFixed(4) + ' '} {option.collateralToken.symbol}
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -311,7 +322,7 @@ export default function BuyLimit(props: {
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>
-              {collateralBalance.toFixed(4)} {option.collateralSymbol}
+              {collateralBalance.toFixed(4)} {option.collateralToken.symbol}
             </LabelGrayStyle>
           </RightSideLabel>
         </FormDiv>

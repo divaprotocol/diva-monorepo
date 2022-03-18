@@ -50,7 +50,7 @@ export const Liquidity = () => {
         .then((pool: Pool) => {
           setPool(pool)
           const token = new ethers.Contract(
-            pool!.collateralToken,
+            pool!.collateralToken.id,
             ERC20,
             provider.getSigner()
           )
@@ -60,7 +60,7 @@ export const Liquidity = () => {
           token.decimals().then((decimals: number) => {
             setDecimal(decimals)
           })
-          setOpenAlert(Date.now() > 1000 * parseInt(pool.expiryDate))
+          setOpenAlert(Date.now() > 1000 * parseInt(pool.expiryTime))
         })
     }
   }, [chainId])
@@ -127,20 +127,14 @@ export const Liquidity = () => {
                   <Typography>
                     {pool &&
                       (100 *
-                        (parseFloat(
-                          formatUnits(pool.collateralBalanceLong, decimal)
-                        ) +
-                          parseFloat(
-                            formatUnits(pool.collateralBalanceShort, decimal)
-                          ))) /
+                        parseFloat(
+                          formatUnits(pool.collateralBalance, decimal)
+                        )) /
                         parseFloat(formatUnits(pool.capacity)) +
                         '% / ' +
-                        (parseFloat(
-                          formatUnits(pool.collateralBalanceLong, decimal)
-                        ) +
-                          parseFloat(
-                            formatUnits(pool.collateralBalanceShort, decimal)
-                          ))}{' '}
+                        parseFloat(
+                          formatUnits(pool.collateralBalance, decimal)
+                        )}{' '}
                     {symbol!}{' '}
                   </Typography>
                 </Stack>
@@ -155,13 +149,8 @@ export const Liquidity = () => {
                   <Typography>Current Pool Size</Typography>
                   <Typography>
                     {pool &&
-                      (
-                        parseFloat(
-                          formatUnits(pool.collateralBalanceLong, decimal)
-                        ) +
-                        parseFloat(
-                          formatUnits(pool.collateralBalanceShort, decimal)
-                        )
+                      parseFloat(
+                        formatUnits(pool.collateralBalance, decimal)
                       ).toFixed(4)}{' '}
                     {symbol!}{' '}
                   </Typography>

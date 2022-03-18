@@ -104,7 +104,7 @@ function mapOrderData(
     const metaData = record.metaData
     const makerToken = order.makerToken
     const takerToken = order.takerToken
-    const collateralToken = option.collateralToken.toLowerCase()
+    const collateralToken = option.collateralToken.id.toLowerCase()
     const tokenAddress = optionTokenAddress.toLowerCase()
     const makerAmount = new BigNumber(order.makerAmount)
     const takerAmount = new BigNumber(order.takerAmount)
@@ -122,13 +122,13 @@ function mapOrderData(
         const nbrOptions = Number(
           formatUnits(
             remainingTakerAmount.toString(),
-            option.collateralDecimals
+            option.collateralToken.decimals
           )
         )
         orders.nbrOptions = nbrOptions
       } else {
         const nbrOptions = Number(
-          formatUnits(takerAmount.toString(), option.collateralDecimals)
+          formatUnits(takerAmount.toString(), option.collateralToken.decimals)
         )
         orders.nbrOptions = nbrOptions
       }
@@ -144,13 +144,13 @@ function mapOrderData(
       )
       if (remainingTakerAmount.eq(makerAmount)) {
         const nbrOptions = Number(
-          formatUnits(makerAmount.toString(), option.collateralDecimals)
+          formatUnits(makerAmount.toString(), option.collateralToken.decimals)
         )
         orders.nbrOptions = nbrOptions
       } else {
         const quantity = remainingTakerAmount.dividedBy(askAmount)
         const nbrOptions = Number(
-          formatUnits(quantity.toString(), option.collateralDecimals)
+          formatUnits(quantity.toString(), option.collateralToken.decimals)
         )
         orders.nbrOptions = nbrOptions
       }
@@ -238,7 +238,7 @@ export default function OrderBook(props: {
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken
+        option.collateralToken.id
       )
       if (rSell.length > 0) {
         responseSell = rSell
@@ -247,7 +247,7 @@ export default function OrderBook(props: {
 
     if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
-        option.collateralToken,
+        option.collateralToken.id,
         optionTokenAddress
       )
       if (rBuy.length > 0) {

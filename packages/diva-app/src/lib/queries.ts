@@ -1,38 +1,65 @@
 import gql from 'graphql-tag'
 import { BigNumber } from 'ethers'
 
+export type FeeRecipientCollateralToken = {
+  id: string
+  feeRecipient: FeeRecipient
+  collateralToken: WhitelistCollateralToken
+  amount: string
+}
+
+export type FeeRecipient = {
+  id: string
+  collateralTokens: FeeRecipientCollateralToken[]
+}
+
+export type CollateralTokenEntity = {
+  id: string
+  name: string
+  decimals: number
+  symbol: string
+  feeRecipients: FeeRecipientCollateralToken[]
+}
+
+type PositionToken = {
+  id: string
+  name: string
+  symbol: string
+  decimals: number
+  pool: Pool
+  owner: string
+}
+
 export type Pool = {
   cap: string
-  capacity: BigNumber
+  capacity: string
   challenges: Challenge[]
-  collateralBalanceLong: string
+  collateralBalance: string
   collateralBalanceLongInitial: string
-  collateralBalanceShort: string
   collateralBalanceShortInitial: string
-  collateralToken: string
-  collateralSymbol: string
-  collateralTokenName: string
-  collateralDecimals: number
-  dataFeedProvider: string
-  expiryDate: string
+  collateralToken: CollateralTokenEntity
+  dataProvider: string
+  expiryTime: string
   finalReferenceValue: string
   floor: string
   id: string
   inflection: string
-  longToken: string
+  longToken: PositionToken
+  shortToken: PositionToken
   redemptionAmountLongToken: string
   redemptionAmountShortToken: string
   redemptionFee: string
   referenceAsset: string
   settlementFee: string
-  shortToken: string
   statusFinalReferenceValue: string
   statusTimestamp: string
+
+  supplyInitial: string
   supplyLong: string
-  supplyLongInitial: string
   supplyShort: string
-  supplyShortInitial: string
+
   createdBy: string
+  createdAt: string
 }
 
 export const queryPools = gql`
@@ -40,33 +67,52 @@ export const queryPools = gql`
     pools {
       id
       referenceAsset
+      floor
       inflection
       cap
-      floor
-      challenges {
-        proposedFinalReferenceValue
-      }
-      supplyShortInitial
-      supplyLongInitial
+      supplyInitial
       supplyShort
       supplyLong
-      expiryDate
-      collateralToken
-      collateralSymbol
-      collateralTokenName
+      expiryTime
+      collateralToken {
+        id
+        name
+        decimals
+        symbol
+      }
       collateralBalanceShortInitial
       collateralBalanceLongInitial
-      shortToken
-      longToken
+      collateralBalance
+      shortToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
+      longToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
       finalReferenceValue
       statusFinalReferenceValue
       redemptionAmountLongToken
       redemptionAmountShortToken
       statusTimestamp
-      dataFeedProvider
+      dataProvider
       redemptionFee
       settlementFee
       createdBy
+      createdAt
+      capacity
+      expiryTime
+      challenges {
+        challengedBy
+        proposedFinalReferenceValue
+      }
     }
   }
 `
@@ -76,32 +122,52 @@ export const queryPool = (poolId: number) => gql`
     pool(id: ${poolId}) {
       id
       referenceAsset
+      floor
       inflection
       cap
-      floor
-      supplyShortInitial
-      supplyLongInitial
+      supplyInitial
       supplyShort
       supplyLong
-      expiryDate
-      collateralToken
-      collateralSymbol
+      expiryTime
+      collateralToken {
+        id
+        name
+        decimals
+        symbol
+      }
       collateralBalanceShortInitial
       collateralBalanceLongInitial
-      collateralBalanceShort
-      collateralDecimals
-      collateralBalanceLong
-      collateralDecimals
-      shortToken
-      longToken
+      collateralBalance
+      shortToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
+      longToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
       finalReferenceValue
       statusFinalReferenceValue
       redemptionAmountLongToken
       redemptionAmountShortToken
       statusTimestamp
-      dataFeedProvider
+      dataProvider
       redemptionFee
       settlementFee
+      createdBy
+      createdAt
+      capacity
+      expiryTime
+      challenges {
+        challengedBy
+        proposedFinalReferenceValue
+      }
     }
   }
 `
@@ -121,7 +187,7 @@ export type DataProvider = {
   name: string
 }
 
-export type CollateralToken = {
+export type WhitelistCollateralToken = {
   id: string
   name: string
   symbol: string
@@ -131,7 +197,7 @@ export type CollateralToken = {
 export type WhitelistQueryResponse = {
   dataProviders: DataProvider[]
   dataFeeds: DataFeed[]
-  collateralTokens: CollateralToken[]
+  collateralTokens: WhitelistCollateralToken[]
 }
 
 export const queryWhitelist = gql`
