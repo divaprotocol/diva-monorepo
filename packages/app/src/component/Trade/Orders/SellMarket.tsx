@@ -115,7 +115,7 @@ export default function SellMarket(props: {
         alert(
           'Total allowance ' +
             approvedAllowance +
-            ` for ${option.referenceAsset} successfully set`
+            ` for ${params.tokenType} successfully set`
         )
       } else {
         alert('please enter positive balance for approval')

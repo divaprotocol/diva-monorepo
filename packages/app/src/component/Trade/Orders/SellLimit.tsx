@@ -115,7 +115,8 @@ export default function SellLimit(props: {
             { exchangeProxyAddress } +
             ` successfully updated to ` +
             approvedAllowance +
-            `position token`
+            ` ` +
+            params.tokenType
         )
       } else {
         alert('please enter positive balance for approval')
