@@ -11,17 +11,15 @@
     "c": "yarn hardhat compile",
     "build": "yarn hardhat compile && yarn hardhat diamondABI",
     "size": "yarn hardhat size-contracts",
-    "coverage": "npx hardhat coverage"
+    "coverage": "npx hardhat coverage",
+    "postinstall": "yarn build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mudgen/contracts-starter.git"
+    "url": "git+https://github.com/divaprotocol/diva-monorepo.git"
   },
-  "author": "Nick Mudge",
+  "author": "Diva",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/mudgen/contracts-starter/issues"
-  },
   "homepage": "https://github.com/mudgen/contracts-starter#readme",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "2.0.2",
