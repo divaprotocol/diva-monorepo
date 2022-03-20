@@ -115,7 +115,7 @@ export default function Underlying() {
           </Stack>
 
           <Stack spacing={2}>
-            <Paper>
+            <Paper style={{ height: '600px' }}>
               <CreateOrder option={pool} tokenAddress={tokenAddress} />
             </Paper>
             <Paper>

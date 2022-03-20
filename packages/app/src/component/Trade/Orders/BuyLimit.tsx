@@ -1,8 +1,8 @@
-import React, { FormEvent } from 'react'
+import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { MenuItem } from '@mui/material'
+import { Divider, MenuItem, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
@@ -23,11 +23,20 @@ import { BigNumber } from '@0x/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 import ERC20_ABI from '../../../abi/ERC20.json'
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import { useWallet } from '@web3-ui/hooks'
 import { useAppSelector } from '../../../Redux/hooks'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
+import Typography from '@mui/material/Typography'
+import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
+import { calcPayoffPerToken } from './BuyMarket'
+import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -57,7 +66,13 @@ export default function BuyLimit(props: {
   const [takerAccount, setTakerAccount] = React.useState('')
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken
-
+  const theme = useTheme()
+  const [maxPayout, setMaxPayout] = useState('0')
+  const [intrinsicValue, setIntrinsicValue] = useState('0')
+  const [usdPrice, setUsdPrice] = useState('0')
+  const [maxYield, setMaxYield] = useState('n/a')
+  const [breakEven, setBreakEven] = useState('n/a')
+  const isLong = window.location.pathname.split('/')[2] === 'long'
   // TODO: Check why any is required
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
@@ -273,6 +288,121 @@ export default function BuyLimit(props: {
     })
   }, [responseBuy])
 
+  useEffect(() => {
+    console.log(option.referenceAsset)
+    getUnderlyingPrice(option.referenceAsset).then((data) => {
+      setUsdPrice(data)
+    })
+
+    const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
+      BigENumber.from(option.floor),
+      BigENumber.from(option.inflection),
+      BigENumber.from(option.cap),
+      BigENumber.from(option.collateralBalanceLongInitial),
+      BigENumber.from(option.collateralBalanceShortInitial),
+      option.statusFinalReferenceValue === 'Open' &&
+        parseUnits(usdPrice, 2).gt(0)
+        ? parseUnits(usdPrice, 2)
+        : BigENumber.from(option.finalReferenceValue),
+      BigENumber.from(option.supplyLongInitial),
+      BigENumber.from(option.supplyShortInitial),
+      option.collateralDecimals
+    )
+    if (pricePerOption > 0) {
+      setMaxYield(
+        formatEther(
+          parseEther(maxPayout).div(parseEther(String(pricePerOption)))
+        )
+      )
+    }
+    if (isLong) {
+      if (parseUnits(usdPrice, 2).gt(0)) {
+        const be1 = parseUnits(usdPrice, 2)
+          .mul(BigENumber.from(option.inflection))
+          .sub(BigENumber.from(option.floor))
+          .mul(BigENumber.from(option.supplyLong))
+          .div(BigENumber.from(option.collateralBalanceLongInitial))
+          .add(BigENumber.from(option.floor))
+
+        const be2 = parseUnits(usdPrice, 2)
+          .mul(BigENumber.from(option.supplyLong))
+          .sub(BigENumber.from(option.collateralBalanceLongInitial))
+          .mul(
+            BigENumber.from(option.cap).sub(BigENumber.from(option.inflection))
+          )
+          .div(BigENumber.from(option.collateralBalanceShortInitial))
+          .add(BigENumber.from(option.inflection))
+
+        if (
+          BigENumber.from(option.floor).lte(be1) &&
+          be1.lte(BigENumber.from(option.inflection))
+        ) {
+          setBreakEven(formatEther(be1))
+        } else if (
+          BigENumber.from(option.inflection).lt(be2) &&
+          be2.lte(BigENumber.from(option.cap))
+        ) {
+          setBreakEven(formatEther(be2))
+        }
+      }
+      setIntrinsicValue(formatEther(payoffPerLongToken))
+      setMaxPayout(
+        formatEther(
+          BigENumber.from(option.collateralBalanceLongInitial)
+            .add(BigENumber.from(option.collateralBalanceShortInitial))
+            .mul(parseUnits('1', 18 - option.collateralDecimals))
+            .mul(parseEther('1'))
+            .div(BigENumber.from(option.supplyLongInitial))
+        )
+      )
+    } else {
+      if (parseUnits(usdPrice, 2).gt(0)) {
+        const be1 = parseUnits(usdPrice, 2)
+          .mul(BigENumber.from(option.supplyShort))
+          .sub(BigENumber.from(option.collateralBalanceShortInitial))
+          .div(BigENumber.from(option.collateralBalanceLongInitial))
+          .mul(
+            BigENumber.from(option.inflection).sub(
+              BigENumber.from(option.floor)
+            )
+          )
+          .sub(BigENumber.from(option.inflection))
+          .mul(BigENumber.from(-1))
+
+        const be2 = parseUnits(usdPrice, 2)
+          .mul(BigENumber.from(option.supplyShort))
+          .div(BigENumber.from(option.collateralBalanceShortInitial))
+          .mul(
+            BigENumber.from(option.cap).sub(BigENumber.from(option.inflection))
+          )
+          .sub(BigENumber.from(option.cap))
+          .mul(BigENumber.from(-1))
+
+        if (
+          BigENumber.from(option.floor).lte(be1) &&
+          be1.lte(BigENumber.from(option.inflection))
+        ) {
+          setBreakEven(formatEther(be1))
+        } else if (
+          BigENumber.from(option.inflection).lt(be2) &&
+          be2.lte(BigENumber.from(option.cap))
+        ) {
+          setBreakEven(formatEther(be2))
+        }
+      }
+      setIntrinsicValue(formatEther(payoffPerShortToken))
+      setMaxPayout(
+        formatEther(
+          BigENumber.from(option.collateralBalanceLongInitial)
+            .add(BigENumber.from(option.collateralBalanceShortInitial))
+            .mul(parseUnits('1', 18 - option.collateralDecimals))
+            .mul(parseEther('1'))
+            .div(BigENumber.from(option.supplyShortInitial))
+        )
+      )
+    }
+  }, [option, pricePerOption])
+
   return (
     <div>
       <form onSubmit={(event) => handleOrderSubmit(event)}>
@@ -363,6 +493,28 @@ export default function BuyLimit(props: {
           </Button>
         </Box>
       </form>
+      <Typography sx={{ mt: theme.spacing(1) }}>Stats Buy side:</Typography>
+      <Divider />
+      <Stack direction="row" justifyContent="space-between">
+        <Typography sx={{ mt: theme.spacing(1) }}>Max yield</Typography>
+        <Typography sx={{ mt: theme.spacing(1) }}>{maxYield}</Typography>
+      </Stack>
+      <Stack direction="row" justifyContent="space-between">
+        <Typography sx={{ mt: theme.spacing(1) }}>Break-even</Typography>
+        <Typography sx={{ mt: theme.spacing(1) }}>{breakEven}</Typography>
+      </Stack>
+      <Stack direction="row" justifyContent="space-between">
+        <Typography sx={{ mt: theme.spacing(1) }}>
+          Intrinsic value per token
+        </Typography>
+        <Typography sx={{ mt: theme.spacing(1) }}>{intrinsicValue}</Typography>
+      </Stack>
+      <Stack direction="row" justifyContent="space-between">
+        <Typography sx={{ mt: theme.spacing(1) }}>
+          Max payout per token
+        </Typography>
+        <Typography sx={{ mt: theme.spacing(1) }}>{maxPayout}</Typography>
+      </Stack>
     </div>
   )
 }
