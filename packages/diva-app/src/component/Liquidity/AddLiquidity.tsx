@@ -13,12 +13,19 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
-import { Contract, ethers } from 'ethers'
+import { BigNumber, Contract, ethers } from 'ethers'
 import styled from '@emotion/styled'
 import ERC20 from '@diva/contracts/abis/erc20.json'
-import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import { withStyles } from '@mui/styles'
 import { useWallet } from '@web3-ui/hooks'
+import { config } from '../../constants'
+import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -33,42 +40,42 @@ const BlackTextTypography = withStyles({
 
 type Props = {
   pool?: any
-  diva?: Contract
-  symbol?: string
 }
 
-export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
+export const AddLiquidity = ({ pool }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
   const theme = useTheme()
   const [openAlert, setOpenAlert] = React.useState(false)
   const [openCapacityAlert, setOpenCapacityAlert] = React.useState(false)
   const [decimal, setDecimal] = React.useState(18)
-  const tokenBalance = useErcBalance(pool ? pool!.collateralToken : undefined)
+  const tokenBalance = useErcBalance(
+    pool ? pool!.collateralToken.id : undefined
+  )
 
   const {
     provider,
     connection: { userAddress: account },
   } = useWallet()
-
+  const chainId = provider?.network?.chainId
   useEffect(() => {
     if (pool) {
-      const token = new ethers.Contract(
-        pool!.collateralToken,
-        ERC20,
-        provider.getSigner()
-      )
-      token.decimals().then((decimals: number) => {
-        setDecimal(decimals)
-      })
+      setDecimal(pool.collateralToken.decimals)
     }
     if (
       pool! &&
-      formatUnits(pool!.capacity, decimal!) !== '0.0' &&
+      formatUnits(parseEther(pool!.capacity), pool.collateralToken.decimals) !==
+        '0.0' &&
       textFieldValue !== '' &&
       parseFloat(formatEther(parseEther(textFieldValue))) +
-        parseFloat(formatUnits(pool!.collateralBalanceLong, decimal!)) +
-        parseFloat(formatUnits(pool!.collateralBalanceShort, decimal!)) >
-        parseFloat(formatUnits(pool!.capacity, decimal!))
+        parseFloat(
+          formatUnits(
+            parseEther(pool!.collateralBalance),
+            pool.collateralToken.decimals
+          )
+        ) >
+        parseFloat(
+          formatUnits(parseEther(pool!.capacity), pool.collateralToken.decimals)
+        )
     ) {
       setOpenCapacityAlert(true)
     } else {
@@ -80,6 +87,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
       setOpenAlert(false)
     }
   }, [tokenBalance, textFieldValue, pool])
+
   return (
     <Stack
       direction="column"
@@ -106,7 +114,8 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
           {tokenBalance ? (
             <>
               <Typography variant="subtitle2" color="text.secondary">
-                Your balance: {parseFloat(tokenBalance!).toFixed(4)} {symbol!}{' '}
+                Your balance: {parseFloat(tokenBalance!).toFixed(4)}{' '}
+                {pool!.collateralToken.symbol}{' '}
                 <MaxCollateral
                   role="button"
                   onClick={() => {
@@ -200,7 +209,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                     {pool &&
                       textFieldValue !== '' &&
                       (
-                        (parseFloat(formatEther(pool.supplyLongInitial)) /
+                        (parseFloat(formatEther(pool.supplyInitial)) /
                           (parseFloat(
                             formatUnits(
                               pool.collateralBalanceLongInitial,
@@ -228,7 +237,7 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                     {pool &&
                       textFieldValue !== '' &&
                       (
-                        (parseFloat(formatEther(pool.supplyShortInitial)) /
+                        (parseFloat(formatEther(pool.supplyInitial)) /
                           (parseFloat(
                             formatUnits(
                               pool.collateralBalanceLongInitial,
@@ -256,20 +265,20 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                     {pool &&
                       textFieldValue !== '' &&
                       (
-                        Math.round(
-                          ((parseFloat(textFieldValue) * 100) /
+                        (Math.round(
+                          (parseFloat(textFieldValue) * 100) /
                             parseFloat(
-                              formatEther(
-                                parseEther(textFieldValue).add(
-                                  pool.collateralBalanceLong.add(
-                                    pool.collateralBalanceShort
-                                  )
-                                )
+                              formatUnits(
+                                parseUnits(textFieldValue, decimal).add(
+                                  BigNumber.from(pool.collateralBalance)
+                                ),
+                                decimal
                               )
                             ) +
-                            Number.EPSILON) *
-                            100
-                        ) / 100
+                            Number.EPSILON
+                        ) *
+                          100) /
+                        100
                       ).toString() + ' %'}
                   </BlackTextTypography>
                   <BlackTextTypography>Share of Pool</BlackTextTypography>
@@ -301,22 +310,33 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                 }
                 onClick={() => {
                   const token = new ethers.Contract(
-                    pool!.collateralToken,
+                    pool!.collateralToken.id,
                     ERC20,
                     provider.getSigner()
                   )
                   token
-                    .approve(diva?.address, parseEther(textFieldValue))
+                    .approve(
+                      config[chainId!].divaAddress,
+                      parseUnits(textFieldValue, decimal)
+                    )
                     .then((tx: any) => {
                       return tx.wait()
                     })
                     .then(() => {
-                      return token.allowance(account, diva?.address)
+                      return token.allowance(
+                        account,
+                        config[chainId!].divaAddress
+                      )
                     })
                     .then(() => {
+                      const diva = new ethers.Contract(
+                        config[chainId!].divaAddress,
+                        DIVA_ABI,
+                        provider?.getSigner()
+                      )
                       diva!.addLiquidity(
                         window.location.pathname.split('/')[1],
-                        parseEther(textFieldValue)
+                        parseUnits(textFieldValue, decimal)
                       )
                     })
                     .catch((err: any) => console.error(err))

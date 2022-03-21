@@ -14,8 +14,7 @@ import React, { useEffect } from 'react'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import { AddLiquidity } from './AddLiquidity'
-import { Contract, ethers } from 'ethers'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import { BigNumber, Contract, ethers } from 'ethers'
 import { Pool } from '../../lib/queries'
 import { RemoveLiquidity } from './RemoveLiquidity'
 import { formatUnits } from 'ethers/lib/utils'
@@ -25,44 +24,21 @@ import { useWallet } from '@web3-ui/hooks'
 import { ReactComponent as Bullish } from '../../Images/bullish-svgrepo-com.svg'
 import { ReactComponent as Bearish } from '../../Images/bearish-svgrepo-com.svg'
 import { ReactComponent as Star } from '../../Images/star-svgrepo-com.svg'
-export const Liquidity = () => {
+import { parseEther } from 'ethers/utils'
+type Props = {
+  pool?: any
+}
+
+export const Liquidity = ({ pool }: Props) => {
   const [value, setValue] = React.useState(0)
-  const [pool, setPool] = React.useState<Pool>()
-  const [diva, setDiva] = React.useState<Contract>()
-  const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
-  const [symbol, setSymbol] = React.useState('')
   const { provider } = useWallet()
   const chainId = provider?.network?.chainId
 
   const theme = useTheme()
 
   useEffect(() => {
-    if (chainId) {
-      const diva = new ethers.Contract(
-        config[chainId!].divaAddress,
-        DIVA_ABI,
-        provider.getSigner()
-      )
-      setDiva(diva!)
-      diva
-        .getPoolParameters(window.location.pathname.split('/')[1])
-        .then((pool: Pool) => {
-          setPool(pool)
-          const token = new ethers.Contract(
-            pool!.collateralToken.id,
-            ERC20,
-            provider.getSigner()
-          )
-          token.symbol().then((symbol: string) => {
-            setSymbol(symbol)
-          })
-          token.decimals().then((decimals: number) => {
-            setDecimal(decimals)
-          })
-          setOpenAlert(Date.now() > 1000 * parseInt(pool.expiryTime))
-        })
-    }
+    setOpenAlert(Date.now() > 1000 * parseInt(pool.expiryTime))
   }, [chainId])
 
   const handleChange = (event: any, newValue: any) => {
@@ -103,23 +79,31 @@ export const Liquidity = () => {
             <Tab label="Remove" />
           </Tabs>
           {value ? (
-            <RemoveLiquidity pool={pool!} diva={diva} symbol={symbol} />
+            <RemoveLiquidity pool={pool!} />
           ) : (
-            <AddLiquidity pool={pool!} diva={diva} symbol={symbol} />
+            <AddLiquidity pool={pool!} />
           )}
         </Container>
         {!value && pool && (
           <Container sx={{ mt: theme.spacing(4), mb: theme.spacing(4) }}>
-            {pool && formatUnits(pool!.capacity, decimal!) !== '0.0' ? (
+            {pool &&
+            formatUnits(pool!.capacity, pool!.collateralToken.decimals) !==
+              '0.0' ? (
               <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(4) }}>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Pool Capacity</Typography>
                   <Typography>
                     {pool &&
-                      (formatUnits(pool!.capacity, decimal) === '0.0'
+                      (formatUnits(
+                        pool!.capacity,
+                        pool!.collateralToken.decimals
+                      ) === '0.0'
                         ? 'Unlimited'
-                        : formatUnits(pool!.capacity, decimal))}{' '}
-                    {symbol!}{' '}
+                        : formatUnits(
+                            pool!.capacity,
+                            pool!.collateralToken.decimals
+                          ))}{' '}
+                    {pool!.collateralToken.symbol}{' '}
                   </Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
@@ -128,14 +112,20 @@ export const Liquidity = () => {
                     {pool &&
                       (100 *
                         parseFloat(
-                          formatUnits(pool.collateralBalance, decimal)
+                          formatUnits(
+                            BigNumber.from(pool.collateralBalance),
+                            pool!.collateralToken.decimals
+                          )
                         )) /
                         parseFloat(formatUnits(pool.capacity)) +
                         '% / ' +
                         parseFloat(
-                          formatUnits(pool.collateralBalance, decimal)
+                          formatUnits(
+                            BigNumber.from(pool.collateralBalance),
+                            pool!.collateralToken.decimals
+                          )
                         )}{' '}
-                    {symbol!}{' '}
+                    {pool.collateralToken.symbol!}{' '}
                   </Typography>
                 </Stack>
               </Container>
@@ -150,9 +140,12 @@ export const Liquidity = () => {
                   <Typography>
                     {pool &&
                       parseFloat(
-                        formatUnits(pool.collateralBalance, decimal)
+                        formatUnits(
+                          BigNumber.from(pool.collateralBalance),
+                          pool.collateralToken.decimals
+                        )
                       ).toFixed(4)}{' '}
-                    {symbol!}{' '}
+                    {pool.collateralToken.symbol!}{' '}
                   </Typography>
                 </Stack>
               </Container>

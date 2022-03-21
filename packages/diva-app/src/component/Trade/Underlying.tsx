@@ -87,7 +87,7 @@ export default function Underlying() {
         <Tab label="Liquidity" />
       </Tabs>
       {value ? (
-        <Liquidity />
+        <Liquidity pool={pool} />
       ) : (
         <Stack direction="row" spacing={2}>
           <Stack spacing={2}>

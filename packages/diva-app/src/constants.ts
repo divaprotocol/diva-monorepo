@@ -11,7 +11,7 @@ export const projectId = 'e3ea5575a42b4de7be15d7c197c12045'
 export const config: { [key: number]: SingleConfig } = {
   1: {
     name: 'Ropsten',
-    divaAddress: '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E',
+    divaAddress: '0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf',
     whitelistAddress: '0x2A5c18f001719f4663ab8d3E65E3E54182376B20',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten-staging',
@@ -20,7 +20,7 @@ export const config: { [key: number]: SingleConfig } = {
   },
   3: {
     name: 'Ropsten',
-    divaAddress: '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E',
+    divaAddress: '0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf',
     whitelistAddress: '0x2A5c18f001719f4663ab8d3E65E3E54182376B20',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten-staging',

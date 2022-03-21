@@ -49,7 +49,7 @@ const AddToMetamask = (props: any) => {
         params: {
           type: 'ERC20',
           options: {
-            address: props.row.address,
+            address: props.row.address.id,
             symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
             decimals: 18,
             image:
@@ -100,7 +100,7 @@ const SubmitButton = (props: any) => {
   )
 
   const token =
-    provider && new ethers.Contract(props.row.address, ERC20, provider)
+    provider && new ethers.Contract(props.row.address.id, ERC20, provider)
   const handleRedeem = (e) => {
     e.stopPropagation()
     if (props.row.Status === 'Confirmed*') {
@@ -120,7 +120,7 @@ const SubmitButton = (props: any) => {
                   .then((tx) => {
                     tx.wait().then(() => {
                       diva
-                        .redeemPositionToken(props.row.address, bal)
+                        .redeemPositionToken(props.row.address.id, bal)
                         .catch((err) => {
                           console.error(err)
                         })
@@ -138,7 +138,7 @@ const SubmitButton = (props: any) => {
               ?.balanceOf(userAddress)
               .then((bal: BigNumber) => {
                 diva
-                  .redeemPositionToken(props.row.address, bal)
+                  .redeemPositionToken(props.row.address.id, bal)
                   .catch((err) => {
                     console.error(err)
                   })
@@ -155,7 +155,7 @@ const SubmitButton = (props: any) => {
       token
         ?.balanceOf(userAddress)
         .then((bal: BigNumber) => {
-          diva.redeemPositionToken(props.row.address, bal).catch((err) => {
+          diva.redeemPositionToken(props.row.address.id, bal).catch((err) => {
             console.error(err)
           })
         })
@@ -476,24 +476,28 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
-  const tokenBalances = useTokenBalances(rows.map((v) => v.address))
+  const tokenBalances = useTokenBalances(rows.map((v) => v.address.id))
 
   const filteredRows =
     tokenBalances != null
       ? rows
           .filter(
             (v) =>
-              tokenBalances[v.address] != null && tokenBalances[v.address].gt(0)
+              tokenBalances[v.address.id] != null &&
+              tokenBalances[v.address.id].gt(0)
           )
           .map((v) => ({
             ...v,
             Balance:
-              parseInt(formatUnits(tokenBalances[v.address])) < 0.01
+              parseInt(formatUnits(tokenBalances[v.address.id])) < 0.01
                 ? '<0.01'
-                : parseFloat(formatUnits(tokenBalances[v.address])).toFixed(4),
+                : parseFloat(formatUnits(tokenBalances[v.address.id])).toFixed(
+                    4
+                  ),
           }))
       : []
-
+  console.log('filteredRows')
+  console.log(rows)
   return userAddress ? (
     <Stack
       direction="row"
