@@ -113,95 +113,99 @@ export default function BuyMarket(props: {
         alert('Please enter number of options you want to buy')
       }
     } else {
-      const totalAmount = youPay + existingOrdersAmount
-      if (youPay > remainingApprovalAmount) {
-        if (totalAmount > collateralBalance) {
-          alert('Not sufficient balance')
-        } else {
-          const additionalApproval = Number(
-            (youPay - remainingApprovalAmount).toFixed(
-              totalDecimals(youPay, remainingApprovalAmount)
-            )
-          )
-          if (
-            confirm(
-              'Required collateral balance exceeds approval limit, do you want to approve additioal ' +
-                additionalApproval +
-                ' to complete this order'
-            )
-          ) {
-            let newAllowance = Number(
-              (additionalApproval + allowance).toFixed(
-                totalDecimals(additionalApproval, allowance)
-              )
-            )
-            newAllowance = await approveBuyAmount(newAllowance)
-            newAllowance = Number(
-              formatUnits(newAllowance.toString(), option.collateralDecimals)
-            )
-            const remainingApproval = Number(
-              (newAllowance - existingOrdersAmount).toFixed(
-                totalDecimals(newAllowance, existingOrdersAmount)
-              )
-            )
-            setRemainingApprovalAmount(remainingApproval)
-            setAllowance(newAllowance)
+      if (collateralBalance > 0) {
+        const totalAmount = youPay + existingOrdersAmount
+        if (youPay > remainingApprovalAmount) {
+          if (totalAmount > collateralBalance) {
+            alert('Not sufficient balance')
           } else {
-            //TBD discuss this case
-            console.log('nothing done')
-          }
-        }
-      } else {
-        const orderData = {
-          takerAccount: accounts[0],
-          provider: web3,
-          isBuy: true,
-          nbrOptions: numberOfOptions,
-          collateralDecimals: option.collateralDecimals,
-          makerToken: makerToken,
-          takerToken: option.collateralToken,
-          ERC20_ABI: ERC20_ABI,
-          avgExpectedRate: avgExpectedRate,
-          existingLimitOrders: existingSellLimitOrders,
-        }
-
-        buyMarketOrder(orderData).then((orderFillStatus: any) => {
-          let orderFilled = false
-          if (!(orderFillStatus === undefined)) {
-            if (!('logs' in orderFillStatus)) {
-              alert('Order could not be filled logs not found')
-              return
+            const additionalApproval = Number(
+              (youPay - remainingApprovalAmount).toFixed(
+                totalDecimals(youPay, remainingApprovalAmount)
+              )
+            )
+            if (
+              confirm(
+                'Required collateral balance exceeds approval limit, do you want to approve additioal ' +
+                  additionalApproval +
+                  ' to complete this order'
+              )
+            ) {
+              let newAllowance = Number(
+                (additionalApproval + allowance).toFixed(
+                  totalDecimals(additionalApproval, allowance)
+                )
+              )
+              newAllowance = await approveBuyAmount(newAllowance)
+              newAllowance = Number(
+                formatUnits(newAllowance.toString(), option.collateralDecimals)
+              )
+              const remainingApproval = Number(
+                (newAllowance - existingOrdersAmount).toFixed(
+                  totalDecimals(newAllowance, existingOrdersAmount)
+                )
+              )
+              setRemainingApprovalAmount(remainingApproval)
+              setAllowance(newAllowance)
             } else {
-              orderFillStatus.logs.forEach(async (eventData: any) => {
-                if (!('event' in eventData)) {
-                  return
-                } else {
-                  if (eventData.event === 'LimitOrderFilled') {
-                    //wait for 4 secs for 0x to update orders then handle order book display
-                    await new Promise((resolve) => setTimeout(resolve, 4000))
-                    await props.handleDisplayOrder()
-                    //reset input & you pay fields
-                    Array.from(document.querySelectorAll('input')).forEach(
-                      (input) => (input.value = '')
-                    )
-                    setNumberOfOptions(0.0)
-                    setYouPay(0.0)
-                    //alert('Order successfully filled')
-                    orderFilled = true
+              //TBD discuss this case
+              console.log('nothing done')
+            }
+          }
+        } else {
+          const orderData = {
+            takerAccount: accounts[0],
+            provider: web3,
+            isBuy: true,
+            nbrOptions: numberOfOptions,
+            collateralDecimals: option.collateralDecimals,
+            makerToken: makerToken,
+            takerToken: option.collateralToken,
+            ERC20_ABI: ERC20_ABI,
+            avgExpectedRate: avgExpectedRate,
+            existingLimitOrders: existingSellLimitOrders,
+          }
+
+          buyMarketOrder(orderData).then((orderFillStatus: any) => {
+            let orderFilled = false
+            if (!(orderFillStatus === undefined)) {
+              if (!('logs' in orderFillStatus)) {
+                alert('Order could not be filled logs not found')
+                return
+              } else {
+                orderFillStatus.logs.forEach(async (eventData: any) => {
+                  if (!('event' in eventData)) {
                     return
                   } else {
-                    alert('Order could not be filled')
+                    if (eventData.event === 'LimitOrderFilled') {
+                      //wait for 4 secs for 0x to update orders then handle order book display
+                      await new Promise((resolve) => setTimeout(resolve, 4000))
+                      await props.handleDisplayOrder()
+                      //reset input & you pay fields
+                      Array.from(document.querySelectorAll('input')).forEach(
+                        (input) => (input.value = '')
+                      )
+                      setNumberOfOptions(0.0)
+                      setYouPay(0.0)
+                      //alert('Order successfully filled')
+                      orderFilled = true
+                      return
+                    } else {
+                      alert('Order could not be filled')
+                    }
                   }
-                }
-              })
+                })
+              }
+            } else {
+              alert('order could not be filled response is not defined')
             }
-          } else {
-            alert('order could not be filled response is not defined')
-          }
-          if (orderFilled) {
-            alert('Order successfully filled')
-          }
-        })
+            if (orderFilled) {
+              alert('Order successfully filled')
+            }
+          })
+        }
+      } else {
+        alert('Collateral balance is zero')
       }
     }
   }

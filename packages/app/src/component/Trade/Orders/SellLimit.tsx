@@ -122,68 +122,72 @@ export default function SellLimit(props: {
         alert('please enter positive balance for approval')
       }
     } else {
-      const totalAmount = numberOfOptions + existingOrdersAmount
-      if (numberOfOptions > remainingApprovalAmount) {
-        if (totalAmount > walletBalance) {
-          alert('Not sufficiant balance')
-        } else {
-          const additionalApproval = Number(
-            (numberOfOptions - remainingApprovalAmount).toFixed(
-              totalDecimals(numberOfOptions, remainingApprovalAmount)
-            )
-          )
-          if (
-            confirm(
-              'options to sell exceeds approval limit, do you want to approve additional ' +
-                additionalApproval +
-                ' to complete this order?'
-            )
-          ) {
-            setOrderBtnDisabled(true)
-            let newAllowance = Number(
-              (additionalApproval + allowance).toFixed(
-                totalDecimals(additionalApproval, allowance)
-              )
-            )
-            newAllowance = await approveSellAmount(newAllowance)
-            newAllowance = Number(formatUnits(newAllowance.toString(), 18))
-            const remainingApproval = Number(
-              (newAllowance - existingOrdersAmount).toFixed(
-                totalDecimals(newAllowance, existingOrdersAmount)
-              )
-            )
-            setRemainingApprovalAmount(remainingApproval)
-            setAllowance(newAllowance)
-            setOrderBtnDisabled(false)
+      if (walletBalance > 0) {
+        const totalAmount = numberOfOptions + existingOrdersAmount
+        if (numberOfOptions > remainingApprovalAmount) {
+          if (totalAmount > walletBalance) {
+            alert('Not sufficiant balance')
           } else {
-            //TBD discuss this case
-            setIsApproved(true)
-            console.log('nothing done')
+            const additionalApproval = Number(
+              (numberOfOptions - remainingApprovalAmount).toFixed(
+                totalDecimals(numberOfOptions, remainingApprovalAmount)
+              )
+            )
+            if (
+              confirm(
+                'options to sell exceeds approval limit, do you want to approve additional ' +
+                  additionalApproval +
+                  ' to complete this order?'
+              )
+            ) {
+              setOrderBtnDisabled(true)
+              let newAllowance = Number(
+                (additionalApproval + allowance).toFixed(
+                  totalDecimals(additionalApproval, allowance)
+                )
+              )
+              newAllowance = await approveSellAmount(newAllowance)
+              newAllowance = Number(formatUnits(newAllowance.toString(), 18))
+              const remainingApproval = Number(
+                (newAllowance - existingOrdersAmount).toFixed(
+                  totalDecimals(newAllowance, existingOrdersAmount)
+                )
+              )
+              setRemainingApprovalAmount(remainingApproval)
+              setAllowance(newAllowance)
+              setOrderBtnDisabled(false)
+            } else {
+              //TBD discuss this case
+              setIsApproved(true)
+              console.log('nothing done')
+            }
           }
+        } else {
+          const orderData = {
+            maker: makerAccount,
+            makerToken: optionTokenAddress,
+            takerToken: option.collateralToken,
+            provider: web3,
+            isBuy: false,
+            nbrOptions: numberOfOptions,
+            limitPrice: pricePerOption,
+            collateralDecimals: option.collateralDecimals,
+            orderExpiry: expiry,
+          }
+          sellLimitOrder(orderData)
+            .then(async (response) => {
+              if (response.status === 200) {
+                await new Promise((resolve) => setTimeout(resolve, 2000))
+                await props.handleDisplayOrder()
+                handleFormReset()
+              }
+            })
+            .catch(function (error) {
+              console.error(error)
+            })
         }
       } else {
-        const orderData = {
-          maker: makerAccount,
-          makerToken: optionTokenAddress,
-          takerToken: option.collateralToken,
-          provider: web3,
-          isBuy: false,
-          nbrOptions: numberOfOptions,
-          limitPrice: pricePerOption,
-          collateralDecimals: option.collateralDecimals,
-          orderExpiry: expiry,
-        }
-        sellLimitOrder(orderData)
-          .then(async (response) => {
-            if (response.status === 200) {
-              await new Promise((resolve) => setTimeout(resolve, 2000))
-              await props.handleDisplayOrder()
-              handleFormReset()
-            }
-          })
-          .catch(function (error) {
-            console.error(error)
-          })
+        alert('No ' + params.tokenType.toUpperCase() + ' avaible to sell')
       }
     }
   }
@@ -291,7 +295,7 @@ export default function SellLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Price per Option</LabelStyle>
+            <LabelStyle>Price per {params.tokenType.toUpperCase()}</LabelStyle>
           </LabelStyleDiv>
           <FormInput
             type="text"
@@ -311,7 +315,9 @@ export default function SellLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>Options in Wallet</LabelGrayStyle>
+            <LabelGrayStyle>
+              {params.tokenType.toUpperCase()} in Wallet
+            </LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>{walletBalance.toFixed(4)}</LabelGrayStyle>

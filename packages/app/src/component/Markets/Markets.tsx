@@ -69,7 +69,6 @@ const columns: GridColDef[] = [
 export default function Markets() {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
-
   const query = useQuery<{ pools: Pool[] }>(
     `pools-${chainId}`,
     () =>
