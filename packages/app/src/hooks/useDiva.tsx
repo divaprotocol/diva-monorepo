@@ -33,9 +33,17 @@ type DivaContract = Contract & {
     finalReferenceValue: string,
     allowChallenge: boolean
   ) => Promise<void>
+  challengeFinalReferenceValue: (
+    poolId: string,
+    referenceValue: number
+  ) => Promise<void>
 }
 
 type DivaApi = {
+  challengeFinalReferenceValue: (props: {
+    poolId: string
+    referenceValue: number
+  }) => Promise<void>
   createContingentPool: (props: {
     inflection: number
     cap: number
@@ -149,6 +157,9 @@ export function useDiva(): DivaApi | null {
       return contract.getPoolParametersById(id).then((val) => {
         return val
       })
+    },
+    challengeFinalReferenceValue: () => {
+      return Promise.resolve()
     },
     setFinalReferenceValueById: () => {
       return Promise.resolve()
