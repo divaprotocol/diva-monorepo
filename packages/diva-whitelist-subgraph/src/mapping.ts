@@ -23,6 +23,7 @@ function handleDataProviderEvent(dataProviderAddress: Address, whitelistContract
   let contract = DIVAWhitelist.bind(whitelistContract);
   let dataProviderInfo = contract.getDataProvider(dataProviderAddress);
   dataProvider.name = dataProviderInfo.name;
+  dataProvider.publicTrigger = dataProviderInfo.publicTrigger;
 
   dataProvider.save();
 }
