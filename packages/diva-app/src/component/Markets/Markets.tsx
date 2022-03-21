@@ -163,7 +163,7 @@ export default function Markets() {
       {
         ...shared,
         id: `${val.id}/long`,
-        Id: 'L-' + val.id,
+        Id: 'L' + val.id,
         address: val.longToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
@@ -187,7 +187,7 @@ export default function Markets() {
       {
         ...shared,
         id: `${val.id}/short`,
-        Id: 'S-' + val.id,
+        Id: 'S' + val.id,
         address: val.shortToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
