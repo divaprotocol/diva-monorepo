@@ -59,8 +59,8 @@ export default function OptionHeader(optionData: {
   const handleAddMetaMask = async () => {
     const { TokenAddress, isLong, tokenDecimals } = optionData
     const tokenSymbol = isLong
-      ? `L-${optionData.poolId}`
-      : `S-${optionData.poolId}`
+      ? `L${optionData.poolId}`
+      : `S${optionData.poolId}`
 
     try {
       await window.ethereum.request({
@@ -70,7 +70,7 @@ export default function OptionHeader(optionData: {
           options: {
             address: TokenAddress,
             symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
-            decimals: tokenDecimals,
+            decimals: 18,
             image:
               'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
           },

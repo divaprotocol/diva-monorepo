@@ -35,16 +35,17 @@ const dict: {
   [key: string]: any
 } = {
   referenceAsset: 'Reference Asset',
-  expiryTime: 'Expiry Date',
+  expiryTime: 'Expiry Time',
   floor: 'Floor',
-  cap: 'Ceiling',
+  cap: 'Cap',
   inflection: 'Inflection',
-  collateralBalanceShort: 'CollateralBalance (Short)',
-  collateralBalanceLong: 'CollateralBalance (Long)',
+  collateralBalanceShort: 'Collateral Balance (Short)',
+  collateralBalanceLong: 'Collateral Balance (Long)',
   shortTokenSupply: 'Token Supply (Short)',
   longTokenSupply: 'Token Supply (Long)',
-  dataProvider: 'Data Feed Provider',
+  dataProvider: 'Data Provider',
   collateralToken: 'Collateral Token',
+  tokenSupply: 'Position Token Supply',
   capacity: 'Maximum Pool Capacity',
 }
 

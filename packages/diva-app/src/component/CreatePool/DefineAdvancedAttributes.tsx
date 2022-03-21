@@ -97,7 +97,7 @@ export function DefineAdvanced({
         <Box pb={3}>
           <FormControl fullWidth error={formik.errors.tokenSupply != null}>
             <TextField
-              name="tokenSupply"
+              name="Position Token Supply"
               id="tokenSupply"
               onBlur={formik.handleBlur}
               error={formik.errors.tokenSupply != null}

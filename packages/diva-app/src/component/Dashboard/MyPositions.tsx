@@ -40,9 +40,7 @@ const AddToMetamask = (props: any) => {
   const handleAddMetaMask = async (e) => {
     e.stopPropagation()
     const tokenSymbol =
-      props.row.id.split('/')[1][0].toUpperCase() +
-      '-' +
-      props.row.id.split('/')[0]
+      props.row.id.split('/')[1][0].toUpperCase() + props.row.id.split('/')[0]
     try {
       await window.ethereum.request({
         method: 'wallet_watchAsset',
