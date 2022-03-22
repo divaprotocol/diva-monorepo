@@ -326,30 +326,52 @@ export default function BuyLimit(props: {
     if (pricePerOption > 0) {
       dispatch(
         setMaxYield(
-          formatEther(
-            parseEther(maxPayout).div(parseEther(String(pricePerOption)))
-          )
+          parseFloat(
+            formatEther(
+              parseEther(maxPayout)
+                .mul(parseEther('1'))
+                .div(parseEther(String(pricePerOption)))
+            )
+          ).toFixed(2)
         )
       )
     }
     if (isLong) {
-      if (parseUnits(usdPrice, 2).gt(0)) {
-        const be1 = parseUnits(usdPrice, 2)
-          .mul(BigENumber.from(option.inflection))
-          .sub(BigENumber.from(option.floor))
-          .mul(BigENumber.from(option.supplyLong))
-          .div(BigENumber.from(option.collateralBalanceLongInitial))
+      if (parseEther(String(pricePerOption)).gt(0)) {
+        const be1 = parseEther(String(pricePerOption))
+          .mul(
+            BigENumber.from(option.inflection).sub(
+              BigENumber.from(option.floor)
+            )
+          )
+          .mul(BigENumber.from(option.supplyInitial))
+          .div(
+            BigENumber.from(option.collateralBalanceLongInitial).mul(
+              parseUnits('1', 18 - option.collateralToken.decimals)
+            )
+          )
+          .div(parseEther('1'))
           .add(BigENumber.from(option.floor))
 
-        const be2 = parseUnits(usdPrice, 2)
-          .mul(BigENumber.from(option.supplyLong))
-          .sub(BigENumber.from(option.collateralBalanceLongInitial))
+        const be2 = parseEther(String(pricePerOption))
+          .mul(BigENumber.from(option.supplyInitial))
+          .div(parseEther('1'))
+          .sub(
+            BigENumber.from(option.collateralBalanceLongInitial).mul(
+              parseUnits('1', 18 - option.collateralToken.decimals)
+            )
+          )
           .mul(
             BigENumber.from(option.cap).sub(BigENumber.from(option.inflection))
           )
-          .div(BigENumber.from(option.collateralBalanceShortInitial))
+          .div(
+            BigENumber.from(option.collateralBalanceShortInitial).mul(
+              parseUnits('1', 18 - option.collateralToken.decimals)
+            )
+          )
           .add(BigENumber.from(option.inflection))
-
+        console.log(formatEther(be1))
+        console.log(formatEther(be2))
         if (
           BigENumber.from(option.floor).lte(be1) &&
           be1.lte(BigENumber.from(option.inflection))
@@ -375,38 +397,53 @@ export default function BuyLimit(props: {
         )
       )
     } else {
-      if (parseUnits(usdPrice, 2).gt(0)) {
-        const be1 = parseUnits(usdPrice, 2)
-          .mul(BigENumber.from(option.supplyShort))
-          .sub(BigENumber.from(option.collateralBalanceShortInitial))
-          .div(BigENumber.from(option.collateralBalanceLongInitial))
+      if (parseEther(String(pricePerOption)).gt(0)) {
+        const be1 = parseEther(String(pricePerOption))
+          .mul(BigENumber.from(option.supplyInitial))
+          .div(parseEther('1'))
+          .sub(
+            BigENumber.from(option.collateralBalanceShortInitial).mul(
+              parseUnits('1', 18 - option.collateralToken.decimals)
+            )
+          )
           .mul(
             BigENumber.from(option.inflection).sub(
               BigENumber.from(option.floor)
             )
           )
+          .div(
+            BigENumber.from(option.collateralBalanceLongInitial).mul(
+              parseUnits('1', 18 - option.collateralToken.decimals)
+            )
+          )
           .sub(BigENumber.from(option.inflection))
-          .mul(BigENumber.from(-1))
+          .mul(BigENumber.from('-1'))
 
-        const be2 = parseUnits(usdPrice, 2)
-          .mul(BigENumber.from(option.supplyShort))
-          .div(BigENumber.from(option.collateralBalanceShortInitial))
+        const be2 = parseEther(String(pricePerOption))
+          .mul(BigENumber.from(option.supplyInitial))
+          .div(
+            BigENumber.from(option.collateralBalanceShortInitial).mul(
+              parseUnits('1', 18 - option.collateralToken.decimals)
+            )
+          )
           .mul(
             BigENumber.from(option.cap).sub(BigENumber.from(option.inflection))
           )
+          .div(parseEther('1'))
           .sub(BigENumber.from(option.cap))
-          .mul(BigENumber.from(-1))
-
+          .mul(BigENumber.from('-1'))
+        console.log(formatEther(be1))
+        console.log(formatEther(be2))
         if (
           BigENumber.from(option.floor).lte(be1) &&
           be1.lte(BigENumber.from(option.inflection))
         ) {
-          setBreakEven(formatEther(be1))
+          dispatch(setBreakEven(formatEther(be1)))
         } else if (
           BigENumber.from(option.inflection).lt(be2) &&
           be2.lte(BigENumber.from(option.cap))
         ) {
-          setBreakEven(formatEther(be2))
+          dispatch(setBreakEven(formatEther(be2)))
         }
       }
       dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))

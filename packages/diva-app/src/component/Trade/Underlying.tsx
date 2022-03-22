@@ -136,7 +136,7 @@ export default function Underlying() {
               />
             </Paper>
             <Typography sx={{ mt: theme.spacing(1) }}>
-              Stats Buy side:
+              Buyers statistics:
             </Typography>
             <Divider />
             <Stack direction="row" justifyContent="space-between">

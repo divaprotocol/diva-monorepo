@@ -399,9 +399,11 @@ export default function BuyMarket(props: {
     if (avgExpectedRate > 0) {
       dispatch(
         setMaxYield(
-          formatEther(
-            BigENumber.from(maxPayout).div(BigENumber.from(avgExpectedRate))
-          )
+          parseFloat(
+            formatEther(
+              BigENumber.from(maxPayout).div(BigENumber.from(avgExpectedRate))
+            )
+          ).toFixed(2)
         )
       )
     }
