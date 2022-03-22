@@ -20,7 +20,6 @@ import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import {
   formatEther,
@@ -28,91 +27,29 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import ERC20_ABI from '../../../abi/ERC20.json'
+import {
+  setBreakEven,
+  setMaxYield,
+  setIntrinsicValue,
+  setMaxPayout,
+} from '../../../Redux/Stats'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { BigNumber } from '@0x/utils'
 import { BigNumber as BigENumber } from 'ethers'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
 import { NETWORKS } from '@web3-ui/hooks'
-import { useAppSelector } from '../../../Redux/hooks'
+import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { Container, Divider, Stack, useTheme } from '@mui/material'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
+import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const CHAIN_ID = NETWORKS.ropsten
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
-export function calcPayoffPerToken(
-  floor,
-  inflection,
-  cap,
-  collateralBalanceLongInitial,
-  collateralBalanceShortInitial,
-  finalReferenceValue,
-  supplyLongInitial,
-  supplyShortInitial,
-  collateralTokenDecimals
-) {
-  const SCALING = parseUnits('1', 18 - collateralTokenDecimals)
-  const UNIT = parseEther('1')
-
-  const collateralBalanceLongInitialScaled =
-    collateralBalanceLongInitial.mul(SCALING)
-  const collateralBalanceShortInitialScaled =
-    collateralBalanceShortInitial.mul(SCALING)
-  let payoffLong = BigENumber.from(0)
-  if (finalReferenceValue.eq(inflection)) {
-    payoffLong = collateralBalanceLongInitialScaled
-  } else if (finalReferenceValue.lt(inflection)) {
-    if ((cap.eq(inflection) && floor.eq(inflection)) || floor.eq(inflection)) {
-      payoffLong = BigENumber.from(0)
-    } else {
-      if (finalReferenceValue.gt(floor)) {
-        payoffLong = collateralBalanceLongInitialScaled
-          .mul(finalReferenceValue.sub(floor))
-          .div(inflection.sub(floor))
-      } else {
-        payoffLong = BigENumber.from(0)
-      }
-    }
-  } else {
-    if ((cap.eq(inflection) && floor.eq(inflection)) || inflection.eq(cap)) {
-      payoffLong = collateralBalanceLongInitialScaled.add(
-        collateralBalanceShortInitialScaled
-      )
-    } else {
-      if (finalReferenceValue.lt(cap)) {
-        payoffLong = collateralBalanceLongInitialScaled.add(
-          collateralBalanceShortInitialScaled
-            .mul(finalReferenceValue.sub(inflection))
-            .div(cap.sub(inflection))
-        )
-      } else {
-        payoffLong = collateralBalanceLongInitialScaled.add(
-          collateralBalanceShortInitialScaled
-        )
-      }
-    }
-  }
-  const payoffShort = collateralBalanceLongInitialScaled
-    .add(collateralBalanceShortInitialScaled)
-    .sub(payoffLong)
-
-  const payoffPerLongToken = payoffLong
-    .mul(UNIT)
-    .div(supplyLongInitial)
-    .div(SCALING)
-  const payoffPerShortToken = payoffShort
-    .mul(UNIT)
-    .div(supplyShortInitial)
-    .div(SCALING)
-
-  return { payoffPerLongToken, payoffPerShortToken }
-}
-
 export default function BuyMarket(props: {
   option: Pool
   handleDisplayOrder: () => any
@@ -144,12 +81,9 @@ export default function BuyMarket(props: {
   // TODO: check again why we need to use "any" here
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const theme = useTheme()
-  const [maxPayout, setMaxPayout] = useState('0')
-  const [intrinsicValue, setIntrinsicValue] = useState('0')
-  const [maxYield, setMaxYield] = useState('n/a')
-  const [breakEven, setBreakEven] = useState('n/a')
   const [usdPrice, setUsdPrice] = useState('0')
-
+  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
+  const dispatch = useAppDispatch()
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseFloat(value)
@@ -459,14 +393,15 @@ export default function BuyMarket(props: {
         parseUnits(usdPrice, 2).gt(0)
         ? parseUnits(usdPrice, 2)
         : BigENumber.from(option.finalReferenceValue),
-      BigENumber.from(option.supplyLongInitial),
-      BigENumber.from(option.supplyShortInitial),
-      option.collateralDecimals
+      BigENumber.from(option.supplyInitial),
+      option.collateralToken.decimals
     )
     if (avgExpectedRate > 0) {
-      setMaxYield(
-        formatEther(
-          BigENumber.from(maxPayout).div(BigENumber.from(avgExpectedRate))
+      dispatch(
+        setMaxYield(
+          formatEther(
+            BigENumber.from(maxPayout).div(BigENumber.from(avgExpectedRate))
+          )
         )
       )
     }
@@ -492,22 +427,24 @@ export default function BuyMarket(props: {
           BigENumber.from(option.floor).lte(be1) &&
           be1.lte(BigENumber.from(option.inflection))
         ) {
-          setBreakEven(formatEther(be1))
+          dispatch(setBreakEven(formatEther(be1)))
         } else if (
           BigENumber.from(option.inflection).lt(be2) &&
           be2.lte(BigENumber.from(option.cap))
         ) {
-          setBreakEven(formatEther(be2))
+          dispatch(setBreakEven(formatEther(be2)))
         }
       }
-      setIntrinsicValue(formatEther(payoffPerLongToken))
-      setMaxPayout(
-        formatEther(
-          BigENumber.from(option.collateralBalanceLongInitial)
-            .add(BigENumber.from(option.collateralBalanceShortInitial))
-            .mul(parseUnits('1', 18 - option.collateralDecimals))
-            .mul(parseEther('1'))
-            .div(BigENumber.from(option.supplyLongInitial))
+      dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
+      dispatch(
+        setMaxPayout(
+          formatEther(
+            BigENumber.from(option.collateralBalanceLongInitial)
+              .add(BigENumber.from(option.collateralBalanceShortInitial))
+              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+              .mul(parseEther('1'))
+              .div(BigENumber.from(option.supplyInitial))
+          )
         )
       )
     } else {
@@ -537,22 +474,24 @@ export default function BuyMarket(props: {
           BigENumber.from(option.floor).lte(be1) &&
           be1.lte(BigENumber.from(option.inflection))
         ) {
-          setBreakEven(formatEther(be1))
+          dispatch(setBreakEven(formatEther(be1)))
         } else if (
           BigENumber.from(option.inflection).lt(be2) &&
           be2.lte(BigENumber.from(option.cap))
         ) {
-          setBreakEven(formatEther(be2))
+          dispatch(setBreakEven(formatEther(be2)))
         }
       }
-      setIntrinsicValue(formatEther(payoffPerShortToken))
-      setMaxPayout(
-        formatEther(
-          BigENumber.from(option.collateralBalanceLongInitial)
-            .add(BigENumber.from(option.collateralBalanceShortInitial))
-            .mul(parseUnits('1', 18 - option.collateralDecimals))
-            .mul(parseEther('1'))
-            .div(BigENumber.from(option.supplyShortInitial))
+      dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
+      dispatch(
+        setMaxPayout(
+          formatEther(
+            BigENumber.from(option.collateralBalanceLongInitial)
+              .add(BigENumber.from(option.collateralBalanceShortInitial))
+              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+              .mul(parseEther('1'))
+              .div(BigENumber.from(option.supplyInitial))
+          )
         )
       )
     }
@@ -675,29 +614,6 @@ export default function BuyMarket(props: {
           </Button>
         </Box>
       </form>
-
-      <Typography sx={{ mt: theme.spacing(1) }}>Stats Buy side:</Typography>
-      <Divider />
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(1) }}>Max yield</Typography>
-        <Typography sx={{ mt: theme.spacing(1) }}>{maxYield}</Typography>
-      </Stack>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(1) }}>Break-even</Typography>
-        <Typography sx={{ mt: theme.spacing(1) }}>{breakEven}</Typography>
-      </Stack>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(1) }}>
-          Intrinsic value per token
-        </Typography>
-        <Typography sx={{ mt: theme.spacing(1) }}>{intrinsicValue}</Typography>
-      </Stack>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(1) }}>
-          Max payout per token
-        </Typography>
-        <Typography sx={{ mt: theme.spacing(1) }}>{maxPayout}</Typography>
-      </Stack>
     </div>
   )
 }

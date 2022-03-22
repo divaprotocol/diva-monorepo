@@ -22,7 +22,6 @@ import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-import ERC20_ABI from '../../../abi/ERC20.json'
 import {
   formatEther,
   formatUnits,
@@ -30,15 +29,20 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useWallet } from '@web3-ui/hooks'
-import { useAppSelector } from '../../../Redux/hooks'
+import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import Typography from '@mui/material/Typography'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
-import { calcPayoffPerToken } from './BuyMarket'
+import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
+import {
+  setBreakEven,
+  setMaxYield,
+  setIntrinsicValue,
+  setMaxPayout,
+} from '../../../Redux/Stats'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -70,11 +74,11 @@ export default function BuyLimit(props: {
   const takerToken = option.collateralToken.id
 
   const theme = useTheme()
-  const [maxPayout, setMaxPayout] = useState('0')
-  const [intrinsicValue, setIntrinsicValue] = useState('0')
+  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const [usdPrice, setUsdPrice] = useState('0')
-  const [maxYield, setMaxYield] = useState('n/a')
-  const [breakEven, setBreakEven] = useState('n/a')
+
+  const dispatch = useAppDispatch()
+
   const isLong = window.location.pathname.split('/')[2] === 'long'
   // TODO: Check why any is required
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
@@ -259,6 +263,9 @@ export default function BuyLimit(props: {
   }
 
   useEffect(() => {
+    getUnderlyingPrice(option.referenceAsset).then((data) => {
+      setUsdPrice(data)
+    })
     const getCollateralInWallet = async () => {
       accounts = await window.ethereum.enable()
       const takerAccount = accounts[0]
@@ -303,11 +310,6 @@ export default function BuyLimit(props: {
   }, [responseBuy])
 
   useEffect(() => {
-    console.log(option.referenceAsset)
-    getUnderlyingPrice(option.referenceAsset).then((data) => {
-      setUsdPrice(data)
-    })
-
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigENumber.from(option.floor),
       BigENumber.from(option.inflection),
@@ -315,17 +317,18 @@ export default function BuyLimit(props: {
       BigENumber.from(option.collateralBalanceLongInitial),
       BigENumber.from(option.collateralBalanceShortInitial),
       option.statusFinalReferenceValue === 'Open' &&
-        parseUnits(usdPrice, 2).gt(0)
-        ? parseUnits(usdPrice, 2)
+        parseUnits(usdPrice!, 2).gt(0)
+        ? parseUnits(usdPrice!, 2)
         : BigENumber.from(option.finalReferenceValue),
-      BigENumber.from(option.supplyLongInitial),
-      BigENumber.from(option.supplyShortInitial),
-      option.collateralDecimals
+      BigENumber.from(option.supplyInitial),
+      option.collateralToken.decimals
     )
     if (pricePerOption > 0) {
-      setMaxYield(
-        formatEther(
-          parseEther(maxPayout).div(parseEther(String(pricePerOption)))
+      dispatch(
+        setMaxYield(
+          formatEther(
+            parseEther(maxPayout).div(parseEther(String(pricePerOption)))
+          )
         )
       )
     }
@@ -351,22 +354,24 @@ export default function BuyLimit(props: {
           BigENumber.from(option.floor).lte(be1) &&
           be1.lte(BigENumber.from(option.inflection))
         ) {
-          setBreakEven(formatEther(be1))
+          dispatch(setBreakEven(formatEther(be1)))
         } else if (
           BigENumber.from(option.inflection).lt(be2) &&
           be2.lte(BigENumber.from(option.cap))
         ) {
-          setBreakEven(formatEther(be2))
+          dispatch(setBreakEven(formatEther(be2)))
         }
       }
-      setIntrinsicValue(formatEther(payoffPerLongToken))
-      setMaxPayout(
-        formatEther(
-          BigENumber.from(option.collateralBalanceLongInitial)
-            .add(BigENumber.from(option.collateralBalanceShortInitial))
-            .mul(parseUnits('1', 18 - option.collateralDecimals))
-            .mul(parseEther('1'))
-            .div(BigENumber.from(option.supplyLongInitial))
+      dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
+      dispatch(
+        setMaxPayout(
+          formatEther(
+            BigENumber.from(option.collateralBalanceLongInitial)
+              .add(BigENumber.from(option.collateralBalanceShortInitial))
+              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+              .mul(parseEther('1'))
+              .div(BigENumber.from(option.supplyInitial))
+          )
         )
       )
     } else {
@@ -404,14 +409,16 @@ export default function BuyLimit(props: {
           setBreakEven(formatEther(be2))
         }
       }
-      setIntrinsicValue(formatEther(payoffPerShortToken))
-      setMaxPayout(
-        formatEther(
-          BigENumber.from(option.collateralBalanceLongInitial)
-            .add(BigENumber.from(option.collateralBalanceShortInitial))
-            .mul(parseUnits('1', 18 - option.collateralDecimals))
-            .mul(parseEther('1'))
-            .div(BigENumber.from(option.supplyShortInitial))
+      dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
+      dispatch(
+        setMaxPayout(
+          formatEther(
+            BigENumber.from(option.collateralBalanceLongInitial)
+              .add(BigENumber.from(option.collateralBalanceShortInitial))
+              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+              .mul(parseEther('1'))
+              .div(BigENumber.from(option.supplyInitial))
+          )
         )
       )
     }
@@ -507,28 +514,6 @@ export default function BuyLimit(props: {
           </Button>
         </Box>
       </form>
-      <Typography sx={{ mt: theme.spacing(1) }}>Stats Buy side:</Typography>
-      <Divider />
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(1) }}>Max yield</Typography>
-        <Typography sx={{ mt: theme.spacing(1) }}>{maxYield}</Typography>
-      </Stack>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(1) }}>Break-even</Typography>
-        <Typography sx={{ mt: theme.spacing(1) }}>{breakEven}</Typography>
-      </Stack>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(1) }}>
-          Intrinsic value per token
-        </Typography>
-        <Typography sx={{ mt: theme.spacing(1) }}>{intrinsicValue}</Typography>
-      </Stack>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography sx={{ mt: theme.spacing(1) }}>
-          Max payout per token
-        </Typography>
-        <Typography sx={{ mt: theme.spacing(1) }}>{maxPayout}</Typography>
-      </Stack>
     </div>
   )
 }
