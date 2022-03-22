@@ -9,6 +9,7 @@ import {
   Stack,
   useTheme,
   CircularProgress,
+  Box,
 } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
@@ -46,6 +47,8 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
   const [decimal, setDecimal] = useState(18)
   const tokenBalance = useErcBalance(pool ? pool!.collateralToken : undefined)
   const [loading, setLoading] = useState(false)
+  const [alert, setAlert] = useState(false)
+  const [approving, setApproving] = useState('')
 
   const {
     provider,
@@ -89,6 +92,15 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
         mt: theme.spacing(2),
       }}
     >
+      {alert ? (
+        <>
+          <Box pt={2} pb={3}>
+            <Alert severity="info">{approving}</Alert>
+          </Box>
+        </>
+      ) : (
+        ''
+      )}
       <Card sx={{ minWidth: '100px', borderRadius: '16px' }}>
         <Container sx={{ mt: theme.spacing(2) }}>
           <Stack direction="row" justifyContent="space-between">
@@ -314,6 +326,8 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                     token
                       .approve(diva?.address, parseEther(textFieldValue))
                       .then((tx: any) => {
+                        setApproving('Approving...')
+                        setAlert(true)
                         return tx.wait()
                       })
                       .then(() => {
@@ -324,8 +338,11 @@ export const AddLiquidity = ({ pool, diva, symbol }: Props) => {
                           window.location.pathname.split('/')[1],
                           parseEther(textFieldValue)
                         )
+                        setApproving('Adding Liquidity...')
                       })
-                      .then(setLoading(false))
+                      .then((tx: any) => {
+                        console.log('tx status', tx)
+                      })
                       .catch((err: any) => {
                         console.error(err)
                         setLoading(false)
