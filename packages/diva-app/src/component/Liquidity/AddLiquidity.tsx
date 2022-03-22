@@ -350,7 +350,6 @@ export const AddLiquidity = ({ pool }: Props) => {
                       .then((tx: any) => {
                         console.log('tx status', tx)
                       })
-                      .then(setLoading(false))
                       .catch((err: any) => {
                         console.error(err)
                         setLoading(false)
