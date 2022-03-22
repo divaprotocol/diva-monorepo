@@ -303,6 +303,8 @@ export function MyDataFeeds() {
     query.refetch()
   }, [chainId])
   const pools = query?.data?.pools || ([] as Pool[])
+  console.log('pools')
+  console.log(pools)
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,

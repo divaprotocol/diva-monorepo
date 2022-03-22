@@ -67,32 +67,52 @@ export const queryPools = gql`
     pools {
       id
       referenceAsset
+      floor
       inflection
       cap
-      floor
-      supplyShortInitial
-      supplyLongInitial
+      supplyInitial
       supplyShort
       supplyLong
-      expiryDate
-      collateralToken
-      collateralSymbol
-      collateralTokenName
-      collateralDecimals
+      expiryTime
+      collateralToken {
+        id
+        name
+        decimals
+        symbol
+      }
       collateralBalanceShortInitial
       collateralBalanceLongInitial
-      collateralBalanceShort
-      collateralBalanceLong
-      shortToken
-      longToken
+      collateralBalance
+      shortToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
+      longToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
       finalReferenceValue
       statusFinalReferenceValue
       redemptionAmountLongToken
       redemptionAmountShortToken
       statusTimestamp
-      dataFeedProvider
+      dataProvider
       redemptionFee
       settlementFee
+      createdBy
+      createdAt
+      capacity
+      expiryTime
+      challenges {
+        challengedBy
+        proposedFinalReferenceValue
+      }
     }
   }
 `
@@ -102,39 +122,59 @@ export const queryMarkets = (id: string) => gql`
     pools( where: { statusFinalReferenceValue_not:"Confirmed" id_gt: "${id}" } ) {
       id
       referenceAsset
+      floor
       inflection
       cap
-      floor
-      supplyShortInitial
-      supplyLongInitial
+      supplyInitial
       supplyShort
       supplyLong
-      expiryDate
-      collateralToken
-      collateralSymbol
-      collateralTokenName
-      collateralDecimals
+      expiryTime
+      collateralToken {
+        id
+        name
+        decimals
+        symbol
+      }
       collateralBalanceShortInitial
       collateralBalanceLongInitial
-      collateralBalanceShort
-      collateralBalanceLong
-      shortToken
-      longToken
+      collateralBalance
+      shortToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
+      longToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
       finalReferenceValue
       statusFinalReferenceValue
       redemptionAmountLongToken
       redemptionAmountShortToken
       statusTimestamp
-      dataFeedProvider
+      dataProvider
       redemptionFee
       settlementFee
+      createdBy
+      createdAt
+      capacity
+      expiryTime
+      challenges {
+        challengedBy
+        proposedFinalReferenceValue
+      }
     }
   }
 `
 
 export const queryDatafeed = (address: string, id: string) => gql`
   {
-    pools(where: { dataFeedProvider: "${address}" id_gt: "${id}" } ) {
+    pools(where: { dataProvider: "${address}" id_gt: "${id}" } ) {
       id
       referenceAsset
       floor
