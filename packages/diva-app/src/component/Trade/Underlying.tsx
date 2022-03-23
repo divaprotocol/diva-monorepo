@@ -135,31 +135,46 @@ export default function Underlying() {
                 breakEven={breakEvenOptionPrice}
               />
             </Paper>
-            <Typography sx={{ mt: theme.spacing(1) }}>
+            <Typography
+              sx={{
+                paddingLeft: theme.spacing(3),
+                mt: theme.spacing(1),
+              }}
+            >
               Buyers statistics:
             </Typography>
             <Divider />
             <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ mt: theme.spacing(1) }}>Max yield</Typography>
-              <Typography sx={{ mt: theme.spacing(1) }}>{maxYield}</Typography>
+              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
+                Max yield
+              </Typography>
+              <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
+                {maxYield}
+              </Typography>
             </Stack>
             <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ mt: theme.spacing(1) }}>Break-even</Typography>
-              <Typography sx={{ mt: theme.spacing(1) }}>{breakEven}</Typography>
+              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
+                Break-even
+              </Typography>
+              <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
+                {breakEven}
+              </Typography>
             </Stack>
             <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ mt: theme.spacing(1) }}>
+              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
                 Intrinsic value per token
               </Typography>
-              <Typography sx={{ mt: theme.spacing(1) }}>
+              <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
                 {intrinsicValue}
               </Typography>
             </Stack>
             <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ mt: theme.spacing(1) }}>
+              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
                 Max payout per token
               </Typography>
-              <Typography sx={{ mt: theme.spacing(1) }}>{maxPayout}</Typography>
+              <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
+                {maxPayout}
+              </Typography>
             </Stack>
           </Stack>
         </Stack>
