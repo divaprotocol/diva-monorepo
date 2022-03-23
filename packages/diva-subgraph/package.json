@@ -9,7 +9,7 @@
     "graph:auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
     "deploy": "run-s deploy-ropsten deploy-mumbai deploy-rinkeby deploy-kovan",
     "deploy-ropsten": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-ropsten ropsten.subgraph.yaml",
-    "deploy-staging": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-ropsten-staging ropsten.subgraph.yaml",
+    "deploy-staging": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-ropsten-staging ropsten-staging.subgraph.yaml",
     "deploy-mumbai": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-mumbai mumbai.subgraph.yaml",
     "deploy-rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-rinkeby rinkeby.subgraph.yaml",
     "deploy-kovan": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-kovan kovan.subgraph.yaml",    
