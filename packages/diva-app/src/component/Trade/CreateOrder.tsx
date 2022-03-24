@@ -16,6 +16,7 @@ import {
 } from '../../Redux/TradeOption'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
+import { fetchOrders } from '../../Redux/poolSlice'
 const PageDiv = styled.div`
   width: 400px;
   height: 420px;
@@ -73,7 +74,7 @@ export default function CreateOrder(props: {
 }) {
   //const op = useSelector((state) => state.tradeOption.option)
   const option = props.option
-  const optionTokenAddress = props.tokenAddress
+  const isLong = window.location.pathname.split('/')[2] === 'long'
   const dispatch = useAppDispatch()
   const classes = useStyles()
   const dividerClass = useDividerStyle()
@@ -103,21 +104,8 @@ export default function CreateOrder(props: {
     setPriceTypeValue(newValue)
   }
 
-  const getExistingOrders = async () => {
-    const responseSell: any = await get0xOpenOrders(
-      optionTokenAddress,
-      option.collateralToken.id
-    )
-    const responseBuy: any = await get0xOpenOrders(
-      option.collateralToken.id,
-      optionTokenAddress
-    )
-    if (responseSell.length > 0) {
-      dispatch(setResponseSell(responseSell))
-    }
-    if (responseBuy.length > 0) {
-      dispatch(setResponseBuy(responseBuy))
-    }
+  const getExistingOrders = () => {
+    dispatch(fetchOrders({ pool: option, isLong }))
   }
 
   const renderOrderInfo = () => {
