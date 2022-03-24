@@ -345,8 +345,6 @@ export default function SellLimit(props: {
             )
           )
           .add(BigENumber.from(option.inflection))
-        console.log(formatEther(be1))
-        console.log(formatEther(be2))
         if (
           BigENumber.from(option.floor).lte(be1) &&
           be1.lte(BigENumber.from(option.inflection))
@@ -414,8 +412,6 @@ export default function SellLimit(props: {
           .div(parseEther('1'))
           .sub(BigENumber.from(option.cap))
           .mul(BigENumber.from('-1'))
-        console.log(formatEther(be1))
-        console.log(formatEther(be2))
         if (
           BigENumber.from(option.floor).lte(be1) &&
           be1.lte(BigENumber.from(option.inflection))

@@ -494,8 +494,6 @@ export function MyPositions() {
                   ),
           }))
       : []
-  console.log('filteredRows')
-  console.log(rows)
   return userAddress ? (
     <Stack
       direction="row"
