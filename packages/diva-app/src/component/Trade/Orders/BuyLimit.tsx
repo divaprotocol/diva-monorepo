@@ -384,7 +384,15 @@ export default function BuyLimit(props: {
           dispatch(setBreakEven(formatEther(be2)))
         }
       }
-      dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
+      console.log(option.statusFinalReferenceValue)
+      if (
+        option.statusFinalReferenceValue === 'Open' &&
+        parseFloat(usdPrice) == 0
+      ) {
+        dispatch(setIntrinsicValue('n/a'))
+      } else {
+        dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
+      }
       dispatch(
         setMaxPayout(
           formatEther(
@@ -446,7 +454,14 @@ export default function BuyLimit(props: {
           dispatch(setBreakEven(formatEther(be2)))
         }
       }
-      dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
+      if (
+        option.statusFinalReferenceValue === 'Open' &&
+        parseFloat(usdPrice) == 0
+      ) {
+        dispatch(setIntrinsicValue('n/a'))
+      } else {
+        dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
+      }
       dispatch(
         setMaxPayout(
           formatEther(
