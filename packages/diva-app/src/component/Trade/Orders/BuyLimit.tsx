@@ -264,7 +264,7 @@ export default function BuyLimit(props: {
 
   useEffect(() => {
     getUnderlyingPrice(option.referenceAsset).then((data) => {
-      setUsdPrice(data)
+      if (data != null) setUsdPrice(data)
     })
     const getCollateralInWallet = async () => {
       accounts = await window.ethereum.enable()
@@ -318,8 +318,8 @@ export default function BuyLimit(props: {
         BigENumber.from(option.collateralBalanceLongInitial),
         BigENumber.from(option.collateralBalanceShortInitial),
         option.statusFinalReferenceValue === 'Open' &&
-          parseUnits(usdPrice!, 2).gt(0)
-          ? parseUnits(usdPrice!, 2)
+          parseUnits(usdPrice, 2).gt(0)
+          ? parseUnits(usdPrice, 2)
           : BigENumber.from(option.finalReferenceValue),
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals

@@ -252,7 +252,7 @@ export default function SellLimit(props: {
 
   useEffect(() => {
     getUnderlyingPrice(option.referenceAsset).then((data) => {
-      setUsdPrice(data)
+      if (data != null) setUsdPrice(data)
     })
     getOptionsInWallet().then((val) => {
       !Number.isNaN(val.balance)
@@ -293,8 +293,8 @@ export default function SellLimit(props: {
         BigENumber.from(option.collateralBalanceLongInitial),
         BigENumber.from(option.collateralBalanceShortInitial),
         option.statusFinalReferenceValue === 'Open' &&
-          parseUnits(usdPrice!, 2).gt(0)
-          ? parseUnits(usdPrice!, 2)
+          parseUnits(usdPrice, 2).gt(0)
+          ? parseUnits(usdPrice, 2)
           : BigENumber.from(option.finalReferenceValue),
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals

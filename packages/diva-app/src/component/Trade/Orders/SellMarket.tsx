@@ -380,7 +380,7 @@ export default function SellMarket(props: {
   }
   useEffect(() => {
     getUnderlyingPrice(option.referenceAsset).then((data) => {
-      setUsdPrice(data)
+      if (data != null) setUsdPrice(data)
     })
     if (usdPrice != '') {
       const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
