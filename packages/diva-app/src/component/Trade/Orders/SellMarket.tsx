@@ -382,134 +382,139 @@ export default function SellMarket(props: {
     getUnderlyingPrice(option.referenceAsset).then((data) => {
       setUsdPrice(data)
     })
+    if (usdPrice != '') {
+      const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
+        BigENumber.from(option.floor),
+        BigENumber.from(option.inflection),
+        BigENumber.from(option.cap),
+        BigENumber.from(option.collateralBalanceLongInitial),
+        BigENumber.from(option.collateralBalanceShortInitial),
+        option.statusFinalReferenceValue === 'Open' &&
+          parseUnits(usdPrice, 2).gt(0)
+          ? parseUnits(usdPrice, 2)
+          : BigENumber.from(option.finalReferenceValue),
+        BigENumber.from(option.supplyInitial),
+        option.collateralToken.decimals
+      )
+      if (avgExpectedRate > 0) {
+        dispatch(
+          setMaxYield(
+            parseFloat(
+              formatEther(
+                BigENumber.from(maxPayout).div(BigENumber.from(avgExpectedRate))
+              )
+            ).toFixed(2)
+          )
+        )
+      }
+      if (isLong) {
+        if (parseUnits(usdPrice, 2).gt(0)) {
+          const be1 = parseUnits(usdPrice, 2)
+            .mul(BigENumber.from(option.inflection))
+            .sub(BigENumber.from(option.floor))
+            .mul(BigENumber.from(option.supplyLong))
+            .div(BigENumber.from(option.collateralBalanceLongInitial))
+            .add(BigENumber.from(option.floor))
 
-    const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
-      BigENumber.from(option.floor),
-      BigENumber.from(option.inflection),
-      BigENumber.from(option.cap),
-      BigENumber.from(option.collateralBalanceLongInitial),
-      BigENumber.from(option.collateralBalanceShortInitial),
-      option.statusFinalReferenceValue === 'Open' &&
-        parseUnits(usdPrice, 2).gt(0)
-        ? parseUnits(usdPrice, 2)
-        : BigENumber.from(option.finalReferenceValue),
-      BigENumber.from(option.supplyInitial),
-      option.collateralToken.decimals
-    )
-    if (avgExpectedRate > 0) {
-      dispatch(
-        setMaxYield(
-          parseFloat(
+          const be2 = parseUnits(usdPrice, 2)
+            .mul(BigENumber.from(option.supplyLong))
+            .sub(BigENumber.from(option.collateralBalanceLongInitial))
+            .mul(
+              BigENumber.from(option.cap).sub(
+                BigENumber.from(option.inflection)
+              )
+            )
+            .div(BigENumber.from(option.collateralBalanceShortInitial))
+            .add(BigENumber.from(option.inflection))
+
+          if (
+            BigENumber.from(option.floor).lte(be1) &&
+            be1.lte(BigENumber.from(option.inflection))
+          ) {
+            dispatch(setBreakEven(formatEther(be1)))
+          } else if (
+            BigENumber.from(option.inflection).lt(be2) &&
+            be2.lte(BigENumber.from(option.cap))
+          ) {
+            dispatch(setBreakEven(formatEther(be2)))
+          }
+        }
+        if (
+          option.statusFinalReferenceValue === 'Open' &&
+          parseFloat(usdPrice) == 0
+        ) {
+          dispatch(setIntrinsicValue('n/a'))
+        } else {
+          dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
+        }
+        dispatch(
+          setMaxPayout(
             formatEther(
-              BigENumber.from(maxPayout).div(BigENumber.from(avgExpectedRate))
-            )
-          ).toFixed(2)
-        )
-      )
-    }
-    if (isLong) {
-      if (parseUnits(usdPrice, 2).gt(0)) {
-        const be1 = parseUnits(usdPrice, 2)
-          .mul(BigENumber.from(option.inflection))
-          .sub(BigENumber.from(option.floor))
-          .mul(BigENumber.from(option.supplyLong))
-          .div(BigENumber.from(option.collateralBalanceLongInitial))
-          .add(BigENumber.from(option.floor))
-
-        const be2 = parseUnits(usdPrice, 2)
-          .mul(BigENumber.from(option.supplyLong))
-          .sub(BigENumber.from(option.collateralBalanceLongInitial))
-          .mul(
-            BigENumber.from(option.cap).sub(BigENumber.from(option.inflection))
-          )
-          .div(BigENumber.from(option.collateralBalanceShortInitial))
-          .add(BigENumber.from(option.inflection))
-
-        if (
-          BigENumber.from(option.floor).lte(be1) &&
-          be1.lte(BigENumber.from(option.inflection))
-        ) {
-          dispatch(setBreakEven(formatEther(be1)))
-        } else if (
-          BigENumber.from(option.inflection).lt(be2) &&
-          be2.lte(BigENumber.from(option.cap))
-        ) {
-          dispatch(setBreakEven(formatEther(be2)))
-        }
-      }
-      if (
-        option.statusFinalReferenceValue === 'Open' &&
-        parseFloat(usdPrice) == 0
-      ) {
-        dispatch(setIntrinsicValue('n/a'))
-      } else {
-        dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
-      }
-      dispatch(
-        setMaxPayout(
-          formatEther(
-            BigENumber.from(option.collateralBalanceLongInitial)
-              .add(BigENumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
-              .mul(parseEther('1'))
-              .div(BigENumber.from(option.supplyInitial))
-          )
-        )
-      )
-    } else {
-      if (parseUnits(usdPrice, 2).gt(0)) {
-        const be1 = parseUnits(usdPrice, 2)
-          .mul(BigENumber.from(option.supplyShort))
-          .sub(BigENumber.from(option.collateralBalanceShortInitial))
-          .div(BigENumber.from(option.collateralBalanceLongInitial))
-          .mul(
-            BigENumber.from(option.inflection).sub(
-              BigENumber.from(option.floor)
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .add(BigENumber.from(option.collateralBalanceShortInitial))
+                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+                .mul(parseEther('1'))
+                .div(BigENumber.from(option.supplyInitial))
             )
           )
-          .sub(BigENumber.from(option.inflection))
-          .mul(BigENumber.from(-1))
-
-        const be2 = parseUnits(usdPrice, 2)
-          .mul(BigENumber.from(option.supplyShort))
-          .div(BigENumber.from(option.collateralBalanceShortInitial))
-          .mul(
-            BigENumber.from(option.cap).sub(BigENumber.from(option.inflection))
-          )
-          .sub(BigENumber.from(option.cap))
-          .mul(BigENumber.from(-1))
-
-        if (
-          BigENumber.from(option.floor).lte(be1) &&
-          be1.lte(BigENumber.from(option.inflection))
-        ) {
-          dispatch(setBreakEven(formatEther(be1)))
-        } else if (
-          BigENumber.from(option.inflection).lt(be2) &&
-          be2.lte(BigENumber.from(option.cap))
-        ) {
-          dispatch(setBreakEven(formatEther(be2)))
-        }
-      }
-      if (
-        option.statusFinalReferenceValue === 'Open' &&
-        parseFloat(usdPrice) == 0
-      ) {
-        dispatch(setIntrinsicValue('n/a'))
+        )
       } else {
-        dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
-      }
-      dispatch(
-        setMaxPayout(
-          formatEther(
-            BigENumber.from(option.collateralBalanceLongInitial)
-              .add(BigENumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
-              .mul(parseEther('1'))
-              .div(BigENumber.from(option.supplyInitial))
+        if (parseUnits(usdPrice, 2).gt(0)) {
+          const be1 = parseUnits(usdPrice, 2)
+            .mul(BigENumber.from(option.supplyShort))
+            .sub(BigENumber.from(option.collateralBalanceShortInitial))
+            .div(BigENumber.from(option.collateralBalanceLongInitial))
+            .mul(
+              BigENumber.from(option.inflection).sub(
+                BigENumber.from(option.floor)
+              )
+            )
+            .sub(BigENumber.from(option.inflection))
+            .mul(BigENumber.from(-1))
+
+          const be2 = parseUnits(usdPrice, 2)
+            .mul(BigENumber.from(option.supplyShort))
+            .div(BigENumber.from(option.collateralBalanceShortInitial))
+            .mul(
+              BigENumber.from(option.cap).sub(
+                BigENumber.from(option.inflection)
+              )
+            )
+            .sub(BigENumber.from(option.cap))
+            .mul(BigENumber.from(-1))
+
+          if (
+            BigENumber.from(option.floor).lte(be1) &&
+            be1.lte(BigENumber.from(option.inflection))
+          ) {
+            dispatch(setBreakEven(formatEther(be1)))
+          } else if (
+            BigENumber.from(option.inflection).lt(be2) &&
+            be2.lte(BigENumber.from(option.cap))
+          ) {
+            dispatch(setBreakEven(formatEther(be2)))
+          }
+        }
+        if (
+          option.statusFinalReferenceValue === 'Open' &&
+          parseFloat(usdPrice) == 0
+        ) {
+          dispatch(setIntrinsicValue('n/a'))
+        } else {
+          dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
+        }
+        dispatch(
+          setMaxPayout(
+            formatEther(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .add(BigENumber.from(option.collateralBalanceShortInitial))
+                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+                .mul(parseEther('1'))
+                .div(BigENumber.from(option.supplyInitial))
+            )
           )
         )
-      )
+      }
     }
   }, [option])
   return (
