@@ -75,7 +75,7 @@ export default function BuyLimit(props: {
 
   const theme = useTheme()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const [usdPrice, setUsdPrice] = useState('0')
+  const [usdPrice, setUsdPrice] = useState('')
 
   const dispatch = useAppDispatch()
 

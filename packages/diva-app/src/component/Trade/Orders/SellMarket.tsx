@@ -80,7 +80,7 @@ export default function SellMarket(props: {
   const makerToken = option.collateralToken
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
-  const [usdPrice, setUsdPrice] = useState('0')
+  const [usdPrice, setUsdPrice] = useState('')
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const dispatch = useAppDispatch()
 

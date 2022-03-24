@@ -72,7 +72,7 @@ export default function SellLimit(props: {
   const makerToken = optionTokenAddress
   const takerToken = option.collateralToken
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
-  const [usdPrice, setUsdPrice] = useState('0')
+  const [usdPrice, setUsdPrice] = useState('')
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const isLong = window.location.pathname.split('/')[2] === 'long'
   const dispatch = useAppDispatch()
