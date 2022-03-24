@@ -317,9 +317,8 @@ export default function BuyLimit(props: {
         BigENumber.from(option.cap),
         BigENumber.from(option.collateralBalanceLongInitial),
         BigENumber.from(option.collateralBalanceShortInitial),
-        option.statusFinalReferenceValue === 'Open' &&
-          parseUnits(usdPrice, 2).gt(0)
-          ? parseUnits(usdPrice, 2)
+        option.statusFinalReferenceValue === 'Open' && usdPrice != ''
+          ? parseEther(usdPrice)
           : BigENumber.from(option.finalReferenceValue),
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals
@@ -475,7 +474,7 @@ export default function BuyLimit(props: {
         )
       }
     }
-  }, [option, pricePerOption])
+  }, [option, pricePerOption, usdPrice])
 
   return (
     <div>

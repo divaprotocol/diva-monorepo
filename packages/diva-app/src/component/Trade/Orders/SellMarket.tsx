@@ -390,8 +390,8 @@ export default function SellMarket(props: {
         BigENumber.from(option.collateralBalanceLongInitial),
         BigENumber.from(option.collateralBalanceShortInitial),
         option.statusFinalReferenceValue === 'Open' &&
-          parseUnits(usdPrice, 2).gt(0)
-          ? parseUnits(usdPrice, 2)
+          parseUnits(usdPrice).gt(0)
+          ? parseUnits(usdPrice)
           : BigENumber.from(option.finalReferenceValue),
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals
@@ -408,15 +408,15 @@ export default function SellMarket(props: {
         )
       }
       if (isLong) {
-        if (parseUnits(usdPrice, 2).gt(0)) {
-          const be1 = parseUnits(usdPrice, 2)
+        if (parseEther(usdPrice).gt(0)) {
+          const be1 = parseEther(usdPrice)
             .mul(BigENumber.from(option.inflection))
             .sub(BigENumber.from(option.floor))
             .mul(BigENumber.from(option.supplyLong))
             .div(BigENumber.from(option.collateralBalanceLongInitial))
             .add(BigENumber.from(option.floor))
 
-          const be2 = parseUnits(usdPrice, 2)
+          const be2 = parseEther(usdPrice)
             .mul(BigENumber.from(option.supplyLong))
             .sub(BigENumber.from(option.collateralBalanceLongInitial))
             .mul(
@@ -459,7 +459,7 @@ export default function SellMarket(props: {
           )
         )
       } else {
-        if (parseUnits(usdPrice, 2).gt(0)) {
+        if (parseEther(usdPrice).gt(0)) {
           const be1 = parseUnits(usdPrice, 2)
             .mul(BigENumber.from(option.supplyShort))
             .sub(BigENumber.from(option.collateralBalanceShortInitial))
@@ -472,7 +472,7 @@ export default function SellMarket(props: {
             .sub(BigENumber.from(option.inflection))
             .mul(BigENumber.from(-1))
 
-          const be2 = parseUnits(usdPrice, 2)
+          const be2 = parseEther(usdPrice)
             .mul(BigENumber.from(option.supplyShort))
             .div(BigENumber.from(option.collateralBalanceShortInitial))
             .mul(
@@ -516,7 +516,7 @@ export default function SellMarket(props: {
         )
       }
     }
-  }, [option])
+  }, [option, usdPrice])
   return (
     <div>
       <form onSubmit={handleOrderSubmit}>

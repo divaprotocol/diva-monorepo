@@ -383,19 +383,21 @@ export default function BuyMarket(props: {
       if (data != null) setUsdPrice(data)
     })
     if (usdPrice != '') {
+      console.log('usdPrice')
+      console.log(usdPrice)
       const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
         BigENumber.from(option.floor),
         BigENumber.from(option.inflection),
         BigENumber.from(option.cap),
         BigENumber.from(option.collateralBalanceLongInitial),
         BigENumber.from(option.collateralBalanceShortInitial),
-        option.statusFinalReferenceValue === 'Open' &&
-          parseUnits(usdPrice, 2).gt(0)
-          ? parseUnits(usdPrice, 2)
+        option.statusFinalReferenceValue === 'Open' && usdPrice != ''
+          ? parseEther(usdPrice)
           : BigENumber.from(option.finalReferenceValue),
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals
       )
+      console.log(payoffPerLongToken)
       if (avgExpectedRate > 0) {
         dispatch(
           setMaxYield(
@@ -410,14 +412,14 @@ export default function BuyMarket(props: {
 
       if (isLong) {
         if (parseUnits(usdPrice, 2).gt(0)) {
-          const be1 = parseUnits(usdPrice, 2)
+          const be1 = parseEther(usdPrice)
             .mul(BigENumber.from(option.inflection))
             .sub(BigENumber.from(option.floor))
             .mul(BigENumber.from(option.supplyLong))
             .div(BigENumber.from(option.collateralBalanceLongInitial))
             .add(BigENumber.from(option.floor))
 
-          const be2 = parseUnits(usdPrice, 2)
+          const be2 = parseEther(usdPrice)
             .mul(BigENumber.from(option.supplyLong))
             .sub(BigENumber.from(option.collateralBalanceLongInitial))
             .mul(
@@ -460,8 +462,8 @@ export default function BuyMarket(props: {
           )
         )
       } else {
-        if (parseUnits(usdPrice, 2).gt(0)) {
-          const be1 = parseUnits(usdPrice, 2)
+        if (parseEther(usdPrice).gt(0)) {
+          const be1 = parseEther(usdPrice)
             .mul(BigENumber.from(option.supplyShort))
             .sub(BigENumber.from(option.collateralBalanceShortInitial))
             .div(BigENumber.from(option.collateralBalanceLongInitial))
@@ -473,7 +475,7 @@ export default function BuyMarket(props: {
             .sub(BigENumber.from(option.inflection))
             .mul(BigENumber.from(-1))
 
-          const be2 = parseUnits(usdPrice, 2)
+          const be2 = parseEther(usdPrice)
             .mul(BigENumber.from(option.supplyShort))
             .div(BigENumber.from(option.collateralBalanceShortInitial))
             .mul(
@@ -517,7 +519,7 @@ export default function BuyMarket(props: {
         )
       }
     }
-  }, [option])
+  }, [option, usdPrice])
   const handleSliderChange = (_event: any, newValue: any) => {
     setValue(newValue)
   }

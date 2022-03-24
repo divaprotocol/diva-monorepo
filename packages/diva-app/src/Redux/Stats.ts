@@ -5,7 +5,7 @@ export const statsSlice = createSlice({
   initialState: {
     maxYield: 'n/a',
     breakEven: 'n/a',
-    intrinsicValue: '0',
+    intrinsicValue: 'n/a',
     maxPayout: '0',
   },
   reducers: {

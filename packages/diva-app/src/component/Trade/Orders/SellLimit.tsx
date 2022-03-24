@@ -293,8 +293,8 @@ export default function SellLimit(props: {
         BigENumber.from(option.collateralBalanceLongInitial),
         BigENumber.from(option.collateralBalanceShortInitial),
         option.statusFinalReferenceValue === 'Open' &&
-          parseUnits(usdPrice, 2).gt(0)
-          ? parseUnits(usdPrice, 2)
+          parseEther(usdPrice).gt(0)
+          ? parseEther(usdPrice)
           : BigENumber.from(option.finalReferenceValue),
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals
@@ -450,7 +450,7 @@ export default function SellLimit(props: {
         )
       }
     }
-  }, [option, pricePerOption])
+  }, [option, pricePerOption, usdPrice])
 
   return (
     <div>
