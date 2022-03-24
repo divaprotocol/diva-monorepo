@@ -32,4 +32,4 @@ jobs:
           THEGRAPH_ACCESS_TOKEN: ${{ secrets.THEGRAPH_ACCESS_TOKEN_TEST }}
         run: |
           yarn graph:auth
-#          yarn turbo run deploy --scope="@diva/*-subgraph"
+          yarn turbo run deploy --scope="@diva/*-subgraph"
