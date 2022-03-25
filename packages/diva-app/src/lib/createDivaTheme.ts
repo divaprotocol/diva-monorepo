@@ -14,7 +14,8 @@ export function createDivaTheme(prefersDarkMode: boolean) {
       secondary: {
         main: '#00688B',
       },
-      mode: prefersDarkMode ? 'dark' : 'light',
+      mode: 'dark',
+      // mode: prefersDarkMode ? 'dark' : 'light',
     },
   })
 }
