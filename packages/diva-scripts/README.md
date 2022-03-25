@@ -1,3 +1,4 @@
+This repository has now been archived as it's been moved to our monorepo
 # Intro
 This repository is a collection of scripts to interact with the DIVA smart contract.
 

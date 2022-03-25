@@ -6,7 +6,7 @@
  */
 
 const { ethers } = require('hardhat');
-const DIVA_ABI = require('../contracts/abis/DIVA.json');
+const DIVA_ABI = require('@diva/contracts/abis/diamond.json')
 const { addresses } = require('../constants/constants')
 
 async function main() {
