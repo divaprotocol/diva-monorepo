@@ -1,4 +1,7 @@
-on: pull_request
+on:
+  pull_request:
+    paths:
+      - packages/*-subgraph/**
 name: Deploy Staging subgraph
 jobs:
   pr:
@@ -26,6 +29,6 @@ jobs:
           THEGRAPH_ACCESS_TOKEN: ${{ secrets.THEGRAPH_ACCESS_TOKEN_TEST }}
         run: |
           yarn graph:auth
-          yarn turbo run deploy-staging --scope="@diva/*-subgraph"
+#          yarn turbo run deploy-staging --scope="@diva/*-subgraph"
  
  

@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: kovan
     source:
-      address: "0xa8450f6cDbC80a07Eb593E514b9Bd5503c3812Ba"
+      address: "0x607228ebB95aa097648Fa8b24dF8807684BBF101"
       abi: DivaDiamond
-      startBlock: 29190631
+      startBlock: 30394849
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -16,11 +16,17 @@ dataSources:
       entities:
         - Pool
         - Challenge
+        - CollateralToken
+        - FeeRecipient
+        - FeeRecipientCollateralToken
+        - PositionToken
       abis:
         - name: DivaDiamond
-          file: ./abis/DivaDiamond.json
+          file: ../diva-contracts/abis/diamond.json
         - name: Erc20Token
-          file: ./abis/Erc20Token.json
+          file: ../diva-contracts/abis/erc20.json
+        - name: PositionTokenABI
+          file: ../diva-contracts/abis/position-token.json
       eventHandlers:
         - event: LiquidityAdded(indexed uint256,indexed address,uint256)
           handler: handleLiquidityAdded
@@ -30,4 +36,10 @@ dataSources:
           handler: handlePoolIssued
         - event: StatusChanged(indexed uint8,indexed address,indexed uint256,uint256)
           handler: handleStatusChanged
+        - event: FeeClaimAllocated(indexed uint256,indexed address,uint256)
+          handler: handleFeeClaimAllocated
+        - event: FeesClaimed(indexed address,indexed address,uint256)
+          handler: handleFeesClaimed
+        - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
+          handler: handleFeeClaimTransferred
       file: ./src/mapping.ts

@@ -26,5 +26,18 @@ yarn-error.log*
 
 .turbo
 
+**/abis/*
+
 
 generated
+
+!.gitignore
+!.gitkeep
+
+## hardhat specific
+
+cache
+artifacts
+.env
+coverage.json
+coverage
