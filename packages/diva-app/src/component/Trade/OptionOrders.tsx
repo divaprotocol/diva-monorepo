@@ -232,64 +232,62 @@ export default function OpenOrders(props: {
           </TableHead>
           <TableBody>
             {orders.length > 0 ? (
-              orders
-                //.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((order: any, index: number) => {
-                  const labelId = `enhanced-table-${index}`
-                  return (
-                    <TableRow key={index} hover>
-                      <TableCellStyle
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        align="left"
-                      >
-                        <Box>
-                          <Typography variant="subtitle1">
-                            {order.orderType}
-                          </Typography>
-                          <Typography variant="caption" noWrap>
-                            {order.expiry}
-                          </Typography>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box paddingBottom="20px">
-                          <Typography variant="subtitle1">
-                            {order.nbrOptions}
-                          </Typography>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box paddingBottom="20px">
-                          <Typography variant="subtitle1">
-                            {order.pricePerOption.toFixed(2)}
-                          </Typography>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="center">
-                        <Box paddingBottom="20px">
-                          <Typography variant="subtitle1">
-                            {order.payReceive.toFixed(2)}
-                          </Typography>
-                        </Box>
-                      </TableCellStyle>
-                      <TableCellStyle align="right">
-                        <Box paddingBottom="20px">
-                          <Typography variant="subtitle1">
-                            <Button
-                              variant="outlined"
-                              startIcon={<DeleteIcon />}
-                              size="small"
-                            >
-                              Cancel
-                            </Button>
-                          </Typography>
-                        </Box>
-                      </TableCellStyle>
-                    </TableRow>
-                  )
-                })
+              orders.map((order: any, index: number) => {
+                const labelId = `enhanced-table-${index}`
+                return (
+                  <TableRow key={index} hover>
+                    <TableCellStyle
+                      component="th"
+                      id={labelId}
+                      scope="row"
+                      align="left"
+                    >
+                      <Box>
+                        <Typography variant="subtitle1">
+                          {order.orderType}
+                        </Typography>
+                        <Typography variant="caption" noWrap>
+                          {order.expiry}
+                        </Typography>
+                      </Box>
+                    </TableCellStyle>
+                    <TableCellStyle align="center">
+                      <Box paddingBottom="20px">
+                        <Typography variant="subtitle1">
+                          {order.nbrOptions}
+                        </Typography>
+                      </Box>
+                    </TableCellStyle>
+                    <TableCellStyle align="center">
+                      <Box paddingBottom="20px">
+                        <Typography variant="subtitle1">
+                          {order.pricePerOption.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    </TableCellStyle>
+                    <TableCellStyle align="center">
+                      <Box paddingBottom="20px">
+                        <Typography variant="subtitle1">
+                          {order.payReceive.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    </TableCellStyle>
+                    <TableCellStyle align="right">
+                      <Box paddingBottom="20px">
+                        <Typography variant="subtitle1">
+                          <Button
+                            variant="outlined"
+                            startIcon={<DeleteIcon />}
+                            size="small"
+                          >
+                            Cancel
+                          </Button>
+                        </Typography>
+                      </Box>
+                    </TableCellStyle>
+                  </TableRow>
+                )
+              })
             ) : (
               <NoOrderTextDiv>None</NoOrderTextDiv>
             )}

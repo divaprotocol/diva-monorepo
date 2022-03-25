@@ -317,8 +317,7 @@ export default function BuyLimit(props: {
             <Stack spacing={0.5}>
               <LabelStyle>You Pay </LabelStyle>
               <SubLabelStyle>
-                Remaining allowance: {remainingApprovalAmount}{' '}
-                {option.collateralToken.symbol}
+                Remaining allowance: {remainingApprovalAmount}
               </SubLabelStyle>
             </Stack>
           </LabelStyleDiv>

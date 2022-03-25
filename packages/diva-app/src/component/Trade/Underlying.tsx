@@ -1,6 +1,4 @@
 import styled from 'styled-components'
-import OptionOrders from './OptionOrders'
-import OrderBook from './OrderBook'
 import { Container, Paper, Stack, useTheme } from '@mui/material'
 import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
