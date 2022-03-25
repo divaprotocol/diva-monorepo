@@ -25,7 +25,12 @@ task(
       `./artifacts/${libraryBasePath}${file}/${jsonFile}`
     );
     json = JSON.parse(json);
-    abi.push(...json.abi);
+    json.abi.forEach(v => {
+      const ids = json.abi.map(a => a.name + v.type)
+      if (!ids.includes(v.name + v.type)) {
+        abi.push(v)
+      }
+    })
   }
   let finalAbi = JSON.stringify(abi);
   fs.writeFileSync("./abis/diamond.json", finalAbi);

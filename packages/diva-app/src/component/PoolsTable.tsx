@@ -30,6 +30,7 @@ export const PayoffCell = ({ data }: { data: any }) => {
 type Props = {
   columns: GridColDef[]
   disableRowClick?: boolean
+  loading?: boolean
   rows: GridRowModel[]
   onPageChange?: (page: number, details: any) => void
   page: number
@@ -40,6 +41,7 @@ export default function PoolsTable({
   columns,
   disableRowClick,
   rows,
+  loading,
   page,
   rowCount,
   onPageChange,
@@ -91,6 +93,7 @@ export default function PoolsTable({
         rows={filteredRows}
         pagination
         columns={columns}
+        loading={loading}
         rowCount={rowCount}
         onPageChange={onPageChange}
         page={page}
