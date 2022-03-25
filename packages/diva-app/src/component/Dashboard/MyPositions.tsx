@@ -1,6 +1,7 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import {
   Button,
+  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -19,16 +20,19 @@ import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
-import { Pool, queryMarkets, queryPools } from '../../lib/queries'
+import { Pool, queryMarkets } from '../../lib/queries'
 import { request } from 'graphql-request'
 import ERC20 from '@diva/contracts/abis/erc20.json'
-import { useTokenBalances } from '../../hooks/useTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
+
+type Response = {
+  [token: string]: BigNumber
+}
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -340,9 +344,9 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
-  const userAddress = wallet?.connection?.userAddress
+  const { provider, connection } = useWallet()
+  const chainId = provider?.network?.chainId
+  const userAddress = connection?.userAddress
 
   const account = userAddress
   const [page, setPage] = useState(0)
@@ -484,7 +488,29 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
-  const tokenBalances = useTokenBalances(rows.map((v) => v.address.id))
+  const tokenAddresses = rows.map((v) => v.address.id)
+
+  const balances = useQuery<Response>(
+    `balance-${userAddress}-${query.isLoading}`,
+    async () => {
+      const response: Response = {}
+      if (!userAddress) throw new Error('wallet not connected')
+      await Promise.all(
+        tokenAddresses.map(async (tokenAddress) => {
+          const contract = new ethers.Contract(tokenAddress, ERC20, provider)
+          try {
+            const res: BigNumber = await contract.balanceOf(userAddress)
+            response[tokenAddress] = res
+          } catch (error) {
+            console.error(error)
+          }
+        })
+      )
+      return response
+    }
+  )
+
+  const tokenBalances = balances.data
 
   const filteredRows =
     tokenBalances != null
@@ -515,6 +541,7 @@ export function MyPositions() {
       <PoolsTable
         page={page}
         rows={filteredRows}
+        loading={query.isLoading || balances.isLoading}
         columns={columns}
         disableRowClick
         onPageChange={(page) => setPage(page)}
