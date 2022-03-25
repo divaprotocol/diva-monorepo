@@ -98,7 +98,7 @@ export default function PoolsTable({
           disableRowClick
             ? undefined
             : (row) => {
-                history.push(`${row.id}`)
+                history.push(`../../${row.id}`)
               }
         }
         componentsProps={{

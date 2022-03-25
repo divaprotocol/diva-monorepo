@@ -57,13 +57,10 @@ export const RemoveLiquidity = ({ pool }: Props) => {
 
   useEffect(() => {
     if (pool) {
-      console.log(pool)
       setDecimal(pool!.collateralToken.decimals)
 
       if (tokenBalanceLong && tokenBalanceShort && decimal) {
         const longBalance = parseEther(tokenBalanceLong)
-        console.log('longBalance')
-        console.log(longBalance)
         const shortBalance = parseEther(tokenBalanceShort)
         const colLong = longBalance
           .mul(

@@ -1,11 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import tradeReducer from './TradeOption'
 import activeTabReducer from './ActiveTab'
-
+import statsReducer from './Stats'
 const store = configureStore({
   reducer: {
     tradeOption: tradeReducer,
     activeTab: activeTabReducer,
+    stats: statsReducer,
   },
 })
 
