@@ -31,9 +31,19 @@ type Props = {
   columns: GridColDef[]
   disableRowClick?: boolean
   rows: GridRowModel[]
+  onPageChange?: (page: number, details: any) => void
+  page: number
+  rowCount?: number
 }
 
-export default function PoolsTable({ columns, disableRowClick, rows }: Props) {
+export default function PoolsTable({
+  columns,
+  disableRowClick,
+  rows,
+  page,
+  rowCount,
+  onPageChange,
+}: Props) {
   const history = useHistory()
   const [search, setSearch] = useState('')
   const filteredRows =
@@ -79,7 +89,11 @@ export default function PoolsTable({ columns, disableRowClick, rows }: Props) {
       <DataGrid
         className={classes.root}
         rows={filteredRows}
+        pagination
         columns={columns}
+        rowCount={rowCount}
+        onPageChange={onPageChange}
+        page={page}
         onRowClick={
           disableRowClick
             ? undefined
