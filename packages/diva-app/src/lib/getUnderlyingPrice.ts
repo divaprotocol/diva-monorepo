@@ -23,9 +23,15 @@ export const getUnderlyingPrice = async (underlyingAssets: string) => {
   }
 
   if (asset && vsAssets) {
-    const coinsList = await (
-      await fetch('https://api.coingecko.com/api/v3/coins/list')
-    ).json()
+    let coinsList = []
+
+    try {
+      coinsList = await (
+        await fetch('https://api.coingecko.com/api/v3/coins/list')
+      ).json()
+    } catch (err) {
+      console.error(err)
+    }
 
     const getCoinIdFromSymbol = (coinSymbol: string) => {
       const { id } = coinsList.filter(

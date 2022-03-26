@@ -1,5 +1,5 @@
 import axios from 'axios'
-const ordersUrl = 'https://ropsten.api.0x.org/orderbook/v1/orders?makerToken='
+const ordersUrl = 'http://localhost:3001/orderbook/v1/orders?makerToken='
 
 export const get0xOpenOrders = (
   CollateralToken: string,
