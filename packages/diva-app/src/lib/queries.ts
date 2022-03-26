@@ -117,6 +117,116 @@ export const queryPools = gql`
   }
 `
 
+export const queryMarkets = (id: string) => gql`
+  {
+    pools( where: { statusFinalReferenceValue_not:"Confirmed" id_gt: "${id}" } ) {
+      id
+      referenceAsset
+      floor
+      inflection
+      cap
+      supplyInitial
+      supplyShort
+      supplyLong
+      expiryTime
+      collateralToken {
+        id
+        name
+        decimals
+        symbol
+      }
+      collateralBalanceShortInitial
+      collateralBalanceLongInitial
+      collateralBalance
+      shortToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
+      longToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
+      finalReferenceValue
+      statusFinalReferenceValue
+      redemptionAmountLongToken
+      redemptionAmountShortToken
+      statusTimestamp
+      dataProvider
+      redemptionFee
+      settlementFee
+      createdBy
+      createdAt
+      capacity
+      expiryTime
+      challenges {
+        challengedBy
+        proposedFinalReferenceValue
+      }
+    }
+  }
+`
+
+export const queryDatafeed = (address: string, id: string) => gql`
+  {
+    pools(where: { dataProvider: "${address}" id_gt: "${id}" } ) {
+      id
+      referenceAsset
+      floor
+      inflection
+      cap
+      supplyInitial
+      supplyShort
+      supplyLong
+      expiryTime
+      collateralToken {
+        id
+        name
+        decimals
+        symbol
+      }
+      collateralBalanceShortInitial
+      collateralBalanceLongInitial
+      collateralBalance
+      shortToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
+      longToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+      }
+      finalReferenceValue
+      statusFinalReferenceValue
+      redemptionAmountLongToken
+      redemptionAmountShortToken
+      statusTimestamp
+      dataProvider
+      redemptionFee
+      settlementFee
+      createdBy
+      createdAt
+      capacity
+      expiryTime
+      challenges {
+        challengedBy
+        proposedFinalReferenceValue
+      }
+    }
+  }
+`
+
 export const queryPool = (poolId: number) => gql`
   {
     pool(id: ${poolId}) {

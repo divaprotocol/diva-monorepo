@@ -14,18 +14,18 @@ export const config: { [key: number]: SingleConfig } = {
     divaAddress: '0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf',
     whitelistAddress: '0x2A5c18f001719f4663ab8d3E65E3E54182376B20',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten-staging',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
     whitelistSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten-staging',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
   },
   3: {
     name: 'Ropsten',
     divaAddress: '0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf',
     whitelistAddress: '0x2A5c18f001719f4663ab8d3E65E3E54182376B20',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten-staging',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
     whitelistSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten-staging',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
   },
   4: {
     name: 'Rinkeby',

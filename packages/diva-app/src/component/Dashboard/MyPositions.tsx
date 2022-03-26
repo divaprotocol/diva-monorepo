@@ -1,6 +1,7 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import {
   Button,
+  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -19,16 +20,19 @@ import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
-import { Pool, queryPools } from '../../lib/queries'
+import { Pool, queryMarkets } from '../../lib/queries'
 import { request } from 'graphql-request'
 import ERC20 from '@diva/contracts/abis/erc20.json'
-import { useTokenBalances } from '../../hooks/useTokenBalances'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
+
+type Response = {
+  [token: string]: BigNumber
+}
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -82,13 +86,6 @@ const SubmitButton = (props: any) => {
   const history = useHistory()
 
   const chainId = provider?.network?.chainId
-  const query = useQuery<{ pools: Pool[] }>(
-    'challenges',
-    () =>
-      chainId != null &&
-      request(config[chainId as number].divaSubgraph, queryPools)
-  )
-
   if (chainId == null) return null
 
   const diva = new ethers.Contract(
@@ -347,18 +344,35 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
-  const userAddress = wallet?.connection?.userAddress
+  const { provider, connection } = useWallet()
+  const chainId = provider?.network?.chainId
+  const userAddress = connection?.userAddress
 
-  const poolsQuery = useQuery<{ pools: Pool[] }>(
-    `pools`,
-    () =>
-      chainId != null &&
-      request(config[chainId as number].divaSubgraph, queryPools)
-  )
+  const account = userAddress
+  const [page, setPage] = useState(0)
 
-  const pools = poolsQuery.data?.pools || ([] as Pool[])
+  const query = useQuery<{ pools: Pool[] }>(`pools-${account}`, async () => {
+    let res: Pool[] = []
+    if (chainId != null) {
+      let lastId = '0'
+      let lastRes: Pool[]
+      while (lastRes == null || lastRes.length > 0) {
+        const result = await request(
+          config[chainId as number].divaSubgraph,
+          queryMarkets(lastId)
+        )
+
+        if (result.pools.length > 0)
+          lastId = result.pools[result.pools?.length - 1].id
+
+        lastRes = result.pools
+        res = res.concat(lastRes)
+      }
+    }
+    return { pools: res }
+  })
+
+  const pools = query.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
     const now = new Date()
@@ -474,7 +488,29 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
-  const tokenBalances = useTokenBalances(rows.map((v) => v.address.id))
+  const tokenAddresses = rows.map((v) => v.address.id)
+
+  const balances = useQuery<Response>(
+    `balance-${userAddress}-${query.isLoading}`,
+    async () => {
+      const response: Response = {}
+      if (!userAddress) throw new Error('wallet not connected')
+      await Promise.all(
+        tokenAddresses.map(async (tokenAddress) => {
+          const contract = new ethers.Contract(tokenAddress, ERC20, provider)
+          try {
+            const res: BigNumber = await contract.balanceOf(userAddress)
+            response[tokenAddress] = res
+          } catch (error) {
+            console.error(error)
+          }
+        })
+      )
+      return response
+    }
+  )
+
+  const tokenBalances = balances.data
 
   const filteredRows =
     tokenBalances != null
@@ -494,8 +530,6 @@ export function MyPositions() {
                   ),
           }))
       : []
-  console.log('filteredRows')
-  console.log(rows)
   return userAddress ? (
     <Stack
       direction="row"
@@ -504,7 +538,14 @@ export function MyPositions() {
       }}
     >
       <SideMenu />
-      <PoolsTable rows={filteredRows} columns={columns} />
+      <PoolsTable
+        page={page}
+        rows={filteredRows}
+        loading={query.isLoading || balances.isLoading}
+        columns={columns}
+        disableRowClick
+        onPageChange={(page) => setPage(page)}
+      />
     </Stack>
   ) : (
     <div

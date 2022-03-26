@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Container, Paper, Stack, useTheme } from '@mui/material'
+import { Container, Divider, Paper, Stack, useTheme } from '@mui/material'
 import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
@@ -16,6 +16,8 @@ import Tabs from '@mui/material/Tabs'
 import React from 'react'
 import { Liquidity } from '../Liquidity/Liquidity'
 import OrdersPanel from './OrdersPanel'
+import Typography from '@mui/material/Typography'
+import { useAppSelector } from '../../Redux/hooks'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -28,22 +30,14 @@ const LeftDiv = styled.div`
 const RightDiv = styled.div`
   width: 40%;
 `
-const LeftCompLeftDiv = styled.div`
-  width: 40%;
-  margin: 0.5%;
-  height: 100%;
-  align-items: stretch;
-`
-const LeftCompRightDiv = styled.div`
-  width: 60%;
-  margin: 0.5%;
-  height: 100%;
-  align-items: stretch;
-`
 
 export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const [value, setValue] = React.useState(0)
+  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
+  const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
+  const maxYield = useAppSelector((state) => state.stats.maxYield)
+  const breakEven = useAppSelector((state) => state.stats.breakEven)
   const breakEvenOptionPrice = 0
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
@@ -107,7 +101,6 @@ export default function Underlying() {
                 />
                 <OptionDetails pool={pool} isLong={isLong} />
               </Paper>
-
               <Paper>
                 <LeftCompFlexContainer>
                   <OrdersPanel option={pool} tokenAddress={tokenAddress} />
@@ -131,6 +124,47 @@ export default function Underlying() {
                   breakEven={breakEvenOptionPrice}
                 />
               </Paper>
+              <Typography
+                sx={{
+                  paddingLeft: theme.spacing(3),
+                  mt: theme.spacing(1),
+                }}
+              >
+                Buyers statistics:
+              </Typography>
+              <Divider />
+              <Stack direction="row" justifyContent="space-between">
+                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
+                  Max yield
+                </Typography>
+                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
+                  {maxYield}
+                </Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
+                  Break-even
+                </Typography>
+                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
+                  {breakEven}
+                </Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
+                  Intrinsic value per token
+                </Typography>
+                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
+                  {intrinsicValue}
+                </Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
+                  Max payout per token
+                </Typography>
+                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
+                  {maxPayout}
+                </Typography>
+              </Stack>
             </Stack>
           </RightDiv>
         </Stack>
