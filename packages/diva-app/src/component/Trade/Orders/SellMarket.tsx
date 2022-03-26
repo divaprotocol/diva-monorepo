@@ -36,6 +36,8 @@ import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { useWallet } from '@web3-ui/hooks'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
+import { Stack } from '@mui/material'
+import { useParams } from 'react-router-dom'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
@@ -77,9 +79,10 @@ export default function SellMarket(props: {
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
   const [walletBalance, setWalletBalance] = React.useState(0)
-  const makerToken = option.collateralToken
+  //const makerToken = option.collateralToken
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
+  const params: { tokenType: string } = useParams()
   const [usdPrice, setUsdPrice] = useState('')
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const dispatch = useAppDispatch()
@@ -131,89 +134,98 @@ export default function SellMarket(props: {
         alert(
           'Total allowance ' +
             approvedAllowance +
-            ` for ${option.referenceAsset} successfully set`
+            ` for ${params.tokenType} successfully set`
         )
       } else {
         alert('please enter positive balance for approval')
       }
     } else {
-      const totalAmount = numberOfOptions + existingOrdersAmount
-      if (numberOfOptions > remainingApprovalAmount) {
-        if (totalAmount > walletBalance) {
-          alert('Not sufficiant balance')
-        } else {
-          const additionalApproval = Number(
-            (numberOfOptions - remainingApprovalAmount).toFixed(
-              totalDecimals(numberOfOptions, remainingApprovalAmount)
-            )
-          )
-          if (
-            confirm(
-              'options to sell exceeds approval limit, do you want to approve additional ' +
-                additionalApproval +
-                ' to complete this order?'
-            )
-          ) {
-            let newAllowance = Number(
-              (additionalApproval + allowance).toFixed(
-                totalDecimals(additionalApproval, allowance)
+      if (walletBalance > 0) {
+        const totalAmount = numberOfOptions + existingOrdersAmount
+        if (numberOfOptions > remainingApprovalAmount) {
+          if (totalAmount > walletBalance) {
+            alert('Not sufficiant balance')
+          } else {
+            const additionalApproval = Number(
+              (numberOfOptions - remainingApprovalAmount).toFixed(
+                totalDecimals(numberOfOptions, remainingApprovalAmount)
               )
             )
-            newAllowance = await approveSellAmount(newAllowance)
-            newAllowance = Number(formatUnits(newAllowance.toString(), 18))
-            setRemainingApprovalAmount(newAllowance)
-            setAllowance(newAllowance)
-          } else {
-            //TBD discuss this case
-            setIsApproved(true)
-            console.log('nothing done')
-          }
-        }
-      } else {
-        const orderData = {
-          maker: makerAccount,
-          provider: web3,
-          isBuy: false,
-          nbrOptions: numberOfOptions,
-          collateralDecimals: option.collateralToken.decimals,
-          makerToken: optionTokenAddress,
-          takerToken: option.collateralToken,
-          ERC20_ABI: ERC20_ABI,
-          avgExpectedRate: avgExpectedRate,
-          existingLimitOrders: existingBuyLimitOrders,
-        }
-        sellMarketOrder(orderData).then((orderFillStatus: any) => {
-          if (!(orderFillStatus == undefined)) {
-            if (!('logs' in orderFillStatus)) {
-              alert('order could not be filled')
-              return
+            if (
+              confirm(
+                'options to sell exceeds approval limit, do you want to approve additional ' +
+                  additionalApproval +
+                  ' to complete this order?'
+              )
+            ) {
+              let newAllowance = Number(
+                (additionalApproval + allowance).toFixed(
+                  totalDecimals(additionalApproval, allowance)
+                )
+              )
+              newAllowance = await approveSellAmount(newAllowance)
+              newAllowance = Number(formatUnits(newAllowance.toString(), 18))
+              setRemainingApprovalAmount(newAllowance)
+              setAllowance(newAllowance)
             } else {
-              orderFillStatus.logs.forEach(async (eventData: any) => {
-                if (!('event' in eventData)) {
-                  return
-                } else {
-                  if (eventData.event === 'LimitOrderFilled') {
-                    //wait for 4 secs for 0x to update orders then handle order book display
-                    await new Promise((resolve) => setTimeout(resolve, 4000))
-                    await props.handleDisplayOrder()
-                    //reset input & you pay fields
-                    Array.from(document.querySelectorAll('input')).forEach(
-                      (input) => (input.value = '')
-                    )
-                    setNumberOfOptions(0.0)
-                    setYouReceive(0.0)
-                    alert('Order successfully filled')
+              //TBD discuss this case
+              setIsApproved(true)
+              console.log('nothing done')
+            }
+          }
+        } else {
+          const orderData = {
+            maker: makerAccount,
+            provider: web3,
+            isBuy: false,
+            nbrOptions: numberOfOptions,
+            collateralDecimals: option.collateralToken.decimals,
+            makerToken: optionTokenAddress,
+            takerToken: option.collateralToken.id,
+            ERC20_ABI: ERC20_ABI,
+            avgExpectedRate: avgExpectedRate,
+            existingLimitOrders: existingBuyLimitOrders,
+          }
+          sellMarketOrder(orderData).then((orderFillStatus: any) => {
+            let orderFilled = false
+            if (!(orderFillStatus == undefined)) {
+              if (!('logs' in orderFillStatus)) {
+                alert('order could not be filled')
+                return
+              } else {
+                orderFillStatus.logs.forEach(async (eventData: any) => {
+                  if (!('event' in eventData)) {
                     return
                   } else {
-                    alert('Order could not be filled')
+                    if (eventData.event === 'LimitOrderFilled') {
+                      //wait for 4 secs for 0x to update orders then handle order book display
+                      await new Promise((resolve) => setTimeout(resolve, 4000))
+                      await props.handleDisplayOrder()
+                      //reset input & you pay fields
+                      Array.from(document.querySelectorAll('input')).forEach(
+                        (input) => (input.value = '')
+                      )
+                      setNumberOfOptions(0.0)
+                      setYouReceive(0.0)
+                      //alert('Order successfully filled')
+                      orderFilled = true
+                      return
+                    } else {
+                      alert('Order could not be filled')
+                    }
                   }
-                }
-              })
+                })
+              }
+            } else {
+              alert('order could not be filled')
             }
-          } else {
-            alert('order could not be filled')
-          }
-        })
+            if (orderFilled) {
+              alert('Order successfully filled')
+            }
+          })
+        }
+      } else {
+        alert('No ' + params.tokenType.toUpperCase() + ' avaible to sell')
       }
     }
   }
@@ -522,10 +534,14 @@ export default function SellMarket(props: {
       <form onSubmit={handleOrderSubmit}>
         <FormDiv>
           <LabelStyleDiv>
-            <Box>
-              <LabelStyle>Number of Options</LabelStyle>
-              <SubLabelStyle>Remaining {remainingApprovalAmount}</SubLabelStyle>
-            </Box>
+            <Stack spacing={0.5}>
+              <LabelStyle>
+                Number of {params.tokenType.toUpperCase()}
+              </LabelStyle>
+              <SubLabelStyle>
+                Remaining allowance: {remainingApprovalAmount}
+              </SubLabelStyle>
+            </Stack>
           </LabelStyleDiv>
           <FormInput
             type="text"
@@ -537,7 +553,7 @@ export default function SellMarket(props: {
             title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
           >
             <LabelStyleDiv>
-              <LabelStyle>Expected Rate </LabelStyle>
+              <LabelStyle>Expected Price </LabelStyle>
               <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
             </LabelStyleDiv>
           </InfoTooltip>
@@ -555,7 +571,9 @@ export default function SellMarket(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>Options in Wallet</LabelGrayStyle>
+            <LabelGrayStyle>
+              {params.tokenType.toUpperCase()} in Wallet
+            </LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
             <LabelGrayStyle>{walletBalance.toFixed(4)}</LabelGrayStyle>
@@ -598,7 +616,7 @@ export default function SellMarket(props: {
           </FormControlDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="100px">
+        <Box marginLeft="35%" marginTop="15%">
           <Button
             variant="contained"
             color="primary"
