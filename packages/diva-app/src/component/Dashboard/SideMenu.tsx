@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import DataThresholdingOutlinedIcon from '@mui/icons-material/DataThresholdingOutlined'
 import ShoppingCartCheckoutOutlinedIcon from '@mui/icons-material/ShoppingCartCheckoutOutlined'
 import RssFeedOutlinedIcon from '@mui/icons-material/RssFeedOutlined'
+import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined'
 export function SideMenu() {
   return (
     <Stack
@@ -32,6 +33,13 @@ export function SideMenu() {
           sx={{ mr: '0.3em', ml: '0.4em' }}
         />
         My Data Feeds
+      </Button>
+      <Button component={Link} to="/dashboard/myfeeclaims" variant="text">
+        <ReceiptOutlinedIcon
+          fontSize="large"
+          sx={{ mr: '0.3em', ml: '0.4em' }}
+        />
+        My Fee Claims
       </Button>
 
       <Box

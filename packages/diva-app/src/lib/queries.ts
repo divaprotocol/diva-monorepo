@@ -227,6 +227,22 @@ export const queryDatafeed = (address: string, id: string) => gql`
   }
 `
 
+export const queryMyFeeClaims = (address: string) => gql`
+  {
+    feeRecipients(where: { id: "${address}" }) {
+      id
+      collateralTokens {
+        amount
+        collateralToken {
+          id
+          name
+          symbol
+        }
+      }
+    }
+  }
+`
+
 export const queryPool = (poolId: number) => gql`
   {
     pool(id: ${poolId}) {
