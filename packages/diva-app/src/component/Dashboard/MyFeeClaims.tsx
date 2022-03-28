@@ -24,7 +24,12 @@ import {
 } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { useWallet } from '@web3-ui/hooks'
-import { parseUnits } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 
 const TransferFeesCell = (props: any) => {
   const { provider } = useWallet()
@@ -64,13 +69,8 @@ const TransferFeesCell = (props: any) => {
         Transfer Fees
       </Button>
       <Dialog open={open} onClose={handleClose}>
-        <DialogContent>
-          <DialogContentText>
-            Please provide a value for this option
-          </DialogContentText>
-        </DialogContent>
         <DialogActions>
-          <Stack>
+          <Stack sx={{ mr: '1em' }}>
             {'Transfer to address:'}
             <TextField
               defaultValue={addressValue}
@@ -89,6 +89,7 @@ const TransferFeesCell = (props: any) => {
           <Button
             color="primary"
             type="submit"
+            variant="contained"
             onClick={() => {
               if (diva != null) {
                 diva
@@ -144,27 +145,54 @@ const ClaimFeesCell = (props: any) => {
   )
 }
 
+const AmountCell = (props: any) => {
+  const wallet = useWallet()
+  const [decimal, setDecimal] = useState<number>()
+
+  const token = new ethers.Contract(
+    props.row.Address,
+    ERC20,
+    wallet.provider.getSigner()
+  )
+  token
+    .decimals()
+    .then((decimals: number) => {
+      setDecimal(decimals)
+    })
+    .catch((e) => {
+      console.log(e)
+    })
+
+  return decimal ? (
+    <div>{parseFloat(props.row.Amount) / 10 ** decimal}</div>
+  ) : (
+    <div>Loading...</div>
+  )
+}
+
 const columns: GridColDef[] = [
   {
     field: 'TokenSymbol',
-    align: 'center',
-    headerAlign: 'center',
+    align: 'left',
+    headerAlign: 'left',
     minWidth: 200,
     headerName: 'Asset',
   },
   {
     field: 'Amount',
-    headerAlign: 'center',
-    align: 'center',
+    headerAlign: 'right',
+    align: 'right',
     disableReorder: true,
     disableColumnMenu: true,
+    minWidth: 200,
+    renderCell: (props) => <AmountCell {...props} />,
   },
   {
     field: 'submitValue',
     align: 'right',
     headerAlign: 'right',
     headerName: '',
-    minWidth: 1200,
+    minWidth: 200,
     renderCell: (props) => <ClaimFeesCell {...props} />,
   },
   {
