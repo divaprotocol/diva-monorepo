@@ -75,7 +75,7 @@ const columns: GridColDef[] = [
 export function MyFeeClaims() {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId
-  const userAddress = wallet?.connection?.userAddress
+  const userAddress = wallet?.connection?.userAddress.toLowerCase()
   const [page, setPage] = useState(0)
   const query = useQuery<{ fees: FeeRecipientCollateralToken[] }>(
     `pools-fees-${userAddress}`,
