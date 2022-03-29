@@ -16,8 +16,8 @@ class DIVATradeChart extends Component {
   }
 
   componentDidMount() {
-    const { data, w, h, refAsset, payOut, breakEven } = this.props
-
+    const { data, w, h, refAsset, payOut, isLong, breakEven } = this.props
+    const optionTypeText = isLong ? 'LONG' : 'SHORT'
     // Set the dimensions and margins of the graph
     // var margin = {top: 50, right: 20, bottom: 30, left: 50},
     var margin = { top: 5, right: 2, bottom: 3, left: 5 },
@@ -162,7 +162,7 @@ class DIVATradeChart extends Component {
       .attr('x', 18)
       .attr('y', 44)
       .attr('font-size', '14')
-      .text('Option Payout (' + payOut + '):')
+      .text(optionTypeText + ' Payout (' + payOut + '):')
 
     tooltipPerLine
       .append('text')

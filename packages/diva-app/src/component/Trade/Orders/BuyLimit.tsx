@@ -33,6 +33,7 @@ import { useWallet } from '@web3-ui/hooks'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
+import { useParams } from 'react-router-dom'
 import Typography from '@mui/material/Typography'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
@@ -72,6 +73,7 @@ export default function BuyLimit(props: {
   const [takerAccount, setTakerAccount] = React.useState('')
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken.id
+  const params: { tokenType: string } = useParams()
 
   const theme = useTheme()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
@@ -147,82 +149,88 @@ export default function BuyLimit(props: {
         setAllowance(collateralAllowance)
         setIsApproved(true)
         alert(
-          `Taker allowance for ${
-            option.collateralToken + ' '
-          } ${collateralAllowance} successfully set by ${takerAccount}`
+          `Allowance for ${
+            option.collateralToken.id + ' '
+          } successfully updated to  ${collateralAllowance} + ' ' ${
+            option.collateralToken.symbol
+          }`
         )
       } else {
         alert('Please enter number of options you want to buy')
       }
     } else {
-      const totalAmount = youPay + existingOrdersAmount
-      if (youPay > remainingApprovalAmount) {
-        if (totalAmount > collateralBalance) {
-          alert('Not sufficient balance')
-        } else {
-          const additionalApproval = Number(
-            (youPay - remainingApprovalAmount).toFixed(
-              totalDecimals(youPay, remainingApprovalAmount)
-            )
-          )
-          if (
-            confirm(
-              'Required collateral balance exceeds approval limit, do you want to approve additioal ' +
-                additionalApproval +
-                ' to complete this order'
-            )
-          ) {
-            setOrderBtnDisabled(true)
-            let newAllowance = Number(
-              (additionalApproval + allowance).toFixed(
-                totalDecimals(additionalApproval, allowance)
-              )
-            )
-            newAllowance = await approveBuyAmount(newAllowance)
-            newAllowance = Number(
-              formatUnits(
-                newAllowance.toString(),
-                option.collateralToken.decimals
-              )
-            )
-            const remainingApproval = Number(
-              (newAllowance - existingOrdersAmount).toFixed(
-                totalDecimals(newAllowance, existingOrdersAmount)
-              )
-            )
-            setRemainingApprovalAmount(remainingApproval)
-            setAllowance(newAllowance)
-            setOrderBtnDisabled(false)
+      if (collateralBalance > 0) {
+        const totalAmount = youPay + existingOrdersAmount
+        if (youPay > remainingApprovalAmount) {
+          if (totalAmount > collateralBalance) {
+            alert('Not sufficient balance')
           } else {
-            //TBD discuss this case
-            console.log('nothing done')
+            const additionalApproval = Number(
+              (youPay - remainingApprovalAmount).toFixed(
+                totalDecimals(youPay, remainingApprovalAmount)
+              )
+            )
+            if (
+              confirm(
+                'Required collateral balance exceeds approval limit, do you want to approve additioal ' +
+                  additionalApproval +
+                  ' to complete this order'
+              )
+            ) {
+              setOrderBtnDisabled(true)
+              let newAllowance = Number(
+                (additionalApproval + allowance).toFixed(
+                  totalDecimals(additionalApproval, allowance)
+                )
+              )
+              newAllowance = await approveBuyAmount(newAllowance)
+              newAllowance = Number(
+                formatUnits(
+                  newAllowance.toString(),
+                  option.collateralToken.decimals
+                )
+              )
+              const remainingApproval = Number(
+                (newAllowance - existingOrdersAmount).toFixed(
+                  totalDecimals(newAllowance, existingOrdersAmount)
+                )
+              )
+              setRemainingApprovalAmount(remainingApproval)
+              setAllowance(newAllowance)
+              setOrderBtnDisabled(false)
+            } else {
+              //TBD discuss this case
+              console.log('nothing done')
+            }
           }
+        } else {
+          const orderData = {
+            makerAccount: accounts[0],
+            makerToken: option.collateralToken.id,
+            takerToken: makerToken,
+            provider: web3,
+            isBuy: true,
+            chainId,
+            nbrOptions: numberOfOptions,
+            collateralDecimals: option.collateralToken.decimals,
+            limitPrice: pricePerOption,
+            orderExpiry: expiry,
+          }
+
+          buylimitOrder(orderData)
+            .then(async (response) => {
+              if (response.status === 200) {
+                await new Promise((resolve) => setTimeout(resolve, 2000))
+                await props.handleDisplayOrder()
+                handleFormReset()
+              }
+            })
+            .catch(function (error) {
+              console.error('Error' + error)
+            })
         }
       } else {
-        const orderData = {
-          makerAccount: accounts[0],
-          makerToken: option.collateralToken,
-          takerToken: makerToken,
-          provider: web3,
-          isBuy: true,
-          chainId,
-          nbrOptions: numberOfOptions,
-          collateralDecimals: option.collateralToken.decimals,
-          limitPrice: pricePerOption,
-          orderExpiry: expiry,
-        }
-
-        buylimitOrder(orderData)
-          .then(async (response) => {
-            if (response.status === 200) {
-              await new Promise((resolve) => setTimeout(resolve, 2000))
-              await props.handleDisplayOrder()
-              handleFormReset()
-            }
-          })
-          .catch(function (error) {
-            console.error('Error' + error)
-          })
+        alert('No collateral avaible to Buy ' + params.tokenType.toUpperCase())
       }
     }
   }
@@ -481,7 +489,7 @@ export default function BuyLimit(props: {
       <form onSubmit={(event) => handleOrderSubmit(event)}>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Number of Options</LabelStyle>
+            <LabelStyle>Number of {params.tokenType.toUpperCase()}</LabelStyle>
           </LabelStyleDiv>
           <FormInput
             type="text"
@@ -490,7 +498,7 @@ export default function BuyLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Price per Option</LabelStyle>
+            <LabelStyle>Price per {params.tokenType.toUpperCase()}</LabelStyle>
           </LabelStyleDiv>
           <FormInput
             type="text"
@@ -499,10 +507,12 @@ export default function BuyLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>You Pay</LabelStyle>
-            <SubLabelStyle>
-              Remaining balance {remainingApprovalAmount}
-            </SubLabelStyle>
+            <Stack spacing={0.5}>
+              <LabelStyle>You Pay </LabelStyle>
+              <SubLabelStyle>
+                Remaining allowance: {remainingApprovalAmount}
+              </SubLabelStyle>
+            </Stack>
           </LabelStyleDiv>
           <RightSideLabel>
             {youPay.toFixed(4) + ' '} {option.collateralToken.symbol}
@@ -552,7 +562,7 @@ export default function BuyLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="30%">
+        <Box marginLeft="35%">
           <Button
             variant="contained"
             color="primary"
