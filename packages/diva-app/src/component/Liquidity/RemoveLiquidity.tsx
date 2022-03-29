@@ -1,7 +1,9 @@
 import { BigNumber, Contract, ethers } from 'ethers'
 import {
   Alert,
+  Box,
   Card,
+  CircularProgress,
   Collapse,
   Container,
   IconButton,
@@ -49,6 +51,8 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const [shortToken, setShortToken] = React.useState('')
   const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
+  //const [alert, setAlert] = React.useState(false)
+  const [loading, setLoading] = useState(false)
   const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
   const { provider } = useWallet()
   const chainId = provider?.network?.chainId
@@ -150,6 +154,15 @@ export const RemoveLiquidity = ({ pool }: Props) => {
         mt: theme.spacing(2),
       }}
     >
+      {loading ? (
+        <>
+          <Box pt={2} pb={3}>
+            <Alert severity="info">Removing..</Alert>
+          </Box>
+        </>
+      ) : (
+        ''
+      )}
       <Card sx={{ borderRadius: '16px' }}>
         <Container sx={{ mt: theme.spacing(2) }}>
           <Stack direction="row" justifyContent="space-between">
@@ -256,33 +269,45 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               alignItems: 'center',
             }}
           >
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              type="submit"
-              value="Submit"
-              disabled={!pool}
-              onClick={() => {
-                const diva = new ethers.Contract(
-                  config[chainId].divaAddress,
-                  DIVA_ABI,
-                  provider?.getSigner()
-                )
-                diva!.removeLiquidity(
-                  window.location.pathname.split('/')[1],
-                  parseEther(longToken)
-                )
-              }}
-              style={{
-                maxWidth: theme.spacing(38),
-                maxHeight: theme.spacing(5),
-                minWidth: theme.spacing(38),
-                minHeight: theme.spacing(5),
-              }}
-            >
-              Remove
-            </Button>
+            {loading ? (
+              <CircularProgress />
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                type="submit"
+                value="Submit"
+                disabled={!pool}
+                onClick={() => {
+                  setLoading(true)
+                  const diva = new ethers.Contract(
+                    config[chainId].divaAddress,
+                    DIVA_ABI,
+                    provider?.getSigner()
+                  )
+                  const tx = diva!.removeLiquidity(
+                    window.location.pathname.split('/')[1],
+                    parseEther(longToken)
+                  )
+                  if (tx.promise != pending) {
+                    setLoading(false)
+                  }
+                  tx.catch((err: any) => {
+                    setLoading(false)
+                    console.log(err)
+                  })
+                }}
+                style={{
+                  maxWidth: theme.spacing(38),
+                  maxHeight: theme.spacing(5),
+                  minWidth: theme.spacing(38),
+                  minHeight: theme.spacing(5),
+                }}
+              >
+                Remove
+              </Button>
+            )}
           </div>
         </Container>
       </Card>
