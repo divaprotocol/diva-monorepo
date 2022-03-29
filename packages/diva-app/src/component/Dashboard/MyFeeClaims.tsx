@@ -54,7 +54,9 @@ const TransferFeesCell = (props: any) => {
 
   const [open, setOpen] = useState(false)
   const [addressValue, setAddressValue] = useState('')
-  const [amountValue, setAmountValue] = useState('')
+  const [amountValue, setAmountValue] = useState(
+    (parseFloat(props.row.Amount) / 10 ** decimal).toFixed(4)
+  )
   const handleOpen = () => {
     setOpen(true)
   }
@@ -70,7 +72,7 @@ const TransferFeesCell = (props: any) => {
       </Button>
       <Dialog open={open} onClose={handleClose}>
         <DialogActions>
-          <Stack sx={{ mr: '1em' }}>
+          <Stack>
             {'Transfer to address:'}
             <TextField
               defaultValue={addressValue}
@@ -85,28 +87,29 @@ const TransferFeesCell = (props: any) => {
                 setAmountValue(e.target.value)
               }}
             />
+            <Button
+              sx={{ mt: '1em', alignSelf: 'right' }}
+              color="primary"
+              type="submit"
+              variant="contained"
+              onClick={() => {
+                if (diva != null) {
+                  diva
+                    .transferFeeClaim(
+                      addressValue,
+                      props.row.Address,
+                      parseUnits(amountValue, decimal)
+                    )
+                    .catch((err) => {
+                      console.error(err)
+                    })
+                }
+                handleClose()
+              }}
+            >
+              Transfer Fees
+            </Button>
           </Stack>
-          <Button
-            color="primary"
-            type="submit"
-            variant="contained"
-            onClick={() => {
-              if (diva != null) {
-                diva
-                  .transferFeeClaim(
-                    addressValue,
-                    props.row.Address,
-                    parseUnits(amountValue, decimal)
-                  )
-                  .catch((err) => {
-                    console.error(err)
-                  })
-              }
-              handleClose()
-            }}
-          >
-            Transfer Fees
-          </Button>
         </DialogActions>
       </Dialog>
     </Container>
@@ -162,9 +165,13 @@ const AmountCell = (props: any) => {
     .catch((e) => {
       console.log(e)
     })
-
+  const amount = parseFloat(props.row.Amount) / 10 ** decimal
   return decimal ? (
-    <div>{parseFloat(props.row.Amount) / 10 ** decimal}</div>
+    amount > 0.0001 ? (
+      <div>{amount.toFixed(4)}</div>
+    ) : (
+      <div>{'<0.0001'}</div>
+    )
   ) : (
     <div>Loading...</div>
   )
