@@ -4,8 +4,6 @@ import {
   Container,
   Dialog,
   DialogActions,
-  DialogContent,
-  DialogContentText,
   Stack,
   TextField,
 } from '@mui/material'
@@ -24,12 +22,7 @@ import {
 } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { useWallet } from '@web3-ui/hooks'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { parseUnits } from 'ethers/lib/utils'
 
 const TransferFeesCell = (props: any) => {
   const { provider } = useWallet()
@@ -54,10 +47,9 @@ const TransferFeesCell = (props: any) => {
 
   const [open, setOpen] = useState(false)
   const [addressValue, setAddressValue] = useState('')
-  const [amountValue, setAmountValue] = useState(
-    (parseFloat(props.row.Amount) / 10 ** decimal).toFixed(4)
-  )
+  const [amountValue, setAmountValue] = useState('')
   const handleOpen = () => {
+    setAmountValue((parseFloat(props.row.Amount) / 10 ** decimal).toString())
     setOpen(true)
   }
 
