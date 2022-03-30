@@ -29,6 +29,10 @@ import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
+import { useAppSelector } from '../../Redux/hooks'
+import { calcPayoffPerToken } from '../../Util/calcPayoffPerToken'
+import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
+import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 
 type Response = {
   [token: string]: BigNumber
@@ -350,6 +354,7 @@ export function MyPositions() {
 
   const account = userAddress
   const [page, setPage] = useState(0)
+  const [usdPrice, setUsdPrice] = useState('')
 
   const query = useQuery<{ pools: Pool[] }>(`pools-${account}`, async () => {
     let res: Pool[] = []
@@ -371,7 +376,7 @@ export function MyPositions() {
     }
     return { pools: res }
   })
-
+  const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
   const pools = query.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
