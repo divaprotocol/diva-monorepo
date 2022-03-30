@@ -81,6 +81,7 @@ export default function Underlying() {
     if (pool != null) dispatch(fetchUnderlyingPrice(pool))
   }, [pool, dispatch])
 
+  // const priceSelector
   console.log(pool)
 
   if (pool == null) {

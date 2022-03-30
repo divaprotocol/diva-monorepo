@@ -44,7 +44,11 @@ import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { Container, Divider, Stack, useTheme } from '@mui/material'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
-import { orderSelector, payoffSelector } from '../../../Redux/poolSlice'
+import {
+  fetchOrders,
+  orderSelector,
+  payoffSelector,
+} from '../../../Redux/poolSlice'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
@@ -53,14 +57,24 @@ const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 export default function BuyMarket(props: {
   option: Pool
-  handleDisplayOrder: () => any
   tokenAddress: string
 }) {
   const option = props.option
   const isLong = window.location.pathname.split('/')[2] === 'long'
-  const { buy: responseBuy, sell: responseSell } = useAppSelector((state) =>
+  const order = useAppSelector((state) =>
     orderSelector(state, option.id, isLong)
   )
+  console.log({ order })
+  const responseBuy = []
+  const responseSell = []
+
+  const getExistingOrders = () => {
+    console.log('fetch existing orders')
+    dispatch(fetchOrders({ pool: option, isLong }))
+  }
+
+  console.log({ order, responseBuy, responseSell })
+
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
@@ -199,15 +213,9 @@ export default function BuyMarket(props: {
                   return
                 } else {
                   if (eventData.event === 'LimitOrderFilled') {
-                    //wait for 4 secs for 0x to update orders then handle order book display
-                    await new Promise((resolve) => setTimeout(resolve, 4000))
-                    await props.handleDisplayOrder()
-                    //reset input & you pay fields
                     Array.from(document.querySelectorAll('input')).forEach(
                       (input) => (input.value = '')
                     )
-                    setNumberOfOptions(0.0)
-                    setYouPay(0.0)
                     alert('Order successfully filled')
                     return
                   } else {
@@ -215,6 +223,9 @@ export default function BuyMarket(props: {
                   }
                 }
               })
+              getExistingOrders()
+              setNumberOfOptions(0.0)
+              setYouPay(0.0)
             }
           } else {
             alert('order could not be filled response is not defined')

@@ -176,11 +176,17 @@ export const expectedRateSelector = (
   isLong: boolean
 ) => {
   const orders = orderSelector(state, poolId, isLong)
+  // TODO: use orders to get buy and sell
   console.log(orders)
   return {
-    buy: 7,
-    sell: 7,
+    buy: 7.8,
+    sell: 8.1,
   }
+}
+
+export const tokenSelector = (state: RootState, poolId: string) => {
+  const pool = poolSelector(state, poolId)
+  return pool?.collateralToken
 }
 
 export const maxYieldSelector = (
@@ -188,20 +194,27 @@ export const maxYieldSelector = (
   poolId: string,
   isLong: boolean
 ) => {
+  const _B = BigNumber
+  const token = tokenSelector(state, poolId)
   const maxPayout = maxPayoutSelector(state, poolId, isLong)
   const avgExpectedRate = expectedRateSelector(state, poolId, isLong)
   if (maxPayout == null || avgExpectedRate === undefined) return undefined
+  // TODO: This currently throws error
   console.log({ maxPayout, avgExpectedRate })
 
   return {
     buy: parseFloat(
       formatEther(
-        BigNumber.from(maxPayout).div(BigNumber.from(avgExpectedRate))
+        parseUnits(maxPayout).div(
+          parseUnits(String(avgExpectedRate.buy), token.decimals)
+        )
       )
     ).toFixed(2),
     sell: parseFloat(
       formatEther(
-        BigNumber.from(maxPayout).div(BigNumber.from(avgExpectedRate))
+        parseUnits(maxPayout).div(
+          parseUnits(String(avgExpectedRate.sell), token.decimals)
+        )
       )
     ).toFixed(2),
   }
@@ -215,6 +228,7 @@ export const breakEvenSelector = (
   const pool = poolSelector(state, poolId)
   if (pool == null) return undefined
   const usdPrice = priceSelector(state, poolId)
+  if (usdPrice == null) return undefined
 
   const be1 = parseUnits(usdPrice, 2)
     .mul(BigNumber.from(pool.inflection))

@@ -105,19 +105,14 @@ export default function CreateOrder(props: {
   }
 
   const getExistingOrders = () => {
-    dispatch(fetchOrders({ pool: option, isLong }))
+    console.log('get existing true')
+    // dispatch(fetchOrders({ pool: option, isLong }))
   }
 
   const renderOrderInfo = () => {
     if (orderType === 0 && priceType === 0) {
       //Buy Market
-      return (
-        <BuyMarket
-          option={option}
-          handleDisplayOrder={getExistingOrders}
-          tokenAddress={props.tokenAddress}
-        />
-      )
+      return <BuyMarket option={option} tokenAddress={props.tokenAddress} />
     }
     if (orderType === 0 && priceType === 1) {
       //Buy Limit
