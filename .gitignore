@@ -36,8 +36,8 @@ generated
 
 ## hardhat specific
 
-cache
-artifacts
-.env
-coverage.json
-coverage
+**/cache
+**/artifacts
+**/.env
+**/coverage.json
+**/coverage

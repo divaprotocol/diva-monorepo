@@ -4,7 +4,7 @@ import { formatUnits } from 'ethers/lib/utils'
 import { getDateTime } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
-import { Pool, queryPools } from '../../lib/queries'
+import { Pool, queryMarkets } from '../../lib/queries'
 import { request } from 'graphql-request'
 import { config, createdByFilterAddressForMarket } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
@@ -77,12 +77,30 @@ export default function Markets() {
   const [mainPools, setMainPools] = useState<Pool[]>([])
   const [otherPools, setOtherPools] = useState<Pool[]>([])
   const [pools, setPools] = useState<Pool[]>([])
+  const [page, setPage] = useState(0)
 
   const { isLoading, data } = useQuery<{ pools: Pool[] }>(
     `pools-${chainId}`,
-    () =>
-      chainId != null &&
-      request(config[chainId as number].divaSubgraph, queryPools)
+    async () => {
+      let res: Pool[] = []
+      if (chainId != null) {
+        let lastId = '0'
+        let lastRes: Pool[]
+        while (lastRes == null || lastRes.length > 0) {
+          const result = await request(
+            config[chainId as number].divaSubgraph,
+            queryMarkets(lastId)
+          )
+
+          if (result.pools.length > 0)
+            lastId = result.pools[result.pools?.length - 1].id
+
+          lastRes = result.pools
+          res = res.concat(lastRes)
+        }
+      }
+      return { pools: res }
+    }
   )
 
   useEffect(() => {
@@ -222,7 +240,13 @@ export default function Markets() {
           <Tab label="Other" />
         </Tabs>
       </Container>
-      <PoolsTable columns={columns} rows={filteredRows} />
+      <PoolsTable
+        columns={columns}
+        rows={filteredRows}
+        page={page}
+        rowCount={filteredRows.length}
+        onPageChange={(page) => setPage(page)}
+      />
     </>
   )
 }

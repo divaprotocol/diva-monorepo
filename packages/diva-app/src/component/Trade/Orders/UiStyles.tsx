@@ -12,6 +12,7 @@ export const LabelStyle = styled.label`
 `
 export const SubLabelStyle = styled.label`
   font-size: 8px;
+  color: rgba(255, 255, 255, 0.7);
 `
 
 export const IconLabel = styled.label`

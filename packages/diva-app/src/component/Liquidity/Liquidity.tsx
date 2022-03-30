@@ -2,7 +2,6 @@ import {
   Alert,
   Box,
   Card,
-  CardContent,
   Collapse,
   Container,
   IconButton,
@@ -14,32 +13,23 @@ import React, { useEffect } from 'react'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import { AddLiquidity } from './AddLiquidity'
-import { BigNumber, Contract, ethers } from 'ethers'
-import { Pool } from '../../lib/queries'
+import { BigNumber } from 'ethers'
 import { RemoveLiquidity } from './RemoveLiquidity'
 import { formatUnits } from 'ethers/lib/utils'
-import ERC20 from '@diva/contracts/abis/erc20.json'
-import { config } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
 import { ReactComponent as Bullish } from '../../Images/bullish-svgrepo-com.svg'
 import { ReactComponent as Bearish } from '../../Images/bearish-svgrepo-com.svg'
 import { ReactComponent as Star } from '../../Images/star-svgrepo-com.svg'
-import { parseEther } from 'ethers/utils'
 type Props = {
   pool?: any
 }
 
 export const Liquidity = ({ pool }: Props) => {
   const [value, setValue] = React.useState(0)
-  const [openAlert, setOpenAlert] = React.useState(false)
   const { provider } = useWallet()
   const chainId = provider?.network?.chainId
 
   const theme = useTheme()
-
-  useEffect(() => {
-    setOpenAlert(Date.now() > 1000 * parseInt(pool.expiryTime))
-  }, [chainId])
 
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
@@ -53,26 +43,6 @@ export const Liquidity = ({ pool }: Props) => {
           minWidth: theme.spacing(82),
         }}
       >
-        <Collapse in={openAlert}>
-          <Alert
-            severity="error"
-            action={
-              <IconButton
-                aria-label="close"
-                color="inherit"
-                size="small"
-                onClick={() => {
-                  setOpenAlert(false)
-                }}
-              >
-                {'X'}
-              </IconButton>
-            }
-            sx={{ mb: 2 }}
-          >
-            Pool expired. Addition/removal of liquidity is no longer possible
-          </Alert>
-        </Collapse>
         <Container sx={{ borderRadius: '16px' }}>
           <Tabs value={value} onChange={handleChange} variant="fullWidth">
             <Tab label="Add" />

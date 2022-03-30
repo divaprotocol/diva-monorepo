@@ -7,22 +7,9 @@ import Markets from './component/Markets/Markets'
 import { Container } from '@mui/material'
 import { MyDataFeeds } from './component/Dashboard/MyDataFeeds'
 import { MyPositions } from './component/Dashboard/MyPositions'
-import { useWallet } from '@web3-ui/hooks'
-import { useQuery } from 'react-query'
-import { Pool, queryPools } from './lib/queries'
-import { request } from 'graphql-request'
-import { config } from './constants'
+import { MyFeeClaims } from './component/Dashboard/MyFeeClaims'
 
 export const App = () => {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
-
-  const query = useQuery<{ pools: Pool[] }>(
-    `pools-${chainId}`,
-    () =>
-      chainId != null &&
-      request(config[chainId as number].divaSubgraph, queryPools)
-  )
   return (
     <Router>
       <Header />
@@ -40,6 +27,9 @@ export const App = () => {
           </Route>
           <Route exact path="/dashboard/mypositions">
             <MyPositions />
+          </Route>
+          <Route exact path="/dashboard/myfeeclaims">
+            <MyFeeClaims />
           </Route>
           <Route path="/:poolId/:tokenType">
             <Underlying />

@@ -46,6 +46,7 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
   const theme = useTheme()
   const [openAlert, setOpenAlert] = React.useState(false)
+  const [openExpiredAlert, setOpenExpiredAlert] = React.useState(false)
   const [openCapacityAlert, setOpenCapacityAlert] = React.useState(false)
   const [decimal, setDecimal] = React.useState(18)
   const tokenBalance = useErcBalance(
@@ -60,6 +61,7 @@ export const AddLiquidity = ({ pool }: Props) => {
   useEffect(() => {
     if (pool) {
       setDecimal(pool.collateralToken.decimals)
+      setOpenExpiredAlert(Date.now() > 1000 * parseInt(pool.expiryTime))
     }
     if (
       pool! &&
@@ -95,6 +97,26 @@ export const AddLiquidity = ({ pool }: Props) => {
         mt: theme.spacing(2),
       }}
     >
+      <Collapse in={openExpiredAlert}>
+        <Alert
+          severity="error"
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setOpenExpiredAlert(false)
+              }}
+            >
+              {'X'}
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          Pool expired. Addition of liquidity is no longer possible
+        </Alert>
+      </Collapse>
       <Card sx={{ minWidth: '100px', borderRadius: '16px' }}>
         <Container sx={{ mt: theme.spacing(2) }}>
           <Stack direction="row" justifyContent="space-between">

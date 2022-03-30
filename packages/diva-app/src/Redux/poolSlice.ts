@@ -136,6 +136,12 @@ export const payoffSelector = (state: RootState, poolId: string) => {
   )
 }
 
+export const intrinsicSelector = (state: RootState, poolId: string) => {
+  const payoff = payoffSelector(state, poolId)
+  // TODO: Calculate intrinsic
+  return undefined
+}
+
 export const maxPayoutSelector = (
   state: RootState,
   poolId: string,

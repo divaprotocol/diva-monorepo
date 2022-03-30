@@ -1,6 +1,4 @@
 import styled from 'styled-components'
-import OptionOrders from './OptionOrders'
-import OrderBook from './OrderBook'
 import { Container, Divider, Paper, Stack, useTheme } from '@mui/material'
 import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
@@ -14,6 +12,7 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import React, { useEffect } from 'react'
 import { Liquidity } from '../Liquidity/Liquidity'
+import OrdersPanel from './OrdersPanel'
 import Typography from '@mui/material/Typography'
 import { useAppSelector } from '../../Redux/hooks'
 import { useDispatch } from 'react-redux'
@@ -21,6 +20,7 @@ import {
   breakEvenSelector,
   fetchPool,
   fetchUnderlyingPrice,
+  intrinsicSelector,
   maxPayoutSelector,
   maxYieldSelector,
   poolSelector,
@@ -31,17 +31,11 @@ const LeftCompFlexContainer = styled.div`
   justify-content: space-between;
   flex-basis: 100%;
 `
-const LeftCompLeftDiv = styled.div`
-  width: 40%;
-  margin: 0.5%;
-  height: 100%;
-  align-items: stretch;
-`
-const LeftCompRightDiv = styled.div`
+const LeftDiv = styled.div`
   width: 60%;
-  margin: 0.5%;
-  height: 100%;
-  align-items: stretch;
+`
+const RightDiv = styled.div`
+  width: 40%;
 `
 
 export default function Underlying() {
@@ -80,6 +74,10 @@ export default function Underlying() {
   useEffect(() => {
     if (pool != null) dispatch(fetchUnderlyingPrice(pool))
   }, [pool, dispatch])
+
+  const intrinsicValue = useAppSelector((state) =>
+    intrinsicSelector(state, params.poolId)
+  )
 
   // const priceSelector
   console.log(pool)
@@ -120,87 +118,84 @@ export default function Underlying() {
         <Liquidity pool={pool} />
       ) : (
         <Stack direction="row" spacing={2}>
-          <Stack spacing={2}>
-            <Paper>
-              <OptionHeader
-                ReferenceAsset={pool.referenceAsset}
-                TokenAddress={tokenAddress}
-                isLong={isLong}
-                poolId={pool.id}
-                tokenDecimals={pool.collateralToken.decimals}
-              />
-              <OptionDetails pool={pool} isLong={isLong} />
-            </Paper>
-
-            <Paper>
-              <LeftCompFlexContainer>
-                <LeftCompLeftDiv>
-                  <OrderBook option={pool} tokenAddress={tokenAddress} />
-                </LeftCompLeftDiv>
-                <LeftCompRightDiv>
-                  <OptionOrders option={pool} tokenAddress={tokenAddress} />
-                </LeftCompRightDiv>
-              </LeftCompFlexContainer>
-            </Paper>
-          </Stack>
-
-          <Stack spacing={2}>
-            <Paper>
-              <CreateOrder option={pool} tokenAddress={tokenAddress} />
-            </Paper>
-            <Paper>
-              <TradeChart
-                data={data}
-                refAsset={pool.referenceAsset}
-                payOut={pool.collateralToken.symbol}
-                w={380}
-                h={200}
-                isLong={OptionParams.IsLong}
-                breakEven={breakEvenOptionPrice}
-              />
-            </Paper>
-            <Typography
-              sx={{
-                paddingLeft: theme.spacing(3),
-                mt: theme.spacing(1),
-              }}
-            >
-              Buyers statistics:
-            </Typography>
-            <Divider />
-            <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                Max yield
-              </Typography>
-              <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                {JSON.stringify(maxYield)}
-              </Typography>
+          <LeftDiv>
+            <Stack spacing={2}>
+              <Paper>
+                <OptionHeader
+                  ReferenceAsset={pool.referenceAsset}
+                  TokenAddress={tokenAddress}
+                  isLong={isLong}
+                  poolId={pool.id}
+                  tokenDecimals={pool.collateralToken.decimals}
+                />
+                <OptionDetails pool={pool} isLong={isLong} />
+              </Paper>
+              <Paper>
+                <LeftCompFlexContainer>
+                  <OrdersPanel option={pool} tokenAddress={tokenAddress} />
+                </LeftCompFlexContainer>
+              </Paper>
             </Stack>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                Break-even
+          </LeftDiv>
+          <RightDiv>
+            <Stack spacing={2}>
+              <Paper>
+                <CreateOrder option={pool} tokenAddress={tokenAddress} />
+              </Paper>
+              <Paper>
+                <TradeChart
+                  data={data}
+                  refAsset={pool.referenceAsset}
+                  payOut={pool.collateralToken.symbol}
+                  w={380}
+                  h={200}
+                  isLong={OptionParams.IsLong}
+                  breakEven={breakEvenOptionPrice}
+                />
+              </Paper>
+              <Typography
+                sx={{
+                  paddingLeft: theme.spacing(3),
+                  mt: theme.spacing(1),
+                }}
+              >
+                Buyers statistics:
               </Typography>
-              <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                {breakEven}
-              </Typography>
+              <Divider />
+              <Stack direction="row" justifyContent="space-between">
+                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
+                  Max yield
+                </Typography>
+                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
+                  {maxYield}
+                </Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
+                  Break-even
+                </Typography>
+                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
+                  {breakEven}
+                </Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
+                  Intrinsic value per token
+                </Typography>
+                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
+                  {intrinsicValue}
+                </Typography>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
+                  Max payout per token
+                </Typography>
+                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
+                  {maxPayout}
+                </Typography>
+              </Stack>
             </Stack>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                Intrinsic value per token
-              </Typography>
-              <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                {/* intrinsicValue */}
-              </Typography>
-            </Stack>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                Max payout per token
-              </Typography>
-              <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                {maxPayout}
-              </Typography>
-            </Stack>
-          </Stack>
+          </RightDiv>
         </Stack>
       )}
     </Container>
