@@ -92,6 +92,44 @@ export const AddLiquidity = ({ pool }: Props) => {
       setOpenAlert(false)
     }
   }, [tokenBalance, textFieldValue, pool])
+  async function addLiquidityTrade() {
+    setLoading(true)
+    setApproving('Approving..')
+    const token = new ethers.Contract(
+      pool!.collateralToken.id,
+      ERC20,
+      provider.getSigner()
+    )
+    token
+      .approve(
+        config[chainId!].divaAddress,
+        parseUnits(textFieldValue, decimal)
+      )
+      .then((tx: any) => {
+        return tx.wait()
+      })
+      .then(() => {
+        return token.allowance(account, config[chainId!].divaAddress)
+      })
+      .then(async () => {
+        const diva = new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider?.getSigner()
+        )
+        setApproving('Adding..')
+        const tx = await diva!.addLiquidity(
+          window.location.pathname.split('/')[1],
+          parseUnits(textFieldValue, decimal)
+        )
+        await tx?.wait()
+        setLoading(false)
+      })
+      .catch((err: any) => {
+        console.log(err)
+        setLoading(false)
+      })
+  }
 
   return (
     <Stack
@@ -325,49 +363,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                   disabled={
                     !pool || Date.now() > 1000 * parseInt(pool.expiryTime)
                   }
-                  onClick={() => {
-                    setLoading(true)
-                    setApproving('Approving..')
-                    const token = new ethers.Contract(
-                      pool!.collateralToken.id,
-                      ERC20,
-                      provider.getSigner()
-                    )
-                    token
-                      .approve(
-                        config[chainId!].divaAddress,
-                        parseUnits(textFieldValue, decimal)
-                      )
-                      .then((tx: any) => {
-                        return tx.wait()
-                      })
-                      .then(() => {
-                        return token.allowance(
-                          account,
-                          config[chainId!].divaAddress
-                        )
-                      })
-                      .then(async () => {
-                        const diva = new ethers.Contract(
-                          config[chainId!].divaAddress,
-                          DIVA_ABI,
-                          provider?.getSigner()
-                        )
-                        setApproving('Adding..')
-                        const tx = await diva!.addLiquidity(
-                          window.location.pathname.split('/')[1],
-                          parseUnits(textFieldValue, decimal)
-                        )
-                        console.log('tx  vaule =', tx)
-                        if (tx.hash != null) {
-                          setLoading(false)
-                        }
-                      })
-                      .catch((err: any) => {
-                        console.log(err)
-                        setLoading(false)
-                      })
-                  }}
+                  onClick={() => addLiquidityTrade()}
                   style={{
                     maxWidth: theme.spacing(38),
                     maxHeight: theme.spacing(5),

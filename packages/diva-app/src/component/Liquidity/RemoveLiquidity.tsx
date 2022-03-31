@@ -148,6 +148,27 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       setOpenAlert(false)
     }
   }, [tokenBalanceLong, tokenBalanceShort, textFieldValue, chainId, pool])
+
+  async function removeLiquidityTrade() {
+    try {
+      setLoading(true)
+      const diva = new ethers.Contract(
+        config[chainId].divaAddress,
+        DIVA_ABI,
+        provider?.getSigner()
+      )
+      const tx = await diva!.removeLiquidity(
+        window.location.pathname.split('/')[1],
+        parseEther(longToken)
+      )
+      await tx?.wait()
+      setLoading(false)
+    } catch (error) {
+      setLoading(false)
+      console.log('tsx err')
+      console.log(error)
+    }
+  }
   return (
     <Container
       sx={{
@@ -279,25 +300,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 type="submit"
                 value="Submit"
                 disabled={!pool}
-                onClick={() => {
-                  setLoading(true)
-                  const diva = new ethers.Contract(
-                    config[chainId].divaAddress,
-                    DIVA_ABI,
-                    provider?.getSigner()
-                  )
-                  const tx = diva!.removeLiquidity(
-                    window.location.pathname.split('/')[1],
-                    parseEther(longToken)
-                  )
-                  if (tx.promise != pending) {
-                    setLoading(false)
-                  }
-                  tx.catch((err: any) => {
-                    setLoading(false)
-                    console.log(err)
-                  })
-                }}
+                onClick={() => removeLiquidityTrade()}
                 style={{
                   maxWidth: theme.spacing(38),
                   maxHeight: theme.spacing(5),
