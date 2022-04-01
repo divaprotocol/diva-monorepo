@@ -68,7 +68,6 @@ export const fetchPool = createAsyncThunk(
       graphUrl,
       queryPool(parseInt(poolId))
     )
-    console.log('fetch pool', res)
     return res.pool
   }
 )
@@ -106,13 +105,11 @@ export const poolSlice = createSlice({
   },
 })
 
-export const poolSelector = (state: RootState, poolId: string) => {
-  const pool = state.poolSlice.pools.find((p) => p.id === poolId)
-  if (pool != null) {
-    return pool
-  }
-
-  return undefined
+export const poolSelector = (
+  state: RootState,
+  poolId: string
+): Pool | undefined => {
+  return state.poolSlice.pools.find((p) => p.id === poolId)
 }
 
 export const priceSelector = (state: RootState, poolId: string) =>
@@ -120,7 +117,9 @@ export const priceSelector = (state: RootState, poolId: string) =>
 
 export const payoffSelector = (state: RootState, poolId: string) => {
   const pool = poolSelector(state, poolId)
+  if (pool == null) return undefined
   const usdPrice = priceSelector(state, poolId)
+  if (usdPrice == null) return undefined
 
   return calcPayoffPerToken(
     BigNumber.from(pool.floor),
@@ -128,8 +127,8 @@ export const payoffSelector = (state: RootState, poolId: string) => {
     BigNumber.from(pool.cap),
     BigNumber.from(pool.collateralBalanceLongInitial),
     BigNumber.from(pool.collateralBalanceShortInitial),
-    pool.statusFinalReferenceValue === 'Open' && parseUnits(usdPrice, 2).gt(0)
-      ? parseUnits(usdPrice, 2)
+    pool.statusFinalReferenceValue === 'Open'
+      ? parseEther(usdPrice)
       : BigNumber.from(pool.finalReferenceValue),
     BigNumber.from(pool.supplyInitial),
     pool.collateralToken.decimals
@@ -183,7 +182,7 @@ export const expectedRateSelector = (
 ) => {
   const orders = orderSelector(state, poolId, isLong)
   // TODO: use orders to get buy and sell
-  console.log(orders)
+  console.log({ orders })
   return {
     buy: 7.8,
     sell: 8.1,
@@ -205,8 +204,6 @@ export const maxYieldSelector = (
   const maxPayout = maxPayoutSelector(state, poolId, isLong)
   const avgExpectedRate = expectedRateSelector(state, poolId, isLong)
   if (maxPayout == null || avgExpectedRate === undefined) return undefined
-  // TODO: This currently throws error
-  console.log({ maxPayout, avgExpectedRate })
 
   return {
     buy: parseFloat(

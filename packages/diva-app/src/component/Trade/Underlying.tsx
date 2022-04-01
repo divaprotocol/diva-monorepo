@@ -79,9 +79,6 @@ export default function Underlying() {
     intrinsicSelector(state, params.poolId)
   )
 
-  // const priceSelector
-  console.log(pool)
-
   if (pool == null) {
     return <div>Loading</div>
   }
@@ -167,7 +164,7 @@ export default function Underlying() {
                   Max yield
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {maxYield}
+                  {JSON.stringify(maxYield)}
                 </Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
@@ -175,7 +172,7 @@ export default function Underlying() {
                   Break-even
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {breakEven}
+                  {JSON.stringify(breakEven)}
                 </Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
@@ -183,7 +180,7 @@ export default function Underlying() {
                   Intrinsic value per token
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {intrinsicValue}
+                  {JSON.stringify(intrinsicValue)}
                 </Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
@@ -191,7 +188,7 @@ export default function Underlying() {
                   Max payout per token
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {maxPayout}
+                  {JSON.stringify(maxPayout)}
                 </Typography>
               </Stack>
             </Stack>
