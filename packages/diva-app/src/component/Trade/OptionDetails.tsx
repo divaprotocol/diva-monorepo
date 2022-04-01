@@ -98,6 +98,16 @@ export default function OptionDetails({
   //Instead of calling redux to get selected option at each component level
   //we can call at root component of trade that is underlying and pass as porps
   //to each child component.
+  const longShortCollateralSum =
+    parseInt(pool.collateralBalanceLongInitial) +
+    parseInt(pool.collateralBalanceShortInitial)
+  const longCollateralRatio =
+    (parseInt(pool.collateralBalanceLongInitial) / longShortCollateralSum) * 100
+  const shortCollateralRatio =
+    (parseInt(pool.collateralBalanceShortInitial) / longShortCollateralSum) *
+    100
+  const shortLongRatio = shortCollateralRatio / longCollateralRatio
+  console.log('çollateralBalanceLongInitial =', shortLongRatio)
 
   return (
     <PageDiv>
@@ -152,6 +162,12 @@ export default function OptionDetails({
         <FlexBoxSecondLine>
           <FlexBoxHeader>Data source</FlexBoxHeader>
           <FlexBoxSecondLineData>TBD</FlexBoxSecondLineData>
+        </FlexBoxSecondLine>
+        <FlexBoxSecondLine>
+          <FlexBoxHeader>Short/Long ratio</FlexBoxHeader>
+          <FlexBoxSecondLineData>
+            {shortCollateralRatio.toFixed()} / {longCollateralRatio.toFixed()}
+          </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
       </FlexSecondLineDiv>
     </PageDiv>
