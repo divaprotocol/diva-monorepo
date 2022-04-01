@@ -1,76 +1,86 @@
 /**
- * Script to redeem long tokens from a pool that has already expired 
- * To execute the script, run `yarn hardhat run scripts/redeemPositionToken.js --network ropsten` (you can replace ropsten with any other network that is listed in constants.js)
+ * Script to redeem position tokens from a pool that has already expired 
+ * Run: `yarn hardhat run scripts/redeemPositionToken.js --network ropsten` 
+ * Replace ropsten with any other network that is listed in constants.js
  * 
  * Note that as opposed to `addLiquidity` where you specify the amount of collateral tokens to be added, in `removeLiquidity`, you pass in the 
- * number of long tokens to be removed. The required number of short tokens to withdraw collateral is calculated inside the smart contract function
- *  
- * DIVA smart contract addresses for the different networks are registered in constants.js
+ * number of position tokens to remove (e.g., 200 means that 200 position and 200 short tokens will be removed). The collateral to return is 
+ * calculated inside the smart contract.
  */
 
 const { ethers } = require('hardhat');
-const DIVA_ABI = require('@diva/contracts/abis/diamond.json')
-const ERC20_ABI = require('@diva/contracts/abis/erc20.json')
-const positionToken_ABI = require('@diva/contracts/abis/position-token.json')
+const ERC20_ABI = require('../contracts/abis/ERC20.json');
+const positionToken_ABI = require('../contracts/abis/PositionToken.json');
+const DIVA_ABI = require('../contracts/abis/DIVA.json');
 const { parseEther, formatEther, formatUnits } = require('@ethersproject/units')
 const { addresses } = require('../constants/constants')
 
+
 async function main() {
 
-  // INPUT (network)
-  const network = "ropsten" // has to be one of the networks included in constants.js
+  // INPUT: network (check constants.js for available values), id of an existing pool
+  const network = "ropsten"
   
-  // INPUT (in this example, the first input `positionTokenAddress` into redeemPositionToken function is derived from the poolId)
-  const poolId = 132 // id of an existing pool
-  const redemptionAmount = parseEther("10") // number of position tokens to redeem
+  // INPUT id of an existing pool and number of position tokens to redeem
+  const poolId = 4 // id of an existing pool
+  const redemptionAmount = parseEther("30") // number of position tokens to redeem
+  const sideToRedeem = "long" // short / long
   
-  // Get account (account 1 in your Metamask wallet)
-  const [user1] = await ethers.getSigners();
-  console.log("user1 address: " + user1.address)
+  // Get accounts
+  const [acc1, acc2, acc3] = await ethers.getSigners();
+  positionTokenHolder = acc1;
+  console.log("PositionTokenHolder address: " + positionTokenHolder.address)
   
   // Connect to DIVA contract
   let diva = await ethers.getContractAt(DIVA_ABI, addresses[network].divaAddress);
   console.log("DIVA address: ", diva.address);
 
-  // Get pool parameters before long token redemption
+  // Get pool parameters before position token redemption
   const poolParamsBefore = await diva.getPoolParameters(poolId)
-  console.log("Long token supply before: " + formatEther(poolParamsBefore.supplyLong))
+
+  // Connect to position token 
+  if (sideToRedeem === "short") {
+    positionTokenInstance = await ethers.getContractAt(ERC20_ABI, poolParamsBefore.shortToken)
+  } else if (sideToRedeem === "long") {
+    positionTokenInstance = await ethers.getContractAt(ERC20_ABI, poolParamsBefore.longToken)
+  } else {
+    console.log("Invalid input for sideToRedeem. Choose short or long")
+    return;
+  }
+  
+  console.log("Position token supply before: " + formatEther(await positionTokenInstance.totalSupply()))
 
   // Connect to ERC20 collateral token 
   const erc20Contract = await ethers.getContractAt(ERC20_ABI, poolParamsBefore.collateralToken)   
   const decimals = await erc20Contract.decimals() 
 
-  // Get user's collateral token balance before redemption
-  const collateralBalanceBefore = await erc20Contract.balanceOf(user1.address)
-  console.log("Collateral token balance user before: " + formatUnits(collateralBalanceBefore, decimals))
+  // Get positionTokenHolder's collateral token balance before redemption
+  const collateralBalanceBefore = await erc20Contract.balanceOf(positionTokenHolder.address)
+  console.log("Collateral token balance positionTokenHolder before: " + formatUnits(collateralBalanceBefore, decimals))
 
-  // Connect to long token 
-  const longToken = await ethers.getContractAt(positionToken_ABI, poolParamsBefore.longToken)    
+  // Get positionTokenHolder's position token balance before redemption
+  const positionTokenBalanceBefore = await positionTokenInstance.balanceOf(positionTokenHolder.address)
+  console.log("Position token balance positionTokenHolder before: " + formatEther(positionTokenBalanceBefore))
 
-  // Get user's long token balance before redemption
-  const longBalanceBefore = await longToken.balanceOf(user1.address)
-  console.log("Long token balance user before: " + formatEther(longBalanceBefore))
-
-  // Check user's long token wallet balance
-  if (longBalanceBefore.lt(redemptionAmount)) {
-    throw "Insufficient long token balance"
+  // Check positionTokenHolder's position token wallet balance
+  if (positionTokenBalanceBefore.lt(redemptionAmount)) {
+    throw "Insufficient position token balance"
   }
   
-  // Redeem long tokens
-  let tx = await diva.redeemPositionToken(poolParamsBefore.longToken, redemptionAmount); 
+  // Redeem position tokens
+  let tx = await diva.redeemPositionToken(positionTokenInstance.address, redemptionAmount); 
   await tx.wait();
   
   // Get pool parameters after redemption
-  const poolParamsAfter = await diva.getPoolParameters(poolId)
-  console.log("Long token supply after: " + formatEther(poolParamsAfter.supplyLong))
+  console.log("Position token supply after: " + formatEther(await positionTokenInstance.totalSupply()))
 
-  // Get user's collateral token balance after redemption
-  const collateralBalanceAfter = await erc20Contract.balanceOf(user1.address)
-  console.log("Collateral token balance user after: " + formatUnits(collateralBalanceAfter, decimals))
+  // Get positionTokenHolder's collateral token balance after redemption
+  const collateralBalanceAfter = await erc20Contract.balanceOf(positionTokenHolder.address)
+  console.log("Collateral token balance positionTokenHolder after: " + formatUnits(collateralBalanceAfter, decimals))
 
-  // Get user's long token balance after redemption
-  const longBalanceAfter = await longToken.balanceOf(user1.address)
-  console.log("Long token balance user after: " + formatEther(longBalanceAfter))
+  // Get positionTokenHolder's position token balance after redemption
+  const positionTokenBalanceAfter = await positionTokenInstance.balanceOf(positionTokenHolder.address)
+  console.log("position token balance positionTokenHolder after: " + formatEther(positionTokenBalanceAfter))
 
  }
  

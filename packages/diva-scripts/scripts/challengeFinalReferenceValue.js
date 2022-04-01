@@ -1,28 +1,27 @@
 /**
- * Script to challenge the value submitted by the data feed provider. Only works if challenge was enabled by the data feed provider at value submission and if within the challenge period (24h after submission)
- * To execute the script, run `yarn hardhat run scripts/challengeFinalReferenceValue.js --network ropsten` (you can replace ropsten with any other network that is listed in constants.js)
- * 
- * 
- * DIVA smart contract addresses for the different networks are registered in constants.js
+ * Script to challenge the value submitted by the data feed provider. Only works if 
+ * challenge was enabled by the data feed provider at value submission and if within the challenge period (24h after submission)
+ * Run: `yarn hardhat run scripts/challengeFinalReferenceValue.js --network ropsten`
+ * Replace ropsten with any other network that is listed in constants.js
  */
 
 const { ethers } = require('hardhat');
-const DIVA_ABI = require('@diva/contracts/abis/diamond.json')
-
+const DIVA_ABI = require('../contracts/abis/DIVA.json');
 const { parseEther, formatEther } = require('@ethersproject/units')
 const { addresses, status } = require('../constants/constants')
 
 async function main() {
 
-  // INPUT (network)
+  // INPUT: network
   const network = "ropsten" // has to be one of the networks included in constants.js
   
-  // INPUT (setFinalReferenceValue arguments)
-  const poolId = 22 // id of an existing pool
+  // INPUT: arguments into `setFinalReferenceValue` function
+  const poolId = 5 // id of an existing pool
   const proposedFinalReferenceValue = parseEther("1670") // 18 decimals
 
-  // Get accounts (account 1 in your wallet)
-  const [positionTokenHolder] = await ethers.getSigners();
+  // Get accounts
+  const [acc1, acc2, acc3] = await ethers.getSigners();
+  const positionTokenHolder = acc1;
   console.log("Position token holder address: " + positionTokenHolder.address)
   
   // Connect to DIVA contract

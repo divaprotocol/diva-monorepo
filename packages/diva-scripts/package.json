@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "create-ropsten": "yarn hardhat run scripts/createContingentPool.js --network ropsten",
+    "get-ropsten": "yarn hardhat run scripts/getPoolParameters.js --network ropsten",
+    "redeem-ropsten": "yarn hardhat run scripts/redeemPositionToken.js --network ropsten",
+    "add-ropsten": "yarn hardhat run scripts/addLiquidity.js --network ropsten",
+    "0x-allowance-ropsten": "yarn hardhat run scripts/0xAllowance.js --network ropsten"
   },
   "repository": {
     "type": "git",
@@ -23,7 +27,7 @@
     "chai": "^4.3.4",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.2",
-    "hardhat": "^2.9.2"
+    "hardhat": "^2.8.0"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.1",

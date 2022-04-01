@@ -1,24 +1,27 @@
 /**
  * Script to create a contingent pool
- * To execute the script, run `yarn hardhat run scripts/createContingentPool.js --network ropsten` (you can replace ropsten with any other network that is listed in constants.js)
- * 
- * DIVA smart contract addresses for the different networks are registered in constants.js
+ * Run: `yarn hardhat run scripts/createContingentPool.js --network ropsten`
+ * Replace ropsten with any other network that is listed in constants.js
  */
 
 const { ethers } = require('hardhat');
-const DIVA_ABI = require('@diva/contracts/abis/diamond.json')
-const ERC20_ABI = require('@diva/contracts/abis/erc20.json')
+const ERC20_ABI = require('../contracts/abis/ERC20.json');
+const DIVA_ABI = require('../contracts/abis/DIVA.json');
 const { parseEther, parseUnits, formatUnits } = require('@ethersproject/units')
 const { addresses } = require('../constants/constants')
-const { BigNumber } = require('ethers')
 const { getExpiryInSeconds, AddressZero } = require('./utils.js')
 
 
 async function main() {
 
-  // INPUT (network)
-  const network = "ropsten" // has to be one of the networks included in constants.js
-  const collateralTokenSymbol = "DAI"
+  // INPUT: network, collateral token symbol (check constants.js for available values)
+  const network = "ropsten" 
+  const collateralTokenSymbol = "WAGMI6"
+
+  // Get signers
+  const [acc1, acc2, acc3] = await ethers.getSigners();
+  const user = acc1;
+  console.log("poolCreator address: " + user.address)
 
   // Connect to ERC20 token which will be used as collateral. Modify constants.js if you want to use a different ERC20 token
   const erc20CollateralTokenAddress = addresses[network][collateralTokenSymbol];
@@ -27,18 +30,17 @@ async function main() {
   console.log("ERC20 collateral token address: " + erc20CollateralTokenAddress)
   console.log("Collateral token decimals: " + decimals);
   
-  // INPUT (createContingentPool arguments)
-  const inflection = parseEther("20")
-  const cap = parseEther("25") 
-  const floor = parseEther("15") 
-  const collateralBalanceShort = parseUnits("0.00001", decimals) 
-  const collateralBalanceLong = parseUnits("0.00001", decimals)  
-  const expiryDate = getExpiryInSeconds(0) // epoch unix timestamp in seconds
-  const supplyShort = parseEther("2")
-  const supplyLong = parseEther("2") // 
-  const referenceAsset = "ETH/USD" // "BTC/USD" 
+  // INPUTS: arguments for `createContingentPool` function
+  const referenceAsset = "UMA/USD" // "BTC/USD" 
+  const expiryTime = getExpiryInSeconds(0) // epoch unix timestamp in seconds
+  const floor = parseEther("20000") 
+  const inflection = parseEther("20000")
+  const cap = parseEther("45000") 
+  const collateralBalanceShort = parseUnits("50", decimals) 
+  const collateralBalanceLong = parseUnits("50", decimals)  
+  const supplyPositionToken = parseEther("100")
   const collateralToken = erc20CollateralTokenAddress 
-  const dataFeedProvider = "0xED6D661645a11C45F4B82274db677867a7D32675"
+  const dataProvider = "0x9AdEFeb576dcF52F5220709c1B267d89d5208D78" // Tellor: "0xED6D661645a11C45F4B82274db677867a7D32675"
   const capacity = parseUnits("0", decimals)
 
   // Input checks
@@ -52,19 +54,19 @@ async function main() {
     return;
   }
 
-  if (collateralToken === AddressZero || dataFeedProvider === AddressZero) {
-    console.log("collateralToken/dataFeedProvider cannot be zero address");
+  if (collateralToken === AddressZero || dataProvider === AddressZero) {
+    console.log("collateralToken/dataProvider cannot be zero address");
     return;
   }
 
-  if (supplyLong.eq(0) || supplyShort.eq(0)) {
-    console.log("Token supply cannot be zero");
+  if (supplyPositionToken.eq(0)) {
+    console.log("Position token supply cannot be zero");
     return;
   }
 
   if (capacity.gt(0)) {
     if (capacity.lt(collateralBalanceShort.add(collateralBalanceLong))) {
-      console.log("capacity cannot be smaller than collateral put in");
+      console.log("Capacity cannot be smaller than collateral provided");
       return;
     }
   }
@@ -74,12 +76,13 @@ async function main() {
     return;
   }
 
-  // Get account (account 1 in your Metamask wallet)
-  const [poolCreator] = await ethers.getSigners();
-  console.log("poolCreator address: " + poolCreator.address)
+  if (decimals < 3) {
+    console.log("Collateral token cannot have less than 3 decimals");
+    return;
+  }
 
   // Check ERC20 token balance
-  const balance = await erc20Contract.balanceOf(poolCreator.address)
+  const balance = await erc20Contract.balanceOf(user.address)
   console.log("ERC20 token balance: " + formatUnits(balance, decimals))
   if (balance.lt(collateralBalanceShort.add(collateralBalanceLong))) {
     throw "Insufficient collateral tokens in wallet"
@@ -90,27 +93,26 @@ async function main() {
   console.log("DIVA address: ", diva.address);
 
   // Set allowance for DIVA contract
-  const approveTx = await erc20Contract.approve(diva.address, collateralBalanceLong.add(collateralBalanceShort));
+  const approveTx = await erc20Contract.connect(user).approve(diva.address, collateralBalanceLong.add(collateralBalanceShort));
   await approveTx.wait();
 
   // Check that allowance was set
-  const allowance = await erc20Contract.allowance(poolCreator.address, diva.address)
+  const allowance = await erc20Contract.allowance(user.address, diva.address)
   console.log("Approved amount: " + formatUnits(await allowance, decimals))
 
   // Create contingent pool
-  const tx = await diva.createContingentPool([
+  const tx = await diva.connect(user).createContingentPool([
+    referenceAsset, 
+    expiryTime, 
+    floor,
     inflection, 
     cap,
-    floor,
     collateralBalanceShort, 
     collateralBalanceLong,  
-    expiryDate, 
-    supplyShort, 
-    supplyLong, 
-    referenceAsset, 
+    supplyPositionToken, 
     collateralToken, 
-    dataFeedProvider,
-    capacity 
+    dataProvider,
+    capacity
   ]); 
   await tx.wait();
 
@@ -120,14 +122,17 @@ async function main() {
 
   // Get pool parameters
   const poolParams = await diva.getPoolParameters(poolId);
-  console.log("Long token: " + poolParams.longToken)
-  console.log("Short token: " + poolParams.shortToken)
-  console.log("Supply long token: " + poolParams.supplyLong)
-  console.log("Supply short token: " + poolParams.supplyShort)
-  console.log("Collateral balance long: " + poolParams.collateralBalanceLong)
-  console.log("Collateral balance long: " + poolParams.collateralBalanceShort)
-  
 
+  // Get instances of short and long position token
+  const shortTokenInstance = await ethers.getContractAt(ERC20_ABI, poolParams.shortToken)
+  const longTokenInstance = await ethers.getContractAt(ERC20_ABI, poolParams.longToken)
+  console.log("Short token address: " + poolParams.shortToken)
+  console.log("Long token address: " + poolParams.longToken)
+  console.log("Supply short token: " + await shortTokenInstance.totalSupply())
+  console.log("Supply long token: " + await longTokenInstance.totalSupply())
+  console.log("Collateral balance short initial: " + poolParams.collateralBalanceShortInitial)
+  console.log("Collateral balance long initial: " + poolParams.collateralBalanceLongInitial)
+  
 }
 
 main()

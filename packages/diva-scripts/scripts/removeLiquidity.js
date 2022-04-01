@@ -9,9 +9,9 @@
  */
 
 const { ethers } = require('hardhat');
-const DIVA_ABI = require('@diva/contracts/abis/diamond.json')
-const ERC20_ABI = require('@diva/contracts/abis/erc20.json')
-const positionToken_ABI = require('@diva/contracts/abis/position-token.json')
+const ERC20_ABI = require('../contracts/abis/ERC20.json');
+const positionToken_ABI = require('../contracts/abis/PositionToken.json');
+const DIVA_ABI = require('../contracts/abis/DIVA.json');
 const { parseEther, formatEther, parseUnits, formatUnits } = require('@ethersproject/units')
 const { addresses } = require('../constants/constants')
 
@@ -21,8 +21,8 @@ async function main() {
     const network = "ropsten" // has to be one of the networks included in constants.js
     
     // INPUT (removeLiquidity arguments)
-    const poolId = 129 // id of an existing pool
-    const amountLongTokens = parseEther("10") // number of long tokens to be removed from an existing pool
+    const poolId = 3 // id of an existing pool
+    const amountTokens = parseEther("1") // number of long tokens to be removed from an existing pool
     
     // Get account (account 1 in your Metamask wallet)
     const [user1] = await ethers.getSigners();
@@ -39,20 +39,20 @@ async function main() {
     const erc20Contract = await ethers.getContractAt(ERC20_ABI, poolParamsBefore.collateralToken)    
     const decimals = await erc20Contract.decimals();
     console.log("Collateral token address: " + poolParamsBefore.collateralToken)
-    console.log("Collateral balance before: " + formatUnits((poolParamsBefore.collateralBalanceLong).add(poolParamsBefore.collateralBalanceShort), decimals))
+    console.log("Collateral balance before: " + formatUnits(poolParamsBefore.collateralBalance, decimals))
     console.log("Long token address: " + poolParamsBefore.longToken)
     console.log("Short token address: " + poolParamsBefore.shortToken)
-    console.log("Long token supply before: " + formatEther(poolParamsBefore.supplyLong))
-    console.log("Short token supply before: " + formatEther(poolParamsBefore.supplyShort))
-
-    // Calculate required short token balance in user wallet
-    const supplyLongInitial = poolParamsBefore.supplyLongInitial
-    const supplyShortInitial = poolParamsBefore.supplyShortInitial
-    const amountShortTokens = amountLongTokens.mul(supplyShortInitial).div(supplyLongInitial) // calc in line with calculation in the smart contract
-
+    
     // Connect to long and short tokens 
     const longToken = await ethers.getContractAt(positionToken_ABI, poolParamsBefore.longToken)    
-    const shortToken = await ethers.getContractAt(positionToken_ABI, poolParamsBefore.shortToken)    
+    const shortToken = await ethers.getContractAt(positionToken_ABI, poolParamsBefore.shortToken)   
+    
+    // Calculate required short token balance in user wallet
+    const supplyLong = await longToken.totalSupply()
+    const supplyShort = await shortToken.totalSupply()
+
+    console.log("Long token supply before: " + formatEther(supplyLong))
+    console.log("Short token supply before: " + formatEther(supplyShort))
 
     // Get user's long and short token balances
     const longBalance = await longToken.balanceOf(user1.address)
@@ -61,18 +61,18 @@ async function main() {
     console.log("Short token balance user: " + formatEther(shortBalance))
 
     // Check user's long and short token wallet balance
-    if (longBalance.lt(amountLongTokens)) {
+    if (longBalance.lt(amountTokens)) {
       throw "Insufficient long token amount in wallet"
-    } else if (shortBalance.lt(amountShortTokens)) {
+    } else if (shortBalance.lt(amountTokens)) {
       throw "Insufficient short token amount in wallet"
     }
     
     // Set allowance for DIVA contract to move long position tokens
-    const approveLongTx = await longToken.approve(diva.address, amountLongTokens);
+    const approveLongTx = await longToken.approve(diva.address, amountTokens);
     await approveLongTx.wait();
 
     // Set allowance for DIVA contract to move short position tokens
-    const approveShortTx = await shortToken.approve(diva.address, amountShortTokens); 
+    const approveShortTx = await shortToken.approve(diva.address, amountTokens); 
     await approveShortTx.wait();
 
     // Check that allowances were set
@@ -83,14 +83,16 @@ async function main() {
     console.log("Short token allowance: " + formatEther(await shortTokenAllowance))
 
     // Remove liquidity
-    let tx = await diva.removeLiquidity(poolId, amountLongTokens); 
+    let tx = await diva.removeLiquidity(poolId, amountTokens); 
     await tx.wait();
     
     // Get pool parameters after liquidity has been removed
     const poolParamsAfter = await diva.getPoolParameters(poolId)
-    console.log("Collateral balance after: " + formatUnits((poolParamsAfter.collateralBalanceLong).add(poolParamsAfter.collateralBalanceShort), decimals))
-    console.log("Long token supply after: " + formatEther(poolParamsAfter.supplyLong))
-    console.log("Short token supply after: " + formatEther(poolParamsAfter.supplyShort))
+    const supplyLongAfter = await longToken.totalSupply()
+    const supplyShortAfter = await shortToken.totalSupply()
+    console.log("Collateral balance after: " + formatUnits(poolParamsAfter.collateralBalance, decimals))
+    console.log("Long token supply after: " + formatEther(supplyLongAfter))
+    console.log("Short token supply after: " + formatEther(supplyShortAfter))
     
 }
 

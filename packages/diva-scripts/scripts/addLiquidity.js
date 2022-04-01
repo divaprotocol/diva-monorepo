@@ -1,28 +1,28 @@
 /**
  * Script to add liquidity to an existing pool that has not yet expired
- * To execute the script, run `yarn hardhat run scripts/addLiquidity.js --network ropsten` (you can replace ropsten with any other network that is listed in constants.js)
- * 
- * DIVA smart contract addresses for the different networks are registered in constants.js
+ * Run: `yarn hardhat run scripts/addLiquidity.js --network ropsten`
+ * Replace ropsten with any other network that is listed in constants.js
  */
 
 const { ethers } = require('hardhat');
-const DIVA_ABI = require('@diva/contracts/abis/diamond.json')
-const ERC20_ABI = require('@diva/contracts/abis/erc20.json')
+const ERC20_ABI = require('../contracts/abis/ERC20.json');
+const DIVA_ABI = require('../contracts/abis/DIVA.json');
 const { parseUnits, formatUnits, formatEther } = require('@ethersproject/units')
 const { addresses } = require('../constants/constants')
 
 async function main() {
     let additionalAmount
 
-    // INPUT (network)
-    const network = "ropsten" // has to be one of the networks included in constants.js
+    // INPUT: network, collateral token symbol (check constants.js for available values)
+    const network = "ropsten" 
     
-    // INPUT (addLiquidity arguments)
-    const poolId = 131 // id of an existing pool
+    // INPUT: arguments for `addLiquidity` function
+    const poolId = 3 // id of an existing pool
     additionalAmount = 3 // collateral token amount to be added to an existing pool
 
     // Get account (account 1 in your Metamask wallet)
-    const [liquidityProvider] = await ethers.getSigners();
+    const [acc1, acc2, acc3] = await ethers.getSigners();
+    const liquidityProvider = acc1;  
     console.log("liquidityProvider address: " + liquidityProvider.address)
     
     // Connect to DIVA contract
@@ -32,6 +32,13 @@ async function main() {
     // Get pool parameters before new liquidity is added
     const poolParamsBefore = await diva.getPoolParameters(poolId)
 
+    // Check that pool didn't expire yet
+    currentTime = Math.floor(Date.now() / 1000)
+    if (poolParamsBefore.expiryTime <= new Date().getTime() / 1000) {
+      console.log("Pool already expired. No addition of liquidity possible anymore.")
+      return;
+    }
+
     // Connect to ERC20 collateral token 
     const erc20Contract = await ethers.getContractAt(ERC20_ABI, poolParamsBefore.collateralToken)    
     const decimals = await erc20Contract.decimals();
@@ -40,7 +47,7 @@ async function main() {
     // Print collateral token and liquidity information
     console.log("Collateral token decimals: " + decimals)
     console.log("Collateral token address: " + poolParamsBefore.collateralToken)
-    console.log("Current liquidity: " + formatUnits((poolParamsBefore.collateralBalanceLong).add(poolParamsBefore.collateralBalanceShort), decimals))
+    console.log("Current liquidity: " + formatUnits(poolParamsBefore.collateralBalance, decimals))
 
     // Get user's collateral token balances
     const balance = await erc20Contract.balanceOf(liquidityProvider.address)
@@ -63,13 +70,17 @@ async function main() {
     let tx = await diva.addLiquidity(poolId, additionalAmount); 
     await tx.wait();
     
-    // Get pool parameters after new liquidity has been added
+    // Get pool parameters and position token supply after new liquidity has been added
     const poolParamsAfter = await diva.getPoolParameters(poolId)
-    console.log("New liquidity: " + formatUnits((poolParamsAfter.collateralBalanceLong).add(poolParamsAfter.collateralBalanceShort), decimals))
-    console.log("New long token supply: " + poolParamsAfter.supplyLong)
-    console.log("New short token supply: " + poolParamsAfter.supplyShort)
-    console.log("New long token supply (formatted): " + formatEther(poolParamsAfter.supplyLong))
-    console.log("New short token supply (formatted): " + formatEther(poolParamsAfter.supplyShort))
+    const longTokenInstance = await ethers.getContractAt(ERC20_ABI, poolParamsAfter.longToken)
+    const shortTokenInstance = await ethers.getContractAt(ERC20_ABI, poolParamsAfter.shortToken)
+    const supplyShort = await shortTokenInstance.totalSupply();
+    const supplyLong = await longTokenInstance.totalSupply();
+    console.log("New liquidity: " + formatUnits(poolParamsAfter.collateralBalance, decimals))
+    console.log("New long token supply: " + supplyLong)
+    console.log("New short token supply: " + supplyShort)
+    console.log("New long token supply (formatted): " + formatEther(supplyLong))
+    console.log("New short token supply (formatted): " + formatEther(supplyShort))
 }
 
 main()
