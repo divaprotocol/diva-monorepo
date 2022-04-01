@@ -5,8 +5,8 @@
  */
 
 const { ethers } = require('hardhat');
-const ERC20_ABI = require('../contracts/abis/ERC20.json');
-const DIVA_ABI = require('../contracts/abis/DIVA.json');
+const ERC20_ABI = require('@diva/contracts/abis/erc20.json');
+const DIVA_ABI = require('@diva/contracts/abis/diamond.json');
 const { parseEther, parseUnits, formatUnits } = require('@ethersproject/units')
 const { addresses } = require('../constants/constants')
 const { getExpiryInSeconds, AddressZero } = require('./utils.js')
