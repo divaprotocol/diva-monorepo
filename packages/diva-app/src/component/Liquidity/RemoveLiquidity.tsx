@@ -51,7 +51,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const [shortToken, setShortToken] = React.useState('')
   const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
-  //const [alert, setAlert] = React.useState(false)
   const [loading, setLoading] = useState(false)
   const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
   const { provider } = useWallet()
@@ -165,7 +164,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       setLoading(false)
     } catch (error) {
       setLoading(false)
-      console.log('tsx err')
       console.log(error)
     }
   }
@@ -178,7 +176,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       {loading ? (
         <>
           <Box pt={2} pb={3}>
-            <Alert severity="info">Removing..</Alert>
+            <Alert severity="info">Removing...</Alert>
           </Box>
         </>
       ) : (

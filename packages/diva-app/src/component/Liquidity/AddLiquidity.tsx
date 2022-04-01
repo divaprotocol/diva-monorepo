@@ -94,7 +94,7 @@ export const AddLiquidity = ({ pool }: Props) => {
   }, [tokenBalance, textFieldValue, pool])
   async function addLiquidityTrade() {
     setLoading(true)
-    setApproving('Approving..')
+    setApproving('Approving...')
     const token = new ethers.Contract(
       pool!.collateralToken.id,
       ERC20,
@@ -117,7 +117,7 @@ export const AddLiquidity = ({ pool }: Props) => {
           DIVA_ABI,
           provider?.getSigner()
         )
-        setApproving('Adding..')
+        setApproving('Adding...')
         const tx = await diva!.addLiquidity(
           window.location.pathname.split('/')[1],
           parseUnits(textFieldValue, decimal)
