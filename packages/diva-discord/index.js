@@ -49,12 +49,12 @@ client.on("ready", () => {
 
     commands?.create({
         name: 'address',
-        description: 'Shows your registed wallet address',
+        description: 'Shows your registered wallet address',
     })
 
     commands?.create({
         name: 'register',
-        description: 'Register wallet and receive testnet tokens',
+        description: 'Register your wallet and receive testnet tokens',
         options: [ 
             {
                 name: 'address',
