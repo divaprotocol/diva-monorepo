@@ -20,12 +20,12 @@ import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { useQuery } from 'react-query'
-import { Pool, queryDatafeed } from '../../lib/queries'
-import { request } from 'graphql-request'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
+import { useAppSelector } from '../../Redux/hooks'
+import { fetchFeeds, fetchPools, poolsSelector } from '../../Redux/poolSlice'
+import { useDispatch } from 'react-redux'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -273,36 +273,18 @@ export function MyDataFeeds() {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId
   const userAddress = wallet?.connection?.userAddress
-
+  const dispatch = useDispatch()
   const [page, setPage] = useState(0)
-
-  const query = useQuery<{ pools: Pool[] }>(
-    `pools-${userAddress}`,
-    async () => {
-      let res: Pool[] = []
-      if (chainId != null) {
-        let lastId = '0'
-        let lastRes: Pool[]
-        while (lastRes == null || lastRes.length > 0) {
-          const result = await request(
-            config[chainId as number].divaSubgraph,
-            queryDatafeed(userAddress, lastId)
-          )
-
-          if (result.pools.length > 0)
-            lastId = result.pools[result.pools?.length - 1].id
-
-          lastRes = result.pools
-          res = res.concat(lastRes)
-        }
-      }
-      return { pools: res }
-    }
-  )
   useEffect(() => {
-    query.refetch()
-  }, [chainId])
-  const pools = query?.data?.pools || ([] as Pool[])
+    dispatch(
+      fetchFeeds({
+        graphUrl: config[chainId as number].divaSubgraph,
+        userAddress,
+      })
+    )
+  }, [chainId, dispatch])
+
+  const pools = useAppSelector((state) => poolsSelector(state))
   console.log('pools')
   console.log(pools)
   const rows: GridRowModel[] = pools.reduce((acc, val) => {

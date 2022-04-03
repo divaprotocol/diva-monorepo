@@ -16,7 +16,7 @@ import {
 } from '../../Redux/TradeOption'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
-import { fetchOrders } from '../../Redux/poolSlice'
+import { fetchOrders, setIsBuy } from '../../Redux/poolSlice'
 const PageDiv = styled.div`
   width: 400px;
   height: 420px;
@@ -97,6 +97,7 @@ export default function CreateOrder(props: {
   })
 
   const handleOrderTypeChange = (event: any, newValue: number) => {
+    dispatch(setIsBuy(newValue === 0))
     setOrderTypeValue(newValue)
   }
 
@@ -105,7 +106,6 @@ export default function CreateOrder(props: {
   }
 
   const getExistingOrders = () => {
-    console.log('get existing true')
     // dispatch(fetchOrders({ pool: option, isLong }))
   }
 

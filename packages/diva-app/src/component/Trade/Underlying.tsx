@@ -21,10 +21,12 @@ import {
   fetchPool,
   fetchUnderlyingPrice,
   intrinsicSelector,
+  isBuySelector,
   maxPayoutSelector,
   maxYieldSelector,
   poolSelector,
 } from '../../Redux/poolSlice'
+import { formatEther } from 'ethers/lib/utils'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -41,10 +43,6 @@ const RightDiv = styled.div`
 export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const [value, setValue] = React.useState(0)
-  // const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  // const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
-  // const maxYield = useAppSelector((state) => state.stats.maxYield)
-  // const breakEven = useAppSelector((state) => state.stats.breakEven)
   const isLong = params.tokenType === 'long'
   const maxPayout = useAppSelector((state) =>
     maxPayoutSelector(state, params.poolId, isLong)
@@ -55,6 +53,7 @@ export default function Underlying() {
   const breakEven = useAppSelector((state) =>
     breakEvenSelector(state, params.poolId, isLong)
   )
+  const isBuy = useAppSelector((state) => isBuySelector(state))
   const breakEvenOptionPrice = 0
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
@@ -78,7 +77,12 @@ export default function Underlying() {
   const intrinsicValue = useAppSelector((state) =>
     intrinsicSelector(state, params.poolId)
   )
-
+  const intValDisplay =
+    intrinsicValue != 'n/a' && intrinsicValue != null
+      ? isLong
+        ? formatEther(intrinsicValue?.payoffPerLongToken)
+        : formatEther(intrinsicValue?.payoffPerShortToken)
+      : 'n/a'
   if (pool == null) {
     return <div>Loading</div>
   }
@@ -163,16 +167,26 @@ export default function Underlying() {
                 <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
                   Max yield
                 </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {JSON.stringify(maxYield)}
-                </Typography>
+                {isBuy ? (
+                  <Typography
+                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    {maxYield.buy}
+                  </Typography>
+                ) : (
+                  <Typography
+                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    {maxYield.sell}
+                  </Typography>
+                )}
               </Stack>
               <Stack direction="row" justifyContent="space-between">
                 <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
                   Break-even
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {JSON.stringify(breakEven)}
+                  {breakEven}
                 </Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
@@ -180,7 +194,7 @@ export default function Underlying() {
                   Intrinsic value per token
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {JSON.stringify(intrinsicValue)}
+                  {intValDisplay}
                 </Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
@@ -188,7 +202,7 @@ export default function Underlying() {
                   Max payout per token
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {JSON.stringify(maxPayout)}
+                  {maxPayout}
                 </Typography>
               </Stack>
             </Stack>

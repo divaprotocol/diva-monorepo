@@ -53,7 +53,7 @@ export type Pool = {
   settlementFee: string
   statusFinalReferenceValue: string
   statusTimestamp: string
-
+  intrinsicValue?: string
   supplyInitial: string
   supplyLong: string
   supplyShort: string

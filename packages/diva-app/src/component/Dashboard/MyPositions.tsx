@@ -20,19 +20,19 @@ import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
-import { Pool, queryMarkets } from '../../lib/queries'
-import { request } from 'graphql-request'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
-import { calcPayoffPerToken } from '../../Util/calcPayoffPerToken'
-import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
-import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
+import {
+  fetchPools,
+  poolsSelector,
+} from '../../Redux/poolSlice'
+import { useDispatch } from 'react-redux'
 
 type Response = {
   [token: string]: BigNumber
@@ -349,35 +349,23 @@ const columns: GridColDef[] = [
 
 export function MyPositions() {
   const { provider, connection } = useWallet()
-  const chainId = provider?.network?.chainId
+  const chainId = provider?.network?.chainId || 3
   const userAddress = connection?.userAddress
 
   const account = userAddress
   const [page, setPage] = useState(0)
-  const [usdPrice, setUsdPrice] = useState('')
 
-  const query = useQuery<{ pools: Pool[] }>(`pools-${account}`, async () => {
-    let res: Pool[] = []
-    if (chainId != null) {
-      let lastId = '0'
-      let lastRes: Pool[]
-      while (lastRes == null || lastRes.length > 0) {
-        const result = await request(
-          config[chainId as number].divaSubgraph,
-          queryMarkets(lastId)
-        )
+  const dispatch = useDispatch()
+  useEffect(() => {
+    dispatch(
+      fetchPools({
+        graphUrl: config[chainId as number].divaSubgraph,
+      })
+    )
+  }, [chainId, dispatch])
 
-        if (result.pools.length > 0)
-          lastId = result.pools[result.pools?.length - 1].id
+  const pools = useAppSelector((state) => poolsSelector(state))
 
-        lastRes = result.pools
-        res = res.concat(lastRes)
-      }
-    }
-    return { pools: res }
-  })
-  const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
-  const pools = query.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
     const now = new Date()
@@ -496,7 +484,7 @@ export function MyPositions() {
   const tokenAddresses = rows.map((v) => v.address.id)
 
   const balances = useQuery<Response>(
-    `balance-${userAddress}-${query.isLoading}`,
+    `balance-${userAddress}-${pools == null}`,
     async () => {
       const response: Response = {}
       if (!userAddress) throw new Error('wallet not connected')
@@ -546,7 +534,7 @@ export function MyPositions() {
       <PoolsTable
         page={page}
         rows={filteredRows}
-        loading={query.isLoading || balances.isLoading}
+        loading={balances.isLoading}
         columns={columns}
         disableRowClick
         onPageChange={(page) => setPage(page)}

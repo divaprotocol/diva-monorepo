@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { BigNumber } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
-import { Pool, queryPool } from '../lib/queries'
+import { Pool, queryDatafeed, queryMarkets, queryPool } from '../lib/queries'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
@@ -10,6 +10,7 @@ import { get0xOpenOrders } from '../DataService/OpenOrders'
 
 type PoolState = {
   pools: Pool[]
+  isBuy: boolean
   underlyingPrice: {
     [poolId: string]: string
   }
@@ -29,6 +30,7 @@ type PoolState = {
 
 const initialState: PoolState = {
   pools: [],
+  isBuy: true,
   underlyingPrice: {},
   orders: {},
 }
@@ -72,9 +74,58 @@ export const fetchPool = createAsyncThunk(
   }
 )
 
+export const fetchPools = createAsyncThunk(
+  'pools/pools',
+  async ({ graphUrl }: { graphUrl: string }) => {
+    let res: Pool[] = []
+
+    let lastId = '0'
+    let lastRes: Pool[]
+    while (lastRes == null || lastRes.length > 0) {
+      const result = await request(graphUrl, queryMarkets(lastId))
+
+      if (result.pools.length > 0)
+        lastId = result.pools[result.pools?.length - 1].id
+
+      lastRes = result.pools
+      res = res.concat(lastRes)
+    }
+
+    return res
+  }
+)
+
+export const fetchFeeds = createAsyncThunk(
+  'pools/feeds',
+  async ({
+    graphUrl,
+    userAddress,
+  }: {
+    graphUrl: string
+    userAddress: string
+  }) => {
+    let res: Pool[] = []
+
+    let lastId = '0'
+    let lastRes: Pool[]
+    while (lastRes == null || lastRes.length > 0) {
+      const result = await request(graphUrl, queryDatafeed(lastId, userAddress))
+
+      if (result.pools.length > 0)
+        lastId = result.pools[result.pools?.length - 1].id
+
+      lastRes = result.pools
+      res = res.concat(lastRes)
+    }
+
+    return res
+  }
+)
+
 const addPools = (state: PoolState, pools: Pool[]) => {
   const existingPoolIds = state.pools.map((p) => p.id)
-  const newPools = pools.filter((pool) => !existingPoolIds.includes(pool.id))
+
+  const newPools = pools?.filter((pool) => !existingPoolIds.includes(pool.id))
   state.pools = state.pools.concat(newPools)
 }
 
@@ -82,6 +133,9 @@ export const poolSlice = createSlice({
   name: 'stats',
   initialState,
   reducers: {
+    setIsBuy: (state, action: PayloadAction<boolean>) => {
+      state.isBuy = action.payload
+    },
     addPools: (state: PoolState, action: PayloadAction<Pool[]>) => {
       addPools(state, action.payload)
     },
@@ -95,6 +149,14 @@ export const poolSlice = createSlice({
       addPools(state, [action.payload])
     })
 
+    builder.addCase(fetchPools.fulfilled, (state, action) => {
+      addPools(state, action.payload)
+    })
+
+    builder.addCase(fetchFeeds.fulfilled, (state, action) => {
+      addPools(state, action.payload)
+    })
+
     builder.addCase(fetchOrders.fulfilled, (state, action) => {
       const orders = state.orders[action.meta.arg.pool.id]
       state.orders[action.meta.arg.pool.id] = {
@@ -105,12 +167,20 @@ export const poolSlice = createSlice({
   },
 })
 
+export const isBuySelector = (state: RootState) => state.poolSlice.isBuy
+
 export const poolSelector = (
   state: RootState,
   poolId: string
 ): Pool | undefined => {
-  return state.poolSlice.pools.find((p) => p.id === poolId)
+  return state.poolSlice.pools.find((p) => p?.id === poolId)
 }
+
+export const poolsSelector = (state: RootState): Pool[] | undefined =>
+  state.poolSlice.pools.map((p) => ({
+    ...p,
+    intrinsicValue: intrinsicSelector(state, p.id),
+  }))
 
 export const priceSelector = (state: RootState, poolId: string) =>
   state.poolSlice.underlyingPrice[poolId]
@@ -120,8 +190,7 @@ export const payoffSelector = (state: RootState, poolId: string) => {
   if (pool == null) return undefined
   const usdPrice = priceSelector(state, poolId)
   if (usdPrice == null) return undefined
-
-  return calcPayoffPerToken(
+  const payoff = calcPayoffPerToken(
     BigNumber.from(pool.floor),
     BigNumber.from(pool.inflection),
     BigNumber.from(pool.cap),
@@ -133,12 +202,29 @@ export const payoffSelector = (state: RootState, poolId: string) => {
     BigNumber.from(pool.supplyInitial),
     pool.collateralToken.decimals
   )
+  if (payoff == null) return undefined
+
+  return {
+    payoff: payoff,
+    usdPrice: usdPrice,
+  }
 }
 
-export const intrinsicSelector = (state: RootState, poolId: string) => {
+export const intrinsicSelector = (
+  state: RootState,
+  poolId: string
+): any | undefined => {
   const payoff = payoffSelector(state, poolId)
-  // TODO: Calculate intrinsic
-  return undefined
+  if (payoff == null) return undefined
+  const pool = poolSelector(state, poolId)
+  if (
+    pool.statusFinalReferenceValue === 'Open' &&
+    parseFloat(payoff.usdPrice) == 0
+  ) {
+    return 'n/a'
+  } else {
+    return payoff.payoff
+  }
 }
 
 export const maxPayoutSelector = (
@@ -182,7 +268,6 @@ export const expectedRateSelector = (
 ) => {
   const orders = orderSelector(state, poolId, isLong)
   // TODO: use orders to get buy and sell
-  console.log({ orders })
   return {
     buy: 7.8,
     sell: 8.1,
@@ -275,5 +360,8 @@ export const breakEvenSelector = (
     be2.lte(BigNumber.from(pool.cap))
   ) {
     return formatEther(be2)
+  } else {
+    return 'n/a'
   }
 }
+export const { setIsBuy } = poolSlice.actions

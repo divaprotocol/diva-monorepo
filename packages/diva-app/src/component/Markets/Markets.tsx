@@ -3,9 +3,7 @@ import PoolsTable, { PayoffCell } from '../PoolsTable'
 import { formatUnits } from 'ethers/lib/utils'
 import { getDateTime } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { useQuery } from 'react-query'
 import { Pool, queryMarkets } from '../../lib/queries'
-import { request } from 'graphql-request'
 import { config, createdByFilterAddressForMarket } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
@@ -15,6 +13,9 @@ import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import styled from '@emotion/styled'
 import { CoinIconPair } from '../CoinIcon'
+import { fetchPools, poolsSelector } from '../../Redux/poolSlice'
+import { useAppSelector } from '../../Redux/hooks'
+import { useDispatch } from 'react-redux'
 
 const columns: GridColDef[] = [
   {
@@ -79,34 +80,18 @@ export default function Markets() {
   const [pools, setPools] = useState<Pool[]>([])
   const [page, setPage] = useState(0)
 
-  const { isLoading, data } = useQuery<{ pools: Pool[] }>(
-    `pools-${chainId}`,
-    async () => {
-      let res: Pool[] = []
-      if (chainId != null) {
-        let lastId = '0'
-        let lastRes: Pool[]
-        while (lastRes == null || lastRes.length > 0) {
-          const result = await request(
-            config[chainId as number].divaSubgraph,
-            queryMarkets(lastId)
-          )
-
-          if (result.pools.length > 0)
-            lastId = result.pools[result.pools?.length - 1].id
-
-          lastRes = result.pools
-          res = res.concat(lastRes)
-        }
-      }
-      return { pools: res }
-    }
-  )
+  const dispatch = useDispatch()
 
   useEffect(() => {
+    dispatch(
+      fetchPools({
+        graphUrl: config[chainId as number].divaSubgraph,
+      })
+    )
+  }, [chainId, dispatch])
+  const poolsData = useAppSelector((state) => poolsSelector(state))
+  useEffect(() => {
     const updatePools = async () => {
-      const poolsData = data?.pools || ([] as Pool[])
-
       const mainPoolsData = poolsData.filter(
         (p) => p.createdBy === createdByFilterAddressForMarket
       )
@@ -119,7 +104,7 @@ export default function Markets() {
       setPools(mainPoolsData)
     }
     updatePools()
-  }, [data?.pools])
+  }, [poolsData])
 
   useEffect(() => {
     if (value === 0) setPools(mainPools)
