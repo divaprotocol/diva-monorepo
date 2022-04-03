@@ -10,7 +10,7 @@ module.exports = {
             interaction.reply({
                 content:  `Your discord account is already registered with address \n `
                 +`**${dbRegisteredUsers.get(interaction.user?.id, "address")}** \n `
-                +`To change the your ethereum address use **/changeaddress ADDRESS**`,
+                +`To change the your ethereum address use\n**/changeaddress ADDRESS**`,
                 ephemeral: true,
             })
             return
@@ -40,9 +40,9 @@ module.exports = {
         //const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
 
         interaction.reply({
-            content:  `Your successfully registered with wallet address **${address}**. \n`
+            content:  `You successfully registered for DIVA testnet :tada: \n`
             +`You will shortly receive dUSD tokens on ropsten \n`
-            +`Transaction: https://ropsten.etherscan.io/tx/${tx.hash}.`,
+            +`https://ropsten.etherscan.io/tx/${tx.hash}.`,
             ephemeral: true,
         })
     }

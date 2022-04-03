@@ -40,8 +40,8 @@ module.exports = {
         const tx = await erc20Contract.connect(senderAccount).transfer(address, parseEther("1000"))
 
         interaction.reply({
-            content:  `You will shortly receive dUSD tokens on ropsten. \n  `
-                      +`Transaction: https://ropsten.etherscan.io/tx/${tx.hash}.`,
+            content:  `You will shortly receive dUSD tokens on ropsten.\n  `
+                      +`https://ropsten.etherscan.io/tx/${tx.hash}.`,
             ephemeral: true,
         })
     }

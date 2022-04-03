@@ -92,12 +92,26 @@ client.on('interactionCreate', async(interaction) =>{
             return
         } else {
             //call function from the commands folder with the given commandName
-            if (["address", "changeaddress"].includes(interaction.commandName)) {
-                client.commands.get(interaction.commandName).execute(interaction, dbRegisteredUsers);
-            }
-            else if (["register", "claimtokens"].includes(interaction.commandName)) {
-                console.log(Config.DUSD_CONTRACT)
-                client.commands.get(interaction.commandName).execute(interaction, dbRegisteredUsers, Config.DUSD_CONTRACT, senderAccount);
+            console.log(interaction.member.roles)
+            //check if user has the needed role
+            if (interaction.member.roles.cache.some(r => r.name === "Team")){
+                if (["address", "changeaddress"].includes(interaction.commandName)) {
+                    client.commands.get(interaction.commandName).execute(interaction,
+                        dbRegisteredUsers);
+                }
+                else if (["register", "claimtokens"].includes(interaction.commandName)) {
+                    console.log(Config.DUSD_CONTRACT)
+                    client.commands.get(interaction.commandName).execute(
+                        interaction,
+                        dbRegisteredUsers,
+                        Config.DUSD_CONTRACT,
+                        senderAccount);
+                }
+            } else {
+                interaction.reply({
+                    content:  `Sorry, you don't have the needed permissions`,
+                    ephemeral: true,
+                })
             }
         }
     } 
