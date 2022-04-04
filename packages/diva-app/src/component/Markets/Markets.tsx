@@ -81,16 +81,13 @@ export default function Markets() {
   const [page, setPage] = useState(0)
 
   const dispatch = useDispatch()
-
+  const poolsData = useAppSelector((state) => poolsSelector(state))
   useEffect(() => {
     dispatch(
       fetchPools({
         graphUrl: config[chainId as number].divaSubgraph,
       })
     )
-  }, [chainId, dispatch])
-  const poolsData = useAppSelector((state) => poolsSelector(state))
-  useEffect(() => {
     const updatePools = async () => {
       const mainPoolsData = poolsData.filter(
         (p) => p.createdBy === createdByFilterAddressForMarket
@@ -103,13 +100,15 @@ export default function Markets() {
       setOtherPools(otherPoolsData)
       setPools(mainPoolsData)
     }
-    updatePools()
-  }, [poolsData.length === 0])
+    if (poolsData.length > 0) {
+      updatePools()
+    }
+  }, [chainId, poolsData.length])
 
   useEffect(() => {
     if (value === 0) setPools(mainPools)
     if (value === 1) setPools(otherPools)
-  }, [value])
+  }, [value, mainPools, otherPools])
 
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)

@@ -533,7 +533,6 @@ export function MyPositions() {
         rows={filteredRows}
         loading={balances.isLoading}
         columns={columns}
-        disableRowClick
         onPageChange={(page) => setPage(page)}
       />
     </Stack>

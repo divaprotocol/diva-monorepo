@@ -65,16 +65,12 @@ export default function BuyMarket(props: {
   const order = useAppSelector((state) =>
     orderSelector(state, option.id, isLong)
   )
-  console.log({ order })
   const responseBuy = []
   const responseSell = []
 
   const getExistingOrders = () => {
-    console.log('fetch existing orders')
     dispatch(fetchOrders({ pool: option, isLong }))
   }
-
-  console.log({ order, responseBuy, responseSell })
 
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
