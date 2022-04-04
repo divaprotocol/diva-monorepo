@@ -39,9 +39,9 @@ dataSources:
         - event: DataFeedDeactivated(indexed address,indexed uint256)
           handler: handleDataFeedDeactivated
         - event: DataFeedActivated(indexed address,indexed uint256)
-          handler: handleDataFeedActivated 
+          handler: handleDataFeedActivated
         - event: CollateralTokenAdded(indexed address)
           handler: handleCollateralTokenAdded
         - event: CollateralTokenDeleted(indexed address)
-          handler: handleCollateralTokenDeleted                   
+          handler: handleCollateralTokenDeleted
       file: ./src/mapping.ts

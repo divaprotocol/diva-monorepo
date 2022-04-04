@@ -42,12 +42,14 @@ type CollateralToken @entity {
   name: String!
   decimals: Int!
   symbol: String!
-  feeRecipients: [FeeRecipientCollateralToken!] @derivedFrom(field: "collateralToken")
+  feeRecipients: [FeeRecipientCollateralToken!]
+    @derivedFrom(field: "collateralToken")
 }
 
 type FeeRecipient @entity {
   id: ID! # feeRecipient address
-  collateralTokens: [FeeRecipientCollateralToken!] @derivedFrom(field: "feeRecipient")
+  collateralTokens: [FeeRecipientCollateralToken!]
+    @derivedFrom(field: "feeRecipient")
 }
 
 type FeeRecipientCollateralToken @entity {
