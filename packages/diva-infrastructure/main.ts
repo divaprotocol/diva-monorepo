@@ -1,12 +1,17 @@
 import { Construct } from "constructs";
 import { App, TerraformStack } from "cdktf";
-import { AppsyncApiKey, AppsyncDatasource, AppsyncGraphqlApi, AppsyncResolver } from "@cdktf/provider-aws/lib/appsync";
+import {
+  AppsyncApiKey,
+  AppsyncDatasource,
+  AppsyncGraphqlApi,
+  AppsyncResolver,
+} from "@cdktf/provider-aws/lib/appsync";
 import { AwsProvider } from "@cdktf/provider-aws";
 import { id } from "./lib/id";
 import { DynamodbTable } from "@cdktf/provider-aws/lib/dynamodb";
 import { IamRole, IamRolePolicy } from "@cdktf/provider-aws/lib/iam";
 
-class MyStack extends TerraformStack {
+class DivaStack extends TerraformStack {
   constructor(scope: Construct, name: string) {
     super(scope, name);
 
@@ -18,11 +23,16 @@ class MyStack extends TerraformStack {
       name: id("Orderbook0Table"),
       readCapacity: 1,
       writeCapacity: 1,
-      hashKey: "OrderId",
+      hashKey: "makerToken",
+      rangeKey: "id",
 
       attribute: [
         {
-          name: "OrderId",
+          name: "makerToken",
+          type: "S",
+        },
+        {
+          name: "id",
           type: "S",
         },
       ],
@@ -32,27 +42,78 @@ class MyStack extends TerraformStack {
       name: id("OrderbookAppsyncApi"),
       authenticationType: "API_KEY",
       schema: `
-        schema {
-          query: Query
-          mutation: Mutation
-        }
+      schema {
+        query: Query
+        mutation: Mutation
+      }
 
-        type Order {
-          OrderId: ID!
-          sender: String!
+      type Signature {
+        signatureType: String!
+        r: String!
+        s: String!
+        v: String!
+      }
+
+      input SignatureInput {
+        signatureType: String!
+        r: String!
+        s: String!
+        v: String!
+      }
+
+      type Order {
+        id: ID!
+
+        pool: String!
+        feeRecipient: String!
+        takerTokenFeeAmount: String!
+        makerToken: String!
+        takerToken: String!
+        makerAmount: String!
+        takerAmount: String!
+        maker: String!
+        taker: String!
+        sender: String!
+        expiry: String!
+        salt: String!
+        chainId: Int!
+        verifyingContract: String!
+        signature: Signature!
+      }
+
+
+      type Mutation {
+        createOrder(
+          pool: String!
+          feeRecipient: String!
+          takerTokenFeeAmount: String!
+          makerToken: String!
+          takerToken: String!
+          makerAmount: String!
+          takerAmount: String!
           maker: String!
           taker: String!
-        }
-
-        type Mutation {
-          putOrder(sender: String!, maker: String!, taker: String!): Order
-        }
-        
-        type Query {
-          getOrder(id: ID!): Order
-          allOrders: [Order]
-        }`,
+          sender: String!
+          expiry: String!
+          salt: String!
+          chainId: Int!
+          verifyingContract: String!
+          signature: SignatureInput!
+        ): Order
+      }
+      
+      type PaginatedOrders {
+        items: [Order]
+        nextToken: String!
+      }
+    
+      type Query {
+        order(id: ID!): Order
+        orders(makerToken: String, limit: Int, nextToken: String): PaginatedOrders
+      }
+      `,
     });
+
 
     new AppsyncApiKey(this, id("OrderbookAppsyncApiKey"), {
       apiId: api.id,
@@ -86,45 +147,62 @@ class MyStack extends TerraformStack {
 
     new AppsyncResolver(this, id("OrderbookAppsyncResolverGetOrder"), {
       apiId: api.id,
-      field: "getOrder",
+      field: "order",
       type: "Query",
       dataSource: dataSource.name,
       requestTemplate: `{
         "version": "2017-02-28",
         "operation": "GetItem",
         "key" : {
-            "OrderId" : $util.dynamodb.toDynamoDBJson($ctx.args.id)
+          "id" : $util.dynamodb.toDynamoDBJson($ctx.args.id)
         }
       }`,
-      responseTemplate: `$util.toJson($ctx.result)`,
+      responseTemplate: `
+      {
+        "items": $utils.toJson($ctx.result.items)
+        #if($ctx.result.nextToken)
+          ,"nextToken": $util.toJson($ctx.result.nextToken)
+        #end
+      }
+      `,
     });
 
-    new AppsyncResolver(this, id("OrderbookAppsyncResolverGetOrder"), {
+    new AppsyncResolver(this, id("OrderbookAppsyncResolverGetOrders"), {
       apiId: api.id,
-      field: "getOrder",
+      field: "orders",
       type: "Query",
       dataSource: dataSource.name,
       requestTemplate: `{
-        "version": "2017-02-28",
-        "operation": "GetItem",
-        "key" : {
-            "OrderId" : $util.dynamodb.toDynamoDBJson($ctx.args.id)
+        "version" : "2017-02-28",
+        "operation" : "Query"
+        #if($ctx.args.count)
+          ,"limit": $util.toJson($ctx.args.count)
+        #end
+        #if($ctx.args.nextToken)
+          ,"nextToken": $util.toJson($ctx.args.nextToken)
+        #end
+        #if($ctx.args.makerToken)
+        ,"query" : {
+          "expression": "makerToken = :makerToken",
+            "expressionValues" : {
+              ":makerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.makerToken)
+            }
         }
-      }`,
+        #end
+    }`,
       responseTemplate: `$util.toJson($ctx.result)`,
     });
 
-
-    new AppsyncResolver(this, id("OrderbookAppsyncResolverPutOrder"), {
+    new AppsyncResolver(this, id("OrderbookAppsyncResolverCreateOrder"), {
       apiId: api.id,
-      field: "putOrder",
+      field: "createOrder",
       type: "Mutation",
       dataSource: dataSource.name,
       requestTemplate: `{
         "version" : "2017-02-28",
         "operation" : "PutItem",
         "key" : {
-            "OrderId": $util.dynamodb.toDynamoDBJson($util.autoId())
+          "id": $util.dynamodb.toDynamoDBJson($util.autoId())
         },
         "attributeValues" : $util.dynamodb.toMapValuesJson($ctx.args)
     }`,
@@ -153,5 +231,5 @@ class MyStack extends TerraformStack {
 }
 
 const app = new App();
-new MyStack(app, "diva-infrastructure");
+new DivaStack(app, "diva-infrastructure");
 app.synth();

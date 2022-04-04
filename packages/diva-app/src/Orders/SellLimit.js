@@ -7,6 +7,7 @@ import { metamaskProvider } from './Config'
 import { ROPSTEN } from './Config'
 import { ethers } from 'ethers'
 import { BigNumber } from '@0x/utils'
+
 export const sellLimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
     return Math.floor(Date.now() / 1000 + orderData.orderExpiry * 60).toString()
@@ -61,6 +62,8 @@ export const sellLimitOrder = async (orderData) => {
       utils.SignatureType.EIP712 // Optional
     )
     const signedOrder = { ...order, signature }
+
+    // TODO: replace with appsync
     const resp = await fetch(ROPSTEN, {
       method: 'POST',
       body: JSON.stringify(signedOrder),

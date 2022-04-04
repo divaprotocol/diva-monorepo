@@ -367,3 +367,81 @@ export type Challenges = {
 export type Challenge = {
   proposedFinalReferenceValue: BigNumber
 }
+
+type Signature = {
+  signatureType: string
+  r: string
+  s: string
+  v: string
+}
+
+type Order = {
+  pool: string
+  feeRecipient: string
+  takerTokenFeeAmount: string
+  makerToken: string
+  takerToken: string
+  makerAmount: string
+  takerAmount: string
+  maker: string
+  taker: string
+  sender: string
+  expiry: string
+  salt: string
+  chainId: string
+  verifyingContract: string
+  signature: Signature
+}
+
+/**
+ * Orderbook
+ */
+export const queryOrders = gql`
+  orders {
+    items {
+      id
+      pool
+      feeRecipient
+      takerTokenFeeAmount
+      makerToken
+      takerToken
+      makerAmount
+      takerAmount
+      maker
+      taker
+      sender
+      expiry
+      salt
+      chainId
+      verifyingContract
+      signature {
+        signatureType
+        r
+        s
+        v
+      }
+    }
+  }
+`
+
+export const createOrder = (order: Order) => gql`
+  createOrder(
+    chainId: "${order.chainId}",
+    expiry: "${order.expiry}",
+    feeRecipient: "${order.feeRecipient}",
+    maker: "${order.maker}",
+    makerAmount: "${order.makerAmount}",
+    makerToken: "${order.makerToken}",
+    pool: "${order.pool}",
+    salt: "${order.salt}",
+    sender: "${order.sender}",
+    signature: ${order.signature},
+    taker: "${order.taker}",
+    takerAmount: "${order.takerAmount}",
+    takerToken: "${order.takerToken}",
+    takerTokenFeeAmount: "${order.takerTokenFeeAmount}",
+    verifyingContract: "${order.verifyingContract}"
+  ) {
+    id
+  }
+`

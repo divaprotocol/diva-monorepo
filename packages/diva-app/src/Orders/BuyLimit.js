@@ -58,6 +58,7 @@ export const buylimitOrder = async (orderData) => {
       utils.SignatureType.EIP712 // Optional
     )
     const signedOrder = { ...order, signature }
+    // TODO: replace with appsync api
     const resp = await fetch(ROPSTEN, {
       method: 'POST',
       body: JSON.stringify(signedOrder),
