@@ -96,10 +96,9 @@ export const fetchPools = createAsyncThunk(
 )
 
 const addPools = (state: PoolState, pools: Pool[]) => {
-  const existingPoolIds = state.pools.map((p) => p.id)
-
-  const newPools = pools?.filter((pool) => !existingPoolIds.includes(pool.id))
-  state.pools = state.pools.concat(newPools)
+  const newPools = pools.map((p) => p.id)
+  const oldPools = state.pools.filter((p) => !newPools.includes(p.id))
+  state.pools = pools.concat(oldPools)
 }
 
 export const poolSlice = createSlice({

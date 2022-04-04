@@ -363,16 +363,22 @@ export const AddLiquidity = ({ pool }: Props) => {
                           window.location.pathname.split('/')[1],
                           parseUnits(textFieldValue, decimal)
                         )
-                        .then(() => {
+                        .then((tx) => {
                           /**
                            * dispatch action to refetch the pool after action
                            */
-                          dispatch(
-                            fetchPool({
-                              graphUrl: config[chainId as number].divaSubgraph,
-                              poolId: window.location.pathname.split('/')[1],
-                            })
-                          )
+                          tx.wait().then(() => {
+                            setTimeout(() => {
+                              dispatch(
+                                fetchPool({
+                                  graphUrl:
+                                    config[chainId as number].divaSubgraph,
+                                  poolId:
+                                    window.location.pathname.split('/')[1],
+                                })
+                              )
+                            }, 5000)
+                          })
                         })
                     })
                     .catch((err: any) => console.error(err))

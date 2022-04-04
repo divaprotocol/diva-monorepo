@@ -179,16 +179,20 @@ const SubmitCell = (props: any) => {
                     parseEther(textFieldValue),
                     true
                   )
-                  .then(() => {
+                  .then((tx) => {
                     /**
                      * dispatch action to refetch the pool after action
                      */
-                    dispatch(
-                      fetchPool({
-                        graphUrl: config[chainId as number].divaSubgraph,
-                        poolId: props.id.split('/')[0],
-                      })
-                    )
+                    tx.wait().then(() => {
+                      setTimeout(() => {
+                        dispatch(
+                          fetchPool({
+                            graphUrl: config[chainId as number].divaSubgraph,
+                            poolId: props.id.split('/')[0],
+                          })
+                        )
+                      }, 10000)
+                    })
                   })
                   .catch((err) => {
                     console.error(err)
@@ -299,7 +303,9 @@ export function MyDataFeeds() {
 
   const pools = useAppSelector((state) => poolsSelector(state))
   const rows: GridRowModel[] = pools
-    .filter((pool) => pool.dataProvider === userAddress)
+    .filter(
+      (pool) => pool.dataProvider.toLowerCase() === userAddress.toLowerCase()
+    )
     .reduce((acc, val) => {
       const shared = {
         Icon: val.referenceAsset,

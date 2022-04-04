@@ -116,16 +116,19 @@ const SubmitButton = (props: any) => {
                     tx.wait().then(() => {
                       diva
                         .redeemPositionToken(props.row.address.id, bal)
-                        .then(() => {
+                        .then((tx) => {
                           /**
                            * dispatch action to refetch the pool after action
                            */
-                          dispatch(
-                            fetchPool({
-                              graphUrl: config[chainId as number].divaSubgraph,
-                              poolId: props.id.split('/')[0],
-                            })
-                          )
+                          tx.wait().then(() => {
+                            dispatch(
+                              fetchPool({
+                                graphUrl:
+                                  config[chainId as number].divaSubgraph,
+                                poolId: props.id.split('/')[0],
+                              })
+                            )
+                          })
                         })
                         .catch((err) => {
                           console.error(err)
@@ -252,6 +255,21 @@ const SubmitButton = (props: any) => {
                       props.id.split('/')[0],
                       parseEther(textFieldValue)
                     )
+                    .then((tx) => {
+                      /**
+                       * dispatch action to refetch the pool after action
+                       */
+                      tx.wait().then(() => {
+                        setTimeout(() => {
+                          dispatch(
+                            fetchPool({
+                              graphUrl: config[chainId as number].divaSubgraph,
+                              poolId: props.id.split('/')[0],
+                            })
+                          )
+                        }, 10000)
+                      })
+                    })
                     .catch((err) => {
                       console.error(err)
                     })

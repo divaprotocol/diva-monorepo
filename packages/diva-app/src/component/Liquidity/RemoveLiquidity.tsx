@@ -60,7 +60,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   useEffect(() => {
     if (pool) {
       setDecimal(pool!.collateralToken.decimals)
-
       if (tokenBalanceLong && tokenBalanceShort && decimal) {
         const longBalance = parseEther(tokenBalanceLong)
         const shortBalance = parseEther(tokenBalanceShort)
@@ -276,16 +275,23 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                     window.location.pathname.split('/')[1],
                     parseEther(longToken)
                   )
-                  .then(() => {
+                  .then((tx) => {
                     /**
                      * dispatch action to refetch the pool after action
                      */
-                    dispatch(
-                      fetchPool({
-                        graphUrl: config[chainId as number].divaSubgraph,
-                        poolId: window.location.pathname.split('/')[1],
-                      })
-                    )
+                    tx.wait().then(() => {
+                      setTimeout(() => {
+                        dispatch(
+                          fetchPool({
+                            graphUrl: config[chainId as number].divaSubgraph,
+                            poolId: window.location.pathname.split('/')[1],
+                          })
+                        )
+                      }, 5000)
+                    })
+                  })
+                  .catch((err) => {
+                    console.log(err)
                   })
               }}
               style={{
