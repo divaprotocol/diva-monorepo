@@ -84,12 +84,10 @@ const SubmitButton = (props: any) => {
     connection: { userAddress },
     provider,
   } = useWallet()
-  const history = useHistory()
-
+  const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
   if (chainId == null) return null
 
-  const dispatch = useDispatch()
   const diva = new ethers.Contract(
     config[chainId].divaAddress,
     DIVA_ABI,
@@ -119,17 +117,19 @@ const SubmitButton = (props: any) => {
                       diva
                         .redeemPositionToken(props.row.address.id, bal)
                         .then(() => {
+                          /**
+                           * dispatch action to refetch the pool after action
+                           */
                           dispatch(
                             fetchPool({
                               graphUrl: config[chainId as number].divaSubgraph,
-                              poolId: pool.id,
+                              poolId: props.id.split('/')[0],
                             })
                           )
                         })
                         .catch((err) => {
                           console.error(err)
                         })
-
                     })
                   })
                   .catch((err) => {

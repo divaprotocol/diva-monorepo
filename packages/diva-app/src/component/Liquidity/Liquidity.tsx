@@ -1,15 +1,6 @@
-import {
-  Alert,
-  Box,
-  Card,
-  Collapse,
-  Container,
-  IconButton,
-  Stack,
-  useTheme,
-} from '@mui/material'
+import { Box, Card, Container, Stack, useTheme } from '@mui/material'
 import Typography from '@mui/material/Typography'
-import React, { useEffect } from 'react'
+import React from 'react'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import { AddLiquidity } from './AddLiquidity'

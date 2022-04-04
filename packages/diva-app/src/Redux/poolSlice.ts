@@ -95,33 +95,6 @@ export const fetchPools = createAsyncThunk(
   }
 )
 
-export const fetchFeeds = createAsyncThunk(
-  'pools/feeds',
-  async ({
-    graphUrl,
-    userAddress,
-  }: {
-    graphUrl: string
-    userAddress: string
-  }) => {
-    let res: Pool[] = []
-
-    let lastId = '0'
-    let lastRes: Pool[]
-    while (lastRes == null || lastRes.length > 0) {
-      const result = await request(graphUrl, queryDatafeed(lastId, userAddress))
-
-      if (result.pools.length > 0)
-        lastId = result.pools[result.pools?.length - 1].id
-
-      lastRes = result.pools
-      res = res.concat(lastRes)
-    }
-
-    return res
-  }
-)
-
 const addPools = (state: PoolState, pools: Pool[]) => {
   const existingPoolIds = state.pools.map((p) => p.id)
 
@@ -150,10 +123,6 @@ export const poolSlice = createSlice({
     })
 
     builder.addCase(fetchPools.fulfilled, (state, action) => {
-      addPools(state, action.payload)
-    })
-
-    builder.addCase(fetchFeeds.fulfilled, (state, action) => {
       addPools(state, action.payload)
     })
 

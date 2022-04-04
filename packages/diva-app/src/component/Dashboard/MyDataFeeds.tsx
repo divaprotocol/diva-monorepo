@@ -24,7 +24,7 @@ import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
-import { fetchFeeds, fetchPools, poolsSelector } from '../../Redux/poolSlice'
+import { fetchPool, fetchPools, poolsSelector } from '../../Redux/poolSlice'
 import { useDispatch } from 'react-redux'
 
 const DueInCell = (props: any) => {
@@ -120,6 +120,7 @@ const SubmitCell = (props: any) => {
   const { provider } = useWallet()
 
   const chainId = provider?.network?.chainId
+  const dispatch = useDispatch()
 
   const diva =
     chainId != null
@@ -178,6 +179,17 @@ const SubmitCell = (props: any) => {
                     parseEther(textFieldValue),
                     true
                   )
+                  .then(() => {
+                    /**
+                     * dispatch action to refetch the pool after action
+                     */
+                    dispatch(
+                      fetchPool({
+                        graphUrl: config[chainId as number].divaSubgraph,
+                        poolId: props.id.split('/')[0],
+                      })
+                    )
+                  })
                   .catch((err) => {
                     console.error(err)
                   })
@@ -276,65 +288,68 @@ export function MyDataFeeds() {
   const dispatch = useDispatch()
   const [page, setPage] = useState(0)
   useEffect(() => {
-    dispatch(
-      fetchFeeds({
-        graphUrl: config[chainId as number].divaSubgraph,
-        userAddress,
-      })
-    )
+    if (config[chainId as number] != null) {
+      dispatch(
+        fetchPools({
+          graphUrl: config[chainId as number].divaSubgraph,
+        })
+      )
+    }
   }, [chainId, dispatch])
 
   const pools = useAppSelector((state) => poolsSelector(state))
-  const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const shared = {
-      Icon: val.referenceAsset,
-      Underlying: val.referenceAsset,
-      Floor: formatUnits(val.floor),
-      Inflection: formatUnits(val.inflection),
-      Cap: formatUnits(val.cap),
-      Expiry: val.expiryTime,
-      Sell: 'TBD',
-      Buy: 'TBD',
-      MaxYield: 'TBD',
-      Challenges: val.challenges,
-    }
+  const rows: GridRowModel[] = pools
+    .filter((pool) => pool.dataProvider === userAddress)
+    .reduce((acc, val) => {
+      const shared = {
+        Icon: val.referenceAsset,
+        Underlying: val.referenceAsset,
+        Floor: formatUnits(val.floor),
+        Inflection: formatUnits(val.inflection),
+        Cap: formatUnits(val.cap),
+        Expiry: val.expiryTime,
+        Sell: 'TBD',
+        Buy: 'TBD',
+        MaxYield: 'TBD',
+        Challenges: val.challenges,
+      }
 
-    const payOff = {
-      Floor: parseInt(val.floor) / 1e18,
-      Inflection: parseInt(val.inflection) / 1e18,
-      Cap: parseInt(val.cap) / 1e18,
-    }
+      const payOff = {
+        Floor: parseInt(val.floor) / 1e18,
+        Inflection: parseInt(val.inflection) / 1e18,
+        Cap: parseInt(val.cap) / 1e18,
+      }
 
-    const Status = val.statusFinalReferenceValue
-    return [
-      ...acc,
-      {
-        ...shared,
-        id: `${val.id}/long`,
-        Id: val.id,
-        address: val.longToken,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: true,
-        }),
-        TVL:
-          parseFloat(
-            formatUnits(
-              BigNumber.from(val.collateralBalance),
-              val.collateralToken.decimals
-            )
-          ).toFixed(4) +
-          ' ' +
-          val.collateralToken.symbol,
-        Status,
-        StatusTimestamp: val.statusTimestamp,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
-      },
-    ]
-  }, [] as GridRowModel[])
+      const Status = val.statusFinalReferenceValue
+      return [
+        ...acc,
+        {
+          ...shared,
+          id: `${val.id}/long`,
+          Id: val.id,
+          address: val.longToken,
+          PayoffProfile: generatePayoffChartData({
+            ...payOff,
+            IsLong: true,
+          }),
+          TVL:
+            parseFloat(
+              formatUnits(
+                BigNumber.from(val.collateralBalance),
+                val.collateralToken.decimals
+              )
+            ).toFixed(4) +
+            ' ' +
+            val.collateralToken.symbol,
+          Status,
+          StatusTimestamp: val.statusTimestamp,
+          finalValue:
+            val.statusFinalReferenceValue === 'Open'
+              ? '-'
+              : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
+        },
+      ]
+    }, [] as GridRowModel[])
 
   return userAddress ? (
     <Stack
