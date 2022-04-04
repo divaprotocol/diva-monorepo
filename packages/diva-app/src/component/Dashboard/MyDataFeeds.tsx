@@ -285,8 +285,6 @@ export function MyDataFeeds() {
   }, [chainId, dispatch])
 
   const pools = useAppSelector((state) => poolsSelector(state))
-  console.log('pools')
-  console.log(pools)
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,

@@ -104,7 +104,7 @@ export default function Markets() {
       setPools(mainPoolsData)
     }
     updatePools()
-  }, [poolsData])
+  }, [poolsData.length === 0])
 
   useEffect(() => {
     if (value === 0) setPools(mainPools)
