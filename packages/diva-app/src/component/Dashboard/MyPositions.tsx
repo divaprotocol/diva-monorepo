@@ -28,7 +28,7 @@ import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useEffect, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
-import { fetchPools, poolsSelector } from '../../Redux/poolSlice'
+import { fetchPool, fetchPools, poolsSelector } from '../../Redux/poolSlice'
 import { useDispatch } from 'react-redux'
 
 type Response = {
@@ -89,6 +89,7 @@ const SubmitButton = (props: any) => {
   const chainId = provider?.network?.chainId
   if (chainId == null) return null
 
+  const dispatch = useDispatch()
   const diva = new ethers.Contract(
     config[chainId].divaAddress,
     DIVA_ABI,
@@ -117,9 +118,18 @@ const SubmitButton = (props: any) => {
                     tx.wait().then(() => {
                       diva
                         .redeemPositionToken(props.row.address.id, bal)
+                        .then(() => {
+                          dispatch(
+                            fetchPool({
+                              graphUrl: config[chainId as number].divaSubgraph,
+                              poolId: pool.id,
+                            })
+                          )
+                        })
                         .catch((err) => {
                           console.error(err)
                         })
+
                     })
                   })
                   .catch((err) => {
