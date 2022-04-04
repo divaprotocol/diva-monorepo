@@ -26,6 +26,8 @@ import { withStyles } from '@mui/styles'
 import { useWallet } from '@web3-ui/hooks'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import { fetchPool } from '../../Redux/poolSlice'
+import { useDispatch } from 'react-redux'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -52,7 +54,7 @@ export const AddLiquidity = ({ pool }: Props) => {
   const tokenBalance = useErcBalance(
     pool ? pool!.collateralToken.id : undefined
   )
-
+  const dispatch = useDispatch()
   const {
     provider,
     connection: { userAddress: account },
@@ -356,10 +358,22 @@ export const AddLiquidity = ({ pool }: Props) => {
                         DIVA_ABI,
                         provider?.getSigner()
                       )
-                      diva!.addLiquidity(
-                        window.location.pathname.split('/')[1],
-                        parseUnits(textFieldValue, decimal)
-                      )
+                      diva!
+                        .addLiquidity(
+                          window.location.pathname.split('/')[1],
+                          parseUnits(textFieldValue, decimal)
+                        )
+                        .then(() => {
+                          /**
+                           * dispatch action to refetch the pool after action
+                           */
+                          dispatch(
+                            fetchPool({
+                              graphUrl: config[chainId as number].divaSubgraph,
+                              poolId: window.location.pathname.split('/')[1],
+                            })
+                          )
+                        })
                     })
                     .catch((err: any) => console.error(err))
                 }}

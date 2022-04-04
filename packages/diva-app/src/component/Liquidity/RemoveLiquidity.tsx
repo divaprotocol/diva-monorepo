@@ -25,6 +25,8 @@ import Button from '@mui/material/Button'
 import { useWallet } from '@web3-ui/hooks'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import { fetchPool } from '../../Redux/poolSlice'
+import { useDispatch } from 'react-redux'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -52,7 +54,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
   const { provider } = useWallet()
   const chainId = provider?.network?.chainId
-
+  const dispatch = useDispatch()
   const theme = useTheme()
 
   useEffect(() => {
@@ -269,10 +271,22 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                   DIVA_ABI,
                   provider?.getSigner()
                 )
-                diva!.removeLiquidity(
-                  window.location.pathname.split('/')[1],
-                  parseEther(longToken)
-                )
+                diva!
+                  .removeLiquidity(
+                    window.location.pathname.split('/')[1],
+                    parseEther(longToken)
+                  )
+                  .then(() => {
+                    /**
+                     * dispatch action to refetch the pool after action
+                     */
+                    dispatch(
+                      fetchPool({
+                        graphUrl: config[chainId as number].divaSubgraph,
+                        poolId: window.location.pathname.split('/')[1],
+                      })
+                    )
+                  })
               }}
               style={{
                 maxWidth: theme.spacing(38),
