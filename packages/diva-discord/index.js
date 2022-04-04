@@ -119,24 +119,3 @@ client.on('interactionCreate', async(interaction) =>{
         console.log(e)
     }
 })
-
-/*
-client.on("message", (message) => {
-    console.log(`${message.author.tag} sent "${message.content}".`);
-    if(!message.content.startsWith(Config.PREFIX)) return;
-    let args = message.content.slice(Config.PREFIX.length).split(" ");
-    let commandName = args.shift().toLowerCase();
-
-    if (message.channel.id == channelId) {
-        
-        //if (commandName === 'reactionrole') {
-        //    client.commands.get('reactionrole').execute(message, args, Discord, client);
-        //} 
-        
-        if (commandName === 'printall') {
-            console.log(dbRegisteredUsers.keys());
-        }
-        
-    }
-}) 
-*/
