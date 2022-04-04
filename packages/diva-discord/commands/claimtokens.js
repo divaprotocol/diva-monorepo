@@ -10,7 +10,7 @@ module.exports = {
         //check is user is already registered
         if (dbRegisteredUsers.get(userId) == null) {
             interaction.reply({
-                content:  `Your discord account is is not yet registered.\n `
+                content:  `Your discord account is not yet registered.\n `
                             +`Register with **/register ADDRESS**`,
                 ephemeral: true,
             })

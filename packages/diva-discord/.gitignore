@@ -1,2 +1,12 @@
 config.json
 .env
+
+**/data
+## hardhat specific
+
+**/cache
+**/artifacts
+**/.env
+**/coverage.json
+**/coverage
+
