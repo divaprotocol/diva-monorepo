@@ -16,19 +16,14 @@ import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { get0xOpenOrders } from '../../DataService/OpenOrders'
+import { get0xOpenOrders, getOrderDetails } from '../../DataService/OpenOrders'
 import { getDateTime } from '../../Util/Dates'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { BigNumber } from '@0x/utils'
-
-const useStyles = makeStyles({
-  table: {
-    minWidth: 250,
-  },
-})
-
+import { formatEther } from 'ethers/lib/utils'
+import { cancelSellLimitOrder } from '../../Orders/SellLimit'
 const TableCellStyle = withStyles(() => ({
   root: {
     height: '10px',
@@ -63,8 +58,13 @@ function mapOrderData(
   const orderbook: any = records.map((record: any) => {
     const order = record.order
     const orderMaker = order.maker
-    const makerAmount = new BigNumber(order.makerAmount)
-    const takerAmount = new BigNumber(order.takerAmount)
+    //const makerAmount = new BigNumber(order.makerAmount)
+    //const takerAmount = new BigNumber(order.takerAmount)
+    const takerAmount = formatUnits(
+      order.takerAmount,
+      option.collateralToken.decimals
+    )
+    const makerAmount = formatUnits(order.makerAmount)
     const metaData = record.metaData
     if (account === orderMaker) {
       const makerToken = order.makerToken
@@ -73,46 +73,52 @@ function mapOrderData(
       let nbrOptions = 0
       let pricePerOption = 0
       let payReceive = 0
+      const remainingTakerAmount = formatUnits(
+        metaData.remainingFillableTakerAmount,
+        option.collateralToken.decimals
+      )
       if (makerToken === tokenAddress) {
-        const askAmount = takerAmount.dividedBy(makerAmount)
-        const remainingTakerAmount = new BigNumber(
-          metaData.remainingFillableTakerAmount
-        )
-        if (remainingTakerAmount.eq(makerAmount)) {
-          nbrOptions = Number(
-            formatUnits(makerAmount.toString(), option.collateralToken.decimals)
-          )
+        //const takerAmount = formatUnits(
+        //  order.takerAmount,
+        //  option.collateralToken.decimals
+        //)
+        //const makerAmount = formatUnits(order.makerAmount)
+        const askAmount = Number(takerAmount) / Number(makerAmount)
+
+        if (remainingTakerAmount == makerAmount) {
+          //nbrOptions = Number(
+          //  formatUnits(makerAmount.toString(), option.collateralToken.decimals)
+          //)
+          nbrOptions = Number(makerAmount)
         } else {
-          const quantity = remainingTakerAmount.dividedBy(askAmount)
-          nbrOptions = Number(
-            formatUnits(quantity.toString(), option.collateralToken.decimals)
-          )
+          nbrOptions = Number(remainingTakerAmount) / askAmount
         }
-        const receiveAmount = metaData.remainingFillableTakerAmount
-        payReceive = Number(
-          formatUnits(receiveAmount.toString(), option.collateralToken.decimals)
-        )
+        //const receiveAmount = metaData.remainingFillableTakerAmount
+        payReceive = Number(remainingTakerAmount)
+        //payReceive = Number(
+        //formatUnits(receiveAmount.toString(), option.collateralToken.decimals)
+        //)
+        //pricePerOption = payReceive / nbrOptions
         pricePerOption = payReceive / nbrOptions
       } else {
-        const remainingTakerAmount = new BigNumber(
-          metaData.remainingFillableTakerAmount
-        )
-        if (remainingTakerAmount.lt(takerAmount)) {
-          nbrOptions = Number(
-            formatUnits(
-              remainingTakerAmount.toString(),
-              option.collateralToken.decimals
-            )
-          )
+        //const remainingTakerAmount = new BigNumber(
+        //  metaData.remainingFillableTakerAmount
+        //)
+        if (remainingTakerAmount < takerAmount) {
+          //nbrOptions = Number(
+          //  formatUnits(
+          //    remainingTakerAmount.toString(),
+          //    option.collateralToken.decimals
+          //  )
+          //)
+          nbrOptions = Number(remainingTakerAmount)
         } else {
-          nbrOptions = Number(
-            formatUnits(takerAmount.toString(), option.collateralToken.decimals)
-          )
+          nbrOptions = Number(takerAmount)
         }
         payReceive = Number(
           formatUnits(makerAmount.toString(), option.collateralToken.decimals)
         )
-        pricePerOption = makerAmount.dividedBy(takerAmount).toNumber()
+        pricePerOption = Number(makerAmount) / Number(takerAmount)
       }
       const expiry = getDateTime(order.expiry)
       const expiryMins = getExpiryMinutesFromNow(order.expiry)
@@ -124,6 +130,7 @@ function mapOrderData(
         pricePerOption: pricePerOption,
         expiry: expiry,
         expiryMins: expiryMins + ' mins',
+        orderHash: metaData.orderHash,
       }
       return orders
     }
@@ -135,6 +142,7 @@ let accounts
 export default function OpenOrders(props: {
   option: Pool
   tokenAddress: string
+  exchangeProxy: string
 }) {
   const option = props.option
   const optionTokenAddress = props.tokenAddress
@@ -165,13 +173,13 @@ export default function OpenOrders(props: {
         responseBuy = rBuy
       }
     }
-
     const orderBookBuy = mapOrderData(
       responseBuy,
       option,
       optionTokenAddress,
       accounts[0]
     )
+
     const orderBookSell = mapOrderData(
       responseSell,
       option,
@@ -215,7 +223,11 @@ export default function OpenOrders(props: {
     }
   }, [responseBuy, responseSell])
 
-  const classes = useStyles()
+  async function cancelOrder(order) {
+    const orderHash = order.orderHash
+    const rSell = await getOrderDetails(orderHash)
+    cancelSellLimitOrder(rSell)
+  }
 
   return (
     <PageDiv>
@@ -279,6 +291,9 @@ export default function OpenOrders(props: {
                             variant="outlined"
                             startIcon={<DeleteIcon />}
                             size="small"
+                            onClick={async () => {
+                              await cancelOrder(orders[index])
+                            }}
                           >
                             Cancel
                           </Button>

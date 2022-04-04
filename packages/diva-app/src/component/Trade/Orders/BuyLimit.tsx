@@ -51,12 +51,14 @@ export default function BuyLimit(props: {
   option: Pool
   handleDisplayOrder: () => any
   tokenAddress: string
+  exchangeProxy: string
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
-  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxyAddress = address.exchangeProxy
+  //const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
+  //const exchangeProxyAddress = address.exchangeProxy
+  const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
   const makerToken = props.tokenAddress
   const classes = useStyles()

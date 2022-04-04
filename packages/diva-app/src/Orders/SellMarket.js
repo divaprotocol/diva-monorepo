@@ -54,3 +54,17 @@ export const sellMarketOrder = async (orderData) => {
   filledOrder = await fillOrderResponse(makerAssetAmounts)
   return filledOrder
 }
+
+export const cancelSellMarketOrder = async (orderData) => {
+  console.log('cancel order')
+  /*const minValidWethZrxSalt = sellWethLimitOrder2.salt.plus(1);
+  const cancelWethZrxOrdersTx = await contractWrappers.exchangeProxy.cancelPairLimitOrders(etherTokenAddress, zrxTokenAddress, minValidWethZrxSalt).sendTransactionAsync({
+    from: maker,
+    ...TX_DEFAULTS,
+  });*/
+  // eslint-disable-next-line no-undef
+  const cancelOrderResponse = await exchangeProxyAddress.cancelLimitOrder(
+    orderData
+  )
+  console.log(cancelOrderResponse)
+}

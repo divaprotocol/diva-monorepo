@@ -41,7 +41,7 @@ export const config: { [key: number]: SingleConfig } = {
     divaAddress: '0x27FaBaed614059b98e7f1e79D872e13aa65640a8',
     whitelistAddress: '0x47d3EF37b7750498061D26bE4351369d2749DfeD',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-matic',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-polygon',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-matic',
   },

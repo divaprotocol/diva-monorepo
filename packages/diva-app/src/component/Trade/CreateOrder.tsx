@@ -17,7 +17,6 @@ import {
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
 const PageDiv = styled.div`
-  width: 400px;
   height: 420px;
 `
 
@@ -70,6 +69,7 @@ let accounts
 export default function CreateOrder(props: {
   option: Pool
   tokenAddress: string
+  exchangeProxy: string
 }) {
   //const op = useSelector((state) => state.tradeOption.option)
   const option = props.option
@@ -128,6 +128,7 @@ export default function CreateOrder(props: {
           option={option}
           handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
+          exchangeProxy={props.exchangeProxy}
         />
       )
     }
@@ -138,6 +139,7 @@ export default function CreateOrder(props: {
           handleDisplayOrder={getExistingOrders}
           option={option}
           tokenAddress={props.tokenAddress}
+          exchangeProxy={props.exchangeProxy}
         />
       )
     }
@@ -148,6 +150,7 @@ export default function CreateOrder(props: {
           option={option}
           handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
+          exchangeProxy={props.exchangeProxy}
         />
       )
     }
@@ -158,6 +161,7 @@ export default function CreateOrder(props: {
           option={option}
           handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
+          exchangeProxy={props.exchangeProxy}
         />
       )
     }

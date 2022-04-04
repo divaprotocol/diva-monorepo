@@ -50,13 +50,15 @@ export default function SellLimit(props: {
   option: Pool
   handleDisplayOrder: () => any
   tokenAddress: string
+  exchangeProxy: string
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const wallet = useWallet()
   const classes = useStyles()
-  const chainId = wallet?.provider?.network?.chainId || 3
-  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxyAddress = address.exchangeProxy
+  const chainId = wallet?.provider?.network?.chainId || 137
+  //const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
+  //const exchangeProxyAddress = address.exchangeProxy
+  const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const [expiry, setExpiry] = React.useState(5)
@@ -191,6 +193,7 @@ export default function SellLimit(props: {
             limitPrice: pricePerOption,
             collateralDecimals: option.collateralToken.decimals,
             orderExpiry: expiry,
+            chainId: chainId,
           }
           sellLimitOrder(orderData)
             .then(async (response) => {

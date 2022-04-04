@@ -56,11 +56,12 @@ export default function SellMarket(props: {
   option: Pool
   handleDisplayOrder: () => any
   tokenAddress: string
+  exchangeProxy: string
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const chainId = wallet?.provider?.network?.chainId || 137
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)
@@ -76,8 +77,9 @@ export default function SellMarket(props: {
   const [allowance, setAllowance] = React.useState(0.0)
   const [makerAccount, setMakerAccount] = React.useState('')
   // eslint-disable-next-line prettier/prettier
-  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxyAddress = address.exchangeProxy
+  //const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
+  //const exchangeProxyAddress = address.exchangeProxy
+  const exchangeProxyAddress = props.exchangeProxy
   const [walletBalance, setWalletBalance] = React.useState(0)
   //const makerToken = option.collateralToken
   const takerToken = props.tokenAddress
@@ -185,6 +187,7 @@ export default function SellMarket(props: {
             ERC20_ABI: ERC20_ABI,
             avgExpectedRate: avgExpectedRate,
             existingLimitOrders: existingBuyLimitOrders,
+            chainId: chainId,
           }
           sellMarketOrder(orderData).then((orderFillStatus: any) => {
             let orderFilled = false

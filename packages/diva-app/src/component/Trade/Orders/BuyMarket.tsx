@@ -55,6 +55,7 @@ export default function BuyMarket(props: {
   option: Pool
   handleDisplayOrder: () => any
   tokenAddress: string
+  exchangeProxy: string
 }) {
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
@@ -74,8 +75,9 @@ export default function BuyMarket(props: {
     React.useState(0.0)
   const [takerAccount, setTakerAccount] = React.useState('')
   // eslint-disable-next-line prettier/prettier
-  const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
-  const exchangeProxyAddress = address.exchangeProxy
+  //const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+  //const exchangeProxyAddress = address.exchangeProxy
+  const exchangeProxy = props.exchangeProxy
   const makerToken = props.tokenAddress
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken.id
@@ -99,11 +101,11 @@ export default function BuyMarket(props: {
   const approveBuyAmount = async (amount) => {
     const amountBigNumber = parseUnits(amount.toString())
     await takerTokenContract.methods
-      .approve(exchangeProxyAddress, amountBigNumber)
+      .approve(exchangeProxy, amountBigNumber)
       .send({ from: accounts[0] })
 
     const collateralAllowance = await takerTokenContract.methods
-      .allowance(accounts[0], exchangeProxyAddress)
+      .allowance(accounts[0], exchangeProxy)
       .call()
     return collateralAllowance
   }
@@ -238,7 +240,7 @@ export default function BuyMarket(props: {
     accounts = await window.ethereum.enable()
     const takerAccount = accounts[0]
     let allowance = await takerTokenContract.methods
-      .allowance(takerAccount, exchangeProxyAddress)
+      .allowance(takerAccount, exchangeProxy)
       .call()
     allowance = Number(formatUnits(allowance, option.collateralToken.decimals))
     let balance = await takerTokenContract.methods
