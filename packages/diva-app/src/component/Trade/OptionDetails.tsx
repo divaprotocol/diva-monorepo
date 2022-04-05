@@ -53,7 +53,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 33.3%;
+  width: 40%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
@@ -108,12 +108,13 @@ export default function OptionDetails({
   const shortCollateralRatio =
     (parseInt(pool.collateralBalanceShortInitial) / longShortCollateralSum) *
     100
+
   const dataSourceprovider = dataSource.dataProviders.find(
     (dataSourceprovider: { id: string }) =>
       dataSourceprovider.id == pool.dataProvider
   )
 
-  const dataSourseNameProvider = dataSourceprovider.name
+  console.log('name', dataSourceprovider.name)
   return (
     <PageDiv>
       <HeaderDiv>
@@ -167,7 +168,7 @@ export default function OptionDetails({
         <FlexBoxSecondLine>
           <FlexBoxHeader>Data source</FlexBoxHeader>
           <FlexBoxSecondLineData>
-            {dataSourseNameProvider}
+            {dataSourceprovider.name}
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
