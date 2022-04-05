@@ -91,9 +91,11 @@ const FlexBoxSecondLineData = styled.div`
 export default function OptionDetails({
   pool,
   isLong,
+  dataSource,
 }: {
   pool: Pool
   isLong: boolean
+  dataSource: any
 }) {
   //Instead of calling redux to get selected option at each component level
   //we can call at root component of trade that is underlying and pass as porps
@@ -106,9 +108,12 @@ export default function OptionDetails({
   const shortCollateralRatio =
     (parseInt(pool.collateralBalanceShortInitial) / longShortCollateralSum) *
     100
-  const shortLongRatio = shortCollateralRatio / longCollateralRatio
-  console.log('çollateralBalanceLongInitial =', shortLongRatio)
+  const dataSourceprovider = dataSource.dataProviders.find(
+    (dataSourceprovider: { id: string }) =>
+      dataSourceprovider.id == pool.dataProvider
+  )
 
+  const dataSourseNameProvider = dataSourceprovider.name
   return (
     <PageDiv>
       <HeaderDiv>
@@ -161,7 +166,9 @@ export default function OptionDetails({
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Data source</FlexBoxHeader>
-          <FlexBoxSecondLineData>TBD</FlexBoxSecondLineData>
+          <FlexBoxSecondLineData>
+            {dataSourseNameProvider}
+          </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Short/Long ratio</FlexBoxHeader>

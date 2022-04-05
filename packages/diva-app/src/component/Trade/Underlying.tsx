@@ -18,6 +18,7 @@ import { Liquidity } from '../Liquidity/Liquidity'
 import OrdersPanel from './OrdersPanel'
 import Typography from '@mui/material/Typography'
 import { useAppSelector } from '../../Redux/hooks'
+import { useWhitelist } from '../../hooks/useWhitelist'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -42,6 +43,7 @@ export default function Underlying() {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
   const theme = useTheme()
+  const dataSource = useWhitelist()
   const query = useQuery<{ pool: Pool }>('pool', () =>
     request(
       config[chainId as number].divaSubgraph,
@@ -99,7 +101,11 @@ export default function Underlying() {
                   poolId={pool.id}
                   tokenDecimals={pool.collateralToken.decimals}
                 />
-                <OptionDetails pool={pool} isLong={isLong} />
+                <OptionDetails
+                  pool={pool}
+                  isLong={isLong}
+                  dataSource={dataSource}
+                />
               </Paper>
               <Paper>
                 <LeftCompFlexContainer>
