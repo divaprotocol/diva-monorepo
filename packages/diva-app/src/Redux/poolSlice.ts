@@ -126,6 +126,11 @@ const addPools = (state: PoolState, pools: Pool[]) => {
   const newPools = pools.map((p) => p.id)
   const oldPools = state.pools.filter((p) => !newPools.includes(p.id))
   state.pools = pools.concat(oldPools)
+  state.pools.sort((a, b) => {
+    if (a.id < b.id) return -1
+    if (a.id > b.id) return 1
+    return 0
+  })
 }
 
 export const poolSlice = createSlice({
