@@ -170,7 +170,8 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           }
           sx={{ mb: 2 }}
         >
-          Pool is confirmed please claim your tokens to remove liquidity
+          Final value is already confirmed. Please redeem your tokens in My
+          Positions.
         </Alert>
       </Collapse>
       <Card sx={{ borderRadius: '16px' }}>
