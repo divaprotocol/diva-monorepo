@@ -102,7 +102,7 @@ export const fetchPools = createAsyncThunk(
 )
 
 export const fetchMarkets = createAsyncThunk(
-  'pools/pools',
+  'pools/markets',
   async ({ graphUrl }: { graphUrl: string }) => {
     let res: Pool[] = []
 
