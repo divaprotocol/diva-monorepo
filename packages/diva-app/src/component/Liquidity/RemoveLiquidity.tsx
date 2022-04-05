@@ -47,6 +47,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const tokenBalanceShort = useErcBalance(
     pool ? pool!.shortToken.id : undefined
   )
+  const [openExpiredAlert, setOpenExpiredAlert] = React.useState(false)
   const [longToken, setLongToken] = React.useState('')
   const [shortToken, setShortToken] = React.useState('')
   const [decimal, setDecimal] = React.useState(18)
@@ -59,6 +60,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
 
   useEffect(() => {
     if (pool) {
+      setOpenExpiredAlert(pool.statusFinalReferenceValue === 'Confirmed')
       setDecimal(pool!.collateralToken.decimals)
       if (tokenBalanceLong && tokenBalanceShort && decimal) {
         const longBalance = parseEther(tokenBalanceLong)
@@ -151,6 +153,26 @@ export const RemoveLiquidity = ({ pool }: Props) => {
         mt: theme.spacing(2),
       }}
     >
+      <Collapse in={openExpiredAlert}>
+        <Alert
+          severity="error"
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setOpenExpiredAlert(false)
+              }}
+            >
+              {'X'}
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          Pool is confirmed please claim your tokens to remove liquidity
+        </Alert>
+      </Collapse>
       <Card sx={{ borderRadius: '16px' }}>
         <Container sx={{ mt: theme.spacing(2) }}>
           <Stack direction="row" justifyContent="space-between">
@@ -263,7 +285,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               size="large"
               type="submit"
               value="Submit"
-              disabled={!pool}
+              disabled={!pool || openExpiredAlert}
               onClick={() => {
                 const diva = new ethers.Contract(
                   config[chainId].divaAddress,
