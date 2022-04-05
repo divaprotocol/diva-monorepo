@@ -1,7 +1,13 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { BigNumber } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
-import { Pool, queryDatafeed, queryMarkets, queryPool } from '../lib/queries'
+import {
+  Pool,
+  queryDatafeed,
+  queryMarkets,
+  queryPool,
+  queryPools,
+} from '../lib/queries'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
@@ -82,6 +88,27 @@ export const fetchPools = createAsyncThunk(
     let lastId = '0'
     let lastRes: Pool[]
     while (lastRes == null || lastRes.length > 0) {
+      const result = await request(graphUrl, queryPools(lastId))
+
+      if (result.pools.length > 0)
+        lastId = result.pools[result.pools?.length - 1].id
+
+      lastRes = result.pools
+      res = res.concat(lastRes)
+    }
+
+    return res
+  }
+)
+
+export const fetchMarkets = createAsyncThunk(
+  'pools/pools',
+  async ({ graphUrl }: { graphUrl: string }) => {
+    let res: Pool[] = []
+
+    let lastId = '0'
+    let lastRes: Pool[]
+    while (lastRes == null || lastRes.length > 0) {
       const result = await request(graphUrl, queryMarkets(lastId))
 
       if (result.pools.length > 0)
@@ -122,6 +149,10 @@ export const poolSlice = createSlice({
     })
 
     builder.addCase(fetchPools.fulfilled, (state, action) => {
+      addPools(state, action.payload)
+    })
+
+    builder.addCase(fetchMarkets.fulfilled, (state, action) => {
       addPools(state, action.payload)
     })
 

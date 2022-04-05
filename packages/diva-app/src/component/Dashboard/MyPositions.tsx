@@ -28,7 +28,12 @@ import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useEffect, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
-import { fetchPool, fetchPools, poolsSelector } from '../../Redux/poolSlice'
+import {
+  fetchPool,
+  fetchMarkets,
+  poolsSelector,
+  fetchPools,
+} from '../../Redux/poolSlice'
 import { useDispatch } from 'react-redux'
 
 type Response = {

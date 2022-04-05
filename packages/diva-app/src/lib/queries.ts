@@ -62,9 +62,9 @@ export type Pool = {
   createdAt: string
 }
 
-export const queryPools = gql`
+export const queryPools = (id: string) => gql`
   {
-    pools {
+    pools( where: { id_gt: "${id}" } ) {
       id
       referenceAsset
       floor

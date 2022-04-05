@@ -13,7 +13,7 @@ import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import styled from '@emotion/styled'
 import { CoinIconPair } from '../CoinIcon'
-import { fetchPools, poolsSelector } from '../../Redux/poolSlice'
+import { fetchMarkets, poolsSelector } from '../../Redux/poolSlice'
 import { useAppSelector } from '../../Redux/hooks'
 import { useDispatch } from 'react-redux'
 
@@ -84,7 +84,7 @@ export default function Markets() {
   const poolsData = useAppSelector((state) => poolsSelector(state))
   useEffect(() => {
     dispatch(
-      fetchPools({
+      fetchMarkets({
         graphUrl: config[chainId as number].divaSubgraph,
       })
     )
