@@ -12,9 +12,11 @@ import { useMediaQuery } from '@mui/material'
 import { Box } from '@mui/system'
 import { createDivaTheme } from './lib/createDivaTheme'
 import { Provider as Web3Provider } from '@web3-ui/hooks'
+import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import 'react-vis/dist/style.css'
 import { projectId } from './constants'
+import connectors from './Util/setConnectors'
 
 const queryClient = new QueryClient()
 
@@ -46,7 +48,9 @@ const WithProviders = () => {
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <ThemeProvider theme={theme}>
               <Provider store={store}>
-                <App />
+                <WagmiProvider autoConnect connectors={connectors}>
+                  <App />
+                </WagmiProvider>
               </Provider>
             </ThemeProvider>
           </LocalizationProvider>
