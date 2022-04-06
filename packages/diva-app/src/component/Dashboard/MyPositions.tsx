@@ -1,7 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import {
   Button,
-  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -21,19 +20,13 @@ import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
-import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
-import {
-  fetchPool,
-  fetchMarkets,
-  poolsSelector,
-  fetchPools,
-} from '../../Redux/poolSlice'
+import { fetchPool, poolsSelector } from '../../Redux/poolSlice'
 import { useDispatch } from 'react-redux'
 
 type Response = {
@@ -379,21 +372,8 @@ const columns: GridColDef[] = [
 
 export function MyPositions() {
   const { provider, connection } = useWallet()
-  const chainId = provider?.network?.chainId || 3
   const userAddress = connection?.userAddress
-
-  const account = userAddress
   const [page, setPage] = useState(0)
-
-  const dispatch = useDispatch()
-  useEffect(() => {
-    dispatch(
-      fetchPools({
-        graphUrl: config[chainId as number].divaSubgraph,
-      })
-    )
-  }, [chainId, dispatch])
-
   const pools = useAppSelector((state) => poolsSelector(state))
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {

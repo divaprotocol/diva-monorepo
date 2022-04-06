@@ -1,20 +1,21 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { BigNumber } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
-import {
-  Pool,
-  queryDatafeed,
-  queryMarkets,
-  queryPool,
-  queryPools,
-} from '../lib/queries'
+import { Pool, queryPool, queryPools } from '../lib/queries'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
 import { RootState } from './Store'
 import { get0xOpenOrders } from '../DataService/OpenOrders'
+import { config } from '../constants'
 
-type PoolState = {
+type Wallet = {
+  chainId: number
+  userAddress: string
+}
+
+type PoolByChain = {
+  wallet?: Wallet
   pools: Pool[]
   isBuy: boolean
   underlyingPrice: {
@@ -34,7 +35,7 @@ type PoolState = {
   }
 }
 
-const initialState: PoolState = {
+const initialState: PoolByChain = {
   pools: [],
   isBuy: true,
   underlyingPrice: {},
@@ -82,8 +83,18 @@ export const fetchPool = createAsyncThunk(
 
 export const fetchPools = createAsyncThunk(
   'pools/pools',
-  async ({ graphUrl }: { graphUrl: string }) => {
+  async (args, store) => {
     let res: Pool[] = []
+    const state = store.getState() as RootState
+    if (
+      state.poolSlice.wallet?.chainId != null &&
+      config[state.poolSlice.wallet?.chainId] == null
+    ) {
+      console.error(
+        `chainId ${state.poolSlice.wallet?.chainId} is not configured in constants`
+      )
+    }
+    const graphUrl = config[state.poolSlice.wallet?.chainId || 3].divaSubgraph
 
     let lastId = '0'
     let lastRes: Pool[]
@@ -101,28 +112,7 @@ export const fetchPools = createAsyncThunk(
   }
 )
 
-export const fetchMarkets = createAsyncThunk(
-  'pools/markets',
-  async ({ graphUrl }: { graphUrl: string }) => {
-    let res: Pool[] = []
-
-    let lastId = '0'
-    let lastRes: Pool[]
-    while (lastRes == null || lastRes.length > 0) {
-      const result = await request(graphUrl, queryMarkets(lastId))
-
-      if (result.pools.length > 0)
-        lastId = result.pools[result.pools?.length - 1].id
-
-      lastRes = result.pools
-      res = res.concat(lastRes)
-    }
-
-    return res
-  }
-)
-
-const addPools = (state: PoolState, pools: Pool[]) => {
+const addPools = (state: PoolByChain, pools: Pool[]) => {
   const newPools = pools.map((p) => p.id)
   const oldPools = state.pools.filter((p) => !newPools.includes(p.id))
   state.pools = pools.concat(oldPools)
@@ -140,7 +130,23 @@ export const poolSlice = createSlice({
     setIsBuy: (state, action: PayloadAction<boolean>) => {
       state.isBuy = action.payload
     },
-    addPools: (state: PoolState, action: PayloadAction<Pool[]>) => {
+    setWallet: (state, action: PayloadAction<Wallet>) => {
+      /**
+       * when set wallet is used - the redux state gets reset
+       * TODO: Store pool state by chain id, make this work with
+       * cache at some point
+       */
+      if (
+        state.wallet?.chainId !== action.payload.chainId &&
+        action.payload.chainId !== undefined
+      ) {
+        state.pools = []
+        state.orders = {}
+        state.underlyingPrice = {}
+      }
+      state.wallet = action.payload
+    },
+    addPools: (state: PoolByChain, action: PayloadAction<Pool[]>) => {
       addPools(state, action.payload)
     },
   },
@@ -154,10 +160,6 @@ export const poolSlice = createSlice({
     })
 
     builder.addCase(fetchPools.fulfilled, (state, action) => {
-      addPools(state, action.payload)
-    })
-
-    builder.addCase(fetchMarkets.fulfilled, (state, action) => {
       addPools(state, action.payload)
     })
 
@@ -185,6 +187,11 @@ export const poolsSelector = (state: RootState): Pool[] | undefined =>
     ...p,
     intrinsicValue: intrinsicSelector(state, p.id),
   }))
+
+export const selectMyDataFeeds = (state: RootState) =>
+  poolsSelector(state).filter(
+    (m) => m.dataProvider === state.poolSlice.wallet?.userAddress
+  )
 
 export const priceSelector = (state: RootState, poolId: string) =>
   state.poolSlice.underlyingPrice[poolId]
@@ -368,4 +375,4 @@ export const breakEvenSelector = (
     return 'n/a'
   }
 }
-export const { setIsBuy } = poolSlice.actions
+export const { setIsBuy, setWallet } = poolSlice.actions

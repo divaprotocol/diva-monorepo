@@ -10,7 +10,7 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 
 import { config } from '../../constants'
@@ -23,9 +23,8 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { useAppSelector } from '../../Redux/hooks'
-import { fetchPool, fetchMarkets, poolsSelector } from '../../Redux/poolSlice'
-import { useDispatch } from 'react-redux'
+import { fetchPool, selectMyDataFeeds } from '../../Redux/poolSlice'
+import { useDispatch, useSelector } from 'react-redux'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -287,21 +286,10 @@ const columns: GridColDef[] = [
 
 export function MyDataFeeds() {
   const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
   const userAddress = wallet?.connection?.userAddress
-  const dispatch = useDispatch()
   const [page, setPage] = useState(0)
-  useEffect(() => {
-    if (config[chainId as number] != null) {
-      dispatch(
-        fetchMarkets({
-          graphUrl: config[chainId as number].divaSubgraph,
-        })
-      )
-    }
-  }, [chainId, dispatch])
 
-  const pools = useAppSelector((state) => poolsSelector(state))
+  const pools = useSelector(selectMyDataFeeds)
   const rows: GridRowModel[] = pools
     .filter(
       (pool) => pool.dataProvider.toLowerCase() === userAddress.toLowerCase()

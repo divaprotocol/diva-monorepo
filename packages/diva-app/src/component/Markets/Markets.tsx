@@ -3,19 +3,18 @@ import PoolsTable, { PayoffCell } from '../PoolsTable'
 import { formatUnits } from 'ethers/lib/utils'
 import { getDateTime } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { Pool, queryMarkets } from '../../lib/queries'
-import { config, createdByFilterAddressForMarket } from '../../constants'
+import { Pool } from '../../lib/queries'
+import { createdByFilterAddressForMarket } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import styled from '@emotion/styled'
 import { CoinIconPair } from '../CoinIcon'
-import { fetchMarkets, poolsSelector } from '../../Redux/poolSlice'
+import { poolsSelector } from '../../Redux/poolSlice'
 import { useAppSelector } from '../../Redux/hooks'
-import { useDispatch } from 'react-redux'
 
 const columns: GridColDef[] = [
   {
@@ -80,14 +79,11 @@ export default function Markets() {
   const [pools, setPools] = useState<Pool[]>([])
   const [page, setPage] = useState(0)
 
-  const dispatch = useDispatch()
   const poolsData = useAppSelector((state) => poolsSelector(state))
   useEffect(() => {
-    dispatch(
-      fetchMarkets({
-        graphUrl: config[chainId as number].divaSubgraph,
-      })
-    )
+    /**
+     * TODO make selectors out of these
+     */
     const updatePools = async () => {
       const mainPoolsData = poolsData.filter(
         (p) => p.createdBy === createdByFilterAddressForMarket
@@ -100,9 +96,7 @@ export default function Markets() {
       setOtherPools(otherPoolsData)
       setPools(mainPoolsData)
     }
-    if (poolsData.length > 0) {
-      updatePools()
-    }
+    updatePools()
   }, [chainId, poolsData.length])
 
   useEffect(() => {
