@@ -109,12 +109,11 @@ export default function OptionDetails({
     (parseInt(pool.collateralBalanceShortInitial) / longShortCollateralSum) *
     100
 
-  const dataSourceprovider = dataSource.dataProviders.find(
-    (dataSourceprovider: { id: string }) =>
-      dataSourceprovider.id == pool.dataProvider
+  const dataName = dataSource?.dataProviders.find(
+    (dataName: { id: string }) => dataName.id == pool.dataProvider
   )
 
-  console.log('name', dataSourceprovider.name)
+  console.log('name', dataName.name)
   return (
     <PageDiv>
       <HeaderDiv>
@@ -167,9 +166,7 @@ export default function OptionDetails({
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Data source</FlexBoxHeader>
-          <FlexBoxSecondLineData>
-            {dataSourceprovider.name}
-          </FlexBoxSecondLineData>
+          <FlexBoxSecondLineData>{dataName.name}</FlexBoxSecondLineData>
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Short/Long ratio</FlexBoxHeader>
