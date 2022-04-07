@@ -43,7 +43,6 @@ export default function Underlying() {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
   const theme = useTheme()
-  const dataSource = useWhitelist()
   const query = useQuery<{ pool: Pool }>('pool', () =>
     request(
       config[chainId as number].divaSubgraph,
@@ -101,11 +100,7 @@ export default function Underlying() {
                   poolId={pool.id}
                   tokenDecimals={pool.collateralToken.decimals}
                 />
-                <OptionDetails
-                  pool={pool}
-                  isLong={isLong}
-                  dataSource={dataSource}
-                />
+                <OptionDetails pool={pool} isLong={isLong} />
               </Paper>
               <Paper>
                 <LeftCompFlexContainer>

@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
 import { Pool } from '../../lib/queries'
 import { formatEther, formatUnits } from 'ethers/lib/utils'
+import { useWhitelist } from '../../hooks/useWhitelist'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -91,11 +92,9 @@ const FlexBoxSecondLineData = styled.div`
 export default function OptionDetails({
   pool,
   isLong,
-  dataSource,
 }: {
   pool: Pool
   isLong: boolean
-  dataSource: any
 }) {
   //Instead of calling redux to get selected option at each component level
   //we can call at root component of trade that is underlying and pass as porps
@@ -108,12 +107,16 @@ export default function OptionDetails({
   const shortCollateralRatio =
     (parseInt(pool.collateralBalanceShortInitial) / longShortCollateralSum) *
     100
+  const dataSource = useWhitelist()
+  const [dataSourceName, setDataSourceName] = useState('')
+  useEffect(() => {
+    const dataName = dataSource?.dataProviders?.find(
+      (dataName: { id: string }) => dataName.id == pool.dataProvider
+    )
 
-  const dataName = dataSource?.dataProviders.find(
-    (dataName: { id: string }) => dataName.id == pool.dataProvider
-  )
-
-  console.log('name', dataName.name)
+    setDataSourceName(dataName.name)
+  }, [dataSource.dataProviders, pool.dataProvider])
+  console.log('data provider name', dataSourceName)
   return (
     <PageDiv>
       <HeaderDiv>
@@ -166,7 +169,7 @@ export default function OptionDetails({
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Data source</FlexBoxHeader>
-          <FlexBoxSecondLineData>{dataName.name}</FlexBoxSecondLineData>
+          <FlexBoxSecondLineData></FlexBoxSecondLineData>
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Short/Long ratio</FlexBoxHeader>
