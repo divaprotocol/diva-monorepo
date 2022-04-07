@@ -28,6 +28,8 @@ import { withStyles } from '@mui/styles'
 import { useWallet } from '@web3-ui/hooks'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import { fetchPool } from '../../Redux/poolSlice'
+import { useDispatch } from 'react-redux'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -48,6 +50,7 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
   const theme = useTheme()
   const [openAlert, setOpenAlert] = React.useState(false)
+  const [openExpiredAlert, setOpenExpiredAlert] = React.useState(false)
   const [openCapacityAlert, setOpenCapacityAlert] = React.useState(false)
   const [decimal, setDecimal] = React.useState(18)
   const [loading, setLoading] = React.useState(false)
@@ -56,7 +59,7 @@ export const AddLiquidity = ({ pool }: Props) => {
   const tokenBalance = useErcBalance(
     pool ? pool!.collateralToken.id : undefined
   )
-
+  const dispatch = useDispatch()
   const {
     provider,
     connection: { userAddress: account },
@@ -65,6 +68,7 @@ export const AddLiquidity = ({ pool }: Props) => {
   useEffect(() => {
     if (pool) {
       setDecimal(pool.collateralToken.decimals)
+      setOpenExpiredAlert(Date.now() > 1000 * parseInt(pool.expiryTime))
     }
     if (
       pool! &&
@@ -147,6 +151,26 @@ export const AddLiquidity = ({ pool }: Props) => {
       ) : (
         ''
       )}
+      <Collapse in={openExpiredAlert}>
+        <Alert
+          severity="error"
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setOpenExpiredAlert(false)
+              }}
+            >
+              {'X'}
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          Pool expired. Addition of liquidity is no longer possible
+        </Alert>
+      </Collapse>
       <Card sx={{ minWidth: '100px', borderRadius: '16px' }}>
         <Container sx={{ mt: theme.spacing(2) }}>
           <Stack direction="row" justifyContent="space-between">
@@ -363,7 +387,57 @@ export const AddLiquidity = ({ pool }: Props) => {
                   disabled={
                     !pool || Date.now() > 1000 * parseInt(pool.expiryTime)
                   }
-                  onClick={() => addLiquidityTrade()}
+                  onClick={() => {
+                    const token = new ethers.Contract(
+                      pool!.collateralToken.id,
+                      ERC20,
+                      provider.getSigner()
+                    )
+                    token
+                      .approve(
+                        config[chainId!].divaAddress,
+                        parseUnits(textFieldValue, decimal)
+                      )
+                      .then((tx: any) => {
+                        return tx.wait()
+                      })
+                      .then(() => {
+                        return token.allowance(
+                          account,
+                          config[chainId!].divaAddress
+                        )
+                      })
+                      .then(() => {
+                        const diva = new ethers.Contract(
+                          config[chainId!].divaAddress,
+                          DIVA_ABI,
+                          provider?.getSigner()
+                        )
+                        diva!
+                          .addLiquidity(
+                            window.location.pathname.split('/')[1],
+                            parseUnits(textFieldValue, decimal)
+                          )
+                          .then((tx) => {
+                            /**
+                             * dispatch action to refetch the pool after action
+                             */
+                            tx.wait().then(() => {
+                              setTimeout(() => {
+                                dispatch(
+                                  fetchPool({
+                                    graphUrl:
+                                      config[chainId as number].divaSubgraph,
+                                    poolId:
+                                      window.location.pathname.split('/')[1],
+                                  })
+                                )
+                              }, 5000)
+                            })
+                          })
+                      })
+                      .catch((err: any) => console.error(err))
+                  }}
                   style={{
                     maxWidth: theme.spacing(38),
                     maxHeight: theme.spacing(5),

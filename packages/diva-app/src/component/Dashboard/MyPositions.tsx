@@ -1,7 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
 import {
   Button,
-  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -20,15 +19,15 @@ import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
-import { Pool, queryMarkets } from '../../lib/queries'
-import { request } from 'graphql-request'
 import ERC20 from '@diva/contracts/abis/erc20.json'
-import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
+import { useAppSelector } from '../../Redux/hooks'
+import { fetchPool, poolsSelector } from '../../Redux/poolSlice'
+import { useDispatch } from 'react-redux'
 
 type Response = {
   [token: string]: BigNumber
@@ -83,8 +82,7 @@ const SubmitButton = (props: any) => {
     connection: { userAddress },
     provider,
   } = useWallet()
-  const history = useHistory()
-
+  const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
   if (chainId == null) return null
 
@@ -116,6 +114,20 @@ const SubmitButton = (props: any) => {
                     tx.wait().then(() => {
                       diva
                         .redeemPositionToken(props.row.address.id, bal)
+                        .then((tx) => {
+                          /**
+                           * dispatch action to refetch the pool after action
+                           */
+                          tx.wait().then(() => {
+                            dispatch(
+                              fetchPool({
+                                graphUrl:
+                                  config[chainId as number].divaSubgraph,
+                                poolId: props.id.split('/')[0],
+                              })
+                            )
+                          })
+                        })
                         .catch((err) => {
                           console.error(err)
                         })
@@ -241,6 +253,21 @@ const SubmitButton = (props: any) => {
                       props.id.split('/')[0],
                       parseEther(textFieldValue)
                     )
+                    .then((tx) => {
+                      /**
+                       * dispatch action to refetch the pool after action
+                       */
+                      tx.wait().then(() => {
+                        setTimeout(() => {
+                          dispatch(
+                            fetchPool({
+                              graphUrl: config[chainId as number].divaSubgraph,
+                              poolId: props.id.split('/')[0],
+                            })
+                          )
+                        }, 10000)
+                      })
+                    })
                     .catch((err) => {
                       console.error(err)
                     })
@@ -345,34 +372,10 @@ const columns: GridColDef[] = [
 
 export function MyPositions() {
   const { provider, connection } = useWallet()
-  const chainId = provider?.network?.chainId
   const userAddress = connection?.userAddress
-
-  const account = userAddress
   const [page, setPage] = useState(0)
+  const pools = useAppSelector((state) => poolsSelector(state))
 
-  const query = useQuery<{ pools: Pool[] }>(`pools-${account}`, async () => {
-    let res: Pool[] = []
-    if (chainId != null) {
-      let lastId = '0'
-      let lastRes: Pool[]
-      while (lastRes == null || lastRes.length > 0) {
-        const result = await request(
-          config[chainId as number].divaSubgraph,
-          queryMarkets(lastId)
-        )
-
-        if (result.pools.length > 0)
-          lastId = result.pools[result.pools?.length - 1].id
-
-        lastRes = result.pools
-        res = res.concat(lastRes)
-      }
-    }
-    return { pools: res }
-  })
-
-  const pools = query.data?.pools || ([] as Pool[])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
     const now = new Date()
@@ -491,7 +494,7 @@ export function MyPositions() {
   const tokenAddresses = rows.map((v) => v.address.id)
 
   const balances = useQuery<Response>(
-    `balance-${userAddress}-${query.isLoading}`,
+    `balance-${userAddress}-${pools == null}`,
     async () => {
       const response: Response = {}
       if (!userAddress) throw new Error('wallet not connected')
@@ -541,9 +544,8 @@ export function MyPositions() {
       <PoolsTable
         page={page}
         rows={filteredRows}
-        loading={query.isLoading || balances.isLoading}
+        loading={balances.isLoading}
         columns={columns}
-        disableRowClick
         onPageChange={(page) => setPage(page)}
       />
     </Stack>
