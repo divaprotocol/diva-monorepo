@@ -8,6 +8,8 @@ import {
   Input,
   Stack,
   useTheme,
+  CircularProgress,
+  Box,
 } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
@@ -51,6 +53,9 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [openExpiredAlert, setOpenExpiredAlert] = React.useState(false)
   const [openCapacityAlert, setOpenCapacityAlert] = React.useState(false)
   const [decimal, setDecimal] = React.useState(18)
+  const [loading, setLoading] = React.useState(false)
+  //const [alert, setAlert] = React.useState(false)
+  const [approving, setApproving] = React.useState('')
   const tokenBalance = useErcBalance(
     pool ? pool!.collateralToken.id : undefined
   )
@@ -91,6 +96,44 @@ export const AddLiquidity = ({ pool }: Props) => {
       setOpenAlert(false)
     }
   }, [tokenBalance, textFieldValue, pool])
+  async function addLiquidityTrade() {
+    setLoading(true)
+    setApproving('Approving...')
+    const token = new ethers.Contract(
+      pool!.collateralToken.id,
+      ERC20,
+      provider.getSigner()
+    )
+    token
+      .approve(
+        config[chainId!].divaAddress,
+        parseUnits(textFieldValue, decimal)
+      )
+      .then((tx: any) => {
+        return tx.wait()
+      })
+      .then(() => {
+        return token.allowance(account, config[chainId!].divaAddress)
+      })
+      .then(async () => {
+        const diva = new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider?.getSigner()
+        )
+        setApproving('Adding...')
+        const tx = await diva!.addLiquidity(
+          window.location.pathname.split('/')[1],
+          parseUnits(textFieldValue, decimal)
+        )
+        await tx?.wait()
+        setLoading(false)
+      })
+      .catch((err: any) => {
+        console.log(err)
+        setLoading(false)
+      })
+  }
 
   return (
     <Stack
@@ -99,6 +142,15 @@ export const AddLiquidity = ({ pool }: Props) => {
         mt: theme.spacing(2),
       }}
     >
+      {loading ? (
+        <>
+          <Box pt={2} pb={3}>
+            <Alert severity="info">{approving}</Alert>
+          </Box>
+        </>
+      ) : (
+        ''
+      )}
       <Collapse in={openExpiredAlert}>
         <Alert
           severity="error"
@@ -323,6 +375,29 @@ export const AddLiquidity = ({ pool }: Props) => {
                 alignItems: 'center',
               }}
             >
+              {loading ? (
+                <CircularProgress />
+              ) : (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  type="submit"
+                  value="Submit"
+                  disabled={
+                    !pool || Date.now() > 1000 * parseInt(pool.expiryTime)
+                  }
+                  onClick={() => addLiquidityTrade()}
+                  style={{
+                    maxWidth: theme.spacing(38),
+                    maxHeight: theme.spacing(5),
+                    minWidth: theme.spacing(38),
+                    minHeight: theme.spacing(5),
+                  }}
+                >
+                  Add
+                </Button>
+              )}
               <Button
                 variant="contained"
                 color="primary"
