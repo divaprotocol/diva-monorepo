@@ -387,7 +387,57 @@ export const AddLiquidity = ({ pool }: Props) => {
                   disabled={
                     !pool || Date.now() > 1000 * parseInt(pool.expiryTime)
                   }
-                  onClick={() => addLiquidityTrade()}
+                  onClick={() => {
+                    const token = new ethers.Contract(
+                      pool!.collateralToken.id,
+                      ERC20,
+                      provider.getSigner()
+                    )
+                    token
+                      .approve(
+                        config[chainId!].divaAddress,
+                        parseUnits(textFieldValue, decimal)
+                      )
+                      .then((tx: any) => {
+                        return tx.wait()
+                      })
+                      .then(() => {
+                        return token.allowance(
+                          account,
+                          config[chainId!].divaAddress
+                        )
+                      })
+                      .then(() => {
+                        const diva = new ethers.Contract(
+                          config[chainId!].divaAddress,
+                          DIVA_ABI,
+                          provider?.getSigner()
+                        )
+                        diva!
+                          .addLiquidity(
+                            window.location.pathname.split('/')[1],
+                            parseUnits(textFieldValue, decimal)
+                          )
+                          .then((tx) => {
+                            /**
+                             * dispatch action to refetch the pool after action
+                             */
+                            tx.wait().then(() => {
+                              setTimeout(() => {
+                                dispatch(
+                                  fetchPool({
+                                    graphUrl:
+                                      config[chainId as number].divaSubgraph,
+                                    poolId:
+                                      window.location.pathname.split('/')[1],
+                                  })
+                                )
+                              }, 5000)
+                            })
+                          })
+                      })
+                      .catch((err: any) => console.error(err))
+                  }}
                   style={{
                     maxWidth: theme.spacing(38),
                     maxHeight: theme.spacing(5),
@@ -398,75 +448,6 @@ export const AddLiquidity = ({ pool }: Props) => {
                   Add
                 </Button>
               )}
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                type="submit"
-                value="Submit"
-                disabled={
-                  !pool || Date.now() > 1000 * parseInt(pool.expiryTime)
-                }
-                onClick={() => {
-                  const token = new ethers.Contract(
-                    pool!.collateralToken.id,
-                    ERC20,
-                    provider.getSigner()
-                  )
-                  token
-                    .approve(
-                      config[chainId!].divaAddress,
-                      parseUnits(textFieldValue, decimal)
-                    )
-                    .then((tx: any) => {
-                      return tx.wait()
-                    })
-                    .then(() => {
-                      return token.allowance(
-                        account,
-                        config[chainId!].divaAddress
-                      )
-                    })
-                    .then(() => {
-                      const diva = new ethers.Contract(
-                        config[chainId!].divaAddress,
-                        DIVA_ABI,
-                        provider?.getSigner()
-                      )
-                      diva!
-                        .addLiquidity(
-                          window.location.pathname.split('/')[1],
-                          parseUnits(textFieldValue, decimal)
-                        )
-                        .then((tx) => {
-                          /**
-                           * dispatch action to refetch the pool after action
-                           */
-                          tx.wait().then(() => {
-                            setTimeout(() => {
-                              dispatch(
-                                fetchPool({
-                                  graphUrl:
-                                    config[chainId as number].divaSubgraph,
-                                  poolId:
-                                    window.location.pathname.split('/')[1],
-                                })
-                              )
-                            }, 5000)
-                          })
-                        })
-                    })
-                    .catch((err: any) => console.error(err))
-                }}
-                style={{
-                  maxWidth: theme.spacing(38),
-                  maxHeight: theme.spacing(5),
-                  minWidth: theme.spacing(38),
-                  minHeight: theme.spacing(5),
-                }}
-              >
-                Add
-              </Button>
             </div>
           </Container>
         </Container>

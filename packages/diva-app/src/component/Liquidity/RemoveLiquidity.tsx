@@ -321,8 +321,37 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 size="large"
                 type="submit"
                 value="Submit"
-                disabled={!pool}
-                onClick={() => removeLiquidityTrade()}
+                disabled={!pool || openExpiredAlert}
+                onClick={() => {
+                  const diva = new ethers.Contract(
+                    config[chainId].divaAddress,
+                    DIVA_ABI,
+                    provider?.getSigner()
+                  )
+                  diva!
+                    .removeLiquidity(
+                      window.location.pathname.split('/')[1],
+                      parseEther(longToken)
+                    )
+                    .then((tx) => {
+                      /**
+                       * dispatch action to refetch the pool after action
+                       */
+                      tx.wait().then(() => {
+                        setTimeout(() => {
+                          dispatch(
+                            fetchPool({
+                              graphUrl: config[chainId as number].divaSubgraph,
+                              poolId: window.location.pathname.split('/')[1],
+                            })
+                          )
+                        }, 5000)
+                      })
+                    })
+                    .catch((err) => {
+                      console.log(err)
+                    })
+                }}
                 style={{
                   maxWidth: theme.spacing(38),
                   maxHeight: theme.spacing(5),
@@ -333,52 +362,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 Remove
               </Button>
             )}
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              type="submit"
-              value="Submit"
-              disabled={!pool || openExpiredAlert}
-              onClick={() => {
-                const diva = new ethers.Contract(
-                  config[chainId].divaAddress,
-                  DIVA_ABI,
-                  provider?.getSigner()
-                )
-                diva!
-                  .removeLiquidity(
-                    window.location.pathname.split('/')[1],
-                    parseEther(longToken)
-                  )
-                  .then((tx) => {
-                    /**
-                     * dispatch action to refetch the pool after action
-                     */
-                    tx.wait().then(() => {
-                      setTimeout(() => {
-                        dispatch(
-                          fetchPool({
-                            graphUrl: config[chainId as number].divaSubgraph,
-                            poolId: window.location.pathname.split('/')[1],
-                          })
-                        )
-                      }, 5000)
-                    })
-                  })
-                  .catch((err) => {
-                    console.log(err)
-                  })
-              }}
-              style={{
-                maxWidth: theme.spacing(38),
-                maxHeight: theme.spacing(5),
-                minWidth: theme.spacing(38),
-                minHeight: theme.spacing(5),
-              }}
-            >
-              Remove
-            </Button>
           </div>
         </Container>
       </Card>
