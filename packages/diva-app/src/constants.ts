@@ -43,7 +43,7 @@ export const config: { [key: number]: SingleConfig } = {
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-polygon',
     whitelistSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-matic',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-polygon',
   },
   42: {
     name: 'Kovan',

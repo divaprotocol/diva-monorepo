@@ -10,7 +10,7 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 
 import { config } from '../../constants'
@@ -20,12 +20,11 @@ import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { useQuery } from 'react-query'
-import { Pool, queryDatafeed } from '../../lib/queries'
-import { request } from 'graphql-request'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
+import { fetchPool, selectMyDataFeeds } from '../../Redux/poolSlice'
+import { useDispatch, useSelector } from 'react-redux'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -120,6 +119,7 @@ const SubmitCell = (props: any) => {
   const { provider } = useWallet()
 
   const chainId = provider?.network?.chainId
+  const dispatch = useDispatch()
 
   const diva =
     chainId != null
@@ -178,6 +178,21 @@ const SubmitCell = (props: any) => {
                     parseEther(textFieldValue),
                     true
                   )
+                  .then((tx) => {
+                    /**
+                     * dispatch action to refetch the pool after action
+                     */
+                    tx.wait().then(() => {
+                      setTimeout(() => {
+                        dispatch(
+                          fetchPool({
+                            graphUrl: config[chainId as number].divaSubgraph,
+                            poolId: props.id.split('/')[0],
+                          })
+                        )
+                      }, 10000)
+                    })
+                  })
                   .catch((err) => {
                     console.error(err)
                   })
@@ -271,90 +286,64 @@ const columns: GridColDef[] = [
 
 export function MyDataFeeds() {
   const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
   const userAddress = wallet?.connection?.userAddress
-
   const [page, setPage] = useState(0)
 
-  const query = useQuery<{ pools: Pool[] }>(
-    `pools-${userAddress}`,
-    async () => {
-      let res: Pool[] = []
-      if (chainId != null) {
-        let lastId = '0'
-        let lastRes: Pool[]
-        while (lastRes == null || lastRes.length > 0) {
-          const result = await request(
-            config[chainId as number].divaSubgraph,
-            queryDatafeed(userAddress, lastId)
-          )
-
-          if (result.pools.length > 0)
-            lastId = result.pools[result.pools?.length - 1].id
-
-          lastRes = result.pools
-          res = res.concat(lastRes)
-        }
+  const pools = useSelector(selectMyDataFeeds)
+  const rows: GridRowModel[] = pools
+    .filter(
+      (pool) => pool.dataProvider.toLowerCase() === userAddress.toLowerCase()
+    )
+    .reduce((acc, val) => {
+      const shared = {
+        Icon: val.referenceAsset,
+        Underlying: val.referenceAsset,
+        Floor: formatUnits(val.floor),
+        Inflection: formatUnits(val.inflection),
+        Cap: formatUnits(val.cap),
+        Expiry: val.expiryTime,
+        Sell: 'TBD',
+        Buy: 'TBD',
+        MaxYield: 'TBD',
+        Challenges: val.challenges,
       }
-      return { pools: res }
-    }
-  )
-  useEffect(() => {
-    query.refetch()
-  }, [chainId])
-  const pools = query?.data?.pools || ([] as Pool[])
-  console.log('pools')
-  console.log(pools)
-  const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const shared = {
-      Icon: val.referenceAsset,
-      Underlying: val.referenceAsset,
-      Floor: formatUnits(val.floor),
-      Inflection: formatUnits(val.inflection),
-      Cap: formatUnits(val.cap),
-      Expiry: val.expiryTime,
-      Sell: 'TBD',
-      Buy: 'TBD',
-      MaxYield: 'TBD',
-      Challenges: val.challenges,
-    }
 
-    const payOff = {
-      Floor: parseInt(val.floor) / 1e18,
-      Inflection: parseInt(val.inflection) / 1e18,
-      Cap: parseInt(val.cap) / 1e18,
-    }
+      const payOff = {
+        Floor: parseInt(val.floor) / 1e18,
+        Inflection: parseInt(val.inflection) / 1e18,
+        Cap: parseInt(val.cap) / 1e18,
+      }
 
-    const Status = val.statusFinalReferenceValue
-    return [
-      ...acc,
-      {
-        ...shared,
-        id: `${val.id}/long`,
-        Id: val.id,
-        address: val.longToken,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: true,
-        }),
-        TVL:
-          parseFloat(
-            formatUnits(
-              BigNumber.from(val.collateralBalance),
-              val.collateralToken.decimals
-            )
-          ).toFixed(4) +
-          ' ' +
-          val.collateralToken.symbol,
-        Status,
-        StatusTimestamp: val.statusTimestamp,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
-      },
-    ]
-  }, [] as GridRowModel[])
+      const Status = val.statusFinalReferenceValue
+      return [
+        ...acc,
+        {
+          ...shared,
+          id: `${val.id}/long`,
+          Id: val.id,
+          address: val.longToken,
+          PayoffProfile: generatePayoffChartData({
+            ...payOff,
+            IsLong: true,
+          }),
+          TVL:
+            parseFloat(
+              formatUnits(
+                BigNumber.from(val.collateralBalance),
+                val.collateralToken.decimals
+              )
+            ).toFixed(4) +
+            ' ' +
+            val.collateralToken.symbol,
+          Status,
+          StatusTimestamp: val.statusTimestamp,
+          finalValue:
+            val.statusFinalReferenceValue === 'Open'
+              ? '-'
+              : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
+        },
+      ]
+    }, [] as GridRowModel[])
 
   return userAddress ? (
     <Stack

@@ -9,8 +9,8 @@ type DataProvider @entity {
 type DataFeed @entity {
   id: ID!
   referenceAsset: String!
-  referenceAssetUnified: String! # BTC/USD for XBT/USD and BTC-USD, for instance 
-  dataProvider: DataProvider! 
+  referenceAssetUnified: String! # BTC/USD for XBT/USD and BTC-USD, for instance
+  dataProvider: DataProvider!
   active: Boolean!
 }
 

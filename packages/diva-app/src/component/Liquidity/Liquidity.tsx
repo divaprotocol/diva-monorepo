@@ -1,15 +1,6 @@
-import {
-  Alert,
-  Box,
-  Card,
-  Collapse,
-  Container,
-  IconButton,
-  Stack,
-  useTheme,
-} from '@mui/material'
+import { Box, Card, Container, Stack, useTheme } from '@mui/material'
 import Typography from '@mui/material/Typography'
-import React, { useEffect } from 'react'
+import React from 'react'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import { AddLiquidity } from './AddLiquidity'
@@ -26,15 +17,10 @@ type Props = {
 
 export const Liquidity = ({ pool }: Props) => {
   const [value, setValue] = React.useState(0)
-  const [openAlert, setOpenAlert] = React.useState(false)
   const { provider } = useWallet()
   const chainId = provider?.network?.chainId
 
   const theme = useTheme()
-
-  useEffect(() => {
-    setOpenAlert(Date.now() > 1000 * parseInt(pool.expiryTime))
-  }, [chainId])
 
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
@@ -48,26 +34,6 @@ export const Liquidity = ({ pool }: Props) => {
           minWidth: theme.spacing(82),
         }}
       >
-        <Collapse in={openAlert}>
-          <Alert
-            severity="error"
-            action={
-              <IconButton
-                aria-label="close"
-                color="inherit"
-                size="small"
-                onClick={() => {
-                  setOpenAlert(false)
-                }}
-              >
-                {'X'}
-              </IconButton>
-            }
-            sx={{ mb: 2 }}
-          >
-            Pool expired. Addition/removal of liquidity is no longer possible
-          </Alert>
-        </Collapse>
         <Container sx={{ borderRadius: '16px' }}>
           <Tabs value={value} onChange={handleChange} variant="fullWidth">
             <Tab label="Add" />

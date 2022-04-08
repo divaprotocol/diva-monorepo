@@ -1,7 +1,9 @@
 import { BigNumber, Contract, ethers } from 'ethers'
 import {
   Alert,
+  Box,
   Card,
+  CircularProgress,
   Collapse,
   Container,
   IconButton,
@@ -25,6 +27,8 @@ import Button from '@mui/material/Button'
 import { useWallet } from '@web3-ui/hooks'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import { fetchPool } from '../../Redux/poolSlice'
+import { useDispatch } from 'react-redux'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -45,20 +49,22 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const tokenBalanceShort = useErcBalance(
     pool ? pool!.shortToken.id : undefined
   )
+  const [openExpiredAlert, setOpenExpiredAlert] = React.useState(false)
   const [longToken, setLongToken] = React.useState('')
   const [shortToken, setShortToken] = React.useState('')
   const [decimal, setDecimal] = React.useState(18)
   const [openAlert, setOpenAlert] = React.useState(false)
+  const [loading, setLoading] = useState(false)
   const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
   const { provider } = useWallet()
   const chainId = provider?.network?.chainId
-
+  const dispatch = useDispatch()
   const theme = useTheme()
 
   useEffect(() => {
     if (pool) {
+      setOpenExpiredAlert(pool.statusFinalReferenceValue === 'Confirmed')
       setDecimal(pool!.collateralToken.decimals)
-
       if (tokenBalanceLong && tokenBalanceShort && decimal) {
         const longBalance = parseEther(tokenBalanceLong)
         const shortBalance = parseEther(tokenBalanceShort)
@@ -144,12 +150,62 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       setOpenAlert(false)
     }
   }, [tokenBalanceLong, tokenBalanceShort, textFieldValue, chainId, pool])
+
+  async function removeLiquidityTrade() {
+    try {
+      setLoading(true)
+      const diva = new ethers.Contract(
+        config[chainId].divaAddress,
+        DIVA_ABI,
+        provider?.getSigner()
+      )
+      const tx = await diva!.removeLiquidity(
+        window.location.pathname.split('/')[1],
+        parseEther(longToken)
+      )
+      await tx?.wait()
+      setLoading(false)
+    } catch (error) {
+      setLoading(false)
+      console.log(error)
+    }
+  }
   return (
     <Container
       sx={{
         mt: theme.spacing(2),
       }}
     >
+      {loading ? (
+        <>
+          <Box pt={2} pb={3}>
+            <Alert severity="info">Removing...</Alert>
+          </Box>
+        </>
+      ) : (
+        ''
+      )}
+      <Collapse in={openExpiredAlert}>
+        <Alert
+          severity="error"
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setOpenExpiredAlert(false)
+              }}
+            >
+              {'X'}
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          Final value is already confirmed. Please redeem your tokens in My
+          Positions.
+        </Alert>
+      </Collapse>
       <Card sx={{ borderRadius: '16px' }}>
         <Container sx={{ mt: theme.spacing(2) }}>
           <Stack direction="row" justifyContent="space-between">
@@ -256,33 +312,56 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               alignItems: 'center',
             }}
           >
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              type="submit"
-              value="Submit"
-              disabled={!pool}
-              onClick={() => {
-                const diva = new ethers.Contract(
-                  config[chainId].divaAddress,
-                  DIVA_ABI,
-                  provider?.getSigner()
-                )
-                diva!.removeLiquidity(
-                  window.location.pathname.split('/')[1],
-                  parseEther(longToken)
-                )
-              }}
-              style={{
-                maxWidth: theme.spacing(38),
-                maxHeight: theme.spacing(5),
-                minWidth: theme.spacing(38),
-                minHeight: theme.spacing(5),
-              }}
-            >
-              Remove
-            </Button>
+            {loading ? (
+              <CircularProgress />
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                type="submit"
+                value="Submit"
+                disabled={!pool || openExpiredAlert}
+                onClick={() => {
+                  const diva = new ethers.Contract(
+                    config[chainId].divaAddress,
+                    DIVA_ABI,
+                    provider?.getSigner()
+                  )
+                  diva!
+                    .removeLiquidity(
+                      window.location.pathname.split('/')[1],
+                      parseEther(longToken)
+                    )
+                    .then((tx) => {
+                      /**
+                       * dispatch action to refetch the pool after action
+                       */
+                      tx.wait().then(() => {
+                        setTimeout(() => {
+                          dispatch(
+                            fetchPool({
+                              graphUrl: config[chainId as number].divaSubgraph,
+                              poolId: window.location.pathname.split('/')[1],
+                            })
+                          )
+                        }, 5000)
+                      })
+                    })
+                    .catch((err) => {
+                      console.log(err)
+                    })
+                }}
+                style={{
+                  maxWidth: theme.spacing(38),
+                  maxHeight: theme.spacing(5),
+                  minWidth: theme.spacing(38),
+                  minHeight: theme.spacing(5),
+                }}
+              >
+                Remove
+              </Button>
+            )}
           </div>
         </Container>
       </Card>
