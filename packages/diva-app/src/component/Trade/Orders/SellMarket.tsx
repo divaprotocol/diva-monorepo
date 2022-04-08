@@ -47,10 +47,11 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
+import { useAccount } from 'wagmi'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const web3 = new Web3(Web3.givenProvider)
-let accounts: any[]
+let accounts: string
 
 export default function SellMarket(props: {
   option: Pool
@@ -79,6 +80,9 @@ export default function SellMarket(props: {
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
   const [walletBalance, setWalletBalance] = React.useState(0)
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
   //const makerToken = option.collateralToken
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
@@ -231,7 +235,7 @@ export default function SellMarket(props: {
   }
 
   const getOptionsInWallet = async () => {
-    accounts = await window.ethereum.enable()
+    accounts = accountData.address
     const makerAccount = accounts[0]
     let allowance = await takerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)

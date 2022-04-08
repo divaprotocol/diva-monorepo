@@ -45,12 +45,13 @@ import { useParams } from 'react-router-dom'
 import { Stack, useTheme } from '@mui/material'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
+import { useAccount } from 'wagmi'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const CHAIN_ID = NETWORKS.ropsten
 const web3 = new Web3(Web3.givenProvider)
-let accounts: any[]
+let accounts: string
 export default function BuyMarket(props: {
   option: Pool
   handleDisplayOrder: () => any
@@ -79,6 +80,9 @@ export default function BuyMarket(props: {
   const makerToken = props.tokenAddress
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken.id
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
   // TODO: check again why we need to use "any" here
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const params: { tokenType: string } = useParams()
@@ -235,7 +239,7 @@ export default function BuyMarket(props: {
   }
 
   const getCollateralInWallet = async () => {
-    accounts = await window.ethereum.enable()
+    accounts = accountData.address
     const takerAccount = accounts[0]
     let allowance = await takerTokenContract.methods
       .allowance(takerAccount, exchangeProxyAddress)

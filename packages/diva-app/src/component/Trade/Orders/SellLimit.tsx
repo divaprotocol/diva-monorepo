@@ -43,8 +43,9 @@ import {
   setMaxYield,
 } from '../../../Redux/Stats'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
+import { useAccount } from 'wagmi'
 const web3 = new Web3(Web3.givenProvider)
-let accounts: any[]
+let accounts: string
 
 export default function SellLimit(props: {
   option: Pool
@@ -71,6 +72,9 @@ export default function SellLimit(props: {
   const [walletBalance, setWalletBalance] = React.useState(0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const makerToken = optionTokenAddress
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
   //const takerToken = option.collateralToken
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const params: { tokenType: string } = useParams()
@@ -243,7 +247,7 @@ export default function SellLimit(props: {
   }
 
   const getOptionsInWallet = async () => {
-    accounts = await window.ethereum.enable()
+    accounts = accountData.address
     const makerAccount = accounts[0]
     let allowance = await makerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)

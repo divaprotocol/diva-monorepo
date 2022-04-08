@@ -44,8 +44,9 @@ import {
   setIntrinsicValue,
   setMaxPayout,
 } from '../../../Redux/Stats'
+import { useAccount } from 'wagmi'
 const web3 = new Web3(Web3.givenProvider)
-let accounts: any[]
+let accounts: string
 
 export default function BuyLimit(props: {
   option: Pool
@@ -72,6 +73,9 @@ export default function BuyLimit(props: {
     React.useState(0.0)
   const [takerAccount, setTakerAccount] = React.useState('')
   const [collateralBalance, setCollateralBalance] = React.useState(0)
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
   const takerToken = option.collateralToken.id
   const params: { tokenType: string } = useParams()
 
@@ -275,7 +279,7 @@ export default function BuyLimit(props: {
       if (data != null) setUsdPrice(data)
     })
     const getCollateralInWallet = async () => {
-      accounts = await window.ethereum.enable()
+      accounts = accountData.address
       const takerAccount = accounts[0]
       let allowance = await takerTokenContract.methods
         .allowance(takerAccount, exchangeProxyAddress)

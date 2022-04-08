@@ -16,6 +16,7 @@ import {
 } from '../../Redux/TradeOption'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
+import { useAccount } from 'wagmi'
 const PageDiv = styled.div`
   width: 400px;
   height: 420px;
@@ -81,9 +82,12 @@ export default function CreateOrder(props: {
   const [orderType, setOrderTypeValue] = React.useState(0)
   const [priceType, setPriceTypeValue] = React.useState(0)
   const [userAccount, setUserAccount] = React.useState('')
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
 
   const componentDidMount = async () => {
-    accounts = await window.ethereum.enable()
+    accounts = accountData.address
     setUserAccount(accounts[0])
   }
 
