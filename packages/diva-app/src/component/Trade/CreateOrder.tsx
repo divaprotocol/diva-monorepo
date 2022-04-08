@@ -17,6 +17,7 @@ import {
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
 const PageDiv = styled.div`
+  justify-content: center
   height: 420px;
 `
 
@@ -169,7 +170,7 @@ export default function CreateOrder(props: {
 
   return (
     <PageDiv className={classes.root}>
-      <TabsDiv>
+      <TabsDiv className={classes.root}>
         <LeftTabDiv>
           <Tabs
             className={tabsClass.tabs}

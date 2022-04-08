@@ -55,7 +55,7 @@ export default function BuyLimit(props: {
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const chainId = wallet?.provider?.network?.chainId || 137
   //const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   //const exchangeProxyAddress = address.exchangeProxy
   const exchangeProxyAddress = props.exchangeProxy
@@ -282,9 +282,7 @@ export default function BuyLimit(props: {
       let allowance = await takerTokenContract.methods
         .allowance(takerAccount, exchangeProxyAddress)
         .call()
-      allowance = Number(
-        formatUnits(allowance, option.collateralToken.decimals)
-      )
+      allowance = Number(formatUnits(allowance))
       let balance = await takerTokenContract.methods
         .balanceOf(takerAccount)
         .call()
@@ -564,7 +562,7 @@ export default function BuyLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="35%">
+        <Box marginLeft="30%">
           <Button
             variant="contained"
             color="primary"

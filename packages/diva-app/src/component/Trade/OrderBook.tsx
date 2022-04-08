@@ -95,60 +95,48 @@ function mapOrderData(
     const takerToken = order.takerToken
     const collateralToken = option.collateralToken.id.toLowerCase()
     const tokenAddress = optionTokenAddress.toLowerCase()
-    //const makerAmount = new BigNumber(order.makerAmount)
-    //const takerAmount = new BigNumber(order.takerAmount)
-    const takerAmount = formatUnits(
-      order.takerAmount,
-      option.collateralToken.decimals
-    )
-    const remainingTakerAmount = formatUnits(
-      metaData.remainingFillableTakerAmount,
-      option.collateralToken.decimals
-    )
-    const makerAmount = formatUnits(order.makerAmount)
     const orders: any = {}
     if (makerToken === collateralToken && takerToken === tokenAddress) {
+      const takerAmount = formatUnits(order.takerAmount)
+      const makerAmount = formatUnits(
+        order.makerAmount.toString(),
+        option.collateralToken.decimals
+      )
+      const remainingTakerAmount = formatUnits(
+        metaData.remainingFillableTakerAmount
+      )
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
-      //const bidAmount = makerAmount.dividedBy(takerAmount)
       const bidAmount = Number(makerAmount) / Number(takerAmount)
       orders.bid = bidAmount
-      //const remainingTakerAmount = new BigNumber(
-      //  metaData.remainingFillableTakerAmount.toString()
-      //)
       if (remainingTakerAmount < takerAmount) {
         const nbrOptions = Number(remainingTakerAmount)
         orders.nbrOptions = nbrOptions
       } else {
-        const nbrOptions = Number(
-          formatUnits(takerAmount.toString(), option.collateralToken.decimals)
-        )
+        const nbrOptions = Number(takerAmount)
         orders.nbrOptions = nbrOptions
       }
     }
     if (makerToken === tokenAddress && takerToken === collateralToken) {
+      const takerAmount = formatUnits(
+        order.takerAmount,
+        option.collateralToken.decimals
+      )
+      const remainingTakerAmount = formatUnits(
+        metaData.remainingFillableTakerAmount,
+        option.collateralToken.decimals
+      )
+      const makerAmount = formatUnits(order.makerAmount)
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'sell'
       orders.id = 'sell' + records.indexOf(record as never)
-      //const askAmount = takerAmount.dividedBy(makerAmount)
       const askAmount = Number(takerAmount) / Number(makerAmount)
       orders.ask = askAmount
-      //const remainingTakerAmount = new BigNumber(
-      //  metaData.remainingFillableTakerAmount
-      //)
       if (remainingTakerAmount == makerAmount) {
-        //const nbrOptions = Number(
-        //  formatUnits(makerAmount.toString(), option.collateralToken.decimals)
-        //)
         orders.nbrOptions = Number(makerAmount)
       } else {
-        //const quantity = remainingTakerAmount.dividedBy(askAmount)
         const quantity = Number(remainingTakerAmount) / askAmount
-        //const nbrOptions = Number(
-        //  formatUnits(quantity.toString(), option.collateralToken.decimals)
-        //)
-        //orders.nbrOptions = nbrOptions
         orders.nbrOptions = quantity
       }
     }

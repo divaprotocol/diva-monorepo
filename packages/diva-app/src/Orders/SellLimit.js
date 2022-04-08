@@ -1,14 +1,9 @@
 import { contractAddresses } from './Config'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
-import { CHAIN_ID } from './Config'
 import { utils } from './Config'
 import { metamaskProvider } from './Config'
 import { ROPSTEN, POLYGON } from './Config'
-import { IZeroExContract } from '@0x/contract-wrappers'
-import { MetamaskSubprovider } from '@0x/subproviders'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const contractAddress = require('@0x/contract-addresses')
 
 export const sellLimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
@@ -88,61 +83,4 @@ export const sellLimitOrder = async (orderData) => {
   } catch (e) {
     alert('You need to sign the order')
   }
-}
-
-/**
- * 
- * const response = await exchange
-      .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true)
-      .awaitTransactionSuccessAsync({ from: orderData.maker })
-      .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
-    return response} orderData 
-    orders.map(function (order) {
-      signatures.push(order.signature)
-      delete order.signature
-      return order
-    })
- */
-
-export const cancelSellLimitOrder = async (orderData) => {
-  delete orderData.order.signature
-  let order = orderData.order
-  //order = JSON.stringify(order)
-
-  const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
-  const exchangeProxyAddress = address.exchangeProxy
-
-  const supportedProvider = new MetamaskSubprovider(window.web3.currentProvider)
-
-  const exchange = new IZeroExContract(
-    exchangeProxyAddress,
-    supportedProvider,
-    {
-      from: order.maker,
-    }
-  )
-  //const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
-  console.log('order maker' + order)
-  const response = await exchange
-    .cancelLimitOrder(order)
-    .awaitTransactionSuccessAsync()
-    .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
-  console.log('response ' + JSON.stringify(response))
-  alert('order canceled')
-  /*if (!('logs' in response)) {
-    alert('order could not be filled')
-    return
-  } else {
-    response.logs.forEach((eventData) => {
-      if (!('event' in eventData)) {
-        return
-      } else {
-        if (eventData.event === 'OrderCancelled') {
-          alert('Order Canceled ')
-        } else {
-          alert('order could not be canceled')
-        }
-      }
-    })
-  }*/
 }

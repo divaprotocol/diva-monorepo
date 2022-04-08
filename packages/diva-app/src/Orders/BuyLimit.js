@@ -1,5 +1,5 @@
 import { parseEther, parseUnits } from 'ethers/lib/utils'
-import { contractAddresses } from './Config'
+import { contractAddresses, POLYGON } from './Config'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { metamaskProvider } from './Config'
@@ -13,6 +13,7 @@ export const buylimitOrder = async (orderData) => {
   const isFloat = (number) => {
     return number != '' && !isNaN(number) && Math.round(number) != number
   }
+
   const decimalPlaces = (number) => {
     return number.toString().split('.')[1].length
   }
@@ -31,6 +32,7 @@ export const buylimitOrder = async (orderData) => {
    * to resolve this problem we need to calculate the total number of digit by
    * addition of individual floating point number
    */
+
   const amount = Number(orderData.nbrOptions * orderData.limitPrice).toFixed(
     totalDecimalPlaces
   )
@@ -58,7 +60,7 @@ export const buylimitOrder = async (orderData) => {
       utils.SignatureType.EIP712 // Optional
     )
     const signedOrder = { ...order, signature }
-    const resp = await fetch(ROPSTEN, {
+    const resp = await fetch(POLYGON, {
       method: 'POST',
       body: JSON.stringify(signedOrder),
       headers: {

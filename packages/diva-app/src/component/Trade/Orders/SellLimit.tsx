@@ -548,7 +548,7 @@ export default function SellLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="35%">
+        <Box marginLeft="30%">
           <Button
             variant="contained"
             color="primary"

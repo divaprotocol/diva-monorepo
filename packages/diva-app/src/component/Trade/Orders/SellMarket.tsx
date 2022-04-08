@@ -77,11 +77,8 @@ export default function SellMarket(props: {
   const [allowance, setAllowance] = React.useState(0.0)
   const [makerAccount, setMakerAccount] = React.useState('')
   // eslint-disable-next-line prettier/prettier
-  //const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
-  //const exchangeProxyAddress = address.exchangeProxy
   const exchangeProxyAddress = props.exchangeProxy
   const [walletBalance, setWalletBalance] = React.useState(0)
-  //const makerToken = option.collateralToken
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const params: { tokenType: string } = useParams()
@@ -210,7 +207,6 @@ export default function SellMarket(props: {
                       )
                       setNumberOfOptions(0.0)
                       setYouReceive(0.0)
-                      //alert('Order successfully filled')
                       orderFilled = true
                       return
                     } else {
@@ -255,9 +251,14 @@ export default function SellMarket(props: {
     const orders: any = []
     responseBuy.forEach((data: any) => {
       const order = JSON.parse(JSON.stringify(data.order))
-      const takerAmount = new BigNumber(order.takerAmount)
-      const makerAmount = new BigNumber(order.makerAmount)
-      order['expectedRate'] = makerAmount.dividedBy(takerAmount)
+      const makerAmount = Number(
+        formatUnits(order.makerAmount, option.collateralToken.decimals)
+      )
+      const takerAmount = Number(formatUnits(order.takerAmount))
+      const expectedRate = (makerAmount / takerAmount).toFixed(
+        totalDecimals(makerAmount, takerAmount)
+      )
+      order['expectedRate'] = expectedRate
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
@@ -335,39 +336,41 @@ export default function SellMarket(props: {
   useEffect(() => {
     if (numberOfOptions > 0 && existingBuyLimitOrders.length > 0) {
       let count = numberOfOptions
-      let cumulativeAvg = parseEther('0')
-      let cumulativeTaker = parseEther('0')
-      let cumulativeMaker = parseEther('0')
+      let cumulativeAvg = 0
+      let cumulativeTaker = 0
+      let cumulativeMaker = 0
       existingBuyLimitOrders.forEach((order: any) => {
-        const takerAmount = Number(
-          formatUnits(
-            order.takerAmount.toString(),
-            option.collateralToken.decimals
+        const makerAmount = Number(
+          formatUnits(order.makerAmount, option.collateralToken.decimals)
+        )
+        const takerAmount = Number(formatUnits(order.takerAmount))
+        const expectedRate = Number(
+          (makerAmount / takerAmount).toFixed(
+            totalDecimals(makerAmount, takerAmount)
           )
         )
-        const expectedRate = order.expectedRate
         if (count > 0) {
           if (count <= takerAmount) {
-            const orderTotalAmount = parseEther(expectedRate.toString()).mul(
-              parseEther(count.toString())
+            const orderTotalAmount = Number(
+              (expectedRate * count).toFixed(totalDecimals(expectedRate, count))
             )
-            cumulativeMaker = cumulativeMaker.add(orderTotalAmount)
-            cumulativeTaker = cumulativeTaker.add(parseEther(count.toString()))
+            cumulativeMaker = cumulativeMaker + orderTotalAmount
+            cumulativeTaker = cumulativeTaker + count
             count = 0
           } else {
-            cumulativeTaker = cumulativeTaker.add(
-              parseEther(takerAmount.toString())
-            )
-            cumulativeMaker = cumulativeMaker.add(
-              parseEther(order.makerAmount.toString())
-            )
+            cumulativeTaker = cumulativeTaker + takerAmount
+            cumulativeMaker = cumulativeMaker + makerAmount
             count = count - takerAmount
           }
         }
       })
-      cumulativeAvg = cumulativeMaker.div(cumulativeTaker)
-      if (cumulativeAvg.gt(0)) {
-        const avg = Number(formatUnits(cumulativeAvg))
+      cumulativeAvg = Number(
+        (cumulativeMaker / cumulativeTaker).toFixed(
+          totalDecimals(cumulativeMaker, cumulativeTaker)
+        )
+      )
+      if (cumulativeAvg > 0) {
+        const avg = cumulativeAvg
         setAvgExpectedRate(avg)
         const youReceive = avg * numberOfOptions
         setYouReceive(youReceive)
@@ -619,7 +622,7 @@ export default function SellMarket(props: {
           </FormControlDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="35%" marginTop="15%">
+        <Box marginLeft="30%" marginTop="15%">
           <Button
             variant="contained"
             color="primary"
