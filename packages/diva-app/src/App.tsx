@@ -13,14 +13,18 @@ import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { fetchPools, poolsSelector, setWallet } from './Redux/poolSlice'
 import { useAppSelector } from './Redux/hooks'
+import { useAccount, useProvider } from 'wagmi'
 
 export const App = () => {
-  const { provider, connection } = useWallet()
+  // const { provider, connection } = useWallet()
+  const [{ data, error, loading }, disconnect] = useAccount()
+  const provider = useProvider()
   const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
-  const userAddress = connection?.userAddress
+  const userAddress = 'connection?.userAddress'
   const pools = useAppSelector((state) => poolsSelector(state))
-
+  console.log('data app')
+  console.log(data)
   useEffect(() => {
     dispatch(
       setWallet({
@@ -51,7 +55,7 @@ export const App = () => {
 
   return (
     <Router>
-      <Header />
+      {/*<Header />*/}
       <Container
         disableGutters
         sx={{ alignItems: 'left', height: '100%', overflow: 'auto' }}

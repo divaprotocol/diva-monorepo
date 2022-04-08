@@ -15,6 +15,7 @@ import styled from '@emotion/styled'
 import { CoinIconPair } from '../CoinIcon'
 import { poolsSelector } from '../../Redux/poolSlice'
 import { useAppSelector } from '../../Redux/hooks'
+import { useNetwork } from 'wagmi'
 
 const columns: GridColDef[] = [
   {
@@ -71,8 +72,10 @@ const columns: GridColDef[] = [
 ]
 
 export default function Markets() {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  // const wallet = useWallet()
+  const [{ data, error, loading }, switchNetwork] = useNetwork()
+  console.log(data.chain)
+  const chainId = 3
   const [value, setValue] = useState(0)
   const [mainPools, setMainPools] = useState<Pool[]>([])
   const [otherPools, setOtherPools] = useState<Pool[]>([])

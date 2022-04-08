@@ -11,13 +11,36 @@ import { ThemeProvider } from '@mui/material/styles'
 import { useMediaQuery } from '@mui/material'
 import { Box } from '@mui/system'
 import { createDivaTheme } from './lib/createDivaTheme'
-import { Provider as Web3Provider } from '@web3-ui/hooks'
+import { defaultChains, Provider as Web3Provider } from 'wagmi'
+import { InjectedConnector } from 'wagmi/connectors/injected'
+import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
+import { WalletLinkConnector } from 'wagmi/connectors/walletLink'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import 'react-vis/dist/style.css'
 import { projectId } from './constants'
-
+const chains = defaultChains
 const queryClient = new QueryClient()
-
+const connectors = ({ chainId }) => {
+  const rpcUrl = 'https://ropsten.infura.io/v3/'
+  return [
+    new InjectedConnector({
+      chains,
+      options: { shimDisconnect: true },
+    }),
+    new WalletConnectConnector({
+      options: {
+        infuraId: projectId,
+        qrcode: true,
+      },
+    }),
+    new WalletLinkConnector({
+      options: {
+        appName: 'My wagmi app',
+        jsonRpcUrl: `${rpcUrl}/${projectId}`,
+      },
+    }),
+  ]
+}
 const WithProviders = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
 
@@ -41,7 +64,7 @@ const WithProviders = () => {
         overflow: 'hidden',
       }}
     >
-      <Web3Provider network={undefined as any} infuraId={projectId}>
+      <Web3Provider autoConnect connectors={connectors}>
         <QueryClientProvider client={queryClient}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <ThemeProvider theme={theme}>
