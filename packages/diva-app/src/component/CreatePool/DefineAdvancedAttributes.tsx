@@ -105,6 +105,7 @@ export function DefineAdvanced({
               value={tokenSupply}
               type="number"
               onChange={formik.handleChange}
+              inputProps={{ readOnly: true }}
             />
             {formik.errors.tokenSupply != null && (
               <FormHelperText>{formik.errors.tokenSupply}</FormHelperText>
