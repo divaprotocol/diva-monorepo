@@ -51,6 +51,7 @@ export default function SellLimit(props: {
   handleDisplayOrder: () => any
   tokenAddress: string
   exchangeProxy: string
+  chainId: number
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const wallet = useWallet()
@@ -219,7 +220,8 @@ export default function SellLimit(props: {
       //Double check any limit orders exists
       const rSell: any = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken.id
+        option.collateralToken.id,
+        chainId
       )
       responseSell = rSell
     }

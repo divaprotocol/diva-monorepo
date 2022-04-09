@@ -72,6 +72,7 @@ export default function CreateOrder(props: {
   option: Pool
   tokenAddress: string
   exchangeProxy: string
+  chainId: number
 }) {
   //const op = useSelector((state) => state.tradeOption.option)
   const option = props.option
@@ -119,6 +120,7 @@ export default function CreateOrder(props: {
           handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
+          chainId={props.chainId}
         />
       )
     }
@@ -130,6 +132,7 @@ export default function CreateOrder(props: {
           option={option}
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
+          chainId={props.chainId}
         />
       )
     }
@@ -141,6 +144,7 @@ export default function CreateOrder(props: {
           handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
+          chainId={props.chainId}
         />
       )
     }
@@ -152,6 +156,7 @@ export default function CreateOrder(props: {
           handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
+          chainId={props.chainId}
         />
       )
     }

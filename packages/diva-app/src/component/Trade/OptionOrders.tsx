@@ -22,6 +22,8 @@ import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
+import { CHAIN_ID } from '../../Orders/Config'
+import { useWallet } from '@web3-ui/hooks'
 const TableCellStyle = withStyles(() => ({
   root: {
     height: '10px',
@@ -133,14 +135,16 @@ export default function OpenOrders(props: {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const dispatch = useAppDispatch()
   const [orders, setOrders] = useState([])
-
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId || 137
   const componentDidMount = async () => {
     accounts = await window.ethereum.enable()
     const orderBook: any = []
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken.id
+        option.collateralToken.id,
+        chainId
       )
       if (rSell.length > 0) {
         responseSell = rSell
@@ -150,7 +154,8 @@ export default function OpenOrders(props: {
     if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
-        optionTokenAddress
+        optionTokenAddress,
+        CHAIN_ID
       )
       if (rBuy.length > 0) {
         responseBuy = rBuy
@@ -209,7 +214,7 @@ export default function OpenOrders(props: {
   async function cancelOrder(order) {
     const orderHash = order.orderHash
     //get the order details in current form from 0x before cancelling it.
-    const cancelOrder = await getOrderDetails(orderHash)
+    const cancelOrder = await getOrderDetails(orderHash, chainId)
     cancelLimitOrder(cancelOrder).then(function (cancelOrderResponse: any) {
       if (!(cancelOrderResponse === 'undefined')) {
         if (!('logs' in cancelOrderResponse)) {

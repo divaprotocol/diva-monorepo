@@ -52,6 +52,7 @@ export default function BuyLimit(props: {
   handleDisplayOrder: () => any
   tokenAddress: string
   exchangeProxy: string
+  chainId: number
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const wallet = useWallet()
@@ -241,7 +242,11 @@ export default function BuyLimit(props: {
     let existingOrdersAmount = new BigNumber(0)
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
-      const rBuy = await get0xOpenOrders(option.collateralToken.id, makerToken)
+      const rBuy = await get0xOpenOrders(
+        option.collateralToken.id,
+        makerToken,
+        chainId
+      )
       if (rBuy.length > 0) {
         responseBuy = rBuy
       }

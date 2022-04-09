@@ -44,6 +44,7 @@ import { useParams } from 'react-router-dom'
 import { Stack, useTheme } from '@mui/material'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
+import { ChainId } from '@0x/contract-addresses'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
@@ -53,6 +54,7 @@ export default function BuyMarket(props: {
   handleDisplayOrder: () => any
   tokenAddress: string
   exchangeProxy: string
+  chainId: number
 }) {
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
@@ -278,7 +280,11 @@ export default function BuyMarket(props: {
     let existingOrdersAmount = new BigNumber(0)
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
-      const rBuy = await get0xOpenOrders(option.collateralToken.id, makerToken)
+      const rBuy = await get0xOpenOrders(
+        option.collateralToken.id,
+        makerToken,
+        props.chainId
+      )
       if (rBuy.length > 0) {
         responseBuy = rBuy
       }

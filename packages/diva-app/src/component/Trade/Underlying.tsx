@@ -154,6 +154,7 @@ export default function Underlying() {
                   option={pool}
                   tokenAddress={tokenAddress}
                   exchangeProxy={exchangeProxy}
+                  chainId={chainId}
                 />
               </Paper>
               <Paper>

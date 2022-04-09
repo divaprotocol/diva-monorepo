@@ -57,6 +57,7 @@ export default function SellMarket(props: {
   handleDisplayOrder: () => any
   tokenAddress: string
   exchangeProxy: string
+  chainId: number
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
@@ -280,7 +281,8 @@ export default function SellMarket(props: {
       //Double check the any limit orders exists
       const rSell: any = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken.id
+        option.collateralToken.id,
+        chainId
       )
       responseSell = rSell
     }

@@ -17,8 +17,8 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-//import { BigNumber } from '@0x/utils'
-//import { formatEther } from 'ethers/lib/utils'
+import { useWallet } from '@web3-ui/hooks'
+
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -215,13 +215,15 @@ export default function OrderBook(props: {
     BUY: 0,
     SELL: 1,
   }
-
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId || 137
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken.id
+        option.collateralToken.id,
+        chainId
       )
       if (rSell.length > 0) {
         responseSell = rSell
@@ -231,7 +233,8 @@ export default function OrderBook(props: {
     if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
-        optionTokenAddress
+        optionTokenAddress,
+        chainId
       )
       if (rBuy.length > 0) {
         responseBuy = rBuy
