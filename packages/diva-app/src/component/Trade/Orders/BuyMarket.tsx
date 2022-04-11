@@ -38,14 +38,15 @@ import { useAccount, useNetwork } from 'wagmi'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-const [{ data: networkData }] = useNetwork()
-const CHAIN_ID = networkData.chain?.id
+
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 export default function BuyMarket(props: {
   option: Pool
   tokenAddress: string
 }) {
+  const [{ data: networkData }] = useNetwork()
+  const CHAIN_ID = networkData.chain?.id
   const option = props.option
   const isLong = window.location.pathname.split('/')[2] === 'long'
   const order = useAppSelector((state) =>
