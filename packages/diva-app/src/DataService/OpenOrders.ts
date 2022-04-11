@@ -11,9 +11,6 @@ export const get0xOpenOrders = (
   TokenAddress: string,
   chainId: number
 ) => {
-  console.log(
-    'chain id ' + chainId + ' all orders ' + config[chainId].allOrders
-  )
   const res = axios
     .get(
       config[chainId].allOrders +
