@@ -1,9 +1,10 @@
-import { contractAddresses } from './Config'
+//import { contractAddresses } from './Config'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { metamaskProvider } from './Config'
 import { ROPSTEN, POLYGON } from './Config'
+import { config } from '../constants'
 
 export const sellLimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
@@ -39,7 +40,7 @@ export const sellLimitOrder = async (orderData) => {
     amount.toString(),
     orderData.collateralDecimals
   )
-
+  const networkUrl = config[orderData.chainId].order
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
@@ -50,7 +51,7 @@ export const sellLimitOrder = async (orderData) => {
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
     chainId: orderData.chainId,
-    verifyingContract: contractAddresses.exchangeProxy,
+    verifyingContract: orderData.exchangeProxy,
   })
 
   try {
@@ -59,7 +60,7 @@ export const sellLimitOrder = async (orderData) => {
       utils.SignatureType.EIP712 // Optional
     )
     const signedOrder = { ...order, signature }
-    const resp = await fetch(POLYGON, {
+    const resp = await fetch(networkUrl, {
       method: 'POST',
       body: JSON.stringify(signedOrder),
       headers: {

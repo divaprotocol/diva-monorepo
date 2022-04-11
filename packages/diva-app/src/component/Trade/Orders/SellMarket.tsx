@@ -624,7 +624,7 @@ export default function SellMarket(props: {
           </FormControlDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="30%" marginTop="15%">
+        <Box marginLeft="30%" marginTop="15%" marginBottom={2}>
           <Button
             variant="contained"
             color="primary"

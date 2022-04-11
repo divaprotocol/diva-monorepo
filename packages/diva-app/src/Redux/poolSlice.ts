@@ -45,18 +45,18 @@ const initialState: PoolByChain = {
 
 export const fetchOrders = createAsyncThunk(
   'pools/orders',
-  async ({ pool, isLong }: { pool: Pool; isLong: boolean }) => {
-    console.log('chain -- ' + ChainId)
+  async ({ pool, isLong }: { pool: Pool; isLong: boolean }, store) => {
     const tokenAddress = pool[isLong ? 'longToken' : 'shortToken'].id
+    const state = store.getState() as RootState
     const sellOrders: any = await get0xOpenOrders(
       tokenAddress,
       pool.collateralToken.id,
-      137
+      Number(config[state.poolSlice.wallet?.chainId || 3])
     )
     const buyOrders: any = await get0xOpenOrders(
       pool.collateralToken.id,
       tokenAddress,
-      137
+      Number(config[state.poolSlice.wallet?.chainId || 3])
     )
 
     return {

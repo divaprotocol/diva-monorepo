@@ -19,7 +19,7 @@ import { Pool } from '../../lib/queries'
 import { fetchOrders, setIsBuy } from '../../Redux/poolSlice'
 const PageDiv = styled.div`
   justify-content: center
-  height: 420px;
+  height: 500px;
 `
 
 function a11yProps(index: number) {

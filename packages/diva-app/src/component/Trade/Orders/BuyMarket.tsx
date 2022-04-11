@@ -44,7 +44,6 @@ import { useParams } from 'react-router-dom'
 import { Stack, useTheme } from '@mui/material'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
-import { ChainId } from '@0x/contract-addresses'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
@@ -181,6 +180,7 @@ export default function BuyMarket(props: {
             ERC20_ABI: ERC20_ABI,
             avgExpectedRate: avgExpectedRate,
             existingLimitOrders: existingSellLimitOrders,
+            chainId: props.chainId,
           }
 
           buyMarketOrder(orderData).then((orderFillStatus: any) => {
@@ -382,9 +382,9 @@ export default function BuyMarket(props: {
   }, [numberOfOptions])
 
   useEffect(() => {
-    getUnderlyingPrice(option.referenceAsset).then((data) => {
-      if (data != null) setUsdPrice(data)
-    })
+    //getUnderlyingPrice(option.referenceAsset).then((data) => {
+    //  if (data != null) setUsdPrice(data)
+    //})
     if (usdPrice != '') {
       console.log('usdPrice')
       console.log(usdPrice)
@@ -627,7 +627,7 @@ export default function BuyMarket(props: {
           </FormControlDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="30%" marginTop="15%">
+        <Box marginLeft="30%" marginTop="15%" marginBottom={2}>
           <Button
             variant="contained"
             color="primary"

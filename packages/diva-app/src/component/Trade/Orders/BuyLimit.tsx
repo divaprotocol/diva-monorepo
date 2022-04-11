@@ -218,6 +218,7 @@ export default function BuyLimit(props: {
             collateralDecimals: option.collateralToken.decimals,
             limitPrice: pricePerOption,
             orderExpiry: expiry,
+            exchangeProxy: exchangeProxyAddress,
           }
 
           buylimitOrder(orderData)
@@ -567,7 +568,7 @@ export default function BuyLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="30%">
+        <Box marginLeft="30%" marginBottom={2}>
           <Button
             variant="contained"
             color="primary"

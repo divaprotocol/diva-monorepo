@@ -22,7 +22,6 @@ import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
-import { CHAIN_ID } from '../../Orders/Config'
 import { useWallet } from '@web3-ui/hooks'
 const TableCellStyle = withStyles(() => ({
   root: {
@@ -155,7 +154,7 @@ export default function OpenOrders(props: {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
         optionTokenAddress,
-        CHAIN_ID
+        chainId
       )
       if (rBuy.length > 0) {
         responseBuy = rBuy
@@ -211,11 +210,13 @@ export default function OpenOrders(props: {
     }
   }, [responseBuy, responseSell])
 
-  async function cancelOrder(order) {
+  async function cancelOrder(order, chainId) {
     const orderHash = order.orderHash
     //get the order details in current form from 0x before cancelling it.
     const cancelOrder = await getOrderDetails(orderHash, chainId)
-    cancelLimitOrder(cancelOrder).then(function (cancelOrderResponse: any) {
+    cancelLimitOrder(cancelOrder, chainId).then(function (
+      cancelOrderResponse: any
+    ) {
       if (!(cancelOrderResponse === 'undefined')) {
         if (!('logs' in cancelOrderResponse)) {
           alert('order could not be filled')
@@ -302,7 +303,7 @@ export default function OpenOrders(props: {
                             startIcon={<DeleteIcon />}
                             size="small"
                             onClick={async () => {
-                              await cancelOrder(orders[index])
+                              await cancelOrder(orders[index], chainId)
                             }}
                           >
                             Cancel

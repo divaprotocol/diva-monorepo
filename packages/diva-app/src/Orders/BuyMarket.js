@@ -1,12 +1,14 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
-import { CHAIN_ID } from './Config'
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 
 export const buyMarketOrder = async (orderData) => {
   let filledOrder = {}
-  const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+  const address = contractAddress.getContractAddressesForChainOrThrow(
+    orderData.chainId
+  )
   const exchangeProxyAddress = address.exchangeProxy
   // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)

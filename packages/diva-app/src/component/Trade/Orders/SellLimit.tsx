@@ -195,6 +195,7 @@ export default function SellLimit(props: {
             collateralDecimals: option.collateralToken.decimals,
             orderExpiry: expiry,
             chainId: chainId,
+            exchangeProxy: exchangeProxyAddress,
           }
           sellLimitOrder(orderData)
             .then(async (response) => {
@@ -550,7 +551,7 @@ export default function SellLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="30%">
+        <Box marginLeft="30%" marginBottom={2}>
           <Button
             variant="contained"
             color="primary"
