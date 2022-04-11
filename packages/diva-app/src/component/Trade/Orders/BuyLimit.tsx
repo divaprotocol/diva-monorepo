@@ -56,9 +56,7 @@ export default function BuyLimit(props: {
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 137
-  //const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
-  //const exchangeProxyAddress = address.exchangeProxy
+  const chainId = wallet?.provider?.network?.chainId || 3
   const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
   const makerToken = props.tokenAddress
