@@ -4,8 +4,8 @@ import { useNetwork } from 'wagmi'
 export function NetworkTag() {
   const [{ data, loading }] = useNetwork()
 
-  if (loading!) {
-    return <Chip label={data.chain.id} sx={{ marginLeft: 'auto' }} />
+  if (data?.chain) {
+    return <Chip label={data.chain.name} sx={{ marginLeft: 'auto' }} />
   } else {
     return <Chip label={'Preview (ropsten)'} sx={{ marginLeft: 'auto' }} />
   }
