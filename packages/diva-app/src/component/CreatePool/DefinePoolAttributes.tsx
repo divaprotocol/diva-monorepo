@@ -49,7 +49,11 @@ export function DefinePoolAttributes({
   } = formik.values
 
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
+  //const [defaultToken, setDefaultToken] = useState()
 
+  const defaultToken =
+    collateralTokens?.filter((v) => v.name.includes('DAI')) || []
+  console.log('defaultToken', defaultToken)
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
@@ -229,10 +233,11 @@ export function DefinePoolAttributes({
               }}
               renderInput={(params) => (
                 <TextField
+                  defaultValue={defaultToken[0].name}
                   error={formik.errors.collateralToken != null}
                   onBlur={formik.handleBlur}
                   {...params}
-                  label="Collateral Asset"
+                  //label="Collateral Asset"
                 />
               )}
             />
