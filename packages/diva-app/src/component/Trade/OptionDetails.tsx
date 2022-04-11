@@ -28,6 +28,7 @@ const FlexBoxHeader = styled.div`
   font-weight: solid;
   text-align: left;
   padding-left: 15px;
+  fwhite-space: nowrap;
 `
 
 const FlexBoxData = styled.div`
@@ -54,7 +55,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 40%;
+  width: 60%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
@@ -111,10 +112,10 @@ export default function OptionDetails({
   const [dataSourceName, setDataSourceName] = useState('')
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
-      (dataName: { id: string }) => dataName.id == pool.dataProvider
+      (dataName: { id: string }) => dataName?.id == pool?.dataProvider
     )
 
-    setDataSourceName(dataName.name)
+    setDataSourceName(dataName?.name)
   }, [dataSource.dataProviders, pool.dataProvider])
 
   return (
