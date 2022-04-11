@@ -66,7 +66,7 @@ const FlexSecondLineDiv = styled.div`
 `
 
 const FlexBoxSecondLine = styled.div`
-  width: 50%;
+  width: 100%;
   flex: 1;
 `
 
@@ -116,7 +116,7 @@ export default function OptionDetails({
 
     setDataSourceName(dataName.name)
   }, [dataSource.dataProviders, pool.dataProvider])
-  console.log('data provider name', dataSourceName)
+
   return (
     <PageDiv>
       <HeaderDiv>
@@ -169,7 +169,7 @@ export default function OptionDetails({
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Data source</FlexBoxHeader>
-          <FlexBoxSecondLineData></FlexBoxSecondLineData>
+          <FlexBoxSecondLineData>{dataSourceName}</FlexBoxSecondLineData>
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Short/Long ratio</FlexBoxHeader>
