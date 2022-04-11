@@ -1,11 +1,6 @@
 import { useWallet } from '@web3-ui/hooks'
 import axios from 'axios'
 import { config } from '../constants'
-
-//const ordersUrl = 'https://ropsten.api.0x.org/orderbook/v1/orders?makerToken='
-//const ordersUrl = 'https://polygon.api.0x.org/orderbook/v1/orders?makerToken='
-//const getOrderHashUrl = 'https://polygon.api.0x.org/orderbook/v1/order/'
-
 export const get0xOpenOrders = (
   CollateralToken: string,
   TokenAddress: string,

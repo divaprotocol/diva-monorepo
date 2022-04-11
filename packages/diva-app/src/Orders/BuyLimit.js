@@ -1,10 +1,8 @@
 import { parseEther, parseUnits } from 'ethers/lib/utils'
-//import { contractAddresses, POLYGON } from './Config'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { metamaskProvider } from './Config'
 import { config } from '../constants'
-//import { ROPSTEN } from './Config'
 
 export const buylimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {

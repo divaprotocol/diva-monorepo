@@ -1,9 +1,7 @@
-//import { contractAddresses } from './Config'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { metamaskProvider } from './Config'
-import { ROPSTEN, POLYGON } from './Config'
 import { config } from '../constants'
 
 export const sellLimitOrder = async (orderData) => {
