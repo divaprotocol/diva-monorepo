@@ -3,7 +3,7 @@ import Backdrop from '@mui/material/Backdrop'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import { useConnect } from 'wagmi'
-import { Dialog } from '@mui/material'
+import { Dialog, Grid, Icon, Stack } from '@mui/material'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 
@@ -31,9 +31,9 @@ const WalletDialog = (props: SimpleDialogProps) => {
         timeout: 500,
       }}
     >
-      <List>
+      <Grid container>
         {data.connectors.map((connector) => (
-          <ListItem>
+          <Grid item xs={4}>
             <Button
               disabled={!connector.ready}
               key={connector.id}
@@ -42,12 +42,17 @@ const WalletDialog = (props: SimpleDialogProps) => {
                 handleClose()
               }}
             >
-              {connector.name}
-              {!connector.ready && ' (unsupported)'}
+              <Stack minHeight="200px" minWidth="200px">
+                {/*<Icon>*/}
+                {/*  <img src="/images/walletconnect.svg" />*/}
+                {/*</Icon>*/}
+                {connector.name}
+                {!connector.ready && ' (unsupported)'}
+              </Stack>
             </Button>
-          </ListItem>
+          </Grid>
         ))}
-      </List>
+      </Grid>
 
       {error && <div>{error?.message ?? 'Failed to connect'}</div>}
     </Dialog>
