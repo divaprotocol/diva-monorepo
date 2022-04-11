@@ -5,7 +5,6 @@ import { getDateTime } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { Pool } from '../../lib/queries'
 import { createdByFilterAddressForMarket } from '../../constants'
-import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { useEffect, useState } from 'react'
@@ -72,10 +71,8 @@ const columns: GridColDef[] = [
 ]
 
 export default function Markets() {
-  // const wallet = useWallet()
-  const [{ data, error, loading }, switchNetwork] = useNetwork()
-  console.log(data.chain)
-  const chainId = 3
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData?.chain?.id || 3
   const [value, setValue] = useState(0)
   const [mainPools, setMainPools] = useState<Pool[]>([])
   const [otherPools, setOtherPools] = useState<Pool[]>([])

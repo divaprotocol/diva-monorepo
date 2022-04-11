@@ -25,11 +25,11 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { withStyles } from '@mui/styles'
-import { useWallet } from '@web3-ui/hooks'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { fetchPool } from '../../Redux/poolSlice'
 import { useDispatch } from 'react-redux'
+import { useAccount, useNetwork, useSigner } from 'wagmi'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -54,17 +54,18 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [openCapacityAlert, setOpenCapacityAlert] = React.useState(false)
   const [decimal, setDecimal] = React.useState(18)
   const [loading, setLoading] = React.useState(false)
-  //const [alert, setAlert] = React.useState(false)
   const [approving, setApproving] = React.useState('')
   const tokenBalance = useErcBalance(
     pool ? pool!.collateralToken.id : undefined
   )
+  const [{ data: signerData }] = useSigner()
   const dispatch = useDispatch()
-  const {
-    provider,
-    connection: { userAddress: account },
-  } = useWallet()
-  const chainId = provider?.network?.chainId
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData?.chain?.id
+  const account = accountData?.address
   useEffect(() => {
     if (pool) {
       setDecimal(pool.collateralToken.decimals)
@@ -102,7 +103,7 @@ export const AddLiquidity = ({ pool }: Props) => {
     const token = new ethers.Contract(
       pool!.collateralToken.id,
       ERC20,
-      provider.getSigner()
+      signerData
     )
     token
       .approve(
@@ -119,7 +120,7 @@ export const AddLiquidity = ({ pool }: Props) => {
         const diva = new ethers.Contract(
           config[chainId!].divaAddress,
           DIVA_ABI,
-          provider?.getSigner()
+          signerData
         )
         setApproving('Adding...')
         const tx = await diva!.addLiquidity(
@@ -391,7 +392,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                     const token = new ethers.Contract(
                       pool!.collateralToken.id,
                       ERC20,
-                      provider.getSigner()
+                      signerData
                     )
                     token
                       .approve(
@@ -411,7 +412,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                         const diva = new ethers.Contract(
                           config[chainId!].divaAddress,
                           DIVA_ABI,
-                          provider?.getSigner()
+                          signerData
                         )
                         diva!
                           .addLiquidity(

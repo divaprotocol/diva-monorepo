@@ -8,28 +8,26 @@ import { Container } from '@mui/material'
 import { MyDataFeeds } from './component/Dashboard/MyDataFeeds'
 import { MyPositions } from './component/Dashboard/MyPositions'
 import { MyFeeClaims } from './component/Dashboard/MyFeeClaims'
-import { useWallet } from '@web3-ui/hooks'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { fetchPools, poolsSelector, setWallet } from './Redux/poolSlice'
 import { useAppSelector } from './Redux/hooks'
-import { useAccount, useProvider } from 'wagmi'
+import { useAccount, useNetwork } from 'wagmi'
 
 export const App = () => {
-  // const { provider, connection } = useWallet()
-  const [{ data, error, loading }, disconnect] = useAccount()
-  const provider = useProvider()
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData.chain?.id
   const dispatch = useDispatch()
-  const chainId = provider?.network?.chainId
-  const userAddress = 'connection?.userAddress'
   const pools = useAppSelector((state) => poolsSelector(state))
-  console.log('data app')
-  console.log(data)
+
   useEffect(() => {
     dispatch(
       setWallet({
-        chainId,
-        userAddress,
+        chainId: chainId,
+        userAddress: accountData?.address,
       })
     )
 
@@ -41,21 +39,18 @@ export const App = () => {
      * pool pools every minute
      */
     const interval = setInterval(pollPools, 1000 * 60)
-
-    console.log(1)
     if (pools.length <= 0) {
-      console.log(2)
       pollPools()
     }
 
     return () => {
       clearInterval(interval)
     }
-  }, [chainId, userAddress, dispatch])
+  }, [chainId, accountData?.address, dispatch])
 
   return (
     <Router>
-      {/*<Header />*/}
+      <Header />
       <Container
         disableGutters
         sx={{ alignItems: 'left', height: '100%', overflow: 'auto' }}

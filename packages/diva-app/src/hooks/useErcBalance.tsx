@@ -2,8 +2,14 @@ import { ethers, Contract, BigNumber } from 'ethers'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 
 import { useEffect, useState } from 'react'
-import { useWallet } from '@web3-ui/hooks'
 import { formatUnits } from 'ethers/lib/utils'
+import {
+  useAccount,
+  useContract,
+  useNetwork,
+  useProvider,
+  useSigner,
+} from 'wagmi'
 
 type Erc20Contract = Contract & {
   balanceOf: (address: string) => Promise<BigNumber>
@@ -16,23 +22,25 @@ type Erc20Contract = Contract & {
  * no balance is returned
  */
 export function useErcBalance(address?: string) {
-  const { connection, provider } = useWallet()
-  const chainId = provider?.network?.chainId
-  const account = connection.userAddress
-
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const account = accountData?.address
+  const provider = useProvider()
+  const [{ data: signerData }] = useSigner()
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData?.chain?.id
+  const contract = useContract<Erc20Contract>({
+    addressOrName: address,
+    contractInterface: ERC20,
+    signerOrProvider: signerData,
+  })
   const [balance, setBalance] = useState<string>()
-
   useEffect(() => {
     const run = async () => {
       if (provider != null && chainId != null && address != null) {
-        const signer = provider.getSigner()
         try {
-          const contract = new ethers.Contract(
-            address,
-            ERC20,
-            signer
-          ) as Erc20Contract
-          const myAddress = await signer.getAddress()
+          const myAddress = accountData?.address
           const _balance = await contract.balanceOf(myAddress)
           setBalance(formatUnits(_balance, await contract.decimals()))
         } catch (err) {

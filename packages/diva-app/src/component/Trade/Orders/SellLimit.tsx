@@ -26,7 +26,6 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { useWallet } from '@web3-ui/hooks'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
@@ -43,6 +42,7 @@ import {
   setMaxYield,
 } from '../../../Redux/Stats'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
+import { useAccount, useNetwork } from 'wagmi'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -52,9 +52,9 @@ export default function SellLimit(props: {
   tokenAddress: string
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const wallet = useWallet()
   const classes = useStyles()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData?.chain?.id
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
   const option = props.option
@@ -241,10 +241,12 @@ export default function SellLimit(props: {
     //return existingOrderAmount
     return Number(formatUnits(existingOrderAmount.toString(), 18))
   }
-
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const account = accountData?.address
   const getOptionsInWallet = async () => {
-    accounts = await window.ethereum.enable()
-    const makerAccount = accounts[0]
+    const makerAccount = account
     let allowance = await makerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()

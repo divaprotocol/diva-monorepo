@@ -29,12 +29,10 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { useWallet } from '@web3-ui/hooks'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
-import Typography from '@mui/material/Typography'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
@@ -44,6 +42,7 @@ import {
   setIntrinsicValue,
   setMaxPayout,
 } from '../../../Redux/Stats'
+import { useAccount, useNetwork } from 'wagmi'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -53,8 +52,8 @@ export default function BuyLimit(props: {
   tokenAddress: string
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData.chain?.id
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
   const option = props.option
@@ -269,14 +268,16 @@ export default function BuyLimit(props: {
       )
     )
   }
-
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const account = accountData?.address
   useEffect(() => {
     getUnderlyingPrice(option.referenceAsset).then((data) => {
       if (data != null) setUsdPrice(data)
     })
     const getCollateralInWallet = async () => {
-      accounts = await window.ethereum.enable()
-      const takerAccount = accounts[0]
+      const takerAccount = account
       let allowance = await takerTokenContract.methods
         .allowance(takerAccount, exchangeProxyAddress)
         .call()

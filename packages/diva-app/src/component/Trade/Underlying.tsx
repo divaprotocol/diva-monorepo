@@ -7,7 +7,6 @@ import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
 import OptionHeader from './OptionHeader'
 import { config } from '../../constants'
-import { useWallet } from '@web3-ui/hooks'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import React, { useEffect } from 'react'
@@ -27,6 +26,7 @@ import {
   poolSelector,
 } from '../../Redux/poolSlice'
 import { formatEther } from 'ethers/lib/utils'
+import { useNetwork } from 'wagmi'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -55,8 +55,8 @@ export default function Underlying() {
   )
   const isBuy = useAppSelector((state) => isBuySelector(state))
   const breakEvenOptionPrice = 0
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData.chain?.id || 3
   const theme = useTheme()
   const dispatch = useDispatch()
   useEffect(() => {

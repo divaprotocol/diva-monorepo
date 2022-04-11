@@ -33,7 +33,6 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
-import { useWallet } from '@web3-ui/hooks'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { Stack } from '@mui/material'
@@ -47,6 +46,7 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
+import { useAccount, useNetwork } from 'wagmi'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const web3 = new Web3(Web3.givenProvider)
@@ -59,8 +59,8 @@ export default function SellMarket(props: {
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData?.chain?.id
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)
@@ -229,10 +229,12 @@ export default function SellMarket(props: {
       }
     }
   }
-
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const account = accountData?.address
   const getOptionsInWallet = async () => {
-    accounts = await window.ethereum.enable()
-    const makerAccount = accounts[0]
+    const makerAccount = account
     let allowance = await takerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()

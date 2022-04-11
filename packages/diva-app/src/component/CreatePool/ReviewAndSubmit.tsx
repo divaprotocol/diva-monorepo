@@ -8,13 +8,13 @@ import {
   useTheme,
 } from '@mui/material'
 import { Box } from '@mui/material'
-import { useWallet } from '@web3-ui/hooks'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
 import { config } from '../../constants'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useCreatePoolFormik } from './formik'
+import { useNetwork } from 'wagmi'
 
 const stringifyValue = (val: any) => {
   if (val?.name) return val.name
@@ -56,9 +56,8 @@ export function ReviewAndSubmit({
 }) {
   const { values } = formik
   const theme = useTheme()
-  const { provider } = useWallet()
-  const chainId = provider?.network?.chainId
-
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData.chain?.id
   const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
     request(config[chainId].whitelistSubgraph, queryWhitelist)
   )

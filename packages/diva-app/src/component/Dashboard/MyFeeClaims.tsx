@@ -21,28 +21,21 @@ import {
   queryMyFeeClaims,
 } from '../../lib/queries'
 import { request } from 'graphql-request'
-import { useWallet } from '@web3-ui/hooks'
 import { parseUnits } from 'ethers/lib/utils'
+import { useAccount, useNetwork, useProvider, useSigner } from 'wagmi'
 
 const TransferFeesCell = (props: any) => {
-  const { provider } = useWallet()
+  const provider = useProvider()
+  const [{ data: signerData }] = useSigner()
   const [decimal, setDecimal] = useState(18)
   const chainId = provider?.network?.chainId
-  const token = new ethers.Contract(
-    props.row.Address,
-    ERC20,
-    provider.getSigner()
-  )
+  const token = new ethers.Contract(props.row.Address, ERC20, signerData)
   token.decimals().then((decimals: number) => {
     setDecimal(decimals)
   })
   const diva =
     chainId != null
-      ? new ethers.Contract(
-          config[chainId!].divaAddress,
-          DIVA_ABI,
-          provider.getSigner()
-        )
+      ? new ethers.Contract(config[chainId!].divaAddress, DIVA_ABI, signerData)
       : null
 
   const [open, setOpen] = useState(false)
@@ -109,17 +102,12 @@ const TransferFeesCell = (props: any) => {
 }
 
 const ClaimFeesCell = (props: any) => {
-  const { provider } = useWallet()
-
-  const chainId = provider?.network?.chainId
-
+  const [{ data: signerData }] = useSigner()
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData.chain?.id
   const diva =
     chainId != null
-      ? new ethers.Contract(
-          config[chainId!].divaAddress,
-          DIVA_ABI,
-          provider.getSigner()
-        )
+      ? new ethers.Contract(config[chainId!].divaAddress, DIVA_ABI, signerData)
       : null
 
   return (
@@ -141,14 +129,10 @@ const ClaimFeesCell = (props: any) => {
 }
 
 const AmountCell = (props: any) => {
-  const wallet = useWallet()
+  const [{ data: signerData }] = useSigner()
   const [decimal, setDecimal] = useState<number>()
 
-  const token = new ethers.Contract(
-    props.row.Address,
-    ERC20,
-    wallet.provider.getSigner()
-  )
+  const token = new ethers.Contract(props.row.Address, ERC20, signerData)
   token
     .decimals()
     .then((decimals: number) => {
@@ -205,9 +189,12 @@ const columns: GridColDef[] = [
 ]
 
 export function MyFeeClaims() {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
-  const userAddress = wallet?.connection?.userAddress?.toLowerCase()
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData.chain?.id
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const userAddress = accountData?.address
   const [page, setPage] = useState(0)
   const query = useQuery<{ fees: FeeRecipientCollateralToken[] }>(
     `pools-fees-${userAddress}`,

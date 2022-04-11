@@ -22,6 +22,7 @@ import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { BigNumber } from '@0x/utils'
+import { useAccount } from 'wagmi'
 
 const useStyles = makeStyles({
   table: {
@@ -131,7 +132,6 @@ function mapOrderData(
   return orderbook
 }
 
-let accounts
 export default function OpenOrders(props: {
   option: Pool
   tokenAddress: string
@@ -142,9 +142,11 @@ export default function OpenOrders(props: {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const dispatch = useAppDispatch()
   const [orders, setOrders] = useState([])
-
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const account = accountData.address
   const componentDidMount = async () => {
-    accounts = await window.ethereum.enable()
     const orderBook: any = []
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
@@ -170,13 +172,13 @@ export default function OpenOrders(props: {
       responseBuy,
       option,
       optionTokenAddress,
-      accounts[0]
+      account
     )
     const orderBookSell = mapOrderData(
       responseSell,
       option,
       optionTokenAddress,
-      accounts[0]
+      account
     )
 
     if (orderBookSell.length > 0) {

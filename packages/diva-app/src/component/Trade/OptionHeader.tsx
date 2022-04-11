@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import '../../Util/Dates'
 import { IconButton, Link } from '@mui/material'
@@ -7,13 +7,12 @@ import {
   EtherscanLinkType,
 } from '../../Util/getEtherscanLink'
 import Tooltip from '@mui/material/Tooltip'
-import { useWallet } from '@web3-ui/hooks'
-import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import { priceSelector } from '../../Redux/poolSlice'
 import { useParams } from 'react-router-dom'
+import { useNetwork } from 'wagmi'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -52,9 +51,9 @@ export default function OptionHeader(optionData: {
   poolId: string
   tokenDecimals: number
 }) {
-  const wallet = useWallet()
   const params: { poolId: string; tokenType: string } = useParams()
-  const chainId = wallet?.provider?.network?.chainId
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData.chain?.id
   const headerTitle = optionData.ReferenceAsset
   const underlyingAssetPrice = useAppSelector((state) =>
     priceSelector(state, params.poolId)

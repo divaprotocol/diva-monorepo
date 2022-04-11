@@ -4,7 +4,7 @@ import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import { WhitelistCollateralToken, Pool } from '../lib/queries'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
-import { useWallet } from '@web3-ui/hooks'
+import { useNetwork, useProvider, useSigner } from 'wagmi'
 
 /**
  * Note: The order of parameters matter in this case,
@@ -65,14 +65,16 @@ type DivaApi = {
 }
 
 export function useDiva(): DivaApi | null {
-  const { provider } = useWallet()
-  const chainId = provider?.network?.chainId
+  const provider = useProvider()
+  const [{ data: signerData }] = useSigner()
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData.chain?.id
 
   if (chainId == null || provider == null) return null
 
   const divaAddress = config[chainId].divaAddress
 
-  const signer = provider.getSigner()
+  const signer = signerData
 
   const contract = new ethers.Contract(
     divaAddress,

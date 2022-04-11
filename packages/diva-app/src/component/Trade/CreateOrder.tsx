@@ -17,6 +17,7 @@ import {
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
 import { fetchOrders, setIsBuy } from '../../Redux/poolSlice'
+import { useAccount } from 'wagmi'
 const PageDiv = styled.div`
   width: 400px;
   height: 420px;
@@ -81,17 +82,12 @@ export default function CreateOrder(props: {
   const tabsClass = useTabsBorder()
   const [orderType, setOrderTypeValue] = React.useState(0)
   const [priceType, setPriceTypeValue] = React.useState(0)
-  const [userAccount, setUserAccount] = React.useState('')
-
-  const componentDidMount = async () => {
-    accounts = await window.ethereum.enable()
-    setUserAccount(accounts[0])
-  }
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const userAccount = accountData?.address
 
   useEffect(() => {
-    if (Object.keys(userAccount).length === 0) {
-      componentDidMount()
-    }
     dispatch(setMetamaskAccount(userAccount))
     getExistingOrders()
   })

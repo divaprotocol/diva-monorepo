@@ -7,7 +7,6 @@ import { AddLiquidity } from './AddLiquidity'
 import { BigNumber } from 'ethers'
 import { RemoveLiquidity } from './RemoveLiquidity'
 import { formatUnits } from 'ethers/lib/utils'
-import { useWallet } from '@web3-ui/hooks'
 import { ReactComponent as Bullish } from '../../Images/bullish-svgrepo-com.svg'
 import { ReactComponent as Bearish } from '../../Images/bearish-svgrepo-com.svg'
 import { ReactComponent as Star } from '../../Images/star-svgrepo-com.svg'
@@ -17,11 +16,7 @@ type Props = {
 
 export const Liquidity = ({ pool }: Props) => {
   const [value, setValue] = React.useState(0)
-  const { provider } = useWallet()
-  const chainId = provider?.network?.chainId
-
   const theme = useTheme()
-
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
   }

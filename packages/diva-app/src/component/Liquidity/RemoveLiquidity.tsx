@@ -22,13 +22,12 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { useCoinIcon } from '../../hooks/useCoinIcon'
-import ERC20 from '@diva/contracts/abis/erc20.json'
 import Button from '@mui/material/Button'
-import { useWallet } from '@web3-ui/hooks'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { fetchPool } from '../../Redux/poolSlice'
 import { useDispatch } from 'react-redux'
+import { useProvider, useSigner } from 'wagmi'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -56,7 +55,8 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const [openAlert, setOpenAlert] = React.useState(false)
   const [loading, setLoading] = useState(false)
   const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
-  const { provider } = useWallet()
+  const [{ data: signerData }] = useSigner()
+  const provider = useProvider()
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
   const theme = useTheme()
@@ -157,7 +157,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       const diva = new ethers.Contract(
         config[chainId].divaAddress,
         DIVA_ABI,
-        provider?.getSigner()
+        signerData
       )
       const tx = await diva!.removeLiquidity(
         window.location.pathname.split('/')[1],
@@ -326,7 +326,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                   const diva = new ethers.Contract(
                     config[chainId].divaAddress,
                     DIVA_ABI,
-                    provider?.getSigner()
+                    signerData
                   )
                   diva!
                     .removeLiquidity(

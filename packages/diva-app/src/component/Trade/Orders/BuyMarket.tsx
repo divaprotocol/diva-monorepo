@@ -21,35 +21,21 @@ import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
-import {
-  setBreakEven,
-  setMaxYield,
-  setIntrinsicValue,
-  setMaxPayout,
-} from '../../../Redux/Stats'
+import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { BigNumber } from '@0x/utils'
-import { BigNumber as BigENumber } from 'ethers'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
 import { NETWORKS } from '@web3-ui/hooks'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
-import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
 import { Stack, useTheme } from '@mui/material'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
-import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 import {
   fetchOrders,
   orderSelector,
   payoffSelector,
 } from '../../../Redux/poolSlice'
+import { useAccount } from 'wagmi'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
@@ -232,10 +218,12 @@ export default function BuyMarket(props: {
       }
     }
   }
-
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const account = accountData?.address
   const getCollateralInWallet = async () => {
-    accounts = await window.ethereum.enable()
-    const takerAccount = accounts[0]
+    const takerAccount = account
     let allowance = await takerTokenContract.methods
       .allowance(takerAccount, exchangeProxyAddress)
       .call()

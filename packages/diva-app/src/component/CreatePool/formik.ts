@@ -1,7 +1,7 @@
 import { useFormik } from 'formik'
 import { useDiva } from '../../hooks/useDiva'
-import { useWallet } from '@web3-ui/hooks'
 import { WhitelistCollateralToken } from '../../lib/queries'
+import { useNetwork, useProvider } from 'wagmi'
 
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
@@ -45,10 +45,9 @@ type Errors = {
 }
 
 export const useCreatePoolFormik = () => {
-  const {
-    connection: { network },
-    provider,
-  } = useWallet()
+  const provider = useProvider()
+  const [{ data: networkData }] = useNetwork()
+  const chainId = networkData.chain?.id
 
   const contract = useDiva()
 
@@ -118,7 +117,7 @@ export const useCreatePoolFormik = () => {
         errors.collateralToken = 'You must choose a collateral asset'
       }
 
-      if (network == null) {
+      if (chainId == null) {
         errors.collateralWalletBalance =
           'Your wallet must be connected before you can proceed'
       } else if (walletBalance < collateralBalance) {
@@ -167,7 +166,7 @@ export const useCreatePoolFormik = () => {
           errors.dataProvider = 'Must define dataProvider'
         } else {
           try {
-            await provider.getSigner(values.dataProvider)
+            await provider._getAddress(values.dataProvider)
           } catch (err) {
             errors.dataProvider =
               'You must specify a valid address as the data feed provider'

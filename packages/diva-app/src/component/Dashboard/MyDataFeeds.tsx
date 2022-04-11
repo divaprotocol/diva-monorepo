@@ -13,18 +13,19 @@ import {
 import { useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 
-import { config } from '../../constants'
+import { config, projectId } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable from '../PoolsTable'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { fetchPool, selectMyDataFeeds } from '../../Redux/poolSlice'
-import { useDispatch, useSelector } from 'react-redux'
+import { fetchPool, poolsSelector } from '../../Redux/poolSlice'
+import { useDispatch } from 'react-redux'
+import { useAccount, useNetwork } from 'wagmi'
+import { useAppSelector } from '../../Redux/hooks'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -116,8 +117,13 @@ const DueInCell = (props: any) => {
   )
 }
 const SubmitCell = (props: any) => {
-  const { provider } = useWallet()
-
+  const [{ data: networkData }] = useNetwork()
+  const provider = new ethers.providers.JsonRpcProvider(
+    'https://' +
+      networkData.chain?.name.toLowerCase() +
+      '.infura.io/v3/' +
+      projectId
+  )
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
 
@@ -285,14 +291,16 @@ const columns: GridColDef[] = [
 ]
 
 export function MyDataFeeds() {
-  const wallet = useWallet()
-  const userAddress = wallet?.connection?.userAddress
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const userAddress = accountData?.address
   const [page, setPage] = useState(0)
 
-  const pools = useSelector(selectMyDataFeeds)
+  const pools = useAppSelector((state) => poolsSelector(state))
   const rows: GridRowModel[] = pools
     .filter(
-      (pool) => pool.dataProvider.toLowerCase() === userAddress.toLowerCase()
+      (pool) => pool.dataProvider.toLowerCase() === userAddress?.toLowerCase()
     )
     .reduce((acc, val) => {
       const shared = {

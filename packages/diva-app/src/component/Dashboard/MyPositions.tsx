@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from '@mui/material'
 import { BigNumber, ethers } from 'ethers'
-import { config } from '../../constants'
+import { config, projectId } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
@@ -21,13 +21,13 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import styled from 'styled-components'
-import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import { fetchPool, poolsSelector } from '../../Redux/poolSlice'
 import { useDispatch } from 'react-redux'
+import { useAccount, useNetwork, useSigner } from 'wagmi'
 
 type Response = {
   [token: string]: BigNumber
@@ -78,10 +78,17 @@ const AddToMetamask = (props: any) => {
 const SubmitButton = (props: any) => {
   const [open, setOpen] = React.useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
-  const {
-    connection: { userAddress },
-    provider,
-  } = useWallet()
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const [{ data: networkData }] = useNetwork()
+  const provider = new ethers.providers.JsonRpcProvider(
+    'https://' +
+      networkData.chain?.name.toLowerCase() +
+      '.infura.io/v3/' +
+      projectId
+  )
+  const [{ data: signerData }] = useSigner()
   const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
   if (chainId == null) return null
@@ -89,7 +96,7 @@ const SubmitButton = (props: any) => {
   const diva = new ethers.Contract(
     config[chainId].divaAddress,
     DIVA_ABI,
-    provider?.getSigner()
+    signerData
   )
 
   const token =
@@ -102,7 +109,7 @@ const SubmitButton = (props: any) => {
         .then((pool) => {
           if (pool.statusFinalReferenceValue === 0) {
             token
-              ?.balanceOf(userAddress)
+              ?.balanceOf(accountData?.address)
               .then((bal: BigNumber) => {
                 diva
                   .setFinalReferenceValue(
@@ -142,7 +149,7 @@ const SubmitButton = (props: any) => {
               })
           } else {
             token
-              ?.balanceOf(userAddress)
+              ?.balanceOf(accountData?.address)
               .then((bal: BigNumber) => {
                 diva
                   .redeemPositionToken(props.row.address.id, bal)
@@ -160,7 +167,7 @@ const SubmitButton = (props: any) => {
         })
     } else {
       token
-        ?.balanceOf(userAddress)
+        ?.balanceOf(accountData?.address)
         .then((bal: BigNumber) => {
           diva.redeemPositionToken(props.row.address.id, bal).catch((err) => {
             console.error(err)
@@ -371,8 +378,17 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const { provider, connection } = useWallet()
-  const userAddress = connection?.userAddress
+  const [{ data: accountData }] = useAccount({
+    fetchEns: true,
+  })
+  const [{ data: networkData }] = useNetwork()
+  const provider = new ethers.providers.JsonRpcProvider(
+    'https://' +
+      networkData.chain?.name.toLowerCase() +
+      '.infura.io/v3/' +
+      projectId
+  )
+  const userAddress = accountData?.address
   const [page, setPage] = useState(0)
   const pools = useAppSelector((state) => poolsSelector(state))
 

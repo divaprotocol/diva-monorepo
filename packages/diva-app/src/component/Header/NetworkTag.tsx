@@ -1,11 +1,11 @@
 import { Chip } from '@mui/material'
-import { useWallet } from '@web3-ui/hooks'
+import { useNetwork } from 'wagmi'
 
 export function NetworkTag() {
-  const { connection, connected } = useWallet()
+  const [{ data, loading }] = useNetwork()
 
-  if (connected) {
-    return <Chip label={connection.network} sx={{ marginLeft: 'auto' }} />
+  if (loading!) {
+    return <Chip label={data.chain.id} sx={{ marginLeft: 'auto' }} />
   } else {
     return <Chip label={'Preview (ropsten)'} sx={{ marginLeft: 'auto' }} />
   }
