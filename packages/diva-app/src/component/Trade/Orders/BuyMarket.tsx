@@ -26,7 +26,6 @@ import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
-import { NETWORKS } from '@web3-ui/hooks'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { useParams } from 'react-router-dom'
 import { Stack, useTheme } from '@mui/material'
@@ -35,11 +34,12 @@ import {
   orderSelector,
   payoffSelector,
 } from '../../../Redux/poolSlice'
-import { useAccount } from 'wagmi'
+import { useAccount, useNetwork } from 'wagmi'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-const CHAIN_ID = NETWORKS.ropsten
+const [{ data: networkData }] = useNetwork()
+const CHAIN_ID = networkData.chain?.id
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 export default function BuyMarket(props: {
