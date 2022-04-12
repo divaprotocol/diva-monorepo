@@ -11,6 +11,9 @@ import { useWallet } from '@web3-ui/hooks'
 import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { CoinIconPair } from '../CoinIcon'
+import { useAppSelector } from '../../Redux/hooks'
+import { priceSelector } from '../../Redux/poolSlice'
+import { useParams } from 'react-router-dom'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -50,11 +53,12 @@ export default function OptionHeader(optionData: {
   tokenDecimals: number
 }) {
   const wallet = useWallet()
+  const params: { poolId: string; tokenType: string } = useParams()
   const chainId = wallet?.provider?.network?.chainId
   const headerTitle = optionData.ReferenceAsset
-  const [underlyingAssetPrice, setUnderlyingAssetPrice] = useState<
-    string | undefined
-  >(undefined)
+  const underlyingAssetPrice = useAppSelector((state) =>
+    priceSelector(state, params.poolId)
+  )
 
   const handleAddMetaMask = async () => {
     const { TokenAddress, isLong, tokenDecimals } = optionData
@@ -81,13 +85,6 @@ export default function OptionHeader(optionData: {
     }
   }
 
-  useEffect(() => {
-    getUnderlyingPrice(optionData.ReferenceAsset).then((data) => {
-      setUnderlyingAssetPrice(data)
-    })
-
-    return () => setUnderlyingAssetPrice(undefined)
-  }, [optionData.ReferenceAsset])
   const shortenTokenAddress = getShortenedAddress(optionData.TokenAddress)
 
   return (

@@ -6,18 +6,27 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
 import OptionHeader from './OptionHeader'
-import { useQuery } from 'react-query'
-import { Pool, queryPool } from '../../lib/queries'
-import request from 'graphql-request'
 import { config } from '../../constants'
 import { useWallet } from '@web3-ui/hooks'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Liquidity } from '../Liquidity/Liquidity'
 import OrdersPanel from './OrdersPanel'
 import Typography from '@mui/material/Typography'
 import { useAppSelector } from '../../Redux/hooks'
+import { useDispatch } from 'react-redux'
+import {
+  breakEvenSelector,
+  fetchPool,
+  fetchUnderlyingPrice,
+  intrinsicSelector,
+  isBuySelector,
+  maxPayoutSelector,
+  maxYieldSelector,
+  poolSelector,
+} from '../../Redux/poolSlice'
+import { formatEther } from 'ethers/lib/utils'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -34,28 +43,49 @@ const RightDiv = styled.div`
 export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const [value, setValue] = React.useState(0)
-  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
-  const maxYield = useAppSelector((state) => state.stats.maxYield)
-  const breakEven = useAppSelector((state) => state.stats.breakEven)
+  const isLong = params.tokenType === 'long'
+  const maxPayout = useAppSelector((state) =>
+    maxPayoutSelector(state, params.poolId, isLong)
+  )
+  const maxYield = useAppSelector((state) =>
+    maxYieldSelector(state, params.poolId, isLong)
+  )
+  const breakEven = useAppSelector((state) =>
+    breakEvenSelector(state, params.poolId, isLong)
+  )
+  const isBuy = useAppSelector((state) => isBuySelector(state))
   const breakEvenOptionPrice = 0
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
   const theme = useTheme()
-  const query = useQuery<{ pool: Pool }>('pool', () =>
-    request(
-      config[chainId as number].divaSubgraph,
-      queryPool(parseInt(params.poolId))
+  const dispatch = useDispatch()
+  useEffect(() => {
+    dispatch(
+      fetchPool({
+        graphUrl: config[chainId as number].divaSubgraph,
+        poolId: params.poolId,
+      })
     )
+  }, [chainId, params.poolId, dispatch])
+
+  const pool = useAppSelector((state) => poolSelector(state, params.poolId))
+
+  useEffect(() => {
+    if (pool != null) dispatch(fetchUnderlyingPrice(pool))
+  }, [pool, dispatch])
+
+  const intrinsicValue = useAppSelector((state) =>
+    intrinsicSelector(state, params.poolId)
   )
-
-  const pool = query.data?.pool
-
+  const intValDisplay =
+    intrinsicValue != 'n/a' && intrinsicValue != null
+      ? isLong
+        ? formatEther(intrinsicValue?.payoffPerLongToken)
+        : formatEther(intrinsicValue?.payoffPerShortToken)
+      : 'n/a'
   if (pool == null) {
     return <div>Loading</div>
   }
-
-  const isLong = params.tokenType === 'long'
 
   const OptionParams = {
     CollateralBalanceLong: 100,
@@ -137,9 +167,19 @@ export default function Underlying() {
                 <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
                   Max yield
                 </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {maxYield}
-                </Typography>
+                {isBuy ? (
+                  <Typography
+                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    {maxYield.buy}
+                  </Typography>
+                ) : (
+                  <Typography
+                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    {maxYield.sell}
+                  </Typography>
+                )}
               </Stack>
               <Stack direction="row" justifyContent="space-between">
                 <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
@@ -154,7 +194,7 @@ export default function Underlying() {
                   Intrinsic value per token
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {intrinsicValue}
+                  {intValDisplay}
                 </Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
