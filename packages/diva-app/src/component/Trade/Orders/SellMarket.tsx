@@ -541,15 +541,23 @@ export default function SellMarket(props: {
       <form onSubmit={handleOrderSubmit}>
         <FormDiv>
           <LabelStyleDiv>
-            <Stack spacing={0.5}>
-              <LabelStyle>
-                Number of {params.tokenType.toUpperCase()}
-              </LabelStyle>
-              <SubLabelStyle>
+            <Stack>
+              <LabelStyle>Number </LabelStyle>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
                 Remaining allowance: {remainingApprovalAmount}
-              </SubLabelStyle>
+              </FormLabel>
             </Stack>
           </LabelStyleDiv>
+          <FormLabel
+            sx={{
+              color: 'Gray',
+              fontSize: 8,
+              paddingTop: 2.5,
+              paddingRight: 1.5,
+            }}
+          >
+            {params.tokenType.toUpperCase() + ' '}
+          </FormLabel>
           <FormInput
             type="text"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
@@ -561,18 +569,18 @@ export default function SellMarket(props: {
               <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
               <InfoTooltip
                 title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-                sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}
+                sx={{ color: 'Gray', fontSize: 2 }}
               >
                 <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
               </InfoTooltip>
             </Stack>
           </LabelStyleDiv>
           <RightSideLabel>
-            <Stack direction={'row'} spacing={1}>
-              <FormLabel>{avgExpectedRate.toFixed(4)}</FormLabel>
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
               <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
-                {option.collateralToken.name}
+                {option.collateralToken.symbol + ' '}
               </FormLabel>
+              <FormLabel>{avgExpectedRate.toFixed(4)}</FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
@@ -581,66 +589,67 @@ export default function SellMarket(props: {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <Stack direction={'row'} spacing={1}>
-              <FormLabel>{youReceive.toFixed(4)}</FormLabel>
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
               <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
-                {option.collateralToken.symbol}
+                {option.collateralToken.symbol + ' '}
               </FormLabel>
+              <FormLabel>{youReceive.toFixed(4)}</FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>
-              {params.tokenType.toUpperCase()} in Wallet
-            </LabelGrayStyle>
+            <LabelGrayStyle>Wallet Balance</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <Stack direction={'row'} spacing={1}>
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {params.tokenType.toUpperCase() + ' '}
+              </FormLabel>
               <FormLabel>{walletBalance.toFixed(4)}</FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
-        <FormDiv>
-          <SliderDiv>
-            <Typography id="input-slider" gutterBottom>
-              <Stack direction={'row'} spacing={0.5}>
-                <FormLabel sx={{ color: 'White' }}>Max slippage %</FormLabel>
-                <InfoTooltip
-                  title={<React.Fragment>{MaxSlippageText}</React.Fragment>}
-                  sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}
-                >
-                  <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-                </InfoTooltip>
-              </Stack>
-            </Typography>
-            <Stack direction={'row'} spacing={1}>
-              <Slider
-                value={typeof value === 'number' ? value : 0}
-                onChange={handleSliderChange}
-                step={0.1}
-                min={0}
-                max={20}
-                aria-labelledby="input-slider"
-              />
-            </Stack>
-          </SliderDiv>
-          <FormControlDiv>
-            <Input
-              value={value}
-              margin="dense"
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              inputProps={{
-                step: 0.1,
-                min: 0.0,
-                max: 20,
-                type: 'number',
-                'aria-labelledby': 'input-slider',
-              }}
-            />
-          </FormControlDiv>
-        </FormDiv>
+        {/*<FormDiv>*/}
+        {/*  <SliderDiv>*/}
+        {/*    <Typography id="input-slider" gutterBottom>*/}
+        {/*      <Stack direction={'row'} spacing={0.5}>*/}
+        {/*        /!*<FormLabel sx={{ color: 'White' }}>Max slippage %</FormLabel>*!/*/}
+        {/*        <InfoTooltip*/}
+        {/*          title={<React.Fragment>{MaxSlippageText}</React.Fragment>}*/}
+        {/*          sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}*/}
+        {/*        >*/}
+        {/*          <InfoIcon style={{ fontSize: 15, color: 'grey' }} />*/}
+        {/*        </InfoTooltip>*/}
+        {/*      </Stack>*/}
+        {/*    </Typography>*/}
+        {/*    <Stack direction={'row'} spacing={1}>*/}
+        {/*      <Slider*/}
+        {/*        value={typeof value === 'number' ? value : 0}*/}
+        {/*        onChange={handleSliderChange}*/}
+        {/*        step={0.1}*/}
+        {/*        min={0}*/}
+        {/*        max={20}*/}
+        {/*        aria-labelledby="input-slider"*/}
+        {/*      />*/}
+        {/*    </Stack>*/}
+        {/*  </SliderDiv>*/}
+        {/*  <FormControlDiv>*/}
+        {/*    <Input*/}
+        {/*      value={value}*/}
+        {/*      margin="dense"*/}
+        {/*      onChange={handleInputChange}*/}
+        {/*      onBlur={handleBlur}*/}
+        {/*      inputProps={{*/}
+        {/*        step: 0.1,*/}
+        {/*        min: 0.0,*/}
+        {/*        max: 20,*/}
+        {/*        type: 'number',*/}
+        {/*        'aria-labelledby': 'input-slider',*/}
+        {/*      }}*/}
+        {/*    />*/}
+        {/*  </FormControlDiv>*/}
+        {/*</FormDiv>*/}
         <CreateButtonWrapper />
         <Box marginLeft="30%" marginTop="15%" marginBottom={2}>
           <Button
