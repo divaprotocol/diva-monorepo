@@ -123,6 +123,7 @@ export default function OptionDetails({
       setCheckIcon(true)
     } else {
       setDataSourceName('Unknown')
+      setCheckIcon(false)
     }
   }, [dataSource.dataProviders, pool.dataProvider])
 
@@ -197,7 +198,7 @@ export default function OptionDetails({
                 <Tooltip title="Untrusted data provider">
                   <WarningAmberSharpIcon
                     sx={{
-                      mt: 0.7,
+                      mt: 0.3,
                       paddingLeft: 1,
                     }}
                     color="warning"
