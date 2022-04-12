@@ -5,7 +5,8 @@ import { Tooltip } from '@mui/material'
 import { Pool } from '../../lib/queries'
 import { formatEther, formatUnits } from 'ethers/lib/utils'
 import { useWhitelist } from '../../hooks/useWhitelist'
-
+import CheckCircleSharpIcon from '@mui/icons-material/CheckCircleSharp'
+import WarningAmberSharpIcon from '@mui/icons-material/WarningAmberSharp'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -28,7 +29,6 @@ const FlexBoxHeader = styled.div`
   font-weight: solid;
   text-align: left;
   padding-left: 15px;
-  fwhite-space: nowrap;
 `
 
 const FlexBoxData = styled.div`
@@ -110,12 +110,17 @@ export default function OptionDetails({
     100
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
+  const [checkIcon, setCheckIcon] = useState(false)
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
       (dataName: { id: string }) => dataName?.id == pool?.dataProvider
     )
-
-    setDataSourceName(dataName?.name)
+    if (dataName?.name != null) {
+      setDataSourceName(dataName?.name)
+      setCheckIcon(true)
+    } else {
+      setDataSourceName('Unknown')
+    }
   }, [dataSource.dataProviders, pool.dataProvider])
 
   return (
@@ -170,7 +175,14 @@ export default function OptionDetails({
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Data source</FlexBoxHeader>
-          <FlexBoxSecondLineData>{dataSourceName}</FlexBoxSecondLineData>
+          <FlexBoxSecondLineData>
+            {dataSourceName}
+            {checkIcon ? (
+              <CheckCircleSharpIcon color="success" fontSize="inherit" />
+            ) : (
+              <WarningAmberSharpIcon color="warning" fontSize="inherit" />
+            )}
+          </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Short/Long ratio</FlexBoxHeader>
