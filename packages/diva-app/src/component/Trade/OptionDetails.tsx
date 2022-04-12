@@ -55,7 +55,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 60%;
+  width: 65%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
@@ -89,7 +89,10 @@ const FlexBoxSecondLineData = styled.div`
   font-weight: bold;
   text-align: left;
 `
-
+const FlexCheckIcon = styled.div`
+  display: flex;
+  flex-direction: row;
+`
 export default function OptionDetails({
   pool,
   isLong,
@@ -176,14 +179,36 @@ export default function OptionDetails({
         <FlexBoxSecondLine>
           <FlexBoxHeader>Data source</FlexBoxHeader>
           <FlexBoxSecondLineData>
-            {dataSourceName}
-            {checkIcon ? (
-              <CheckCircleSharpIcon color="success" fontSize="inherit" />
-            ) : (
-              <WarningAmberSharpIcon color="warning" fontSize="inherit" />
-            )}
+            <FlexCheckIcon>
+              {dataSourceName}
+
+              {checkIcon ? (
+                <Tooltip title="Trusted data provider from the DIVA whitelist">
+                  <CheckCircleSharpIcon
+                    sx={{
+                      mt: 0.7,
+                      paddingLeft: 1,
+                    }}
+                    color="success"
+                    fontSize="inherit"
+                  />
+                </Tooltip>
+              ) : (
+                <Tooltip title="Untrusted data provider">
+                  <WarningAmberSharpIcon
+                    sx={{
+                      mt: 0.7,
+                      paddingLeft: 1,
+                    }}
+                    color="warning"
+                    fontSize="inherit"
+                  />
+                </Tooltip>
+              )}
+            </FlexCheckIcon>
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
+
         <FlexBoxSecondLine>
           <FlexBoxHeader>Short/Long ratio</FlexBoxHeader>
           <FlexBoxSecondLineData>
