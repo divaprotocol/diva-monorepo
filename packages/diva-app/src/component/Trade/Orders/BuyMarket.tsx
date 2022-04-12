@@ -8,7 +8,6 @@ import Input from '@mui/material/Input'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { buyMarketOrder } from '../../../Orders/BuyMarket'
-import { LabelGrayStyle, SubLabelStyle } from './UiStyles'
 import { LabelStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -41,7 +40,7 @@ import { Pool } from '../../../lib/queries'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
-import { Stack, useTheme } from '@mui/material'
+import { FormLabel, InputLabel, Paper, Stack, useTheme } from '@mui/material'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 
@@ -382,9 +381,9 @@ export default function BuyMarket(props: {
   }, [numberOfOptions])
 
   useEffect(() => {
-    //getUnderlyingPrice(option.referenceAsset).then((data) => {
-    //  if (data != null) setUsdPrice(data)
-    //})
+    getUnderlyingPrice(option.referenceAsset).then((data) => {
+      if (data != null) setUsdPrice(data)
+    })
     if (usdPrice != '') {
       console.log('usdPrice')
       console.log(usdPrice)
@@ -555,50 +554,69 @@ export default function BuyMarket(props: {
           />
         </FormDiv>
         <FormDiv>
-          <InfoTooltip
-            title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-          >
-            <LabelStyleDiv>
-              <LabelStyle>Expected Price </LabelStyle>
-              <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-            </LabelStyleDiv>
-          </InfoTooltip>
-          <RightSideLabel>
-            {avgExpectedRate.toFixed(4)} {option.collateralToken.name}
-          </RightSideLabel>
-        </FormDiv>
-        <FormDiv>
           <LabelStyleDiv>
-            <Stack spacing={0.5}>
-              <LabelStyle>You Pay</LabelStyle>
-              <SubLabelStyle>
-                Remaining allowance: {remainingApprovalAmount}
-              </SubLabelStyle>
+            <Stack direction={'row'} spacing={0.5}>
+              <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
+              <InfoTooltip
+                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
+                sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}
+              >
+                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
+              </InfoTooltip>
             </Stack>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youPay.toFixed(4) + ' '} {option.collateralToken.symbol}
+            <Stack direction={'row'} spacing={1}>
+              <FormLabel>{avgExpectedRate.toFixed(4)}</FormLabel>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.name}
+              </FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>Wallet Balance</LabelGrayStyle>
+            <Stack direction={'row'} spacing={1}>
+              <FormLabel sx={{ color: 'White' }}>You Pay</FormLabel>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                Remaining allowance: {remainingApprovalAmount}
+              </FormLabel>
+            </Stack>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>
-              {collateralBalance.toFixed(4)} {option.collateralToken.symbol}
-            </LabelGrayStyle>
+            <Stack direction={'row'} spacing={1}>
+              <FormLabel>{youPay.toFixed(4) + ' '}</FormLabel>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.symbol}
+              </FormLabel>
+            </Stack>
+          </RightSideLabel>
+        </FormDiv>
+        <FormDiv>
+          <LabelStyleDiv>
+            <FormLabel sx={{ color: 'White' }}>Wallet Balance</FormLabel>
+          </LabelStyleDiv>
+          <RightSideLabel>
+            <Stack direction={'row'} spacing={1}>
+              <FormLabel>{collateralBalance.toFixed(4)}</FormLabel>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.symbol}
+              </FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
           <SliderDiv>
             <Typography id="input-slider" gutterBottom>
-              <LabelGrayStyle>Max slippage %</LabelGrayStyle>
-              <InfoTooltip
-                title={<React.Fragment>{MaxSlippageText}</React.Fragment>}
-              >
-                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-              </InfoTooltip>
+              <Stack direction={'row'} spacing={0.5}>
+                <FormLabel sx={{ color: 'White' }}>Max slippage %</FormLabel>
+                <InfoTooltip
+                  title={<React.Fragment>{MaxSlippageText}</React.Fragment>}
+                  sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}
+                >
+                  <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
+                </InfoTooltip>
+              </Stack>
             </Typography>
 
             <Slider

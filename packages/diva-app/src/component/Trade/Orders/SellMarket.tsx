@@ -36,7 +36,7 @@ import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { useWallet } from '@web3-ui/hooks'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
-import { Stack } from '@mui/material'
+import { FormLabel, Stack } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
@@ -48,7 +48,6 @@ import {
   setMaxYield,
 } from '../../../Redux/Stats'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const contractAddress = require('@0x/contract-addresses')
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -557,16 +556,24 @@ export default function SellMarket(props: {
           />
         </FormDiv>
         <FormDiv>
-          <InfoTooltip
-            title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-          >
-            <LabelStyleDiv>
-              <LabelStyle>Expected Price </LabelStyle>
-              <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-            </LabelStyleDiv>
-          </InfoTooltip>
+          <LabelStyleDiv>
+            <Stack direction={'row'} spacing={0.5}>
+              <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
+              <InfoTooltip
+                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
+                sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}
+              >
+                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
+              </InfoTooltip>
+            </Stack>
+          </LabelStyleDiv>
           <RightSideLabel>
-            {avgExpectedRate.toFixed(4)} {option.collateralToken.name}
+            <Stack direction={'row'} spacing={1}>
+              <FormLabel>{avgExpectedRate.toFixed(4)}</FormLabel>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.name}
+              </FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -574,7 +581,12 @@ export default function SellMarket(props: {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youReceive.toFixed(4)} {option.collateralToken.symbol}
+            <Stack direction={'row'} spacing={1}>
+              <FormLabel>{youReceive.toFixed(4)}</FormLabel>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.symbol}
+              </FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -584,28 +596,34 @@ export default function SellMarket(props: {
             </LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>{walletBalance.toFixed(4)}</LabelGrayStyle>
+            <Stack direction={'row'} spacing={1}>
+              <FormLabel>{walletBalance.toFixed(4)}</FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
           <SliderDiv>
             <Typography id="input-slider" gutterBottom>
-              <LabelGrayStyle>Max slippage %</LabelGrayStyle>
-              <InfoTooltip
-                title={<React.Fragment>{MaxSlippageText}</React.Fragment>}
-              >
-                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-              </InfoTooltip>
+              <Stack direction={'row'} spacing={0.5}>
+                <FormLabel sx={{ color: 'White' }}>Max slippage %</FormLabel>
+                <InfoTooltip
+                  title={<React.Fragment>{MaxSlippageText}</React.Fragment>}
+                  sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}
+                >
+                  <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
+                </InfoTooltip>
+              </Stack>
             </Typography>
-
-            <Slider
-              value={typeof value === 'number' ? value : 0}
-              onChange={handleSliderChange}
-              step={0.1}
-              min={0}
-              max={20}
-              aria-labelledby="input-slider"
-            />
+            <Stack direction={'row'} spacing={1}>
+              <Slider
+                value={typeof value === 'number' ? value : 0}
+                onChange={handleSliderChange}
+                step={0.1}
+                min={0}
+                max={20}
+                aria-labelledby="input-slider"
+              />
+            </Stack>
           </SliderDiv>
           <FormControlDiv>
             <Input

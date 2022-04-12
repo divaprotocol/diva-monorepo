@@ -2,13 +2,18 @@ import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { Divider, MenuItem, Stack, useTheme } from '@mui/material'
+import { Divider, FormLabel, MenuItem, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
-import { LabelStyle, SubLabelStyle } from './UiStyles'
+import {
+  ExpectedRateInfoText,
+  InfoTooltip,
+  LabelStyle,
+  SubLabelStyle,
+} from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -21,7 +26,6 @@ import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const contractAddress = require('@0x/contract-addresses')
 import {
   formatEther,
   formatUnits,
@@ -519,7 +523,12 @@ export default function BuyLimit(props: {
             </Stack>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youPay.toFixed(4) + ' '} {option.collateralToken.symbol}
+            <Stack direction={'row'} spacing={1}>
+              <FormLabel>{youPay.toFixed(4) + ' '}</FormLabel>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.symbol}
+              </FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -527,15 +536,25 @@ export default function BuyLimit(props: {
             <LabelGrayStyle>Wallet Balance</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>
-              {collateralBalance.toFixed(4)} {option.collateralToken.symbol}
-            </LabelGrayStyle>
+            <Stack direction={'row'} spacing={1}>
+              <FormLabel>{collateralBalance.toFixed(4)}</FormLabel>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.symbol}
+              </FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>Order Expires in</LabelGrayStyle>
-            <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
+            <Stack direction={'row'} spacing={0.5}>
+              <FormLabel sx={{ color: 'White' }}>Order Expires in</FormLabel>
+              <InfoTooltip
+                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
+                sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}
+              >
+                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
+              </InfoTooltip>
+            </Stack>
           </LabelStyleDiv>
           <LimitOrderExpiryDiv>
             <FormControl className={classes.formControl}>
@@ -566,7 +585,7 @@ export default function BuyLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="30%" marginBottom={2}>
+        <Box marginLeft={isApproved ? 13 : 16} marginBottom={2}>
           <Button
             variant="contained"
             color="primary"
