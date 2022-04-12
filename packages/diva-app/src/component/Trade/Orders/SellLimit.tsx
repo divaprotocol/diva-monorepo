@@ -475,15 +475,23 @@ export default function SellLimit(props: {
       <form onSubmit={handleOrderSubmit}>
         <FormDiv>
           <LabelStyleDiv>
-            <Stack spacing={0.5}>
-              <LabelStyle>
-                Number of {params.tokenType.toUpperCase()}
-              </LabelStyle>
-              <SubLabelStyle>
+            <Stack>
+              <LabelStyle>Number</LabelStyle>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
                 Remaining allowance: {remainingApprovalAmount}
-              </SubLabelStyle>
+              </FormLabel>
             </Stack>
           </LabelStyleDiv>
+          <FormLabel
+            sx={{
+              color: 'Gray',
+              fontSize: 8,
+              paddingTop: 2.5,
+              paddingRight: 1.5,
+            }}
+          >
+            {params.tokenType.toUpperCase() + ' '}
+          </FormLabel>
           <FormInput
             type="text"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
@@ -491,8 +499,18 @@ export default function SellLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Price per {params.tokenType.toUpperCase()}</LabelStyle>
+            <LabelStyle>Price</LabelStyle>
           </LabelStyleDiv>
+          <FormLabel
+            sx={{
+              color: 'Gray',
+              fontSize: 8,
+              paddingTop: 2.5,
+              paddingRight: 1.5,
+            }}
+          >
+            {params.tokenType.toUpperCase() + ' '}
+          </FormLabel>
           <FormInput
             type="text"
             onChange={(event) => handlePricePerOptions(event.target.value)}
@@ -503,27 +521,27 @@ export default function SellLimit(props: {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <Stack direction={'row'} spacing={1}>
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.symbol + ' '}
+              </FormLabel>
               <FormLabel>
                 {pricePerOption * numberOfOptions > 0
-                  ? (pricePerOption * numberOfOptions).toFixed(2)
-                  : 0.0}
-              </FormLabel>
-              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
-                {' '}
-                {' ' + option.collateralToken.symbol}
+                  ? (pricePerOption * numberOfOptions).toFixed(4)
+                  : (0).toFixed(4)}
               </FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>
-              {params.tokenType.toUpperCase()} in Wallet
-            </LabelGrayStyle>
+            <LabelGrayStyle>Wallet Balance</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <Stack direction={'row'} spacing={1}>
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {params.tokenType.toUpperCase() + ' '}
+              </FormLabel>
               <FormLabel>{walletBalance.toFixed(4)}</FormLabel>
             </Stack>
           </RightSideLabel>
@@ -534,7 +552,7 @@ export default function SellLimit(props: {
               <FormLabel sx={{ color: 'White' }}>Order Expires in</FormLabel>
               <InfoTooltip
                 title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-                sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}
+                sx={{ color: 'Gray', fontSize: 2 }}
               >
                 <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
               </InfoTooltip>

@@ -31,7 +31,7 @@ export const FormDiv = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-around;
-  margin-top: 10px;
+  margin-top: 20px;
   margin-bottom: 10px;
   margin-left: 20px;
   margin-right: 20px;
@@ -81,6 +81,7 @@ export const CreateButtonWrapper = styled.div`
 
 export const LimitOrderExpiryDiv = styled.div`
   aligned: center;
+  margin-top: -10px;
   font-size: 18px;
 `
 

@@ -130,7 +130,7 @@ export default function OptionDetails({
           <FlexBoxData>
             {Number(
               formatUnits(pool.collateralBalance, pool.collateralToken.decimals)
-            ) +
+            ).toFixed(2) +
               ' ' +
               pool.collateralToken.symbol}
           </FlexBoxData>

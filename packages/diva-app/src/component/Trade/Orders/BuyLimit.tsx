@@ -2,7 +2,14 @@ import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { Divider, FormLabel, MenuItem, Stack, useTheme } from '@mui/material'
+import {
+  Container,
+  Divider,
+  FormLabel,
+  MenuItem,
+  Stack,
+  useTheme,
+} from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
@@ -497,8 +504,18 @@ export default function BuyLimit(props: {
       <form onSubmit={(event) => handleOrderSubmit(event)}>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Number of {params.tokenType.toUpperCase()}</LabelStyle>
+            <LabelStyle>Number</LabelStyle>
           </LabelStyleDiv>
+          <FormLabel
+            sx={{
+              color: 'Gray',
+              fontSize: 8,
+              paddingTop: 2.5,
+              paddingRight: 1.5,
+            }}
+          >
+            {params.tokenType.toUpperCase() + ' '}
+          </FormLabel>
           <FormInput
             type="text"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
@@ -506,8 +523,18 @@ export default function BuyLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Price per {params.tokenType.toUpperCase()}</LabelStyle>
+            <LabelStyle>Price</LabelStyle>
           </LabelStyleDiv>
+          <FormLabel
+            sx={{
+              color: 'Gray',
+              fontSize: 8,
+              paddingTop: 2.5,
+              paddingRight: 1.5,
+            }}
+          >
+            {params.tokenType.toUpperCase() + ' '}
+          </FormLabel>
           <FormInput
             type="text"
             onChange={(event) => handlePricePerOptions(event.target.value)}
@@ -515,19 +542,19 @@ export default function BuyLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <Stack spacing={0.5}>
+            <Stack>
               <LabelStyle>You Pay </LabelStyle>
-              <SubLabelStyle>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
                 Remaining allowance: {remainingApprovalAmount}
-              </SubLabelStyle>
+              </FormLabel>
             </Stack>
           </LabelStyleDiv>
           <RightSideLabel>
-            <Stack direction={'row'} spacing={1}>
-              <FormLabel>{youPay.toFixed(4) + ' '}</FormLabel>
-              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.6 }}>
                 {option.collateralToken.symbol}
               </FormLabel>
+              <FormLabel>{youPay.toFixed(4) + ' '}</FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
@@ -536,11 +563,11 @@ export default function BuyLimit(props: {
             <LabelGrayStyle>Wallet Balance</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <Stack direction={'row'} spacing={1}>
-              <FormLabel>{collateralBalance.toFixed(4)}</FormLabel>
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
               <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
                 {option.collateralToken.symbol}
               </FormLabel>
+              <FormLabel>{collateralBalance.toFixed(4)}</FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
@@ -550,7 +577,7 @@ export default function BuyLimit(props: {
               <FormLabel sx={{ color: 'White' }}>Order Expires in</FormLabel>
               <InfoTooltip
                 title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-                sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}
+                sx={{ color: 'Gray', fontSize: 2 }}
               >
                 <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
               </InfoTooltip>
