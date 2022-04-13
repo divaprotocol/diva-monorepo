@@ -24,13 +24,16 @@ export const App = () => {
   const pools = useAppSelector((state) => poolsSelector(state))
 
   useEffect(() => {
-    dispatch(
-      setWallet({
-        chainId: chainId,
-        userAddress: accountData?.address,
-      })
-    )
-
+    if (chainId) {
+      console.log('chainId', chainId)
+      dispatch(
+        setWallet({
+          chainId: chainId,
+          userAddress: accountData?.address,
+        })
+      )
+      dispatch(fetchPools())
+    }
     const pollPools = () => {
       dispatch(fetchPools())
     }
