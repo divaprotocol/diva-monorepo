@@ -13,7 +13,7 @@ export interface SimpleDialogProps {
 }
 
 const WalletDialog = (props: SimpleDialogProps) => {
-  const [{ data, error }, connect] = useConnect()
+  const [{ data: connectionData, error }, connect] = useConnect()
   const { onClose, open } = props
   const handleClose = () => {
     onClose()
@@ -32,25 +32,29 @@ const WalletDialog = (props: SimpleDialogProps) => {
       }}
     >
       <Grid container>
-        {data.connectors.map((connector) => (
-          <Grid item xs={4}>
-            <Button
-              disabled={!connector.ready}
-              key={connector.id}
-              onClick={() => {
-                connect(connector)
-                handleClose()
-              }}
-            >
-              <Stack minHeight="200px" minWidth="200px">
-                {/*<Icon>*/}
-                {/*  <img src="/images/walletconnect.svg" />*/}
-                {/*</Icon>*/}
-                {connector.name}
-                {!connector.ready && ' (unsupported)'}
-              </Stack>
-            </Button>
-          </Grid>
+        {connectionData.connectors.map((connector) => (
+          <Button
+            disabled={!connector.ready}
+            key={connector.id}
+            onClick={() => {
+              connect(connector)
+              handleClose()
+            }}
+          >
+            <Stack minHeight="100px" minWidth="150px">
+              <Box>
+                <img
+                  src={
+                    '/images/' +
+                    connector.name.split(' ')[0].toLowerCase() +
+                    '.svg'
+                  }
+                />
+              </Box>
+              {connector.name}
+              {!connector.ready && ' (unsupported)'}
+            </Stack>
+          </Button>
         ))}
       </Grid>
 
