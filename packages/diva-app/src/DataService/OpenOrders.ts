@@ -30,7 +30,8 @@ export const getOrderDetails = (orderHash: string, chainId) => {
     .then(function (response) {
       return response.data
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error(err)
       return {}
     })
   return res
