@@ -23,8 +23,13 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { fetchPool, selectMyDataFeeds } from '../../Redux/poolSlice'
+import {
+  fetchPool,
+  poolsSelector,
+  selectMyDataFeeds,
+} from '../../Redux/poolSlice'
 import { useDispatch, useSelector } from 'react-redux'
+import { useAppSelector } from '../../Redux/hooks'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -289,7 +294,7 @@ export function MyDataFeeds() {
   const userAddress = wallet?.connection?.userAddress
   const [page, setPage] = useState(0)
 
-  const pools = useSelector(selectMyDataFeeds)
+  const pools = useAppSelector((state) => poolsSelector(state))
   const rows: GridRowModel[] = pools
     .filter(
       (pool) => pool.dataProvider.toLowerCase() === userAddress.toLowerCase()
