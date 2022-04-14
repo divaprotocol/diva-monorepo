@@ -2,22 +2,16 @@ import React, { useState } from 'react'
 import { useEffect } from 'react'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
-import Typography from '@mui/material/Typography'
-import Slider from '@mui/material/Slider'
-import Input from '@mui/material/Input'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
-import { LabelStyle, SubLabelStyle } from './UiStyles'
+import { LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
 import { FormInput } from './UiStyles'
 import { RightSideLabel } from './UiStyles'
-import { FormControlDiv } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
-import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
-import { MaxSlippageText } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
@@ -610,46 +604,6 @@ export default function SellMarket(props: {
             </Stack>
           </RightSideLabel>
         </FormDiv>
-        {/*<FormDiv>*/}
-        {/*  <SliderDiv>*/}
-        {/*    <Typography id="input-slider" gutterBottom>*/}
-        {/*      <Stack direction={'row'} spacing={0.5}>*/}
-        {/*        /!*<FormLabel sx={{ color: 'White' }}>Max slippage %</FormLabel>*!/*/}
-        {/*        <InfoTooltip*/}
-        {/*          title={<React.Fragment>{MaxSlippageText}</React.Fragment>}*/}
-        {/*          sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}*/}
-        {/*        >*/}
-        {/*          <InfoIcon style={{ fontSize: 15, color: 'grey' }} />*/}
-        {/*        </InfoTooltip>*/}
-        {/*      </Stack>*/}
-        {/*    </Typography>*/}
-        {/*    <Stack direction={'row'} spacing={1}>*/}
-        {/*      <Slider*/}
-        {/*        value={typeof value === 'number' ? value : 0}*/}
-        {/*        onChange={handleSliderChange}*/}
-        {/*        step={0.1}*/}
-        {/*        min={0}*/}
-        {/*        max={20}*/}
-        {/*        aria-labelledby="input-slider"*/}
-        {/*      />*/}
-        {/*    </Stack>*/}
-        {/*  </SliderDiv>*/}
-        {/*  <FormControlDiv>*/}
-        {/*    <Input*/}
-        {/*      value={value}*/}
-        {/*      margin="dense"*/}
-        {/*      onChange={handleInputChange}*/}
-        {/*      onBlur={handleBlur}*/}
-        {/*      inputProps={{*/}
-        {/*        step: 0.1,*/}
-        {/*        min: 0.0,*/}
-        {/*        max: 20,*/}
-        {/*        type: 'number',*/}
-        {/*        'aria-labelledby': 'input-slider',*/}
-        {/*      }}*/}
-        {/*    />*/}
-        {/*  </FormControlDiv>*/}
-        {/*</FormDiv>*/}
         <CreateButtonWrapper />
         <Box marginLeft="30%" marginTop="15%" marginBottom={2}>
           <Button
