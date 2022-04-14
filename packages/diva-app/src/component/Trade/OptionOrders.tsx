@@ -217,25 +217,13 @@ export default function OpenOrders(props: {
     cancelLimitOrder(cancelOrder, chainId).then(function (
       cancelOrderResponse: any
     ) {
-      if (!(cancelOrderResponse === 'undefined')) {
-        if (!('logs' in cancelOrderResponse)) {
-          alert('order could not be filled')
-          return
-        } else {
-          cancelOrderResponse.logs.forEach((eventData) => {
-            if (!('event' in eventData)) {
-              return
-            } else {
-              if (eventData.event == 'OrderCancelled') {
-                alert('Order successfully canceled')
-                //update orderbook & create orders widget
-                componentDidMount()
-              }
-            }
-          })
-        }
+      const log = cancelOrderResponse?.logs?.[0]
+      if (log != null && eventData.event == 'OrderCancelled') {
+        alert('Order successfully canceled')
+        //update orderbook & create orders widget
+        componentDidMount()
       } else {
-        alert('order could not be canceled, response is undefined')
+        alert('order could not be canceled')
       }
     })
   }
