@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
 import { Pool } from '../../lib/queries'
 import { formatEther, formatUnits } from 'ethers/lib/utils'
-
+import { useWhitelist } from '../../hooks/useWhitelist'
+import CheckCircleSharpIcon from '@mui/icons-material/CheckCircleSharp'
+import WarningAmberSharpIcon from '@mui/icons-material/WarningAmberSharp'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -53,7 +55,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 33.3%;
+  width: 65%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
@@ -65,7 +67,7 @@ const FlexSecondLineDiv = styled.div`
 `
 
 const FlexBoxSecondLine = styled.div`
-  width: 50%;
+  width: 100%;
   flex: 1;
 `
 
@@ -87,7 +89,10 @@ const FlexBoxSecondLineData = styled.div`
   font-weight: bold;
   text-align: left;
 `
-
+const FlexCheckIcon = styled.div`
+  display: flex;
+  flex-direction: row;
+`
 export default function OptionDetails({
   pool,
   isLong,
@@ -98,6 +103,39 @@ export default function OptionDetails({
   //Instead of calling redux to get selected option at each component level
   //we can call at root component of trade that is underlying and pass as porps
   //to each child component.
+  const collateralBalanceLongInitial = Number(
+    formatUnits(
+      pool.collateralBalanceLongInitial,
+      pool.collateralToken.decimals
+    )
+  )
+  const collateralBalanceShortInitial = Number(
+    formatUnits(
+      pool.collateralBalanceShortInitial,
+      pool.collateralToken.decimals
+    )
+  )
+  const longShortCollateralSum =
+    collateralBalanceLongInitial + collateralBalanceShortInitial
+  const longCollateralRatio =
+    (collateralBalanceLongInitial / longShortCollateralSum) * 100
+  const shortCollateralRatio =
+    (collateralBalanceShortInitial / longShortCollateralSum) * 100
+  const dataSource = useWhitelist()
+  const [dataSourceName, setDataSourceName] = useState('')
+  const [checkIcon, setCheckIcon] = useState(true)
+  useEffect(() => {
+    const dataName = dataSource?.dataProviders?.find(
+      (dataName: { id: string }) => dataName?.id == pool?.dataProvider
+    )
+    if (dataName?.name != null) {
+      setDataSourceName(dataName?.name)
+      setCheckIcon(true)
+    } else {
+      setDataSourceName('Unknown')
+      setCheckIcon(false)
+    }
+  }, [dataSource.dataProviders, pool.dataProvider])
 
   return (
     <PageDiv>
@@ -151,7 +189,42 @@ export default function OptionDetails({
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Data source</FlexBoxHeader>
-          <FlexBoxSecondLineData>TBD</FlexBoxSecondLineData>
+          <FlexBoxSecondLineData>
+            <FlexCheckIcon>
+              {dataSourceName}
+
+              {checkIcon ? (
+                <Tooltip title="Trusted data provider from the DIVA whitelist">
+                  <CheckCircleSharpIcon
+                    sx={{
+                      mt: 0.3,
+                      paddingLeft: 1,
+                    }}
+                    color="success"
+                    fontSize="inherit"
+                  />
+                </Tooltip>
+              ) : (
+                <Tooltip title="Untrusted data provider">
+                  <WarningAmberSharpIcon
+                    sx={{
+                      mt: 0.3,
+                      paddingLeft: 1,
+                    }}
+                    color="warning"
+                    fontSize="inherit"
+                  />
+                </Tooltip>
+              )}
+            </FlexCheckIcon>
+          </FlexBoxSecondLineData>
+        </FlexBoxSecondLine>
+
+        <FlexBoxSecondLine>
+          <FlexBoxHeader>Short/Long ratio</FlexBoxHeader>
+          <FlexBoxSecondLineData>
+            {shortCollateralRatio.toFixed()} / {longCollateralRatio.toFixed()}
+          </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
       </FlexSecondLineDiv>
     </PageDiv>
