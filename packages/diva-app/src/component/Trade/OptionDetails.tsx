@@ -103,17 +103,27 @@ export default function OptionDetails({
   //Instead of calling redux to get selected option at each component level
   //we can call at root component of trade that is underlying and pass as porps
   //to each child component.
+  const collateralBalanceLongInitial = Number(
+    formatUnits(
+      pool.collateralBalanceLongInitial,
+      pool.collateralToken.decimals
+    )
+  )
+  const collateralBalanceShortInitial = Number(
+    formatUnits(
+      pool.collateralBalanceShortInitial,
+      pool.collateralToken.decimals
+    )
+  )
   const longShortCollateralSum =
-    parseInt(pool.collateralBalanceLongInitial) +
-    parseInt(pool.collateralBalanceShortInitial)
+    collateralBalanceLongInitial + collateralBalanceShortInitial
   const longCollateralRatio =
-    (parseInt(pool.collateralBalanceLongInitial) / longShortCollateralSum) * 100
+    (collateralBalanceLongInitial / longShortCollateralSum) * 100
   const shortCollateralRatio =
-    (parseInt(pool.collateralBalanceShortInitial) / longShortCollateralSum) *
-    100
+    (collateralBalanceShortInitial / longShortCollateralSum) * 100
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
-  const [checkIcon, setCheckIcon] = useState(false)
+  const [checkIcon, setCheckIcon] = useState(true)
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
       (dataName: { id: string }) => dataName?.id == pool?.dataProvider
@@ -187,7 +197,7 @@ export default function OptionDetails({
                 <Tooltip title="Trusted data provider from the DIVA whitelist">
                   <CheckCircleSharpIcon
                     sx={{
-                      mt: 0.7,
+                      mt: 0.3,
                       paddingLeft: 1,
                     }}
                     color="success"
