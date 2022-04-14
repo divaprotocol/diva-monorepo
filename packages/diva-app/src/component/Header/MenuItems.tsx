@@ -1,38 +1,41 @@
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import { Route, Link } from 'react-router-dom'
+import { Divider, IconButton, Tooltip } from '@mui/material'
+import { Stack } from '@mui/material'
+import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
+import { Link } from 'react-router-dom'
 
 export default function MenuItems() {
   return (
-    <div>
-      <Route
-        path="/"
-        render={(history) => (
-          <Tabs
-            indicatorColor="secondary"
-            textColor="inherit"
-            value={
-              history.location.pathname.includes('/trade')
-                ? false
-                : history.location.pathname
-            }
-          >
-            <Tab label="Markets" value={'/'} component={Link} to={'/'} />
-            <Tab
-              label="My Dashboard"
-              value={'/dashboard/mypositions'}
-              component={Link}
-              to={'/dashboard/mypositions'}
-            />
-            <Tab
-              label="Create"
-              value={'/Create'}
-              component={Link}
-              to={'/Create'}
-            />
-          </Tabs>
-        )}
-      />
-    </div>
+    <Stack
+      direction="column"
+      justifyContent="center"
+      alignItems="center"
+      spacing={2}
+    >
+      <Divider />
+      <Link to="/">
+        <Tooltip title="Market">
+          <IconButton aria-label="Market">
+            <ShowChartOutlined />
+          </IconButton>
+        </Tooltip>
+      </Link>
+      <Divider />
+      <Link to="/dashboard/mypositions">
+        <Tooltip title=" My Dashboard">
+          <IconButton aria-label="DashBoard">
+            <Person />
+          </IconButton>
+        </Tooltip>
+      </Link>
+      <Divider />
+      <Link to="/Create">
+        <Tooltip title="Create">
+          <IconButton aria-label="Create">
+            <Add />
+          </IconButton>
+        </Tooltip>
+      </Link>
+      <Divider />
+    </Stack>
   )
 }
