@@ -1,4 +1,3 @@
-import { useWallet } from '@web3-ui/hooks'
 import axios from 'axios'
 import { config } from '../constants'
 export const get0xOpenOrders = (

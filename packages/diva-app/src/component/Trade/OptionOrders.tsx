@@ -1,10 +1,9 @@
-import React from 'react'
 import { useState, useEffect } from 'react'
 import { useAppSelector, useAppDispatch } from '../../Redux/hooks'
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
-import { makeStyles, withStyles } from '@mui/styles'
+import { withStyles } from '@mui/styles'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -218,7 +217,7 @@ export default function OpenOrders(props: {
       cancelOrderResponse: any
     ) {
       const log = cancelOrderResponse?.logs?.[0]
-      if (log != null && eventData.event == 'OrderCancelled') {
+      if (log != null && log.event == 'OrderCancelled') {
         alert('Order successfully canceled')
         //update orderbook & create orders widget
         componentDidMount()
@@ -298,7 +297,7 @@ export default function OpenOrders(props: {
                       </Box>
                     </TableCellStyle>
                   </TableRow>
-                );
+                )
               })
             ) : (
               <NoOrderTextDiv>None</NoOrderTextDiv>
