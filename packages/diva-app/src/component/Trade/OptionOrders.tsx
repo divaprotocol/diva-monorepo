@@ -290,9 +290,7 @@ export default function OpenOrders(props: {
                             variant="outlined"
                             startIcon={<DeleteIcon />}
                             size="small"
-                            onClick={async () => {
-                              await cancelOrder(orders[index], chainId)
-                            }}
+                            onClick={() => cancelOrder(orders[index], chainId)}
                           >
                             Cancel
                           </Button>
@@ -300,7 +298,7 @@ export default function OpenOrders(props: {
                       </Box>
                     </TableCellStyle>
                   </TableRow>
-                )
+                );
               })
             ) : (
               <NoOrderTextDiv>None</NoOrderTextDiv>
