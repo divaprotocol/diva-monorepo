@@ -16,7 +16,8 @@ export const get0xOpenOrders = (
     .then(function (response) {
       return response.data.records
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error(err)
       return {}
     })
 
