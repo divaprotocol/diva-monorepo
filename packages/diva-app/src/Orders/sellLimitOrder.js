@@ -80,6 +80,7 @@ export const sellLimitOrder = async (orderData) => {
     }
     return resp
   } catch (e) {
+    console.error(e)
     alert('You need to sign the order')
   }
 }

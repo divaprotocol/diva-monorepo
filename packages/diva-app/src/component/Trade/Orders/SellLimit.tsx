@@ -7,7 +7,7 @@ import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
-import { sellLimitOrder } from '../../../Orders/SellLimit'
+import { sellLimitOrder } from '../../../Orders/sellLimitOrder'
 import {
   ExpectedRateInfoText,
   InfoTooltip,
@@ -201,7 +201,7 @@ export default function SellLimit(props: {
           }
           sellLimitOrder(orderData)
             .then(async (response) => {
-              if (response.status === 200) {
+              if (response?.status === 200) {
                 await new Promise((resolve) => setTimeout(resolve, 2000))
                 await props.handleDisplayOrder()
                 handleFormReset()
@@ -228,7 +228,8 @@ export default function SellLimit(props: {
       )
       responseSell = rSell
     }
-    responseSell.forEach((data: any) => {
+
+    responseSell?.forEach((data: any) => {
       const order = data.order
       if (maker == order.maker) {
         const metaData = data.metaData
