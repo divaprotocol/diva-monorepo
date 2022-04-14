@@ -21,7 +21,28 @@ import { projectId } from './constants'
 const chains = defaultChains
 const queryClient = new QueryClient()
 const connectors = ({ chainId }) => {
-  const rpcUrl = 'https://ropsten.infura.io/v3/'
+  let rpcUrl = ''
+  switch (chainId) {
+    case 1:
+      rpcUrl = 'https://mainet.infura.io/v3/'
+      break
+    case 3:
+      rpcUrl = 'https://ropsten.infura.io/v3/'
+      break
+    case 4:
+      rpcUrl = 'https://rinkeby.infura.io/v3/'
+      break
+    case 137:
+      rpcUrl = 'https://polygon.infura.io/v3/'
+      break
+    case 42:
+      rpcUrl = 'https://kovan.infura.io/v3/'
+      break
+    default:
+      rpcUrl = 'https://ropsten.infura.io/v3/'
+      break
+  }
+
   return [
     new InjectedConnector({
       chains,

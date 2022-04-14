@@ -382,12 +382,28 @@ export function MyPositions() {
     fetchEns: true,
   })
   const [{ data: networkData }] = useNetwork()
-  const provider = new ethers.providers.JsonRpcProvider(
-    'https://' +
-      networkData.chain?.name.toLowerCase() +
-      '.infura.io/v3/' +
-      projectId
-  )
+  let rpcUrl = ''
+  switch (networkData.chain?.id) {
+    case 1:
+      rpcUrl = 'https://mainet.infura.io/v3/'
+      break
+    case 3:
+      rpcUrl = 'https://ropsten.infura.io/v3/'
+      break
+    case 4:
+      rpcUrl = 'https://rinkeby.infura.io/v3/'
+      break
+    case 137:
+      rpcUrl = 'https://polygon.infura.io/v3/'
+      break
+    case 42:
+      rpcUrl = 'https://kovan.infura.io/v3/'
+      break
+    default:
+      rpcUrl = 'https://ropsten.infura.io/v3/'
+      break
+  }
+  const provider = new ethers.providers.JsonRpcProvider(rpcUrl + projectId)
   const userAddress = accountData?.address
   const [page, setPage] = useState(0)
   const pools = useAppSelector((state) => poolsSelector(state))

@@ -25,7 +25,6 @@ export const App = () => {
 
   useEffect(() => {
     if (chainId) {
-      console.log('chainId', chainId)
       dispatch(
         setWallet({
           chainId: chainId,
