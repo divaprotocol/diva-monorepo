@@ -13,6 +13,7 @@ import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { fetchPools, poolsSelector, setWallet } from './Redux/poolSlice'
 import { useAppSelector } from './Redux/hooks'
+import MenuItems from './component/Header/MenuItems'
 
 export const App = () => {
   const { provider, connection } = useWallet()
@@ -51,18 +52,15 @@ export const App = () => {
 
   return (
     <Router>
-      <Stack
-        height="100%"
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Header />
+      <Stack height="100%" direction="row" justifyContent="space-between">
+        <MenuItems />
+        <Divider orientation="vertical" />
         <Container
           disableGutters
           sx={{ alignItems: 'left', height: '100%', overflow: 'auto' }}
           maxWidth={false}
         >
+          <Header />
           <Switch>
             <Route exact path="/">
               <Markets />

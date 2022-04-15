@@ -1,41 +1,38 @@
-import { Divider, IconButton, Tooltip } from '@mui/material'
+import { Box, Divider, Tooltip } from '@mui/material'
 import { Stack } from '@mui/material'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
 import { Link } from 'react-router-dom'
+import { Logo } from '../Logo'
 
 export default function MenuItems() {
   return (
     <Stack
+      width="70px"
       direction="column"
-      justifyContent="center"
+      justifyContent="flex-start"
       alignItems="center"
-      spacing={2}
+      marginTop="16px"
+      spacing={3}
     >
-      <Divider />
+      <Box sx={{ padding: '10px', width: 30, marginBottom: 5 }}>
+        <Logo />
+      </Box>
       <Link to="/">
         <Tooltip title="Market">
-          <IconButton aria-label="Market">
-            <ShowChartOutlined />
-          </IconButton>
+          <ShowChartOutlined color="action" />
         </Tooltip>
       </Link>
-      <Divider />
       <Link to="/dashboard/mypositions">
         <Tooltip title=" My Dashboard">
-          <IconButton aria-label="DashBoard">
-            <Person />
-          </IconButton>
+          <Person color="action" />
         </Tooltip>
       </Link>
-      <Divider />
       <Link to="/Create">
-        <Tooltip title="Create">
-          <IconButton aria-label="Create">
-            <Add />
-          </IconButton>
+        <Tooltip title="Create Pool">
+          <Add color="action" />
         </Tooltip>
       </Link>
-      <Divider />
+      <Divider variant="middle" />
     </Stack>
   )
 }
