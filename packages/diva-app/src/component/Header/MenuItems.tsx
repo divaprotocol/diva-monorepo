@@ -32,7 +32,6 @@ export default function MenuItems() {
           <Add color="action" />
         </Tooltip>
       </Link>
-      <Divider variant="middle" />
     </Stack>
   )
 }
