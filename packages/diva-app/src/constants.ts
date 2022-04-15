@@ -6,7 +6,7 @@ type SingleConfig = {
   whitelistSubgraph: string
 }
 
-export const projectId = 'e3ea5575a42b4de7be15d7c197c12045'
+export const projectId = '2b92938819f54fe6bfe5c4b77e0d7a0a'
 
 export const config: { [key: number]: SingleConfig } = {
   1: {

@@ -46,7 +46,6 @@ export default function BuyMarket(props: {
   tokenAddress: string
 }) {
   const [{ data: networkData }] = useNetwork()
-  const CHAIN_ID = networkData.chain?.id
   const option = props.option
   const isLong = window.location.pathname.split('/')[2] === 'long'
   const order = useAppSelector((state) =>
@@ -74,7 +73,7 @@ export default function BuyMarket(props: {
     React.useState(0.0)
   const [takerAccount, setTakerAccount] = React.useState('')
   // eslint-disable-next-line prettier/prettier
-  const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
+  const address = contractAddress.getContractAddressesForChainOrThrow(networkData?.chain?.id || 3)
   const exchangeProxyAddress = address.exchangeProxy
   const makerToken = props.tokenAddress
   const [collateralBalance, setCollateralBalance] = React.useState(0)
@@ -96,15 +95,17 @@ export default function BuyMarket(props: {
     }
   }
   const approveBuyAmount = async (amount) => {
-    const amountBigNumber = parseUnits(amount.toString())
-    await takerTokenContract.methods
-      .approve(exchangeProxyAddress, amountBigNumber)
-      .send({ from: accounts[0] })
+    if (networkData.chain.id != undefined) {
+      const amountBigNumber = parseUnits(amount.toString())
+      await takerTokenContract.methods
+        .approve(exchangeProxyAddress, amountBigNumber)
+        .send({ from: accounts[0] })
 
-    const collateralAllowance = await takerTokenContract.methods
-      .allowance(accounts[0], exchangeProxyAddress)
-      .call()
-    return collateralAllowance
+      const collateralAllowance = await takerTokenContract.methods
+        .allowance(accounts[0], exchangeProxyAddress)
+        .call()
+      return collateralAllowance
+    }
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -222,22 +223,21 @@ export default function BuyMarket(props: {
   const [{ data: accountData }] = useAccount({
     fetchEns: true,
   })
-  const account = accountData?.address
+
   const getCollateralInWallet = async () => {
-    const takerAccount = account
     let allowance = await takerTokenContract.methods
-      .allowance(takerAccount, exchangeProxyAddress)
+      .allowance(accountData?.address, exchangeProxyAddress)
       .call()
     allowance = Number(formatUnits(allowance, option.collateralToken.decimals))
     let balance = await takerTokenContract.methods
-      .balanceOf(takerAccount)
+      .balanceOf(accountData?.address)
       .call()
     balance = Number(
       formatUnits(balance.toString(), option.collateralToken.decimals)
     )
     return {
       balance: balance,
-      account: takerAccount,
+      account: accountData?.address,
       approvalAmount: allowance,
     }
   }
@@ -309,31 +309,32 @@ export default function BuyMarket(props: {
   }
 
   useEffect(() => {
-    getCollateralInWallet().then((val) => {
-      !Number.isNaN(val.balance)
-        ? setCollateralBalance(Number(val.balance))
-        : setCollateralBalance(0)
-      setTakerAccount(val.account)
-      setAllowance(val.approvalAmount)
-      setApprovalAmount(val.approvalAmount)
-      setRemainingApprovalAmount(val.approvalAmount)
-      val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
-      if (responseSell.length > 0) {
-        const data = getSellLimitOrders()
-        setExistingSellLimitOrders(data.sortedOrders)
-      }
-      getTakerOrdersTotalAmount(val.account).then((amount) => {
-        const remainingAmount = Number(
-          (val.approvalAmount - amount).toFixed(
-            totalDecimals(val.approvalAmount, amount)
+    if (accountData != null) {
+      getCollateralInWallet().then((val) => {
+        !Number.isNaN(val.balance)
+          ? setCollateralBalance(Number(val.balance))
+          : setCollateralBalance(0)
+        setTakerAccount(val.account)
+        setAllowance(val.approvalAmount)
+        setApprovalAmount(val.approvalAmount)
+        setRemainingApprovalAmount(val.approvalAmount)
+        val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+        if (responseSell.length > 0) {
+          const data = getSellLimitOrders()
+          setExistingSellLimitOrders(data.sortedOrders)
+        }
+        getTakerOrdersTotalAmount(val?.account).then((amount) => {
+          const remainingAmount = Number(
+            (val.approvalAmount - amount).toFixed(
+              totalDecimals(val.approvalAmount, amount)
+            )
           )
-        )
-        setRemainingApprovalAmount(remainingAmount)
-        remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+          setRemainingApprovalAmount(remainingAmount)
+          remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+        })
       })
-      //}
-    })
-  }, [responseSell, responseBuy])
+    }
+  }, [accountData])
 
   useEffect(() => {
     if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {

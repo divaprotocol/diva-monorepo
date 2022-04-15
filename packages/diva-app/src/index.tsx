@@ -33,7 +33,7 @@ const connectors = ({ chainId }) => {
       rpcUrl = 'https://rinkeby.infura.io/v3/'
       break
     case 137:
-      rpcUrl = 'https://polygon.infura.io/v3/'
+      rpcUrl = 'https://polygon-mainnet.infura.io/v3/'
       break
     case 42:
       rpcUrl = 'https://kovan.infura.io/v3/'

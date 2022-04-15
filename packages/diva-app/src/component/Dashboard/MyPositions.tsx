@@ -394,7 +394,7 @@ export function MyPositions() {
       rpcUrl = 'https://rinkeby.infura.io/v3/'
       break
     case 137:
-      rpcUrl = 'https://polygon.infura.io/v3/'
+      rpcUrl = 'https://polygon-mainnet.infura.io/v3/'
       break
     case 42:
       rpcUrl = 'https://kovan.infura.io/v3/'
@@ -404,7 +404,7 @@ export function MyPositions() {
       break
   }
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl + projectId)
-  const userAddress = accountData?.address
+  const userAddress = '0x9adefeb576dcf52f5220709c1b267d89d5208d78'
   const [page, setPage] = useState(0)
   const pools = useAppSelector((state) => poolsSelector(state))
 
