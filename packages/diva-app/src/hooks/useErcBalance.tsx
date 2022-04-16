@@ -30,15 +30,11 @@ export function useErcBalance(address?: string) {
   const [{ data: signerData }] = useSigner()
   const [{ data: networkData }] = useNetwork()
   const chainId = networkData?.chain?.id
-  const contract = useContract<Erc20Contract>({
-    addressOrName: address,
-    contractInterface: ERC20,
-    signerOrProvider: signerData,
-  })
   const [balance, setBalance] = useState<string>()
   useEffect(() => {
     const run = async () => {
       if (provider != null && chainId != null && address != null) {
+        const contract = new ethers.Contract(address, ERC20, signerData)
         try {
           const myAddress = accountData?.address
           const _balance = await contract.balanceOf(myAddress)

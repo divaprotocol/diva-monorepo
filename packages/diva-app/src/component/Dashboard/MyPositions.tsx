@@ -404,7 +404,7 @@ export function MyPositions() {
       break
   }
   const provider = new ethers.providers.JsonRpcProvider(rpcUrl + projectId)
-  const userAddress = '0x9adefeb576dcf52f5220709c1b267d89d5208d78'
+  const userAddress = accountData?.address
   const [page, setPage] = useState(0)
   const pools = useAppSelector((state) => poolsSelector(state))
 
