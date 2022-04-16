@@ -25,7 +25,6 @@ export function useWhitelist() {
     dataProviders?.filter((p) =>
       p.dataFeeds.some((f) => f.referenceAssetUnified === referenceAssetUnified)
     )
-
   return {
     dataFeeds,
     dataProviders,

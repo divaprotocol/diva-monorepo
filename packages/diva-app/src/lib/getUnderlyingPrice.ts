@@ -53,7 +53,7 @@ export const getUnderlyingPrice = async (underlyingAssets: string) => {
       )
     }
     if (vsAssets.toUpperCase() === 'USD') {
-      return assetPriceUsd.toFixed(2)
+      return assetPriceUsd?.toFixed(2)
     }
     return (assetPriceUsd / vsAssetPriceUsd).toFixed(2)
   }
