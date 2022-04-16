@@ -1,0 +1,13 @@
+{
+  "version": "0.10.1",
+  "stacks": {
+    "diva-infrastructure": {
+      "name": "diva-infrastructure",
+      "constructPath": "diva-infrastructure",
+      "workingDirectory": "stacks/diva-infrastructure",
+      "synthesizedStackPath": "stacks/diva-infrastructure/cdk.tf.json",
+      "annotations": [],
+      "dependencies": []
+    }
+  }
+}

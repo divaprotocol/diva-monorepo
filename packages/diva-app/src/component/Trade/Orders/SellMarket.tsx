@@ -47,6 +47,7 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 const web3 = new Web3(Web3.givenProvider)
@@ -74,7 +75,6 @@ export default function SellMarket(props: {
     React.useState(0.0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
-  const [makerAccount, setMakerAccount] = React.useState('')
   // eslint-disable-next-line prettier/prettier
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
@@ -230,9 +230,9 @@ export default function SellMarket(props: {
     }
   }
 
+  const { address: makerAccount } = useConnectionContext()
+
   const getOptionsInWallet = async () => {
-    accounts = await window.ethereum.enable()
-    const makerAccount = accounts[0]
     let allowance = await takerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()
@@ -306,7 +306,6 @@ export default function SellMarket(props: {
       !Number.isNaN(val.balance)
         ? setWalletBalance(Number(val.balance))
         : setWalletBalance(0)
-      setMakerAccount(val.account)
       setAllowance(val.approvalAmount)
       setApprovalAmount(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)

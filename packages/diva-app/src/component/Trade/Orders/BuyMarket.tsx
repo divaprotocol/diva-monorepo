@@ -50,6 +50,7 @@ import {
   orderSelector,
   payoffSelector,
 } from '../../../Redux/poolSlice'
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
@@ -85,7 +86,6 @@ export default function BuyMarket(props: {
   const [allowance, setAllowance] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
-  const [takerAccount, setTakerAccount] = React.useState('')
   // eslint-disable-next-line prettier/prettier
   const address = contractAddress.getContractAddressesForChainOrThrow(CHAIN_ID)
   const exchangeProxyAddress = address.exchangeProxy
@@ -140,7 +140,7 @@ export default function BuyMarket(props: {
         alert(
           `Taker allowance for ${
             option.collateralToken.id + ' '
-          } ${collateralAllowance} successfully set by ${takerAccount}`
+          } ${collateralAllowance} successfully set by ${userAddress}`
         )
       } else {
         alert('Please enter number of options you want to buy')
@@ -233,9 +233,9 @@ export default function BuyMarket(props: {
     }
   }
 
-  const getCollateralInWallet = async () => {
-    accounts = await window.ethereum.enable()
-    const takerAccount = accounts[0]
+  const { address: userAddress } = useConnectionContext()
+
+  const getCollateralInWallet = async (takerAccount: string) => {
     let allowance = await takerTokenContract.methods
       .allowance(takerAccount, exchangeProxyAddress)
       .call()
@@ -320,31 +320,32 @@ export default function BuyMarket(props: {
   }
 
   useEffect(() => {
-    getCollateralInWallet().then((val) => {
-      !Number.isNaN(val.balance)
-        ? setCollateralBalance(Number(val.balance))
-        : setCollateralBalance(0)
-      setTakerAccount(val.account)
-      setAllowance(val.approvalAmount)
-      setApprovalAmount(val.approvalAmount)
-      setRemainingApprovalAmount(val.approvalAmount)
-      val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
-      if (responseSell.length > 0) {
-        const data = getSellLimitOrders()
-        setExistingSellLimitOrders(data.sortedOrders)
-      }
-      getTakerOrdersTotalAmount(val.account).then((amount) => {
-        const remainingAmount = Number(
-          (val.approvalAmount - amount).toFixed(
-            totalDecimals(val.approvalAmount, amount)
+    if (address != null) {
+      getCollateralInWallet(userAddress).then((val) => {
+        !Number.isNaN(val.balance)
+          ? setCollateralBalance(Number(val.balance))
+          : setCollateralBalance(0)
+        setAllowance(val.approvalAmount)
+        setApprovalAmount(val.approvalAmount)
+        setRemainingApprovalAmount(val.approvalAmount)
+        val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+        if (responseSell.length > 0) {
+          const data = getSellLimitOrders()
+          setExistingSellLimitOrders(data.sortedOrders)
+        }
+        getTakerOrdersTotalAmount(val.account).then((amount) => {
+          const remainingAmount = Number(
+            (val.approvalAmount - amount).toFixed(
+              totalDecimals(val.approvalAmount, amount)
+            )
           )
-        )
-        setRemainingApprovalAmount(remainingAmount)
-        remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+          setRemainingApprovalAmount(remainingAmount)
+          remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+        })
+        //}
       })
-      //}
-    })
-  }, [responseSell, responseBuy])
+    }
+  }, [responseSell, responseBuy, address])
 
   useEffect(() => {
     if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {

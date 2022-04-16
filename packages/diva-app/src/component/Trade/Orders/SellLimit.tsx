@@ -43,6 +43,7 @@ import {
   setMaxYield,
 } from '../../../Redux/Stats'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -67,7 +68,6 @@ export default function SellLimit(props: {
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
-  const [makerAccount, setMakerAccount] = React.useState('')
   const [walletBalance, setWalletBalance] = React.useState(0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const makerToken = optionTokenAddress
@@ -241,10 +241,9 @@ export default function SellLimit(props: {
     //return existingOrderAmount
     return Number(formatUnits(existingOrderAmount.toString(), 18))
   }
+  const { address: makerAccount } = useConnectionContext()
 
   const getOptionsInWallet = async () => {
-    accounts = await window.ethereum.enable()
-    const makerAccount = accounts[0]
     let allowance = await makerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()
@@ -268,7 +267,6 @@ export default function SellLimit(props: {
       !Number.isNaN(val.balance)
         ? setWalletBalance(Number(val.balance))
         : setWalletBalance(0)
-      setMakerAccount(val.account)
       setAllowance(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)

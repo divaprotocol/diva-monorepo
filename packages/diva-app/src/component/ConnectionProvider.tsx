@@ -1,10 +1,12 @@
 import { BaseProvider, ExternalProvider } from '@ethersproject/providers'
 import { createContext, useCallback, useEffect, useState } from 'react'
+import { BigNumber, utils } from 'ethers'
 import detectEthereumProvider from '@metamask/detect-provider'
 
 type MetamaskProvider = ExternalProvider &
   BaseProvider & {
     isConnected: () => boolean
+    chainId: string
   }
 
 type ConnectionContextState = {
@@ -25,12 +27,13 @@ export const ConnectionContext = createContext<ConnectionContextType>({})
 const ethereum = window.ethereum as MetamaskProvider
 
 export const ConnectionProvider = ({ children }) => {
-  const [state, setState] = useState<ConnectionContextState>({})
+  const [state, setState] = useState<ConnectionContextState>({ chainId: 3 })
   const connect = useCallback(async () => {
     const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
     setState((_state) => ({
       ..._state,
       address: accounts[0],
+      chainId: BigNumber.from(ethereum.chainId).toNumber(),
       isConnected: ethereum.isConnected(),
     }))
   }, [])

@@ -44,6 +44,7 @@ import {
   setIntrinsicValue,
   setMaxPayout,
 } from '../../../Redux/Stats'
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -70,7 +71,6 @@ export default function BuyLimit(props: {
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
-  const [takerAccount, setTakerAccount] = React.useState('')
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken.id
   const params: { tokenType: string } = useParams()
@@ -270,13 +270,13 @@ export default function BuyLimit(props: {
     )
   }
 
+  const { address: takerAccount } = useConnectionContext()
+
   useEffect(() => {
     getUnderlyingPrice(option.referenceAsset).then((data) => {
       if (data != null) setUsdPrice(data)
     })
     const getCollateralInWallet = async () => {
-      accounts = await window.ethereum.enable()
-      const takerAccount = accounts[0]
       let allowance = await takerTokenContract.methods
         .allowance(takerAccount, exchangeProxyAddress)
         .call()
@@ -300,7 +300,6 @@ export default function BuyLimit(props: {
       !Number.isNaN(val.balance)
         ? setCollateralBalance(Number(val.balance))
         : setCollateralBalance(0)
-      setTakerAccount(val.account)
       setAllowance(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)

@@ -28,6 +28,7 @@ import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import { fetchPool, poolsSelector } from '../../Redux/poolSlice'
 import { useDispatch } from 'react-redux'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 type Response = {
   [token: string]: BigNumber
@@ -40,12 +41,13 @@ const MetaMaskImage = styled.img`
 `
 
 const AddToMetamask = (props: any) => {
+  const { provider } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
     e.stopPropagation()
     const tokenSymbol =
       props.row.id.split('/')[1][0].toUpperCase() + props.row.id.split('/')[0]
     try {
-      await window.ethereum.request({
+      await provider.request({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC20',
@@ -56,7 +58,7 @@ const AddToMetamask = (props: any) => {
             image:
               'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
           },
-        },
+        } as any,
       })
     } catch (error) {
       console.error('Error in HandleAddMetaMask', error)

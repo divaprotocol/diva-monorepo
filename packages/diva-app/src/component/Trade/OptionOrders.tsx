@@ -144,7 +144,6 @@ export default function OpenOrders(props: {
   const [orders, setOrders] = useState([])
 
   const componentDidMount = async () => {
-    accounts = await window.ethereum.enable()
     const orderBook: any = []
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(

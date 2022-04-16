@@ -74,25 +74,14 @@ export default function CreateOrder(props: {
 }) {
   //const op = useSelector((state) => state.tradeOption.option)
   const option = props.option
-  const isLong = window.location.pathname.split('/')[2] === 'long'
   const dispatch = useAppDispatch()
   const classes = useStyles()
   const dividerClass = useDividerStyle()
   const tabsClass = useTabsBorder()
   const [orderType, setOrderTypeValue] = React.useState(0)
   const [priceType, setPriceTypeValue] = React.useState(0)
-  const [userAccount, setUserAccount] = React.useState('')
-
-  const componentDidMount = async () => {
-    accounts = await window.ethereum.enable()
-    setUserAccount(accounts[0])
-  }
 
   useEffect(() => {
-    if (Object.keys(userAccount).length === 0) {
-      componentDidMount()
-    }
-    dispatch(setMetamaskAccount(userAccount))
     getExistingOrders()
   })
 

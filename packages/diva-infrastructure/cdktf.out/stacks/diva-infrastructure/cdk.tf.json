@@ -1,0 +1,168 @@
+{
+  "//": {
+    "metadata": {
+      "backend": "local",
+      "stackName": "diva-infrastructure",
+      "version": "0.10.1"
+    },
+    "outputs": {
+    }
+  },
+  "provider": {
+    "aws": [
+      {
+        "region": "eu-west-2"
+      }
+    ]
+  },
+  "resource": {
+    "aws_appsync_api_key": {
+      "DivaDevOrderbookAppsyncApiKey": {
+        "//": {
+          "metadata": {
+            "path": "diva-infrastructure/DivaDevOrderbookAppsyncApiKey",
+            "uniqueId": "DivaDevOrderbookAppsyncApiKey"
+          }
+        },
+        "api_id": "${aws_appsync_graphql_api.DivaDevOrderbookAppsyncApi.id}"
+      }
+    },
+    "aws_appsync_datasource": {
+      "DivaDevOrderbookDatasource": {
+        "//": {
+          "metadata": {
+            "path": "diva-infrastructure/DivaDevOrderbookDatasource",
+            "uniqueId": "DivaDevOrderbookDatasource"
+          }
+        },
+        "api_id": "${aws_appsync_graphql_api.DivaDevOrderbookAppsyncApi.id}",
+        "dynamodb_config": {
+          "table_name": "${aws_dynamodb_table.DivaDevOrderbookTable.name}"
+        },
+        "name": "DivaDevOrderbookDatasource",
+        "service_role_arn": "${aws_iam_role.DivaDevOrderbookDatasourceRole.arn}",
+        "type": "AMAZON_DYNAMODB"
+      }
+    },
+    "aws_appsync_graphql_api": {
+      "DivaDevOrderbookAppsyncApi": {
+        "//": {
+          "metadata": {
+            "path": "diva-infrastructure/DivaDevOrderbookAppsyncApi",
+            "uniqueId": "DivaDevOrderbookAppsyncApi"
+          }
+        },
+        "authentication_type": "API_KEY",
+        "name": "DivaDevOrderbookAppsyncApi",
+        "schema": "\n      schema {\n        query: Query\n        mutation: Mutation\n      }\n\n      type Signature {\n        signatureType: String!\n        r: String!\n        s: String!\n        v: String!\n      }\n\n      input SignatureInput {\n        signatureType: String!\n        r: String!\n        s: String!\n        v: String!\n      }\n\n      type Order {\n        id: ID!\n\n        pool: String!\n        feeRecipient: String!\n        takerTokenFeeAmount: String!\n        makerToken: String!\n        takerToken: String!\n        makerAmount: String!\n        takerAmount: String!\n        maker: String!\n        taker: String!\n        sender: String!\n        expiry: String!\n        salt: String!\n        chainId: Int!\n        verifyingContract: String!\n        signature: Signature!\n      }\n\n\n      type Mutation {\n        createOrder(\n          pool: String!\n          feeRecipient: String!\n          takerTokenFeeAmount: String!\n          makerToken: String!\n          takerToken: String!\n          makerAmount: String!\n          takerAmount: String!\n          maker: String!\n          taker: String!\n          sender: String!\n          expiry: String!\n          salt: String!\n          chainId: Int!\n          verifyingContract: String!\n          signature: SignatureInput!\n        ): Order\n      }\n      \n      type PaginatedOrders {\n        items: [Order]\n        nextToken: String!\n      }\n    \n      type Query {\n        order(id: ID!): Order\n        orders(makerToken: String, limit: Int, nextToken: String): PaginatedOrders\n      }\n      "
+      }
+    },
+    "aws_appsync_resolver": {
+      "DivaDevOrderbookAppsyncResolverCreateOrder": {
+        "//": {
+          "metadata": {
+            "path": "diva-infrastructure/DivaDevOrderbookAppsyncResolverCreateOrder",
+            "uniqueId": "DivaDevOrderbookAppsyncResolverCreateOrder"
+          }
+        },
+        "api_id": "${aws_appsync_graphql_api.DivaDevOrderbookAppsyncApi.id}",
+        "data_source": "${aws_appsync_datasource.DivaDevOrderbookDatasource.name}",
+        "field": "createOrder",
+        "request_template": "{\n        \"version\" : \"2017-02-28\",\n        \"operation\" : \"PutItem\",\n        \"key\" : {\n          \"id\": $util.dynamodb.toDynamoDBJson($util.autoId())\n        },\n        \"attributeValues\" : $util.dynamodb.toMapValuesJson($ctx.args)\n    }",
+        "response_template": "$util.toJson($ctx.result)",
+        "type": "Mutation"
+      },
+      "DivaDevOrderbookAppsyncResolverGetOrder": {
+        "//": {
+          "metadata": {
+            "path": "diva-infrastructure/DivaDevOrderbookAppsyncResolverGetOrder",
+            "uniqueId": "DivaDevOrderbookAppsyncResolverGetOrder"
+          }
+        },
+        "api_id": "${aws_appsync_graphql_api.DivaDevOrderbookAppsyncApi.id}",
+        "data_source": "${aws_appsync_datasource.DivaDevOrderbookDatasource.name}",
+        "field": "order",
+        "request_template": "{\n        \"version\": \"2017-02-28\",\n        \"operation\": \"GetItem\",\n        \"key\" : {\n          \"id\" : $util.dynamodb.toDynamoDBJson($ctx.args.id)\n        }\n      }",
+        "response_template": "\n      {\n        \"items\": $utils.toJson($ctx.result.items)\n        #if($ctx.result.nextToken)\n          ,\"nextToken\": $util.toJson($ctx.result.nextToken)\n        #end\n      }\n      ",
+        "type": "Query"
+      },
+      "DivaDevOrderbookAppsyncResolverGetOrders": {
+        "//": {
+          "metadata": {
+            "path": "diva-infrastructure/DivaDevOrderbookAppsyncResolverGetOrders",
+            "uniqueId": "DivaDevOrderbookAppsyncResolverGetOrders"
+          }
+        },
+        "api_id": "${aws_appsync_graphql_api.DivaDevOrderbookAppsyncApi.id}",
+        "data_source": "${aws_appsync_datasource.DivaDevOrderbookDatasource.name}",
+        "field": "orders",
+        "request_template": "{\n        \"version\" : \"2017-02-28\",\n        \"operation\" : \"Query\"\n        #if($ctx.args.count)\n          ,\"limit\": $util.toJson($ctx.args.count)\n        #end\n        #if($ctx.args.nextToken)\n          ,\"nextToken\": $util.toJson($ctx.args.nextToken)\n        #end\n        #if($ctx.args.makerToken)\n        ,\"query\" : {\n          \"expression\": \"makerToken = :makerToken\",\n            \"expressionValues\" : {\n              \":makerToken\" : $util.dynamodb.toDynamoDBJson($context.arguments.makerToken)\n            }\n        }\n        #end\n    }",
+        "response_template": "$util.toJson($ctx.result)",
+        "type": "Query"
+      }
+    },
+    "aws_dynamodb_table": {
+      "DivaDevOrderbookTable": {
+        "//": {
+          "metadata": {
+            "path": "diva-infrastructure/DivaDevOrderbookTable",
+            "uniqueId": "DivaDevOrderbookTable"
+          }
+        },
+        "attribute": [
+          {
+            "name": "makerToken",
+            "type": "S"
+          },
+          {
+            "name": "id",
+            "type": "S"
+          }
+        ],
+        "hash_key": "makerToken",
+        "name": "DivaDevOrderbook0Table",
+        "range_key": "id",
+        "read_capacity": 1,
+        "write_capacity": 1
+      }
+    },
+    "aws_iam_role": {
+      "DivaDevOrderbookDatasourceRole": {
+        "//": {
+          "metadata": {
+            "path": "diva-infrastructure/DivaDevOrderbookDatasourceRole",
+            "uniqueId": "DivaDevOrderbookDatasourceRole"
+          }
+        },
+        "assume_role_policy": "{\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Action\": \"sts:AssumeRole\",\n            \"Principal\": {\n              \"Service\": \"appsync.amazonaws.com\"\n            },\n            \"Effect\": \"Allow\"\n          }\n        ]\n      }",
+        "name": "DivaDevOrderbookDatasourceRole"
+      }
+    },
+    "aws_iam_role_policy": {
+      "DivaDevOrderbookDatasourcePolicy": {
+        "//": {
+          "metadata": {
+            "path": "diva-infrastructure/DivaDevOrderbookDatasourcePolicy",
+            "uniqueId": "DivaDevOrderbookDatasourcePolicy"
+          }
+        },
+        "name": "DivaDevOrderbookDataSourcePolicy",
+        "policy": "{\n        \"Version\": \"2012-10-17\",\n        \"Statement\": [\n          {\n            \"Action\": [\n              \"dynamodb:*\"\n            ],\n            \"Effect\": \"Allow\",\n            \"Resource\": [\n              \"${aws_dynamodb_table.DivaDevOrderbookTable.arn}\"\n            ]\n          }\n        ]\n      }",
+        "role": "${aws_iam_role.DivaDevOrderbookDatasourceRole.id}"
+      }
+    }
+  },
+  "terraform": {
+    "backend": {
+      "local": {
+        "path": "/Users/juliankrispel/projects/diva/monorepo/packages/diva-infrastructure/terraform.diva-infrastructure.tfstate"
+      }
+    },
+    "required_providers": {
+      "aws": {
+        "source": "aws",
+        "version": "4.8.0"
+      }
+    }
+  }
+}
