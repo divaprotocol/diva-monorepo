@@ -13,7 +13,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import { PayoffProfile } from './PayoffProfile'
-import { useCreatePoolFormik } from './formik'
+import { useCreatePoolFormik, initialValues } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
@@ -35,9 +35,7 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-
   const { referenceAssets, collateralTokens } = useWhitelist()
-
   const {
     referenceAsset,
     expiryTime,
@@ -52,9 +50,6 @@ export function DefinePoolAttributes({
 
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
 
-  const defaultToken =
-    collateralTokens?.filter((v) => v.name.includes('DAI')) || []
-  console.log('defaultToken', defaultToken)
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
@@ -218,6 +213,7 @@ export function DefinePoolAttributes({
         <Stack pb={3} spacing={2} direction="row">
           <FormControl fullWidth error={formik.errors.collateralToken != null}>
             <Autocomplete
+              getOptionLabel={(option) => option?.name || ''}
               options={possibleOptions}
               value={collateralToken}
               onChange={(_, newValue) => {
