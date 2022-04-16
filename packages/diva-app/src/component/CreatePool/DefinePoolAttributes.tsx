@@ -49,11 +49,19 @@ export function DefinePoolAttributes({
   } = formik.values
 
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
-  //const [defaultToken, setDefaultToken] = useState()
+  useEffect(() => {
+    const getDefaultToken = async () => {
+      const whitelistedTokens = ['DAI', 'USDC', 'USDT']
 
-  const defaultToken =
-    collateralTokens?.filter((v) => v.name.includes('DAI')) || []
-  console.log('defaultToken', defaultToken)
+      const whitelistedToken = await collateralTokens?.find((token) =>
+        whitelistedTokens?.includes(token.name)
+      )
+      initialValues.collateralToken = whitelistedToken
+      console.log('defaultColletralToken', whitelistedToken)
+    }
+    getDefaultToken()
+  }, [collateralTokens])
+
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
@@ -233,11 +241,10 @@ export function DefinePoolAttributes({
               }}
               renderInput={(params) => (
                 <TextField
-                  defaultValue={defaultToken[0].name}
                   error={formik.errors.collateralToken != null}
                   onBlur={formik.handleBlur}
                   {...params}
-                  //label="Collateral Asset"
+                  label="Collateral Asset"
                 />
               )}
             />
