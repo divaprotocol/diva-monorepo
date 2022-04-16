@@ -1,5 +1,5 @@
 import { Chip } from '@mui/material'
-import { useWallet } from '@web3-ui/hooks'
+import { useWallet } from '../../hooks/useConnectionContext'
 
 export function NetworkTag() {
   const { connection, connected } = useWallet()

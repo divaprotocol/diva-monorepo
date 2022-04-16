@@ -8,17 +8,16 @@ import { Container } from '@mui/material'
 import { MyDataFeeds } from './component/Dashboard/MyDataFeeds'
 import { MyPositions } from './component/Dashboard/MyPositions'
 import { MyFeeClaims } from './component/Dashboard/MyFeeClaims'
-import { useWallet } from '@web3-ui/hooks'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { fetchPools, poolsSelector, setWallet } from './Redux/poolSlice'
 import { useAppSelector } from './Redux/hooks'
+import { useConnectionContext } from './hooks/useConnectionContext'
 
 export const App = () => {
-  const { provider, connection } = useWallet()
+  const { provider, address: userAddress } = useConnectionContext()
   const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
-  const userAddress = connection?.userAddress
   const pools = useAppSelector((state) => poolsSelector(state))
 
   useEffect(() => {

@@ -1,47 +1,9 @@
 import Button from '@mui/material/Button'
-import { useCallback, useEffect, useState } from 'react'
-import { useWallet } from '@web3-ui/hooks'
-import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 export function ConnectWalletButton() {
-  const { connected, connectWallet, connection, provider, disconnectWallet } =
-    useWallet()
-  const [walletName, setWalletName] = useState('')
-
-  useEffect(() => {
-    const run = async () => {
-      if (
-        connection &&
-        provider != null &&
-        connection.userAddress != null &&
-        connected
-      ) {
-        try {
-          const res = await provider.lookupAddress(connection.userAddress)
-          if (res === null) {
-            setWalletName(getShortenedAddress(connection.userAddress))
-          } else {
-            setWalletName(res)
-          }
-        } catch (err) {
-          console.warn(err)
-        }
-      }
-    }
-
-    run()
-  }, [connection, provider, connected])
-  const toggleConnect = useCallback(() => {
-    if (connected) {
-      disconnectWallet?.()
-    } else {
-      const _connectWallet = connectWallet as any
-      _connectWallet?.()?.catch((err) => {
-        console.warn(err)
-      })
-    }
-  }, [connected, connectWallet, disconnectWallet])
-
+  const context = useConnectionContext()
+  console.log({ context })
   return (
     <Button
       variant="contained"
@@ -50,9 +12,11 @@ export function ConnectWalletButton() {
       type="submit"
       value="Submit"
       sx={{ marginLeft: '10px' }}
-      onClick={toggleConnect}
+      onClick={() =>
+        context?.isConnected ? context.disconnect() : context.connect()
+      }
     >
-      {!connected ? 'Connect Wallet' : walletName}
+      {context?.isConnected ? 'Disconnect' : 'Connect Wallet'}
     </Button>
   )
 }

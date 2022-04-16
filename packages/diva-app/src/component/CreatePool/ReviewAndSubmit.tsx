@@ -8,10 +8,10 @@ import {
   useTheme,
 } from '@mui/material'
 import { Box } from '@mui/material'
-import { useWallet } from '@web3-ui/hooks'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
 import { config } from '../../constants'
+import { useWallet } from '../../hooks/useConnectionContext'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useCreatePoolFormik } from './formik'

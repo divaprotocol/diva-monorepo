@@ -1,6 +1,6 @@
 import { useFormik } from 'formik'
+import { useWallet } from '../../hooks/useConnectionContext'
 import { useDiva } from '../../hooks/useDiva'
-import { useWallet } from '@web3-ui/hooks'
 import { WhitelistCollateralToken } from '../../lib/queries'
 
 const defaultDate = new Date()
