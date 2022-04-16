@@ -44,9 +44,10 @@ export function useErcBalance(address?: string) {
         }
       }
     }
-
-    run()
-  }, [address, chainId, account != null])
+    if (accountData != null) {
+      run()
+    }
+  }, [address, chainId, accountData])
 
   return balance
 }
