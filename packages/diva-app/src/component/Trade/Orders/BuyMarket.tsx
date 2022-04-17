@@ -21,36 +21,18 @@ import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import { MaxSlippageText } from './UiStyles'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
-import {
-  setBreakEven,
-  setMaxYield,
-  setIntrinsicValue,
-  setMaxPayout,
-} from '../../../Redux/Stats'
+import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { BigNumber } from '@0x/utils'
-import { BigNumber as BigENumber } from 'ethers'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
-import { NETWORKS } from '@web3-ui/hooks'
-import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
-import { get0xOpenOrders } from '../../../DataService/OpenOrders'
-import { useParams } from 'react-router-dom'
-import { Stack, useTheme } from '@mui/material'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
-import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
-import {
-  fetchOrders,
-  orderSelector,
-  payoffSelector,
-} from '../../../Redux/poolSlice'
+import { fetchOrders, orderSelector } from '../../../Redux/poolSlice'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
+import { Stack } from '@mui/material'
+import { NETWORKS } from '@web3-ui/hooks'
+import { useParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
+import { useAppSelector, useAppDispatch } from '../../../Redux/hooks'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
@@ -93,7 +75,8 @@ export default function BuyMarket(props: {
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken.id
   // TODO: check again why we need to use "any" here
-  const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
+  const takerTokenContract =
+    takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const params: { tokenType: string } = useParams()
 
   const theme = useTheme()
@@ -320,7 +303,7 @@ export default function BuyMarket(props: {
   }
 
   useEffect(() => {
-    if (address != null) {
+    if (userAddress != null) {
       getCollateralInWallet(userAddress).then((val) => {
         !Number.isNaN(val.balance)
           ? setCollateralBalance(Number(val.balance))
@@ -345,7 +328,7 @@ export default function BuyMarket(props: {
         //}
       })
     }
-  }, [responseSell, responseBuy, address])
+  }, [responseSell, responseBuy, userAddress])
 
   useEffect(() => {
     if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {

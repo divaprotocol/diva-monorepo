@@ -26,7 +26,6 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { useWallet } from '@web3-ui/hooks'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
@@ -53,9 +52,8 @@ export default function SellLimit(props: {
   tokenAddress: string
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const wallet = useWallet()
+  const { chainId } = useConnectionContext()
   const classes = useStyles()
-  const chainId = wallet?.provider?.network?.chainId || 3
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
   const option = props.option

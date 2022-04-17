@@ -2,7 +2,7 @@ import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { Divider, MenuItem, Stack, useTheme } from '@mui/material'
+import { MenuItem, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
@@ -29,7 +29,6 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { useWallet } from '@web3-ui/hooks'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
@@ -54,8 +53,7 @@ export default function BuyLimit(props: {
   tokenAddress: string
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const { chainId } = useConnectionContext()
   const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxyAddress = address.exchangeProxy
   const option = props.option

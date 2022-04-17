@@ -11,7 +11,7 @@ import { Box } from '@mui/material'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
 import { config } from '../../constants'
-import { useWallet } from '../../hooks/useConnectionContext'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useCreatePoolFormik } from './formik'
@@ -56,7 +56,7 @@ export function ReviewAndSubmit({
 }) {
   const { values } = formik
   const theme = useTheme()
-  const { provider } = useWallet()
+  const { provider } = useConnectionContext()
   const chainId = provider?.network?.chainId
 
   const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>

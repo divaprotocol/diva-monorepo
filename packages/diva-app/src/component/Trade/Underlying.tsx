@@ -57,7 +57,6 @@ export default function Underlying() {
   const breakEvenOptionPrice = 0
   const { chainId } = useConnectionContext()
   const theme = useTheme()
-  console.log({ chainId })
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(

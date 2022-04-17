@@ -3,7 +3,6 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 export function ConnectWalletButton() {
   const context = useConnectionContext()
-  console.log({ context })
   return (
     <Button
       variant="contained"

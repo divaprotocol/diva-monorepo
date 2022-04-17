@@ -1,5 +1,5 @@
 import { useFormik } from 'formik'
-import { useWallet } from '../../hooks/useConnectionContext'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useDiva } from '../../hooks/useDiva'
 import { WhitelistCollateralToken } from '../../lib/queries'
 
@@ -45,10 +45,7 @@ type Errors = {
 }
 
 export const useCreatePoolFormik = () => {
-  const {
-    connection: { network },
-    provider,
-  } = useWallet()
+  const { provider, isConnected } = useConnectionContext()
 
   const contract = useDiva()
 
@@ -118,7 +115,7 @@ export const useCreatePoolFormik = () => {
         errors.collateralToken = 'You must choose a collateral asset'
       }
 
-      if (network == null) {
+      if (!isConnected) {
         errors.collateralWalletBalance =
           'Your wallet must be connected before you can proceed'
       } else if (walletBalance < collateralBalance) {

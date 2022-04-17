@@ -58,13 +58,13 @@ export default function OptionHeader(optionData: {
   )
 
   const handleAddMetaMask = async () => {
-    const { TokenAddress, isLong, tokenDecimals } = optionData
+    const { TokenAddress, isLong } = optionData
     const tokenSymbol = isLong
       ? `L${optionData.poolId}`
       : `S${optionData.poolId}`
 
     try {
-      await provider.request({
+      await window.ethereum.request({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC20',

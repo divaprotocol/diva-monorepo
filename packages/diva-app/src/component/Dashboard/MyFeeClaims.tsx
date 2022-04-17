@@ -7,25 +7,25 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { ethers } from 'ethers'
+import { request } from 'graphql-request'
+import { parseUnits } from 'ethers/lib/utils'
+import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import { useQuery } from 'react-query'
+import ERC20 from '@diva/contracts/abis/erc20.json'
 
 import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable from '../PoolsTable'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import ERC20 from '@diva/contracts/abis/erc20.json'
-import { useQuery } from 'react-query'
 import {
   FeeRecipientCollateralToken,
   queryMyFeeClaims,
 } from '../../lib/queries'
-import { request } from 'graphql-request'
-import { useWallet } from '@web3-ui/hooks'
-import { parseUnits } from 'ethers/lib/utils'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const TransferFeesCell = (props: any) => {
-  const { provider } = useWallet()
+  const { provider } = useConnectionContext()
   const [decimal, setDecimal] = useState(18)
   const chainId = provider?.network?.chainId
   const token = new ethers.Contract(
@@ -109,7 +109,7 @@ const TransferFeesCell = (props: any) => {
 }
 
 const ClaimFeesCell = (props: any) => {
-  const { provider } = useWallet()
+  const { provider } = useConnectionContext()
 
   const chainId = provider?.network?.chainId
 
@@ -141,7 +141,7 @@ const ClaimFeesCell = (props: any) => {
 }
 
 const AmountCell = (props: any) => {
-  const wallet = useWallet()
+  const wallet = useConnectionContext()
   const [decimal, setDecimal] = useState<number>()
 
   const token = new ethers.Contract(
@@ -205,9 +205,7 @@ const columns: GridColDef[] = [
 ]
 
 export function MyFeeClaims() {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
-  const userAddress = wallet?.connection?.userAddress?.toLowerCase()
+  const { chainId, address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
   const query = useQuery<{ fees: FeeRecipientCollateralToken[] }>(
     `pools-fees-${userAddress}`,

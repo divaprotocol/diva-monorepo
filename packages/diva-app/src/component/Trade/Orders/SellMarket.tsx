@@ -33,7 +33,6 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
-import { useWallet } from '@web3-ui/hooks'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { Stack } from '@mui/material'
@@ -60,8 +59,7 @@ export default function SellMarket(props: {
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const { chainId } = useConnectionContext()
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)

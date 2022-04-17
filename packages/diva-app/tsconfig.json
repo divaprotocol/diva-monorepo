@@ -8,6 +8,7 @@
     "allowSyntheticDefaultImports": true,
     "downlevelIteration": true,
     "strict": false,
+    "allowUmdGlobalAccess": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "types": ["@metamask/types"],
@@ -19,7 +20,17 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "exclude": ["node_modules"],
+  "exclude": [
+    "node_modules",
+    "@mui/icons-material",
+    "@mui/lab",
+    "@metamask/detect-provider",
+    "@mui/material",
+    "@mui/styles"
+  ],
+  "files": [
+    "src/types.d.ts"
+  ],
   "include": [
     "src"
   ]

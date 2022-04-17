@@ -1,6 +1,6 @@
 import { BaseProvider, ExternalProvider } from '@ethersproject/providers'
 import { createContext, useCallback, useEffect, useState } from 'react'
-import { BigNumber, utils } from 'ethers'
+import { BigNumber, utils, providers } from 'ethers'
 import detectEthereumProvider from '@metamask/detect-provider'
 
 type MetamaskProvider = ExternalProvider &
@@ -14,7 +14,7 @@ type ConnectionContextState = {
   error?: string
   address?: string
   isConnected?: boolean
-  provider?: MetamaskProvider
+  provider?: providers.Web3Provider
 }
 
 type ConnectionContextType = {
@@ -24,7 +24,7 @@ type ConnectionContextType = {
 
 export const ConnectionContext = createContext<ConnectionContextType>({})
 
-const ethereum = window.ethereum as MetamaskProvider
+const ethereum = window.ethereum
 
 export const ConnectionProvider = ({ children }) => {
   const [state, setState] = useState<ConnectionContextState>({ chainId: 3 })
@@ -79,7 +79,10 @@ export const ConnectionProvider = ({ children }) => {
     })
 
     detectEthereumProvider().then((provider: MetamaskProvider) =>
-      setState((_state) => ({ ..._state, provider }))
+      setState((_state) => ({
+        ..._state,
+        provider: new providers.Web3Provider(provider),
+      }))
     )
 
     ethereum.on('message', (msg) => console.log('message', { msg }))

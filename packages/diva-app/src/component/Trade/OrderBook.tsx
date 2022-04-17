@@ -1,7 +1,6 @@
 import React from 'react'
 import 'styled-components'
 import styled from 'styled-components'
-import { withStyles } from '@mui/styles'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -22,27 +21,6 @@ import { BigNumber } from '@0x/utils'
 const PageDiv = styled.div`
   width: 100%;
 `
-const NoOrderTextDiv = styled.div`
-  font-size: 1.1rem;
-  width: 100%;
-  margin-left: 140%;
-  margin-top: 4%;
-  margin-bottom: 4%;
-`
-
-const TableHeaderCell = withStyles(() => ({
-  root: {
-    fontWeight: 100,
-  },
-}))(TableCell)
-
-const TableCellStyle = withStyles(() => ({
-  root: {
-    height: '10px',
-    padding: '10px',
-  },
-}))(TableCell)
-
 function descendingComparator(a: [], b: [], orderBy: any) {
   let comparator = 0
   if (b[orderBy] < a[orderBy]) {
@@ -275,10 +253,10 @@ export default function OrderBook(props: {
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
-              <TableHeaderCell align="center">BID</TableHeaderCell>
-              <TableHeaderCell align="center">ASK</TableHeaderCell>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
+              <TableCell>Quantity</TableCell>
+              <TableCell>BID</TableCell>
+              <TableCell>ASK</TableCell>
+              <TableCell>Quantity</TableCell>
             </TableRow>
           </TableHead>
 
@@ -288,7 +266,7 @@ export default function OrderBook(props: {
                 const labelId = `table-${index}`
                 return (
                   <TableRow hover tabIndex={-1} key={orderBook.indexOf(row)}>
-                    <TableCellStyle
+                    <TableCell
                       component="th"
                       id={labelId}
                       scope="row"
@@ -302,8 +280,8 @@ export default function OrderBook(props: {
                         </Typography>
                         <label> </label>
                       </Box>
-                    </TableCellStyle>
-                    <TableCellStyle align="center">
+                    </TableCell>
+                    <TableCell align="center">
                       <Box>
                         <Typography variant="subtitle1">
                           {row.bid != '' ? Number(row.bid).toFixed(2) : '-'}
@@ -312,8 +290,8 @@ export default function OrderBook(props: {
                           {row.buyExpiry}
                         </Typography>
                       </Box>
-                    </TableCellStyle>
-                    <TableCellStyle align="center">
+                    </TableCell>
+                    <TableCell align="center">
                       <Box>
                         <Typography variant="subtitle1">
                           {row.ask != '' ? row.ask.toFixed(2).toString() : '-'}
@@ -322,8 +300,8 @@ export default function OrderBook(props: {
                           {row.sellExpiry}
                         </Typography>
                       </Box>
-                    </TableCellStyle>
-                    <TableCellStyle align="center">
+                    </TableCell>
+                    <TableCell align="center">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.sellQuantity != ''
@@ -331,12 +309,16 @@ export default function OrderBook(props: {
                             : '-'}
                         </Typography>
                       </Box>
-                    </TableCellStyle>
+                    </TableCell>
                   </TableRow>
                 )
               })
             ) : (
-              <NoOrderTextDiv>None</NoOrderTextDiv>
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  None
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

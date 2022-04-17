@@ -37,9 +37,7 @@ export const App = () => {
      */
     const interval = setInterval(pollPools, 1000 * 60)
 
-    console.log(1)
     if (pools.length <= 0) {
-      console.log(2)
       pollPools()
     }
 
