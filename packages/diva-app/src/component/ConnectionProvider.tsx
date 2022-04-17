@@ -1,6 +1,7 @@
 import { BaseProvider, ExternalProvider } from '@ethersproject/providers'
 import { createContext, useCallback, useEffect, useState } from 'react'
 import { BigNumber, utils, providers } from 'ethers'
+import useLocalStorage from 'use-local-storage'
 import detectEthereumProvider from '@metamask/detect-provider'
 
 type MetamaskProvider = ExternalProvider &
@@ -27,6 +28,9 @@ export const ConnectionContext = createContext<ConnectionContextType>({})
 const ethereum = window.ethereum
 
 export const ConnectionProvider = ({ children }) => {
+  const [{ connected }, setConnectionState] = useLocalStorage<{
+    connected?: string
+  }>('diva-dapp-connection', {})
   const [state, setState] = useState<ConnectionContextState>({ chainId: 3 })
   const connect = useCallback(async () => {
     const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
@@ -36,20 +40,19 @@ export const ConnectionProvider = ({ children }) => {
       chainId: BigNumber.from(ethereum.chainId).toNumber(),
       isConnected: ethereum.isConnected(),
     }))
+    setConnectionState({ connected: 'metamask' })
   }, [])
 
   const disconnect = useCallback(() => {
-    console.log('disconnecting')
     setState((_state) => ({
       ..._state,
       address: undefined,
       isConnected: false,
     }))
+    setConnectionState({})
   }, [])
 
   useEffect(() => {
-    /** TODO: Automatically try to connect */
-
     if (!ethereum?.isMetaMask) {
       setState({
         ...state,
@@ -71,6 +74,11 @@ export const ConnectionProvider = ({ children }) => {
 
     ethereum.on('connect', (connectInfo) => {
       console.log('connect yo', { connectInfo })
+      setState((_state) => ({
+        ..._state,
+        isConnected: ethereum.isConnected(),
+        chainId: BigNumber.from(ethereum.chainId).toNumber(),
+      }))
     })
 
     ethereum.on('disconnect', (connectInfo) => {
@@ -87,7 +95,7 @@ export const ConnectionProvider = ({ children }) => {
 
     ethereum.on('message', (msg) => console.log('message', { msg }))
 
-    connect()
+    if (connected) connect()
   }, [])
 
   const value = {
