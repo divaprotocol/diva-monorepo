@@ -493,26 +493,25 @@ export function MyPositions() {
 
   const tokenAddresses = rows.map((v) => v.address.id)
 
-  const balances = useQuery<Response>(
-    `balance-${userAddress}-${pools == null}`,
-    async () => {
-      const response: Response = {}
-      if (!userAddress) throw new Error('wallet not connected')
-      await Promise.all(
-        tokenAddresses.map(async (tokenAddress) => {
-          const contract = new ethers.Contract(tokenAddress, ERC20, provider)
-          try {
-            const res: BigNumber = await contract.balanceOf(userAddress)
-            response[tokenAddress] = res
-          } catch (error) {
-            console.error(error)
-          }
-        })
-      )
-      return response
-    }
-  )
-
+  const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
+    const response: Response = {}
+    if (!userAddress) throw new Error('wallet not connected')
+    await Promise.all(
+      tokenAddresses.map(async (tokenAddress) => {
+        const contract = new ethers.Contract(tokenAddress, ERC20, provider)
+        try {
+          const res: BigNumber = await contract.balanceOf(userAddress)
+          response[tokenAddress] = res
+        } catch (error) {
+          console.error(error)
+        }
+      })
+    )
+    return response
+  })
+  if (pools.length > 0) {
+    balances.refetch()
+  }
   const tokenBalances = balances.data
 
   const filteredRows =
