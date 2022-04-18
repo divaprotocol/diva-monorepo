@@ -107,8 +107,23 @@ export default function CreateOrder(props: {
     setPriceTypeValue(newValue)
   }
 
-  const getExistingOrders = () => {
-    dispatch(fetchOrders({ pool: option, isLong }))
+  const getExistingOrders = async () => {
+    const responseSell: any = await get0xOpenOrders(
+      props.tokenAddress,
+      option.collateralToken.id,
+      props.chainId
+    )
+    const responseBuy: any = await get0xOpenOrders(
+      option.collateralToken.id,
+      props.tokenAddress,
+      props.chainId
+    )
+    if (responseSell.length > 0) {
+      dispatch(setResponseSell(responseSell))
+    }
+    if (responseBuy.length > 0) {
+      dispatch(setResponseBuy(responseBuy))
+    }
   }
 
   const renderOrderInfo = () => {
