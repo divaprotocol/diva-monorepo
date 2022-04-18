@@ -1,10 +1,9 @@
-import React from 'react'
 import { useState, useEffect } from 'react'
 import { useAppSelector, useAppDispatch } from '../../Redux/hooks'
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
-import { makeStyles, withStyles } from '@mui/styles'
+import { withStyles } from '@mui/styles'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -16,19 +15,13 @@ import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { get0xOpenOrders } from '../../DataService/OpenOrders'
+import { get0xOpenOrders, getOrderDetails } from '../../DataService/OpenOrders'
 import { getDateTime } from '../../Util/Dates'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { BigNumber } from '@0x/utils'
-
-const useStyles = makeStyles({
-  table: {
-    minWidth: 250,
-  },
-})
-
+import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
+import { useWallet } from '@web3-ui/hooks'
 const TableCellStyle = withStyles(() => ({
   root: {
     height: '10px',
@@ -63,8 +56,6 @@ function mapOrderData(
   const orderbook: any = records.map((record: any) => {
     const order = record.order
     const orderMaker = order.maker
-    const makerAmount = new BigNumber(order.makerAmount)
-    const takerAmount = new BigNumber(order.takerAmount)
     const metaData = record.metaData
     if (account === orderMaker) {
       const makerToken = order.makerToken
@@ -73,46 +64,44 @@ function mapOrderData(
       let nbrOptions = 0
       let pricePerOption = 0
       let payReceive = 0
+
       if (makerToken === tokenAddress) {
-        const askAmount = takerAmount.dividedBy(makerAmount)
-        const remainingTakerAmount = new BigNumber(
-          metaData.remainingFillableTakerAmount
+        //Sell order
+        const takerAmount = formatUnits(
+          order.takerAmount,
+          option.collateralToken.decimals
         )
-        if (remainingTakerAmount.eq(makerAmount)) {
-          nbrOptions = Number(
-            formatUnits(makerAmount.toString(), option.collateralToken.decimals)
-          )
+        const makerAmount = formatUnits(order.makerAmount)
+        const remainingTakerAmount = formatUnits(
+          metaData.remainingFillableTakerAmount,
+          option.collateralToken.decimals
+        )
+        const askAmount = Number(takerAmount) / Number(makerAmount)
+
+        if (remainingTakerAmount == makerAmount) {
+          nbrOptions = Number(makerAmount)
         } else {
-          const quantity = remainingTakerAmount.dividedBy(askAmount)
-          nbrOptions = Number(
-            formatUnits(quantity.toString(), option.collateralToken.decimals)
-          )
+          nbrOptions = Number(remainingTakerAmount) / askAmount
         }
-        const receiveAmount = metaData.remainingFillableTakerAmount
-        payReceive = Number(
-          formatUnits(receiveAmount.toString(), option.collateralToken.decimals)
-        )
+        payReceive = Number(remainingTakerAmount)
         pricePerOption = payReceive / nbrOptions
       } else {
-        const remainingTakerAmount = new BigNumber(
+        //Buy order
+        const takerAmount = formatUnits(order.takerAmount)
+        const makerAmount = formatUnits(
+          order.makerAmount.toString(),
+          option.collateralToken.decimals
+        )
+        const remainingTakerAmount = formatUnits(
           metaData.remainingFillableTakerAmount
         )
-        if (remainingTakerAmount.lt(takerAmount)) {
-          nbrOptions = Number(
-            formatUnits(
-              remainingTakerAmount.toString(),
-              option.collateralToken.decimals
-            )
-          )
+        if (remainingTakerAmount < takerAmount) {
+          nbrOptions = Number(remainingTakerAmount)
         } else {
-          nbrOptions = Number(
-            formatUnits(takerAmount.toString(), option.collateralToken.decimals)
-          )
+          nbrOptions = Number(takerAmount)
         }
-        payReceive = Number(
-          formatUnits(makerAmount.toString(), option.collateralToken.decimals)
-        )
-        pricePerOption = makerAmount.dividedBy(takerAmount).toNumber()
+        payReceive = Number(makerAmount)
+        pricePerOption = Number(payReceive) / Number(takerAmount)
       }
       const expiry = getDateTime(order.expiry)
       const expiryMins = getExpiryMinutesFromNow(order.expiry)
@@ -124,6 +113,7 @@ function mapOrderData(
         pricePerOption: pricePerOption,
         expiry: expiry,
         expiryMins: expiryMins + ' mins',
+        orderHash: metaData.orderHash,
       }
       return orders
     }
@@ -135,6 +125,7 @@ let accounts
 export default function OpenOrders(props: {
   option: Pool
   tokenAddress: string
+  exchangeProxy: string
 }) {
   const option = props.option
   const optionTokenAddress = props.tokenAddress
@@ -142,14 +133,16 @@ export default function OpenOrders(props: {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const dispatch = useAppDispatch()
   const [orders, setOrders] = useState([])
-
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId || 137
   const componentDidMount = async () => {
     accounts = await window.ethereum.enable()
     const orderBook: any = []
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken.id
+        option.collateralToken.id,
+        chainId
       )
       if (rSell.length > 0) {
         responseSell = rSell
@@ -159,19 +152,20 @@ export default function OpenOrders(props: {
     if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
-        optionTokenAddress
+        optionTokenAddress,
+        chainId
       )
       if (rBuy.length > 0) {
         responseBuy = rBuy
       }
     }
-
     const orderBookBuy = mapOrderData(
       responseBuy,
       option,
       optionTokenAddress,
       accounts[0]
     )
+
     const orderBookSell = mapOrderData(
       responseSell,
       option,
@@ -215,7 +209,23 @@ export default function OpenOrders(props: {
     }
   }, [responseBuy, responseSell])
 
-  const classes = useStyles()
+  async function cancelOrder(order, chainId) {
+    const orderHash = order.orderHash
+    //get the order details in current form from 0x before cancelling it.
+    const cancelOrder = await getOrderDetails(orderHash, chainId)
+    cancelLimitOrder(cancelOrder, chainId).then(function (
+      cancelOrderResponse: any
+    ) {
+      const log = cancelOrderResponse?.logs?.[0]
+      if (log != null && log.event == 'OrderCancelled') {
+        alert('Order successfully canceled')
+        //update orderbook & create orders widget
+        componentDidMount()
+      } else {
+        alert('order could not be canceled')
+      }
+    })
+  }
 
   return (
     <PageDiv>
@@ -279,6 +289,7 @@ export default function OpenOrders(props: {
                             variant="outlined"
                             startIcon={<DeleteIcon />}
                             size="small"
+                            onClick={() => cancelOrder(orders[index], chainId)}
                           >
                             Cancel
                           </Button>

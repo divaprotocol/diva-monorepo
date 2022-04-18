@@ -18,8 +18,8 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
 import { fetchOrders, setIsBuy } from '../../Redux/poolSlice'
 const PageDiv = styled.div`
-  width: 400px;
-  height: 420px;
+  justify-content: center
+  height: 500px;
 `
 
 function a11yProps(index: number) {
@@ -71,6 +71,8 @@ let accounts
 export default function CreateOrder(props: {
   option: Pool
   tokenAddress: string
+  exchangeProxy: string
+  chainId: number
 }) {
   //const op = useSelector((state) => state.tradeOption.option)
   const option = props.option
@@ -105,14 +107,37 @@ export default function CreateOrder(props: {
     setPriceTypeValue(newValue)
   }
 
-  const getExistingOrders = () => {
-    // dispatch(fetchOrders({ pool: option, isLong }))
+  const getExistingOrders = async () => {
+    const responseSell: any = await get0xOpenOrders(
+      props.tokenAddress,
+      option.collateralToken.id,
+      props.chainId
+    )
+    const responseBuy: any = await get0xOpenOrders(
+      option.collateralToken.id,
+      props.tokenAddress,
+      props.chainId
+    )
+    if (responseSell.length > 0) {
+      dispatch(setResponseSell(responseSell))
+    }
+    if (responseBuy.length > 0) {
+      dispatch(setResponseBuy(responseBuy))
+    }
   }
 
   const renderOrderInfo = () => {
     if (orderType === 0 && priceType === 0) {
       //Buy Market
-      return <BuyMarket option={option} tokenAddress={props.tokenAddress} />
+      return (
+        <BuyMarket
+          option={option}
+          handleDisplayOrder={getExistingOrders}
+          tokenAddress={props.tokenAddress}
+          exchangeProxy={props.exchangeProxy}
+          chainId={props.chainId}
+        />
+      )
     }
     if (orderType === 0 && priceType === 1) {
       //Buy Limit
@@ -121,6 +146,8 @@ export default function CreateOrder(props: {
           handleDisplayOrder={getExistingOrders}
           option={option}
           tokenAddress={props.tokenAddress}
+          exchangeProxy={props.exchangeProxy}
+          chainId={props.chainId}
         />
       )
     }
@@ -131,6 +158,8 @@ export default function CreateOrder(props: {
           option={option}
           handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
+          exchangeProxy={props.exchangeProxy}
+          chainId={props.chainId}
         />
       )
     }
@@ -141,6 +170,8 @@ export default function CreateOrder(props: {
           option={option}
           handleDisplayOrder={getExistingOrders}
           tokenAddress={props.tokenAddress}
+          exchangeProxy={props.exchangeProxy}
+          chainId={props.chainId}
         />
       )
     }
@@ -148,7 +179,7 @@ export default function CreateOrder(props: {
 
   return (
     <PageDiv className={classes.root}>
-      <TabsDiv>
+      <TabsDiv className={classes.root}>
         <LeftTabDiv>
           <Tabs
             className={tabsClass.tabs}

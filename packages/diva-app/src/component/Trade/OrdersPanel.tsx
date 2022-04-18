@@ -36,6 +36,7 @@ const TabsDiv = styled.div`
 export default function OrdersPanel(props: {
   option: Pool
   tokenAddress: string
+  exchangeProxy: string
 }) {
   const [orderType, setOrderTypeValue] = React.useState(0)
   const classes = useStyles()
@@ -52,7 +53,11 @@ export default function OrdersPanel(props: {
     }
     if (orderType === 1) {
       return (
-        <OptionOrders option={props.option} tokenAddress={props.tokenAddress} />
+        <OptionOrders
+          option={props.option}
+          tokenAddress={props.tokenAddress}
+          exchangeProxy={props.exchangeProxy}
+        />
       )
     }
   }

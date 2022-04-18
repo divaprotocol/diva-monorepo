@@ -1,12 +1,9 @@
-import { contractAddresses } from './Config'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
-import { CHAIN_ID } from './Config'
 import { utils } from './Config'
 import { metamaskProvider } from './Config'
-import { ROPSTEN } from './Config'
-import { ethers } from 'ethers'
-import { BigNumber } from '@0x/utils'
+import { config } from '../constants'
+
 export const sellLimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
     return Math.floor(Date.now() / 1000 + orderData.orderExpiry * 60).toString()
@@ -41,7 +38,7 @@ export const sellLimitOrder = async (orderData) => {
     amount.toString(),
     orderData.collateralDecimals
   )
-
+  const networkUrl = config[orderData.chainId].order
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
@@ -51,8 +48,8 @@ export const sellLimitOrder = async (orderData) => {
     sender: NULL_ADDRESS,
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
-    chainId: CHAIN_ID,
-    verifyingContract: contractAddresses.exchangeProxy,
+    chainId: orderData.chainId,
+    verifyingContract: orderData.exchangeProxy,
   })
 
   try {
@@ -61,7 +58,7 @@ export const sellLimitOrder = async (orderData) => {
       utils.SignatureType.EIP712 // Optional
     )
     const signedOrder = { ...order, signature }
-    const resp = await fetch(ROPSTEN, {
+    const resp = await fetch(networkUrl, {
       method: 'POST',
       body: JSON.stringify(signedOrder),
       headers: {
@@ -83,6 +80,7 @@ export const sellLimitOrder = async (orderData) => {
     }
     return resp
   } catch (e) {
+    console.error(e)
     alert('You need to sign the order')
   }
 }
