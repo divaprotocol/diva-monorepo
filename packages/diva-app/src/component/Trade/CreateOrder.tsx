@@ -108,7 +108,7 @@ export default function CreateOrder(props: {
   }
 
   const getExistingOrders = () => {
-    // dispatch(fetchOrders({ pool: option, isLong }))
+    dispatch(fetchOrders({ pool: option, isLong }))
   }
 
   const renderOrderInfo = () => {
