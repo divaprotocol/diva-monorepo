@@ -21,13 +21,13 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import styled from 'styled-components'
-import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import { fetchPool, poolsSelector } from '../../Redux/poolSlice'
 import { useDispatch } from 'react-redux'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 type Response = {
   [token: string]: BigNumber
@@ -38,14 +38,16 @@ const MetaMaskImage = styled.img`
   height: 20px;
   cursor: pointer;
 `
+const ethereum = window?.ethereum
 
 const AddToMetamask = (props: any) => {
+  const { provider } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
     e.stopPropagation()
     const tokenSymbol =
       props.row.id.split('/')[1][0].toUpperCase() + props.row.id.split('/')[0]
     try {
-      await window.ethereum.request({
+      await ethereum.request({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC20',
@@ -56,7 +58,7 @@ const AddToMetamask = (props: any) => {
             image:
               'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
           },
-        },
+        } as any,
       })
     } catch (error) {
       console.error('Error in HandleAddMetaMask', error)
@@ -78,10 +80,7 @@ const AddToMetamask = (props: any) => {
 const SubmitButton = (props: any) => {
   const [open, setOpen] = React.useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
-  const {
-    connection: { userAddress },
-    provider,
-  } = useWallet()
+  const { address: userAddress, provider } = useConnectionContext()
   const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
   if (chainId == null) return null
@@ -371,8 +370,7 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const { provider, connection } = useWallet()
-  const userAddress = connection?.userAddress
+  const { provider, address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
   const pools = useAppSelector((state) => poolsSelector(state))
 

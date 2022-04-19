@@ -14,7 +14,7 @@ export const orderBookEndpoint =
 
 export const config: { [key: number]: SingleConfig } = {
   1: {
-    name: 'Ropsten',
+    name: 'Mainnet',
     divaAddress: '0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf',
     whitelistAddress: '0x2A5c18f001719f4663ab8d3E65E3E54182376B20',
     divaSubgraph:

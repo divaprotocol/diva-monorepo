@@ -5,7 +5,6 @@ import { getDateTime } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { Pool } from '../../lib/queries'
 import { createdByFilterAddressForMarket } from '../../constants'
-import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { useEffect, useState } from 'react'
@@ -15,6 +14,7 @@ import styled from '@emotion/styled'
 import { CoinIconPair } from '../CoinIcon'
 import { poolsSelector } from '../../Redux/poolSlice'
 import { useAppSelector } from '../../Redux/hooks'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const columns: GridColDef[] = [
   {
@@ -71,8 +71,7 @@ const columns: GridColDef[] = [
 ]
 
 export default function Markets() {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const { chainId } = useConnectionContext()
   const [value, setValue] = useState(0)
   const [mainPools, setMainPools] = useState<Pool[]>([])
   const [otherPools, setOtherPools] = useState<Pool[]>([])

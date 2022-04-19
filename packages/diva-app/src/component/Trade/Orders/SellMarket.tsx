@@ -11,7 +11,6 @@ import { FormDiv } from './UiStyles'
 import { FormInput } from './UiStyles'
 import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
-import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
@@ -27,10 +26,9 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
-import { useWallet } from '@web3-ui/hooks'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
-import { FormLabel, Stack } from '@mui/material'
+import { FormLabel, Stack, Tooltip } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
@@ -41,6 +39,7 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
@@ -54,8 +53,7 @@ export default function SellMarket(props: {
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 137
+  const { chainId } = useConnectionContext()
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)
@@ -69,7 +67,6 @@ export default function SellMarket(props: {
     React.useState(0.0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
-  const [makerAccount, setMakerAccount] = React.useState('')
   // eslint-disable-next-line prettier/prettier
   const exchangeProxyAddress = props.exchangeProxy
   const [walletBalance, setWalletBalance] = React.useState(0)
@@ -223,9 +220,9 @@ export default function SellMarket(props: {
     }
   }
 
+  const { address: makerAccount } = useConnectionContext()
+
   const getOptionsInWallet = async () => {
-    accounts = await window.ethereum.enable()
-    const makerAccount = accounts[0]
     let allowance = await takerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()
@@ -305,7 +302,6 @@ export default function SellMarket(props: {
       !Number.isNaN(val.balance)
         ? setWalletBalance(Number(val.balance))
         : setWalletBalance(0)
-      setMakerAccount(val.account)
       setAllowance(val.approvalAmount)
       setApprovalAmount(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
@@ -561,12 +557,11 @@ export default function SellMarket(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
-              <InfoTooltip
+              <Tooltip
                 title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-                sx={{ color: 'Gray', fontSize: 2 }}
               >
                 <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-              </InfoTooltip>
+              </Tooltip>
             </Stack>
           </LabelStyleDiv>
           <RightSideLabel>

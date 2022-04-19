@@ -1,12 +1,15 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { BigNumber } from 'ethers'
+import { BigNumber, Contract, ethers, providers } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
 import {
+  createOrderMutation,
   Pool,
   queryOrdersByMakerToken,
   queryPool,
   queryPools,
 } from '../lib/queries'
+
+import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
@@ -37,6 +40,9 @@ type PoolByChain = {
       }
     }
   }
+  approvals: {
+    [tokenAddress: string]: number
+  }
 }
 
 const initialState: PoolByChain = {
@@ -44,7 +50,31 @@ const initialState: PoolByChain = {
   isBuy: true,
   underlyingPrice: {},
   orders: {},
+  approvals: {},
 }
+
+export const approveOrder = createAsyncThunk(
+  'pools/approveOrder',
+  async ({
+    token,
+    amount,
+    provider,
+  }: {
+    token: string
+    amount: number
+    provider: providers.Web3Provider
+  }) => {
+    const contract = new Contract(token, ERC20_ABI, provider.getSigner())
+    const decimals = contract.decimals()
+    const allowance = parseUnits(amount.toString(), decimals)
+    const tx = await contract.approve(token, allowance)
+    await tx.wait()
+    return {
+      token,
+      amount,
+    }
+  }
+)
 
 export const fetchOrders = createAsyncThunk(
   'pools/orders',
@@ -71,6 +101,31 @@ export const fetchOrders = createAsyncThunk(
     //   tokenAddress
     // )
 
+    // return {
+    //   buyOrders,
+    //   sellOrders,
+    // }
+  }
+)
+
+export const createOrder = createAsyncThunk(
+  'pools/createOrder',
+  async ({ pool, isLong }: { pool: Pool; isLong: boolean }) => {
+      request<{ pool: Pool }>(
+        orderBookEndpoint,
+        createOrderMutation({
+          chainId: state.poolSlice.wallet?.chainId,
+        }),
+      ),
+ 
+    // const sellOrders: any = await get0xOpenOrders(
+    //   tokenAddress,
+    //   pool.collateralToken.id
+    // )
+    // const buyOrders: any = await get0xOpenOrders(
+    //   pool.collateralToken.id,
+    //   tokenAddress
+    // )
     // return {
     //   buyOrders,
     //   sellOrders,
@@ -140,7 +195,7 @@ const addPools = (state: PoolByChain, pools: Pool[]) => {
 }
 
 export const poolSlice = createSlice({
-  name: 'stats',
+  name: 'pools',
   initialState,
   reducers: {
     setIsBuy: (state, action: PayloadAction<boolean>) => {
@@ -177,6 +232,10 @@ export const poolSlice = createSlice({
 
     builder.addCase(fetchPools.fulfilled, (state, action) => {
       addPools(state, action.payload)
+    })
+
+    builder.addCase(approveOrder.fulfilled, (state, action) => {
+      state.approvals[action.payload.token] = action.payload.amount
     })
 
     // builder.addCase(fetchOrders.fulfilled, (state, action) => {

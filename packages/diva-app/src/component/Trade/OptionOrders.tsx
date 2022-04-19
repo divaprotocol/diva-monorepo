@@ -3,6 +3,7 @@ import { useAppSelector, useAppDispatch } from '../../Redux/hooks'
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
+import { makeStyles } from '@mui/styles'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -25,18 +26,6 @@ import { useWallet } from '@web3-ui/hooks'
 const PageDiv = styled.div`
   width: 100%;
 `
-
-const NoOrderTextDiv = styled.div`
-  font-size: 1.1rem;
-  width: 100%;
-  margin-left: 267%;
-  margin-top: 8%;
-  margin-bottom: 8%;
-`
-
-const TableHeaderCell = (props) => (
-  <TableCell sx={{ fontWeight: 100 }}>{props.children}</TableCell>
-)
 
 function mapOrderData(
   records: [],
@@ -127,7 +116,6 @@ export default function OpenOrders(props: {
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 137
   const componentDidMount = async () => {
-    accounts = await window.ethereum.enable()
     const orderBook: any = []
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
@@ -224,11 +212,11 @@ export default function OpenOrders(props: {
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
-              <TableHeaderCell>Type</TableHeaderCell>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
-              <TableHeaderCell align="center">Price</TableHeaderCell>
-              <TableHeaderCell align="center">Pay/Receive</TableHeaderCell>
-              <TableHeaderCell align="right">Cancel</TableHeaderCell>
+              <TableCell>Type</TableCell>
+              <TableCell align="center">Quantity</TableCell>
+              <TableCell align="center">Price</TableCell>
+              <TableCell align="center">Pay/Receive</TableCell>
+              <TableCell align="right">Cancel</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -291,7 +279,9 @@ export default function OpenOrders(props: {
                 )
               })
             ) : (
-              <NoOrderTextDiv>None</NoOrderTextDiv>
+              <TableRow>
+                <TableCell>None</TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

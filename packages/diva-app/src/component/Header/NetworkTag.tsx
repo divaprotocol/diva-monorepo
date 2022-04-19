@@ -1,11 +1,17 @@
 import { Chip } from '@mui/material'
-import { useWallet } from '@web3-ui/hooks'
+import { config } from '../../constants'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 export function NetworkTag() {
-  const { connection, connected } = useWallet()
+  const { isConnected, chainId } = useConnectionContext()
 
-  if (connected) {
-    return <Chip label={connection.network} sx={{ marginLeft: 'auto' }} />
+  if (isConnected) {
+    return (
+      <Chip
+        label={config[chainId]?.name || 'Unsupported'}
+        sx={{ marginLeft: 'auto' }}
+      />
+    )
   } else {
     return <Chip label={'Preview (ropsten)'} sx={{ marginLeft: 'auto' }} />
   }

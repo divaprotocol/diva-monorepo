@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import { withStyles, makeStyles } from '@mui/styles'
-import Tooltip from '@mui/material/Tooltip'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 
 export const LabelGrayStyle = styled.label`
@@ -108,14 +107,6 @@ export const useStyles = makeStyles((theme: any) => ({
     marginTop: theme.spacing(1),
   },
 }))
-
-export const InfoTooltip = withStyles(() => ({
-  tooltip: {
-    maxWidth: 220,
-    fontSize: 12,
-    border: '1px solid #dadde9',
-  },
-}))(Tooltip)
 
 export const InfoIconStyle = withStyles(() => ({
   tooltip: {

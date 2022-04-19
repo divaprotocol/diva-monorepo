@@ -19,17 +19,13 @@ import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import {
-  fetchPool,
-  poolsSelector,
-  selectMyDataFeeds,
-} from '../../Redux/poolSlice'
-import { useDispatch, useSelector } from 'react-redux'
+import { fetchPool, poolsSelector } from '../../Redux/poolSlice'
+import { useDispatch } from 'react-redux'
 import { useAppSelector } from '../../Redux/hooks'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -121,7 +117,7 @@ const DueInCell = (props: any) => {
   )
 }
 const SubmitCell = (props: any) => {
-  const { provider } = useWallet()
+  const { provider } = useConnectionContext()
 
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
@@ -290,8 +286,7 @@ const columns: GridColDef[] = [
 ]
 
 export function MyDataFeeds() {
-  const wallet = useWallet()
-  const userAddress = wallet?.connection?.userAddress
+  const { address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
 
   const pools = useAppSelector((state) => poolsSelector(state))

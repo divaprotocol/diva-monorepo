@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import '../../Util/Dates'
 import { IconButton, Link } from '@mui/material'
@@ -7,13 +6,12 @@ import {
   EtherscanLinkType,
 } from '../../Util/getEtherscanLink'
 import Tooltip from '@mui/material/Tooltip'
-import { useWallet } from '@web3-ui/hooks'
-import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import { priceSelector } from '../../Redux/poolSlice'
 import { useParams } from 'react-router-dom'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -52,16 +50,15 @@ export default function OptionHeader(optionData: {
   poolId: string
   tokenDecimals: number
 }) {
-  const wallet = useWallet()
+  const { chainId, provider } = useConnectionContext()
   const params: { poolId: string; tokenType: string } = useParams()
-  const chainId = wallet?.provider?.network?.chainId
   const headerTitle = optionData.ReferenceAsset
   const underlyingAssetPrice = useAppSelector((state) =>
     priceSelector(state, params.poolId)
   )
 
   const handleAddMetaMask = async () => {
-    const { TokenAddress, isLong, tokenDecimals } = optionData
+    const { TokenAddress, isLong } = optionData
     const tokenSymbol = isLong
       ? `L${optionData.poolId}`
       : `S${optionData.poolId}`
@@ -79,7 +76,7 @@ export default function OptionHeader(optionData: {
               'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
           },
         },
-      })
+      } as any)
     } catch (error) {
       console.error('Error in HandleAddMetaMask', error)
     }

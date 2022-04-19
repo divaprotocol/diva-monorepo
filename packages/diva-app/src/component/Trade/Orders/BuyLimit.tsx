@@ -2,25 +2,13 @@ import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import {
-  Container,
-  Divider,
-  FormLabel,
-  MenuItem,
-  Stack,
-  useTheme,
-} from '@mui/material'
+import { FormLabel, MenuItem, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
-import {
-  ExpectedRateInfoText,
-  InfoTooltip,
-  LabelStyle,
-  SubLabelStyle,
-} from './UiStyles'
+import { ExpectedRateInfoText, LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -40,7 +28,6 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { useWallet } from '@web3-ui/hooks'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
@@ -55,6 +42,7 @@ import {
   setIntrinsicValue,
   setMaxPayout,
 } from '../../../Redux/Stats'
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -66,8 +54,7 @@ export default function BuyLimit(props: {
   chainId: number
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const { chainId } = useConnectionContext()
   const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
   const makerToken = props.tokenAddress
@@ -82,7 +69,6 @@ export default function BuyLimit(props: {
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
-  const [takerAccount, setTakerAccount] = React.useState('')
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken.id
   const params: { tokenType: string } = useParams()
@@ -287,13 +273,13 @@ export default function BuyLimit(props: {
     )
   }
 
+  const { address: takerAccount } = useConnectionContext()
+
   useEffect(() => {
     getUnderlyingPrice(option.referenceAsset).then((data) => {
       if (data != null) setUsdPrice(data)
     })
     const getCollateralInWallet = async () => {
-      accounts = await window.ethereum.enable()
-      const takerAccount = accounts[0]
       let allowance = await takerTokenContract.methods
         .allowance(takerAccount, exchangeProxyAddress)
         .call()
@@ -315,7 +301,6 @@ export default function BuyLimit(props: {
       !Number.isNaN(val.balance)
         ? setCollateralBalance(Number(val.balance))
         : setCollateralBalance(0)
-      setTakerAccount(val.account)
       setAllowance(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)

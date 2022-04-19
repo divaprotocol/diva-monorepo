@@ -2,18 +2,13 @@ import React, { useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { FormLabel, MenuItem, Stack } from '@mui/material'
+import { FormLabel, MenuItem, Stack, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { sellLimitOrder } from '../../../Orders/sellLimitOrder'
-import {
-  ExpectedRateInfoText,
-  InfoTooltip,
-  LabelStyle,
-  SubLabelStyle,
-} from './UiStyles'
+import { ExpectedRateInfoText, LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -31,7 +26,6 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { useWallet } from '@web3-ui/hooks'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
@@ -47,6 +41,7 @@ import {
   setMaxYield,
 } from '../../../Redux/Stats'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -58,9 +53,8 @@ export default function SellLimit(props: {
   chainId: number
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const wallet = useWallet()
+  const { chainId } = useConnectionContext()
   const classes = useStyles()
-  const chainId = wallet?.provider?.network?.chainId || 3
   const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
   const optionTokenAddress = props.tokenAddress
@@ -72,7 +66,6 @@ export default function SellLimit(props: {
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
-  const [makerAccount, setMakerAccount] = React.useState('')
   const [walletBalance, setWalletBalance] = React.useState(0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const makerToken = optionTokenAddress
@@ -250,10 +243,9 @@ export default function SellLimit(props: {
     //return existingOrderAmount
     return Number(formatUnits(existingOrderAmount.toString(), 18))
   }
+  const { address: makerAccount } = useConnectionContext()
 
   const getOptionsInWallet = async () => {
-    accounts = await window.ethereum.enable()
-    const makerAccount = accounts[0]
     let allowance = await makerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()
@@ -277,7 +269,6 @@ export default function SellLimit(props: {
       !Number.isNaN(val.balance)
         ? setWalletBalance(Number(val.balance))
         : setWalletBalance(0)
-      setMakerAccount(val.account)
       setAllowance(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
@@ -551,12 +542,11 @@ export default function SellLimit(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Order Expires in</FormLabel>
-              <InfoTooltip
+              <Tooltip
                 title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-                sx={{ color: 'Gray', fontSize: 2 }}
               >
                 <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-              </InfoTooltip>
+              </Tooltip>
             </Stack>
           </LabelStyleDiv>
           <LimitOrderExpiryDiv>

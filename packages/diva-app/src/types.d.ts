@@ -1,5 +1,15 @@
-// declare module '@mui/x-data-grid' {
-//   import { DataGrid as _DataGrid } from '@mui/x-data-grid/x-data-grid'
-// 
-//   export const DataGrid = _DataGrid
-// }
+import { ExternalProvider, BaseProvider } from '@ethersproject/providers'
+
+type MetamaskProvider = ExternalProvider &
+  BaseProvider & {
+    isConnected: () => boolean
+    chainId: string
+    request: any
+  }
+
+declare global {
+  interface Window {
+    ethereum?: MetamaskProvider
+    hell: string
+  }
+}

@@ -431,7 +431,7 @@ export const queryOrdersByMakerToken = (props: {
   }
 `
 
-export const createOrder = (order: Order) => gql`
+export const createOrderMutation = (order: Order) => gql`
   createOrder(
     chainId: "${order.chainId}",
     expiry: "${order.expiry}",
