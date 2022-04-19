@@ -1,9 +1,8 @@
 import { parseEther, parseUnits } from 'ethers/lib/utils'
-import { contractAddresses } from './Config'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { metamaskProvider } from './Config'
-import { ROPSTEN } from './Config'
+import { config } from '../constants'
 
 export const buylimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
@@ -13,6 +12,7 @@ export const buylimitOrder = async (orderData) => {
   const isFloat = (number) => {
     return number != '' && !isNaN(number) && Math.round(number) != number
   }
+
   const decimalPlaces = (number) => {
     return number.toString().split('.')[1].length
   }
@@ -31,6 +31,7 @@ export const buylimitOrder = async (orderData) => {
    * to resolve this problem we need to calculate the total number of digit by
    * addition of individual floating point number
    */
+
   const amount = Number(orderData.nbrOptions * orderData.limitPrice).toFixed(
     totalDecimalPlaces
   )
@@ -39,6 +40,7 @@ export const buylimitOrder = async (orderData) => {
     orderData.collateralDecimals
   )
   const takerAmount = parseEther(orderData.nbrOptions.toString())
+  const networkUrl = config[orderData.chainId].order
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
@@ -49,7 +51,7 @@ export const buylimitOrder = async (orderData) => {
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
     chainId: orderData.chainId,
-    verifyingContract: contractAddresses.exchangeProxy,
+    verifyingContract: orderData.exchangeProxy,
   })
 
   try {
@@ -58,7 +60,7 @@ export const buylimitOrder = async (orderData) => {
       utils.SignatureType.EIP712 // Optional
     )
     const signedOrder = { ...order, signature }
-    const resp = await fetch(ROPSTEN, {
+    const resp = await fetch(networkUrl, {
       method: 'POST',
       body: JSON.stringify(signedOrder),
       headers: {

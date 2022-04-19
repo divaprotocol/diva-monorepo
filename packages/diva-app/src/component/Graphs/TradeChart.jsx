@@ -20,7 +20,7 @@ class DIVATradeChart extends Component {
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
     // Set the dimensions and margins of the graph
     // var margin = {top: 50, right: 20, bottom: 30, left: 50},
-    var margin = { top: 5, right: 2, bottom: 3, left: 5 },
+    var margin = { top: 5, right: 2, bottom: 3, left: 20 },
       width = w - margin.left - margin.right,
       height = h - margin.top - margin.bottom
 

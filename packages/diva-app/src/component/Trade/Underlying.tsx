@@ -14,6 +14,8 @@ import { Liquidity } from '../Liquidity/Liquidity'
 import OrdersPanel from './OrdersPanel'
 import Typography from '@mui/material/Typography'
 import { useAppSelector } from '../../Redux/hooks'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const contractAddress = require('@0x/contract-addresses')
 import { useDispatch } from 'react-redux'
 import {
   breakEvenSelector,
@@ -37,7 +39,7 @@ const LeftDiv = styled.div`
   width: 60%;
 `
 const RightDiv = styled.div`
-  width: 40%;
+  width: 35%;
 `
 
 export default function Underlying() {
@@ -56,6 +58,9 @@ export default function Underlying() {
   const isBuy = useAppSelector((state) => isBuySelector(state))
   const breakEvenOptionPrice = 0
   const { chainId } = useConnectionContext()
+  const chainContractAddress =
+    contractAddress.getContractAddressesForChainOrThrow(chainId)
+  const exchangeProxy = chainContractAddress.exchangeProxy
   const theme = useTheme()
   const dispatch = useDispatch()
   useEffect(() => {
@@ -132,7 +137,11 @@ export default function Underlying() {
               </Paper>
               <Paper>
                 <LeftCompFlexContainer>
-                  <OrdersPanel option={pool} tokenAddress={tokenAddress} />
+                  <OrdersPanel
+                    option={pool}
+                    tokenAddress={tokenAddress}
+                    exchangeProxy={exchangeProxy}
+                  />
                 </LeftCompFlexContainer>
               </Paper>
             </Stack>
@@ -140,7 +149,12 @@ export default function Underlying() {
           <RightDiv>
             <Stack spacing={2}>
               <Paper>
-                <CreateOrder option={pool} tokenAddress={tokenAddress} />
+                <CreateOrder
+                  option={pool}
+                  tokenAddress={tokenAddress}
+                  exchangeProxy={exchangeProxy}
+                  chainId={chainId}
+                />
               </Paper>
               <Paper>
                 <TradeChart

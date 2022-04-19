@@ -8,6 +8,7 @@ import request from 'graphql-request'
 import { RootState } from './Store'
 import { get0xOpenOrders } from '../DataService/OpenOrders'
 import { config } from '../constants'
+import { ChainId } from '@0x/contract-addresses'
 
 type Wallet = {
   chainId: number
@@ -44,15 +45,18 @@ const initialState: PoolByChain = {
 
 export const fetchOrders = createAsyncThunk(
   'pools/orders',
-  async ({ pool, isLong }: { pool: Pool; isLong: boolean }) => {
+  async ({ pool, isLong }: { pool: Pool; isLong: boolean }, store) => {
     const tokenAddress = pool[isLong ? 'longToken' : 'shortToken'].id
+    const state = store.getState() as RootState
     const sellOrders: any = await get0xOpenOrders(
       tokenAddress,
-      pool.collateralToken.id
+      pool.collateralToken.id,
+      Number(config[state.poolSlice.wallet?.chainId || 3])
     )
     const buyOrders: any = await get0xOpenOrders(
       pool.collateralToken.id,
-      tokenAddress
+      tokenAddress,
+      Number(config[state.poolSlice.wallet?.chainId || 3])
     )
 
     return {

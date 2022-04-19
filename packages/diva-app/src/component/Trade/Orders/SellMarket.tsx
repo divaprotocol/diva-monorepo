@@ -2,22 +2,16 @@ import React, { useState } from 'react'
 import { useEffect } from 'react'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
-import Typography from '@mui/material/Typography'
-import Slider from '@mui/material/Slider'
-import Input from '@mui/material/Input'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
-import { LabelStyle, SubLabelStyle } from './UiStyles'
+import { LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
 import { FormInput } from './UiStyles'
 import { RightSideLabel } from './UiStyles'
-import { FormControlDiv } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
-import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
-import { MaxSlippageText } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
@@ -35,7 +29,7 @@ import {
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
-import { Stack } from '@mui/material'
+import { FormLabel, Stack } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
@@ -48,7 +42,6 @@ import {
 } from '../../../Redux/Stats'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const contractAddress = require('@0x/contract-addresses')
 const web3 = new Web3(Web3.givenProvider)
 let accounts: any[]
 
@@ -56,6 +49,8 @@ export default function SellMarket(props: {
   option: Pool
   handleDisplayOrder: () => any
   tokenAddress: string
+  exchangeProxy: string
+  chainId: number
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
@@ -74,10 +69,8 @@ export default function SellMarket(props: {
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
   // eslint-disable-next-line prettier/prettier
-  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxyAddress = address.exchangeProxy
+  const exchangeProxyAddress = props.exchangeProxy
   const [walletBalance, setWalletBalance] = React.useState(0)
-  //const makerToken = option.collateralToken
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const params: { tokenType: string } = useParams()
@@ -183,6 +176,7 @@ export default function SellMarket(props: {
             ERC20_ABI: ERC20_ABI,
             avgExpectedRate: avgExpectedRate,
             existingLimitOrders: existingBuyLimitOrders,
+            chainId: chainId,
           }
           sellMarketOrder(orderData).then((orderFillStatus: any) => {
             let orderFilled = false
@@ -205,7 +199,6 @@ export default function SellMarket(props: {
                       )
                       setNumberOfOptions(0.0)
                       setYouReceive(0.0)
-                      //alert('Order successfully filled')
                       orderFilled = true
                       return
                     } else {
@@ -250,9 +243,14 @@ export default function SellMarket(props: {
     const orders: any = []
     responseBuy.forEach((data: any) => {
       const order = JSON.parse(JSON.stringify(data.order))
-      const takerAmount = new BigNumber(order.takerAmount)
-      const makerAmount = new BigNumber(order.makerAmount)
-      order['expectedRate'] = makerAmount.dividedBy(takerAmount)
+      const makerAmount = Number(
+        formatUnits(order.makerAmount, option.collateralToken.decimals)
+      )
+      const takerAmount = Number(formatUnits(order.takerAmount))
+      const expectedRate = (makerAmount / takerAmount).toFixed(
+        totalDecimals(makerAmount, takerAmount)
+      )
+      order['expectedRate'] = expectedRate
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
@@ -274,7 +272,8 @@ export default function SellMarket(props: {
       //Double check the any limit orders exists
       const rSell: any = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken.id
+        option.collateralToken.id,
+        chainId
       )
       responseSell = rSell
     }
@@ -329,39 +328,41 @@ export default function SellMarket(props: {
   useEffect(() => {
     if (numberOfOptions > 0 && existingBuyLimitOrders.length > 0) {
       let count = numberOfOptions
-      let cumulativeAvg = parseEther('0')
-      let cumulativeTaker = parseEther('0')
-      let cumulativeMaker = parseEther('0')
+      let cumulativeAvg = 0
+      let cumulativeTaker = 0
+      let cumulativeMaker = 0
       existingBuyLimitOrders.forEach((order: any) => {
-        const takerAmount = Number(
-          formatUnits(
-            order.takerAmount.toString(),
-            option.collateralToken.decimals
+        const makerAmount = Number(
+          formatUnits(order.makerAmount, option.collateralToken.decimals)
+        )
+        const takerAmount = Number(formatUnits(order.takerAmount))
+        const expectedRate = Number(
+          (makerAmount / takerAmount).toFixed(
+            totalDecimals(makerAmount, takerAmount)
           )
         )
-        const expectedRate = order.expectedRate
         if (count > 0) {
           if (count <= takerAmount) {
-            const orderTotalAmount = parseEther(expectedRate.toString()).mul(
-              parseEther(count.toString())
+            const orderTotalAmount = Number(
+              (expectedRate * count).toFixed(totalDecimals(expectedRate, count))
             )
-            cumulativeMaker = cumulativeMaker.add(orderTotalAmount)
-            cumulativeTaker = cumulativeTaker.add(parseEther(count.toString()))
+            cumulativeMaker = cumulativeMaker + orderTotalAmount
+            cumulativeTaker = cumulativeTaker + count
             count = 0
           } else {
-            cumulativeTaker = cumulativeTaker.add(
-              parseEther(takerAmount.toString())
-            )
-            cumulativeMaker = cumulativeMaker.add(
-              parseEther(order.makerAmount.toString())
-            )
+            cumulativeTaker = cumulativeTaker + takerAmount
+            cumulativeMaker = cumulativeMaker + makerAmount
             count = count - takerAmount
           }
         }
       })
-      cumulativeAvg = cumulativeMaker.div(cumulativeTaker)
-      if (cumulativeAvg.gt(0)) {
-        const avg = Number(formatUnits(cumulativeAvg))
+      cumulativeAvg = Number(
+        (cumulativeMaker / cumulativeTaker).toFixed(
+          totalDecimals(cumulativeMaker, cumulativeTaker)
+        )
+      )
+      if (cumulativeAvg > 0) {
+        const avg = cumulativeAvg
         setAvgExpectedRate(avg)
         const youReceive = avg * numberOfOptions
         setYouReceive(youReceive)
@@ -531,31 +532,47 @@ export default function SellMarket(props: {
       <form onSubmit={handleOrderSubmit}>
         <FormDiv>
           <LabelStyleDiv>
-            <Stack spacing={0.5}>
-              <LabelStyle>
-                Number of {params.tokenType.toUpperCase()}
-              </LabelStyle>
-              <SubLabelStyle>
+            <Stack>
+              <LabelStyle>Number </LabelStyle>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
                 Remaining allowance: {remainingApprovalAmount}
-              </SubLabelStyle>
+              </FormLabel>
             </Stack>
           </LabelStyleDiv>
+          <FormLabel
+            sx={{
+              color: 'Gray',
+              fontSize: 8,
+              paddingTop: 2.5,
+              paddingRight: 1.5,
+            }}
+          >
+            {params.tokenType.toUpperCase() + ' '}
+          </FormLabel>
           <FormInput
             type="text"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
         </FormDiv>
         <FormDiv>
-          <InfoTooltip
-            title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-          >
-            <LabelStyleDiv>
-              <LabelStyle>Expected Price </LabelStyle>
-              <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-            </LabelStyleDiv>
-          </InfoTooltip>
+          <LabelStyleDiv>
+            <Stack direction={'row'} spacing={0.5}>
+              <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
+              <InfoTooltip
+                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
+                sx={{ color: 'Gray', fontSize: 2 }}
+              >
+                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
+              </InfoTooltip>
+            </Stack>
+          </LabelStyleDiv>
           <RightSideLabel>
-            {avgExpectedRate.toFixed(4)} {option.collateralToken.name}
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.symbol + ' '}
+              </FormLabel>
+              <FormLabel>{avgExpectedRate.toFixed(4)}</FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -563,57 +580,29 @@ export default function SellMarket(props: {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youReceive.toFixed(4)} {option.collateralToken.symbol}
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.symbol + ' '}
+              </FormLabel>
+              <FormLabel>{youReceive.toFixed(4)}</FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>
-              {params.tokenType.toUpperCase()} in Wallet
-            </LabelGrayStyle>
+            <LabelGrayStyle>Wallet Balance</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>{walletBalance.toFixed(4)}</LabelGrayStyle>
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {params.tokenType.toUpperCase() + ' '}
+              </FormLabel>
+              <FormLabel>{walletBalance.toFixed(4)}</FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
-        <FormDiv>
-          <SliderDiv>
-            <Typography id="input-slider" gutterBottom>
-              <LabelGrayStyle>Max slippage %</LabelGrayStyle>
-              <InfoTooltip
-                title={<React.Fragment>{MaxSlippageText}</React.Fragment>}
-              >
-                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-              </InfoTooltip>
-            </Typography>
-
-            <Slider
-              value={typeof value === 'number' ? value : 0}
-              onChange={handleSliderChange}
-              step={0.1}
-              min={0}
-              max={20}
-              aria-labelledby="input-slider"
-            />
-          </SliderDiv>
-          <FormControlDiv>
-            <Input
-              value={value}
-              margin="dense"
-              onChange={handleInputChange}
-              onBlur={handleBlur}
-              inputProps={{
-                step: 0.1,
-                min: 0.0,
-                max: 20,
-                type: 'number',
-                'aria-labelledby': 'input-slider',
-              }}
-            />
-          </FormControlDiv>
-        </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="35%" marginTop="15%">
+        <Box marginLeft="30%" marginTop="15%" marginBottom={2}>
           <Button
             variant="contained"
             color="primary"

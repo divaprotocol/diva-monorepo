@@ -2,13 +2,18 @@ import React, { useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { MenuItem, Stack } from '@mui/material'
+import { FormLabel, MenuItem, Stack } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
-import { sellLimitOrder } from '../../../Orders/SellLimit'
-import { LabelStyle, SubLabelStyle } from './UiStyles'
+import { sellLimitOrder } from '../../../Orders/sellLimitOrder'
+import {
+  ExpectedRateInfoText,
+  InfoTooltip,
+  LabelStyle,
+  SubLabelStyle,
+} from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -30,7 +35,6 @@ import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const contractAddress = require('@0x/contract-addresses')
 import { BigNumber } from '@0x/utils'
 import { useParams } from 'react-router-dom'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
@@ -50,12 +54,13 @@ export default function SellLimit(props: {
   option: Pool
   handleDisplayOrder: () => any
   tokenAddress: string
+  exchangeProxy: string
+  chainId: number
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const { chainId } = useConnectionContext()
   const classes = useStyles()
-  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxyAddress = address.exchangeProxy
+  const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const [expiry, setExpiry] = React.useState(5)
@@ -189,10 +194,12 @@ export default function SellLimit(props: {
             limitPrice: pricePerOption,
             collateralDecimals: option.collateralToken.decimals,
             orderExpiry: expiry,
+            chainId: chainId,
+            exchangeProxy: exchangeProxyAddress,
           }
           sellLimitOrder(orderData)
             .then(async (response) => {
-              if (response.status === 200) {
+              if (response?.status === 200) {
                 await new Promise((resolve) => setTimeout(resolve, 2000))
                 await props.handleDisplayOrder()
                 handleFormReset()
@@ -214,11 +221,13 @@ export default function SellLimit(props: {
       //Double check any limit orders exists
       const rSell: any = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken.id
+        option.collateralToken.id,
+        chainId
       )
       responseSell = rSell
     }
-    responseSell.forEach((data: any) => {
+
+    responseSell?.forEach((data: any) => {
       const order = data.order
       if (maker == order.maker) {
         const metaData = data.metaData
@@ -463,15 +472,23 @@ export default function SellLimit(props: {
       <form onSubmit={handleOrderSubmit}>
         <FormDiv>
           <LabelStyleDiv>
-            <Stack spacing={0.5}>
-              <LabelStyle>
-                Number of {params.tokenType.toUpperCase()}
-              </LabelStyle>
-              <SubLabelStyle>
+            <Stack>
+              <LabelStyle>Number</LabelStyle>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
                 Remaining allowance: {remainingApprovalAmount}
-              </SubLabelStyle>
+              </FormLabel>
             </Stack>
           </LabelStyleDiv>
+          <FormLabel
+            sx={{
+              color: 'Gray',
+              fontSize: 8,
+              paddingTop: 2.5,
+              paddingRight: 1.5,
+            }}
+          >
+            {params.tokenType.toUpperCase() + ' '}
+          </FormLabel>
           <FormInput
             type="text"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
@@ -479,8 +496,18 @@ export default function SellLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Price per {params.tokenType.toUpperCase()}</LabelStyle>
+            <LabelStyle>Price</LabelStyle>
           </LabelStyleDiv>
+          <FormLabel
+            sx={{
+              color: 'Gray',
+              fontSize: 8,
+              paddingTop: 2.5,
+              paddingRight: 1.5,
+            }}
+          >
+            {params.tokenType.toUpperCase() + ' '}
+          </FormLabel>
           <FormInput
             type="text"
             onChange={(event) => handlePricePerOptions(event.target.value)}
@@ -491,26 +518,42 @@ export default function SellLimit(props: {
             <LabelStyle>You Receive</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            {pricePerOption * numberOfOptions > 0
-              ? (pricePerOption * numberOfOptions).toFixed(2)
-              : 0.0}
-            {' ' + option.collateralToken.symbol}
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.symbol + ' '}
+              </FormLabel>
+              <FormLabel>
+                {pricePerOption * numberOfOptions > 0
+                  ? (pricePerOption * numberOfOptions).toFixed(4)
+                  : (0).toFixed(4)}
+              </FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>
-              {params.tokenType.toUpperCase()} in Wallet
-            </LabelGrayStyle>
+            <LabelGrayStyle>Wallet Balance</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>{walletBalance.toFixed(4)}</LabelGrayStyle>
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {params.tokenType.toUpperCase() + ' '}
+              </FormLabel>
+              <FormLabel>{walletBalance.toFixed(4)}</FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>Order Expires in</LabelGrayStyle>
-            <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
+            <Stack direction={'row'} spacing={0.5}>
+              <FormLabel sx={{ color: 'White' }}>Order Expires in</FormLabel>
+              <InfoTooltip
+                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
+                sx={{ color: 'Gray', fontSize: 2 }}
+              >
+                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
+              </InfoTooltip>
+            </Stack>
           </LabelStyleDiv>
           <LimitOrderExpiryDiv>
             <FormControl className={classes.formControl}>
@@ -536,12 +579,30 @@ export default function SellLimit(props: {
                 <MenuItem value={60}>
                   <LabelGrayStyle>1 Hour</LabelGrayStyle>
                 </MenuItem>
+                <MenuItem value={60 * 4}>
+                  <LabelGrayStyle>4 Hours</LabelGrayStyle>
+                </MenuItem>
+                <MenuItem value={60 * 12}>
+                  <LabelGrayStyle>12 Hours</LabelGrayStyle>
+                </MenuItem>
+                <MenuItem value={60 * 24}>
+                  <LabelGrayStyle>1 Day</LabelGrayStyle>
+                </MenuItem>
+                <MenuItem value={60 * 24 * 7}>
+                  <LabelGrayStyle>7 Days</LabelGrayStyle>
+                </MenuItem>
+                <MenuItem value={60 * 24 * 14}>
+                  <LabelGrayStyle>14 Days</LabelGrayStyle>
+                </MenuItem>
+                <MenuItem value={60 * 24 * 30}>
+                  <LabelGrayStyle>1 Month</LabelGrayStyle>
+                </MenuItem>
               </Select>
             </FormControl>
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="35%">
+        <Box marginLeft={isApproved ? 13 : 16} marginBottom={2}>
           <Button
             variant="contained"
             color="primary"

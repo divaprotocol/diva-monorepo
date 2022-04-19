@@ -16,7 +16,7 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { BigNumber } from '@0x/utils'
+import { useWallet } from '@web3-ui/hooks'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -73,53 +73,49 @@ function mapOrderData(
     const takerToken = order.takerToken
     const collateralToken = option.collateralToken.id.toLowerCase()
     const tokenAddress = optionTokenAddress.toLowerCase()
-    const makerAmount = new BigNumber(order.makerAmount)
-    const takerAmount = new BigNumber(order.takerAmount)
     const orders: any = {}
     if (makerToken === collateralToken && takerToken === tokenAddress) {
+      const takerAmount = formatUnits(order.takerAmount)
+      const makerAmount = formatUnits(
+        order.makerAmount.toString(),
+        option.collateralToken.decimals
+      )
+      const remainingTakerAmount = formatUnits(
+        metaData.remainingFillableTakerAmount
+      )
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
-      const bidAmount = makerAmount.dividedBy(takerAmount)
+      const bidAmount = Number(makerAmount) / Number(takerAmount)
       orders.bid = bidAmount
-      const remainingTakerAmount = new BigNumber(
-        metaData.remainingFillableTakerAmount.toString()
-      )
-      if (remainingTakerAmount.lt(takerAmount)) {
-        const nbrOptions = Number(
-          formatUnits(
-            remainingTakerAmount.toString(),
-            option.collateralToken.decimals
-          )
-        )
+      if (remainingTakerAmount < takerAmount) {
+        const nbrOptions = Number(remainingTakerAmount)
         orders.nbrOptions = nbrOptions
       } else {
-        const nbrOptions = Number(
-          formatUnits(takerAmount.toString(), option.collateralToken.decimals)
-        )
+        const nbrOptions = Number(takerAmount)
         orders.nbrOptions = nbrOptions
       }
     }
     if (makerToken === tokenAddress && takerToken === collateralToken) {
+      const takerAmount = formatUnits(
+        order.takerAmount,
+        option.collateralToken.decimals
+      )
+      const remainingTakerAmount = formatUnits(
+        metaData.remainingFillableTakerAmount,
+        option.collateralToken.decimals
+      )
+      const makerAmount = formatUnits(order.makerAmount)
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'sell'
       orders.id = 'sell' + records.indexOf(record as never)
-      const askAmount = takerAmount.dividedBy(makerAmount)
+      const askAmount = Number(takerAmount) / Number(makerAmount)
       orders.ask = askAmount
-      const remainingTakerAmount = new BigNumber(
-        metaData.remainingFillableTakerAmount
-      )
-      if (remainingTakerAmount.eq(makerAmount)) {
-        const nbrOptions = Number(
-          formatUnits(makerAmount.toString(), option.collateralToken.decimals)
-        )
-        orders.nbrOptions = nbrOptions
+      if (remainingTakerAmount == makerAmount) {
+        orders.nbrOptions = Number(makerAmount)
       } else {
-        const quantity = remainingTakerAmount.dividedBy(askAmount)
-        const nbrOptions = Number(
-          formatUnits(quantity.toString(), option.collateralToken.decimals)
-        )
-        orders.nbrOptions = nbrOptions
+        const quantity = Number(remainingTakerAmount) / askAmount
+        orders.nbrOptions = quantity
       }
     }
     return orders
@@ -197,13 +193,15 @@ export default function OrderBook(props: {
     BUY: 0,
     SELL: 1,
   }
-
+  const wallet = useWallet()
+  const chainId = wallet?.provider?.network?.chainId || 137
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
-        option.collateralToken.id
+        option.collateralToken.id,
+        chainId
       )
       if (rSell.length > 0) {
         responseSell = rSell
@@ -213,7 +211,8 @@ export default function OrderBook(props: {
     if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
-        optionTokenAddress
+        optionTokenAddress,
+        chainId
       )
       if (rBuy.length > 0) {
         responseBuy = rBuy
