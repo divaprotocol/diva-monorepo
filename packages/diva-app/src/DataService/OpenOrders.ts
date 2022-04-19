@@ -1,19 +1,40 @@
 import axios from 'axios'
-const ordersUrl = 'https://ropsten.api.0x.org/orderbook/v1/orders?makerToken='
-
 // TODO: replace with appsync
+import { config } from '../constants'
+
 export const get0xOpenOrders = (
   CollateralToken: string,
-  TokenAddress: string
+  TokenAddress: string,
+  chainId: number
 ) => {
   const res = axios
-    .get(ordersUrl + CollateralToken + '&takerToken=' + TokenAddress)
+    .get(
+      config[chainId].allOrders +
+        '?makerToken=' +
+        CollateralToken +
+        '&takerToken=' +
+        TokenAddress
+    )
     .then(function (response) {
       return response.data.records
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error(err)
       return {}
     })
 
+  return res
+}
+
+export const getOrderDetails = (orderHash: string, chainId) => {
+  const res = axios
+    .get(config[chainId].order + orderHash)
+    .then(function (response) {
+      return response.data
+    })
+    .catch((err) => {
+      console.error(err)
+      return {}
+    })
   return res
 }

@@ -58,7 +58,7 @@ const LineSeriesDiv = styled.div`
 const LabelDiv = styled.div`
   margin-left: 50px;
   margin-right: 50px;
-  marting-top: 20px;
+  margin-top: 20px;
   padding-left: 5px;
   padding-right: 5px;
   display: flex;

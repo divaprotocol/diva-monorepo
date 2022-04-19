@@ -2,13 +2,25 @@ import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { Divider, MenuItem, Stack, useTheme } from '@mui/material'
+import {
+  Container,
+  Divider,
+  FormLabel,
+  MenuItem,
+  Stack,
+  useTheme,
+} from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
-import { LabelStyle, SubLabelStyle } from './UiStyles'
+import {
+  ExpectedRateInfoText,
+  InfoTooltip,
+  LabelStyle,
+  SubLabelStyle,
+} from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -21,7 +33,6 @@ import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const contractAddress = require('@0x/contract-addresses')
 import {
   formatEther,
   formatUnits,
@@ -51,12 +62,13 @@ export default function BuyLimit(props: {
   option: Pool
   handleDisplayOrder: () => any
   tokenAddress: string
+  exchangeProxy: string
+  chainId: number
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const wallet = useWallet()
   const chainId = wallet?.provider?.network?.chainId || 3
-  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxyAddress = address.exchangeProxy
+  const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
   const makerToken = props.tokenAddress
   const classes = useStyles()
@@ -215,6 +227,7 @@ export default function BuyLimit(props: {
             collateralDecimals: option.collateralToken.decimals,
             limitPrice: pricePerOption,
             orderExpiry: expiry,
+            exchangeProxy: exchangeProxyAddress,
           }
 
           buylimitOrder(orderData)
@@ -239,7 +252,11 @@ export default function BuyLimit(props: {
     let existingOrdersAmount = new BigNumber(0)
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
-      const rBuy = await get0xOpenOrders(option.collateralToken.id, makerToken)
+      const rBuy = await get0xOpenOrders(
+        option.collateralToken.id,
+        makerToken,
+        chainId
+      )
       if (rBuy.length > 0) {
         responseBuy = rBuy
       }
@@ -280,9 +297,7 @@ export default function BuyLimit(props: {
       let allowance = await takerTokenContract.methods
         .allowance(takerAccount, exchangeProxyAddress)
         .call()
-      allowance = Number(
-        formatUnits(allowance, option.collateralToken.decimals)
-      )
+      allowance = Number(formatUnits(allowance))
       let balance = await takerTokenContract.methods
         .balanceOf(takerAccount)
         .call()
@@ -489,8 +504,18 @@ export default function BuyLimit(props: {
       <form onSubmit={(event) => handleOrderSubmit(event)}>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Number of {params.tokenType.toUpperCase()}</LabelStyle>
+            <LabelStyle>Number</LabelStyle>
           </LabelStyleDiv>
+          <FormLabel
+            sx={{
+              color: 'Gray',
+              fontSize: 8,
+              paddingTop: 2.5,
+              paddingRight: 1.5,
+            }}
+          >
+            {params.tokenType.toUpperCase() + ' '}
+          </FormLabel>
           <FormInput
             type="text"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
@@ -498,8 +523,18 @@ export default function BuyLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelStyle>Price per {params.tokenType.toUpperCase()}</LabelStyle>
+            <LabelStyle>Price</LabelStyle>
           </LabelStyleDiv>
+          <FormLabel
+            sx={{
+              color: 'Gray',
+              fontSize: 8,
+              paddingTop: 2.5,
+              paddingRight: 1.5,
+            }}
+          >
+            {params.tokenType.toUpperCase() + ' '}
+          </FormLabel>
           <FormInput
             type="text"
             onChange={(event) => handlePricePerOptions(event.target.value)}
@@ -507,15 +542,20 @@ export default function BuyLimit(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <Stack spacing={0.5}>
+            <Stack>
               <LabelStyle>You Pay </LabelStyle>
-              <SubLabelStyle>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
                 Remaining allowance: {remainingApprovalAmount}
-              </SubLabelStyle>
+              </FormLabel>
             </Stack>
           </LabelStyleDiv>
           <RightSideLabel>
-            {youPay.toFixed(4) + ' '} {option.collateralToken.symbol}
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.6 }}>
+                {option.collateralToken.symbol}
+              </FormLabel>
+              <FormLabel>{youPay.toFixed(4) + ' '}</FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
@@ -523,15 +563,25 @@ export default function BuyLimit(props: {
             <LabelGrayStyle>Wallet Balance</LabelGrayStyle>
           </LabelStyleDiv>
           <RightSideLabel>
-            <LabelGrayStyle>
-              {collateralBalance.toFixed(4)} {option.collateralToken.symbol}
-            </LabelGrayStyle>
+            <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+                {option.collateralToken.symbol}
+              </FormLabel>
+              <FormLabel>{collateralBalance.toFixed(4)}</FormLabel>
+            </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>Order Expires in</LabelGrayStyle>
-            <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
+            <Stack direction={'row'} spacing={0.5}>
+              <FormLabel sx={{ color: 'White' }}>Order Expires in</FormLabel>
+              <InfoTooltip
+                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
+                sx={{ color: 'Gray', fontSize: 2 }}
+              >
+                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
+              </InfoTooltip>
+            </Stack>
           </LabelStyleDiv>
           <LimitOrderExpiryDiv>
             <FormControl className={classes.formControl}>
@@ -557,12 +607,30 @@ export default function BuyLimit(props: {
                 <MenuItem value={60}>
                   <LabelGrayStyle>1 Hour</LabelGrayStyle>
                 </MenuItem>
+                <MenuItem value={60 * 4}>
+                  <LabelGrayStyle>4 Hours</LabelGrayStyle>
+                </MenuItem>
+                <MenuItem value={60 * 12}>
+                  <LabelGrayStyle>12 Hours</LabelGrayStyle>
+                </MenuItem>
+                <MenuItem value={60 * 24}>
+                  <LabelGrayStyle>1 Day</LabelGrayStyle>
+                </MenuItem>
+                <MenuItem value={60 * 24 * 7}>
+                  <LabelGrayStyle>7 Days</LabelGrayStyle>
+                </MenuItem>
+                <MenuItem value={60 * 24 * 14}>
+                  <LabelGrayStyle>14 Days</LabelGrayStyle>
+                </MenuItem>
+                <MenuItem value={60 * 24 * 30}>
+                  <LabelGrayStyle>1 Month</LabelGrayStyle>
+                </MenuItem>
               </Select>
             </FormControl>
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="35%">
+        <Box marginLeft={isApproved ? 13 : 16} marginBottom={2}>
           <Button
             variant="contained"
             color="primary"
