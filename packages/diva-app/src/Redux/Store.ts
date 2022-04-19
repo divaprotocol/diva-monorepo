@@ -5,7 +5,8 @@ import statsReducer from './Stats'
 import { poolSlice } from './poolSlice'
 import { debounce } from '../lib/debounce'
 const store = configureStore({
-  preloadedState: JSON.parse(localStorage.getItem('diva-app-state')) || {},
+  preloadedState:
+    JSON.parse(localStorage.getItem('diva-app-state-local')) || {},
   reducer: {
     tradeOption: tradeReducer,
     activeTab: activeTabReducer,
@@ -20,7 +21,7 @@ export type AppDispatch = typeof store.dispatch
 store.subscribe(
   debounce(() => {
     const serializedState = JSON.stringify(store.getState())
-    localStorage.setItem('diva-app-state', serializedState)
+    localStorage.setItem('diva-app-state-local', serializedState)
   }, 1000)
 )
 
