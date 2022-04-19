@@ -1,13 +1,17 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { BigNumber } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
-import { Pool, queryPool, queryPools } from '../lib/queries'
+import {
+  Pool,
+  queryOrdersByMakerToken,
+  queryPool,
+  queryPools,
+} from '../lib/queries'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
 import { RootState } from './Store'
-import { get0xOpenOrders } from '../DataService/OpenOrders'
-import { config } from '../constants'
+import { config, orderBookEndpoint } from '../constants'
 
 type Wallet = {
   chainId: number
@@ -45,20 +49,32 @@ const initialState: PoolByChain = {
 export const fetchOrders = createAsyncThunk(
   'pools/orders',
   async ({ pool, isLong }: { pool: Pool; isLong: boolean }) => {
-    const tokenAddress = pool[isLong ? 'longToken' : 'shortToken'].id
-    const sellOrders: any = await get0xOpenOrders(
-      tokenAddress,
-      pool.collateralToken.id
-    )
-    const buyOrders: any = await get0xOpenOrders(
-      pool.collateralToken.id,
-      tokenAddress
-    )
+    const res = await Promise.all([
+      request<{ pool: Pool }>(
+        orderBookEndpoint,
+        queryOrdersByMakerToken({ makerToken: pool.longToken.id })
+      ),
+      request<{ pool: Pool }>(
+        orderBookEndpoint,
+        queryOrdersByMakerToken({ makerToken: pool.shortToken.id })
+      ),
+    ])
 
-    return {
-      buyOrders,
-      sellOrders,
-    }
+    console.log({ res })
+
+    // const sellOrders: any = await get0xOpenOrders(
+    //   tokenAddress,
+    //   pool.collateralToken.id
+    // )
+    // const buyOrders: any = await get0xOpenOrders(
+    //   pool.collateralToken.id,
+    //   tokenAddress
+    // )
+
+    // return {
+    //   buyOrders,
+    //   sellOrders,
+    // }
   }
 )
 
@@ -163,13 +179,13 @@ export const poolSlice = createSlice({
       addPools(state, action.payload)
     })
 
-    builder.addCase(fetchOrders.fulfilled, (state, action) => {
-      const orders = state.orders[action.meta.arg.pool.id]
-      state.orders[action.meta.arg.pool.id] = {
-        ...orders,
-        [action.meta.arg.isLong ? 'long' : 'short']: action.payload,
-      }
-    })
+    // builder.addCase(fetchOrders.fulfilled, (state, action) => {
+    //   const orders = state.orders[action.meta.arg.pool.id]
+    //   state.orders[action.meta.arg.pool.id] = {
+    //     ...orders,
+    //     [action.meta.arg.isLong ? 'long' : 'short']: action.payload,
+    //   }
+    // })
   },
 })
 

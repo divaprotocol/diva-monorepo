@@ -1,5 +1,5 @@
 import { Construct } from "constructs";
-import { App, TerraformStack } from "cdktf";
+import { App, S3Backend, TerraformStack } from "cdktf";
 import {
   AppsyncApiKey,
   AppsyncDatasource,
@@ -10,10 +10,18 @@ import { AwsProvider } from "@cdktf/provider-aws";
 import { id } from "./lib/id";
 import { DynamodbTable } from "@cdktf/provider-aws/lib/dynamodb";
 import { IamRole, IamRolePolicy } from "@cdktf/provider-aws/lib/iam";
+import { tags } from "./lib/tags";
 
 class DivaStack extends TerraformStack {
   constructor(scope: Construct, name: string) {
     super(scope, name);
+
+    new S3Backend(this, {
+      region: "eu-west-2",
+      key: id("TerraformS3Backend"),
+      bucket: "divaterraformlockfiles",
+      dynamodbTable: "TerraformLock",
+    });
 
     new AwsProvider(this, id("provider"), {
       region: "eu-west-2",
@@ -36,6 +44,7 @@ class DivaStack extends TerraformStack {
           type: "S",
         },
       ],
+      tags: tags({}),
     });
 
     const api = new AppsyncGraphqlApi(this, id("OrderbookAppsyncApi"), {
@@ -109,14 +118,18 @@ class DivaStack extends TerraformStack {
     
       type Query {
         order(id: ID!): Order
-        orders(makerToken: String, limit: Int, nextToken: String): PaginatedOrders
+        ordersByMakerToken(makerToken: String, limit: Int, nextToken: String): PaginatedOrders
       }
       `,
+      tags: tags({}),
     });
 
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 30);
 
     new AppsyncApiKey(this, id("OrderbookAppsyncApiKey"), {
       apiId: api.id,
+      expires: expiryDate.toISOString(),
     });
 
     const iamRole = new IamRole(this, id("OrderbookDatasourceRole"), {
@@ -133,6 +146,7 @@ class DivaStack extends TerraformStack {
           }
         ]
       }`,
+      tags: tags({}),
     });
 
     const dataSource = new AppsyncDatasource(this, id("OrderbookDatasource"), {
@@ -167,28 +181,26 @@ class DivaStack extends TerraformStack {
       `,
     });
 
-    new AppsyncResolver(this, id("OrderbookAppsyncResolverGetOrders"), {
+    new AppsyncResolver(this, id("GetOrdersByMakerToken"), {
       apiId: api.id,
-      field: "orders",
+      field: "ordersByMakerToken",
       type: "Query",
       dataSource: dataSource.name,
       requestTemplate: `{
         "version" : "2017-02-28",
         "operation" : "Query"
-        #if($ctx.args.count)
-          ,"limit": $util.toJson($ctx.args.count)
+        #if($ctx.args.limit)
+          ,"limit": $util.toJson($ctx.args.limit)
         #end
         #if($ctx.args.nextToken)
           ,"nextToken": $util.toJson($ctx.args.nextToken)
         #end
-        #if($ctx.args.makerToken)
         ,"query" : {
           "expression": "makerToken = :makerToken",
             "expressionValues" : {
               ":makerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.makerToken)
             }
         }
-        #end
     }`,
       responseTemplate: `$util.toJson($ctx.result)`,
     });

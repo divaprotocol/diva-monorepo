@@ -7,6 +7,8 @@ type SingleConfig = {
 }
 
 export const projectId = 'e3ea5575a42b4de7be15d7c197c12045'
+export const orderBookEndpoint =
+  'https://laivdkxggzhedgcpjh2wsulnxi.appsync-api.eu-west-2.amazonaws.com/graphql'
 
 export const config: { [key: number]: SingleConfig } = {
   1: {

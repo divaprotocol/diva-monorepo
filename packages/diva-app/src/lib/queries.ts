@@ -396,29 +396,36 @@ type Order = {
 /**
  * Orderbook
  */
-export const queryOrders = gql`
-  orders {
-    items {
-      id
-      pool
-      feeRecipient
-      takerTokenFeeAmount
-      makerToken
-      takerToken
-      makerAmount
-      takerAmount
-      maker
-      taker
-      sender
-      expiry
-      salt
-      chainId
-      verifyingContract
-      signature {
-        signatureType
-        r
-        s
-        v
+export const queryOrdersByMakerToken = (props: {
+  makerToken: string
+  nextToken?: string
+}) => gql`
+  {
+    orders (makerToken: "${props.makerToken}" ${
+  props.nextToken != null ? ', nextToken: ' + props.nextToken : ''
+}) {
+      items {
+        id
+        pool
+        feeRecipient
+        takerTokenFeeAmount
+        makerToken
+        takerToken
+        makerAmount
+        takerAmount
+        maker
+        taker
+        sender
+        expiry
+        salt
+        chainId
+        verifyingContract
+        signature {
+          signatureType
+          r
+          s
+          v
+        }
       }
     }
   }
@@ -435,7 +442,12 @@ export const createOrder = (order: Order) => gql`
     pool: "${order.pool}",
     salt: "${order.salt}",
     sender: "${order.sender}",
-    signature: ${order.signature},
+    signature: {
+      r: "${order.signature.r}",
+      s: "${order.signature.s}",
+      v: "${order.signature.v}",
+      signatureType: "${order.signature.signatureType}",
+    },
     taker: "${order.taker}",
     takerAmount: "${order.takerAmount}",
     takerToken: "${order.takerToken}",
