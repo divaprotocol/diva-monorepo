@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
-import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
+import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import { Box, Input, InputAdornment } from '@mui/material'
 import { LineSeries, XYPlot } from 'react-vis'
 import { Search } from '@mui/icons-material'

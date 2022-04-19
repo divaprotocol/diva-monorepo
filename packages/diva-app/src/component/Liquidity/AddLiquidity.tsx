@@ -36,11 +36,9 @@ const MaxCollateral = styled.u`
     color: ${(props) => (props.theme as any).palette.primary.main};
   }
 `
-const BlackTextTypography = withStyles({
-  root: {
-    color: '#000000',
-  },
-})(Typography)
+const BlackTextTypography = (props) => (
+  <Typography color={'#000'}>{props.children}</Typography>
+)
 
 type Props = {
   pool?: any

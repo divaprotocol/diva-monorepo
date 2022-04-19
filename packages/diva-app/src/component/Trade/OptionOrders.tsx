@@ -3,7 +3,6 @@ import { useAppSelector, useAppDispatch } from '../../Redux/hooks'
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
-import { withStyles } from '@mui/styles'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -22,12 +21,6 @@ import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import { useWallet } from '@web3-ui/hooks'
-const TableCellStyle = withStyles(() => ({
-  root: {
-    height: '10px',
-    padding: '10px',
-  },
-}))(TableCell)
 
 const PageDiv = styled.div`
   width: 100%;
@@ -41,11 +34,9 @@ const NoOrderTextDiv = styled.div`
   margin-bottom: 8%;
 `
 
-const TableHeaderCell = withStyles(() => ({
-  root: {
-    fontWeight: 100,
-  },
-}))(TableCell)
+const TableHeaderCell = (props) => (
+  <TableCell sx={{ fontWeight: 100 }}>{props.children}</TableCell>
+)
 
 function mapOrderData(
   records: [],
@@ -246,7 +237,7 @@ export default function OpenOrders(props: {
                 const labelId = `enhanced-table-${index}`
                 return (
                   <TableRow key={index} hover>
-                    <TableCellStyle
+                    <TableCell
                       component="th"
                       id={labelId}
                       scope="row"
@@ -260,29 +251,29 @@ export default function OpenOrders(props: {
                           {order.expiry}
                         </Typography>
                       </Box>
-                    </TableCellStyle>
-                    <TableCellStyle align="center">
+                    </TableCell>
+                    <TableCell align="center">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {order.nbrOptions}
                         </Typography>
                       </Box>
-                    </TableCellStyle>
-                    <TableCellStyle align="center">
+                    </TableCell>
+                    <TableCell align="center">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {order.pricePerOption.toFixed(2)}
                         </Typography>
                       </Box>
-                    </TableCellStyle>
-                    <TableCellStyle align="center">
+                    </TableCell>
+                    <TableCell align="center">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {order.payReceive.toFixed(2)}
                         </Typography>
                       </Box>
-                    </TableCellStyle>
-                    <TableCellStyle align="right">
+                    </TableCell>
+                    <TableCell align="right">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           <Button
@@ -295,7 +286,7 @@ export default function OpenOrders(props: {
                           </Button>
                         </Typography>
                       </Box>
-                    </TableCellStyle>
+                    </TableCell>
                   </TableRow>
                 )
               })
