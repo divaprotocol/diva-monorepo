@@ -16,10 +16,8 @@ import { useConnectionContext } from './hooks/useConnectionContext'
 import MenuItems from './component/Header/MenuItems'
 
 export const App = () => {
-  const { provider, address: userAddress } = useConnectionContext()
+  const { address: userAddress, chainId } = useConnectionContext()
   const dispatch = useDispatch()
-  const chainId = provider?.network?.chainId
-  const pools = useAppSelector((state) => poolsSelector(state))
 
   useEffect(() => {
     dispatch(
@@ -38,9 +36,7 @@ export const App = () => {
      */
     const interval = setInterval(pollPools, 1000 * 60)
 
-    if (pools.length <= 0) {
-      pollPools()
-    }
+    pollPools()
 
     return () => {
       clearInterval(interval)

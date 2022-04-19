@@ -32,6 +32,7 @@ export const ConnectionProvider = ({ children }) => {
     connected?: string
   }>('diva-dapp-connection', {})
   const [state, setState] = useState<ConnectionContextState>({ chainId: 3 })
+
   const connect = useCallback(async () => {
     const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
     setState((_state) => ({
@@ -49,27 +50,37 @@ export const ConnectionProvider = ({ children }) => {
       address: undefined,
       isConnected: false,
     }))
+    console.log('disconnect?')
     setConnectionState({})
   }, [])
 
   useEffect(() => {
     if (!ethereum?.isMetaMask) {
-      setState({
-        ...state,
+      setState((_state) => ({
+        ..._state,
         error: 'Please install metamask',
-      })
+      }))
       console.log('not metamask')
       return
     }
 
     ethereum.on('accountsChanged', (accounts) => {
-      console.log('accounts changed')
-      setState((_state) => ({ ...state, address: accounts?.[0] }))
+      console.log('accounts changed', accounts)
+      setState((_state) => ({
+        ..._state,
+        address: accounts?.[0],
+        chainId: BigNumber.from(ethereum.chainId).toNumber(),
+        isConnected: ethereum.isConnected(),
+      }))
     })
 
     ethereum.on('chainChanged', (chainId) => {
       console.log('chain changed')
-      setState((_state) => ({ ...state, chainId }))
+      setState((_state) => ({
+        ..._state,
+        isConnected: ethereum.isConnected(),
+        chainId: BigNumber.from(ethereum.chainId).toNumber(),
+      }))
     })
 
     ethereum.on('connect', (connectInfo) => {
@@ -82,8 +93,8 @@ export const ConnectionProvider = ({ children }) => {
     })
 
     ethereum.on('disconnect', (connectInfo) => {
-      setState((_state) => ({ ..._state, isConnected: ethereum.isConnected() }))
       console.log('disconnect', { connectInfo })
+      setState((_state) => ({ ..._state, isConnected: ethereum.isConnected() }))
     })
 
     detectEthereumProvider().then((provider: MetamaskProvider) =>

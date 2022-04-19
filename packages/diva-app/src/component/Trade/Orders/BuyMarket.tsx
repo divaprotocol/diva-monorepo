@@ -2,9 +2,6 @@ import React, { useState } from 'react'
 import { useEffect } from 'react'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
-import Typography from '@mui/material/Typography'
-import Slider from '@mui/material/Slider'
-import Input from '@mui/material/Input'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { buyMarketOrder } from '../../../Orders/BuyMarket'
@@ -13,27 +10,33 @@ import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
 import { FormInput } from './UiStyles'
 import { RightSideLabel } from './UiStyles'
-import { FormControlDiv } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
-import { SliderDiv } from './UiStyles'
 import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
-import { MaxSlippageText } from './UiStyles'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
-import { fetchOrders, orderSelector } from '../../../Redux/poolSlice'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
-import { Stack } from '@mui/material'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
-import { FormLabel, InputLabel, Paper, Stack, useTheme } from '@mui/material'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
+import { FormLabel, Stack, useTheme } from '@mui/material'
+import { BigNumber as BigENumber } from 'ethers'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
+import {
+  setBreakEven,
+  setIntrinsicValue,
+  setMaxPayout,
+  setMaxYield,
+} from '../../../Redux/Stats'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
@@ -307,7 +310,7 @@ export default function BuyMarket(props: {
 
   useEffect(() => {
     if (userAddress != null) {
-      getCollateralInWallet(userAddress).then((val) => {
+      getCollateralInWallet(userAddress).then(async (val) => {
         !Number.isNaN(val.balance)
           ? setCollateralBalance(Number(val.balance))
           : setCollateralBalance(0)
@@ -316,7 +319,7 @@ export default function BuyMarket(props: {
         setRemainingApprovalAmount(val.approvalAmount)
         val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
         if (responseSell.length > 0) {
-          const data = getSellLimitOrders()
+          const data = await getSellLimitOrders()
           setExistingSellLimitOrders(data.sortedOrders)
         }
         getTakerOrdersTotalAmount(val.account).then((amount) => {

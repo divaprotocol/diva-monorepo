@@ -3,18 +3,15 @@ import PoolsTable, { PayoffCell } from '../PoolsTable'
 import { formatUnits } from 'ethers/lib/utils'
 import { getDateTime } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { Pool } from '../../lib/queries'
-import { createdByFilterAddressForMarket } from '../../constants'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import styled from '@emotion/styled'
 import { CoinIconPair } from '../CoinIcon'
-import { poolsSelector } from '../../Redux/poolSlice'
+import { selectMainPools, selectOtherPools } from '../../Redux/poolSlice'
 import { useAppSelector } from '../../Redux/hooks'
-import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const columns: GridColDef[] = [
   {
@@ -71,37 +68,13 @@ const columns: GridColDef[] = [
 ]
 
 export default function Markets() {
-  const { chainId } = useConnectionContext()
   const [value, setValue] = useState(0)
-  const [mainPools, setMainPools] = useState<Pool[]>([])
-  const [otherPools, setOtherPools] = useState<Pool[]>([])
-  const [pools, setPools] = useState<Pool[]>([])
   const [page, setPage] = useState(0)
+  const mainPools = useAppSelector(selectMainPools)
+  const otherPools = useAppSelector(selectOtherPools)
+  console.log({ mainPools })
 
-  const poolsData = useAppSelector((state) => poolsSelector(state))
-  useEffect(() => {
-    /**
-     * TODO make selectors out of these
-     */
-    const updatePools = async () => {
-      const mainPoolsData = poolsData.filter(
-        (p) => p.createdBy === createdByFilterAddressForMarket
-      )
-      const otherPoolsData = poolsData.filter(
-        (p) => p.createdBy !== createdByFilterAddressForMarket
-      )
-
-      setMainPools(mainPoolsData)
-      setOtherPools(otherPoolsData)
-      setPools(mainPoolsData)
-    }
-    updatePools()
-  }, [chainId, poolsData.length])
-
-  useEffect(() => {
-    if (value === 0) setPools(mainPools)
-    if (value === 1) setPools(otherPools)
-  }, [value, mainPools, otherPools])
+  const pools = value === 0 ? mainPools : otherPools
 
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
@@ -211,12 +184,10 @@ export default function Markets() {
 
   return (
     <>
-      <Container>
-        <Tabs value={value} onChange={handleChange} variant="standard">
-          <Tab label="Main" />
-          <Tab label="Other" />
-        </Tabs>
-      </Container>
+      <Tabs value={value} onChange={handleChange} variant="standard">
+        <Tab label="Main" />
+        <Tab label="Other" />
+      </Tabs>
       <PoolsTable
         columns={columns}
         rows={filteredRows}

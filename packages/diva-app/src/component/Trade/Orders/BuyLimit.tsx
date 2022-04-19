@@ -2,26 +2,13 @@ import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { MenuItem, Stack, useTheme } from '@mui/material'
-import {
-  Container,
-  Divider,
-  FormLabel,
-  MenuItem,
-  Stack,
-  useTheme,
-} from '@mui/material'
+import { FormLabel, MenuItem, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
-import {
-  ExpectedRateInfoText,
-  InfoTooltip,
-  LabelStyle,
-  SubLabelStyle,
-} from './UiStyles'
+import { ExpectedRateInfoText, InfoTooltip, LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -45,7 +32,6 @@ import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
-import Typography from '@mui/material/Typography'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'

@@ -1,5 +1,6 @@
 import Button from '@mui/material/Button'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 export function ConnectWalletButton() {
   const context = useConnectionContext()
@@ -15,7 +16,11 @@ export function ConnectWalletButton() {
         context?.isConnected ? context.disconnect() : context.connect()
       }
     >
-      {context?.isConnected ? 'Disconnect' : 'Connect Wallet'}
+      {context?.isConnected
+        ? context.address != null
+          ? getShortenedAddress(context.address)
+          : ''
+        : 'Connect Wallet'}
     </Button>
   )
 }

@@ -7,8 +7,7 @@ import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
 import { RootState } from './Store'
 import { get0xOpenOrders } from '../DataService/OpenOrders'
-import { config } from '../constants'
-import { ChainId } from '@0x/contract-addresses'
+import { config, whitelistedPoolCreatorAddress } from '../constants'
 
 type Wallet = {
   chainId: number
@@ -17,30 +16,41 @@ type Wallet = {
 
 type PoolByChain = {
   wallet?: Wallet
-  pools: Pool[]
-  isBuy: boolean
-  underlyingPrice: {
-    [poolId: string]: string
-  }
-  orders: {
-    [poolId: string]: {
-      long: {
-        sell: any[]
-        buy: any[]
-      }
-      short: {
-        sell: any[]
-        buy: any[]
+  [chainId: number]: {
+    pools: Pool[]
+    isBuy: boolean
+    underlyingPrice: {
+      [poolId: string]: string
+    }
+    orders: {
+      [poolId: string]: {
+        long: {
+          sell: any[]
+          buy: any[]
+        }
+        short: {
+          sell: any[]
+          buy: any[]
+        }
       }
     }
   }
 }
 
-const initialState: PoolByChain = {
-  pools: [],
+const defaultPoolState = {
   isBuy: true,
+  pools: [],
   underlyingPrice: {},
   orders: {},
+}
+
+const initialState: PoolByChain = {
+  1: defaultPoolState,
+  3: defaultPoolState,
+  4: defaultPoolState,
+  42: defaultPoolState,
+  137: defaultPoolState,
+  80001: defaultPoolState,
 }
 
 export const fetchOrders = createAsyncThunk(
@@ -90,6 +100,8 @@ export const fetchPools = createAsyncThunk(
   async (args, store) => {
     let res: Pool[] = []
     const state = store.getState() as RootState
+    const chainId = state.poolSlice.wallet?.chainId || 3
+    console.log('fetch pools', { chainId })
     if (
       state.poolSlice.wallet?.chainId != null &&
       config[state.poolSlice.wallet?.chainId] == null
@@ -98,7 +110,7 @@ export const fetchPools = createAsyncThunk(
         `chainId ${state.poolSlice.wallet?.chainId} is not configured in constants`
       )
     }
-    const graphUrl = config[state.poolSlice.wallet?.chainId || 3].divaSubgraph
+    const graphUrl = config[chainId].divaSubgraph
 
     let lastId = '0'
     let lastRes: Pool[]
@@ -112,12 +124,16 @@ export const fetchPools = createAsyncThunk(
       res = res.concat(lastRes)
     }
 
-    return res
+    return {
+      pools: res,
+      chainId,
+    }
   }
 )
 
-const addPools = (state: PoolByChain, pools: Pool[]) => {
+const addPools = (_state: PoolByChain, pools: Pool[], chainId?: number) => {
   const newPools = pools.map((p) => p.id)
+  const state = _state[chainId || _state.wallet?.chainId || 3]
   const oldPools = state.pools.filter((p) => !newPools.includes(p.id))
   state.pools = pools.concat(oldPools)
   state.pools.sort((a, b) => {
@@ -132,22 +148,9 @@ export const poolSlice = createSlice({
   initialState,
   reducers: {
     setIsBuy: (state, action: PayloadAction<boolean>) => {
-      state.isBuy = action.payload
+      state[state.wallet?.chainId || 3].isBuy = action.payload
     },
     setWallet: (state, action: PayloadAction<Wallet>) => {
-      /**
-       * when set wallet is used - the redux state gets reset
-       * TODO: Store pool state by chain id, make this work with
-       * cache at some point
-       */
-      if (
-        state.wallet?.chainId !== action.payload.chainId &&
-        action.payload.chainId !== undefined
-      ) {
-        state.pools = []
-        state.orders = {}
-        state.underlyingPrice = {}
-      }
       state.wallet = action.payload
     },
     addPools: (state: PoolByChain, action: PayloadAction<Pool[]>) => {
@@ -156,7 +159,8 @@ export const poolSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(fetchUnderlyingPrice.fulfilled, (state, action) => {
-      state.underlyingPrice[action.meta.arg.id] = action.payload
+      const poolState = state[state.wallet?.chainId || 3]
+      poolState.underlyingPrice[action.meta.arg.id] = action.payload
     })
 
     builder.addCase(fetchPool.fulfilled, (state, action) => {
@@ -164,12 +168,13 @@ export const poolSlice = createSlice({
     })
 
     builder.addCase(fetchPools.fulfilled, (state, action) => {
-      addPools(state, action.payload)
+      addPools(state, action.payload.pools, action.payload.chainId)
     })
 
     builder.addCase(fetchOrders.fulfilled, (state, action) => {
-      const orders = state.orders[action.meta.arg.pool.id]
-      state.orders[action.meta.arg.pool.id] = {
+      const poolState = state[state.wallet?.chainId || 3]
+      const orders = poolState.orders[action.meta.arg.pool.id]
+      poolState.orders[action.meta.arg.pool.id] = {
         ...orders,
         [action.meta.arg.isLong ? 'long' : 'short']: action.payload,
       }
@@ -177,20 +182,27 @@ export const poolSlice = createSlice({
   },
 })
 
-export const isBuySelector = (state: RootState) => state.poolSlice.isBuy
+export const selectPoolState = (state: RootState) =>
+  state.poolSlice[state.poolSlice.wallet?.chainId || 3]
+
+export const isBuySelector = (state: RootState) => selectPoolState(state).isBuy
 
 export const poolSelector = (
   state: RootState,
   poolId: string
 ): Pool | undefined => {
-  return state.poolSlice.pools.find((p) => p?.id === poolId)
+  return selectPoolState(state).pools.find((p) => p?.id === poolId)
 }
 
-export const poolsSelector = (state: RootState): Pool[] | undefined =>
-  state.poolSlice.pools.map((p) => ({
+export const poolsSelector = (state: RootState) => {
+  const poolState = selectPoolState(state)
+  console.log({ poolState })
+
+  return selectPoolState(state).pools.map((p) => ({
     ...p,
     intrinsicValue: intrinsicSelector(state, p.id),
   }))
+}
 
 export const selectMyDataFeeds = (state: RootState) =>
   poolsSelector(state).filter(
@@ -198,7 +210,7 @@ export const selectMyDataFeeds = (state: RootState) =>
   )
 
 export const priceSelector = (state: RootState, poolId: string) =>
-  state.poolSlice.underlyingPrice[poolId]
+  selectPoolState(state).underlyingPrice[poolId]
 
 export const payoffSelector = (state: RootState, poolId: string) => {
   const pool = poolSelector(state, poolId)
@@ -272,9 +284,7 @@ export const orderSelector = (
   state: RootState,
   poolId: string,
   isLong: boolean
-) => {
-  return state.poolSlice.orders[poolId]?.[isLong ? 'long' : 'short']
-}
+) => selectPoolState(state).orders[poolId]?.[isLong ? 'long' : 'short']
 
 export const expectedRateSelector = (
   state: RootState,
@@ -379,4 +389,15 @@ export const breakEvenSelector = (
     return 'n/a'
   }
 }
+
+export const selectMainPools = (state: RootState) =>
+  selectPoolState(state).pools.filter(
+    (p) => p?.createdBy === whitelistedPoolCreatorAddress
+  )
+
+export const selectOtherPools = (state: RootState) =>
+  selectPoolState(state).pools.filter(
+    (p) => p?.createdBy !== whitelistedPoolCreatorAddress
+  )
+
 export const { setIsBuy, setWallet } = poolSlice.actions

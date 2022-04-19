@@ -18,12 +18,9 @@ export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
 
 store.subscribe(
-  // Save editor text, plagiarism data to localStorage
   debounce(() => {
     const serializedState = JSON.stringify(store.getState())
     localStorage.setItem('diva-app-state', serializedState)
-    // saveState('gc-slate-content', store.getState().editor.editorValue);
-    // saveState('gc-plagiarism-results', store.getState().editor.plagiarismData);
   }, 1000)
 )
 

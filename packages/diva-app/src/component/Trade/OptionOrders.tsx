@@ -22,6 +22,8 @@ import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { BigNumber } from '@0x/utils'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 
 const useStyles = makeStyles({
   table: {
@@ -119,8 +121,7 @@ export default function OpenOrders(props: {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const dispatch = useAppDispatch()
   const [orders, setOrders] = useState([])
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 137
+  const { chainId } = useConnectionContext()
   const componentDidMount = async () => {
     const orderBook: any = []
     if (responseSell.length === 0) {
