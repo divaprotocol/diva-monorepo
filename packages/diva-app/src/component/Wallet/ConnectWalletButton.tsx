@@ -1,14 +1,15 @@
-import Button from '@mui/material/Button'
+import { LoadingButton } from '@mui/lab'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 export function ConnectWalletButton() {
   const context = useConnectionContext()
   return (
-    <Button
+    <LoadingButton
       variant="contained"
       color="primary"
       size="large"
+      loading={context.chainId == null}
       type="submit"
       value="Submit"
       sx={{ marginLeft: '10px' }}
@@ -21,6 +22,6 @@ export function ConnectWalletButton() {
           ? getShortenedAddress(context.address)
           : ''
         : 'Connect Wallet'}
-    </Button>
+    </LoadingButton>
   )
 }

@@ -1,8 +1,10 @@
 import { BaseProvider, ExternalProvider } from '@ethersproject/providers'
 import { createContext, useCallback, useEffect, useState } from 'react'
-import { BigNumber, utils, providers } from 'ethers'
+import { BigNumber, providers } from 'ethers'
 import useLocalStorage from 'use-local-storage'
 import detectEthereumProvider from '@metamask/detect-provider'
+import { useDispatch } from 'react-redux'
+import { setChainId, setUserAddress } from '../Redux/appSlice'
 
 type MetamaskProvider = ExternalProvider &
   BaseProvider & {
@@ -19,8 +21,8 @@ type ConnectionContextState = {
 }
 
 type ConnectionContextType = {
-  connect?: () => any
-  disconnect?: () => any
+  connect?: () => unknown
+  disconnect?: () => unknown
 } & ConnectionContextState
 
 export const ConnectionContext = createContext<ConnectionContextType>({})
@@ -31,7 +33,21 @@ export const ConnectionProvider = ({ children }) => {
   const [{ connected }, setConnectionState] = useLocalStorage<{
     connected?: string
   }>('diva-dapp-connection', {})
-  const [state, setState] = useState<ConnectionContextState>({ chainId: 3 })
+  const [state, setState] = useState<ConnectionContextState>({})
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (state.chainId != null) {
+        dispatch(setChainId(state.chainId))
+      }
+    }, 200)
+    return () => clearTimeout(timeout)
+  }, [dispatch, state.chainId])
+
+  useEffect(() => {
+    dispatch(setUserAddress(state.address))
+  }, [dispatch, state.address])
 
   const connect = useCallback(async () => {
     const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
@@ -42,6 +58,7 @@ export const ConnectionProvider = ({ children }) => {
       isConnected: ethereum.isConnected(),
     }))
     setConnectionState({ connected: 'metamask' })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const disconnect = useCallback(() => {
@@ -51,6 +68,7 @@ export const ConnectionProvider = ({ children }) => {
       isConnected: false,
     }))
     setConnectionState({})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -66,15 +84,12 @@ export const ConnectionProvider = ({ children }) => {
       setState((_state) => ({
         ..._state,
         address: accounts?.[0],
-        chainId: BigNumber.from(ethereum.chainId).toNumber(),
-        isConnected: ethereum.isConnected(),
       }))
     })
 
-    ethereum.on('chainChanged', (chainId) => {
+    ethereum.on('chainChanged', (chainInfo) => {
       setState((_state) => ({
         ..._state,
-        isConnected: ethereum.isConnected(),
         chainId: BigNumber.from(ethereum.chainId).toNumber(),
       }))
     })
@@ -87,7 +102,7 @@ export const ConnectionProvider = ({ children }) => {
       }))
     })
 
-    ethereum.on('disconnect', (connectInfo) => {
+    ethereum.on('disconnect', () => {
       setState((_state) => ({ ..._state, isConnected: ethereum.isConnected() }))
     })
 
@@ -98,8 +113,22 @@ export const ConnectionProvider = ({ children }) => {
       }))
     )
 
+    // connect()
     if (connected) connect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  /**
+   * set default chain if it doesn't load automatically
+   */
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (state.chainId == null) {
+        setState((_state) => ({ ..._state, chainId: 137 }))
+      }
+    }, 3000)
+    return () => clearTimeout(timeout)
+  }, [dispatch, state.chainId])
 
   const value = {
     connect,

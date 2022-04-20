@@ -2,16 +2,41 @@ import { configureStore } from '@reduxjs/toolkit'
 import tradeReducer from './TradeOption'
 import activeTabReducer from './ActiveTab'
 import statsReducer from './Stats'
-import { poolSlice } from './poolSlice'
+import { appSlice, defaultAppState, initialState } from './appSlice'
 import { debounce } from '../lib/debounce'
+const preloadedState = JSON.parse(localStorage.getItem('diva-app-state-local'))
+
+const validState = (state) => {
+  if (
+    preloadedState != null &&
+    /**
+     * validates that all properties from defaultAppState and
+     * initialState are there as a way to validate the schema
+     * of the cached app state
+     */
+    !Object.keys(initialState).every(
+      (key) =>
+        preloadedState[key] != null &&
+        Object.keys(defaultAppState).every(
+          (_key) => preloadedState[key][_key] != null
+        )
+    )
+  ) {
+    console.error('previous app state is invalid, resetting it')
+    return undefined
+  }
+  return state
+}
+
 const store = configureStore({
-  preloadedState:
-    JSON.parse(localStorage.getItem('diva-app-state-local')) || {},
+  preloadedState: validState(
+    JSON.parse(localStorage.getItem('diva-app-state-local'))
+  ),
   reducer: {
     tradeOption: tradeReducer,
     activeTab: activeTabReducer,
     stats: statsReducer,
-    poolSlice: poolSlice.reducer,
+    appSlice: appSlice.reducer,
   },
 })
 

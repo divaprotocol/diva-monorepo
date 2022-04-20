@@ -22,7 +22,7 @@ import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { fetchPool, poolsSelector } from '../../Redux/poolSlice'
+import { fetchPool, selectPools } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -289,7 +289,7 @@ export function MyDataFeeds() {
   const { address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
 
-  const pools = useAppSelector((state) => poolsSelector(state))
+  const pools = useAppSelector((state) => selectPools(state))
   const rows: GridRowModel[] = pools
     .filter(
       (pool) => pool.dataProvider.toLowerCase() === userAddress.toLowerCase()

@@ -25,7 +25,7 @@ import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
-import { fetchPool, poolsSelector } from '../../Redux/poolSlice'
+import { fetchPool, selectPools } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 
@@ -372,7 +372,7 @@ const columns: GridColDef[] = [
 export function MyPositions() {
   const { provider, address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
-  const pools = useAppSelector((state) => poolsSelector(state))
+  const pools = useAppSelector((state) => selectPools(state))
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
@@ -535,7 +535,11 @@ export function MyPositions() {
       direction="row"
       sx={{
         height: '100%',
+        maxHeight: 'calc(100% - 6em)',
       }}
+      spacing={6}
+      paddingTop={2}
+      paddingRight={6}
     >
       <SideMenu />
       <PoolsTable

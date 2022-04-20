@@ -16,7 +16,7 @@ import {
 } from '../../Redux/TradeOption'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
-import { fetchOrders, setIsBuy } from '../../Redux/poolSlice'
+import { fetchOrders, setIsBuy } from '../../Redux/appSlice'
 const PageDiv = styled.div`
   justify-content: center
   height: 500px;

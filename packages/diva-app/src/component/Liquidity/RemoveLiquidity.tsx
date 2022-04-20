@@ -26,7 +26,7 @@ import ERC20 from '@diva/contracts/abis/erc20.json'
 import Button from '@mui/material/Button'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import { fetchPool } from '../../Redux/poolSlice'
+import { fetchPool } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 

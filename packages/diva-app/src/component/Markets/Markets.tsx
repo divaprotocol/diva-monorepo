@@ -10,8 +10,9 @@ import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import styled from '@emotion/styled'
 import { CoinIconPair } from '../CoinIcon'
-import { selectMainPools, selectOtherPools } from '../../Redux/poolSlice'
+import { selectMainPools, selectOtherPools } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
+import { Box } from '@mui/material'
 
 const columns: GridColDef[] = [
   {
@@ -183,23 +184,26 @@ export default function Markets() {
 
   return (
     <>
-      <Tabs value={value} onChange={handleChange} variant="standard">
-        <Tab label="Main" />
-        <Tab label="Other" />
-      </Tabs>
-      <PoolsTable
-        columns={columns}
-        rows={filteredRows}
-        page={page}
-        rowCount={filteredRows.length}
-        onPageChange={(page) => setPage(page)}
-      />
+      <Box
+        paddingX={6}
+        sx={{
+          height: 'calc(100% - 6em)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <Tabs value={value} onChange={handleChange} variant="standard">
+          <Tab label="Main" />
+          <Tab label="Other" />
+        </Tabs>
+        <PoolsTable
+          columns={columns}
+          rows={filteredRows}
+          page={page}
+          rowCount={filteredRows.length}
+          onPageChange={(page) => setPage(page)}
+        />
+      </Box>
     </>
   )
 }
-
-const Container = styled.div`
-  position: absolute;
-  left: 70px;
-  top: 80px;
-`

@@ -18,17 +18,18 @@ import { useAppSelector } from '../../Redux/hooks'
 const contractAddress = require('@0x/contract-addresses')
 import { useDispatch } from 'react-redux'
 import {
-  breakEvenSelector,
+  selectBreakEven,
   fetchPool,
   fetchUnderlyingPrice,
-  intrinsicSelector,
-  isBuySelector,
-  maxPayoutSelector,
-  maxYieldSelector,
-  poolSelector,
-} from '../../Redux/poolSlice'
+  selectIntrinsicValue,
+  selectIsBuy,
+  selectMaxPayout,
+  selectMaxYield,
+  selectPool,
+} from '../../Redux/appSlice'
 import { formatEther } from 'ethers/lib/utils'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { LoadingBox } from '../LoadingBox'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -47,15 +48,15 @@ export default function Underlying() {
   const [value, setValue] = React.useState(0)
   const isLong = params.tokenType === 'long'
   const maxPayout = useAppSelector((state) =>
-    maxPayoutSelector(state, params.poolId, isLong)
+    selectMaxPayout(state, params.poolId, isLong)
   )
   const maxYield = useAppSelector((state) =>
-    maxYieldSelector(state, params.poolId, isLong)
+    selectMaxYield(state, params.poolId, isLong)
   )
   const breakEven = useAppSelector((state) =>
-    breakEvenSelector(state, params.poolId, isLong)
+    selectBreakEven(state, params.poolId, isLong)
   )
-  const isBuy = useAppSelector((state) => isBuySelector(state))
+  const isBuy = useAppSelector((state) => selectIsBuy(state))
   const breakEvenOptionPrice = 0
   const { chainId } = useConnectionContext()
   const chainContractAddress =
@@ -72,14 +73,14 @@ export default function Underlying() {
     )
   }, [chainId, params.poolId, dispatch])
 
-  const pool = useAppSelector((state) => poolSelector(state, params.poolId))
+  const pool = useAppSelector((state) => selectPool(state, params.poolId))
 
   useEffect(() => {
     if (pool != null) dispatch(fetchUnderlyingPrice(pool))
   }, [pool, dispatch])
 
   const intrinsicValue = useAppSelector((state) =>
-    intrinsicSelector(state, params.poolId)
+    selectIntrinsicValue(state, params.poolId)
   )
   const intValDisplay =
     intrinsicValue != 'n/a' && intrinsicValue != null
@@ -87,8 +88,9 @@ export default function Underlying() {
         ? formatEther(intrinsicValue?.payoffPerLongToken)
         : formatEther(intrinsicValue?.payoffPerShortToken)
       : 'n/a'
+
   if (pool == null) {
-    return <div>Loading</div>
+    return <LoadingBox />
   }
 
   const OptionParams = {

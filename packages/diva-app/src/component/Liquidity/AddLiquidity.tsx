@@ -27,7 +27,7 @@ import {
 import { withStyles } from '@mui/styles'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import { fetchPool } from '../../Redux/poolSlice'
+import { fetchPool } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 const MaxCollateral = styled.u`
