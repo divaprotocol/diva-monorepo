@@ -16,19 +16,17 @@ export function ConnectWalletButton() {
         connection.userAddress != null &&
         connected
       ) {
-        setWalletName(getShortenedAddress(connection.userAddress))
-        //
-        // try {
-        //   const res = await provider.lookupAddress(connection.userAddress)
-        //   if (res === null) {
-        //     setWalletName(getShortenedAddress(connection.userAddress))
-        //   } else {
-        //     setWalletName(res)
-        //   }
-        // } catch (err) {
-        //   setWalletName(getShortenedAddress(connection.userAddress))
-        //   console.warn(err)
-        // }
+        try {
+          const res = await provider.lookupAddress(connection.userAddress)
+          if (res === null) {
+            setWalletName(getShortenedAddress(connection.userAddress))
+          } else {
+            setWalletName(res)
+          }
+        } catch (err) {
+          setWalletName(getShortenedAddress(connection.userAddress))
+          console.warn(err)
+        }
       }
     }
 
