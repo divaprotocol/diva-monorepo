@@ -277,7 +277,9 @@ export default function OpenOrders(props: {
               })
             ) : (
               <TableRow>
-                <TableCell>None</TableCell>
+                <TableCell colSpan={5} align="center">
+                  None
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
