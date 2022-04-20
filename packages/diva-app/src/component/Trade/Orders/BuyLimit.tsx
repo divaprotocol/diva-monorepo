@@ -2,13 +2,13 @@ import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { FormLabel, MenuItem, Stack, useTheme } from '@mui/material'
+import { FormLabel, MenuItem, Stack, Tooltip, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
-import { ExpectedRateInfoText, InfoTooltip, LabelStyle } from './UiStyles'
+import { ExpectedRateInfoText, LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -34,7 +34,6 @@ import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import {
   setBreakEven,
   setMaxYield,
@@ -42,6 +41,7 @@ import {
   setMaxPayout,
 } from '../../../Redux/Stats'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
+import { selectUnderlyingPrice } from '../../../Redux/appSlice'
 const web3 = new Web3(Web3.givenProvider)
 
 export default function BuyLimit(props: {
@@ -51,6 +51,10 @@ export default function BuyLimit(props: {
   exchangeProxy: string
   chainId: number
 }) {
+  const underlyingPrice = useAppSelector(
+    selectUnderlyingPrice(props.option.referenceAsset)
+  )
+
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const { chainId, address } = useConnectionContext()
   const exchangeProxyAddress = props.exchangeProxy
@@ -73,7 +77,6 @@ export default function BuyLimit(props: {
 
   const theme = useTheme()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const [usdPrice, setUsdPrice] = useState('')
 
   const dispatch = useAppDispatch()
 
@@ -274,9 +277,6 @@ export default function BuyLimit(props: {
   const { address: takerAccount } = useConnectionContext()
 
   useEffect(() => {
-    getUnderlyingPrice(option.referenceAsset).then((data) => {
-      if (data != null) setUsdPrice(data)
-    })
     const getCollateralInWallet = async () => {
       let allowance = await takerTokenContract.methods
         .allowance(takerAccount, exchangeProxyAddress)
@@ -316,15 +316,15 @@ export default function BuyLimit(props: {
   }, [responseBuy])
 
   useEffect(() => {
-    if (usdPrice != '') {
+    if (underlyingPrice != null) {
       const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
         BigENumber.from(option.floor),
         BigENumber.from(option.inflection),
         BigENumber.from(option.cap),
         BigENumber.from(option.collateralBalanceLongInitial),
         BigENumber.from(option.collateralBalanceShortInitial),
-        option.statusFinalReferenceValue === 'Open' && usdPrice != ''
-          ? parseEther(usdPrice)
+        option.statusFinalReferenceValue === 'Open'
+          ? parseEther(underlyingPrice)
           : BigENumber.from(option.finalReferenceValue),
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals
@@ -392,7 +392,7 @@ export default function BuyLimit(props: {
         }
         if (
           option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
+          parseFloat(underlyingPrice) == 0
         ) {
           dispatch(setIntrinsicValue('n/a'))
         } else {
@@ -461,7 +461,7 @@ export default function BuyLimit(props: {
         }
         if (
           option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
+          parseFloat(underlyingPrice) == 0
         ) {
           dispatch(setIntrinsicValue('n/a'))
         } else {
@@ -480,7 +480,7 @@ export default function BuyLimit(props: {
         )
       }
     }
-  }, [option, pricePerOption, usdPrice])
+  }, [option, pricePerOption, underlyingPrice])
 
   return (
     <div>
@@ -558,12 +558,9 @@ export default function BuyLimit(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Order Expires in</FormLabel>
-              <InfoTooltip
-                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-                sx={{ color: 'Gray', fontSize: 2 }}
-              >
-                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-              </InfoTooltip>
+              <Tooltip title={ExpectedRateInfoText}>
+                <InfoIcon />
+              </Tooltip>
             </Stack>
           </LabelStyleDiv>
           <LimitOrderExpiryDiv>

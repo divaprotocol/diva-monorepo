@@ -4,6 +4,7 @@ import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 export function ConnectWalletButton() {
   const context = useConnectionContext()
+
   return (
     <LoadingButton
       variant="contained"

@@ -1,3 +1,10 @@
+/**
+ * polyfills (this is mostly needed because of 0x deps)
+ * TODO: Remove once 0x deps are removed
+ */
+import 'core-js/stable'
+import 'react-app-polyfill/stable'
+
 import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'

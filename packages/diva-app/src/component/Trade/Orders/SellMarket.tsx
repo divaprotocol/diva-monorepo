@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useEffect } from 'react'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
@@ -11,7 +11,6 @@ import { FormDiv } from './UiStyles'
 import { FormInput } from './UiStyles'
 import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
-import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
@@ -29,9 +28,8 @@ import {
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
-import { FormLabel, Stack } from '@mui/material'
+import { FormLabel, Stack, Tooltip } from '@mui/material'
 import { useParams } from 'react-router-dom'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 import {
@@ -41,7 +39,7 @@ import {
   setMaxYield,
 } from '../../../Redux/Stats'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
-import { selectChainId } from '../../../Redux/appSlice'
+import { selectChainId, selectUnderlyingPrice } from '../../../Redux/appSlice'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
 
@@ -74,7 +72,10 @@ export default function SellMarket(props: {
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const params: { tokenType: string } = useParams()
-  const [usdPrice, setUsdPrice] = useState('')
+  const underlyingPrice = useAppSelector(
+    selectUnderlyingPrice(props.option.referenceAsset)
+  )
+
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const dispatch = useAppDispatch()
 
@@ -389,10 +390,7 @@ export default function SellMarket(props: {
     }
   }
   useEffect(() => {
-    getUnderlyingPrice(option.referenceAsset).then((data) => {
-      if (data != null) setUsdPrice(data)
-    })
-    if (usdPrice != '') {
+    if (underlyingPrice != null) {
       const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
         BigENumber.from(option.floor),
         BigENumber.from(option.inflection),
@@ -400,8 +398,8 @@ export default function SellMarket(props: {
         BigENumber.from(option.collateralBalanceLongInitial),
         BigENumber.from(option.collateralBalanceShortInitial),
         option.statusFinalReferenceValue === 'Open' &&
-          parseUnits(usdPrice).gt(0)
-          ? parseUnits(usdPrice)
+          parseUnits(underlyingPrice).gt(0)
+          ? parseUnits(underlyingPrice)
           : BigENumber.from(option.finalReferenceValue),
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals
@@ -418,15 +416,15 @@ export default function SellMarket(props: {
         )
       }
       if (isLong) {
-        if (parseEther(usdPrice).gt(0)) {
-          const be1 = parseEther(usdPrice)
+        if (parseEther(underlyingPrice).gt(0)) {
+          const be1 = parseEther(underlyingPrice)
             .mul(BigENumber.from(option.inflection))
             .sub(BigENumber.from(option.floor))
             .mul(BigENumber.from(option.supplyLong))
             .div(BigENumber.from(option.collateralBalanceLongInitial))
             .add(BigENumber.from(option.floor))
 
-          const be2 = parseEther(usdPrice)
+          const be2 = parseEther(underlyingPrice)
             .mul(BigENumber.from(option.supplyLong))
             .sub(BigENumber.from(option.collateralBalanceLongInitial))
             .mul(
@@ -451,7 +449,7 @@ export default function SellMarket(props: {
         }
         if (
           option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
+          parseFloat(underlyingPrice) == 0
         ) {
           dispatch(setIntrinsicValue('n/a'))
         } else {
@@ -469,8 +467,8 @@ export default function SellMarket(props: {
           )
         )
       } else {
-        if (parseEther(usdPrice).gt(0)) {
-          const be1 = parseUnits(usdPrice, 2)
+        if (parseEther(underlyingPrice).gt(0)) {
+          const be1 = parseUnits(underlyingPrice, 2)
             .mul(BigENumber.from(option.supplyShort))
             .sub(BigENumber.from(option.collateralBalanceShortInitial))
             .div(BigENumber.from(option.collateralBalanceLongInitial))
@@ -482,7 +480,7 @@ export default function SellMarket(props: {
             .sub(BigENumber.from(option.inflection))
             .mul(BigENumber.from(-1))
 
-          const be2 = parseEther(usdPrice)
+          const be2 = parseEther(underlyingPrice)
             .mul(BigENumber.from(option.supplyShort))
             .div(BigENumber.from(option.collateralBalanceShortInitial))
             .mul(
@@ -507,7 +505,7 @@ export default function SellMarket(props: {
         }
         if (
           option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
+          parseFloat(underlyingPrice) == 0
         ) {
           dispatch(setIntrinsicValue('n/a'))
         } else {
@@ -526,7 +524,7 @@ export default function SellMarket(props: {
         )
       }
     }
-  }, [option, usdPrice])
+  }, [option, underlyingPrice])
   return (
     <div>
       <form onSubmit={handleOrderSubmit}>
@@ -558,12 +556,9 @@ export default function SellMarket(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
-              <InfoTooltip
-                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-                sx={{ color: 'Gray', fontSize: 2 }}
-              >
-                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-              </InfoTooltip>
+              <Tooltip title={ExpectedRateInfoText}>
+                <InfoIcon />
+              </Tooltip>
             </Stack>
           </LabelStyleDiv>
           <RightSideLabel>

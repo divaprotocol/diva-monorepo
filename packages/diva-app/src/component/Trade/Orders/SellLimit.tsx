@@ -2,13 +2,13 @@ import React, { useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { FormLabel, MenuItem, Stack } from '@mui/material'
+import { FormLabel, MenuItem, Stack, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { sellLimitOrder } from '../../../Orders/sellLimitOrder'
-import { ExpectedRateInfoText, InfoTooltip, LabelStyle } from './UiStyles'
+import { ExpectedRateInfoText, LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -40,9 +40,8 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
-import { selectChainId } from '../../../Redux/appSlice'
+import { selectChainId, selectUnderlyingPrice } from '../../../Redux/appSlice'
 const web3 = new Web3(Web3.givenProvider)
 
 export default function SellLimit(props: {
@@ -72,7 +71,9 @@ export default function SellLimit(props: {
   //const takerToken = option.collateralToken
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const params: { tokenType: string } = useParams()
-  const [usdPrice, setUsdPrice] = useState('')
+  const underlyingPrice = useAppSelector(
+    selectUnderlyingPrice(props.option.referenceAsset)
+  )
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const isLong = window.location.pathname.split('/')[2] === 'long'
   const dispatch = useAppDispatch()
@@ -262,9 +263,6 @@ export default function SellLimit(props: {
   }
 
   useEffect(() => {
-    getUnderlyingPrice(option.referenceAsset).then((data) => {
-      if (data != null) setUsdPrice(data)
-    })
     getOptionsInWallet().then((val) => {
       !Number.isNaN(val.balance)
         ? setWalletBalance(Number(val.balance))
@@ -295,7 +293,7 @@ export default function SellLimit(props: {
     )
   }
   useEffect(() => {
-    if (usdPrice != '') {
+    if (underlyingPrice) {
       const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
         BigENumber.from(option.floor),
         BigENumber.from(option.inflection),
@@ -303,8 +301,8 @@ export default function SellLimit(props: {
         BigENumber.from(option.collateralBalanceLongInitial),
         BigENumber.from(option.collateralBalanceShortInitial),
         option.statusFinalReferenceValue === 'Open' &&
-          parseEther(usdPrice).gt(0)
-          ? parseEther(usdPrice)
+          parseEther(underlyingPrice).gt(0)
+          ? parseEther(underlyingPrice)
           : BigENumber.from(option.finalReferenceValue),
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals
@@ -372,7 +370,7 @@ export default function SellLimit(props: {
         }
         if (
           option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
+          parseFloat(underlyingPrice) == 0
         ) {
           dispatch(setIntrinsicValue('n/a'))
         } else {
@@ -441,7 +439,7 @@ export default function SellLimit(props: {
         }
         if (
           option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
+          parseFloat(underlyingPrice) == 0
         ) {
           dispatch(setIntrinsicValue('n/a'))
         } else {
@@ -460,7 +458,7 @@ export default function SellLimit(props: {
         )
       }
     }
-  }, [option, pricePerOption, usdPrice])
+  }, [option, pricePerOption, underlyingPrice])
 
   return (
     <div>
@@ -542,12 +540,9 @@ export default function SellLimit(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Order Expires in</FormLabel>
-              <InfoTooltip
-                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-                sx={{ color: 'Gray', fontSize: 2 }}
-              >
-                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-              </InfoTooltip>
+              <Tooltip title={ExpectedRateInfoText}>
+                <InfoIcon />
+              </Tooltip>
             </Stack>
           </LabelStyleDiv>
           <LimitOrderExpiryDiv>

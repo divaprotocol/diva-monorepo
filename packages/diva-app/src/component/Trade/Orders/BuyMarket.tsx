@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useEffect } from 'react'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
@@ -11,7 +11,6 @@ import { FormDiv } from './UiStyles'
 import { FormInput } from './UiStyles'
 import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
-import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import {
@@ -28,7 +27,7 @@ import { useConnectionContext } from '../../../hooks/useConnectionContext'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
-import { FormLabel, Stack, useTheme } from '@mui/material'
+import { FormLabel, Stack, Tooltip, useTheme } from '@mui/material'
 import { BigNumber as BigENumber } from 'ethers'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 import {
@@ -37,6 +36,7 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
+import { selectUnderlyingPrice } from '../../../Redux/appSlice'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
@@ -49,6 +49,10 @@ export default function BuyMarket(props: {
 }) {
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  const underlyingPrice = useAppSelector(
+    selectUnderlyingPrice(props.option.referenceAsset)
+  )
+
   const option = props.option
   const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
@@ -73,7 +77,6 @@ export default function BuyMarket(props: {
   const params: { tokenType: string } = useParams()
 
   const theme = useTheme()
-  const [usdPrice, setUsdPrice] = useState('')
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const dispatch = useAppDispatch()
   const handleNumberOfOptions = (value: string) => {
@@ -374,18 +377,15 @@ export default function BuyMarket(props: {
   }, [numberOfOptions])
 
   useEffect(() => {
-    // getUnderlyingPrice(option.referenceAsset).then((data) => {
-    //   if (data != null) setUsdPrice(data)
-    // })
-    if (usdPrice != '') {
+    if (underlyingPrice != null) {
       const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
         BigENumber.from(option.floor),
         BigENumber.from(option.inflection),
         BigENumber.from(option.cap),
         BigENumber.from(option.collateralBalanceLongInitial),
         BigENumber.from(option.collateralBalanceShortInitial),
-        option.statusFinalReferenceValue === 'Open' && usdPrice != ''
-          ? parseEther(usdPrice)
+        option.statusFinalReferenceValue === 'Open'
+          ? parseEther(underlyingPrice)
           : BigENumber.from(option.finalReferenceValue),
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals
@@ -403,15 +403,15 @@ export default function BuyMarket(props: {
       }
 
       if (isLong) {
-        if (parseUnits(usdPrice, 2).gt(0)) {
-          const be1 = parseEther(usdPrice)
+        if (parseUnits(underlyingPrice, 2).gt(0)) {
+          const be1 = parseEther(underlyingPrice)
             .mul(BigENumber.from(option.inflection))
             .sub(BigENumber.from(option.floor))
             .mul(BigENumber.from(option.supplyLong))
             .div(BigENumber.from(option.collateralBalanceLongInitial))
             .add(BigENumber.from(option.floor))
 
-          const be2 = parseEther(usdPrice)
+          const be2 = parseEther(underlyingPrice)
             .mul(BigENumber.from(option.supplyLong))
             .sub(BigENumber.from(option.collateralBalanceLongInitial))
             .mul(
@@ -436,7 +436,7 @@ export default function BuyMarket(props: {
         }
         if (
           option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
+          parseFloat(underlyingPrice) == 0
         ) {
           dispatch(setIntrinsicValue('n/a'))
         } else {
@@ -454,8 +454,8 @@ export default function BuyMarket(props: {
           )
         )
       } else {
-        if (parseEther(usdPrice).gt(0)) {
-          const be1 = parseEther(usdPrice)
+        if (parseEther(underlyingPrice).gt(0)) {
+          const be1 = parseEther(underlyingPrice)
             .mul(BigENumber.from(option.supplyShort))
             .sub(BigENumber.from(option.collateralBalanceShortInitial))
             .div(BigENumber.from(option.collateralBalanceLongInitial))
@@ -467,7 +467,7 @@ export default function BuyMarket(props: {
             .sub(BigENumber.from(option.inflection))
             .mul(BigENumber.from(-1))
 
-          const be2 = parseEther(usdPrice)
+          const be2 = parseEther(underlyingPrice)
             .mul(BigENumber.from(option.supplyShort))
             .div(BigENumber.from(option.collateralBalanceShortInitial))
             .mul(
@@ -492,7 +492,7 @@ export default function BuyMarket(props: {
         }
         if (
           option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
+          parseFloat(underlyingPrice) == 0
         ) {
           dispatch(setIntrinsicValue('n/a'))
         } else {
@@ -511,7 +511,7 @@ export default function BuyMarket(props: {
         )
       }
     }
-  }, [option, usdPrice])
+  }, [option, underlyingPrice])
   const handleSliderChange = (_event: any, newValue: any) => {
     setValue(newValue)
   }
@@ -557,12 +557,12 @@ export default function BuyMarket(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
-              <InfoTooltip
+              <Tooltip
                 title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
                 sx={{ color: 'Gray', fontSize: 2 }}
               >
                 <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-              </InfoTooltip>
+              </Tooltip>
             </Stack>
           </LabelStyleDiv>
           <RightSideLabel>
@@ -605,46 +605,6 @@ export default function BuyMarket(props: {
             </Stack>
           </RightSideLabel>
         </FormDiv>
-        {/*<FormDiv>*/}
-        {/*  <SliderDiv>*/}
-        {/*    <Typography id="input-slider" gutterBottom>*/}
-        {/*      <Stack direction={'row'} spacing={0.5}>*/}
-        {/*        /!*TODO: add it back at a later date slippage handling is done*!/*/}
-        {/*        <FormLabel sx={{ color: 'White' }}>Max slippage %</FormLabel>*/}
-        {/*        <InfoTooltip*/}
-        {/*          title={<React.Fragment>{MaxSlippageText}</React.Fragment>}*/}
-        {/*          sx={{ color: 'Gray', fontSize: 2, paddingTop: 0.7 }}*/}
-        {/*        >*/}
-        {/*          <InfoIcon style={{ fontSize: 15, color: 'grey' }} />*/}
-        {/*        </InfoTooltip>*/}
-        {/*      </Stack>*/}
-        {/*    </Typography>*/}
-
-        {/*    <Slider*/}
-        {/*      value={typeof value === 'number' ? value : 0}*/}
-        {/*      step={0.1}*/}
-        {/*      min={0}*/}
-        {/*      max={20}*/}
-        {/*      onChange={handleSliderChange}*/}
-        {/*      aria-labelledby="input-slider"*/}
-        {/*    />*/}
-        {/*  </SliderDiv>*/}
-        {/*  <FormControlDiv>*/}
-        {/*    <Input*/}
-        {/*      value={value}*/}
-        {/*      margin="dense"*/}
-        {/*      onChange={(event) => handleInputChange(event)}*/}
-        {/*      onBlur={handleBlur}*/}
-        {/*      inputProps={{*/}
-        {/*        step: 0.1,*/}
-        {/*        min: 0.0,*/}
-        {/*        max: 20,*/}
-        {/*        type: 'number',*/}
-        {/*        'aria-labelledby': 'input-slider',*/}
-        {/*      }}*/}
-        {/*    />*/}
-        {/*  </FormControlDiv>*/}
-        {/*</FormDiv>*/}
         <CreateButtonWrapper />
         <Box marginLeft="30%" marginTop="15%" marginBottom={2}>
           <Button

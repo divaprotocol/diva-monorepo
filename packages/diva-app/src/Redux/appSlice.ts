@@ -87,8 +87,8 @@ export const fetchOrders = createAsyncThunk(
 
 export const fetchUnderlyingPrice = createAsyncThunk(
   'app/underlyingPrice',
-  async (pool: Pool) => {
-    const res = await getUnderlyingPrice(pool.referenceAsset)
+  async (asset: string) => {
+    const res = await getUnderlyingPrice(asset)
     return res
   }
 )
@@ -202,8 +202,8 @@ export const appSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(fetchUnderlyingPrice.fulfilled, (state, action) => {
-      const poolState = state[state.chainId]
-      poolState.underlyingPrice[action.meta.arg.id] = action.payload
+      const appState = state[state.chainId]
+      appState.underlyingPrice[action.meta.arg] = action.payload
     })
 
     builder.addCase(fetchPool.fulfilled, (state, action) => {
@@ -462,5 +462,10 @@ export const selectOtherPools = (state: RootState) =>
   )
 
 export const selectChainId = (state: RootState) => state.appSlice.chainId
+
+export const selectUnderlyingPrice =
+  (asset: string) =>
+  (state: RootState): string | undefined =>
+    selectAppStateByChain(state).underlyingPrice[asset]
 
 export const { setIsBuy, setUserAddress, setChainId } = appSlice.actions

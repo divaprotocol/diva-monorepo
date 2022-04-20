@@ -77,7 +77,8 @@ export default function Underlying() {
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
 
   useEffect(() => {
-    if (pool != null) dispatch(fetchUnderlyingPrice(pool))
+    if (pool?.referenceAsset != null)
+      dispatch(fetchUnderlyingPrice(pool.referenceAsset))
   }, [pool, dispatch])
 
   const intrinsicValue = useAppSelector((state) =>
