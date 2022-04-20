@@ -14,6 +14,8 @@ type MetamaskProvider = ExternalProvider &
 declare global {
   interface Window {
     ethereum?: MetamaskProvider
-    hell: string
+    web3?: {
+      currentProvider: any
+    }
   }
 }

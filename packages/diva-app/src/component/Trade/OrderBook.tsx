@@ -16,7 +16,7 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { useWallet } from '@web3-ui/hooks'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -193,8 +193,7 @@ export default function OrderBook(props: {
     BUY: 0,
     SELL: 1,
   }
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 137
+  const { chainId } = useConnectionContext()
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
