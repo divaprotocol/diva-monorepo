@@ -26,6 +26,7 @@ import {
   selectMaxPayout,
   selectMaxYield,
   selectPool,
+  selectChainId,
 } from '../../Redux/appSlice'
 import { formatEther } from 'ethers/lib/utils'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -58,7 +59,7 @@ export default function Underlying() {
   )
   const isBuy = useAppSelector((state) => selectIsBuy(state))
   const breakEvenOptionPrice = 0
-  const { chainId } = useConnectionContext()
+  const chainId = useAppSelector(selectChainId)
   const chainContractAddress =
     contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxy = chainContractAddress.exchangeProxy

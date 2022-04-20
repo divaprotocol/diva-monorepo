@@ -17,6 +17,7 @@ import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { selectChainId } from '../../Redux/appSlice'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -194,7 +195,7 @@ export default function OrderBook(props: {
     BUY: 0,
     SELL: 1,
   }
-  const { chainId } = useConnectionContext()
+  const chainId = useAppSelector(selectChainId)
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {

@@ -461,4 +461,6 @@ export const selectOtherPools = (state: RootState) =>
     (p) => p?.createdBy !== whitelistedPoolCreatorAddress
   )
 
+export const selectChainId = (state: RootState) => state.appSlice.chainId
+
 export const { setIsBuy, setUserAddress, setChainId } = appSlice.actions

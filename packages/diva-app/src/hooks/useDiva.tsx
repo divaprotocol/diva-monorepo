@@ -5,6 +5,8 @@ import ERC20 from '@diva/contracts/abis/erc20.json'
 import { WhitelistCollateralToken, Pool } from '../lib/queries'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { useConnectionContext } from './useConnectionContext'
+import { useAppSelector } from '../Redux/hooks'
+import { selectChainId } from '../Redux/appSlice'
 
 /**
  * Note: The order of parameters matter in this case,
@@ -65,7 +67,8 @@ type DivaApi = {
 }
 
 export function useDiva(): DivaApi | null {
-  const { provider, chainId } = useConnectionContext()
+  const { provider } = useConnectionContext()
+  const chainId = useAppSelector(selectChainId)
 
   if (chainId == null || provider == null) return null
 

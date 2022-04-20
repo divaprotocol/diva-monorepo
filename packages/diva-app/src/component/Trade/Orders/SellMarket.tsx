@@ -41,6 +41,7 @@ import {
   setMaxYield,
 } from '../../../Redux/Stats'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
+import { selectChainId } from '../../../Redux/appSlice'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
 
@@ -53,7 +54,7 @@ export default function SellMarket(props: {
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const { chainId } = useConnectionContext()
+  const chainId = useAppSelector(selectChainId)
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   const [value, setValue] = React.useState<string | number>(0)

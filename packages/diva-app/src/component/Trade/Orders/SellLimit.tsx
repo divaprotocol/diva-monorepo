@@ -8,12 +8,7 @@ import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { sellLimitOrder } from '../../../Orders/sellLimitOrder'
-import {
-  ExpectedRateInfoText,
-  InfoTooltip,
-  LabelStyle,
-  SubLabelStyle,
-} from './UiStyles'
+import { ExpectedRateInfoText, InfoTooltip, LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -47,6 +42,7 @@ import {
 } from '../../../Redux/Stats'
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
+import { selectChainId } from '../../../Redux/appSlice'
 const web3 = new Web3(Web3.givenProvider)
 
 export default function SellLimit(props: {
@@ -57,7 +53,7 @@ export default function SellLimit(props: {
   chainId: number
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const { chainId } = useConnectionContext()
+  const chainId = useAppSelector(selectChainId)
   const classes = useStyles()
   const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
