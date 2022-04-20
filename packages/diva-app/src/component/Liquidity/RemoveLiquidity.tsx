@@ -167,7 +167,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       setLoading(false)
     } catch (error) {
       setLoading(false)
-      console.log(error)
+      console.error(error)
     }
   }
   return (
@@ -349,7 +349,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                       })
                     })
                     .catch((err) => {
-                      console.log(err)
+                      console.error(err)
                     })
                 }}
                 style={{

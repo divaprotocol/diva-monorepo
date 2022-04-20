@@ -101,7 +101,6 @@ export const fetchPools = createAsyncThunk(
     let res: Pool[] = []
     const state = store.getState() as RootState
     const chainId = state.poolSlice.wallet?.chainId || 3
-    console.log('fetch pools', { chainId })
     if (
       state.poolSlice.wallet?.chainId != null &&
       config[state.poolSlice.wallet?.chainId] == null

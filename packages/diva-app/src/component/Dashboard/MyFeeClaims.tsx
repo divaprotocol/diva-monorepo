@@ -155,7 +155,7 @@ const AmountCell = (props: any) => {
       setDecimal(decimals)
     })
     .catch((e) => {
-      console.log(e)
+      console.error(e)
     })
   const amount = parseFloat(props.row.Amount) / 10 ** decimal
   return decimal ? (

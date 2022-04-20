@@ -50,7 +50,6 @@ export const ConnectionProvider = ({ children }) => {
       address: undefined,
       isConnected: false,
     }))
-    console.log('disconnect?')
     setConnectionState({})
   }, [])
 
@@ -60,12 +59,10 @@ export const ConnectionProvider = ({ children }) => {
         ..._state,
         error: 'Please install metamask',
       }))
-      console.log('not metamask')
       return
     }
 
     ethereum.on('accountsChanged', (accounts) => {
-      console.log('accounts changed', accounts)
       setState((_state) => ({
         ..._state,
         address: accounts?.[0],
@@ -75,7 +72,6 @@ export const ConnectionProvider = ({ children }) => {
     })
 
     ethereum.on('chainChanged', (chainId) => {
-      console.log('chain changed')
       setState((_state) => ({
         ..._state,
         isConnected: ethereum.isConnected(),
@@ -84,16 +80,14 @@ export const ConnectionProvider = ({ children }) => {
     })
 
     ethereum.on('connect', (connectInfo) => {
-      console.log('connect yo', { connectInfo })
       setState((_state) => ({
         ..._state,
         isConnected: ethereum.isConnected(),
-        chainId: BigNumber.from(ethereum.chainId).toNumber(),
+        chainId: BigNumber.from(connectInfo.chainId).toNumber(),
       }))
     })
 
     ethereum.on('disconnect', (connectInfo) => {
-      console.log('disconnect', { connectInfo })
       setState((_state) => ({ ..._state, isConnected: ethereum.isConnected() }))
     })
 
@@ -103,8 +97,6 @@ export const ConnectionProvider = ({ children }) => {
         provider: new providers.Web3Provider(provider),
       }))
     )
-
-    ethereum.on('message', (msg) => console.log('message', { msg }))
 
     if (connected) connect()
   }, [])

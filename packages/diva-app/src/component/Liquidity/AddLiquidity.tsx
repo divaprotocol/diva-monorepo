@@ -127,7 +127,7 @@ export const AddLiquidity = ({ pool }: Props) => {
         setLoading(false)
       })
       .catch((err: any) => {
-        console.log(err)
+        console.error(err)
         setLoading(false)
       })
   }

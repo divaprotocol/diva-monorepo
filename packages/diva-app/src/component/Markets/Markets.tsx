@@ -72,7 +72,6 @@ export default function Markets() {
   const [page, setPage] = useState(0)
   const mainPools = useAppSelector(selectMainPools)
   const otherPools = useAppSelector(selectOtherPools)
-  console.log({ mainPools })
 
   const pools = value === 0 ? mainPools : otherPools
 

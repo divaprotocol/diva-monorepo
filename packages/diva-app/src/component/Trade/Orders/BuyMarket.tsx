@@ -379,8 +379,6 @@ export default function BuyMarket(props: {
     //   if (data != null) setUsdPrice(data)
     // })
     if (usdPrice != '') {
-      console.log('usdPrice')
-      console.log(usdPrice)
       const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
         BigENumber.from(option.floor),
         BigENumber.from(option.inflection),
@@ -393,7 +391,6 @@ export default function BuyMarket(props: {
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals
       )
-      console.log(payoffPerLongToken)
       if (avgExpectedRate > 0) {
         dispatch(
           setMaxYield(
