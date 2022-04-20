@@ -236,7 +236,8 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           {tokenBalanceLong ? (
             <>
               <Typography variant="subtitle2" color="text.secondary">
-                You can remove up to {formatEther(maxCollateral)}{' '}
+                You can remove up to{' '}
+                {parseFloat(formatEther(maxCollateral)).toFixed(4)}{' '}
                 {pool!.collateralToken.symbol}
                 {' (after fees) '}
                 <MaxCollateral
