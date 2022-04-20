@@ -43,7 +43,6 @@ import {
 } from '../../../Redux/Stats'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
 const web3 = new Web3(Web3.givenProvider)
-let accounts: any[]
 
 export default function BuyLimit(props: {
   option: Pool
@@ -53,7 +52,7 @@ export default function BuyLimit(props: {
   chainId: number
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  const { chainId } = useConnectionContext()
+  const { chainId, address } = useConnectionContext()
   const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
   const makerToken = props.tokenAddress
@@ -115,10 +114,10 @@ export default function BuyLimit(props: {
     const amountBigNumber = parseUnits(amount.toString())
     await takerTokenContract.methods
       .approve(exchangeProxyAddress, amountBigNumber)
-      .send({ from: accounts[0] })
+      .send({ from: address })
 
     const collateralAllowance = await takerTokenContract.methods
-      .allowance(accounts[0], exchangeProxyAddress)
+      .allowance(address, exchangeProxyAddress)
       .call()
     return collateralAllowance
   }
@@ -202,7 +201,7 @@ export default function BuyLimit(props: {
           }
         } else {
           const orderData = {
-            makerAccount: accounts[0],
+            makerAccount: address,
             makerToken: option.collateralToken.id,
             takerToken: makerToken,
             provider: web3,

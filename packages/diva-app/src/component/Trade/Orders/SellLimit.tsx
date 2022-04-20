@@ -48,7 +48,6 @@ import {
 import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
 const web3 = new Web3(Web3.givenProvider)
-let accounts: any[]
 
 export default function SellLimit(props: {
   option: Pool

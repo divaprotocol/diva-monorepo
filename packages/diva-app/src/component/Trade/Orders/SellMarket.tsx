@@ -43,7 +43,6 @@ import {
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
-let accounts: any[]
 
 export default function SellMarket(props: {
   option: Pool

@@ -66,8 +66,6 @@ const useTabsBorder = makeStyles(() => ({
   },
 }))
 
-let accounts
-
 export default function CreateOrder(props: {
   option: Pool
   tokenAddress: string

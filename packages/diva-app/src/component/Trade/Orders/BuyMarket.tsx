@@ -40,7 +40,6 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
-let accounts: any[]
 export default function BuyMarket(props: {
   option: Pool
   handleDisplayOrder: () => any
@@ -90,10 +89,10 @@ export default function BuyMarket(props: {
     const amountBigNumber = parseUnits(amount.toString())
     await takerTokenContract.methods
       .approve(exchangeProxy, amountBigNumber)
-      .send({ from: accounts[0] })
+      .send({ from: userAddress })
 
     const collateralAllowance = await takerTokenContract.methods
-      .allowance(accounts[0], exchangeProxy)
+      .allowance(userAddress, exchangeProxy)
       .call()
     return collateralAllowance
   }
@@ -163,7 +162,7 @@ export default function BuyMarket(props: {
           }
         } else {
           const orderData = {
-            takerAccount: accounts[0],
+            takerAccount: userAddress,
             provider: web3,
             isBuy: true,
             nbrOptions: numberOfOptions,

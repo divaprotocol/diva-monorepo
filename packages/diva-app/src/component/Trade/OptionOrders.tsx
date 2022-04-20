@@ -3,8 +3,6 @@ import { useAppSelector, useAppDispatch } from '../../Redux/hooks'
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
-import { makeStyles } from '@mui/styles'
-import { withStyles } from '@mui/styles'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -21,15 +19,8 @@ import { getDateTime } from '../../Util/Dates'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { BigNumber } from '@0x/utils'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
-
-const useStyles = makeStyles({
-  table: {
-    minWidth: 250,
-  },
-})
 
 const PageDiv = styled.div`
   width: 100%;
@@ -109,7 +100,6 @@ function mapOrderData(
   return orderbook
 }
 
-let accounts
 export default function OpenOrders(props: {
   option: Pool
   tokenAddress: string
@@ -121,7 +111,7 @@ export default function OpenOrders(props: {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const dispatch = useAppDispatch()
   const [orders, setOrders] = useState([])
-  const { chainId } = useConnectionContext()
+  const { chainId, address } = useConnectionContext()
   const componentDidMount = async () => {
     const orderBook: any = []
     if (responseSell.length === 0) {
@@ -149,14 +139,14 @@ export default function OpenOrders(props: {
       responseBuy,
       option,
       optionTokenAddress,
-      accounts[0]
+      address
     )
 
     const orderBookSell = mapOrderData(
       responseSell,
       option,
       optionTokenAddress,
-      accounts[0]
+      address
     )
 
     if (orderBookSell.length > 0) {
