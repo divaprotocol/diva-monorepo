@@ -26,7 +26,11 @@ import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
-import { fetchPool, selectPools } from '../../Redux/appSlice'
+import {
+  fetchPool,
+  selectPools,
+  selectRequestStatus,
+} from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 
@@ -374,6 +378,7 @@ export function MyPositions() {
   const { provider, address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
   const pools = useAppSelector((state) => selectPools(state))
+  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
@@ -492,6 +497,9 @@ export function MyPositions() {
 
   const tokenAddresses = rows.map((v) => v.address.id)
 
+  /**
+   * TODO: Move into redux
+   */
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
     const response: Response = {}
     if (!userAddress) {
@@ -562,7 +570,7 @@ export function MyPositions() {
           <PoolsTable
             page={page}
             rows={filteredRows}
-            loading={balances.isLoading}
+            loading={balances.isLoading || poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}
           />

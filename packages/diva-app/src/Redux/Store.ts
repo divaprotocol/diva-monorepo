@@ -9,20 +9,23 @@ const preloadedState = JSON.parse(localStorage.getItem('diva-app-state-local'))
 const validState = (state) => {
   if (
     preloadedState != null &&
+    preloadedState.appSlice != null &&
     /**
      * validates that all properties from defaultAppState and
      * initialState are there as a way to validate the schema
      * of the cached app state
      */
-    !Object.keys(initialState).every(
-      (key) =>
-        preloadedState[key] != null &&
-        Object.keys(defaultAppState).every(
-          (_key) => preloadedState[key][_key] != null
-        )
-    )
+    !Object.keys(initialState).every((key) => {
+      const res =
+        preloadedState.appSlice[key] != null &&
+        Object.keys(defaultAppState).every((_key) => {
+          const _res = preloadedState.appSlice[key][_key] != null
+          return _res
+        })
+      return res
+    })
   ) {
-    console.error('previous app state is invalid, resetting it')
+    console.error('previous app state is invalid, resetting it', preloadedState)
     return undefined
   }
   return state

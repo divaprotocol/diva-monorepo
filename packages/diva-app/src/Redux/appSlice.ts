@@ -9,10 +9,13 @@ import { RootState } from './Store'
 import { get0xOpenOrders } from '../DataService/OpenOrders'
 import { config, whitelistedPoolCreatorAddress } from '../constants'
 
+type RequestState = 'pending' | 'fulfilled' | 'rejected'
+
 type AppStateByChain = {
   chainId?: number
   userAddress?: string
   [chainId: number]: {
+    statusByName: Record<string, RequestState | undefined>
     pools: Pool[]
     isBuy: boolean
     underlyingPrice: {
@@ -33,6 +36,7 @@ type AppStateByChain = {
 }
 
 export const defaultAppState = {
+  statusByName: {},
   isBuy: true,
   pools: [],
   underlyingPrice: {},
@@ -198,7 +202,7 @@ export const appSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(fetchUnderlyingPrice.fulfilled, (state, action) => {
-      const poolState = state[state.chainId || 3]
+      const poolState = state[state.chainId]
       poolState.underlyingPrice[action.meta.arg.id] = action.payload
     })
 
@@ -206,7 +210,25 @@ export const appSlice = createSlice({
       addPools(state, [action.payload])
     })
 
+    builder.addCase(fetchPools.pending, (state, action) => {
+      const poolState = state[state.chainId]
+      poolState.statusByName[
+        action.type.substring(0, action.type.length - ('pending'.length + 1))
+      ] = 'pending'
+    })
+
+    builder.addCase(fetchPools.rejected, (state, action) => {
+      const poolState = state[state.chainId]
+      poolState.statusByName[
+        action.type.substring(0, action.type.length - ('rejected'.length + 1))
+      ] = 'rejected'
+    })
+
     builder.addCase(fetchPools.fulfilled, (state, action) => {
+      const poolState = state[state.chainId]
+      poolState.statusByName[
+        action.type.substring(0, action.type.length - ('fulfilled'.length + 1))
+      ] = 'fulfilled'
       addPools(state, action.payload.pools, action.payload.chainId)
     })
 
@@ -247,6 +269,9 @@ export const selectMyDataFeeds = (state: RootState) =>
 
 export const selectPrice = (state: RootState, poolId: string) =>
   selectAppStateByChain(state).underlyingPrice[poolId]
+
+export const selectRequestStatus = (status) => (state: RootState) =>
+  selectAppStateByChain(state).statusByName[status]
 
 export const selectPayoff = (state: RootState, poolId: string) => {
   const pool = selectPool(state, poolId)
