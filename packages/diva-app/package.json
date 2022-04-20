@@ -55,6 +55,7 @@
   "scripts": {
     "deploy": "",
     "dev": "react-scripts start",
+    "start": "CHOKIDAR_USEPOLLING=true react-scripts start",
     "build": "react-scripts build",
     "test": "start-server-and-test 'yarn dev' http-get://localhost:3000 'synpress run --configFile synpress.json'",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx && tsc --noEmit",
