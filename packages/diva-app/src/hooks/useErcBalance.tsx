@@ -15,7 +15,7 @@ type Erc20Contract = Contract & {
  * returns the balance of a token. If no token address is provided,
  * no balance is returned
  */
-export function useErcBalance(address?: string) {
+export function useErcBalance(address?: string, updated = true) {
   const { connection, provider } = useWallet()
   const chainId = provider?.network?.chainId
   const account = connection.userAddress
@@ -42,7 +42,7 @@ export function useErcBalance(address?: string) {
     }
 
     run()
-  }, [address, chainId, account != null])
+  }, [address, chainId, account != null, updated])
 
   return balance
 }

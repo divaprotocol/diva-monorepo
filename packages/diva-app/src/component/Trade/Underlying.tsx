@@ -58,7 +58,7 @@ export default function Underlying() {
   const isBuy = useAppSelector((state) => isBuySelector(state))
   const breakEvenOptionPrice = 0
   const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 137
+  const chainId = wallet?.provider?.network?.chainId || 3
   const chainContractAddress =
     contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxy = chainContractAddress.exchangeProxy
