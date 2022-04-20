@@ -9,6 +9,7 @@ import {
   Stack,
   TextField,
   Tooltip,
+  Typography,
 } from '@mui/material'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
@@ -493,7 +494,10 @@ export function MyPositions() {
 
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
     const response: Response = {}
-    if (!userAddress) throw new Error('wallet not connected')
+    if (!userAddress) {
+      console.warn('wallet not connected')
+      return Promise.resolve({})
+    }
     await Promise.all(
       tokenAddresses.map(async (tokenAddress) => {
         const contract = new ethers.Contract(tokenAddress, ERC20, provider)
@@ -507,9 +511,7 @@ export function MyPositions() {
     )
     return response
   })
-  if (pools.length > 0) {
-    balances.refetch()
-  }
+
   const tokenBalances = balances.data
 
   const filteredRows =
@@ -530,7 +532,8 @@ export function MyPositions() {
                   ),
           }))
       : []
-  return userAddress ? (
+
+  return (
     <Stack
       direction="row"
       sx={{
@@ -541,25 +544,30 @@ export function MyPositions() {
       paddingTop={2}
       paddingRight={6}
     >
-      <SideMenu />
-      <PoolsTable
-        page={page}
-        rows={filteredRows}
-        loading={balances.isLoading}
-        columns={columns}
-        onPageChange={(page) => setPage(page)}
-      />
+      {!userAddress ? (
+        <Typography
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            width: '100%',
+          }}
+        >
+          Please connect your wallet
+        </Typography>
+      ) : (
+        <>
+          <SideMenu />
+          <PoolsTable
+            page={page}
+            rows={filteredRows}
+            loading={balances.isLoading}
+            columns={columns}
+            onPageChange={(page) => setPage(page)}
+          />
+        </>
+      )}
     </Stack>
-  ) : (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '75vh',
-      }}
-    >
-      Please connect your wallet{' '}
-    </div>
   )
 }
