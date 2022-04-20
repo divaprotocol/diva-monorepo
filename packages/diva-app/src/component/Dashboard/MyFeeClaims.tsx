@@ -6,6 +6,7 @@ import {
   DialogActions,
   Stack,
   TextField,
+  Typography,
 } from '@mui/material'
 import { useState } from 'react'
 import { ethers } from 'ethers'
@@ -141,13 +142,13 @@ const ClaimFeesCell = (props: any) => {
 }
 
 const AmountCell = (props: any) => {
-  const wallet = useConnectionContext()
+  const context = useConnectionContext()
   const [decimal, setDecimal] = useState<number>()
 
   const token = new ethers.Contract(
     props.row.Address,
     ERC20,
-    wallet.provider.getSigner()
+    context.provider.getSigner()
   )
   token
     .decimals()
@@ -237,32 +238,40 @@ export function MyFeeClaims() {
   }, [] as GridRowModel[])
 
   const filtered = rows.filter((v) => v.Amount != 0)
-  return userAddress ? (
+  return (
     <Stack
       direction="row"
       sx={{
         height: '100%',
+        maxHeight: 'calc(100% - 6em)',
       }}
+      spacing={6}
+      paddingTop={2}
+      paddingRight={6}
     >
-      <SideMenu />
-      <PoolsTable
-        page={page}
-        disableRowClick
-        columns={columns}
-        rows={filtered}
-        onPageChange={(page) => setPage(page)}
-      />
+      {!userAddress ? (
+        <Typography
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            width: '100%',
+          }}
+        >
+          Please connect your wallet
+        </Typography>
+      ) : (
+        <>
+          <SideMenu />
+          <PoolsTable
+            page={page}
+            rows={filtered}
+            columns={columns}
+            onPageChange={(page) => setPage(page)}
+          />
+        </>
+      )}
     </Stack>
-  ) : (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '75vh',
-      }}
-    >
-      Please connect your wallet{' '}
-    </div>
   )
 }

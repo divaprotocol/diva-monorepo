@@ -16,7 +16,6 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { selectChainId } from '../../Redux/appSlice'
 
 const PageDiv = styled.div`

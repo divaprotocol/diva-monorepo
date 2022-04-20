@@ -40,8 +40,11 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
-import { useConnectionContext } from '../../../hooks/useConnectionContext'
-import { selectChainId, selectUnderlyingPrice } from '../../../Redux/appSlice'
+import {
+  selectChainId,
+  selectUnderlyingPrice,
+  selectUserAddress,
+} from '../../../Redux/appSlice'
 const web3 = new Web3(Web3.givenProvider)
 
 export default function SellLimit(props: {
@@ -244,7 +247,7 @@ export default function SellLimit(props: {
     //return existingOrderAmount
     return Number(formatUnits(existingOrderAmount.toString(), 18))
   }
-  const { address: makerAccount } = useConnectionContext()
+  const makerAccount = useAppSelector(selectUserAddress)
 
   const getOptionsInWallet = async () => {
     let allowance = await makerTokenContract.methods

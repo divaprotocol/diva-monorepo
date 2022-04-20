@@ -30,6 +30,7 @@ import {
   fetchPool,
   selectPools,
   selectRequestStatus,
+  selectUserAddress,
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -85,7 +86,9 @@ const AddToMetamask = (props: any) => {
 const SubmitButton = (props: any) => {
   const [open, setOpen] = React.useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
-  const { address: userAddress, provider } = useConnectionContext()
+  const { provider } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+
   const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
   if (chainId == null) return null

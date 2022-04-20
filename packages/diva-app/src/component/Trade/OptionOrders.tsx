@@ -19,8 +19,8 @@ import { getDateTime } from '../../Util/Dates'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
+import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -111,7 +111,9 @@ export default function OpenOrders(props: {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const dispatch = useAppDispatch()
   const [orders, setOrders] = useState([])
-  const { chainId, address } = useConnectionContext()
+  const chainId = useAppSelector(selectChainId)
+  const address = useAppSelector(selectUserAddress)
+
   const componentDidMount = async () => {
     const orderBook: any = []
     if (responseSell.length === 0) {

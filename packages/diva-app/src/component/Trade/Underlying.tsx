@@ -29,7 +29,6 @@ import {
   selectChainId,
 } from '../../Redux/appSlice'
 import { formatEther } from 'ethers/lib/utils'
-import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { LoadingBox } from '../LoadingBox'
 
 const LeftCompFlexContainer = styled.div`

@@ -40,8 +40,11 @@ import {
   setIntrinsicValue,
   setMaxPayout,
 } from '../../../Redux/Stats'
-import { useConnectionContext } from '../../../hooks/useConnectionContext'
-import { selectUnderlyingPrice } from '../../../Redux/appSlice'
+import {
+  selectChainId,
+  selectUnderlyingPrice,
+  selectUserAddress,
+} from '../../../Redux/appSlice'
 const web3 = new Web3(Web3.givenProvider)
 
 export default function BuyLimit(props: {
@@ -56,7 +59,9 @@ export default function BuyLimit(props: {
   )
 
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  const { chainId, address } = useConnectionContext()
+  const chainId = useAppSelector(selectChainId)
+  const userAdress = useAppSelector(selectUserAddress)
+
   const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
   const makerToken = props.tokenAddress
@@ -117,10 +122,10 @@ export default function BuyLimit(props: {
     const amountBigNumber = parseUnits(amount.toString())
     await takerTokenContract.methods
       .approve(exchangeProxyAddress, amountBigNumber)
-      .send({ from: address })
+      .send({ from: userAdress })
 
     const collateralAllowance = await takerTokenContract.methods
-      .allowance(address, exchangeProxyAddress)
+      .allowance(userAdress, exchangeProxyAddress)
       .call()
     return collateralAllowance
   }
@@ -204,7 +209,7 @@ export default function BuyLimit(props: {
           }
         } else {
           const orderData = {
-            makerAccount: address,
+            makerAccount: userAdress,
             makerToken: option.collateralToken.id,
             takerToken: makerToken,
             provider: web3,
@@ -274,23 +279,23 @@ export default function BuyLimit(props: {
     )
   }
 
-  const { address: takerAccount } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
 
   useEffect(() => {
     const getCollateralInWallet = async () => {
       let allowance = await takerTokenContract.methods
-        .allowance(takerAccount, exchangeProxyAddress)
+        .allowance(userAdress, exchangeProxyAddress)
         .call()
       allowance = Number(formatUnits(allowance))
       let balance = await takerTokenContract.methods
-        .balanceOf(takerAccount)
+        .balanceOf(userAdress)
         .call()
       balance = Number(
         formatUnits(balance.toString(), option.collateralToken.decimals)
       )
       return {
         balance: balance,
-        account: takerAccount,
+        account: userAdress,
         approvalAmount: allowance,
       }
     }

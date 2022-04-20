@@ -1,9 +1,12 @@
 import { LoadingButton } from '@mui/lab'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { selectUserAddress } from '../../Redux/appSlice'
+import { useAppSelector } from '../../Redux/hooks'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 export function ConnectWalletButton() {
   const context = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
 
   return (
     <LoadingButton
@@ -19,8 +22,8 @@ export function ConnectWalletButton() {
       }
     >
       {context?.isConnected
-        ? context.address != null
-          ? getShortenedAddress(context.address)
+        ? userAddress != null
+          ? getShortenedAddress(userAddress)
           : ''
         : 'Connect Wallet'}
     </LoadingButton>

@@ -4,6 +4,8 @@ import ERC20 from '@diva/contracts/abis/erc20.json'
 import { useEffect, useState } from 'react'
 import { formatUnits } from 'ethers/lib/utils'
 import { useConnectionContext } from './useConnectionContext'
+import { selectUserAddress, selectChainId } from '../Redux/appSlice'
+import { useAppSelector } from '../Redux/hooks'
 
 type Erc20Contract = Contract & {
   balanceOf: (address: string) => Promise<BigNumber>
@@ -16,7 +18,9 @@ type Erc20Contract = Contract & {
  * no balance is returned
  */
 export function useErcBalance(address?: string) {
-  const { chainId, provider, address: account } = useConnectionContext()
+  const { provider } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+  const chainId = useAppSelector(selectChainId)
 
   const [balance, setBalance] = useState<string>()
 
@@ -40,7 +44,7 @@ export function useErcBalance(address?: string) {
     }
 
     run()
-  }, [address, chainId, account != null])
+  }, [address, chainId, userAddress != null])
 
   return balance
 }

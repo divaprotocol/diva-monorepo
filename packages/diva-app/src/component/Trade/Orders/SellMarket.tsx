@@ -38,8 +38,11 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
-import { useConnectionContext } from '../../../hooks/useConnectionContext'
-import { selectChainId, selectUnderlyingPrice } from '../../../Redux/appSlice'
+import {
+  selectChainId,
+  selectUnderlyingPrice,
+  selectUserAddress,
+} from '../../../Redux/appSlice'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
 
@@ -222,7 +225,7 @@ export default function SellMarket(props: {
     }
   }
 
-  const { address: makerAccount } = useConnectionContext()
+  const makerAccount = useAppSelector(selectUserAddress)
 
   const getOptionsInWallet = async () => {
     let allowance = await takerTokenContract.methods

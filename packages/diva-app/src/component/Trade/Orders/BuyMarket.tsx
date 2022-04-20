@@ -23,7 +23,6 @@ import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
-import { useConnectionContext } from '../../../hooks/useConnectionContext'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
@@ -36,7 +35,10 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
-import { selectUnderlyingPrice } from '../../../Redux/appSlice'
+import {
+  selectUnderlyingPrice,
+  selectUserAddress,
+} from '../../../Redux/appSlice'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
@@ -222,7 +224,7 @@ export default function BuyMarket(props: {
     }
   }
 
-  const { address: userAddress } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
 
   const getCollateralInWallet = async (takerAccount: string) => {
     let allowance = await takerTokenContract.methods

@@ -260,7 +260,7 @@ export const selectPools = (state: RootState) =>
   selectAppStateByChain(state).pools.map((p) => ({
     ...p,
     intrinsicValue: selectIntrinsicValue(state, p.id),
-  }))
+  })) || []
 
 export const selectMyDataFeeds = (state: RootState) =>
   selectPools(state).filter(
@@ -462,6 +462,9 @@ export const selectOtherPools = (state: RootState) =>
   )
 
 export const selectChainId = (state: RootState) => state.appSlice.chainId
+
+export const selectUserAddress = (state: RootState) =>
+  state.appSlice.userAddress
 
 export const selectUnderlyingPrice =
   (asset: string) =>
