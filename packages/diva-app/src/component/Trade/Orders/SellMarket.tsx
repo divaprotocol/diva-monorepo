@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useEffect } from 'react'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
@@ -11,7 +11,6 @@ import { FormDiv } from './UiStyles'
 import { FormInput } from './UiStyles'
 import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
-import { InfoTooltip } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
@@ -20,30 +19,15 @@ import { BigNumber } from '@0x/utils'
 import { sellMarketOrder } from '../../../Orders/SellMarket'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
-import { useWallet } from '@web3-ui/hooks'
-import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
+import { useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
-import { FormLabel, Stack } from '@mui/material'
+import { FormLabel, Stack, Tooltip } from '@mui/material'
 import { useParams } from 'react-router-dom'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
-import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
-import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
-import {
-  setBreakEven,
-  setIntrinsicValue,
-  setMaxPayout,
-  setMaxYield,
-} from '../../../Redux/Stats'
+import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
-let accounts: any[]
 
 export default function SellMarket(props: {
   option: Pool
@@ -54,33 +38,24 @@ export default function SellMarket(props: {
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 137
+  const chainId = useAppSelector(selectChainId)
   const option = props.option
   const optionTokenAddress = props.tokenAddress
-  const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
   const [youReceive, setYouReceive] = React.useState(0.0)
   const [existingBuyLimitOrders, setExistingBuyLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
-  const [approvalAmount, setApprovalAmount] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
-  const [makerAccount, setMakerAccount] = React.useState('')
   // eslint-disable-next-line prettier/prettier
   const exchangeProxyAddress = props.exchangeProxy
   const [walletBalance, setWalletBalance] = React.useState(0)
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const params: { tokenType: string } = useParams()
-  const [usdPrice, setUsdPrice] = useState('')
-  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const dispatch = useAppDispatch()
-
-  const isLong = window.location.pathname.split('/')[2] === 'long'
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseFloat(value)
@@ -223,9 +198,9 @@ export default function SellMarket(props: {
     }
   }
 
+  const makerAccount = useAppSelector(selectUserAddress)
+
   const getOptionsInWallet = async () => {
-    accounts = await window.ethereum.enable()
-    const makerAccount = accounts[0]
     let allowance = await takerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()
@@ -305,9 +280,7 @@ export default function SellMarket(props: {
       !Number.isNaN(val.balance)
         ? setWalletBalance(Number(val.balance))
         : setWalletBalance(0)
-      setMakerAccount(val.account)
       setAllowance(val.approvalAmount)
-      setApprovalAmount(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
       if (responseBuy.length > 0) {
@@ -373,163 +346,6 @@ export default function SellMarket(props: {
     }
   }, [numberOfOptions])
 
-  const handleSliderChange = (_event: any, newValue: any) => {
-    setValue(newValue)
-  }
-
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
-    const value = event.target.value.toString()
-    setValue(value === '' ? '' : Number(value))
-  }
-
-  const handleBlur = () => {
-    if (value < 0) {
-      setValue(0)
-    } else if (value >= 20) {
-      setValue(20)
-    }
-  }
-  useEffect(() => {
-    getUnderlyingPrice(option.referenceAsset).then((data) => {
-      if (data != null) setUsdPrice(data)
-    })
-    if (usdPrice != '') {
-      const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
-        BigENumber.from(option.floor),
-        BigENumber.from(option.inflection),
-        BigENumber.from(option.cap),
-        BigENumber.from(option.collateralBalanceLongInitial),
-        BigENumber.from(option.collateralBalanceShortInitial),
-        option.statusFinalReferenceValue === 'Open' &&
-          parseUnits(usdPrice).gt(0)
-          ? parseUnits(usdPrice)
-          : BigENumber.from(option.finalReferenceValue),
-        BigENumber.from(option.supplyInitial),
-        option.collateralToken.decimals
-      )
-      if (avgExpectedRate > 0) {
-        dispatch(
-          setMaxYield(
-            parseFloat(
-              formatEther(
-                BigENumber.from(maxPayout).div(BigENumber.from(avgExpectedRate))
-              )
-            ).toFixed(2)
-          )
-        )
-      }
-      if (isLong) {
-        if (parseEther(usdPrice).gt(0)) {
-          const be1 = parseEther(usdPrice)
-            .mul(BigENumber.from(option.inflection))
-            .sub(BigENumber.from(option.floor))
-            .mul(BigENumber.from(option.supplyLong))
-            .div(BigENumber.from(option.collateralBalanceLongInitial))
-            .add(BigENumber.from(option.floor))
-
-          const be2 = parseEther(usdPrice)
-            .mul(BigENumber.from(option.supplyLong))
-            .sub(BigENumber.from(option.collateralBalanceLongInitial))
-            .mul(
-              BigENumber.from(option.cap).sub(
-                BigENumber.from(option.inflection)
-              )
-            )
-            .div(BigENumber.from(option.collateralBalanceShortInitial))
-            .add(BigENumber.from(option.inflection))
-
-          if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
-          ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
-            dispatch(setBreakEven(formatEther(be2)))
-          }
-        }
-        if (
-          option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
-        ) {
-          dispatch(setIntrinsicValue('n/a'))
-        } else {
-          dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
-        }
-        dispatch(
-          setMaxPayout(
-            formatEther(
-              BigENumber.from(option.collateralBalanceLongInitial)
-                .add(BigENumber.from(option.collateralBalanceShortInitial))
-                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
-                .mul(parseEther('1'))
-                .div(BigENumber.from(option.supplyInitial))
-            )
-          )
-        )
-      } else {
-        if (parseEther(usdPrice).gt(0)) {
-          const be1 = parseUnits(usdPrice, 2)
-            .mul(BigENumber.from(option.supplyShort))
-            .sub(BigENumber.from(option.collateralBalanceShortInitial))
-            .div(BigENumber.from(option.collateralBalanceLongInitial))
-            .mul(
-              BigENumber.from(option.inflection).sub(
-                BigENumber.from(option.floor)
-              )
-            )
-            .sub(BigENumber.from(option.inflection))
-            .mul(BigENumber.from(-1))
-
-          const be2 = parseEther(usdPrice)
-            .mul(BigENumber.from(option.supplyShort))
-            .div(BigENumber.from(option.collateralBalanceShortInitial))
-            .mul(
-              BigENumber.from(option.cap).sub(
-                BigENumber.from(option.inflection)
-              )
-            )
-            .sub(BigENumber.from(option.cap))
-            .mul(BigENumber.from(-1))
-
-          if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
-          ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
-            dispatch(setBreakEven(formatEther(be2)))
-          }
-        }
-        if (
-          option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
-        ) {
-          dispatch(setIntrinsicValue('n/a'))
-        } else {
-          dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
-        }
-        dispatch(
-          setMaxPayout(
-            formatEther(
-              BigENumber.from(option.collateralBalanceLongInitial)
-                .add(BigENumber.from(option.collateralBalanceShortInitial))
-                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
-                .mul(parseEther('1'))
-                .div(BigENumber.from(option.supplyInitial))
-            )
-          )
-        )
-      }
-    }
-  }, [option, usdPrice])
   return (
     <div>
       <form onSubmit={handleOrderSubmit}>
@@ -561,12 +377,9 @@ export default function SellMarket(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
-              <InfoTooltip
-                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-                sx={{ color: 'Gray', fontSize: 2 }}
-              >
-                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-              </InfoTooltip>
+              <Tooltip title={ExpectedRateInfoText}>
+                <InfoIcon />
+              </Tooltip>
             </Stack>
           </LabelStyleDiv>
           <RightSideLabel>

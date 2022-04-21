@@ -24,11 +24,11 @@ import {
 import { useCoinIcon } from '../../hooks/useCoinIcon'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import Button from '@mui/material/Button'
-import { useWallet } from '@web3-ui/hooks'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import { fetchPool } from '../../Redux/poolSlice'
+import { fetchPool } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -56,7 +56,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const [openAlert, setOpenAlert] = React.useState(false)
   const [loading, setLoading] = useState(false)
   const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
-  const { provider } = useWallet()
+  const { provider } = useConnectionContext()
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
   const theme = useTheme()
@@ -167,7 +167,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       setLoading(false)
     } catch (error) {
       setLoading(false)
-      console.log(error)
+      console.error(error)
     }
   }
   return (
@@ -349,7 +349,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                       })
                     })
                     .catch((err) => {
-                      console.log(err)
+                      console.error(err)
                     })
                 }}
                 style={{

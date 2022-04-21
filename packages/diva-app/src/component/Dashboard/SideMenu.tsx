@@ -10,9 +10,12 @@ export function SideMenu() {
       direction="column"
       flexDirection="column"
       spacing={2}
+      paddingLeft={2}
+      paddingTop={6}
       sx={{
-        paddingLeft: '2em',
-        paddingTop: '3em',
+        '*': {
+          whiteSpace: 'nowrap',
+        },
         alignItems: 'left',
       }}
     >

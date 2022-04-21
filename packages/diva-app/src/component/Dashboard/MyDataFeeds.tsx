@@ -1,4 +1,4 @@
-import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
+import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
   Button,
   Container,
@@ -9,6 +9,7 @@ import {
   Stack,
   TextField,
   Tooltip,
+  Typography,
 } from '@mui/material'
 import { useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
@@ -20,16 +21,12 @@ import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { useWallet } from '@web3-ui/hooks'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import {
-  fetchPool,
-  poolsSelector,
-  selectMyDataFeeds,
-} from '../../Redux/poolSlice'
-import { useDispatch, useSelector } from 'react-redux'
+import { fetchPool, selectPools, selectUserAddress } from '../../Redux/appSlice'
+import { useDispatch } from 'react-redux'
 import { useAppSelector } from '../../Redux/hooks'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -121,7 +118,7 @@ const DueInCell = (props: any) => {
   )
 }
 const SubmitCell = (props: any) => {
-  const { provider } = useWallet()
+  const { provider } = useConnectionContext()
 
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
@@ -290,14 +287,13 @@ const columns: GridColDef[] = [
 ]
 
 export function MyDataFeeds() {
-  const wallet = useWallet()
-  const userAddress = wallet?.connection?.userAddress
+  const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
 
-  const pools = useAppSelector((state) => poolsSelector(state))
+  const pools = useAppSelector(selectPools)
   const rows: GridRowModel[] = pools
     .filter(
-      (pool) => pool.dataProvider.toLowerCase() === userAddress.toLowerCase()
+      (pool) => pool.dataProvider.toLowerCase() === userAddress?.toLowerCase()
     )
     .reduce((acc, val) => {
       const shared = {
@@ -350,32 +346,40 @@ export function MyDataFeeds() {
       ]
     }, [] as GridRowModel[])
 
-  return userAddress ? (
+  return (
     <Stack
       direction="row"
       sx={{
         height: '100%',
+        maxHeight: 'calc(100% - 6em)',
       }}
+      spacing={6}
+      paddingTop={2}
+      paddingRight={6}
     >
-      <SideMenu />
-      <PoolsTable
-        page={page}
-        disableRowClick
-        columns={columns}
-        rows={rows}
-        onPageChange={(page) => setPage(page)}
-      />
+      {!userAddress ? (
+        <Typography
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            width: '100%',
+          }}
+        >
+          Please connect your wallet
+        </Typography>
+      ) : (
+        <>
+          <SideMenu />
+          <PoolsTable
+            page={page}
+            rows={rows}
+            columns={columns}
+            onPageChange={(page) => setPage(page)}
+          />
+        </>
+      )}
     </Stack>
-  ) : (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '75vh',
-      }}
-    >
-      Please connect your wallet{' '}
-    </div>
   )
 }
