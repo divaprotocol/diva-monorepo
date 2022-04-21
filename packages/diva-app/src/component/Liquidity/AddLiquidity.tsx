@@ -393,26 +393,60 @@ export const AddLiquidity = ({ pool }: Props) => {
                       ERC20,
                       provider.getSigner()
                     )
-                    token
-                      .approve(
-                        config[chainId!].divaAddress,
-                        parseUnits(textFieldValue, decimal)
+                    const diva = new ethers.Contract(
+                      config[chainId!].divaAddress,
+                      DIVA_ABI,
+                      provider?.getSigner()
+                    )
+                    token.allowance(account, diva.address).then((res) => {
+                      console.log(formatEther(res))
+                      console.log(
+                        formatEther(parseUnits(textFieldValue, decimal))
                       )
-                      .then((tx: any) => {
-                        return tx.wait()
-                      })
-                      .then(() => {
-                        return token.allowance(
-                          account,
-                          config[chainId!].divaAddress
-                        )
-                      })
-                      .then(() => {
-                        const diva = new ethers.Contract(
-                          config[chainId!].divaAddress,
-                          DIVA_ABI,
-                          provider?.getSigner()
-                        )
+                      if (res.lt(parseUnits(textFieldValue, decimal))) {
+                        token
+                          .approve(
+                            config[chainId!].divaAddress,
+                            parseUnits(textFieldValue, decimal)
+                          )
+                          .then((tx: any) => {
+                            return tx.wait()
+                          })
+                          .then(() => {
+                            return token.allowance(
+                              account,
+                              config[chainId!].divaAddress
+                            )
+                          })
+                          .then(() => {
+                            diva!
+                              .addLiquidity(
+                                window.location.pathname.split('/')[1],
+                                parseUnits(textFieldValue, decimal)
+                              )
+                              .then((tx) => {
+                                /**
+                                 * dispatch action to refetch the pool after action
+                                 */
+                                tx.wait().then(() => {
+                                  setTimeout(() => {
+                                    dispatch(
+                                      fetchPool({
+                                        graphUrl:
+                                          config[chainId as number]
+                                            .divaSubgraph,
+                                        poolId:
+                                          window.location.pathname.split(
+                                            '/'
+                                          )[1],
+                                      })
+                                    )
+                                  }, 5000)
+                                })
+                              })
+                          })
+                          .catch((err: any) => console.error(err))
+                      } else {
                         diva!
                           .addLiquidity(
                             window.location.pathname.split('/')[1],
@@ -435,8 +469,8 @@ export const AddLiquidity = ({ pool }: Props) => {
                               }, 5000)
                             })
                           })
-                      })
-                      .catch((err: any) => console.error(err))
+                      }
+                    })
                   }}
                   style={{
                     maxWidth: theme.spacing(38),

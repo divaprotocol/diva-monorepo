@@ -216,7 +216,7 @@ export default function OrderBook(props: {
     SELL: 1,
   }
   const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 137
+  const chainId = wallet?.provider?.network?.chainId || 3
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
@@ -295,7 +295,7 @@ export default function OrderBook(props: {
                     >
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
-                          {row.buyQuantity != ''
+                          {row.buyQuantity != null
                             ? row.buyQuantity.toFixed(2).toString()
                             : '-'}
                         </Typography>
@@ -305,7 +305,7 @@ export default function OrderBook(props: {
                     <TableCellStyle align="center">
                       <Box>
                         <Typography variant="subtitle1">
-                          {row.bid != '' ? Number(row.bid).toFixed(2) : '-'}
+                          {row.bid != null ? Number(row.bid).toFixed(2) : '-'}
                         </Typography>
                         <Typography variant="caption" noWrap>
                           {row.buyExpiry}
@@ -315,7 +315,9 @@ export default function OrderBook(props: {
                     <TableCellStyle align="center">
                       <Box>
                         <Typography variant="subtitle1">
-                          {row.ask != '' ? row.ask.toFixed(2).toString() : '-'}
+                          {row.ask != null
+                            ? row.ask.toFixed(2).toString()
+                            : '-'}
                         </Typography>
                         <Typography variant="caption" noWrap>
                           {row.sellExpiry}
@@ -325,7 +327,7 @@ export default function OrderBook(props: {
                     <TableCellStyle align="center">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
-                          {row.sellQuantity != ''
+                          {row.sellQuantity != null
                             ? row.sellQuantity.toFixed(2).toString()
                             : '-'}
                         </Typography>
