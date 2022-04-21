@@ -26,7 +26,7 @@ max_time_away = dt.timedelta(minutes=60)
 
 resp = run_query(query)
 
-df_reporting_needed = get_required_reporting_df(resp,hours=45)
+df_reporting_needed = get_required_reporting_df(resp,hours=1000)
 
 
 for i in range(df_reporting_needed.shape[0]):
