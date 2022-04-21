@@ -375,10 +375,6 @@ export const AddLiquidity = ({ pool }: Props) => {
                       provider?.getSigner()
                     )
                     token.allowance(account, diva.address).then((res) => {
-                      console.log(formatEther(res))
-                      console.log(
-                        formatEther(parseUnits(textFieldValue, decimal))
-                      )
                       if (res.lt(parseUnits(textFieldValue, decimal))) {
                         token
                           .approve(
@@ -389,37 +385,11 @@ export const AddLiquidity = ({ pool }: Props) => {
                             return tx.wait()
                           })
                           .then(() => {
+                            setBtnName('Add')
                             return token.allowance(
                               account,
                               config[chainId!].divaAddress
                             )
-                          })
-                          .then(() => {
-                            diva!
-                              .addLiquidity(
-                                window.location.pathname.split('/')[1],
-                                parseUnits(textFieldValue, decimal)
-                              )
-                              .then((tx) => {
-                                /**
-                                 * dispatch action to refetch the pool after action
-                                 */
-                                tx.wait().then(() => {
-                                  setTimeout(() => {
-                                    dispatch(
-                                      fetchPool({
-                                        graphUrl:
-                                          config[chainId as number]
-                                            .divaSubgraph,
-                                        poolId:
-                                          window.location.pathname.split(
-                                            '/'
-                                          )[1],
-                                      })
-                                    )
-                                  }, 5000)
-                                })
-                              })
                           })
                           .catch((err: any) => console.error(err))
                       } else {
