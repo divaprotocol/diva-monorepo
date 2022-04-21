@@ -1,7 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
 import tradeReducer from './TradeOption'
-import activeTabReducer from './ActiveTab'
-import statsReducer from './Stats'
 import { appSlice, defaultAppState, initialState } from './appSlice'
 import { debounce } from '../lib/debounce'
 const preloadedState = JSON.parse(localStorage.getItem('diva-app-state-local'))
@@ -37,8 +35,6 @@ const store = configureStore({
   ),
   reducer: {
     tradeOption: tradeReducer,
-    activeTab: activeTabReducer,
-    stats: statsReducer,
     appSlice: appSlice.reducer,
   },
 })

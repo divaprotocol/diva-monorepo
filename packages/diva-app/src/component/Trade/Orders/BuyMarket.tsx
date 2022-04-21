@@ -13,32 +13,16 @@ import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
-import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
+import { useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
-import { FormLabel, Stack, Tooltip, useTheme } from '@mui/material'
-import { BigNumber as BigENumber } from 'ethers'
-import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
-import {
-  setBreakEven,
-  setIntrinsicValue,
-  setMaxPayout,
-  setMaxYield,
-} from '../../../Redux/Stats'
-import {
-  selectUnderlyingPrice,
-  selectUserAddress,
-} from '../../../Redux/appSlice'
+import { FormLabel, Stack, Tooltip } from '@mui/material'
+import { selectUserAddress } from '../../../Redux/appSlice'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
@@ -51,12 +35,8 @@ export default function BuyMarket(props: {
 }) {
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  const underlyingPrice = useAppSelector(
-    selectUnderlyingPrice(props.option.referenceAsset)
-  )
 
   const option = props.option
-  const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
   const [youPay, setYouPay] = React.useState(0.0)
@@ -64,7 +44,6 @@ export default function BuyMarket(props: {
     []
   )
   const [isApproved, setIsApproved] = React.useState(false)
-  const [approvalAmount, setApprovalAmount] = React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
@@ -78,9 +57,6 @@ export default function BuyMarket(props: {
     takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const params: { tokenType: string } = useParams()
 
-  const theme = useTheme()
-  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const dispatch = useAppDispatch()
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseFloat(value)
@@ -89,7 +65,7 @@ export default function BuyMarket(props: {
       setYouPay(0.0)
     }
   }
-  const isLong = window.location.pathname.split('/')[2] === 'long'
+
   const approveBuyAmount = async (amount) => {
     const amountBigNumber = parseUnits(amount.toString())
     await takerTokenContract.methods
@@ -319,7 +295,6 @@ export default function BuyMarket(props: {
           ? setCollateralBalance(Number(val.balance))
           : setCollateralBalance(0)
         setAllowance(val.approvalAmount)
-        setApprovalAmount(val.approvalAmount)
         setRemainingApprovalAmount(val.approvalAmount)
         val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
         if (responseSell.length > 0) {
@@ -339,199 +314,6 @@ export default function BuyMarket(props: {
       })
     }
   }, [responseSell, responseBuy, userAddress])
-
-  useEffect(() => {
-    if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {
-      let count = numberOfOptions
-      let cumulativeAvg = 0
-      let cumulativeTaker = 0
-      let cumulativeMaker = 0
-      existingSellLimitOrders.forEach((order: any) => {
-        const takerAmount = Number(
-          formatUnits(order.takerAmount, option.collateralToken.decimals)
-        )
-        const makerAmount = Number(formatUnits(order.makerAmount))
-        const expectedRate = order.expectedRate
-        if (count > 0) {
-          if (count <= makerAmount) {
-            const orderTotalAmount = Number(expectedRate * count)
-            cumulativeTaker = cumulativeTaker + orderTotalAmount
-            cumulativeMaker = cumulativeMaker + count
-            count = 0
-          } else {
-            cumulativeTaker = cumulativeTaker + takerAmount
-            cumulativeMaker = cumulativeMaker + makerAmount
-            count = count - makerAmount
-          }
-        }
-      })
-      cumulativeAvg = Number(
-        (cumulativeTaker / cumulativeMaker).toFixed(
-          totalDecimals(cumulativeTaker, cumulativeMaker)
-        )
-      )
-      if (cumulativeAvg > 0) {
-        setAvgExpectedRate(cumulativeAvg)
-        const youPayAmount = cumulativeAvg * numberOfOptions
-        setYouPay(youPayAmount)
-      }
-    }
-  }, [numberOfOptions])
-
-  useEffect(() => {
-    if (underlyingPrice != null) {
-      const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
-        BigENumber.from(option.floor),
-        BigENumber.from(option.inflection),
-        BigENumber.from(option.cap),
-        BigENumber.from(option.collateralBalanceLongInitial),
-        BigENumber.from(option.collateralBalanceShortInitial),
-        option.statusFinalReferenceValue === 'Open'
-          ? parseEther(underlyingPrice)
-          : BigENumber.from(option.finalReferenceValue),
-        BigENumber.from(option.supplyInitial),
-        option.collateralToken.decimals
-      )
-      if (avgExpectedRate > 0) {
-        dispatch(
-          setMaxYield(
-            parseFloat(
-              formatEther(
-                BigENumber.from(maxPayout).div(BigENumber.from(avgExpectedRate))
-              )
-            ).toFixed(2)
-          )
-        )
-      }
-
-      if (isLong) {
-        if (parseUnits(underlyingPrice, 2).gt(0)) {
-          const be1 = parseEther(underlyingPrice)
-            .mul(BigENumber.from(option.inflection))
-            .sub(BigENumber.from(option.floor))
-            .mul(BigENumber.from(option.supplyLong))
-            .div(BigENumber.from(option.collateralBalanceLongInitial))
-            .add(BigENumber.from(option.floor))
-
-          const be2 = parseEther(underlyingPrice)
-            .mul(BigENumber.from(option.supplyLong))
-            .sub(BigENumber.from(option.collateralBalanceLongInitial))
-            .mul(
-              BigENumber.from(option.cap).sub(
-                BigENumber.from(option.inflection)
-              )
-            )
-            .div(BigENumber.from(option.collateralBalanceShortInitial))
-            .add(BigENumber.from(option.inflection))
-
-          if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
-          ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
-            dispatch(setBreakEven(formatEther(be2)))
-          }
-        }
-        if (
-          option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(underlyingPrice) == 0
-        ) {
-          dispatch(setIntrinsicValue('n/a'))
-        } else {
-          dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
-        }
-        dispatch(
-          setMaxPayout(
-            formatEther(
-              BigENumber.from(option.collateralBalanceLongInitial)
-                .add(BigENumber.from(option.collateralBalanceShortInitial))
-                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
-                .mul(parseEther('1'))
-                .div(BigENumber.from(option.supplyInitial))
-            )
-          )
-        )
-      } else {
-        if (parseEther(underlyingPrice).gt(0)) {
-          const be1 = parseEther(underlyingPrice)
-            .mul(BigENumber.from(option.supplyShort))
-            .sub(BigENumber.from(option.collateralBalanceShortInitial))
-            .div(BigENumber.from(option.collateralBalanceLongInitial))
-            .mul(
-              BigENumber.from(option.inflection).sub(
-                BigENumber.from(option.floor)
-              )
-            )
-            .sub(BigENumber.from(option.inflection))
-            .mul(BigENumber.from(-1))
-
-          const be2 = parseEther(underlyingPrice)
-            .mul(BigENumber.from(option.supplyShort))
-            .div(BigENumber.from(option.collateralBalanceShortInitial))
-            .mul(
-              BigENumber.from(option.cap).sub(
-                BigENumber.from(option.inflection)
-              )
-            )
-            .sub(BigENumber.from(option.cap))
-            .mul(BigENumber.from(-1))
-
-          if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
-          ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
-            dispatch(setBreakEven(formatEther(be2)))
-          }
-        }
-        if (
-          option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(underlyingPrice) == 0
-        ) {
-          dispatch(setIntrinsicValue('n/a'))
-        } else {
-          dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
-        }
-        dispatch(
-          setMaxPayout(
-            formatEther(
-              BigENumber.from(option.collateralBalanceLongInitial)
-                .add(BigENumber.from(option.collateralBalanceShortInitial))
-                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
-                .mul(parseEther('1'))
-                .div(BigENumber.from(option.supplyInitial))
-            )
-          )
-        )
-      }
-    }
-  }, [option, underlyingPrice])
-  const handleSliderChange = (_event: any, newValue: any) => {
-    setValue(newValue)
-  }
-
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
-    const value = event.target.value.toString()
-    setValue(value === '' ? '' : Number(value))
-  }
-
-  const handleBlur = () => {
-    if (value < 0) {
-      setValue(0)
-    } else if (value >= 20) {
-      setValue(20)
-    }
-  }
 
   return (
     <div>

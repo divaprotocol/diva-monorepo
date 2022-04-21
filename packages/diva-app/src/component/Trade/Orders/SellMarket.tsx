@@ -19,30 +19,13 @@ import { BigNumber } from '@0x/utils'
 import { sellMarketOrder } from '../../../Orders/SellMarket'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
-import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
+import { useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
 import { useParams } from 'react-router-dom'
-import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
-import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
-import {
-  setBreakEven,
-  setIntrinsicValue,
-  setMaxPayout,
-  setMaxYield,
-} from '../../../Redux/Stats'
-import {
-  selectChainId,
-  selectUnderlyingPrice,
-  selectUserAddress,
-} from '../../../Redux/appSlice'
+import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
 
@@ -58,13 +41,11 @@ export default function SellMarket(props: {
   const chainId = useAppSelector(selectChainId)
   const option = props.option
   const optionTokenAddress = props.tokenAddress
-  const [value, setValue] = React.useState<string | number>(0)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
   const [youReceive, setYouReceive] = React.useState(0.0)
   const [existingBuyLimitOrders, setExistingBuyLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
-  const [approvalAmount, setApprovalAmount] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
@@ -75,14 +56,6 @@ export default function SellMarket(props: {
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const params: { tokenType: string } = useParams()
-  const underlyingPrice = useAppSelector(
-    selectUnderlyingPrice(props.option.referenceAsset)
-  )
-
-  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const dispatch = useAppDispatch()
-
-  const isLong = window.location.pathname.split('/')[2] === 'long'
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseFloat(value)
@@ -308,7 +281,6 @@ export default function SellMarket(props: {
         ? setWalletBalance(Number(val.balance))
         : setWalletBalance(0)
       setAllowance(val.approvalAmount)
-      setApprovalAmount(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
       if (responseBuy.length > 0) {
@@ -374,160 +346,6 @@ export default function SellMarket(props: {
     }
   }, [numberOfOptions])
 
-  const handleSliderChange = (_event: any, newValue: any) => {
-    setValue(newValue)
-  }
-
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
-    const value = event.target.value.toString()
-    setValue(value === '' ? '' : Number(value))
-  }
-
-  const handleBlur = () => {
-    if (value < 0) {
-      setValue(0)
-    } else if (value >= 20) {
-      setValue(20)
-    }
-  }
-  useEffect(() => {
-    if (underlyingPrice != null) {
-      const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
-        BigENumber.from(option.floor),
-        BigENumber.from(option.inflection),
-        BigENumber.from(option.cap),
-        BigENumber.from(option.collateralBalanceLongInitial),
-        BigENumber.from(option.collateralBalanceShortInitial),
-        option.statusFinalReferenceValue === 'Open' &&
-          parseUnits(underlyingPrice).gt(0)
-          ? parseUnits(underlyingPrice)
-          : BigENumber.from(option.finalReferenceValue),
-        BigENumber.from(option.supplyInitial),
-        option.collateralToken.decimals
-      )
-      if (avgExpectedRate > 0) {
-        dispatch(
-          setMaxYield(
-            parseFloat(
-              formatEther(
-                BigENumber.from(maxPayout).div(BigENumber.from(avgExpectedRate))
-              )
-            ).toFixed(2)
-          )
-        )
-      }
-      if (isLong) {
-        if (parseEther(underlyingPrice).gt(0)) {
-          const be1 = parseEther(underlyingPrice)
-            .mul(BigENumber.from(option.inflection))
-            .sub(BigENumber.from(option.floor))
-            .mul(BigENumber.from(option.supplyLong))
-            .div(BigENumber.from(option.collateralBalanceLongInitial))
-            .add(BigENumber.from(option.floor))
-
-          const be2 = parseEther(underlyingPrice)
-            .mul(BigENumber.from(option.supplyLong))
-            .sub(BigENumber.from(option.collateralBalanceLongInitial))
-            .mul(
-              BigENumber.from(option.cap).sub(
-                BigENumber.from(option.inflection)
-              )
-            )
-            .div(BigENumber.from(option.collateralBalanceShortInitial))
-            .add(BigENumber.from(option.inflection))
-
-          if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
-          ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
-            dispatch(setBreakEven(formatEther(be2)))
-          }
-        }
-        if (
-          option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(underlyingPrice) == 0
-        ) {
-          dispatch(setIntrinsicValue('n/a'))
-        } else {
-          dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
-        }
-        dispatch(
-          setMaxPayout(
-            formatEther(
-              BigENumber.from(option.collateralBalanceLongInitial)
-                .add(BigENumber.from(option.collateralBalanceShortInitial))
-                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
-                .mul(parseEther('1'))
-                .div(BigENumber.from(option.supplyInitial))
-            )
-          )
-        )
-      } else {
-        if (parseEther(underlyingPrice).gt(0)) {
-          const be1 = parseUnits(underlyingPrice, 2)
-            .mul(BigENumber.from(option.supplyShort))
-            .sub(BigENumber.from(option.collateralBalanceShortInitial))
-            .div(BigENumber.from(option.collateralBalanceLongInitial))
-            .mul(
-              BigENumber.from(option.inflection).sub(
-                BigENumber.from(option.floor)
-              )
-            )
-            .sub(BigENumber.from(option.inflection))
-            .mul(BigENumber.from(-1))
-
-          const be2 = parseEther(underlyingPrice)
-            .mul(BigENumber.from(option.supplyShort))
-            .div(BigENumber.from(option.collateralBalanceShortInitial))
-            .mul(
-              BigENumber.from(option.cap).sub(
-                BigENumber.from(option.inflection)
-              )
-            )
-            .sub(BigENumber.from(option.cap))
-            .mul(BigENumber.from(-1))
-
-          if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
-          ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
-            dispatch(setBreakEven(formatEther(be2)))
-          }
-        }
-        if (
-          option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(underlyingPrice) == 0
-        ) {
-          dispatch(setIntrinsicValue('n/a'))
-        } else {
-          dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
-        }
-        dispatch(
-          setMaxPayout(
-            formatEther(
-              BigENumber.from(option.collateralBalanceLongInitial)
-                .add(BigENumber.from(option.collateralBalanceShortInitial))
-                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
-                .mul(parseEther('1'))
-                .div(BigENumber.from(option.supplyInitial))
-            )
-          )
-        )
-      }
-    }
-  }, [option, underlyingPrice])
   return (
     <div>
       <form onSubmit={handleOrderSubmit}>
