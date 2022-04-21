@@ -1,3 +1,10 @@
+/**
+ * polyfills (this is mostly needed because of 0x deps)
+ * TODO: Remove once 0x deps are removed
+ */
+import 'core-js/stable'
+import 'react-app-polyfill/stable'
+
 import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
@@ -40,27 +47,22 @@ const WithProviders = () => {
         overflow: 'hidden',
       }}
     >
-      <ConnectionProvider>
-        <QueryClientProvider client={queryClient}>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <ThemeProvider theme={theme}>
-              <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <ThemeProvider theme={theme}>
+            <Provider store={store}>
+              <ConnectionProvider>
                 <App />
-              </Provider>
-            </ThemeProvider>
-          </LocalizationProvider>
-        </QueryClientProvider>
-      </ConnectionProvider>
+              </ConnectionProvider>
+            </Provider>
+          </ThemeProvider>
+        </LocalizationProvider>
+      </QueryClientProvider>
     </Box>
   )
 }
 
-ReactDOM.render(
-  <React.StrictMode>
-    <WithProviders />
-  </React.StrictMode>,
-  document.getElementById('root')
-)
+ReactDOM.render(<WithProviders />, document.getElementById('root'))
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

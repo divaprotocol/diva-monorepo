@@ -1,13 +1,11 @@
 import React, { useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
-import { Box, Input, InputAdornment } from '@mui/material'
+import { Box, Input, InputAdornment, Stack } from '@mui/material'
 import { LineSeries, XYPlot } from 'react-vis'
 import { Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
 import { makeStyles } from '@mui/styles'
-import localCoinImages from '../Util/localCoinImages.json'
-const assetLogoPath = '/images/coin-logos/'
 
 const useStyles = makeStyles({
   root: {
@@ -57,17 +55,7 @@ export default function PoolsTable({
   const classes = useStyles()
 
   return (
-    <Box
-      sx={{
-        height: 'calc(100% - 1em)',
-        display: 'flex',
-        flexGrow: 1,
-        flexDirection: 'column',
-        paddingTop: '2em',
-        paddingLeft: '4em',
-        paddingRight: '4em',
-      }}
-    >
+    <Stack height="100%" width="100%">
       <Box
         sx={{
           display: 'flex',
@@ -112,6 +100,6 @@ export default function PoolsTable({
           },
         }}
       />
-    </Box>
+    </Stack>
   )
 }

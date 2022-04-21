@@ -16,7 +16,7 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { useWallet } from '@web3-ui/hooks'
+import { selectChainId } from '../../Redux/appSlice'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -167,12 +167,13 @@ function createTable(buyOrders: any, sellOrders: any) {
       const buyOrder = buyOrders[j]
       const sellOrder = sellOrders[j]
       const row = {
-        buyExpiry: buyOrder === undefined ? '-' : buyOrder.expiry + ' mins',
-        buyQuantity: buyOrder === undefined ? '' : buyOrder.nbrOptions,
-        bid: buyOrder === undefined ? '' : buyOrder.bid,
-        sellExpiry: sellOrder === undefined ? '-' : sellOrder.expiry + ' mins',
-        sellQuantity: sellOrder === undefined ? '' : sellOrder.nbrOptions,
-        ask: sellOrder === undefined ? '' : sellOrder.ask,
+        buyExpiry: buyOrder?.expiry == null ? '-' : buyOrder.expiry + ' mins',
+        buyQuantity: buyOrder?.nbrOptions == null ? '' : buyOrder.nbrOptions,
+        bid: buyOrder?.bid == null ? '' : buyOrder.bid,
+        sellExpiry:
+          sellOrder?.expiry == null ? '-' : sellOrder.expiry + ' mins',
+        sellQuantity: sellOrder?.nbrOptions == null ? '' : sellOrder.nbrOptions,
+        ask: sellOrder?.ask == null ? '' : sellOrder.ask,
       }
       table.push(row)
     }
@@ -193,8 +194,7 @@ export default function OrderBook(props: {
     BUY: 0,
     SELL: 1,
   }
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 137
+  const chainId = useAppSelector(selectChainId)
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
@@ -252,10 +252,10 @@ export default function OrderBook(props: {
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
-              <TableCell>Quantity</TableCell>
-              <TableCell>BID</TableCell>
-              <TableCell>ASK</TableCell>
-              <TableCell>Quantity</TableCell>
+              <TableCell align="center">Quantity</TableCell>
+              <TableCell align="center">BID</TableCell>
+              <TableCell align="center">ASK</TableCell>
+              <TableCell align="center">Quantity</TableCell>
             </TableRow>
           </TableHead>
 
@@ -274,7 +274,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.buyQuantity != ''
-                            ? row.buyQuantity.toFixed(2).toString()
+                            ? row.buyQuantity?.toFixed(2).toString()
                             : '-'}
                         </Typography>
                         <label> </label>
@@ -283,7 +283,7 @@ export default function OrderBook(props: {
                     <TableCell align="center">
                       <Box>
                         <Typography variant="subtitle1">
-                          {row.bid != '' ? Number(row.bid).toFixed(2) : '-'}
+                          {row.bid != '' ? Number(row.bid)?.toFixed(2) : '-'}
                         </Typography>
                         <Typography variant="caption" noWrap>
                           {row.buyExpiry}
@@ -293,7 +293,7 @@ export default function OrderBook(props: {
                     <TableCell align="center">
                       <Box>
                         <Typography variant="subtitle1">
-                          {row.ask != '' ? row.ask.toFixed(2).toString() : '-'}
+                          {row.ask != '' ? row.ask?.toFixed(2).toString() : '-'}
                         </Typography>
                         <Typography variant="caption" noWrap>
                           {row.sellExpiry}
@@ -304,7 +304,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.sellQuantity != ''
-                            ? row.sellQuantity.toFixed(2).toString()
+                            ? row.sellQuantity?.toFixed(2).toString()
                             : '-'}
                         </Typography>
                       </Box>

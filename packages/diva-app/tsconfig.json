@@ -11,7 +11,7 @@
     "allowUmdGlobalAccess": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["@metamask/types"],
+    "types": [],
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,

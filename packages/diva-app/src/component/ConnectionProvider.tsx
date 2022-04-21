@@ -3,6 +3,8 @@ import { createContext, useCallback, useEffect, useState } from 'react'
 import { BigNumber, providers } from 'ethers'
 import useLocalStorage from 'use-local-storage'
 import detectEthereumProvider from '@metamask/detect-provider'
+import { useDispatch } from 'react-redux'
+import { setChainId, setUserAddress } from '../Redux/appSlice'
 
 type MetamaskProvider = ExternalProvider &
   BaseProvider & {
@@ -19,8 +21,8 @@ type ConnectionContextState = {
 }
 
 type ConnectionContextType = {
-  connect?: () => any
-  disconnect?: () => any
+  connect?: () => unknown
+  disconnect?: () => unknown
 } & ConnectionContextState
 
 export const ConnectionContext = createContext<ConnectionContextType>({})
@@ -31,7 +33,22 @@ export const ConnectionProvider = ({ children }) => {
   const [{ connected }, setConnectionState] = useLocalStorage<{
     connected?: string
   }>('diva-dapp-connection', {})
-  const [state, setState] = useState<ConnectionContextState>({ chainId: 3 })
+  const [state, setState] = useState<ConnectionContextState>({})
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (state.chainId != null) {
+        dispatch(setChainId(state.chainId))
+      }
+    }, 200)
+    return () => clearTimeout(timeout)
+  }, [dispatch, state.chainId])
+
+  useEffect(() => {
+    dispatch(setUserAddress(state.address))
+  }, [dispatch, state.address])
+
   const connect = useCallback(async () => {
     const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
     setState((_state) => ({
@@ -41,6 +58,7 @@ export const ConnectionProvider = ({ children }) => {
       isConnected: ethereum.isConnected(),
     }))
     setConnectionState({ connected: 'metamask' })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const disconnect = useCallback(() => {
@@ -50,40 +68,42 @@ export const ConnectionProvider = ({ children }) => {
       isConnected: false,
     }))
     setConnectionState({})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     if (!ethereum?.isMetaMask) {
-      setState({
-        ...state,
+      setState((_state) => ({
+        ..._state,
         error: 'Please install metamask',
-      })
-      console.log('not metamask')
+      }))
       return
     }
 
     ethereum.on('accountsChanged', (accounts) => {
-      console.log('accounts changed')
-      setState((_state) => ({ ...state, address: accounts?.[0] }))
-    })
-
-    ethereum.on('chainChanged', (chainId) => {
-      console.log('chain changed')
-      setState((_state) => ({ ...state, chainId }))
-    })
-
-    ethereum.on('connect', (connectInfo) => {
-      console.log('connect yo', { connectInfo })
       setState((_state) => ({
         ..._state,
-        isConnected: ethereum.isConnected(),
+        address: accounts?.[0],
+      }))
+    })
+
+    ethereum.on('chainChanged', (chainInfo) => {
+      setState((_state) => ({
+        ..._state,
         chainId: BigNumber.from(ethereum.chainId).toNumber(),
       }))
     })
 
-    ethereum.on('disconnect', (connectInfo) => {
+    ethereum.on('connect', (connectInfo) => {
+      setState((_state) => ({
+        ..._state,
+        isConnected: ethereum.isConnected(),
+        chainId: BigNumber.from(connectInfo.chainId).toNumber(),
+      }))
+    })
+
+    ethereum.on('disconnect', () => {
       setState((_state) => ({ ..._state, isConnected: ethereum.isConnected() }))
-      console.log('disconnect', { connectInfo })
     })
 
     detectEthereumProvider().then((provider: MetamaskProvider) =>
@@ -93,10 +113,22 @@ export const ConnectionProvider = ({ children }) => {
       }))
     )
 
-    ethereum.on('message', (msg) => console.log('message', { msg }))
-
+    // connect()
     if (connected) connect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  /**
+   * set default chain if it doesn't load automatically
+   */
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (state.chainId == null) {
+        setState((_state) => ({ ..._state, chainId: 137 }))
+      }
+    }, 3000)
+    return () => clearTimeout(timeout)
+  }, [dispatch, state.chainId])
 
   const value = {
     connect,

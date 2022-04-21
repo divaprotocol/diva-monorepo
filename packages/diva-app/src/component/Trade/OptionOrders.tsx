@@ -3,7 +3,6 @@ import { useAppSelector, useAppDispatch } from '../../Redux/hooks'
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
-import { makeStyles } from '@mui/styles'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -15,13 +14,12 @@ import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import Button from '@mui/material/Button'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { get0xOpenOrders, getOrderDetails } from '../../DataService/OpenOrders'
+import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getDateTime } from '../../Util/Dates'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
-import { useWallet } from '@web3-ui/hooks'
+import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -101,7 +99,6 @@ function mapOrderData(
   return orderbook
 }
 
-let accounts
 export default function OpenOrders(props: {
   option: Pool
   tokenAddress: string
@@ -113,8 +110,9 @@ export default function OpenOrders(props: {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const dispatch = useAppDispatch()
   const [orders, setOrders] = useState([])
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 137
+  const chainId = useAppSelector(selectChainId)
+  const address = useAppSelector(selectUserAddress)
+
   const componentDidMount = async () => {
     const orderBook: any = []
     if (responseSell.length === 0) {
@@ -142,14 +140,14 @@ export default function OpenOrders(props: {
       responseBuy,
       option,
       optionTokenAddress,
-      accounts[0]
+      address
     )
 
     const orderBookSell = mapOrderData(
       responseSell,
       option,
       optionTokenAddress,
-      accounts[0]
+      address
     )
 
     if (orderBookSell.length > 0) {
@@ -187,24 +185,6 @@ export default function OpenOrders(props: {
       }
     }
   }, [responseBuy, responseSell])
-
-  async function cancelOrder(order, chainId) {
-    const orderHash = order.orderHash
-    //get the order details in current form from 0x before cancelling it.
-    const cancelOrder = await getOrderDetails(orderHash, chainId)
-    cancelLimitOrder(cancelOrder, chainId).then(function (
-      cancelOrderResponse: any
-    ) {
-      const log = cancelOrderResponse?.logs?.[0]
-      if (log != null && log.event == 'OrderCancelled') {
-        alert('Order successfully canceled')
-        //update orderbook & create orders widget
-        componentDidMount()
-      } else {
-        alert('order could not be canceled')
-      }
-    })
-  }
 
   return (
     <PageDiv>
@@ -268,7 +248,11 @@ export default function OpenOrders(props: {
                             variant="outlined"
                             startIcon={<DeleteIcon />}
                             size="small"
-                            onClick={() => cancelOrder(orders[index], chainId)}
+                            onClick={() => {
+                              /**
+                               * TODO: implement cancel
+                               */
+                            }}
                           >
                             Cancel
                           </Button>
@@ -280,7 +264,9 @@ export default function OpenOrders(props: {
               })
             ) : (
               <TableRow>
-                <TableCell>None</TableCell>
+                <TableCell colSpan={5} align="center">
+                  None
+                </TableCell>
               </TableRow>
             )}
           </TableBody>

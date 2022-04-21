@@ -9,9 +9,12 @@ import Tooltip from '@mui/material/Tooltip'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
-import { priceSelector } from '../../Redux/poolSlice'
+import {
+  selectChainId,
+  selectPool,
+  selectUnderlyingPrice,
+} from '../../Redux/appSlice'
 import { useParams } from 'react-router-dom'
-import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -50,11 +53,13 @@ export default function OptionHeader(optionData: {
   poolId: string
   tokenDecimals: number
 }) {
-  const { chainId, provider } = useConnectionContext()
+  const chainId = useAppSelector(selectChainId)
+
   const params: { poolId: string; tokenType: string } = useParams()
+  const pool = useAppSelector((state) => selectPool(state, params.poolId))
   const headerTitle = optionData.ReferenceAsset
-  const underlyingAssetPrice = useAppSelector((state) =>
-    priceSelector(state, params.poolId)
+  const underlyingAssetPrice = useAppSelector(
+    selectUnderlyingPrice(pool?.referenceAsset)
   )
 
   const handleAddMetaMask = async () => {

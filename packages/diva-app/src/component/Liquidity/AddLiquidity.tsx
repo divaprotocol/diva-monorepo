@@ -15,7 +15,7 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
-import { BigNumber, Contract, ethers } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import styled from '@emotion/styled'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import {
@@ -24,20 +24,21 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { withStyles } from '@mui/styles'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import { fetchPool } from '../../Redux/poolSlice'
+import { fetchPool, selectUserAddress } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { useAppSelector } from '../../Redux/hooks'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
     color: ${(props) => (props.theme as any).palette.primary.main};
   }
 `
+
 const BlackTextTypography = (props) => (
-  <Typography color={'#000'}>{props.children}</Typography>
+  <Typography color="#000">{props.children}</Typography>
 )
 
 type Props = {
@@ -58,7 +59,9 @@ export const AddLiquidity = ({ pool }: Props) => {
     pool ? pool!.collateralToken.id : undefined
   )
   const dispatch = useDispatch()
-  const { provider, address: account } = useConnectionContext()
+  const { provider } = useConnectionContext()
+  const account = useAppSelector(selectUserAddress)
+
   const chainId = provider?.network?.chainId
   useEffect(() => {
     if (pool) {
@@ -125,7 +128,7 @@ export const AddLiquidity = ({ pool }: Props) => {
         setLoading(false)
       })
       .catch((err: any) => {
-        console.log(err)
+        console.error(err)
         setLoading(false)
       })
   }

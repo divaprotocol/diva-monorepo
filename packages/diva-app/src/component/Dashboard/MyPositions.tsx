@@ -9,6 +9,7 @@ import {
   Stack,
   TextField,
   Tooltip,
+  Typography,
 } from '@mui/material'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
@@ -21,13 +22,18 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import styled from 'styled-components'
-import { GrayText } from '../Trade/Orders/UiStyles'
 import React, { useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
-import { fetchPool, poolsSelector } from '../../Redux/poolSlice'
+import {
+  fetchPool,
+  selectPools,
+  selectRequestStatus,
+  selectUserAddress,
+} from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { GrayText } from '../Graytext'
 
 type Response = {
   [token: string]: BigNumber
@@ -80,7 +86,9 @@ const AddToMetamask = (props: any) => {
 const SubmitButton = (props: any) => {
   const [open, setOpen] = React.useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
-  const { address: userAddress, provider } = useConnectionContext()
+  const { provider } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+
   const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
   if (chainId == null) return null
@@ -372,7 +380,8 @@ const columns: GridColDef[] = [
 export function MyPositions() {
   const { provider, address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
-  const pools = useAppSelector((state) => poolsSelector(state))
+  const pools = useAppSelector((state) => selectPools(state))
+  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
@@ -491,9 +500,15 @@ export function MyPositions() {
 
   const tokenAddresses = rows.map((v) => v.address.id)
 
+  /**
+   * TODO: Move into redux
+   */
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
     const response: Response = {}
-    if (!userAddress) throw new Error('wallet not connected')
+    if (!userAddress) {
+      console.warn('wallet not connected')
+      return Promise.resolve({})
+    }
     await Promise.all(
       tokenAddresses.map(async (tokenAddress) => {
         const contract = new ethers.Contract(tokenAddress, ERC20, provider)
@@ -507,9 +522,7 @@ export function MyPositions() {
     )
     return response
   })
-  if (pools.length > 0) {
-    balances.refetch()
-  }
+
   const tokenBalances = balances.data
 
   const filteredRows =
@@ -530,32 +543,42 @@ export function MyPositions() {
                   ),
           }))
       : []
-  return userAddress ? (
+
+  return (
     <Stack
       direction="row"
       sx={{
         height: '100%',
+        maxHeight: 'calc(100% - 6em)',
       }}
+      spacing={6}
+      paddingTop={2}
+      paddingRight={6}
     >
-      <SideMenu />
-      <PoolsTable
-        page={page}
-        rows={filteredRows}
-        loading={balances.isLoading}
-        columns={columns}
-        onPageChange={(page) => setPage(page)}
-      />
+      {!userAddress ? (
+        <Typography
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            width: '100%',
+          }}
+        >
+          Please connect your wallet
+        </Typography>
+      ) : (
+        <>
+          <SideMenu />
+          <PoolsTable
+            page={page}
+            rows={filteredRows}
+            loading={balances.isLoading || poolsRequestStatus === 'pending'}
+            columns={columns}
+            onPageChange={(page) => setPage(page)}
+          />
+        </>
+      )}
     </Stack>
-  ) : (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '75vh',
-      }}
-    >
-      Please connect your wallet{' '}
-    </div>
   )
 }

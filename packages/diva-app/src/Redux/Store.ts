@@ -1,16 +1,41 @@
 import { configureStore } from '@reduxjs/toolkit'
 import tradeReducer from './TradeOption'
-import activeTabReducer from './ActiveTab'
-import statsReducer from './Stats'
-import { poolSlice } from './poolSlice'
+import { appSlice, defaultAppState, initialState } from './appSlice'
 import { debounce } from '../lib/debounce'
+const preloadedState = JSON.parse(localStorage.getItem('diva-app-state-local'))
+
+const validState = (state) => {
+  if (
+    preloadedState != null &&
+    preloadedState.appSlice != null &&
+    /**
+     * validates that all properties from defaultAppState and
+     * initialState are there as a way to validate the schema
+     * of the cached app state
+     */
+    !Object.keys(initialState).every((key) => {
+      const res =
+        preloadedState.appSlice[key] != null &&
+        Object.keys(defaultAppState).every((_key) => {
+          const _res = preloadedState.appSlice[key][_key] != null
+          return _res
+        })
+      return res
+    })
+  ) {
+    console.error('previous app state is invalid, resetting it', preloadedState)
+    return undefined
+  }
+  return state
+}
+
 const store = configureStore({
-  preloadedState: JSON.parse(localStorage.getItem('diva-app-state')) || {},
+  preloadedState: validState(
+    JSON.parse(localStorage.getItem('diva-app-state-local'))
+  ),
   reducer: {
     tradeOption: tradeReducer,
-    activeTab: activeTabReducer,
-    stats: statsReducer,
-    poolSlice: poolSlice.reducer,
+    appSlice: appSlice.reducer,
   },
 })
 
@@ -18,12 +43,9 @@ export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
 
 store.subscribe(
-  // Save editor text, plagiarism data to localStorage
   debounce(() => {
     const serializedState = JSON.stringify(store.getState())
-    localStorage.setItem('diva-app-state', serializedState)
-    // saveState('gc-slate-content', store.getState().editor.editorValue);
-    // saveState('gc-plagiarism-results', store.getState().editor.plagiarismData);
+    localStorage.setItem('diva-app-state-local', serializedState)
   }, 1000)
 )
 
