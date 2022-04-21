@@ -14,11 +14,22 @@ import { ReviewAndSubmit } from './ReviewAndSubmit'
 import { useCreatePoolFormik } from './formik'
 import { SelectDataFeedProvider } from './SelectDataFeedProvider'
 import { LoadingButton } from '@mui/lab'
+import { ethers } from 'ethers'
+import { useWallet } from '@web3-ui/hooks'
+import ERC20 from '@diva/contracts/abis/erc20.json'
+import { config } from '../../constants'
+import { parseUnits } from 'ethers/lib/utils'
+import { useState } from 'react'
 
 export function CreatePool() {
+  const [decimal, setDecimal] = useState(18)
+  const [btnName, setBtnName] = useState('')
   const formik = useCreatePoolFormik()
   const theme = useTheme()
-
+  const {
+    provider,
+    connection: { userAddress: account },
+  } = useWallet()
   let step = null
   switch (formik.values.step) {
     case 1:
@@ -30,6 +41,26 @@ export function CreatePool() {
     case 3:
       step = <ReviewAndSubmit formik={formik} />
       break
+  }
+
+  if (formik.values.collateralToken != null) {
+    const token = new ethers.Contract(
+      formik.values.collateralToken.id,
+      ERC20,
+      provider.getSigner()
+    )
+    token.decimals().then((decimals: number) => {
+      setDecimal(decimals)
+    })
+    token
+      .allowance(account, config[provider?.network?.chainId].divaAddress)
+      .then((res) => {
+        if (res.lt(parseUnits(formik.values.collateralBalance, decimal))) {
+          setBtnName('Approve')
+        } else {
+          setBtnName('Add')
+        }
+      })
   }
 
   return (
@@ -92,9 +123,7 @@ export function CreatePool() {
             }
             disabled={!formik.isValid}
           >
-            {formik.values.step === 3
-              ? formik.status || 'Approve and Create Pool'
-              : 'Next'}
+            {formik.values.step === 3 ? formik.status || btnName : 'Next'}
           </LoadingButton>
         </Stack>
       </Box>
