@@ -13,7 +13,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import { PayoffProfile } from './PayoffProfile'
-import { useCreatePoolFormik, initialValues } from './formik'
+import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
@@ -49,18 +49,6 @@ export function DefinePoolAttributes({
   } = formik.values
 
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
-  useEffect(() => {
-    const getDefaultToken = async () => {
-      const whitelistedTokens = ['DAI', 'USDC', 'USDT']
-
-      const whitelistedToken = await collateralTokens?.find((token) =>
-        whitelistedTokens?.includes(token.name)
-      )
-      initialValues.collateralToken = whitelistedToken
-      console.log('defaultColletralToken', whitelistedToken)
-    }
-    getDefaultToken()
-  }, [collateralTokens])
 
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)

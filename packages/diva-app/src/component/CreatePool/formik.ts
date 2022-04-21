@@ -2,52 +2,13 @@ import { useFormik } from 'formik'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useDiva } from '../../hooks/useDiva'
 import { WhitelistCollateralToken } from '../../lib/queries'
-
-const defaultDate = new Date()
-defaultDate.setHours(defaultDate.getHours() + 25)
-
-type Values = {
-  step: number
-  referenceAsset: string
-  expiryTime: Date
-  floor: number
-  cap: number
-  inflection: number
-  collateralToken?: WhitelistCollateralToken
-  collateralWalletBalance: string
-  collateralBalance: string
-  collateralBalanceShort: number
-  collateralBalanceLong: number
-  tokenSupply: number
-  capacity: number
-  dataProvider: string
-}
-
-export const initialValues: Values = {
-  step: 1,
-  referenceAsset: '',
-  expiryTime: defaultDate,
-  floor: 100,
-  cap: 300,
-  inflection: 200,
-  collateralWalletBalance: '0',
-  collateralBalance: '2',
-  collateralBalanceShort: 1,
-  collateralBalanceLong: 1,
-  tokenSupply: 2,
-  capacity: 0,
-  dataProvider: '',
-}
-
-type Errors = {
-  [P in keyof typeof initialValues]?: string
-}
+import { useWhitelist } from '../../hooks/useWhitelist'
+import { useEffect } from 'react'
 
 export const useCreatePoolFormik = () => {
   const { provider, isConnected } = useConnectionContext()
 
   const contract = useDiva()
-
   const _formik = useFormik({
     initialValues,
     onSubmit: async (values, formik) => {
