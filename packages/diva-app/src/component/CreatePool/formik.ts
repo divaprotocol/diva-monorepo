@@ -8,6 +8,68 @@ import { useEffect } from 'react'
 export const useCreatePoolFormik = () => {
   const { provider, isConnected } = useConnectionContext()
 
+  const { collateralTokens } = useWhitelist()
+  useEffect(() => {
+    const getDefaultToken = async () => {
+      const whitelistedTokens = [
+        '0xad6d458402f60fd3bd25163575031acdce07538d',
+        '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        'US0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      ]
+
+      const whitelistedToken = await collateralTokens?.find((token) =>
+        whitelistedTokens?.includes(token.id)
+      )
+      initialValues.collateralToken = whitelistedToken
+      console.log(whitelistedToken)
+    }
+    getDefaultToken()
+  }, [collateralTokens])
+  const defaultDate = new Date()
+  defaultDate.setHours(defaultDate.getHours() + 25)
+  const defaultToken = {
+    id: '0xad6d458402f60fd3bd25163575031acdce07538d',
+    name: 'DAI',
+    decimals: 18,
+    symbol: 'DAI',
+  }
+
+  type Values = {
+    step: number
+    referenceAsset: string
+    expiryTime: Date
+    floor: number
+    cap: number
+    inflection: number
+    collateralToken?: WhitelistCollateralToken
+    collateralWalletBalance: string
+    collateralBalance: string
+    collateralBalanceShort: number
+    collateralBalanceLong: number
+    tokenSupply: number
+    capacity: number
+    dataProvider: string
+  }
+  const initialValues: Values = {
+    step: 1,
+    referenceAsset: '',
+    expiryTime: defaultDate,
+    floor: 100,
+    cap: 300,
+    inflection: 200,
+    collateralToken: defaultToken,
+    collateralWalletBalance: '0',
+    collateralBalance: '2',
+    collateralBalanceShort: 1,
+    collateralBalanceLong: 1,
+    tokenSupply: 2,
+    capacity: 0,
+    dataProvider: '',
+  }
+
+  type Errors = {
+    [P in keyof typeof initialValues]?: string
+  }
   const contract = useDiva()
   const _formik = useFormik({
     initialValues,
