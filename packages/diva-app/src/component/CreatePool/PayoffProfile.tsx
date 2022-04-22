@@ -145,11 +145,11 @@ export function PayoffProfile(props: {
           items={[
             {
               title: 'Long',
-              color: theme.palette.primary.main,
+              color: '#12939A',
             },
             {
               title: 'Short',
-              color: theme.palette.secondary.main,
+              color: '#79C7E3',
             },
           ]}
         />
