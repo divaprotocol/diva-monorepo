@@ -35,7 +35,9 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
+
   const { referenceAssets, collateralTokens } = useWhitelist()
+
   const {
     referenceAsset,
     expiryTime,
@@ -50,6 +52,9 @@ export function DefinePoolAttributes({
 
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
 
+  const defaultToken =
+    collateralTokens?.filter((v) => v.name.includes('DAI')) || []
+  console.log('defaultToken', defaultToken)
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
@@ -213,7 +218,6 @@ export function DefinePoolAttributes({
         <Stack pb={3} spacing={2} direction="row">
           <FormControl fullWidth error={formik.errors.collateralToken != null}>
             <Autocomplete
-              getOptionLabel={(option) => option?.name || ''}
               options={possibleOptions}
               value={collateralToken}
               onChange={(_, newValue) => {
@@ -229,6 +233,7 @@ export function DefinePoolAttributes({
               }}
               renderInput={(params) => (
                 <TextField
+                  defaultValue={defaultToken[0].name}
                   error={formik.errors.collateralToken != null}
                   onBlur={formik.handleBlur}
                   {...params}
