@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { useAppDispatch } from '../../Redux/hooks'
 import 'styled-components'
 import styled from 'styled-components'
 import { makeStyles } from '@mui/styles'
@@ -17,6 +16,7 @@ import {
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
 import { fetchOrders, setIsBuy } from '../../Redux/appSlice'
+import { useDispatch } from 'react-redux'
 const PageDiv = styled.div`
   justify-content: center
   height: 500px;
@@ -74,7 +74,7 @@ export default function CreateOrder(props: {
 }) {
   //const op = useSelector((state) => state.tradeOption.option)
   const option = props.option
-  const dispatch = useAppDispatch()
+  const dispatch = useDispatch()
   const classes = useStyles()
   const dividerClass = useDividerStyle()
   const tabsClass = useTabsBorder()
