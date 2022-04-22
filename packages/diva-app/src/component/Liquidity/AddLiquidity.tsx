@@ -364,6 +364,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                     !pool || Date.now() > 1000 * parseInt(pool.expiryTime)
                   }
                   onClick={() => {
+                    setLoading(true)
                     const token = new ethers.Contract(
                       pool!.collateralToken.id,
                       ERC20,
@@ -386,6 +387,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                           })
                           .then(() => {
                             setBtnName('Add')
+                            setLoading(false)
                             return token.allowance(
                               account,
                               config[chainId!].divaAddress
@@ -403,6 +405,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                              * dispatch action to refetch the pool after action
                              */
                             tx.wait().then(() => {
+                              setLoading(false)
                               setTimeout(() => {
                                 dispatch(
                                   fetchPool({
