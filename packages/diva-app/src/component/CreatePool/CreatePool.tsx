@@ -58,7 +58,7 @@ export function CreatePool() {
         if (res.lt(parseUnits(formik.values.collateralBalance, decimal))) {
           setBtnName('Approve')
         } else {
-          setBtnName('Add')
+          setBtnName('Create')
         }
       })
   }
