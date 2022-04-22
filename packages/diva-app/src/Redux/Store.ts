@@ -41,6 +41,9 @@ const storeConfig: ConfigureStoreOptions = {
   },
 }
 
+/**
+ * Only add preloadded state to redux configuration if it is valid
+ */
 if (preloadedState != null) {
   storeConfig.preloadedState = preloadedState
 }
