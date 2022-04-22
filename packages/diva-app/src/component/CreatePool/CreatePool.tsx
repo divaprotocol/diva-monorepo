@@ -56,7 +56,7 @@ export function CreatePool() {
       .allowance(account, config[provider?.network?.chainId].divaAddress)
       .then((res) => {
         if (res.lt(parseUnits(formik.values.collateralBalance, decimal))) {
-          setBtnName('Approve')
+          setBtnName('Approve & Create')
         } else {
           setBtnName('Create')
         }
