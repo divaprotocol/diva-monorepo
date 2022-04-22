@@ -115,11 +115,15 @@ export function useDiva(): DivaApi | null {
       if (
         allowedBalance.lt(collateralBalanceLong.add(collateralBalanceShort))
       ) {
-        const tx = await erc20.approve(
-          divaAddress,
-          collateralBalanceLong.add(collateralBalanceShort)
-        )
-        await tx.wait()
+        try {
+          const tx = await erc20.approve(
+            divaAddress,
+            collateralBalanceLong.add(collateralBalanceShort)
+          )
+          await tx.wait()
+        } catch (e) {
+          console.error(e)
+        }
       }
 
       const tx2 = await contract.createContingentPool([
