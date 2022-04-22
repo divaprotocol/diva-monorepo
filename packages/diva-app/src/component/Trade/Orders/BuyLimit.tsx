@@ -1,26 +1,14 @@
-import React, { FormEvent, useState } from 'react'
+import React, { FormEvent } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import {
-  Container,
-  Divider,
-  FormLabel,
-  MenuItem,
-  Stack,
-  useTheme,
-} from '@mui/material'
+import { FormLabel, MenuItem, Stack, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
-import {
-  ExpectedRateInfoText,
-  InfoTooltip,
-  LabelStyle,
-  SubLabelStyle,
-} from './UiStyles'
+import { ExpectedRateInfoText, LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
@@ -33,30 +21,14 @@ import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
 import { BigNumber } from '@0x/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { useWallet } from '@web3-ui/hooks'
-import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
+import { useAppSelector } from '../../../Redux/hooks'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
-import Typography from '@mui/material/Typography'
-import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
-import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
-import {
-  setBreakEven,
-  setMaxYield,
-  setIntrinsicValue,
-  setMaxPayout,
-} from '../../../Redux/Stats'
+import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
 const web3 = new Web3(Web3.givenProvider)
-let accounts: any[]
 
 export default function BuyLimit(props: {
   option: Pool
@@ -66,8 +38,9 @@ export default function BuyLimit(props: {
   chainId: number
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const chainId = useAppSelector(selectChainId)
+  const userAdress = useAppSelector(selectUserAddress)
+
   const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
   const makerToken = props.tokenAddress
@@ -82,18 +55,10 @@ export default function BuyLimit(props: {
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
-  const [takerAccount, setTakerAccount] = React.useState('')
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken.id
   const params: { tokenType: string } = useParams()
 
-  const theme = useTheme()
-  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const [usdPrice, setUsdPrice] = useState('')
-
-  const dispatch = useAppDispatch()
-
-  const isLong = window.location.pathname.split('/')[2] === 'long'
   // TODO: Check why any is required
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
@@ -130,10 +95,10 @@ export default function BuyLimit(props: {
     const amountBigNumber = parseUnits(amount.toString())
     await takerTokenContract.methods
       .approve(exchangeProxyAddress, amountBigNumber)
-      .send({ from: accounts[0] })
+      .send({ from: userAdress })
 
     const collateralAllowance = await takerTokenContract.methods
-      .allowance(accounts[0], exchangeProxyAddress)
+      .allowance(userAdress, exchangeProxyAddress)
       .call()
     return collateralAllowance
   }
@@ -217,7 +182,7 @@ export default function BuyLimit(props: {
           }
         } else {
           const orderData = {
-            makerAccount: accounts[0],
+            makerAccount: userAdress,
             makerToken: option.collateralToken.id,
             takerToken: makerToken,
             provider: web3,
@@ -287,26 +252,23 @@ export default function BuyLimit(props: {
     )
   }
 
+  const userAddress = useAppSelector(selectUserAddress)
+
   useEffect(() => {
-    getUnderlyingPrice(option.referenceAsset).then((data) => {
-      if (data != null) setUsdPrice(data)
-    })
     const getCollateralInWallet = async () => {
-      accounts = await window.ethereum.enable()
-      const takerAccount = accounts[0]
       let allowance = await takerTokenContract.methods
-        .allowance(takerAccount, exchangeProxyAddress)
+        .allowance(userAdress, exchangeProxyAddress)
         .call()
       allowance = Number(formatUnits(allowance))
       let balance = await takerTokenContract.methods
-        .balanceOf(takerAccount)
+        .balanceOf(userAdress)
         .call()
       balance = Number(
         formatUnits(balance.toString(), option.collateralToken.decimals)
       )
       return {
         balance: balance,
-        account: takerAccount,
+        account: userAdress,
         approvalAmount: allowance,
       }
     }
@@ -315,7 +277,6 @@ export default function BuyLimit(props: {
       !Number.isNaN(val.balance)
         ? setCollateralBalance(Number(val.balance))
         : setCollateralBalance(0)
-      setTakerAccount(val.account)
       setAllowance(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
@@ -331,173 +292,6 @@ export default function BuyLimit(props: {
       })
     })
   }, [responseBuy])
-
-  useEffect(() => {
-    if (usdPrice != '') {
-      const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
-        BigENumber.from(option.floor),
-        BigENumber.from(option.inflection),
-        BigENumber.from(option.cap),
-        BigENumber.from(option.collateralBalanceLongInitial),
-        BigENumber.from(option.collateralBalanceShortInitial),
-        option.statusFinalReferenceValue === 'Open' && usdPrice != ''
-          ? parseEther(usdPrice)
-          : BigENumber.from(option.finalReferenceValue),
-        BigENumber.from(option.supplyInitial),
-        option.collateralToken.decimals
-      )
-      if (pricePerOption > 0) {
-        dispatch(
-          setMaxYield(
-            parseFloat(
-              formatEther(
-                parseEther(maxPayout)
-                  .mul(parseEther('1'))
-                  .div(parseEther(String(pricePerOption)))
-              )
-            ).toFixed(2)
-          )
-        )
-      }
-      if (isLong) {
-        if (parseEther(String(pricePerOption)).gt(0)) {
-          const be1 = parseEther(String(pricePerOption))
-            .mul(
-              BigENumber.from(option.inflection).sub(
-                BigENumber.from(option.floor)
-              )
-            )
-            .mul(BigENumber.from(option.supplyInitial))
-            .div(
-              BigENumber.from(option.collateralBalanceLongInitial).mul(
-                parseUnits('1', 18 - option.collateralToken.decimals)
-              )
-            )
-            .div(parseEther('1'))
-            .add(BigENumber.from(option.floor))
-
-          const be2 = parseEther(String(pricePerOption))
-            .mul(BigENumber.from(option.supplyInitial))
-            .div(parseEther('1'))
-            .sub(
-              BigENumber.from(option.collateralBalanceLongInitial).mul(
-                parseUnits('1', 18 - option.collateralToken.decimals)
-              )
-            )
-            .mul(
-              BigENumber.from(option.cap).sub(
-                BigENumber.from(option.inflection)
-              )
-            )
-            .div(
-              BigENumber.from(option.collateralBalanceShortInitial).mul(
-                parseUnits('1', 18 - option.collateralToken.decimals)
-              )
-            )
-            .add(BigENumber.from(option.inflection))
-          if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
-          ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
-            dispatch(setBreakEven(formatEther(be2)))
-          }
-        }
-        if (
-          option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
-        ) {
-          dispatch(setIntrinsicValue('n/a'))
-        } else {
-          dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
-        }
-        dispatch(
-          setMaxPayout(
-            formatEther(
-              BigENumber.from(option.collateralBalanceLongInitial)
-                .add(BigENumber.from(option.collateralBalanceShortInitial))
-                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
-                .mul(parseEther('1'))
-                .div(BigENumber.from(option.supplyInitial))
-            )
-          )
-        )
-      } else {
-        if (parseEther(String(pricePerOption)).gt(0)) {
-          const be1 = parseEther(String(pricePerOption))
-            .mul(BigENumber.from(option.supplyInitial))
-            .div(parseEther('1'))
-            .sub(
-              BigENumber.from(option.collateralBalanceShortInitial).mul(
-                parseUnits('1', 18 - option.collateralToken.decimals)
-              )
-            )
-            .mul(
-              BigENumber.from(option.inflection).sub(
-                BigENumber.from(option.floor)
-              )
-            )
-            .div(
-              BigENumber.from(option.collateralBalanceLongInitial).mul(
-                parseUnits('1', 18 - option.collateralToken.decimals)
-              )
-            )
-            .sub(BigENumber.from(option.inflection))
-            .mul(BigENumber.from('-1'))
-
-          const be2 = parseEther(String(pricePerOption))
-            .mul(BigENumber.from(option.supplyInitial))
-            .div(
-              BigENumber.from(option.collateralBalanceShortInitial).mul(
-                parseUnits('1', 18 - option.collateralToken.decimals)
-              )
-            )
-            .mul(
-              BigENumber.from(option.cap).sub(
-                BigENumber.from(option.inflection)
-              )
-            )
-            .div(parseEther('1'))
-            .sub(BigENumber.from(option.cap))
-            .mul(BigENumber.from('-1'))
-          if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
-          ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
-            dispatch(setBreakEven(formatEther(be2)))
-          }
-        }
-        if (
-          option.statusFinalReferenceValue === 'Open' &&
-          parseFloat(usdPrice) == 0
-        ) {
-          dispatch(setIntrinsicValue('n/a'))
-        } else {
-          dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
-        }
-        dispatch(
-          setMaxPayout(
-            formatEther(
-              BigENumber.from(option.collateralBalanceLongInitial)
-                .add(BigENumber.from(option.collateralBalanceShortInitial))
-                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
-                .mul(parseEther('1'))
-                .div(BigENumber.from(option.supplyInitial))
-            )
-          )
-        )
-      }
-    }
-  }, [option, pricePerOption, usdPrice])
 
   return (
     <div>
@@ -575,12 +369,9 @@ export default function BuyLimit(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Order Expires in</FormLabel>
-              <InfoTooltip
-                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
-                sx={{ color: 'Gray', fontSize: 2 }}
-              >
-                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
-              </InfoTooltip>
+              <Tooltip title={ExpectedRateInfoText}>
+                <InfoIcon />
+              </Tooltip>
             </Stack>
           </LabelStyleDiv>
           <LimitOrderExpiryDiv>

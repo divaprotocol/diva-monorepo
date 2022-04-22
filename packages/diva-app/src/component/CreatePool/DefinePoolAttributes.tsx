@@ -19,6 +19,7 @@ import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
 import { CheckCircle, Report } from '@mui/icons-material'
 import { useWhitelist } from '../../hooks/useWhitelist'
+import { WhitelistCollateralToken } from '../../lib/queries'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -219,7 +220,9 @@ export function DefinePoolAttributes({
               onChange={(_, newValue) => {
                 formik.setFieldValue('collateralToken', newValue)
               }}
-              getOptionLabel={(option) => option?.name || ''}
+              getOptionLabel={(option: WhitelistCollateralToken) =>
+                option?.name || ''
+              }
               onInputChange={(event) => {
                 if (event != null && event.target != null) {
                   setReferenceAssetSearch((event.target as any).value || '')

@@ -1,7 +1,6 @@
 import React from 'react'
 import 'styled-components'
 import styled from 'styled-components'
-import { withStyles } from '@mui/styles'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
@@ -17,32 +16,11 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
-import { useWallet } from '@web3-ui/hooks'
+import { selectChainId } from '../../Redux/appSlice'
 
 const PageDiv = styled.div`
   width: 100%;
 `
-const NoOrderTextDiv = styled.div`
-  font-size: 1.1rem;
-  width: 100%;
-  margin-left: 140%;
-  margin-top: 4%;
-  margin-bottom: 4%;
-`
-
-const TableHeaderCell = withStyles(() => ({
-  root: {
-    fontWeight: 100,
-  },
-}))(TableCell)
-
-const TableCellStyle = withStyles(() => ({
-  root: {
-    height: '10px',
-    padding: '10px',
-  },
-}))(TableCell)
-
 function descendingComparator(a: [], b: [], orderBy: any) {
   let comparator = 0
   if (b[orderBy] < a[orderBy]) {
@@ -189,12 +167,13 @@ function createTable(buyOrders: any, sellOrders: any) {
       const buyOrder = buyOrders[j]
       const sellOrder = sellOrders[j]
       const row = {
-        buyExpiry: buyOrder === undefined ? '-' : buyOrder.expiry + ' mins',
-        buyQuantity: buyOrder === undefined ? '' : buyOrder.nbrOptions,
-        bid: buyOrder === undefined ? '' : buyOrder.bid,
-        sellExpiry: sellOrder === undefined ? '-' : sellOrder.expiry + ' mins',
-        sellQuantity: sellOrder === undefined ? '' : sellOrder.nbrOptions,
-        ask: sellOrder === undefined ? '' : sellOrder.ask,
+        buyExpiry: buyOrder?.expiry == null ? '-' : buyOrder.expiry + ' mins',
+        buyQuantity: buyOrder?.nbrOptions == null ? '' : buyOrder.nbrOptions,
+        bid: buyOrder?.bid == null ? '' : buyOrder.bid,
+        sellExpiry:
+          sellOrder?.expiry == null ? '-' : sellOrder.expiry + ' mins',
+        sellQuantity: sellOrder?.nbrOptions == null ? '' : sellOrder.nbrOptions,
+        ask: sellOrder?.ask == null ? '' : sellOrder.ask,
       }
       table.push(row)
     }
@@ -215,8 +194,7 @@ export default function OrderBook(props: {
     BUY: 0,
     SELL: 1,
   }
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
+  const chainId = useAppSelector(selectChainId)
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
@@ -274,10 +252,10 @@ export default function OrderBook(props: {
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
-              <TableHeaderCell align="center">BID</TableHeaderCell>
-              <TableHeaderCell align="center">ASK</TableHeaderCell>
-              <TableHeaderCell align="center">Quantity</TableHeaderCell>
+              <TableCell align="center">Quantity</TableCell>
+              <TableCell align="center">BID</TableCell>
+              <TableCell align="center">ASK</TableCell>
+              <TableCell align="center">Quantity</TableCell>
             </TableRow>
           </TableHead>
 
@@ -287,7 +265,7 @@ export default function OrderBook(props: {
                 const labelId = `table-${index}`
                 return (
                   <TableRow hover tabIndex={-1} key={orderBook.indexOf(row)}>
-                    <TableCellStyle
+                    <TableCell
                       component="th"
                       id={labelId}
                       scope="row"
@@ -295,49 +273,51 @@ export default function OrderBook(props: {
                     >
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
-                          {row.buyQuantity != null
-                            ? row.buyQuantity.toFixed(2).toString()
+                          {row.buyQuantity != ''
+                            ? row.buyQuantity?.toFixed(2).toString()
                             : '-'}
                         </Typography>
                         <label> </label>
                       </Box>
-                    </TableCellStyle>
-                    <TableCellStyle align="center">
+                    </TableCell>
+                    <TableCell align="center">
                       <Box>
                         <Typography variant="subtitle1">
-                          {row.bid != null ? Number(row.bid).toFixed(2) : '-'}
+                          {row.bid != '' ? Number(row.bid)?.toFixed(2) : '-'}
                         </Typography>
                         <Typography variant="caption" noWrap>
                           {row.buyExpiry}
                         </Typography>
                       </Box>
-                    </TableCellStyle>
-                    <TableCellStyle align="center">
+                    </TableCell>
+                    <TableCell align="center">
                       <Box>
                         <Typography variant="subtitle1">
-                          {row.ask != null
-                            ? row.ask.toFixed(2).toString()
-                            : '-'}
+                          {row.ask != '' ? row.ask?.toFixed(2).toString() : '-'}
                         </Typography>
                         <Typography variant="caption" noWrap>
                           {row.sellExpiry}
                         </Typography>
                       </Box>
-                    </TableCellStyle>
-                    <TableCellStyle align="center">
+                    </TableCell>
+                    <TableCell align="center">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
-                          {row.sellQuantity != null
-                            ? row.sellQuantity.toFixed(2).toString()
+                          {row.sellQuantity != ''
+                            ? row.sellQuantity?.toFixed(2).toString()
                             : '-'}
                         </Typography>
                       </Box>
-                    </TableCellStyle>
+                    </TableCell>
                   </TableRow>
                 )
               })
             ) : (
-              <NoOrderTextDiv>None</NoOrderTextDiv>
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  None
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

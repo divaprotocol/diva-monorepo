@@ -1,4 +1,4 @@
-import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
+import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
   Button,
   Container,
@@ -6,26 +6,27 @@ import {
   DialogActions,
   Stack,
   TextField,
+  Typography,
 } from '@mui/material'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { ethers } from 'ethers'
+import { request } from 'graphql-request'
+import { parseUnits } from 'ethers/lib/utils'
+import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import { useQuery } from 'react-query'
+import ERC20 from '@diva/contracts/abis/erc20.json'
 
 import { config } from '../../constants'
 import { SideMenu } from './SideMenu'
 import PoolsTable from '../PoolsTable'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import ERC20 from '@diva/contracts/abis/erc20.json'
-import { useQuery } from 'react-query'
 import {
   FeeRecipientCollateralToken,
   queryMyFeeClaims,
 } from '../../lib/queries'
-import { request } from 'graphql-request'
-import { useWallet } from '@web3-ui/hooks'
-import { parseUnits } from 'ethers/lib/utils'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const TransferFeesCell = (props: any) => {
-  const { provider } = useWallet()
+  const { provider } = useConnectionContext()
   const [decimal, setDecimal] = useState(18)
   const chainId = provider?.network?.chainId
   const token = new ethers.Contract(
@@ -109,7 +110,7 @@ const TransferFeesCell = (props: any) => {
 }
 
 const ClaimFeesCell = (props: any) => {
-  const { provider } = useWallet()
+  const { provider } = useConnectionContext()
 
   const chainId = provider?.network?.chainId
 
@@ -141,13 +142,13 @@ const ClaimFeesCell = (props: any) => {
 }
 
 const AmountCell = (props: any) => {
-  const wallet = useWallet()
+  const context = useConnectionContext()
   const [decimal, setDecimal] = useState<number>()
 
   const token = new ethers.Contract(
     props.row.Address,
     ERC20,
-    wallet.provider.getSigner()
+    context.provider.getSigner()
   )
   token
     .decimals()
@@ -155,7 +156,7 @@ const AmountCell = (props: any) => {
       setDecimal(decimals)
     })
     .catch((e) => {
-      console.log(e)
+      console.error(e)
     })
   const amount = parseFloat(props.row.Amount) / 10 ** decimal
   return decimal ? (
@@ -205,9 +206,7 @@ const columns: GridColDef[] = [
 ]
 
 export function MyFeeClaims() {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId
-  const userAddress = wallet?.connection?.userAddress?.toLowerCase()
+  const { chainId, address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
   const query = useQuery<{ fees: FeeRecipientCollateralToken[] }>(
     `pools-fees-${userAddress}`,
@@ -239,32 +238,40 @@ export function MyFeeClaims() {
   }, [] as GridRowModel[])
 
   const filtered = rows.filter((v) => v.Amount != 0)
-  return userAddress ? (
+  return (
     <Stack
       direction="row"
       sx={{
         height: '100%',
+        maxHeight: 'calc(100% - 6em)',
       }}
+      spacing={6}
+      paddingTop={2}
+      paddingRight={6}
     >
-      <SideMenu />
-      <PoolsTable
-        page={page}
-        disableRowClick
-        columns={columns}
-        rows={filtered}
-        onPageChange={(page) => setPage(page)}
-      />
+      {!userAddress ? (
+        <Typography
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            width: '100%',
+          }}
+        >
+          Please connect your wallet
+        </Typography>
+      ) : (
+        <>
+          <SideMenu />
+          <PoolsTable
+            page={page}
+            rows={filtered}
+            columns={columns}
+            onPageChange={(page) => setPage(page)}
+          />
+        </>
+      )}
     </Stack>
-  ) : (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '75vh',
-      }}
-    >
-      Please connect your wallet{' '}
-    </div>
   )
 }

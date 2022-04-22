@@ -4,7 +4,9 @@ import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import { WhitelistCollateralToken, Pool } from '../lib/queries'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
-import { useWallet } from '@web3-ui/hooks'
+import { useConnectionContext } from './useConnectionContext'
+import { useAppSelector } from '../Redux/hooks'
+import { selectChainId } from '../Redux/appSlice'
 
 /**
  * Note: The order of parameters matter in this case,
@@ -65,8 +67,8 @@ type DivaApi = {
 }
 
 export function useDiva(): DivaApi | null {
-  const { provider } = useWallet()
-  const chainId = provider?.network?.chainId
+  const { provider } = useConnectionContext()
+  const chainId = useAppSelector(selectChainId)
 
   if (chainId == null || provider == null) return null
 

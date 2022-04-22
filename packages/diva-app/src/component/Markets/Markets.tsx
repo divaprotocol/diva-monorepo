@@ -1,20 +1,18 @@
-import { GridColDef, GridRowModel } from '@mui/x-data-grid/x-data-grid'
+import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import { formatUnits } from 'ethers/lib/utils'
 import { getDateTime } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { Pool } from '../../lib/queries'
-import { createdByFilterAddressForMarket } from '../../constants'
-import { useWallet } from '@web3-ui/hooks'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import styled from '@emotion/styled'
 import { CoinIconPair } from '../CoinIcon'
-import { poolsSelector } from '../../Redux/poolSlice'
+import { selectMainPools, selectOtherPools } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
+import { Box } from '@mui/material'
 
 const columns: GridColDef[] = [
   {
@@ -71,38 +69,12 @@ const columns: GridColDef[] = [
 ]
 
 export default function Markets() {
-  const wallet = useWallet()
-  const chainId = wallet?.provider?.network?.chainId || 3
   const [value, setValue] = useState(0)
-  const [mainPools, setMainPools] = useState<Pool[]>([])
-  const [otherPools, setOtherPools] = useState<Pool[]>([])
-  const [pools, setPools] = useState<Pool[]>([])
   const [page, setPage] = useState(0)
+  const mainPools = useAppSelector(selectMainPools)
+  const otherPools = useAppSelector(selectOtherPools)
 
-  const poolsData = useAppSelector((state) => poolsSelector(state))
-  useEffect(() => {
-    /**
-     * TODO make selectors out of these
-     */
-    const updatePools = async () => {
-      const mainPoolsData = poolsData.filter(
-        (p) => p.createdBy === createdByFilterAddressForMarket
-      )
-      const otherPoolsData = poolsData.filter(
-        (p) => p.createdBy !== createdByFilterAddressForMarket
-      )
-
-      setMainPools(mainPoolsData)
-      setOtherPools(otherPoolsData)
-      setPools(mainPoolsData)
-    }
-    updatePools()
-  }, [chainId, poolsData.length])
-
-  useEffect(() => {
-    if (value === 0) setPools(mainPools)
-    if (value === 1) setPools(otherPools)
-  }, [value, mainPools, otherPools])
+  const pools = value === 0 ? mainPools : otherPools
 
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
@@ -212,25 +184,26 @@ export default function Markets() {
 
   return (
     <>
-      <Container>
+      <Box
+        paddingX={6}
+        sx={{
+          height: 'calc(100% - 6em)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <Tabs value={value} onChange={handleChange} variant="standard">
           <Tab label="Main" />
           <Tab label="Other" />
         </Tabs>
-      </Container>
-      <PoolsTable
-        columns={columns}
-        rows={filteredRows}
-        page={page}
-        rowCount={filteredRows.length}
-        onPageChange={(page) => setPage(page)}
-      />
+        <PoolsTable
+          columns={columns}
+          rows={filteredRows}
+          page={page}
+          rowCount={filteredRows.length}
+          onPageChange={(page) => setPage(page)}
+        />
+      </Box>
     </>
   )
 }
-
-const Container = styled.div`
-  position: absolute;
-  left: 70px;
-  top: 80px;
-`

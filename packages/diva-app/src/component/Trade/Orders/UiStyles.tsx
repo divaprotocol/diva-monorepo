@@ -109,22 +109,6 @@ export const useStyles = makeStyles((theme: any) => ({
   },
 }))
 
-export const InfoTooltip = withStyles(() => ({
-  tooltip: {
-    maxWidth: 220,
-    fontSize: 12,
-    border: '1px solid #dadde9',
-  },
-}))(Tooltip)
-
-export const InfoIconStyle = withStyles(() => ({
-  tooltip: {
-    height: 7,
-    width: 7,
-    border: '1px solid #dadde9',
-  },
-}))(InfoIcon)
-
 export const ExpectedRateInfoText =
   'Rate is based on the current orderbook and may change at the time of execution. Use the slippage parameter to define your tolerance level.'
 export const MaxSlippageText =
