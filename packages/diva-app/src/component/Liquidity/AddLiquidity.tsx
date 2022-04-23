@@ -54,10 +54,12 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [openCapacityAlert, setOpenCapacityAlert] = React.useState(false)
   const [decimal, setDecimal] = React.useState(18)
   const [loading, setLoading] = React.useState(false)
+  const [balanceUpdated, setBalanceUpdated] = React.useState(true)
   const [btnName, setBtnName] = React.useState('Add')
   const [approving, setApproving] = React.useState('')
   const tokenBalance = useErcBalance(
-    pool ? pool!.collateralToken.id : undefined
+    pool ? pool!.collateralToken.id : undefined,
+    balanceUpdated
   )
   const dispatch = useDispatch()
   const { provider } = useConnectionContext()
@@ -108,8 +110,7 @@ export const AddLiquidity = ({ pool }: Props) => {
     } else {
       setOpenAlert(false)
     }
-  }, [tokenBalance, textFieldValue, pool])
-
+  }, [textFieldValue, pool, tokenBalance])
   return (
     <Stack
       direction="column"
@@ -406,6 +407,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                             tx.wait().then(() => {
                               setLoading(false)
                               setTimeout(() => {
+                                setBalanceUpdated(false)
                                 dispatch(
                                   fetchPool({
                                     graphUrl:
@@ -417,8 +419,8 @@ export const AddLiquidity = ({ pool }: Props) => {
                               }, 5000)
                             })
                           })
-                      }
-                    })
+                      })
+                      .catch((err: any) => console.error(err))
                   }}
                   style={{
                     maxWidth: theme.spacing(38),
