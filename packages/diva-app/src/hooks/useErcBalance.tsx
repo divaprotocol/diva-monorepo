@@ -17,7 +17,7 @@ type Erc20Contract = Contract & {
  * returns the balance of a token. If no token address is provided,
  * no balance is returned
  */
-export function useErcBalance(address?: string) {
+export function useErcBalance(address?: string, updated = true) {
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
   const chainId = useAppSelector(selectChainId)
@@ -44,7 +44,7 @@ export function useErcBalance(address?: string) {
     }
 
     run()
-  }, [address, chainId, userAddress != null])
+  }, [address, chainId, userAddress != null, updated])
 
   return balance
 }

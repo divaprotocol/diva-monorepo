@@ -54,10 +54,11 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [openCapacityAlert, setOpenCapacityAlert] = React.useState(false)
   const [decimal, setDecimal] = React.useState(18)
   const [loading, setLoading] = React.useState(false)
-  //const [alert, setAlert] = React.useState(false)
+  const [balanceUpdated, setBalanceUpdated] = React.useState(true)
   const [approving, setApproving] = React.useState('')
   const tokenBalance = useErcBalance(
-    pool ? pool!.collateralToken.id : undefined
+    pool ? pool!.collateralToken.id : undefined,
+    balanceUpdated
   )
   const dispatch = useDispatch()
   const { provider } = useConnectionContext()
@@ -94,46 +95,7 @@ export const AddLiquidity = ({ pool }: Props) => {
     } else {
       setOpenAlert(false)
     }
-  }, [tokenBalance, textFieldValue, pool])
-  async function addLiquidityTrade() {
-    setLoading(true)
-    setApproving('Approving...')
-    const token = new ethers.Contract(
-      pool!.collateralToken.id,
-      ERC20,
-      provider.getSigner()
-    )
-    token
-      .approve(
-        config[chainId!].divaAddress,
-        parseUnits(textFieldValue, decimal)
-      )
-      .then((tx: any) => {
-        return tx.wait()
-      })
-      .then(() => {
-        return token.allowance(account, config[chainId!].divaAddress)
-      })
-      .then(async () => {
-        const diva = new ethers.Contract(
-          config[chainId!].divaAddress,
-          DIVA_ABI,
-          provider?.getSigner()
-        )
-        setApproving('Adding...')
-        const tx = await diva!.addLiquidity(
-          window.location.pathname.split('/')[1],
-          parseUnits(textFieldValue, decimal)
-        )
-        await tx?.wait()
-        setLoading(false)
-      })
-      .catch((err: any) => {
-        console.error(err)
-        setLoading(false)
-      })
-  }
-
+  }, [textFieldValue, pool, tokenBalance])
   return (
     <Stack
       direction="column"
@@ -423,6 +385,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                              */
                             tx.wait().then(() => {
                               setTimeout(() => {
+                                setBalanceUpdated(false)
                                 dispatch(
                                   fetchPool({
                                     graphUrl:
