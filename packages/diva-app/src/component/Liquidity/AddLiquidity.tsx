@@ -375,50 +375,59 @@ export const AddLiquidity = ({ pool }: Props) => {
                       DIVA_ABI,
                       provider?.getSigner()
                     )
-                    token.allowance(account, diva.address).then((res) => {
-                      if (res.lt(parseUnits(textFieldValue, decimal))) {
-                        token
-                          .approve(
-                            config[chainId!].divaAddress,
-                            parseUnits(textFieldValue, decimal)
-                          )
-                          .then((tx: any) => {
-                            return tx.wait()
-                          })
-                          .then(() => {
-                            setBtnName('Add')
-                            setLoading(false)
-                            return token.allowance(
-                              account,
-                              config[chainId!].divaAddress
+                    token
+                      .allowance(account, diva.address)
+                      .then((res) => {
+                        if (res.lt(parseUnits(textFieldValue, decimal))) {
+                          token
+                            .approve(
+                              config[chainId!].divaAddress,
+                              parseUnits(textFieldValue, decimal)
                             )
-                          })
-                          .catch((err: any) => console.error(err))
-                      } else {
-                        diva!
-                          .addLiquidity(
-                            window.location.pathname.split('/')[1],
-                            parseUnits(textFieldValue, decimal)
-                          )
-                          .then((tx) => {
-                            /**
-                             * dispatch action to refetch the pool after action
-                             */
-                            tx.wait().then(() => {
-                              setLoading(false)
-                              setTimeout(() => {
-                                setBalanceUpdated(false)
-                                dispatch(
-                                  fetchPool({
-                                    graphUrl:
-                                      config[chainId as number].divaSubgraph,
-                                    poolId:
-                                      window.location.pathname.split('/')[1],
-                                  })
-                                )
-                              }, 5000)
+                            .then((tx: any) => {
+                              return tx.wait()
                             })
-                          })
+                            .then(() => {
+                              setBtnName('Add')
+                              setLoading(false)
+                              return token.allowance(
+                                account,
+                                config[chainId!].divaAddress
+                              )
+                            })
+                            .catch((err: any) => console.error(err))
+                        } else {
+                          diva!
+                            .addLiquidity(
+                              window.location.pathname.split('/')[1],
+                              parseUnits(textFieldValue, decimal)
+                            )
+                            .then((tx) => {
+                              /**
+                               * dispatch action to refetch the pool after action
+                               */
+                              tx.wait()
+                                .then(() => {
+                                  setLoading(false)
+                                  setTimeout(() => {
+                                    setBalanceUpdated(false)
+                                    dispatch(
+                                      fetchPool({
+                                        graphUrl:
+                                          config[chainId as number]
+                                            .divaSubgraph,
+                                        poolId:
+                                          window.location.pathname.split(
+                                            '/'
+                                          )[1],
+                                      })
+                                    )
+                                  }, 5000)
+                                })
+                                .catch((err: any) => console.error(err))
+                            })
+                            .catch((err: any) => console.error(err))
+                        }
                       })
                       .catch((err: any) => console.error(err))
                   }}
