@@ -1,3 +1,10 @@
+/**
+ * polyfills (this is mostly needed because of 0x deps)
+ * TODO: Remove once 0x deps are removed
+ */
+import 'core-js/stable'
+import 'react-app-polyfill/stable'
+
 import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
@@ -11,10 +18,9 @@ import { ThemeProvider } from '@mui/material/styles'
 import { useMediaQuery } from '@mui/material'
 import { Box } from '@mui/system'
 import { createDivaTheme } from './lib/createDivaTheme'
-import { Provider as Web3Provider } from '@web3-ui/hooks'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import 'react-vis/dist/style.css'
-import { projectId } from './constants'
+import { ConnectionProvider } from './component/ConnectionProvider'
 
 const queryClient = new QueryClient()
 
@@ -41,27 +47,22 @@ const WithProviders = () => {
         overflow: 'hidden',
       }}
     >
-      <Web3Provider network={undefined as any} infuraId={projectId}>
-        <QueryClientProvider client={queryClient}>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <ThemeProvider theme={theme}>
-              <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <ThemeProvider theme={theme}>
+            <Provider store={store}>
+              <ConnectionProvider>
                 <App />
-              </Provider>
-            </ThemeProvider>
-          </LocalizationProvider>
-        </QueryClientProvider>
-      </Web3Provider>
+              </ConnectionProvider>
+            </Provider>
+          </ThemeProvider>
+        </LocalizationProvider>
+      </QueryClientProvider>
     </Box>
   )
 }
 
-ReactDOM.render(
-  <React.StrictMode>
-    <WithProviders />
-  </React.StrictMode>,
-  document.getElementById('root')
-)
+ReactDOM.render(<WithProviders />, document.getElementById('root'))
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

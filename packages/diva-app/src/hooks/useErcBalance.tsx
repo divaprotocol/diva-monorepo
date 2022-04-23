@@ -2,8 +2,10 @@ import { ethers, Contract, BigNumber } from 'ethers'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 
 import { useEffect, useState } from 'react'
-import { useWallet } from '@web3-ui/hooks'
 import { formatUnits } from 'ethers/lib/utils'
+import { useConnectionContext } from './useConnectionContext'
+import { selectUserAddress, selectChainId } from '../Redux/appSlice'
+import { useAppSelector } from '../Redux/hooks'
 
 type Erc20Contract = Contract & {
   balanceOf: (address: string) => Promise<BigNumber>
@@ -16,9 +18,9 @@ type Erc20Contract = Contract & {
  * no balance is returned
  */
 export function useErcBalance(address?: string, updated = true) {
-  const { connection, provider } = useWallet()
-  const chainId = provider?.network?.chainId
-  const account = connection.userAddress
+  const { provider } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+  const chainId = useAppSelector(selectChainId)
 
   const [balance, setBalance] = useState<string>()
 
@@ -42,7 +44,7 @@ export function useErcBalance(address?: string, updated = true) {
     }
 
     run()
-  }, [address, chainId, account != null, updated])
+  }, [address, chainId, userAddress != null, updated])
 
   return balance
 }

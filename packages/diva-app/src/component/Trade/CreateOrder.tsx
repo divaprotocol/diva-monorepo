@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { useAppDispatch } from '../../Redux/hooks'
 import 'styled-components'
 import styled from 'styled-components'
 import { makeStyles } from '@mui/styles'
@@ -16,7 +15,8 @@ import {
 } from '../../Redux/TradeOption'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
-import { fetchOrders, setIsBuy } from '../../Redux/poolSlice'
+import { fetchOrders, setIsBuy } from '../../Redux/appSlice'
+import { useDispatch } from 'react-redux'
 const PageDiv = styled.div`
   justify-content: center
   height: 500px;
@@ -66,8 +66,6 @@ const useTabsBorder = makeStyles(() => ({
   },
 }))
 
-let accounts
-
 export default function CreateOrder(props: {
   option: Pool
   tokenAddress: string
@@ -76,25 +74,14 @@ export default function CreateOrder(props: {
 }) {
   //const op = useSelector((state) => state.tradeOption.option)
   const option = props.option
-  const isLong = window.location.pathname.split('/')[2] === 'long'
-  const dispatch = useAppDispatch()
+  const dispatch = useDispatch()
   const classes = useStyles()
   const dividerClass = useDividerStyle()
   const tabsClass = useTabsBorder()
   const [orderType, setOrderTypeValue] = React.useState(0)
   const [priceType, setPriceTypeValue] = React.useState(0)
-  const [userAccount, setUserAccount] = React.useState('')
-
-  const componentDidMount = async () => {
-    accounts = await window.ethereum.enable()
-    setUserAccount(accounts[0])
-  }
 
   useEffect(() => {
-    if (Object.keys(userAccount).length === 0) {
-      componentDidMount()
-    }
-    dispatch(setMetamaskAccount(userAccount))
     getExistingOrders()
   })
 

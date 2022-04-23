@@ -25,22 +25,22 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { withStyles } from '@mui/styles'
-import { useWallet } from '@web3-ui/hooks'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import { fetchPool } from '../../Redux/poolSlice'
+import { fetchPool, selectUserAddress } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { useAppSelector } from '../../Redux/hooks'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
     color: ${(props) => (props.theme as any).palette.primary.main};
   }
 `
-const BlackTextTypography = withStyles({
-  root: {
-    color: '#000000',
-  },
-})(Typography)
+
+const BlackTextTypography = (props) => (
+  <Typography color="#000">{props.children}</Typography>
+)
 
 type Props = {
   pool?: any
@@ -61,10 +61,9 @@ export const AddLiquidity = ({ pool }: Props) => {
     balanceUpdated
   )
   const dispatch = useDispatch()
-  const {
-    provider,
-    connection: { userAddress: account },
-  } = useWallet()
+  const { provider } = useConnectionContext()
+  const account = useAppSelector(selectUserAddress)
+
   const chainId = provider?.network?.chainId
   useEffect(() => {
     if (pool) {

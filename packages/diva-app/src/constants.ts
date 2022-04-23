@@ -12,7 +12,7 @@ export const projectId = 'e3ea5575a42b4de7be15d7c197c12045'
 
 export const config: { [key: number]: SingleConfig } = {
   1: {
-    name: 'Ropsten',
+    name: 'Mainnet',
     divaAddress: '0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf',
     whitelistAddress: '0x2A5c18f001719f4663ab8d3E65E3E54182376B20',
     divaSubgraph:
@@ -79,5 +79,5 @@ export const config: { [key: number]: SingleConfig } = {
   },
 }
 
-export const createdByFilterAddressForMarket =
+export const whitelistedPoolCreatorAddress =
   '0x47566c6c8f70e4f16aa3e7d8eed4a2bdb3f4925b'

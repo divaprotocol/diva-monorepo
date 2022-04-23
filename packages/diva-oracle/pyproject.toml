@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "diva-oracle"
+version = "0.1.0"
+description = ""
+authors = ["manvsc <79197645+manvsc@users.noreply.github.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+web3 = "^5.29.0"
+pandas = "^1.4.2"
+requests = "^2.27.1"
+DateTime = "^4.4"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
