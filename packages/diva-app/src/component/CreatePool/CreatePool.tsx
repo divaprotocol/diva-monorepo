@@ -62,7 +62,7 @@ export function CreatePool() {
           }
         })
         .catch((err) => {
-          console.log(err)
+          console.error(err)
         })
     }
   }, [formik.values.collateralToken])
