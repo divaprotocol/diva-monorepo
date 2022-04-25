@@ -336,5 +336,89 @@ export const ApproveActionButtons = ({
           </Stack>
         </div>
       )
+    case 'trade':
+      return (
+        <Stack direction="row" sx={{ ml: '-9em' }}>
+          {approveLoading ? (
+            <Container sx={{ minWidth: theme.spacing(10) }}>
+              <CircularProgress />
+            </Container>
+          ) : (
+            <Container>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                type="submit"
+                value="Submit"
+                disabled={approveEnabled === false}
+                onClick={() => {
+                  setApproveLoading(true)
+                  const token = new ethers.Contract(
+                    collateralTokenAddress,
+                    ERC20,
+                    provider.getSigner()
+                  )
+
+                  token
+                    .approve(
+                      config[chainId!].divaAddress,
+                      parseUnits(textFieldValue, decimal)
+                    )
+                    .then((tx: any) => {
+                      return tx.wait()
+                    })
+                    .then(() => {
+                      setApproveLoading(false)
+                      return token.allowance(
+                        account,
+                        config[chainId!].divaAddress
+                      )
+                    })
+                    .catch((err: any) => {
+                      setApproveLoading(false)
+                      console.error(err)
+                    })
+                }}
+                style={{
+                  maxWidth: theme.spacing(22),
+                  maxHeight: theme.spacing(5),
+                  minWidth: theme.spacing(22),
+                  minHeight: theme.spacing(5),
+                }}
+              >
+                <CheckIcon />
+                Approve
+              </Button>
+            </Container>
+          )}
+          {actionLoading ? (
+            <Container sx={{ minWidth: theme.spacing(20) }}>
+              <CircularProgress />
+            </Container>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              type="submit"
+              value="Submit"
+              disabled={actionEnabled === false}
+              onClick={() => {
+                onTransactionSuccess()
+              }}
+              style={{
+                maxWidth: theme.spacing(22),
+                maxHeight: theme.spacing(5),
+                minWidth: theme.spacing(22),
+                minHeight: theme.spacing(5),
+              }}
+            >
+              <AddIcon />
+              Fill Order
+            </Button>
+          )}
+        </Stack>
+      )
   }
 }
