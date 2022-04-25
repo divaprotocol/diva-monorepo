@@ -22,6 +22,7 @@ import { useEffect, useState } from 'react'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
+import { ApproveActionButtons } from '../ApproveActionButtons'
 
 export function CreatePool() {
   const [decimal, setDecimal] = useState(18)
@@ -112,23 +113,37 @@ export function CreatePool() {
               Go Back
             </Button>
           )}
-          <LoadingButton
-            variant="contained"
-            onClick={() => {
-              formik.handleSubmit()
-            }}
-            sx={{
-              paddingLeft: formik.status != null ? theme.spacing(6) : undefined,
-            }}
-            loading={
-              formik.status != null &&
-              !formik.status.startsWith('Error:') &&
-              !formik.status.includes('Success')
-            }
-            disabled={!formik.isValid}
-          >
-            {formik.values.step === 3 ? formik.status || btnName : 'Next'}
-          </LoadingButton>
+          {formik.values.step === 3 ? (
+            <ApproveActionButtons
+              collateralTokenAddress={formik.values.collateralToken.id}
+              onTransactionSuccess={() => {
+                formik.setFieldValue('step', 1, true)
+              }}
+              pool={formik.values}
+              decimal={decimal}
+              textFieldValue={formik.values.collateralBalance}
+              componentName={'create'}
+            />
+          ) : (
+            <LoadingButton
+              variant="contained"
+              onClick={() => {
+                formik.handleSubmit()
+              }}
+              sx={{
+                paddingLeft:
+                  formik.status != null ? theme.spacing(6) : undefined,
+              }}
+              loading={
+                formik.status != null &&
+                !formik.status.startsWith('Error:') &&
+                !formik.status.includes('Success')
+              }
+              disabled={!formik.isValid}
+            >
+              {formik.values.step === 3 ? formik.status || btnName : 'Next'}
+            </LoadingButton>
+          )}
         </Stack>
       </Box>
     </Container>

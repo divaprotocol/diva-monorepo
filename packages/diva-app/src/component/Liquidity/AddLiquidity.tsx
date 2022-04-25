@@ -31,6 +31,7 @@ import { fetchPool, selectUserAddress } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useAppSelector } from '../../Redux/hooks'
+import { ApproveActionButtons } from '../ApproveActionButtons'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -343,105 +344,13 @@ export const AddLiquidity = ({ pool }: Props) => {
               mt: '2em',
             }}
           >
-            <div
-              style={{
-                height: '100px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {loading ? (
-                <CircularProgress />
-              ) : (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  type="submit"
-                  value="Submit"
-                  disabled={
-                    !pool || Date.now() > 1000 * parseInt(pool.expiryTime)
-                  }
-                  onClick={() => {
-                    setLoading(true)
-                    const token = new ethers.Contract(
-                      pool!.collateralToken.id,
-                      ERC20,
-                      provider.getSigner()
-                    )
-                    const diva = new ethers.Contract(
-                      config[chainId!].divaAddress,
-                      DIVA_ABI,
-                      provider?.getSigner()
-                    )
-                    token
-                      .allowance(account, diva.address)
-                      .then((res) => {
-                        if (res.lt(parseUnits(textFieldValue, decimal))) {
-                          token
-                            .approve(
-                              config[chainId!].divaAddress,
-                              parseUnits(textFieldValue, decimal)
-                            )
-                            .then((tx: any) => {
-                              return tx.wait()
-                            })
-                            .then(() => {
-                              setBtnName('Add')
-                              setLoading(false)
-                              return token.allowance(
-                                account,
-                                config[chainId!].divaAddress
-                              )
-                            })
-                            .catch((err: any) => console.error(err))
-                        } else {
-                          diva!
-                            .addLiquidity(
-                              window.location.pathname.split('/')[1],
-                              parseUnits(textFieldValue, decimal)
-                            )
-                            .then((tx) => {
-                              /**
-                               * dispatch action to refetch the pool after action
-                               */
-                              tx.wait()
-                                .then(() => {
-                                  setLoading(false)
-                                  setTimeout(() => {
-                                    setBalanceUpdated(false)
-                                    dispatch(
-                                      fetchPool({
-                                        graphUrl:
-                                          config[chainId as number]
-                                            .divaSubgraph,
-                                        poolId:
-                                          window.location.pathname.split(
-                                            '/'
-                                          )[1],
-                                      })
-                                    )
-                                  }, 5000)
-                                })
-                                .catch((err: any) => console.error(err))
-                            })
-                            .catch((err: any) => console.error(err))
-                        }
-                      })
-                      .catch((err: any) => console.error(err))
-                  }}
-                  style={{
-                    maxWidth: theme.spacing(38),
-                    maxHeight: theme.spacing(5),
-                    minWidth: theme.spacing(38),
-                    minHeight: theme.spacing(5),
-                  }}
-                >
-                  {btnName}
-                </Button>
-              )}
-            </div>
+            <ApproveActionButtons
+              collateralTokenAddress={pool!.collateralToken.id}
+              decimal={pool.collateralToken.decimals}
+              textFieldValue={textFieldValue}
+              componentName={'liquidity'}
+              onTransactionSuccess={() => setBalanceUpdated(!balanceUpdated)}
+            />
           </Container>
         </Container>
       </Card>
