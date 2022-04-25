@@ -111,13 +111,20 @@ export function useDiva(): DivaApi | null {
       )
 
       const creatorAddress = await signer.getAddress()
-      const tx = await erc20.approve(
-        divaAddress,
-        collateralBalanceLong.add(collateralBalanceShort)
-      )
-      await tx.wait()
-
-      await erc20.allowance(creatorAddress, divaAddress)
+      const allowedBalance = await erc20.allowance(creatorAddress, divaAddress)
+      if (
+        allowedBalance.lt(collateralBalanceLong.add(collateralBalanceShort))
+      ) {
+        try {
+          const tx = await erc20.approve(
+            divaAddress,
+            collateralBalanceLong.add(collateralBalanceShort)
+          )
+          await tx.wait()
+        } catch (e) {
+          console.error(e)
+        }
+      }
 
       const tx2 = await contract.createContingentPool([
         referenceAsset,

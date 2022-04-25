@@ -55,6 +55,7 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [decimal, setDecimal] = React.useState(18)
   const [loading, setLoading] = React.useState(false)
   const [balanceUpdated, setBalanceUpdated] = React.useState(true)
+  const [btnName, setBtnName] = React.useState('Add')
   const [approving, setApproving] = React.useState('')
   const tokenBalance = useErcBalance(
     pool ? pool!.collateralToken.id : undefined,
@@ -69,6 +70,20 @@ export const AddLiquidity = ({ pool }: Props) => {
     if (pool) {
       setDecimal(pool.collateralToken.decimals)
       setOpenExpiredAlert(Date.now() > 1000 * parseInt(pool.expiryTime))
+    }
+    if (textFieldValue !== '' && chainId) {
+      const token = new ethers.Contract(
+        pool!.collateralToken.id,
+        ERC20,
+        provider.getSigner()
+      )
+      token.allowance(account, config[chainId!].divaAddress).then((res) => {
+        if (res.lt(parseUnits(textFieldValue, decimal))) {
+          setBtnName('Approve')
+        } else {
+          setBtnName('Add')
+        }
+      })
     }
     if (
       pool! &&
@@ -349,54 +364,70 @@ export const AddLiquidity = ({ pool }: Props) => {
                     !pool || Date.now() > 1000 * parseInt(pool.expiryTime)
                   }
                   onClick={() => {
+                    setLoading(true)
                     const token = new ethers.Contract(
                       pool!.collateralToken.id,
                       ERC20,
                       provider.getSigner()
                     )
+                    const diva = new ethers.Contract(
+                      config[chainId!].divaAddress,
+                      DIVA_ABI,
+                      provider?.getSigner()
+                    )
                     token
-                      .approve(
-                        config[chainId!].divaAddress,
-                        parseUnits(textFieldValue, decimal)
-                      )
-                      .then((tx: any) => {
-                        return tx.wait()
-                      })
-                      .then(() => {
-                        return token.allowance(
-                          account,
-                          config[chainId!].divaAddress
-                        )
-                      })
-                      .then(() => {
-                        const diva = new ethers.Contract(
-                          config[chainId!].divaAddress,
-                          DIVA_ABI,
-                          provider?.getSigner()
-                        )
-                        diva!
-                          .addLiquidity(
-                            window.location.pathname.split('/')[1],
-                            parseUnits(textFieldValue, decimal)
-                          )
-                          .then((tx) => {
-                            /**
-                             * dispatch action to refetch the pool after action
-                             */
-                            tx.wait().then(() => {
-                              setTimeout(() => {
-                                setBalanceUpdated(false)
-                                dispatch(
-                                  fetchPool({
-                                    graphUrl:
-                                      config[chainId as number].divaSubgraph,
-                                    poolId:
-                                      window.location.pathname.split('/')[1],
-                                  })
-                                )
-                              }, 5000)
+                      .allowance(account, diva.address)
+                      .then((res) => {
+                        if (res.lt(parseUnits(textFieldValue, decimal))) {
+                          token
+                            .approve(
+                              config[chainId!].divaAddress,
+                              parseUnits(textFieldValue, decimal)
+                            )
+                            .then((tx: any) => {
+                              return tx.wait()
                             })
-                          })
+                            .then(() => {
+                              setBtnName('Add')
+                              setLoading(false)
+                              return token.allowance(
+                                account,
+                                config[chainId!].divaAddress
+                              )
+                            })
+                            .catch((err: any) => console.error(err))
+                        } else {
+                          diva!
+                            .addLiquidity(
+                              window.location.pathname.split('/')[1],
+                              parseUnits(textFieldValue, decimal)
+                            )
+                            .then((tx) => {
+                              /**
+                               * dispatch action to refetch the pool after action
+                               */
+                              tx.wait()
+                                .then(() => {
+                                  setLoading(false)
+                                  setTimeout(() => {
+                                    setBalanceUpdated(false)
+                                    dispatch(
+                                      fetchPool({
+                                        graphUrl:
+                                          config[chainId as number]
+                                            .divaSubgraph,
+                                        poolId:
+                                          window.location.pathname.split(
+                                            '/'
+                                          )[1],
+                                      })
+                                    )
+                                  }, 5000)
+                                })
+                                .catch((err: any) => console.error(err))
+                            })
+                            .catch((err: any) => console.error(err))
+                        }
                       })
                       .catch((err: any) => console.error(err))
                   }}
@@ -407,7 +438,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                     minHeight: theme.spacing(5),
                   }}
                 >
-                  Add
+                  {btnName}
                 </Button>
               )}
             </div>
