@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useAppSelector, useAppDispatch } from '../../Redux/hooks'
+import { useAppSelector } from '../../Redux/hooks'
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
@@ -20,6 +20,7 @@ import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
+import { useDispatch } from 'react-redux'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -108,7 +109,7 @@ export default function OpenOrders(props: {
   const optionTokenAddress = props.tokenAddress
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const dispatch = useAppDispatch()
+  const dispatch = useDispatch()
   const [orders, setOrders] = useState([])
   const chainId = useAppSelector(selectChainId)
   const address = useAppSelector(selectUserAddress)

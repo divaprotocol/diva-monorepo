@@ -14,11 +14,22 @@ import { ReviewAndSubmit } from './ReviewAndSubmit'
 import { useCreatePoolFormik } from './formik'
 import { SelectDataFeedProvider } from './SelectDataFeedProvider'
 import { LoadingButton } from '@mui/lab'
+import { ethers } from 'ethers'
+import ERC20 from '@diva/contracts/abis/erc20.json'
+import { config } from '../../constants'
+import { parseUnits } from 'ethers/lib/utils'
+import { useEffect, useState } from 'react'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { useAppSelector } from '../../Redux/hooks'
+import { selectUserAddress } from '../../Redux/appSlice'
 
 export function CreatePool() {
+  const [decimal, setDecimal] = useState(18)
+  const [btnName, setBtnName] = useState('')
   const formik = useCreatePoolFormik()
   const theme = useTheme()
-
+  const { provider } = useConnectionContext()
+  const account = useAppSelector(selectUserAddress)
   let step = null
   switch (formik.values.step) {
     case 1:
@@ -31,6 +42,30 @@ export function CreatePool() {
       step = <ReviewAndSubmit formik={formik} />
       break
   }
+  useEffect(() => {
+    if (formik.values.collateralToken != null) {
+      const token = new ethers.Contract(
+        formik.values.collateralToken.id,
+        ERC20,
+        provider.getSigner()
+      )
+      token.decimals().then((decimals: number) => {
+        setDecimal(decimals)
+      })
+      token
+        .allowance(account, config[provider?.network?.chainId].divaAddress)
+        .then((res) => {
+          if (res.lt(parseUnits(formik.values.collateralBalance, decimal))) {
+            setBtnName('Approve & Create')
+          } else {
+            setBtnName('Create')
+          }
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    }
+  }, [formik.values.collateralToken])
 
   return (
     <Container maxWidth="md">
@@ -92,9 +127,7 @@ export function CreatePool() {
             }
             disabled={!formik.isValid}
           >
-            {formik.values.step === 3
-              ? formik.status || 'Approve and Create Pool'
-              : 'Next'}
+            {formik.values.step === 3 ? formik.status || btnName : 'Next'}
           </LoadingButton>
         </Stack>
       </Box>
