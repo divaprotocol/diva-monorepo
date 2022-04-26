@@ -23,7 +23,6 @@ import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
 import { selectUserAddress } from '../../../Redux/appSlice'
-import { ApproveActionButtons } from '../../ApproveActionButtons'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
@@ -392,24 +391,17 @@ export default function BuyMarket(props: {
         </FormDiv>
         <CreateButtonWrapper />
         <Box marginLeft="30%" marginTop="15%" marginBottom={2}>
-          <ApproveActionButtons
-            textFieldValue={youPay.toFixed(4)}
-            onTransactionSuccess={() => handleOrderSubmit}
-            decimal={option.collateralToken.decimals}
-            collateralTokenAddress={option.collateralToken.id}
-            componentName={'trade'}
-          />
-          {/*<Button*/}
-          {/*  variant="contained"*/}
-          {/*  color="primary"*/}
-          {/*  size="large"*/}
-          {/*  startIcon={<AddIcon />}*/}
-          {/*  type="submit"*/}
-          {/*  value="Submit"*/}
-          {/*  disabled={existingSellLimitOrders.length > 0 ? false : true}*/}
-          {/*>*/}
-          {/*  {isApproved ? 'Fill Order' : 'Approve'}*/}
-          {/*</Button>*/}
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<AddIcon />}
+            type="submit"
+            value="Submit"
+            disabled={existingSellLimitOrders.length > 0 ? false : true}
+          >
+            {isApproved ? 'Fill Order' : 'Approve'}
+          </Button>
         </Box>
       </form>
     </div>
