@@ -135,11 +135,7 @@ export const ApproveActionButtons = ({
                 size="large"
                 type="submit"
                 value="Submit"
-                disabled={
-                  !pool ||
-                  Date.now() > 1000 * parseInt(pool.expiryTime) ||
-                  actionEnabled === false
-                }
+                disabled={actionEnabled === false}
                 onClick={() => {
                   setActionLoading(true)
                   const diva = new ethers.Contract(
