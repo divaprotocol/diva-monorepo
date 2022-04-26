@@ -1,7 +1,6 @@
 import { Construct } from "constructs";
 import { App, S3Backend, TerraformStack } from "cdktf";
 import {
-  AppsyncApiKey,
   AppsyncDatasource,
   AppsyncGraphqlApi,
   AppsyncResolver,
@@ -9,8 +8,11 @@ import {
 import { AwsProvider } from "@cdktf/provider-aws";
 import { id } from "./lib/id";
 import { DynamodbTable } from "@cdktf/provider-aws/lib/dynamodb";
-import { IamRole, IamRolePolicy } from "@cdktf/provider-aws/lib/iam";
+import { IamPolicy, IamRole, IamRolePolicy, IamRolePolicyAttachment } from "@cdktf/provider-aws/lib/iam";
 import { tags } from "./lib/tags";
+import { LambdaFunction, LambdaPermission } from "@cdktf/provider-aws/lib/lambdafunction";
+import { fileHash } from "./lib/fileHash";
+import { CloudwatchLogGroup } from "@cdktf/provider-aws/lib/cloudwatch";
 
 class DivaStack extends TerraformStack {
   constructor(scope: Construct, name: string) {
@@ -47,9 +49,79 @@ class DivaStack extends TerraformStack {
       tags: tags({}),
     });
 
+    const lambdaAuthorizerRole = new IamRole(
+      this,
+      id("OrderbookLambdaAuthRole"),
+      {
+        name: id("OrderbookLambdaAuthRole"),
+        assumeRolePolicy: JSON.stringify({
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Action: "sts:AssumeRole",
+              Principal: {
+                Service: "lambda.amazonaws.com",
+              },
+              Effect: "Allow",
+              Sid: "",
+            },
+          ],
+        }),
+        tags: tags({}),
+      }
+    );
+
+
+    const authFileName = `${process.cwd()}/dist/lambda-fns/orderbookAuth.zip`;
+    const lambdaAuthorizer = new LambdaFunction(
+      this,
+      id("OrderbookLambdaAuthorizer"),
+      {
+        filename: authFileName,
+        runtime: "nodejs12.x",
+        handler: "index.handler",
+        role: lambdaAuthorizerRole.arn,
+        sourceCodeHash: fileHash(authFileName),
+        functionName: id("OrderbookLambdaAuthorizer"),
+        tags: tags({})
+      }
+    );
+
+    new CloudwatchLogGroup(this, id("OrderbookAuthorizerLogs"), {
+      name: `/aws/lambda/${lambdaAuthorizer.functionName}`,
+      retentionInDays: 14,
+      tags: tags({}),
+    });
+
+    const lambdaLogging = new IamPolicy(this, id("LambdaLoggingPolicy"), {
+      name: id("LambdaLoggingPolicy"),
+      path: "/",
+      description: "IAM policy for logging from a lambda",
+      policy: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Action: [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents",
+            ],
+            Resource: "arn:aws:logs:*:*:*",
+            Effect: "Allow",
+          },
+        ],
+      }),
+      tags: tags({}),
+    });
+
+    new IamRolePolicyAttachment(this, id("LambdaLogs"), {
+      role: lambdaAuthorizerRole.name,
+      policyArn: lambdaLogging.arn,
+    });
+
     const api = new AppsyncGraphqlApi(this, id("OrderbookAppsyncApi"), {
       name: id("OrderbookAppsyncApi"),
-      authenticationType: "API_KEY",
+      authenticationType: "AWS_LAMBDA",
       schema: `
       schema {
         query: Query
@@ -122,14 +194,17 @@ class DivaStack extends TerraformStack {
       }
       `,
       tags: tags({}),
+      lambdaAuthorizerConfig: {
+        authorizerUri: lambdaAuthorizer.arn,
+      },
     });
 
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 30);
-
-    new AppsyncApiKey(this, id("OrderbookAppsyncApiKey"), {
-      apiId: api.id,
-      expires: expiryDate.toISOString(),
+    new LambdaPermission(this, id("OrderbookAppsyncLambdaPermission"), {
+      statementId: "appsync_lambda_authorizer",
+      action: "lambda:InvokeFunction",
+      functionName: lambdaAuthorizer.functionName,
+      principal: "appsync.amazonaws.com",
+      sourceArn: api.arn,
     });
 
     const iamRole = new IamRole(this, id("OrderbookDatasourceRole"), {

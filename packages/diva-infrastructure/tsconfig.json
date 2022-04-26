@@ -15,12 +15,10 @@
     "isolatedModules": true,
     "downlevelIteration": true,
     "target": "ES2018",
-    "incremental": true
+    "incremental": true,
+    "rootDir": "src",
+    "outDir": "dist"
   },
-  "include": [
-    "main.ts",
-    "lib/**/*.ts"
-  ],
   "exclude": [
     "node_modules",
     "cdktf.out"

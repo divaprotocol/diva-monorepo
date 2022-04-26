@@ -151,9 +151,7 @@ export default function Underlying() {
           </LeftDiv>
           <RightDiv>
             <Stack spacing={2}>
-              <Paper>
-                <CreateOrder />
-              </Paper>
+              <CreateOrder />
               <Paper>
                 <TradeChart
                   data={data}

@@ -1,16 +1,16 @@
 {
   "name": "diva-infrastructure",
   "version": "1.0.0",
-  "main": "main.js",
-  "types": "main.ts",
+  "main": "dist/main.js",
+  "types": "src/main.ts",
   "license": "MPL-2.0",
   "private": true,
   "scripts": {
-    "get": "cdktf get",
-    "build": "tsc",
-    "synth": "cdktf synth",
+    "get": "yarn cdktf get",
+    "build": "tsc && node buildLambda.js",
+    "synth": "yarn cdktf synth",
     "compile": "tsc --pretty",
-    "deploy": "cdktf deploy",
+    "deploy": "yarn build && cdktf deploy",
     "watch": "tsc -w",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -21,13 +21,14 @@
     "node": ">=14.0"
   },
   "dependencies": {
-    "@cdktf/provider-aws": "^7.0.3",
-    "cdktf": "^0.10.1",
+    "@cdktf/provider-aws": "^7.0.32",
+    "cdktf": "^0.10.2",
     "constructs": "^10.0.103"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",
     "@types/node": "^17.0.23",
+    "cdktf-cli": "^0.10.2",
     "jest": "^27.5.1",
     "ts-jest": "^27.1.4",
     "ts-node": "^10.7.0",
