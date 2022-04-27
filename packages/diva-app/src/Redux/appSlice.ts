@@ -1,5 +1,4 @@
 import {
-  ActionCreator,
   ActionReducerMapBuilder,
   AsyncThunk,
   CaseReducer,
@@ -7,7 +6,12 @@ import {
   createSlice,
   PayloadAction,
 } from '@reduxjs/toolkit'
-import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import { Pool, queryPool, queryPools } from '../lib/queries'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
@@ -38,11 +42,12 @@ type ChainState = {
       }
     }
   }
-  allowances: {
-    [tokenAddress: string]: number
-  }
-  balances: {
-    [tokenAddress: string]: number
+  tokens: {
+    [tokenAddress: string]: {
+      decimals: number
+      balance: string
+      allowance: string
+    }
   }
 }
 
@@ -52,20 +57,24 @@ type AppStateByChain = {
   [chainId: number]: ChainState
 }
 
-const buildThunkState = (
-  thunk: AsyncThunk<unknown, unknown, unknown>,
+const buildThunkState = <T extends AsyncThunk<unknown, unknown, unknown>>(
+  thunk: T,
   builder: ActionReducerMapBuilder<AppStateByChain>,
   overrides?: {
-    fulfilled?: CaseReducer<AppStateByChain, ReturnType<ActionCreator<any>>>
-    pending?: CaseReducer<AppStateByChain, ReturnType<ActionCreator<any>>>
-    rejected?: CaseReducer<AppStateByChain, ReturnType<ActionCreator<any>>>
+    fulfilled?: CaseReducer<AppStateByChain, ReturnType<T['fulfilled']>>
+    pending?: CaseReducer<AppStateByChain, ReturnType<T['pending']>>
+    rejected?: CaseReducer<AppStateByChain, ReturnType<T['rejected']>>
   }
 ) => {
   const keys = ['fulfilled', 'pending', 'rejected'] as const
   keys.forEach((key) => {
     builder.addCase(thunk[key], (state, action) => {
-      if (overrides?.[key]) overrides?.[key](state, action)
+      const override = overrides?.[key]
+      if (override) override(state, action as unknown as any)
 
+      if (key === 'rejected') {
+        console.error(action)
+      }
       const poolState = state[state.chainId]
       poolState.statusByName[
         action.type.substring(0, action.type.length - (key.length + 1))
@@ -80,8 +89,7 @@ export const defaultAppState = {
   pools: [],
   underlyingPrice: {},
   orders: {},
-  allowances: {},
-  balances: {},
+  tokens: {},
 }
 
 export const initialState: AppStateByChain = {
@@ -150,6 +158,49 @@ export const createOrder = createAsyncThunk(
   }
 )
 
+export const fetchTokenInfo = createAsyncThunk(
+  'app/fetchTokenInfo',
+  async (
+    {
+      token,
+      provider,
+    }: {
+      token: string
+      provider: providers.Web3Provider
+    },
+    store
+  ) => {
+    const contract = new Contract(token, ERC20_ABI, provider.getSigner())
+    const state = store.getState() as RootState
+    if (state.appSlice.userAddress == null) {
+      console.warn('trying to use fetchTokenInfo when userAddress not defined')
+      return {
+        token,
+        balance: '',
+        decimals: 18,
+        allowance: '',
+      }
+    }
+    const { userAddress } = state.appSlice
+
+    const [balance, decimals, allowance] = await Promise.all([
+      contract.balanceOf(userAddress) as Promise<BigNumber>,
+      contract.decimals() as Promise<number>,
+      contract.allowance(
+        userAddress,
+        config[state.appSlice.chainId].divaAddress
+      ) as Promise<BigNumber>,
+    ])
+
+    return {
+      token,
+      balance: balance.toString(),
+      decimals,
+      allowance: allowance.toString(),
+    }
+  }
+)
+
 export const fetchBalance = createAsyncThunk(
   'app/fetchBalance',
   async (
@@ -169,7 +220,6 @@ export const fetchBalance = createAsyncThunk(
       return
     }
     const balance = await contract.balanceOf(state.appSlice.userAddress)
-    console.log({ balance })
     return balance
   }
 )
@@ -192,7 +242,7 @@ export const approveOrder = createAsyncThunk(
     await tx.wait()
     return {
       token,
-      amount,
+      amount: amount.toString(),
     }
   }
 )
@@ -323,13 +373,38 @@ export const appSlice = createSlice({
     buildThunkState(approveOrder, builder, {
       fulfilled: (state, action) => {
         const appState = state[state.chainId]
-        appState.allowances[action.payload.token] = action.payload.amount
+        appState.tokens[action.payload.token] = {
+          ...appState.tokens[action.payload.token],
+          allowance: action.payload.amount,
+        }
+      },
+    })
+
+    buildThunkState(fetchBalance, builder, {
+      fulfilled: (state, action) => {
+        const appState = state[state.chainId]
+        appState.tokens[action.payload.token] = {
+          ...appState.tokens[action.payload.token],
+          balance: action.payload,
+        }
       },
     })
 
     buildThunkState(fetchPool, builder, {
       fulfilled: (state, action) => {
         addPools(state, [action.payload], state.chainId)
+      },
+    })
+
+    buildThunkState(fetchTokenInfo, builder, {
+      fulfilled: (state, action) => {
+        const appState = state[state.chainId]
+        appState.tokens[action.payload.token] = {
+          ...appState.tokens[action.payload.token],
+          balance: action.payload.balance,
+          allowance: action.payload.allowance,
+          decimals: action.payload.decimals,
+        }
       },
     })
 
@@ -569,8 +644,18 @@ export const selectChainId = (state: RootState) => state.appSlice.chainId
 export const selectUserAddress = (state: RootState) =>
   state.appSlice.userAddress
 
-export const selectTokenBalance = (token) => (state: RootState) =>
-  selectAppStateByChain(state).balances[token]
+export const selectTokenBalance = (token) => (state: RootState) => {
+  const tokenInfo = selectAppStateByChain(state).tokens[token]
+  return formatUnits(BigNumber.from(tokenInfo.balance), tokenInfo.decimals)
+}
+
+export const selectTokenAllowance = (token) => (state: RootState) => {
+  const tokenInfo = selectAppStateByChain(state).tokens[token]
+  return formatUnits(BigNumber.from(tokenInfo.allowance), tokenInfo.decimals)
+}
+
+export const selectTokenInfo = (token) => (state: RootState) =>
+  selectAppStateByChain(state).tokens[token]
 
 export const selectUnderlyingPrice =
   (asset: string) =>

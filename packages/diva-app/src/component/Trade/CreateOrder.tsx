@@ -1,12 +1,13 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { Add, Check, Tune } from '@mui/icons-material'
 import { Box, Button, Stack, TextField, useTheme } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import {
-  fetchBalance,
+  fetchTokenInfo,
   selectPool,
   selectTokenBalance,
+  selectUserAddress,
 } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
 import { SmallButton } from '../SmallButton'
@@ -14,9 +15,9 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 export default function CreateOrder() {
   const params: { poolId: string; tokenType: string } = useParams()
-  const [value, setValue] = React.useState(0)
   const isLong = params.tokenType === 'long'
   const { provider } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
   const dispatch = useDispatch()
   const token = isLong ? pool.longToken.id : pool.shortToken.id
@@ -26,11 +27,13 @@ export default function CreateOrder() {
   )
 
   useEffect(() => {
-    dispatch(fetchBalance({ provider, token }))
-    if (pool.collateralToken != null) {
-      dispatch(fetchBalance({ provider, token: pool.collateralToken.id }))
+    if (userAddress != null) {
+      dispatch(fetchTokenInfo({ provider, token }))
+      if (pool.collateralToken != null) {
+        dispatch(fetchTokenInfo({ provider, token: pool.collateralToken.id }))
+      }
     }
-  }, [pool])
+  }, [dispatch, pool, provider, token, userAddress])
 
   const theme = useTheme()
   return (

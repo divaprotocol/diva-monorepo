@@ -91,8 +91,6 @@ export default function Underlying() {
         : formatEther(intrinsicValue?.payoffPerShortToken)
       : 'n/a'
 
-  console.log({ pool })
-
   if (pool == null) {
     return <LoadingBox />
   }
