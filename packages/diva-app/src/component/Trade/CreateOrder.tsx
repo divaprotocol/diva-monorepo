@@ -1,23 +1,36 @@
-import { Add, Check, PlusOne, Tune } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  Stack,
-  TextField,
-  Typography,
-  useTheme,
-} from '@mui/material'
+import React, { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { Add, Check, Tune } from '@mui/icons-material'
+import { Box, Button, Stack, TextField, useTheme } from '@mui/material'
 import { useParams } from 'react-router-dom'
-import { selectPool } from '../../Redux/appSlice'
+import {
+  fetchBalance,
+  selectPool,
+  selectTokenBalance,
+} from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
 import { SmallButton } from '../SmallButton'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 export default function CreateOrder() {
   const params: { poolId: string; tokenType: string } = useParams()
   const [value, setValue] = React.useState(0)
   const isLong = params.tokenType === 'long'
+  const { provider } = useConnectionContext()
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
-  const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
+  const dispatch = useDispatch()
+  const token = isLong ? pool.longToken.id : pool.shortToken.id
+  const tokenBalance = useAppSelector(selectTokenBalance(token))
+  const collateralTokenBalance = useAppSelector(
+    selectTokenBalance(pool.collateralToken.id)
+  )
+
+  useEffect(() => {
+    dispatch(fetchBalance({ provider, token }))
+    if (pool.collateralToken != null) {
+      dispatch(fetchBalance({ provider, token: pool.collateralToken.id }))
+    }
+  }, [pool])
 
   const theme = useTheme()
   return (
@@ -41,7 +54,7 @@ export default function CreateOrder() {
         <TextField
           defaultValue={0}
           label="You buy"
-          helperText="There are x Long tokens in your wallet"
+          helperText={`You have ${tokenBalance} Long tokens in your wallet`}
         />
         <TextField defaultValue={0} label="Price per token" />
       </Stack>
@@ -58,7 +71,7 @@ export default function CreateOrder() {
         <TextField
           defaultValue={0}
           label="You pay"
-          helperText="Your wallet balance is 510 DAI"
+          helperText={`Your wallet balance is ${collateralTokenBalance} ${pool.collateralToken.symbol}`}
         />
         <Stack direction="row" justifyContent="space-between">
           <Button

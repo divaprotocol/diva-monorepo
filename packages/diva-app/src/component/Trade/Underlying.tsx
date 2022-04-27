@@ -76,8 +76,9 @@ export default function Underlying() {
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
 
   useEffect(() => {
-    if (pool?.referenceAsset != null)
+    if (pool?.referenceAsset != null) {
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
+    }
   }, [pool, dispatch])
 
   const intrinsicValue = useAppSelector((state) =>
@@ -89,6 +90,8 @@ export default function Underlying() {
         ? formatEther(intrinsicValue?.payoffPerLongToken)
         : formatEther(intrinsicValue?.payoffPerShortToken)
       : 'n/a'
+
+  console.log({ pool })
 
   if (pool == null) {
     return <LoadingBox />

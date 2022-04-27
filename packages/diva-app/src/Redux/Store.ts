@@ -34,21 +34,24 @@ const preloadedState = validState(
   JSON.parse(localStorage.getItem('diva-app-state-local'))
 )
 
-const storeConfig: ConfigureStoreOptions = {
+const storeConfig = {
   reducer: {
     tradeOption: tradeOptionSlice.reducer,
     appSlice: appSlice.reducer,
   },
 }
 
-/**
- * Only add preloadded state to redux configuration if it is valid
- */
-if (preloadedState != null) {
-  storeConfig.preloadedState = preloadedState
-}
-
-const store = configureStore(storeConfig)
+const store = configureStore(
+  preloadedState != null
+    ? /**
+       * Only add preloadded state to redux configuration if it is valid
+       */
+      {
+        ...storeConfig,
+        preloadedState,
+      }
+    : storeConfig
+)
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch

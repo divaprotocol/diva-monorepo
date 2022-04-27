@@ -1,4 +1,12 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
+import {
+  ActionCreator,
+  ActionReducerMapBuilder,
+  AsyncThunk,
+  CaseReducer,
+  createAsyncThunk,
+  createSlice,
+  PayloadAction,
+} from '@reduxjs/toolkit'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
 import { Pool, queryPool, queryPools } from '../lib/queries'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
@@ -12,31 +20,58 @@ import { BigNumber, Contract, providers } from 'ethers'
 
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
+type ChainState = {
+  statusByName: Record<string, RequestState | undefined>
+  pools: Pool[]
+  isBuy: boolean
+  underlyingPrice: {
+    [poolId: string]: string
+  }
+  orders: {
+    [poolId: string]: {
+      long: {
+        buy: any[]
+      }
+      short: {
+        sell: any[]
+        buy: any[]
+      }
+    }
+  }
+  allowances: {
+    [tokenAddress: string]: number
+  }
+  balances: {
+    [tokenAddress: string]: number
+  }
+}
+
 type AppStateByChain = {
   chainId?: number
   userAddress?: string
-  [chainId: number]: {
-    statusByName: Record<string, RequestState | undefined>
-    pools: Pool[]
-    isBuy: boolean
-    underlyingPrice: {
-      [poolId: string]: string
-    }
-    orders: {
-      [poolId: string]: {
-        long: {
-          buy: any[]
-        }
-        short: {
-          sell: any[]
-          buy: any[]
-        }
-      }
-    }
-    approvals: {
-      [tokenAddress: string]: number
-    }
+  [chainId: number]: ChainState
+}
+
+const buildThunkState = (
+  thunk: AsyncThunk<unknown, unknown, unknown>,
+  builder: ActionReducerMapBuilder<AppStateByChain>,
+  overrides?: {
+    fulfilled?: CaseReducer<AppStateByChain, ReturnType<ActionCreator<any>>>
+    pending?: CaseReducer<AppStateByChain, ReturnType<ActionCreator<any>>>
+    rejected?: CaseReducer<AppStateByChain, ReturnType<ActionCreator<any>>>
   }
+) => {
+  const keys = ['fulfilled', 'pending', 'rejected'] as const
+  keys.forEach((key) => {
+    builder.addCase(thunk[key], (state, action) => {
+      if (overrides?.[key]) overrides?.[key](state, action)
+
+      const poolState = state[state.chainId]
+      poolState.statusByName[
+        action.type.substring(0, action.type.length - (key.length + 1))
+      ] = key
+    })
+  })
 }
 
 export const defaultAppState = {
@@ -45,7 +80,8 @@ export const defaultAppState = {
   pools: [],
   underlyingPrice: {},
   orders: {},
-  approvals: {},
+  allowances: {},
+  balances: {},
 }
 
 export const initialState: AppStateByChain = {
@@ -114,8 +150,32 @@ export const createOrder = createAsyncThunk(
   }
 )
 
+export const fetchBalance = createAsyncThunk(
+  'app/fetchBalance',
+  async (
+    {
+      token,
+      provider,
+    }: {
+      token: string
+      provider: providers.Web3Provider
+    },
+    store
+  ) => {
+    const contract = new Contract(token, ERC20_ABI, provider.getSigner())
+    const state = store.getState() as RootState
+    if (state.appSlice.userAddress == null) {
+      console.warn('trying to use fetchBalance when userAddress not defined')
+      return
+    }
+    const balance = await contract.balanceOf(state.appSlice.userAddress)
+    console.log({ balance })
+    return balance
+  }
+)
+
 export const approveOrder = createAsyncThunk(
-  'pools/approveOrder',
+  'app/approveOrder',
   async ({
     token,
     amount,
@@ -219,7 +279,7 @@ const addPools = (_state: AppStateByChain, pools: Pool[], chainId?: number) => {
   const state = _state[chainId]
 
   if (chainId == null) {
-    console.warn('fetchOrders was called even though chainId is undefined')
+    console.warn('addPools was called even though chainId is undefined')
     /**
      * cancel action if chainId is undefined
      */
@@ -253,54 +313,40 @@ export const appSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchUnderlyingPrice.fulfilled, (state, action) => {
-      const appState = state[state.chainId]
-      appState.underlyingPrice[action.meta.arg] = action.payload
+    buildThunkState(fetchUnderlyingPrice, builder, {
+      fulfilled: (state, action) => {
+        const appState = state[state.chainId]
+        appState.underlyingPrice[action.meta.arg] = action.payload
+      },
     })
 
-    builder.addCase(approveOrder.fulfilled, (state, action) => {
-      const appState = state[state.chainId]
-      appState.approvals[action.payload.token] = action.payload.amount
+    buildThunkState(approveOrder, builder, {
+      fulfilled: (state, action) => {
+        const appState = state[state.chainId]
+        appState.allowances[action.payload.token] = action.payload.amount
+      },
     })
 
-    builder.addCase(fetchPool.fulfilled, (state, action) => {
-      addPools(state, [action.payload])
+    buildThunkState(fetchPool, builder, {
+      fulfilled: (state, action) => {
+        addPools(state, [action.payload], state.chainId)
+      },
     })
 
-    builder.addCase(fetchPools.pending, (state, action) => {
-      const poolState = state[state.chainId]
-      poolState.statusByName[
-        action.type.substring(0, action.type.length - ('pending'.length + 1))
-      ] = 'pending'
-    })
-
-    builder.addCase(fetchPools.rejected, (state, action) => {
-      const poolState = state[state.chainId]
-      poolState.statusByName[
-        action.type.substring(0, action.type.length - ('rejected'.length + 1))
-      ] = 'rejected'
-    })
-
-    builder.addCase(fetchPools.fulfilled, (state, action) => {
-      const poolState = state[state.chainId]
-      poolState.statusByName[
-        action.type.substring(0, action.type.length - ('fulfilled'.length + 1))
-      ] = 'fulfilled'
-      addPools(state, action.payload.pools, action.payload.chainId)
-    })
-
-    builder.addCase(fetchOrders.fulfilled, (state, action) => {
-      const poolState = state[state?.chainId]
-      const orders = poolState.orders[action.meta.arg.pool.id]
-      poolState.orders[action.meta.arg.pool.id] = {
-        ...orders,
-        [action.meta.arg.isLong ? 'long' : 'short']: action.payload,
-      }
+    buildThunkState(fetchOrders, builder, {
+      fulfilled: (state, action) => {
+        const poolState = state[state?.chainId]
+        const orders = poolState.orders[action.meta.arg.pool.id]
+        poolState.orders[action.meta.arg.pool.id] = {
+          ...orders,
+          [action.meta.arg.isLong ? 'long' : 'short']: action.payload,
+        }
+      },
     })
   },
 })
 
-export const selectAppStateByChain = (state: RootState) => {
+export const selectAppStateByChain = (state: RootState): ChainState => {
   return state.appSlice[state.appSlice.chainId]
 }
 
@@ -522,6 +568,9 @@ export const selectChainId = (state: RootState) => state.appSlice.chainId
 
 export const selectUserAddress = (state: RootState) =>
   state.appSlice.userAddress
+
+export const selectTokenBalance = (token) => (state: RootState) =>
+  selectAppStateByChain(state).balances[token]
 
 export const selectUnderlyingPrice =
   (asset: string) =>
