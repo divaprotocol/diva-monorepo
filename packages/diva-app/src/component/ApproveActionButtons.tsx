@@ -72,6 +72,7 @@ export const ApproveActionButtons = ({
   return (
     <div
       style={{
+        paddingTop: theme.spacing(6),
         height: '100px',
         width: '100%',
         display: 'flex',
