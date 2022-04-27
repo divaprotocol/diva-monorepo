@@ -112,6 +112,10 @@ export function useDiva(): DivaApi | null {
 
       const creatorAddress = await signer.getAddress()
       const allowedBalance = await erc20.allowance(creatorAddress, divaAddress)
+
+      /*** in order to avoid redundant approvals we only need to approve if collateral is
+       greater than already approved balance
+       */
       if (
         allowedBalance.lt(collateralBalanceLong.add(collateralBalanceShort))
       ) {
