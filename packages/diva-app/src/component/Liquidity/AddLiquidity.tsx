@@ -8,26 +8,20 @@ import {
   Input,
   Stack,
   useTheme,
-  CircularProgress,
   Box,
 } from '@mui/material'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
 import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
-import { BigNumber, Contract, ethers } from 'ethers'
+import { BigNumber } from 'ethers'
 import styled from '@emotion/styled'
-import ERC20 from '@diva/contracts/abis/erc20.json'
 import {
   formatEther,
   formatUnits,
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { withStyles } from '@mui/styles'
-import { config } from '../../constants'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import { fetchPool, selectUserAddress } from '../../Redux/appSlice'
+import { selectUserAddress } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useAppSelector } from '../../Redux/hooks'
@@ -56,35 +50,15 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [decimal, setDecimal] = React.useState(18)
   const [loading, setLoading] = React.useState(false)
   const [balanceUpdated, setBalanceUpdated] = React.useState(true)
-  const [btnName, setBtnName] = React.useState('Add')
   const [approving, setApproving] = React.useState('')
   const tokenBalance = useErcBalance(
     pool ? pool!.collateralToken.id : undefined,
     balanceUpdated
   )
-  const dispatch = useDispatch()
-  const { provider } = useConnectionContext()
-  const account = useAppSelector(selectUserAddress)
-
-  const chainId = provider?.network?.chainId
   useEffect(() => {
     if (pool) {
       setDecimal(pool.collateralToken.decimals)
       setOpenExpiredAlert(Date.now() > 1000 * parseInt(pool.expiryTime))
-    }
-    if (textFieldValue !== '' && chainId) {
-      const token = new ethers.Contract(
-        pool!.collateralToken.id,
-        ERC20,
-        provider.getSigner()
-      )
-      token.allowance(account, config[chainId!].divaAddress).then((res) => {
-        if (res.lt(parseUnits(textFieldValue, decimal))) {
-          setBtnName('Approve')
-        } else {
-          setBtnName('Add')
-        }
-      })
     }
     if (
       pool! &&
@@ -348,7 +322,7 @@ export const AddLiquidity = ({ pool }: Props) => {
               collateralTokenAddress={pool!.collateralToken.id}
               decimal={pool.collateralToken.decimals}
               textFieldValue={textFieldValue}
-              componentName={'liquidity'}
+              transactionType={'liquidity'}
               onTransactionSuccess={() => setBalanceUpdated(!balanceUpdated)}
             />
           </Container>

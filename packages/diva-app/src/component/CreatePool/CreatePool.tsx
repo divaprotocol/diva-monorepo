@@ -16,21 +16,15 @@ import { SelectDataFeedProvider } from './SelectDataFeedProvider'
 import { LoadingButton } from '@mui/lab'
 import { ethers } from 'ethers'
 import ERC20 from '@diva/contracts/abis/erc20.json'
-import { config } from '../../constants'
-import { parseUnits } from 'ethers/lib/utils'
 import { useEffect, useState } from 'react'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { useAppSelector } from '../../Redux/hooks'
-import { selectUserAddress } from '../../Redux/appSlice'
 import { ApproveActionButtons } from '../ApproveActionButtons'
 
 export function CreatePool() {
   const [decimal, setDecimal] = useState(18)
-  const [btnName, setBtnName] = useState('')
   const formik = useCreatePoolFormik()
   const theme = useTheme()
   const { provider } = useConnectionContext()
-  const account = useAppSelector(selectUserAddress)
   let step = null
   switch (formik.values.step) {
     case 1:
@@ -53,18 +47,6 @@ export function CreatePool() {
       token.decimals().then((decimals: number) => {
         setDecimal(decimals)
       })
-      token
-        .allowance(account, config[provider?.network?.chainId].divaAddress)
-        .then((res) => {
-          if (res.lt(parseUnits(formik.values.collateralBalance, decimal))) {
-            setBtnName('Approve & Create')
-          } else {
-            setBtnName('Create')
-          }
-        })
-        .catch((err) => {
-          console.log(err)
-        })
     }
   }, [formik.values.collateralToken])
 
@@ -122,7 +104,7 @@ export function CreatePool() {
               pool={formik.values}
               decimal={decimal}
               textFieldValue={formik.values.collateralBalance}
-              componentName={'create'}
+              transactionType={'create'}
             />
           ) : (
             <LoadingButton
@@ -141,7 +123,7 @@ export function CreatePool() {
               }
               disabled={!formik.isValid}
             >
-              {formik.values.step === 3 ? formik.status || btnName : 'Next'}
+              {formik.values.step === 3 ? formik.status || 'Create' : 'Next'}
             </LoadingButton>
           )}
         </Stack>
