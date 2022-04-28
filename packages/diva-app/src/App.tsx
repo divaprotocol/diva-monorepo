@@ -17,6 +17,11 @@ import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import { LoadingBox } from './component/LoadingBox'
 
+import * as Ethers from 'ethers'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+window._ethers = Ethers
+
 export const App = () => {
   const dispatch = useDispatch()
   const chainId = useAppSelector((state) => state.appSlice.chainId)

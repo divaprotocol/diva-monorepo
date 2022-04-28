@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { Add, Check, Tune } from '@mui/icons-material'
 import { Box, Button, Stack, TextField, useTheme } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import {
-  approveDivaTransaction,
+  approveTransaction,
+  fetchAllowance,
   fetchTokenInfo,
+  selectAllowance,
+  selectChainId,
   selectOrderView,
   selectPool,
   selectRequestStatus,
@@ -18,11 +21,13 @@ import { useAppSelector } from '../../Redux/hooks'
 import { SmallButton } from '../SmallButton'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { LoadingButton } from '@mui/lab'
+import { config } from '../../constants'
 
 export default function CreateOrder() {
   const params: { poolId: string; tokenType: string } = useParams()
   const isLong = params.tokenType === 'long'
   const { provider } = useConnectionContext()
+  const chainId = useAppSelector(selectChainId)
   const userAddress = useAppSelector(selectUserAddress)
   const approvalStatus = useAppSelector(
     selectRequestStatus('app/approveDivaTransaction')
@@ -30,7 +35,11 @@ export default function CreateOrder() {
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
   const dispatch = useDispatch()
   const token = isLong ? pool.longToken.id : pool.shortToken.id
-  const { allowance, balance } = useAppSelector(selectTokenInfo(token))
+  const tokenInfo = useAppSelector(selectTokenInfo(token))
+  const balance = tokenInfo?.balance
+  const allowance0x = useAppSelector(
+    selectAllowance(token, config[chainId].zeroXAddress)
+  )
   const collateralTokenBalance = useAppSelector(
     selectTokenBalance(pool.collateralToken.id)
   )
@@ -41,33 +50,40 @@ export default function CreateOrder() {
 
   const youPay = parseFloat(amount) * parseFloat(price)
 
-  console.log({ token, collateralTokenBalance, amount, allowance })
-  const hasEnoughBalance = collateralTokenBalance > amount
-  const hasEnoughAllowance = collateralTokenBalance > allowance
+  const hasEnoughBalance = Number(collateralTokenBalance) > youPay
+  const hasEnoughAllowance = Number(allowance0x) > youPay
 
   const isApprovedDisabled = isNaN(youPay) || youPay <= 0
-  const isOrderButtonDisabled = hasEnoughBalance && hasEnoughAllowance // should be enabled if we have allowance and balance for the amount
+  const canOrder = hasEnoughBalance && hasEnoughAllowance // should be enabled if we have allowance and balance for the amount
 
   const onClickApprove = useCallback(() => {
     if (!isNaN(youPay)) {
       dispatch(
-        approveDivaTransaction({
-          token: makerToken,
-          amount: youPay,
+        approveTransaction({
+          tokenAddress: makerToken,
+          allowanceAddress: config[chainId].zeroXAddress,
+          amount: youPay.toString(),
           provider,
         })
       )
     }
-  }, [dispatch, makerToken, provider, youPay])
+  }, [chainId, dispatch, makerToken, provider, youPay])
 
   useEffect(() => {
     if (userAddress != null) {
       dispatch(fetchTokenInfo({ provider, token }))
+      dispatch(
+        fetchAllowance({
+          provider,
+          allowanceAddress: config[chainId].zeroXAddress,
+          tokenAddress: token,
+        })
+      )
       if (pool.collateralToken != null) {
         dispatch(fetchTokenInfo({ provider, token: pool.collateralToken.id }))
       }
     }
-  }, [dispatch, pool, provider, token, userAddress])
+  }, [chainId, dispatch, pool, provider, token, userAddress])
 
   const theme = useTheme()
   return (
@@ -170,8 +186,11 @@ export default function CreateOrder() {
             </LoadingButton>
             <Button
               variant="contained"
-              disabled={isOrderButtonDisabled}
+              disabled={!canOrder}
               size="large"
+              onClick={() => {
+                console.error('todo make order')
+              }}
             >
               <Add
                 sx={{

@@ -54,7 +54,13 @@ type ChainState = {
     [tokenAddress: string]: {
       decimals: number
       balance: string
-      allowance: string
+    }
+  }
+  allowance: {
+    [address: string]: {
+      tokenAddress: string
+      allowanceAddress: string
+      amount: string
     }
   }
   orderView: {
@@ -102,6 +108,7 @@ export const defaultAppState: ChainState = {
   orders: {},
   tokens: {},
   orderView: {},
+  allowance: {},
 }
 
 export const initialState: AppStateByChain = {
@@ -200,20 +207,15 @@ export const fetchTokenInfo = createAsyncThunk(
     }
     const { userAddress } = state.appSlice
 
-    const [balance, decimals, allowance] = await Promise.all([
+    const [balance, decimals] = await Promise.all([
       contract.balanceOf(userAddress) as Promise<BigNumber>,
       contract.decimals() as Promise<number>,
-      contract.allowance(
-        userAddress,
-        config[state.appSlice.chainId].divaAddress
-      ) as Promise<BigNumber>,
     ])
 
     return {
       token,
       balance: balance.toString(),
       decimals,
-      allowance: allowance.toString(),
     }
   }
 )
@@ -241,34 +243,65 @@ export const fetchBalance = createAsyncThunk(
   }
 )
 
-export const approveDivaTransaction = createAsyncThunk(
-  'app/approveDivaTransaction',
+export const fetchAllowance = createAsyncThunk(
+  'app/fetchAllowance',
   async (
     {
-      token,
+      allowanceAddress,
+      tokenAddress,
+      provider,
+    }: {
+      allowanceAddress: string
+      tokenAddress: string
+      provider: providers.Web3Provider
+    },
+    store
+  ) => {
+    const contract = new Contract(tokenAddress, ERC20_ABI, provider.getSigner())
+    const state = store.getState() as RootState
+    if (state.appSlice.userAddress == null) {
+      console.warn('userAddress not defined')
+      return
+    }
+    const allowance = await contract.allowance(
+      state.appSlice.userAddress,
+      allowanceAddress
+    )
+    return allowance.toString()
+  }
+)
+
+export const approveTransaction = createAsyncThunk(
+  'app/approveTransaction',
+  async (
+    {
+      tokenAddress,
+      allowanceAddress,
       amount,
       provider,
     }: {
-      token: string
-      amount: number
+      tokenAddress: string
+      allowanceAddress: string
+      amount: string
       provider: providers.Web3Provider
     },
     store
   ) => {
     const state = store.getState() as RootState
-    const contract = new Contract(token, ERC20_ABI, provider.getSigner())
+    const contract = new Contract(tokenAddress, ERC20_ABI, provider.getSigner())
     const decimals = await contract.decimals()
-    const allowance = parseUnits(amount.toString(), decimals)
+    const allowance = parseUnits(amount, decimals)
 
     const { chainId } = state.appSlice
     if (chainId == null) {
       throw new Error('chainId must be defined')
     }
-    const tx = await contract.approve(config[chainId].divaAddress, allowance)
+    const tx = await contract.approve(allowanceAddress, allowance)
     await tx.wait()
     return {
-      token,
-      amount: amount.toString(),
+      tokenAddress,
+      allowanceAddress,
+      amount: allowance.toString(),
     }
   }
 )
@@ -407,12 +440,20 @@ export const appSlice = createSlice({
       },
     })
 
-    buildThunkState(approveDivaTransaction, builder, {
+    buildThunkState(fetchAllowance, builder, {
       fulfilled: (state, action) => {
         const appState = state[state.chainId]
-        appState.tokens[action.payload.token] = {
-          ...appState.tokens[action.payload.token],
-          allowance: action.payload.amount,
+        appState.allowance[action.payload] = action.payload
+      },
+    })
+
+    buildThunkState(approveTransaction, builder, {
+      fulfilled: (state, action) => {
+        const appState = state[state.chainId]
+        appState.allowance[action.payload.allowanceAddress] = {
+          amount: action.payload.amount,
+          tokenAddress: action.payload.tokenAddress,
+          allowanceAddress: action.payload.allowanceAddress,
         }
       },
     })
@@ -439,7 +480,6 @@ export const appSlice = createSlice({
         appState.tokens[action.payload.token] = {
           ...appState.tokens[action.payload.token],
           balance: action.payload.balance,
-          allowance: action.payload.allowance,
           decimals: action.payload.decimals,
         }
       },
@@ -692,13 +732,21 @@ export const selectTokenBalance = (token) => (state: RootState) => {
   return formatUnits(BigNumber.from(tokenInfo.balance), tokenInfo.decimals)
 }
 
-export const selectTokenAllowance = (token) => (state: RootState) => {
-  const tokenInfo = selectAppStateByChain(state).tokens[token]
-  return formatUnits(BigNumber.from(tokenInfo.allowance), tokenInfo.decimals)
-}
+export const selectAllowanceState =
+  (tokenAddress: string, allowanceAddress: string) => (state: RootState) => {
+    const allowance = selectAppStateByChain(state)?.allowance[allowanceAddress]
+    return allowance?.[tokenAddress]
+  }
+
+export const selectAllowance =
+  (tokenAddress: string, allowanceAddress: string) => (state: RootState) => {
+    const allowance = selectAppStateByChain(state)?.allowance[allowanceAddress]
+    const tokenInfo = selectTokenInfo(allowance.tokenAddress)(state)
+    return formatUnits(BigNumber.from(allowance.amount), tokenInfo.decimals)
+  }
 
 export const selectTokenInfo = (token) => (state: RootState) =>
-  selectAppStateByChain(state).tokens[token]
+  selectAppStateByChain(state).tokens[token] || undefined
 
 export const selectUnderlyingPrice =
   (asset: string) =>
