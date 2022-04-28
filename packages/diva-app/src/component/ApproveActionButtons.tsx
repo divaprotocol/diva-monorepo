@@ -2,7 +2,7 @@ import { CircularProgress, Container, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import { ethers } from 'ethers'
 import { config } from '../constants'
-import { parseUnits } from 'ethers/lib/utils'
+import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { fetchPool, selectUserAddress } from '../Redux/appSlice'
 import React, { useEffect } from 'react'
 import { useConnectionContext } from '../hooks/useConnectionContext'
@@ -146,17 +146,19 @@ export const ApproveActionButtons = ({
                 case 'create':
                   diva!
                     .createContingentPool({
-                      inflection: pool.inflection,
-                      cap: pool.cap,
-                      floor: pool.floor,
+                      inflection: parseEther(pool.inflection.toString()),
+                      cap: parseEther(pool.cap.toString()),
+                      floor: parseEther(pool.floor.toString()),
                       collateralBalanceShort: pool.collateralBalanceShort,
                       collateralBalanceLong: pool.collateralBalanceLong,
-                      expiryTime: pool.expiryTime.getTime(),
-                      supplyPositionToken: pool.tokenSupply,
+                      expiryTime: pool.expiryTime.getTime() / 1000,
+                      supplyPositionToken: parseEther(
+                        pool.tokenSupply.toString()
+                      ),
                       referenceAsset: pool.referenceAsset,
                       collateralToken: pool.collateralToken.id,
                       dataProvider: pool.dataProvider,
-                      capacity: 0,
+                      capacity: parseEther('0'),
                     })
                     .then((tx) => {
                       /**
