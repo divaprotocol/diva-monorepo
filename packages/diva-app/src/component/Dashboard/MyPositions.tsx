@@ -17,11 +17,7 @@ import { SideMenu } from './SideMenu'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-} from 'ethers/lib/utils'
+import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
