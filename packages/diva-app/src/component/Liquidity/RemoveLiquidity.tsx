@@ -330,6 +330,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 value="Submit"
                 disabled={!pool || openExpiredAlert}
                 onClick={() => {
+                  setLoading(true)
                   const diva = new ethers.Contract(
                     config[chainId].divaAddress,
                     DIVA_ABI,
@@ -345,6 +346,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                        * dispatch action to refetch the pool after action
                        */
                       tx.wait().then(() => {
+                        setLoading(false)
                         setTimeout(() => {
                           setBalanceUpdated(false)
                           dispatch(
@@ -357,6 +359,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                       })
                     })
                     .catch((err) => {
+                      setLoading(false)
                       console.error(err)
                     })
                 }}
