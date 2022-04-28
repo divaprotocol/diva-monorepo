@@ -22,10 +22,18 @@ import { get0xOpenOrders } from '../DataService/OpenOrders'
 import { config, whitelistedPoolCreatorAddress } from '../constants'
 import { BigNumber, Contract, providers } from 'ethers'
 
+/**
+ * We track the state of thunks in redux
+ */
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
+type OrderView = {
+  amount: string
+  price: string
+}
+
 type ChainState = {
-  statusByName: Record<string, RequestState | undefined>
+  requestByName: Record<string, RequestState | undefined>
   pools: Pool[]
   isBuy: boolean
   underlyingPrice: {
@@ -48,6 +56,9 @@ type ChainState = {
       balance: string
       allowance: string
     }
+  }
+  orderView: {
+    [key: string]: OrderView
   }
 }
 
@@ -76,20 +87,21 @@ const buildThunkState = <T extends AsyncThunk<unknown, unknown, unknown>>(
         console.error(action)
       }
       const poolState = state[state.chainId]
-      poolState.statusByName[
+      poolState.requestByName[
         action.type.substring(0, action.type.length - (key.length + 1))
       ] = key
     })
   })
 }
 
-export const defaultAppState = {
-  statusByName: {},
+export const defaultAppState: ChainState = {
+  requestByName: {},
   isBuy: true,
   pools: [],
   underlyingPrice: {},
   orders: {},
   tokens: {},
+  orderView: {},
 }
 
 export const initialState: AppStateByChain = {
@@ -170,8 +182,13 @@ export const fetchTokenInfo = createAsyncThunk(
     },
     store
   ) => {
+    if (provider == null || token == null)
+      throw new Error('provider or token is not defined')
     const contract = new Contract(token, ERC20_ABI, provider.getSigner())
     const state = store.getState() as RootState
+    if (state.appSlice.chainId == null) {
+      throw new Error('chainId must be defined')
+    }
     if (state.appSlice.userAddress == null) {
       console.warn('trying to use fetchTokenInfo when userAddress not defined')
       return {
@@ -224,21 +241,30 @@ export const fetchBalance = createAsyncThunk(
   }
 )
 
-export const approveOrder = createAsyncThunk(
-  'app/approveOrder',
-  async ({
-    token,
-    amount,
-    provider,
-  }: {
-    token: string
-    amount: number
-    provider: providers.Web3Provider
-  }) => {
+export const approveDivaTransaction = createAsyncThunk(
+  'app/approveDivaTransaction',
+  async (
+    {
+      token,
+      amount,
+      provider,
+    }: {
+      token: string
+      amount: number
+      provider: providers.Web3Provider
+    },
+    store
+  ) => {
+    const state = store.getState() as RootState
     const contract = new Contract(token, ERC20_ABI, provider.getSigner())
-    const decimals = contract.decimals()
+    const decimals = await contract.decimals()
     const allowance = parseUnits(amount.toString(), decimals)
-    const tx = await contract.approve(token, allowance)
+
+    const { chainId } = state.appSlice
+    if (chainId == null) {
+      throw new Error('chainId must be defined')
+    }
+    const tx = await contract.approve(config[chainId].divaAddress, allowance)
     await tx.wait()
     return {
       token,
@@ -324,7 +350,11 @@ export const fetchPools = createAsyncThunk(
   }
 )
 
-const addPools = (_state: AppStateByChain, pools: Pool[], chainId?: number) => {
+const reducePools = (
+  _state: AppStateByChain,
+  pools: Pool[],
+  chainId?: number
+) => {
   const newPools = pools.map((p) => p.id)
   const state = _state[chainId]
 
@@ -349,9 +379,6 @@ export const appSlice = createSlice({
   name: 'app',
   initialState,
   reducers: {
-    setIsBuy: (state, action: PayloadAction<boolean>) => {
-      state[state.chainId].isBuy = action.payload
-    },
     setChainId: (state, action: PayloadAction<number>) => {
       state.chainId = action.payload
     },
@@ -359,7 +386,17 @@ export const appSlice = createSlice({
       state.userAddress = action.payload
     },
     addPools: (state: AppStateByChain, action: PayloadAction<Pool[]>) => {
-      addPools(state, action.payload)
+      reducePools(state, action.payload)
+    },
+    setOrderView: (
+      state,
+      action: PayloadAction<{ key: string; data: Partial<OrderView> }>
+    ) => {
+      const { key, data } = action.payload
+      state[state.chainId].orderView[key] = {
+        ...state[state.chainId].orderView[key],
+        ...data,
+      }
     },
   },
   extraReducers: (builder) => {
@@ -370,7 +407,7 @@ export const appSlice = createSlice({
       },
     })
 
-    buildThunkState(approveOrder, builder, {
+    buildThunkState(approveDivaTransaction, builder, {
       fulfilled: (state, action) => {
         const appState = state[state.chainId]
         appState.tokens[action.payload.token] = {
@@ -392,7 +429,7 @@ export const appSlice = createSlice({
 
     buildThunkState(fetchPool, builder, {
       fulfilled: (state, action) => {
-        addPools(state, [action.payload], state.chainId)
+        reducePools(state, [action.payload], state.chainId)
       },
     })
 
@@ -448,8 +485,8 @@ export const selectMyDataFeeds = (state: RootState) =>
 export const selectPrice = (state: RootState, poolId: string) =>
   selectAppStateByChain(state).underlyingPrice[poolId]
 
-export const selectRequestStatus = (status) => (state: RootState) =>
-  selectAppStateByChain(state).statusByName[status]
+export const selectRequestStatus = (name: string) => (state: RootState) =>
+  selectAppStateByChain(state).requestByName[name]
 
 export const selectPayoff = (state: RootState, poolId: string) => {
   const pool = selectPool(state, poolId)
@@ -524,6 +561,11 @@ export const selectOrder = (
   poolId: string,
   isLong: boolean
 ) => selectAppStateByChain(state).orders[poolId]?.[isLong ? 'long' : 'short']
+
+export const selectOrderView =
+  (key: string) =>
+  (state: RootState): OrderView =>
+    selectAppStateByChain(state).orderView[key] || { price: '0', amount: '0' }
 
 export const selectExpectedRate = (
   state: RootState,
@@ -646,6 +688,7 @@ export const selectUserAddress = (state: RootState) =>
 
 export const selectTokenBalance = (token) => (state: RootState) => {
   const tokenInfo = selectAppStateByChain(state).tokens[token]
+  if (tokenInfo == null) return null
   return formatUnits(BigNumber.from(tokenInfo.balance), tokenInfo.decimals)
 }
 
@@ -662,4 +705,5 @@ export const selectUnderlyingPrice =
   (state: RootState): string | undefined =>
     selectAppStateByChain(state).underlyingPrice[asset]
 
-export const { setIsBuy, setUserAddress, setChainId } = appSlice.actions
+export const { setUserAddress, setChainId, setOrderView, addPools } =
+  appSlice.actions
