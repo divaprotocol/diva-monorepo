@@ -296,24 +296,24 @@ const SubmitButton = (props: any) => {
 
 const Payoff = (props: any) => {
   const intrinsicValue = useAppSelector((state) =>
-    selectIntrinsicValue(state, props.row.Payoff.id)
+    selectIntrinsicValue(state, props.row.Payoff.id, props.row.finalValue)
   )
   if (
-    props.row.Status.startsWith('Confirmed') &&
+    props.row.finalValue != '-' &&
     intrinsicValue.payoffPerShortToken != null &&
     intrinsicValue.payoffPerLongToken != null
   ) {
     if (props.row.Id.toLowerCase().startsWith('s')) {
       return (
         <div>
-          {Number(formatEther(intrinsicValue.payoffPerShortToken)) *
+          {parseFloat(formatEther(intrinsicValue.payoffPerShortToken)) *
             props.row.Balance}
         </div>
       )
     } else {
       return (
         <div>
-          {Number(formatEther(intrinsicValue.payoffPerLongToken)) *
+          {parseFloat(formatEther(intrinsicValue.payoffPerLongToken)) *
             props.row.Balance}
         </div>
       )

@@ -305,24 +305,18 @@ export const selectPayoff = (
 
 export const selectIntrinsicValue = (
   state: RootState,
-  poolId: string
+  poolId: string,
+  finalReferenceValue?: string
 ): any | undefined => {
   const pool = selectPool(state, poolId)
   const payoff = selectPayoff(
     state,
     poolId,
     pool.referenceAsset,
-    pool.finalReferenceValue
+    finalReferenceValue != null ? finalReferenceValue : pool.finalReferenceValue
   )
   if (payoff == null) return 'n/a'
-  if (
-    pool.statusFinalReferenceValue === 'Open' &&
-    pool.finalReferenceValue == null
-  ) {
-    return 'n/a'
-  } else {
-    return payoff.payoff
-  }
+  return payoff.payoff
 }
 
 export const selectMaxPayout = (
