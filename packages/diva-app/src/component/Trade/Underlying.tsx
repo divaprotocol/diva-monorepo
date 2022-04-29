@@ -83,13 +83,7 @@ export default function Underlying() {
   const intrinsicValue = useAppSelector((state) =>
     selectIntrinsicValue(state, params.poolId)
   )
-  const intValDisplay =
-    intrinsicValue != 'n/a' && intrinsicValue != null
-      ? isLong
-        ? formatEther(intrinsicValue?.payoffPerLongToken)
-        : formatEther(intrinsicValue?.payoffPerShortToken)
-      : 'n/a'
-
+  console.log('intrinsicValue', intrinsicValue)
   if (pool == null) {
     return <LoadingBox />
   }
@@ -209,9 +203,19 @@ export default function Underlying() {
                 <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
                   Intrinsic value per token
                 </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {intValDisplay}
-                </Typography>
+                {isLong ? (
+                  <Typography
+                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    {formatEther(intrinsicValue?.payoffPerLongToken)}
+                  </Typography>
+                ) : (
+                  <Typography
+                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    {formatEther(intrinsicValue?.payoffPerShortToken)}
+                  </Typography>
+                )}
               </Stack>
               <Stack direction="row" justifyContent="space-between">
                 <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>

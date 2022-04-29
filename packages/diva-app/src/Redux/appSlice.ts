@@ -273,11 +273,16 @@ export const selectPrice = (state: RootState, poolId: string) =>
 export const selectRequestStatus = (status) => (state: RootState) =>
   selectAppStateByChain(state).statusByName[status]
 
-export const selectPayoff = (state: RootState, poolId: string) => {
+export const selectPayoff = (
+  state: RootState,
+  poolId: string,
+  referenceAsset: string,
+  finalReferenceValue: string
+) => {
   const pool = selectPool(state, poolId)
   if (pool == null) return undefined
-  const usdPrice = selectPrice(state, poolId)
-  if (usdPrice == null) return undefined
+  let usdPrice = selectPrice(state, referenceAsset)
+  if (usdPrice == null) usdPrice = '0'
   const payoff = calcPayoffPerToken(
     BigNumber.from(pool.floor),
     BigNumber.from(pool.inflection),
@@ -286,7 +291,7 @@ export const selectPayoff = (state: RootState, poolId: string) => {
     BigNumber.from(pool.collateralBalanceShortInitial),
     pool.statusFinalReferenceValue === 'Open'
       ? parseEther(usdPrice)
-      : BigNumber.from(pool.finalReferenceValue),
+      : BigNumber.from(finalReferenceValue),
     BigNumber.from(pool.supplyInitial),
     pool.collateralToken.decimals
   )
@@ -302,12 +307,17 @@ export const selectIntrinsicValue = (
   state: RootState,
   poolId: string
 ): any | undefined => {
-  const payoff = selectPayoff(state, poolId)
-  if (payoff == null) return undefined
   const pool = selectPool(state, poolId)
+  const payoff = selectPayoff(
+    state,
+    poolId,
+    pool.referenceAsset,
+    pool.finalReferenceValue
+  )
+  if (payoff == null) return 'n/a'
   if (
     pool.statusFinalReferenceValue === 'Open' &&
-    parseFloat(payoff.usdPrice) == 0
+    pool.finalReferenceValue == null
   ) {
     return 'n/a'
   } else {

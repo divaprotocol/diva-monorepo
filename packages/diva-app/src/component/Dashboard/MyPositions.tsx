@@ -28,6 +28,7 @@ import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import {
   fetchPool,
+  selectIntrinsicValue,
   selectPools,
   selectRequestStatus,
   selectUserAddress,
@@ -293,6 +294,39 @@ const SubmitButton = (props: any) => {
   }
 }
 
+const Payoff = (props: any) => {
+  // console.log('props', props.row)
+  const intrinsicValue = useAppSelector((state) =>
+    selectIntrinsicValue(state, props.row.Payoff.id)
+  )
+  console.log(props.row.Id)
+  console.log(props.row.Status)
+  console.log(intrinsicValue)
+  if (
+    props.row.Status.startsWith('Confirmed') &&
+    intrinsicValue.payoffPerShortToken != null &&
+    intrinsicValue.payoffPerLongToken != null
+  ) {
+    if (props.row.Id.toLowerCase().startsWith('s')) {
+      return (
+        <div>
+          {Number(formatEther(intrinsicValue.payoffPerShortToken)) *
+            props.row.Balance}
+        </div>
+      )
+    } else {
+      return (
+        <div>
+          {Number(formatEther(intrinsicValue.payoffPerLongToken)) *
+            props.row.Balance}
+        </div>
+      )
+    }
+  } else {
+    return <>-</>
+  }
+}
+
 const columns: GridColDef[] = [
   {
     field: 'Id',
@@ -357,6 +391,12 @@ const columns: GridColDef[] = [
     field: 'Balance',
     align: 'right',
     headerAlign: 'right',
+  },
+  {
+    field: 'Payoff',
+    align: 'right',
+    headerAlign: 'right',
+    renderCell: (props) => <Payoff {...props} />,
   },
   {
     field: 'submitValue',
@@ -437,6 +477,7 @@ export function MyPositions() {
       Buy: 'TBD',
       MaxYield: 'TBD',
       StatusTimestamp: val.statusTimestamp,
+      Payoff: val,
     }
 
     const payOff = {
