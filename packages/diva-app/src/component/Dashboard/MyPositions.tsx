@@ -295,13 +295,9 @@ const SubmitButton = (props: any) => {
 }
 
 const Payoff = (props: any) => {
-  // console.log('props', props.row)
   const intrinsicValue = useAppSelector((state) =>
     selectIntrinsicValue(state, props.row.Payoff.id)
   )
-  console.log(props.row.Id)
-  console.log(props.row.Status)
-  console.log(intrinsicValue)
   if (
     props.row.Status.startsWith('Confirmed') &&
     intrinsicValue.payoffPerShortToken != null &&

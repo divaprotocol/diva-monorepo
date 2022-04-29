@@ -83,7 +83,6 @@ export default function Underlying() {
   const intrinsicValue = useAppSelector((state) =>
     selectIntrinsicValue(state, params.poolId)
   )
-  console.log('intrinsicValue', intrinsicValue)
   if (pool == null) {
     return <LoadingBox />
   }
