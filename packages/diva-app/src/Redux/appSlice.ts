@@ -313,7 +313,9 @@ export const selectIntrinsicValue = (
     state,
     poolId,
     pool.referenceAsset,
-    finalReferenceValue != null ? finalReferenceValue : pool.finalReferenceValue
+    finalReferenceValue != null && finalReferenceValue != '-'
+      ? parseEther(finalReferenceValue).toString()
+      : pool.finalReferenceValue
   )
   if (payoff == null) return 'n/a'
   return payoff.payoff
