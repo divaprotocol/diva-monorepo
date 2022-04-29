@@ -150,11 +150,11 @@ export const ApproveActionButtons = ({
                       cap: parseEther(pool.cap.toString()),
                       floor: parseEther(pool.floor.toString()),
                       collateralBalanceShort: parseUnits(
-                        pool.collateralBalanceShort,
+                        pool.collateralBalanceShort.toString(),
                         decimal
                       ),
                       collateralBalanceLong: parseUnits(
-                        pool.collateralBalanceLong,
+                        pool.collateralBalanceLong.toString(),
                         decimal
                       ),
                       expiryTime: pool.expiryTime.getTime() / 1000,
