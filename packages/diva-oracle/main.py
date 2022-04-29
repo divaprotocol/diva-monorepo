@@ -10,7 +10,7 @@ from SendPrice import sendPrice
 
 query = """
             {
-              pools (where: {dataProvider: "0xc948f2F172Fe25977E322c8D82F8f53338f8a051"}) {
+              pools (where: {dataProvider: "0x9AdEFeb576dcF52F5220709c1B267d89d5208D78"}) {
                 id
                 dataProvider
                 referenceAsset

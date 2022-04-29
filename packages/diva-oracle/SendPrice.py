@@ -1,149 +1,22 @@
 from web3 import Web3
+import config
+import diva
 
-PRIVATE_KEY = '0x' + 'ca9af43b9f248bd8b8a2f51b4905325f1dc65e8ae0e8a96638f37ef60bbe1476'
-wallet = '0xc948f2F172Fe25977E322c8D82F8f53338f8a051'
+PRIVATE_KEY = config.PRIVATE_KEY
+PUBLIC_KEY = config.PUBLIC_KEY
 
-contract_address = '0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf'
-
-provider_url = 'https://ropsten.infura.io/v3/a6b3d560ce544297b265bb09f0d4bfa8'
-
-w3 = Web3(Web3.HTTPProvider(provider_url))
+w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL))
 
 print(w3.isConnected())
 
-abi = '''[
-{
-    "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" },
-      {
-        "internalType": "uint256",
-        "name": "_finalReferenceValue",
-        "type": "uint256"
-      },
-      { "internalType": "bool", "name": "_allowChallenge", "type": "bool" }
-    ],
-    "name": "setFinalReferenceValue",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-{
-    "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" }
-    ],
-    "name": "getPoolParameters",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "string",
-            "name": "referenceAsset",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "expiryTime",
-            "type": "uint256"
-          },
-          { "internalType": "uint256", "name": "floor", "type": "uint256" },
-          {
-            "internalType": "uint256",
-            "name": "inflection",
-            "type": "uint256"
-          },
-          { "internalType": "uint256", "name": "cap", "type": "uint256" },
-          {
-            "internalType": "uint256",
-            "name": "supplyInitial",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "collateralToken",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "collateralBalanceShortInitial",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "collateralBalanceLongInitial",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "collateralBalance",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "shortToken",
-            "type": "address"
-          },
-          { "internalType": "address", "name": "longToken", "type": "address" },
-          {
-            "internalType": "uint256",
-            "name": "finalReferenceValue",
-            "type": "uint256"
-          },
-          {
-            "internalType": "enum LibDiamond.Status",
-            "name": "statusFinalReferenceValue",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "redemptionAmountLongToken",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "redemptionAmountShortToken",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "statusTimestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "dataProvider",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "redemptionFee",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "settlementFee",
-            "type": "uint256"
-          },
-          { "internalType": "uint256", "name": "capacity", "type": "uint256" }
-        ],
-        "internalType": "struct LibDiamond.Pool",
-        "name": "",
-        "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-]
-'''
-
 def sendPrice(pool_id, value):
-    my_contract = w3.eth.contract(address=contract_address, abi=abi)
+    my_contract = w3.eth.contract(address=diva.contract_address, abi=diva.abi)
     setFinRef_txn = my_contract.functions.setFinalReferenceValue(int(pool_id), int(w3.toWei(value, 'ether')), False).buildTransaction(
         {
             "gasPrice": w3.eth.gas_price,
             "chainId": 3,
-            "from": wallet,
-            "nonce": w3.eth.get_transaction_count(wallet)
+            "from": PUBLIC_KEY,
+            "nonce": w3.eth.get_transaction_count(PUBLIC_KEY)
         }
     )
 
