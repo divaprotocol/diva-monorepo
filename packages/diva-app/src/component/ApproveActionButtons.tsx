@@ -157,13 +157,13 @@ export const ApproveActionButtons = ({
                         pool.collateralBalanceLong.toString(),
                         decimal
                       ),
-                      expiryTime: pool.expiryTime.getTime() / 1000,
+                      expiryTime: Math.trunc(pool.expiryTime.getTime() / 1000),
                       supplyPositionToken: parseEther(
                         pool.tokenSupply.toString()
                       ),
-                      referenceAsset: pool.referenceAsset,
-                      collateralToken: pool.collateralToken.id,
-                      dataProvider: pool.dataProvider,
+                      referenceAsset: pool.referenceAsset.toString(),
+                      collateralToken: pool.collateralToken.id.toString(),
+                      dataProvider: pool.dataProvider.toString(),
                       capacity: parseEther('0'),
                     })
                     .then((tx) => {
