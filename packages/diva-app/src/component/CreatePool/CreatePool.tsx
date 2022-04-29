@@ -88,6 +88,7 @@ export function CreatePool() {
         >
           {formik.values.step > 1 && (
             <Button
+              sx={{ width: theme.spacing(16) }}
               onClick={() => {
                 formik.setFieldValue('step', formik.values.step - 1, true)
               }}
