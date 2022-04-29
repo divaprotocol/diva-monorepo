@@ -12,6 +12,7 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
+import { BigNumber, Contract, providers } from 'ethers'
 import { Pool, queryPool, queryPools } from '../lib/queries'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
@@ -20,7 +21,7 @@ import { RootState } from './Store'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { get0xOpenOrders } from '../DataService/OpenOrders'
 import { config, whitelistedPoolCreatorAddress } from '../constants'
-import { BigNumber, Contract, providers } from 'ethers'
+import { zeroXDomain, create0xMessage, zeroXTypes } from '../lib/zeroX'
 
 /**
  * We track the state of thunks in redux
@@ -155,7 +156,34 @@ export const fetchOrders = createAsyncThunk(
 
 export const createOrder = createAsyncThunk(
   'app/createOrder',
-  async ({ pool, isLong }: { pool: Pool; isLong: boolean }) => {
+  async ({ provider }: { provider: providers.Web3Provider }, thunk) => {
+    const state = thunk.getState() as RootState
+    const { chainId } = state.appSlice
+    const verifyingAddress = config[chainId].zeroXAddress
+    const signer = provider.getSigner()
+    signer._signTypedData(
+      zeroXDomain({ chainId, verifyingContract: verifyingAddress }),
+      zeroXTypes,
+      create0xMessage({
+        expiry: '',
+        feeRecipient: '',
+        maker: '',
+        makerAmount: '',
+        makerToken: '',
+        pool: '',
+        salt: '',
+        sender: '',
+        taker: '',
+        takerAmount: '',
+        takerToken: '',
+        takerTokenFeeAmount: '',
+      })
+    )
+
+    // const mutation = createOrderMutation({
+    //   chainId,
+
+    // })
     // request<{ pool: Pool }>(
     //   orderBookEndpoint,
     //   createOrderMutation({

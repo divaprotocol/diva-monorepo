@@ -56,6 +56,14 @@ export default function CreateOrder() {
   const isApprovedDisabled = isNaN(youPay) || youPay <= 0
   const canOrder = hasEnoughBalance && hasEnoughAllowance // should be enabled if we have allowance and balance for the amount
 
+  const onClickOrder = useCallback(() => {
+    /**
+     * 1. Create EIP712 struct
+     * 2. Sign struct into hash
+     */
+    // dispatch()
+  }, [])
+
   const onClickApprove = useCallback(() => {
     if (!isNaN(youPay)) {
       dispatch(
