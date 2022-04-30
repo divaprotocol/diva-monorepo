@@ -284,7 +284,6 @@ export const selectPayoff = (
   if (pool == null) return undefined
   let usdPrice = selectPrice(state, referenceAsset)
   if (usdPrice == null) usdPrice = '0'
-  console.log('pool.statusFinalReferenceValue', pool.statusFinalReferenceValue)
   const payoff = calcPayoffPerToken(
     BigNumber.from(pool.floor),
     BigNumber.from(pool.inflection),
@@ -322,7 +321,6 @@ export const selectIntrinsicValue = (
     statusFinalReferenceValue
   )
   if (payoff == null) return 'n/a'
-  console.log(poolId, finalReferenceValue, payoff)
   return payoff.payoff
 }
 

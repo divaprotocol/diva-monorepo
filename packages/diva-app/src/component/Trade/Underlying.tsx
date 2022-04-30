@@ -85,7 +85,6 @@ export default function Underlying() {
       ? Date.now() - Number(pool.expiryTime) * 1000 > 24 * 60 * 60 * 1000
       : false
 
-  console.log('confirmed', confirmed)
   const intrinsicValue = useAppSelector((state) =>
     selectIntrinsicValue(
       state,
