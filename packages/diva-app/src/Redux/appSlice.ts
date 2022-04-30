@@ -20,7 +20,11 @@ import request from 'graphql-request'
 import { RootState } from './Store'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { get0xOpenOrders } from '../DataService/OpenOrders'
-import { config, whitelistedPoolCreatorAddress } from '../constants'
+import {
+  config,
+  NULL_ADDRESS,
+  whitelistedPoolCreatorAddress,
+} from '../constants'
 import { zeroXDomain, create0xMessage, zeroXTypes } from '../lib/zeroX'
 
 /**
@@ -29,8 +33,12 @@ import { zeroXDomain, create0xMessage, zeroXTypes } from '../lib/zeroX'
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
 type OrderView = {
-  amount: string
+  takerAmount: string
+  takerToken: string
+  makerAmount: string
+  makerToken: string
   price: string
+  expiryInSeconds: string
 }
 
 type ChainState = {
@@ -65,8 +73,17 @@ type ChainState = {
     }
   }
   orderView: {
-    [key: string]: OrderView
+    [orderKey: string]: OrderView
   }
+}
+
+const defaultOrderViewState: OrderView = {
+  price: '0',
+  makerAmount: '0',
+  takerAmount: '0',
+  expiryInSeconds: '3600', // 1 hour default
+  makerToken: '',
+  takerToken: '',
 }
 
 type AppStateByChain = {
@@ -86,12 +103,12 @@ const buildThunkState = <T extends AsyncThunk<unknown, unknown, unknown>>(
 ) => {
   const keys = ['fulfilled', 'pending', 'rejected'] as const
   keys.forEach((key) => {
-    builder.addCase(thunk[key], (state, action) => {
+    builder.addCase(thunk[key], (state, action: any) => {
       const override = overrides?.[key]
       if (override) override(state, action as unknown as any)
 
       if (key === 'rejected') {
-        console.error(action)
+        console.error(action.error)
       }
       const poolState = state[state.chainId]
       poolState.requestByName[
@@ -156,27 +173,40 @@ export const fetchOrders = createAsyncThunk(
 
 export const createOrder = createAsyncThunk(
   'app/createOrder',
-  async ({ provider }: { provider: providers.Web3Provider }, thunk) => {
+  async (
+    {
+      provider,
+      orderKey,
+    }: { provider: providers.Web3Provider; orderKey: string },
+    thunk
+  ) => {
     const state = thunk.getState() as RootState
-    const { chainId } = state.appSlice
+    const { chainId, userAddress } = state.appSlice
+    const orderView = state.appSlice[chainId].orderView[orderKey]
     const verifyingAddress = config[chainId].zeroXAddress
     const signer = provider.getSigner()
+    const expiry = (
+      Date.now() / 1000 +
+      Number(orderView.expiryInSeconds)
+    ).toString()
+
     signer._signTypedData(
       zeroXDomain({ chainId, verifyingContract: verifyingAddress }),
       zeroXTypes,
       create0xMessage({
-        expiry: '',
-        feeRecipient: '',
-        maker: '',
-        makerAmount: '',
-        makerToken: '',
-        pool: '',
-        salt: '',
-        sender: '',
-        taker: '',
-        takerAmount: '',
-        takerToken: '',
-        takerTokenFeeAmount: '',
+        expiry,
+        feeRecipient: NULL_ADDRESS,
+        maker: userAddress,
+        makerAmount: orderView.makerAmount, // amount sold
+        makerToken: orderView.makerToken, // token sold
+        // 0x pools are deprecated - this is the null value for 0x pools
+        pool: '0x0000000000000000000000000000000000000000000000000000000000000000',
+        salt: Date.now().toString(),
+        sender: NULL_ADDRESS,
+        taker: NULL_ADDRESS,
+        takerAmount: orderView.takerAmount, // buyer amount
+        takerToken: orderView.takerToken, // buyer token
+        takerTokenFeeAmount: BigNumber.from(0).toString(),
       })
     )
 
@@ -459,6 +489,39 @@ export const appSlice = createSlice({
         ...data,
       }
     },
+    setMakerAmount: (
+      state,
+      action: PayloadAction<{ value: string; orderViewKey: string }>
+    ) => {
+      const { orderViewKey, value } = action.payload
+      const appState = state[state.chainId]
+      const orderView = appState.orderView[orderViewKey]
+      orderView.makerAmount = value
+      const result = parseFloat(value) / parseFloat(orderView.takerAmount)
+      orderView.price = (isNaN(result) ? '0' : result).toString()
+    },
+    setTakerAmount: (
+      state,
+      action: PayloadAction<{ value: string; orderViewKey: string }>
+    ) => {
+      const { orderViewKey, value } = action.payload
+      const appState = state[state.chainId]
+      const orderView = appState.orderView[orderViewKey]
+      orderView.takerAmount = value
+      const result = parseFloat(orderView.makerAmount) / parseFloat(value)
+      orderView.price = (isNaN(result) ? '0' : result).toString()
+    },
+    setOrderPrice: (
+      state,
+      action: PayloadAction<{ value: string; orderViewKey: string }>
+    ) => {
+      const { orderViewKey, value } = action.payload
+      const appState = state[state.chainId]
+      const orderView = appState.orderView[orderViewKey]
+      const result = parseFloat(orderView.takerAmount) * parseFloat(value)
+      orderView.makerAmount = (isNaN(result) ? '0' : result).toString()
+      orderView.price = value
+    },
   },
   extraReducers: (builder) => {
     buildThunkState(fetchUnderlyingPrice, builder, {
@@ -633,7 +696,7 @@ export const selectOrder = (
 export const selectOrderView =
   (key: string) =>
   (state: RootState): OrderView =>
-    selectAppStateByChain(state).orderView[key] || { price: '0', amount: '0' }
+    selectAppStateByChain(state).orderView[key] || defaultOrderViewState
 
 export const selectExpectedRate = (
   state: RootState,
@@ -781,5 +844,12 @@ export const selectUnderlyingPrice =
   (state: RootState): string | undefined =>
     selectAppStateByChain(state).underlyingPrice[asset]
 
-export const { setUserAddress, setChainId, setOrderView, addPools } =
-  appSlice.actions
+export const {
+  setUserAddress,
+  setChainId,
+  setOrderView,
+  addPools,
+  setMakerAmount,
+  setOrderPrice,
+  setTakerAmount,
+} = appSlice.actions

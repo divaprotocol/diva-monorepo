@@ -5,6 +5,7 @@ import { Box, Button, Stack, TextField, useTheme } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import {
   approveTransaction,
+  createOrder,
   fetchAllowance,
   fetchTokenInfo,
   selectAllowance,
@@ -15,7 +16,9 @@ import {
   selectTokenBalance,
   selectTokenInfo,
   selectUserAddress,
-  setOrderView,
+  setMakerAmount,
+  setOrderPrice,
+  setTakerAmount,
 } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
 import { SmallButton } from '../SmallButton'
@@ -45,10 +48,11 @@ export default function CreateOrder() {
   )
 
   const url = `${params.poolId}/${params.tokenType}`
-  const { price, amount } = useAppSelector(selectOrderView(url))
+  const { price, takerAmount, makerAmount } = useAppSelector(
+    selectOrderView(url)
+  )
   const makerToken = pool.collateralToken.id
-
-  const youPay = parseFloat(amount) * parseFloat(price)
+  const youPay = Number(makerAmount)
 
   const hasEnoughBalance = Number(collateralTokenBalance) > youPay
   const hasEnoughAllowance = Number(allowance0x) > youPay
@@ -56,13 +60,14 @@ export default function CreateOrder() {
   const isApprovedDisabled = isNaN(youPay) || youPay <= 0
   const canOrder = hasEnoughBalance && hasEnoughAllowance // should be enabled if we have allowance and balance for the amount
 
-  const onClickOrder = useCallback(() => {
-    /**
-     * 1. Create EIP712 struct
-     * 2. Sign struct into hash
-     */
-    // dispatch()
-  }, [])
+  const onClickCreateOrder = useCallback(() => {
+    dispatch(
+      createOrder({
+        provider,
+        orderKey: url,
+      })
+    )
+  }, [dispatch, provider])
 
   const onClickApprove = useCallback(() => {
     if (!isNaN(youPay)) {
@@ -78,7 +83,7 @@ export default function CreateOrder() {
   }, [chainId, dispatch, makerToken, provider, youPay])
 
   useEffect(() => {
-    if (userAddress != null) {
+    if (userAddress != null && provider != null) {
       dispatch(fetchTokenInfo({ provider, token }))
       dispatch(
         fetchAllowance({
@@ -94,129 +99,144 @@ export default function CreateOrder() {
   }, [chainId, dispatch, pool, provider, token, userAddress])
 
   const theme = useTheme()
+
   return (
-    <form>
-      <Box
+    <Box
+      sx={{
+        border: `1px solid ${theme.palette.grey[800]}`,
+        borderRadius: '10px',
+      }}
+    >
+      <Stack padding={3} paddingBottom={5} spacing={4}>
+        <Stack direction="row" justifyContent="space-between">
+          <Stack direction="row" spacing={2}>
+            <SmallButton active>Buy</SmallButton>
+            <SmallButton>Sell</SmallButton>
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <SmallButton>Fill order</SmallButton>
+            <SmallButton active>Create order</SmallButton>
+          </Stack>
+        </Stack>
+        <TextField
+          value={takerAmount}
+          autoComplete="true"
+          onChange={(e) => {
+            console.log('hello', e.target.value)
+            dispatch(
+              setTakerAmount({
+                orderViewKey: url,
+                value: e.target.value,
+              })
+            )
+          }}
+          name="amount"
+          label="You buy"
+          helperText={
+            balance != null &&
+            `You have ${balance} ${
+              isLong ? 'long' : 'short'
+            } tokens in your wallet`
+          }
+        />
+        <TextField
+          defaultValue={0}
+          name="price"
+          value={price}
+          InputProps={{
+            endAdornment: (
+              <Box sx={{ opacity: 0.7, fontSize: '0.8em', fontWeight: 'bold' }}>
+                {pool.collateralToken.symbol}
+              </Box>
+            ),
+          }}
+          onChange={(e) =>
+            dispatch(
+              setOrderPrice({
+                orderViewKey: url,
+                value: e.target.value,
+              })
+            )
+          }
+          label="Price per token"
+        />
+      </Stack>
+      <Stack
+        padding={3}
+        paddingTop={5}
+        spacing={4}
         sx={{
-          border: `1px solid ${theme.palette.grey[800]}`,
-          borderRadius: '10px',
+          borderTop: `1px solid ${theme.palette.grey[800]}`,
+          background:
+            'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
         }}
       >
-        <Stack padding={3} paddingBottom={5} spacing={4}>
-          <Stack direction="row" justifyContent="space-between">
-            <Stack direction="row" spacing={2}>
-              <SmallButton active>Buy</SmallButton>
-              <SmallButton>Sell</SmallButton>
-            </Stack>
-            <Stack direction="row" spacing={2}>
-              <SmallButton>Fill order</SmallButton>
-              <SmallButton active>Create order</SmallButton>
-            </Stack>
-          </Stack>
-          <TextField
-            defaultValue={amount}
-            value={amount}
-            autoComplete="true"
-            onChange={(e) => {
-              dispatch(
-                setOrderView({
-                  key: url,
-                  data: {
-                    amount: e.target.value,
-                  },
-                })
-              )
-            }}
-            name="amount"
-            label="You buy"
-            helperText={
-              balance != null &&
-              `You have ${balance} ${
-                isLong ? 'long' : 'short'
-              } tokens in your wallet`
-            }
-          />
-          <TextField
-            defaultValue={0}
-            name="price"
-            value={price}
-            onChange={(e) =>
-              dispatch(
-                setOrderView({
-                  key: url,
-                  data: {
-                    price: e.target.value,
-                  },
-                })
-              )
-            }
-            label="Price per token"
-          />
-        </Stack>
-        <Stack
-          padding={3}
-          paddingTop={5}
-          spacing={4}
-          sx={{
-            borderTop: `1px solid ${theme.palette.grey[800]}`,
-            background:
-              'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
+        <TextField
+          label="You pay"
+          name="you pay"
+          value={makerAmount}
+          type="text"
+          InputProps={{
+            endAdornment: (
+              <Box sx={{ opacity: 0.7, fontSize: '0.8em', fontWeight: 'bold' }}>
+                {pool.collateralToken.symbol}
+              </Box>
+            ),
           }}
-        >
-          <TextField
-            label="You pay"
-            disabled
-            value={youPay}
-            type="number"
-            helperText={
-              collateralTokenBalance != null &&
-              `Your have ${collateralTokenBalance} ${pool.collateralToken.symbol} in your wallet`
+          onChange={(e) =>
+            dispatch(
+              setMakerAmount({
+                orderViewKey: url,
+                value: e.target.value,
+              })
+            )
+          }
+          helperText={
+            collateralTokenBalance != null &&
+            `Your have ${collateralTokenBalance} ${pool.collateralToken.symbol} in your wallet`
+          }
+        />
+        <Stack direction="row" justifyContent="space-between">
+          <LoadingButton
+            size="large"
+            variant="contained"
+            loading={approvalStatus === 'pending'}
+            disabled={isApprovedDisabled}
+            onClick={onClickApprove}
+            sx={
+              !isApprovedDisabled
+                ? {
+                    background:
+                      'linear-gradient(103.17deg, #3393E0 -0.15%, #0059A2 61.59%)',
+                  }
+                : {}
             }
-          />
-          <Stack direction="row" justifyContent="space-between">
-            <LoadingButton
-              size="large"
-              variant="contained"
-              loading={approvalStatus === 'pending'}
-              disabled={isApprovedDisabled}
-              onClick={onClickApprove}
-              sx={
-                !isApprovedDisabled
-                  ? {
-                      background:
-                        'linear-gradient(103.17deg, #3393E0 -0.15%, #0059A2 61.59%)',
-                    }
-                  : {}
-              }
-            >
-              <Check sx={{ marginRight: '.2em', marginLeft: '-.3em' }} />
-              Approve
-            </LoadingButton>
-            <Button
-              variant="contained"
-              disabled={!canOrder}
-              size="large"
-              onClick={() => {
-                console.error('todo make order')
+          >
+            <Check sx={{ marginRight: '.2em', marginLeft: '-.3em' }} />
+            Approve
+          </LoadingButton>
+          <Button
+            variant="contained"
+            disabled={!canOrder}
+            size="large"
+            onClick={onClickCreateOrder}
+          >
+            <Add
+              sx={{
+                marginRight: '.2em',
+                marginBottom: '0.05em',
+                marginLeft: '-.3em',
               }}
-            >
-              <Add
-                sx={{
-                  marginRight: '.2em',
-                  marginBottom: '0.05em',
-                  marginLeft: '-.3em',
-                }}
-              />
-              Fill order
-            </Button>
-          </Stack>
-          <Stack direction="row" justifyContent="end">
-            <SmallButton>
-              <Tune /> Advanced Settings
-            </SmallButton>
-          </Stack>
+            />
+            Fill order
+          </Button>
         </Stack>
-      </Box>
-    </form>
+        <Stack direction="row" justifyContent="end">
+          <SmallButton>
+            <Tune /> Advanced Settings
+          </SmallButton>
+        </Stack>
+      </Stack>
+    </Box>
   )
 }

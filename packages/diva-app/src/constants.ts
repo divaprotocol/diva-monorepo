@@ -90,3 +90,5 @@ export const config: { [key: number]: SingleConfig } = {
 
 export const whitelistedPoolCreatorAddress =
   '0x47566c6c8f70e4f16aa3e7d8eed4a2bdb3f4925b'
+
+export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
