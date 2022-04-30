@@ -296,7 +296,12 @@ const SubmitButton = (props: any) => {
 
 const Payoff = (props: any) => {
   const intrinsicValue = useAppSelector((state) =>
-    selectIntrinsicValue(state, props.row.Payoff.id, props.row.finalValue)
+    selectIntrinsicValue(
+      state,
+      props.row.Payoff.id,
+      props.row.finalValue,
+      props.row.statusFinalReferenceValue
+    )
   )
   if (
     props.row.finalValue != '-' &&

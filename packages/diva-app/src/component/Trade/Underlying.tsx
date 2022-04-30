@@ -80,8 +80,19 @@ export default function Underlying() {
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
   }, [pool, dispatch])
 
+  const confirmed =
+    pool.statusFinalReferenceValue === 'Open'
+      ? Date.now() - Number(pool.expiryTime) * 1000 > 24 * 60 * 60 * 1000
+      : false
+
+  console.log('confirmed', confirmed)
   const intrinsicValue = useAppSelector((state) =>
-    selectIntrinsicValue(state, params.poolId)
+    selectIntrinsicValue(
+      state,
+      params.poolId,
+      confirmed ? pool?.inflection : pool?.finalReferenceValue,
+      confirmed ? 'Confirmed' : pool?.statusFinalReferenceValue
+    )
   )
   if (pool == null) {
     return <LoadingBox />
