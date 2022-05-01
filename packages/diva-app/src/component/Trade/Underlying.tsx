@@ -30,6 +30,7 @@ import {
 } from '../../Redux/appSlice'
 import { formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
+import { BigNumber } from 'ethers'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -89,7 +90,9 @@ export default function Underlying() {
     selectIntrinsicValue(
       state,
       params.poolId,
-      confirmed ? pool?.inflection : pool?.finalReferenceValue,
+      confirmed
+        ? formatEther(BigNumber.from(pool?.inflection))
+        : formatEther(BigNumber.from(pool?.finalReferenceValue)),
       confirmed ? 'Confirmed' : pool?.statusFinalReferenceValue
     )
   )
