@@ -16,12 +16,11 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import TableContainer from '@mui/material/TableContainer'
 import { formatUnits } from 'ethers/lib/utils'
 import { useState, useEffect } from 'react'
-import styled from 'styled-components'
 import { getOrderDetails, getUserOrders } from '../../DataService/OpenOrders'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import {
   selectChainId,
-  selectOtherPools,
+  selectPools,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
@@ -33,7 +32,7 @@ export function MyOrders() {
   const chainId = useAppSelector(selectChainId)
   const makerAccount = useAppSelector(selectUserAddress)
   const [dataOrders, setDataOrders] = useState([])
-  const pools = useAppSelector(selectOtherPools)
+  const pools = useAppSelector((state) => selectPools(state))
   const [search, setSearch] = useState('')
   const collateralTokens = pools.map((pool) => {
     return pool.collateralToken
