@@ -38,8 +38,6 @@ export const getOrderDetails = (orderHash: string, chainId) => {
 }
 
 export const getUserOrders = async (trader: string, chainId) => {
-  console.log('trader ' + config[chainId].allOrders + '?trader=' + trader)
-
   if (trader != 'undefined') {
     const res = axios
       .get(config[chainId].allOrders + '?trader=' + trader)
