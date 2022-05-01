@@ -59,7 +59,6 @@ export function MyOrders() {
       if (sellOrderCollateral.length > 0) {
         type = 'Sell'
         const decimals = sellOrderCollateral[0].decimals
-        console.log('decimals ' + decimals)
         const takerAmount = formatUnits(order.takerAmount, decimals)
         const makerAmount = formatUnits(order.makerAmount)
         const remainingTakerAmount = formatUnits(
@@ -255,22 +254,3 @@ export function MyOrders() {
     </Stack>
   )
 }
-
-/**
- * <DataGrid
-          className={classes.root}
-          rows={dataOrders}
-          pagination
-          columns={columns}
-          loading={false}
-          rowCount={3}
-          componentsProps={{
-            row: {
-              style: {
-                cursor: 'pointer',
-              },
-            },
-          }}
-        />
- * 
- */
