@@ -23,7 +23,7 @@ export function SideMenu() {
         <DataThresholdingOutlinedIcon fontSize="large" sx={{ mr: '0.3em' }} />
         My Positions
       </Button>
-      <Button fullWidth variant="text">
+      <Button component={Link} to="/dashboard/myorders" variant="text">
         <ShoppingCartCheckoutOutlinedIcon
           fontSize="large"
           sx={{ mr: '0.3em', ml: '-0.4em' }}
