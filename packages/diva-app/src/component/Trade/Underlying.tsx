@@ -228,13 +228,17 @@ export default function Underlying() {
                     <Typography
                       sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                     >
-                      {formatEther(intrinsicValue?.payoffPerLongToken)}
+                      {parseFloat(
+                        formatEther(intrinsicValue?.payoffPerLongToken)
+                      ).toFixed(2)}
                     </Typography>
                   ) : (
                     <Typography
                       sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                     >
-                      {formatEther(intrinsicValue?.payoffPerShortToken)}
+                      {parseFloat(
+                        formatEther(intrinsicValue?.payoffPerShortToken)
+                      ).toFixed(2)}
                     </Typography>
                   )
                 ) : (
