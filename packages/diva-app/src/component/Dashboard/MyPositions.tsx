@@ -299,8 +299,9 @@ const Payoff = (props: any) => {
     selectIntrinsicValue(
       state,
       props.row.Payoff.id,
-      props.row.finalValue,
-      props.row.statusFinalReferenceValue
+      props.row.finalValue != '-'
+        ? parseEther(props.row.finalValue).toString()
+        : '-'
     )
   )
   if (

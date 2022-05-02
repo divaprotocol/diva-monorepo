@@ -27,6 +27,7 @@ import {
   selectMaxYield,
   selectPool,
   selectChainId,
+  selectPrice,
 } from '../../Redux/appSlice'
 import { formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
@@ -81,20 +82,24 @@ export default function Underlying() {
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
   }, [pool, dispatch])
 
+  // not open final value
+  // open if less
   const confirmed =
     pool.statusFinalReferenceValue === 'Open'
-      ? Date.now() - Number(pool.expiryTime) * 1000 > 24 * 60 * 60 * 1000
+      ? Date.now() - Number(pool.expiryTime) * 1000 >
+        6 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000
       : false
-
+  const usdPrice = useAppSelector((state) =>
+    selectPrice(state, pool?.referenceAsset)
+  )
+  const finalValue =
+    pool.statusFinalReferenceValue !== 'Open' && pool != null
+      ? pool?.finalReferenceValue
+      : confirmed
+      ? pool?.inflection
+      : usdPrice
   const intrinsicValue = useAppSelector((state) =>
-    selectIntrinsicValue(
-      state,
-      params.poolId,
-      confirmed
-        ? formatEther(BigNumber.from(pool?.inflection))
-        : formatEther(BigNumber.from(pool?.finalReferenceValue)),
-      confirmed ? 'Confirmed' : pool?.statusFinalReferenceValue
-    )
+    selectIntrinsicValue(state, params?.poolId, finalValue)
   )
   if (pool == null) {
     return <LoadingBox />
