@@ -312,15 +312,23 @@ const Payoff = (props: any) => {
     if (props.row.Id.toLowerCase().startsWith('s')) {
       return (
         <div>
-          {parseFloat(formatEther(intrinsicValue.payoffPerShortToken)) *
-            props.row.Balance}
+          {parseFloat(
+            formatUnits(
+              intrinsicValue.payoffPerShortToken,
+              props.row.Payoff.collateralToken.decimals
+            )
+          ) * props.row.Balance}
         </div>
       )
     } else {
       return (
         <div>
-          {parseFloat(formatEther(intrinsicValue.payoffPerLongToken)) *
-            props.row.Balance}
+          {parseFloat(
+            formatUnits(
+              intrinsicValue.payoffPerLongToken,
+              props.row.Payoff.collateralToken.decimals
+            )
+          ) * props.row.Balance}
         </div>
       )
     }

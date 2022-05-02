@@ -29,9 +29,8 @@ import {
   selectChainId,
   selectPrice,
 } from '../../Redux/appSlice'
-import { formatEther, parseEther } from 'ethers/lib/utils'
+import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
-import { BigNumber } from 'ethers'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -117,7 +116,6 @@ export default function Underlying() {
     TokenSupply: 200,
     IsLong: isLong,
   }
-
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
   const handleChange = (event: any, newValue: any) => {
@@ -229,7 +227,10 @@ export default function Underlying() {
                       sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                     >
                       {parseFloat(
-                        formatEther(intrinsicValue?.payoffPerLongToken)
+                        formatUnits(
+                          intrinsicValue?.payoffPerLongToken,
+                          pool.collateralToken.decimals
+                        )
                       ).toFixed(2)}
                     </Typography>
                   ) : (
@@ -237,7 +238,10 @@ export default function Underlying() {
                       sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                     >
                       {parseFloat(
-                        formatEther(intrinsicValue?.payoffPerShortToken)
+                        formatUnits(
+                          intrinsicValue?.payoffPerShortToken,
+                          pool.collateralToken.decimals
+                        )
                       ).toFixed(2)}
                     </Typography>
                   )
