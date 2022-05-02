@@ -16,8 +16,11 @@ import {
   selectTokenBalance,
   selectTokenInfo,
   selectUserAddress,
+  setIsBuy,
+  setIsLimit,
   setMakerAmount,
   setOrderPrice,
+  setOrderView,
   setTakerAmount,
 } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
@@ -33,31 +36,33 @@ export default function CreateOrder() {
   const chainId = useAppSelector(selectChainId)
   const userAddress = useAppSelector(selectUserAddress)
   const approvalStatus = useAppSelector(
-    selectRequestStatus('app/approveDivaTransaction')
+    selectRequestStatus('app/approveTransaction')
   )
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
   const dispatch = useDispatch()
   const token = isLong ? pool.longToken.id : pool.shortToken.id
   const tokenInfo = useAppSelector(selectTokenInfo(token))
-  const balance = tokenInfo?.balance
+  const divaTokenBalance = tokenInfo?.balance
   const allowance0x = useAppSelector(
     selectAllowance(token, config[chainId].zeroXAddress)
   )
+
   const collateralTokenBalance = useAppSelector(
     selectTokenBalance(pool.collateralToken.id)
   )
 
   const url = `${params.poolId}/${params.tokenType}`
-  const { price, takerAmount, makerAmount } = useAppSelector(
+  const { price, takerAmount, makerAmount, isBuy, isLimit } = useAppSelector(
     selectOrderView(url)
   )
   const makerToken = pool.collateralToken.id
   const youPay = Number(makerAmount)
 
-  const hasEnoughBalance = Number(collateralTokenBalance) > youPay
-  const hasEnoughAllowance = Number(allowance0x) > youPay
+  const hasEnoughBalance =
+    Number(isBuy ? collateralTokenBalance : divaTokenBalance) > youPay
+  const hasEnoughAllowance = parseFloat(allowance0x) >= youPay
 
-  const isApprovedDisabled = isNaN(youPay) || youPay <= 0
+  const isApprovedDisabled = isNaN(youPay) || youPay <= 0 || !hasEnoughBalance
   const canOrder = hasEnoughBalance && hasEnoughAllowance // should be enabled if we have allowance and balance for the amount
 
   const onClickCreateOrder = useCallback(() => {
@@ -98,6 +103,20 @@ export default function CreateOrder() {
     }
   }, [chainId, dispatch, pool, provider, token, userAddress])
 
+  useEffect(() => {
+    if (token != null && pool.collateralToken.id != null) {
+      dispatch(
+        setOrderView({
+          data: {
+            makerToken: isBuy ? pool.collateralToken.id : token,
+            takerToken: isBuy ? token : pool.collateralToken.id,
+          },
+          key: url,
+        })
+      )
+    }
+  }, [token, pool.collateralToken, dispatch, isBuy, url])
+
   const theme = useTheme()
 
   return (
@@ -110,19 +129,46 @@ export default function CreateOrder() {
       <Stack padding={3} paddingBottom={5} spacing={4}>
         <Stack direction="row" justifyContent="space-between">
           <Stack direction="row" spacing={2}>
-            <SmallButton active>Buy</SmallButton>
-            <SmallButton>Sell</SmallButton>
+            <SmallButton
+              onClick={() => {
+                dispatch(setIsBuy({ orderViewKey: url, value: true }))
+              }}
+              active={isBuy}
+            >
+              Buy
+            </SmallButton>
+            <SmallButton
+              active={!isBuy}
+              onClick={() => {
+                dispatch(setIsBuy({ orderViewKey: url, value: false }))
+              }}
+            >
+              Sell
+            </SmallButton>
           </Stack>
           <Stack direction="row" spacing={2}>
-            <SmallButton>Fill order</SmallButton>
-            <SmallButton active>Create order</SmallButton>
+            <SmallButton
+              active={!isLimit}
+              onClick={() => {
+                dispatch(setIsLimit({ orderViewKey: url, value: false }))
+              }}
+            >
+              Fill order
+            </SmallButton>
+            <SmallButton
+              active={isLimit}
+              onClick={() => {
+                dispatch(setIsLimit({ orderViewKey: url, value: true }))
+              }}
+            >
+              Create order
+            </SmallButton>
           </Stack>
         </Stack>
         <TextField
           value={takerAmount}
           autoComplete="true"
           onChange={(e) => {
-            console.log('hello', e.target.value)
             dispatch(
               setTakerAmount({
                 orderViewKey: url,
@@ -131,11 +177,18 @@ export default function CreateOrder() {
             )
           }}
           name="amount"
-          label="You buy"
+          label={`You ${isBuy ? 'buy' : 'sell'}`}
+          InputProps={{
+            endAdornment: (
+              <Box sx={{ opacity: 0.7, fontSize: '0.8em', fontWeight: 'bold' }}>
+                {isLong ? 'LONG' : 'SHORT'}
+              </Box>
+            ),
+          }}
           helperText={
-            balance != null &&
-            `You have ${balance} ${
-              isLong ? 'long' : 'short'
+            divaTokenBalance != null &&
+            `You have ${divaTokenBalance} ${
+              isLong ? 'LONG' : 'SHORT'
             } tokens in your wallet`
           }
         />
@@ -143,6 +196,7 @@ export default function CreateOrder() {
           defaultValue={0}
           name="price"
           value={price}
+          disabled={!isLimit}
           InputProps={{
             endAdornment: (
               <Box sx={{ opacity: 0.7, fontSize: '0.8em', fontWeight: 'bold' }}>
@@ -172,8 +226,7 @@ export default function CreateOrder() {
         }}
       >
         <TextField
-          label="You pay"
-          name="you pay"
+          label={`You ${isBuy ? 'pay' : 'get'}`}
           value={makerAmount}
           type="text"
           InputProps={{
@@ -228,7 +281,7 @@ export default function CreateOrder() {
                 marginLeft: '-.3em',
               }}
             />
-            Fill order
+            {isLimit ? 'Create' : `Fill`} order
           </Button>
         </Stack>
         <Stack direction="row" justifyContent="end">

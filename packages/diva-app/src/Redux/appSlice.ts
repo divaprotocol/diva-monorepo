@@ -6,14 +6,20 @@ import {
   createSlice,
   PayloadAction,
 } from '@reduxjs/toolkit'
+import { getMessage } from 'eip-712'
 import {
   formatEther,
   formatUnits,
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { BigNumber, Contract, providers } from 'ethers'
-import { Pool, queryPool, queryPools } from '../lib/queries'
+import { BigNumber, Contract, providers, utils, Wallet } from 'ethers'
+import {
+  createOrderMutation,
+  Pool,
+  queryPool,
+  queryPools,
+} from '../lib/queries'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
@@ -23,9 +29,11 @@ import { get0xOpenOrders } from '../DataService/OpenOrders'
 import {
   config,
   NULL_ADDRESS,
+  orderBookEndpoint,
   whitelistedPoolCreatorAddress,
 } from '../constants'
 import { zeroXDomain, create0xMessage, zeroXTypes } from '../lib/zeroX'
+import { TypedDataUtils } from '../lib/signHash'
 
 /**
  * We track the state of thunks in redux
@@ -33,6 +41,8 @@ import { zeroXDomain, create0xMessage, zeroXTypes } from '../lib/zeroX'
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
 type OrderView = {
+  isBuy: boolean
+  isLimit: boolean
   takerAmount: string
   takerToken: string
   makerAmount: string
@@ -40,11 +50,15 @@ type OrderView = {
   price: string
   expiryInSeconds: string
 }
+type AllowanceState = {
+  tokenAddress: string
+  allowanceAddress: string
+  amount: string
+}
 
 type ChainState = {
   requestByName: Record<string, RequestState | undefined>
   pools: Pool[]
-  isBuy: boolean
   underlyingPrice: {
     [poolId: string]: string
   }
@@ -66,24 +80,22 @@ type ChainState = {
     }
   }
   allowance: {
-    [address: string]: {
-      tokenAddress: string
-      allowanceAddress: string
-      amount: string
-    }
+    [address: string]: AllowanceState
   }
   orderView: {
     [orderKey: string]: OrderView
   }
 }
 
-const defaultOrderViewState: OrderView = {
+const defaultOrderViewState = {
   price: '0',
   makerAmount: '0',
   takerAmount: '0',
   expiryInSeconds: '3600', // 1 hour default
   makerToken: '',
   takerToken: '',
+  isBuy: true,
+  isLimit: true,
 }
 
 type AppStateByChain = {
@@ -120,7 +132,6 @@ const buildThunkState = <T extends AsyncThunk<unknown, unknown, unknown>>(
 
 export const defaultAppState: ChainState = {
   requestByName: {},
-  isBuy: true,
   pools: [],
   underlyingPrice: {},
   orders: {},
@@ -184,16 +195,18 @@ export const createOrder = createAsyncThunk(
     const { chainId, userAddress } = state.appSlice
     const orderView = state.appSlice[chainId].orderView[orderKey]
     const verifyingAddress = config[chainId].zeroXAddress
-    const signer = provider.getSigner()
     const expiry = (
-      Date.now() / 1000 +
-      Number(orderView.expiryInSeconds)
+      Math.floor(Date.now() / 1000) + Number(orderView.expiryInSeconds)
     ).toString()
 
-    signer._signTypedData(
-      zeroXDomain({ chainId, verifyingContract: verifyingAddress }),
-      zeroXTypes,
-      create0xMessage({
+    try {
+      // Generate a random private key
+      const privateKey = utils.formatBytes32String(
+        Math.random().toString().substring(2)
+      )
+      console.log({ privateKey, orderView })
+      const signingKey = new utils.SigningKey(privateKey)
+      const order = {
         expiry,
         feeRecipient: NULL_ADDRESS,
         maker: userAddress,
@@ -202,24 +215,47 @@ export const createOrder = createAsyncThunk(
         // 0x pools are deprecated - this is the null value for 0x pools
         pool: '0x0000000000000000000000000000000000000000000000000000000000000000',
         salt: Date.now().toString(),
-        sender: NULL_ADDRESS,
+        sender: userAddress,
         taker: NULL_ADDRESS,
         takerAmount: orderView.takerAmount, // buyer amount
         takerToken: orderView.takerToken, // buyer token
         takerTokenFeeAmount: BigNumber.from(0).toString(),
+      }
+      const typedData = {
+        types: zeroXTypes,
+        primaryType: 'LimitOrder',
+        domain: zeroXDomain({ chainId, verifyingContract: verifyingAddress }),
+        message: create0xMessage(order),
+      }
+
+      const message = getMessage(typedData, true)
+      const { r, s, v } = signingKey.signDigest(message)
+      console.log({ r, s, v, message })
+      const mutation = createOrderMutation({
+        ...order,
+        chainId,
+        verifyingContract: verifyingAddress,
+        signature: {
+          r,
+          s,
+          v,
+          signatureType: 'EIP712',
+        },
       })
-    )
 
-    // const mutation = createOrderMutation({
-    //   chainId,
+      const res = await request<{ pool: Pool }>(
+        orderBookEndpoint,
+        mutation,
+        {},
+        { authorization: 'a' }
+      )
+      console.log(res)
 
-    // })
-    // request<{ pool: Pool }>(
-    //   orderBookEndpoint,
-    //   createOrderMutation({
-    //     chainId: state.poolSlice?.chainId,
-    //   }),
-    // ),
+      /* eslint-disable no-console */
+    } catch (err) {
+      console.error(err)
+    }
+
     // const sellOrders: any = await get0xOpenOrders(
     //   tokenAddress,
     //   pool.collateralToken.id
@@ -484,6 +520,7 @@ export const appSlice = createSlice({
       action: PayloadAction<{ key: string; data: Partial<OrderView> }>
     ) => {
       const { key, data } = action.payload
+      console.log('reduce set order view')
       state[state.chainId].orderView[key] = {
         ...state[state.chainId].orderView[key],
         ...data,
@@ -495,6 +532,9 @@ export const appSlice = createSlice({
     ) => {
       const { orderViewKey, value } = action.payload
       const appState = state[state.chainId]
+      if (appState.orderView[orderViewKey] == null) {
+        appState.orderView[orderViewKey] = defaultOrderViewState
+      }
       const orderView = appState.orderView[orderViewKey]
       orderView.makerAmount = value
       const result = parseFloat(value) / parseFloat(orderView.takerAmount)
@@ -506,6 +546,9 @@ export const appSlice = createSlice({
     ) => {
       const { orderViewKey, value } = action.payload
       const appState = state[state.chainId]
+      if (appState.orderView[orderViewKey] == null) {
+        appState.orderView[orderViewKey] = defaultOrderViewState
+      }
       const orderView = appState.orderView[orderViewKey]
       orderView.takerAmount = value
       const result = parseFloat(orderView.makerAmount) / parseFloat(value)
@@ -517,10 +560,31 @@ export const appSlice = createSlice({
     ) => {
       const { orderViewKey, value } = action.payload
       const appState = state[state.chainId]
+      if (appState.orderView[orderViewKey] == null) {
+        appState.orderView[orderViewKey] = defaultOrderViewState
+      }
       const orderView = appState.orderView[orderViewKey]
       const result = parseFloat(orderView.takerAmount) * parseFloat(value)
       orderView.makerAmount = (isNaN(result) ? '0' : result).toString()
       orderView.price = value
+    },
+    setIsBuy: (
+      state,
+      action: PayloadAction<{ value: boolean; orderViewKey: string }>
+    ) => {
+      const { orderViewKey, value } = action.payload
+      const appState = state[state.chainId]
+      const orderView = appState.orderView[orderViewKey]
+      orderView.isBuy = value
+    },
+    setIsLimit: (
+      state,
+      action: PayloadAction<{ value: boolean; orderViewKey: string }>
+    ) => {
+      const { orderViewKey, value } = action.payload
+      const appState = state[state.chainId]
+      const orderView = appState.orderView[orderViewKey]
+      orderView.isLimit = value
     },
   },
   extraReducers: (builder) => {
@@ -592,9 +656,6 @@ export const appSlice = createSlice({
 export const selectAppStateByChain = (state: RootState): ChainState => {
   return state.appSlice[state.appSlice.chainId]
 }
-
-export const selectIsBuy = (state: RootState) =>
-  selectAppStateByChain(state).isBuy
 
 export const selectPool = (
   state: RootState,
@@ -824,16 +885,19 @@ export const selectTokenBalance = (token) => (state: RootState) => {
 }
 
 export const selectAllowanceState =
-  (tokenAddress: string, allowanceAddress: string) => (state: RootState) => {
-    const allowance = selectAppStateByChain(state)?.allowance[allowanceAddress]
-    return allowance?.[tokenAddress]
+  (allowanceAddress: string) =>
+  (state: RootState): AllowanceState => {
+    return selectAppStateByChain(state)?.allowance[allowanceAddress]
   }
 
 export const selectAllowance =
   (tokenAddress: string, allowanceAddress: string) => (state: RootState) => {
-    const allowance = selectAppStateByChain(state)?.allowance[allowanceAddress]
-    const tokenInfo = selectTokenInfo(allowance.tokenAddress)(state)
-    return formatUnits(BigNumber.from(allowance.amount), tokenInfo.decimals)
+    const allowance = selectAllowanceState(allowanceAddress)(state)
+    if (allowance != null) {
+      const tokenInfo = selectTokenInfo(allowance.tokenAddress)(state)
+      return formatUnits(BigNumber.from(allowance.amount), tokenInfo.decimals)
+    }
+    return undefined
   }
 
 export const selectTokenInfo = (token) => (state: RootState) =>
@@ -852,4 +916,6 @@ export const {
   setMakerAmount,
   setOrderPrice,
   setTakerAmount,
+  setIsBuy,
+  setIsLimit,
 } = appSlice.actions

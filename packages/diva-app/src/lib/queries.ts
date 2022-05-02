@@ -372,7 +372,7 @@ type Signature = {
   signatureType: string
   r: string
   s: string
-  v: string
+  v: number
 }
 
 type Order = {
@@ -388,7 +388,7 @@ type Order = {
   sender: string
   expiry: string
   salt: string
-  chainId: string
+  chainId: number
   verifyingContract: string
   signature: Signature
 }
@@ -432,28 +432,30 @@ export const queryOrdersByMakerToken = (props: {
 `
 
 export const createOrderMutation = (order: Order) => gql`
-  createOrder(
-    chainId: "${order.chainId}",
-    expiry: "${order.expiry}",
-    feeRecipient: "${order.feeRecipient}",
-    maker: "${order.maker}",
-    makerAmount: "${order.makerAmount}",
-    makerToken: "${order.makerToken}",
-    pool: "${order.pool}",
-    salt: "${order.salt}",
-    sender: "${order.sender}",
-    signature: {
-      r: "${order.signature.r}",
-      s: "${order.signature.s}",
-      v: "${order.signature.v}",
-      signatureType: "${order.signature.signatureType}",
-    },
-    taker: "${order.taker}",
-    takerAmount: "${order.takerAmount}",
-    takerToken: "${order.takerToken}",
-    takerTokenFeeAmount: "${order.takerTokenFeeAmount}",
-    verifyingContract: "${order.verifyingContract}"
-  ) {
-    id
+  mutation CreateOrder {
+    createOrder(
+      chainId: ${order.chainId},
+      expiry: "${order.expiry}",
+      feeRecipient: "${order.feeRecipient}",
+      maker: "${order.maker}",
+      makerAmount: "${order.makerAmount}",
+      makerToken: "${order.makerToken}",
+      pool: "${order.pool}",
+      salt: "${order.salt}",
+      sender: "${order.sender}",
+      signature: {
+        r: "${order.signature.r}",
+        s: "${order.signature.s}",
+        v: "${order.signature.v}",
+        signatureType: "${order.signature.signatureType}",
+      },
+      taker: "${order.taker}",
+      takerAmount: "${order.takerAmount}",
+      takerToken: "${order.takerToken}",
+      takerTokenFeeAmount: "${order.takerTokenFeeAmount}",
+      verifyingContract: "${order.verifyingContract}"
+    ) {
+      id
+    }
   }
 `

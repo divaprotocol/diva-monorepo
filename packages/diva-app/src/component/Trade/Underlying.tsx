@@ -22,11 +22,11 @@ import {
   fetchPool,
   fetchUnderlyingPrice,
   selectIntrinsicValue,
-  selectIsBuy,
   selectMaxPayout,
   selectMaxYield,
   selectPool,
   selectChainId,
+  selectOrderView,
 } from '../../Redux/appSlice'
 import { formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
@@ -56,7 +56,6 @@ export default function Underlying() {
   const breakEven = useAppSelector((state) =>
     selectBreakEven(state, params.poolId, isLong)
   )
-  const isBuy = useAppSelector((state) => selectIsBuy(state))
   const breakEvenOptionPrice = 0
   const chainId = useAppSelector(selectChainId)
   const chainContractAddress =
@@ -90,6 +89,9 @@ export default function Underlying() {
         ? formatEther(intrinsicValue?.payoffPerLongToken)
         : formatEther(intrinsicValue?.payoffPerShortToken)
       : 'n/a'
+
+  const url = `${params.poolId}/${params.tokenType}`
+  const { isBuy } = useAppSelector(selectOrderView(url))
 
   if (pool == null) {
     return <LoadingBox />

@@ -3,18 +3,18 @@ import { Typography, useTheme } from '@mui/material'
 
 type Props = React.PropsWithChildren<{
   active?: boolean
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
 }>
 
-export const SmallButton = (props: Props) => {
+export const SmallButton = ({ active, children, onClick }: Props) => {
   const theme = useTheme()
 
   return (
     <Typography
       component="button"
+      onClick={onClick}
       sx={{
-        color: props.active
-          ? theme.palette.text.secondary
-          : theme.palette.grey[500],
+        color: active ? theme.palette.text.secondary : theme.palette.grey[500],
         display: 'flex',
         alignItems: 'center',
         cursor: 'pointer',
@@ -33,7 +33,7 @@ export const SmallButton = (props: Props) => {
         },
       }}
     >
-      {props.children}
+      {children}
     </Typography>
   )
 }

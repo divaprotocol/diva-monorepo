@@ -71,6 +71,15 @@ export const ConnectionProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const setEthereumProvider = () => {
+    detectEthereumProvider().then((provider: MetamaskProvider) =>
+      setState((_state) => ({
+        ..._state,
+        provider: new providers.Web3Provider(provider),
+      }))
+    )
+  }
+
   useEffect(() => {
     if (!ethereum?.isMetaMask) {
       setState((_state) => ({
@@ -92,6 +101,7 @@ export const ConnectionProvider = ({ children }) => {
         ..._state,
         chainId: BigNumber.from(ethereum.chainId).toNumber(),
       }))
+      setEthereumProvider()
     })
 
     ethereum.on('connect', (connectInfo) => {
@@ -106,14 +116,8 @@ export const ConnectionProvider = ({ children }) => {
       setState((_state) => ({ ..._state, isConnected: ethereum.isConnected() }))
     })
 
-    detectEthereumProvider().then((provider: MetamaskProvider) =>
-      setState((_state) => ({
-        ..._state,
-        provider: new providers.Web3Provider(provider),
-      }))
-    )
+    setEthereumProvider()
 
-    // connect()
     if (connected) connect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
