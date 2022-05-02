@@ -29,7 +29,7 @@ import {
   selectChainId,
   selectPrice,
 } from '../../Redux/appSlice'
-import { formatEther } from 'ethers/lib/utils'
+import { formatEther, parseEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
 import { BigNumber } from 'ethers'
 
@@ -92,12 +92,15 @@ export default function Underlying() {
   const usdPrice = useAppSelector((state) =>
     selectPrice(state, pool?.referenceAsset)
   )
+
   const finalValue =
     pool.statusFinalReferenceValue !== 'Open' && pool != null
       ? pool?.finalReferenceValue
       : confirmed
       ? pool?.inflection
-      : usdPrice
+      : usdPrice == null
+      ? '-'
+      : formatEther(usdPrice).toString()
   const intrinsicValue = useAppSelector((state) =>
     selectIntrinsicValue(state, params?.poolId, finalValue)
   )
@@ -220,17 +223,25 @@ export default function Underlying() {
                 <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
                   Intrinsic value per token
                 </Typography>
-                {isLong ? (
-                  <Typography
-                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    {formatEther(intrinsicValue?.payoffPerLongToken)}
-                  </Typography>
+                {intrinsicValue != '-' ? (
+                  isLong ? (
+                    <Typography
+                      sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                    >
+                      {formatEther(intrinsicValue?.payoffPerLongToken)}
+                    </Typography>
+                  ) : (
+                    <Typography
+                      sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                    >
+                      {formatEther(intrinsicValue?.payoffPerShortToken)}
+                    </Typography>
+                  )
                 ) : (
                   <Typography
                     sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                   >
-                    {formatEther(intrinsicValue?.payoffPerShortToken)}
+                    n/a
                   </Typography>
                 )}
               </Stack>
