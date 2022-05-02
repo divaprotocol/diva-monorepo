@@ -92,21 +92,20 @@ export default function Markets() {
       expiryTime.getMinutes() + 2 * 24 * 60 + 5
     )
     let status = val.statusFinalReferenceValue
-    if (Date.now() > fallbackPeriod) {
-      status = 'Fallback'
-    }
-    if (
-      val.statusFinalReferenceValue === 'Open' &&
-      Date.now() > unchallengedPeriod
-    ) {
-      status = 'Confirmed*'
-    } else if (
-      val.statusFinalReferenceValue === 'Challenged' &&
-      Date.now() > challengedPeriod
-    ) {
-      status = 'Confirmed*'
-    } else {
-      status = val.statusFinalReferenceValue
+
+    if (val.statusFinalReferenceValue === 'Open') {
+      if (Date.now() > fallbackPeriod && Date.now() < unchallengedPeriod) {
+        status = 'Fallback'
+      } else if (Date.now() > unchallengedPeriod) {
+        status = 'Confirmed*'
+      } else if (
+        val.statusFinalReferenceValue === 'Challenged' &&
+        Date.now() > challengedPeriod
+      ) {
+        status = 'Confirmed*'
+      } else {
+        status = val.statusFinalReferenceValue
+      }
     }
     const shared = {
       Icon: val.referenceAsset,

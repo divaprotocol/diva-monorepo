@@ -451,13 +451,13 @@ export function MyPositions() {
     ).setMinutes(expiryTime.getMinutes() + 2 * 24 * 60 + 5)
     let finalValue = '-'
     let status = val.statusFinalReferenceValue
-    if (Date.now() > fallbackPeriod) {
-      status = 'Fallback'
-    }
+
     if (now.getTime() < expiryTime.getTime()) {
       finalValue = '-'
     } else if (val.statusFinalReferenceValue === 'Open') {
-      if (now.getTime() > unchallengedPeriod) {
+      if (Date.now() > fallbackPeriod && Date.now() < unchallengedPeriod) {
+        status = 'Fallback'
+      } else if (now.getTime() > unchallengedPeriod) {
         finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
         status = 'Confirmed*'
       } else if (
