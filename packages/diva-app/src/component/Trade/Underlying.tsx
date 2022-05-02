@@ -100,7 +100,7 @@ export default function Underlying() {
       ? pool?.inflection
       : usdPrice == null
       ? '-'
-      : formatEther(usdPrice).toString()
+      : parseEther(usdPrice).toString()
   const intrinsicValue = useAppSelector((state) =>
     selectIntrinsicValue(state, params?.poolId, finalValue)
   )
