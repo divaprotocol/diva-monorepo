@@ -13,7 +13,7 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { BigNumber, Contract, providers, utils, Wallet } from 'ethers'
+import { BigNumber, Contract, providers, utils } from 'ethers'
 import {
   createOrderMutation,
   Pool,
@@ -33,7 +33,6 @@ import {
   whitelistedPoolCreatorAddress,
 } from '../constants'
 import { zeroXDomain, create0xMessage, zeroXTypes } from '../lib/zeroX'
-import { TypedDataUtils } from '../lib/signHash'
 
 /**
  * We track the state of thunks in redux
