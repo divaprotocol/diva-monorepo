@@ -31,7 +31,7 @@ class DivaStack extends TerraformStack {
 
     const table = new DynamodbTable(this, id("OrderbookTable"), {
       name: id("Orderbook0Table"),
-      readCapacity: 1,
+      readCapacity: 10,
       writeCapacity: 1,
       hashKey: "makerToken",
       rangeKey: "id",
@@ -44,6 +44,32 @@ class DivaStack extends TerraformStack {
         {
           name: "id",
           type: "S",
+        },
+        {
+          name: "takerToken",
+          type: "S",
+        },
+        {
+          name: "maker",
+          type: "S",
+        },
+      ],
+      globalSecondaryIndex: [
+        {
+          name: "OrderBookIndex",
+          hashKey: "makerToken",
+          rangeKey: "takerToken",
+          projectionType: "ALL",
+          writeCapacity: 1,
+          readCapacity: 10,
+        },
+        {
+          name: "MakerIndex",
+          hashKey: "maker",
+          rangeKey: "makerToken",
+          projectionType: "ALL",
+          writeCapacity: 1,
+          readCapacity: 10,
         },
       ],
       tags: tags({}),
@@ -191,6 +217,7 @@ class DivaStack extends TerraformStack {
       type Query {
         order(id: ID!): Order
         ordersByMakerToken(makerToken: String, limit: Int, nextToken: String): PaginatedOrders
+        ordersByTokens(makerToken: String, takerToken: String, limit: Int, nextToken: String): PaginatedOrders
       }
       `,
       tags: tags({}),
@@ -256,6 +283,32 @@ class DivaStack extends TerraformStack {
       `,
     });
 
+    new AppsyncResolver(this, id("GetOrdersByTokens"), {
+      apiId: api.id,
+      field: "ordersByTokens",
+      type: "Query",
+      dataSource: dataSource.name,
+      requestTemplate: `{
+        "version" : "2017-02-28",
+        "index": "OrderBookIndex",
+        "operation" : "Query"
+        #if($ctx.args.limit)
+          ,"limit": $util.toJson($ctx.args.limit)
+        #end
+        #if($ctx.args.nextToken)
+          ,"nextToken": $util.toJson($ctx.args.nextToken)
+        #end
+        ,"query" : {
+          "expression": "makerToken = :makerToken AND takerToken = :takerToken",
+            "expressionValues" : {
+              ":makerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.makerToken),
+              ":takerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.takerToken)
+            }
+          }
+      }`,
+      responseTemplate: `$util.toJson($ctx.result)`,
+    });
+
     new AppsyncResolver(this, id("GetOrdersByMakerToken"), {
       apiId: api.id,
       field: "ordersByMakerToken",
@@ -279,6 +332,7 @@ class DivaStack extends TerraformStack {
     }`,
       responseTemplate: `$util.toJson($ctx.result)`,
     });
+
 
     new AppsyncResolver(this, id("OrderbookAppsyncResolverCreateOrder"), {
       apiId: api.id,
@@ -307,7 +361,9 @@ class DivaStack extends TerraformStack {
             ],
             "Effect": "Allow",
             "Resource": [
-              "${table.arn}"
+              "${table.arn}",
+              "${table.arn}/index/OrderBookIndex",
+              "${table.arn}/index/MakerIndex"
             ]
           }
         ]

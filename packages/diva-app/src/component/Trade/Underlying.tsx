@@ -11,7 +11,6 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import React, { useEffect } from 'react'
 import { Liquidity } from '../Liquidity/Liquidity'
-import OrdersPanel from './OrdersPanel'
 import Typography from '@mui/material/Typography'
 import { useAppSelector } from '../../Redux/hooks'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -30,6 +29,7 @@ import {
 } from '../../Redux/appSlice'
 import { formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
+import { OrderView } from './Orders'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -143,11 +143,7 @@ export default function Underlying() {
               </Paper>
               <Paper>
                 <LeftCompFlexContainer>
-                  <OrdersPanel
-                    option={pool}
-                    tokenAddress={tokenAddress}
-                    exchangeProxy={exchangeProxy}
-                  />
+                  <OrderView />
                 </LeftCompFlexContainer>
               </Paper>
             </Stack>

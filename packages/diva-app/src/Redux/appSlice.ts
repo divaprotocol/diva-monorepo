@@ -16,7 +16,9 @@ import {
 import { BigNumber, Contract, providers, utils } from 'ethers'
 import {
   createOrderMutation,
+  Order,
   Pool,
+  queryOrdersByTokens,
   queryPool,
   queryPools,
 } from '../lib/queries'
@@ -25,7 +27,6 @@ import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
 import { RootState } from './Store'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { get0xOpenOrders } from '../DataService/OpenOrders'
 import {
   config,
   NULL_ADDRESS,
@@ -33,6 +34,7 @@ import {
   whitelistedPoolCreatorAddress,
 } from '../constants'
 import { zeroXDomain, create0xMessage, zeroXTypes } from '../lib/zeroX'
+import { ActionTypes } from '@mui/base'
 
 /**
  * We track the state of thunks in redux
@@ -62,14 +64,8 @@ type ChainState = {
     [poolId: string]: string
   }
   orders: {
-    [poolId: string]: {
-      long: {
-        buy: any[]
-      }
-      short: {
-        sell: any[]
-        buy: any[]
-      }
+    [makerToken: string]: {
+      [takerToken: string]: Order[]
     }
   }
   tokens: {
@@ -149,47 +145,38 @@ export const initialState: AppStateByChain = {
 }
 
 export const fetchOrders = createAsyncThunk(
-  'app/orders',
-  async ({ pool, isLong }: { pool: Pool; isLong: boolean }, store) => {
-    const tokenAddress = pool[isLong ? 'longToken' : 'shortToken'].id
-    const state = store.getState() as RootState
+  'app/fetchOrders',
+  async ({
+    makerToken,
+    takerToken,
+  }: {
+    makerToken: string
+    takerToken: string
+  }) => {
+    const query = queryOrdersByTokens({
+      makerToken,
+      takerToken,
+    })
 
-    if (state.appSlice.chainId == null) {
-      console.warn('fetchOrders was called even though chainId is undefined')
-
-      return {
-        buyOrders: [],
-        sellOrders: [],
+    console.log('fetch orders', { makerToken, takerToken })
+    const {
+      ordersByTokens: { items: orders },
+    } = await request<{
+      ordersByTokens: {
+        items: Order[]
       }
-    }
-
-    const sellOrders: any = await get0xOpenOrders(
-      tokenAddress,
-      pool.collateralToken.id,
-      Number(config[state.appSlice.chainId])
-    )
-    const buyOrders: any = await get0xOpenOrders(
-      pool.collateralToken.id,
-      tokenAddress,
-      Number(config[state.appSlice.chainId])
-    )
-
+    }>(orderBookEndpoint, query, {}, { authorization: 'a' })
     return {
-      buyOrders,
-      sellOrders,
+      orders,
+      makerToken,
+      takerToken,
     }
   }
 )
 
 export const createOrder = createAsyncThunk(
   'app/createOrder',
-  async (
-    {
-      provider,
-      orderKey,
-    }: { provider: providers.Web3Provider; orderKey: string },
-    thunk
-  ) => {
+  async (orderKey: string, thunk) => {
     const state = thunk.getState() as RootState
     const { chainId, userAddress } = state.appSlice
     const orderView = state.appSlice[chainId].orderView[orderKey]
@@ -203,21 +190,20 @@ export const createOrder = createAsyncThunk(
       const privateKey = utils.formatBytes32String(
         Math.random().toString().substring(2)
       )
-      console.log({ privateKey, orderView })
       const signingKey = new utils.SigningKey(privateKey)
       const order = {
         expiry,
-        feeRecipient: NULL_ADDRESS,
         maker: userAddress,
         makerAmount: orderView.makerAmount, // amount sold
         makerToken: orderView.makerToken, // token sold
         // 0x pools are deprecated - this is the null value for 0x pools
         pool: '0x0000000000000000000000000000000000000000000000000000000000000000',
         salt: Date.now().toString(),
-        sender: userAddress,
-        taker: NULL_ADDRESS,
-        takerAmount: orderView.takerAmount, // buyer amount
-        takerToken: orderView.takerToken, // buyer token
+        sender: NULL_ADDRESS, // If set, only this address can directly call fillLimitOrder()
+        taker: NULL_ADDRESS, // If set, only this address can fill this order.
+        takerAmount: orderView.takerAmount,
+        takerToken: orderView.takerToken,
+        feeRecipient: NULL_ADDRESS,
         takerTokenFeeAmount: BigNumber.from(0).toString(),
       }
       const typedData = {
@@ -242,31 +228,15 @@ export const createOrder = createAsyncThunk(
         },
       })
 
-      const res = await request<{ pool: Pool }>(
+      await request<{ pool: Pool }>(
         orderBookEndpoint,
         mutation,
         {},
         { authorization: 'a' }
       )
-      console.log(res)
-
-      /* eslint-disable no-console */
     } catch (err) {
       console.error(err)
     }
-
-    // const sellOrders: any = await get0xOpenOrders(
-    //   tokenAddress,
-    //   pool.collateralToken.id
-    // )
-    // const buyOrders: any = await get0xOpenOrders(
-    //   pool.collateralToken.id,
-    //   tokenAddress
-    // )
-    // return {
-    //   buyOrders,
-    //   sellOrders,
-    // }
   }
 )
 
@@ -641,12 +611,25 @@ export const appSlice = createSlice({
 
     buildThunkState(fetchOrders, builder, {
       fulfilled: (state, action) => {
-        const poolState = state[state?.chainId]
-        const orders = poolState.orders[action.meta.arg.pool.id]
-        poolState.orders[action.meta.arg.pool.id] = {
-          ...orders,
-          [action.meta.arg.isLong ? 'long' : 'short']: action.payload,
+        const appState = state[state.chainId]
+        console.log('fulfilling fetchOrders', { action })
+        if (appState.orders[action.payload.makerToken] == null) {
+          appState.orders[action.payload.makerToken] = {}
         }
+
+        const orders =
+          appState.orders[action.payload.makerToken]?.[
+            action.payload.takerToken
+          ] || []
+        const newOrders = action.payload.orders || []
+        const newOrderIds = newOrders.map((order) => order.id)
+
+        appState.orders[action.payload.makerToken][action.payload.takerToken] =
+          [
+            ...(orders.filter((order) => !newOrderIds.includes(order.id)) ||
+              []),
+            ...newOrders,
+          ]
       },
     })
   },
@@ -906,6 +889,10 @@ export const selectUnderlyingPrice =
   (asset: string) =>
   (state: RootState): string | undefined =>
     selectAppStateByChain(state).underlyingPrice[asset]
+
+export const selectOrdersByTokens =
+  (makerToken: string, takerToken: string) => (state: RootState) =>
+    selectAppStateByChain(state).orders[makerToken]?.[takerToken] || undefined
 
 export const {
   setUserAddress,

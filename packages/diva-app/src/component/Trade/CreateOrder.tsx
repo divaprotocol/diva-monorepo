@@ -66,13 +66,8 @@ export default function CreateOrder() {
   const canOrder = hasEnoughBalance && hasEnoughAllowance // should be enabled if we have allowance and balance for the amount
 
   const onClickCreateOrder = useCallback(() => {
-    dispatch(
-      createOrder({
-        provider,
-        orderKey: url,
-      })
-    )
-  }, [dispatch, provider])
+    dispatch(createOrder(url))
+  }, [dispatch, url])
 
   const onClickApprove = useCallback(() => {
     if (!isNaN(youPay)) {
