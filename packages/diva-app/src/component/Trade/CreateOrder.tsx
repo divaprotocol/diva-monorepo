@@ -148,7 +148,7 @@ export default function CreateOrder() {
                 dispatch(setIsLimit({ orderViewKey: url, value: false }))
               }}
             >
-              Fill order
+              Fill
             </SmallButton>
             <SmallButton
               active={isLimit}
@@ -156,7 +156,7 @@ export default function CreateOrder() {
                 dispatch(setIsLimit({ orderViewKey: url, value: true }))
               }}
             >
-              Create order
+              Create
             </SmallButton>
           </Stack>
         </Stack>

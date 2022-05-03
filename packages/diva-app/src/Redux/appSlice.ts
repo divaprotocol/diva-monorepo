@@ -184,6 +184,7 @@ export const createOrder = createAsyncThunk(
     const expiry = (
       Math.floor(Date.now() / 1000) + Number(orderView.expiryInSeconds)
     ).toString()
+    console.log({ expiry })
 
     try {
       // Generate a random private key
@@ -191,6 +192,7 @@ export const createOrder = createAsyncThunk(
         Math.random().toString().substring(2)
       )
       const signingKey = new utils.SigningKey(privateKey)
+      console.log(orderView)
       const order = {
         expiry,
         maker: userAddress,
@@ -212,6 +214,7 @@ export const createOrder = createAsyncThunk(
         domain: zeroXDomain({ chainId, verifyingContract: verifyingAddress }),
         message: create0xMessage(order),
       }
+      console.log(typedData)
 
       const message = getMessage(typedData, true)
       const { r, s, v } = signingKey.signDigest(message)
@@ -481,16 +484,17 @@ export const appSlice = createSlice({
     setUserAddress: (state, action: PayloadAction<string>) => {
       state.userAddress = action.payload
     },
-    addPools: (state: AppStateByChain, action: PayloadAction<Pool[]>) => {
-      reducePools(state, action.payload)
-    },
     setOrderView: (
       state,
       action: PayloadAction<{ key: string; data: Partial<OrderView> }>
     ) => {
       const { key, data } = action.payload
-      console.log('reduce set order view')
-      state[state.chainId].orderView[key] = {
+      console.log('reduce set order view', data)
+      const appState = state[state.chainId]
+      if (appState.orderView[key] == null) {
+        appState.orderView[key] = defaultOrderViewState
+      }
+      appState.orderView[key] = {
         ...state[state.chainId].orderView[key],
         ...data,
       }
@@ -543,6 +547,9 @@ export const appSlice = createSlice({
     ) => {
       const { orderViewKey, value } = action.payload
       const appState = state[state.chainId]
+      if (appState.orderView[orderViewKey] == null) {
+        appState.orderView[orderViewKey] = defaultOrderViewState
+      }
       const orderView = appState.orderView[orderViewKey]
       orderView.isBuy = value
     },
@@ -552,6 +559,9 @@ export const appSlice = createSlice({
     ) => {
       const { orderViewKey, value } = action.payload
       const appState = state[state.chainId]
+      if (appState.orderView[orderViewKey] == null) {
+        appState.orderView[orderViewKey] = defaultOrderViewState
+      }
       const orderView = appState.orderView[orderViewKey]
       orderView.isLimit = value
     },
@@ -595,6 +605,12 @@ export const appSlice = createSlice({
     buildThunkState(fetchPool, builder, {
       fulfilled: (state, action) => {
         reducePools(state, [action.payload], state.chainId)
+      },
+    })
+
+    buildThunkState(fetchPools, builder, {
+      fulfilled: (state, action) => {
+        reducePools(state, action.payload.pools, state.chainId)
       },
     })
 
@@ -892,13 +908,12 @@ export const selectUnderlyingPrice =
 
 export const selectOrdersByTokens =
   (makerToken: string, takerToken: string) => (state: RootState) =>
-    selectAppStateByChain(state).orders[makerToken]?.[takerToken] || undefined
+    selectAppStateByChain(state).orders[makerToken]?.[takerToken] || []
 
 export const {
   setUserAddress,
   setChainId,
   setOrderView,
-  addPools,
   setMakerAmount,
   setOrderPrice,
   setTakerAmount,
