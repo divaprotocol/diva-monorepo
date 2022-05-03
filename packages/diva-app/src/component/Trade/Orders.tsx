@@ -29,9 +29,6 @@ const Orders = ({
 
   useEffect(() => {
     if (pool != null) {
-      /**
-       * fetch buy orders
-       */
       dispatch(
         fetchOrders({
           takerToken,
