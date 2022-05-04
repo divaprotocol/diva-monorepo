@@ -103,8 +103,8 @@ export function DefineAdvanced({
               error={formik.errors.tokenSupply != null}
               label="Position Token Supply"
               value={tokenSupply}
+              disabled
               type="number"
-              onChange={formik.handleChange}
               inputProps={{ readOnly: true }}
             />
             {formik.errors.tokenSupply != null && (
