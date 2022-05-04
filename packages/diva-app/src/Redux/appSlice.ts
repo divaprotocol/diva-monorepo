@@ -770,7 +770,7 @@ export const selectExpectedRate = (
   }
 }
 
-export const selectToken = (state: RootState, poolId: string) => {
+export const selectCollateralToken = (state: RootState, poolId: string) => {
   const pool = selectPool(state, poolId)
   return pool?.collateralToken
 }
@@ -781,7 +781,7 @@ export const selectMaxYield = (
   isLong: boolean
 ) => {
   const _B = BigNumber
-  const token = selectToken(state, poolId)
+  const token = selectCollateralToken(state, poolId)
   const maxPayout = selectMaxPayout(state, poolId, isLong)
   const avgExpectedRate = selectExpectedRate(state, poolId, isLong)
   if (maxPayout == null || avgExpectedRate === undefined) return undefined
@@ -879,6 +879,7 @@ export const selectUserAddress = (state: RootState) =>
 export const selectTokenBalance = (token) => (state: RootState) => {
   const tokenInfo = selectAppStateByChain(state).tokens[token]
   if (tokenInfo == null) return null
+  console.log('select token balance', tokenInfo)
   return formatUnits(BigNumber.from(tokenInfo.balance), tokenInfo.decimals)
 }
 

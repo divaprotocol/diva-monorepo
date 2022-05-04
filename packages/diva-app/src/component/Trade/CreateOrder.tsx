@@ -40,9 +40,10 @@ export default function CreateOrder() {
   )
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
   const dispatch = useDispatch()
+  // token is either long or short token, dependening on the view
   const token = isLong ? pool.longToken.id : pool.shortToken.id
   const tokenInfo = useAppSelector(selectTokenInfo(token))
-  const divaTokenBalance = tokenInfo?.balance
+  const poolTokenBalance = tokenInfo?.balance
   const allowance0x = useAppSelector(
     selectAllowance(token, config[chainId].zeroXAddress)
   )
@@ -59,7 +60,7 @@ export default function CreateOrder() {
   const youPay = Number(makerAmount)
 
   const hasEnoughBalance =
-    Number(isBuy ? collateralTokenBalance : divaTokenBalance) > youPay
+    Number(isBuy ? collateralTokenBalance : poolTokenBalance) > youPay
   const hasEnoughAllowance = parseFloat(allowance0x) >= youPay
 
   const isApprovedDisabled = isNaN(youPay) || youPay <= 0 || !hasEnoughBalance
@@ -84,7 +85,7 @@ export default function CreateOrder() {
 
   useEffect(() => {
     if (userAddress != null && provider != null) {
-      dispatch(fetchTokenInfo({ provider, token }))
+      dispatch(fetchTokenInfo({ provider, token: token }))
       dispatch(
         fetchAllowance({
           provider,
@@ -181,8 +182,8 @@ export default function CreateOrder() {
             ),
           }}
           helperText={
-            divaTokenBalance != null &&
-            `You have ${divaTokenBalance} ${
+            poolTokenBalance != null &&
+            `You have ${poolTokenBalance} ${
               isLong ? 'LONG' : 'SHORT'
             } tokens in your wallet`
           }
