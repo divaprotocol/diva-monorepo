@@ -152,7 +152,7 @@ export function MyOrders() {
       const log = cancelOrderResponse?.logs?.[0]
       if (log != null && log.event == 'OrderCancelled') {
         alert('Order successfully canceled')
-        //update orderbook & create orders widget
+        //update myOrders table
         componentDidMount()
       } else {
         alert('order could not be canceled')
