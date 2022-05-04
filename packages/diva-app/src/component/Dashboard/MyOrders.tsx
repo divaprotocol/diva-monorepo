@@ -27,6 +27,8 @@ import { useAppSelector } from '../../Redux/hooks'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { SideMenu } from './SideMenu'
 import { Search } from '@mui/icons-material'
+import { CoinIconPair } from '../CoinIcon'
+import { useHistory } from 'react-router-dom'
 
 export function MyOrders() {
   const chainId = useAppSelector(selectChainId)
@@ -34,8 +36,15 @@ export function MyOrders() {
   const [dataOrders, setDataOrders] = useState([])
   const pools = useAppSelector((state) => selectPools(state))
   const [search, setSearch] = useState('')
-  const collateralTokens = pools.map((pool) => {
-    return pool.collateralToken
+  const history = useHistory()
+  const trimPools = pools.map((pool) => {
+    return {
+      id: pool.id,
+      collateralToken: pool.collateralToken,
+      underlying: pool.referenceAsset,
+      shortToken: pool.shortToken,
+      longToken: pool.longToken,
+    }
   })
 
   function getDataOrders(userOrders: any) {
@@ -44,20 +53,34 @@ export function MyOrders() {
     records.forEach((record) => {
       const order = record.order
       const metaData = record.metaData
-      const sellOrderCollateral = collateralTokens.filter(
-        (token) => token.id === order.takerToken
+      const sellOrderPool = trimPools.filter(
+        (token) => token.collateralToken.id === order.takerToken
       )
-      const buyOrderCollateral = collateralTokens.filter(
-        (token) => token.id === order.makerToken
+      const buyOrderPool = trimPools.filter(
+        (token) => token.collateralToken.id === order.makerToken
       )
-
       let type = ''
       let quantity = 0
       let price = 0
       let payReceive = 0
-      if (sellOrderCollateral.length > 0) {
+      let poolId = ''
+      let underlying = ''
+      let position = ''
+      let symbol = ''
+      if (sellOrderPool.length > 0) {
         type = 'Sell'
-        const decimals = sellOrderCollateral[0].decimals
+        poolId = sellOrderPool[0].id
+        underlying = sellOrderPool[0].underlying
+        if (order.makerToken == sellOrderPool[0].shortToken.id) {
+          position = 'short'
+          symbol = sellOrderPool[0].shortToken.symbol
+        } else {
+          if (order.makerToken == sellOrderPool[0].longToken.id) {
+            position = 'long'
+            symbol = sellOrderPool[0].longToken.symbol
+          }
+        }
+        const decimals = sellOrderPool[0].collateralToken.decimals
         const takerAmount = formatUnits(order.takerAmount, decimals)
         const makerAmount = formatUnits(order.makerAmount)
         const remainingTakerAmount = formatUnits(
@@ -73,9 +96,20 @@ export function MyOrders() {
         payReceive = Number(remainingTakerAmount)
         price = payReceive / quantity
       }
-      if (buyOrderCollateral.length > 0) {
+      if (buyOrderPool.length > 0) {
         type = 'Buy'
-        const decimals = buyOrderCollateral[0].decimals
+        poolId = buyOrderPool[0].id
+        underlying = buyOrderPool[0].underlying
+        if (order.takerToken == buyOrderPool[0].shortToken.id) {
+          position = 'short'
+          symbol = buyOrderPool[0].shortToken.symbol
+        } else {
+          if (order.takerToken == buyOrderPool[0].longToken.id) {
+            position = 'long'
+            symbol = buyOrderPool[0].longToken.symbol
+          }
+        }
+        const decimals = buyOrderPool[0].collateralToken.decimals
         const takerAmount = formatUnits(order.takerAmount)
         const makerAmount = formatUnits(order.makerAmount, decimals)
         const remainingTakerAmount = formatUnits(
@@ -91,6 +125,10 @@ export function MyOrders() {
       }
       const dataOrder = {
         id: type + records.indexOf(record as never),
+        poolId: poolId,
+        position: position,
+        symbol: symbol,
+        underlying: underlying,
         orderType: type,
         nbrOptions: quantity,
         price: price,
@@ -132,6 +170,10 @@ export function MyOrders() {
     componentDidMount()
   }, [])
 
+  function openTrade(order: any) {
+    history.push(`../../${order.poolId}/${order.position}`)
+  }
+
   return (
     <Stack
       direction="row"
@@ -166,10 +208,12 @@ export function MyOrders() {
               }
             />
           </Box>
-          <TableContainer component={Paper} sx={{ maxHeight: 340 }}>
+          <TableContainer component={Paper}>
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
                 <TableRow>
+                  <TableCell align="left">Asset Id</TableCell>
+                  <TableCell align="left">Underlying</TableCell>
                   <TableCell>Type</TableCell>
                   <TableCell align="center">Quantity</TableCell>
                   <TableCell align="center">Price</TableCell>
@@ -182,7 +226,28 @@ export function MyOrders() {
                   dataOrders.map((order: any, index: number) => {
                     const labelId = `enhanced-table-${index}`
                     return (
-                      <TableRow key={index} hover>
+                      <TableRow
+                        key={index}
+                        hover
+                        onClick={() => openTrade(order)}
+                      >
+                        <TableCell align="left">
+                          <Box>
+                            <Typography variant="subtitle1">
+                              {order.symbol}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell align="left">
+                          <Stack direction={'row'}>
+                            <Stack direction={'row'} paddingRight={'0.5em'}>
+                              <CoinIconPair assetName={order.underlying} />
+                            </Stack>
+                            <Typography variant="subtitle1">
+                              {order.underlying}
+                            </Typography>
+                          </Stack>
+                        </TableCell>
                         <TableCell
                           component="th"
                           id={labelId}
