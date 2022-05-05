@@ -190,25 +190,31 @@ export const fillOrder = createAsyncThunk(
       throw new Error('cannot fill order in limit view')
     }
     const orders =
-      state.appSlice[chainId].orders[orderView.makerToken][orderView.takerToken]
+      state.appSlice[chainId].orders[orderView.takerToken][orderView.makerToken]
     const exchangeProxy = config[chainId].zeroXAddress
     const takerTokenInfo = selectTokenInfo(orderView.takerToken)(state)
 
     const ordersToFill: Omit<Order, 'signature'>[] = []
     const signatures: Order['signature'][] = []
-    const amountsToFill: number[] = []
+    const amountsToFill: string[] = []
 
-    let restAmount = Number(orderView.takerAmount)
+    let restAmount = parseFloat(orderView.takerAmount)
 
     orders.forEach(({ signature, ...order }) => {
-      const orderAmount = Number(
+      const orderAmount = parseFloat(
         formatUnits(order.takerAmount, takerTokenInfo?.decimals)
       )
+      console.log({ orderAmount, restAmount })
 
       if (restAmount > 0) {
         ordersToFill.push(order)
         signatures.push(signature)
-        amountsToFill.push(Math.min(restAmount, orderAmount))
+        amountsToFill.push(
+          parseUnits(
+            Math.min(restAmount, orderAmount).toString(),
+            18
+          ).toString()
+        )
       }
       restAmount = restAmount - orderAmount
     })
@@ -219,7 +225,13 @@ export const fillOrder = createAsyncThunk(
       provider.getSigner()
     )
 
-    console.log({ ordersToFill, signatures, amountsToFill })
+    console.log({
+      orders,
+      ordersToFill,
+      signatures,
+      amountsToFill,
+      takerAmount: orderView.takerAmount,
+    })
 
     try {
       const tx = await exchangeContract.batchFillLimitOrders(
