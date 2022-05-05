@@ -280,7 +280,6 @@ export const selectPayoff = (
 ) => {
   const pool = selectPool(state, poolId)
   if (pool == null) return undefined
-  if (finalReferenceValue == null) return undefined
   const payoff = calcPayoffPerToken(
     BigNumber.from(pool.floor),
     BigNumber.from(pool.inflection),
@@ -306,7 +305,7 @@ export const selectIntrinsicValue = (
   if (finalReferenceValue === '-' || finalReferenceValue == null) return '-'
   else {
     const payoff = selectPayoff(state, poolId, finalReferenceValue)
-    if (payoff == null) return 'n/a'
+    if (payoff == null) return undefined
     return payoff.payoff
   }
 }

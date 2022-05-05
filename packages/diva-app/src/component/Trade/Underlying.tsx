@@ -91,15 +91,12 @@ export default function Underlying() {
   const usdPrice = useAppSelector((state) =>
     selectPrice(state, pool?.referenceAsset)
   )
-
+  const priceValue = usdPrice == null ? '-' : parseEther(usdPrice).toString()
+  const inflectionValue = confirmed ? pool.inflection : priceValue
   const finalValue =
     pool.statusFinalReferenceValue !== 'Open' && pool != null
       ? pool?.finalReferenceValue
-      : confirmed
-      ? pool?.inflection
-      : usdPrice == null
-      ? '-'
-      : parseEther(usdPrice).toString()
+      : inflectionValue
   const intrinsicValue = useAppSelector((state) =>
     selectIntrinsicValue(state, params?.poolId, finalValue)
   )

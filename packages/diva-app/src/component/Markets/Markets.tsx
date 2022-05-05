@@ -98,14 +98,14 @@ export default function Markets() {
         status = 'Fallback'
       } else if (Date.now() > unchallengedPeriod) {
         status = 'Confirmed*'
-      } else if (
-        val.statusFinalReferenceValue === 'Challenged' &&
-        Date.now() > challengedPeriod
-      ) {
-        status = 'Confirmed*'
       } else {
         status = val.statusFinalReferenceValue
       }
+    } else if (
+      val.statusFinalReferenceValue === 'Challenged' &&
+      Date.now() > challengedPeriod
+    ) {
+      status = 'Confirmed*'
     }
     const shared = {
       Icon: val.referenceAsset,
