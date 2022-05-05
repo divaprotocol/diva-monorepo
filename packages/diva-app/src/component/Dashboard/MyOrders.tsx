@@ -47,97 +47,130 @@ export function MyOrders() {
     }
   })
 
+  function getBuyOrderFields(record: any, pool: any) {
+    const order = record.order
+    const metaData = record.metaData
+    const type = 'Buy'
+    const poolId = pool.id
+    const underlying = pool.underlying
+    const decimals = pool.collateralToken.decimals
+    const takerAmount = formatUnits(order.takerAmount)
+    const makerAmount = formatUnits(order.makerAmount, decimals)
+    let quantity = 0
+    let price = 0
+    let payReceive = 0
+    const remainingTakerAmount = formatUnits(
+      metaData.remainingFillableTakerAmount
+    )
+    if (remainingTakerAmount < takerAmount) {
+      quantity = Number(remainingTakerAmount)
+    } else {
+      quantity = Number(takerAmount)
+    }
+    payReceive = Number(makerAmount)
+    price = Number(payReceive) / Number(takerAmount)
+    return {
+      type: type,
+      poolId: poolId,
+      underlying: underlying,
+      quantity: quantity,
+      price: price,
+      payReceive: payReceive,
+      expiry: getDateTime(order.expiry),
+      expiryMins: getExpiryMinutesFromNow(order.expiry) + ' mins',
+      orderHash: metaData.orderHash,
+    }
+  }
+  function getSellOrderFields(record: any, pool: any) {
+    const order = record.order
+    const metaData = record.metaData
+    const type = 'Sell'
+    const poolId = pool.id
+    const underlying = pool.underlying
+    const decimals = pool.collateralToken.decimals
+    const takerAmount = formatUnits(order.takerAmount, decimals)
+    const makerAmount = formatUnits(order.makerAmount)
+    let quantity = 0
+    let price = 0
+    let payReceive = 0
+    const remainingTakerAmount = formatUnits(
+      metaData.remainingFillableTakerAmount,
+      decimals
+    )
+    const askAmount = Number(takerAmount) / Number(makerAmount)
+    if (remainingTakerAmount == takerAmount) {
+      quantity = Number(makerAmount)
+    } else {
+      quantity = Number(remainingTakerAmount) / askAmount
+    }
+    payReceive = Number(remainingTakerAmount)
+    price = payReceive / quantity
+    return {
+      type: type,
+      poolId: poolId,
+      underlying: underlying,
+      quantity: quantity,
+      price: price,
+      payReceive: payReceive,
+      expiry: getDateTime(order.expiry),
+      expiryMins: getExpiryMinutesFromNow(order.expiry) + ' mins',
+      orderHash: metaData.orderHash,
+    }
+  }
+
   function getDataOrders(userOrders: any) {
     const dataOrders = []
     const records = userOrders
     records.forEach((record) => {
       const order = record.order
-      const metaData = record.metaData
-      const sellOrderPool = trimPools.filter(
-        (token) => token.collateralToken.id === order.takerToken
+      const sellOrderShort = trimPools.filter(
+        (token) => token.shortToken.id === order.makerToken
       )
-      const buyOrderPool = trimPools.filter(
-        (token) => token.collateralToken.id === order.makerToken
+      const sellOrderLong = trimPools.filter(
+        (token) => token.longToken.id === order.makerToken
       )
-      let type = ''
-      let quantity = 0
-      let price = 0
-      let payReceive = 0
-      let poolId = ''
-      let underlying = ''
-      let position = ''
-      let symbol = ''
-      if (sellOrderPool.length > 0) {
-        type = 'Sell'
-        poolId = sellOrderPool[0].id
-        underlying = sellOrderPool[0].underlying
-        if (order.makerToken == sellOrderPool[0].shortToken.id) {
-          position = 'short'
-          symbol = sellOrderPool[0].shortToken.symbol
-        } else {
-          if (order.makerToken == sellOrderPool[0].longToken.id) {
-            position = 'long'
-            symbol = sellOrderPool[0].longToken.symbol
-          }
+      const buyOrderShort = trimPools.filter(
+        (token) => token.shortToken.id === order.takerToken
+      )
+      const buyOrderLong = trimPools.filter(
+        (token) => token.longToken.id === order.takerToken
+      )
+      if (sellOrderShort.length > 0) {
+        const fields = getSellOrderFields(record, sellOrderShort[0])
+        const shortFields = {
+          id: 'short' + records.indexOf(record as never),
+          position: 'short',
+          symbol: sellOrderShort[0].shortToken.symbol,
         }
-        const decimals = sellOrderPool[0].collateralToken.decimals
-        const takerAmount = formatUnits(order.takerAmount, decimals)
-        const makerAmount = formatUnits(order.makerAmount)
-        const remainingTakerAmount = formatUnits(
-          metaData.remainingFillableTakerAmount,
-          decimals
-        )
-        const askAmount = Number(takerAmount) / Number(makerAmount)
-        if (remainingTakerAmount == takerAmount) {
-          quantity = Number(makerAmount)
-        } else {
-          quantity = Number(remainingTakerAmount) / askAmount
-        }
-        payReceive = Number(remainingTakerAmount)
-        price = payReceive / quantity
+        dataOrders.push({ ...fields, ...shortFields })
       }
-      if (buyOrderPool.length > 0) {
-        type = 'Buy'
-        poolId = buyOrderPool[0].id
-        underlying = buyOrderPool[0].underlying
-        if (order.takerToken == buyOrderPool[0].shortToken.id) {
-          position = 'short'
-          symbol = buyOrderPool[0].shortToken.symbol
-        } else {
-          if (order.takerToken == buyOrderPool[0].longToken.id) {
-            position = 'long'
-            symbol = buyOrderPool[0].longToken.symbol
-          }
+      if (sellOrderLong.length > 0) {
+        const fields = getSellOrderFields(record, sellOrderLong[0])
+        const longFields = {
+          id: 'long' + records.indexOf(record as never),
+          position: 'long',
+          symbol: sellOrderLong[0].longToken.symbol,
         }
-        const decimals = buyOrderPool[0].collateralToken.decimals
-        const takerAmount = formatUnits(order.takerAmount)
-        const makerAmount = formatUnits(order.makerAmount, decimals)
-        const remainingTakerAmount = formatUnits(
-          metaData.remainingFillableTakerAmount
-        )
-        if (remainingTakerAmount < takerAmount) {
-          quantity = Number(remainingTakerAmount)
-        } else {
-          quantity = Number(takerAmount)
+        dataOrders.push({ ...fields, ...longFields })
+      }
+      if (buyOrderShort.length > 0) {
+        const fields = getBuyOrderFields(record, buyOrderShort[0])
+        const shortFields = {
+          id: 'short' + records.indexOf(record as never),
+          position: 'short',
+          symbol: buyOrderShort[0].shortToken.symbol,
         }
-        payReceive = Number(makerAmount)
-        price = Number(payReceive) / Number(takerAmount)
+        dataOrders.push({ ...fields, ...shortFields })
       }
-      const dataOrder = {
-        id: type + records.indexOf(record as never),
-        poolId: poolId,
-        position: position,
-        symbol: symbol,
-        underlying: underlying,
-        orderType: type,
-        nbrOptions: quantity,
-        price: price,
-        payReceive: payReceive,
-        expiry: getDateTime(order.expiry),
-        expiryMins: getExpiryMinutesFromNow(order.expiry) + ' mins',
-        orderHash: metaData.orderHash,
+      if (buyOrderLong.length > 0) {
+        const fields = getBuyOrderFields(record, buyOrderLong[0])
+        const longFields = {
+          id: 'long' + records.indexOf(record as never),
+          position: 'long',
+          symbol: buyOrderLong[0].longToken.symbol,
+        }
+        dataOrders.push({ ...fields, ...longFields })
       }
-      dataOrders.push(dataOrder)
     })
     return dataOrders
   }
@@ -256,7 +289,7 @@ export function MyOrders() {
                         >
                           <Box>
                             <Typography variant="subtitle1">
-                              {order.orderType}
+                              {order.type}
                             </Typography>
                             <Typography variant="caption" noWrap>
                               {order.expiry}
@@ -266,7 +299,7 @@ export function MyOrders() {
                         <TableCell align="center">
                           <Box>
                             <Typography variant="subtitle1">
-                              {order.nbrOptions}
+                              {order.quantity}
                             </Typography>
                           </Box>
                         </TableCell>
