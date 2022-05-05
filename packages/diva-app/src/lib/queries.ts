@@ -369,7 +369,7 @@ export type Challenge = {
 }
 
 type Signature = {
-  signatureType: string
+  signatureType: number
   r: string
   s: string
   v: number

@@ -1,6 +1,8 @@
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Box, Tab, Tabs, useTheme } from '@mui/material'
 import { GridColDef, DataGrid } from '@mui/x-data-grid'
+import { formatDistance } from 'date-fns'
+import { formatUnits } from 'ethers/lib/utils'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
@@ -10,22 +12,23 @@ import {
   selectOrdersByTokens,
   selectOrderView,
   selectPool,
+  selectTokenInfo,
   setIsBuy,
 } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 const RenderPriceCell = ({ order }: { order: Order }) => {
-  const price = parseFloat(order.takerAmount) / parseFloat(order.makerAmount)
   const params: { poolId: string; tokenType: string } = useParams()
-  const isLong = params.tokenType === 'long'
-  const prefix = isLong ? 'L' : 'S'
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
   const theme = useTheme()
+  const orderKey = `${params.poolId}/${params.tokenType}`
+  const { isBuy } = useAppSelector(selectOrderView(orderKey))
+  const price = (
+    parseFloat(order.makerAmount) / parseFloat(order.takerAmount)
+  ).toFixed(2)
 
-  const symbol =
-    order.takerToken === pool?.collateralToken.id
-      ? pool?.collateralToken.name
-      : `${prefix}${pool?.id}`
+  const symbol = pool?.collateralToken.name
 
   return (
     <Box
@@ -54,30 +57,43 @@ const RenderPriceCell = ({ order }: { order: Order }) => {
   )
 }
 
+const RenderQuantityCell = (props) => {
+  const params: { poolId: string; tokenType: string } = useParams()
+  const orderKey = `${params.poolId}/${params.tokenType}`
+  const { isBuy } = useAppSelector(selectOrderView(orderKey))
+
+  const token = isBuy ? props.row.makerToken : props.row.takerToken
+  const tokenAmount = isBuy ? props.row.makerAmount : props.row.takerAmount
+
+  const tokenInfo = useAppSelector(selectTokenInfo(token))
+  return <>{formatUnits(tokenAmount, tokenInfo.decimals)}</>
+}
+
 const dataGridColumns: GridColDef<Order>[] = [
   {
     field: 'Quantity',
     align: 'left',
-    renderCell: (params) => params.row.makerAmount,
+    renderCell: (params) => <RenderQuantityCell {...params} />,
   },
   {
     field: 'price',
     align: 'left',
+    flex: 1,
     renderCell: (params) => <RenderPriceCell order={params.row} />,
   },
   {
     field: 'Expires In',
     align: 'left',
-    renderCell: () => {
-      return 'expires'
+    flex: 1,
+    renderCell: (params) => {
+      const date = new Date(Number(params.row.expiry + '000'))
+      return formatDistance(date, new Date(), { addSuffix: true })
     },
   },
   {
     field: 'User',
     align: 'left',
-    renderCell: () => {
-      return 'expires'
-    },
+    renderCell: (params) => getShortenedAddress(params.row.maker),
     flex: 1,
   },
   {
@@ -118,9 +134,8 @@ const Orders = ({
       pagination
       rows={orders}
       sx={{
-        padding: 0,
         height: '100%',
-        width: '100Q%',
+        width: '100%',
       }}
     />
   )

@@ -21,8 +21,6 @@ export function createDivaTheme(prefersDarkMode: boolean) {
       text: {
         secondary: '#fff',
       },
-      // mode: prefersDarkMode ? 'dark' : 'light',
-      divider: '#2E2E2E',
     },
     typography: {
       h1: {

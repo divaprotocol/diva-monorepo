@@ -34,6 +34,7 @@ import {
   whitelistedPoolCreatorAddress,
 } from '../constants'
 import { zeroXDomain, create0xMessage, zeroXTypes } from '../lib/zeroX'
+import IZeroX_ABI from '../abi/IZeroX.json'
 import { ActionTypes } from '@mui/base'
 
 /**
@@ -158,7 +159,6 @@ export const fetchOrders = createAsyncThunk(
       takerToken,
     })
 
-    console.log('fetch orders', { makerToken, takerToken })
     const {
       ordersByTokens: { items: orders },
     } = await request<{
@@ -174,6 +174,67 @@ export const fetchOrders = createAsyncThunk(
   }
 )
 
+export const fillOrder = createAsyncThunk(
+  'app/fillOrder',
+  async (
+    {
+      orderKey,
+      provider,
+    }: { orderKey: string; provider: providers.Web3Provider },
+    thunk
+  ) => {
+    const state = thunk.getState() as RootState
+    const { chainId } = state.appSlice
+    const orderView = state.appSlice[chainId].orderView[orderKey]
+    if (orderView.isLimit) {
+      throw new Error('cannot fill order in limit view')
+    }
+    const orders =
+      state.appSlice[chainId].orders[orderView.makerToken][orderView.takerToken]
+    const exchangeProxy = config[chainId].zeroXAddress
+    const takerTokenInfo = selectTokenInfo(orderView.takerToken)(state)
+
+    const ordersToFill: Omit<Order, 'signature'>[] = []
+    const signatures: Order['signature'][] = []
+    const amountsToFill: number[] = []
+
+    let restAmount = Number(orderView.takerAmount)
+
+    orders.forEach(({ signature, ...order }) => {
+      const orderAmount = Number(
+        formatUnits(order.takerAmount, takerTokenInfo?.decimals)
+      )
+
+      if (restAmount > 0) {
+        ordersToFill.push(order)
+        signatures.push(signature)
+        amountsToFill.push(Math.min(restAmount, orderAmount))
+      }
+      restAmount = restAmount - orderAmount
+    })
+
+    const exchangeContract = new Contract(
+      exchangeProxy,
+      IZeroX_ABI,
+      provider.getSigner()
+    )
+
+    console.log({ ordersToFill, signatures, amountsToFill })
+
+    try {
+      const tx = await exchangeContract.batchFillLimitOrders(
+        ordersToFill,
+        signatures,
+        amountsToFill,
+        true
+      )
+      await tx.wait()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+)
+
 export const createOrder = createAsyncThunk(
   'app/createOrder',
   async (orderKey: string, thunk) => {
@@ -184,7 +245,9 @@ export const createOrder = createAsyncThunk(
     const expiry = (
       Math.floor(Date.now() / 1000) + Number(orderView.expiryInSeconds)
     ).toString()
-    console.log({ expiry })
+
+    const makerToken = selectTokenInfo(orderView.makerToken)(state)
+    const takerToken = selectTokenInfo(orderView.takerToken)(state)
 
     try {
       // Generate a random private key
@@ -192,18 +255,23 @@ export const createOrder = createAsyncThunk(
         Math.random().toString().substring(2)
       )
       const signingKey = new utils.SigningKey(privateKey)
-      console.log(orderView)
       const order = {
         expiry,
         maker: userAddress,
-        makerAmount: orderView.makerAmount, // amount sold
+        makerAmount: parseUnits(
+          orderView.makerAmount,
+          makerToken.decimals
+        ).toString(), // amount sold
         makerToken: orderView.makerToken, // token sold
         // 0x pools are deprecated - this is the null value for 0x pools
         pool: '0x0000000000000000000000000000000000000000000000000000000000000000',
         salt: Date.now().toString(),
         sender: NULL_ADDRESS, // If set, only this address can directly call fillLimitOrder()
         taker: NULL_ADDRESS, // If set, only this address can fill this order.
-        takerAmount: orderView.takerAmount,
+        takerAmount: parseUnits(
+          orderView.takerAmount,
+          takerToken.decimals
+        ).toString(),
         takerToken: orderView.takerToken,
         feeRecipient: NULL_ADDRESS,
         takerTokenFeeAmount: BigNumber.from(0).toString(),
@@ -214,11 +282,9 @@ export const createOrder = createAsyncThunk(
         domain: zeroXDomain({ chainId, verifyingContract: verifyingAddress }),
         message: create0xMessage(order),
       }
-      console.log(typedData)
 
       const message = getMessage(typedData, true)
       const { r, s, v } = signingKey.signDigest(message)
-      console.log({ r, s, v, message })
       const mutation = createOrderMutation({
         ...order,
         chainId,
@@ -227,7 +293,7 @@ export const createOrder = createAsyncThunk(
           r,
           s,
           v,
-          signatureType: 'EIP712',
+          signatureType: 2,
         },
       })
 
@@ -489,7 +555,6 @@ export const appSlice = createSlice({
       action: PayloadAction<{ key: string; data: Partial<OrderView> }>
     ) => {
       const { key, data } = action.payload
-      console.log('reduce set order view', data)
       const appState = state[state.chainId]
       if (appState.orderView[key] == null) {
         appState.orderView[key] = defaultOrderViewState
@@ -510,7 +575,10 @@ export const appSlice = createSlice({
       }
       const orderView = appState.orderView[orderViewKey]
       orderView.makerAmount = value
-      const result = parseFloat(value) / parseFloat(orderView.takerAmount)
+      const result =
+        value === '0' || orderView.takerAmount === '0'
+          ? 0
+          : parseFloat(value) / parseFloat(orderView.takerAmount)
       orderView.price = (isNaN(result) ? '0' : result).toString()
     },
     setTakerAmount: (
@@ -524,7 +592,10 @@ export const appSlice = createSlice({
       }
       const orderView = appState.orderView[orderViewKey]
       orderView.takerAmount = value
-      const result = parseFloat(orderView.makerAmount) / parseFloat(value)
+      const result =
+        value === '0' || orderView.makerAmount === '0'
+          ? 0
+          : parseFloat(orderView.makerAmount) / parseFloat(value)
       orderView.price = (isNaN(result) ? '0' : result).toString()
     },
     setOrderPrice: (
@@ -628,7 +699,6 @@ export const appSlice = createSlice({
     buildThunkState(fetchOrders, builder, {
       fulfilled: (state, action) => {
         const appState = state[state.chainId]
-        console.log('fulfilling fetchOrders', { action })
         if (appState.orders[action.payload.makerToken] == null) {
           appState.orders[action.payload.makerToken] = {}
         }
@@ -879,7 +949,6 @@ export const selectUserAddress = (state: RootState) =>
 export const selectTokenBalance = (token) => (state: RootState) => {
   const tokenInfo = selectAppStateByChain(state).tokens[token]
   if (tokenInfo == null) return null
-  console.log('select token balance', tokenInfo)
   return formatUnits(BigNumber.from(tokenInfo.balance), tokenInfo.decimals)
 }
 

@@ -8,6 +8,7 @@ import {
   createOrder,
   fetchAllowance,
   fetchTokenInfo,
+  fillOrder,
   selectAllowance,
   selectChainId,
   selectOrderView,
@@ -28,6 +29,7 @@ import { SmallButton } from '../SmallButton'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { LoadingButton } from '@mui/lab'
 import { config } from '../../constants'
+import { formatUnits } from 'ethers/lib/utils'
 
 export default function CreateOrder() {
   const params: { poolId: string; tokenType: string } = useParams()
@@ -43,7 +45,8 @@ export default function CreateOrder() {
   // token is either long or short token, dependening on the view
   const token = isLong ? pool.longToken.id : pool.shortToken.id
   const tokenInfo = useAppSelector(selectTokenInfo(token))
-  const poolTokenBalance = tokenInfo?.balance
+  const poolTokenBalance =
+    tokenInfo != null && formatUnits(tokenInfo.balance, tokenInfo.decimals)
   const allowance0x = useAppSelector(
     selectAllowance(token, config[chainId].zeroXAddress)
   )
@@ -57,18 +60,22 @@ export default function CreateOrder() {
     selectOrderView(url)
   )
   const makerToken = pool.collateralToken.id
-  const youPay = Number(makerAmount)
+  const youPay = Number(isBuy ? makerAmount : takerAmount)
 
   const hasEnoughBalance =
-    Number(isBuy ? collateralTokenBalance : poolTokenBalance) > youPay
+    Number(isBuy ? collateralTokenBalance : poolTokenBalance) >= youPay
   const hasEnoughAllowance = parseFloat(allowance0x) >= youPay
 
   const isApprovedDisabled = isNaN(youPay) || youPay <= 0 || !hasEnoughBalance
   const canOrder = hasEnoughBalance && hasEnoughAllowance // should be enabled if we have allowance and balance for the amount
 
   const onClickCreateOrder = useCallback(() => {
-    dispatch(createOrder(url))
-  }, [dispatch, url])
+    if (!isLimit) {
+      dispatch(fillOrder({ orderKey: url, provider }))
+    } else {
+      dispatch(createOrder(url))
+    }
+  }, [isLimit, dispatch, url, provider])
 
   const onClickApprove = useCallback(() => {
     if (!isNaN(youPay)) {
