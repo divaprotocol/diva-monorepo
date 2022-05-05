@@ -56,6 +56,7 @@ export default function Underlying() {
   const breakEven = useAppSelector((state) =>
     selectBreakEven(state, params.poolId, isLong)
   )
+  // console.log('maxYield', maxYield)
   const isBuy = useAppSelector((state) => selectIsBuy(state))
   const breakEvenOptionPrice = 0
   const chainId = useAppSelector(selectChainId)

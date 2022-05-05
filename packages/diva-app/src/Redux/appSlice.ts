@@ -233,7 +233,7 @@ export const appSlice = createSlice({
     })
 
     builder.addCase(fetchOrders.fulfilled, (state, action) => {
-      const poolState = state[state?.chainId]
+      const poolState = state[state.chainId]
       const orders = poolState.orders[action.meta.arg.pool.id]
       poolState.orders[action.meta.arg.pool.id] = {
         ...orders,
@@ -347,16 +347,10 @@ export const selectOrder = (
   isLong: boolean
 ) => selectAppStateByChain(state).orders[poolId]?.[isLong ? 'long' : 'short']
 
-export const selectExpectedRate = (
-  state: RootState,
-  poolId: string,
-  isLong: boolean
-) => {
-  const orders = selectOrder(state, poolId, isLong)
-  // TODO: use orders to get buy and sell
+export const selectExpectedRate = (state: RootState) => {
   return {
-    buy: 7.8,
-    sell: 8.1,
+    buy: state.tradeOption.responseBuy[0].order.makerAmount,
+    sell: state.tradeOption.responseSell[0].order.makerAmount,
   }
 }
 
@@ -373,20 +367,19 @@ export const selectMaxYield = (
   const _B = BigNumber
   const token = selectToken(state, poolId)
   const maxPayout = selectMaxPayout(state, poolId, isLong)
-  const avgExpectedRate = selectExpectedRate(state, poolId, isLong)
+  const avgExpectedRate = selectExpectedRate(state)
   if (maxPayout == null || avgExpectedRate === undefined) return undefined
-
   return {
     buy: parseFloat(
       formatEther(
-        parseUnits(maxPayout).div(
+        parseEther(maxPayout).div(
           parseUnits(String(avgExpectedRate.buy), token.decimals)
         )
       )
     ).toFixed(2),
     sell: parseFloat(
       formatEther(
-        parseUnits(maxPayout).div(
+        parseEther(maxPayout).div(
           parseUnits(String(avgExpectedRate.sell), token.decimals)
         )
       )
@@ -401,10 +394,9 @@ export const selectBreakEven = (
 ) => {
   const pool = selectPool(state, poolId)
   if (pool == null) return undefined
-  const usdPrice = selectPrice(state, poolId)
+  const usdPrice = selectPrice(state, pool.referenceAsset)
   if (usdPrice == null) return undefined
-
-  const be1 = parseUnits(usdPrice, 2)
+  const be1 = parseEther(usdPrice)
     .mul(BigNumber.from(pool.inflection))
     .sub(BigNumber.from(pool.floor))
     .mul(BigNumber.from(isLong ? pool.supplyLong : pool.supplyShort))
@@ -416,8 +408,7 @@ export const selectBreakEven = (
       )
     )
     .add(BigNumber.from(pool.floor))
-
-  const be2 = parseUnits(usdPrice, 2)
+  const be2 = parseEther(usdPrice)
     .mul(BigNumber.from(pool.supplyLong))
     .sub(
       BigNumber.from(
@@ -435,7 +426,8 @@ export const selectBreakEven = (
       )
     )
     .add(BigNumber.from(pool.inflection))
-
+  // console.log('be1', formatEther(be1))
+  // console.log('be2', formatEther(be2))
   if (
     BigNumber.from(pool.floor).lte(be1) &&
     be1.lte(BigNumber.from(pool.inflection))
