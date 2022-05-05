@@ -175,7 +175,8 @@ export function MyOrders() {
     return dataOrders
   }
 
-  async function cancelOrder(order, chainId) {
+  async function cancelOrder(event, order, chainId) {
+    event.stopPropagation()
     const orderHash = order.orderHash
     //get the order details in current form from 0x before cancelling it.
     const cancelOrder = await getOrderDetails(orderHash, chainId)
@@ -324,8 +325,8 @@ export function MyOrders() {
                                 variant="outlined"
                                 startIcon={<DeleteIcon />}
                                 size="small"
-                                onClick={() =>
-                                  cancelOrder(dataOrders[index], chainId)
+                                onClick={(event) =>
+                                  cancelOrder(event, dataOrders[index], chainId)
                                 }
                               >
                                 Cancel
