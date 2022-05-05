@@ -156,9 +156,12 @@ export default function Underlying() {
 
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
-  const path = location.pathname
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    window.history.replaceState({}, '', `${path}/` + TabPath[newValue])
+    window.history.pushState(
+      {},
+      '',
+      `/${params.poolId}/${isLong ? 'long' : 'short'}/` + TabPath[newValue]
+    )
     setValue(newValue)
   }
 
