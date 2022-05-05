@@ -1,5 +1,16 @@
+import React, { useEffect } from 'react'
 import styled from 'styled-components'
-import { Container, Divider, Paper, Stack, useTheme } from '@mui/material'
+import {
+  Box,
+  Container,
+  Typography,
+  Divider,
+  Paper,
+  Stack,
+  useTheme,
+} from '@mui/material'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
 import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
@@ -7,12 +18,7 @@ import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
 import OptionHeader from './OptionHeader'
 import { config } from '../../constants'
-import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import React, { useEffect } from 'react'
-import { Liquidity } from '../Liquidity/Liquidity'
 import OrdersPanel from './OrdersPanel'
-import Typography from '@mui/material/Typography'
 import { useAppSelector } from '../../Redux/hooks'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
@@ -30,6 +36,7 @@ import {
 } from '../../Redux/appSlice'
 import { formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
+import { Liquidity } from '../Liquidity/Liquidity'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -43,9 +50,52 @@ const RightDiv = styled.div`
   width: 35%;
 `
 
+interface TabPanelProps {
+  children?: React.ReactNode
+  index: number
+  value: number
+}
+
+enum TabPath {
+  trade,
+  liquidity,
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`vertical-tabpanel-${index}`}
+      aria-labelledby={`vertical-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  )
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `vertical-tab-${index}`,
+    'aria-controls': `vertical-tabpanel-${index}`,
+  }
+}
+
 export default function Underlying() {
-  const params: { poolId: string; tokenType: string } = useParams()
   const [value, setValue] = React.useState(0)
+  const theme = useTheme()
+  useEffect(() => {
+    setValue(+TabPath[window.location.pathname.substring(1)] || 0)
+  }, [])
+
+  const params: { poolId: string; tokenType: string } = useParams()
   const isLong = params.tokenType === 'long'
   const maxPayout = useAppSelector((state) =>
     selectMaxPayout(state, params.poolId, isLong)
@@ -62,7 +112,7 @@ export default function Underlying() {
   const chainContractAddress =
     contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxy = chainContractAddress.exchangeProxy
-  const theme = useTheme()
+
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(
@@ -106,7 +156,9 @@ export default function Underlying() {
 
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
-  const handleChange = (event: any, newValue: any) => {
+  const path = location.pathname
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    window.history.replaceState({}, '', `${path}/` + TabPath[newValue])
     setValue(newValue)
   }
 
@@ -119,12 +171,10 @@ export default function Underlying() {
         centered
         sx={{ mb: theme.spacing(4) }}
       >
-        <Tab label="Trade" />
-        <Tab label="Liquidity" />
+        <Tab label="Trade" {...a11yProps(0)} />
+        <Tab label="Liquidity" {...a11yProps(1)} />
       </Tabs>
-      {value ? (
-        <Liquidity pool={pool} />
-      ) : (
+      <TabPanel value={value} index={0}>
         <Stack direction="row" spacing={2}>
           <LeftDiv>
             <Stack spacing={2}>
@@ -224,7 +274,15 @@ export default function Underlying() {
             </Stack>
           </RightDiv>
         </Stack>
-      )}
+      </TabPanel>
+      <TabPanel value={value} index={1}>
+        <Liquidity pool={pool} />
+      </TabPanel>
+      {/*  {value ? (
+        <Liquidity pool={pool} />
+      ) : (
+        
+      )} */}
     </Container>
   )
 }
