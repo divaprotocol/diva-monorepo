@@ -13,6 +13,7 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
+import { useHistory } from 'react-router-dom'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
@@ -72,11 +73,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`vertical-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   )
 }
@@ -89,14 +86,30 @@ function a11yProps(index: number) {
 }
 
 export default function Underlying() {
-  const [value, setValue] = React.useState(0)
-  const theme = useTheme()
-  useEffect(() => {
-    setValue(+TabPath[window.location.pathname.substring(1)] || 0)
-  }, [])
-
+  const history = useHistory()
   const params: { poolId: string; tokenType: string } = useParams()
   const isLong = params.tokenType === 'long'
+  const CurrentTab = () => {
+    if (
+      history.location.pathname ===
+      `/${params.poolId}/${isLong ? 'long' : 'short'}`
+    )
+      return 0
+    else if (
+      history.location.pathname ===
+      `/${params.poolId}/${isLong ? 'long' : 'short'}/trade`
+    )
+      return 0
+    else if (
+      history.location.pathname ===
+      `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity`
+    )
+      return 1
+  }
+
+  const [value, setValue] = React.useState(CurrentTab)
+  const theme = useTheme()
+
   const maxPayout = useAppSelector((state) =>
     selectMaxPayout(state, params.poolId, isLong)
   )
@@ -157,9 +170,7 @@ export default function Underlying() {
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    window.history.pushState(
-      {},
-      '',
+    history.push(
       `/${params.poolId}/${isLong ? 'long' : 'short'}/` + TabPath[newValue]
     )
     setValue(newValue)
