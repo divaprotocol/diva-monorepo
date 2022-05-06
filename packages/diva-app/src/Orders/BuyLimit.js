@@ -1,7 +1,7 @@
+import { MetamaskSubprovider } from '@0x/subproviders'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
-import { metamaskProvider } from './Config'
 import { config } from '../constants'
 
 export const buylimitOrder = async (orderData) => {
@@ -12,6 +12,8 @@ export const buylimitOrder = async (orderData) => {
   const isFloat = (number) => {
     return number != '' && !isNaN(number) && Math.round(number) != number
   }
+
+  const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
   const decimalPlaces = (number) => {
     return number.toString().split('.')[1].length
@@ -59,6 +61,7 @@ export const buylimitOrder = async (orderData) => {
       metamaskProvider,
       utils.SignatureType.EIP712 // Optional
     )
+
     const signedOrder = { ...order, signature }
     const resp = await fetch(networkUrl, {
       method: 'POST',
