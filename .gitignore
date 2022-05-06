@@ -41,3 +41,4 @@ generated
 **/.env
 **/coverage.json
 **/coverage
+**/config.py
