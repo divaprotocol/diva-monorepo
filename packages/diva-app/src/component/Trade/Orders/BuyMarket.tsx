@@ -370,7 +370,7 @@ export default function BuyMarket(props: {
                   )
                 )
               )
-            ).toFixed(20)
+            ).toFixed(2)
           )
         )
       }
