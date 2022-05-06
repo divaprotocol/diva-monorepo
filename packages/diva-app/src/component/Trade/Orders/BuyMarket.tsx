@@ -331,14 +331,14 @@ export default function BuyMarket(props: {
       })
     }
   }, [responseSell, responseBuy, userAddress])
-
   useEffect(() => {
+    dispatch(setBreakEven('0'))
     getUnderlyingPrice(option.referenceAsset).then((data) => {
       if (data != null) setUsdPrice(data)
     })
+  }, [option.referenceAsset])
+  useEffect(() => {
     if (usdPrice != '') {
-      console.log('usdPrice')
-      console.log(usdPrice)
       const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
         BigENumber.from(option.floor),
         BigENumber.from(option.inflection),
@@ -353,12 +353,6 @@ export default function BuyMarket(props: {
       )
 
       if (avgExpectedRate > 0) {
-        console.log(
-          'max yield',
-          parseUnits(String(avgExpectedRate), option.collateralToken.decimals)
-        )
-        console.log('avgExpectedRate')
-        console.log(avgExpectedRate)
         dispatch(
           setMaxYield(
             parseFloat(

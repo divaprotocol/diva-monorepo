@@ -271,12 +271,13 @@ export default function BuyLimit(props: {
       )
     )
   }
-
-  const userAddress = useAppSelector(selectUserAddress)
   useEffect(() => {
     getUnderlyingPrice(option.referenceAsset).then((data) => {
       if (data != null) setUsdPrice(data)
     })
+  }, [option.referenceAsset])
+  const userAddress = useAppSelector(selectUserAddress)
+  useEffect(() => {
     const getCollateralInWallet = async () => {
       let allowance = await takerTokenContract.methods
         .allowance(userAdress, exchangeProxyAddress)
@@ -343,7 +344,7 @@ export default function BuyLimit(props: {
         )
       }
       if (isLong) {
-        if (parseEther(String(pricePerOption)).gt(0)) {
+        if (!isNaN(pricePerOption)) {
           const be1 = parseEther(String(pricePerOption))
             .mul(
               BigENumber.from(option.inflection).sub(
@@ -378,16 +379,21 @@ export default function BuyLimit(props: {
               )
             )
             .add(BigENumber.from(option.inflection))
+
           if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
-          ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
+            parseEther(String(pricePerOption)).gte(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .mul(parseUnits('1', option.collateralToken.decimals))
+                .div(
+                  BigENumber.from(option.collateralBalanceLongInitial).add(
+                    BigENumber.from(option.collateralBalanceShortInitial)
+                  )
+                )
+            )
           ) {
             dispatch(setBreakEven(formatEther(be2)))
+          } else {
+            dispatch(setBreakEven(formatEther(be1)))
           }
         }
         if (
@@ -410,7 +416,7 @@ export default function BuyLimit(props: {
           )
         )
       } else {
-        if (parseEther(String(pricePerOption)).gt(0)) {
+        if (!isNaN(pricePerOption)) {
           const be1 = parseEther(String(pricePerOption))
             .mul(BigENumber.from(option.supplyInitial))
             .div(parseEther('1'))
@@ -448,14 +454,18 @@ export default function BuyLimit(props: {
             .sub(BigENumber.from(option.cap))
             .mul(BigENumber.from('-1'))
           if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
+            parseEther(String(pricePerOption)).gte(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .mul(parseUnits('1', option.collateralToken.decimals))
+                .div(
+                  BigENumber.from(option.collateralBalanceLongInitial).add(
+                    BigENumber.from(option.collateralBalanceShortInitial)
+                  )
+                )
+            )
           ) {
             dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
+          } else {
             dispatch(setBreakEven(formatEther(be2)))
           }
         }

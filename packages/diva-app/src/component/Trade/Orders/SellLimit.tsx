@@ -259,11 +259,12 @@ export default function SellLimit(props: {
       approvalAmount: allowance,
     }
   }
-
   useEffect(() => {
     getUnderlyingPrice(option.referenceAsset).then((data) => {
       if (data != null) setUsdPrice(data)
     })
+  }, [option.referenceAsset])
+  useEffect(() => {
     getOptionsInWallet().then((val) => {
       !Number.isNaN(val.balance)
         ? setWalletBalance(Number(val.balance))
@@ -323,7 +324,7 @@ export default function SellLimit(props: {
         )
       }
       if (isLong) {
-        if (parseEther(String(pricePerOption)).gt(0)) {
+        if (!isNaN(pricePerOption)) {
           const be1 = parseEther(String(pricePerOption))
             .mul(
               BigENumber.from(option.inflection).sub(
@@ -390,7 +391,7 @@ export default function SellLimit(props: {
           )
         )
       } else {
-        if (parseEther(String(pricePerOption)).gt(0)) {
+        if (!isNaN(pricePerOption)) {
           const be1 = parseEther(String(pricePerOption))
             .mul(BigENumber.from(option.supplyInitial))
             .div(parseEther('1'))

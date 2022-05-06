@@ -365,10 +365,15 @@ export default function SellMarket(props: {
       }
     }
   }, [numberOfOptions])
+
   useEffect(() => {
+    dispatch(setBreakEven('0'))
     getUnderlyingPrice(option.referenceAsset).then((data) => {
       if (data != null) setUsdPrice(data)
     })
+  }, [option.referenceAsset])
+
+  useEffect(() => {
     if (usdPrice != '') {
       const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
         BigENumber.from(option.floor),
