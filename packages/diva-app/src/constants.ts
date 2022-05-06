@@ -19,7 +19,7 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
-    allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders',
+    allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
     order: 'https://ropsten.api.0x.org/orderbook/v1/order/',
   },
   3: {
@@ -30,7 +30,7 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
-    allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders',
+    allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
     order: 'https://ropsten.api.0x.org/orderbook/v1/order/',
   },
   4: {
@@ -41,7 +41,7 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-rinkeby',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-rinkeby',
-    allOrders: 'https://rinkeby.api.0x.org/orderbook/v1/orders',
+    allOrders: 'https://rinkeby.api.0x.org/orderbook/v1/orders/',
     order: 'https://rinkeby.api.0x.org/orderbook/v1/order/',
   },
   137: {
@@ -52,7 +52,7 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-polygon',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-polygon',
-    allOrders: 'https://polygon.api.0x.org/orderbook/v1/orders',
+    allOrders: 'https://polygon.api.0x.org/orderbook/v1/orders/',
     order: 'https://polygon.api.0x.org/orderbook/v1/order/',
   },
   42: {
@@ -63,7 +63,7 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-kovan',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-kovan',
-    allOrders: 'https://kovan.api.0x.org/orderbook/v1/orders',
+    allOrders: 'https://kovan.api.0x.org/orderbook/v1/orders/',
     order: 'https://kovan.api.0x.org/orderbook/v1/order/',
   },
   80001: {
@@ -74,7 +74,7 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-mumbai',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-mumbai',
-    allOrders: 'https://mumbai.api.0x.org/orderbook/v1/orders',
+    allOrders: 'https://mumbai.api.0x.org/orderbook/v1/orders/',
     order: 'https://mumbai.api.0x.org/orderbook/v1/order/',
   },
 }

@@ -27,8 +27,9 @@ import {
   selectMaxYield,
   selectPool,
   selectChainId,
+  selectPrice,
 } from '../../Redux/appSlice'
-import { formatEther } from 'ethers/lib/utils'
+import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
 
 const LeftCompFlexContainer = styled.div`
@@ -86,6 +87,25 @@ export default function Underlying() {
   //       : formatEther(intrinsicValue?.payoffPerShortToken)
   //     : 'n/a'
 
+  // not open final value
+  // open if less
+  // const confirmed =
+  //   pool.statusFinalReferenceValue === 'Open'
+  //     ? Date.now() - Number(pool.expiryTime) * 1000 >
+  //       6 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000
+  //     : false
+  // const usdPrice = useAppSelector((state) =>
+  //   selectPrice(state, pool?.referenceAsset)
+  // )
+  // const priceValue = usdPrice == null ? '-' : parseEther(usdPrice).toString()
+  // const inflectionValue = confirmed ? pool.inflection : priceValue
+  // const finalValue =
+  //   pool.statusFinalReferenceValue !== 'Open' && pool != null
+  //     ? pool?.finalReferenceValue
+  //     : inflectionValue
+  // const intrinsicValue = useAppSelector((state) =>
+  //   selectIntrinsicValue(state, params?.poolId, finalValue)
+  // )
   if (pool == null) {
     return <LoadingBox />
   }
@@ -99,7 +119,6 @@ export default function Underlying() {
     TokenSupply: 200,
     IsLong: isLong,
   }
-
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
   const handleChange = (event: any, newValue: any) => {
