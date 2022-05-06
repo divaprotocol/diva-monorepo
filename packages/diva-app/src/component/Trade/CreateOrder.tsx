@@ -47,19 +47,23 @@ export default function CreateOrder() {
   const tokenInfo = useAppSelector(selectTokenInfo(token))
   const poolTokenBalance =
     tokenInfo != null && formatUnits(tokenInfo.balance, tokenInfo.decimals)
+  const url = `${params.poolId}/${params.tokenType}`
+  const collateralToken = pool.collateralToken.id
+  const { price, takerAmount, makerAmount, isBuy, isLimit } = useAppSelector(
+    selectOrderView(url)
+  )
+
   const allowance0x = useAppSelector(
-    selectAllowance(token, config[chainId].zeroXAddress)
+    selectAllowance(
+      isBuy ? collateralToken : token,
+      config[chainId].zeroXAddress
+    )
   )
 
   const collateralTokenBalance = useAppSelector(
     selectTokenBalance(pool.collateralToken.id)
   )
 
-  const url = `${params.poolId}/${params.tokenType}`
-  const { price, takerAmount, makerAmount, isBuy, isLimit } = useAppSelector(
-    selectOrderView(url)
-  )
-  const makerToken = pool.collateralToken.id
   const youPay = Number(isBuy ? makerAmount : takerAmount)
 
   const hasEnoughBalance =
@@ -79,16 +83,23 @@ export default function CreateOrder() {
 
   const onClickApprove = useCallback(() => {
     if (!isNaN(youPay)) {
+      console.log('approve', {
+        isBuy,
+        tokenAddress: isBuy ? collateralToken : token,
+        allowanceAddress: config[chainId].zeroXAddress,
+        amount: youPay.toString(),
+        provider,
+      })
       dispatch(
         approveTransaction({
-          tokenAddress: makerToken,
+          tokenAddress: isBuy ? collateralToken : token,
           allowanceAddress: config[chainId].zeroXAddress,
           amount: youPay.toString(),
           provider,
         })
       )
     }
-  }, [chainId, dispatch, makerToken, provider, youPay])
+  }, [youPay, dispatch, isBuy, collateralToken, token, chainId, provider])
 
   useEffect(() => {
     if (userAddress != null && provider != null) {

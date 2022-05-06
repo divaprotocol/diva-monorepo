@@ -198,6 +198,27 @@ export const fillOrder = createAsyncThunk(
     const signatures: Order['signature'][] = []
     const amountsToFill: string[] = []
 
+    const buyerToken = new Contract(
+      '0xf9C6740DDFfDd0303ffDc79BAB56cc90fA858E9F',
+      ERC20_ABI,
+      provider
+    )
+
+    const sellerToken = new Contract(
+      '0x87f725d834fcd8ae2347af58984309b415ddd1d1',
+      ERC20_ABI,
+      provider
+    )
+
+    const seller = '0x7543C7cfA57BA2a465BAe9084F6776AEdF5684a1'
+    const buyer = '0x9d265705a779bbdacb2C149eD12B0944e3A0CC19'
+
+    const sellerAllowance = await sellerToken.allowance(seller, exchangeProxy)
+
+    const buyerAllowance = await buyerToken.allowance(buyer, exchangeProxy)
+
+    console.log({ buyerAllowance, sellerAllowance, orderView })
+
     let restAmount = parseFloat(orderView.takerAmount)
 
     orders.forEach(({ signature, ...order }) => {
