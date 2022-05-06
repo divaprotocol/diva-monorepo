@@ -10,6 +10,7 @@ w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL))
 print(w3.isConnected())
 
 def sendPrice(pool_id, value):
+    print("Sending price to smart contract ...")
     my_contract = w3.eth.contract(address=diva.contract_address, abi=diva.abi)
     setFinRef_txn = my_contract.functions.setFinalReferenceValue(int(pool_id), int(w3.toWei(value, 'ether')), False).buildTransaction(
         {

@@ -1,8 +1,7 @@
 import requests
 import pandas as pd
-import datetime as dt
 from datetime import datetime
-import json
+
 
 # function to use requests.post to make an API call to the subgraph url
 def run_query(query):

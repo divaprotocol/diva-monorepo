@@ -1,16 +1,11 @@
 import datetime as dt
-from datetime import datetime
-import requests
-import pandas as pd
-import json
-
 from Prices import getKrakenPrice
 from QueryGraph import *
 from SendPrice import sendPrice
-
+#0x9AdEFeb576dcF52F5220709c1B267d89d5208D78
 query = """
             {
-              pools (where: {dataProvider: "0x9AdEFeb576dcF52F5220709c1B267d89d5208D78"}) {
+              pools (where: {dataProvider: "0xc948f2F172Fe25977E322c8D82F8f53338f8a051"}) {
                 id
                 dataProvider
                 referenceAsset
@@ -26,7 +21,7 @@ max_time_away = dt.timedelta(minutes=60)
 
 resp = run_query(query)
 
-df_reporting_needed = get_required_reporting_df(resp,hours=1000)
+df_reporting_needed = get_required_reporting_df(resp,hours=24)
 
 
 for i in range(df_reporting_needed.shape[0]):
