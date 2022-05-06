@@ -47,15 +47,10 @@ export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const [value, setValue] = React.useState(0)
   const isLong = params.tokenType === 'long'
-  const maxPayout = useAppSelector((state) =>
-    selectMaxPayout(state, params.poolId, isLong)
-  )
-  const maxYield = useAppSelector((state) =>
-    selectMaxYield(state, params.poolId, isLong)
-  )
-  const breakEven = useAppSelector((state) =>
-    selectBreakEven(state, params.poolId, isLong)
-  )
+  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
+  const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
+  const maxYield = useAppSelector((state) => state.stats.maxYield)
+  const breakEven = useAppSelector((state) => state.stats.breakEven)
   // console.log('maxYield', maxYield)
   const isBuy = useAppSelector((state) => selectIsBuy(state))
   const breakEvenOptionPrice = 0
@@ -81,15 +76,15 @@ export default function Underlying() {
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
   }, [pool, dispatch])
 
-  const intrinsicValue = useAppSelector((state) =>
-    selectIntrinsicValue(state, params.poolId)
-  )
-  const intValDisplay =
-    intrinsicValue != 'n/a' && intrinsicValue != null
-      ? isLong
-        ? formatEther(intrinsicValue?.payoffPerLongToken)
-        : formatEther(intrinsicValue?.payoffPerShortToken)
-      : 'n/a'
+  // const intrinsicValue = useAppSelector((state) =>
+  //   selectIntrinsicValue(state, params.poolId)
+  // )
+  // const intValDisplay =
+  //   intrinsicValue != 'n/a' && intrinsicValue != null
+  //     ? isLong
+  //       ? formatEther(intrinsicValue?.payoffPerLongToken)
+  //       : formatEther(intrinsicValue?.payoffPerShortToken)
+  //     : 'n/a'
 
   if (pool == null) {
     return <LoadingBox />
@@ -188,13 +183,13 @@ export default function Underlying() {
                   <Typography
                     sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                   >
-                    {maxYield.buy}
+                    {maxYield}
                   </Typography>
                 ) : (
                   <Typography
                     sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                   >
-                    {maxYield.sell}
+                    {maxYield}
                   </Typography>
                 )}
               </Stack>
@@ -211,7 +206,7 @@ export default function Underlying() {
                   Intrinsic value per token
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {intValDisplay}
+                  {parseFloat(intrinsicValue).toFixed(2)}
                 </Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
