@@ -31,6 +31,8 @@ import {
 } from '../../Redux/appSlice'
 import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
+import Stats from './Stats'
+import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -175,67 +177,13 @@ export default function Underlying() {
                 />
               </Paper>
               <Paper>
-                <TradeChart
+                <Stats
+                  pool={pool}
                   data={data}
-                  refAsset={pool.referenceAsset}
-                  payOut={pool.collateralToken.symbol}
-                  w={380}
-                  h={200}
-                  isLong={OptionParams.IsLong}
-                  breakEven={breakEvenOptionPrice}
+                  chainId={chainId}
+                  OptionParams={OptionParams}
                 />
               </Paper>
-              <Typography
-                sx={{
-                  paddingLeft: theme.spacing(3),
-                  mt: theme.spacing(1),
-                }}
-              >
-                Buyers statistics:
-              </Typography>
-              <Divider />
-              <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                  Max yield
-                </Typography>
-                {isBuy ? (
-                  <Typography
-                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    {maxYield}
-                  </Typography>
-                ) : (
-                  <Typography
-                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    {maxYield}
-                  </Typography>
-                )}
-              </Stack>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                  Break-even
-                </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {breakEven}
-                </Typography>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                  Intrinsic value per token
-                </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {parseFloat(intrinsicValue).toFixed(2)}
-                </Typography>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                  Max payout per token
-                </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {maxPayout}
-                </Typography>
-              </Stack>
             </Stack>
           </RightDiv>
         </Stack>

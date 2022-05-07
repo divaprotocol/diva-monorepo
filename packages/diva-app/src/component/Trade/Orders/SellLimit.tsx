@@ -50,6 +50,7 @@ export default function SellLimit(props: {
   tokenAddress: string
   exchangeProxy: string
   chainId: number
+  usdPrice: string
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const chainId = useAppSelector(selectChainId)
@@ -71,7 +72,8 @@ export default function SellLimit(props: {
   //const takerToken = option.collateralToken
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const params: { tokenType: string } = useParams()
-  const [usdPrice, setUsdPrice] = useState('')
+  //const [usdPrice, setUsdPrice] = useState('')
+  const usdPrice = props.usdPrice
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const isLong = window.location.pathname.split('/')[2] === 'long'
   const dispatch = useAppDispatch()
@@ -259,11 +261,7 @@ export default function SellLimit(props: {
       approvalAmount: allowance,
     }
   }
-  useEffect(() => {
-    getUnderlyingPrice(option.referenceAsset).then((data) => {
-      if (data != null) setUsdPrice(data)
-    })
-  }, [option.referenceAsset])
+
   useEffect(() => {
     getOptionsInWallet().then((val) => {
       !Number.isNaN(val.balance)

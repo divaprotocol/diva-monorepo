@@ -50,6 +50,7 @@ export default function BuyLimit(props: {
   tokenAddress: string
   exchangeProxy: string
   chainId: number
+  usdPrice: string
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const chainId = useAppSelector(selectChainId)
@@ -74,8 +75,8 @@ export default function BuyLimit(props: {
   const params: { tokenType: string } = useParams()
   const theme = useTheme()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const [usdPrice, setUsdPrice] = useState('')
-
+  //const [usdPrice, setUsdPrice] = useState('')
+  const usdPrice = props.usdPrice
   const dispatch = useAppDispatch()
 
   const isLong = window.location.pathname.split('/')[2] === 'long'
@@ -271,11 +272,7 @@ export default function BuyLimit(props: {
       )
     )
   }
-  useEffect(() => {
-    getUnderlyingPrice(option.referenceAsset).then((data) => {
-      if (data != null) setUsdPrice(data)
-    })
-  }, [option.referenceAsset])
+
   const userAddress = useAppSelector(selectUserAddress)
   useEffect(() => {
     const getCollateralInWallet = async () => {

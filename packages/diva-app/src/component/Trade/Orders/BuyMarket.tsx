@@ -45,6 +45,7 @@ export default function BuyMarket(props: {
   tokenAddress: string
   exchangeProxy: string
   chainId: number
+  usdPrice: string
 }) {
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
@@ -70,7 +71,8 @@ export default function BuyMarket(props: {
     takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const params: { tokenType: string } = useParams()
   const theme = useTheme()
-  const [usdPrice, setUsdPrice] = useState('')
+  //const [usdPrice, setUsdPrice] = useState('')
+  const usdPrice = props.usdPrice
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const dispatch = useAppDispatch()
   const isLong = window.location.pathname.split('/')[2] === 'long'
@@ -331,12 +333,7 @@ export default function BuyMarket(props: {
       })
     }
   }, [responseSell, responseBuy, userAddress])
-  useEffect(() => {
-    dispatch(setBreakEven('0'))
-    getUnderlyingPrice(option.referenceAsset).then((data) => {
-      if (data != null) setUsdPrice(data)
-    })
-  }, [option.referenceAsset])
+
   useEffect(() => {
     if (usdPrice != '') {
       const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(

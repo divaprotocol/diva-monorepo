@@ -17,6 +17,8 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
 import { fetchOrders, setIsBuy } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
+import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
+import { setBreakEven } from '../../Redux/Stats'
 const PageDiv = styled.div`
   justify-content: center
   height: 500px;
@@ -80,10 +82,10 @@ export default function CreateOrder(props: {
   const tabsClass = useTabsBorder()
   const [orderType, setOrderTypeValue] = React.useState(0)
   const [priceType, setPriceTypeValue] = React.useState(0)
-
+  const [usdPrice, setUsdPrice] = React.useState('')
   useEffect(() => {
     getExistingOrders()
-  })
+  }, [])
 
   const handleOrderTypeChange = (event: any, newValue: number) => {
     dispatch(setIsBuy(newValue === 0))
@@ -113,9 +115,23 @@ export default function CreateOrder(props: {
     }
   }
 
+  useEffect(() => {
+    getUnderlyingPrice(option.referenceAsset).then((data) => {
+      if (data != null || data != undefined) {
+        console.log('data ' + data)
+        setUsdPrice(data)
+      } else {
+        //handle undefined object return
+        console.log('Please handle me i am undefined')
+      }
+    })
+  }, [option.referenceAsset])
+
   const renderOrderInfo = () => {
     if (orderType === 0 && priceType === 0) {
       //Buy Market
+      dispatch(setIsBuy(true))
+      dispatch(setBreakEven('0'))
       return (
         <BuyMarket
           option={option}
@@ -123,11 +139,13 @@ export default function CreateOrder(props: {
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
+          usdPrice={usdPrice}
         />
       )
     }
     if (orderType === 0 && priceType === 1) {
       //Buy Limit
+      dispatch(setIsBuy(true))
       return (
         <BuyLimit
           handleDisplayOrder={getExistingOrders}
@@ -135,11 +153,13 @@ export default function CreateOrder(props: {
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
+          usdPrice={usdPrice}
         />
       )
     }
     if (orderType === 1 && priceType === 0) {
       //Sell Market
+      dispatch(setBreakEven('0'))
       return (
         <SellMarket
           option={option}
@@ -147,6 +167,7 @@ export default function CreateOrder(props: {
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
+          usdPrice={usdPrice}
         />
       )
     }
@@ -159,6 +180,7 @@ export default function CreateOrder(props: {
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
+          usdPrice={usdPrice}
         />
       )
     }

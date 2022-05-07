@@ -49,6 +49,7 @@ export default function SellMarket(props: {
   tokenAddress: string
   exchangeProxy: string
   chainId: number
+  usdPrice: string
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
@@ -70,8 +71,8 @@ export default function SellMarket(props: {
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const params: { tokenType: string } = useParams()
-
-  const [usdPrice, setUsdPrice] = useState('')
+  const usdPrice = props.usdPrice
+  //const [usdPrice, setUsdPrice] = useState('')
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const dispatch = useAppDispatch()
 
@@ -365,13 +366,6 @@ export default function SellMarket(props: {
       }
     }
   }, [numberOfOptions])
-
-  useEffect(() => {
-    dispatch(setBreakEven('0'))
-    getUnderlyingPrice(option.referenceAsset).then((data) => {
-      if (data != null) setUsdPrice(data)
-    })
-  }, [option.referenceAsset])
 
   useEffect(() => {
     if (usdPrice != '') {
