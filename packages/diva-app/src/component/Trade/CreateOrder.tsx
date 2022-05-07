@@ -60,6 +60,8 @@ export default function CreateOrder() {
     )
   )
 
+  console.log({ allowance0x })
+
   const collateralTokenBalance = useAppSelector(
     selectTokenBalance(pool.collateralToken.id)
   )
@@ -108,14 +110,23 @@ export default function CreateOrder() {
         fetchAllowance({
           provider,
           allowanceAddress: config[chainId].zeroXAddress,
-          tokenAddress: token,
+          tokenAddress: isBuy ? collateralToken : token,
         })
       )
       if (pool.collateralToken != null) {
         dispatch(fetchTokenInfo({ provider, token: pool.collateralToken.id }))
       }
     }
-  }, [chainId, dispatch, pool, provider, token, userAddress])
+  }, [
+    chainId,
+    collateralToken,
+    dispatch,
+    isBuy,
+    pool,
+    provider,
+    token,
+    userAddress,
+  ])
 
   useEffect(() => {
     if (token != null && pool.collateralToken.id != null) {

@@ -52,11 +52,6 @@ type OrderView = {
   price: string
   expiryInSeconds: string
 }
-type AllowanceState = {
-  tokenAddress: string
-  allowanceAddress: string
-  amount: string
-}
 
 type ChainState = {
   requestByName: Record<string, RequestState | undefined>
@@ -76,7 +71,9 @@ type ChainState = {
     }
   }
   allowance: {
-    [address: string]: AllowanceState
+    [allowanceAddress: string]: {
+      [tokenAddress: string]: string
+    }
   }
   orderView: {
     [orderKey: string]: OrderView
@@ -194,7 +191,10 @@ export const fillOrder = createAsyncThunk(
     const exchangeProxy = config[chainId].zeroXAddress
     const takerTokenInfo = selectTokenInfo(orderView.takerToken)(state)
 
-    const ordersToFill: Omit<Order, 'signature'>[] = []
+    const ordersToFill: (Omit<Order, 'signature' | 'id'> & {
+      remainingFillableTakerAmount: string
+      expectedRate: string
+    })[] = []
     const signatures: Order['signature'][] = []
     const amountsToFill: string[] = []
 
@@ -221,15 +221,23 @@ export const fillOrder = createAsyncThunk(
 
     let restAmount = parseFloat(orderView.takerAmount)
 
-    orders.forEach(({ signature, ...order }) => {
+    orders.forEach(({ signature, id, ...order }) => {
       const orderAmount = parseFloat(
         formatUnits(order.takerAmount, takerTokenInfo?.decimals)
       )
       console.log({ orderAmount, restAmount })
 
       if (restAmount > 0) {
-        ordersToFill.push(order)
-        signatures.push(signature)
+        ordersToFill.push({
+          ...order,
+          expectedRate: '2.00',
+          remainingFillableTakerAmount: '300000000000000000',
+        })
+        signatures.push({
+          ...signature,
+          v: Number(signature.v),
+          signatureType: Number(signature.signatureType),
+        })
         amountsToFill.push(
           parseUnits(
             Math.min(restAmount, orderAmount).toString(),
@@ -246,13 +254,13 @@ export const fillOrder = createAsyncThunk(
       provider.getSigner()
     )
 
-    console.log({
-      orders,
-      ordersToFill,
-      signatures,
-      amountsToFill,
-      takerAmount: orderView.takerAmount,
-    })
+    console.log(
+      JSON.stringify({
+        ordersToFill,
+        signatures,
+        amountsToFill,
+      })
+    )
 
     try {
       const tx = await exchangeContract.batchFillLimitOrders(
@@ -292,7 +300,7 @@ export const createOrder = createAsyncThunk(
         expiry,
         maker: userAddress,
         makerAmount: parseUnits(
-          orderView.makerAmount,
+          orderView.isBuy ? orderView.makerAmount : orderView.takerAmount,
           makerToken.decimals
         ).toString(), // amount sold
         makerToken: orderView.makerToken, // token sold
@@ -302,7 +310,7 @@ export const createOrder = createAsyncThunk(
         sender: NULL_ADDRESS, // If set, only this address can directly call fillLimitOrder()
         taker: NULL_ADDRESS, // If set, only this address can fill this order.
         takerAmount: parseUnits(
-          orderView.takerAmount,
+          orderView.isBuy ? orderView.takerAmount : orderView.makerAmount,
           takerToken.decimals
         ).toString(),
         takerToken: orderView.takerToken,
@@ -329,6 +337,19 @@ export const createOrder = createAsyncThunk(
           signatureType: 2,
         },
       })
+
+      console.log(
+        JSON.stringify({
+          ...order,
+          chainId,
+          verifyingContract: verifyingAddress,
+          signature: {
+            r,
+            s,
+            v,
+          },
+        })
+      )
 
       await request<{ pool: Pool }>(
         orderBookEndpoint,
@@ -432,7 +453,11 @@ export const fetchAllowance = createAsyncThunk(
       state.appSlice.userAddress,
       allowanceAddress
     )
-    return allowance.toString()
+    return {
+      allowance: allowance.toString(),
+      tokenAddress,
+      allowanceAddress,
+    }
   }
 )
 
@@ -681,17 +706,20 @@ export const appSlice = createSlice({
     buildThunkState(fetchAllowance, builder, {
       fulfilled: (state, action) => {
         const appState = state[state.chainId]
-        appState.allowance[action.payload] = action.payload
+        appState.allowance[action.payload.allowanceAddress] = {
+          ...appState.allowance[action.payload.allowanceAddress],
+          [action.payload.tokenAddress]: action.payload.allowance,
+        }
       },
     })
 
     buildThunkState(approveTransaction, builder, {
       fulfilled: (state, action) => {
         const appState = state[state.chainId]
+
         appState.allowance[action.payload.allowanceAddress] = {
-          amount: action.payload.amount,
-          tokenAddress: action.payload.tokenAddress,
-          allowanceAddress: action.payload.allowanceAddress,
+          ...appState.allowance[action.payload.allowanceAddress],
+          [action.payload.tokenAddress]: action.payload.amount,
         }
       },
     })
@@ -986,17 +1014,24 @@ export const selectTokenBalance = (token) => (state: RootState) => {
 }
 
 export const selectAllowanceState =
-  (allowanceAddress: string) =>
-  (state: RootState): AllowanceState => {
-    return selectAppStateByChain(state)?.allowance[allowanceAddress]
+  (allowanceAddress: string, tokenAddress: string) =>
+  (state: RootState): string => {
+    return selectAppStateByChain(state)?.allowance[allowanceAddress]?.[
+      tokenAddress
+    ]
   }
 
 export const selectAllowance =
   (tokenAddress: string, allowanceAddress: string) => (state: RootState) => {
-    const allowance = selectAllowanceState(allowanceAddress)(state)
+    const allowance = selectAllowanceState(
+      allowanceAddress,
+      tokenAddress
+    )(state)
     if (allowance != null) {
-      const tokenInfo = selectTokenInfo(allowance.tokenAddress)(state)
-      return formatUnits(BigNumber.from(allowance.amount), tokenInfo.decimals)
+      const tokenInfo = selectTokenInfo(tokenAddress)(state)
+      return tokenInfo != null
+        ? formatUnits(BigNumber.from(allowance), tokenInfo.decimals)
+        : undefined
     }
     return undefined
   }

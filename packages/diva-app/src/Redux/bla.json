@@ -1,0 +1,64 @@
+{
+  "newBuyFill": {
+    "ordersToFill": [
+      {
+        "sender": "0x0000000000000000000000000000000000000000",
+        "maker": "0x7543c7cfa57ba2a465bae9084f6776aedf5684a1",
+        "taker": "0x0000000000000000000000000000000000000000",
+        "takerTokenFeeAmount": "0",
+        "makerAmount": "100000000000000000",
+        "takerAmount": "200000000000000000",
+        "makerToken": "0x87f725d834fcd8ae2347af58984309b415ddd1d1",
+        "takerToken": "0xf9c6740ddffdd0303ffdc79bab56cc90fa858e9f",
+        "salt": "1651906231981",
+        "verifyingContract": "0xdef1c0ded9bec7f1a1670819833240f027b25eff",
+        "feeRecipient": "0x0000000000000000000000000000000000000000",
+        "expiry": "1651909831",
+        "chainId": 137,
+        "pool": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "expectedRate": "2.00",
+        "remainingFillableTakerAmount": "300000000000000000"
+      }
+    ],
+    "signatures": [
+      {
+        "signatureType": 2,
+        "r": "0xed3f2f9e3079478962e24fc1bb2ab928db95caca63b7530c0364ed48da6f756b",
+        "s": "0x48aeb1aab412f740d5737a46ac7a7bdf26140e013d83f9ff0db74f8192895896",
+        "v": 28
+      }
+    ],
+    "amountsToFill": ["100000000000000000"]
+  },
+  "buyfill": {
+    "orders": [
+      {
+        "sender": "0x0000000000000000000000000000000000000000",
+        "maker": "0x7543c7cfa57ba2a465bae9084f6776aedf5684a1",
+        "taker": "0x0000000000000000000000000000000000000000",
+        "takerTokenFeeAmount": "0",
+        "makerAmount": "200000000000000000",
+        "takerAmount": "400000000000000000",
+        "makerToken": "0x87f725d834fcd8ae2347af58984309b415ddd1d1",
+        "takerToken": "0xf9c6740ddffdd0303ffdc79bab56cc90fa858e9f",
+        "salt": "1651904516945",
+        "verifyingContract": "0xdef1c0ded9bec7f1a1670819833240f027b25eff",
+        "feeRecipient": "0x0000000000000000000000000000000000000000",
+        "expiry": "1651904816",
+        "chainId": 137,
+        "pool": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "expectedRate": "2.00",
+        "remainingFillableTakerAmount": "400000000000000000"
+      }
+    ],
+    "signatures": [
+      {
+        "signatureType": 2,
+        "r": "0x30ecad5d36ce7f61992741f72a1ef2387fe87f6e49e1486fa3cab217dc1dd842",
+        "s": "0x5627f56253b8d88d99c4cdb618a952a87c33c1450c9437acbee8bebdad3a0ce4",
+        "v": 28
+      }
+    ],
+    "takerAssetFillAmounts": [100000000000000000]
+  }
+}
