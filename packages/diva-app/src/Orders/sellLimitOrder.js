@@ -1,13 +1,15 @@
+import { MetamaskSubprovider } from '@0x/subproviders'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
-import { metamaskProvider } from './Config'
 import { config } from '../constants'
 
 export const sellLimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
     return Math.floor(Date.now() / 1000 + orderData.orderExpiry * 60).toString()
   }
+
+  const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
   const isFloat = (number) => {
     return number != '' && !isNaN(number) && Math.round(number) != number
@@ -58,6 +60,9 @@ export const sellLimitOrder = async (orderData) => {
       utils.SignatureType.EIP712 // Optional
     )
     const signedOrder = { ...order, signature }
+    console.log(
+      JSON.stringify({ signedOrder, typedData: order.getEIP712TypedData() })
+    )
     const resp = await fetch(networkUrl, {
       method: 'POST',
       body: JSON.stringify(signedOrder),
