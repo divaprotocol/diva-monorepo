@@ -27,8 +27,9 @@ import {
   selectMaxYield,
   selectPool,
   selectChainId,
+  selectPrice,
 } from '../../Redux/appSlice'
-import { formatEther } from 'ethers/lib/utils'
+import { formatUnits, parseEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
 
 const LeftCompFlexContainer = styled.div`
@@ -80,16 +81,25 @@ export default function Underlying() {
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
   }, [pool, dispatch])
 
-  const intrinsicValue = useAppSelector((state) =>
-    selectIntrinsicValue(state, params.poolId)
+  // not open final value
+  // open if less
+  const confirmed =
+    pool.statusFinalReferenceValue === 'Open'
+      ? Date.now() - Number(pool.expiryTime) * 1000 >
+        6 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000
+      : false
+  const usdPrice = useAppSelector((state) =>
+    selectPrice(state, pool?.referenceAsset)
   )
-  const intValDisplay =
-    intrinsicValue != 'n/a' && intrinsicValue != null
-      ? isLong
-        ? formatEther(intrinsicValue?.payoffPerLongToken)
-        : formatEther(intrinsicValue?.payoffPerShortToken)
-      : 'n/a'
-
+  const priceValue = usdPrice == null ? '-' : parseEther(usdPrice).toString()
+  const inflectionValue = confirmed ? pool.inflection : priceValue
+  const finalValue =
+    pool.statusFinalReferenceValue !== 'Open' && pool != null
+      ? pool?.finalReferenceValue
+      : inflectionValue
+  const intrinsicValue = useAppSelector((state) =>
+    selectIntrinsicValue(state, params?.poolId, finalValue)
+  )
   if (pool == null) {
     return <LoadingBox />
   }
@@ -103,7 +113,6 @@ export default function Underlying() {
     TokenSupply: 200,
     IsLong: isLong,
   }
-
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
   const handleChange = (event: any, newValue: any) => {
@@ -209,9 +218,37 @@ export default function Underlying() {
                 <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
                   Intrinsic value per token
                 </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {intValDisplay}
-                </Typography>
+                {intrinsicValue != '-' ? (
+                  isLong ? (
+                    <Typography
+                      sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                    >
+                      {parseFloat(
+                        formatUnits(
+                          intrinsicValue?.payoffPerLongToken,
+                          pool.collateralToken.decimals
+                        )
+                      ).toFixed(2)}
+                    </Typography>
+                  ) : (
+                    <Typography
+                      sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                    >
+                      {parseFloat(
+                        formatUnits(
+                          intrinsicValue?.payoffPerShortToken,
+                          pool.collateralToken.decimals
+                        )
+                      ).toFixed(2)}
+                    </Typography>
+                  )
+                ) : (
+                  <Typography
+                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    n/a
+                  </Typography>
+                )}
               </Stack>
               <Stack direction="row" justifyContent="space-between">
                 <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
