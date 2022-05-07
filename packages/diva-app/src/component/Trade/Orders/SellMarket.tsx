@@ -367,7 +367,6 @@ export default function SellMarket(props: {
   }, [numberOfOptions])
 
   useEffect(() => {
-    dispatch(setBreakEven('0'))
     getUnderlyingPrice(option.referenceAsset).then((data) => {
       if (data != null) setUsdPrice(data)
     })
@@ -393,7 +392,7 @@ export default function SellMarket(props: {
           setMaxYield(
             parseFloat(
               formatEther(
-                BigENumber.from(maxPayout).div(
+                parseEther(maxPayout).div(
                   parseUnits(
                     String(avgExpectedRate),
                     option.collateralToken.decimals

@@ -332,7 +332,6 @@ export default function BuyMarket(props: {
     }
   }, [responseSell, responseBuy, userAddress])
   useEffect(() => {
-    dispatch(setBreakEven('0'))
     getUnderlyingPrice(option.referenceAsset).then((data) => {
       if (data != null) setUsdPrice(data)
     })
@@ -407,7 +406,11 @@ export default function BuyMarket(props: {
         ) {
           dispatch(setIntrinsicValue('n/a'))
         } else {
-          dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
+          dispatch(
+            setIntrinsicValue(
+              formatUnits(payoffPerLongToken, option.collateralToken.decimals)
+            )
+          )
         }
         dispatch(
           setMaxPayout(
@@ -421,8 +424,8 @@ export default function BuyMarket(props: {
           )
         )
       } else {
-        if (parseEther(usdPrice).gt(0)) {
-          const be1 = parseEther(usdPrice)
+        if (!isNaN(avgExpectedRate)) {
+          const be1 = parseEther(String(avgExpectedRate))
             .mul(BigENumber.from(option.supplyShort))
             .sub(BigENumber.from(option.collateralBalanceShortInitial))
             .div(BigENumber.from(option.collateralBalanceLongInitial))
@@ -434,7 +437,7 @@ export default function BuyMarket(props: {
             .sub(BigENumber.from(option.inflection))
             .mul(BigENumber.from(-1))
 
-          const be2 = parseEther(usdPrice)
+          const be2 = parseEther(String(avgExpectedRate))
             .mul(BigENumber.from(option.supplyShort))
             .div(BigENumber.from(option.collateralBalanceShortInitial))
             .mul(
@@ -463,7 +466,11 @@ export default function BuyMarket(props: {
         ) {
           dispatch(setIntrinsicValue('n/a'))
         } else {
-          dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
+          dispatch(
+            setIntrinsicValue(
+              formatUnits(payoffPerShortToken, option.collateralToken.decimals)
+            )
+          )
         }
         dispatch(
           setMaxPayout(
