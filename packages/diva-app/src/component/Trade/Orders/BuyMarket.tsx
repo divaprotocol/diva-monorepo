@@ -369,35 +369,55 @@ export default function BuyMarket(props: {
       }
 
       if (isLong) {
-        if (parseUnits(usdPrice, 2).gt(0)) {
-          const be1 = parseEther(usdPrice)
-            .mul(BigENumber.from(option.inflection))
-            .sub(BigENumber.from(option.floor))
-            .mul(BigENumber.from(option.supplyLong))
-            .div(BigENumber.from(option.collateralBalanceLongInitial))
+        if (!isNaN(avgExpectedRate)) {
+          const be1 = parseEther(String(avgExpectedRate))
+            .mul(
+              BigENumber.from(option.inflection).sub(
+                BigENumber.from(option.floor)
+              )
+            )
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(
+              BigENumber.from(option.collateralBalanceLongInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .div(parseEther('1'))
             .add(BigENumber.from(option.floor))
 
-          const be2 = parseEther(usdPrice)
-            .mul(BigENumber.from(option.supplyLong))
-            .sub(BigENumber.from(option.collateralBalanceLongInitial))
+          const be2 = parseEther(String(avgExpectedRate))
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(parseEther('1'))
+            .sub(
+              BigENumber.from(option.collateralBalanceLongInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
             .mul(
               BigENumber.from(option.cap).sub(
                 BigENumber.from(option.inflection)
               )
             )
-            .div(BigENumber.from(option.collateralBalanceShortInitial))
+            .div(
+              BigENumber.from(option.collateralBalanceShortInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
             .add(BigENumber.from(option.inflection))
-
           if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
-          ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
+            parseEther(String(avgExpectedRate)).gte(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .mul(parseUnits('1', option.collateralToken.decimals))
+                .div(
+                  BigENumber.from(option.collateralBalanceLongInitial).add(
+                    BigENumber.from(option.collateralBalanceShortInitial)
+                  )
+                )
+            )
           ) {
             dispatch(setBreakEven(formatEther(be2)))
+          } else {
+            dispatch(setBreakEven(formatEther(be1)))
           }
         }
         if (
@@ -426,37 +446,55 @@ export default function BuyMarket(props: {
       } else {
         if (!isNaN(avgExpectedRate)) {
           const be1 = parseEther(String(avgExpectedRate))
-            .mul(BigENumber.from(option.supplyShort))
-            .sub(BigENumber.from(option.collateralBalanceShortInitial))
-            .div(BigENumber.from(option.collateralBalanceLongInitial))
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(parseEther('1'))
+            .sub(
+              BigENumber.from(option.collateralBalanceShortInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
             .mul(
               BigENumber.from(option.inflection).sub(
                 BigENumber.from(option.floor)
               )
             )
+            .div(
+              BigENumber.from(option.collateralBalanceLongInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
             .sub(BigENumber.from(option.inflection))
-            .mul(BigENumber.from(-1))
+            .mul(BigENumber.from('-1'))
 
           const be2 = parseEther(String(avgExpectedRate))
-            .mul(BigENumber.from(option.supplyShort))
-            .div(BigENumber.from(option.collateralBalanceShortInitial))
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(
+              BigENumber.from(option.collateralBalanceShortInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
             .mul(
               BigENumber.from(option.cap).sub(
                 BigENumber.from(option.inflection)
               )
             )
+            .div(parseEther('1'))
             .sub(BigENumber.from(option.cap))
-            .mul(BigENumber.from(-1))
+            .mul(BigENumber.from('-1'))
 
           if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
+            parseEther(String(avgExpectedRate)).gte(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .mul(parseUnits('1', option.collateralToken.decimals))
+                .div(
+                  BigENumber.from(option.collateralBalanceLongInitial).add(
+                    BigENumber.from(option.collateralBalanceShortInitial)
+                  )
+                )
+            )
           ) {
             dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
+          } else {
             dispatch(setBreakEven(formatEther(be2)))
           }
         }
@@ -485,7 +523,7 @@ export default function BuyMarket(props: {
         )
       }
     }
-  }, [option, usdPrice])
+  }, [option, avgExpectedRate, usdPrice])
 
   return (
     <div>

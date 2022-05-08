@@ -360,14 +360,18 @@ export default function SellLimit(props: {
             )
             .add(BigENumber.from(option.inflection))
           if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
+            parseEther(String(pricePerOption)).gte(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .mul(parseUnits('1', option.collateralToken.decimals))
+                .div(
+                  BigENumber.from(option.collateralBalanceLongInitial).add(
+                    BigENumber.from(option.collateralBalanceShortInitial)
+                  )
+                )
+            )
           ) {
             dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
+          } else {
             dispatch(setBreakEven(formatEther(be2)))
           }
         }
@@ -429,14 +433,18 @@ export default function SellLimit(props: {
             .sub(BigENumber.from(option.cap))
             .mul(BigENumber.from('-1'))
           if (
-            BigENumber.from(option.floor).lte(be1) &&
-            be1.lte(BigENumber.from(option.inflection))
+            parseEther(String(pricePerOption)).gte(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .mul(parseUnits('1', option.collateralToken.decimals))
+                .div(
+                  BigENumber.from(option.collateralBalanceLongInitial).add(
+                    BigENumber.from(option.collateralBalanceShortInitial)
+                  )
+                )
+            )
           ) {
             dispatch(setBreakEven(formatEther(be1)))
-          } else if (
-            BigENumber.from(option.inflection).lt(be2) &&
-            be2.lte(BigENumber.from(option.cap))
-          ) {
+          } else {
             dispatch(setBreakEven(formatEther(be2)))
           }
         }
