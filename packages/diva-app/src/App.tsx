@@ -16,7 +16,6 @@ import MenuItems from './component/Header/MenuItems'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import { LoadingBox } from './component/LoadingBox'
-import { MyOrders } from './component/Dashboard/MyOrders'
 
 export const App = () => {
   const dispatch = useDispatch()
@@ -71,7 +70,7 @@ export const App = () => {
                 <MyPositions />
               </Route>
               <Route exact path="/dashboard/myorders">
-                <MyOrders />
+                <div>TODO</div>
               </Route>
               <Route exact path="/dashboard/myfeeclaims">
                 <MyFeeClaims />

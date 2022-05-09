@@ -11,7 +11,6 @@ import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import React, { useEffect } from 'react'
 import { Liquidity } from '../Liquidity/Liquidity'
-import Typography from '@mui/material/Typography'
 import { useAppSelector } from '../../Redux/hooks'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
@@ -20,7 +19,6 @@ import {
   selectBreakEven,
   fetchPool,
   fetchUnderlyingPrice,
-  selectIntrinsicValue,
   selectMaxPayout,
   selectMaxYield,
   selectPool,
@@ -28,7 +26,7 @@ import {
   selectOrderView,
   selectPrice,
 } from '../../Redux/appSlice'
-import { formatEther, parseEther } from 'ethers/lib/utils'
+import { parseEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
 import { OrderView } from './Orders'
 
@@ -68,34 +66,7 @@ export default function Underlying() {
     }
   }, [pool, dispatch])
 
-  // not open final value
-  // open if less
-  const confirmed =
-    pool.statusFinalReferenceValue === 'Open'
-      ? Date.now() - Number(pool.expiryTime) * 1000 >
-        6 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000
-      : false
-  const usdPrice = useAppSelector((state) =>
-    selectPrice(state, pool?.referenceAsset)
-  )
-  const priceValue = usdPrice == null ? '-' : parseEther(usdPrice).toString()
-  const inflectionValue = confirmed ? pool.inflection : priceValue
-  const finalValue =
-    pool.statusFinalReferenceValue !== 'Open' && pool != null
-      ? pool?.finalReferenceValue
-      : inflectionValue
-  const intrinsicValue = useAppSelector((state) =>
-    selectIntrinsicValue(state, params?.poolId, finalValue)
-  )
-  const intValDisplay =
-    intrinsicValue != 'n/a' && intrinsicValue != null
-      ? isLong
-        ? formatEther(intrinsicValue?.payoffPerLongToken)
-        : formatEther(intrinsicValue?.payoffPerShortToken)
-      : 'n/a'
-
   const url = `${params.poolId}/${params.tokenType}`
-  const { isBuy } = useAppSelector(selectOrderView(url))
 
   if (pool == null) {
     return <LoadingBox />
@@ -158,53 +129,6 @@ export default function Underlying() {
                 breakEven={breakEvenOptionPrice}
               />
             </Paper>
-            <Typography
-              sx={{
-                paddingLeft: theme.spacing(3),
-                mt: theme.spacing(1),
-              }}
-            >
-              Buyers statistics:
-            </Typography>
-            <Divider />
-            <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                Max yield
-              </Typography>
-              {isBuy ? (
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {maxYield.buy}
-                </Typography>
-              ) : (
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {maxYield.sell}
-                </Typography>
-              )}
-            </Stack>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                Break-even
-              </Typography>
-              <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                {breakEven}
-              </Typography>
-            </Stack>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                Intrinsic value per token
-              </Typography>
-              <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                {intValDisplay}
-              </Typography>
-            </Stack>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                Max payout per token
-              </Typography>
-              <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                {maxPayout}
-              </Typography>
-            </Stack>
           </Stack>
         </Stack>
       )}
