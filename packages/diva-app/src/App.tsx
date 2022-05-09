@@ -16,11 +16,7 @@ import MenuItems from './component/Header/MenuItems'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import { LoadingBox } from './component/LoadingBox'
-
-import * as Ethers from 'ethers'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-window._ethers = Ethers
+import { MyOrders } from './component/Dashboard/MyOrders'
 
 export const App = () => {
   const dispatch = useDispatch()
@@ -73,6 +69,9 @@ export const App = () => {
               </Route>
               <Route exact path="/dashboard/mypositions">
                 <MyPositions />
+              </Route>
+              <Route exact path="/dashboard/myorders">
+                <MyOrders />
               </Route>
               <Route exact path="/dashboard/myfeeclaims">
                 <MyFeeClaims />

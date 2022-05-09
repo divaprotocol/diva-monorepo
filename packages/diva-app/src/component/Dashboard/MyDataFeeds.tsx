@@ -373,6 +373,7 @@ export function MyDataFeeds() {
         <>
           <SideMenu />
           <PoolsTable
+            disableRowClick={true}
             page={page}
             rows={rows}
             columns={columns}

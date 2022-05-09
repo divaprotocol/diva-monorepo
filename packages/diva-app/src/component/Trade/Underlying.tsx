@@ -26,22 +26,11 @@ import {
   selectPool,
   selectChainId,
   selectOrderView,
+  selectPrice,
 } from '../../Redux/appSlice'
-import { formatEther } from 'ethers/lib/utils'
+import { formatEther, parseEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
 import { OrderView } from './Orders'
-
-const LeftCompFlexContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  flex-basis: 100%;
-`
-const LeftDiv = styled.div`
-  width: 60%;
-`
-const RightDiv = styled.div`
-  width: 35%;
-`
 
 export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
@@ -60,7 +49,6 @@ export default function Underlying() {
   const chainId = useAppSelector(selectChainId)
   const chainContractAddress =
     contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxy = chainContractAddress.exchangeProxy
   const theme = useTheme()
   const dispatch = useDispatch()
   useEffect(() => {
@@ -80,8 +68,24 @@ export default function Underlying() {
     }
   }, [pool, dispatch])
 
+  // not open final value
+  // open if less
+  const confirmed =
+    pool.statusFinalReferenceValue === 'Open'
+      ? Date.now() - Number(pool.expiryTime) * 1000 >
+        6 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000
+      : false
+  const usdPrice = useAppSelector((state) =>
+    selectPrice(state, pool?.referenceAsset)
+  )
+  const priceValue = usdPrice == null ? '-' : parseEther(usdPrice).toString()
+  const inflectionValue = confirmed ? pool.inflection : priceValue
+  const finalValue =
+    pool.statusFinalReferenceValue !== 'Open' && pool != null
+      ? pool?.finalReferenceValue
+      : inflectionValue
   const intrinsicValue = useAppSelector((state) =>
-    selectIntrinsicValue(state, params.poolId)
+    selectIntrinsicValue(state, params?.poolId, finalValue)
   )
   const intValDisplay =
     intrinsicValue != 'n/a' && intrinsicValue != null
@@ -106,7 +110,6 @@ export default function Underlying() {
     TokenSupply: 200,
     IsLong: isLong,
   }
-
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
   const handleChange = (event: any, newValue: any) => {

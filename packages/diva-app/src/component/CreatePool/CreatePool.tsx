@@ -16,20 +16,15 @@ import { SelectDataFeedProvider } from './SelectDataFeedProvider'
 import { LoadingButton } from '@mui/lab'
 import { ethers } from 'ethers'
 import ERC20 from '@diva/contracts/abis/erc20.json'
-import { config } from '../../constants'
-import { parseUnits } from 'ethers/lib/utils'
 import { useEffect, useState } from 'react'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { useAppSelector } from '../../Redux/hooks'
-import { selectUserAddress } from '../../Redux/appSlice'
+import { ApproveActionButtons } from '../ApproveActionButtons'
 
 export function CreatePool() {
   const [decimal, setDecimal] = useState(18)
-  const [btnName, setBtnName] = useState('')
   const formik = useCreatePoolFormik()
   const theme = useTheme()
   const { provider } = useConnectionContext()
-  const account = useAppSelector(selectUserAddress)
   let step = null
   switch (formik.values.step) {
     case 1:
@@ -52,18 +47,6 @@ export function CreatePool() {
       token.decimals().then((decimals: number) => {
         setDecimal(decimals)
       })
-      token
-        .allowance(account, config[provider?.network?.chainId].divaAddress)
-        .then((res) => {
-          if (res.lt(parseUnits(formik.values.collateralBalance, decimal))) {
-            setBtnName('Approve & Create')
-          } else {
-            setBtnName('Create')
-          }
-        })
-        .catch((err) => {
-          console.error(err)
-        })
     }
   }, [formik.values.collateralToken])
 
@@ -105,6 +88,7 @@ export function CreatePool() {
         >
           {formik.values.step > 1 && (
             <Button
+              sx={{ width: theme.spacing(16) }}
               onClick={() => {
                 formik.setFieldValue('step', formik.values.step - 1, true)
               }}
@@ -112,23 +96,37 @@ export function CreatePool() {
               Go Back
             </Button>
           )}
-          <LoadingButton
-            variant="contained"
-            onClick={() => {
-              formik.handleSubmit()
-            }}
-            sx={{
-              paddingLeft: formik.status != null ? theme.spacing(6) : undefined,
-            }}
-            loading={
-              formik.status != null &&
-              !formik.status.startsWith('Error:') &&
-              !formik.status.includes('Success')
-            }
-            disabled={!formik.isValid}
-          >
-            {formik.values.step === 3 ? formik.status || btnName : 'Next'}
-          </LoadingButton>
+          {formik.values.step === 3 ? (
+            <ApproveActionButtons
+              collateralTokenAddress={formik.values.collateralToken.id}
+              onTransactionSuccess={() => {
+                formik.setFieldValue('step', 1, true)
+              }}
+              pool={formik.values}
+              decimal={decimal}
+              textFieldValue={formik.values.collateralBalance}
+              transactionType={'create'}
+            />
+          ) : (
+            <LoadingButton
+              variant="contained"
+              onClick={() => {
+                formik.handleSubmit()
+              }}
+              sx={{
+                paddingLeft:
+                  formik.status != null ? theme.spacing(6) : undefined,
+              }}
+              loading={
+                formik.status != null &&
+                !formik.status.startsWith('Error:') &&
+                !formik.status.includes('Success')
+              }
+              disabled={!formik.isValid}
+            >
+              {formik.values.step === 3 ? formik.status || 'Create' : 'Next'}
+            </LoadingButton>
+          )}
         </Stack>
       </Box>
     </Container>

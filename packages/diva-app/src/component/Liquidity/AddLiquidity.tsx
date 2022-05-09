@@ -8,28 +8,21 @@ import {
   Input,
   Stack,
   useTheme,
-  CircularProgress,
   Box,
 } from '@mui/material'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
 import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
-import { BigNumber, ethers } from 'ethers'
+import { BigNumber } from 'ethers'
 import styled from '@emotion/styled'
-import ERC20 from '@diva/contracts/abis/erc20.json'
 import {
   formatEther,
   formatUnits,
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { config } from '../../constants'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import { fetchPool, selectUserAddress } from '../../Redux/appSlice'
-import { useDispatch } from 'react-redux'
-import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { useAppSelector } from '../../Redux/hooks'
+import { ApproveActionButtons } from '../ApproveActionButtons'
+import { Pool } from '../../lib/queries'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -42,7 +35,7 @@ const BlackTextTypography = (props) => (
 )
 
 type Props = {
-  pool?: any
+  pool?: Pool
 }
 
 export const AddLiquidity = ({ pool }: Props) => {
@@ -54,35 +47,15 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [decimal, setDecimal] = React.useState(18)
   const [loading, setLoading] = React.useState(false)
   const [balanceUpdated, setBalanceUpdated] = React.useState(true)
-  const [btnName, setBtnName] = React.useState('Add')
   const [approving, setApproving] = React.useState('')
   const tokenBalance = useErcBalance(
     pool ? pool!.collateralToken.id : undefined,
     balanceUpdated
   )
-  const dispatch = useDispatch()
-  const { provider } = useConnectionContext()
-  const account = useAppSelector(selectUserAddress)
-
-  const chainId = provider?.network?.chainId
   useEffect(() => {
     if (pool) {
       setDecimal(pool.collateralToken.decimals)
       setOpenExpiredAlert(Date.now() > 1000 * parseInt(pool.expiryTime))
-    }
-    if (textFieldValue !== '' && chainId) {
-      const token = new ethers.Contract(
-        pool!.collateralToken.id,
-        ERC20,
-        provider.getSigner()
-      )
-      token.allowance(account, config[chainId!].divaAddress).then((res) => {
-        if (res.lt(parseUnits(textFieldValue, decimal))) {
-          setBtnName('Approve')
-        } else {
-          setBtnName('Add')
-        }
-      })
     }
     if (
       pool! &&
@@ -342,105 +315,13 @@ export const AddLiquidity = ({ pool }: Props) => {
               mt: '2em',
             }}
           >
-            <div
-              style={{
-                height: '100px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {loading ? (
-                <CircularProgress />
-              ) : (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  type="submit"
-                  value="Submit"
-                  disabled={
-                    !pool || Date.now() > 1000 * parseInt(pool.expiryTime)
-                  }
-                  onClick={() => {
-                    setLoading(true)
-                    const token = new ethers.Contract(
-                      pool!.collateralToken.id,
-                      ERC20,
-                      provider.getSigner()
-                    )
-                    const diva = new ethers.Contract(
-                      config[chainId!].divaAddress,
-                      DIVA_ABI,
-                      provider?.getSigner()
-                    )
-                    token
-                      .allowance(account, diva.address)
-                      .then((res) => {
-                        if (res.lt(parseUnits(textFieldValue, decimal))) {
-                          token
-                            .approve(
-                              config[chainId!].divaAddress,
-                              parseUnits(textFieldValue, decimal)
-                            )
-                            .then((tx: any) => {
-                              return tx.wait()
-                            })
-                            .then(() => {
-                              setBtnName('Add')
-                              setLoading(false)
-                              return token.allowance(
-                                account,
-                                config[chainId!].divaAddress
-                              )
-                            })
-                            .catch((err: any) => console.error(err))
-                        } else {
-                          diva!
-                            .addLiquidity(
-                              window.location.pathname.split('/')[1],
-                              parseUnits(textFieldValue, decimal)
-                            )
-                            .then((tx) => {
-                              /**
-                               * dispatch action to refetch the pool after action
-                               */
-                              tx.wait()
-                                .then(() => {
-                                  setLoading(false)
-                                  setTimeout(() => {
-                                    setBalanceUpdated(false)
-                                    dispatch(
-                                      fetchPool({
-                                        graphUrl:
-                                          config[chainId as number]
-                                            .divaSubgraph,
-                                        poolId:
-                                          window.location.pathname.split(
-                                            '/'
-                                          )[1],
-                                      })
-                                    )
-                                  }, 5000)
-                                })
-                                .catch((err: any) => console.error(err))
-                            })
-                            .catch((err: any) => console.error(err))
-                        }
-                      })
-                      .catch((err: any) => console.error(err))
-                  }}
-                  style={{
-                    maxWidth: theme.spacing(38),
-                    maxHeight: theme.spacing(5),
-                    minWidth: theme.spacing(38),
-                    minHeight: theme.spacing(5),
-                  }}
-                >
-                  {btnName}
-                </Button>
-              )}
-            </div>
+            <ApproveActionButtons
+              collateralTokenAddress={pool!.collateralToken.id}
+              decimal={pool.collateralToken.decimals}
+              textFieldValue={textFieldValue}
+              transactionType={'liquidity'}
+              onTransactionSuccess={() => setBalanceUpdated(!balanceUpdated)}
+            />
           </Container>
         </Container>
       </Card>
