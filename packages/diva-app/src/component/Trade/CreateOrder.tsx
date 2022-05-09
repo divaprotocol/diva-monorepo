@@ -79,7 +79,7 @@ export default function CreateOrder() {
     if (!isLimit) {
       dispatch(fillOrder({ orderKey: url, provider }))
     } else {
-      dispatch(createOrder(url))
+      dispatch(createOrder({ orderKey: url, provider }))
     }
   }, [isLimit, dispatch, url, provider])
 

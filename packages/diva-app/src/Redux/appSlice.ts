@@ -6,12 +6,12 @@ import {
   createSlice,
   PayloadAction,
 } from '@reduxjs/toolkit'
-import { getMessage } from 'eip-712'
 import {
   formatEther,
   formatUnits,
   parseEther,
   parseUnits,
+  splitSignature,
 } from 'ethers/lib/utils'
 import { BigNumber, Contract, providers, utils } from 'ethers'
 import {
@@ -186,7 +186,7 @@ export const fillOrder = createAsyncThunk(
     if (orderView.isLimit) {
       throw new Error('cannot fill order in limit view')
     }
-    const orders =
+    const orders: Order[] =
       state.appSlice[chainId].orders[orderView.takerToken][orderView.makerToken]
     const exchangeProxy = config[chainId].zeroXAddress
     const takerTokenInfo = selectTokenInfo(orderView.takerToken)(state)
@@ -278,7 +278,13 @@ export const fillOrder = createAsyncThunk(
 
 export const createOrder = createAsyncThunk(
   'app/createOrder',
-  async (orderKey: string, thunk) => {
+  async (
+    {
+      orderKey,
+      provider,
+    }: { orderKey: string; provider: providers.Web3Provider },
+    thunk
+  ) => {
     const state = thunk.getState() as RootState
     const { chainId, userAddress } = state.appSlice
     const orderView = state.appSlice[chainId].orderView[orderKey]
@@ -295,7 +301,9 @@ export const createOrder = createAsyncThunk(
       const privateKey = utils.formatBytes32String(
         Math.random().toString().substring(2)
       )
-      const signingKey = new utils.SigningKey(privateKey)
+      const signer = provider.getSigner()
+      const address = await signer.getAddress()
+
       const order = {
         expiry,
         maker: userAddress,
@@ -324,8 +332,11 @@ export const createOrder = createAsyncThunk(
         message: create0xMessage(order),
       }
 
-      const message = getMessage(typedData, true)
-      const { r, s, v } = signingKey.signDigest(message)
+      const data = await provider.send('eth_signTypedData_v4', [
+        address,
+        JSON.stringify(typedData),
+      ])
+      const { r, s, v } = splitSignature(data)
       const mutation = createOrderMutation({
         ...order,
         chainId,
