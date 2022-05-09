@@ -23,7 +23,7 @@ const validState = (state) => {
       return res
     })
   ) {
-    console.error('previous app state is invalid, resetting it', preloadedState)
+    console.error('previous app state is invalid, resetting it', state)
     return undefined
   }
 
