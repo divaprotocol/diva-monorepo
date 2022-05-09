@@ -10,7 +10,7 @@ export const statsSlice = createSlice({
   },
   reducers: {
     setMaxYield: (state, action) => {
-      state.maxYield = action.payload + 'x'
+      state.maxYield = action.payload
     },
     setBreakEven: (state, action) => {
       state.breakEven = action.payload

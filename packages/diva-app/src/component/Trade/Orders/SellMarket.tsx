@@ -387,21 +387,20 @@ export default function SellMarket(props: {
         BigENumber.from(option.supplyInitial),
         option.collateralToken.decimals
       )
-      if (avgExpectedRate > 0) {
+      if (avgExpectedRate > 0 && !isNaN(avgExpectedRate)) {
         dispatch(
           setMaxYield(
             parseFloat(
               formatEther(
-                parseEther(maxPayout).div(
-                  parseUnits(
-                    String(avgExpectedRate),
-                    option.collateralToken.decimals
-                  )
-                )
+                parseEther(maxPayout)
+                  .mul(parseEther('1'))
+                  .div(parseEther(String(avgExpectedRate)))
               )
-            ).toFixed(2)
+            ).toFixed(2) + 'x'
           )
         )
+      } else {
+        dispatch(setMaxYield('n/a'))
       }
       if (isLong) {
         if (!isNaN(avgExpectedRate)) {

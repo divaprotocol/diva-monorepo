@@ -319,9 +319,11 @@ export default function SellLimit(props: {
                   .mul(parseEther('1'))
                   .div(parseEther(String(pricePerOption)))
               )
-            ).toFixed(2)
+            ).toFixed(2) + 'x'
           )
         )
+      } else {
+        dispatch(setMaxYield('n/a'))
       }
       if (isLong) {
         if (!isNaN(pricePerOption)) {
@@ -469,7 +471,7 @@ export default function SellLimit(props: {
         )
       }
     }
-  }, [option, pricePerOption, usdPrice])
+  }, [option, pricePerOption, usdPrice, existingOrdersAmount])
 
   return (
     <div>
