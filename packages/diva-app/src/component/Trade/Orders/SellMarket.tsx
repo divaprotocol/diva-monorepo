@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useEffect } from 'react'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
@@ -19,13 +19,27 @@ import { BigNumber } from '@0x/utils'
 import { sellMarketOrder } from '../../../Orders/SellMarket'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import { getComparator, stableSort, totalDecimals } from './OrderHelper'
-import { useAppSelector } from '../../../Redux/hooks'
+import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
+import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
+import {
+  setBreakEven,
+  setIntrinsicValue,
+  setMaxPayout,
+  setMaxYield,
+} from '../../../Redux/Stats'
+import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
+import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
 
@@ -35,6 +49,7 @@ export default function SellMarket(props: {
   tokenAddress: string
   exchangeProxy: string
   chainId: number
+  usdPrice: string
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
@@ -56,6 +71,12 @@ export default function SellMarket(props: {
   const takerToken = props.tokenAddress
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const params: { tokenType: string } = useParams()
+
+  const usdPrice = props.usdPrice
+  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
+  const dispatch = useAppDispatch()
+
+  const isLong = window.location.pathname.split('/')[2] === 'long'
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseFloat(value)
@@ -346,6 +367,184 @@ export default function SellMarket(props: {
     }
   }, [numberOfOptions])
 
+  useEffect(() => {
+    if (usdPrice != '') {
+      const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
+        BigENumber.from(option.floor),
+        BigENumber.from(option.inflection),
+        BigENumber.from(option.cap),
+        BigENumber.from(option.collateralBalanceLongInitial),
+        BigENumber.from(option.collateralBalanceShortInitial),
+        option.statusFinalReferenceValue === 'Open' &&
+          parseUnits(usdPrice).gt(0)
+          ? parseUnits(usdPrice)
+          : BigENumber.from(option.finalReferenceValue),
+        BigENumber.from(option.supplyInitial),
+        option.collateralToken.decimals
+      )
+      if (avgExpectedRate > 0 && !isNaN(avgExpectedRate)) {
+        dispatch(
+          setMaxYield(
+            parseFloat(
+              formatEther(
+                parseEther(maxPayout)
+                  .mul(parseEther('1'))
+                  .div(parseEther(String(avgExpectedRate)))
+              )
+            ).toFixed(2) + 'x'
+          )
+        )
+      } else {
+        dispatch(setMaxYield('n/a'))
+      }
+      if (isLong) {
+        if (!isNaN(avgExpectedRate)) {
+          const be1 = parseEther(String(avgExpectedRate))
+            .mul(
+              BigENumber.from(option.inflection).sub(
+                BigENumber.from(option.floor)
+              )
+            )
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(
+              BigENumber.from(option.collateralBalanceLongInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .div(parseEther('1'))
+            .add(BigENumber.from(option.floor))
+
+          const be2 = parseEther(String(avgExpectedRate))
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(parseEther('1'))
+            .sub(
+              BigENumber.from(option.collateralBalanceLongInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .mul(
+              BigENumber.from(option.cap).sub(
+                BigENumber.from(option.inflection)
+              )
+            )
+            .div(
+              BigENumber.from(option.collateralBalanceShortInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .add(BigENumber.from(option.inflection))
+          if (
+            parseEther(String(avgExpectedRate)).gte(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .mul(parseUnits('1', option.collateralToken.decimals))
+                .div(
+                  BigENumber.from(option.collateralBalanceLongInitial).add(
+                    BigENumber.from(option.collateralBalanceShortInitial)
+                  )
+                )
+            )
+          ) {
+            dispatch(setBreakEven(formatEther(be2)))
+          } else {
+            dispatch(setBreakEven(formatEther(be1)))
+          }
+        }
+        if (
+          option.statusFinalReferenceValue === 'Open' &&
+          parseFloat(usdPrice) == 0
+        ) {
+          dispatch(setIntrinsicValue('n/a'))
+        } else {
+          dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
+        }
+        dispatch(
+          setMaxPayout(
+            formatEther(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .add(BigENumber.from(option.collateralBalanceShortInitial))
+                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+                .mul(parseEther('1'))
+                .div(BigENumber.from(option.supplyInitial))
+            )
+          )
+        )
+      } else {
+        if (!isNaN(avgExpectedRate) && avgExpectedRate != 0) {
+          const be1 = parseEther(String(avgExpectedRate))
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(parseEther('1'))
+            .sub(
+              BigENumber.from(option.collateralBalanceShortInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .mul(
+              BigENumber.from(option.inflection).sub(
+                BigENumber.from(option.floor)
+              )
+            )
+            .div(
+              BigENumber.from(option.collateralBalanceLongInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .sub(BigENumber.from(option.inflection))
+            .mul(BigENumber.from('-1'))
+
+          const be2 = parseEther(String(avgExpectedRate))
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(
+              BigENumber.from(option.collateralBalanceShortInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .mul(
+              BigENumber.from(option.cap).sub(
+                BigENumber.from(option.inflection)
+              )
+            )
+            .div(parseEther('1'))
+            .sub(BigENumber.from(option.cap))
+            .mul(BigENumber.from('-1'))
+
+          if (
+            parseEther(String(avgExpectedRate)).gte(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .mul(parseUnits('1', option.collateralToken.decimals))
+                .div(
+                  BigENumber.from(option.collateralBalanceLongInitial).add(
+                    BigENumber.from(option.collateralBalanceShortInitial)
+                  )
+                )
+            )
+          ) {
+            dispatch(setBreakEven(formatEther(be1)))
+          } else {
+            dispatch(setBreakEven(formatEther(be2)))
+          }
+        }
+        if (
+          option.statusFinalReferenceValue === 'Open' &&
+          parseFloat(usdPrice) == 0
+        ) {
+          dispatch(setIntrinsicValue('n/a'))
+        } else {
+          dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
+        }
+        dispatch(
+          setMaxPayout(
+            formatEther(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .add(BigENumber.from(option.collateralBalanceShortInitial))
+                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+                .mul(parseEther('1'))
+                .div(BigENumber.from(option.supplyInitial))
+            )
+          )
+        )
+      }
+    }
+  }, [option, avgExpectedRate, usdPrice])
   return (
     <div>
       <form onSubmit={handleOrderSubmit}>
