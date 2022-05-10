@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
@@ -17,17 +17,31 @@ import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
-import { useAppSelector } from '../../../Redux/hooks'
+import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { totalDecimals } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
+import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import { BigNumber } from '@0x/utils'
 import { useParams } from 'react-router-dom'
 import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
+import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
+import {
+  setBreakEven,
+  setIntrinsicValue,
+  setMaxPayout,
+  setMaxYield,
+} from '../../../Redux/Stats'
+import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 const web3 = new Web3(Web3.givenProvider)
 
 export default function SellLimit(props: {
@@ -36,6 +50,7 @@ export default function SellLimit(props: {
   tokenAddress: string
   exchangeProxy: string
   chainId: number
+  usdPrice: string
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const chainId = useAppSelector(selectChainId)
@@ -57,6 +72,10 @@ export default function SellLimit(props: {
   //const takerToken = option.collateralToken
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const params: { tokenType: string } = useParams()
+  const usdPrice = props.usdPrice
+  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
+  const isLong = window.location.pathname.split('/')[2] === 'long'
+  const dispatch = useAppDispatch()
   const handleNumberOfOptions = (value: string) => {
     setNumberOfOptions(parseFloat(value))
   }
@@ -272,6 +291,184 @@ export default function SellLimit(props: {
         : event.target.value
     )
   }
+
+  useEffect(() => {
+    if (usdPrice != '') {
+      const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
+        BigENumber.from(option.floor),
+        BigENumber.from(option.inflection),
+        BigENumber.from(option.cap),
+        BigENumber.from(option.collateralBalanceLongInitial),
+        BigENumber.from(option.collateralBalanceShortInitial),
+        option.statusFinalReferenceValue === 'Open' &&
+          parseEther(usdPrice).gt(0)
+          ? parseEther(usdPrice)
+          : BigENumber.from(option.finalReferenceValue),
+        BigENumber.from(option.supplyInitial),
+        option.collateralToken.decimals
+      )
+      if (pricePerOption > 0) {
+        dispatch(
+          setMaxYield(
+            parseFloat(
+              formatEther(
+                parseEther(maxPayout)
+                  .mul(parseEther('1'))
+                  .div(parseEther(String(pricePerOption)))
+              )
+            ).toFixed(2) + 'x'
+          )
+        )
+      } else {
+        dispatch(setMaxYield('n/a'))
+      }
+      if (isLong) {
+        if (!isNaN(pricePerOption)) {
+          const be1 = parseEther(String(pricePerOption))
+            .mul(
+              BigENumber.from(option.inflection).sub(
+                BigENumber.from(option.floor)
+              )
+            )
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(
+              BigENumber.from(option.collateralBalanceLongInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .div(parseEther('1'))
+            .add(BigENumber.from(option.floor))
+
+          const be2 = parseEther(String(pricePerOption))
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(parseEther('1'))
+            .sub(
+              BigENumber.from(option.collateralBalanceLongInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .mul(
+              BigENumber.from(option.cap).sub(
+                BigENumber.from(option.inflection)
+              )
+            )
+            .div(
+              BigENumber.from(option.collateralBalanceShortInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .add(BigENumber.from(option.inflection))
+          if (
+            parseEther(String(pricePerOption)).gte(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .mul(parseUnits('1', option.collateralToken.decimals))
+                .div(
+                  BigENumber.from(option.collateralBalanceLongInitial).add(
+                    BigENumber.from(option.collateralBalanceShortInitial)
+                  )
+                )
+            )
+          ) {
+            dispatch(setBreakEven(formatEther(be1)))
+          } else {
+            dispatch(setBreakEven(formatEther(be2)))
+          }
+        }
+        if (
+          option.statusFinalReferenceValue === 'Open' &&
+          parseFloat(usdPrice) == 0
+        ) {
+          dispatch(setIntrinsicValue('n/a'))
+        } else {
+          dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
+        }
+        dispatch(
+          setMaxPayout(
+            formatEther(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .add(BigENumber.from(option.collateralBalanceShortInitial))
+                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+                .mul(parseEther('1'))
+                .div(BigENumber.from(option.supplyInitial))
+            )
+          )
+        )
+      } else {
+        if (!isNaN(pricePerOption)) {
+          const be1 = parseEther(String(pricePerOption))
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(parseEther('1'))
+            .sub(
+              BigENumber.from(option.collateralBalanceShortInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .mul(
+              BigENumber.from(option.inflection).sub(
+                BigENumber.from(option.floor)
+              )
+            )
+            .div(
+              BigENumber.from(option.collateralBalanceLongInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .sub(BigENumber.from(option.inflection))
+            .mul(BigENumber.from('-1'))
+
+          const be2 = parseEther(String(pricePerOption))
+            .mul(BigENumber.from(option.supplyInitial))
+            .div(
+              BigENumber.from(option.collateralBalanceShortInitial).mul(
+                parseUnits('1', 18 - option.collateralToken.decimals)
+              )
+            )
+            .mul(
+              BigENumber.from(option.cap).sub(
+                BigENumber.from(option.inflection)
+              )
+            )
+            .div(parseEther('1'))
+            .sub(BigENumber.from(option.cap))
+            .mul(BigENumber.from('-1'))
+          if (
+            parseEther(String(pricePerOption)).gte(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .mul(parseUnits('1', option.collateralToken.decimals))
+                .div(
+                  BigENumber.from(option.collateralBalanceLongInitial).add(
+                    BigENumber.from(option.collateralBalanceShortInitial)
+                  )
+                )
+            )
+          ) {
+            dispatch(setBreakEven(formatEther(be1)))
+          } else {
+            dispatch(setBreakEven(formatEther(be2)))
+          }
+        }
+        if (
+          option.statusFinalReferenceValue === 'Open' &&
+          parseFloat(usdPrice) == 0
+        ) {
+          dispatch(setIntrinsicValue('n/a'))
+        } else {
+          dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
+        }
+        dispatch(
+          setMaxPayout(
+            formatEther(
+              BigENumber.from(option.collateralBalanceLongInitial)
+                .add(BigENumber.from(option.collateralBalanceShortInitial))
+                .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+                .mul(parseEther('1'))
+                .div(BigENumber.from(option.supplyInitial))
+            )
+          )
+        )
+      }
+    }
+  }, [option, pricePerOption, usdPrice, existingOrdersAmount])
 
   return (
     <div>
