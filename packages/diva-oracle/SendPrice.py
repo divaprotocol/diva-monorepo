@@ -1,12 +1,31 @@
 from web3 import Web3
+import json
 
-PRIVATE_KEY = '0x' + 'ca9af43b9f248bd8b8a2f51b4905325f1dc65e8ae0e8a96638f37ef60bbe1476'
-wallet = '0xc948f2F172Fe25977E322c8D82F8f53338f8a051'
+from ChainSet import Chain
 
-contract_address = '0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf'
+# here pull keys and Diva contract address from config.json
+# Must create a config.json file with below format
+'''
+{
+    "wallet" :
+    "private_key" : 
+    "contract_address" : 
+}
+'''
+data = open("config.json")
+configs = json.loads(data.read())
 
-provider_url = 'https://ropsten.infura.io/v3/a6b3d560ce544297b265bb09f0d4bfa8'
+PRIVATE_KEY = configs["private_key"]
+WALLET = configs["wallet"]
+# 0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf
+CONTRACT_ADDRESS = configs["contract_address"]
+e = Chain()
 
+e.Price_infra()
+
+
+provider_url = e.Price_infra()
+print(provider_url)
 w3 = Web3(Web3.HTTPProvider(provider_url))
 
 print(w3.isConnected())
@@ -137,7 +156,7 @@ abi = '''[
 '''
 
 def sendPrice(pool_id, value):
-    my_contract = w3.eth.contract(address=contract_address, abi=abi)
+    my_contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
     #print("contract: {}", my_contract)
     #print(w3.eth.get_transaction_count(wallet))
     #print(w3.eth.gas_price)
@@ -145,8 +164,8 @@ def sendPrice(pool_id, value):
         {
             "gasPrice": w3.eth.gas_price,
             "chainId": 3,
-            "from": wallet,
-            "nonce": w3.eth.get_transaction_count(wallet)
+            "from": WALLET,
+            "nonce": w3.eth.get_transaction_count(WALLET)
         }
     )
 

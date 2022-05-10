@@ -4,12 +4,17 @@ import datetime as dt
 from datetime import datetime
 import json
 
+from ChainSet import Chain
+
 # function to use requests.post to make an API call to the subgraph url
 def run_query(query):
 
     # endpoint where you are making the request
-    request = requests.post('https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten'
-                            '',
+    url = Chain()
+    url.Graph_url()
+    u2 = url.Graph_url()
+    request = requests.post( u2
+                            ,
                             json={'query': query})
     if request.status_code == 200:
         return request.json()
