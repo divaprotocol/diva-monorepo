@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
@@ -34,7 +34,6 @@ import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 import { BigNumber } from '@0x/utils'
 import { useParams } from 'react-router-dom'
 import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import {
   setBreakEven,
   setIntrinsicValue,
@@ -94,14 +93,20 @@ export default function SellLimit(props: {
 
   const approveSellAmount = async (amount) => {
     const amountBigNumber = parseUnits(amount.toString())
-    await makerTokenContract.methods
+    const approveResponse = await makerTokenContract.methods
       .approve(exchangeProxyAddress, amountBigNumber)
       .send({ from: makerAccount })
-
-    const allowance = await makerTokenContract.methods
-      .allowance(makerAccount, exchangeProxyAddress)
-      .call()
-    return allowance
+    if ('events' in approveResponse) {
+      return approveResponse.events.Approval.returnValues.value
+    } else {
+      //in case the approve call does not emit events read the allowance again
+      //may be there is delay in updating the values this way we can reduce an extra call to contract
+      await new Promise((resolve) => setTimeout(resolve, 4000))
+      const approvedAllowance = await makerTokenContract.methods
+        .allowance(makerAccount, exchangeProxyAddress)
+        .call()
+      return approvedAllowance
+    }
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -127,9 +132,7 @@ export default function SellLimit(props: {
         setIsApproved(true)
         //Allowance for 0x exchange contract [address 0xdef1c] successfully updated to 80 DAI
         alert(
-          `Allowance for 0x exchange contract ` +
-            { exchangeProxyAddress } +
-            ` successfully updated to ` +
+          `Allowance successfully updated to ` +
             approvedAllowance +
             ` ` +
             params.tokenType
