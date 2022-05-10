@@ -164,7 +164,7 @@ export const ApproveActionButtons = ({
                       referenceAsset: pool.referenceAsset.toString(),
                       collateralToken: pool.collateralToken.id.toString(),
                       dataProvider: pool.dataProvider.toString(),
-                      capacity: parseEther('0'),
+                      capacity: parseUnits(pool.capacity.toString(), decimal),
                     })
                     .then((tx) => {
                       /**

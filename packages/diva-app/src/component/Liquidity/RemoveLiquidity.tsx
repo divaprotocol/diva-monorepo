@@ -328,7 +328,12 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 size="large"
                 type="submit"
                 value="Submit"
-                disabled={!pool || openExpiredAlert}
+                disabled={
+                  !pool ||
+                  openExpiredAlert ||
+                  textFieldValue === '' ||
+                  chainId == null
+                }
                 onClick={() => {
                   setLoading(true)
                   const diva = new ethers.Contract(
@@ -388,7 +393,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           </Typography>
         </Stack>
         <Stack direction="row" justifyContent="space-between">
-          <Typography>Redemption Fee</Typography>
+          <Typography>Protocol Fee</Typography>
           <Typography>
             {pool &&
               textFieldValue !== '' &&
