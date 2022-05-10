@@ -138,6 +138,9 @@ abi = '''[
 
 def sendPrice(pool_id, value):
     my_contract = w3.eth.contract(address=contract_address, abi=abi)
+    #print("contract: {}", my_contract)
+    #print(w3.eth.get_transaction_count(wallet))
+    #print(w3.eth.gas_price)
     setFinRef_txn = my_contract.functions.setFinalReferenceValue(int(pool_id), int(w3.toWei(value, 'ether')), False).buildTransaction(
         {
             "gasPrice": w3.eth.gas_price,

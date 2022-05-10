@@ -1,3 +1,6 @@
+The purpose of this repo is to run a DIVA price Oracle for certian trading pairs.
+Current this only runs on robsten testnet
+This is operational in its current form running the main.py script. Instructions below
 1. Install poetry: 
 
 * osx / linux / bashonwindows install instructions:
@@ -30,3 +33,5 @@ poetry add pandas
 
 ## Helpful links
 * Python poetry docs: https://python-poetry.org/docs/
+
+
