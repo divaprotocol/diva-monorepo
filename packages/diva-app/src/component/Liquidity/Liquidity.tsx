@@ -22,7 +22,7 @@ export const Liquidity = ({ pool }: Props) => {
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
   }
-  console.log('capacity', pool.capacity)
+
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <Stack
@@ -72,16 +72,39 @@ export const Liquidity = ({ pool }: Props) => {
                       parseFloat(
                         formatUnits(
                           BigNumber.from(pool.collateralBalance),
-                          pool!.collateralToken.decimals
+                          pool.collateralToken.decimals
                         )
                       ) +
                         ' / ' +
                         parseFloat(
                           formatUnits(
                             BigNumber.from(pool.capacity),
-                            pool!.collateralToken.decimals
+                            pool.collateralToken.decimals
                           )
                         )}{' '}
+                    {pool.collateralToken.symbol!}{' '}
+                  </Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Currently Utilized</Typography>
+                  <Typography>
+                    {pool &&
+                      (
+                        (100 *
+                          parseFloat(
+                            formatUnits(
+                              BigNumber.from(pool.collateralBalance),
+                              pool.collateralToken.decimals
+                            )
+                          )) /
+                        parseFloat(
+                          formatUnits(
+                            BigNumber.from(pool.capacity),
+                            pool.collateralToken.decimals
+                          )
+                        )
+                      ).toFixed(2)}
+                    {'% '}
                     {pool.collateralToken.symbol!}{' '}
                   </Typography>
                 </Stack>

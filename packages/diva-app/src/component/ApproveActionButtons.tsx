@@ -92,7 +92,7 @@ export const ApproveActionButtons = ({
               size="large"
               type="submit"
               value="Submit"
-              disabled={approveEnabled === false}
+              disabled={approveEnabled === false || account == null}
               onClick={() => {
                 setApproveLoading(true)
 
@@ -139,7 +139,7 @@ export const ApproveActionButtons = ({
             size="large"
             type="submit"
             value="Submit"
-            disabled={actionEnabled === false}
+            disabled={actionEnabled === false || account == null}
             onClick={() => {
               setActionLoading(true)
               switch (transactionType) {
