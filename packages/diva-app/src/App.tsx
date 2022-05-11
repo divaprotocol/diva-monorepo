@@ -45,6 +45,8 @@ export const App = () => {
     }
   }, [chainId, dispatch])
 
+  console.log('chainId', chainId)
+
   return (
     <Router>
       <Stack height="100%" direction="row" justifyContent="space-between">
