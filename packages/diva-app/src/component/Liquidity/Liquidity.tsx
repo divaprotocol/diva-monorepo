@@ -74,19 +74,12 @@ export const Liquidity = ({ pool }: Props) => {
                           BigNumber.from(pool.collateralBalance),
                           pool.collateralToken.decimals
                         )
-                      ) +
-                        ' / ' +
-                        parseFloat(
-                          formatUnits(
-                            BigNumber.from(pool.capacity),
-                            pool.collateralToken.decimals
-                          )
-                        )}{' '}
+                      )}{' '}
                     {pool.collateralToken.symbol!}{' '}
                   </Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
-                  <Typography>Currently Utilized</Typography>
+                  <Typography>Currently Utilized in %</Typography>
                   <Typography>
                     {pool &&
                       (
@@ -104,8 +97,7 @@ export const Liquidity = ({ pool }: Props) => {
                           )
                         )
                       ).toFixed(2)}
-                    {'% '}
-                    {pool.collateralToken.symbol!}{' '}
+                    {'%'}
                   </Typography>
                 </Stack>
               </Container>
