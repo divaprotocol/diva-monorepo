@@ -49,9 +49,7 @@ export function DefinePoolAttributes({
     cap,
     floor,
   } = formik.values
-
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
-
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
