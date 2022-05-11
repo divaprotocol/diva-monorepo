@@ -1,5 +1,6 @@
 from web3 import Web3
 import json
+import os
 
 from ChainSet import Chain
 
@@ -12,19 +13,18 @@ from ChainSet import Chain
     "contract_address" : 
 }
 '''
-data = open("config.json")
-configs = json.loads(data.read())
-
-PRIVATE_KEY = configs["private_key"]
-WALLET = configs["wallet"]
-# 0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf
-CONTRACT_ADDRESS = configs["contract_address"]
 e = Chain()
 
-e.Price_infra()
+PRIVATE_KEY = os.environ.get('PRIVATE_KEY')
+WALLET = os.environ.get('WALLET')
+# 0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf
+CONTRACT_ADDRESS = e.contract_address()
+e = Chain()
+
+e.price_infra()
 
 
-provider_url = e.Price_infra()
+provider_url = e.price_infra()
 print(provider_url)
 w3 = Web3(Web3.HTTPProvider(provider_url))
 

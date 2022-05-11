@@ -11,8 +11,8 @@ def run_query(query):
 
     # endpoint where you are making the request
     url = Chain()
-    url.Graph_url()
-    u2 = url.Graph_url()
+    url.graph_url()
+    u2 = url.graph_url()
     request = requests.post( u2
                             ,
                             json={'query': query})

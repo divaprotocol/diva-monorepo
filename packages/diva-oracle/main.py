@@ -4,6 +4,7 @@ import requests
 import pandas as pd
 import json
 import time
+import os
 
 from Prices import getKrakenPrice
 from QueryGraph import *
@@ -29,6 +30,7 @@ from SendPrice import sendPrice
     						statusFinalReferenceValue
               }
             }'''
+dp = os.environ.get('WALLET')
 query = """
             {
               pools (where: {dataProvider: "0xc948f2F172Fe25977E322c8D82F8f53338f8a051"}) {
