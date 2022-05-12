@@ -125,6 +125,7 @@ export default function OpenOrders(props: {
       )
       if (rSell.length > 0) {
         responseSell = rSell
+        dispatch(setResponseSell(responseSell))
       }
     }
 
@@ -136,6 +137,7 @@ export default function OpenOrders(props: {
       )
       if (rBuy.length > 0) {
         responseBuy = rBuy
+        dispatch(setResponseBuy(responseBuy))
       }
     }
     const orderBookBuy = mapOrderData(
@@ -198,6 +200,9 @@ export default function OpenOrders(props: {
       const log = cancelOrderResponse?.logs?.[0]
       if (log != null && log.event == 'OrderCancelled') {
         alert('Order successfully canceled')
+        //need to invalidate cache order response since orderbook is updated
+        dispatch(setResponseSell([]))
+        dispatch(setResponseBuy([]))
         //update orderbook & create orders widget
         componentDidMount()
       } else {

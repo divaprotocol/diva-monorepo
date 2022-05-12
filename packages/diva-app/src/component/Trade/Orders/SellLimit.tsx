@@ -41,6 +41,7 @@ import {
   setMaxYield,
 } from '../../../Redux/Stats'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
+import { setResponseSell } from '../../../Redux/TradeOption'
 const web3 = new Web3(Web3.givenProvider)
 
 export default function SellLimit(props: {
@@ -89,23 +90,39 @@ export default function SellLimit(props: {
     )
     setNumberOfOptions(parseFloat('0.0'))
     setPricePerOption(parseFloat('0.0'))
+    let approvedAllowance = await makerTokenContract.methods
+      .allowance(makerAccount, exchangeProxyAddress)
+      .call()
+    approvedAllowance = Number(formatUnits(approvedAllowance.toString(), 18))
+    const remainingAmount = Number(
+      (approvedAllowance - existingOrdersAmount).toFixed(
+        totalDecimals(approvedAllowance, existingOrdersAmount)
+      )
+    )
+    setRemainingApprovalAmount(remainingAmount)
   }
 
   const approveSellAmount = async (amount) => {
-    const amountBigNumber = parseUnits(amount.toString())
-    const approveResponse = await makerTokenContract.methods
-      .approve(exchangeProxyAddress, amountBigNumber)
-      .send({ from: makerAccount })
-    if ('events' in approveResponse) {
-      return approveResponse.events.Approval.returnValues.value
-    } else {
-      //in case the approve call does not emit events read the allowance again
-      //may be there is delay in updating the values this way we can reduce an extra call to contract
-      await new Promise((resolve) => setTimeout(resolve, 4000))
-      const approvedAllowance = await makerTokenContract.methods
-        .allowance(makerAccount, exchangeProxyAddress)
-        .call()
-      return approvedAllowance
+    try {
+      const amountBigNumber = parseUnits(amount.toString())
+      const approveResponse = await makerTokenContract.methods
+        .approve(exchangeProxyAddress, amountBigNumber)
+        .send({ from: makerAccount })
+      console.log('Approve response ' + JSON.stringify(approveResponse))
+      if ('events' in approveResponse) {
+        return approveResponse.events.Approval.returnValues.value
+      } else {
+        //in case the approve call does not emit events read the allowance again
+        //may be there is delay in updating the values this way we can reduce an extra call to contract
+        await new Promise((resolve) => setTimeout(resolve, 4000))
+        const approvedAllowance = await makerTokenContract.methods
+          .allowance(makerAccount, exchangeProxyAddress)
+          .call()
+        return approvedAllowance
+      }
+    } catch (error) {
+      console.log('error ' + JSON.stringify(error))
+      return 'undefined'
     }
   }
 
@@ -119,24 +136,28 @@ export default function SellLimit(props: {
           )
         )
         let approvedAllowance = await approveSellAmount(amount)
-        approvedAllowance = Number(
-          formatUnits(approvedAllowance.toString(), 18)
-        )
-        const remainingApproval = Number(
-          (approvedAllowance - existingOrdersAmount).toFixed(
-            totalDecimals(approvedAllowance, existingOrdersAmount)
+        if (approvedAllowance == 'undefined') {
+          alert('Metamask could not finish approval please check gas limit')
+        } else {
+          approvedAllowance = Number(
+            formatUnits(approvedAllowance.toString(), 18)
           )
-        )
-        setRemainingApprovalAmount(remainingApproval)
-        setAllowance(approvedAllowance)
-        setIsApproved(true)
-        //Allowance for 0x exchange contract [address 0xdef1c] successfully updated to 80 DAI
-        alert(
-          `Allowance successfully updated to ` +
-            approvedAllowance +
-            ` ` +
-            params.tokenType
-        )
+          const remainingApproval = Number(
+            (approvedAllowance - existingOrdersAmount).toFixed(
+              totalDecimals(approvedAllowance, existingOrdersAmount)
+            )
+          )
+          setRemainingApprovalAmount(remainingApproval)
+          setAllowance(approvedAllowance)
+          setIsApproved(true)
+          //Allowance for 0x exchange contract [address 0xdef1c] successfully updated to 80 DAI
+          alert(
+            `Allowance successfully updated to ` +
+              approvedAllowance +
+              ` ` +
+              params.tokenType
+          )
+        }
       } else {
         alert('please enter positive balance for approval')
       }
@@ -165,16 +186,27 @@ export default function SellLimit(props: {
                   totalDecimals(additionalApproval, allowance)
                 )
               )
-              newAllowance = await approveSellAmount(newAllowance)
-              newAllowance = Number(formatUnits(newAllowance.toString(), 18))
-              const remainingApproval = Number(
-                (newAllowance - existingOrdersAmount).toFixed(
-                  totalDecimals(newAllowance, existingOrdersAmount)
+              const approvedAllowance = await approveSellAmount(newAllowance)
+              if (approvedAllowance == 'undefined') {
+                alert('Metamask could not finish transaction')
+                setOrderBtnDisabled(false)
+              } else {
+                newAllowance = approvedAllowance
+                newAllowance = Number(formatUnits(newAllowance.toString(), 18))
+                const remainingApproval = Number(
+                  (newAllowance - existingOrdersAmount).toFixed(
+                    totalDecimals(newAllowance, existingOrdersAmount)
+                  )
                 )
-              )
-              setRemainingApprovalAmount(remainingApproval)
-              setAllowance(newAllowance)
-              setOrderBtnDisabled(false)
+                setRemainingApprovalAmount(remainingApproval)
+                setAllowance(newAllowance)
+                setOrderBtnDisabled(false)
+                alert(
+                  'Additional ' +
+                    additionalApproval +
+                    ' sell options approved please proceed with order'
+                )
+              }
             } else {
               //TBD discuss this case
               setIsApproved(true)
@@ -198,6 +230,8 @@ export default function SellLimit(props: {
           sellLimitOrder(orderData)
             .then(async (response) => {
               if (response?.status === 200) {
+                //need to invalidate cache order response since orderbook is updated
+                dispatch(setResponseSell([]))
                 await new Promise((resolve) => setTimeout(resolve, 2000))
                 await props.handleDisplayOrder()
                 handleFormReset()

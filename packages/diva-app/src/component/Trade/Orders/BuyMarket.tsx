@@ -334,6 +334,49 @@ export default function BuyMarket(props: {
   }, [responseSell, responseBuy, userAddress])
 
   useEffect(() => {
+    if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {
+      let count = numberOfOptions
+      let cumulativeAvg = 0
+      let cumulativeTaker = 0
+      let cumulativeMaker = 0
+      existingSellLimitOrders.forEach((order: any) => {
+        const takerAmount = Number(
+          formatUnits(order.takerAmount, option.collateralToken.decimals)
+        )
+        const makerAmount = Number(formatUnits(order.makerAmount))
+        const expectedRate = order.expectedRate
+        if (count > 0) {
+          if (count <= makerAmount) {
+            const orderTotalAmount = Number(expectedRate * count)
+            cumulativeTaker = cumulativeTaker + orderTotalAmount
+            cumulativeMaker = cumulativeMaker + count
+            count = 0
+          } else {
+            cumulativeTaker = cumulativeTaker + takerAmount
+            cumulativeMaker = cumulativeMaker + makerAmount
+            count = count - makerAmount
+          }
+        }
+      })
+      if (totalDecimals(cumulativeTaker, cumulativeMaker) > 0) {
+        cumulativeAvg = Number(
+          (cumulativeTaker / cumulativeMaker).toFixed(
+            totalDecimals(cumulativeTaker, cumulativeMaker)
+          )
+        )
+      } else {
+        cumulativeAvg = Number(cumulativeTaker / cumulativeMaker)
+      }
+      console.log(totalDecimals(cumulativeTaker, cumulativeMaker))
+      if (cumulativeAvg > 0) {
+        setAvgExpectedRate(cumulativeAvg)
+        const youPayAmount = cumulativeAvg * numberOfOptions
+        setYouPay(youPayAmount)
+      }
+    }
+  }, [numberOfOptions])
+
+  useEffect(() => {
     if (usdPrice != '') {
       const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
         BigENumber.from(option.floor),

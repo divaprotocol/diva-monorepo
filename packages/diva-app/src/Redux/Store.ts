@@ -46,20 +46,20 @@ const storeConfig: any = {
 /**
  * Only add preloadded state to redux configuration if it is valid
  */
-if (preloadedState != null) {
-  storeConfig.preloadedState = preloadedState
-}
+//if (preloadedState != null) {
+//  storeConfig.preloadedState = preloadedState
+//}
 
 const store = configureStore(storeConfig)
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
 
-store.subscribe(
+/*store.subscribe(
   debounce(() => {
     const serializedState = JSON.stringify(store.getState())
     localStorage.setItem('diva-app-state-local', serializedState)
   }, 1000)
-)
+)*/
 
 export default store
