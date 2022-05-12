@@ -1,9 +1,14 @@
 # This file will set chains when running this script
 # For instance, choose robsten, rinkeby, etc, to run this script
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class Chain:
+    WALLET = os.getenv('WALLET')
+    PRIVATE_KEY = os.getenv('PRIVATE_KEY')
     CHAIN_ID = 3
     '''eth mainnet is 1
     ropsten is 3, 
@@ -55,8 +60,8 @@ class Chain:
     
     def contract_address(self):
         contract = "test"
-        if self.CHAIN_ID == 1:
-            contract = os.environ.get('ROBSTEN')
+        if self.CHAIN_ID == 3:
+            contract = os.getenv('ROBSTEN')
             #print(graph)
             return contract
         elif self.CHAIN_ID == 4:

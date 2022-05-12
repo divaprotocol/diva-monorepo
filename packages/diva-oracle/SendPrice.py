@@ -4,28 +4,17 @@ import os
 
 from ChainSet import Chain
 
-# here pull keys and Diva contract address from config.json
-# Must create a config.json file with below format
-'''
-{
-    "wallet" :
-    "private_key" : 
-    "contract_address" : 
-}
-'''
-e = Chain()
 
-PRIVATE_KEY = os.environ.get('PRIVATE_KEY')
-WALLET = os.environ.get('WALLET')
+config = Chain()
+
+PRIVATE_KEY = config.PRIVATE_KEY
+WALLET = config.WALLET
 # 0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf
-CONTRACT_ADDRESS = e.contract_address()
-e = Chain()
-
-e.price_infra()
-
-
-provider_url = e.price_infra()
+CONTRACT_ADDRESS = config.contract_address()
+provider_url = config.price_infra()
 print(provider_url)
+
+
 w3 = Web3(Web3.HTTPProvider(provider_url))
 
 print(w3.isConnected())

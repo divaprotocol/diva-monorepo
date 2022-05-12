@@ -23,10 +23,15 @@ def run_query(query):
 
 
 
-def get_required_reporting_df(resp, hours=24):
+def get_required_reporting_df(resp,  Asset_list, hours=24,):
     df = pd.json_normalize(resp, ['data', 'pools'])
     # filtering for time error in app
     df = df[df['expiryTime'].apply(lambda x: float(x) < 16512056850 )]
+
+    # Asset list of what assets the oracle resonds to
+    #df = df[df['referenceAsset'].isin(Asset_list)]
+
+    df = df[df['statusFinalReferenceValue'] == 'Open']
     
 
     df['expiryTime_datetime'] = df['expiryTime'].apply(lambda x: datetime.fromtimestamp(float(x)))

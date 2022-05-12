@@ -10,6 +10,7 @@ web3 = "^5.29.0"
 pandas = "^1.4.2"
 requests = "^2.27.1"
 DateTime = "^4.4"
+python-dotenv = "^0.20.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
