@@ -203,6 +203,8 @@ export default function OpenOrders(props: {
         //need to invalidate cache order response since orderbook is updated
         dispatch(setResponseSell([]))
         dispatch(setResponseBuy([]))
+        responseBuy = []
+        responseSell = []
         //update orderbook & create orders widget
         componentDidMount()
       } else {
