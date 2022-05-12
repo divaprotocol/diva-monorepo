@@ -58,10 +58,12 @@ export const Liquidity = ({ pool }: Props) => {
                         pool.collateralToken.decimals
                       ) === '0.0'
                         ? 'Unlimited'
-                        : formatUnits(
-                            pool.capacity,
-                            pool.collateralToken.decimals
-                          ))}{' '}
+                        : parseFloat(
+                            formatUnits(
+                              pool.capacity,
+                              pool.collateralToken.decimals
+                            )
+                          ).toFixed(2))}{' '}
                     {pool.collateralToken.symbol}{' '}
                   </Typography>
                 </Stack>
@@ -74,7 +76,7 @@ export const Liquidity = ({ pool }: Props) => {
                           BigNumber.from(pool.collateralBalance),
                           pool.collateralToken.decimals
                         )
-                      )}{' '}
+                      ).toFixed(2)}{' '}
                     {pool.collateralToken.symbol!}{' '}
                   </Typography>
                 </Stack>
