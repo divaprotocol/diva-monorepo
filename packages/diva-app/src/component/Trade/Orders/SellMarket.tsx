@@ -123,7 +123,7 @@ export default function SellMarket(props: {
         alert(
           'Total allowance ' +
             approvedAllowance +
-            ` for ${params.tokenType} successfully set`
+            ` for ${params.tokenType.toUpperCase()} successfully set`
         )
       } else {
         alert('please enter positive balance for approval')
@@ -142,8 +142,10 @@ export default function SellMarket(props: {
             )
             if (
               confirm(
-                'options to sell exceeds approval limit, do you want to approve additional ' +
+                'options to sell exceeds approved limit.Do you want to approve additional ' +
                   additionalApproval +
+                  ' ' +
+                  params.tokenType.toUpperCase() +
                   ' to complete this order?'
               )
             ) {

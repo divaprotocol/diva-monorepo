@@ -178,7 +178,7 @@ export default function BuyLimit(props: {
           setAllowance(collateralAllowance)
           setIsApproved(true)
           alert(
-            `Approved additional allowance of ${youPay} ${option.collateralToken.symbol}`
+            `Approved allowance of ${youPay} ${option.collateralToken.symbol}`
           )
         }
       } else {
@@ -198,8 +198,10 @@ export default function BuyLimit(props: {
             )
             if (
               confirm(
-                'Required collateral balance exceeds approval limit, do you want to approve additioal ' +
+                'Required collateral balance exceeds approved limit.Do you want to approve additioal ' +
                   additionalApproval +
+                  ' ' +
+                  option.collateralToken.name +
                   ' to complete this order'
               )
             ) {
@@ -212,7 +214,7 @@ export default function BuyLimit(props: {
               const approvedAllowance = await approveBuyAmount(newAllowance)
               if (approvedAllowance == 'undefined') {
                 alert(
-                  'Metamask could not finish approval please check gas limit'
+                  'Metamask could not finish approval. Try to increase the gas price for the transaction.'
                 )
                 setOrderBtnDisabled(false)
               } else {

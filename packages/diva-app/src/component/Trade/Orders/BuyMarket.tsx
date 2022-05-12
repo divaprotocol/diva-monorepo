@@ -114,9 +114,7 @@ export default function BuyMarket(props: {
         setAllowance(collateralAllowance)
         setIsApproved(true)
         alert(
-          `Taker allowance for ${
-            option.collateralToken.id + ' '
-          } ${collateralAllowance} successfully set by ${userAddress}`
+          `Taker allowance of ${collateralAllowance} ${option.collateralToken.name} successfully approved`
         )
       } else {
         alert('Please enter number of options you want to buy')
@@ -134,8 +132,10 @@ export default function BuyMarket(props: {
             )
             if (
               confirm(
-                'Required collateral balance exceeds approval limit, do you want to approve additioal ' +
+                'Required collateral balance exceeds approved limit.Do you want to approve additioal ' +
                   additionalApproval +
+                  ' ' +
+                  option.collateralToken.name +
                   ' to complete this order'
               )
             ) {
@@ -367,7 +367,7 @@ export default function BuyMarket(props: {
       } else {
         cumulativeAvg = Number(cumulativeTaker / cumulativeMaker)
       }
-      console.log(totalDecimals(cumulativeTaker, cumulativeMaker))
+      console.log('avg ' + cumulativeAvg)
       if (cumulativeAvg > 0) {
         setAvgExpectedRate(cumulativeAvg)
         const youPayAmount = cumulativeAvg * numberOfOptions

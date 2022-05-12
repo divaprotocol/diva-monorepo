@@ -137,7 +137,9 @@ export default function SellLimit(props: {
         )
         let approvedAllowance = await approveSellAmount(amount)
         if (approvedAllowance == 'undefined') {
-          alert('Metamask could not finish approval please check gas limit')
+          alert(
+            'Metamask could not finish approval. Try to increase the gas price for the transaction.'
+          )
         } else {
           approvedAllowance = Number(
             formatUnits(approvedAllowance.toString(), 18)
@@ -155,7 +157,7 @@ export default function SellLimit(props: {
             `Allowance successfully updated to ` +
               approvedAllowance +
               ` ` +
-              params.tokenType
+              params.tokenType.toUpperCase()
           )
         }
       } else {
@@ -175,8 +177,9 @@ export default function SellLimit(props: {
             )
             if (
               confirm(
-                'options to sell exceeds approval limit, do you want to approve additional ' +
-                  additionalApproval +
+                'options to sell exceeds approved limit.Do you want to approve additional ' +
+                  +additionalApproval +
+                  params.tokenType.toUpperCase() +
                   ' to complete this order?'
               )
             ) {
@@ -188,7 +191,9 @@ export default function SellLimit(props: {
               )
               const approvedAllowance = await approveSellAmount(newAllowance)
               if (approvedAllowance == 'undefined') {
-                alert('Metamask could not finish transaction')
+                alert(
+                  'Metamask could not finish approval. Try to increase the gas price for the transaction.'
+                )
                 setOrderBtnDisabled(false)
               } else {
                 newAllowance = approvedAllowance
@@ -204,6 +209,7 @@ export default function SellLimit(props: {
                 alert(
                   'Additional ' +
                     additionalApproval +
+                    params.tokenType.toUpperCase() +
                     ' sell options approved please proceed with order'
                 )
               }
