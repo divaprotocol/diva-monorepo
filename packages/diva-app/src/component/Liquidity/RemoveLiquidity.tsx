@@ -148,8 +148,9 @@ export const RemoveLiquidity = ({ pool }: Props) => {
     }
     if (
       tokenBalanceLong &&
+      maxCollateral &&
       textFieldValue !== '' &&
-      maxCollateral!.lt(parseUnits(textFieldValue, decimal))
+      maxCollateral.lt(parseUnits(textFieldValue, decimal))
     ) {
       setOpenAlert(true)
     } else {
