@@ -108,12 +108,10 @@ export default function SellLimit(props: {
       const approveResponse = await makerTokenContract.methods
         .approve(exchangeProxyAddress, amountBigNumber)
         .send({ from: makerAccount })
-      console.log('Approve response ' + JSON.stringify(approveResponse))
       if ('events' in approveResponse) {
         return approveResponse.events.Approval.returnValues.value
       } else {
-        //in case the approve call does not emit events read the allowance again
-        //may be there is delay in updating the values this way we can reduce an extra call to contract
+        //in case the approve call does not or delay emit events read the allowance again
         await new Promise((resolve) => setTimeout(resolve, 4000))
         const approvedAllowance = await makerTokenContract.methods
           .allowance(makerAccount, exchangeProxyAddress)
@@ -121,7 +119,7 @@ export default function SellLimit(props: {
         return approvedAllowance
       }
     } catch (error) {
-      console.log('error ' + JSON.stringify(error))
+      console.error('error ' + JSON.stringify(error))
       return 'undefined'
     }
   }
@@ -137,9 +135,7 @@ export default function SellLimit(props: {
         )
         let approvedAllowance = await approveSellAmount(amount)
         if (approvedAllowance == 'undefined') {
-          alert(
-            'Metamask could not finish approval. Try to increase the gas price for the transaction.'
-          )
+          alert('Metamask could not finish approval.')
         } else {
           approvedAllowance = Number(
             formatUnits(approvedAllowance.toString(), 18)
@@ -152,7 +148,6 @@ export default function SellLimit(props: {
           setRemainingApprovalAmount(remainingApproval)
           setAllowance(approvedAllowance)
           setIsApproved(true)
-          //Allowance for 0x exchange contract [address 0xdef1c] successfully updated to 80 DAI
           alert(
             `Allowance successfully updated to ` +
               approvedAllowance +
@@ -177,8 +172,9 @@ export default function SellLimit(props: {
             )
             if (
               confirm(
-                'options to sell exceeds approved limit.Do you want to approve additional ' +
+                'options to sell exceeds approved limit. Do you want to approve additional ' +
                   +additionalApproval +
+                  ' ' +
                   params.tokenType.toUpperCase() +
                   ' to complete this order?'
               )
@@ -191,9 +187,7 @@ export default function SellLimit(props: {
               )
               const approvedAllowance = await approveSellAmount(newAllowance)
               if (approvedAllowance == 'undefined') {
-                alert(
-                  'Metamask could not finish approval. Try to increase the gas price for the transaction.'
-                )
+                alert('Metamask could not finish approval.')
                 setOrderBtnDisabled(false)
               } else {
                 newAllowance = approvedAllowance
@@ -209,6 +203,7 @@ export default function SellLimit(props: {
                 alert(
                   'Additional ' +
                     additionalApproval +
+                    ' ' +
                     params.tokenType.toUpperCase() +
                     ' sell options approved please proceed with order'
                 )

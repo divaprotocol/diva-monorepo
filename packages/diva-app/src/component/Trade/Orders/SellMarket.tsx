@@ -141,7 +141,7 @@ export default function SellMarket(props: {
             )
             if (
               confirm(
-                'options to sell exceeds approved limit.Do you want to approve additional ' +
+                'options to sell exceeds approved limit. Do you want to approve additional ' +
                   additionalApproval +
                   ' ' +
                   params.tokenType.toUpperCase() +
@@ -354,11 +354,6 @@ export default function SellMarket(props: {
           }
         }
       })
-      /*cumulativeAvg = Number(
-        (cumulativeMaker / cumulativeTaker).toFixed(
-          totalDecimals(cumulativeMaker, cumulativeTaker)
-        )
-      )*/
       if (totalDecimals(cumulativeMaker, cumulativeTaker) > 1) {
         cumulativeAvg = Number(
           (cumulativeMaker / cumulativeTaker).toFixed(

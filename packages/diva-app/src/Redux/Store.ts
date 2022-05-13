@@ -55,11 +55,11 @@ const store = configureStore(storeConfig)
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
 
-/*store.subscribe(
-  debounce(() => {
-    const serializedState = JSON.stringify(store.getState())
-    localStorage.setItem('diva-app-state-local', serializedState)
-  }, 1000)
-)*/
+//store.subscribe(
+//  debounce(() => {
+//    const serializedState = JSON.stringify(store.getState())
+//    localStorage.setItem('diva-app-state-local', serializedState)
+//  }, 1000)
+//)
 
 export default store

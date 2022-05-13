@@ -200,7 +200,7 @@ export default function OpenOrders(props: {
       const log = cancelOrderResponse?.logs?.[0]
       if (log != null && log.event == 'OrderCancelled') {
         alert('Order successfully cancelled')
-        //need to invalidate cache order response since orderbook is updated
+        //need to invalidate orders since orderbook is updated
         dispatch(setResponseSell([]))
         dispatch(setResponseBuy([]))
         responseBuy = []

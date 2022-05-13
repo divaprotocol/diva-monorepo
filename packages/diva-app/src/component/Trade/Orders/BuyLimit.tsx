@@ -131,28 +131,19 @@ export default function BuyLimit(props: {
         .send({ from: userAdress })
 
       if ('events' in approveResponse) {
-        console.log(
-          'parse respones ' + approveResponse.events.Approval.returnValues.value
-        )
         return approveResponse.events.Approval.returnValues.value
       } else {
-        //in case the approve call does not emit events read the allowance again
-        //may be there is delay in updating the values this way we can reduce an extra call to contract
+        //in case the approve call does not or delay emit events, read the allowance again
         await new Promise((resolve) => setTimeout(resolve, 4000))
         const approvedAllowance = await takerTokenContract.methods
           .allowance(userAdress, exchangeProxyAddress)
           .call()
-        console.log('else ' + approvedAllowance)
         return approvedAllowance
       }
     } catch (error) {
-      console.log('error ' + JSON.stringify(error))
+      console.error('error ' + JSON.stringify(error))
       return 'undefined'
     }
-    /*const collateralAllowance = await takerTokenContract.methods
-      .allowance(userAdress, exchangeProxyAddress)
-      .call()
-    return collateralAllowance*/
   }
 
   const handleOrderSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -178,7 +169,7 @@ export default function BuyLimit(props: {
           setAllowance(collateralAllowance)
           setIsApproved(true)
           alert(
-            `Approved allowance of ${youPay} ${option.collateralToken.symbol}`
+            `Approved allowance of ${youPay}  ${option.collateralToken.symbol}`
           )
         }
       } else {
@@ -198,11 +189,11 @@ export default function BuyLimit(props: {
             )
             if (
               confirm(
-                'Required collateral balance exceeds approved limit.Do you want to approve additioal ' +
+                'Required collateral balance exceeds approved limit. Do you want to approve additional ' +
                   additionalApproval +
                   ' ' +
                   option.collateralToken.name +
-                  ' to complete this order'
+                  ' to complete this order?'
               )
             ) {
               setOrderBtnDisabled(true)
@@ -213,9 +204,7 @@ export default function BuyLimit(props: {
               )
               const approvedAllowance = await approveBuyAmount(newAllowance)
               if (approvedAllowance == 'undefined') {
-                alert(
-                  'Metamask could not finish approval. Try to increase the gas price for the transaction.'
-                )
+                alert('Metamask could not finish approval.')
                 setOrderBtnDisabled(false)
               } else {
                 newAllowance = approvedAllowance
