@@ -2,41 +2,64 @@ import datetime as dt
 from Prices import getKrakenPrice
 from QueryGraph import *
 from SendPrice import sendPrice
-#0x9AdEFeb576dcF52F5220709c1B267d89d5208D78
+import config
+import threading
+from web3 import Web3
+
 query = """
-            {
-              pools (where: {dataProvider: "0xc948f2F172Fe25977E322c8D82F8f53338f8a051"}) {
+        { 
+            pools (where: {dataProvider: """ + """ "{}" """.format(config.dataprovider) + """}) {
                 id
                 dataProvider
                 referenceAsset
                 floor
                 inflection
                 cap
+                statusFinalReferenceValue
                 expiryTime
               }
             }
         """
 
-max_time_away = dt.timedelta(minutes=60)
+def run(network):
+    w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
+    print(w3.isConnected())
 
-resp = run_query(query)
+    max_time_away = dt.timedelta(minutes=60)
+    resp = run_query(query, network)
+    df_reporting_needed = get_required_reporting_df(resp, hours=24)
 
-df_reporting_needed = get_required_reporting_df(resp,hours=24)
+    for i in range(df_reporting_needed.shape[0]):
+        pair = df_reporting_needed['referenceAsset'].iloc[i]
+        pair = pair.replace("/", "")
+        date_dt = df_reporting_needed['expiryTime_datetime'].iloc[i]
+        pool_id = df_reporting_needed['id'].iloc[i]
+
+        date_max_away = date_dt - max_time_away
+        # convert times to timestamp
+        ts_date = datetime.timestamp(date_dt)
+        ts_date_max_away = datetime.timestamp(date_max_away)
+
+        price, date = getKrakenPrice(pair=pair, ts_date=ts_date, ts_date_max_away=ts_date_max_away)
+        if (price, date) != (-1, -1):
+            print("Price for pair ", pair, " at ", date, ": ", price, " where time interval is from", date_max_away,
+                  " to expiryTime:", date_dt)
+        # send price to smart contract
+        sendPrice(pool_id=pool_id, value=price, network=network, w3=w3)
 
 
-for i in range(df_reporting_needed.shape[0]):
-    pair = df_reporting_needed['referenceAsset'].iloc[i]
-    pair = pair.replace("/", "")
-    date_dt = df_reporting_needed['expiryTime_datetime'].iloc[i]
-    pool_id = df_reporting_needed['id'].iloc[i]
+# Parallel execution
+networks = ["ropsten","mumbai"]
 
-    date_max_away = date_dt - max_time_away
-    #convert times to timestamp
-    ts_date = datetime.timestamp(date_dt)
-    ts_date_max_away = datetime.timestamp(date_max_away)
+jobs = []
+for nt in networks:
+    thread = threading.Thread(target=run(nt))
+    jobs.append(thread)
 
-    price, date = getKrakenPrice(pair=pair, ts_date=ts_date, ts_date_max_away=ts_date_max_away)
-    if (price, date) != (-1,-1):
-        print("Price for pair ", pair, " at ", date,": ", price, " where time interval is from",date_max_away, " to expiryTime:", date_dt )
-    #send price to smart contract
-    sendPrice(pool_id=pool_id, value=price)
+for j in jobs:
+    j.start()
+
+for j in jobs:
+    j.join()
+
+print("All jobs complete.")
