@@ -586,8 +586,11 @@ export default function SellMarket(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
-              <Tooltip title={ExpectedRateInfoText}>
-                <InfoIcon />
+              <Tooltip
+                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
+                sx={{ color: 'Gray', fontSize: 2 }}
+              >
+                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
               </Tooltip>
             </Stack>
           </LabelStyleDiv>
