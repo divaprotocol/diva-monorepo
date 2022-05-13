@@ -38,7 +38,6 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
@@ -355,11 +354,20 @@ export default function SellMarket(props: {
           }
         }
       })
-      cumulativeAvg = Number(
+      /*cumulativeAvg = Number(
         (cumulativeMaker / cumulativeTaker).toFixed(
           totalDecimals(cumulativeMaker, cumulativeTaker)
         )
-      )
+      )*/
+      if (totalDecimals(cumulativeMaker, cumulativeTaker) > 1) {
+        cumulativeAvg = Number(
+          (cumulativeMaker / cumulativeTaker).toFixed(
+            totalDecimals(cumulativeMaker, cumulativeTaker)
+          )
+        )
+      } else {
+        cumulativeAvg = Number(cumulativeMaker / cumulativeTaker)
+      }
       if (cumulativeAvg > 0) {
         const avg = cumulativeAvg
         setAvgExpectedRate(avg)
