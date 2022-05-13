@@ -358,7 +358,7 @@ export default function BuyMarket(props: {
           }
         }
       })
-      if (totalDecimals(cumulativeTaker, cumulativeMaker) > 0) {
+      if (totalDecimals(cumulativeTaker, cumulativeMaker) > 1) {
         cumulativeAvg = Number(
           (cumulativeTaker / cumulativeMaker).toFixed(
             totalDecimals(cumulativeTaker, cumulativeMaker)
