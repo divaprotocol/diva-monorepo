@@ -246,9 +246,14 @@ export default function BuyMarket(props: {
         formatUnits(order.takerAmount, option.collateralToken.decimals)
       )
       const makerAmount = Number(formatUnits(order.makerAmount))
-      order['expectedRate'] = (takerAmount / makerAmount).toFixed(
-        totalDecimals(takerAmount, makerAmount)
-      )
+      if (totalDecimals(takerAmount, makerAmount) > 0) {
+        order['expectedRate'] = (takerAmount / makerAmount).toFixed(
+          totalDecimals(takerAmount, makerAmount)
+        )
+      } else {
+        order['expectedRate'] = takerAmount / makerAmount
+      }
+      console.log('expected rate ' + order['expectedRate'])
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
@@ -257,6 +262,7 @@ export default function BuyMarket(props: {
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedOrders = stableSort(orders, getComparator(sortOrder, orderBy))
+    console.log('sorted orders ' + JSON.stringify(sortedOrders))
     if (sortedOrders.length > 0) {
       const bestRate = sortedOrders[0].expectedRate
       const rate = Number(bestRate)
@@ -340,10 +346,29 @@ export default function BuyMarket(props: {
       let cumulativeTaker = 0
       let cumulativeMaker = 0
       existingSellLimitOrders.forEach((order: any) => {
-        const takerAmount = Number(
+        let takerAmount = Number(
           formatUnits(order.takerAmount, option.collateralToken.decimals)
         )
-        const makerAmount = Number(formatUnits(order.makerAmount))
+        let makerAmount = Number(formatUnits(order.makerAmount))
+        const remainingFillableTakerAmount = Number(
+          formatUnits(order.remainingFillableTakerAmount)
+        )
+        if (remainingFillableTakerAmount < takerAmount) {
+          //Order partially filled
+          takerAmount = remainingFillableTakerAmount
+          const decimals = totalDecimals(
+            remainingFillableTakerAmount,
+            order.expectedRate
+          )
+          makerAmount =
+            decimals > 1
+              ? Number(
+                  (remainingFillableTakerAmount / order.expectedRate).toFixed(
+                    decimals
+                  )
+                )
+              : Number(remainingFillableTakerAmount / order.expectedRate)
+        }
         const expectedRate = order.expectedRate
         if (count > 0) {
           if (count <= makerAmount) {

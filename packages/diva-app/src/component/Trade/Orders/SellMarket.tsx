@@ -246,10 +246,13 @@ export default function SellMarket(props: {
         formatUnits(order.makerAmount, option.collateralToken.decimals)
       )
       const takerAmount = Number(formatUnits(order.takerAmount))
-      const expectedRate = (makerAmount / takerAmount).toFixed(
-        totalDecimals(makerAmount, takerAmount)
-      )
-      order['expectedRate'] = expectedRate
+      if (totalDecimals(makerAmount, takerAmount) > 1) {
+        order['expectedRate'] = (makerAmount / takerAmount).toFixed(
+          totalDecimals(makerAmount, takerAmount)
+        )
+      } else {
+        order['expectedRate'] = makerAmount / takerAmount
+      }
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
@@ -261,7 +264,6 @@ export default function SellMarket(props: {
       const bestRate = sortedOrders[0].expectedRate
       setAvgExpectedRate(Number(bestRate))
     }
-
     return sortedOrders
   }
 
@@ -334,16 +336,10 @@ export default function SellMarket(props: {
           formatUnits(order.makerAmount, option.collateralToken.decimals)
         )
         const takerAmount = Number(formatUnits(order.takerAmount))
-        const expectedRate = Number(
-          (makerAmount / takerAmount).toFixed(
-            totalDecimals(makerAmount, takerAmount)
-          )
-        )
+        const expectedRate = order.expectedRate
         if (count > 0) {
           if (count <= takerAmount) {
-            const orderTotalAmount = Number(
-              (expectedRate * count).toFixed(totalDecimals(expectedRate, count))
-            )
+            const orderTotalAmount = Number(expectedRate * count)
             cumulativeMaker = cumulativeMaker + orderTotalAmount
             cumulativeTaker = cumulativeTaker + count
             count = 0
