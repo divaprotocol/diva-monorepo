@@ -17,7 +17,7 @@ print(provider_url)
 
 w3 = Web3(Web3.HTTPProvider(provider_url))
 
-print(w3.isConnected())
+print("connected to blockchain: ", w3.isConnected())
 
 abi = '''[
 {

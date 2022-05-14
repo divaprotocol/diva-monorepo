@@ -32,10 +32,10 @@ class Chain:
             network = "https://rinkeby.infura.io/v3/" + API_KEY
             return network
         elif self.CHAIN_ID == 137:
-            network = "https://polygon.infura.io/v3/" + API_KEY
+            network = "https://polygon-mainnet.infura.io/v3/" + API_KEY
             return network
         elif self.CHAIN_ID == 80001:
-            network = "https://mumbai.infura.io/v3/" + API_KEY
+            network = "https://polygon-mumbai.infura.io/v3/" + API_KEY
             return network
         else:
             print("chain not set")

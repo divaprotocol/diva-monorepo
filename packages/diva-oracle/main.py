@@ -34,11 +34,26 @@ query = '''
             }
 '''% dataprovider
 
+query2 = '''
+            {
+              pools (where: {dataProvider: "%s"}) {
+                
+               
+                referenceAsset
+                floor
+                inflection
+                cap
+                expiryTime
+                statusFinalReferenceValue
+              }
+            }
+'''% dataprovider
+
 # Asset list to query and send prices for
 Asset_list = ['BTC/USD', 'ETH/USD']
 
 
-query_list = [query]
+query_list = [query2]
 # seeing when expirty is 1 hour away to send in prce oracle
 max_time_away = dt.timedelta(minutes=60)
 
@@ -53,7 +68,8 @@ def main_send(df_reporting_needed):
         pair = df_reporting_needed['referenceAsset'].iloc[i]
         pair = pair.replace("/", "")
         date_dt = df_reporting_needed['expiryTime_datetime'].iloc[i]
-        pool_id = df_reporting_needed['id'].iloc[i]
+        # This might be broken due to column name change
+        pool_id = df_reporting_needed['poolId'].iloc[i]
 
         date_max_away = date_dt - max_time_away
         #convert times to timestamp
@@ -65,6 +81,7 @@ def main_send(df_reporting_needed):
           print("asset error at get kraken price")
           continue
         if (price, date) != (-1,-1):
+            print("Submission for PoolId:", pool_id)
             print("Price for pair ", pair, " at ", date,": ", price, " where time interval is from",date_max_away, " to expiryTime:", date_dt )
         #send price to smart contract
         try:
@@ -80,6 +97,7 @@ if __name__ == "__main__":
 
   while True:
     # Iterate through the graph queries to pull selected data
+    print("Activity on Chain ID", Chain().CHAIN_ID)
     for query in range(len(query_list)):
       
       # This will run the graph query to gather existing data
