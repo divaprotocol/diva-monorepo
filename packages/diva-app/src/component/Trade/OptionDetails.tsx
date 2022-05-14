@@ -221,9 +221,12 @@ export default function OptionDetails({
         </FlexBoxSecondLine>
 
         <FlexBoxSecondLine>
-          <FlexBoxHeader>Short/Long ratio</FlexBoxHeader>
+          <FlexBoxHeader>Gradient</FlexBoxHeader>
           <FlexBoxSecondLineData>
-            {shortCollateralRatio.toFixed()} / {longCollateralRatio.toFixed()}
+            {(
+              Number(pool.supplyLong) /
+              (Number(pool.supplyLong) + Number(pool.supplyShort))
+            ).toFixed(4)}
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
       </FlexSecondLineDiv>

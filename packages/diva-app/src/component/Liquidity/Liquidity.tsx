@@ -22,7 +22,6 @@ export const Liquidity = ({ pool }: Props) => {
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
   }
-
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <Stack
@@ -47,7 +46,9 @@ export const Liquidity = ({ pool }: Props) => {
           <Container sx={{ mt: theme.spacing(4), mb: theme.spacing(4) }}>
             {pool &&
             formatUnits(pool.capacity, pool.collateralToken.decimals) !==
-              '0.0' ? (
+              '0.0' &&
+            pool.capacity.toString() !==
+              '115792089237316195423570985008687907853269984665640564039457584007913129639935' ? (
               <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(4) }}>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Pool Capacity</Typography>

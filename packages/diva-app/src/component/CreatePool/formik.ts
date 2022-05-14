@@ -13,6 +13,7 @@ export type Values = {
   floor: number
   cap: number
   inflection: number
+  gradient: number
   collateralToken?: WhitelistCollateralToken
   collateralWalletBalance: string
   collateralBalance: string
@@ -30,9 +31,10 @@ export const initialValues: Values = {
   floor: 100,
   cap: 300,
   inflection: 200,
+  gradient: 0.5,
   collateralToken: undefined,
   collateralWalletBalance: '0',
-  collateralBalance: '2',
+  collateralBalance: '10',
   collateralBalanceShort: 1,
   collateralBalanceLong: 1,
   tokenSupply: 2,
