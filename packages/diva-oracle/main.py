@@ -5,6 +5,7 @@ from SendPrice import sendPrice
 import config
 import threading
 from web3 import Web3
+import time
 
 query = """
         { 
@@ -21,10 +22,11 @@ query = """
             }
         """
 
-def run(network):
-    w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
-    print(w3.isConnected())
-
+def run(network, w3):
+    #w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
+    #print(w3.isConnected())
+    print("#########################################")
+    print('\033[1m' + "Network: {}".format(network) + '\033[0m')
     max_time_away = dt.timedelta(minutes=60)
     resp = run_query(query, network)
     df_reporting_needed = get_required_reporting_df(resp, hours=24)
@@ -42,24 +44,37 @@ def run(network):
 
         price, date = getKrakenPrice(pair=pair, ts_date=ts_date, ts_date_max_away=ts_date_max_away)
         if (price, date) != (-1, -1):
-            print("Price for pair ", pair, " at ", date, ": ", price, " where time interval is from", date_max_away,
-                  " to expiryTime:", date_dt)
+            print("-----------------------------------------")
+            print("Pool id {} :".format(pool_id),"Price for pair ", pair, " at ", date, ": ", price)
+            # print("Price for pair ", pair, " at ", date, ": ", price, " where time interval is from", date_max_away,
+            #      " to expiryTime:", date_dt)
         # send price to smart contract
         sendPrice(pool_id=pool_id, value=price, network=network, w3=w3)
+    if df_reporting_needed.shape[0] == 0:
+        print("No pools that require price now.")
 
 
 # Parallel execution
 networks = ["ropsten","mumbai"]
+waiting_sec = 120
 
-jobs = []
+w3_instances = []
 for nt in networks:
-    thread = threading.Thread(target=run(nt))
-    jobs.append(thread)
+    w3_instances.append(Web3(Web3.HTTPProvider(config.PROVIDER_URL[nt])))
 
-for j in jobs:
-    j.start()
+while True:
+    jobs = []
+    for (nt, w3) in zip(networks, w3_instances):
+        thread = threading.Thread(target=run(nt, w3))
+        jobs.append(thread)
 
-for j in jobs:
-    j.join()
+    for j in jobs:
+        j.start()
 
-print("All jobs complete.")
+    for j in jobs:
+        j.join()
+
+    print("#########################################")
+    print("Waiting {} sec before next iteration...".format(waiting_sec))
+    # Wait before next iteration
+    time.sleep(waiting_sec)
