@@ -21,7 +21,7 @@ export function DefineAdvanced({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const [expanded, setExpanded] = useState(false)
-  const [unlimited, setUnlimited] = useState(false)
+  const [unlimited, setUnlimited] = useState(true)
   const {
     gradient,
     collateralBalanceShort,
@@ -34,10 +34,15 @@ export function DefineAdvanced({
     if (unlimited) {
       formik.setValues((_values) => ({
         ..._values,
-        capacity: 0,
+        capacity: 'Unlimited',
+      }))
+    } else {
+      formik.setValues((_values) => ({
+        ..._values,
+        capacity: formik.values.collateralBalance,
       }))
     }
-  }, [unlimited])
+  }, [unlimited, formik.values.collateralBalance])
 
   return (
     <Accordion
@@ -63,7 +68,10 @@ export function DefineAdvanced({
       <AccordionDetails sx={{ padding: 0 }}>
         <Box pb={3}>
           <FormControl fullWidth error={formik.errors.gradient != null}>
-            <Tooltip title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient.">
+            <Tooltip
+              placement="top-end"
+              title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
+            >
               <TextField
                 name="gradient"
                 id="gradient"
@@ -150,7 +158,10 @@ export function DefineAdvanced({
         </Box>
         <Box pb={3}>
           <FormControl fullWidth error={formik.errors.capacity != null}>
-            <Tooltip title="Maximum collateral that the pool can accept.">
+            <Tooltip
+              placement="top-end"
+              title="Maximum collateral that the pool can accept."
+            >
               <TextField
                 name="capacity"
                 error={formik.errors.capacity != null}
@@ -170,7 +181,7 @@ export function DefineAdvanced({
           <FormControlLabel
             control={
               <Checkbox
-                defaultChecked={false}
+                defaultChecked={unlimited}
                 onChange={() => setUnlimited(!unlimited)}
               />
             }

@@ -116,7 +116,7 @@ export function DefinePoolAttributes({
 
   return (
     <Box>
-      <Typography pb={theme.spacing(5)} variant="subtitle1">
+      <Typography pb={theme.spacing(2)} variant="subtitle1">
         Define all the parameters for your Contingent Pool below.
       </Typography>
       <h3>Event</h3>
@@ -305,7 +305,10 @@ export function DefinePoolAttributes({
               </FormHelperText>
             )}
             <Stack spacing={3}>
-              <Tooltip title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout).">
+              <Tooltip
+                placement="top-end"
+                title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+              >
                 <TextField
                   inputProps={{ min: 0, max: inflection }}
                   name="floor"
@@ -318,7 +321,10 @@ export function DefinePoolAttributes({
                   onChange={formik.handleChange}
                 />
               </Tooltip>
-              <Tooltip title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings).">
+              <Tooltip
+                placement="top-end"
+                title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+              >
                 <TextField
                   id="inflection"
                   error={formik.errors.inflection != null}
@@ -335,7 +341,10 @@ export function DefinePoolAttributes({
                   sx={{ width: '100%' }}
                 />
               </Tooltip>
-              <Tooltip title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0.">
+              <Tooltip
+                placement="top-end"
+                title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
+              >
                 <TextField
                   error={formik.errors.cap != null}
                   inputProps={{ min: inflection }}

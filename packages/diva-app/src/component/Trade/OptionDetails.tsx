@@ -3,10 +3,11 @@ import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
 import { Pool } from '../../lib/queries'
-import { formatEther, formatUnits } from 'ethers/lib/utils'
+import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import CheckCircleSharpIcon from '@mui/icons-material/CheckCircleSharp'
 import WarningAmberSharpIcon from '@mui/icons-material/WarningAmberSharp'
+import { BigNumber } from 'ethers'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -223,10 +224,17 @@ export default function OptionDetails({
         <FlexBoxSecondLine>
           <FlexBoxHeader>Gradient</FlexBoxHeader>
           <FlexBoxSecondLineData>
-            {(
-              Number(pool.supplyLong) /
-              (Number(pool.supplyLong) + Number(pool.supplyShort))
-            ).toFixed(4)}
+            {formatUnits(
+              BigNumber.from(pool.collateralBalanceLongInitial)
+                .mul(parseUnits('1', pool.collateralToken.decimals))
+                .div(
+                  BigNumber.from(pool.collateralBalanceLongInitial).add(
+                    BigNumber.from(pool.collateralBalanceShortInitial)
+                  )
+                ),
+
+              pool.collateralToken.decimals
+            )}
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
       </FlexSecondLineDiv>
