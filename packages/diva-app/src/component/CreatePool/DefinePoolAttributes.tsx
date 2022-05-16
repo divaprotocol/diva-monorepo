@@ -21,6 +21,7 @@ import { DefineAdvanced } from './DefineAdvancedAttributes'
 import { CheckCircle, Report } from '@mui/icons-material'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistCollateralToken } from '../../lib/queries'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -63,15 +64,38 @@ export function DefinePoolAttributes({
 
   useEffect(() => {
     if (formik.touched.collateralBalance || formik.touched.gradient) {
-      const collateralBalanceLong =
-        formik.values.gradient * parseFloat(formik.values.collateralBalance)
-      const collateralBalanceShort =
-        (1 - formik.values.gradient) *
-        parseFloat(formik.values.collateralBalance)
+      const collateralBalanceLong = parseUnits(
+        formik.values.collateralBalance,
+        collateralToken.decimals
+      )
+        .mul(
+          parseUnits(
+            formik.values.gradient.toString(),
+            collateralToken.decimals
+          )
+        )
+        .div(parseUnits('1', collateralToken.decimals))
+      const collateralBalanceShort = parseUnits(
+        formik.values.collateralBalance,
+        collateralToken.decimals
+      )
+        .mul(
+          parseUnits('1', collateralToken.decimals).sub(
+            parseUnits(
+              formik.values.gradient.toString(),
+              collateralToken.decimals
+            )
+          )
+        )
+        .div(parseUnits('1', collateralToken.decimals))
       formik.setValues((_values) => ({
         ..._values,
-        collateralBalanceLong: collateralBalanceLong,
-        collateralBalanceShort: collateralBalanceShort,
+        collateralBalanceLong: parseFloat(
+          formatUnits(collateralBalanceLong, collateralToken.decimals)
+        ),
+        collateralBalanceShort: parseFloat(
+          formatUnits(collateralBalanceShort, collateralToken.decimals)
+        ),
       }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
