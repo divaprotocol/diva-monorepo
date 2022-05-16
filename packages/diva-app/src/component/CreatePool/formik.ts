@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useFormik } from 'formik'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useDiva } from '../../hooks/useDiva'
@@ -5,8 +6,7 @@ import { WhitelistCollateralToken } from '../../lib/queries'
 
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
-
-type Values = {
+export type Values = {
   step: number
   referenceAsset: string
   expiryTime: Date
@@ -27,15 +27,15 @@ export const initialValues: Values = {
   step: 1,
   referenceAsset: '',
   expiryTime: defaultDate,
-  floor: 1,
-  inflection: 2,
-  cap: 3,
+  floor: 100,
+  cap: 300,
+  inflection: 200,
   collateralToken: undefined,
   collateralWalletBalance: '0',
   collateralBalance: '2',
   collateralBalanceShort: 1,
   collateralBalanceLong: 1,
-  tokenSupply: 4,
+  tokenSupply: 2,
   capacity: 0,
   dataProvider: '',
 }
@@ -43,12 +43,9 @@ export const initialValues: Values = {
 type Errors = {
   [P in keyof typeof initialValues]?: string
 }
-
 export const useCreatePoolFormik = () => {
   const { provider, isConnected } = useConnectionContext()
-
   const contract = useDiva()
-
   const _formik = useFormik({
     initialValues,
     onSubmit: async (values, formik) => {
@@ -110,7 +107,6 @@ export const useCreatePoolFormik = () => {
       const collateralBalance =
         values.collateralBalanceLong + values.collateralBalanceShort
       const walletBalance = parseFloat(values.collateralWalletBalance)
-
       if (values.collateralToken == null) {
         errors.collateralToken = 'You must choose a collateral asset'
       }

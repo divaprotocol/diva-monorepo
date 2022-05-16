@@ -1,5 +1,4 @@
-import styled from 'styled-components'
-import { Container, Divider, Paper, Stack, useTheme } from '@mui/material'
+import { Container, Paper, Stack, useTheme } from '@mui/material'
 import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
@@ -16,17 +15,11 @@ import { useAppSelector } from '../../Redux/hooks'
 const contractAddress = require('@0x/contract-addresses')
 import { useDispatch } from 'react-redux'
 import {
-  selectBreakEven,
   fetchPool,
   fetchUnderlyingPrice,
-  selectMaxPayout,
-  selectMaxYield,
   selectPool,
   selectChainId,
-  selectOrderView,
-  selectPrice,
 } from '../../Redux/appSlice'
-import { parseEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
 import { OrderView } from './Orders'
 
@@ -34,19 +27,8 @@ export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const [value, setValue] = React.useState(0)
   const isLong = params.tokenType === 'long'
-  const maxPayout = useAppSelector((state) =>
-    selectMaxPayout(state, params.poolId, isLong)
-  )
-  const maxYield = useAppSelector((state) =>
-    selectMaxYield(state, params.poolId, isLong)
-  )
-  const breakEven = useAppSelector((state) =>
-    selectBreakEven(state, params.poolId, isLong)
-  )
   const breakEvenOptionPrice = 0
   const chainId = useAppSelector(selectChainId)
-  const chainContractAddress =
-    contractAddress.getContractAddressesForChainOrThrow(chainId)
   const theme = useTheme()
   const dispatch = useDispatch()
   useEffect(() => {
@@ -65,8 +47,6 @@ export default function Underlying() {
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
     }
   }, [pool, dispatch])
-
-  const url = `${params.poolId}/${params.tokenType}`
 
   if (pool == null) {
     return <LoadingBox />

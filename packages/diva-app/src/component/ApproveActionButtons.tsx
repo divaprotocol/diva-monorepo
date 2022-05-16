@@ -92,7 +92,11 @@ export const ApproveActionButtons = ({
               size="large"
               type="submit"
               value="Submit"
-              disabled={approveEnabled === false}
+              disabled={
+                approveEnabled === false ||
+                account == null ||
+                textFieldValue === ''
+              }
               onClick={() => {
                 setApproveLoading(true)
 
@@ -139,7 +143,11 @@ export const ApproveActionButtons = ({
             size="large"
             type="submit"
             value="Submit"
-            disabled={actionEnabled === false}
+            disabled={
+              actionEnabled === false ||
+              account == null ||
+              textFieldValue === ''
+            }
             onClick={() => {
               setActionLoading(true)
               switch (transactionType) {
@@ -164,7 +172,7 @@ export const ApproveActionButtons = ({
                       referenceAsset: pool.referenceAsset.toString(),
                       collateralToken: pool.collateralToken.id.toString(),
                       dataProvider: pool.dataProvider.toString(),
-                      capacity: parseEther('0'),
+                      capacity: parseUnits(pool.capacity.toString(), decimal),
                     })
                     .then((tx) => {
                       /**
