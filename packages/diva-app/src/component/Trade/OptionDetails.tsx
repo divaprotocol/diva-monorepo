@@ -153,15 +153,30 @@ export default function OptionDetails({
           <FlexBoxData>{isLong ? 'Up' : 'Down'}</FlexBoxData>
         </FlexBox>
         <FlexBox>
-          <FlexBoxHeader>Floor</FlexBoxHeader>
+          <Tooltip
+            placement="top-end"
+            title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+          >
+            <FlexBoxHeader>Floor</FlexBoxHeader>
+          </Tooltip>
           <FlexBoxData>{parseInt(pool.floor) / 1e18}</FlexBoxData>
         </FlexBox>
         <FlexBox>
-          <FlexBoxHeader>Inflection</FlexBoxHeader>
+          <Tooltip
+            placement="top-end"
+            title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+          >
+            <FlexBoxHeader>Inflection</FlexBoxHeader>
+          </Tooltip>
           <FlexBoxData>{parseInt(pool.inflection) / 1e18}</FlexBoxData>
         </FlexBox>
         <FlexBox>
-          <FlexBoxHeader>Cap</FlexBoxHeader>
+          <Tooltip
+            placement="top-end"
+            title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
+          >
+            <FlexBoxHeader>Cap</FlexBoxHeader>
+          </Tooltip>
           <FlexBoxData>{Number(formatEther(pool.cap))}</FlexBoxData>
         </FlexBox>
         <FlexBox>
@@ -222,7 +237,12 @@ export default function OptionDetails({
         </FlexBoxSecondLine>
 
         <FlexBoxSecondLine>
-          <FlexBoxHeader>Gradient</FlexBoxHeader>
+          <Tooltip
+            placement="top-end"
+            title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
+          >
+            <FlexBoxHeader>Gradient</FlexBoxHeader>
+          </Tooltip>
           <FlexBoxSecondLineData>
             {formatUnits(
               BigNumber.from(pool.collateralBalanceLongInitial)

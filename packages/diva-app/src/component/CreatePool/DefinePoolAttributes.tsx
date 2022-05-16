@@ -63,7 +63,7 @@ export function DefinePoolAttributes({
   }, [referenceAssets.length])
 
   useEffect(() => {
-    if (formik.touched.collateralBalance || formik.touched.gradient) {
+    if (collateralToken != null) {
       const collateralBalanceLong = parseUnits(
         formik.values.collateralBalance,
         collateralToken.decimals
@@ -88,6 +88,7 @@ export function DefinePoolAttributes({
           )
         )
         .div(parseUnits('1', collateralToken.decimals))
+
       formik.setValues((_values) => ({
         ..._values,
         collateralBalanceLong: parseFloat(
@@ -96,15 +97,11 @@ export function DefinePoolAttributes({
         collateralBalanceShort: parseFloat(
           formatUnits(collateralBalanceShort, collateralToken.decimals)
         ),
+        tokenSupply: parseFloat(formik.values.collateralBalance),
       }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    formik.touched.collateralBalance,
-    formik.touched.gradient,
-    formik.values.collateralBalance,
-    formik.values.gradient,
-  ])
+  }, [formik.values.collateralBalance, formik.values.gradient])
 
   const theme = useTheme()
 
