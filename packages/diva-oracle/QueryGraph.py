@@ -29,8 +29,14 @@ def get_required_reporting_df(resp,  Asset_list, hours=24):
     df = df[df['expiryTime'].apply(lambda x: float(x) < 16512056850 )]
     df = df.rename(columns={'id':'poolId'})
 
+    # modify column values to alter decimal place
+    df['floor'] = df['floor'].apply(lambda x: str(int(x)/1000000000000000000))
+    df['inflection'] = df['inflection'].apply(lambda x: str(int(x)/1000000000000000000))
+    df['cap'] = df['cap'].apply(lambda x: str(int(x)/1000000000000000000))
+
+
     # Asset list of what assets the oracle resonds to
-    #df = df[df['referenceAsset'].isin(Asset_list)]
+    df = df[df['referenceAsset'].isin(Asset_list)]
 
     df = df[df['statusFinalReferenceValue'] == 'Open']
     
