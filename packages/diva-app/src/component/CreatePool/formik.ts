@@ -146,7 +146,9 @@ export const useCreatePoolFormik = () => {
         errors.inflection = 'Must be lower than cap'
         errors.cap = 'Must be higher than inflection'
       }
-
+      if (values.gradient < 0 || values.gradient > 1) {
+        errors.gradient = 'Gradient value must be between 0 and 1'
+      }
       if (parseFloat(values.capacity) < 0) {
         errors.capacity = 'Capacity cannot be negative'
       } else if (

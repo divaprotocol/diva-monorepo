@@ -63,7 +63,12 @@ export function DefinePoolAttributes({
   }, [referenceAssets.length])
 
   useEffect(() => {
-    if (collateralToken != null && formik.values.gradient.toString() != '') {
+    if (
+      collateralToken != null &&
+      formik.values.gradient.toString() != '' &&
+      formik.values.gradient >= 0 &&
+      formik.values.gradient <= 1
+    ) {
       const collateralBalanceLong = parseUnits(
         formik.values.collateralBalance,
         collateralToken.decimals
