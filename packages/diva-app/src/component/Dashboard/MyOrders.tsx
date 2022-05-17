@@ -232,8 +232,8 @@ export function MyOrders() {
           >
             <Input
               value={search}
-              placeholder="Filter asset"
-              aria-label="Filter asset"
+              placeholder="Filter underlying"
+              aria-label="Filter underlying"
               onChange={(e) => setSearch(e.target.value)}
               startAdornment={
                 <InputAdornment position="start">
