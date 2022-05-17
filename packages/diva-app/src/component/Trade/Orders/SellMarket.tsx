@@ -332,10 +332,17 @@ export default function SellMarket(props: {
       let cumulativeTaker = 0
       let cumulativeMaker = 0
       existingBuyLimitOrders.forEach((order: any) => {
-        const makerAmount = Number(
+        let makerAmount = Number(
           formatUnits(order.makerAmount, option.collateralToken.decimals)
         )
-        const takerAmount = Number(formatUnits(order.takerAmount))
+        let takerAmount = Number(formatUnits(order.takerAmount))
+        const remainingFillableTakerAmount = Number(
+          formatUnits(order.remainingFillableTakerAmount)
+        )
+        if (remainingFillableTakerAmount < takerAmount) {
+          takerAmount = remainingFillableTakerAmount
+          makerAmount = remainingFillableTakerAmount * order.expectedRate
+        }
         const expectedRate = order.expectedRate
         if (count > 0) {
           if (count <= takerAmount) {

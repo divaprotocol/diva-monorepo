@@ -253,7 +253,6 @@ export default function BuyMarket(props: {
       } else {
         order['expectedRate'] = takerAmount / makerAmount
       }
-      console.log('expected rate ' + order['expectedRate'])
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
@@ -262,7 +261,6 @@ export default function BuyMarket(props: {
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedOrders = stableSort(orders, getComparator(sortOrder, orderBy))
-    console.log('sorted orders ' + JSON.stringify(sortedOrders))
     if (sortedOrders.length > 0) {
       const bestRate = sortedOrders[0].expectedRate
       const rate = Number(bestRate)
