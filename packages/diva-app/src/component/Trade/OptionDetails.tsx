@@ -165,13 +165,18 @@ export default function OptionDetails({
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Collateral</FlexBoxHeader>
-          <FlexBoxData>
-            {Number(
-              formatUnits(pool.collateralBalance, pool.collateralToken.decimals)
-            ).toFixed(2) +
-              ' ' +
-              pool.collateralToken.symbol}
-          </FlexBoxData>
+          <Tooltip title={pool.collateralToken.id} arrow>
+            <FlexBoxData>
+              {Number(
+                formatUnits(
+                  pool.collateralBalance,
+                  pool.collateralToken.decimals
+                )
+              ).toFixed(2) +
+                ' ' +
+                pool.collateralToken.symbol}
+            </FlexBoxData>
+          </Tooltip>
         </FlexBox>
       </FlexDiv>
       <FlexSecondLineDiv>
