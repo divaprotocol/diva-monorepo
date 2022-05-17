@@ -33,11 +33,7 @@ const isFloat = (number) => {
   return number != '' && !isNaN(number) && Math.round(number) != number
 }
 const decimalPlaces = (number) => {
-  if (typeof number === 'number') {
-    return number.toString().split('.')?.[1].length
-  } else {
-    return 0
-  }
+  return number.toString().split('.')?.[1].length
 }
 
 export const totalDecimals = (a: number, b: number) => {
