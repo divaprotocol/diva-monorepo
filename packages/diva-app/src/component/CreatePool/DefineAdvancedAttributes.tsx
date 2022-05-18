@@ -91,54 +91,6 @@ export function DefineAdvanced({
           </FormControl>
         </Box>
         <Box pb={3}>
-          <FormControl
-            fullWidth
-            error={formik.errors.collateralBalanceShort != null}
-          >
-            <TextField
-              disabled
-              name="collateralBalanceShort"
-              id="collateralBalanceShort"
-              label="Short Pool Balance"
-              onBlur={formik.handleBlur}
-              error={formik.errors.collateralBalanceShort != null}
-              inputProps={{ min: 0 }}
-              onChange={formik.handleChange}
-              value={collateralBalanceShort}
-              type="number"
-            />
-            {formik.errors.collateralBalanceShort != null && (
-              <FormHelperText>
-                {formik.errors.collateralBalanceShort}
-              </FormHelperText>
-            )}
-          </FormControl>
-        </Box>
-        <Box pb={3}>
-          <FormControl
-            fullWidth
-            error={formik.errors.collateralBalanceLong != null}
-          >
-            <TextField
-              disabled
-              name="collateralBalanceLong"
-              id="collateralBalanceLong"
-              label="Long Pool Balance"
-              onBlur={formik.handleBlur}
-              error={formik.errors.collateralBalanceLong != null}
-              inputProps={{ min: 0 }}
-              value={collateralBalanceLong}
-              type="number"
-              onChange={formik.handleChange}
-            />
-            {formik.errors.collateralBalanceLong != null && (
-              <FormHelperText>
-                {formik.errors.collateralBalanceLong}
-              </FormHelperText>
-            )}
-          </FormControl>
-        </Box>
-        <Box pb={3}>
           <FormControl fullWidth error={formik.errors.tokenSupply != null}>
             <TextField
               name="Position Token Supply"
