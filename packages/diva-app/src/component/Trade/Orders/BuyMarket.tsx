@@ -390,7 +390,6 @@ export default function BuyMarket(props: {
       } else {
         cumulativeAvg = Number(cumulativeTaker / cumulativeMaker)
       }
-      console.log('avg ' + cumulativeAvg)
       if (cumulativeAvg > 0) {
         setAvgExpectedRate(cumulativeAvg)
         const youPayAmount = cumulativeAvg * numberOfOptions
