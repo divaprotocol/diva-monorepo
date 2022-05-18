@@ -60,10 +60,16 @@ export default function MenuItems() {
       marginTop="16px"
       spacing={3}
     >
-      <Box sx={{ padding: '10px', width: 30, marginBottom: 5 }}>
-        <Link to="/">
+      <Box sx={{ width: 30, marginBottom: 5, paddingRight: 4 }}>
+        <Button
+          onClick={() => {
+            setMarketVariant('contained')
+            setCreateVariant('text')
+            setDashboardVariant('text')
+          }}
+        >
           <Logo />
-        </Link>
+        </Button>
       </Box>
       <Button
         variant={marketVariant}
