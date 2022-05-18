@@ -13,13 +13,14 @@ export type Values = {
   floor: number
   cap: number
   inflection: number
+  gradient: number
   collateralToken?: WhitelistCollateralToken
   collateralWalletBalance: string
   collateralBalance: string
   collateralBalanceShort: number
   collateralBalanceLong: number
   tokenSupply: number
-  capacity: number
+  capacity: string
   dataProvider: string
 }
 
@@ -30,13 +31,14 @@ export const initialValues: Values = {
   floor: 100,
   cap: 300,
   inflection: 200,
+  gradient: 0.5,
   collateralToken: undefined,
   collateralWalletBalance: '0',
-  collateralBalance: '2',
+  collateralBalance: '10',
   collateralBalanceShort: 1,
   collateralBalanceLong: 1,
   tokenSupply: 2,
-  capacity: 0,
+  capacity: '0',
   dataProvider: '',
 }
 
@@ -144,10 +146,15 @@ export const useCreatePoolFormik = () => {
         errors.inflection = 'Must be lower than cap'
         errors.cap = 'Must be higher than inflection'
       }
-
-      if (values.capacity < 0) {
+      if (values.gradient < 0 || values.gradient > 1) {
+        errors.gradient = 'Gradient value must be between 0 and 1'
+      }
+      if (parseFloat(values.capacity) < 0) {
         errors.capacity = 'Capacity cannot be negative'
-      } else if (values.capacity !== 0 && collateralBalance > values.capacity) {
+      } else if (
+        parseFloat(values.capacity) !== 0 &&
+        collateralBalance > parseFloat(values.capacity)
+      ) {
         errors.capacity = `Capacity must be larger than ${collateralBalance}. For unlimited capacity, set to 0`
       }
 

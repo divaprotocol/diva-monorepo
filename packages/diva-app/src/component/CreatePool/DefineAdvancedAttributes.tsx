@@ -1,6 +1,7 @@
 import { ExpandMoreOutlined } from '@mui/icons-material'
 import {
   Accordion,
+  Checkbox,
   AccordionSummary,
   Typography,
   AccordionDetails,
@@ -8,8 +9,10 @@ import {
   FormControl,
   TextField,
   FormHelperText,
+  FormControlLabel,
+  Tooltip,
 } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCreatePoolFormik } from './formik'
 
 export function DefineAdvanced({
@@ -18,13 +21,28 @@ export function DefineAdvanced({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const [expanded, setExpanded] = useState(false)
-
+  const [unlimited, setUnlimited] = useState(true)
   const {
+    gradient,
     collateralBalanceShort,
     tokenSupply,
     collateralBalanceLong,
     capacity,
   } = formik.values
+
+  useEffect(() => {
+    if (unlimited) {
+      formik.setValues((_values) => ({
+        ..._values,
+        capacity: 'Unlimited',
+      }))
+    } else {
+      formik.setValues((_values) => ({
+        ..._values,
+        capacity: formik.values.collateralBalance,
+      }))
+    }
+  }, [unlimited, formik.values.collateralBalance])
 
   return (
     <Accordion
@@ -49,11 +67,36 @@ export function DefineAdvanced({
       </AccordionSummary>
       <AccordionDetails sx={{ padding: 0 }}>
         <Box pb={3}>
+          <FormControl fullWidth error={formik.errors.gradient != null}>
+            <Tooltip
+              placement="top-end"
+              title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
+            >
+              <TextField
+                name="gradient"
+                id="gradient"
+                label="Gradient"
+                onBlur={formik.handleBlur}
+                error={formik.errors.gradient != null}
+                inputProps={{ min: 0 }}
+                onChange={formik.handleChange}
+                value={gradient}
+                type="number"
+              />
+            </Tooltip>
+
+            {formik.errors.gradient != null && (
+              <FormHelperText>{formik.errors.gradient}</FormHelperText>
+            )}
+          </FormControl>
+        </Box>
+        <Box pb={3}>
           <FormControl
             fullWidth
             error={formik.errors.collateralBalanceShort != null}
           >
             <TextField
+              disabled
               name="collateralBalanceShort"
               id="collateralBalanceShort"
               label="Short Pool Balance"
@@ -77,6 +120,7 @@ export function DefineAdvanced({
             error={formik.errors.collateralBalanceLong != null}
           >
             <TextField
+              disabled
               name="collateralBalanceLong"
               id="collateralBalanceLong"
               label="Long Pool Balance"
@@ -114,22 +158,35 @@ export function DefineAdvanced({
         </Box>
         <Box pb={3}>
           <FormControl fullWidth error={formik.errors.capacity != null}>
-            <TextField
-              name="capacity"
-              error={formik.errors.capacity != null}
-              onBlur={formik.handleBlur}
-              id="capacity"
-              label="Maximum Pool Capacity"
-              value={capacity}
-              helperText={
-                formik.errors.capacity != null
-                  ? formik.errors.capacity
-                  : 'A value of 0 means no limit is imposed.'
-              }
-              type="number"
-              onChange={formik.handleChange}
-            />
+            <Tooltip
+              placement="top-end"
+              title="Maximum collateral that the pool can accept."
+            >
+              <TextField
+                name="capacity"
+                error={formik.errors.capacity != null}
+                disabled={unlimited}
+                onBlur={formik.handleBlur}
+                id="capacity"
+                label="Maximum Pool Capacity"
+                value={capacity}
+                helperText={
+                  formik.errors.capacity != null ? formik.errors.capacity : ''
+                }
+                type="number"
+                onChange={formik.handleChange}
+              />
+            </Tooltip>
           </FormControl>
+          <FormControlLabel
+            control={
+              <Checkbox
+                defaultChecked={unlimited}
+                onChange={() => setUnlimited(!unlimited)}
+              />
+            }
+            label="Unlimited"
+          />
         </Box>
       </AccordionDetails>
     </Accordion>

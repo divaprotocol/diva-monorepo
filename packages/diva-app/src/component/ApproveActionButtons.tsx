@@ -172,7 +172,10 @@ export const ApproveActionButtons = ({
                       referenceAsset: pool.referenceAsset.toString(),
                       collateralToken: pool.collateralToken.id.toString(),
                       dataProvider: pool.dataProvider.toString(),
-                      capacity: parseUnits(pool.capacity.toString(), decimal),
+                      capacity:
+                        pool.capacity === 'Unlimited'
+                          ? ethers.constants.MaxUint256
+                          : parseUnits(pool.capacity.toString(), decimal),
                     })
                     .then((tx) => {
                       /**
