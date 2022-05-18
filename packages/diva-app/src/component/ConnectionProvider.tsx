@@ -55,7 +55,7 @@ export const ConnectionProvider = ({ children }) => {
       ..._state,
       address: accounts[0],
       chainId: BigNumber.from(ethereum.chainId).toNumber(),
-      isConnected: ethereum.isConnected(),
+      isConnected: ethereum.isConnected() && accounts.length > 0,
     }))
     setConnectionState({ connected: 'metamask' })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -66,6 +66,7 @@ export const ConnectionProvider = ({ children }) => {
       ..._state,
       address: undefined,
       isConnected: false,
+      chainId: 3,
     }))
     setConnectionState({})
     // eslint-disable-next-line react-hooks/exhaustive-deps

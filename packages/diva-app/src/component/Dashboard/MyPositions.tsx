@@ -28,6 +28,7 @@ import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import {
   fetchPool,
+  selectIntrinsicValue,
   selectPools,
   selectRequestStatus,
   selectUserAddress,
@@ -293,6 +294,53 @@ const SubmitButton = (props: any) => {
   }
 }
 
+const Payoff = (props: any) => {
+  const intrinsicValue = useAppSelector((state) =>
+    selectIntrinsicValue(
+      state,
+      props.row.Payoff.id,
+      props.row.finalValue != '-'
+        ? parseEther(props.row.finalValue).toString()
+        : '-'
+    )
+  )
+  if (
+    props.row.finalValue != '-' &&
+    intrinsicValue.payoffPerShortToken != null &&
+    intrinsicValue.payoffPerLongToken != null
+  ) {
+    if (props.row.Id.toLowerCase().startsWith('s')) {
+      return (
+        <div>
+          {(
+            parseFloat(
+              formatUnits(
+                intrinsicValue.payoffPerShortToken,
+                props.row.Payoff.collateralToken.decimals
+              )
+            ) * props.row.Balance
+          ).toFixed(4)}
+        </div>
+      )
+    } else {
+      return (
+        <div>
+          {(
+            parseFloat(
+              formatUnits(
+                intrinsicValue.payoffPerLongToken,
+                props.row.Payoff.collateralToken.decimals
+              )
+            ) * props.row.Balance
+          ).toFixed(4)}
+        </div>
+      )
+    }
+  } else {
+    return <>-</>
+  }
+}
+
 const columns: GridColDef[] = [
   {
     field: 'Id',
@@ -359,6 +407,12 @@ const columns: GridColDef[] = [
     headerAlign: 'right',
   },
   {
+    field: 'Payoff',
+    align: 'right',
+    headerAlign: 'right',
+    renderCell: (props) => <Payoff {...props} />,
+  },
+  {
     field: 'submitValue',
     align: 'right',
     headerAlign: 'right',
@@ -397,13 +451,13 @@ export function MyPositions() {
     ).setMinutes(expiryTime.getMinutes() + 2 * 24 * 60 + 5)
     let finalValue = '-'
     let status = val.statusFinalReferenceValue
-    if (Date.now() > fallbackPeriod) {
-      status = 'Fallback'
-    }
+
     if (now.getTime() < expiryTime.getTime()) {
       finalValue = '-'
     } else if (val.statusFinalReferenceValue === 'Open') {
-      if (now.getTime() > unchallengedPeriod) {
+      if (Date.now() > fallbackPeriod && Date.now() < unchallengedPeriod) {
+        status = 'Fallback'
+      } else if (now.getTime() > unchallengedPeriod) {
         finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
         status = 'Confirmed*'
       } else if (
@@ -437,6 +491,7 @@ export function MyPositions() {
       Buy: 'TBD',
       MaxYield: 'TBD',
       StatusTimestamp: val.statusTimestamp,
+      Payoff: val,
     }
 
     const payOff = {

@@ -45,10 +45,7 @@ type Props = {
 
 export const RemoveLiquidity = ({ pool }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
-  const tokenBalanceLong = useErcBalance(pool ? pool!.longToken.id : undefined)
-  const tokenBalanceShort = useErcBalance(
-    pool ? pool!.shortToken.id : undefined
-  )
+
   const [openExpiredAlert, setOpenExpiredAlert] = React.useState(false)
   const [longToken, setLongToken] = React.useState('')
   const [shortToken, setShortToken] = React.useState('')
@@ -56,11 +53,20 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const [openAlert, setOpenAlert] = React.useState(false)
   const [loading, setLoading] = useState(false)
   const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
+  const [balanceUpdated, setBalanceUpdated] = React.useState(true)
   const { provider } = useConnectionContext()
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
   const theme = useTheme()
+  const tokenBalanceLong = useErcBalance(
+    pool ? pool!.longToken.id : undefined,
+    balanceUpdated
+  )
+  const tokenBalanceShort = useErcBalance(
+    pool ? pool!.shortToken.id : undefined,
 
+    balanceUpdated
+  )
   useEffect(() => {
     if (pool) {
       setOpenExpiredAlert(pool.statusFinalReferenceValue === 'Confirmed')
@@ -142,6 +148,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
     }
     if (
       tokenBalanceLong &&
+      maxCollateral &&
       textFieldValue !== '' &&
       maxCollateral.lt(parseUnits(textFieldValue, decimal))
     ) {
@@ -230,7 +237,8 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           {tokenBalanceLong ? (
             <>
               <Typography variant="subtitle2" color="text.secondary">
-                You can remove up to {formatEther(maxCollateral)}{' '}
+                You can remove up to{' '}
+                {parseFloat(formatEther(maxCollateral)).toFixed(4)}{' '}
                 {pool!.collateralToken.symbol}
                 {' (after fees) '}
                 <MaxCollateral
@@ -321,8 +329,14 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 size="large"
                 type="submit"
                 value="Submit"
-                disabled={!pool || openExpiredAlert}
+                disabled={
+                  !pool ||
+                  openExpiredAlert ||
+                  textFieldValue === '' ||
+                  chainId == null
+                }
                 onClick={() => {
+                  setLoading(true)
                   const diva = new ethers.Contract(
                     config[chainId].divaAddress,
                     DIVA_ABI,
@@ -338,7 +352,9 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                        * dispatch action to refetch the pool after action
                        */
                       tx.wait().then(() => {
+                        setLoading(false)
                         setTimeout(() => {
+                          setBalanceUpdated(false)
                           dispatch(
                             fetchPool({
                               graphUrl: config[chainId as number].divaSubgraph,
@@ -349,6 +365,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                       })
                     })
                     .catch((err) => {
+                      setLoading(false)
                       console.error(err)
                     })
                 }}
@@ -377,7 +394,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           </Typography>
         </Stack>
         <Stack direction="row" justifyContent="space-between">
-          <Typography>Redemption Fee</Typography>
+          <Typography>Protocol Fee</Typography>
           <Typography>
             {pool &&
               textFieldValue !== '' &&

@@ -14,11 +14,17 @@ import { ReviewAndSubmit } from './ReviewAndSubmit'
 import { useCreatePoolFormik } from './formik'
 import { SelectDataFeedProvider } from './SelectDataFeedProvider'
 import { LoadingButton } from '@mui/lab'
+import { ethers } from 'ethers'
+import ERC20 from '@diva/contracts/abis/erc20.json'
+import { useEffect, useState } from 'react'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { ApproveActionButtons } from '../ApproveActionButtons'
 
 export function CreatePool() {
+  const [decimal, setDecimal] = useState(18)
   const formik = useCreatePoolFormik()
   const theme = useTheme()
-
+  const { provider } = useConnectionContext()
   let step = null
   switch (formik.values.step) {
     case 1:
@@ -31,6 +37,18 @@ export function CreatePool() {
       step = <ReviewAndSubmit formik={formik} />
       break
   }
+  useEffect(() => {
+    if (formik.values.collateralToken != null) {
+      const token = new ethers.Contract(
+        formik.values.collateralToken.id,
+        ERC20,
+        provider.getSigner()
+      )
+      token.decimals().then((decimals: number) => {
+        setDecimal(decimals)
+      })
+    }
+  }, [formik.values.collateralToken])
 
   return (
     <Container maxWidth="md">
@@ -70,6 +88,7 @@ export function CreatePool() {
         >
           {formik.values.step > 1 && (
             <Button
+              sx={{ width: theme.spacing(16) }}
               onClick={() => {
                 formik.setFieldValue('step', formik.values.step - 1, true)
               }}
@@ -77,25 +96,37 @@ export function CreatePool() {
               Go Back
             </Button>
           )}
-          <LoadingButton
-            variant="contained"
-            onClick={() => {
-              formik.handleSubmit()
-            }}
-            sx={{
-              paddingLeft: formik.status != null ? theme.spacing(6) : undefined,
-            }}
-            loading={
-              formik.status != null &&
-              !formik.status.startsWith('Error:') &&
-              !formik.status.includes('Success')
-            }
-            disabled={!formik.isValid}
-          >
-            {formik.values.step === 3
-              ? formik.status || 'Approve and Create Pool'
-              : 'Next'}
-          </LoadingButton>
+          {formik.values.step === 3 ? (
+            <ApproveActionButtons
+              collateralTokenAddress={formik.values.collateralToken.id}
+              onTransactionSuccess={() => {
+                formik.setFieldValue('step', 1, true)
+              }}
+              pool={formik.values}
+              decimal={decimal}
+              textFieldValue={formik.values.collateralBalance}
+              transactionType={'create'}
+            />
+          ) : (
+            <LoadingButton
+              variant="contained"
+              onClick={() => {
+                formik.handleSubmit()
+              }}
+              sx={{
+                paddingLeft:
+                  formik.status != null ? theme.spacing(6) : undefined,
+              }}
+              loading={
+                formik.status != null &&
+                !formik.status.startsWith('Error:') &&
+                !formik.status.includes('Success')
+              }
+              disabled={!formik.isValid}
+            >
+              {formik.values.step === 3 ? formik.status || 'Create' : 'Next'}
+            </LoadingButton>
+          )}
         </Stack>
       </Box>
     </Container>

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useFormik } from 'formik'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useDiva } from '../../hooks/useDiva'
@@ -5,21 +6,21 @@ import { WhitelistCollateralToken } from '../../lib/queries'
 
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
-
-type Values = {
+export type Values = {
   step: number
   referenceAsset: string
   expiryTime: Date
   floor: number
   cap: number
   inflection: number
+  gradient: number
   collateralToken?: WhitelistCollateralToken
   collateralWalletBalance: string
   collateralBalance: string
   collateralBalanceShort: number
   collateralBalanceLong: number
   tokenSupply: number
-  capacity: number
+  capacity: string
   dataProvider: string
 }
 
@@ -27,28 +28,26 @@ export const initialValues: Values = {
   step: 1,
   referenceAsset: '',
   expiryTime: defaultDate,
-  floor: 1,
-  cap: 3,
-  inflection: 2,
+  floor: 100,
+  cap: 300,
+  inflection: 200,
+  gradient: 0.5,
   collateralToken: undefined,
   collateralWalletBalance: '0',
-  collateralBalance: '2',
+  collateralBalance: '10',
   collateralBalanceShort: 1,
   collateralBalanceLong: 1,
-  tokenSupply: 4,
-  capacity: 0,
+  tokenSupply: 2,
+  capacity: '0',
   dataProvider: '',
 }
 
 type Errors = {
   [P in keyof typeof initialValues]?: string
 }
-
 export const useCreatePoolFormik = () => {
   const { provider, isConnected } = useConnectionContext()
-
   const contract = useDiva()
-
   const _formik = useFormik({
     initialValues,
     onSubmit: async (values, formik) => {
@@ -110,7 +109,6 @@ export const useCreatePoolFormik = () => {
       const collateralBalance =
         values.collateralBalanceLong + values.collateralBalanceShort
       const walletBalance = parseFloat(values.collateralWalletBalance)
-
       if (values.collateralToken == null) {
         errors.collateralToken = 'You must choose a collateral asset'
       }
@@ -148,10 +146,15 @@ export const useCreatePoolFormik = () => {
         errors.inflection = 'Must be lower than cap'
         errors.cap = 'Must be higher than inflection'
       }
-
-      if (values.capacity < 0) {
+      if (values.gradient < 0 || values.gradient > 1) {
+        errors.gradient = 'Gradient value must be between 0 and 1'
+      }
+      if (parseFloat(values.capacity) < 0) {
         errors.capacity = 'Capacity cannot be negative'
-      } else if (values.capacity !== 0 && collateralBalance > values.capacity) {
+      } else if (
+        parseFloat(values.capacity) !== 0 &&
+        collateralBalance > parseFloat(values.capacity)
+      ) {
         errors.capacity = `Capacity must be larger than ${collateralBalance}. For unlimited capacity, set to 0`
       }
 

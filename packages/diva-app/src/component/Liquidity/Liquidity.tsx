@@ -45,45 +45,62 @@ export const Liquidity = ({ pool }: Props) => {
         {!value && pool && (
           <Container sx={{ mt: theme.spacing(4), mb: theme.spacing(4) }}>
             {pool &&
-            formatUnits(pool!.capacity, pool!.collateralToken.decimals) !==
-              '0.0' ? (
+            formatUnits(pool.capacity, pool.collateralToken.decimals) !==
+              '0.0' &&
+            pool.capacity.toString() !==
+              '115792089237316195423570985008687907853269984665640564039457584007913129639935' ? (
               <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(4) }}>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Pool Capacity</Typography>
                   <Typography>
                     {pool &&
                       (formatUnits(
-                        pool!.capacity,
-                        pool!.collateralToken.decimals
+                        pool.capacity,
+                        pool.collateralToken.decimals
                       ) === '0.0'
                         ? 'Unlimited'
-                        : formatUnits(
-                            pool!.capacity,
-                            pool!.collateralToken.decimals
-                          ))}{' '}
-                    {pool!.collateralToken.symbol}{' '}
+                        : parseFloat(
+                            formatUnits(
+                              pool.capacity,
+                              pool.collateralToken.decimals
+                            )
+                          ).toFixed(2))}{' '}
+                    {pool.collateralToken.symbol}{' '}
                   </Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Currently Utilized</Typography>
                   <Typography>
                     {pool &&
-                      (100 *
-                        parseFloat(
-                          formatUnits(
-                            BigNumber.from(pool.collateralBalance),
-                            pool!.collateralToken.decimals
-                          )
-                        )) /
-                        parseFloat(formatUnits(pool.capacity)) +
-                        '% / ' +
-                        parseFloat(
-                          formatUnits(
-                            BigNumber.from(pool.collateralBalance),
-                            pool!.collateralToken.decimals
-                          )
-                        )}{' '}
+                      parseFloat(
+                        formatUnits(
+                          BigNumber.from(pool.collateralBalance),
+                          pool.collateralToken.decimals
+                        )
+                      ).toFixed(2)}{' '}
                     {pool.collateralToken.symbol!}{' '}
+                  </Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Currently Utilized in %</Typography>
+                  <Typography>
+                    {pool &&
+                      (
+                        (100 *
+                          parseFloat(
+                            formatUnits(
+                              BigNumber.from(pool.collateralBalance),
+                              pool.collateralToken.decimals
+                            )
+                          )) /
+                        parseFloat(
+                          formatUnits(
+                            BigNumber.from(pool.capacity),
+                            pool.collateralToken.decimals
+                          )
+                        )
+                      ).toFixed(2)}
+                    {'%'}
                   </Typography>
                 </Stack>
               </Container>

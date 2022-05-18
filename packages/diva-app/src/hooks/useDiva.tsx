@@ -111,13 +111,24 @@ export function useDiva(): DivaApi | null {
       )
 
       const creatorAddress = await signer.getAddress()
-      const tx = await erc20.approve(
-        divaAddress,
-        collateralBalanceLong.add(collateralBalanceShort)
-      )
-      await tx.wait()
+      const allowedBalance = await erc20.allowance(creatorAddress, divaAddress)
 
-      await erc20.allowance(creatorAddress, divaAddress)
+      /*** in order to avoid redundant approvals we only need to approve if collateral is
+       greater than already approved balance
+       */
+      if (
+        allowedBalance.lt(collateralBalanceLong.add(collateralBalanceShort))
+      ) {
+        try {
+          const tx = await erc20.approve(
+            divaAddress,
+            collateralBalanceLong.add(collateralBalanceShort)
+          )
+          await tx.wait()
+        } catch (e) {
+          console.error(e)
+        }
+      }
 
       const tx2 = await contract.createContingentPool([
         referenceAsset,

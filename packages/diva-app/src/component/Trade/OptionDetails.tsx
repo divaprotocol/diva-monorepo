@@ -3,10 +3,11 @@ import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
 import { Pool } from '../../lib/queries'
-import { formatEther, formatUnits } from 'ethers/lib/utils'
+import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import CheckCircleSharpIcon from '@mui/icons-material/CheckCircleSharp'
 import WarningAmberSharpIcon from '@mui/icons-material/WarningAmberSharp'
+import { BigNumber } from 'ethers'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -152,26 +153,46 @@ export default function OptionDetails({
           <FlexBoxData>{isLong ? 'Up' : 'Down'}</FlexBoxData>
         </FlexBox>
         <FlexBox>
-          <FlexBoxHeader>Floor</FlexBoxHeader>
+          <Tooltip
+            placement="top-end"
+            title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+          >
+            <FlexBoxHeader>Floor</FlexBoxHeader>
+          </Tooltip>
           <FlexBoxData>{parseInt(pool.floor) / 1e18}</FlexBoxData>
         </FlexBox>
         <FlexBox>
-          <FlexBoxHeader>Inflection</FlexBoxHeader>
+          <Tooltip
+            placement="top-end"
+            title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+          >
+            <FlexBoxHeader>Inflection</FlexBoxHeader>
+          </Tooltip>
           <FlexBoxData>{parseInt(pool.inflection) / 1e18}</FlexBoxData>
         </FlexBox>
         <FlexBox>
-          <FlexBoxHeader>Cap</FlexBoxHeader>
+          <Tooltip
+            placement="top-end"
+            title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
+          >
+            <FlexBoxHeader>Cap</FlexBoxHeader>
+          </Tooltip>
           <FlexBoxData>{Number(formatEther(pool.cap))}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Collateral</FlexBoxHeader>
-          <FlexBoxData>
-            {Number(
-              formatUnits(pool.collateralBalance, pool.collateralToken.decimals)
-            ).toFixed(2) +
-              ' ' +
-              pool.collateralToken.symbol}
-          </FlexBoxData>
+          <Tooltip title={pool.collateralToken.id} arrow>
+            <FlexBoxData>
+              {Number(
+                formatUnits(
+                  pool.collateralBalance,
+                  pool.collateralToken.decimals
+                )
+              ).toFixed(2) +
+                ' ' +
+                pool.collateralToken.symbol}
+            </FlexBoxData>
+          </Tooltip>
         </FlexBox>
       </FlexDiv>
       <FlexSecondLineDiv>
@@ -221,9 +242,24 @@ export default function OptionDetails({
         </FlexBoxSecondLine>
 
         <FlexBoxSecondLine>
-          <FlexBoxHeader>Short/Long ratio</FlexBoxHeader>
+          <Tooltip
+            placement="top-end"
+            title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
+          >
+            <FlexBoxHeader>Gradient</FlexBoxHeader>
+          </Tooltip>
           <FlexBoxSecondLineData>
-            {shortCollateralRatio.toFixed()} / {longCollateralRatio.toFixed()}
+            {formatUnits(
+              BigNumber.from(pool.collateralBalanceLongInitial)
+                .mul(parseUnits('1', pool.collateralToken.decimals))
+                .div(
+                  BigNumber.from(pool.collateralBalanceLongInitial).add(
+                    BigNumber.from(pool.collateralBalanceShortInitial)
+                  )
+                ),
+
+              pool.collateralToken.decimals
+            )}
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
       </FlexSecondLineDiv>

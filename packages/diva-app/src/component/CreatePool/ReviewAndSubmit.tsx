@@ -21,9 +21,6 @@ const stringifyValue = (val: any) => {
   if (val instanceof Date) {
     return val.toDateString()
   } else if (typeof val === 'string') {
-    if (val.length > 10) {
-      return getShortenedAddress(val)
-    }
     return val
   } else if (typeof val === 'number') {
     return `${val}`
@@ -39,7 +36,8 @@ const dict: {
   floor: 'Floor',
   cap: 'Cap',
   inflection: 'Inflection',
-  collateralBalanceShort: 'Collateral Balance (Short)',
+  gradient: 'Gradient',
+  collateralBalance: 'Collateral Balance ',
   collateralBalanceLong: 'Collateral Balance (Long)',
   shortTokenSupply: 'Token Supply (Short)',
   longTokenSupply: 'Token Supply (Long)',
@@ -94,9 +92,10 @@ export function ReviewAndSubmit({
               .filter(
                 (v) =>
                   ![
-                    'collateralBalance',
                     'collateralWalletBalance',
                     'step',
+                    'collateralBalanceShort',
+                    'collateralBalanceLong',
                   ].includes(v)
               )
               .map((key: any) => (
