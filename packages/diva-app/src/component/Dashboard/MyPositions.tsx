@@ -23,7 +23,7 @@ import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import styled from 'styled-components'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import {
@@ -434,6 +434,7 @@ const columns: GridColDef[] = [
 export function MyPositions() {
   const { provider, address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
+  const [filterPosition, setFilterPosition] = useState([])
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
 
@@ -578,26 +579,30 @@ export function MyPositions() {
     return response
   })
 
-  const tokenBalances = balances.data
+  useEffect(() => {
+    const tokenBalances = balances.data
 
-  const filteredRows =
-    tokenBalances != null
-      ? rows
-          .filter(
-            (v) =>
-              tokenBalances[v.address.id] != null &&
-              tokenBalances[v.address.id].gt(0)
-          )
-          .map((v) => ({
-            ...v,
-            Balance:
-              parseInt(formatUnits(tokenBalances[v.address.id])) < 0.01
-                ? '<0.01'
-                : parseFloat(formatUnits(tokenBalances[v.address.id])).toFixed(
-                    4
-                  ),
-          }))
-      : []
+    const filteredRows =
+      tokenBalances != null
+        ? rows
+            .filter(
+              (v) =>
+                tokenBalances[v.address.id] != null &&
+                tokenBalances[v.address.id].gt(0)
+            )
+            .map((v) => ({
+              ...v,
+              Balance:
+                parseInt(formatUnits(tokenBalances[v.address.id])) < 0.01
+                  ? '<0.01'
+                  : parseFloat(
+                      formatUnits(tokenBalances[v.address.id])
+                    ).toFixed(4),
+            }))
+        : []
+
+    setFilterPosition(filteredRows)
+  }, [balances])
 
   return (
     <Stack
@@ -627,7 +632,7 @@ export function MyPositions() {
           <SideMenu />
           <PoolsTable
             page={page}
-            rows={filteredRows}
+            rows={filterPosition}
             loading={balances.isLoading || poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}
