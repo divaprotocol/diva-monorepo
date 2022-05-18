@@ -4,12 +4,11 @@ import os
 
 from ChainSet import Chain
 
-
+# Set helper file
 config = Chain()
 
 PRIVATE_KEY = config.PRIVATE_KEY
 WALLET = config.WALLET
-# 0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf
 CONTRACT_ADDRESS = config.contract_address()
 provider_url = config.price_infra()
 print(provider_url)
@@ -17,7 +16,7 @@ print(provider_url)
 
 w3 = Web3(Web3.HTTPProvider(provider_url))
 
-print("connected to blockchain: ", w3.isConnected())
+print("connected to blockchain RPC: ", w3.isConnected())
 
 abi = '''[
 {
@@ -146,13 +145,14 @@ abi = '''[
 
 def sendPrice(pool_id, value):
     my_contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
+    # Troubleshooting prints 
     #print("contract: {}", my_contract)
     #print(w3.eth.get_transaction_count(wallet))
     #print(w3.eth.gas_price)
     setFinRef_txn = my_contract.functions.setFinalReferenceValue(int(pool_id), int(w3.toWei(value, 'ether')), False).buildTransaction(
         {
             "gasPrice": w3.eth.gas_price,
-            "chainId": 3,
+            "chainId": config.CHAIN_ID,
             "from": WALLET,
             "nonce": w3.eth.get_transaction_count(WALLET)
         }

@@ -1,5 +1,8 @@
-# This file will set chains when running this script
-# For instance, choose robsten, rinkeby, etc, to run this script
+'''
+Script is meant to set various chains, contracts, 
+infrastrucutre that is used across the Oracle
+This is meant to be a singular place to update across the Oracle functions
+'''
 import os
 from dotenv import load_dotenv
 
@@ -9,7 +12,7 @@ load_dotenv()
 class Chain:
     WALLET = os.getenv('WALLET')
     PRIVATE_KEY = os.getenv('PRIVATE_KEY')
-    CHAIN_ID = 3
+    CHAIN_ID = 80001
     '''eth mainnet is 1
     ropsten is 3, 
     rinkeby is 4
@@ -35,7 +38,7 @@ class Chain:
             network = "https://polygon-mainnet.infura.io/v3/" + API_KEY
             return network
         elif self.CHAIN_ID == 80001:
-            network = "https://polygon-mumbai.infura.io/v3/" + API_KEY
+            network = "https://speedy-nodes-nyc.moralis.io/86d67e6f9d6f3ccc04df4b37/polygon/mumbai"
             return network
         else:
             print("chain not set")

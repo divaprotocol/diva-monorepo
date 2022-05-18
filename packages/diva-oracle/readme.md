@@ -1,6 +1,13 @@
-The purpose of this repo is to run a DIVA price Oracle for certian trading pairs.
-Current this only runs on robsten testnet
-This is operational in its current form running the main.py script. Instructions below
+# Purpose
+The purpose of this repo is to run a DIVA price Oracle for certian trading pairs. This Oracle can run in the background constantly querying for price inputs to pools. The Oracle will only submit for pools where the wallet defined is the data provider. 
+
+## Usage
+There are a few levers to manage in terms of configuring the Oracle.
+1. main.py defines, pool pairs and cycle wait time
+2. .env file is where the key pair is defined for data provider, DIVA contract locations for various chains. See .env.example for options. 
+3. ChainSet.py is where the Chain ID is set to cascade configs across the Oracle. 
+
+### Installion for usage
 1. Install poetry: 
 
 * osx / linux / bashonwindows install instructions:
@@ -31,7 +38,7 @@ poetry add pandas
 * If `poetry` is not recognized a valid command in your terminal (e.g., when running `poetry --version`), try to add the following path variable in windows `%USERPROFILE%\.poetry\bin`
 * If it's still not working, try to run visual studio / the console in administrator mode
 
-## Helpful links
+#### Helpful links
 * Python poetry docs: https://python-poetry.org/docs/
 
 

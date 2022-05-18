@@ -13,6 +13,11 @@ from SendPrice import sendPrice
 from ChainSet import Chain
 
 
+# List of assets to choose from, if there are more from the Price Oracle
+# Asset list to query and send prices for
+Asset_list = ['BTC/USD', 'ETH/USD', 'ZRX/USD', '1INCH/USD', 'AAVE/USD', 'ALGO/USD', 'AXS/USD']
+
+
 # Dataprovider is determined by who created the pool
 # Only the specified data provider can update the contract
 # In this case, it is the WALLET variable set in the .env file
@@ -34,26 +39,9 @@ query = '''
             }
 '''% dataprovider
 
-query2 = '''
-            {
-              pools (where: {dataProvider: "%s"}) {
-                
-               
-                referenceAsset
-                floor
-                inflection
-                cap
-                expiryTime
-                statusFinalReferenceValue
-              }
-            }
-'''% dataprovider
-
-# Asset list to query and send prices for
-Asset_list = ['BTC/USD', 'ETH/USD']
 
 
-query_list = [query2]
+query_list = [query]
 # seeing when expirty is 1 hour away to send in prce oracle
 max_time_away = dt.timedelta(minutes=60)
 
@@ -105,24 +93,9 @@ if __name__ == "__main__":
       # Determine reporting needed based on time frame, within 24 hours after expiry
       df_reporting_needed = get_required_reporting_df(resp, Asset_list,hours=24)
       main_send(df_reporting_needed)
-    print("sleeping 1 minute: run #: ", run)
+    print("sleeping 1 minute: cycle #: ", run)
     run +=1
+    # Sleep time in seconds
     time.sleep(60)
   
 
-
-    # Send price and verify for send price
-    # Check pool, and what the id
-    # Restrict to data provider
-    # Change hours after expiry
-    # automatically running script 
-    # Call the send price function
-    #sendPrice(pool_id=pool_id, value=price)
-    # Wait for successful transaction 
-    # This would be good for testnet
-    # Then verify the that the reference value is filled. 
-    # Exclude the ones already open 
-
-    # Increase the asset pools,
-    # Change the areas of Queries to pull data providers
-    # Take the average price and average over the various exchanges
