@@ -49,7 +49,7 @@ export default function MenuItems() {
         setDashboardVariant('text')
         break
     }
-  }, [marketVariant, dashboardVariant, createVariant])
+  }, [])
 
   return (
     <Stack
