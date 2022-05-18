@@ -433,40 +433,44 @@ export const queryOrdersByMakerToken = (props: {
 `
 
 export const queryOrdersByTokens = (props: {
+  chainId: number
   makerToken: string
   takerToken: string
   nextToken?: string
 }) => gql`
   query QueryOrders{
-    ordersByTokens (makerToken: "${props.makerToken}",
-    takerToken: "${props.takerToken}"
-    ${props.nextToken != null ? ', nextToken: ' + props.nextToken : ''}) {
-      items {
-        id
-        pool
-        feeRecipient
-        takerTokenFeeAmount
-        makerToken
-        takerToken
-        makerAmount
-        takerAmount
-        maker
-        taker
-        sender
-        expiry
-        salt
-        chainId
-        verifyingContract
-        signature {
-          signatureType
-          r
-          s
-          v
+    ordersByTokens (
+      chainId: "${props.chainId}", 
+      makerToken: "${props.makerToken}",
+      takerToken: "${props.takerToken}" ${
+  props.nextToken != null ? ', nextToken: ' + props.nextToken : ''
+}) {
+        items {
+          id
+          pool
+          feeRecipient
+          takerTokenFeeAmount
+          makerToken
+          takerToken
+          makerAmount
+          takerAmount
+          maker
+          taker
+          sender
+          expiry
+          salt
+          chainId
+          verifyingContract
+          signature {
+            signatureType
+            r
+            s
+            v
+          }
         }
       }
     }
-  }
-`
+  `
 
 export const createOrderMutation = (order: Omit<Order, 'id'>) => gql`
   mutation CreateOrder {

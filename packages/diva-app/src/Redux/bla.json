@@ -1,3 +1,10 @@
 {
-  
+  "data": null,
+  "errors": [
+    {
+      "path": null,
+      "locations": [{ "line": 3, "column": 5, "sourceName": null }],
+      "message": "Validation error of type WrongType: argument 'chainId' with value 'StringValue{value='3'}' is not a valid 'Int' @ 'ordersByTokens'"
+    }
+  ]
 }

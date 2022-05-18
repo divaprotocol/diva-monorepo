@@ -131,6 +131,7 @@ export function orderBookApi(construct: Construct) {
 
     type Mutation {
       createOrder(
+        chainId: Int!
         pool: String!
         feeRecipient: String!
         takerTokenFeeAmount: String!
@@ -143,7 +144,6 @@ export function orderBookApi(construct: Construct) {
         sender: String!
         expiry: String!
         salt: String!
-        chainId: Int!
         verifyingContract: String!
         signature: SignatureInput!
       ): Order
@@ -156,9 +156,9 @@ export function orderBookApi(construct: Construct) {
   
     type Query {
       order(id: ID!): Order
-      orders(limit: Int, nextToken: String): PaginatedOrders
-      ordersByMakerToken(makerToken: String, limit: Int, nextToken: String): PaginatedOrders
-      ordersByTokens(makerToken: String, takerToken: String, limit: Int, nextToken: String): PaginatedOrders
+      orders(chainId: Int, limit: Int, nextToken: String): PaginatedOrders
+      ordersByMakerToken(chainId: Int, makerToken: String, limit: Int, nextToken: String): PaginatedOrders
+      ordersByTokens(chainId: Int, makerToken: String, takerToken: String, limit: Int, nextToken: String): PaginatedOrders
     }
 
     type Subscription {
@@ -250,7 +250,13 @@ export function orderBookApi(construct: Construct) {
             ":makerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.makerToken),
             ":takerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.takerToken)
           }
-        }
+        },
+        "filter" : {
+          "expression" : "chainId = :chainId"
+          "expressionValues" : {
+            ":chainId" : $util.dynamodb.toNumber($context.arguments.chainId),
+          },
+      }
     }`,
     responseTemplate: `$util.toJson($ctx.result)`,
   });
@@ -269,7 +275,13 @@ export function orderBookApi(construct: Construct) {
       #if($ctx.args.nextToken)
         ,"nextToken": $util.toJson($ctx.args.nextToken)
       #end
-  }`,
+      ,"query" : {
+        "expression": "chainId = :chainId",
+          "expressionValues" : {
+            ":chainId" : $util.dynamodb.toNumber($context.arguments.chainId),
+          }
+        }
+    }`,
     responseTemplate: `$util.toJson($ctx.result)`,
   });
 
@@ -288,8 +300,9 @@ export function orderBookApi(construct: Construct) {
         ,"nextToken": $util.toJson($ctx.args.nextToken)
       #end
       ,"query" : {
-        "expression": "makerToken = :makerToken",
+        "expression": "chainId = :chainId AND makerToken = :makerToken",
           "expressionValues" : {
+            ":chainId" : $util.dynamodb.toNumber($context.arguments.chainId),
             ":makerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.makerToken)
           }
       }
@@ -327,7 +340,8 @@ export function orderBookApi(construct: Construct) {
           "Resource": [
             "${table.arn}",
             "${table.arn}/index/OrderBookIndex",
-            "${table.arn}/index/MakerIndex"
+            "${table.arn}/index/MakerIndex",
+            "${table.arn}/index/ChainAndExpiry"
           ]
         }
       ]

@@ -1,4 +1,4 @@
-import { configureStore, ConfigureStoreOptions } from '@reduxjs/toolkit'
+import { configureStore } from '@reduxjs/toolkit'
 import { appSlice, defaultAppState, initialState } from './appSlice'
 import { debounce } from '../lib/debounce'
 import { tradeOptionSlice } from './TradeOption'
@@ -35,7 +35,7 @@ const preloadedState = validState(
   JSON.parse(localStorage.getItem('diva-app-state-local'))
 )
 
-const storeConfig: any = {
+const storeConfig = {
   reducer: {
     tradeOption: tradeOptionSlice.reducer,
     appSlice: appSlice.reducer,

@@ -35,7 +35,6 @@ import {
 } from '../constants'
 import { zeroXDomain, create0xMessage, zeroXTypes } from '../lib/zeroX'
 import IZeroX_ABI from '../abi/IZeroX.json'
-import { ActionTypes } from '@mui/base'
 
 /**
  * We track the state of thunks in redux
@@ -144,14 +143,21 @@ export const initialState: AppStateByChain = {
 
 export const fetchOrders = createAsyncThunk(
   'app/fetchOrders',
-  async ({
-    makerToken,
-    takerToken,
-  }: {
-    makerToken: string
-    takerToken: string
-  }) => {
+  async (
+    {
+      makerToken,
+      takerToken,
+    }: {
+      makerToken: string
+      takerToken: string
+    },
+    thunk
+  ) => {
+    const state = thunk.getState() as RootState
+    const { chainId } = state.appSlice
+
     const query = queryOrdersByTokens({
+      chainId,
       makerToken,
       takerToken,
     })
@@ -337,9 +343,10 @@ export const createOrder = createAsyncThunk(
         JSON.stringify(typedData),
       ])
       const { r, s, v } = splitSignature(data)
+      console.log({ chainId })
       const mutation = createOrderMutation({
         ...order,
-        chainId,
+        chainId: Number(chainId),
         verifyingContract: verifyingAddress,
         signature: {
           r,
@@ -896,8 +903,8 @@ export const selectOrderView =
 
 export const selectExpectedRate = (state: RootState) => {
   return {
-    buy: state.tradeOption.responseBuy[0].order.makerAmount,
-    sell: state.tradeOption.responseSell[0].order.makerAmount,
+    buy: 0, // TODO state.tradeOption.responseBuy[0].order.makerAmount,
+    sell: 0, // TODO state.tradeOption.responseSell[0].order.makerAmount,
   }
 }
 

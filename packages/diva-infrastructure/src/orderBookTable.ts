@@ -31,7 +31,7 @@ export function orderBookTable(construct: Construct) {
       },
       {
         name: "chainId",
-        type: "S",
+        type: "N",
       },
       {
         name: "expiry",
