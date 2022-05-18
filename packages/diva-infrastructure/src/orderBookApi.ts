@@ -246,16 +246,16 @@ export function orderBookApi(construct: Construct) {
       #end
       ,"query" : {
         "expression": "makerToken = :makerToken AND takerToken = :takerToken",
-          "expressionValues" : {
-            ":makerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.makerToken),
-            ":takerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.takerToken)
-          }
-        },
-        "filter" : {
-          "expression" : "chainId = :chainId"
-          "expressionValues" : {
-            ":chainId" : $util.dynamodb.toNumber($context.arguments.chainId),
-          },
+        "expressionValues" : {
+          ":makerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.makerToken),
+          ":takerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.takerToken)
+        }
+      },
+      "filter" : {
+        "expression" : "chainId = :chainId",
+        "expressionValues" : {
+          ":chainId" : $util.dynamodb.toDynamoDBJson($context.arguments.chainId)
+        }
       }
     }`,
     responseTemplate: `$util.toJson($ctx.result)`,
@@ -277,10 +277,10 @@ export function orderBookApi(construct: Construct) {
       #end
       ,"query" : {
         "expression": "chainId = :chainId",
-          "expressionValues" : {
-            ":chainId" : $util.dynamodb.toNumber($context.arguments.chainId),
-          }
+        "expressionValues" : {
+          ":chainId" : $util.dynamodb.toDynamoDBJson($context.arguments.chainId)
         }
+      }
     }`,
     responseTemplate: `$util.toJson($ctx.result)`,
   });
@@ -302,7 +302,7 @@ export function orderBookApi(construct: Construct) {
       ,"query" : {
         "expression": "chainId = :chainId AND makerToken = :makerToken",
           "expressionValues" : {
-            ":chainId" : $util.dynamodb.toNumber($context.arguments.chainId),
+            ":chainId" : $util.dynamodb.toDynamoDBJson($context.arguments.chainId),
             ":makerToken" : $util.dynamodb.toDynamoDBJson($context.arguments.makerToken)
           }
       }

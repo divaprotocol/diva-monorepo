@@ -1,10 +1,13 @@
 {
-  "data": null,
+  "data": { "createOrder": null },
   "errors": [
     {
-      "path": null,
-      "locations": [{ "line": 3, "column": 5, "sourceName": null }],
-      "message": "Validation error of type WrongType: argument 'chainId' with value 'StringValue{value='3'}' is not a valid 'Int' @ 'ordersByTokens'"
+      "path": ["createOrder"],
+      "data": null,
+      "errorType": "DynamoDB:DynamoDbException",
+      "errorInfo": null,
+      "locations": [{ "line": 2, "column": 3, "sourceName": null }],
+      "message": "One or more parameter values were invalid: Type mismatch for Index Key chainId Expected: S Actual: N IndexName: ChainAndExpiry (Service: DynamoDb, Status Code: 400, Request ID: OAH1N362PPJONDI7B6ND9P2BJFVV4KQNSO5AEMVJF66Q9ASUAAJG)"
     }
   ]
 }
