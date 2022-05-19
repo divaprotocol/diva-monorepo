@@ -13,7 +13,7 @@ async function main() {
   const network = "ropsten";
 
   // INPUT: id of existing pool
-  const poolId = 149;
+  const poolId = 100;
 
   // Connect to DIVA contract
   let diva = await ethers.getContractAt(
