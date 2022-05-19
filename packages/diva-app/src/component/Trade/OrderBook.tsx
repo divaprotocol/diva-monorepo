@@ -122,15 +122,11 @@ function mapOrderData(
         orders.nbrOptions = quantity
       }
     }
-    // orders = orders.filter(function (val) {
-    //   return val !== 0
-    // })
-    console.log('orders')
-    console.log(orders)
 
     return orders
   })
 
+  // Filter out orders with quantity = 0 (may happen if maker has revoked the approval)
   const orderbook = orderbookTemp.filter((object) => {
     return object.nbrOptions !== 0
   })

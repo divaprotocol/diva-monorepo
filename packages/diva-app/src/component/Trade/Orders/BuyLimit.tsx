@@ -125,9 +125,8 @@ export default function BuyLimit(props: {
 
   const approveBuyAmount = async (amount) => {
     try {
-      const amountBigNumber = parseUnits(amount.toString())
       const approveResponse = await takerTokenContract.methods
-        .approve(exchangeProxyAddress, amountBigNumber)
+        .approve(exchangeProxyAddress, amount)
         .send({ from: userAdress })
 
       if ('events' in approveResponse) {
@@ -153,7 +152,9 @@ export default function BuyLimit(props: {
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
-        let collateralAllowance = await approveBuyAmount(amount)
+        let collateralAllowance = await approveBuyAmount(
+          parseUnits(amount.toString(), option.collateralToken.decimals)
+        )
         if (collateralAllowance == 'undefined') {
           alert('Metamask could not finish approval please check gas limit')
         } else {

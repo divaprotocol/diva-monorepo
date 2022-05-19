@@ -85,9 +85,9 @@ export default function BuyMarket(props: {
   }
 
   const approveBuyAmount = async (amount) => {
-    const amountBigNumber = parseUnits(amount.toString())
+    // const amountBigNumber = parseUnits(amount.toString())
     await takerTokenContract.methods
-      .approve(exchangeProxy, amountBigNumber)
+      .approve(exchangeProxy, amount)
       .send({ from: userAddress })
 
     const collateralAllowance = await takerTokenContract.methods
@@ -103,7 +103,9 @@ export default function BuyMarket(props: {
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
-        let collateralAllowance = await approveBuyAmount(amount)
+        let collateralAllowance = await approveBuyAmount(
+          parseUnits(amount.toString(), option.collateralToken.decimals)
+        )
         collateralAllowance = Number(
           formatUnits(
             collateralAllowance.toString(),
@@ -248,7 +250,9 @@ export default function BuyMarket(props: {
         formatUnits(order.takerAmount, option.collateralToken.decimals)
       )
       const makerAmount = Number(formatUnits(order.makerAmount))
+
       if (totalDecimals(takerAmount, makerAmount) > 0) {
+        // QUESTION: Why do we need this? This leads to rounding errors and wrong expected price displayed
         order['expectedRate'] = (takerAmount / makerAmount).toFixed(
           totalDecimals(takerAmount, makerAmount)
         )
@@ -263,8 +267,13 @@ export default function BuyMarket(props: {
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedOrders = stableSort(orders, getComparator(sortOrder, orderBy))
+    console.log('sortedOrders')
+    console.log(sortedOrders)
     if (sortedOrders.length > 0) {
       const bestRate = sortedOrders[0].expectedRate
+      console.log(sortedOrders[0])
+      console.log(sortedOrders[1])
+      console.log(sortedOrders[2])
       const rate = Number(bestRate)
       setAvgExpectedRate(rate)
     }
@@ -413,7 +422,7 @@ export default function BuyMarket(props: {
       BigENumber.from(option.supplyInitial),
       option.collateralToken.decimals
     )
-    if (avgExpectedRate > 0) {
+    if (avgExpectedRate > 0 && !isNaN(avgExpectedRate)) {
       dispatch(
         setMaxYield(
           parseFloat(
