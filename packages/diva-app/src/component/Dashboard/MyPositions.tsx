@@ -521,9 +521,22 @@ export function MyPositions() {
     }
 
     const payOff = {
-      Floor: parseInt(val.floor) / 1e18,
-      Inflection: parseInt(val.inflection) / 1e18,
-      Cap: parseInt(val.cap) / 1e18,
+      CollateralBalanceLong: Number(
+        formatUnits(
+          val.collateralBalanceLongInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      CollateralBalanceShort: Number(
+        formatUnits(
+          val.collateralBalanceShortInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      Floor: Number(formatEther(val.floor)),
+      Inflection: Number(formatEther(val.inflection)),
+      Cap: Number(formatEther(val.cap)),
+      TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
 
     const Status =
