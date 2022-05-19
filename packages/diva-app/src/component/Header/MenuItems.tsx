@@ -1,55 +1,12 @@
-import { Box, Button, Tooltip } from '@mui/material'
+import { Box, Tooltip } from '@mui/material'
 import { Stack } from '@mui/material'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Logo } from '../Logo'
-import { useEffect, useState } from 'react'
 
 export default function MenuItems() {
-  const [marketVariant, setMarketVariant] = useState<'text' | 'contained'>(
-    'text'
-  )
-  const [dashboardVariant, setDashboardVariant] = useState<
-    'text' | 'contained'
-  >('text')
-  const [createVariant, setCreateVariant] = useState<'text' | 'contained'>(
-    'text'
-  )
-  const variant = (button: string) => {
-    switch (button) {
-      case 'create':
-        return window.location.toString().split('/')[3] === 'Create'
-          ? 'contained'
-          : 'text'
-      case 'dashboard':
-        return window.location.toString().split('/')[3] === 'dashboard'
-          ? 'contained'
-          : 'text'
-      case 'market':
-        return window.location.toString().split('/')[3] === ''
-          ? 'contained'
-          : 'text'
-    }
-  }
-  useEffect(() => {
-    switch (window.location.toString().split('/')[3]) {
-      case 'Create':
-        setMarketVariant('text')
-        setCreateVariant('contained')
-        setDashboardVariant('text')
-        break
-      case 'dashboard':
-        setMarketVariant('text')
-        setCreateVariant('text')
-        setDashboardVariant('contained')
-        break
-      default:
-        setMarketVariant('contained')
-        setCreateVariant('text')
-        setDashboardVariant('text')
-        break
-    }
-  }, [])
+  const location = useLocation()
+  console.log({ location })
 
   return (
     <Stack
@@ -60,59 +17,38 @@ export default function MenuItems() {
       marginTop="16px"
       spacing={3}
     >
-      <Box sx={{ width: 30, marginBottom: 5, paddingRight: 4 }}>
-        <Button
-          onClick={() => {
-            setMarketVariant('contained')
-            setCreateVariant('text')
-            setDashboardVariant('text')
-          }}
-        >
+      <Link to="/">
+        <Box sx={{ width: 30, marginBottom: 5 }}>
           <Logo />
-        </Button>
-      </Box>
-      <Button
-        variant={marketVariant}
-        onClick={() => {
-          setMarketVariant('contained')
-          setCreateVariant('text')
-          setDashboardVariant('text')
-        }}
-      >
-        <Link to="/">
-          <Tooltip title="Market">
-            <ShowChartOutlined color="action" />
-          </Tooltip>
-        </Link>
-      </Button>
-      <Button
-        variant={dashboardVariant}
-        onClick={() => {
-          setMarketVariant('text')
-          setCreateVariant('text')
-          setDashboardVariant('contained')
-        }}
-      >
-        <Link to="/dashboard/mypositions">
-          <Tooltip title=" My Dashboard">
-            <Person color="action" />
-          </Tooltip>
-        </Link>
-      </Button>
-      <Button
-        variant={createVariant}
-        onClick={() => {
-          setMarketVariant('text')
-          setCreateVariant('contained')
-          setDashboardVariant('text')
-        }}
-      >
-        <Link to="/Create">
-          <Tooltip title="Create Pool">
-            <Add color="action" />
-          </Tooltip>
-        </Link>
-      </Button>
+        </Box>
+      </Link>
+      <Link to="/">
+        <Tooltip title="Market">
+          <ShowChartOutlined
+            color={location.pathname === '/' ? 'primary' : 'action'}
+          />
+        </Tooltip>
+      </Link>
+      <Link to="/dashboard/mypositions">
+        <Tooltip title=" My Dashboard">
+          <Person
+            color={
+              location.pathname.startsWith('/dashboard') ? 'primary' : 'action'
+            }
+          />
+        </Tooltip>
+      </Link>
+      <Link to="/Create">
+        <Tooltip title="Create Pool">
+          <Add
+            color={
+              location.pathname.toLowerCase() === '/create'
+                ? 'primary'
+                : 'action'
+            }
+          />
+        </Tooltip>
+      </Link>
     </Stack>
   )
 }
