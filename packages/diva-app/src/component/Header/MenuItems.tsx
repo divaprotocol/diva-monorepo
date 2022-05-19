@@ -1,4 +1,4 @@
-import { Box, Divider, Tooltip } from '@mui/material'
+import { Box, Tooltip } from '@mui/material'
 import { Stack } from '@mui/material'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
 import { Link } from 'react-router-dom'

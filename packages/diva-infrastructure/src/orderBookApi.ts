@@ -121,7 +121,7 @@ export function orderBookApi(construct: Construct) {
       maker: String!
       taker: String!
       sender: String!
-      expiry: String!
+      expiry: Int!
       salt: String!
       chainId: Int!
       verifyingContract: String!
@@ -142,7 +142,7 @@ export function orderBookApi(construct: Construct) {
         maker: String!
         taker: String!
         sender: String!
-        expiry: String!
+        expiry: Int!
         salt: String!
         verifyingContract: String!
         signature: SignatureInput!

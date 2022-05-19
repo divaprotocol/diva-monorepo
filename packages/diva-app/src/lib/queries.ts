@@ -387,7 +387,7 @@ export type Order = {
   maker: string
   taker: string
   sender: string
-  expiry: string
+  expiry: number
   salt: string
   chainId: number
   verifyingContract: string
@@ -440,7 +440,7 @@ export const queryOrdersByTokens = (props: {
 }) => gql`
   query QueryOrders{
     ordersByTokens (
-      chainId: "${props.chainId}", 
+      chainId: ${props.chainId}, 
       makerToken: "${props.makerToken}",
       takerToken: "${props.takerToken}" ${
   props.nextToken != null ? ', nextToken: ' + props.nextToken : ''
@@ -476,7 +476,7 @@ export const createOrderMutation = (order: Omit<Order, 'id'>) => gql`
   mutation CreateOrder {
     createOrder(
       chainId: ${order.chainId},
-      expiry: "${order.expiry}",
+      expiry: ${order.expiry},
       feeRecipient: "${order.feeRecipient}",
       maker: "${order.maker}",
       makerAmount: "${order.makerAmount}",

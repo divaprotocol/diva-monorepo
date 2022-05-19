@@ -61,7 +61,7 @@ export function create0xMessage({
   sender: string
   feeRecipient: string
   pool: string
-  expiry: string
+  expiry: number
   salt: string
 }) {
   return {

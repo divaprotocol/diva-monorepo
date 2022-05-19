@@ -295,9 +295,8 @@ export const createOrder = createAsyncThunk(
     const { chainId, userAddress } = state.appSlice
     const orderView = state.appSlice[chainId].orderView[orderKey]
     const verifyingAddress = config[chainId].zeroXAddress
-    const expiry = (
+    const expiry =
       Math.floor(Date.now() / 1000) + Number(orderView.expiryInSeconds)
-    ).toString()
 
     const makerToken = selectTokenInfo(orderView.makerToken)(state)
     const takerToken = selectTokenInfo(orderView.takerToken)(state)
