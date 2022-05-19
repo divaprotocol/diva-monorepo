@@ -442,9 +442,9 @@ export default function SellLimit(props: {
                 )
             )
           ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else {
             dispatch(setBreakEven(formatEther(be2)))
+          } else {
+            dispatch(setBreakEven(formatEther(be1)))
           }
         }
         if (

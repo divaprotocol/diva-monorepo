@@ -29,7 +29,7 @@ import {
   selectChainId,
   selectPrice,
 } from '../../Redux/appSlice'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatUnits, parseEther, formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
 
 const LeftCompFlexContainer = styled.div`
@@ -111,12 +111,22 @@ export default function Underlying() {
   }
 
   const OptionParams = {
-    CollateralBalanceLong: 100,
-    CollateralBalanceShort: 100,
-    Floor: parseInt(pool.floor) / 1e18,
-    Inflection: parseInt(pool.inflection) / 1e18,
-    Cap: parseInt(pool.cap) / 1e18,
-    TokenSupply: 200,
+    CollateralBalanceLong: Number(
+      formatUnits(
+        pool.collateralBalanceLongInitial,
+        pool.collateralToken.decimals
+      )
+    ),
+    CollateralBalanceShort: Number(
+      formatUnits(
+        pool.collateralBalanceShortInitial,
+        pool.collateralToken.decimals
+      )
+    ),
+    Floor: Number(formatEther(pool.floor)),
+    Inflection: Number(formatEther(pool.inflection)),
+    Cap: Number(formatEther(pool.cap)),
+    TokenSupply: Number(formatEther(pool.supplyInitial)),
     IsLong: isLong,
   }
   const data = generatePayoffChartData(OptionParams)
