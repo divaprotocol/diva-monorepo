@@ -412,7 +412,11 @@ export default function SellLimit(props: {
       if (option.statusFinalReferenceValue === 'Open' && usdPrice === '') {
         dispatch(setIntrinsicValue('n/a'))
       } else {
-        dispatch(setIntrinsicValue(formatEther(payoffPerLongToken)))
+        dispatch(
+          setIntrinsicValue(
+            formatUnits(payoffPerLongToken, option.collateralToken.decimals)
+          )
+        )
       }
       dispatch(
         setMaxPayout(
@@ -482,7 +486,11 @@ export default function SellLimit(props: {
       if (option.statusFinalReferenceValue === 'Open' && usdPrice == '') {
         dispatch(setIntrinsicValue('n/a'))
       } else {
-        dispatch(setIntrinsicValue(formatEther(payoffPerShortToken)))
+        dispatch(
+          setIntrinsicValue(
+            formatUnits(payoffPerShortToken, option.collateralToken.decimals)
+          )
+        )
       }
       dispatch(
         setMaxPayout(

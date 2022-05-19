@@ -250,7 +250,7 @@ export default function OpenOrders(props: {
                     <TableCell align="center">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
-                          {order.nbrOptions}
+                          {order.nbrOptions.toFixed(2)}
                         </Typography>
                       </Box>
                     </TableCell>
