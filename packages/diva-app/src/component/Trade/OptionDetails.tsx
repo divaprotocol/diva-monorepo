@@ -30,12 +30,12 @@ const FlexBoxHeader = styled.div`
   font-weight: solid;
   text-align: left;
   padding-left: 15px;
+  color: gray;
 `
 
 const FlexBoxData = styled.div`
   padding: 15px;
-  font-size: 0.9rem;
-  font-weight: bold;
+  font-size: 1rem;
   text-align: left;
 `
 
@@ -159,7 +159,7 @@ export default function OptionDetails({
           >
             <FlexBoxHeader>Floor</FlexBoxHeader>
           </Tooltip>
-          <FlexBoxData>{parseInt(pool.floor) / 1e18}</FlexBoxData>
+          <FlexBoxData>{formatEther(pool.floor)}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <Tooltip
@@ -168,7 +168,7 @@ export default function OptionDetails({
           >
             <FlexBoxHeader>Inflection</FlexBoxHeader>
           </Tooltip>
-          <FlexBoxData>{parseInt(pool.inflection) / 1e18}</FlexBoxData>
+          <FlexBoxData>{formatEther(pool.inflection)}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <Tooltip
@@ -177,7 +177,7 @@ export default function OptionDetails({
           >
             <FlexBoxHeader>Cap</FlexBoxHeader>
           </Tooltip>
-          <FlexBoxData>{Number(formatEther(pool.cap))}</FlexBoxData>
+          <FlexBoxData>{formatEther(pool.cap)}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Collateral</FlexBoxHeader>
@@ -249,17 +249,19 @@ export default function OptionDetails({
             <FlexBoxHeader>Gradient</FlexBoxHeader>
           </Tooltip>
           <FlexBoxSecondLineData>
-            {formatUnits(
-              BigNumber.from(pool.collateralBalanceLongInitial)
-                .mul(parseUnits('1', pool.collateralToken.decimals))
-                .div(
-                  BigNumber.from(pool.collateralBalanceLongInitial).add(
-                    BigNumber.from(pool.collateralBalanceShortInitial)
-                  )
-                ),
+            {Number(
+              formatUnits(
+                BigNumber.from(pool.collateralBalanceLongInitial)
+                  .mul(parseUnits('1', pool.collateralToken.decimals))
+                  .div(
+                    BigNumber.from(pool.collateralBalanceLongInitial).add(
+                      BigNumber.from(pool.collateralBalanceShortInitial)
+                    )
+                  ),
 
-              pool.collateralToken.decimals
-            )}
+                pool.collateralToken.decimals
+              )
+            ).toFixed(2)}
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
       </FlexSecondLineDiv>

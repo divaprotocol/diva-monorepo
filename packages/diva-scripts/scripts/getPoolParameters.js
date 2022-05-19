@@ -12,10 +12,10 @@ const { addresses } = require('../constants/constants')
 async function main() {
 
     // INPUT: network (check constants.js for available values), id of an existing pool 
-    const network = "ropsten"     
+    const network = "polygon"     
     
     // INPUT: id of existing pool
-    const poolId = 17
+    const poolId = 14
 
     // Connect to DIVA contract
     let diva = await ethers.getContractAt(DIVA_ABI, addresses[network].divaAddress);
