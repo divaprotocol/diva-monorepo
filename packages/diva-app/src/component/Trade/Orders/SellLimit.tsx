@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
@@ -34,7 +34,6 @@ import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 import { BigNumber } from '@0x/utils'
 import { useParams } from 'react-router-dom'
 import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import {
   setBreakEven,
   setIntrinsicValue,
@@ -42,6 +41,7 @@ import {
   setMaxYield,
 } from '../../../Redux/Stats'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
+import { setResponseSell } from '../../../Redux/TradeOption'
 const web3 = new Web3(Web3.givenProvider)
 
 export default function SellLimit(props: {
@@ -90,18 +90,38 @@ export default function SellLimit(props: {
     )
     setNumberOfOptions(parseFloat('0.0'))
     setPricePerOption(parseFloat('0.0'))
+    let approvedAllowance = await makerTokenContract.methods
+      .allowance(makerAccount, exchangeProxyAddress)
+      .call()
+    approvedAllowance = Number(formatUnits(approvedAllowance.toString(), 18))
+    const remainingAmount = Number(
+      (approvedAllowance - existingOrdersAmount).toFixed(
+        totalDecimals(approvedAllowance, existingOrdersAmount)
+      )
+    )
+    setRemainingApprovalAmount(remainingAmount)
   }
 
   const approveSellAmount = async (amount) => {
-    const amountBigNumber = parseUnits(amount.toString())
-    await makerTokenContract.methods
-      .approve(exchangeProxyAddress, amountBigNumber)
-      .send({ from: makerAccount })
-
-    const allowance = await makerTokenContract.methods
-      .allowance(makerAccount, exchangeProxyAddress)
-      .call()
-    return allowance
+    try {
+      const amountBigNumber = parseUnits(amount.toString())
+      const approveResponse = await makerTokenContract.methods
+        .approve(exchangeProxyAddress, amountBigNumber)
+        .send({ from: makerAccount })
+      if ('events' in approveResponse) {
+        return approveResponse.events.Approval.returnValues.value
+      } else {
+        //in case the approve call does not or delay emit events read the allowance again
+        await new Promise((resolve) => setTimeout(resolve, 4000))
+        const approvedAllowance = await makerTokenContract.methods
+          .allowance(makerAccount, exchangeProxyAddress)
+          .call()
+        return approvedAllowance
+      }
+    } catch (error) {
+      console.error('error ' + JSON.stringify(error))
+      return 'undefined'
+    }
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -114,26 +134,27 @@ export default function SellLimit(props: {
           )
         )
         let approvedAllowance = await approveSellAmount(amount)
-        approvedAllowance = Number(
-          formatUnits(approvedAllowance.toString(), 18)
-        )
-        const remainingApproval = Number(
-          (approvedAllowance - existingOrdersAmount).toFixed(
-            totalDecimals(approvedAllowance, existingOrdersAmount)
+        if (approvedAllowance == 'undefined') {
+          alert('Metamask could not finish approval.')
+        } else {
+          approvedAllowance = Number(
+            formatUnits(approvedAllowance.toString(), 18)
           )
-        )
-        setRemainingApprovalAmount(remainingApproval)
-        setAllowance(approvedAllowance)
-        setIsApproved(true)
-        //Allowance for 0x exchange contract [address 0xdef1c] successfully updated to 80 DAI
-        alert(
-          `Allowance for 0x exchange contract ` +
-            { exchangeProxyAddress } +
-            ` successfully updated to ` +
-            approvedAllowance +
-            ` ` +
-            params.tokenType
-        )
+          const remainingApproval = Number(
+            (approvedAllowance - existingOrdersAmount).toFixed(
+              totalDecimals(approvedAllowance, existingOrdersAmount)
+            )
+          )
+          setRemainingApprovalAmount(remainingApproval)
+          setAllowance(approvedAllowance)
+          setIsApproved(true)
+          alert(
+            `Allowance successfully updated to ` +
+              approvedAllowance +
+              ` ` +
+              params.tokenType.toUpperCase()
+          )
+        }
       } else {
         alert('please enter positive balance for approval')
       }
@@ -151,8 +172,10 @@ export default function SellLimit(props: {
             )
             if (
               confirm(
-                'options to sell exceeds approval limit, do you want to approve additional ' +
-                  additionalApproval +
+                'options to sell exceeds approved limit. Do you want to approve additional ' +
+                  +additionalApproval +
+                  ' ' +
+                  params.tokenType.toUpperCase() +
                   ' to complete this order?'
               )
             ) {
@@ -162,16 +185,29 @@ export default function SellLimit(props: {
                   totalDecimals(additionalApproval, allowance)
                 )
               )
-              newAllowance = await approveSellAmount(newAllowance)
-              newAllowance = Number(formatUnits(newAllowance.toString(), 18))
-              const remainingApproval = Number(
-                (newAllowance - existingOrdersAmount).toFixed(
-                  totalDecimals(newAllowance, existingOrdersAmount)
+              const approvedAllowance = await approveSellAmount(newAllowance)
+              if (approvedAllowance == 'undefined') {
+                alert('Metamask could not finish approval.')
+                setOrderBtnDisabled(false)
+              } else {
+                newAllowance = approvedAllowance
+                newAllowance = Number(formatUnits(newAllowance.toString(), 18))
+                const remainingApproval = Number(
+                  (newAllowance - existingOrdersAmount).toFixed(
+                    totalDecimals(newAllowance, existingOrdersAmount)
+                  )
                 )
-              )
-              setRemainingApprovalAmount(remainingApproval)
-              setAllowance(newAllowance)
-              setOrderBtnDisabled(false)
+                setRemainingApprovalAmount(remainingApproval)
+                setAllowance(newAllowance)
+                setOrderBtnDisabled(false)
+                alert(
+                  'Additional ' +
+                    additionalApproval +
+                    ' ' +
+                    params.tokenType.toUpperCase() +
+                    ' sell options approved please proceed with order'
+                )
+              }
             } else {
               //TBD discuss this case
               setIsApproved(true)
@@ -195,6 +231,8 @@ export default function SellLimit(props: {
           sellLimitOrder(orderData)
             .then(async (response) => {
               if (response?.status === 200) {
+                //need to invalidate cache order response since orderbook is updated
+                dispatch(setResponseSell([]))
                 await new Promise((resolve) => setTimeout(resolve, 2000))
                 await props.handleDisplayOrder()
                 handleFormReset()
@@ -550,8 +588,11 @@ export default function SellLimit(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Order Expires in</FormLabel>
-              <Tooltip title={ExpectedRateInfoText}>
-                <InfoIcon />
+              <Tooltip
+                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
+                sx={{ color: 'Gray', fontSize: 2 }}
+              >
+                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
               </Tooltip>
             </Stack>
           </LabelStyleDiv>

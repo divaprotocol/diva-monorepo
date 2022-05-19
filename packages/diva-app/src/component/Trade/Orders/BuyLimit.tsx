@@ -95,12 +95,23 @@ export default function BuyLimit(props: {
     setYouPay(youPay)
   }
 
-  const handleFormReset = () => {
+  const handleFormReset = async () => {
     Array.from(document.querySelectorAll('input')).forEach(
       (input) => (input.value = '')
     )
     setNumberOfOptions(parseFloat('0.0'))
     setPricePerOption(parseFloat('0.0'))
+    setYouPay(parseFloat('0.0'))
+    let allowance = await takerTokenContract.methods
+      .allowance(userAdress, exchangeProxyAddress)
+      .call()
+    allowance = Number(formatUnits(allowance))
+    const remainingApproval = Number(
+      (allowance - existingOrdersAmount).toFixed(
+        totalDecimals(allowance, existingOrdersAmount)
+      )
+    )
+    setRemainingApprovalAmount(remainingApproval)
   }
 
   const handleExpirySelection = (event: SelectChangeEvent<number>) => {
@@ -113,15 +124,26 @@ export default function BuyLimit(props: {
   }
 
   const approveBuyAmount = async (amount) => {
-    const amountBigNumber = parseUnits(amount.toString())
-    await takerTokenContract.methods
-      .approve(exchangeProxyAddress, amountBigNumber)
-      .send({ from: userAdress })
+    try {
+      const amountBigNumber = parseUnits(amount.toString())
+      const approveResponse = await takerTokenContract.methods
+        .approve(exchangeProxyAddress, amountBigNumber)
+        .send({ from: userAdress })
 
-    const collateralAllowance = await takerTokenContract.methods
-      .allowance(userAdress, exchangeProxyAddress)
-      .call()
-    return collateralAllowance
+      if ('events' in approveResponse) {
+        return approveResponse.events.Approval.returnValues.value
+      } else {
+        //in case the approve call does not or delay emit events, read the allowance again
+        await new Promise((resolve) => setTimeout(resolve, 4000))
+        const approvedAllowance = await takerTokenContract.methods
+          .allowance(userAdress, exchangeProxyAddress)
+          .call()
+        return approvedAllowance
+      }
+    } catch (error) {
+      console.error('error ' + JSON.stringify(error))
+      return 'undefined'
+    }
   }
 
   const handleOrderSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -132,27 +154,24 @@ export default function BuyLimit(props: {
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
         let collateralAllowance = await approveBuyAmount(amount)
-        collateralAllowance = Number(
-          formatUnits(
-            collateralAllowance.toString(),
-            option.collateralToken.decimals
+        if (collateralAllowance == 'undefined') {
+          alert('Metamask could not finish approval please check gas limit')
+        } else {
+          collateralAllowance = Number(
+            formatUnits(collateralAllowance.toString())
           )
-        )
-        const remainingApproval = Number(
-          (collateralAllowance - existingOrdersAmount).toFixed(
-            totalDecimals(collateralAllowance, existingOrdersAmount)
+          const remainingApproval = Number(
+            (collateralAllowance - existingOrdersAmount).toFixed(
+              totalDecimals(collateralAllowance, existingOrdersAmount)
+            )
           )
-        )
-        setRemainingApprovalAmount(remainingApproval)
-        setAllowance(collateralAllowance)
-        setIsApproved(true)
-        alert(
-          `Allowance for ${
-            option.collateralToken.id + ' '
-          } successfully updated to  ${collateralAllowance} + ' ' ${
-            option.collateralToken.symbol
-          }`
-        )
+          setRemainingApprovalAmount(remainingApproval)
+          setAllowance(collateralAllowance)
+          setIsApproved(true)
+          alert(
+            `Approved allowance of ${youPay}  ${option.collateralToken.symbol}`
+          )
+        }
       } else {
         alert('Please enter number of options you want to buy')
       }
@@ -170,9 +189,11 @@ export default function BuyLimit(props: {
             )
             if (
               confirm(
-                'Required collateral balance exceeds approval limit, do you want to approve additioal ' +
+                'Required collateral balance exceeds approved limit. Do you want to approve additional ' +
                   additionalApproval +
-                  ' to complete this order'
+                  ' ' +
+                  option.collateralToken.name +
+                  ' to complete this order?'
               )
             ) {
               setOrderBtnDisabled(true)
@@ -181,21 +202,29 @@ export default function BuyLimit(props: {
                   totalDecimals(additionalApproval, allowance)
                 )
               )
-              newAllowance = await approveBuyAmount(newAllowance)
-              newAllowance = Number(
-                formatUnits(
-                  newAllowance.toString(),
-                  option.collateralToken.decimals
+              const approvedAllowance = await approveBuyAmount(newAllowance)
+              if (approvedAllowance == 'undefined') {
+                alert('Metamask could not finish approval.')
+                setOrderBtnDisabled(false)
+              } else {
+                newAllowance = approvedAllowance
+                newAllowance = Number(formatUnits(newAllowance.toString()))
+                const remainingApproval = Number(
+                  (newAllowance - existingOrdersAmount).toFixed(
+                    totalDecimals(newAllowance, existingOrdersAmount)
+                  )
                 )
-              )
-              const remainingApproval = Number(
-                (newAllowance - existingOrdersAmount).toFixed(
-                  totalDecimals(newAllowance, existingOrdersAmount)
+                setRemainingApprovalAmount(remainingApproval)
+                setAllowance(newAllowance)
+                setOrderBtnDisabled(false)
+                alert(
+                  'Additional ' +
+                    additionalApproval +
+                    ' ' +
+                    option.collateralToken.symbol +
+                    ' approved please proceed with order'
                 )
-              )
-              setRemainingApprovalAmount(remainingApproval)
-              setAllowance(newAllowance)
-              setOrderBtnDisabled(false)
+              }
             } else {
               //TBD discuss this case
               console.log('nothing done')
@@ -566,8 +595,11 @@ export default function BuyLimit(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Order Expires in</FormLabel>
-              <Tooltip title={ExpectedRateInfoText}>
-                <InfoIcon />
+              <Tooltip
+                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
+                sx={{ color: 'Gray', fontSize: 2 }}
+              >
+                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
               </Tooltip>
             </Stack>
           </LabelStyleDiv>

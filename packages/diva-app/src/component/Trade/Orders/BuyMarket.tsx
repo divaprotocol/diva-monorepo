@@ -114,9 +114,7 @@ export default function BuyMarket(props: {
         setAllowance(collateralAllowance)
         setIsApproved(true)
         alert(
-          `Taker allowance for ${
-            option.collateralToken.id + ' '
-          } ${collateralAllowance} successfully set by ${userAddress}`
+          `Taker allowance of ${collateralAllowance} ${option.collateralToken.name} successfully approved`
         )
       } else {
         alert('Please enter number of options you want to buy')
@@ -134,8 +132,10 @@ export default function BuyMarket(props: {
             )
             if (
               confirm(
-                'Required collateral balance exceeds approval limit, do you want to approve additioal ' +
+                'Required collateral balance exceeds approved limit.Do you want to approve additioal ' +
                   additionalApproval +
+                  ' ' +
+                  option.collateralToken.name +
                   ' to complete this order'
               )
             ) {
@@ -246,9 +246,13 @@ export default function BuyMarket(props: {
         formatUnits(order.takerAmount, option.collateralToken.decimals)
       )
       const makerAmount = Number(formatUnits(order.makerAmount))
-      order['expectedRate'] = (takerAmount / makerAmount).toFixed(
-        totalDecimals(takerAmount, makerAmount)
-      )
+      if (totalDecimals(takerAmount, makerAmount) > 0) {
+        order['expectedRate'] = (takerAmount / makerAmount).toFixed(
+          totalDecimals(takerAmount, makerAmount)
+        )
+      } else {
+        order['expectedRate'] = takerAmount / makerAmount
+      }
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
@@ -332,6 +336,67 @@ export default function BuyMarket(props: {
       })
     }
   }, [responseSell, responseBuy, userAddress])
+
+  useEffect(() => {
+    if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {
+      let count = numberOfOptions
+      let cumulativeAvg = 0
+      let cumulativeTaker = 0
+      let cumulativeMaker = 0
+      existingSellLimitOrders.forEach((order: any) => {
+        let takerAmount = Number(
+          formatUnits(order.takerAmount, option.collateralToken.decimals)
+        )
+        let makerAmount = Number(formatUnits(order.makerAmount))
+        const remainingFillableTakerAmount = Number(
+          formatUnits(order.remainingFillableTakerAmount)
+        )
+        if (remainingFillableTakerAmount < takerAmount) {
+          //Order partially filled
+          takerAmount = remainingFillableTakerAmount
+          const decimals = totalDecimals(
+            remainingFillableTakerAmount,
+            order.expectedRate
+          )
+          makerAmount =
+            decimals > 1
+              ? Number(
+                  (remainingFillableTakerAmount / order.expectedRate).toFixed(
+                    decimals
+                  )
+                )
+              : Number(remainingFillableTakerAmount / order.expectedRate)
+        }
+        const expectedRate = order.expectedRate
+        if (count > 0) {
+          if (count <= makerAmount) {
+            const orderTotalAmount = Number(expectedRate * count)
+            cumulativeTaker = cumulativeTaker + orderTotalAmount
+            cumulativeMaker = cumulativeMaker + count
+            count = 0
+          } else {
+            cumulativeTaker = cumulativeTaker + takerAmount
+            cumulativeMaker = cumulativeMaker + makerAmount
+            count = count - makerAmount
+          }
+        }
+      })
+      if (totalDecimals(cumulativeTaker, cumulativeMaker) > 1) {
+        cumulativeAvg = Number(
+          (cumulativeTaker / cumulativeMaker).toFixed(
+            totalDecimals(cumulativeTaker, cumulativeMaker)
+          )
+        )
+      } else {
+        cumulativeAvg = Number(cumulativeTaker / cumulativeMaker)
+      }
+      if (cumulativeAvg > 0) {
+        setAvgExpectedRate(cumulativeAvg)
+        const youPayAmount = cumulativeAvg * numberOfOptions
+        setYouPay(youPayAmount)
+      }
+    }
+  }, [numberOfOptions])
 
   useEffect(() => {
     if (usdPrice != '') {

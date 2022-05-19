@@ -38,7 +38,6 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../../../Util/calcPayoffPerToken'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
@@ -123,7 +122,7 @@ export default function SellMarket(props: {
         alert(
           'Total allowance ' +
             approvedAllowance +
-            ` for ${params.tokenType} successfully set`
+            ` for ${params.tokenType.toUpperCase()} successfully set`
         )
       } else {
         alert('please enter positive balance for approval')
@@ -142,8 +141,10 @@ export default function SellMarket(props: {
             )
             if (
               confirm(
-                'options to sell exceeds approval limit, do you want to approve additional ' +
+                'options to sell exceeds approved limit. Do you want to approve additional ' +
                   additionalApproval +
+                  ' ' +
+                  params.tokenType.toUpperCase() +
                   ' to complete this order?'
               )
             ) {
@@ -245,10 +246,13 @@ export default function SellMarket(props: {
         formatUnits(order.makerAmount, option.collateralToken.decimals)
       )
       const takerAmount = Number(formatUnits(order.takerAmount))
-      const expectedRate = (makerAmount / takerAmount).toFixed(
-        totalDecimals(makerAmount, takerAmount)
-      )
-      order['expectedRate'] = expectedRate
+      if (totalDecimals(makerAmount, takerAmount) > 1) {
+        order['expectedRate'] = (makerAmount / takerAmount).toFixed(
+          totalDecimals(makerAmount, takerAmount)
+        )
+      } else {
+        order['expectedRate'] = makerAmount / takerAmount
+      }
       order['remainingFillableTakerAmount'] =
         data.metaData.remainingFillableTakerAmount
       orders.push(order)
@@ -260,7 +264,6 @@ export default function SellMarket(props: {
       const bestRate = sortedOrders[0].expectedRate
       setAvgExpectedRate(Number(bestRate))
     }
-
     return sortedOrders
   }
 
@@ -329,20 +332,21 @@ export default function SellMarket(props: {
       let cumulativeTaker = 0
       let cumulativeMaker = 0
       existingBuyLimitOrders.forEach((order: any) => {
-        const makerAmount = Number(
+        let makerAmount = Number(
           formatUnits(order.makerAmount, option.collateralToken.decimals)
         )
-        const takerAmount = Number(formatUnits(order.takerAmount))
-        const expectedRate = Number(
-          (makerAmount / takerAmount).toFixed(
-            totalDecimals(makerAmount, takerAmount)
-          )
+        let takerAmount = Number(formatUnits(order.takerAmount))
+        const remainingFillableTakerAmount = Number(
+          formatUnits(order.remainingFillableTakerAmount)
         )
+        if (remainingFillableTakerAmount < takerAmount) {
+          takerAmount = remainingFillableTakerAmount
+          makerAmount = remainingFillableTakerAmount * order.expectedRate
+        }
+        const expectedRate = order.expectedRate
         if (count > 0) {
           if (count <= takerAmount) {
-            const orderTotalAmount = Number(
-              (expectedRate * count).toFixed(totalDecimals(expectedRate, count))
-            )
+            const orderTotalAmount = Number(expectedRate * count)
             cumulativeMaker = cumulativeMaker + orderTotalAmount
             cumulativeTaker = cumulativeTaker + count
             count = 0
@@ -353,11 +357,15 @@ export default function SellMarket(props: {
           }
         }
       })
-      cumulativeAvg = Number(
-        (cumulativeMaker / cumulativeTaker).toFixed(
-          totalDecimals(cumulativeMaker, cumulativeTaker)
+      if (totalDecimals(cumulativeMaker, cumulativeTaker) > 1) {
+        cumulativeAvg = Number(
+          (cumulativeMaker / cumulativeTaker).toFixed(
+            totalDecimals(cumulativeMaker, cumulativeTaker)
+          )
         )
-      )
+      } else {
+        cumulativeAvg = Number(cumulativeMaker / cumulativeTaker)
+      }
       if (cumulativeAvg > 0) {
         const avg = cumulativeAvg
         setAvgExpectedRate(avg)
@@ -576,8 +584,11 @@ export default function SellMarket(props: {
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
               <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
-              <Tooltip title={ExpectedRateInfoText}>
-                <InfoIcon />
+              <Tooltip
+                title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
+                sx={{ color: 'Gray', fontSize: 2 }}
+              >
+                <InfoIcon style={{ fontSize: 15, color: 'grey' }} />
               </Tooltip>
             </Stack>
           </LabelStyleDiv>

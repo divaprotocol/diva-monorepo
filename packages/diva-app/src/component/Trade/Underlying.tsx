@@ -52,7 +52,6 @@ export default function Underlying() {
   const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
   const maxYield = useAppSelector((state) => state.stats.maxYield)
   const breakEven = useAppSelector((state) => state.stats.breakEven)
-  // console.log('maxYield', maxYield)
   const isBuy = useAppSelector((state) => selectIsBuy(state))
   const breakEvenOptionPrice = 0
   const chainId = useAppSelector(selectChainId)
