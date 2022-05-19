@@ -1,8 +1,8 @@
 export function generatePayoffChartData(data) {
   const optionData = data
-  const CollateralBalanceLong = 100 // temporarily hard-coded
-  const CollateralBalanceShort = 100 // temporarily hard-coded
-  const TokenSupply = 200 // temporarily hard-coded
+  const CollateralBalanceLong = data.CollateralBalanceLong // temporarily hard-coded
+  const CollateralBalanceShort = data.CollateralBalanceShort // temporarily hard-coded
+  const TokenSupply = data.TokenSupply // temporarily hard-coded
 
   let chartData = []
 
