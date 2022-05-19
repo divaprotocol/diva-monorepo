@@ -1,17 +1,8 @@
-import React, { useEffect } from 'react'
 import styled from 'styled-components'
-import {
-  Container,
-  Typography,
-  Divider,
-  Paper,
-  Stack,
-  useTheme,
-} from '@mui/material'
+import { Container, Divider, Paper, Stack, useTheme } from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
-import Tab from '@mui/material/Tab'
 import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
 import { useHistory } from 'react-router-dom'
@@ -20,7 +11,11 @@ import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
 import OptionHeader from './OptionHeader'
 import { config } from '../../constants'
+import Tab from '@mui/material/Tab'
+import React, { useState, useEffect } from 'react'
+import { Liquidity } from '../Liquidity/Liquidity'
 import OrdersPanel from './OrdersPanel'
+import Typography from '@mui/material/Typography'
 import { useAppSelector } from '../../Redux/hooks'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
@@ -37,9 +32,8 @@ import {
   selectChainId,
   selectPrice,
 } from '../../Redux/appSlice'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatUnits, parseEther, formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
-import { Liquidity } from '../Liquidity/Liquidity'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -62,37 +56,24 @@ export default function Underlying() {
   const history = useHistory()
   const params: { poolId: string; tokenType: string } = useParams()
   const isLong = params.tokenType === 'long'
-
-  const CurrentTab =
+  const currentTab =
     history.location.pathname ===
     `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity`
       ? 'liquidity'
       : 'trade'
+  const [value, setValue] = useState(currentTab)
 
-  const [value, setValue] = React.useState(CurrentTab)
-  const theme = useTheme()
-
-  const maxPayout = useAppSelector((state) =>
-    selectMaxPayout(state, params.poolId, isLong)
-  )
-  const maxYield = useAppSelector((state) =>
-    selectMaxYield(state, params.poolId, isLong)
-  )
-  const breakEven = useAppSelector((state) =>
-    selectBreakEven(state, params.poolId, isLong)
-  )
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
   const maxYield = useAppSelector((state) => state.stats.maxYield)
   const breakEven = useAppSelector((state) => state.stats.breakEven)
-  // console.log('maxYield', maxYield)
   const isBuy = useAppSelector((state) => selectIsBuy(state))
   const breakEvenOptionPrice = 0
   const chainId = useAppSelector(selectChainId)
   const chainContractAddress =
     contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxy = chainContractAddress.exchangeProxy
-
+  const theme = useTheme()
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(
@@ -144,17 +125,27 @@ export default function Underlying() {
   }
 
   const OptionParams = {
-    CollateralBalanceLong: 100,
-    CollateralBalanceShort: 100,
-    Floor: parseInt(pool.floor) / 1e18,
-    Inflection: parseInt(pool.inflection) / 1e18,
-    Cap: parseInt(pool.cap) / 1e18,
-    TokenSupply: 200,
+    CollateralBalanceLong: Number(
+      formatUnits(
+        pool.collateralBalanceLongInitial,
+        pool.collateralToken.decimals
+      )
+    ),
+    CollateralBalanceShort: Number(
+      formatUnits(
+        pool.collateralBalanceShortInitial,
+        pool.collateralToken.decimals
+      )
+    ),
+    Floor: Number(formatEther(pool.floor)),
+    Inflection: Number(formatEther(pool.inflection)),
+    Cap: Number(formatEther(pool.cap)),
+    TokenSupply: Number(formatEther(pool.supplyInitial)),
     IsLong: isLong,
   }
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = (event: any, newValue: string) => {
     history.push(
       `/${params.poolId}/${isLong ? 'long' : 'short'}/` + TabPath[newValue]
     )
@@ -238,13 +229,13 @@ export default function Underlying() {
                     <Typography
                       sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                     >
-                      {maxYield.buy}
+                      {maxYield}
                     </Typography>
                   ) : (
                     <Typography
                       sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                     >
-                      {maxYield.sell}
+                      {maxYield}
                     </Typography>
                   )}
                 </Stack>
@@ -265,12 +256,11 @@ export default function Underlying() {
                     sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
                   >
                     Intrinsic value per token
-                    {maxYield}
                   </Typography>
                   <Typography
                     sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                   >
-                    {intValDisplay}
+                    {parseFloat(intrinsicValue).toFixed(2)}
                   </Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
@@ -285,33 +275,6 @@ export default function Underlying() {
                     {maxPayout}
                   </Typography>
                 </Stack>
-                    {maxYield}
-                  </Typography>
-                )}
-              </Stack>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                  Break-even
-                </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {breakEven}
-                </Typography>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                  Intrinsic value per token
-                </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {parseFloat(intrinsicValue).toFixed(2)}
-                </Typography>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                  Max payout per token
-                </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {maxPayout}
-                </Typography>
               </Stack>
             </RightDiv>
           </Stack>
