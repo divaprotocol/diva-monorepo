@@ -75,19 +75,17 @@ const FlexBoxSecondLine = styled.div`
 const FlexToolTipBoxData = styled.div`
   margin-left: 15px;
   padding-top: 15px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: bold;
   text-align: left;
 `
 
 const FlexBoxSecondLineData = styled.div`
   padding: 15px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: bold;
   text-align: left;
 `
 const FlexCheckIcon = styled.div`

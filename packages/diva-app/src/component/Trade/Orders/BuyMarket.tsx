@@ -114,10 +114,12 @@ export default function BuyMarket(props: {
         setAllowance(collateralAllowance)
         setIsApproved(true)
         alert(
-          `Taker allowance of ${collateralAllowance} ${option.collateralToken.name} successfully approved`
+          `Allowance for ${collateralAllowance} ${option.collateralToken.name} successfully set.`
         )
       } else {
-        alert('Please enter number of options you want to buy')
+        alert(
+          `Please enter the number of ${params.tokenType.toUpperCase()} you want to buy.`
+        )
       }
     } else {
       if (collateralBalance > 0) {
@@ -476,9 +478,9 @@ export default function BuyMarket(props: {
                 )
             )
           ) {
-            dispatch(setBreakEven(formatEther(be1)))
-          } else {
             dispatch(setBreakEven(formatEther(be2)))
+          } else {
+            dispatch(setBreakEven(formatEther(be1)))
           }
         }
         if (
@@ -544,14 +546,16 @@ export default function BuyMarket(props: {
             .mul(BigENumber.from('-1'))
 
           if (
-            parseEther(String(avgExpectedRate)).gte(
-              BigENumber.from(option.collateralBalanceLongInitial)
-                .mul(parseUnits('1', option.collateralToken.decimals))
-                .div(
-                  BigENumber.from(option.collateralBalanceLongInitial).add(
-                    BigENumber.from(option.collateralBalanceShortInitial)
+            parseEther(String(avgExpectedRate)).lte(
+              parseUnits('1', option.collateralToken.decimals).sub(
+                BigENumber.from(option.collateralBalanceLongInitial)
+                  .mul(parseUnits('1', option.collateralToken.decimals))
+                  .div(
+                    BigENumber.from(option.collateralBalanceLongInitial).add(
+                      BigENumber.from(option.collateralBalanceShortInitial)
+                    )
                   )
-                )
+              )
             )
           ) {
             dispatch(setBreakEven(formatEther(be2)))
@@ -596,7 +600,7 @@ export default function BuyMarket(props: {
           <FormLabel
             sx={{
               color: 'Gray',
-              fontSize: 8,
+              fontSize: 11,
               paddingTop: 2.5,
               paddingRight: 1.5,
             }}
@@ -622,7 +626,7 @@ export default function BuyMarket(props: {
           </LabelStyleDiv>
           <RightSideLabel>
             <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
-              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
               <FormLabel>{avgExpectedRate.toFixed(4)}</FormLabel>
@@ -633,14 +637,17 @@ export default function BuyMarket(props: {
           <LabelStyleDiv>
             <Stack>
               <FormLabel sx={{ color: 'White' }}>You Pay</FormLabel>
-              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
-                Remaining allowance: {remainingApprovalAmount}
+              <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
+                Remaining allowance:{' '}
+                {remainingApprovalAmount.toString().includes('e')
+                  ? remainingApprovalAmount.toExponential(2)
+                  : remainingApprovalAmount}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>
           <RightSideLabel>
             <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
-              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
               <FormLabel>{youPay.toFixed(4) + ' '}</FormLabel>
@@ -653,7 +660,7 @@ export default function BuyMarket(props: {
           </LabelStyleDiv>
           <RightSideLabel>
             <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
-              <FormLabel sx={{ color: 'Gray', fontSize: 8, paddingTop: 0.7 }}>
+              <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
               <FormLabel>{collateralBalance.toFixed(4)}</FormLabel>

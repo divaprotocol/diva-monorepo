@@ -226,7 +226,7 @@ export default function Underlying() {
                   Break-even
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {breakEven}
+                  {parseFloat(breakEven).toFixed(2)}
                 </Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
@@ -234,7 +234,9 @@ export default function Underlying() {
                   Intrinsic value per token
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {parseFloat(intrinsicValue).toFixed(2)}
+                  {intrinsicValue === 'n/a'
+                    ? intrinsicValue
+                    : parseFloat(intrinsicValue).toFixed(2)}
                 </Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
@@ -242,7 +244,7 @@ export default function Underlying() {
                   Max payout per token
                 </Typography>
                 <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {maxPayout}
+                  {parseFloat(maxPayout).toFixed(2)}
                 </Typography>
               </Stack>
             </Stack>
