@@ -68,8 +68,6 @@ function mapOrderData(
   let sortedRecords: any = []
   const orderbookTemp: any = records.map((record: any) => {
     const order = record.order
-    console.log('order')
-    console.log(order)
 
     const metaData = record.metaData
     const makerToken = order.makerToken

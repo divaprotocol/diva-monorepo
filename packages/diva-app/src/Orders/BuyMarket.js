@@ -20,7 +20,6 @@ export const buyMarketOrder = async (orderData) => {
 
   // Define variables for integer math
   const decimals = orderData.collateralDecimals
-  const scaling = parseUnits('1', 18 - decimals)
   const collateralUnit = parseUnits('1', decimals)
 
   // User input converted from decimal number into an integer with collateral decimals
@@ -62,8 +61,6 @@ export const buyMarketOrder = async (orderData) => {
         order.remainingFillableTakerAmount
       )
 
-      // const remainingTakerFillNbrOptions = takerFillNbrOptions
-
       // Add elements to the takerAssetAmounts array which will be used as input in batchFillLimitOrders
       if (takerFillAmount.lte(remainingFillableTakerAmount)) {
         // Add element
@@ -74,14 +71,8 @@ export const buyMarketOrder = async (orderData) => {
           .mul(collateralUnit)
           .div(expectedRate)
         takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled) // This will drop to zero and hence will not enter this if block anymore but will add '0' for the remaining orders
-        console.log('takerFillNbrOptions')
-        console.log(takerFillNbrOptions)
-        // Why is this 0 "trick" not here?
       } else {
-        // const remainingAmountNumber = Number(
-        //   formatUnits(remainingFillableTakerAmount, decimals)
-        // ) // He converts with 1e18 inflated number back to 18 decimals (if collateral token has also 18 decimals, else result with have more decimals, e.g. 30 decimals in case of 6 decimal token)
-        takerAssetAmounts.push(remainingFillableTakerAmount.toString()) // bigBumber scaled to 18 decimals if 18 decimal collateral token is used, or more otherwise; BETTER:
+        takerAssetAmounts.push(remainingFillableTakerAmount.toString())
 
         const nbrOptionsFilled = remainingFillableTakerAmount
           .mul(collateralUnit)

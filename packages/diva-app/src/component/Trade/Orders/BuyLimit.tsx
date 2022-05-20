@@ -106,8 +106,7 @@ export default function BuyLimit(props: {
       .allowance(userAdress, exchangeProxyAddress)
       .call()
     allowance = Number(formatUnits(allowance, option.collateralToken.decimals))
-    console.log('allowance')
-    console.log(allowance)
+
     const remainingApproval = Number(
       (allowance - existingOrdersAmount).toFixed(
         totalDecimals(allowance, existingOrdersAmount)
@@ -154,8 +153,6 @@ export default function BuyLimit(props: {
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
-        console.log('amount')
-        console.log(amount)
         let collateralAllowance = await approveBuyAmount(
           parseUnits(amount.toString(), option.collateralToken.decimals)
         )
@@ -286,11 +283,6 @@ export default function BuyLimit(props: {
     responseBuy.forEach((data: any) => {
       const order = data.order
       const metaData = data.metaData
-      console.log('order')
-      console.log(order)
-
-      console.log('metaData')
-      console.log(metaData)
 
       if (taker == order.maker) {
         const remainingFillableTakerAmount = new BigNumber(
@@ -351,11 +343,6 @@ export default function BuyLimit(props: {
             totalDecimals(val.approvalAmount, existingOrdersAmount)
           )
         )
-        console.log('val.approvalAmount')
-        console.log(val.approvalAmount)
-
-        console.log('existingOrdersAmount')
-        console.log(existingOrdersAmount)
         setRemainingApprovalAmount(remainingAmount)
         remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
         setExistingOrdersAmount(existingOrdersAmount)

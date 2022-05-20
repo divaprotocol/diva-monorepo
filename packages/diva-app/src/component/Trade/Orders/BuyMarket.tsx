@@ -148,11 +148,6 @@ export default function BuyMarket(props: {
                   totalDecimals(additionalApproval, allowance)
                 )
               )
-              console.log('allowance')
-              console.log(allowance)
-
-              console.log('additionalApproval')
-              console.log(additionalApproval)
 
               newAllowance = await approveBuyAmount(
                 parseUnits(
@@ -166,9 +161,6 @@ export default function BuyMarket(props: {
                   option.collateralToken.decimals
                 )
               )
-
-              console.log('newAllowance')
-              console.log(newAllowance)
 
               const remainingApproval = Number(newAllowance)
               setRemainingApprovalAmount(remainingApproval)
