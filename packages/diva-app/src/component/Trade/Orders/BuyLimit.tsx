@@ -286,10 +286,17 @@ export default function BuyLimit(props: {
     responseBuy.forEach((data: any) => {
       const order = data.order
       const metaData = data.metaData
+      console.log('order')
+      console.log(order)
+
+      console.log('metaData')
+      console.log(metaData)
+
       if (taker == order.maker) {
         const remainingFillableTakerAmount = new BigNumber(
           metaData.remainingFillableTakerAmount.toString()
         )
+
         if (remainingFillableTakerAmount < order.takerAmount) {
           const makerAmount = new BigNumber(order.makerAmount)
           const takerAmount = new BigNumber(order.takerAmount)
@@ -344,6 +351,11 @@ export default function BuyLimit(props: {
             totalDecimals(val.approvalAmount, existingOrdersAmount)
           )
         )
+        console.log('val.approvalAmount')
+        console.log(val.approvalAmount)
+
+        console.log('existingOrdersAmount')
+        console.log(existingOrdersAmount)
         setRemainingApprovalAmount(remainingAmount)
         remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
         setExistingOrdersAmount(existingOrdersAmount)

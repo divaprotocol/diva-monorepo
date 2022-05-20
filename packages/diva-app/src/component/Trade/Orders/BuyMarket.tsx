@@ -85,7 +85,6 @@ export default function BuyMarket(props: {
   }
 
   const approveBuyAmount = async (amount) => {
-    // const amountBigNumber = parseUnits(amount.toString())
     await takerTokenContract.methods
       .approve(exchangeProxy, amount)
       .send({ from: userAddress })
@@ -112,6 +111,7 @@ export default function BuyMarket(props: {
             option.collateralToken.decimals
           )
         )
+
         setRemainingApprovalAmount(collateralAllowance)
         setAllowance(collateralAllowance)
         setIsApproved(true)
@@ -136,11 +136,11 @@ export default function BuyMarket(props: {
             )
             if (
               confirm(
-                'Required collateral balance exceeds approved limit.Do you want to approve additioal ' +
+                'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
                   additionalApproval +
                   ' ' +
                   option.collateralToken.name +
-                  ' to complete this order'
+                  '. Click Fill Order after the allowance has been updated.'
               )
             ) {
               let newAllowance = Number(
@@ -148,13 +148,28 @@ export default function BuyMarket(props: {
                   totalDecimals(additionalApproval, allowance)
                 )
               )
-              newAllowance = await approveBuyAmount(newAllowance)
+              console.log('allowance')
+              console.log(allowance)
+
+              console.log('additionalApproval')
+              console.log(additionalApproval)
+
+              newAllowance = await approveBuyAmount(
+                parseUnits(
+                  newAllowance.toString(),
+                  option.collateralToken.decimals
+                )
+              )
               newAllowance = Number(
                 formatUnits(
                   newAllowance.toString(),
                   option.collateralToken.decimals
                 )
               )
+
+              console.log('newAllowance')
+              console.log(newAllowance)
+
               const remainingApproval = Number(newAllowance)
               setRemainingApprovalAmount(remainingApproval)
               setAllowance(newAllowance)

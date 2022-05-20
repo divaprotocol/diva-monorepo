@@ -142,11 +142,11 @@ export default function SellMarket(props: {
             )
             if (
               confirm(
-                'options to sell exceeds approved limit. Do you want to approve additional ' +
+                'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
                   additionalApproval +
                   ' ' +
                   params.tokenType.toUpperCase() +
-                  ' to complete this order?'
+                  '. Click Fill Order after the allowance has been updated.'
               )
             ) {
               let newAllowance = Number(
@@ -154,7 +154,13 @@ export default function SellMarket(props: {
                   totalDecimals(additionalApproval, allowance)
                 )
               )
-              newAllowance = await approveSellAmount(newAllowance)
+
+              newAllowance = await approveSellAmount(
+                parseUnits(
+                  newAllowance.toString(),
+                  option.collateralToken.decimals
+                )
+              )
               newAllowance = Number(formatUnits(newAllowance.toString(), 18))
               setRemainingApprovalAmount(newAllowance)
               setAllowance(newAllowance)
