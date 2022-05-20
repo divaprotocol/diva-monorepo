@@ -13,7 +13,7 @@ import {
   parseUnits,
   splitSignature,
 } from 'ethers/lib/utils'
-import { BigNumber, Contract, providers, utils } from 'ethers'
+import { BigNumber, Contract, providers } from 'ethers'
 import {
   createOrderMutation,
   Order,
@@ -170,7 +170,17 @@ export const fetchOrders = createAsyncThunk(
       }
     }>(orderBookEndpoint, query, {}, { authorization: 'a' })
     return {
-      orders,
+      orders: orders.filter((order) => {
+        const exp = new Date(Number(`${order.expiry}000`))
+        const now = new Date()
+        console.log({
+          expiry: order.expiry,
+          exp,
+          now,
+          filtered: exp > now,
+        })
+        return exp.getTime() > now.getTime()
+      }),
       makerToken,
       takerToken,
     }
@@ -302,10 +312,6 @@ export const createOrder = createAsyncThunk(
     const takerToken = selectTokenInfo(orderView.takerToken)(state)
 
     try {
-      // Generate a random private key
-      const privateKey = utils.formatBytes32String(
-        Math.random().toString().substring(2)
-      )
       const signer = provider.getSigner()
       const address = await signer.getAddress()
 
@@ -342,7 +348,7 @@ export const createOrder = createAsyncThunk(
         JSON.stringify(typedData),
       ])
       const { r, s, v } = splitSignature(data)
-      console.log({ chainId })
+
       const mutation = createOrderMutation({
         ...order,
         chainId: Number(chainId),
@@ -354,19 +360,6 @@ export const createOrder = createAsyncThunk(
           signatureType: 2,
         },
       })
-
-      console.log(
-        JSON.stringify({
-          ...order,
-          chainId,
-          verifyingContract: verifyingAddress,
-          signature: {
-            r,
-            s,
-            v,
-          },
-        })
-      )
 
       await request<{ pool: Pool }>(
         orderBookEndpoint,
@@ -790,8 +783,11 @@ export const appSlice = createSlice({
 
         appState.orders[action.payload.makerToken][action.payload.takerToken] =
           [
-            ...(orders.filter((order) => !newOrderIds.includes(order.id)) ||
-              []),
+            ...(orders
+              .filter((order) => !newOrderIds.includes(order.id))
+              .filter(
+                (order) => new Date(Number(`${order.expiry}000`)) > new Date()
+              ) || []),
             ...newOrders,
           ]
       },
