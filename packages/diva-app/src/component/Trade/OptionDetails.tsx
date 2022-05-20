@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { getDateTime } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
@@ -35,7 +35,9 @@ const FlexBoxHeader = styled.div`
 
 const FlexBoxData = styled.div`
   padding: 15px;
+  width: 100%;
   font-size: 1rem;
+  font-weight: bold;
   text-align: left;
 `
 
@@ -56,7 +58,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 65%;
+  width: 30%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
@@ -72,13 +74,13 @@ const FlexBoxSecondLine = styled.div`
   flex: 1;
 `
 
-const FlexToolTipBoxData = styled.div`
-  margin-left: 15px;
-  padding-top: 15px;
-  font-size: 1rem;
+const FlexBoxTime = styled.div`
+  padding-top: 5.6px;
+  font-size: 0.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
+  color: Gray;
 `
 
 const FlexBoxSecondLineData = styled.div`
@@ -102,27 +104,10 @@ export default function OptionDetails({
   //Instead of calling redux to get selected option at each component level
   //we can call at root component of trade that is underlying and pass as porps
   //to each child component.
-  const collateralBalanceLongInitial = Number(
-    formatUnits(
-      pool.collateralBalanceLongInitial,
-      pool.collateralToken.decimals
-    )
-  )
-  const collateralBalanceShortInitial = Number(
-    formatUnits(
-      pool.collateralBalanceShortInitial,
-      pool.collateralToken.decimals
-    )
-  )
-  const longShortCollateralSum =
-    collateralBalanceLongInitial + collateralBalanceShortInitial
-  const longCollateralRatio =
-    (collateralBalanceLongInitial / longShortCollateralSum) * 100
-  const shortCollateralRatio =
-    (collateralBalanceShortInitial / longShortCollateralSum) * 100
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
+  console.log('pool.expiryTime', getDateTime(pool.expiryTime))
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
       (dataName: { id: string }) => dataName?.id == pool?.dataProvider
@@ -144,7 +129,13 @@ export default function OptionDetails({
       <FlexDiv>
         <FlexBox>
           <FlexBoxHeader>Expires at</FlexBoxHeader>
-          <FlexBoxData>{getDateTime(pool.expiryTime).slice(0, 10)}</FlexBoxData>
+          <FlexBoxData>
+            {getDateTime(pool.expiryTime).slice(0, 10)}
+            {'  '}
+            <FlexBoxTime>
+              {getDateTime(pool.expiryTime).slice(12, 19)}
+            </FlexBoxTime>
+          </FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Direction</FlexBoxHeader>
@@ -203,19 +194,9 @@ export default function OptionDetails({
       </FlexDiv>
       <FlexSecondLineDiv>
         <FlexBoxSecondLine>
-          <FlexBoxHeader>Data provider</FlexBoxHeader>
           <Tooltip title={pool.dataProvider} arrow>
-            <FlexToolTipBoxData>
-              {pool.dataProvider.length > 0
-                ? String(pool.dataProvider).substring(0, 6) +
-                  '...' +
-                  String(pool.dataProvider).substring(38)
-                : 'n/a'}
-            </FlexToolTipBoxData>
+            <FlexBoxHeader>Data Provider</FlexBoxHeader>
           </Tooltip>
-        </FlexBoxSecondLine>
-        <FlexBoxSecondLine>
-          <FlexBoxHeader>Data source</FlexBoxHeader>
           <FlexBoxSecondLineData>
             <FlexCheckIcon>
               {dataSourceName}
