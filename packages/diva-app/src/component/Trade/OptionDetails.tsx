@@ -30,12 +30,12 @@ const FlexBoxHeader = styled.div`
   font-weight: solid;
   text-align: left;
   padding-left: 15px;
+  color: gray;
 `
 
 const FlexBoxData = styled.div`
   padding: 15px;
-  font-size: 0.9rem;
-  font-weight: bold;
+  font-size: 1rem;
   text-align: left;
 `
 
@@ -75,19 +75,17 @@ const FlexBoxSecondLine = styled.div`
 const FlexToolTipBoxData = styled.div`
   margin-left: 15px;
   padding-top: 15px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: bold;
   text-align: left;
 `
 
 const FlexBoxSecondLineData = styled.div`
   padding: 15px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: bold;
   text-align: left;
 `
 const FlexCheckIcon = styled.div`
@@ -159,7 +157,7 @@ export default function OptionDetails({
           >
             <FlexBoxHeader>Floor</FlexBoxHeader>
           </Tooltip>
-          <FlexBoxData>{parseInt(pool.floor) / 1e18}</FlexBoxData>
+          <FlexBoxData>{formatEther(pool.floor)}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <Tooltip
@@ -168,7 +166,7 @@ export default function OptionDetails({
           >
             <FlexBoxHeader>Inflection</FlexBoxHeader>
           </Tooltip>
-          <FlexBoxData>{parseInt(pool.inflection) / 1e18}</FlexBoxData>
+          <FlexBoxData>{formatEther(pool.inflection)}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <Tooltip
@@ -177,22 +175,30 @@ export default function OptionDetails({
           >
             <FlexBoxHeader>Cap</FlexBoxHeader>
           </Tooltip>
-          <FlexBoxData>{Number(formatEther(pool.cap))}</FlexBoxData>
+          <FlexBoxData>{formatEther(pool.cap)}</FlexBoxData>
         </FlexBox>
         <FlexBox>
-          <FlexBoxHeader>Collateral</FlexBoxHeader>
-          <Tooltip title={pool.collateralToken.id} arrow>
-            <FlexBoxData>
-              {Number(
-                formatUnits(
-                  pool.collateralBalance,
-                  pool.collateralToken.decimals
-                )
-              ).toFixed(2) +
-                ' ' +
-                pool.collateralToken.symbol}
-            </FlexBoxData>
+          <Tooltip
+            placement="top-end"
+            title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
+          >
+            <FlexBoxHeader>Gradient</FlexBoxHeader>
           </Tooltip>
+          <FlexBoxData>
+            {Number(
+              formatUnits(
+                BigNumber.from(pool.collateralBalanceLongInitial)
+                  .mul(parseUnits('1', pool.collateralToken.decimals))
+                  .div(
+                    BigNumber.from(pool.collateralBalanceLongInitial).add(
+                      BigNumber.from(pool.collateralBalanceShortInitial)
+                    )
+                  ),
+
+                pool.collateralToken.decimals
+              )
+            ).toFixed(2)}
+          </FlexBoxData>
         </FlexBox>
       </FlexDiv>
       <FlexSecondLineDiv>
@@ -242,25 +248,19 @@ export default function OptionDetails({
         </FlexBoxSecondLine>
 
         <FlexBoxSecondLine>
-          <Tooltip
-            placement="top-end"
-            title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
-          >
-            <FlexBoxHeader>Gradient</FlexBoxHeader>
+          <FlexBoxHeader>Collateral</FlexBoxHeader>
+          <Tooltip title={pool.collateralToken.id} arrow>
+            <FlexBoxSecondLineData>
+              {Number(
+                formatUnits(
+                  pool.collateralBalance,
+                  pool.collateralToken.decimals
+                )
+              ).toFixed(2) +
+                ' ' +
+                pool.collateralToken.symbol}
+            </FlexBoxSecondLineData>
           </Tooltip>
-          <FlexBoxSecondLineData>
-            {formatUnits(
-              BigNumber.from(pool.collateralBalanceLongInitial)
-                .mul(parseUnits('1', pool.collateralToken.decimals))
-                .div(
-                  BigNumber.from(pool.collateralBalanceLongInitial).add(
-                    BigNumber.from(pool.collateralBalanceShortInitial)
-                  )
-                ),
-
-              pool.collateralToken.decimals
-            )}
-          </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
       </FlexSecondLineDiv>
     </PageDiv>

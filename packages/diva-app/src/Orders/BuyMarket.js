@@ -1,20 +1,38 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
+import { BigNumber } from 'ethers'
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 
 export const buyMarketOrder = async (orderData) => {
   let filledOrder = {}
+
+  // Connect to 0x exchange contract
   const address = contractAddress.getContractAddressesForChainOrThrow(
     orderData.chainId
   )
   const exchangeProxyAddress = address.exchangeProxy
-  // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
+
+  // Get existing SELL LIMIT Orders where makerToken = position token and takerToken = collateral token
   const orders = orderData.existingLimitOrders
-  let takerFillNbrOptions = parseEther(orderData.nbrOptions.toString())
+
+  // Define variables for integer math
+  const decimals = orderData.collateralDecimals
+  const collateralUnit = parseUnits('1', decimals)
+
+  // User input converted from decimal number into an integer with collateral decimals
+  let takerFillNbrOptions = parseUnits(
+    orderData.nbrOptions.toString(),
+    decimals
+  )
+
+  // Initialize input arrays for batchFillLimitOrders function
   let takerAssetAmounts = []
   const signatures = []
+
+  // Function to executed the 0x batchFillLimitOrders function
   const fillOrderResponse = async (takerAssetFillAmounts) => {
     orders.map(function (order) {
       signatures.push(order.signature)
@@ -22,41 +40,50 @@ export const buyMarketOrder = async (orderData) => {
       return order
     })
     const response = await exchange
-      .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true)
+      .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true) // takerAssetFillAmounts should be an array of stringified integer numbers
       .awaitTransactionSuccessAsync({ from: orderData.takerAccount })
       .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
     return response
   }
 
   orders.forEach((order) => {
-    if (takerFillNbrOptions > 0) {
-      const expectedRate = parseEther(order.expectedRate.toString())
-      const takerFillAmount = expectedRate.mul(takerFillNbrOptions)
-      const takerFillAmountNumber = Number(
-        formatUnits(takerFillAmount, orderData.collateralDecimals)
+    if (takerFillNbrOptions.gt(0)) {
+      // Convert expected rate (of type number) into an integer with collateral token decimals
+      const expectedRate = parseUnits(order.expectedRate.toString(), decimals)
+
+      // Calculate taker fill amount implied by user input and expected rate; expressed as an integer with collateral token decimals.
+      const takerFillAmount = expectedRate
+        .mul(takerFillNbrOptions)
+        .div(collateralUnit)
+
+      // Convert string into BigNumber; already expressed in collateral token decimals
+      const remainingFillableTakerAmount = BigNumber.from(
+        order.remainingFillableTakerAmount
       )
-      const remainingFillableTakerAmount = parseEther(
-        order.remainingFillableTakerAmount.toString()
-      )
+
+      // Add elements to the takerAssetAmounts array which will be used as input in batchFillLimitOrders
       if (takerFillAmount.lte(remainingFillableTakerAmount)) {
-        takerAssetAmounts.push(takerFillAmountNumber)
-        const nbrOptionsFilled = remainingFillableTakerAmount.div(expectedRate)
-        takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled)
+        // Add element
+        takerAssetAmounts.push(takerFillAmount.toString())
+
+        // Update nbrOptionsFilled and overwrite takerFillNbrOptions with remaining number of position tokens to fill
+        const nbrOptionsFilled = remainingFillableTakerAmount
+          .mul(collateralUnit)
+          .div(expectedRate)
+        takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled) // This will drop to zero and hence will not enter this if block anymore but will add '0' for the remaining orders
       } else {
-        const remainingAmountNumber = Number(
-          formatUnits(
-            remainingFillableTakerAmount,
-            orderData.collateralDecimals
-          )
-        )
-        takerAssetAmounts.push(remainingAmountNumber)
-        const nbrOptionsFilled = remainingFillableTakerAmount.div(expectedRate)
+        takerAssetAmounts.push(remainingFillableTakerAmount.toString())
+
+        const nbrOptionsFilled = remainingFillableTakerAmount
+          .mul(collateralUnit)
+          .div(expectedRate)
         takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled)
       }
     } else {
       takerAssetAmounts.push('0')
     }
   })
+
   filledOrder = await fillOrderResponse(takerAssetAmounts)
   return filledOrder
 }

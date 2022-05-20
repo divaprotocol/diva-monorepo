@@ -1,5 +1,5 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
-import { formatUnits, parseEther } from 'ethers/lib/utils'
+import { parseEther } from 'ethers/lib/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 
@@ -11,9 +11,9 @@ export const sellMarketOrder = async (orderData) => {
   const exchangeProxyAddress = address.exchangeProxy
   // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
-  const orders = orderData.existingLimitOrders
-  let makerFillNbrOptions = parseEther(orderData.nbrOptions.toString())
-  let makerAssetAmounts = []
+  const orders = orderData.existingLimitOrders // Existing BUY LIMIT orders where makerToken = collateral token and takerToken = position token
+  let takerFillNbrOptions = parseEther(orderData.nbrOptions.toString()) // user input * 1e18; note that this part needs adjustment when we move to smart contracts v1.0.0
+  let takerAssetAmounts = []
   const signatures = []
 
   const fillOrderResponse = async (takerAssetFillAmounts) => {
@@ -30,28 +30,20 @@ export const sellMarketOrder = async (orderData) => {
   }
 
   orders.forEach((order) => {
-    if (makerFillNbrOptions > 0) {
-      const makerFillOptions = makerFillNbrOptions.mul(parseEther('1'))
-      const makerFillOptionsNumber = Number(
-        formatUnits(makerFillOptions, orderData.collateralDecimals)
-      )
-      const makerNbrOptionsNumber = Number(formatUnits(makerFillNbrOptions))
-      const remainingFillableTakerAmount = parseEther(
-        order.remainingFillableTakerAmount.toString()
-      )
-      const remainingNumber = remainingFillableTakerAmount.div(parseEther('1'))
-      const remainingAmountNumber = Number(formatUnits(remainingNumber))
-      if (makerNbrOptionsNumber <= remainingAmountNumber) {
-        makerAssetAmounts.push(makerFillOptionsNumber)
-        makerFillNbrOptions = parseEther('0')
+    if (takerFillNbrOptions.gt(0)) {
+      const remainingNumber = order.remainingFillableTakerAmount
+
+      if (takerFillNbrOptions.lte(remainingNumber)) {
+        takerAssetAmounts.push(takerFillNbrOptions.toString())
+        takerFillNbrOptions = parseEther('0') // "trick" to skip the remaining forEach loop
       } else {
-        makerAssetAmounts.push(order.remainingFillableTakerAmount)
-        makerFillNbrOptions = makerFillNbrOptions.sub(remainingNumber)
+        takerAssetAmounts.push(order.remainingFillableTakerAmount)
+        takerFillNbrOptions = takerFillNbrOptions.sub(remainingNumber) // Update the remaining amount to be filled; type: BigNumber
       }
     } else {
-      makerAssetAmounts.push('0')
+      takerAssetAmounts.push('0') // "trick" to skip the remaining forEach loop
     }
   })
-  filledOrder = await fillOrderResponse(makerAssetAmounts)
+  filledOrder = await fillOrderResponse(takerAssetAmounts)
   return filledOrder
 }
