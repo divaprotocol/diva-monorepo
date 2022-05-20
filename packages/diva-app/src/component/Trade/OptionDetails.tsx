@@ -34,6 +34,7 @@ const FlexBoxHeader = styled.div`
 
 const FlexBoxData = styled.div`
   padding: 15px;
+  width: 100%;
   font-size: 0.9rem;
   font-weight: bold;
   text-align: left;
@@ -56,7 +57,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 65%;
+  width: 30%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
@@ -72,14 +73,13 @@ const FlexBoxSecondLine = styled.div`
   flex: 1;
 `
 
-const FlexToolTipBoxData = styled.div`
-  margin-left: 15px;
-  padding-top: 15px;
-  font-size: 0.9rem;
+const FlexBoxTime = styled.div`
+  padding-top: 5.6px;
+  font-size: 0.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: bold;
   text-align: left;
+  color: Gray;
 `
 
 const FlexBoxSecondLineData = styled.div`
@@ -125,6 +125,7 @@ export default function OptionDetails({
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
+  console.log('pool.expiryTime', getDateTime(pool.expiryTime))
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
       (dataName: { id: string }) => dataName?.id == pool?.dataProvider
@@ -146,7 +147,13 @@ export default function OptionDetails({
       <FlexDiv>
         <FlexBox>
           <FlexBoxHeader>Expires at</FlexBoxHeader>
-          <FlexBoxData>{getDateTime(pool.expiryTime).slice(0, 10)}</FlexBoxData>
+          <FlexBoxData>
+            {getDateTime(pool.expiryTime).slice(0, 10)}
+            {'  '}
+            <FlexBoxTime>
+              {getDateTime(pool.expiryTime).slice(12, 19)}
+            </FlexBoxTime>
+          </FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Direction</FlexBoxHeader>
@@ -197,19 +204,9 @@ export default function OptionDetails({
       </FlexDiv>
       <FlexSecondLineDiv>
         <FlexBoxSecondLine>
-          <FlexBoxHeader>Data provider</FlexBoxHeader>
           <Tooltip title={pool.dataProvider} arrow>
-            <FlexToolTipBoxData>
-              {pool.dataProvider.length > 0
-                ? String(pool.dataProvider).substring(0, 6) +
-                  '...' +
-                  String(pool.dataProvider).substring(38)
-                : 'n/a'}
-            </FlexToolTipBoxData>
+            <FlexBoxHeader>Data Provider</FlexBoxHeader>
           </Tooltip>
-        </FlexBoxSecondLine>
-        <FlexBoxSecondLine>
-          <FlexBoxHeader>Data source</FlexBoxHeader>
           <FlexBoxSecondLineData>
             <FlexCheckIcon>
               {dataSourceName}
