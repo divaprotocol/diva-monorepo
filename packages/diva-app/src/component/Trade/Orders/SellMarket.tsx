@@ -251,9 +251,11 @@ export default function SellMarket(props: {
       const remainingFillableTakerAmount = Number(
         formatUnits(
           data.metaData.remainingFillableTakerAmount,
-          option.collateralToken.decimals
+          option.collateralToken.decimals // CHECK 
         )
       )
+      console.log('data: ')
+      console.log(JSON.stringify(data))
 
       if (remainingFillableTakerAmount > 0) {
         if (totalDecimals(makerAmount, takerAmount) > 1) {
@@ -346,9 +348,8 @@ export default function SellMarket(props: {
           formatUnits(order.makerAmount, option.collateralToken.decimals)
         )
         let takerAmount = Number(formatUnits(order.takerAmount))
-        const remainingFillableTakerAmount = Number(
-          formatUnits(order.remainingFillableTakerAmount)
-        )
+        const remainingFillableTakerAmount = order.remainingFillableTakerAmount
+
         if (remainingFillableTakerAmount < takerAmount) {
           takerAmount = remainingFillableTakerAmount
           makerAmount = remainingFillableTakerAmount * order.expectedRate

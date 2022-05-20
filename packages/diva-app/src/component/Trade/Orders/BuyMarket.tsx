@@ -360,12 +360,8 @@ export default function BuyMarket(props: {
           formatUnits(order.takerAmount, option.collateralToken.decimals)
         )
         let makerAmount = Number(formatUnits(order.makerAmount))
-        const remainingFillableTakerAmount = Number(
-          formatUnits(
-            order.remainingFillableTakerAmount,
-            option.collateralToken.decimals
-          )
-        )
+        const remainingFillableTakerAmount = order.remainingFillableTakerAmount
+
         if (remainingFillableTakerAmount < takerAmount) {
           //Order partially filled
           takerAmount = remainingFillableTakerAmount
