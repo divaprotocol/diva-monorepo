@@ -83,9 +83,6 @@ export const buyMarketOrder = async (orderData) => {
       takerAssetAmounts.push('0')
     }
   })
-  console.log('takerAssetAmounts')
-  console.log(takerAssetAmounts)
-  // Filter out the orders that have takerAssetAmounts = 0
 
   filledOrder = await fillOrderResponse(takerAssetAmounts)
   return filledOrder
