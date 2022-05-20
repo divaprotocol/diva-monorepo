@@ -258,7 +258,7 @@ export default function OrderBook(props: {
 
   return (
     <PageDiv>
-      <TableContainer component={Paper} sx={{ maxHeight: 340 }}>
+      <TableContainer component={Paper} sx={{ maxHeight: 550 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>

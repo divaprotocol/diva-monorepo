@@ -251,17 +251,23 @@ export default function BuyMarket(props: {
       )
       const makerAmount = Number(formatUnits(order.makerAmount))
 
-      if (totalDecimals(takerAmount, makerAmount) > 1) {
-        // QUESTION: Why do we need this? This leads to rounding errors and wrong expected price displayed
-        order['expectedRate'] = (takerAmount / makerAmount).toFixed(
-          totalDecimals(takerAmount, makerAmount)
-        )
-      } else {
-        order['expectedRate'] = takerAmount / makerAmount
+      const remainingFillableTakerAmount = Number(
+        formatUnits(data.metaData.remainingFillableTakerAmount)
+      )
+
+      if (remainingFillableTakerAmount > 0) {
+        if (totalDecimals(takerAmount, makerAmount) > 1) {
+          // QUESTION: Why do we need this? This leads to rounding errors and wrong expected price displayed
+          order['expectedRate'] = (takerAmount / makerAmount).toFixed(
+            totalDecimals(takerAmount, makerAmount)
+          )
+        } else {
+          order['expectedRate'] = takerAmount / makerAmount
+        }
+        order['remainingFillableTakerAmount'] =
+          data.metaData.remainingFillableTakerAmount
+        orders.push(order)
       }
-      order['remainingFillableTakerAmount'] =
-        data.metaData.remainingFillableTakerAmount
-      orders.push(order)
     })
 
     const sortOrder = 'ascOrder'

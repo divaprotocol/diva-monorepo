@@ -248,16 +248,24 @@ export default function SellMarket(props: {
       )
       const takerAmount = Number(formatUnits(order.takerAmount))
 
-      if (totalDecimals(makerAmount, takerAmount) > 1) {
-        order['expectedRate'] = (makerAmount / takerAmount).toFixed(
-          totalDecimals(makerAmount, takerAmount)
+      const remainingFillableTakerAmount = Number(
+        formatUnits(
+          data.metaData.remainingFillableTakerAmount,
+          option.collateralToken.decimals
         )
-      } else {
-        order['expectedRate'] = makerAmount / takerAmount
+      )
+
+      if (remainingFillableTakerAmount > 0) {
+        if (totalDecimals(makerAmount, takerAmount) > 1) {
+          order['expectedRate'] = (makerAmount / takerAmount).toFixed(
+            totalDecimals(makerAmount, takerAmount)
+          )
+        } else {
+          order['expectedRate'] = makerAmount / takerAmount
+        }
+        order['remainingFillableTakerAmount'] = remainingFillableTakerAmount
+        orders.push(order)
       }
-      order['remainingFillableTakerAmount'] =
-        data.metaData.remainingFillableTakerAmount
-      orders.push(order)
     })
     const sortOrder = 'desOrder'
     const orderBy = 'expectedRate'
