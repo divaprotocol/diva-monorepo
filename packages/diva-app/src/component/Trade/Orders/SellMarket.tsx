@@ -169,7 +169,7 @@ export default function SellMarket(props: {
             maker: makerAccount,
             provider: web3,
             isBuy: false,
-            nbrOptions: numberOfOptions, // Number of position tokens the user wants to sell 
+            nbrOptions: numberOfOptions, // Number of position tokens the user wants to sell
             collateralDecimals: option.collateralToken.decimals,
             makerToken: optionTokenAddress,
             takerToken: option.collateralToken.id,
@@ -248,16 +248,10 @@ export default function SellMarket(props: {
       )
       const takerAmount = Number(formatUnits(order.takerAmount))
 
-      const remainingFillableTakerAmount = Number(
-        formatUnits(
-          data.metaData.remainingFillableTakerAmount,
-          option.collateralToken.decimals // CHECK
-        )
-      )
-      console.log('data: ')
-      console.log(JSON.stringify(data))
+      const remainingFillableTakerAmount =
+        data.metaData.remainingFillableTakerAmount
 
-      if (remainingFillableTakerAmount > 0) {
+      if (BigENumber.from(remainingFillableTakerAmount).gt(0)) {
         if (totalDecimals(makerAmount, takerAmount) > 1) {
           order['expectedRate'] = (makerAmount / takerAmount).toFixed(
             totalDecimals(makerAmount, takerAmount)

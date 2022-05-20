@@ -11,10 +11,11 @@ export const buyMarketOrder = async (orderData) => {
   const exchangeProxyAddress = address.exchangeProxy
   // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
-  const orders = orderData.existingLimitOrders
+  const orders = orderData.existingLimitOrders // Existing SELL LIMIT orders where makerToken = position token and takerToken = collateral token
   let takerFillNbrOptions = parseEther(orderData.nbrOptions.toString())
   let takerAssetAmounts = []
   const signatures = []
+  
   const fillOrderResponse = async (takerAssetFillAmounts) => {
     orders.map(function (order) {
       signatures.push(order.signature)
