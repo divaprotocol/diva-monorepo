@@ -251,7 +251,7 @@ export default function BuyMarket(props: {
       )
       const makerAmount = Number(formatUnits(order.makerAmount))
 
-      if (totalDecimals(takerAmount, makerAmount) > 0) {
+      if (totalDecimals(takerAmount, makerAmount) > 1) {
         // QUESTION: Why do we need this? This leads to rounding errors and wrong expected price displayed
         order['expectedRate'] = (takerAmount / makerAmount).toFixed(
           totalDecimals(takerAmount, makerAmount)
@@ -360,7 +360,10 @@ export default function BuyMarket(props: {
         )
         let makerAmount = Number(formatUnits(order.makerAmount))
         const remainingFillableTakerAmount = Number(
-          formatUnits(order.remainingFillableTakerAmount)
+          formatUnits(
+            order.remainingFillableTakerAmount,
+            option.collateralToken.decimals
+          )
         )
         if (remainingFillableTakerAmount < takerAmount) {
           //Order partially filled
