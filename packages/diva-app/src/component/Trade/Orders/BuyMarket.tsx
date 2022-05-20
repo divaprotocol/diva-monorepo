@@ -85,9 +85,9 @@ export default function BuyMarket(props: {
   }
 
   const approveBuyAmount = async (amount) => {
-    const amountBigNumber = parseUnits(amount.toString())
+    // const amountBigNumber = parseUnits(amount.toString())
     await takerTokenContract.methods
-      .approve(exchangeProxy, amountBigNumber)
+      .approve(exchangeProxy, amount)
       .send({ from: userAddress })
 
     const collateralAllowance = await takerTokenContract.methods
@@ -103,7 +103,9 @@ export default function BuyMarket(props: {
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
-        let collateralAllowance = await approveBuyAmount(amount)
+        let collateralAllowance = await approveBuyAmount(
+          parseUnits(amount.toString(), option.collateralToken.decimals)
+        )
         collateralAllowance = Number(
           formatUnits(
             collateralAllowance.toString(),
@@ -226,7 +228,7 @@ export default function BuyMarket(props: {
     let allowance = await takerTokenContract.methods
       .allowance(takerAccount, exchangeProxy)
       .call()
-    allowance = Number(formatUnits(allowance))
+    allowance = Number(formatUnits(allowance, option.collateralToken.decimals))
     let balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
@@ -248,16 +250,24 @@ export default function BuyMarket(props: {
         formatUnits(order.takerAmount, option.collateralToken.decimals)
       )
       const makerAmount = Number(formatUnits(order.makerAmount))
-      if (totalDecimals(takerAmount, makerAmount) > 0) {
-        order['expectedRate'] = (takerAmount / makerAmount).toFixed(
-          totalDecimals(takerAmount, makerAmount)
-        )
-      } else {
-        order['expectedRate'] = takerAmount / makerAmount
+
+      const remainingFillableTakerAmount = Number(
+        formatUnits(data.metaData.remainingFillableTakerAmount)
+      )
+
+      if (remainingFillableTakerAmount > 0) {
+        if (totalDecimals(takerAmount, makerAmount) > 1) {
+          // QUESTION: Why do we need this? This leads to rounding errors and wrong expected price displayed
+          order['expectedRate'] = (takerAmount / makerAmount).toFixed(
+            totalDecimals(takerAmount, makerAmount)
+          )
+        } else {
+          order['expectedRate'] = takerAmount / makerAmount
+        }
+        order['remainingFillableTakerAmount'] =
+          data.metaData.remainingFillableTakerAmount
+        orders.push(order)
       }
-      order['remainingFillableTakerAmount'] =
-        data.metaData.remainingFillableTakerAmount
-      orders.push(order)
     })
 
     const sortOrder = 'ascOrder'
@@ -351,7 +361,10 @@ export default function BuyMarket(props: {
         )
         let makerAmount = Number(formatUnits(order.makerAmount))
         const remainingFillableTakerAmount = Number(
-          formatUnits(order.remainingFillableTakerAmount)
+          formatUnits(
+            order.remainingFillableTakerAmount,
+            option.collateralToken.decimals
+          )
         )
         if (remainingFillableTakerAmount < takerAmount) {
           //Order partially filled
@@ -413,7 +426,7 @@ export default function BuyMarket(props: {
       BigENumber.from(option.supplyInitial),
       option.collateralToken.decimals
     )
-    if (avgExpectedRate > 0) {
+    if (avgExpectedRate > 0 && !isNaN(avgExpectedRate)) {
       dispatch(
         setMaxYield(
           parseFloat(

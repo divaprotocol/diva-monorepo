@@ -86,9 +86,8 @@ export default function SellMarket(props: {
   }
 
   const approveSellAmount = async (amount) => {
-    const amountBigNumber = parseUnits(amount.toString())
     await takerTokenContract.methods
-      .approve(exchangeProxyAddress, amountBigNumber)
+      .approve(exchangeProxyAddress, amount)
       .send({ from: makerAccount })
 
     const allowance = await takerTokenContract.methods
@@ -106,8 +105,10 @@ export default function SellMarket(props: {
             totalDecimals(allowance, numberOfOptions)
           )
         )
-
-        let approvedAllowance = await approveSellAmount(amount)
+        // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
+        let approvedAllowance = await approveSellAmount(
+          parseUnits(amount.toString(), 18)
+        )
         approvedAllowance = Number(
           formatUnits(approvedAllowance.toString(), 18)
         )
@@ -246,16 +247,25 @@ export default function SellMarket(props: {
         formatUnits(order.makerAmount, option.collateralToken.decimals)
       )
       const takerAmount = Number(formatUnits(order.takerAmount))
-      if (totalDecimals(makerAmount, takerAmount) > 1) {
-        order['expectedRate'] = (makerAmount / takerAmount).toFixed(
-          totalDecimals(makerAmount, takerAmount)
+
+      const remainingFillableTakerAmount = Number(
+        formatUnits(
+          data.metaData.remainingFillableTakerAmount,
+          option.collateralToken.decimals
         )
-      } else {
-        order['expectedRate'] = makerAmount / takerAmount
+      )
+
+      if (remainingFillableTakerAmount > 0) {
+        if (totalDecimals(makerAmount, takerAmount) > 1) {
+          order['expectedRate'] = (makerAmount / takerAmount).toFixed(
+            totalDecimals(makerAmount, takerAmount)
+          )
+        } else {
+          order['expectedRate'] = makerAmount / takerAmount
+        }
+        order['remainingFillableTakerAmount'] = remainingFillableTakerAmount
+        orders.push(order)
       }
-      order['remainingFillableTakerAmount'] =
-        data.metaData.remainingFillableTakerAmount
-      orders.push(order)
     })
     const sortOrder = 'desOrder'
     const orderBy = 'expectedRate'

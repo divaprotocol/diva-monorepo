@@ -66,14 +66,18 @@ function mapOrderData(
 ) {
   let orderBy: string
   let sortedRecords: any = []
-  const orderbook: any = records.map((record: any) => {
+  const orderbookTemp: any = records.map((record: any) => {
     const order = record.order
+    console.log('order')
+    console.log(order)
+
     const metaData = record.metaData
     const makerToken = order.makerToken
     const takerToken = order.takerToken
     const collateralToken = option.collateralToken.id.toLowerCase()
     const tokenAddress = optionTokenAddress.toLowerCase()
     const orders: any = {}
+    // Buy Limit
     if (makerToken === collateralToken && takerToken === tokenAddress) {
       const takerAmount = formatUnits(order.takerAmount)
       const makerAmount = formatUnits(
@@ -118,7 +122,13 @@ function mapOrderData(
         orders.nbrOptions = quantity
       }
     }
+
     return orders
+  })
+
+  // Filter out orders with quantity = 0 (may happen if maker has revoked the approval)
+  const orderbook = orderbookTemp.filter((object) => {
+    return object.nbrOptions !== 0
   })
 
   if (sortOrder === 'ascOrder') {
@@ -248,7 +258,7 @@ export default function OrderBook(props: {
 
   return (
     <PageDiv>
-      <TableContainer component={Paper} sx={{ maxHeight: 340 }}>
+      <TableContainer component={Paper} sx={{ maxHeight: 550 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>

@@ -93,7 +93,7 @@ export default function SellLimit(props: {
     let approvedAllowance = await makerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()
-    approvedAllowance = Number(formatUnits(approvedAllowance.toString(), 18))
+    approvedAllowance = Number(formatUnits(approvedAllowance.toString(), 18)) // NOTE: decimals need adjustment when we switch to smart contracts version 1.0.0
     const remainingAmount = Number(
       (approvedAllowance - existingOrdersAmount).toFixed(
         totalDecimals(approvedAllowance, existingOrdersAmount)
@@ -104,9 +104,8 @@ export default function SellLimit(props: {
 
   const approveSellAmount = async (amount) => {
     try {
-      const amountBigNumber = parseUnits(amount.toString())
       const approveResponse = await makerTokenContract.methods
-        .approve(exchangeProxyAddress, amountBigNumber)
+        .approve(exchangeProxyAddress, amount)
         .send({ from: makerAccount })
       if ('events' in approveResponse) {
         return approveResponse.events.Approval.returnValues.value
@@ -133,7 +132,10 @@ export default function SellLimit(props: {
             totalDecimals(allowance, numberOfOptions)
           )
         )
-        let approvedAllowance = await approveSellAmount(amount)
+        // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
+        let approvedAllowance = await approveSellAmount(
+          parseUnits(amount.toString(), 18)
+        )
         if (approvedAllowance == 'undefined') {
           alert('Metamask could not finish approval.')
         } else {

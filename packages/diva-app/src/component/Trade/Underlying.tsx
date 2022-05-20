@@ -211,6 +211,8 @@ export default function Underlying() {
                   <Typography
                     sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                   >
+                    {console.log('maxYield')}
+                    {console.log(maxYield)}
                     {maxYield}
                   </Typography>
                 ) : (
