@@ -182,7 +182,7 @@ export default function BuyMarket(props: {
             let orderFilled = false
             if (!(orderFillStatus === undefined)) {
               if (!('logs' in orderFillStatus)) {
-                alert('Order could not be filled logs not found')
+                alert('Order could not be filled.')
                 return
               } else {
                 orderFillStatus.logs.forEach(async (eventData: any) => {

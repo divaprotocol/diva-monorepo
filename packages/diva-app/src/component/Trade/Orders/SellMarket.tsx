@@ -169,7 +169,7 @@ export default function SellMarket(props: {
             maker: makerAccount,
             provider: web3,
             isBuy: false,
-            nbrOptions: numberOfOptions,
+            nbrOptions: numberOfOptions, // Number of position tokens the user wants to sell 
             collateralDecimals: option.collateralToken.decimals,
             makerToken: optionTokenAddress,
             takerToken: option.collateralToken.id,
@@ -182,7 +182,7 @@ export default function SellMarket(props: {
             let orderFilled = false
             if (!(orderFillStatus == undefined)) {
               if (!('logs' in orderFillStatus)) {
-                alert('order could not be filled')
+                alert('Order could not be filled.')
                 return
               } else {
                 orderFillStatus.logs.forEach(async (eventData: any) => {
@@ -251,7 +251,7 @@ export default function SellMarket(props: {
       const remainingFillableTakerAmount = Number(
         formatUnits(
           data.metaData.remainingFillableTakerAmount,
-          option.collateralToken.decimals // CHECK 
+          option.collateralToken.decimals // CHECK
         )
       )
       console.log('data: ')

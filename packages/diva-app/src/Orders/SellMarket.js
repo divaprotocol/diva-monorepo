@@ -11,8 +11,8 @@ export const sellMarketOrder = async (orderData) => {
   const exchangeProxyAddress = address.exchangeProxy
   // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
-  const orders = orderData.existingLimitOrders
-  let makerFillNbrOptions = parseEther(orderData.nbrOptions.toString())
+  const orders = orderData.existingLimitOrders // existing BUY LIMIT orders where makerToken = collateral token (<=18 decimals) and takerToken = position Token (18 decimals)
+  let makerFillNbrOptions = parseEther(orderData.nbrOptions.toString()) // Number of position tokens the user wants to purchase; NOTE: needs decimal adjustment when switching to smart contracts v1.0.0
   let makerAssetAmounts = []
   const signatures = []
 
@@ -32,10 +32,11 @@ export const sellMarketOrder = async (orderData) => {
   orders.forEach((order) => {
     if (makerFillNbrOptions > 0) {
       const makerFillOptions = makerFillNbrOptions.mul(parseEther('1'))
-      const makerFillOptionsNumber = Number(
-        formatUnits(makerFillOptions, orderData.collateralDecimals)
-      )
-      const makerNbrOptionsNumber = Number(formatUnits(makerFillNbrOptions))
+      const makerFillOptionsNumber = makerFillNbrOptions
+      // Number(
+      //   formatUnits(makerFillOptions, orderData.collateralDecimals)
+      // )
+      const makerNbrOptionsNumber = Number(formatUnits(makerFillNbrOptions)) // TODO: not nice, needs fixing
       const remainingFillableTakerAmount = parseEther(
         order.remainingFillableTakerAmount.toString()
       )
