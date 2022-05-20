@@ -105,7 +105,9 @@ export default function BuyLimit(props: {
     let allowance = await takerTokenContract.methods
       .allowance(userAdress, exchangeProxyAddress)
       .call()
-    allowance = Number(formatUnits(allowance))
+    allowance = Number(formatUnits(allowance, option.collateralToken.decimals))
+    console.log('allowance')
+    console.log(allowance)
     const remainingApproval = Number(
       (allowance - existingOrdersAmount).toFixed(
         totalDecimals(allowance, existingOrdersAmount)
@@ -152,6 +154,8 @@ export default function BuyLimit(props: {
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
+        console.log('amount')
+        console.log(amount)
         let collateralAllowance = await approveBuyAmount(
           parseUnits(amount.toString(), option.collateralToken.decimals)
         )
@@ -311,7 +315,9 @@ export default function BuyLimit(props: {
       let allowance = await takerTokenContract.methods
         .allowance(userAdress, exchangeProxyAddress)
         .call()
-      allowance = Number(formatUnits(allowance))
+      allowance = Number(
+        formatUnits(allowance, option.collateralToken.decimals)
+      )
       let balance = await takerTokenContract.methods
         .balanceOf(userAdress)
         .call()

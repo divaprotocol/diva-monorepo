@@ -228,7 +228,7 @@ export default function BuyMarket(props: {
     let allowance = await takerTokenContract.methods
       .allowance(takerAccount, exchangeProxy)
       .call()
-    allowance = Number(formatUnits(allowance))
+    allowance = Number(formatUnits(allowance, option.collateralToken.decimals))
     let balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
@@ -273,13 +273,8 @@ export default function BuyMarket(props: {
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedOrders = stableSort(orders, getComparator(sortOrder, orderBy))
-    console.log('sortedOrders')
-    console.log(sortedOrders)
     if (sortedOrders.length > 0) {
       const bestRate = sortedOrders[0].expectedRate
-      console.log(sortedOrders[0])
-      console.log(sortedOrders[1])
-      console.log(sortedOrders[2])
       const rate = Number(bestRate)
       setAvgExpectedRate(rate)
     }

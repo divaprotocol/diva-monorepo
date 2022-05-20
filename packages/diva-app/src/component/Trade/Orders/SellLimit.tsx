@@ -93,7 +93,7 @@ export default function SellLimit(props: {
     let approvedAllowance = await makerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()
-    approvedAllowance = Number(formatUnits(approvedAllowance.toString(), 18))
+    approvedAllowance = Number(formatUnits(approvedAllowance.toString(), 18)) // NOTE: decimals need adjustment when we switch to smart contracts version 1.0.0
     const remainingAmount = Number(
       (approvedAllowance - existingOrdersAmount).toFixed(
         totalDecimals(approvedAllowance, existingOrdersAmount)
