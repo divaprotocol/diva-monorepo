@@ -224,7 +224,7 @@ export default function SellMarket(props: {
                 })
               }
             } else {
-              alert('order could not be filled. Response is not defined.')
+              alert('Order could not be filled. Response is not defined.')
               setOrderBtnDisabled(false)
             }
             if (orderFilled) {
