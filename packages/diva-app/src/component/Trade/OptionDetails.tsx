@@ -58,7 +58,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 30%;
+  width: 40%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
@@ -227,7 +227,6 @@ export default function OptionDetails({
             </FlexCheckIcon>
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
-
         <FlexBoxSecondLine>
           <FlexBoxHeader>Collateral</FlexBoxHeader>
           <Tooltip title={pool.collateralToken.id} arrow>
