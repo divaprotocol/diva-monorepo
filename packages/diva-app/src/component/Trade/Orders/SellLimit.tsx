@@ -132,6 +132,7 @@ export default function SellLimit(props: {
             totalDecimals(allowance, numberOfOptions)
           )
         )
+
         // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
         let approvedAllowance = await approveSellAmount(
           parseUnits(amount.toString(), 18)
@@ -166,7 +167,7 @@ export default function SellLimit(props: {
         const totalAmount = numberOfOptions + existingOrdersAmount
         if (numberOfOptions > remainingApprovalAmount) {
           if (totalAmount > walletBalance) {
-            alert('Not sufficiant balance')
+            alert('Not sufficient balance')
           } else {
             const additionalApproval = Number(
               (numberOfOptions - remainingApprovalAmount).toFixed(
@@ -175,7 +176,7 @@ export default function SellLimit(props: {
             )
             if (
               confirm(
-                'options to sell exceeds approved limit. Do you want to approve additional ' +
+                'Required collateral balance exceeds approved limit. Do you want to approve additional ' +
                   +additionalApproval +
                   ' ' +
                   params.tokenType.toUpperCase() +
@@ -188,7 +189,10 @@ export default function SellLimit(props: {
                   totalDecimals(additionalApproval, allowance)
                 )
               )
-              const approvedAllowance = await approveSellAmount(newAllowance)
+              const approvedAllowance = await approveSellAmount(
+                parseUnits(newAllowance.toString(), 18)
+              )
+
               if (approvedAllowance == 'undefined') {
                 alert('Metamask could not finish approval.')
                 setOrderBtnDisabled(false)
@@ -208,7 +212,7 @@ export default function SellLimit(props: {
                     additionalApproval +
                     ' ' +
                     params.tokenType.toUpperCase() +
-                    ' sell options approved please proceed with order'
+                    ' approved. Please proceed with order.'
                 )
               }
             } else {

@@ -206,7 +206,12 @@ export default function BuyLimit(props: {
                   totalDecimals(additionalApproval, allowance)
                 )
               )
-              const approvedAllowance = await approveBuyAmount(newAllowance)
+              const approvedAllowance = await approveBuyAmount(
+                parseUnits(
+                  newAllowance.toString(),
+                  option.collateralToken.decimals
+                )
+              )
               if (approvedAllowance == 'undefined') {
                 alert('Metamask could not finish approval.')
                 setOrderBtnDisabled(false)
@@ -226,7 +231,7 @@ export default function BuyLimit(props: {
                     additionalApproval +
                     ' ' +
                     option.collateralToken.symbol +
-                    ' approved please proceed with order'
+                    ' approved. Please proceed with order.'
                 )
               }
             } else {
