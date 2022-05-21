@@ -1,6 +1,7 @@
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 
+// Returned values are expressed as integers with collateral token decimals
 export function calcPayoffPerToken(
   floor,
   inflection,

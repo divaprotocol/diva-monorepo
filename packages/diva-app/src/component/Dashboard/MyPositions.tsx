@@ -400,6 +400,32 @@ const columns: GridColDef[] = [
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
+    renderCell: (cell: any) => {
+      const description = (status: string) => {
+        switch (status) {
+          case 'Open':
+            return `Pool has not expired yet.`
+          case 'Expired':
+            return `Pool expired and the final value input from the data provider is pending.`
+          case 'Submitted':
+            return `A final value has been submitted by the data provider.`
+          case 'Challenged':
+            return `The final value submitted by the data provider has been challenged by position token holders.`
+          case 'Fallback':
+            return `The data provider failed to submit a final value within the 24h submission period. The fallback data provider has 5 days to step in and submit a value. This is only to be expected for whitelisted data providers. For non-whitelisted data providers, the fallback data provider may not submit a value in which case it will default to inflection.
+Confirmed*: The final value will be confirmed inside the smart contract at the first user redemption.`
+          case 'Confirmed*':
+            return `The final value will be confirmed inside the smart contract at the first user redemption.`
+          case 'Confirmed':
+            return `The final value has been confirmed and position token holders can start redeeming their LONG & SHORT position tokens.`
+        }
+      }
+      return (
+        <Tooltip placement="top-end" title={description(cell.value)}>
+          <span className="table-cell-trucate">{cell.value}</span>
+        </Tooltip>
+      )
+    },
   },
   {
     field: 'Balance',
@@ -495,9 +521,22 @@ export function MyPositions() {
     }
 
     const payOff = {
-      Floor: parseInt(val.floor) / 1e18,
-      Inflection: parseInt(val.inflection) / 1e18,
-      Cap: parseInt(val.cap) / 1e18,
+      CollateralBalanceLong: Number(
+        formatUnits(
+          val.collateralBalanceLongInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      CollateralBalanceShort: Number(
+        formatUnits(
+          val.collateralBalanceShortInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      Floor: Number(formatEther(val.floor)),
+      Inflection: Number(formatEther(val.inflection)),
+      Cap: Number(formatEther(val.cap)),
+      TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
 
     const Status =
