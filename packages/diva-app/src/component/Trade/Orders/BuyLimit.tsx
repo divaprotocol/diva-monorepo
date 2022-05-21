@@ -150,6 +150,7 @@ export default function BuyLimit(props: {
     event.preventDefault()
     if (!isApproved) {
       if (numberOfOptions > 0) {
+        setOrderBtnDisabled(true)
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
@@ -173,6 +174,7 @@ export default function BuyLimit(props: {
           alert(
             `Allowance for ${youPay} ${option.collateralToken.symbol} successfully set.`
           )
+          setOrderBtnDisabled(false)
         }
       } else {
         alert(

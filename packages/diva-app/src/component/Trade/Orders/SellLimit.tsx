@@ -127,12 +127,12 @@ export default function SellLimit(props: {
     event.preventDefault()
     if (!isApproved) {
       if (numberOfOptions > 0) {
+        setOrderBtnDisabled(true)
         const amount = Number(
           (allowance + numberOfOptions).toFixed(
             totalDecimals(allowance, numberOfOptions)
           )
         )
-
         // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
         let approvedAllowance = await approveSellAmount(
           parseUnits(amount.toString(), 18)
@@ -158,6 +158,7 @@ export default function SellLimit(props: {
               params.tokenType.toUpperCase() +
               ` successfully set.`
           )
+          setOrderBtnDisabled(false)
         }
       } else {
         alert('Please enter a positive amount for approval.')
