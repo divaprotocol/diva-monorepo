@@ -251,7 +251,7 @@ export default function SellLimit(props: {
             })
         }
       } else {
-        alert('No ' + params.tokenType.toUpperCase() + ' avaible to sell')
+        alert('No ' + params.tokenType.toUpperCase() + ' available to sell.')
       }
     }
   }
