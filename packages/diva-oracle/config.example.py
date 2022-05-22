@@ -2,10 +2,14 @@ PRIVATE_KEY = ''
 PUBLIC_KEY = ''
 dataprovider = ''
 
+
+email = ""
+emailpassword = ""
+
 PROVIDER_URL = {
-    "ropsten": 'https://ropsten.infura.io/v3/a6b3d560ce544297b265bb09f0d4bfa8',
-    "rinkeby": 'https://rinkeby.infura.io/v3/a6b3d560ce544297b265bb09f0d4bfa8',
-    "mumbai": 'https://speedy-nodes-nyc.moralis.io/86d67e6f9d6f3ccc04df4b37/polygon/mumbai'
+    "ropsten": 'https://ropsten.infura.io/v3/<YOUR_API_KEY>',
+    "rinkeby": 'https://rinkeby.infura.io/v3/<YOUR_API_KEY>',
+    "mumbai": ''
 }
 
 chain_id = {

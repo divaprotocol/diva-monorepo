@@ -6,6 +6,8 @@ import config
 import threading
 from web3 import Web3
 import time
+import diva
+from sendEmail import sendEmail
 
 query = """
         { 
@@ -22,14 +24,17 @@ query = """
             }
         """
 
-def run(network, w3):
-    #w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
-    #print(w3.isConnected())
+message = "Subject: Pending Pool Transactions \n"
+
+def run(network, w3, contract):
     print("#########################################")
     print('\033[1m' + "Network: {}".format(network) + '\033[0m')
     max_time_away = dt.timedelta(minutes=60)
     resp = run_query(query, network)
     df_reporting_needed = get_required_reporting_df(resp, hours=24)
+
+    for j in pendingPools[network]:
+        df_reporting_needed = df_reporting_needed[df_reporting_needed["id"] != j]
 
     for i in range(df_reporting_needed.shape[0]):
         pair = df_reporting_needed['referenceAsset'].iloc[i]
@@ -46,26 +51,61 @@ def run(network, w3):
         if (price, date) != (-1, -1):
             print("-----------------------------------------")
             print("Pool id {} :".format(pool_id),"Price for pair ", pair, " at ", date, ": ", price)
-            # print("Price for pair ", pair, " at ", date, ": ", price, " where time interval is from", date_max_away,
-            #      " to expiryTime:", date_dt)
-        # send price to smart contract
-        sendPrice(pool_id=pool_id, value=price, network=network, w3=w3)
+
+            try:
+                sendPrice(pool_id=pool_id, value=price, network=network, w3=w3, my_contract=contract, nonce=nonces[nt])
+            except:
+                print("Transaction is still pending...")
+                pendingPools[nt].append(pool_id)
+                pendingPools_nonces[nt].append(nonces[nt])
+                print("Nonce of pending pool transaction: {}".format(nonces[nt]))
+                print("Pool Id of pending pool: {}".format(pool_id))
+            nonces[nt] += 1
     if df_reporting_needed.shape[0] == 0:
         print("No pools that require price now.")
 
 
 # Parallel execution
 networks = ["ropsten","mumbai"]
-waiting_sec = 120
+waiting_sec = 10
+
+pendingPools = {
+    "ropsten": [],
+    "mumbai": [],
+    "rinkeby": []
+}
+pendingPools_nonces = {
+    "ropsten": [],
+    "mumbai": [],
+    "rinkeby": []
+}
+pendingPools_len = {
+    "ropsten": [0],
+    "mumbai": [0],
+    "rinkeby": [0]
+}
+
 
 w3_instances = []
+contract_instances = []
+nonces = {
+    "ropsten": 0,
+    "mumbai": 0,
+    "rinkeby": 0
+}
+
 for nt in networks:
     w3_instances.append(Web3(Web3.HTTPProvider(config.PROVIDER_URL[nt])))
+    contract_instances.append(w3_instances[-1].eth.contract(address=diva.contract_address[nt], abi=diva.abi))
+    nonces[nt] = w3_instances[-1].eth.get_transaction_count(config.PUBLIC_KEY)
+iter = 0
+
+
 
 while True:
     jobs = []
-    for (nt, w3) in zip(networks, w3_instances):
-        thread = threading.Thread(target=run(nt, w3))
+    for (nt, w3, contract) in zip(networks, w3_instances, contract_instances):
+        thread = threading.Thread(target=run(nt, w3, contract))
         jobs.append(thread)
 
     for j in jobs:
@@ -74,7 +114,25 @@ while True:
     for j in jobs:
         j.join()
 
+
     print("#########################################")
     print("Waiting {} sec before next iteration...".format(waiting_sec))
     # Wait before next iteration
     time.sleep(waiting_sec)
+    iter += 1
+    # Send email with special and pending pools.
+    bool_var = False
+    for nt in networks:
+        bool_var = (pendingPools_len[nt][-1] != len(pendingPools[nt]))
+        if bool_var:
+            break
+    if (iter % 2 == 0) and bool_var:
+        for nt in networks:
+            message += "########## Pending transactions #################\n" \
+                       + "Network: {} \n".format(nt) \
+                       + "Pool ids: {} \n".format(pendingPools[nt]) \
+                       + "Nonces: {} \n".format(pendingPools_nonces[nt])
+            pendingPools_len[nt].append(len(pendingPools[nt]))
+        print("Sending Email...")
+        sendEmail(message)
+        message = "Subject: Pending Pool Transactions \n"
