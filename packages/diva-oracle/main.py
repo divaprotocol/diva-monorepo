@@ -120,7 +120,7 @@ while True:
     # Wait before next iteration
     time.sleep(waiting_sec)
     iter += 1
-    # Send email with special and pending pools.
+    # Send email with pending pool transactions.
     bool_var = False
     for nt in networks:
         bool_var = (pendingPools_len[nt][-1] != len(pendingPools[nt]))
