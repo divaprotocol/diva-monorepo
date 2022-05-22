@@ -1,8 +1,12 @@
 import { Box, Card, Container, Stack, useTheme } from '@mui/material'
 import Typography from '@mui/material/Typography'
-import React from 'react'
+import React, { useState } from 'react'
+import { useParams } from 'react-router'
+import { useHistory } from 'react-router-dom'
 import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
+import TabContext from '@mui/lab/TabContext'
+import TabList from '@mui/lab/TabList'
+import TabPanel from '@mui/lab/TabPanel'
 import { AddLiquidity } from './AddLiquidity'
 import { BigNumber } from 'ethers'
 import { RemoveLiquidity } from './RemoveLiquidity'
@@ -13,13 +17,29 @@ import { ReactComponent as Star } from '../../Images/star-svgrepo-com.svg'
 type Props = {
   pool?: any
 }
+enum TabPath {
+  add = 'add',
+  remove = 'remove',
+}
 
 export const Liquidity = ({ pool }: Props) => {
-  const [value, setValue] = React.useState(0)
+  const history = useHistory()
+  const params: { poolId: string; tokenType: string } = useParams()
+  const isLong = params.tokenType === 'long'
+  const currentTab =
+    history.location.pathname ===
+    `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity/remove`
+      ? 'remove'
+      : 'add'
+  const [value, setValue] = React.useState(currentTab)
 
   const theme = useTheme()
 
-  const handleChange = (event: any, newValue: any) => {
+  const handleChange = (event: any, newValue: string) => {
+    history.push(
+      `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity/` +
+        TabPath[newValue]
+    )
     setValue(newValue)
   }
   return (
@@ -32,20 +52,23 @@ export const Liquidity = ({ pool }: Props) => {
         }}
       >
         <Container sx={{ borderRadius: '16px' }}>
-          <Tabs value={value} onChange={handleChange} variant="fullWidth">
-            <Tab label="Add" />
-            <Tab label="Remove" />
-          </Tabs>
-          {value ? (
-            <RemoveLiquidity pool={pool!} />
-          ) : (
-            <AddLiquidity pool={pool!} />
-          )}
+          <TabContext value={value}>
+            <TabList onChange={handleChange} variant="fullWidth">
+              <Tab value="add" label="Add" />
+              <Tab value="remove" label="Remove" />
+            </TabList>
+            <TabPanel value="add">
+              <AddLiquidity pool={pool!} />
+            </TabPanel>
+            <TabPanel value="remove">
+              <RemoveLiquidity pool={pool!} />
+            </TabPanel>
+          </TabContext>
         </Container>
-        {!value && pool && (
+        {currentTab == 'add' && pool && (
           <Container sx={{ mt: theme.spacing(4), mb: theme.spacing(4) }}>
             {pool &&
-            formatUnits(pool.capacity, pool.collateralToken.decimals) !==
+            formatUnits(pool.capacity, pool.collateralToken.decimals) ==
               '0.0' &&
             pool.capacity.toString() !==
               '115792089237316195423570985008687907853269984665640564039457584007913129639935' ? (
@@ -127,7 +150,7 @@ export const Liquidity = ({ pool }: Props) => {
             )}
           </Container>
         )}
-        {value ? (
+        {currentTab == 'remove' ? (
           <Box
             display="flex"
             alignItems="center"
