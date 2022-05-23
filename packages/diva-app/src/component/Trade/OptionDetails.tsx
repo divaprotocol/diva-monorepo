@@ -76,7 +76,7 @@ const FlexBoxSecondLine = styled.div`
 
 const FlexBoxTime = styled.div`
   padding-top: 5.6px;
-  font-size: 0.5rem;
+  font-size: 0.687rem;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
@@ -107,7 +107,6 @@ export default function OptionDetails({
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
-  console.log('pool.expiryTime', getDateTime(pool.expiryTime))
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
       (dataName: { id: string }) => dataName?.id == pool?.dataProvider
