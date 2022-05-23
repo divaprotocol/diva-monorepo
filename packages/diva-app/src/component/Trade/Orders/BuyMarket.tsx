@@ -216,7 +216,9 @@ export default function BuyMarket(props: {
                       //alert('Order successfully filled')
                       orderFilled = true
                       setOrderBtnDisabled(false)
-                      return
+                      getTakerOrdersTotalAmount(userAddress).then((data) => {
+                        return
+                      })
                     } else {
                       alert('Order could not be filled.')
                       setOrderBtnDisabled(false)

@@ -216,7 +216,9 @@ export default function SellMarket(props: {
                       setYouReceive(0.0)
                       orderFilled = true
                       setOrderBtnDisabled(false)
-                      return
+                      getMakerOrdersTotalAmount(makerAccount).then(() => {
+                        return
+                      })
                     } else {
                       alert('Order could not be filled.')
                       setOrderBtnDisabled(false)
