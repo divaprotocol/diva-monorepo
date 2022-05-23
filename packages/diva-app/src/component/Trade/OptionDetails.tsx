@@ -58,7 +58,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 40%;
+  width: 50%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
@@ -193,37 +193,38 @@ export default function OptionDetails({
       </FlexDiv>
       <FlexSecondLineDiv>
         <FlexBoxSecondLine>
-          <Tooltip title={pool.dataProvider} arrow>
-            <FlexBoxHeader>Data Provider</FlexBoxHeader>
-          </Tooltip>
-          <FlexBoxSecondLineData>
-            <FlexCheckIcon>
-              {dataSourceName}
+          <FlexBoxHeader>Data Provider</FlexBoxHeader>
 
-              {checkIcon ? (
-                <Tooltip title="Trusted data provider from the DIVA whitelist">
-                  <CheckCircleSharpIcon
-                    sx={{
-                      mt: 0.3,
-                      paddingLeft: 1,
-                    }}
-                    color="success"
-                    fontSize="inherit"
-                  />
-                </Tooltip>
-              ) : (
-                <Tooltip title="Untrusted data provider">
-                  <WarningAmberSharpIcon
-                    sx={{
-                      mt: 0.3,
-                      paddingLeft: 1,
-                    }}
-                    color="warning"
-                    fontSize="inherit"
-                  />
-                </Tooltip>
-              )}
-            </FlexCheckIcon>
+          <FlexBoxSecondLineData>
+            <Tooltip title={pool.dataProvider} arrow>
+              <FlexCheckIcon>
+                {dataSourceName}
+
+                {checkIcon ? (
+                  <Tooltip title="Trusted data provider from the DIVA whitelist">
+                    <CheckCircleSharpIcon
+                      sx={{
+                        mt: 0.3,
+                        paddingLeft: 1,
+                      }}
+                      color="success"
+                      fontSize="inherit"
+                    />
+                  </Tooltip>
+                ) : (
+                  <Tooltip title="Untrusted data provider">
+                    <WarningAmberSharpIcon
+                      sx={{
+                        mt: 0.3,
+                        paddingLeft: 1,
+                      }}
+                      color="warning"
+                      fontSize="inherit"
+                    />
+                  </Tooltip>
+                )}
+              </FlexCheckIcon>
+            </Tooltip>
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
