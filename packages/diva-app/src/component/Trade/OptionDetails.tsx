@@ -126,16 +126,15 @@ export default function OptionDetails({
         <HeaderLabel>Details</HeaderLabel>
       </HeaderDiv>
       <FlexDiv>
-        <FlexBox>
-          <FlexBoxHeader>Expires at</FlexBoxHeader>
-          <FlexBoxData>
-            {getDateTime(pool.expiryTime).slice(0, 10)}
-            {'  '}
-            <FlexBoxTime>
-              {getDateTime(pool.expiryTime).slice(12, 19)}
-            </FlexBoxTime>
-          </FlexBoxData>
-        </FlexBox>
+        <Tooltip title={getDateTime(pool.expiryTime).slice(12)} arrow>
+          <FlexBox>
+            <FlexBoxHeader>Expires at</FlexBoxHeader>
+            <FlexBoxData>
+              {getDateTime(pool.expiryTime).slice(0, 10)}
+              {'  '}
+            </FlexBoxData>
+          </FlexBox>
+        </Tooltip>
         <FlexBox>
           <FlexBoxHeader>Direction</FlexBoxHeader>
           <FlexBoxData>{isLong ? 'Up' : 'Down'}</FlexBoxData>
@@ -229,18 +228,20 @@ export default function OptionDetails({
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Collateral</FlexBoxHeader>
-          <Tooltip title={pool.collateralToken.id} arrow>
-            <FlexBoxSecondLineData>
-              {Number(
-                formatUnits(
-                  pool.collateralBalance,
-                  pool.collateralToken.decimals
-                )
-              ).toFixed(2) +
-                ' ' +
-                pool.collateralToken.symbol}
-            </FlexBoxSecondLineData>
-          </Tooltip>
+          <FlexBoxSecondLineData>
+            <Tooltip title={pool.collateralToken.id} arrow placement="bottom">
+              <FlexCheckIcon>
+                {Number(
+                  formatUnits(
+                    pool.collateralBalance,
+                    pool.collateralToken.decimals
+                  )
+                ).toFixed(2) +
+                  ' ' +
+                  pool.collateralToken.symbol}
+              </FlexCheckIcon>
+            </Tooltip>
+          </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
       </FlexSecondLineDiv>
     </PageDiv>
