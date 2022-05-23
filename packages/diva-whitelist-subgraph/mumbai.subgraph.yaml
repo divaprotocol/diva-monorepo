@@ -6,9 +6,9 @@ dataSources:
     name: DIVAWhitelist
     network: mumbai
     source:
-      address: "0x2A5c18f001719f4663ab8d3E65E3E54182376B20"
+      address: "0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e"
       abi: DIVAWhitelist
-      startBlock: 25521196
+      startBlock: 26436789
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -34,6 +34,8 @@ dataSources:
           handler: handleDataProviderDeleted
         - event: DataProviderNameUpdated(indexed address)
           handler: handleDataProviderNameUpdated
+        - event: MaxDurationUpdated(indexed address,indexed uint32,indexed uint32)
+          handler: handleMaxDurationUpdated
         - event: DataFeedAdded(indexed address,indexed uint256)
           handler: handleDataFeedAdded
         - event: DataFeedDeactivated(indexed address,indexed uint256)
