@@ -58,7 +58,7 @@ export default function BuyMarket(props: {
     []
   )
   const [isApproved, setIsApproved] = React.useState(false)
-  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(false)
+  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
@@ -82,6 +82,7 @@ export default function BuyMarket(props: {
       setNumberOfOptions(nbrOptions)
     } else {
       setYouPay(0.0)
+      setNumberOfOptions(0.0)
     }
   }
 
@@ -99,8 +100,8 @@ export default function BuyMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
+      setOrderBtnDisabled(true)
       if (numberOfOptions > 0) {
-        setOrderBtnDisabled(true)
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
@@ -367,6 +368,7 @@ export default function BuyMarket(props: {
 
   useEffect(() => {
     if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {
+      setOrderBtnDisabled(false)
       let count = numberOfOptions
       let cumulativeAvg = 0
       let cumulativeTaker = 0
@@ -422,6 +424,8 @@ export default function BuyMarket(props: {
         const youPayAmount = cumulativeAvg * numberOfOptions
         setYouPay(youPayAmount)
       }
+    } else if (numberOfOptions === 0 || existingSellLimitOrders.length === 0) {
+      setOrderBtnDisabled(true)
     }
   }, [numberOfOptions])
 
@@ -688,9 +692,7 @@ export default function BuyMarket(props: {
             startIcon={<AddIcon />}
             type="submit"
             value="Submit"
-            disabled={
-              existingSellLimitOrders.length === 0 ? true : orderBtnDisabled
-            }
+            disabled={orderBtnDisabled}
           >
             {isApproved ? 'Fill Order' : 'Approve'}
           </Button>

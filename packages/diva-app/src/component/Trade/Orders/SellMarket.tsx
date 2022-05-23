@@ -60,7 +60,7 @@ export default function SellMarket(props: {
   const [youReceive, setYouReceive] = React.useState(0.0)
   const [existingBuyLimitOrders, setExistingBuyLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
-  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(false)
+  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
@@ -83,6 +83,7 @@ export default function SellMarket(props: {
       setNumberOfOptions(nbrOptions)
     } else {
       setYouReceive(0.0)
+      setNumberOfOptions(0.0)
     }
   }
 
@@ -352,6 +353,7 @@ export default function SellMarket(props: {
 
   useEffect(() => {
     if (numberOfOptions > 0 && existingBuyLimitOrders.length > 0) {
+      setOrderBtnDisabled(false)
       let count = numberOfOptions
       let cumulativeAvg = 0
       let cumulativeTaker = 0
@@ -396,6 +398,8 @@ export default function SellMarket(props: {
         const youReceive = avg * numberOfOptions
         setYouReceive(youReceive)
       }
+    } else if (numberOfOptions === 0 || existingBuyLimitOrders.length === 0) {
+      setOrderBtnDisabled(true)
     }
   }, [numberOfOptions])
 
@@ -660,9 +664,7 @@ export default function SellMarket(props: {
             startIcon={<AddIcon />}
             type="submit"
             value="Submit"
-            disabled={
-              existingBuyLimitOrders.length === 0 ? true : orderBtnDisabled
-            }
+            disabled={orderBtnDisabled}
           >
             {isApproved ? 'Fill Order' : 'Approve'}
           </Button>
