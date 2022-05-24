@@ -94,6 +94,7 @@ export default function SellLimit(props: {
         }
       }
     } else {
+      setNumberOfOptions(0.0)
       setOrderBtnDisabled(true)
     }
   }
