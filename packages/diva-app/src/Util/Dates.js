@@ -17,3 +17,8 @@ export function getExpiryMinutesFromNow(Timestamp) {
 export const isExpired = (Timestamp) => {
   return getExpiryMinutesFromNow(Timestamp) < 0 ? true : false
 }
+
+export const userTimeZone = () => {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  return timeZone
+}

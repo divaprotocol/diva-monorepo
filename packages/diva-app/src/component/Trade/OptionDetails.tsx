@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { getDateTime } from '../../Util/Dates'
+import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
 import { Pool } from '../../lib/queries'
 import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
@@ -123,7 +123,14 @@ export default function OptionDetails({
         <FlexBox>
           <FlexBoxHeader>Expires at</FlexBoxHeader>
           <FlexBoxData>
-            <Tooltip title={getDateTime(pool.expiryTime).slice(11, 19)} arrow>
+            <Tooltip
+              title={
+                getDateTime(pool.expiryTime).slice(11, 19) +
+                ' ' +
+                userTimeZone()
+              }
+              arrow
+            >
               <FlexDataDiv>
                 {getDateTime(pool.expiryTime).slice(0, 10)}
                 {'  '}
