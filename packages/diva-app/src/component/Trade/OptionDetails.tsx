@@ -37,7 +37,6 @@ const FlexBoxData = styled.div`
   padding: 15px;
   width: 100%;
   font-size: 1rem;
-  font-weight: bold;
   text-align: left;
 `
 
@@ -85,6 +84,10 @@ const FlexCheckIcon = styled.div`
   display: flex;
   flex-direction: row;
 `
+const FlexDataDiv = styled.div`
+  display: flex;
+  flex-direction: row;
+`
 export default function OptionDetails({
   pool,
   isLong,
@@ -121,10 +124,10 @@ export default function OptionDetails({
           <FlexBoxHeader>Expires at</FlexBoxHeader>
           <FlexBoxData>
             <Tooltip title={getDateTime(pool.expiryTime).slice(11, 19)} arrow>
-              <FlexCheckIcon>
+              <FlexDataDiv>
                 {getDateTime(pool.expiryTime).slice(0, 10)}
                 {'  '}
-              </FlexCheckIcon>
+              </FlexDataDiv>
             </Tooltip>
           </FlexBoxData>
         </FlexBox>
@@ -189,42 +192,44 @@ export default function OptionDetails({
           <FlexBoxHeader>Data Provider</FlexBoxHeader>
 
           <FlexBoxSecondLineData>
-            <Tooltip title={pool.dataProvider} arrow>
-              <FlexCheckIcon>
-                {dataSourceName}
-
-                {checkIcon ? (
-                  <Tooltip title="Trusted data provider from the DIVA whitelist">
-                    <CheckCircleSharpIcon
-                      sx={{
-                        mt: 0.3,
-                        paddingLeft: 1,
-                      }}
-                      color="success"
-                      fontSize="inherit"
-                    />
-                  </Tooltip>
-                ) : (
-                  <Tooltip title="Untrusted data provider">
-                    <WarningAmberSharpIcon
-                      sx={{
-                        mt: 0.3,
-                        paddingLeft: 1,
-                      }}
-                      color="warning"
-                      fontSize="inherit"
-                    />
-                  </Tooltip>
-                )}
-              </FlexCheckIcon>
-            </Tooltip>
+            <FlexDataDiv>
+              <Tooltip title={pool.dataProvider} arrow>
+                <FlexCheckIcon>{dataSourceName}</FlexCheckIcon>
+              </Tooltip>
+              {checkIcon ? (
+                <Tooltip
+                  title="Trusted data provider from the DIVA whitelist"
+                  arrow
+                >
+                  <CheckCircleSharpIcon
+                    sx={{
+                      mt: 0.3,
+                      paddingLeft: 1,
+                    }}
+                    color="success"
+                    fontSize="inherit"
+                  />
+                </Tooltip>
+              ) : (
+                <Tooltip title="Untrusted data provider" arrow>
+                  <WarningAmberSharpIcon
+                    sx={{
+                      mt: 0.3,
+                      paddingLeft: 1,
+                    }}
+                    color="warning"
+                    fontSize="inherit"
+                  />
+                </Tooltip>
+              )}
+            </FlexDataDiv>
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
         <FlexBoxSecondLine>
           <FlexBoxHeader>Collateral</FlexBoxHeader>
           <FlexBoxSecondLineData>
             <Tooltip title={pool.collateralToken.id} arrow placement="bottom">
-              <FlexCheckIcon>
+              <FlexDataDiv>
                 {Number(
                   formatUnits(
                     pool.collateralBalance,
@@ -233,7 +238,7 @@ export default function OptionDetails({
                 ).toFixed(2) +
                   ' ' +
                   pool.collateralToken.symbol}
-              </FlexCheckIcon>
+              </FlexDataDiv>
             </Tooltip>
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
