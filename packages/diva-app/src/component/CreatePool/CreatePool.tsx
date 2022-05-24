@@ -2,6 +2,7 @@ import {
   Alert,
   Box,
   Button,
+  Snackbar,
   Stack,
   Step,
   StepLabel,
@@ -19,12 +20,17 @@ import ERC20 from '@diva/contracts/abis/erc20.json'
 import { useEffect, useState } from 'react'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ApproveActionButtons } from '../ApproveActionButtons'
+import { useHistory } from 'react-router-dom'
 
 export function CreatePool() {
   const [decimal, setDecimal] = useState(18)
   const formik = useCreatePoolFormik()
   const theme = useTheme()
   const { provider } = useConnectionContext()
+  const history = useHistory()
+
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState<boolean>(false)
+
   let step = null
   switch (formik.values.step) {
     case 1:
@@ -49,6 +55,15 @@ export function CreatePool() {
       })
     }
   }, [formik.values.collateralToken])
+
+  // actions after pool is successfully created
+  const handlePoolSuccess = () => {
+    setIsSnackbarOpen(true)
+
+    setTimeout(() => {
+      history.push('/dashboard/mypositions')
+    }, 2000)
+  }
 
   return (
     <Container maxWidth="md">
@@ -99,9 +114,7 @@ export function CreatePool() {
           {formik.values.step === 3 ? (
             <ApproveActionButtons
               collateralTokenAddress={formik.values.collateralToken.id}
-              onTransactionSuccess={() => {
-                formik.setFieldValue('step', 1, true)
-              }}
+              onTransactionSuccess={handlePoolSuccess}
               pool={formik.values}
               decimal={decimal}
               textFieldValue={formik.values.collateralBalance}
@@ -128,6 +141,15 @@ export function CreatePool() {
             </LoadingButton>
           )}
         </Stack>
+        <Snackbar
+          open={isSnackbarOpen}
+          autoHideDuration={6000}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert severity="success" sx={{ width: '100%' }}>
+            Pool was successfully created
+          </Alert>
+        </Snackbar>
       </Box>
     </Container>
   )
