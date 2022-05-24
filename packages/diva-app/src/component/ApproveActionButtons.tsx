@@ -77,7 +77,7 @@ export const ApproveActionButtons = ({
         height: '100px',
         width: '100%',
         display: 'flex',
-        justifyContent: 'space-evenly',
+        justifyContent: 'flex-end',
       }}
     >
       <Stack direction="row" spacing={theme.spacing(2)}>

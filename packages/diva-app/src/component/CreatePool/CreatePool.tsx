@@ -100,6 +100,7 @@ export function CreatePool() {
           direction="row"
           spacing={3}
           justifyContent="space-between"
+          alignItems="center"
         >
           {formik.values.step > 1 && (
             <Button
