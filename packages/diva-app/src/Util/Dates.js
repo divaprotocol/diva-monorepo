@@ -1,9 +1,17 @@
+function formatAMPM(date) {
+  var hours = date.getHours()
+  var minutes = date.getMinutes()
+  var ampm = hours >= 12 ? 'pm' : 'am'
+  hours = hours % 12
+  hours = hours ? hours : 12 // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0' + minutes : minutes // converts "4:4 PM" into "4:04 PM"
+  var strTime = hours + ':' + minutes + ' ' + ampm
+  return strTime
+}
+
 export function getDateTime(dateData) {
   var date = new Date(dateData * 1e3).toISOString().slice(0, 10)
-  var time = new Date(dateData * 1e3).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  var time = formatAMPM(new Date(dateData * 1e3))
   return date + ' ' + time
 }
 
@@ -20,5 +28,6 @@ export const isExpired = (Timestamp) => {
 
 export const userTimeZone = () => {
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  console.log('timeZone: ' + timeZone)
   return timeZone
 }
