@@ -74,15 +74,6 @@ const FlexBoxSecondLine = styled.div`
   flex: 1;
 `
 
-const FlexBoxTime = styled.div`
-  padding-top: 5.6px;
-  font-size: 0.687rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: left;
-  color: Gray;
-`
-
 const FlexBoxSecondLineData = styled.div`
   padding: 15px;
   font-size: 1rem;
@@ -119,6 +110,7 @@ export default function OptionDetails({
       setCheckIcon(false)
     }
   }, [dataSource.dataProviders, pool.dataProvider])
+  console.log('pool====', getDateTime(pool.expiryTime).slice(11, 19))
 
   return (
     <PageDiv>
@@ -126,15 +118,18 @@ export default function OptionDetails({
         <HeaderLabel>Details</HeaderLabel>
       </HeaderDiv>
       <FlexDiv>
-        <Tooltip title={getDateTime(pool.expiryTime).slice(12)} arrow>
-          <FlexBox>
-            <FlexBoxHeader>Expires at</FlexBoxHeader>
-            <FlexBoxData>
-              {getDateTime(pool.expiryTime).slice(0, 10)}
-              {'  '}
-            </FlexBoxData>
-          </FlexBox>
-        </Tooltip>
+        <FlexBox>
+          <FlexBoxHeader>Expires at</FlexBoxHeader>
+          <FlexBoxData>
+            <Tooltip title={getDateTime(pool.expiryTime).slice(11, 19)} arrow>
+              <FlexCheckIcon>
+                {getDateTime(pool.expiryTime).slice(0, 10)}
+                {'  '}
+              </FlexCheckIcon>
+            </Tooltip>
+          </FlexBoxData>
+        </FlexBox>
+
         <FlexBox>
           <FlexBoxHeader>Direction</FlexBoxHeader>
           <FlexBoxData>{isLong ? 'Up' : 'Down'}</FlexBoxData>
