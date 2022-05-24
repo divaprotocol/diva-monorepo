@@ -62,7 +62,7 @@ export default function SellLimit(props: {
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
   const [isApproved, setIsApproved] = React.useState(false)
-  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(false)
+  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
@@ -77,11 +77,47 @@ export default function SellLimit(props: {
   const isLong = window.location.pathname.split('/')[2] === 'long'
   const dispatch = useAppDispatch()
   const handleNumberOfOptions = (value: string) => {
-    setNumberOfOptions(parseFloat(value))
+    if (value !== '') {
+      const nbrOptions = parseFloat(value)
+      if (!isNaN(nbrOptions) && nbrOptions > 0) {
+        setNumberOfOptions(nbrOptions)
+        if (isApproved === false) {
+          setOrderBtnDisabled(false)
+        } else {
+          if (pricePerOption > 0) {
+            setOrderBtnDisabled(false)
+          }
+        }
+      }
+    } else {
+      setOrderBtnDisabled(true)
+    }
   }
 
   const handlePricePerOptions = (value: string) => {
-    setPricePerOption(parseFloat(value))
+    if (value !== '') {
+      const pricePerOption = parseFloat(value)
+      if (!isNaN(pricePerOption) && pricePerOption > 0) {
+        setPricePerOption(pricePerOption)
+        if (numberOfOptions > 0) setOrderBtnDisabled(false)
+      } else {
+        //in case invalid/empty value pricePer option
+        setPricePerOption(0.0)
+        //disable btn if approval is positive & number of options entered
+        if (isApproved == true) {
+          if (numberOfOptions > 0) {
+            setOrderBtnDisabled(true)
+          }
+        }
+      }
+    } else {
+      setPricePerOption(0.0)
+      if (isApproved == true) {
+        if (numberOfOptions > 0) {
+          setOrderBtnDisabled(true)
+        }
+      }
+    }
   }
 
   const handleFormReset = async () => {
@@ -90,6 +126,7 @@ export default function SellLimit(props: {
     )
     setNumberOfOptions(parseFloat('0.0'))
     setPricePerOption(parseFloat('0.0'))
+    setOrderBtnDisabled(true)
     let approvedAllowance = await makerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()
@@ -127,7 +164,6 @@ export default function SellLimit(props: {
     event.preventDefault()
     if (!isApproved) {
       if (numberOfOptions > 0) {
-        setOrderBtnDisabled(true)
         const amount = Number(
           (allowance + numberOfOptions).toFixed(
             totalDecimals(allowance, numberOfOptions)
@@ -151,6 +187,9 @@ export default function SellLimit(props: {
           setRemainingApprovalAmount(remainingApproval)
           setAllowance(approvedAllowance)
           setIsApproved(true)
+          if (pricePerOption <= 0) {
+            setOrderBtnDisabled(true)
+          }
           alert(
             `Allowance for ` +
               approvedAllowance +
@@ -158,7 +197,6 @@ export default function SellLimit(props: {
               params.tokenType.toUpperCase() +
               ` successfully set.`
           )
-          setOrderBtnDisabled(false)
         }
       } else {
         alert('Please enter a positive amount for approval.')
@@ -184,7 +222,6 @@ export default function SellLimit(props: {
                   ' to complete this order?'
               )
             ) {
-              setOrderBtnDisabled(true)
               let newAllowance = Number(
                 (additionalApproval + allowance).toFixed(
                   totalDecimals(additionalApproval, allowance)
@@ -196,7 +233,6 @@ export default function SellLimit(props: {
 
               if (approvedAllowance == 'undefined') {
                 alert('Metamask could not finish approval.')
-                setOrderBtnDisabled(false)
               } else {
                 newAllowance = approvedAllowance
                 newAllowance = Number(formatUnits(newAllowance.toString(), 18))
@@ -207,7 +243,6 @@ export default function SellLimit(props: {
                 )
                 setRemainingApprovalAmount(remainingApproval)
                 setAllowance(newAllowance)
-                setOrderBtnDisabled(false)
                 alert(
                   'Additional ' +
                     additionalApproval +
