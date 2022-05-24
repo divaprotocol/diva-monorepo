@@ -129,7 +129,7 @@ export default function BuyMarket(props: {
       if (collateralBalance > 0) {
         if (youPay > remainingApprovalAmount) {
           if (youPay > collateralBalance) {
-            alert('Inufficient balance')
+            alert('Insufficient balance')
           } else {
             const additionalApproval = Number(
               (youPay - remainingApprovalAmount).toFixed(
@@ -215,7 +215,7 @@ export default function BuyMarket(props: {
                 })
               }
             } else {
-              alert('Order could not be filled. Response is not defined')
+              alert('Order could not be filled.')
             }
             if (orderFilled) {
               alert('Order successfully filled.')

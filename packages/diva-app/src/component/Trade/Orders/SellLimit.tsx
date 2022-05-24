@@ -220,7 +220,7 @@ export default function SellLimit(props: {
             )
             if (
               confirm(
-                'Required collateral balance exceeds approved limit. Do you want to approve additional ' +
+                'Required collateral balance exceeds approved limit. Do you want to approve an additional ' +
                   +additionalApproval +
                   ' ' +
                   params.tokenType.toUpperCase() +
@@ -253,7 +253,7 @@ export default function SellLimit(props: {
                     additionalApproval +
                     ' ' +
                     params.tokenType.toUpperCase() +
-                    ' approved. Please proceed with order.'
+                    ' approved. Please proceed with the order.'
                 )
               }
             } else {

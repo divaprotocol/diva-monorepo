@@ -136,7 +136,7 @@ export default function SellMarket(props: {
         const totalAmount = numberOfOptions + existingOrdersAmount
         if (numberOfOptions > remainingApprovalAmount) {
           if (totalAmount > walletBalance) {
-            alert('Inufficient balance')
+            alert('Insufficient balance')
           } else {
             const additionalApproval = Number(
               (numberOfOptions - remainingApprovalAmount).toFixed(
@@ -216,7 +216,7 @@ export default function SellMarket(props: {
                 })
               }
             } else {
-              alert('Order could not be filled. Response is not defined.')
+              alert('Order could not be filled.')
             }
             if (orderFilled) {
               alert('Order successfully filled.')

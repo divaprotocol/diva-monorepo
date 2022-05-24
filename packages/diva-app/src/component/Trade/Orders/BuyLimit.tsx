@@ -218,7 +218,7 @@ export default function BuyLimit(props: {
             )
             if (
               confirm(
-                'Required collateral balance exceeds approved limit. Do you want to approve additional ' +
+                'Required collateral balance exceeds approved limit. Do you want to approve an additional ' +
                   additionalApproval +
                   ' ' +
                   option.collateralToken.name +
@@ -253,7 +253,7 @@ export default function BuyLimit(props: {
                     additionalApproval +
                     ' ' +
                     option.collateralToken.symbol +
-                    ' approved. Please proceed with order.'
+                    ' approved. Please proceed with the order.'
                 )
               }
             } else {
