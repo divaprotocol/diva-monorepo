@@ -34,8 +34,6 @@ dataSources:
           handler: handleDataProviderDeleted
         - event: DataProviderNameUpdated(indexed address)
           handler: handleDataProviderNameUpdated
-        - event: MaxDurationUpdated(indexed address,indexed uint32,indexed uint32)
-          handler: handleMaxDurationUpdated
         - event: DataFeedAdded(indexed address,indexed uint256)
           handler: handleDataFeedAdded
         - event: DataFeedDeactivated(indexed address,indexed uint256)
