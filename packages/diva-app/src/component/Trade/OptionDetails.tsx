@@ -110,7 +110,6 @@ export default function OptionDetails({
       setCheckIcon(false)
     }
   }, [dataSource.dataProviders, pool.dataProvider])
-  console.log('pool====', getDateTime(pool.expiryTime).slice(11, 19))
 
   return (
     <PageDiv>
