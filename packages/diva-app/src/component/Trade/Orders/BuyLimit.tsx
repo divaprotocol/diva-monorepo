@@ -65,7 +65,7 @@ export default function BuyLimit(props: {
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
   const [youPay, setYouPay] = React.useState(0.0)
   const [isApproved, setIsApproved] = React.useState(false)
-  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(false)
+  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(0.0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
@@ -84,15 +84,39 @@ export default function BuyLimit(props: {
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
   const handleNumberOfOptions = (value: string) => {
-    setNumberOfOptions(parseFloat(value))
-    const youPay = pricePerOption > 0 ? pricePerOption * parseFloat(value) : 0
-    setYouPay(youPay)
+    const nbrOptions = parseFloat(value)
+    if (!isNaN(nbrOptions)) {
+      setNumberOfOptions(nbrOptions)
+      if (pricePerOption > 0 && nbrOptions > 0) {
+        const youPay = pricePerOption * nbrOptions
+        setYouPay(youPay)
+        setOrderBtnDisabled(false)
+      } else {
+        setOrderBtnDisabled(true)
+      }
+    } else {
+      setYouPay(0.0)
+      setNumberOfOptions(0.0)
+      setOrderBtnDisabled(true)
+    }
   }
 
   const handlePricePerOptions = (value: string) => {
-    setPricePerOption(parseFloat(value))
-    const youPay = numberOfOptions > 0 ? numberOfOptions * parseFloat(value) : 0
-    setYouPay(youPay)
+    const pricePerOption = parseFloat(value)
+    if (!isNaN(pricePerOption)) {
+      setPricePerOption(pricePerOption)
+      if (numberOfOptions > 0 && pricePerOption > 0) {
+        const youPay = numberOfOptions * pricePerOption
+        setYouPay(youPay)
+        setOrderBtnDisabled(false)
+      } else {
+        setOrderBtnDisabled(true)
+      }
+    } else {
+      setYouPay(0.0)
+      setPricePerOption(0.0)
+      setOrderBtnDisabled(true)
+    }
   }
 
   const handleFormReset = async () => {
@@ -102,6 +126,7 @@ export default function BuyLimit(props: {
     setNumberOfOptions(parseFloat('0.0'))
     setPricePerOption(parseFloat('0.0'))
     setYouPay(parseFloat('0.0'))
+    setOrderBtnDisabled(true)
     let allowance = await takerTokenContract.methods
       .allowance(userAdress, exchangeProxyAddress)
       .call()
@@ -193,23 +218,26 @@ export default function BuyLimit(props: {
             )
             if (
               confirm(
-                'Required collateral balance exceeds approved limit. Do you want to approve additional ' +
+                'Required collateral balance exceeds approved limit. Do you want to approve an additional ' +
                   additionalApproval +
                   ' ' +
                   option.collateralToken.name +
                   ' to complete this order?'
               )
             ) {
-              setOrderBtnDisabled(true)
               let newAllowance = Number(
                 (additionalApproval + allowance).toFixed(
                   totalDecimals(additionalApproval, allowance)
                 )
               )
-              const approvedAllowance = await approveBuyAmount(newAllowance)
+              const approvedAllowance = await approveBuyAmount(
+                parseUnits(
+                  newAllowance.toString(),
+                  option.collateralToken.decimals
+                )
+              )
               if (approvedAllowance == 'undefined') {
                 alert('Metamask could not finish approval.')
-                setOrderBtnDisabled(false)
               } else {
                 newAllowance = approvedAllowance
                 newAllowance = Number(formatUnits(newAllowance.toString()))
@@ -220,13 +248,12 @@ export default function BuyLimit(props: {
                 )
                 setRemainingApprovalAmount(remainingApproval)
                 setAllowance(newAllowance)
-                setOrderBtnDisabled(false)
                 alert(
                   'Additional ' +
                     additionalApproval +
                     ' ' +
                     option.collateralToken.symbol +
-                    ' approved please proceed with order'
+                    ' approved. Please proceed with the order.'
                 )
               }
             } else {
@@ -262,7 +289,9 @@ export default function BuyLimit(props: {
             })
         }
       } else {
-        alert('No collateral avaible to Buy ' + params.tokenType.toUpperCase())
+        alert(
+          'No collateral available to Buy ' + params.tokenType.toUpperCase()
+        )
       }
     }
   }

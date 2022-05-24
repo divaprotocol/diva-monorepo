@@ -58,6 +58,7 @@ export default function BuyMarket(props: {
     []
   )
   const [isApproved, setIsApproved] = React.useState(false)
+  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
@@ -81,6 +82,8 @@ export default function BuyMarket(props: {
       setNumberOfOptions(nbrOptions)
     } else {
       setYouPay(0.0)
+      setNumberOfOptions(0.0)
+      setOrderBtnDisabled(true)
     }
   }
 
@@ -111,7 +114,6 @@ export default function BuyMarket(props: {
             option.collateralToken.decimals
           )
         )
-
         setRemainingApprovalAmount(collateralAllowance)
         setAllowance(collateralAllowance)
         setIsApproved(true)
@@ -127,7 +129,7 @@ export default function BuyMarket(props: {
       if (collateralBalance > 0) {
         if (youPay > remainingApprovalAmount) {
           if (youPay > collateralBalance) {
-            alert('Not sufficient balance')
+            alert('Insufficient balance')
           } else {
             const additionalApproval = Number(
               (youPay - remainingApprovalAmount).toFixed(
@@ -184,7 +186,6 @@ export default function BuyMarket(props: {
             existingLimitOrders: existingSellLimitOrders,
             chainId: props.chainId,
           }
-
           buyMarketOrder(orderData).then((orderFillStatus: any) => {
             let orderFilled = false
             if (!(orderFillStatus === undefined)) {
@@ -206,20 +207,18 @@ export default function BuyMarket(props: {
                       )
                       setNumberOfOptions(0.0)
                       setYouPay(0.0)
-                      //alert('Order successfully filled')
                       orderFilled = true
-                      return
                     } else {
-                      alert('Order could not be filled')
+                      alert('Order could not be filled.')
                     }
                   }
                 })
               }
             } else {
-              alert('order could not be filled response is not defined')
+              alert('Order could not be filled.')
             }
             if (orderFilled) {
-              alert('Order successfully filled')
+              alert('Order successfully filled.')
             }
           })
         }
@@ -356,6 +355,7 @@ export default function BuyMarket(props: {
 
   useEffect(() => {
     if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {
+      setOrderBtnDisabled(false)
       let count = numberOfOptions
       let cumulativeAvg = 0
       let cumulativeTaker = 0
@@ -411,6 +411,8 @@ export default function BuyMarket(props: {
         const youPayAmount = cumulativeAvg * numberOfOptions
         setYouPay(youPayAmount)
       }
+    } else {
+      setOrderBtnDisabled(true)
     }
   }, [numberOfOptions])
 
@@ -642,7 +644,7 @@ export default function BuyMarket(props: {
                 Remaining allowance:{' '}
                 {remainingApprovalAmount.toString().includes('e')
                   ? remainingApprovalAmount.toExponential(2)
-                  : remainingApprovalAmount}
+                  : remainingApprovalAmount.toFixed(2)}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>
@@ -677,7 +679,7 @@ export default function BuyMarket(props: {
             startIcon={<AddIcon />}
             type="submit"
             value="Submit"
-            disabled={existingSellLimitOrders.length > 0 ? false : true}
+            disabled={orderBtnDisabled}
           >
             {isApproved ? 'Fill Order' : 'Approve'}
           </Button>

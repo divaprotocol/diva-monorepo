@@ -13,7 +13,7 @@
  
     // INPUT: 0x exchange proxy address, token to approve, amount to approve
     const exchangeProxyAddress = "0xdef1c0ded9bec7f1a1670819833240f027b25eff" // same for several chains including Mainnet and Ropsten     
-    const tokenToApprove = "0x867e53fede91d27101e062bf7002143ebaea3e30"
+    const tokenToApprove = "0x8ca8de48c4507fa54a83dde7ac68097e87520eec"
     let allowance = 0 // conversion into BigNumber with the respective number of decimals is done below 
 
     // Get signers
@@ -32,8 +32,8 @@
     
     // Allowance before
     const allowanceBefore = await erc20.allowance(user.address, exchangeProxyAddress)
-    console.log("Approved amount before (integer): " + allowanceBefore.toString())
-    console.log("Approved amount before (decimals): " + formatUnits(allowanceBefore, decimals))
+    console.log("Current approved amount (integer): " + allowanceBefore.toString())
+    console.log("Current approved amount (decimals): " + formatUnits(allowanceBefore, decimals))
 
     // Set allowance for exchangeProxyAddress
     const tx = await erc20.connect(user).approve(exchangeProxyAddress, allowance)
@@ -41,7 +41,8 @@
 
     // Print
     const allowanceAfter = await erc20.allowance(user.address, exchangeProxyAddress)
-    console.log("Approved amount after: " + formatUnits(allowanceAfter, decimals))
+    console.log("New approved amount (integer): " + allowanceAfter.toString())
+    console.log("New approved amount (decimals): " + formatUnits(allowanceAfter, decimals))
  
  }
  

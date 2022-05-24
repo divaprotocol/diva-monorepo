@@ -60,6 +60,7 @@ export default function SellMarket(props: {
   const [youReceive, setYouReceive] = React.useState(0.0)
   const [existingBuyLimitOrders, setExistingBuyLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
+  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
@@ -82,6 +83,8 @@ export default function SellMarket(props: {
       setNumberOfOptions(nbrOptions)
     } else {
       setYouReceive(0.0)
+      setNumberOfOptions(0.0)
+      setOrderBtnDisabled(true)
     }
   }
 
@@ -133,7 +136,7 @@ export default function SellMarket(props: {
         const totalAmount = numberOfOptions + existingOrdersAmount
         if (numberOfOptions > remainingApprovalAmount) {
           if (totalAmount > walletBalance) {
-            alert('Not sufficiant balance')
+            alert('Insufficient balance')
           } else {
             const additionalApproval = Number(
               (numberOfOptions - remainingApprovalAmount).toFixed(
@@ -206,23 +209,22 @@ export default function SellMarket(props: {
                       setNumberOfOptions(0.0)
                       setYouReceive(0.0)
                       orderFilled = true
-                      return
                     } else {
-                      alert('Order could not be filled')
+                      alert('Order could not be filled.')
                     }
                   }
                 })
               }
             } else {
-              alert('order could not be filled')
+              alert('Order could not be filled.')
             }
             if (orderFilled) {
-              alert('Order successfully filled')
+              alert('Order successfully filled.')
             }
           })
         }
       } else {
-        alert('No ' + params.tokenType.toUpperCase() + ' avaible to sell')
+        alert('No ' + params.tokenType.toUpperCase() + ' available to sell.')
       }
     }
   }
@@ -339,6 +341,7 @@ export default function SellMarket(props: {
 
   useEffect(() => {
     if (numberOfOptions > 0 && existingBuyLimitOrders.length > 0) {
+      setOrderBtnDisabled(false)
       let count = numberOfOptions
       let cumulativeAvg = 0
       let cumulativeTaker = 0
@@ -383,6 +386,8 @@ export default function SellMarket(props: {
         const youReceive = avg * numberOfOptions
         setYouReceive(youReceive)
       }
+    } else {
+      setOrderBtnDisabled(true)
     }
   }, [numberOfOptions])
 
@@ -572,7 +577,7 @@ export default function SellMarket(props: {
                 Remaining allowance:{' '}
                 {remainingApprovalAmount.toString().includes('e')
                   ? remainingApprovalAmount.toExponential(2)
-                  : remainingApprovalAmount}
+                  : remainingApprovalAmount.toFixed(2)}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>
@@ -647,7 +652,7 @@ export default function SellMarket(props: {
             startIcon={<AddIcon />}
             type="submit"
             value="Submit"
-            disabled={existingBuyLimitOrders.length > 0 ? false : true}
+            disabled={orderBtnDisabled}
           >
             {isApproved ? 'Fill Order' : 'Approve'}
           </Button>
