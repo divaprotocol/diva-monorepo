@@ -27,7 +27,7 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { totalDecimals } from './OrderHelper'
+import { totalDecimals, convertExponentialToDecimal } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -176,7 +176,7 @@ export default function SellLimit(props: {
         )
         // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
         let approvedAllowance = await approveSellAmount(
-          parseUnits(amount.toString(), 18)
+          parseUnits(convertExponentialToDecimal(amount).toString(), 18)
         )
         if (approvedAllowance == 'undefined') {
           alert('Metamask could not finish approval.')
@@ -233,7 +233,10 @@ export default function SellLimit(props: {
                 )
               )
               const approvedAllowance = await approveSellAmount(
-                parseUnits(newAllowance.toString(), 18)
+                parseUnits(
+                  convertExponentialToDecimal(newAllowance).toString(),
+                  18
+                )
               )
 
               if (approvedAllowance == 'undefined') {

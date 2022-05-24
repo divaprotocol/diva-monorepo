@@ -25,7 +25,12 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { getComparator, stableSort, totalDecimals } from './OrderHelper'
+import {
+  getComparator,
+  stableSort,
+  totalDecimals,
+  convertExponentialToDecimal,
+} from './OrderHelper'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
@@ -110,7 +115,7 @@ export default function SellMarket(props: {
         )
         // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
         let approvedAllowance = await approveSellAmount(
-          parseUnits(amount.toString(), 18)
+          parseUnits(convertExponentialToDecimal(amount).toString(), 18)
         )
         approvedAllowance = Number(
           formatUnits(approvedAllowance.toString(), 18)
@@ -160,7 +165,7 @@ export default function SellMarket(props: {
 
               newAllowance = await approveSellAmount(
                 parseUnits(
-                  newAllowance.toString(),
+                  convertExponentialToDecimal(newAllowance).toString(),
                   option.collateralToken.decimals
                 )
               )

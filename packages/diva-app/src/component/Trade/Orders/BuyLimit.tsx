@@ -29,7 +29,7 @@ import {
 } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
-import { totalDecimals } from './OrderHelper'
+import { totalDecimals, convertExponentialToDecimal } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
 import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
@@ -179,7 +179,10 @@ export default function BuyLimit(props: {
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
         let collateralAllowance = await approveBuyAmount(
-          parseUnits(amount.toString(), option.collateralToken.decimals)
+          parseUnits(
+            convertExponentialToDecimal(amount).toString(),
+            option.collateralToken.decimals
+          )
         )
         if (collateralAllowance == 'undefined') {
           alert('Metamask could not finish approval please check gas limit')
@@ -232,7 +235,7 @@ export default function BuyLimit(props: {
               )
               const approvedAllowance = await approveBuyAmount(
                 parseUnits(
-                  newAllowance.toString(),
+                  convertExponentialToDecimal(newAllowance).toString(),
                   option.collateralToken.decimals
                 )
               )

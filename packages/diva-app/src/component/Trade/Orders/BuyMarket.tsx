@@ -19,7 +19,12 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { getComparator, stableSort, totalDecimals } from './OrderHelper'
+import {
+  getComparator,
+  stableSort,
+  totalDecimals,
+  convertExponentialToDecimal,
+} from './OrderHelper'
 import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
@@ -106,7 +111,10 @@ export default function BuyMarket(props: {
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
         let collateralAllowance = await approveBuyAmount(
-          parseUnits(amount.toString(), option.collateralToken.decimals)
+          parseUnits(
+            convertExponentialToDecimal(amount).toString(),
+            option.collateralToken.decimals
+          )
         )
         collateralAllowance = Number(
           formatUnits(
@@ -153,7 +161,7 @@ export default function BuyMarket(props: {
 
               newAllowance = await approveBuyAmount(
                 parseUnits(
-                  newAllowance.toString(),
+                  convertExponentialToDecimal(newAllowance).toString(),
                   option.collateralToken.decimals
                 )
               )
