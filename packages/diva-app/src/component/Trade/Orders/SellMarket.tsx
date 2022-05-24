@@ -84,6 +84,7 @@ export default function SellMarket(props: {
     } else {
       setYouReceive(0.0)
       setNumberOfOptions(0.0)
+      setOrderBtnDisabled(true)
     }
   }
 
@@ -102,7 +103,6 @@ export default function SellMarket(props: {
     event.preventDefault()
     if (!isApproved) {
       if (numberOfOptions > 0) {
-        setOrderBtnDisabled(true)
         const amount = Number(
           (allowance + numberOfOptions).toFixed(
             totalDecimals(allowance, numberOfOptions)
@@ -128,7 +128,6 @@ export default function SellMarket(props: {
             approvedAllowance +
             ` ${params.tokenType.toUpperCase()} successfully set.`
         )
-        setOrderBtnDisabled(false)
       } else {
         alert('Please enter a positive amount for approval.')
       }
@@ -153,7 +152,6 @@ export default function SellMarket(props: {
                   '. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              setOrderBtnDisabled(true)
               let newAllowance = Number(
                 (additionalApproval + allowance).toFixed(
                   totalDecimals(additionalApproval, allowance)
@@ -169,7 +167,6 @@ export default function SellMarket(props: {
               newAllowance = Number(formatUnits(newAllowance.toString(), 18))
               setRemainingApprovalAmount(newAllowance)
               setAllowance(newAllowance)
-              setOrderBtnDisabled(false)
             } else {
               //TBD discuss this case
               setIsApproved(true)
@@ -190,18 +187,15 @@ export default function SellMarket(props: {
             existingLimitOrders: existingBuyLimitOrders,
             chainId: chainId,
           }
-          setOrderBtnDisabled(true)
           sellMarketOrder(orderData).then((orderFillStatus: any) => {
             let orderFilled = false
             if (!(orderFillStatus == undefined)) {
               if (!('logs' in orderFillStatus)) {
                 alert('Order could not be filled.')
-                setOrderBtnDisabled(false)
                 return
               } else {
                 orderFillStatus.logs.forEach(async (eventData: any) => {
                   if (!('event' in eventData)) {
-                    setOrderBtnDisabled(false)
                     return
                   } else {
                     if (eventData.event === 'LimitOrderFilled') {
@@ -215,27 +209,19 @@ export default function SellMarket(props: {
                       setNumberOfOptions(0.0)
                       setYouReceive(0.0)
                       orderFilled = true
-                      setOrderBtnDisabled(false)
-                      getMakerOrdersTotalAmount(makerAccount).then(() => {
-                        return
-                      })
                     } else {
                       alert('Order could not be filled.')
-                      setOrderBtnDisabled(false)
                     }
                   }
                 })
               }
             } else {
               alert('Order could not be filled. Response is not defined.')
-              setOrderBtnDisabled(false)
             }
             if (orderFilled) {
               alert('Order successfully filled.')
-              setOrderBtnDisabled(false)
             }
           })
-          setOrderBtnDisabled(false)
         }
       } else {
         alert('No ' + params.tokenType.toUpperCase() + ' available to sell.')
@@ -400,7 +386,7 @@ export default function SellMarket(props: {
         const youReceive = avg * numberOfOptions
         setYouReceive(youReceive)
       }
-    } else if (numberOfOptions === 0 || existingBuyLimitOrders.length === 0) {
+    } else {
       setOrderBtnDisabled(true)
     }
   }, [numberOfOptions])

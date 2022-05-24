@@ -83,6 +83,7 @@ export default function BuyMarket(props: {
     } else {
       setYouPay(0.0)
       setNumberOfOptions(0.0)
+      setOrderBtnDisabled(true)
     }
   }
 
@@ -100,7 +101,6 @@ export default function BuyMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
-      setOrderBtnDisabled(true)
       if (numberOfOptions > 0) {
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
@@ -120,7 +120,6 @@ export default function BuyMarket(props: {
         alert(
           `Allowance for ${collateralAllowance} ${option.collateralToken.name} successfully set.`
         )
-        setOrderBtnDisabled(false)
       } else {
         alert(
           `Please enter the number of ${params.tokenType.toUpperCase()} you want to buy.`
@@ -146,7 +145,6 @@ export default function BuyMarket(props: {
                   '. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              setOrderBtnDisabled(true)
               let newAllowance = Number(
                 (additionalApproval + allowance).toFixed(
                   totalDecimals(additionalApproval, allowance)
@@ -169,7 +167,6 @@ export default function BuyMarket(props: {
               const remainingApproval = Number(newAllowance)
               setRemainingApprovalAmount(remainingApproval)
               setAllowance(newAllowance)
-              setOrderBtnDisabled(false)
             } else {
               //TBD discuss this case
               console.log('nothing done')
@@ -189,18 +186,15 @@ export default function BuyMarket(props: {
             existingLimitOrders: existingSellLimitOrders,
             chainId: props.chainId,
           }
-          setOrderBtnDisabled(true)
           buyMarketOrder(orderData).then((orderFillStatus: any) => {
             let orderFilled = false
             if (!(orderFillStatus === undefined)) {
               if (!('logs' in orderFillStatus)) {
                 alert('Order could not be filled.')
-                setOrderBtnDisabled(false)
                 return
               } else {
                 orderFillStatus.logs.forEach(async (eventData: any) => {
                   if (!('event' in eventData)) {
-                    setOrderBtnDisabled(false)
                     return
                   } else {
                     if (eventData.event === 'LimitOrderFilled') {
@@ -213,29 +207,20 @@ export default function BuyMarket(props: {
                       )
                       setNumberOfOptions(0.0)
                       setYouPay(0.0)
-                      //alert('Order successfully filled')
                       orderFilled = true
-                      setOrderBtnDisabled(false)
-                      getTakerOrdersTotalAmount(userAddress).then((data) => {
-                        return
-                      })
                     } else {
                       alert('Order could not be filled.')
-                      setOrderBtnDisabled(false)
                     }
                   }
                 })
               }
             } else {
               alert('Order could not be filled. Response is not defined')
-              setOrderBtnDisabled(false)
             }
             if (orderFilled) {
               alert('Order successfully filled.')
-              setOrderBtnDisabled(false)
             }
           })
-          setOrderBtnDisabled(false)
         }
       } else {
         alert('Collateral balance is zero')
@@ -426,7 +411,7 @@ export default function BuyMarket(props: {
         const youPayAmount = cumulativeAvg * numberOfOptions
         setYouPay(youPayAmount)
       }
-    } else if (numberOfOptions === 0 || existingSellLimitOrders.length === 0) {
+    } else {
       setOrderBtnDisabled(true)
     }
   }, [numberOfOptions])
