@@ -30,9 +30,34 @@ export function stableSort(array: any, comparator: any) {
 }
 
 const isFloat = (number) => {
-  return number != '' && !isNaN(number) && Math.round(number) != number
+  if (number.toString().indexOf('e') !== -1) {
+    // Return true if float number is represented in exponential format
+    return true
+  } else {
+    return number != '' && !isNaN(number) && Math.round(number) != number
+  }
 }
+
+// Source: https://blog.davidjs.com/2018/07/convert-exponential-numbers-to-decimal-in-javascript/
+function convertExponentialToDecimal(
+  exponentialNumber: number
+): number | string {
+  // Check whether number has exponential format
+  const str = exponentialNumber.toString()
+  if (str.indexOf('e') !== -1) {
+    const exponent = parseInt(str.split('-')[1], 10)
+    // Unfortunately I can not return 1e-8 as 0.00000001, because even if I call parseFloat() on it,
+    // it will still return the exponential representation
+    // So I have to use .toFixed()
+    const result = exponentialNumber.toFixed(exponent)
+    return result
+  } else {
+    return exponentialNumber
+  }
+}
+
 const decimalPlaces = (number) => {
+  number = convertExponentialToDecimal(number)
   return number.toString().split('.')?.[1].length
 }
 
