@@ -34,6 +34,7 @@ export const ApproveActionButtons = ({
   const [actionLoading, setActionLoading] = React.useState(false)
   const [approveEnabled, setApproveEnabled] = React.useState(false)
   const [actionEnabled, setActionEnabled] = React.useState(false)
+  const [isPoolCreated, setIsPoolCreated] = React.useState(false)
   const [btnName, setBtnName] = React.useState('Add')
   const { provider } = useConnectionContext()
   const account = useAppSelector(selectUserAddress)
@@ -95,7 +96,8 @@ export const ApproveActionButtons = ({
               disabled={
                 approveEnabled === false ||
                 account == null ||
-                textFieldValue === ''
+                textFieldValue === '' ||
+                isPoolCreated === true
               }
               onClick={() => {
                 setApproveLoading(true)
@@ -146,7 +148,8 @@ export const ApproveActionButtons = ({
             disabled={
               actionEnabled === false ||
               account == null ||
-              textFieldValue === ''
+              textFieldValue === '' ||
+              isPoolCreated === true
             }
             onClick={() => {
               setActionLoading(true)
@@ -183,6 +186,7 @@ export const ApproveActionButtons = ({
                        */
                       tx.wait()
                         .then(() => {
+                          setIsPoolCreated(true)
                           setActionLoading(false)
                           setTimeout(() => {
                             onTransactionSuccess()
