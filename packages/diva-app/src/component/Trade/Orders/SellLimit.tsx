@@ -88,6 +88,10 @@ export default function SellLimit(props: {
             setOrderBtnDisabled(false)
           }
         }
+      } else {
+        if (orderBtnDisabled == false) {
+          setOrderBtnDisabled(true)
+        }
       }
     } else {
       setOrderBtnDisabled(true)
