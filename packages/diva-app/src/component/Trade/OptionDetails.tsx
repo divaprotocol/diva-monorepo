@@ -29,6 +29,7 @@ const FlexBoxHeader = styled.div`
   font-size: 0.9rem;
   font-weight: solid;
   text-align: left;
+  width: max-content;
   padding-left: 15px;
   color: gray;
 `
@@ -57,7 +58,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 50%;
+  width: 33%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
@@ -69,12 +70,12 @@ const FlexSecondLineDiv = styled.div`
 `
 
 const FlexBoxSecondLine = styled.div`
-  width: 100%;
   flex: 1;
 `
 
 const FlexBoxSecondLineData = styled.div`
   padding: 15px;
+  width: max-content;
   font-size: 1rem;
   overflow: hidden;
   text-overflow: ellipsis;
