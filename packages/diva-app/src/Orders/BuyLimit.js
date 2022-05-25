@@ -29,7 +29,7 @@ export const buylimitOrder = async (orderData) => {
   const amount = Number(orderData.nbrOptions * orderData.limitPrice).toFixed(
     totalDecimalPlaces
   )
-  console.log(amount)
+
   const makerAmount = parseUnits(
     amount.toString(),
     orderData.collateralDecimals
