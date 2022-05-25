@@ -58,7 +58,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 33%;
+  width: 34%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
