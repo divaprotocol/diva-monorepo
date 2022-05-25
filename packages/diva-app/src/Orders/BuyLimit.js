@@ -1,5 +1,5 @@
 import { MetamaskSubprovider } from '@0x/subproviders'
-import { parseEther, parseUnits, formatUnits } from 'ethers/lib/utils'
+import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
