@@ -638,6 +638,13 @@ export function MyPositions() {
           }))
       : []
 
+  const sortedRows = filteredRows.sort((a, b) => {
+    const aId = parseFloat(a.Id.substring(1))
+    const bId = parseFloat(b.Id.substring(1))
+
+    return bId - aId
+  })
+
   return (
     <Stack
       direction="row"
@@ -666,7 +673,7 @@ export function MyPositions() {
           <SideMenu />
           <PoolsTable
             page={page}
-            rows={filteredRows}
+            rows={sortedRows}
             loading={balances.isLoading || poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}
