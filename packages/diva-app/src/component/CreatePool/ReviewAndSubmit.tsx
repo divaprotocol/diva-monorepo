@@ -16,7 +16,7 @@ import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { useCreatePoolFormik } from './formik'
 
 const stringifyValue = (val: any) => {
-  if (val?.name) return val.name
+  if (val?.symbol) return val.symbol
   if (val instanceof Date) {
     return val.toDateString()
   } else if (typeof val === 'string') {
