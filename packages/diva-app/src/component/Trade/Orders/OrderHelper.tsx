@@ -29,7 +29,7 @@ export function stableSort(array: any, comparator: any) {
   return stabilizedThis.map((el: any) => el[0])
 }
 
-const isFloat = (number) => {
+export const isFloat = (number) => {
   if (number.toString().indexOf('e') !== -1) {
     // Return true if float number is represented in exponential format
     return true
@@ -56,7 +56,7 @@ export function convertExponentialToDecimal(
   }
 }
 
-const decimalPlaces = (number) => {
+export const decimalPlaces = (number) => {
   number = convertExponentialToDecimal(number) // returns the number in number format if it's not exponential
   return number.toString().split('.')?.[1].length
 }

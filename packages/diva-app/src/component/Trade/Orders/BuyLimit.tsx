@@ -402,7 +402,11 @@ export default function BuyLimit(props: {
             formatEther(
               parseEther(maxPayout)
                 .mul(parseEther('1'))
-                .div(parseEther(String(pricePerOption)))
+                .div(
+                  parseEther(
+                    convertExponentialToDecimal(pricePerOption).toString()
+                  )
+                )
             )
           ).toFixed(2) + 'x'
         )
@@ -412,7 +416,9 @@ export default function BuyLimit(props: {
     }
     if (isLong) {
       if (!isNaN(pricePerOption)) {
-        const be1 = parseEther(String(pricePerOption))
+        const be1 = parseEther(
+          convertExponentialToDecimal(pricePerOption).toString()
+        )
           .mul(
             BigENumber.from(option.inflection).sub(
               BigENumber.from(option.floor)
@@ -427,7 +433,9 @@ export default function BuyLimit(props: {
           .div(parseEther('1'))
           .add(BigENumber.from(option.floor))
 
-        const be2 = parseEther(String(pricePerOption))
+        const be2 = parseEther(
+          convertExponentialToDecimal(pricePerOption).toString()
+        )
           .mul(BigENumber.from(option.supplyInitial))
           .div(parseEther('1'))
           .sub(
@@ -445,7 +453,9 @@ export default function BuyLimit(props: {
           )
           .add(BigENumber.from(option.inflection))
         if (
-          parseEther(String(pricePerOption)).gte(
+          parseEther(
+            convertExponentialToDecimal(pricePerOption).toString()
+          ).gte(
             BigENumber.from(option.collateralBalanceLongInitial)
               .mul(parseUnits('1', option.collateralToken.decimals))
               .div(
@@ -482,7 +492,9 @@ export default function BuyLimit(props: {
       )
     } else {
       if (!isNaN(pricePerOption)) {
-        const be1 = parseEther(String(pricePerOption))
+        const be1 = parseEther(
+          convertExponentialToDecimal(pricePerOption).toString()
+        )
           .mul(BigENumber.from(option.supplyInitial))
           .div(parseEther('1'))
           .sub(
@@ -503,7 +515,9 @@ export default function BuyLimit(props: {
           .sub(BigENumber.from(option.inflection))
           .mul(BigENumber.from('-1'))
 
-        const be2 = parseEther(String(pricePerOption))
+        const be2 = parseEther(
+          convertExponentialToDecimal(pricePerOption).toString()
+        )
           .mul(BigENumber.from(option.supplyInitial))
           .div(
             BigENumber.from(option.collateralBalanceShortInitial).mul(
@@ -517,7 +531,9 @@ export default function BuyLimit(props: {
           .sub(BigENumber.from(option.cap))
           .mul(BigENumber.from('-1'))
         if (
-          parseEther(String(pricePerOption)).lte(
+          parseEther(
+            convertExponentialToDecimal(pricePerOption).toString()
+          ).lte(
             parseUnits('1', option.collateralToken.decimals).sub(
               BigENumber.from(option.collateralBalanceLongInitial)
                 .mul(parseUnits('1', option.collateralToken.decimals))
