@@ -189,7 +189,6 @@ export const ApproveActionButtons = ({
                       /**
                        * dispatch action to refetch the pool after action
                        */
-                      console.log(tx)
                       tx.wait()
                         .then(() => {
                           setIsPoolCreated(true)
