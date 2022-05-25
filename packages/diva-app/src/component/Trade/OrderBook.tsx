@@ -291,7 +291,7 @@ export default function OrderBook(props: {
                     <TableCell align="center">
                       <Box>
                         <Typography variant="subtitle1">
-                          {row.bid != '' ? Number(row.bid)?.toFixed(2) : '-'}
+                          {row.bid != '' ? Number(row.bid)?.toFixed(4) : '-'}
                         </Typography>
                         <Typography variant="caption" noWrap>
                           {row.buyExpiry}
@@ -301,7 +301,7 @@ export default function OrderBook(props: {
                     <TableCell align="center">
                       <Box>
                         <Typography variant="subtitle1">
-                          {row.ask != '' ? row.ask?.toFixed(2).toString() : '-'}
+                          {row.ask != '' ? row.ask?.toFixed(4).toString() : '-'}
                         </Typography>
                         <Typography variant="caption" noWrap>
                           {row.sellExpiry}

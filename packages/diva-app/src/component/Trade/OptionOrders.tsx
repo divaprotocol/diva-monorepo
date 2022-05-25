@@ -259,7 +259,7 @@ export default function OpenOrders(props: {
                     <TableCell align="center">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
-                          {order.pricePerOption.toFixed(2)}
+                          {order.pricePerOption.toFixed(4)}
                         </Typography>
                       </Box>
                     </TableCell>
@@ -268,7 +268,7 @@ export default function OpenOrders(props: {
                         <Typography variant="subtitle1">
                           {order.nbrOptions === 0
                             ? '-'
-                            : order.payReceive.toFixed(2)}
+                            : order.payReceive.toFixed(4)}
                         </Typography>
                       </Box>
                     </TableCell>

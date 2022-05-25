@@ -2,7 +2,12 @@ import { CircularProgress, Container, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import { ethers } from 'ethers'
 import { config } from '../constants'
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
+import {
+  formatUnits,
+  formatEther,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import { fetchPool, selectUserAddress } from '../Redux/appSlice'
 import React, { useEffect } from 'react'
 import { useConnectionContext } from '../hooks/useConnectionContext'
@@ -184,6 +189,7 @@ export const ApproveActionButtons = ({
                       /**
                        * dispatch action to refetch the pool after action
                        */
+                      console.log(tx)
                       tx.wait()
                         .then(() => {
                           setIsPoolCreated(true)
