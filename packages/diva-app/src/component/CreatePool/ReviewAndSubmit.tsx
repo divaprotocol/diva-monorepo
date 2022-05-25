@@ -13,7 +13,6 @@ import { useQuery } from 'react-query'
 import { config } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
-import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useCreatePoolFormik } from './formik'
 
 const stringifyValue = (val: any) => {

@@ -246,7 +246,7 @@ export function DefinePoolAttributes({
                 formik.setFieldValue('collateralToken', newValue)
               }}
               getOptionLabel={(option: WhitelistCollateralToken) =>
-                option?.name || ''
+                option?.symbol || ''
               }
               onInputChange={(event) => {
                 if (event != null && event.target != null) {
