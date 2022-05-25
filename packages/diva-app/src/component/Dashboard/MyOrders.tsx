@@ -343,7 +343,7 @@ export function MyOrders() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} align="center">
+                    <TableCell colSpan={7} align="center">
                       None
                     </TableCell>
                   </TableRow>
