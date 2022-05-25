@@ -47,11 +47,6 @@ const RightDiv = styled.div`
   width: 35%;
 `
 
-enum TabPath {
-  trade = 'trade',
-  liquidity = 'liquidity',
-}
-
 export default function Underlying() {
   const history = useHistory()
   const params: { poolId: string; tokenType: string } = useParams()
@@ -60,8 +55,15 @@ export default function Underlying() {
     history.location.pathname ===
     `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity`
       ? 'liquidity'
+      : history.location.pathname ===
+        `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity/add`
+      ? 'liquidity'
+      : history.location.pathname ===
+        `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity/remove`
+      ? 'liquidity'
       : 'trade'
   const [value, setValue] = useState(currentTab)
+  console.log('Tab Path is:', value)
 
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
@@ -146,9 +148,7 @@ export default function Underlying() {
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
   const handleChange = (event: any, newValue: string) => {
-    history.push(
-      `/${params.poolId}/${isLong ? 'long' : 'short'}/` + TabPath[newValue]
-    )
+    history.push(`/${params.poolId}/${isLong ? 'long' : 'short'}/` + newValue)
     setValue(newValue)
   }
 
