@@ -148,7 +148,7 @@ export function CreatePool() {
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
           <Alert severity="success" sx={{ width: '100%' }}>
-            Pool was successfully created
+            Pool was successfully created. Redirecting to My Positions page.
           </Alert>
         </Snackbar>
       </Box>
