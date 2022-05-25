@@ -16,8 +16,8 @@ export const WrongChain = (props: any) => {
           width: '100%',
         }}
       >
-        Unsupported network, please switch to either, Ethereum Mainnet, Ropsten,
-        Rinkeby, Kovan, Matic or Mumbai.
+        Unsupported network, please switch to Ropsten network in your Metamask
+        wallet.
       </Typography>
     </Box>
   )
