@@ -29,7 +29,7 @@ import {
 } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
-import { totalDecimals } from './OrderHelper'
+import { totalDecimals, convertExponentialToDecimal } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
 import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
@@ -179,7 +179,10 @@ export default function BuyLimit(props: {
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
         let collateralAllowance = await approveBuyAmount(
-          parseUnits(amount.toString(), option.collateralToken.decimals)
+          parseUnits(
+            convertExponentialToDecimal(amount).toString(),
+            option.collateralToken.decimals
+          )
         )
         if (collateralAllowance == 'undefined') {
           alert('Metamask could not finish approval please check gas limit')
@@ -232,7 +235,7 @@ export default function BuyLimit(props: {
               )
               const approvedAllowance = await approveBuyAmount(
                 parseUnits(
-                  newAllowance.toString(),
+                  convertExponentialToDecimal(newAllowance).toString(),
                   option.collateralToken.decimals
                 )
               )
@@ -399,7 +402,11 @@ export default function BuyLimit(props: {
             formatEther(
               parseEther(maxPayout)
                 .mul(parseEther('1'))
-                .div(parseEther(String(pricePerOption)))
+                .div(
+                  parseEther(
+                    convertExponentialToDecimal(pricePerOption).toString()
+                  )
+                )
             )
           ).toFixed(2) + 'x'
         )
@@ -409,7 +416,9 @@ export default function BuyLimit(props: {
     }
     if (isLong) {
       if (!isNaN(pricePerOption)) {
-        const be1 = parseEther(String(pricePerOption))
+        const be1 = parseEther(
+          convertExponentialToDecimal(pricePerOption).toString()
+        )
           .mul(
             BigENumber.from(option.inflection).sub(
               BigENumber.from(option.floor)
@@ -424,7 +433,9 @@ export default function BuyLimit(props: {
           .div(parseEther('1'))
           .add(BigENumber.from(option.floor))
 
-        const be2 = parseEther(String(pricePerOption))
+        const be2 = parseEther(
+          convertExponentialToDecimal(pricePerOption).toString()
+        )
           .mul(BigENumber.from(option.supplyInitial))
           .div(parseEther('1'))
           .sub(
@@ -442,7 +453,9 @@ export default function BuyLimit(props: {
           )
           .add(BigENumber.from(option.inflection))
         if (
-          parseEther(String(pricePerOption)).gte(
+          parseEther(
+            convertExponentialToDecimal(pricePerOption).toString()
+          ).gte(
             BigENumber.from(option.collateralBalanceLongInitial)
               .mul(parseUnits('1', option.collateralToken.decimals))
               .div(
@@ -479,7 +492,9 @@ export default function BuyLimit(props: {
       )
     } else {
       if (!isNaN(pricePerOption)) {
-        const be1 = parseEther(String(pricePerOption))
+        const be1 = parseEther(
+          convertExponentialToDecimal(pricePerOption).toString()
+        )
           .mul(BigENumber.from(option.supplyInitial))
           .div(parseEther('1'))
           .sub(
@@ -500,7 +515,9 @@ export default function BuyLimit(props: {
           .sub(BigENumber.from(option.inflection))
           .mul(BigENumber.from('-1'))
 
-        const be2 = parseEther(String(pricePerOption))
+        const be2 = parseEther(
+          convertExponentialToDecimal(pricePerOption).toString()
+        )
           .mul(BigENumber.from(option.supplyInitial))
           .div(
             BigENumber.from(option.collateralBalanceShortInitial).mul(
@@ -514,7 +531,9 @@ export default function BuyLimit(props: {
           .sub(BigENumber.from(option.cap))
           .mul(BigENumber.from('-1'))
         if (
-          parseEther(String(pricePerOption)).lte(
+          parseEther(
+            convertExponentialToDecimal(pricePerOption).toString()
+          ).lte(
             parseUnits('1', option.collateralToken.decimals).sub(
               BigENumber.from(option.collateralBalanceLongInitial)
                 .mul(parseUnits('1', option.collateralToken.decimals))

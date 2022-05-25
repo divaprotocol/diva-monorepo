@@ -25,7 +25,12 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { getComparator, stableSort, totalDecimals } from './OrderHelper'
+import {
+  getComparator,
+  stableSort,
+  totalDecimals,
+  convertExponentialToDecimal,
+} from './OrderHelper'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
@@ -110,7 +115,7 @@ export default function SellMarket(props: {
         )
         // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
         let approvedAllowance = await approveSellAmount(
-          parseUnits(amount.toString(), 18)
+          parseUnits(convertExponentialToDecimal(amount).toString(), 18)
         )
         approvedAllowance = Number(
           formatUnits(approvedAllowance.toString(), 18)
@@ -160,7 +165,7 @@ export default function SellMarket(props: {
 
               newAllowance = await approveSellAmount(
                 parseUnits(
-                  newAllowance.toString(),
+                  convertExponentialToDecimal(newAllowance).toString(),
                   option.collateralToken.decimals
                 )
               )
@@ -411,7 +416,11 @@ export default function SellMarket(props: {
             formatEther(
               parseEther(maxPayout)
                 .mul(parseEther('1'))
-                .div(parseEther(String(avgExpectedRate)))
+                .div(
+                  parseEther(
+                    convertExponentialToDecimal(avgExpectedRate).toString()
+                  )
+                )
             )
           ).toFixed(2) + 'x'
         )
@@ -421,7 +430,9 @@ export default function SellMarket(props: {
     }
     if (isLong) {
       if (!isNaN(avgExpectedRate)) {
-        const be1 = parseEther(String(avgExpectedRate))
+        const be1 = parseEther(
+          convertExponentialToDecimal(avgExpectedRate).toString()
+        )
           .mul(
             BigENumber.from(option.inflection).sub(
               BigENumber.from(option.floor)
@@ -436,7 +447,9 @@ export default function SellMarket(props: {
           .div(parseEther('1'))
           .add(BigENumber.from(option.floor))
 
-        const be2 = parseEther(String(avgExpectedRate))
+        const be2 = parseEther(
+          convertExponentialToDecimal(avgExpectedRate).toString()
+        )
           .mul(BigENumber.from(option.supplyInitial))
           .div(parseEther('1'))
           .sub(
@@ -454,7 +467,9 @@ export default function SellMarket(props: {
           )
           .add(BigENumber.from(option.inflection))
         if (
-          parseEther(String(avgExpectedRate)).gte(
+          parseEther(
+            convertExponentialToDecimal(avgExpectedRate).toString()
+          ).gte(
             BigENumber.from(option.collateralBalanceLongInitial)
               .mul(parseUnits('1', option.collateralToken.decimals))
               .div(
@@ -491,7 +506,9 @@ export default function SellMarket(props: {
       )
     } else {
       if (!isNaN(avgExpectedRate)) {
-        const be1 = parseEther(String(avgExpectedRate))
+        const be1 = parseEther(
+          convertExponentialToDecimal(avgExpectedRate).toString()
+        )
           .mul(BigENumber.from(option.supplyInitial))
           .div(parseEther('1'))
           .sub(
@@ -512,7 +529,9 @@ export default function SellMarket(props: {
           .sub(BigENumber.from(option.inflection))
           .mul(BigENumber.from('-1'))
 
-        const be2 = parseEther(String(avgExpectedRate))
+        const be2 = parseEther(
+          convertExponentialToDecimal(avgExpectedRate).toString()
+        )
           .mul(BigENumber.from(option.supplyInitial))
           .div(
             BigENumber.from(option.collateralBalanceShortInitial).mul(
@@ -527,7 +546,9 @@ export default function SellMarket(props: {
           .mul(BigENumber.from('-1'))
 
         if (
-          parseEther(String(avgExpectedRate)).lte(
+          parseEther(
+            convertExponentialToDecimal(avgExpectedRate).toString()
+          ).lte(
             parseUnits('1', option.collateralToken.decimals).sub(
               BigENumber.from(option.collateralBalanceLongInitial)
                 .mul(parseUnits('1', option.collateralToken.decimals))

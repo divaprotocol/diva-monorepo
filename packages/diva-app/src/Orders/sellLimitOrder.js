@@ -3,6 +3,7 @@ import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
+import { isFloat, decimalPlaces } from '../component/Trade/Orders/OrderHelper'
 
 export const sellLimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
@@ -11,12 +12,6 @@ export const sellLimitOrder = async (orderData) => {
 
   const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
-  const isFloat = (number) => {
-    return number != '' && !isNaN(number) && Math.round(number) != number
-  }
-  const decimalPlaces = (number) => {
-    return number.toString().split('.')[1].length
-  }
   const makerAmount = parseEther(orderData.nbrOptions.toString())
   const nbrOptionsDecimals = isFloat(orderData.nbrOptions)
     ? decimalPlaces(orderData.nbrOptions)
