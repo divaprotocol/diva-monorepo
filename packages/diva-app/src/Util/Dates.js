@@ -28,6 +28,5 @@ export const isExpired = (Timestamp) => {
 
 export const userTimeZone = () => {
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-  console.log('timeZone: ' + timeZone)
   return timeZone
 }
