@@ -11,11 +11,14 @@ from Prices import getKrakenPrice
 from QueryGraph import *
 from SendPrice import sendPrice
 from ChainSet import Chain
+from email_notify import sendEmail
 
 
 # List of assets to choose from, if there are more from the Price Oracle
 # Asset list to query and send prices for
 Asset_list = ['BTC/USD', 'ETH/USD', 'ZRX/USD', '1INCH/USD', 'AAVE/USD', 'ALGO/USD', 'AXS/USD']
+# How long the oracle sleeps in between checks in seconds
+SLEEP_TIME = 60 
 
 
 # Dataprovider is determined by who created the pool
@@ -38,6 +41,7 @@ query = '''
               }
             }
 '''% dataprovider
+
 
 
 
@@ -89,13 +93,14 @@ if __name__ == "__main__":
     for query in range(len(query_list)):
       
       # This will run the graph query to gather existing data
-      resp = run_query(query_list[query])
+      graph_resp = run_query(query_list[query])
       # Determine reporting needed based on time frame, within 24 hours after expiry
-      df_reporting_needed = get_required_reporting_df(resp, Asset_list,hours=24)
+      
+      df_reporting_needed = get_required_reporting_df(graph_resp, Asset_list,hours=24)
       main_send(df_reporting_needed)
-    print("sleeping 1 minute: cycle #: ", run)
+    print(f"sleeping {SLEEP_TIME} seconds: cycle #: ", run)
     run +=1
     # Sleep time in seconds
-    time.sleep(60)
+    time.sleep(SLEEP_TIME)
   
 
