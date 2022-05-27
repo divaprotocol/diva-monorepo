@@ -29,9 +29,9 @@ message = "Subject: Pending Pool Transactions \n"
 def run(network, w3, contract):
     print("#########################################")
     print('\033[1m' + "Network: {}".format(network) + '\033[0m')
-    max_time_away = dt.timedelta(minutes=60)
+    max_time_away = dt.timedelta(minutes=config.max_time_away)
     resp = run_query(query, network)
-    df_reporting_needed = get_required_reporting_df(resp, hours=24)
+    df_reporting_needed = get_required_reporting_df(resp, hours=config.max_reporting_frame)
 
     for j in pendingPools[network]:
         df_reporting_needed = df_reporting_needed[df_reporting_needed["id"] != j]
@@ -66,8 +66,8 @@ def run(network, w3, contract):
 
 
 # Parallel execution
-networks = ["ropsten","mumbai"]
-waiting_sec = 10
+networks = config.networks
+waiting_sec = config.waiting_next_iteration
 
 pendingPools = {
     "ropsten": [],
@@ -126,7 +126,7 @@ while True:
         bool_var = (pendingPools_len[nt][-1] != len(pendingPools[nt]))
         if bool_var:
             break
-    if (iter % 2 == 0) and bool_var:
+    if (iter % 5 == 0) and bool_var:
         for nt in networks:
             message += "########## Pending transactions #################\n" \
                        + "Network: {} \n".format(nt) \
