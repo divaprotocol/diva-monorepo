@@ -39,91 +39,91 @@ const rows: GridRowModel = [
   {
     id: 1,
     Task: 'Create a pool with a binary payoff',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 2,
     Task: 'Create a pool with a linear payoff',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 3,
     Task: 'Create a pool with a convex payoff',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 4,
     Task: 'Create a pool with a concave payoff',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 5,
     Task: 'Add liquidity to an existing pool',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 6,
     Task: 'Remove the liquidity from an existing pool',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 7,
     Task: 'Create a BUY LIMIT order',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 8,
     Task: 'Create a SELL LIMIT order',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 9,
     Task: 'Fill a BUY LIMIT order',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 10,
     Task: 'Fill a SELL LIMIT order',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 11,
     Task: 'Report final value',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 12,
     Task: 'Challenge reported value',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 13,
     Task: 'Redeem position token',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 14,
     Task: 'Claim fees as a data provider',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
   {
     id: 15,
     Task: 'Transfer fee claims',
-    Points: 100,
+    Points: 200,
     Status: 'Unknown',
   },
 ]
@@ -144,7 +144,7 @@ export const Tasks = (props: any) => {
   let linear = 'Open'
   let concave = 'Open'
   let convex = 'Open'
-
+  const [points, setPoints] = useState(0)
   const [addLiquidity, setAddLiquidity] = useState('Open')
   const [removeLiquidity, setRemoveLiquidity] = useState('Open')
   const [challenged, setChallenged] = useState('Open')
@@ -157,6 +157,7 @@ export const Tasks = (props: any) => {
   const [sellLimitFilled, setSellLimitFilled] = useState('Open')
   //  setBuyLimitFilled
   const myPositionTokens: string[] = []
+  let newPoints = 0
   useEffect(() => {
     if (
       myPools != null &&
@@ -179,16 +180,26 @@ export const Tasks = (props: any) => {
         provider?.getSigner()
       )
       myPools.map((pool) => {
-        if (pool.cap === pool.inflection && pool.inflection === pool.floor) {
+        if (
+          pool.cap === pool.inflection &&
+          pool.inflection === pool.floor &&
+          binary !== 'Closed'
+        ) {
           binary = 'Closed'
         }
-        if (pool.floor < pool.inflection < pool.cap) {
+        if (pool.floor < pool.inflection < pool.cap && linear !== 'Closed') {
           linear = 'Closed'
         }
-        if (pool.inflection - pool.floor > pool.cap - pool.inflection) {
+        if (
+          pool.inflection - pool.floor > pool.cap - pool.inflection &&
+          concave !== 'Closed'
+        ) {
           concave = 'Closed'
         }
-        if (pool.inflection - pool.floor < pool.cap - pool.inflection) {
+        if (
+          pool.inflection - pool.floor < pool.cap - pool.inflection &&
+          convex !== 'Closed'
+        ) {
           convex = 'Closed'
         }
       })
@@ -223,20 +234,28 @@ export const Tasks = (props: any) => {
                 event.data
               )
               if (orderData[1].toLowerCase() === userAddress.toLowerCase()) {
-                if (myPositionTokens.includes(orderData[5].toLowerCase())) {
+                if (
+                  myPositionTokens.includes(orderData[5].toLowerCase()) &&
+                  buyLimit !== 'Closed'
+                ) {
                   setBuyLimitFill('Closed')
                 } else if (
-                  myPositionTokens.includes(orderData[4].toLowerCase())
+                  myPositionTokens.includes(orderData[4].toLowerCase()) &&
+                  sellLimit !== 'Closed'
                 ) {
                   setSellLimitFill('Closed')
                 }
               } else if (
                 orderData[2].toLowerCase() === userAddress.toLowerCase()
               ) {
-                if (myPositionTokens.includes(orderData[5].toLowerCase())) {
+                if (
+                  myPositionTokens.includes(orderData[5].toLowerCase()) &&
+                  buyLimitFilled !== 'Closed'
+                ) {
                   setBuyLimitFilled('Closed')
                 } else if (
-                  myPositionTokens.includes(orderData[4].toLowerCase())
+                  myPositionTokens.includes(orderData[4].toLowerCase()) &&
+                  sellLimitFilled !== 'Closed'
                 ) {
                   setSellLimitFilled('Closed')
                 }
@@ -417,14 +436,27 @@ export const Tasks = (props: any) => {
         })
       )
     }
+    calcRows.map((row) => {
+      if (row.Status === 'Closed') {
+        newPoints = newPoints + 200
+      }
+    })
+    setPoints(newPoints)
   }, [
-    claimFees,
     chainId,
     userAddress,
     provider,
+    claimFees,
+    points,
     addLiquidity,
     removeLiquidity,
     feeTrasfered,
+    reported,
+    challenged,
+    buyLimit,
+    buyLimitFilled,
+    sellLimit,
+    sellLimitFilled,
   ])
   return (
     <Stack
@@ -462,7 +494,10 @@ export const Tasks = (props: any) => {
                 <Typography sx={{ pb: theme.spacing(2) }}>
                   Your progress
                 </Typography>
-                <LinearProgress variant={'determinate'} value={33} />
+                <LinearProgress
+                  variant={'determinate'}
+                  value={(points / 3000) * 100}
+                />
                 <Stack
                   direction={'row'}
                   sx={{ justifyContent: 'space-between' }}
