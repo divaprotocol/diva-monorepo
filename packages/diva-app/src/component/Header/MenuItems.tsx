@@ -6,7 +6,6 @@ import { Logo } from '../Logo'
 import TaskIcon from '@mui/icons-material/Task'
 export default function MenuItems() {
   const location = useLocation()
-  console.log({ location })
 
   return (
     <Stack
