@@ -11,11 +11,13 @@ import time
 import os
 
 
-from Prices import getKrakenPrice
 from QueryGraph import *
 from SendPrice import sendPrice
 from ChainSet import Chain
 from email_notify import sendEmail
+from dataframe_formats import *
+
+
 
 
 # List of assets to choose from, if there are more from the Price Oracle
@@ -71,7 +73,7 @@ if __name__ == "__main__":
       
       # This will run the graph query to gather existing data
       graph_resp = run_query(query_list[query])
-      test = email_report(graph_resp, Asset_list)
+      test = df_format_email_report(graph_resp, Asset_list)
       sendEmail(test)
     print(f"sleeping {SLEEP_TIME} seconds: cycle #: ", run)
     run +=1

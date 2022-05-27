@@ -12,6 +12,7 @@ from QueryGraph import *
 from SendPrice import sendPrice
 from ChainSet import Chain
 from email_notify import sendEmail
+from dataframe_formats import *
 
 
 # List of assets to choose from, if there are more from the Price Oracle
@@ -96,7 +97,7 @@ if __name__ == "__main__":
       graph_resp = run_query(query_list[query])
       # Determine reporting needed based on time frame, within 24 hours after expiry
       
-      df_reporting_needed = get_required_reporting_df(graph_resp, Asset_list,hours=24)
+      df_reporting_needed = df_format_oracle_report(graph_resp, Asset_list,hours=24)
       main_send(df_reporting_needed)
     print(f"sleeping {SLEEP_TIME} seconds: cycle #: ", run)
     run +=1
