@@ -37,7 +37,7 @@ export const initialValues: Values = {
   collateralBalance: '10',
   collateralBalanceShort: 1,
   collateralBalanceLong: 1,
-  tokenSupply: 2,
+  tokenSupply: 10,
   capacity: '0',
   dataProvider: '',
 }
