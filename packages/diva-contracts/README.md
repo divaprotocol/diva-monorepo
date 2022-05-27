@@ -1,5 +1,7 @@
 # Notes
-To generate an ABI for the entire diamond (incl. functions from libraries), run the following command: 
+
+To generate an ABI for the entire diamond (incl. functions from libraries), run the following command:
+
 ```console
 npx hardhat diamondABI
 ```
@@ -13,11 +15,13 @@ The standard loupe functions have been gas-optimized in this implementation and 
 ## Installation
 
 1. Clone this repo:
+
 ```console
 git clone git@github.com:mudgen/diamond-3-hardhat.git
 ```
 
 2. Install NPM packages:
+
 ```console
 cd diamond-3-hardhat
 npm install
@@ -32,14 +36,15 @@ npx hardhat run scripts/deploy.js
 ### How the scripts/deploy.js script works
 
 1. DiamondCutFacet is deployed. DiamondCutFacet has the `diamondCut` external function which is used to upgrade the diamond to add more functions. Information on how the `diamondCut` function works is here: https://eips.ethereum.org/EIPS/eip-2535#diamond-interface
-1. The diamond is deployed, passing as arguments to the diamond constructor the owner address of the diamond, the DiamondCutFacet address and the DIVA treasury address. 
-1. The initialization of some state variables is done in the constructor of the diamond contract. 
+1. The diamond is deployed, passing as arguments to the diamond constructor the owner address of the diamond, the DiamondCutFacet address and the DIVA treasury address.
+1. The initialization of some state variables is done in the constructor of the diamond contract.
 1. Facets are deployed.
 1. The diamond is upgraded. The `diamondCut` function is used to add functions from facets to the diamond. No initialization function passed into `diamondCut` (second and third arguments) as state variables are initialized in the diamond constructor.
 
-How a diamond is deployed is not part of the EIP-2535 Diamonds standard. This implementation shows a usable example. 
+How a diamond is deployed is not part of the EIP-2535 Diamonds standard. This implementation shows a usable example.
 
 ## Run tests:
+
 ```console
 npx hardhat test
 ```
@@ -48,7 +53,7 @@ npx hardhat test
 
 Check the `scripts/deploy.js` and or the `test/diamondTest.js` file for examples of upgrades.
 
-Note that upgrade functionality is optional. It is possible to deploy a diamond that can't be upgraded, which is a 'Single Cut Diamond'.  It is also possible to deploy an upgradeable diamond and at a later date remove its `diamondCut` function so it can't be upgraded any more.
+Note that upgrade functionality is optional. It is possible to deploy a diamond that can't be upgraded, which is a 'Single Cut Diamond'. It is also possible to deploy an upgradeable diamond and at a later date remove its `diamondCut` function so it can't be upgraded any more.
 
 Note that any number of functions from any number of facets can be added/replaced/removed on a diamond in a single transaction. In addition an initialization function can be executed in the same transaction as an upgrade to initialize any state variables required for an upgrade. This 'everything done in a single transaction' capability ensures a diamond maintains a correct and consistent state during upgrades.
 
@@ -109,6 +114,7 @@ string result = MyUsefulFacet(address(diamondContract)).getResult()
 If you need help or would like to discuss diamonds then send me a message [on twitter](https://twitter.com/mudgen), or [email me](mailto:nick@perfectabstractions.com). Or join the [EIP-2535 Diamonds Discord server](https://discord.gg/kQewPw2).
 
 ## Useful Links
+
 1. [Introduction to the Diamond Standard, EIP-2535 Diamonds](https://eip2535diamonds.substack.com/p/introduction-to-the-diamond-standard)
 1. [EIP-2535 Diamonds](https://github.com/ethereum/EIPs/issues/2535)
 1. [Understanding Diamonds on Ethereum](https://dev.to/mudgen/understanding-diamonds-on-ethereum-1fb)
@@ -130,4 +136,3 @@ Contact:
 
 MIT license. See the license file.
 Anyone can use or modify this software for their purposes.
-

@@ -18,7 +18,7 @@ export const config: { [key: number]: SingleConfig } = {
     fromBlock: 12085615,
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     divaAddress: '0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf',
-    whitelistAddress: '0x2A5c18f001719f4663ab8d3E65E3E54182376B20',
+    whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
     whitelistSubgraph:
@@ -31,7 +31,7 @@ export const config: { [key: number]: SingleConfig } = {
     fromBlock: 12085615,
     divaAddress: '0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf',
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
-    whitelistAddress: '0x2A5c18f001719f4663ab8d3E65E3E54182376B20',
+    whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
     whitelistSubgraph:
@@ -44,7 +44,7 @@ export const config: { [key: number]: SingleConfig } = {
     fromBlock: 12085615,
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     divaAddress: '0xa1fa77354D7810A6355583b566E5adB29C3f7733',
-    whitelistAddress: '0x2A5c18f001719f4663ab8d3E65E3E54182376B20',
+    whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-rinkeby',
     whitelistSubgraph:
@@ -57,7 +57,7 @@ export const config: { [key: number]: SingleConfig } = {
     fromBlock: 12085615,
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     divaAddress: '0x27FaBaed614059b98e7f1e79D872e13aa65640a8',
-    whitelistAddress: '0x47d3EF37b7750498061D26bE4351369d2749DfeD',
+    whitelistAddress: '0x3bcBFBd63f0387fF1b72a4C580fA7758C04B718d',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-polygon',
     whitelistSubgraph:
@@ -70,7 +70,7 @@ export const config: { [key: number]: SingleConfig } = {
     fromBlock: 12085615,
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     divaAddress: '0x607228ebB95aa097648Fa8b24dF8807684BBF101',
-    whitelistAddress: '0x2A5c18f001719f4663ab8d3E65E3E54182376B20',
+    whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-kovan',
     whitelistSubgraph:
@@ -83,7 +83,7 @@ export const config: { [key: number]: SingleConfig } = {
     fromBlock: 12085615,
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     divaAddress: '0xf2Ea8e23E1EaA2e5D280cE6b397934Ba7f30EF6B',
-    whitelistAddress: '0x2A5c18f001719f4663ab8d3E65E3E54182376B20',
+    whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-mumbai',
     whitelistSubgraph:
@@ -94,4 +94,4 @@ export const config: { [key: number]: SingleConfig } = {
 }
 
 export const whitelistedPoolCreatorAddress =
-  '0x47566c6c8f70e4f16aa3e7d8eed4a2bdb3f4925b'
+  '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E'

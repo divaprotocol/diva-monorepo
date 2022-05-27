@@ -19,6 +19,7 @@ import { fetchOrders, setIsBuy } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
 import { setBreakEven } from '../../Redux/Stats'
+import { useAppSelector } from '../../Redux/hooks'
 const PageDiv = styled.div`
   justify-content: center
   height: 500px;
@@ -83,9 +84,11 @@ export default function CreateOrder(props: {
   const [orderType, setOrderTypeValue] = React.useState(0)
   const [priceType, setPriceTypeValue] = React.useState(0)
   const [usdPrice, setUsdPrice] = React.useState('')
+  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   useEffect(() => {
     getExistingOrders()
-  }, [])
+  }, [orderType, priceType])
 
   const handleOrderTypeChange = (event: any, newValue: number) => {
     dispatch(setIsBuy(newValue === 0))
@@ -97,12 +100,13 @@ export default function CreateOrder(props: {
   }
 
   const getExistingOrders = async () => {
-    const responseSell: any = await get0xOpenOrders(
+    //updates orders components
+    responseSell = await get0xOpenOrders(
       props.tokenAddress,
       option.collateralToken.id,
       props.chainId
     )
-    const responseBuy: any = await get0xOpenOrders(
+    responseBuy = await get0xOpenOrders(
       option.collateralToken.id,
       props.tokenAddress,
       props.chainId

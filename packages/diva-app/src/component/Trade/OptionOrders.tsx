@@ -46,7 +46,7 @@ function mapOrderData(
       let payReceive = 0
 
       if (makerToken === tokenAddress) {
-        //Sell order
+        //Sell order: maker token is position token, taker token is collateral token
         const takerAmount = formatUnits(
           order.takerAmount,
           option.collateralToken.decimals
@@ -64,7 +64,7 @@ function mapOrderData(
           nbrOptions = Number(remainingTakerAmount) / askAmount
         }
         payReceive = Number(remainingTakerAmount)
-        pricePerOption = payReceive / nbrOptions
+        pricePerOption = askAmount
       } else {
         //Buy order
         const takerAmount = formatUnits(order.takerAmount)
@@ -215,7 +215,7 @@ export default function OpenOrders(props: {
 
   return (
     <PageDiv>
-      <TableContainer component={Paper} sx={{ maxHeight: 340 }}>
+      <TableContainer component={Paper} sx={{ maxHeight: 550 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -250,7 +250,9 @@ export default function OpenOrders(props: {
                     <TableCell align="center">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
-                          {order.nbrOptions}
+                          {order.nbrOptions === 0
+                            ? '-'
+                            : order.nbrOptions.toFixed(2)}
                         </Typography>
                       </Box>
                     </TableCell>
@@ -264,7 +266,9 @@ export default function OpenOrders(props: {
                     <TableCell align="center">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
-                          {order.payReceive.toFixed(2)}
+                          {order.nbrOptions === 0
+                            ? '-'
+                            : order.payReceive.toFixed(2)}
                         </Typography>
                       </Box>
                     </TableCell>

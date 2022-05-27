@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { getDateTime } from '../../Util/Dates'
+import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
 import { Pool } from '../../lib/queries'
 import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
@@ -29,13 +29,15 @@ const FlexBoxHeader = styled.div`
   font-size: 0.9rem;
   font-weight: solid;
   text-align: left;
+  width: max-content;
   padding-left: 15px;
+  color: gray;
 `
 
 const FlexBoxData = styled.div`
   padding: 15px;
-  font-size: 0.9rem;
-  font-weight: bold;
+  width: 100%;
+  font-size: 1rem;
   text-align: left;
 `
 
@@ -56,7 +58,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 65%;
+  width: 34%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
@@ -68,29 +70,22 @@ const FlexSecondLineDiv = styled.div`
 `
 
 const FlexBoxSecondLine = styled.div`
-  width: 100%;
   flex: 1;
-`
-
-const FlexToolTipBoxData = styled.div`
-  margin-left: 15px;
-  padding-top: 15px;
-  font-size: 0.9rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: bold;
-  text-align: left;
 `
 
 const FlexBoxSecondLineData = styled.div`
   padding: 15px;
-  font-size: 0.9rem;
+  width: max-content;
+  font-size: 1rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: bold;
   text-align: left;
 `
 const FlexCheckIcon = styled.div`
+  display: flex;
+  flex-direction: row;
+`
+const FlexDataDiv = styled.div`
   display: flex;
   flex-direction: row;
 `
@@ -104,24 +99,6 @@ export default function OptionDetails({
   //Instead of calling redux to get selected option at each component level
   //we can call at root component of trade that is underlying and pass as porps
   //to each child component.
-  const collateralBalanceLongInitial = Number(
-    formatUnits(
-      pool.collateralBalanceLongInitial,
-      pool.collateralToken.decimals
-    )
-  )
-  const collateralBalanceShortInitial = Number(
-    formatUnits(
-      pool.collateralBalanceShortInitial,
-      pool.collateralToken.decimals
-    )
-  )
-  const longShortCollateralSum =
-    collateralBalanceLongInitial + collateralBalanceShortInitial
-  const longCollateralRatio =
-    (collateralBalanceLongInitial / longShortCollateralSum) * 100
-  const shortCollateralRatio =
-    (collateralBalanceShortInitial / longShortCollateralSum) * 100
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
@@ -146,8 +123,23 @@ export default function OptionDetails({
       <FlexDiv>
         <FlexBox>
           <FlexBoxHeader>Expires at</FlexBoxHeader>
-          <FlexBoxData>{getDateTime(pool.expiryTime).slice(0, 10)}</FlexBoxData>
+          <FlexBoxData>
+            <Tooltip
+              title={
+                getDateTime(pool.expiryTime).slice(11, 19) +
+                ' ' +
+                userTimeZone()
+              }
+              arrow
+            >
+              <FlexDataDiv>
+                {getDateTime(pool.expiryTime).slice(0, 10)}
+                {'  '}
+              </FlexDataDiv>
+            </Tooltip>
+          </FlexBoxData>
         </FlexBox>
+
         <FlexBox>
           <FlexBoxHeader>Direction</FlexBoxHeader>
           <FlexBoxData>{isLong ? 'Up' : 'Down'}</FlexBoxData>
@@ -159,7 +151,7 @@ export default function OptionDetails({
           >
             <FlexBoxHeader>Floor</FlexBoxHeader>
           </Tooltip>
-          <FlexBoxData>{parseInt(pool.floor) / 1e18}</FlexBoxData>
+          <FlexBoxData>{formatEther(pool.floor)}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <Tooltip
@@ -168,7 +160,7 @@ export default function OptionDetails({
           >
             <FlexBoxHeader>Inflection</FlexBoxHeader>
           </Tooltip>
-          <FlexBoxData>{parseInt(pool.inflection) / 1e18}</FlexBoxData>
+          <FlexBoxData>{formatEther(pool.inflection)}</FlexBoxData>
         </FlexBox>
         <FlexBox>
           <Tooltip
@@ -177,45 +169,46 @@ export default function OptionDetails({
           >
             <FlexBoxHeader>Cap</FlexBoxHeader>
           </Tooltip>
-          <FlexBoxData>{Number(formatEther(pool.cap))}</FlexBoxData>
+          <FlexBoxData>{formatEther(pool.cap)}</FlexBoxData>
         </FlexBox>
         <FlexBox>
-          <FlexBoxHeader>Collateral</FlexBoxHeader>
-          <Tooltip title={pool.collateralToken.id} arrow>
-            <FlexBoxData>
-              {Number(
-                formatUnits(
-                  pool.collateralBalance,
-                  pool.collateralToken.decimals
-                )
-              ).toFixed(2) +
-                ' ' +
-                pool.collateralToken.symbol}
-            </FlexBoxData>
+          <Tooltip
+            placement="top-end"
+            title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
+          >
+            <FlexBoxHeader>Gradient</FlexBoxHeader>
           </Tooltip>
+          <FlexBoxData>
+            {Number(
+              formatUnits(
+                BigNumber.from(pool.collateralBalanceLongInitial)
+                  .mul(parseUnits('1', pool.collateralToken.decimals))
+                  .div(
+                    BigNumber.from(pool.collateralBalanceLongInitial).add(
+                      BigNumber.from(pool.collateralBalanceShortInitial)
+                    )
+                  ),
+
+                pool.collateralToken.decimals
+              )
+            ).toFixed(2)}
+          </FlexBoxData>
         </FlexBox>
       </FlexDiv>
       <FlexSecondLineDiv>
         <FlexBoxSecondLine>
-          <FlexBoxHeader>Data provider</FlexBoxHeader>
-          <Tooltip title={pool.dataProvider} arrow>
-            <FlexToolTipBoxData>
-              {pool.dataProvider.length > 0
-                ? String(pool.dataProvider).substring(0, 6) +
-                  '...' +
-                  String(pool.dataProvider).substring(38)
-                : 'n/a'}
-            </FlexToolTipBoxData>
-          </Tooltip>
-        </FlexBoxSecondLine>
-        <FlexBoxSecondLine>
-          <FlexBoxHeader>Data source</FlexBoxHeader>
-          <FlexBoxSecondLineData>
-            <FlexCheckIcon>
-              {dataSourceName}
+          <FlexBoxHeader>Data Provider</FlexBoxHeader>
 
+          <FlexBoxSecondLineData>
+            <FlexDataDiv>
+              <Tooltip title={pool.dataProvider} arrow>
+                <FlexCheckIcon>{dataSourceName}</FlexCheckIcon>
+              </Tooltip>
               {checkIcon ? (
-                <Tooltip title="Trusted data provider from the DIVA whitelist">
+                <Tooltip
+                  title="Trusted data provider from the DIVA whitelist"
+                  arrow
+                >
                   <CheckCircleSharpIcon
                     sx={{
                       mt: 0.3,
@@ -226,7 +219,7 @@ export default function OptionDetails({
                   />
                 </Tooltip>
               ) : (
-                <Tooltip title="Untrusted data provider">
+                <Tooltip title="Untrusted data provider" arrow>
                   <WarningAmberSharpIcon
                     sx={{
                       mt: 0.3,
@@ -237,29 +230,24 @@ export default function OptionDetails({
                   />
                 </Tooltip>
               )}
-            </FlexCheckIcon>
+            </FlexDataDiv>
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
-
         <FlexBoxSecondLine>
-          <Tooltip
-            placement="top-end"
-            title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
-          >
-            <FlexBoxHeader>Gradient</FlexBoxHeader>
-          </Tooltip>
+          <FlexBoxHeader>Collateral</FlexBoxHeader>
           <FlexBoxSecondLineData>
-            {formatUnits(
-              BigNumber.from(pool.collateralBalanceLongInitial)
-                .mul(parseUnits('1', pool.collateralToken.decimals))
-                .div(
-                  BigNumber.from(pool.collateralBalanceLongInitial).add(
-                    BigNumber.from(pool.collateralBalanceShortInitial)
+            <Tooltip title={pool.collateralToken.id} arrow placement="bottom">
+              <FlexDataDiv>
+                {Number(
+                  formatUnits(
+                    pool.collateralBalance,
+                    pool.collateralToken.decimals
                   )
-                ),
-
-              pool.collateralToken.decimals
-            )}
+                ).toFixed(2) +
+                  ' ' +
+                  pool.collateralToken.symbol}
+              </FlexDataDiv>
+            </Tooltip>
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
       </FlexSecondLineDiv>

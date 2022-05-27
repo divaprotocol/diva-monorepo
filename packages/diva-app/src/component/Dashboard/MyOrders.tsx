@@ -104,7 +104,7 @@ export function MyOrders() {
       quantity = Number(remainingTakerAmount) / askAmount
     }
     payReceive = Number(remainingTakerAmount)
-    price = payReceive / quantity
+    price = askAmount
     return {
       type: type,
       poolId: poolId,
@@ -300,7 +300,9 @@ export function MyOrders() {
                         <TableCell align="center">
                           <Box>
                             <Typography variant="subtitle1">
-                              {order.quantity}
+                              {order.quantity === 0
+                                ? '-'
+                                : order.quantity.toFixed(2)}
                             </Typography>
                           </Box>
                         </TableCell>
@@ -314,7 +316,9 @@ export function MyOrders() {
                         <TableCell align="center">
                           <Box>
                             <Typography variant="subtitle1">
-                              {order.payReceive.toFixed(2)}
+                              {order.quantity === 0
+                                ? '-'
+                                : order.payReceive.toFixed(2)}
                             </Typography>
                           </Box>
                         </TableCell>
@@ -339,7 +343,7 @@ export function MyOrders() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} align="center">
+                    <TableCell colSpan={7} align="center">
                       None
                     </TableCell>
                   </TableRow>
