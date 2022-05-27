@@ -155,6 +155,7 @@ export const Tasks = (props: any) => {
   const [buyLimitFilled, setBuyLimitFilled] = useState('Open')
   const [sellLimit, setSellLimitFill] = useState('Open')
   const [sellLimitFilled, setSellLimitFilled] = useState('Open')
+  const [multiplier, setMultiplier] = useState(1)
   //  setBuyLimitFilled
   const myPositionTokens: string[] = []
   let newPoints = 0
@@ -264,7 +265,6 @@ export const Tasks = (props: any) => {
           })
       }
       if (diva) {
-        console.log(diva.filters)
         const LiquidityAdded = {
           address: diva.address,
           topics: [ethers.utils.id('LiquidityAdded(uint256,address,uint256)')],
@@ -442,6 +442,9 @@ export const Tasks = (props: any) => {
       }
     })
     setPoints(newPoints)
+    if (points === 3000) {
+      setMultiplier(1.5)
+    }
   }, [
     chainId,
     userAddress,
@@ -530,15 +533,27 @@ export const Tasks = (props: any) => {
             <Stack direction={'row'} sx={{ justifyContent: 'space-between' }}>
               <Container>
                 <Typography>Current points</Typography>
-                <Typography>-</Typography>
+                {userAddress != null ? (
+                  <Typography>{points}</Typography>
+                ) : (
+                  <Typography>-</Typography>
+                )}
               </Container>
               <Container>
                 <Typography>Multiplier</Typography>
-                <Typography>-</Typography>
+                {userAddress != null ? (
+                  <Typography>{multiplier}</Typography>
+                ) : (
+                  <Typography>-</Typography>
+                )}
               </Container>
               <Container>
                 <Typography>Total points</Typography>
-                <Typography>-</Typography>
+                {userAddress != null ? (
+                  <Typography>{points * multiplier}</Typography>
+                ) : (
+                  <Typography>-</Typography>
+                )}
               </Container>
             </Stack>
           </Container>
