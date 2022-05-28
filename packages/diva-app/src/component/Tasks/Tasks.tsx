@@ -184,24 +184,24 @@ export const Tasks = (props: any) => {
         if (
           pool.cap === pool.inflection &&
           pool.inflection === pool.floor &&
-          binary !== 'Closed'
+          binary !== 'Completed'
         ) {
-          binary = 'Closed'
+          binary = 'Completed'
         }
-        if (pool.floor < pool.inflection < pool.cap && linear !== 'Closed') {
-          linear = 'Closed'
+        if (pool.floor < pool.inflection < pool.cap && linear !== 'Completed') {
+          linear = 'Completed'
         }
         if (
           pool.inflection - pool.floor > pool.cap - pool.inflection &&
-          concave !== 'Closed'
+          concave !== 'Completed'
         ) {
-          concave = 'Closed'
+          concave = 'Completed'
         }
         if (
           pool.inflection - pool.floor < pool.cap - pool.inflection &&
-          convex !== 'Closed'
+          convex !== 'Completed'
         ) {
-          convex = 'Closed'
+          convex = 'Completed'
         }
       })
       if (zeroX) {
@@ -237,28 +237,28 @@ export const Tasks = (props: any) => {
               if (orderData[1].toLowerCase() === userAddress.toLowerCase()) {
                 if (
                   myPositionTokens.includes(orderData[5].toLowerCase()) &&
-                  buyLimit !== 'Closed'
+                  buyLimit !== 'Completed'
                 ) {
-                  setBuyLimitFill('Closed')
+                  setBuyLimitFill('Completed')
                 } else if (
                   myPositionTokens.includes(orderData[4].toLowerCase()) &&
-                  sellLimit !== 'Closed'
+                  sellLimit !== 'Completed'
                 ) {
-                  setSellLimitFill('Closed')
+                  setSellLimitFill('Completed')
                 }
               } else if (
                 orderData[2].toLowerCase() === userAddress.toLowerCase()
               ) {
                 if (
                   myPositionTokens.includes(orderData[5].toLowerCase()) &&
-                  buyLimitFilled !== 'Closed'
+                  buyLimitFilled !== 'Completed'
                 ) {
-                  setBuyLimitFilled('Closed')
+                  setBuyLimitFilled('Completed')
                 } else if (
                   myPositionTokens.includes(orderData[4].toLowerCase()) &&
-                  sellLimitFilled !== 'Closed'
+                  sellLimitFilled !== 'Completed'
                 ) {
-                  setSellLimitFilled('Closed')
+                  setSellLimitFilled('Completed')
                 }
               }
             })
@@ -304,7 +304,7 @@ export const Tasks = (props: any) => {
           .then((data) => {
             data.map((event) => {
               if (event.args[1].toLowerCase() === userAddress.toLowerCase()) {
-                setClaimFees('Closed')
+                setClaimFees('Completed')
               }
             })
           })
@@ -313,7 +313,7 @@ export const Tasks = (props: any) => {
           .then((data) => {
             data.map((event) => {
               if (event.args[1].toLowerCase() === userAddress.toLowerCase()) {
-                setFeeTransfered('Closed')
+                setFeeTransfered('Completed')
               }
             })
           })
@@ -324,11 +324,11 @@ export const Tasks = (props: any) => {
               if (event.args[1].toLowerCase() === userAddress.toLowerCase()) {
                 switch (event.args.statusFinalReferenceValue) {
                   case 1:
-                    setReported('Closed')
+                    setReported('Completed')
                     break
 
                   case 2:
-                    setChallenged('Closed')
+                    setChallenged('Completed')
                     break
                 }
               }
@@ -339,7 +339,7 @@ export const Tasks = (props: any) => {
           .then((data) => {
             data.map((event) => {
               if (event.args[1].toLowerCase() === userAddress.toLowerCase()) {
-                setAddLiquidity('Closed')
+                setAddLiquidity('Completed')
               }
             })
           })
@@ -348,7 +348,7 @@ export const Tasks = (props: any) => {
           .then((data) => {
             data.map((event) => {
               if (event.args[1].toLowerCase() === userAddress.toLowerCase()) {
-                setRemoveLiquidity('Closed')
+                setRemoveLiquidity('Completed')
               }
             })
           })
@@ -437,7 +437,7 @@ export const Tasks = (props: any) => {
       )
     }
     calcRows.map((row) => {
-      if (row.Status === 'Closed') {
+      if (row.Status === 'Completed') {
         newPoints = newPoints + 200
       }
     })
