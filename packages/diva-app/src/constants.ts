@@ -41,7 +41,7 @@ export const config: { [key: number]: SingleConfig } = {
   },
   4: {
     name: 'Rinkeby',
-    fromBlock: 12085615,
+    fromBlock: 10328465,
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     divaAddress: '0xa1fa77354D7810A6355583b566E5adB29C3f7733',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
@@ -54,7 +54,7 @@ export const config: { [key: number]: SingleConfig } = {
   },
   137: {
     name: 'Matic',
-    fromBlock: 12085615,
+    fromBlock: 25942586,
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     divaAddress: '0x27FaBaed614059b98e7f1e79D872e13aa65640a8',
     whitelistAddress: '0x3bcBFBd63f0387fF1b72a4C580fA7758C04B718d',
@@ -67,7 +67,7 @@ export const config: { [key: number]: SingleConfig } = {
   },
   42: {
     name: 'Kovan',
-    fromBlock: 12085615,
+    fromBlock: 30394849,
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     divaAddress: '0x607228ebB95aa097648Fa8b24dF8807684BBF101',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
@@ -80,7 +80,7 @@ export const config: { [key: number]: SingleConfig } = {
   },
   80001: {
     name: 'Mumbai',
-    fromBlock: 12085615,
+    fromBlock: 25514142,
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     divaAddress: '0xf2Ea8e23E1EaA2e5D280cE6b397934Ba7f30EF6B',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
