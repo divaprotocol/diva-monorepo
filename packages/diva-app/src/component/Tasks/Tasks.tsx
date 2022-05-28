@@ -10,10 +10,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
-import {
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { parseEther, parseUnits } from 'ethers/lib/utils'
 import DateRangeIcon from '@mui/icons-material/DateRange'
 import CampaignIcon from '@mui/icons-material/Campaign'
 import { ethers, BigNumber } from 'ethers'
