@@ -9,15 +9,22 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import DateRangeIcon from '@mui/icons-material/DateRange'
 import CampaignIcon from '@mui/icons-material/Campaign'
-import { ethers } from 'ethers'
+import { ethers, BigNumber } from 'ethers'
 import { config } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectPools, selectUserAddress } from '../../Redux/appSlice'
 import IZeroX_ABI from '../../abi/IZeroX.json'
+import { CollateralTokenEntity } from '../../lib/queries'
 
 const columns: GridColDef[] = [
   {
@@ -181,27 +188,58 @@ export const Tasks = (props: any) => {
         provider?.getSigner()
       )
       myPools.map((pool) => {
-        if (
-          pool.cap === pool.inflection &&
-          pool.inflection === pool.floor &&
-          binary !== 'Closed'
-        ) {
+        const floor = BigNumber.from(pool.floor)
+        const inflection = BigNumber.from(pool.inflection)
+        const cap = BigNumber.from(pool.cap)
+        const collateralBalanceLongInitial = BigNumber.from(
+          pool.collateralBalanceLongInitial
+        )
+        const collateralBalanceShortInitial = BigNumber.from(
+          pool.collateralBalanceShortInitial
+        )
+        const collateralUnit = parseUnits('1', pool.collateralToken.decimals)
+        const scaling = parseUnits('1', 18 - pool.collateralToken.decimals)
+
+        if (cap.eq(inflection) && inflection.eq(floor) && binary !== 'Closed') {
           binary = 'Closed'
         }
-        if (pool.floor < pool.inflection < pool.cap && linear !== 'Closed') {
-          linear = 'Closed'
-        }
-        if (
-          pool.inflection - pool.floor > pool.cap - pool.inflection &&
-          concave !== 'Closed'
-        ) {
-          concave = 'Closed'
-        }
-        if (
-          pool.inflection - pool.floor < pool.cap - pool.inflection &&
-          convex !== 'Closed'
-        ) {
-          convex = 'Closed'
+        if (floor.lt(inflection) && inflection.lt(cap)) {
+          if (
+            collateralBalanceLongInitial.eq(collateralBalanceShortInitial) &&
+            linear !== 'Closed'
+          ) {
+            linear = 'Closed'
+          }
+          if (
+            // concave: long payout at inflection > imaginary linear line
+            collateralBalanceLongInitial
+              .mul(collateralUnit)
+              .div(
+                collateralBalanceLongInitial.add(collateralBalanceShortInitial)
+              )
+              .mul(scaling)
+              .gt(
+                inflection.sub(floor).mul(parseEther('1')).div(cap.sub(floor))
+              ) &&
+            concave !== 'Closed'
+          ) {
+            concave = 'Closed'
+          }
+          if (
+            // convex: long payout at inflection < imaginary linear line
+            collateralBalanceLongInitial
+              .mul(collateralUnit)
+              .div(
+                collateralBalanceLongInitial.add(collateralBalanceShortInitial)
+              )
+              .mul(scaling)
+              .lt(
+                inflection.sub(floor).mul(parseEther('1')).div(cap.sub(floor))
+              ) &&
+            convex !== 'Closed'
+          ) {
+            convex = 'Closed'
+          }
         }
       })
       if (zeroX) {
