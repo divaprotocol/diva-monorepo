@@ -212,7 +212,7 @@ const NumberLinearProgress = (props: any) => {
       </Box>
       <Typography
         sx={{
-          pl: (props.value - 3) / 2,
+          pl: (props.value - 3).toString() + '%',
         }}
         variant="body2"
         color="textSecondary"
@@ -247,7 +247,7 @@ export const Tasks = (props: any) => {
   const [buyLimitFilled, setBuyLimitFilled] = useState('Open')
   const [sellLimit, setSellLimitFill] = useState('Open')
   const [sellLimitFilled, setSellLimitFilled] = useState('Open')
-  const [multiplier, setMultiplier] = useState(1)
+  const [multiplier, setMultiplier] = useState('1.0')
   //  setBuyLimitFilled
   const myPositionTokens: string[] = []
   let newPoints = 0
@@ -570,7 +570,7 @@ export const Tasks = (props: any) => {
     })
     setPoints(newPoints)
     if (points === 3000) {
-      setMultiplier(1.5)
+      setMultiplier('1.5')
     }
   }, [
     chainId,
@@ -612,7 +612,7 @@ export const Tasks = (props: any) => {
       <Stack spacing={theme.spacing(6)} sx={{ paddingLeft: theme.spacing(40) }}>
         <Box
           sx={{ mb: theme.spacing(-17), border: 1, borderColor: '#2A2A2D' }}
-          width={theme.spacing(55)}
+          width={theme.spacing(65)}
           height={theme.spacing(30)}
           style={{
             background: '#171718',
@@ -641,7 +641,7 @@ export const Tasks = (props: any) => {
           style={{
             background: 'linear-gradient(to bottom, #050539, #0D0D11)',
           }}
-          width={theme.spacing(55)}
+          width={theme.spacing(65)}
           height={theme.spacing(30)}
         >
           <Container sx={{ pt: theme.spacing(5) }}>
@@ -662,7 +662,7 @@ export const Tasks = (props: any) => {
               <Container>
                 <Typography>Multiplier</Typography>
                 {userAddress != null ? (
-                  <Typography>{multiplier}</Typography>
+                  <Typography>{multiplier}x</Typography>
                 ) : (
                   <Typography>-</Typography>
                 )}
@@ -670,7 +670,7 @@ export const Tasks = (props: any) => {
               <Container>
                 <Typography>Total points</Typography>
                 {userAddress != null ? (
-                  <Typography>{points * multiplier}</Typography>
+                  <Typography>{points * parseFloat(multiplier)}</Typography>
                 ) : (
                   <Typography>-</Typography>
                 )}
@@ -683,7 +683,7 @@ export const Tasks = (props: any) => {
             background: '#171718',
           }}
           sx={{ border: 1, borderColor: '#2A2A2D' }}
-          width={theme.spacing(55)}
+          width={theme.spacing(65)}
           height={theme.spacing(30)}
         >
           <Container sx={{ pt: theme.spacing(5) }}>
