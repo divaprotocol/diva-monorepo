@@ -47,10 +47,12 @@ const columns: GridColDef[] = [
           break
 
         case 5:
-          link = 'https://docs.divaprotocol.io/getting-started/add-liquidity'
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/add#add-liquidity-to-an-existing-pool'
           break
         case 6:
-          link = 'https://docs.divaprotocol.io/getting-started/remove-liquidity'
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/remove#remove-liquidity-from-an-existing-pool'
           break
 
         case 7:
@@ -240,6 +242,7 @@ export const Tasks = (props: any) => {
   const [addLiquidity, setAddLiquidity] = useState('Open')
   const [removeLiquidity, setRemoveLiquidity] = useState('Open')
   const [challenged, setChallenged] = useState('Open')
+  const [redeemed, setRedeemed] = useState('Open')
   const [reported, setReported] = useState('Open')
   const [feeTransferred, setFeeTransfered] = useState('Open')
   const [claimFees, setClaimFees] = useState('Open')
@@ -408,6 +411,14 @@ export const Tasks = (props: any) => {
             ethers.utils.id('StatusChanged(uint8,address,uint256,uint256)'),
           ],
         }
+        const Redeemed = {
+          address: diva.address,
+          topics: [
+            ethers.utils.id(
+              'PositionTokenRedeemed(uint256,address,uint256,uint256,address)'
+            ),
+          ],
+        }
         const FeeClaimTransferred = {
           address: diva.address,
           topics: [
@@ -477,6 +488,16 @@ export const Tasks = (props: any) => {
               }
             })
           })
+        diva.queryFilter(Redeemed, config[chainId].fromBlock).then((data) => {
+          data.map((event) => {
+            console.log(event)
+            if (
+              event.args.returnedTo.toLowerCase() === userAddress.toLowerCase()
+            ) {
+              setRedeemed('Completed')
+            }
+          })
+        })
       }
       setCalcRows(
         rows.map((v) => {
@@ -545,7 +566,7 @@ export const Tasks = (props: any) => {
             case 13:
               return {
                 ...v,
-                Status: 'Not Working',
+                Status: redeemed,
               }
             case 14:
               return {
@@ -581,6 +602,7 @@ export const Tasks = (props: any) => {
     feeTransferred,
     reported,
     challenged,
+    redeemed,
     buyLimit,
     buyLimitFilled,
     sellLimit,

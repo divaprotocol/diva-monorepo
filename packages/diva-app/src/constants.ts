@@ -41,9 +41,9 @@ export const config: { [key: number]: SingleConfig } = {
   },
   4: {
     name: 'Rinkeby',
-    fromBlock: 10328465,
+    fromBlock: 10749776,
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
-    divaAddress: '0xa1fa77354D7810A6355583b566E5adB29C3f7733',
+    divaAddress: '0x3481C73363b52a26068b1C7006CEF98670FEE514',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-rinkeby',

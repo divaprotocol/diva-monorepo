@@ -2,7 +2,7 @@
 // Make sure you have the respective amount of collateral tokens in the wallet that is creating the contingent pool (poolCreator.address)
 const addresses = {
     rinkeby: {
-      divaAddress: "0xa1fa77354D7810A6355583b566E5adB29C3f7733",
+      divaAddress: "0x3481C73363b52a26068b1C7006CEF98670FEE514",
       WETH: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
       WAGMI6: "0xb39be38E1A07b9274f38dCD02461D09f5E5bd3f6", 
       WAGMI18: "0xFaefAF1d3e979E2FA88107453E32319d26708C74", 
