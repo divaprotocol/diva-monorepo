@@ -200,7 +200,11 @@ export const Tasks = (props: any) => {
         const collateralUnit = parseUnits('1', pool.collateralToken.decimals)
         const scaling = parseUnits('1', 18 - pool.collateralToken.decimals)
 
-        if (cap.eq(inflection) && inflection.eq(floor) && binary !== 'Completed') {
+        if (
+          cap.eq(inflection) &&
+          inflection.eq(floor) &&
+          binary !== 'Completed'
+        ) {
           binary = 'Completed'
         }
         if (floor.lt(inflection) && inflection.lt(cap)) {
