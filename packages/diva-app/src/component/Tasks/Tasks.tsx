@@ -241,7 +241,7 @@ export const Tasks = (props: any) => {
   const [removeLiquidity, setRemoveLiquidity] = useState('Open')
   const [challenged, setChallenged] = useState('Open')
   const [reported, setReported] = useState('Open')
-  const [feeTrasfered, setFeeTransfered] = useState('Open')
+  const [feeTransferred, setFeeTransfered] = useState('Open')
   const [claimFees, setClaimFees] = useState('Open')
   const [buyLimit, setBuyLimitFill] = useState('Open')
   const [buyLimitFilled, setBuyLimitFilled] = useState('Open')
@@ -416,21 +416,19 @@ export const Tasks = (props: any) => {
             ),
           ],
         }
-        const FeeClaimAllocated = {
+        const FeesClaimed = {
           address: diva.address,
-          topics: [
-            ethers.utils.id('FeeClaimAllocated(uint256,address,uint256)'),
-          ],
+          topics: [ethers.utils.id('FeesClaimed(address,address,uint256)')],
         }
         const Transfer = {
           address: diva.address,
           topics: [ethers.utils.id('Transfer(address,address,uint256)')],
         }
         diva
-          .queryFilter(FeeClaimAllocated, config[chainId].fromBlock)
+          .queryFilter(FeesClaimed, config[chainId].fromBlock)
           .then((data) => {
             data.map((event) => {
-              if (event.args[1].toLowerCase() === userAddress.toLowerCase()) {
+              if (event.args[0].toLowerCase() === userAddress.toLowerCase()) {
                 setClaimFees('Completed')
               }
             })
@@ -537,12 +535,12 @@ export const Tasks = (props: any) => {
             case 11:
               return {
                 ...v,
-                Status: challenged,
+                Status: reported,
               }
             case 12:
               return {
                 ...v,
-                Status: reported,
+                Status: challenged,
               }
             case 13:
               return {
@@ -557,7 +555,7 @@ export const Tasks = (props: any) => {
             case 15:
               return {
                 ...v,
-                Status: feeTrasfered,
+                Status: feeTransferred,
               }
           }
         })
@@ -580,7 +578,7 @@ export const Tasks = (props: any) => {
     points,
     addLiquidity,
     removeLiquidity,
-    feeTrasfered,
+    feeTransferred,
     reported,
     challenged,
     buyLimit,
@@ -696,10 +694,9 @@ export const Tasks = (props: any) => {
                 direction={'row'}
                 sx={{ justifyContent: 'space-between' }}
               >
-                <Typography>2.0x</Typography>
+                <Typography>1.5x</Typography>
                 <Typography>
-                  Multiplier for each completed task if you are holding an
-                  888Whales NFT
+                  Multiplier on total points collected if you complete all tasks
                 </Typography>
               </Stack>
               <Stack
@@ -707,10 +704,18 @@ export const Tasks = (props: any) => {
                 direction={'row'}
                 sx={{ justifyContent: 'space-between' }}
               >
-                <Typography>1.5x</Typography>
+                <Typography>2.0x</Typography>
                 <Typography>
-                  Multiplier on total points collected if you complete all the
-                  tasks
+                  Multiplier on total points collected if you complete all tasks
+                  and hold an{' '}
+                  <Link
+                    href="https://opensea.io/collection/888whales/activity"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    888Whales NFT
+                  </Link>{' '}
+                  at DIVA token launch
                 </Typography>
               </Stack>
               <Stack spacing={theme.spacing(3)} direction={'row'}>

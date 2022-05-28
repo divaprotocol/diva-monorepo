@@ -49,7 +49,7 @@ export default function MenuItems() {
         </Tooltip>
       </Link>
       <Link to="/tasks">
-        <Tooltip title="Create Pool">
+        <Tooltip title="DIVA App Training">
           <TaskIcon
             color={
               location.pathname.toLowerCase() === '/tasks'
