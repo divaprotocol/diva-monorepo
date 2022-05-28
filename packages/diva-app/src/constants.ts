@@ -54,7 +54,7 @@ export const config: { [key: number]: SingleConfig } = {
   },
   137: {
     name: 'Matic',
-    fromBlock: 25942586,
+    fromBlock: 28885362,
     zeroXAddress: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     divaAddress: '0x27FaBaed614059b98e7f1e79D872e13aa65640a8',
     whitelistAddress: '0x3bcBFBd63f0387fF1b72a4C580fA7758C04B718d',
