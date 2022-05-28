@@ -1,17 +1,16 @@
 import { DataGrid, GridColDef, GridRowModel } from '@mui/x-data-grid'
 import React, { useEffect, useState } from 'react'
-import { useStyles } from '../Trade/Orders/UiStyles'
+import { useStyles, WhiteText } from '../Trade/Orders/UiStyles'
 import {
   Box,
   Container,
   LinearProgress,
   Stack,
+  Link,
   Typography,
   useTheme,
 } from '@mui/material'
 import {
-  formatEther,
-  formatUnits,
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
@@ -24,13 +23,87 @@ import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectPools, selectUserAddress } from '../../Redux/appSlice'
 import IZeroX_ABI from '../../abi/IZeroX.json'
-import { CollateralTokenEntity } from '../../lib/queries'
-
 const columns: GridColDef[] = [
   {
     field: 'Task',
     align: 'left',
     minWidth: 350,
+    renderCell: (cell) => {
+      let link = ''
+      switch (cell.id) {
+        case 1:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/create#create-position-tokens-with-a-binary-payoff'
+          break
+        case 2:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/create#create-position-tokens-with-a-linear-payoff'
+          break
+
+        case 3:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/create#create-position-tokens-with-a-convex-long-payoff-concave-short-payoff'
+          break
+        case 4:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/create#create-position-tokens-with-a-concave-long-payoff-convex-short-payoff'
+          break
+
+        case 5:
+          link = 'https://docs.divaprotocol.io/getting-started/add-liquidity'
+          break
+        case 6:
+          link = 'https://docs.divaprotocol.io/getting-started/remove-liquidity'
+          break
+
+        case 7:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/trade#create-a-buy-limit-order'
+          break
+        case 8:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/trade#create-a-sell-limit-order'
+          break
+
+        case 9:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/trade#fill-existing-buy-limit-orders-sell-market'
+          break
+
+        case 10:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/trade#fill-existing-sell-limit-orders-buy-market'
+          break
+
+        case 11:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/settle#report-final-value'
+          break
+
+        case 12:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/settle#challenge-a-reported-value'
+          break
+        case 13:
+          link = 'https://docs.divaprotocol.io/guides/diva-app-training/redeem'
+          break
+
+        case 14:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/fees#claim-fees-as-a-data-provider'
+          break
+        case 15:
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/fees#transfer-fee-claims'
+          break
+      }
+
+      return (
+        <Link href={link} rel="noopener noreferrer" target="_blank">
+          <WhiteText>{cell.value}</WhiteText>
+        </Link>
+      )
+    },
   },
   {
     field: 'Points',
@@ -134,7 +207,22 @@ const rows: GridRowModel = [
     Status: 'Unknown',
   },
 ]
-
+const NumberLinearProgress = (props: any) => {
+  return (
+    <Stack spacing={2}>
+      <Box mr={1}>
+        <LinearProgress variant="determinate" value={props.value} />
+      </Box>
+      <Typography
+        sx={{
+          pl: (props.value - 3) / 2,
+        }}
+        variant="body2"
+        color="textSecondary"
+      >{`${props.value}%`}</Typography>
+    </Stack>
+  )
+}
 export const Tasks = (props: any) => {
   const classes = useStyles()
   const theme = useTheme()
@@ -539,17 +627,10 @@ export const Tasks = (props: any) => {
                 <Typography sx={{ pb: theme.spacing(2) }}>
                   Your progress
                 </Typography>
-                <LinearProgress
+                <NumberLinearProgress
                   variant={'determinate'}
-                  value={(points / 3000) * 100}
+                  value={Math.round((points / 3000) * 100)}
                 />
-                <Stack
-                  direction={'row'}
-                  sx={{ justifyContent: 'space-between' }}
-                >
-                  <Typography>0%</Typography>
-                  <Typography>100%</Typography>
-                </Stack>
               </>
             ) : (
               <Typography sx={{ pl: theme.spacing(12), pt: theme.spacing(6) }}>
@@ -655,7 +736,17 @@ export const Tasks = (props: any) => {
               <CampaignIcon fontSize={'large'} />
               <Container>
                 <Typography>Feedback? Bug reports?</Typography>
-                <Typography>Let us know in our discord channel</Typography>
+                <Typography>
+                  Let us know in our{' '}
+                  <Link
+                    href="https://discord.gg/Pc7UBqxu2b"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    discord
+                  </Link>{' '}
+                  channel
+                </Typography>
               </Container>
             </Stack>
           </Container>
