@@ -305,10 +305,11 @@ export type DataFeed = {
   id: string
   referenceAsset: string
   referenceAssetUnified: string
+  active: boolean
 }
 
 export type DataProvider = {
-  dataFeeds: { id: string; referenceAssetUnified: string }[]
+  dataFeeds: { id: string; referenceAssetUnified: string; active: boolean }[]
   id: string
   name: string
 }
@@ -334,6 +335,7 @@ export const queryWhitelist = gql`
       dataFeeds {
         id
         referenceAssetUnified
+        active
       }
     }
     dataFeeds {
