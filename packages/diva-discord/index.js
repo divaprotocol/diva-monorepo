@@ -36,14 +36,16 @@ for (const file of commandFiles) {
 client.login(Config.TOKEN)
 //const channelId = "957700678254493776"
 
+let nonceCounter
 
-client.on("ready", () => {
+client.on("ready", async() => {
 
     console.log(`Logged in as ${client.user.tag}!`)
     //set guild to DIVA server
     const guildId = '928050978714976326'
     const guild = client.guilds.cache.get(guildId)
 
+    nonceCounter = await senderAccount.getTransactionCount('pending')
     //create commands
     let commands = guild.commands
 
@@ -92,22 +94,22 @@ client.on('interactionCreate', async(interaction) =>{
             return
         } else {
             //call function from the commands folder with the given commandName
-            console.log(interaction.member.roles)
+                
             //check if user has the needed role
             if (interaction.member.roles.cache.some(r => r.name === "Team")){
                 if (["address", "changeaddress"].includes(interaction.commandName)) {
                     client.commands.get(interaction.commandName).execute(interaction,
                         dbRegisteredUsers);
                 }
-                else if (["register", "claimtokens"].includes(interaction.commandName)) {
-                    console.log(Config.DUSD_CONTRACT)
-                    client.commands.get(interaction.commandName).execute(
+                else if  (["register", "claimtokens"].includes(interaction.commandName)) {
+                    nonceCounter = await client.commands.get(interaction.commandName).execute(
                         interaction,
                         dbRegisteredUsers,
                         Config.DUSD_CONTRACT,
-                        senderAccount);
+                        senderAccount,
+                        nonceCounter);
                 }
-            } else {
+            } else { 
                 interaction.reply({
                     content:  `Sorry, you don't have the needed permissions`,
                     ephemeral: true,
