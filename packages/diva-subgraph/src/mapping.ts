@@ -8,6 +8,7 @@ import {
   FeeClaimAllocated,
   FeeClaimTransferred,
   FeesClaimed,
+  PositionTokenRedeemed
 } from "../generated/DivaDiamond/DivaDiamond";
 import { Erc20Token } from "../generated/DivaDiamond/Erc20Token";
 import { PositionTokenABI } from "../generated/DivaDiamond/PositionTokenABI";
@@ -18,6 +19,7 @@ import {
   CollateralToken,
   FeeRecipientCollateralToken,
   PositionToken,
+  TestnetUser
 } from "../generated/schema";
 
 /**
@@ -39,6 +41,13 @@ function handleChallengeEvent(
   challenge.challengedBy = challengedBy;
   challenge.proposedFinalReferenceValue = proposedFinalReferenceValue;
   challenge.save();
+
+  let testnetUser = TestnetUser.load(challengedBy.toString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(challengedBy.toString());
+  }
+  testnetUser.reportedValueChallanged = true;
+  testnetUser.save();
 }
 
 /**
@@ -64,6 +73,28 @@ function handleLiquidityEvent(
     entity = new Pool(poolId.toString());
     entity.createdBy = msgSender;
     entity.createdAt = blockTimestamp;
+
+    let testnetUser = TestnetUser.load(address.toString());
+    if (!testnetUser) {
+      testnetUser = new TestnetUser(address.toString());
+    }
+    
+    let gradient = parameters.collateralBalanceLongInitial.div(
+      parameters.collateralBalanceLongInitial.plus(parameters.collateralBalanceShortInitial))
+    let gradientLinear = (parameters.inflection.minus(parameters.floor)).div(
+      parameters.cap.minus(parameters.floor));
+
+    if (parameters.floor.equals(parameters.inflection) && 
+      parameters.inflection.equals(parameters.cap)) {
+        testnetUser.binaryPoolCreated = true
+    } else if (gradient.equals(gradientLinear)) {
+      testnetUser.linearPoolCreated = true
+    } else if (gradient.gt(gradientLinear)) {
+      testnetUser.concavePoolCreated = true
+    } else if (gradient.lt(gradientLinear)) {
+      testnetUser.convexPoolCreated = true
+    }
+    testnetUser.save();
   }
 
   let collateralTokenEntity = CollateralToken.load(
@@ -197,6 +228,14 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
     event.transaction.from,
     event.block.timestamp
   );
+
+  let testnetUser = TestnetUser.load(event.transaction.from.toString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toString());
+  }
+  testnetUser.liquidityAdded = true;
+  testnetUser.save();
+
 }
 
 export function handleLiquidityRemoved(event: LiquidityRemoved): void {
@@ -207,6 +246,14 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
     event.transaction.from,
     event.block.timestamp
   );
+
+  let testnetUser = TestnetUser.load(event.transaction.from.toString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toString());
+  }
+  testnetUser.liquidityRemoved = true;
+  testnetUser.save();
+
 }
 
 export function handlePoolIssued(event: PoolIssued): void {
@@ -234,6 +281,14 @@ export function handleStatusChanged(event: StatusChanged): void {
       event.params.proposedFinalReferenceValue,
       event.transaction.hash.toHex() + "-" + event.logIndex.toString()
     );
+
+    let testnetUser = TestnetUser.load(event.transaction.from.toString());
+    if (!testnetUser) {
+      testnetUser = new TestnetUser(event.transaction.from.toString());
+    }
+    testnetUser.finalValueReported = true;
+    testnetUser.save();
+
   }
 }
 
@@ -264,6 +319,14 @@ export function handleFeeClaimTransferred(event: FeeClaimTransferred): void {
     event.params.amount,
     false
   ); // false is decrease
+
+  let testnetUser = TestnetUser.load(event.transaction.from.toString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toString());
+  }
+  testnetUser.feeClaimsTransfered = true;
+  testnetUser.save();
+
 }
 
 export function handleFeesClaimed(event: FeesClaimed): void {
@@ -274,6 +337,26 @@ export function handleFeesClaimed(event: FeesClaimed): void {
     event.params.amount,
     false
   );
+
+  let testnetUser = TestnetUser.load(event.transaction.from.toString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toString());
+  }
+  testnetUser.feesClaimed = true;
+  testnetUser.save();
 }
+
+export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void {
+  log.info("handlePositionTokenRedeemed fired", []);
+
+  let testnetUser = TestnetUser.load(event.transaction.from.toString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toString());
+  }
+  testnetUser.positionTokenRedeemed = true;
+  testnetUser.save();
+
+}
+
 
 // IMPORTANT: Updated the ABI as well!!!

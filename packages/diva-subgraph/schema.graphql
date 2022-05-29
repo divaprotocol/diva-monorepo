@@ -67,3 +67,18 @@ type PositionToken @entity {
   pool: Pool!
   owner: Bytes!
 }
+
+type TestnetUser @entity {
+  id: ID! # Address
+  binaryPoolCreated: Boolean!
+  linearPoolCreated: Boolean!
+  convexPoolCreated: Boolean!
+  concavePoolCreated: Boolean!
+  liquidityAdded: Boolean!
+  liquidityRemoved: Boolean!
+  finalValueReported: Boolean!
+  reportedValueChallanged: Boolean!
+  positionTokenRedeemed: Boolean!
+  feesClaimed: Boolean!
+  feeClaimsTransfered: Boolean!
+}
