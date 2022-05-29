@@ -30,20 +30,35 @@ module.exports = {
 
         //add user to database
         dbRegisteredUsers.set(interaction.user?.id, {address: address, 
-                                                    timestampLastClaim: new Date(),
-                                                    nbrClaims:1})
+            timestampLastClaim: new Date(),
+            nbrClaims:1})
         
+        amountdUsd = parseEther("10000")
         console.log(`Loading contract ${DUSD_CONTRACT}`)
         const erc20Contract = await ethers.getContractAt(ERC20_ABI, DUSD_CONTRACT)
-        console.log(`sending ${parseEther("1000")} dUSD from ${senderAccount} to ${address}`)
-        const tx = await erc20Contract.connect(senderAccount).transfer(address, parseEther("1000"))
+        console.log(`sending ${amountdUsd} dUSD from ${senderAccount} to ${address}`)
+        const tx = await erc20Contract.connect(senderAccount).transfer(address, amountdUsd)
         //const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
 
+        // Ether amount to send
+        let amountInEther = ethers.utils.parseEther('1')
+        // Create a transaction object
+        let txEth = {
+            to: address,
+            // Convert currency unit from ether to wei
+            value: amountInEther
+        }
+
+        console.log(`sending ${amountInEther} ETH from ${senderAccount} to ${address}`)
+        // Send a transaction
+        const txObj = await senderAccount.sendTransaction(txEth)
+
         interaction.reply({
-            content:  `You successfully registered for DIVA testnet :tada: \n`
-            +`You will shortly receive dUSD tokens on ropsten \n`
-            +`https://ropsten.etherscan.io/tx/${tx.hash}.`,
-            ephemeral: true,
+        content:  `You successfully registered for DIVA testnet :tada: \n`
+        +`You will shortly receive dUSD tokens on ropsten and ropsten ETH\n`
+        +`https://ropsten.etherscan.io/tx/${tx.hash} \n`
+        +`https://ropsten.etherscan.io/tx/${txObj.hash}`,
+        ephemeral: true,
         })
     }
 }
