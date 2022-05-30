@@ -20,7 +20,7 @@ class DIVATradeChart extends Component {
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
     // Set the dimensions and margins of the graph
     // var margin = {top: 50, right: 20, bottom: 30, left: 50},
-    var margin = { top: 5, right: 2, bottom: 20, left: 20 },
+    var margin = { top: 15, right: 2, bottom: 20, left: 20 },
       width = w - margin.left - margin.right,
       height = h - margin.top - margin.bottom
 
@@ -47,6 +47,7 @@ class DIVATradeChart extends Component {
       .attr('y', 15)
       .style('padding', 10)
       .style('text-align', 'left')
+      .style('fill', 'white')
       .text(' Payout per ' + optionTypeText + ' token (' + 'in ' + payOut + ')')
 
     // Add X axis
