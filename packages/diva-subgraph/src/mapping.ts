@@ -41,13 +41,6 @@ function handleChallengeEvent(
   challenge.challengedBy = challengedBy;
   challenge.proposedFinalReferenceValue = proposedFinalReferenceValue;
   challenge.save();
-
-  let testnetUser = TestnetUser.load(challengedBy.toHexString());
-  if (!testnetUser) {
-    testnetUser = new TestnetUser(challengedBy.toHexString());
-  }
-  testnetUser.reportedValueChallenged = true;
-  testnetUser.save();
 }
 
 /**
@@ -74,9 +67,9 @@ function handleLiquidityEvent(
     entity.createdBy = msgSender;
     entity.createdAt = blockTimestamp;
 
-    let testnetUser = TestnetUser.load(address.toHexString());
+    let testnetUser = TestnetUser.load(msgSender.toHexString());
     if (!testnetUser) {
-      testnetUser = new TestnetUser(address.toHexString());
+      testnetUser = new TestnetUser(msgSender.toHexString());
     }
 
     const unit = BigInt.fromString("1000000000000000000") // 1e18
@@ -235,9 +228,9 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
     event.block.timestamp
   );
 
-  let testnetUser = TestnetUser.load(event.address.toHexString());
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
-    testnetUser = new TestnetUser(event.address.toHexString());
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.liquidityAdded = true;
   testnetUser.save();
@@ -253,9 +246,9 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
     event.block.timestamp
   );
 
-  let testnetUser = TestnetUser.load(event.address.toHexString());
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
-    testnetUser = new TestnetUser(event.address.toHexString());
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.liquidityRemoved = true;
   testnetUser.save();
@@ -286,13 +279,21 @@ export function handleStatusChanged(event: StatusChanged): void {
       event.transaction.from,
       event.params.proposedFinalReferenceValue,
       event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-    ); // TestnetUser entity is updated inside handleChallengeEvent
+    );
+
+    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+    if (!testnetUser) {
+      testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    }
+    testnetUser.reportedValueChallenged = true;
+    testnetUser.save();
+
   } else if (event.params.statusFinalReferenceValue === 1) {
     // log.info("event.address: ", [event.address.toHexString()])
     // log.info("event.transaction.from: ", [event.transaction.from.toHexString()])
-    let testnetUser = TestnetUser.load(event.address.toHexString());
+    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
     if (!testnetUser) {
-      testnetUser = new TestnetUser(event.address.toHexString());
+      testnetUser = new TestnetUser(event.transaction.from.toHexString());
     }
     testnetUser.finalValueReported = true;
     testnetUser.save();
@@ -328,9 +329,9 @@ export function handleFeeClaimTransferred(event: FeeClaimTransferred): void {
     false
   ); // false is decrease
 
-  let testnetUser = TestnetUser.load(event.address.toHexString());
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
-    testnetUser = new TestnetUser(event.address.toHexString());
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.feeClaimsTransfered = true;
   testnetUser.save();
@@ -346,9 +347,9 @@ export function handleFeesClaimed(event: FeesClaimed): void {
     false
   );
 
-  let testnetUser = TestnetUser.load(event.address.toHexString());
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
-    testnetUser = new TestnetUser(event.address.toHexString());
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.feesClaimed = true;
   testnetUser.save();
@@ -357,9 +358,9 @@ export function handleFeesClaimed(event: FeesClaimed): void {
 export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void {
   log.info("handlePositionTokenRedeemed fired", []);
 
-  let testnetUser = TestnetUser.load(event.address.toHexString());
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
-    testnetUser = new TestnetUser(event.address.toHexString());
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.positionTokenRedeemed = true;
   testnetUser.save();
