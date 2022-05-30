@@ -15,9 +15,7 @@ import { parseUnits } from 'ethers/lib/utils'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
-
 import { config } from '../../constants'
-import { SideMenu } from './SideMenu'
 import PoolsTable from '../PoolsTable'
 import {
   FeeRecipientCollateralToken,
@@ -243,10 +241,8 @@ export function MyFeeClaims() {
       direction="row"
       sx={{
         height: '100%',
-        maxHeight: 'calc(100% - 6em)',
       }}
       spacing={6}
-      paddingTop={2}
       paddingRight={6}
     >
       {!userAddress ? (
@@ -263,7 +259,6 @@ export function MyFeeClaims() {
         </Typography>
       ) : (
         <>
-          <SideMenu />
           <PoolsTable
             page={page}
             rows={filtered}
