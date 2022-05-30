@@ -1,13 +1,10 @@
 import { Box, Tooltip } from '@mui/material'
 import { Stack } from '@mui/material'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Logo } from '../Logo'
 
 export default function MenuItems() {
-  const location = useLocation()
-  console.log({ location })
-
   return (
     <Stack
       width="70px"
@@ -29,7 +26,7 @@ export default function MenuItems() {
           />
         </Tooltip>
       </Link>
-      <Link to="/dashboard/mypositions">
+      <Link to="/dashboard">
         <Tooltip title=" My Dashboard">
           <Person
             color={
