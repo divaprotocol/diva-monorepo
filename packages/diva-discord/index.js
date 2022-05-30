@@ -102,12 +102,14 @@ client.on('interactionCreate', async(interaction) =>{
                         dbRegisteredUsers);
                 }
                 else if  (["register", "claimtokens"].includes(interaction.commandName)) {
+                    console.log(`nonceCounter before call of ${interaction.commandName} = ${nonceCounter}`)
                     nonceCounter = await client.commands.get(interaction.commandName).execute(
                         interaction,
                         dbRegisteredUsers,
                         Config.DUSD_CONTRACT,
                         senderAccount,
                         nonceCounter);
+                    console.log(`nonceCounter after call of ${interaction.commandName} = ${nonceCounter}`)
                 }
             } else { 
                 interaction.reply({

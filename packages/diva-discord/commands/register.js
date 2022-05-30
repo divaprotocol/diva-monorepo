@@ -14,7 +14,7 @@ module.exports = {
                     +`To change the your ethereum address use\n**/changeaddress ADDRESS**`,
                     ephemeral: true,
                 })
-                return
+                return nonceCounter
             }
 
             //get user input for 'address'
@@ -26,7 +26,7 @@ module.exports = {
                     content:  `The entered address is not a valid Ethereum wallet. Please check your input`,
                     ephemeral: true,
                 })
-                return
+                return nonceCounter
             }       
                 
             amountdUsd = parseEther("10000")

@@ -3,7 +3,7 @@ const { parseEther, parseUnits, formatUnits } = require('@ethersproject/units')
 
 module.exports = {
     name: 'claimtokens',
-    async execute(interaction, dbRegisteredUsers, senderAccount, nonceCounter) {
+    async execute(interaction, dbRegisteredUsers, DUSD_CONTRACT, senderAccount, nonceCounter) {
         try{
             console.log(`Function claimtokens called by ${interaction.user?.tag}`)
             const userId = interaction.user?.id
@@ -15,7 +15,7 @@ module.exports = {
                                 +`Register with **/register ADDRESS**`,
                     ephemeral: true,
                 })
-                return
+                return nonceCounter
             }
 
             //next possible claim is 24h after last claim
@@ -25,8 +25,8 @@ module.exports = {
                     content:  `You can only claim tokens once per 24h.\n `
                                 +`You need to wait ${new Date(timeUntilNewClaim).toISOString().slice(11,19)} before the next claim`,
                     ephemeral: true,
-                }) 
-                return
+                })
+                return nonceCounter
             }
 
             address = dbRegisteredUsers.get(userId, "address")
