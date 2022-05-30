@@ -80,5 +80,5 @@ type TestnetUser @entity {
   reportedValueChallenged: Boolean!
   positionTokenRedeemed: Boolean!
   feesClaimed: Boolean!
-  feeClaimsTransfered: Boolean!
+  feeClaimsTransferred: Boolean!
 }

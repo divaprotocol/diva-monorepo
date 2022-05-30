@@ -333,7 +333,7 @@ export function handleFeeClaimTransferred(event: FeeClaimTransferred): void {
   if (!testnetUser) {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
-  testnetUser.feeClaimsTransfered = true;
+  testnetUser.feeClaimsTransferred = true;
   testnetUser.save();
 
 }
