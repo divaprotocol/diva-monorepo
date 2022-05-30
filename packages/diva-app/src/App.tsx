@@ -19,7 +19,6 @@ import Stack from '@mui/material/Stack'
 import { MyOrders } from './component/Dashboard/MyOrders'
 import { config } from './constants'
 import { WrongChain } from './component/Wallet/WrongChain'
-
 export const App = () => {
   const dispatch = useDispatch()
   const chainId = useAppSelector((state) => state.appSlice.chainId)
