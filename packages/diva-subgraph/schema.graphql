@@ -77,7 +77,7 @@ type TestnetUser @entity {
   liquidityAdded: Boolean!
   liquidityRemoved: Boolean!
   finalValueReported: Boolean!
-  reportedValueChallanged: Boolean!
+  reportedValueChallenged: Boolean!
   positionTokenRedeemed: Boolean!
   feesClaimed: Boolean!
   feeClaimsTransfered: Boolean!

@@ -24,10 +24,10 @@ export const config: { [key: number]: SingleConfig } = {
   },
   3: {
     name: 'Ropsten',
-    divaAddress: '0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf',
+    divaAddress: '0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
+      'https://api.thegraph.com/subgraphs/name/walodja1987/diva-ropsten-v2',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
     allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
