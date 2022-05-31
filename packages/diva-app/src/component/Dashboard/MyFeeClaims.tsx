@@ -265,6 +265,7 @@ export function MyFeeClaims() {
         <>
           <SideMenu />
           <PoolsTable
+            disableRowClick
             page={page}
             rows={filtered}
             columns={columns}

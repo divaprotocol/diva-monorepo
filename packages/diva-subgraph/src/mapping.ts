@@ -8,6 +8,7 @@ import {
   FeeClaimAllocated,
   FeeClaimTransferred,
   FeesClaimed,
+  PositionTokenRedeemed
 } from "../generated/DivaDiamond/DivaDiamond";
 import { Erc20Token } from "../generated/DivaDiamond/Erc20Token";
 import { PositionTokenABI } from "../generated/DivaDiamond/PositionTokenABI";
@@ -18,6 +19,7 @@ import {
   CollateralToken,
   FeeRecipientCollateralToken,
   PositionToken,
+  TestnetUser
 } from "../generated/schema";
 
 /**
@@ -64,6 +66,34 @@ function handleLiquidityEvent(
     entity = new Pool(poolId.toString());
     entity.createdBy = msgSender;
     entity.createdAt = blockTimestamp;
+
+    let testnetUser = TestnetUser.load(msgSender.toHexString());
+    if (!testnetUser) {
+      testnetUser = new TestnetUser(msgSender.toHexString());
+    }
+
+    const unit = BigInt.fromString("1000000000000000000") // 1e18
+
+    let gradient = parameters.collateralBalanceLongInitial.times(unit).div(
+      parameters.collateralBalanceLongInitial.plus(parameters.collateralBalanceShortInitial)) // TODO: account for collateral token decimals and then scale to 18 decimals
+
+    let gradientLinear = new BigInt(1); // CHECK with Sascha
+    if (parameters.cap != parameters.floor) {
+      gradientLinear = (parameters.inflection.minus(parameters.floor)).times(unit).div(
+        parameters.cap.minus(parameters.floor));
+    }
+
+    if (parameters.floor.equals(parameters.inflection) &&
+      parameters.inflection.equals(parameters.cap)) {
+        testnetUser.binaryPoolCreated = true
+    } else if (gradient.equals(gradientLinear)) {
+      testnetUser.linearPoolCreated = true
+    } else if (gradient.gt(gradientLinear)) {
+      testnetUser.concavePoolCreated = true
+    } else if (gradient.lt(gradientLinear)) {
+      testnetUser.convexPoolCreated = true
+    }
+    testnetUser.save();
   }
 
   let collateralTokenEntity = CollateralToken.load(
@@ -197,6 +227,14 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
     event.transaction.from,
     event.block.timestamp
   );
+
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+  }
+  testnetUser.liquidityAdded = true;
+  testnetUser.save();
+
 }
 
 export function handleLiquidityRemoved(event: LiquidityRemoved): void {
@@ -207,6 +245,14 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
     event.transaction.from,
     event.block.timestamp
   );
+
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+  }
+  testnetUser.liquidityRemoved = true;
+  testnetUser.save();
+
 }
 
 export function handlePoolIssued(event: PoolIssued): void {
@@ -234,6 +280,24 @@ export function handleStatusChanged(event: StatusChanged): void {
       event.params.proposedFinalReferenceValue,
       event.transaction.hash.toHex() + "-" + event.logIndex.toString()
     );
+
+    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+    if (!testnetUser) {
+      testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    }
+    testnetUser.reportedValueChallenged = true;
+    testnetUser.save();
+
+  } else if (event.params.statusFinalReferenceValue === 1) {
+    // log.info("event.address: ", [event.address.toHexString()])
+    // log.info("event.transaction.from: ", [event.transaction.from.toHexString()])
+    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+    if (!testnetUser) {
+      testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    }
+    testnetUser.finalValueReported = true;
+    testnetUser.save();
+
   }
 }
 
@@ -264,6 +328,14 @@ export function handleFeeClaimTransferred(event: FeeClaimTransferred): void {
     event.params.amount,
     false
   ); // false is decrease
+
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+  }
+  testnetUser.feeClaimsTransferred = true;
+  testnetUser.save();
+
 }
 
 export function handleFeesClaimed(event: FeesClaimed): void {
@@ -274,6 +346,26 @@ export function handleFeesClaimed(event: FeesClaimed): void {
     event.params.amount,
     false
   );
+
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+  }
+  testnetUser.feesClaimed = true;
+  testnetUser.save();
 }
+
+export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void {
+  log.info("handlePositionTokenRedeemed fired", []);
+
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+  }
+  testnetUser.positionTokenRedeemed = true;
+  testnetUser.save();
+
+}
+
 
 // IMPORTANT: Updated the ABI as well!!!
