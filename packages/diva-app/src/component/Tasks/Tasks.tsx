@@ -583,8 +583,7 @@ export const Tasks = (props: any) => {
               >
                 <Typography>1.5x</Typography>
                 <Typography>
-                  Multiplier for each completed task if you are holding an
-                  888Whales NFT
+                  Multiplier on points collected if you complete all tasks
                 </Typography>
               </Stack>
               <Stack
@@ -592,10 +591,10 @@ export const Tasks = (props: any) => {
                 direction={'row'}
                 sx={{ justifyContent: 'space-between' }}
               >
-                <Typography>2.0x</Typography>
+                <Typography>3.0x</Typography>
                 <Typography>
-                  Multiplier on total points collected if you complete all tasks
-                  and hold an{' '}
+                  Multiplier on points collected if you complete all tasks AND
+                  hold an{' '}
                   <Link
                     href="https://opensea.io/collection/888whales/activity"
                     rel="noopener noreferrer"
