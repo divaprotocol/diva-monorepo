@@ -23,6 +23,3 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     nativeOrderFillEntity.save();
 
 }
-
-// Fill order from acc1: https://ropsten.etherscan.io/tx/0xa4c687b28f4c67527b1e70b8a608a05b95e126fb5b7f9077ebbcc604cc4ac19b
-// FillLimitOrder event in 0x: https://ropsten.etherscan.io/tx/0xa4c687b28f4c67527b1e70b8a608a05b95e126fb5b7f9077ebbcc604cc4ac19b#eventlog
