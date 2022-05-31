@@ -326,7 +326,83 @@ export type WhitelistQueryResponse = {
   dataFeeds: DataFeed[]
   collateralTokens: WhitelistCollateralToken[]
 }
+export type TestUser = {
+  id: BigNumber
+  binaryPoolCreated: boolean
+  linearPoolCreated: boolean
+  convexPoolCreated: boolean
+  concavePoolCreated: boolean
+  liquidityAdded: boolean
+  liquidityRemoved: boolean
+  finalValueReported: boolean
+  reportedValueChallanged: boolean
+  positionTokenRedeemed: boolean
+  feesClaimed: boolean
+  feeClaimsTransfered: boolean
+}
 
+export type OrderFill = {
+  id: string
+  orderHash: string
+  maker: string
+  taker: string
+  makerToken: string
+  takerToken: string
+  makerTokenFilledAmount: string
+  takerTokenFilledAmount: string
+}
+
+export const queryOrderFillsMaker = (address: string) => gql`
+  {
+    nativeOrderFills(
+      where: { maker: "${address}" }
+    ) {
+      id
+      orderHash
+      maker
+      taker
+      makerToken
+      takerToken
+      makerTokenFilledAmount
+      takerTokenFilledAmount
+    }
+  }
+`
+
+export const queryOrderFills = (address: string) => gql`
+  {
+    nativeOrderFills(
+      where: { taker: "${address}" }
+    ) {
+      id
+      orderHash
+      maker
+      taker
+      makerToken
+      takerToken
+      makerTokenFilledAmount
+      takerTokenFilledAmount
+    }
+  }
+`
+export const queryTestUser = (address: string) => gql`
+  {
+  testnetUser(id: "${address}") {
+    id
+    binaryPoolCreated
+    linearPoolCreated
+    convexPoolCreated
+    concavePoolCreated
+    liquidityAdded
+    liquidityRemoved
+    finalValueReported
+    reportedValueChallenged
+    positionTokenRedeemed
+    feesClaimed
+    feeClaimsTransferred
+  }
+}
+`
 export const queryWhitelist = gql`
   {
     dataProviders {

@@ -20,6 +20,15 @@ import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectPools, selectUserAddress } from '../../Redux/appSlice'
 import IZeroX_ABI from '../../abi/IZeroX.json'
+import { useQuery } from 'react-query'
+import {
+  OrderFill,
+  queryOrderFills,
+  queryOrderFillsMaker,
+  queryTestUser,
+  TestUser,
+} from '../../lib/queries'
+import request from 'graphql-request'
 const columns: GridColDef[] = [
   {
     field: 'Task',
@@ -47,10 +56,12 @@ const columns: GridColDef[] = [
           break
 
         case 5:
-          link = 'https://docs.divaprotocol.io/getting-started/add-liquidity'
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/add#add-liquidity-to-an-existing-pool'
           break
         case 6:
-          link = 'https://docs.divaprotocol.io/getting-started/remove-liquidity'
+          link =
+            'https://docs.divaprotocol.io/guides/diva-app-training/remove#remove-liquidity-from-an-existing-pool'
           break
 
         case 7:
@@ -232,10 +243,10 @@ export const Tasks = (props: any) => {
   )
   const calcStatuses = rows
   const [calcRows, setCalcRows] = useState(rows)
-  let binary = 'Open'
-  let linear = 'Open'
-  let concave = 'Open'
-  let convex = 'Open'
+  const [binary, setBinary] = useState('Open')
+  const [linear, setLinear] = useState('Open')
+  const [convex, setConvex] = useState('Open')
+  const [concave, setConcave] = useState('Open')
   const [points, setPoints] = useState(0)
   const [addLiquidity, setAddLiquidity] = useState('Open')
   const [removeLiquidity, setRemoveLiquidity] = useState('Open')
@@ -247,272 +258,129 @@ export const Tasks = (props: any) => {
   const [buyLimitFilled, setBuyLimitFilled] = useState('Open')
   const [sellLimit, setSellLimitFill] = useState('Open')
   const [sellLimitFilled, setSellLimitFilled] = useState('Open')
+  const [redeemed, setRedeemed] = useState('Open')
   const [multiplier, setMultiplier] = useState('1.0')
+  let score = 0
   //  setBuyLimitFilled
   const myPositionTokens: string[] = []
-  let newPoints = 0
+  const testnetUser = useQuery<TestUser>('testnetUser', async () => {
+    const response = request(
+      config[chainId].divaSubgraph,
+      queryTestUser(userAddress)
+    ).then((user) => {
+      if (user.testnetUser != null) {
+        return user.testnetUser
+      } else {
+        return {}
+      }
+    })
+    return response
+  })
+  const orderFills = useQuery<OrderFill[]>('orderFills', async () => {
+    const response = request(
+      config[chainId].zeroxSubgraph,
+      queryOrderFills(userAddress)
+    ).then((orders) => {
+      if (orders.nativeOrderFills != null) {
+        return orders.nativeOrderFills
+      } else {
+        return {}
+      }
+    })
+    return response
+  })
+  const orderFillsMaker = useQuery<OrderFill[]>('orderFillsMaker', async () => {
+    const response = request(
+      config[chainId].zeroxSubgraph,
+      queryOrderFillsMaker(userAddress)
+    ).then((orders) => {
+      if (orders.nativeOrderFills != null) {
+        return orders.nativeOrderFills
+      } else {
+        return {}
+      }
+    })
+    return response
+  })
   useEffect(() => {
     if (
-      myPools != null &&
-      chainId != null &&
-      userAddress != null &&
-      provider != null
+      pools != null &&
+      orderFills.data != null &&
+      orderFillsMaker.data != null &&
+      testnetUser.data != null &&
+      userAddress != null
     ) {
-      myPools.map((pool) => {
+      pools.map((pool) => {
         myPositionTokens.push(pool.longToken.id.toLowerCase())
         myPositionTokens.push(pool.shortToken.id.toLowerCase())
       })
-      const diva = new ethers.Contract(
-        config[chainId].divaAddress,
-        DIVA_ABI,
-        provider?.getSigner()
-      )
-      const zeroX = new ethers.Contract(
-        config[chainId].zeroXAddress,
-        IZeroX_ABI,
-        provider?.getSigner()
-      )
-      myPools.map((pool) => {
-        const floor = BigNumber.from(pool.floor)
-        const inflection = BigNumber.from(pool.inflection)
-        const cap = BigNumber.from(pool.cap)
-        const collateralBalanceLongInitial = BigNumber.from(
-          pool.collateralBalanceLongInitial
-        )
-        const collateralBalanceShortInitial = BigNumber.from(
-          pool.collateralBalanceShortInitial
-        )
-        const collateralUnit = parseUnits('1', pool.collateralToken.decimals)
-        const scaling = parseUnits('1', 18 - pool.collateralToken.decimals)
 
-        if (
-          cap.eq(inflection) &&
-          inflection.eq(floor) &&
-          binary !== 'Completed'
-        ) {
-          binary = 'Completed'
-        }
-        if (floor.lt(inflection) && inflection.lt(cap)) {
-          if (
-            collateralBalanceLongInitial.eq(collateralBalanceShortInitial) &&
-            linear !== 'Completed'
-          ) {
-            linear = 'Completed'
-          }
-          if (
-            // concave: long payout at inflection > imaginary linear line
-            collateralBalanceLongInitial
-              .mul(collateralUnit)
-              .div(
-                collateralBalanceLongInitial.add(collateralBalanceShortInitial)
-              )
-              .mul(scaling)
-              .gt(
-                inflection.sub(floor).mul(parseEther('1')).div(cap.sub(floor))
-              ) &&
-            concave !== 'Completed'
-          ) {
-            concave = 'Completed'
-          }
-          if (
-            // convex: long payout at inflection < imaginary linear line
-            collateralBalanceLongInitial
-              .mul(collateralUnit)
-              .div(
-                collateralBalanceLongInitial.add(collateralBalanceShortInitial)
-              )
-              .mul(scaling)
-              .lt(
-                inflection.sub(floor).mul(parseEther('1')).div(cap.sub(floor))
-              ) &&
-            convex !== 'Completed'
-          ) {
-            convex = 'Completed'
-          }
+      orderFills.data.map((order) => {
+        if (myPositionTokens.includes(order.takerToken.toLowerCase())) {
+          setBuyLimitFill('Completed')
+        } else if (myPositionTokens.includes(order.makerToken.toLowerCase())) {
+          setSellLimitFill('Completed')
         }
       })
-      if (zeroX) {
-        const orderFilled = {
-          address: zeroX.address,
-          fromBlock: config[chainId].fromBlock,
-          topics: [
-            ethers.utils.id(
-              'LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)'
-            ),
-          ],
-        }
-        zeroX
-          .queryFilter(orderFilled, config[chainId].fromBlock)
-          .then((data) => {
-            data.map((event) => {
-              const orderData = ethers.utils.defaultAbiCoder.decode(
-                [
-                  'bytes32',
-                  'address',
-                  'address',
-                  'address',
-                  'address',
-                  'address',
-                  'uint128',
-                  'uint128',
-                  'uint128',
-                  'uint256',
-                  'bytes32',
-                ],
-                event.data
-              )
-              if (orderData[1].toLowerCase() === userAddress.toLowerCase()) {
-                if (
-                  myPositionTokens.includes(orderData[5].toLowerCase()) &&
-                  buyLimit !== 'Completed'
-                ) {
-                  setBuyLimitFill('Completed')
-                } else if (
-                  myPositionTokens.includes(orderData[4].toLowerCase()) &&
-                  sellLimit !== 'Completed'
-                ) {
-                  setSellLimitFill('Completed')
-                }
-              } else if (
-                orderData[2].toLowerCase() === userAddress.toLowerCase()
-              ) {
-                if (
-                  myPositionTokens.includes(orderData[5].toLowerCase()) &&
-                  buyLimitFilled !== 'Completed'
-                ) {
-                  setBuyLimitFilled('Completed')
-                } else if (
-                  myPositionTokens.includes(orderData[4].toLowerCase()) &&
-                  sellLimitFilled !== 'Completed'
-                ) {
-                  setSellLimitFilled('Completed')
-                }
-              }
-            })
-          })
-      }
-      if (diva) {
-        const LiquidityAdded = {
-          address: diva.address,
-          topics: [ethers.utils.id('LiquidityAdded(uint256,address,uint256)')],
-        }
-        const LiquidityRemoved = {
-          address: diva.address,
-          topics: [
-            ethers.utils.id('LiquidityRemoved(uint256,address,uint256)'),
-          ],
-        }
-        const statusChanged = {
-          address: diva.address,
-          topics: [
-            ethers.utils.id('StatusChanged(uint8,address,uint256,uint256)'),
-          ],
-        }
-        const FeeClaimTransferred = {
-          address: diva.address,
-          topics: [
-            ethers.utils.id(
-              'FeeClaimTransferred(address,address,address,uint256)'
-            ),
-          ],
-        }
-        const FeeClaimAllocated = {
-          address: diva.address,
-          topics: [
-            ethers.utils.id('FeeClaimAllocated(uint256,address,uint256)'),
-          ],
-        }
-        const Transfer = {
-          address: diva.address,
-          topics: [ethers.utils.id('Transfer(address,address,uint256)')],
-        }
-        diva
-          .queryFilter(FeeClaimAllocated, config[chainId].fromBlock)
-          .then((data) => {
-            data.map((event) => {
-              if (event.args[1].toLowerCase() === userAddress.toLowerCase()) {
-                setClaimFees('Completed')
-              }
-            })
-          })
-        diva
-          .queryFilter(FeeClaimTransferred, config[chainId].fromBlock)
-          .then((data) => {
-            data.map((event) => {
-              if (event.args[1].toLowerCase() === userAddress.toLowerCase()) {
-                setFeeTransfered('Completed')
-              }
-            })
-          })
-        diva
-          .queryFilter(statusChanged, config[chainId].fromBlock)
-          .then((data) => {
-            data.map((event) => {
-              if (event.args[1].toLowerCase() === userAddress.toLowerCase()) {
-                switch (event.args.statusFinalReferenceValue) {
-                  case 1:
-                    setReported('Completed')
-                    break
 
-                  case 2:
-                    setChallenged('Completed')
-                    break
-                }
-              }
-            })
-          })
-        diva
-          .queryFilter(LiquidityAdded, config[chainId].fromBlock)
-          .then((data) => {
-            data.map((event) => {
-              if (event.args[1].toLowerCase() === userAddress.toLowerCase()) {
-                setAddLiquidity('Completed')
-              }
-            })
-          })
-        diva
-          .queryFilter(LiquidityRemoved, config[chainId].fromBlock)
-          .then((data) => {
-            data.map((event) => {
-              if (event.args[1].toLowerCase() === userAddress.toLowerCase()) {
-                setRemoveLiquidity('Completed')
-              }
-            })
-          })
-      }
+      orderFillsMaker.data.map((order) => {
+        if (myPositionTokens.includes(order.takerToken.toLowerCase())) {
+          setBuyLimitFilled('Completed')
+        } else if (myPositionTokens.includes(order.makerToken.toLowerCase())) {
+          setSellLimitFilled('Completed')
+        }
+      })
       setCalcRows(
         rows.map((v) => {
           switch (v.id) {
             case 1:
               return {
                 ...v,
-                Status: binary,
+                Status:
+                  testnetUser.data?.binaryPoolCreated == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 2:
               return {
                 ...v,
-                Status: linear,
+                Status:
+                  testnetUser.data?.linearPoolCreated == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 3:
               return {
                 ...v,
-                Status: convex,
+                Status:
+                  testnetUser.data?.convexPoolCreated == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 4:
               return {
                 ...v,
-                Status: concave,
+                Status:
+                  testnetUser.data?.concavePoolCreated == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 5:
               return {
                 ...v,
-                Status: addLiquidity,
+                Status:
+                  testnetUser.data?.liquidityAdded == true
+                    ? 'Completed'
+                    : 'Open',
               }
 
             case 6:
               return {
                 ...v,
-                Status: removeLiquidity,
+                Status:
+                  testnetUser.data?.liquidityRemoved == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 7:
               return {
@@ -537,57 +405,68 @@ export const Tasks = (props: any) => {
             case 11:
               return {
                 ...v,
-                Status: challenged,
+                Status:
+                  testnetUser.data?.finalValueReported == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 12:
               return {
                 ...v,
-                Status: reported,
+                Status:
+                  testnetUser.data?.reportedValueChallanged == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 13:
               return {
                 ...v,
-                Status: 'Not Working',
+                Status:
+                  testnetUser.data?.positionTokenRedeemed == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 14:
               return {
                 ...v,
-                Status: claimFees,
+                Status:
+                  testnetUser.data?.feesClaimed == true ? 'Completed' : 'Open',
               }
             case 15:
               return {
                 ...v,
-                Status: feeTrasfered,
+                Status:
+                  testnetUser.data?.feeClaimsTransfered == true
+                    ? 'Completed'
+                    : 'Open',
               }
           }
         })
       )
     }
+  }, [
+    testnetUser.isSuccess,
+    orderFillsMaker.isSuccess,
+    orderFills.isSuccess,
+    userAddress,
+    myPositionTokens != null,
+    buyLimitFilled,
+    buyLimit,
+    sellLimitFilled,
+    sellLimit,
+  ])
+
+  useEffect(() => {
     calcRows.map((row) => {
       if (row.Status === 'Completed') {
-        newPoints = newPoints + 200
+        score = score + 200
       }
     })
-    setPoints(newPoints)
+    setPoints(score)
     if (points === 3000) {
       setMultiplier('1.5')
     }
-  }, [
-    chainId,
-    userAddress,
-    provider,
-    claimFees,
-    points,
-    addLiquidity,
-    removeLiquidity,
-    feeTrasfered,
-    reported,
-    challenged,
-    buyLimit,
-    buyLimitFilled,
-    sellLimit,
-    sellLimitFilled,
-  ])
+  }, [calcRows])
   return (
     <Stack
       sx={{ justifyContent: 'space-between' }}
@@ -696,7 +575,7 @@ export const Tasks = (props: any) => {
                 direction={'row'}
                 sx={{ justifyContent: 'space-between' }}
               >
-                <Typography>2.0x</Typography>
+                <Typography>1.5x</Typography>
                 <Typography>
                   Multiplier for each completed task if you are holding an
                   888Whales NFT
@@ -707,10 +586,18 @@ export const Tasks = (props: any) => {
                 direction={'row'}
                 sx={{ justifyContent: 'space-between' }}
               >
-                <Typography>1.5x</Typography>
+                <Typography>2.0x</Typography>
                 <Typography>
-                  Multiplier on total points collected if you complete all the
-                  tasks
+                  Multiplier on total points collected if you complete all tasks
+                  and hold an{' '}
+                  <Link
+                    href="https://opensea.io/collection/888whales/activity"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    888Whales NFT
+                  </Link>{' '}
+                  at DIVA token launch
                 </Typography>
               </Stack>
               <Stack spacing={theme.spacing(3)} direction={'row'}>
