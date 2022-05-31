@@ -414,7 +414,7 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.reportedValueChallanged == true
+                  testnetUser.data?.reportedValueChallenged == true
                     ? 'Completed'
                     : 'Open',
               }
@@ -436,7 +436,7 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.feeClaimsTransfered == true
+                  testnetUser.data?.feeClaimsTransferred == true
                     ? 'Completed'
                     : 'Open',
               }

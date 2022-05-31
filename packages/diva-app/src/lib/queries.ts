@@ -335,10 +335,10 @@ export type TestUser = {
   liquidityAdded: boolean
   liquidityRemoved: boolean
   finalValueReported: boolean
-  reportedValueChallanged: boolean
+  reportedValueChallenged: boolean
   positionTokenRedeemed: boolean
   feesClaimed: boolean
-  feeClaimsTransfered: boolean
+  feeClaimsTransferred: boolean
 }
 
 export type OrderFill = {
