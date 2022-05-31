@@ -26,12 +26,10 @@ export default function MenuItems() {
           />
         </Tooltip>
       </Link>
-      <Link to="/dashboard">
+      <Link to="/dashboard/MyPositions">
         <Tooltip title=" My Dashboard">
           <Person
-            color={
-              location.pathname.startsWith('/dashboard') ? 'primary' : 'action'
-            }
+            color={location.pathname == '/dashboard' ? 'primary' : 'action'}
           />
         </Tooltip>
       </Link>
