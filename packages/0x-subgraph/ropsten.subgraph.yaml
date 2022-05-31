@@ -3,7 +3,7 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: DivaDiamond
+    name: ExchangeProxy
     network: ropsten
     source:
       address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
