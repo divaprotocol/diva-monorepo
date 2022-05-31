@@ -254,9 +254,9 @@ export const Tasks = (props: any) => {
   const [reported, setReported] = useState('Open')
   const [feeTrasfered, setFeeTransfered] = useState('Open')
   const [claimFees, setClaimFees] = useState('Open')
-  const [buyLimit, setBuyLimitFill] = useState('Open')
+  const [buyLimit, setBuyLimit] = useState('Open')
   const [buyLimitFilled, setBuyLimitFilled] = useState('Open')
-  const [sellLimit, setSellLimitFill] = useState('Open')
+  const [sellLimit, setSellLimit] = useState('Open')
   const [sellLimitFilled, setSellLimitFilled] = useState('Open')
   const [redeemed, setRedeemed] = useState('Open')
   const [multiplier, setMultiplier] = useState('1.0')
@@ -315,15 +315,21 @@ export const Tasks = (props: any) => {
         myPositionTokens.push(pool.shortToken.id.toLowerCase())
       })
 
-      orderFills.data.map((order) => {
+      console.log('myPositionTokens')
+      console.log(myPositionTokens)
+
+      console.log('orderFills')
+      console.log(orderFills.data)
+
+      orderFillsMaker.data.map((order) => {
         if (myPositionTokens.includes(order.takerToken.toLowerCase())) {
-          setBuyLimitFill('Completed')
+          setBuyLimit('Completed')
         } else if (myPositionTokens.includes(order.makerToken.toLowerCase())) {
-          setSellLimitFill('Completed')
+          setSellLimit('Completed')
         }
       })
 
-      orderFillsMaker.data.map((order) => {
+      orderFills.data.map((order) => {
         if (myPositionTokens.includes(order.takerToken.toLowerCase())) {
           setBuyLimitFilled('Completed')
         } else if (myPositionTokens.includes(order.makerToken.toLowerCase())) {
