@@ -109,6 +109,9 @@ export const useCreatePoolFormik = () => {
       const collateralBalance =
         values.collateralBalanceLong + values.collateralBalanceShort
       const walletBalance = parseFloat(values.collateralWalletBalance)
+      if (values.referenceAsset == null) {
+        errors.referenceAsset = 'You must choose a reference asset'
+      }
       if (values.collateralToken == null) {
         errors.collateralToken = 'You must choose a collateral asset'
       }

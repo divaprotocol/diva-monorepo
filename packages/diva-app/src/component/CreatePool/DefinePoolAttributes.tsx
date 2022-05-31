@@ -169,7 +169,11 @@ export function DefinePoolAttributes({
                   pt={2}
                   pb={4}
                 >
-                  {isCustomReferenceAsset ? (
+                  {formik.errors.referenceAsset != null ? (
+                    <FormHelperText>
+                      {formik.errors.referenceAsset}
+                    </FormHelperText>
+                  ) : isCustomReferenceAsset ? (
                     <>
                       <CheckCircle
                         fontSize="small"
