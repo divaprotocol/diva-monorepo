@@ -79,7 +79,6 @@ export default function Markets() {
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
   }
-  console.log('page=', page)
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
     const fallbackPeriod = expiryTime.setMinutes(

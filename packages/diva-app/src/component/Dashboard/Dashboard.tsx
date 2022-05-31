@@ -5,9 +5,21 @@ import { MyDataFeeds } from './MyDataFeeds'
 import { MyFeeClaims } from './MyFeeClaims'
 import { MyOrders } from './MyOrders'
 import { MyPositions } from './MyPositions'
-export default function Dashboard() {
+const Dashboard = (props: any) => {
+  const { match, history } = props
+  const { params } = match
+  const { page } = params
+
+  const tabNameToIndex = {
+    0: 'MyPosition',
+    1: 'MyOrders',
+    2: 'MyDataFeeds',
+    3: 'MyFeeClaims',
+  }
+
   const [value, setValue] = useState(0)
   const handleChange = (event: any, newValue: any) => {
+    history.push(`/dashboard/${tabNameToIndex[newValue]}`)
     setValue(newValue)
   }
   return (
@@ -34,3 +46,4 @@ export default function Dashboard() {
     </>
   )
 }
+export default Dashboard

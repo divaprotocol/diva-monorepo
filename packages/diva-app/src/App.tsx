@@ -15,7 +15,7 @@ import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import { config } from './constants'
 import { WrongChain } from './component/Wallet/WrongChain'
-import SideMenu from './component/Dashboard/Dashboard'
+import Dashboard from './component/Dashboard/Dashboard'
 
 export const App = () => {
   const dispatch = useDispatch()
@@ -62,9 +62,11 @@ export const App = () => {
               <Route exact path="/">
                 <Markets />
               </Route>
-              <Route exact path="/dashboard/:page?">
-                <SideMenu />
-              </Route>
+              <Route
+                exact
+                path="/Dashboard/:page?"
+                render={(props) => <Dashboard {...props} />}
+              />
               <Route path="/:poolId/:tokenType">
                 <Underlying />
               </Route>
