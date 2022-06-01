@@ -475,7 +475,7 @@ export const Tasks = (props: any) => {
       width="90%"
     >
       <Container sx={{ paddingRight: theme.spacing(40) }}>
-        <h3>DIVA testnet tasks</h3>
+        <h3>Testnet Tasks</h3>
         <DataGrid
           sx={{ border: 0 }}
           hideFooter={true}

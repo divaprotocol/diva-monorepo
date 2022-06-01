@@ -22,7 +22,7 @@ export default function MenuItems() {
         </Box>
       </Link>
       <Link to="/">
-        <Tooltip title="Market">
+        <Tooltip title="Markets">
           <ShowChartOutlined
             color={location.pathname === '/' ? 'primary' : 'action'}
           />
@@ -49,7 +49,7 @@ export default function MenuItems() {
         </Tooltip>
       </Link>
       <Link to="/tasks">
-        <Tooltip title="Diva App Training">
+        <Tooltip title="Testnet Tasks">
           <TaskIcon
             color={
               location.pathname.toLowerCase() === '/tasks'
