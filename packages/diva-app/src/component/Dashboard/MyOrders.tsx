@@ -239,6 +239,7 @@ export function MyOrders() {
     },
     {
       field: 'underlying',
+      align: 'left',
       minWidth: 100,
       headerName: 'Underlying',
     },
@@ -281,8 +282,10 @@ export function MyOrders() {
     },
     {
       field: 'orderHash',
-      align: 'right',
+      align: 'center',
+      headerAlign: 'center',
       headerName: 'Cancel',
+      minWidth: 170,
       renderCell: (cell) => (
         <Button
           variant="outlined"
