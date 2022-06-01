@@ -174,13 +174,13 @@ const rows: GridRowModel = [
   },
   {
     id: 9,
-    Task: 'Fill an existing order via SELL MARKET',
+    Task: 'Fill a BUY LIMIT order via SELL MARKET',
     Points: 200,
     Status: 'Unknown',
   },
   {
     id: 10,
-    Task: 'Fill an existing order via BUY MARKET',
+    Task: 'Fill a SELL LIMIT order via BUY MARKET',
     Points: 200,
     Status: 'Unknown',
   },
