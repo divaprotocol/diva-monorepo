@@ -1,17 +1,4 @@
-import {
-  Paper,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Box,
-  Typography,
-  Button,
-  Stack,
-  InputAdornment,
-  Input,
-} from '@mui/material'
+import { Box, Button, Stack, InputAdornment, Input } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { formatUnits } from 'ethers/lib/utils'
 import { useState, useEffect } from 'react'
@@ -28,10 +15,8 @@ import { SideMenu } from './SideMenu'
 import { Search } from '@mui/icons-material'
 import { CoinIconPair } from '../CoinIcon'
 import { useHistory } from 'react-router-dom'
-import PoolsTable from '../PoolsTable'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import Underlying from '../Trade/Underlying'
 import { makeStyles } from '@mui/styles'
 
 export function MyOrders() {
