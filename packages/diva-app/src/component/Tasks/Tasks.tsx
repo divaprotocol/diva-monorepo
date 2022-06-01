@@ -315,12 +315,6 @@ export const Tasks = (props: any) => {
         myPositionTokens.push(pool.shortToken.id.toLowerCase())
       })
 
-      console.log('myPositionTokens')
-      console.log(myPositionTokens)
-
-      console.log('orderFills')
-      console.log(orderFills.data)
-
       orderFillsMaker.data.map((order) => {
         if (myPositionTokens.includes(order.takerToken.toLowerCase())) {
           setBuyLimit('Completed')
@@ -576,11 +570,7 @@ export const Tasks = (props: any) => {
               spacing={theme.spacing(2)}
               sx={{ justifyContent: 'space-between' }}
             >
-              <Stack
-                spacing={theme.spacing(2)}
-                direction={'row'}
-                sx={{ justifyContent: 'space-between' }}
-              >
+              <Stack spacing={theme.spacing(2)} direction={'row'}>
                 <Typography>1.5x</Typography>
                 <Typography>
                   Multiplier on points collected if you complete all tasks
@@ -608,7 +598,11 @@ export const Tasks = (props: any) => {
               <Stack spacing={theme.spacing(3)} direction={'row'}>
                 <DateRangeIcon />
                 <Typography>
-                  You can complete all tasks until 30th September 2022
+                  You can complete all tasks until
+                  <Typography fontWeight="bold" display="inline">
+                    {' '}
+                    30th September 2022
+                  </Typography>
                 </Typography>
               </Stack>
             </Stack>
