@@ -466,7 +466,7 @@ export const Tasks = (props: any) => {
     if (points === 3000) {
       setMultiplier('1.5')
     }
-  }, [calcRows])
+  }, [calcRows, multiplier, points === 3000])
   return (
     <Stack
       sx={{ justifyContent: 'space-between' }}
@@ -622,7 +622,7 @@ export const Tasks = (props: any) => {
                 <Typography>
                   Let us know in our{' '}
                   <Link
-                    href="https://discord.gg/Pc7UBqxu2b"
+                    href="https://discord.gg/NJDm29eEa4"
                     rel="noopener noreferrer"
                     target="_blank"
                   >
