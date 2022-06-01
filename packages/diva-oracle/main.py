@@ -59,7 +59,7 @@ query2 = '''
 
 
 
-query_list = [query2]
+query_list = [query]
 # seeing when expirty is 1 hour away to send in prce oracle
 max_time_away = dt.timedelta(minutes=60)
 
