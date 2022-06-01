@@ -101,7 +101,7 @@ client.on('interactionCreate', async(interaction) =>{
                     client.commands.get(interaction.commandName).execute(interaction,
                         dbRegisteredUsers);
                 }
-                else if  (["register", "claimtokens"].includes(interaction.commandName)) {
+                else if  (["register", "claimtestassets"].includes(interaction.commandName)) {
                     console.log(`nonceCounter before call of ${interaction.commandName} = ${nonceCounter}`)
                     nonceCounter = await client.commands.get(interaction.commandName).execute(
                         interaction,

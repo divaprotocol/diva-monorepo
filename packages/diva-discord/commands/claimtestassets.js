@@ -36,13 +36,13 @@ module.exports = {
 
             console.log(`Loading contract ${DUSD_CONTRACT}`)
             const erc20Contract = await ethers.getContractAt(ERC20_ABI, DUSD_CONTRACT)
-            console.log(`sending ${parseEther("1000")} dUSD from ${senderAccount} to ${address}`)
+            console.log(`sending ${parseEther("10000")} dUSD from ${senderAccount} to ${address}`)
 
-            const tx = await erc20Contract.connect(senderAccount).transfer(address, parseEther("1000"), {nonce: nonceCounter, gasPrice: ethers.utils.parseUnits('40',9)})
+            const tx = await erc20Contract.connect(senderAccount).transfer(address, parseEther("10000"), {nonce: nonceCounter, gasPrice: ethers.utils.parseUnits('40',9)})
             nonceCounter = nonceCounter + 1
             
             interaction.reply({
-                content:  `You will shortly receive 1000 dUSD tokens on ropsten.\n  `
+                content:  `You will shortly receive 10000 dUSD tokens on ropsten.\n  `
                         +`https://ropsten.etherscan.io/tx/${tx.hash}.`,
                 ephemeral: true,
             })
