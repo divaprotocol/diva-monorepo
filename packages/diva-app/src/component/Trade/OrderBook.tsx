@@ -282,7 +282,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.buyQuantity != ''
-                            ? row.buyQuantity?.toFixed(2).toString()
+                            ? row.buyQuantity?.toFixed(2)
                             : '-'}
                         </Typography>
                         <label> </label>
@@ -301,7 +301,7 @@ export default function OrderBook(props: {
                     <TableCell align="center">
                       <Box>
                         <Typography variant="subtitle1">
-                          {row.ask != '' ? row.ask?.toFixed(4).toString() : '-'}
+                          {row.ask != '' ? row.ask?.toFixed(4) : '-'}
                         </Typography>
                         <Typography variant="caption" noWrap>
                           {row.sellExpiry}
@@ -312,7 +312,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.sellQuantity != ''
-                            ? row.sellQuantity?.toFixed(2).toString()
+                            ? row.sellQuantity?.toFixed(2)
                             : '-'}
                         </Typography>
                       </Box>

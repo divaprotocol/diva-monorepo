@@ -2,12 +2,7 @@ import { CircularProgress, Container, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import { ethers } from 'ethers'
 import { config } from '../constants'
-import {
-  formatUnits,
-  formatEther,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { fetchPool, selectUserAddress } from '../Redux/appSlice'
 import React, { useEffect } from 'react'
 import { useConnectionContext } from '../hooks/useConnectionContext'
