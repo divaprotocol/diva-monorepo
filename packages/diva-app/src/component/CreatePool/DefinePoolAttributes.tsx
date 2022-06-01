@@ -11,7 +11,7 @@ import {
   useTheme,
   Tooltip,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { PayoffProfile } from './PayoffProfile'
 import { useCreatePoolFormik } from './formik'
@@ -39,6 +39,7 @@ export function DefinePoolAttributes({
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
 
   const { referenceAssets, collateralTokens } = useWhitelist()
+  const theme = useTheme()
 
   const {
     referenceAsset,
@@ -51,7 +52,9 @@ export function DefinePoolAttributes({
     cap,
     floor,
   } = formik.values
+
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
+
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
@@ -60,7 +63,13 @@ export function DefinePoolAttributes({
     if (referenceAssets.length > 0) {
       formik.setFieldValue('referenceAsset', referenceAssets[0], false)
     }
-  }, [referenceAssets.length])
+  }, [formik.values])
+
+  useEffect(() => {
+    if (!collateralToken) {
+      formik.setFieldValue('collateralToken', getDefaultCollateralToken())
+    }
+  }, [formik.values])
 
   useEffect(() => {
     if (
@@ -108,8 +117,6 @@ export function DefinePoolAttributes({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.collateralBalance, formik.values.gradient])
 
-  const theme = useTheme()
-
   const possibleOptions =
     collateralTokens?.filter((v) =>
       v.name.includes(referenceAssetSearch.trim())
@@ -132,6 +139,15 @@ export function DefinePoolAttributes({
       true
     )
   }
+
+  const getDefaultCollateralToken = useCallback(() => {
+    // prioritize the first token in the list
+    const collateralTokenPriority = ['dUSD', 'WAGMI18']
+    const collateralToken = collateralTokens.find((token) =>
+      collateralTokenPriority.includes(token.symbol)
+    )
+    return collateralToken || collateralTokens[0]
+  }, [collateralTokens.length, formik.values])
 
   const hasPaymentProfileError =
     formik.errors.floor != null ||
@@ -253,6 +269,7 @@ export function DefinePoolAttributes({
                   setReferenceAssetSearch((event.target as any).value || '')
                 }
               }}
+              defaultValue={getDefaultCollateralToken()}
               renderInput={(params) => (
                 <TextField
                   error={formik.errors.collateralToken != null}
