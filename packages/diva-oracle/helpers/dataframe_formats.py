@@ -6,7 +6,7 @@ import datetime as dt
 from datetime import datetime
 import json
 
-from ChainSet import Chain
+from helpers.ChainSet import Chain
 
 # Breaking out cleaning data
 def normalize_data(df, Asset_list):
@@ -28,6 +28,9 @@ def normalize_data(df, Asset_list):
 # Reporting criteria and mechanics
 def df_format_oracle_report(resp,  Asset_list, hours=24):
     df = pd.json_normalize(resp, ['data', 'pools'])
+    if  df.empty:
+        print("No data to report on")
+        return df
     df = normalize_data(df, Asset_list)
     
     df['expiryTime_datetime'] = df['expiryTime'].apply(lambda x: datetime.fromtimestamp(float(x)))

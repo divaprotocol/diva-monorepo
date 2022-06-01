@@ -2,7 +2,7 @@ from web3 import Web3
 import json
 import os
 
-from ChainSet import Chain
+from helpers.ChainSet import Chain
 
 # Set helper file
 config = Chain()

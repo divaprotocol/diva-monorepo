@@ -4,7 +4,7 @@ import datetime as dt
 from datetime import datetime
 import json
 
-from ChainSet import Chain
+from helpers.ChainSet import Chain
 
 # function to use requests.post to make an API call to the subgraph url
 def run_query(query):

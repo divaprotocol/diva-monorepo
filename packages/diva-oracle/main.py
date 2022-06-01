@@ -7,12 +7,11 @@ import time
 import os
 
 
-from Prices import getKrakenPrice
-from QueryGraph import *
-from SendPrice import sendPrice
-from ChainSet import Chain
-from email_notify import sendEmail
-from dataframe_formats import *
+from helpers.Prices import getKrakenPrice
+from helpers.QueryGraph import *
+from helpers.SendPrice import sendPrice
+from helpers.ChainSet import Chain
+from helpers.dataframe_formats import *
 
 
 # List of assets to choose from, if there are more from the Price Oracle
@@ -43,10 +42,24 @@ query = '''
             }
 '''% dataprovider
 
+query2 = '''
+            {
+              pools {
+                id
+                dataProvider
+                referenceAsset
+                floor
+                inflection
+                cap
+                expiryTime
+                statusFinalReferenceValue
+              }
+            }
+'''
 
 
 
-query_list = [query]
+query_list = [query2]
 # seeing when expirty is 1 hour away to send in prce oracle
 max_time_away = dt.timedelta(minutes=60)
 

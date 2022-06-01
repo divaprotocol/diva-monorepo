@@ -11,11 +11,12 @@ import time
 import os
 
 
-from QueryGraph import *
-from SendPrice import sendPrice
-from ChainSet import Chain
-from email_notify import sendEmail
-from dataframe_formats import *
+
+from helpers.QueryGraph import *
+from helpers.SendPrice import sendPrice
+from helpers.ChainSet import Chain
+from helpers.email_notify import sendEmail
+from helpers.dataframe_formats import *
 
 
 

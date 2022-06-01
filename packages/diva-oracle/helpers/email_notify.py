@@ -2,11 +2,11 @@ import smtplib, ssl
 # https://realpython.com/python-send-email/
 
 def sendEmail(df):
-    smtp_server = "localhost"
-    port = 1025  # For starttls
-    sender_email = "my@gmail.com"
-    password = "password"
-    receiver_email = "your@gmail.com"
+    smtp_server = "smtp.gmail.com"
+    port = 587  # For starttls
+    sender_email = "diva.protocol.bot@gmail.com"
+    password = ""
+    receiver_email = ""
     message = """\
     Subject: Hi there
 
@@ -24,10 +24,10 @@ def sendEmail(df):
     try:
         server = smtplib.SMTP(smtp_server,port)
         # Below commands are for secure sending of emails
-        #server.ehlo() # Can be omitted
-        #server.starttls(context=context) # Secure the connection
-        #server.ehlo() # Can be omitted
-        #server.login(sender_email, password)
+        server.ehlo() # Can be omitted
+        server.starttls(context=context) # Secure the connection
+        server.ehlo() # Can be omitted
+        server.login(sender_email, password)
         # TODO: Send email here
         server.sendmail(sender_email, receiver_email, message)
     except Exception as e:
