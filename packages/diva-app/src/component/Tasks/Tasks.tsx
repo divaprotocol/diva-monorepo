@@ -1,5 +1,5 @@
 import { DataGrid, GridColDef, GridRowModel } from '@mui/x-data-grid'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStyles, WhiteText } from '../Trade/Orders/UiStyles'
 import {
   Box,
@@ -10,16 +10,11 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
-import { parseEther, parseUnits } from 'ethers/lib/utils'
 import DateRangeIcon from '@mui/icons-material/DateRange'
 import CampaignIcon from '@mui/icons-material/Campaign'
-import { ethers, BigNumber } from 'ethers'
 import { config } from '../../constants'
-import { useConnectionContext } from '../../hooks/useConnectionContext'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectPools, selectUserAddress } from '../../Redux/appSlice'
-import IZeroX_ABI from '../../abi/IZeroX.json'
 import { useQuery } from 'react-query'
 import {
   OrderFill,
@@ -234,31 +229,15 @@ const NumberLinearProgress = (props: any) => {
 export const Tasks = (props: any) => {
   const classes = useStyles()
   const theme = useTheme()
-  const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
   const chainId = useAppSelector((state) => state.appSlice.chainId)
   const pools = useAppSelector((state) => selectPools(state))
-  const myPools = pools.filter(
-    (pool) => pool.createdBy?.toLowerCase() === userAddress?.toLowerCase()
-  )
-  const calcStatuses = rows
   const [calcRows, setCalcRows] = useState(rows)
-  const [binary, setBinary] = useState('Open')
-  const [linear, setLinear] = useState('Open')
-  const [convex, setConvex] = useState('Open')
-  const [concave, setConcave] = useState('Open')
   const [points, setPoints] = useState(0)
-  const [addLiquidity, setAddLiquidity] = useState('Open')
-  const [removeLiquidity, setRemoveLiquidity] = useState('Open')
-  const [challenged, setChallenged] = useState('Open')
-  const [reported, setReported] = useState('Open')
-  const [feeTrasfered, setFeeTransfered] = useState('Open')
-  const [claimFees, setClaimFees] = useState('Open')
   const [buyLimit, setBuyLimit] = useState('Open')
   const [buyLimitFilled, setBuyLimitFilled] = useState('Open')
   const [sellLimit, setSellLimit] = useState('Open')
   const [sellLimitFilled, setSellLimitFilled] = useState('Open')
-  const [redeemed, setRedeemed] = useState('Open')
   const [multiplier, setMultiplier] = useState('1.0')
   let score = 0
   //  setBuyLimitFilled
@@ -586,7 +565,7 @@ export const Tasks = (props: any) => {
                   Multiplier on points collected if you complete all tasks AND
                   hold an{' '}
                   <Link
-                    href="https://opensea.io/collection/888whales/activity"
+                    href="https://opensea.io/collection/888whales"
                     rel="noopener noreferrer"
                     target="_blank"
                   >
