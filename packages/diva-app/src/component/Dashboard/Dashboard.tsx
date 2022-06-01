@@ -5,6 +5,7 @@ import { MyDataFeeds } from './MyDataFeeds'
 import { MyFeeClaims } from './MyFeeClaims'
 import { MyOrders } from './MyOrders'
 import { MyPositions } from './MyPositions'
+import { Person } from '@mui/icons-material'
 const Dashboard = (props: any) => {
   const { match, history } = props
   const { params } = match
@@ -24,6 +25,16 @@ const Dashboard = (props: any) => {
   }
   return (
     <>
+      <Box
+        paddingX={6}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <Person style={{ fontSize: 34, padding: 20, paddingRight: 10 }} />
+        <h2> My Dashboard</h2>
+      </Box>
       <Box
         paddingX={6}
         sx={{

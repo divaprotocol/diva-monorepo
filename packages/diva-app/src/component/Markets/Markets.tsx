@@ -13,6 +13,7 @@ import { CoinIconPair } from '../CoinIcon'
 import { selectMainPools, selectOtherPools } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
 import { Box } from '@mui/material'
+import { ShowChartOutlined } from '@mui/icons-material'
 
 const columns: GridColDef[] = [
   {
@@ -194,6 +195,19 @@ export default function Markets() {
   )
   return (
     <>
+      <Box
+        paddingX={6}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <ShowChartOutlined
+          style={{ fontSize: 34, padding: 20, paddingRight: 10 }}
+        />
+        <h2> Markets</h2>
+      </Box>
+
       <Box
         paddingX={6}
         sx={{
