@@ -6,6 +6,7 @@ import { MyDataFeeds } from './MyDataFeeds'
 import { MyFeeClaims } from './MyFeeClaims'
 import { MyOrders } from './MyOrders'
 import { MyPositions } from './MyPositions'
+import { Person } from '@mui/icons-material'
 const Dashboard = (props: any) => {
   const { match, history } = props
   const { params } = match

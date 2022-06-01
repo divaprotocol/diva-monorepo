@@ -1,10 +1,13 @@
 import { Box, Tooltip } from '@mui/material'
 import { Stack } from '@mui/material'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Logo } from '../Logo'
 
 export default function MenuItems() {
+  const location = useLocation()
+  console.log({ location })
+
   return (
     <Stack
       width="70px"
@@ -20,16 +23,18 @@ export default function MenuItems() {
         </Box>
       </Link>
       <Link to="/">
-        <Tooltip title="Market">
+        <Tooltip title="Markets">
           <ShowChartOutlined
             color={location.pathname === '/' ? 'primary' : 'action'}
           />
         </Tooltip>
       </Link>
-      <Link to="/dashboard/MyPositions">
+      <Link to="/dashboard/mypositions">
         <Tooltip title=" My Dashboard">
           <Person
-            color={location.pathname == '/dashboard' ? 'primary' : 'action'}
+            color={
+              location.pathname.startsWith('/dashboard') ? 'primary' : 'action'
+            }
           />
         </Tooltip>
       </Link>
