@@ -113,7 +113,7 @@ export function DefinePoolAttributes({
 
   const possibleOptions =
     collateralTokens?.filter((v) =>
-      v.name.includes(referenceAssetSearch.trim())
+      v.symbol.includes(referenceAssetSearch.trim())
     ) || []
 
   const setCollateralBalance = (num: number) => {
@@ -170,7 +170,11 @@ export function DefinePoolAttributes({
                   pt={2}
                   pb={4}
                 >
-                  {isCustomReferenceAsset ? (
+                  {formik.errors.referenceAsset != null ? (
+                    <FormHelperText>
+                      {formik.errors.referenceAsset}
+                    </FormHelperText>
+                  ) : isCustomReferenceAsset ? (
                     <>
                       <CheckCircle
                         fontSize="small"
@@ -247,7 +251,7 @@ export function DefinePoolAttributes({
                 formik.setFieldValue('collateralToken', newValue)
               }}
               getOptionLabel={(option: WhitelistCollateralToken) =>
-                option?.name || ''
+                option?.symbol || ''
               }
               onInputChange={(event) => {
                 if (event != null && event.target != null) {

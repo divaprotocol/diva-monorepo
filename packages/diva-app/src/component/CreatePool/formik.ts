@@ -104,13 +104,19 @@ export const useCreatePoolFormik = () => {
     validate: async (values) => {
       const errors: Errors = {}
 
-      const threshold = 30000
+      const threshold = 300000
 
       const collateralBalance =
         values.collateralBalanceLong + values.collateralBalanceShort
       const walletBalance = parseFloat(values.collateralWalletBalance)
+      if (values.referenceAsset == null) {
+        errors.referenceAsset = 'You must choose a reference asset'
+      }
       if (values.collateralToken == null) {
         errors.collateralToken = 'You must choose a collateral asset'
+      }
+      if (values.collateralBalance == '') {
+        errors.collateralBalance = 'Collateral can not be empty'
       }
 
       if (!isConnected) {
@@ -119,14 +125,20 @@ export const useCreatePoolFormik = () => {
       } else if (walletBalance < collateralBalance) {
         errors.collateralWalletBalance =
           'Collateral cannot be higher than your balance'
-      } else if (collateralBalance <= 0) {
+      } else if (values.collateralBalance == '0') {
         errors.collateralBalance = 'Collateral can not be 0'
       }
 
-      if (values.expiryTime.getTime() - Date.now() < threshold) {
-        errors.expiryTime = `Expiry Date cannot be later earlier than ${
-          threshold / 1000
-        } seconds from now`
+      if (values.expiryTime == null) {
+        errors.expiryTime = 'You must set an expiry time'
+      }
+      if (
+        values.expiryTime != null &&
+        values.expiryTime.getTime() - Date.now() < threshold
+      ) {
+        errors.expiryTime = `Expiry time cannot be earlier than ${
+          threshold / 1000 / 60
+        } minutes from now`
       }
 
       // floor can't be higher or equal to inflection
