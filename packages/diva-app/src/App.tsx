@@ -15,8 +15,8 @@ import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import { config } from './constants'
 import { WrongChain } from './component/Wallet/WrongChain'
-import Dashboard from './component/Dashboard/Dashboard'
 import { Tasks } from './component/Tasks/Tasks'
+import Dashboard from './component/Dashboard/Dashboard'
 
 export const App = () => {
   const dispatch = useDispatch()
