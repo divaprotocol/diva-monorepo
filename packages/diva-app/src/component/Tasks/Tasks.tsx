@@ -626,7 +626,7 @@ export const Tasks = (props: any) => {
           >
             <Container sx={{ pt: theme.spacing(1), pb: theme.spacing(1) }}>
               <Stack direction={'row'}>
-                <CampaignIcon fontSize={'large'} />
+                <CampaignIcon fontSize={'large'} color={'primary'} />
                 <Container>
                   <Typography>Feedback? Bug reports?</Typography>
                   <Typography>
