@@ -485,7 +485,7 @@ export const Tasks = (props: any) => {
 
         <Stack
           spacing={theme.spacing(6)}
-          sx={{ paddingLeft: theme.spacing(50) }}
+          sx={{ paddingLeft: theme.spacing(40) }}
         >
           <Box
             sx={{ mb: theme.spacing(-17), border: 1, borderColor: '#2A2A2D' }}
