@@ -62,7 +62,7 @@ export function CreatePool() {
     setIsSnackbarOpen(true)
 
     setTimeout(() => {
-      history.push('/dashboard/mypositions')
+      history.push('/dashboard/myposition')
     }, 2000)
   }
 

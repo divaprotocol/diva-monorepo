@@ -68,7 +68,7 @@ export const App = () => {
               </Route>
               <Route
                 exact
-                path="/Dashboard/:page?"
+                path="/dashboard/:page?"
                 render={(props) => <Dashboard {...props} />}
               />
               <Route path="/:poolId/:tokenType">

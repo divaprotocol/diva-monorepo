@@ -11,10 +11,10 @@ const Dashboard = (props: any) => {
   const { page } = params
 
   const tabNameToIndex = {
-    0: 'MyPosition',
-    1: 'MyOrders',
-    2: 'MyDataFeeds',
-    3: 'MyFeeClaims',
+    0: 'myposition',
+    1: 'myorders',
+    2: 'mydatafeeds',
+    3: 'myfeeclaims',
   }
   const indexToTabName = {
     MyPosition: 0,
