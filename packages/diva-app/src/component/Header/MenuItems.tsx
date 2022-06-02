@@ -28,7 +28,7 @@ export default function MenuItems() {
           />
         </Tooltip>
       </Link>
-      <Link to="/dashboard/MyPosition">
+      <Link to="/dashboard/mypositions">
         <Tooltip title=" My Dashboard">
           <Person
             color={
