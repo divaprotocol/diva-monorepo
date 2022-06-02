@@ -240,6 +240,7 @@ export function MyOrders() {
       headerAlign: 'center',
       headerName: 'Quantity',
       type: 'number',
+      renderCell: (cell) => cell.value.toFixed(2),
     },
     {
       field: 'price',
@@ -248,6 +249,7 @@ export function MyOrders() {
       headerName: 'Price',
       type: 'number',
       minWidth: 100,
+      renderCell: (cell) => cell.value.toFixed(4),
     },
     {
       field: 'payReceive',
@@ -256,13 +258,14 @@ export function MyOrders() {
       headerName: 'Pay/Receive',
       type: 'number',
       minWidth: 150,
+      renderCell: (cell) => cell.value.toFixed(4),
     },
     {
-      field: 'expiry',
+      field: 'expiryMins',
       minWidth: 170,
       align: 'center',
       headerAlign: 'center',
-      headerName: 'Expiry',
+      headerName: 'Order Expires In',
       type: 'dateTime',
     },
     {
