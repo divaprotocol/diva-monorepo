@@ -23,13 +23,13 @@ export default function MenuItems() {
         </Box>
       </Link>
       <Link to="/">
-        <Tooltip title="Market">
+        <Tooltip title="Markets">
           <ShowChartOutlined
             color={location.pathname === '/' ? 'primary' : 'action'}
           />
         </Tooltip>
       </Link>
-      <Link to="/dashboard/mypositions">
+      <Link to="/dashboard/MyPosition">
         <Tooltip title=" My Dashboard">
           <Person
             color={

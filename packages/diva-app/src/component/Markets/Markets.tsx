@@ -13,6 +13,7 @@ import { CoinIconPair } from '../CoinIcon'
 import { selectMainPools, selectOtherPools } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
 import { Box } from '@mui/material'
+import { ShowChartOutlined } from '@mui/icons-material'
 
 const columns: GridColDef[] = [
   {
@@ -79,7 +80,6 @@ export default function Markets() {
   const handleChange = (event: any, newValue: any) => {
     setValue(newValue)
   }
-
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
     const fallbackPeriod = expiryTime.setMinutes(
@@ -193,9 +193,21 @@ export default function Markets() {
   const filteredRows = rows.filter(
     (v) => v.Status && !v.Status.startsWith('Confirmed')
   )
-
   return (
     <>
+      <Box
+        paddingX={6}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <ShowChartOutlined
+          style={{ fontSize: 34, padding: 20, paddingRight: 10 }}
+        />
+        <h2> Markets</h2>
+      </Box>
+
       <Box
         paddingX={6}
         sx={{
