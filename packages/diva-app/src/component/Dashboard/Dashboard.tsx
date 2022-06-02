@@ -9,7 +9,6 @@ const Dashboard = (props: any) => {
   const { match, history } = props
   const { params } = match
   const { page } = params
-  console.log(page)
 
   const tabNameToIndex = {
     0: 'MyPosition',
