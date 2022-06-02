@@ -170,7 +170,7 @@ const AmountCell = (props: any) => {
 
 const columns: GridColDef[] = [
   {
-    field: 'TokenSymbol',
+    field: 'Underlying',
     align: 'left',
     headerAlign: 'left',
     minWidth: 200,
@@ -228,14 +228,14 @@ export function MyFeeClaims() {
       ...acc,
       {
         id: feeCount,
-        TokenSymbol: `${val.collateralToken.symbol}`,
+        Underlying: `${val.collateralToken.symbol}`,
         Amount: `${val.amount}`,
         Address: `${val.collateralToken.id}`,
       },
     ]
   }, [] as GridRowModel[])
 
-  const filtered = rows.filter((v) => v.amount != 0)
+  const filtered = rows.filter((v) => v.Amount != 0)
   return (
     <Stack
       direction="row"
