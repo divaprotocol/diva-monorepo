@@ -11,16 +11,16 @@ const Dashboard = (props: any) => {
   const { page } = params
 
   const tabNameToIndex = {
-    0: 'MyPosition',
-    1: 'MyOrders',
-    2: 'MyDataFeeds',
-    3: 'MyFeeClaims',
+    0: 'mypositions',
+    1: 'myorders',
+    2: 'mydatafeeds',
+    3: 'myfeeclaims',
   }
   const indexToTabName = {
-    MyPosition: 0,
-    MyOrders: 1,
-    MyDataFeeds: 2,
-    MYfeeClaims: 3,
+    mypositions: 0,
+    myorders: 1,
+    mydatafeeds: 2,
+    myfeeclaims: 3,
   }
   console.log(indexToTabName[page])
   const [value, setValue] = useState(indexToTabName[page])
@@ -51,7 +51,7 @@ const Dashboard = (props: any) => {
         <Tabs value={value} onChange={handleChange} variant="standard">
           <Tab label="POSITIONS" />
           <Tab label="ORDERS" />
-          <Tab label="DATAFEEDS" />
+          <Tab label="DATA FEEDS" />
           <Tab label="FEE CLAIMS" />
         </Tabs>
         {value === 0 && <MyPositions />}
