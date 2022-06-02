@@ -4,9 +4,6 @@ import Underlying from './component/Trade/Underlying'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { CreatePool } from './component/CreatePool/CreatePool'
 import Markets from './component/Markets/Markets'
-import { MyDataFeeds } from './component/Dashboard/MyDataFeeds'
-import { MyPositions } from './component/Dashboard/MyPositions'
-import { MyFeeClaims } from './component/Dashboard/MyFeeClaims'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { fetchPools } from './Redux/appSlice'
@@ -16,10 +13,10 @@ import { LoadingBox } from './component/LoadingBox'
 import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
-import { MyOrders } from './component/Dashboard/MyOrders'
 import { config } from './constants'
 import { WrongChain } from './component/Wallet/WrongChain'
 import { Tasks } from './component/Tasks/Tasks'
+import Dashboard from './component/Dashboard/Dashboard'
 export const App = () => {
   const dispatch = useDispatch()
   const chainId = useAppSelector((state) => state.appSlice.chainId)
@@ -68,18 +65,11 @@ export const App = () => {
               <Route exact path="/tasks">
                 <Tasks />
               </Route>
-              <Route exact path="/dashboard/mydatafeeds">
-                <MyDataFeeds />
-              </Route>
-              <Route exact path="/dashboard/mypositions">
-                <MyPositions />
-              </Route>
-              <Route exact path="/dashboard/myorders">
-                <MyOrders />
-              </Route>
-              <Route exact path="/dashboard/myfeeclaims">
-                <MyFeeClaims />
-              </Route>
+              <Route
+                exact
+                path="/Dashboard/:page?"
+                render={(props) => <Dashboard {...props} />}
+              />
               <Route path="/:poolId/:tokenType">
                 <Underlying />
               </Route>
