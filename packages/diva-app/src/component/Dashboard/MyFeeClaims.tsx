@@ -235,7 +235,7 @@ export function MyFeeClaims() {
     ]
   }, [] as GridRowModel[])
 
-  const filtered = rows.filter((v) => v.Amount != 0)
+  const filtered = rows.filter((v) => v.amount != 0)
   return (
     <Stack
       direction="row"
