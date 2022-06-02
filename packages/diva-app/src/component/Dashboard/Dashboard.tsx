@@ -51,7 +51,7 @@ const Dashboard = (props: any) => {
         <Tabs value={value} onChange={handleChange} variant="standard">
           <Tab label="POSITIONS" />
           <Tab label="ORDERS" />
-          <Tab label="DATAFEEDS" />
+          <Tab label="DATA FEEDS" />
           <Tab label="FEE CLAIMS" />
         </Tabs>
         {value === 0 && <MyPositions />}
