@@ -18,7 +18,10 @@ export function useWhitelist() {
   const collateralTokens = whitelistQuery.data?.collateralTokens
 
   const referenceAssets = (dataFeeds || [])
-    .map((v) => v.referenceAssetUnified)
+    .filter((v) => v.active)
+    .map((v) => {
+      return v.referenceAssetUnified
+    })
     .filter((value, index, self) => self.indexOf(value) === index)
 
   const getProvidersByAsset = (referenceAssetUnified: string) =>

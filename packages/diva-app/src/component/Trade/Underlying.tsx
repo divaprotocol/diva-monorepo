@@ -1,15 +1,18 @@
 import styled from 'styled-components'
 import { Container, Divider, Paper, Stack, useTheme } from '@mui/material'
+import TabContext from '@mui/lab/TabContext'
+import TabList from '@mui/lab/TabList'
+import TabPanel from '@mui/lab/TabPanel'
 import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
+import { useHistory } from 'react-router-dom'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
 import OptionHeader from './OptionHeader'
 import { config } from '../../constants'
 import Tab from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Liquidity } from '../Liquidity/Liquidity'
 import OrdersPanel from './OrdersPanel'
 import Typography from '@mui/material/Typography'
@@ -45,9 +48,23 @@ const RightDiv = styled.div`
 `
 
 export default function Underlying() {
+  const history = useHistory()
   const params: { poolId: string; tokenType: string } = useParams()
-  const [value, setValue] = React.useState(0)
   const isLong = params.tokenType === 'long'
+  const currentTab =
+    history.location.pathname ===
+    `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity`
+      ? 'liquidity'
+      : history.location.pathname ===
+        `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity/add`
+      ? 'liquidity'
+      : history.location.pathname ===
+        `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity/remove`
+      ? 'liquidity'
+      : 'trade'
+  const [value, setValue] = useState(currentTab)
+  console.log('Tab Path is:', value)
+
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
   const maxYield = useAppSelector((state) => state.stats.maxYield)
@@ -130,127 +147,142 @@ export default function Underlying() {
   }
   const data = generatePayoffChartData(OptionParams)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
-  const handleChange = (event: any, newValue: any) => {
+  const handleChange = (event: any, newValue: string) => {
+    history.push(`/${params.poolId}/${isLong ? 'long' : 'short'}/` + newValue)
     setValue(newValue)
   }
 
   return (
     <Container sx={{ paddingTop: '1em', paddingBottom: '3em' }}>
-      <Tabs
-        value={value}
-        onChange={handleChange}
-        variant="standard"
-        centered
-        sx={{ mb: theme.spacing(4) }}
-      >
-        <Tab label="Trade" />
-        <Tab label="Liquidity" />
-      </Tabs>
-      {value ? (
-        <Liquidity pool={pool} />
-      ) : (
-        <Stack direction="row" spacing={2}>
-          <LeftDiv>
-            <Stack spacing={2}>
-              <Paper>
-                <OptionHeader
-                  ReferenceAsset={pool.referenceAsset}
-                  TokenAddress={tokenAddress}
-                  isLong={isLong}
-                  poolId={pool.id}
-                  tokenDecimals={pool.collateralToken.decimals}
-                />
-                <OptionDetails pool={pool} isLong={isLong} />
-              </Paper>
-              <Paper>
-                <LeftCompFlexContainer>
-                  <OrdersPanel
+      <TabContext value={value}>
+        <TabList
+          onChange={handleChange}
+          variant="standard"
+          centered
+          sx={{ mb: theme.spacing(4) }}
+        >
+          <Tab value="trade" label="Trade" />
+          <Tab value="liquidity" label="Liquidity" />
+        </TabList>
+        <TabPanel value="trade">
+          <Stack direction="row" spacing={2}>
+            <LeftDiv>
+              <Stack spacing={2}>
+                <Paper>
+                  <OptionHeader
+                    ReferenceAsset={pool.referenceAsset}
+                    TokenAddress={tokenAddress}
+                    isLong={isLong}
+                    poolId={pool.id}
+                    tokenDecimals={pool.collateralToken.decimals}
+                  />
+                  <OptionDetails pool={pool} isLong={isLong} />
+                </Paper>
+                <Paper>
+                  <LeftCompFlexContainer>
+                    <OrdersPanel
+                      option={pool}
+                      tokenAddress={tokenAddress}
+                      exchangeProxy={exchangeProxy}
+                    />
+                  </LeftCompFlexContainer>
+                </Paper>
+              </Stack>
+            </LeftDiv>
+            <RightDiv>
+              <Stack spacing={2}>
+                <Paper>
+                  <CreateOrder
                     option={pool}
                     tokenAddress={tokenAddress}
                     exchangeProxy={exchangeProxy}
+                    chainId={chainId}
                   />
-                </LeftCompFlexContainer>
-              </Paper>
-            </Stack>
-          </LeftDiv>
-          <RightDiv>
-            <Stack spacing={2}>
-              <Paper>
-                <CreateOrder
-                  option={pool}
-                  tokenAddress={tokenAddress}
-                  exchangeProxy={exchangeProxy}
-                  chainId={chainId}
-                />
-              </Paper>
-              <Paper>
-                <TradeChart
-                  data={data}
-                  refAsset={pool.referenceAsset}
-                  payOut={pool.collateralToken.symbol}
-                  w={380}
-                  h={200}
-                  isLong={OptionParams.IsLong}
-                  breakEven={breakEvenOptionPrice}
-                />
-              </Paper>
-              <Typography
-                sx={{
-                  paddingLeft: theme.spacing(3),
-                  mt: theme.spacing(1),
-                }}
-              >
-                Buyers statistics:
-              </Typography>
-              <Divider />
-              <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                  Max yield
+                </Paper>
+                <Paper>
+                  <TradeChart
+                    data={data}
+                    refAsset={pool.referenceAsset}
+                    payOut={pool.collateralToken.symbol}
+                    w={380}
+                    h={220}
+                    isLong={OptionParams.IsLong}
+                    breakEven={breakEvenOptionPrice}
+                  />
+                </Paper>
+                <Typography
+                  sx={{
+                    paddingLeft: theme.spacing(3),
+                    mt: theme.spacing(1),
+                  }}
+                >
+                  Buyers statistics:
                 </Typography>
-                {isBuy ? (
+                <Divider />
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography
+                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    Max yield
+                  </Typography>
+                  {isBuy ? (
+                    <Typography
+                      sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                    >
+                      {maxYield}
+                    </Typography>
+                  ) : (
+                    <Typography
+                      sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                    >
+                      {maxYield}
+                    </Typography>
+                  )}
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography
+                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    Break-even
+                  </Typography>
                   <Typography
                     sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                   >
-                    {maxYield}
+                    {breakEven}
                   </Typography>
-                ) : (
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography
+                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    Intrinsic value per token
+                  </Typography>
                   <Typography
                     sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                   >
-                    {maxYield}
+                    {parseFloat(intrinsicValue).toFixed(2)}
                   </Typography>
-                )}
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography
+                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    Max payout per token
+                  </Typography>
+                  <Typography
+                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
+                  >
+                    {maxPayout}
+                  </Typography>
+                </Stack>
               </Stack>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                  Break-even
-                </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {parseFloat(breakEven).toFixed(2)}
-                </Typography>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                  Intrinsic value per token
-                </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {intrinsicValue === 'n/a'
-                    ? intrinsicValue
-                    : parseFloat(intrinsicValue).toFixed(2)}
-                </Typography>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}>
-                  Max payout per token
-                </Typography>
-                <Typography sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}>
-                  {parseFloat(maxPayout).toFixed(2)}
-                </Typography>
-              </Stack>
-            </Stack>
-          </RightDiv>
-        </Stack>
-      )}
+            </RightDiv>
+          </Stack>
+        </TabPanel>
+        <TabPanel value="liquidity">
+          <Liquidity pool={pool} />
+        </TabPanel>
+      </TabContext>
     </Container>
   )
 }

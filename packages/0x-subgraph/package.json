@@ -1,0 +1,23 @@
+{
+  "name": "@diva/0x-subgraph",
+  "license": "UNLICENSED",
+  "version": "0.0.1",
+  "scripts": {
+    "lint": "yarn codegen && yarn build",
+    "codegen": "graph codegen ropsten.subgraph.yaml",
+    "build": "yarn codegen && graph build ropsten.subgraph.yaml",
+    "graph:auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
+    "deploy": "run-s deploy-ropsten deploy-mumbai deploy-rinkeby deploy-kovan deploy-polygon",
+    "deploy-ropsten": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/zerox-exchange-proxy-ropsten ropsten.subgraph.yaml",
+    "create-local": "graph create --node http://localhost:8020/ divaprotocol/diva-ropsten",
+    "remove-local": "graph remove --node http://localhost:8020/ divaprotocol/diva-ropsten",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 divaprotocol/diva-ropsten"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.29.0",
+    "@graphprotocol/graph-ts": "0.27.0"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
+}

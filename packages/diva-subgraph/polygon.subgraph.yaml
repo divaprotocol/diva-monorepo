@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: matic
     source:
-      address: "0x27FaBaed614059b98e7f1e79D872e13aa65640a8"
+      address: "0x131b154c13c7F2Ac4A0cC7798389A90B536F19f0"
       abi: DivaDiamond
-      startBlock: 25942586
+      startBlock: 28918507
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -20,6 +20,7 @@ dataSources:
         - FeeRecipient
         - FeeRecipientCollateralToken
         - PositionToken
+        - TestnetUser
       abis:
         - name: DivaDiamond
           file: ../diva-contracts/abis/diamond.json
@@ -42,4 +43,6 @@ dataSources:
           handler: handleFeesClaimed
         - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
           handler: handleFeeClaimTransferred
+        - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
+          handler: handlePositionTokenRedeemed
       file: ./src/mapping.ts

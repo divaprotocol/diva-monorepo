@@ -20,7 +20,7 @@ class DIVATradeChart extends Component {
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
     // Set the dimensions and margins of the graph
     // var margin = {top: 50, right: 20, bottom: 30, left: 50},
-    var margin = { top: 5, right: 2, bottom: 3, left: 20 },
+    var margin = { top: 15, right: 2, bottom: 20, left: 20 },
       width = w - margin.left - margin.right,
       height = h - margin.top - margin.bottom
 
@@ -35,6 +35,20 @@ class DIVATradeChart extends Component {
       .style('overflow', 'visible')
       .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+
+    //Text Label on the Top left corner i.e Payout per Long token (in WAGMI18)
+    const labelWidth = 30
+    const labelHeight = 10
+    svg
+      .append('text')
+      .attr('width', labelWidth)
+      .attr('height', labelHeight)
+      .attr('x', 5)
+      .attr('y', 15)
+      .style('padding', 10)
+      .style('text-align', 'left')
+      .style('fill', 'white')
+      .text(' Payout per ' + optionTypeText + ' token (' + 'in ' + payOut + ')')
 
     // Add X axis
     const x = d3
@@ -145,7 +159,7 @@ class DIVATradeChart extends Component {
     tooltipPerLine
       .append('text')
       .attr('x', 18)
-      .attr('y', 22)
+      .attr('y', 40)
       .attr('font-size', '14')
       .text(refAsset + ' at Expiry:')
 
@@ -154,22 +168,22 @@ class DIVATradeChart extends Component {
       .attr('class', 'tooltip-underlying')
       .attr('text-anchor', 'end')
       .attr('x', tooltipBoxWidth)
-      .attr('y', 22)
+      .attr('y', 40)
       .attr('font-size', '14')
 
     tooltipPerLine
       .append('text')
       .attr('x', 18)
-      .attr('y', 44)
+      .attr('y', 55)
       .attr('font-size', '14')
-      .text(optionTypeText + ' Payout (' + payOut + '):')
+      .text(' Payout:')
 
     tooltipPerLine
       .append('text')
       .attr('class', 'tooltip-payout')
       .attr('text-anchor', 'end')
       .attr('x', tooltipBoxWidth)
-      .attr('y', 44)
+      .attr('y', 55)
       .attr('font-weight', 'bold')
       .attr('font-size', '14')
 

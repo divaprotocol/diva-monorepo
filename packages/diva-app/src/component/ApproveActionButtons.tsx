@@ -46,11 +46,14 @@ export const ApproveActionButtons = ({
     ERC20,
     provider?.getSigner()
   )
-  const diva = new ethers.Contract(
-    config[provider?.network?.chainId].divaAddress,
-    DIVA_ABI,
-    provider?.getSigner()
-  )
+  const diva =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider.getSigner()
+        )
+      : null
   useEffect(() => {
     if (transactionType === 'create') {
       setBtnName('Create')

@@ -4,6 +4,7 @@ type SingleConfig = {
   whitelistAddress: string
   divaSubgraph: string
   whitelistSubgraph: string
+  zeroxSubgraph: string
   allOrders: string
   order: string
 }
@@ -19,6 +20,8 @@ export const config: { [key: number]: SingleConfig } = {
   //     'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
   //   whitelistSubgraph:
   //     'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
+  //   zeroxSubgraph:
+  //     'https://api.thegraph.com/subgraphs/name/divaprotocol/zerox-exchange-proxy-ropsten',
   //   allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
   //   order: 'https://ropsten.api.0x.org/orderbook/v1/order/',
   // },
@@ -30,6 +33,8 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
+    zeroxSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/zerox-exchange-proxy-ropsten',
     allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
     order: 'https://ropsten.api.0x.org/orderbook/v1/order/',
   },
@@ -41,6 +46,8 @@ export const config: { [key: number]: SingleConfig } = {
   //     'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-rinkeby',
   //   whitelistSubgraph:
   //     'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-rinkeby',
+  //   zeroxSubgraph:
+  //     'https://api.thegraph.com/subgraphs/name/divaprotocol/zerox-exchange-proxy-rinkeby',
   //   allOrders: 'https://rinkeby.api.0x.org/orderbook/v1/orders/',
   //   order: 'https://rinkeby.api.0x.org/orderbook/v1/order/',
   // },
@@ -52,6 +59,8 @@ export const config: { [key: number]: SingleConfig } = {
   //     'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-polygon',
   //   whitelistSubgraph:
   //     'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-polygon',
+  //   zeroxSubgraph:
+  //     'https://api.thegraph.com/subgraphs/name/divaprotocol/zerox-exchange-proxy-polygon',
   //   allOrders: 'https://polygon.api.0x.org/orderbook/v1/orders/',
   //   order: 'https://polygon.api.0x.org/orderbook/v1/order/',
   // },
@@ -63,6 +72,8 @@ export const config: { [key: number]: SingleConfig } = {
   //     'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-kovan',
   //   whitelistSubgraph:
   //     'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-kovan',
+  //   zeroxSubgraph:
+  //     'https://api.thegraph.com/subgraphs/name/divaprotocol/zerox-exchange-proxy-kovan',
   //   allOrders: 'https://kovan.api.0x.org/orderbook/v1/orders/',
   //   order: 'https://kovan.api.0x.org/orderbook/v1/order/',
   // },
@@ -74,6 +85,8 @@ export const config: { [key: number]: SingleConfig } = {
   //     'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-mumbai',
   //   whitelistSubgraph:
   //     'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-mumbai',
+  //   zeroxSubgraph:
+  //     'https://api.thegraph.com/subgraphs/name/divaprotocol/zerox-exchange-proxy-mumbai',
   //   allOrders: 'https://mumbai.api.0x.org/orderbook/v1/orders/',
   //   order: 'https://mumbai.api.0x.org/orderbook/v1/order/',
   // },

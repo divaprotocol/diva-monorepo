@@ -13,9 +13,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
-
 import { config } from '../../constants'
-import { SideMenu } from './SideMenu'
 import PoolsTable from '../PoolsTable'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
@@ -364,10 +362,8 @@ export function MyDataFeeds() {
       direction="row"
       sx={{
         height: '100%',
-        maxHeight: 'calc(100% - 6em)',
       }}
       spacing={6}
-      paddingTop={2}
       paddingRight={6}
     >
       {!userAddress ? (
@@ -384,7 +380,6 @@ export function MyDataFeeds() {
         </Typography>
       ) : (
         <>
-          <SideMenu />
           <PoolsTable
             disableRowClick={true}
             page={page}
