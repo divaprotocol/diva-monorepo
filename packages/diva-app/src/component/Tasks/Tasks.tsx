@@ -138,13 +138,13 @@ const rows: GridRowModel = [
   },
   {
     id: 3,
-    Task: 'Create a pool with a convex payoff',
+    Task: 'Create a pool with a convex long token payoff',
     Points: 200,
     Status: 'Unknown',
   },
   {
     id: 4,
-    Task: 'Create a pool with a concave payoff',
+    Task: 'Create a pool with a concave long token payoff',
     Points: 200,
     Status: 'Unknown',
   },
