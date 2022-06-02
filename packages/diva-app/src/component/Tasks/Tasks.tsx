@@ -30,7 +30,8 @@ const columns: GridColDef[] = [
   {
     field: 'Task',
     align: 'left',
-    minWidth: 450,
+    minWidth: 550,
+    renderHeader: (header) => <WhiteText>{'Task'}</WhiteText>,
     renderCell: (cell) => {
       let link = ''
       switch (cell.id) {
@@ -113,10 +114,12 @@ const columns: GridColDef[] = [
   {
     field: 'Points',
     align: 'left',
+    renderHeader: (header) => <WhiteText>{'Points'}</WhiteText>,
   },
   {
     field: 'Status',
     align: 'left',
+    renderHeader: (header) => <WhiteText>{'Status'}</WhiteText>,
   },
 ]
 
@@ -485,7 +488,7 @@ export const Tasks = (props: any) => {
 
         <Stack
           spacing={theme.spacing(6)}
-          sx={{ paddingLeft: theme.spacing(40) }}
+          sx={{ paddingLeft: theme.spacing(37) }}
         >
           <Box
             sx={{ mb: theme.spacing(-17), border: 1, borderColor: '#2A2A2D' }}
