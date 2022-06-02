@@ -10,6 +10,10 @@ import {
   Typography,
   useTheme,
   Tooltip,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 
@@ -37,7 +41,11 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
+  const [value, setValue] = useState('binary')
 
+  const handleChange = (event) => {
+    setValue(event.target.value)
+  }
   const { referenceAssets, collateralTokens } = useWhitelist()
 
   const {
@@ -139,7 +147,24 @@ export function DefinePoolAttributes({
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
-
+  useEffect(() => {
+    switch (value) {
+      case 'binary':
+        formik.setValues((_values) => ({
+          ..._values,
+          cap: formik.values.inflection,
+          floor: formik.values.inflection,
+        }))
+        break
+      case 'linear':
+        formik.setValues((_values) => ({
+          ..._values,
+          inflection: (formik.values.cap + formik.values.floor) / 2,
+          gradient: 0.5,
+        }))
+        break
+    }
+  }, [value, formik.values.cap, formik.values.floor, formik.values.inflection])
   return (
     <Box>
       <Typography pb={theme.spacing(2)} variant="subtitle1">
@@ -320,37 +345,23 @@ export function DefinePoolAttributes({
       </Box>
 
       <h3>Payoff</h3>
-
+      <FormControl>
+        <RadioGroup
+          row
+          aria-labelledby="demo-row-radio-buttons-group-label"
+          name="row-radio-buttons-group"
+          value={value}
+          onChange={handleChange}
+        >
+          <FormControlLabel value="binary" control={<Radio />} label="Binary" />
+          <FormControlLabel value="linear" control={<Radio />} label="Linear" />
+          <FormControlLabel value="custom" control={<Radio />} label="Custom" />
+        </RadioGroup>
+      </FormControl>
       <Stack pb={3} spacing={2} direction="row">
-        <Box pt={2} width="50%">
-          <FormControl fullWidth error={hasPaymentProfileError}>
-            {hasPaymentProfileError && (
-              <FormHelperText
-                sx={{ marginLeft: 0, paddingBottom: theme.spacing(3) }}
-              >
-                Invalid input. Please ensure that the following is true: <br />
-                <code>
-                  Floor {'<='} Inflection {'<='} Cap
-                </code>
-              </FormHelperText>
-            )}
+        {value === 'binary' && (
+          <Box pt={2} width="50%">
             <Stack spacing={3}>
-              <Tooltip
-                placement="top-end"
-                title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
-              >
-                <TextField
-                  inputProps={{ min: 0, max: inflection }}
-                  name="floor"
-                  error={formik.errors.floor != null}
-                  id="floor"
-                  onBlur={formik.handleBlur}
-                  label="Floor"
-                  value={floor}
-                  type="number"
-                  onChange={formik.handleChange}
-                />
-              </Tooltip>
               <Tooltip
                 placement="top-end"
                 title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
@@ -371,6 +382,28 @@ export function DefinePoolAttributes({
                   sx={{ width: '100%' }}
                 />
               </Tooltip>
+            </Stack>
+          </Box>
+        )}
+        {value === 'linear' && (
+          <Box pt={2} width="50%">
+            <Stack spacing={3}>
+              <Tooltip
+                placement="top-end"
+                title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+              >
+                <TextField
+                  inputProps={{ min: 0, max: inflection }}
+                  name="floor"
+                  error={formik.errors.floor != null}
+                  id="floor"
+                  onBlur={formik.handleBlur}
+                  label="Floor"
+                  value={floor}
+                  type="number"
+                  onChange={formik.handleChange}
+                />
+              </Tooltip>
               <Tooltip
                 placement="top-end"
                 title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
@@ -387,11 +420,82 @@ export function DefinePoolAttributes({
                   onChange={formik.handleChange}
                 />
               </Tooltip>
-
-              <DefineAdvanced formik={formik} />
             </Stack>
-          </FormControl>
-        </Box>
+          </Box>
+        )}
+        {value === 'custom' && (
+          <Box pt={2} width="50%">
+            <FormControl fullWidth error={hasPaymentProfileError}>
+              {hasPaymentProfileError && (
+                <FormHelperText
+                  sx={{ marginLeft: 0, paddingBottom: theme.spacing(3) }}
+                >
+                  Invalid input. Please ensure that the following is true:{' '}
+                  <br />
+                  <code>
+                    Floor {'<='} Inflection {'<='} Cap
+                  </code>
+                </FormHelperText>
+              )}
+              <Stack spacing={3}>
+                <Tooltip
+                  placement="top-end"
+                  title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+                >
+                  <TextField
+                    inputProps={{ min: 0, max: inflection }}
+                    name="floor"
+                    error={formik.errors.floor != null}
+                    id="floor"
+                    onBlur={formik.handleBlur}
+                    label="Floor"
+                    value={floor}
+                    type="number"
+                    onChange={formik.handleChange}
+                  />
+                </Tooltip>
+                <Tooltip
+                  placement="top-end"
+                  title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+                >
+                  <TextField
+                    id="inflection"
+                    error={formik.errors.inflection != null}
+                    name="inflection"
+                    onBlur={formik.handleBlur}
+                    label="Inflection"
+                    inputProps={{
+                      min: floor,
+                      max: cap,
+                    }}
+                    type="number"
+                    onChange={formik.handleChange}
+                    value={inflection}
+                    sx={{ width: '100%' }}
+                  />
+                </Tooltip>
+                <Tooltip
+                  placement="top-end"
+                  title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
+                >
+                  <TextField
+                    error={formik.errors.cap != null}
+                    inputProps={{ min: inflection }}
+                    onBlur={formik.handleBlur}
+                    name="cap"
+                    id="cap"
+                    label="Cap"
+                    value={cap}
+                    type="number"
+                    onChange={formik.handleChange}
+                  />
+                </Tooltip>
+
+                <DefineAdvanced formik={formik} />
+              </Stack>
+            </FormControl>
+          </Box>
+        )}
 
         {floor != null &&
           cap != null &&
