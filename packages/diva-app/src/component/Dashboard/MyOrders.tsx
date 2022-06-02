@@ -202,9 +202,12 @@ export function MyOrders() {
     componentDidMount()
   }, [])
 
-  function openTrade(order: any) {
-    history.push(`../../${order.poolId}/${order.position}`)
-  }
+  const filteredRows =
+    search != null && search.length > 0
+      ? dataOrders.filter((v) =>
+          v.underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      : dataOrders
 
   const columns: GridColDef[] = [
     {
@@ -317,7 +320,7 @@ export function MyOrders() {
           </Box>
           <DataGrid
             className={classes.root}
-            rows={dataOrders}
+            rows={filteredRows}
             pagination
             columns={columns}
             onPageChange={(page) => setPage(page)}
