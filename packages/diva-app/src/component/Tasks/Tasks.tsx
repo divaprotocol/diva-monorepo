@@ -30,7 +30,7 @@ const columns: GridColDef[] = [
   {
     field: 'Task',
     align: 'left',
-    minWidth: 350,
+    minWidth: 450,
     renderCell: (cell) => {
       let link = ''
       switch (cell.id) {
@@ -468,7 +468,7 @@ export const Tasks = (props: any) => {
       >
         <Container sx={{ paddingRight: theme.spacing(40) }}>
           <DataGrid
-            sx={{ border: 0 }}
+            sx={{ border: 0, paddingLeft: theme.spacing(5) }}
             hideFooter={true}
             autoHeight={true}
             disableColumnMenu={true}
@@ -481,7 +481,7 @@ export const Tasks = (props: any) => {
 
         <Stack
           spacing={theme.spacing(6)}
-          sx={{ paddingLeft: theme.spacing(40) }}
+          sx={{ paddingLeft: theme.spacing(51) }}
         >
           <Box
             sx={{ mb: theme.spacing(-17), border: 1, borderColor: '#2A2A2D' }}
