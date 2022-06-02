@@ -304,7 +304,7 @@ export function MyOrders() {
                         <TableCell align="center">
                           <Box>
                             <Typography variant="subtitle1">
-                              {order.price.toFixed(2)}
+                              {order.price.toFixed(4)}
                             </Typography>
                           </Box>
                         </TableCell>
@@ -313,7 +313,7 @@ export function MyOrders() {
                             <Typography variant="subtitle1">
                               {order.quantity === 0
                                 ? '-'
-                                : order.payReceive.toFixed(2)}
+                                : order.payReceive.toFixed(4)}
                             </Typography>
                           </Box>
                         </TableCell>
