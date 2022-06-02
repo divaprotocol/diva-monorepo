@@ -37,7 +37,7 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
   },
   tab: {
-    width: 100,
+    width: 96,
     minWidth: 50,
   },
 }))

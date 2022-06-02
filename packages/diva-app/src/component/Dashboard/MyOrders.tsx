@@ -11,7 +11,6 @@ import {
 } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import { SideMenu } from './SideMenu'
 import { Search } from '@mui/icons-material'
 import { CoinIconPair } from '../CoinIcon'
 import { useHistory } from 'react-router-dom'
@@ -291,14 +290,10 @@ export function MyOrders() {
       direction="row"
       sx={{
         height: '100%',
-        maxHeight: 'calc(100% - 6em)',
       }}
       spacing={6}
-      paddingTop={2}
-      paddingRight={6}
     >
       <>
-        <SideMenu />
         <Stack height="100%" width="100%">
           <Box
             sx={{

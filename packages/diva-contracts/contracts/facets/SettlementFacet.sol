@@ -195,6 +195,15 @@ contract SettlementFacet is ISettlement, ReentrancyGuard {
             uint256 _amountToReturn = (_tokenRedemptionAmount * _SCALING).multiplyDecimal(_amount) / _SCALING;
 
             LibDiamond._returnCollateral(_poolId, _pool.collateralToken, msg.sender, _amountToReturn);
+
+            // Log redemption of position token
+            emit PositionTokenRedeemed(
+                _poolId,
+                _positionToken,
+                _amount,
+                _amountToReturn,
+                msg.sender
+            );
         }
     }
 }

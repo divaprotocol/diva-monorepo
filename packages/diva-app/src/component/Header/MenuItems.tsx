@@ -3,10 +3,9 @@ import { Stack } from '@mui/material'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
 import { Link, useLocation } from 'react-router-dom'
 import { Logo } from '../Logo'
-
+import TaskIcon from '@mui/icons-material/Task'
 export default function MenuItems() {
   const location = useLocation()
-  console.log({ location })
 
   return (
     <Stack
@@ -23,7 +22,7 @@ export default function MenuItems() {
         </Box>
       </Link>
       <Link to="/">
-        <Tooltip title="Market">
+        <Tooltip title="Markets">
           <ShowChartOutlined
             color={location.pathname === '/' ? 'primary' : 'action'}
           />
@@ -43,6 +42,17 @@ export default function MenuItems() {
           <Add
             color={
               location.pathname.toLowerCase() === '/create'
+                ? 'primary'
+                : 'action'
+            }
+          />
+        </Tooltip>
+      </Link>
+      <Link to="/tasks">
+        <Tooltip title="Testnet Tasks">
+          <TaskIcon
+            color={
+              location.pathname.toLowerCase() === '/tasks'
                 ? 'primary'
                 : 'action'
             }

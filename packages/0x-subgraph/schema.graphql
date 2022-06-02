@@ -1,0 +1,11 @@
+type NativeOrderFill @entity {
+    # tx hash - order hash - log index
+    id: ID!
+    orderHash: Bytes!
+    maker: Bytes!
+    taker: Bytes!
+    makerToken: Bytes!
+    takerToken: Bytes!
+    makerTokenFilledAmount: BigInt!
+    takerTokenFilledAmount: BigInt!
+}

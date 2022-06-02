@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: ropsten
     source:
-      address: "0x07F0293a07703c583F4Fb4ce3aC64043732eF3bf"
+      address: "0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211"
       abi: DivaDiamond
-      startBlock: 12085615
+      startBlock: 12314911
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -20,6 +20,7 @@ dataSources:
         - FeeRecipient
         - FeeRecipientCollateralToken
         - PositionToken
+        - TestnetUser
       abis:
         - name: DivaDiamond
           file: ../diva-contracts/abis/diamond.json
@@ -42,4 +43,6 @@ dataSources:
           handler: handleFeesClaimed
         - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
           handler: handleFeeClaimTransferred
+        - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
+          handler: handlePositionTokenRedeemed
       file: ./src/mapping.ts
