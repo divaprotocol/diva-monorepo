@@ -17,7 +17,7 @@ dataSources:
         - NativeOrderFill
       abis:
         - name: IZeroEx
-          file: ./abis/IZeroEx.json
+          file: ./abi/IZeroEx.json
       eventHandlers:
         - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
           handler: handleLimitOrderFilledEvent
