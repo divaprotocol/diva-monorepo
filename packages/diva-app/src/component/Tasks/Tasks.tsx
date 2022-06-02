@@ -215,8 +215,12 @@ const rows: GridRowModel = [
 const NumberLinearProgress = (props: any) => {
   return (
     <Stack spacing={2}>
-      <Box mr={1}>
-        <LinearProgress variant="determinate" value={props.value} />
+      <Box>
+        <LinearProgress
+          variant="determinate"
+          sx={{ height: '15px', borderRadius: 1 }}
+          value={props.value}
+        />
       </Box>
       <Typography
         sx={{
@@ -481,7 +485,7 @@ export const Tasks = (props: any) => {
 
         <Stack
           spacing={theme.spacing(6)}
-          sx={{ paddingLeft: theme.spacing(51) }}
+          sx={{ paddingLeft: theme.spacing(50) }}
         >
           <Box
             sx={{ mb: theme.spacing(-17), border: 1, borderColor: '#2A2A2D' }}
@@ -521,7 +525,11 @@ export const Tasks = (props: any) => {
           >
             <Container sx={{ pt: theme.spacing(5) }}>
               <Container>
-                <Typography sx={{ pb: theme.spacing(2) }}>
+                <Typography
+                  fontSize={'1.2em'}
+                  color={'white'}
+                  sx={{ pb: theme.spacing(5) }}
+                >
                   Your rewards
                 </Typography>
               </Container>
@@ -529,7 +537,9 @@ export const Tasks = (props: any) => {
                 <Container>
                   <Typography>Current points</Typography>
                   {userAddress != null ? (
-                    <Typography>{points}</Typography>
+                    <Typography fontSize={'1.7em'} color={'white'}>
+                      {points}
+                    </Typography>
                   ) : (
                     <Typography>-</Typography>
                   )}
@@ -537,7 +547,9 @@ export const Tasks = (props: any) => {
                 <Container>
                   <Typography>Multiplier</Typography>
                   {userAddress != null ? (
-                    <Typography>{multiplier}x</Typography>
+                    <Typography fontSize={'1.7em'} color={'white'}>
+                      {multiplier}x
+                    </Typography>
                   ) : (
                     <Typography>-</Typography>
                   )}
@@ -545,7 +557,9 @@ export const Tasks = (props: any) => {
                 <Container>
                   <Typography>Total points</Typography>
                   {userAddress != null ? (
-                    <Typography>{points * parseFloat(multiplier)}</Typography>
+                    <Typography fontSize={'1.7em'} color={'white'}>
+                      {points * parseFloat(multiplier)}
+                    </Typography>
                   ) : (
                     <Typography>-</Typography>
                   )}
@@ -567,7 +581,7 @@ export const Tasks = (props: any) => {
                 sx={{ justifyContent: 'space-between' }}
               >
                 <Stack spacing={theme.spacing(2)} direction={'row'}>
-                  <Typography>1.5x</Typography>
+                  <Typography color={'white'}>1.5x</Typography>
                   <Typography>
                     Multiplier on points collected if you complete all tasks
                   </Typography>
@@ -577,7 +591,7 @@ export const Tasks = (props: any) => {
                   direction={'row'}
                   sx={{ justifyContent: 'space-between' }}
                 >
-                  <Typography>3.0x</Typography>
+                  <Typography color={'white'}>3.0x</Typography>
                   <Typography>
                     Multiplier on points collected if you complete all tasks AND
                     hold an{' '}
@@ -592,7 +606,7 @@ export const Tasks = (props: any) => {
                   </Typography>
                 </Stack>
                 <Stack spacing={theme.spacing(3)} direction={'row'}>
-                  <DateRangeIcon />
+                  <DateRangeIcon sx={{ color: 'white' }} />
                   <Typography>
                     You can complete all tasks until
                     <Typography fontWeight="bold" display="inline">
