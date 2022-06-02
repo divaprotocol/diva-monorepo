@@ -1,16 +1,15 @@
 import { Person } from '@mui/icons-material'
 import { Box, Tab, Tabs } from '@mui/material'
-
 import { useState } from 'react'
 import { MyDataFeeds } from './MyDataFeeds'
 import { MyFeeClaims } from './MyFeeClaims'
 import { MyOrders } from './MyOrders'
 import { MyPositions } from './MyPositions'
-import { Person } from '@mui/icons-material'
 const Dashboard = (props: any) => {
   const { match, history } = props
   const { params } = match
   const { page } = params
+  console.log(page)
 
   const tabNameToIndex = {
     0: 'MyPosition',
@@ -18,8 +17,14 @@ const Dashboard = (props: any) => {
     2: 'MyDataFeeds',
     3: 'MyFeeClaims',
   }
-
-  const [value, setValue] = useState(0)
+  const indexToTabName = {
+    MyPosition: 0,
+    MyOrders: 1,
+    MyDataFeeds: 2,
+    MYfeeClaims: 3,
+  }
+  console.log(indexToTabName[page])
+  const [value, setValue] = useState(indexToTabName[page])
   const handleChange = (event: any, newValue: any) => {
     history.push(`/dashboard/${tabNameToIndex[newValue]}`)
     setValue(newValue)
