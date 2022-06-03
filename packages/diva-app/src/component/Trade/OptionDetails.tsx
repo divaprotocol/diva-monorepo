@@ -238,7 +238,7 @@ export default function OptionDetails({
             <FlexBox>
               <Tooltip
                 placement="top-end"
-                title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
+                title="Payout of long token at inflection."
               >
                 <FlexBoxHeader>Gradient</FlexBoxHeader>
               </Tooltip>
