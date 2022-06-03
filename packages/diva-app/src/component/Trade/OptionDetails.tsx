@@ -162,15 +162,46 @@ export default function OptionDetails({
           <FlexBoxData>{isLong ? 'Up' : 'Down'}</FlexBoxData>
         </FlexBox>
         {binary ? (
-          <FlexBox>
-            <FlexBoxHeader>Payoff type</FlexBoxHeader>
-            <FlexBoxData>Binary</FlexBoxData>
-          </FlexBox>
+          <>
+            <FlexBox>
+              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxData>Binary</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              <Tooltip
+                placement="top-end"
+                title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+              >
+                <FlexBoxHeader>Inflection</FlexBoxHeader>
+              </Tooltip>
+              <FlexBoxData>{formatEther(pool.inflection)}</FlexBoxData>
+            </FlexBox>
+          </>
         ) : linear ? (
-          <FlexBox>
-            <FlexBoxHeader>Payoff type</FlexBoxHeader>
-            <FlexBoxData>Linear</FlexBoxData>
-          </FlexBox>
+          <>
+            <FlexBox>
+              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxData>Linear</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              <Tooltip
+                placement="top-end"
+                title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+              >
+                <FlexBoxHeader>Floor</FlexBoxHeader>
+              </Tooltip>
+              <FlexBoxData>{formatEther(pool.floor)}</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              <Tooltip
+                placement="top-end"
+                title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
+              >
+                <FlexBoxHeader>Cap</FlexBoxHeader>
+              </Tooltip>
+              <FlexBoxData>{formatEther(pool.cap)}</FlexBoxData>
+            </FlexBox>
+          </>
         ) : (
           <>
             <FlexBox>
