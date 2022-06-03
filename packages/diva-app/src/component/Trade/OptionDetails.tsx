@@ -220,7 +220,7 @@ export default function OptionDetails({
             <FlexBox>
               <Tooltip
                 placement="top-end"
-                title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+                title="Value of the reference asset at which the token payout equals Gradient."
               >
                 <FlexBoxHeader>Inflection</FlexBoxHeader>
               </Tooltip>
@@ -236,10 +236,7 @@ export default function OptionDetails({
               <FlexBoxData>{formatEther(pool.cap)}</FlexBoxData>
             </FlexBox>
             <FlexBox>
-              <Tooltip
-                placement="top-end"
-                title="Payout of long token at inflection."
-              >
+              <Tooltip placement="top-end" title="Payout at inflection.">
                 <FlexBoxHeader>Gradient</FlexBoxHeader>
               </Tooltip>
               {isLong ? (
