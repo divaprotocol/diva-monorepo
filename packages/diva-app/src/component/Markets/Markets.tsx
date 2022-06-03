@@ -1,19 +1,52 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import { formatUnits, formatEther } from 'ethers/lib/utils'
-import { getDateTime } from '../../Util/Dates'
+import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import styled from '@emotion/styled'
 import { CoinIconPair } from '../CoinIcon'
 import { selectMainPools, selectOtherPools } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
-import { Box } from '@mui/material'
+import { Box, Tooltip } from '@mui/material'
 import { ShowChartOutlined } from '@mui/icons-material'
+
+export const ExpiresInCell = (props: any) => {
+  const expTimestamp = new Date(props.row.Expiry).getTime()
+  const statusTimestamp = parseInt(props.row.StatusTimestamp)
+  const expiryTime = new Date(parseInt(props.row.Expiry) * 1000)
+  const now = new Date()
+  console.log('expTimestamp', expTimestamp)
+  const minUntilExp = getExpiryMinutesFromNow(expTimestamp / 1000)
+  if (minUntilExp > 0) {
+    return minUntilExp === 1 ? (
+      <Tooltip placement="top-end" title={props.row.Expiry}>
+        <span className="table-cell-trucate">{'<1m'}</span>
+      </Tooltip>
+    ) : (
+      <Tooltip placement="top-end" title={props.row.Expiry}>
+        <span className="table-cell-trucate">
+          {(minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) +
+            'd ' +
+            ((minUntilExp % (60 * 24)) - (minUntilExp % 60)) / 60 +
+            'h ' +
+            (minUntilExp % 60) +
+            'm '}
+        </span>
+      </Tooltip>
+    )
+  } else {
+    return (
+      <Tooltip placement="top-end" title={props.row.Expiry}>
+        <span className="table-cell-trucate">{'-'}</span>
+      </Tooltip>
+    )
+  }
+}
 
 const columns: GridColDef[] = [
   {
@@ -52,6 +85,8 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     type: 'dateTime',
+    headerName: 'Expires in',
+    renderCell: (props) => <ExpiresInCell {...props} />,
   },
   { field: 'Sell', align: 'right', headerAlign: 'right' },
   { field: 'Buy', align: 'right', headerAlign: 'right' },

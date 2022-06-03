@@ -26,7 +26,7 @@ import { useDispatch } from 'react-redux'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 
-const DueInCell = (props: any) => {
+export const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
   const statusTimestamp = parseInt(props.row.StatusTimestamp)
   const expiryTime = new Date(parseInt(props.row.Expiry) * 1000)
@@ -41,30 +41,34 @@ const DueInCell = (props: any) => {
 
     if (minUntilExp < 24 * 60 - 5 && minUntilExp > 0) {
       return minUntilExp === 1 ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {'<1m'}
-        </div>
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '150vh',
+            }}
+          >
+            {'<1m'}
+          </div>
+        </Tooltip>
       ) : (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {(minUntilExp - (minUntilExp % 60)) / 60 +
-            'h ' +
-            (minUntilExp % 60) +
-            'm '}
-        </div>
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '150vh',
+            }}
+          >
+            {(minUntilExp - (minUntilExp % 60)) / 60 +
+              'h ' +
+              (minUntilExp % 60) +
+              'm '}
+          </div>
+        </Tooltip>
       )
     }
   }
@@ -74,45 +78,51 @@ const DueInCell = (props: any) => {
     )
     if (minUntilExp < 48 * 60 - 5 && minUntilExp > 0) {
       return minUntilExp === 1 ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {'<1m'}
-        </div>
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '150vh',
+            }}
+          >
+            {'<1m'}
+          </div>
+        </Tooltip>
       ) : (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {(minUntilExp - (minUntilExp % 60)) / 60 +
-            'h ' +
-            (minUntilExp % 60) +
-            'm '}
-        </div>
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '150vh',
+            }}
+          >
+            {(minUntilExp - (minUntilExp % 60)) / 60 +
+              'h ' +
+              (minUntilExp % 60) +
+              'm '}
+          </div>
+        </Tooltip>
       )
     }
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '150vh',
-      }}
-    >
-      {'-'}
-    </div>
+    <Tooltip placement="top-end" title={props.row.Expiry}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '150vh',
+        }}
+      >
+        {'-'}
+      </div>
+    </Tooltip>
   )
 }
 const SubmitCell = (props: any) => {
