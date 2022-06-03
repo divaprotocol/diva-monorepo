@@ -290,20 +290,20 @@ export default function OrderBook(props: {
                     </TableCell>
                     <TableCell align="center">
                       <Box>
-                        <Typography variant="subtitle1">
-                          {row.bid != '' ? Number(row.bid)?.toFixed(4) : '-'}
+                        <Typography variant="subtitle1" color="#66ffa6">
+                          {row.bid != '' ? Number(row.bid)?.toFixed(2) : '-'}
                         </Typography>
-                        <Typography variant="caption" noWrap>
+                        <Typography variant="caption" color="#8e8e8e" noWrap>
                           {row.buyExpiry}
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell align="center">
                       <Box>
-                        <Typography variant="subtitle1">
-                          {row.ask != '' ? row.ask?.toFixed(4) : '-'}
+                        <Typography variant="subtitle1" color="#ff5c8d">
+                          {row.ask != '' ? row.ask?.toFixed(2).toString() : '-'}
                         </Typography>
-                        <Typography variant="caption" noWrap>
+                        <Typography variant="caption" color="#8e8e8e" noWrap>
                           {row.sellExpiry}
                         </Typography>
                       </Box>
