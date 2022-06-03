@@ -242,21 +242,43 @@ export default function OptionDetails({
               >
                 <FlexBoxHeader>Gradient</FlexBoxHeader>
               </Tooltip>
-              <FlexBoxData>
-                {Number(
-                  formatUnits(
-                    BigNumber.from(pool.collateralBalanceLongInitial)
-                      .mul(parseUnits('1', pool.collateralToken.decimals))
-                      .div(
-                        BigNumber.from(pool.collateralBalanceLongInitial).add(
-                          BigNumber.from(pool.collateralBalanceShortInitial)
-                        )
+              {isLong ? (
+                <FlexBoxData>
+                  {Number(
+                    formatUnits(
+                      BigNumber.from(pool.collateralBalanceLongInitial)
+                        .mul(parseUnits('1', pool.collateralToken.decimals))
+                        .div(
+                          BigNumber.from(pool.collateralBalanceLongInitial).add(
+                            BigNumber.from(pool.collateralBalanceShortInitial)
+                          )
+                        ),
+
+                      pool.collateralToken.decimals
+                    )
+                  ).toFixed(2)}
+                </FlexBoxData>
+              ) : (
+                <FlexBoxData>
+                  {Number(
+                    formatUnits(
+                      parseUnits('1', pool.collateralToken.decimals).sub(
+                        BigNumber.from(pool.collateralBalanceLongInitial)
+                          .mul(parseUnits('1', pool.collateralToken.decimals))
+                          .div(
+                            BigNumber.from(
+                              pool.collateralBalanceLongInitial
+                            ).add(
+                              BigNumber.from(pool.collateralBalanceShortInitial)
+                            )
+                          )
                       ),
 
-                    pool.collateralToken.decimals
-                  )
-                ).toFixed(2)}
-              </FlexBoxData>
+                      pool.collateralToken.decimals
+                    )
+                  ).toFixed(2)}
+                </FlexBoxData>
+              )}
             </FlexBox>
           </>
         )}
