@@ -17,10 +17,6 @@ import { ShowChartOutlined } from '@mui/icons-material'
 
 export const ExpiresInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime()
-  const statusTimestamp = parseInt(props.row.StatusTimestamp)
-  const expiryTime = new Date(parseInt(props.row.Expiry) * 1000)
-  const now = new Date()
-  console.log('expTimestamp', expTimestamp)
   const minUntilExp = getExpiryMinutesFromNow(expTimestamp / 1000)
   if (minUntilExp > 0) {
     return minUntilExp === 1 ? (
