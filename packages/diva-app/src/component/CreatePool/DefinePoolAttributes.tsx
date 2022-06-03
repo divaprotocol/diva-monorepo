@@ -67,7 +67,8 @@ export function DefinePoolAttributes({
       collateralToken != null &&
       formik.values.gradient.toString() != '' &&
       formik.values.gradient >= 0 &&
-      formik.values.gradient <= 1
+      formik.values.gradient <= 1 &&
+      formik.values.collateralBalance.toString() != ''
     ) {
       const collateralBalanceLong = parseUnits(
         formik.values.collateralBalance,

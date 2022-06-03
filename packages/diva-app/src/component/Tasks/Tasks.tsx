@@ -24,11 +24,14 @@ import {
   TestUser,
 } from '../../lib/queries'
 import request from 'graphql-request'
+import TaskIcon from '@mui/icons-material/Task'
+
 const columns: GridColDef[] = [
   {
     field: 'Task',
     align: 'left',
-    minWidth: 350,
+    minWidth: 550,
+    renderHeader: (header) => <WhiteText>{'Task'}</WhiteText>,
     renderCell: (cell) => {
       let link = ''
       switch (cell.id) {
@@ -111,10 +114,12 @@ const columns: GridColDef[] = [
   {
     field: 'Points',
     align: 'left',
+    renderHeader: (header) => <WhiteText>{'Points'}</WhiteText>,
   },
   {
     field: 'Status',
     align: 'left',
+    renderHeader: (header) => <WhiteText>{'Status'}</WhiteText>,
   },
 ]
 
@@ -133,13 +138,13 @@ const rows: GridRowModel = [
   },
   {
     id: 3,
-    Task: 'Create a pool with a convex payoff',
+    Task: 'Create a pool with a convex long token payoff',
     Points: 200,
     Status: 'Unknown',
   },
   {
     id: 4,
-    Task: 'Create a pool with a concave payoff',
+    Task: 'Create a pool with a concave long token payoff',
     Points: 200,
     Status: 'Unknown',
   },
@@ -213,8 +218,12 @@ const rows: GridRowModel = [
 const NumberLinearProgress = (props: any) => {
   return (
     <Stack spacing={2}>
-      <Box mr={1}>
-        <LinearProgress variant="determinate" value={props.value} />
+      <Box>
+        <LinearProgress
+          variant="determinate"
+          sx={{ height: '15px', borderRadius: 1 }}
+          value={props.value}
+        />
       </Box>
       <Typography
         sx={{
@@ -447,173 +456,201 @@ export const Tasks = (props: any) => {
     }
   }, [calcRows, multiplier, points === 3000])
   return (
-    <Stack
-      sx={{ justifyContent: 'space-between' }}
-      direction={'row'}
-      height="80%"
-      width="90%"
-    >
-      <Container sx={{ paddingRight: theme.spacing(40) }}>
-        <h3>Testnet Tasks</h3>
-        <DataGrid
-          sx={{ border: 0 }}
-          hideFooter={true}
-          autoHeight={true}
-          disableColumnMenu={true}
-          disableSelectionOnClick={true}
-          className={classes.root}
-          rows={calcRows}
-          columns={columns}
-        />
-      </Container>
+    <Box>
+      <Box
+        paddingX={6}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <TaskIcon style={{ fontSize: 34, padding: 20, paddingRight: 10 }} />
+        <h2> Testnet Tasks</h2>
+      </Box>
+      <Stack
+        sx={{ justifyContent: 'space-between' }}
+        direction={'row'}
+        height="80%"
+        width="90%"
+      >
+        <Container
+          sx={{ width: theme.spacing(99), marginLeft: theme.spacing(5) }}
+        >
+          <DataGrid
+            sx={{ border: 0 }}
+            hideFooter={true}
+            autoHeight={true}
+            disableColumnMenu={true}
+            disableSelectionOnClick={true}
+            className={classes.root}
+            rows={calcRows}
+            columns={columns}
+          />
+        </Container>
 
-      <Stack spacing={theme.spacing(6)} sx={{ paddingLeft: theme.spacing(40) }}>
-        <Box
-          sx={{ mb: theme.spacing(-17), border: 1, borderColor: '#2A2A2D' }}
-          width={theme.spacing(65)}
-          height={theme.spacing(30)}
-          style={{
-            background: '#171718',
-          }}
+        <Stack
+          spacing={theme.spacing(6)}
+          sx={{ paddingLeft: theme.spacing(2) }}
         >
-          <Container sx={{ pt: theme.spacing(2) }}>
-            {userAddress != null ? (
-              <>
-                <Typography sx={{ pb: theme.spacing(2) }}>
-                  Your progress
+          <Box
+            sx={{ mb: theme.spacing(-17), border: 1, borderColor: '#2A2A2D' }}
+            width={theme.spacing(65)}
+            height={theme.spacing(30)}
+            style={{
+              background: '#171718',
+            }}
+          >
+            <Container sx={{ pt: theme.spacing(2) }}>
+              {userAddress != null ? (
+                <>
+                  <Typography sx={{ pb: theme.spacing(2) }}>
+                    Your progress
+                  </Typography>
+                  <NumberLinearProgress
+                    variant={'determinate'}
+                    value={Math.round((points / 3000) * 100)}
+                  />
+                </>
+              ) : (
+                <Typography
+                  sx={{ pl: theme.spacing(12), pt: theme.spacing(6) }}
+                >
+                  Please connect your wallet
                 </Typography>
-                <NumberLinearProgress
-                  variant={'determinate'}
-                  value={Math.round((points / 3000) * 100)}
-                />
-              </>
-            ) : (
-              <Typography sx={{ pl: theme.spacing(12), pt: theme.spacing(6) }}>
-                Please connect your wallet
-              </Typography>
-            )}
-          </Container>
-        </Box>
-        <Box
-          sx={{ border: 1, borderColor: '#2A2A2D' }}
-          style={{
-            background: 'linear-gradient(to bottom, #050539, #0D0D11)',
-          }}
-          width={theme.spacing(65)}
-          height={theme.spacing(30)}
-        >
-          <Container sx={{ pt: theme.spacing(5) }}>
-            <Container>
-              <Typography sx={{ pb: theme.spacing(2) }}>
-                Your rewards
-              </Typography>
+              )}
             </Container>
-            <Stack direction={'row'} sx={{ justifyContent: 'space-between' }}>
+          </Box>
+          <Box
+            sx={{ border: 1, borderColor: '#2A2A2D' }}
+            style={{
+              background: 'linear-gradient(to bottom, #050539, #0D0D11)',
+            }}
+            width={theme.spacing(65)}
+            height={theme.spacing(30)}
+          >
+            <Container sx={{ pt: theme.spacing(5) }}>
               <Container>
-                <Typography>Current points</Typography>
-                {userAddress != null ? (
-                  <Typography>{points}</Typography>
-                ) : (
-                  <Typography>-</Typography>
-                )}
-              </Container>
-              <Container>
-                <Typography>Multiplier</Typography>
-                {userAddress != null ? (
-                  <Typography>{multiplier}x</Typography>
-                ) : (
-                  <Typography>-</Typography>
-                )}
-              </Container>
-              <Container>
-                <Typography>Total points</Typography>
-                {userAddress != null ? (
-                  <Typography>{points * parseFloat(multiplier)}</Typography>
-                ) : (
-                  <Typography>-</Typography>
-                )}
-              </Container>
-            </Stack>
-          </Container>
-        </Box>
-        <Box
-          style={{
-            background: '#171718',
-          }}
-          sx={{ border: 1, borderColor: '#2A2A2D' }}
-          width={theme.spacing(65)}
-          height={theme.spacing(30)}
-        >
-          <Container sx={{ pt: theme.spacing(5) }}>
-            <Stack
-              spacing={theme.spacing(2)}
-              sx={{ justifyContent: 'space-between' }}
-            >
-              <Stack spacing={theme.spacing(2)} direction={'row'}>
-                <Typography>1.5x</Typography>
-                <Typography>
-                  Multiplier on points collected if you complete all tasks
+                <Typography
+                  fontSize={'1.2em'}
+                  color={'white'}
+                  sx={{ pb: theme.spacing(5) }}
+                >
+                  Your rewards
                 </Typography>
+              </Container>
+              <Stack direction={'row'} sx={{ justifyContent: 'space-between' }}>
+                <Container>
+                  <Typography>Current points</Typography>
+                  {userAddress != null ? (
+                    <Typography fontSize={'1.7em'} color={'white'}>
+                      {points}
+                    </Typography>
+                  ) : (
+                    <Typography>-</Typography>
+                  )}
+                </Container>
+                <Container>
+                  <Typography>Multiplier</Typography>
+                  {userAddress != null ? (
+                    <Typography fontSize={'1.7em'} color={'white'}>
+                      {multiplier}x
+                    </Typography>
+                  ) : (
+                    <Typography>-</Typography>
+                  )}
+                </Container>
+                <Container>
+                  <Typography>Total points</Typography>
+                  {userAddress != null ? (
+                    <Typography fontSize={'1.7em'} color={'white'}>
+                      {points * parseFloat(multiplier)}
+                    </Typography>
+                  ) : (
+                    <Typography>-</Typography>
+                  )}
+                </Container>
               </Stack>
+            </Container>
+          </Box>
+          <Box
+            style={{
+              background: '#171718',
+            }}
+            sx={{ border: 1, borderColor: '#2A2A2D' }}
+            width={theme.spacing(65)}
+            height={theme.spacing(30)}
+          >
+            <Container sx={{ pt: theme.spacing(5) }}>
               <Stack
                 spacing={theme.spacing(2)}
-                direction={'row'}
                 sx={{ justifyContent: 'space-between' }}
               >
-                <Typography>3.0x</Typography>
-                <Typography>
-                  Multiplier on points collected if you complete all tasks AND
-                  hold an{' '}
-                  <Link
-                    href="https://opensea.io/collection/888whales"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    888Whales NFT
-                  </Link>{' '}
-                  at DIVA token launch
-                </Typography>
-              </Stack>
-              <Stack spacing={theme.spacing(3)} direction={'row'}>
-                <DateRangeIcon />
-                <Typography>
-                  You can complete all tasks until
-                  <Typography fontWeight="bold" display="inline">
-                    {' '}
-                    30th September 2022
+                <Stack spacing={theme.spacing(2)} direction={'row'}>
+                  <Typography color={'white'}>1.5x</Typography>
+                  <Typography>
+                    Multiplier on points collected if you complete all tasks
                   </Typography>
-                </Typography>
+                </Stack>
+                <Stack
+                  spacing={theme.spacing(2)}
+                  direction={'row'}
+                  sx={{ justifyContent: 'space-between' }}
+                >
+                  <Typography color={'white'}>3.0x</Typography>
+                  <Typography>
+                    Multiplier on points collected if you complete all tasks AND
+                    hold an{' '}
+                    <Link
+                      href="https://opensea.io/collection/888whales"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      888Whales NFT
+                    </Link>{' '}
+                    at DIVA token launch
+                  </Typography>
+                </Stack>
+                <Stack spacing={theme.spacing(3)} direction={'row'}>
+                  <DateRangeIcon sx={{ color: 'white' }} />
+                  <Typography>
+                    You can complete all tasks until
+                    <Typography fontWeight="bold" display="inline">
+                      {' '}
+                      30th September 2022
+                    </Typography>
+                  </Typography>
+                </Stack>
               </Stack>
-            </Stack>
-          </Container>
-        </Box>
-        <Box
-          sx={{ border: 1, borderColor: '#2A2A2D' }}
-          style={{
-            background: 'linear-gradient(to bottom, #191935, #0D0D11)',
-          }}
-        >
-          <Container sx={{ pt: theme.spacing(1), pb: theme.spacing(1) }}>
-            <Stack direction={'row'}>
-              <CampaignIcon fontSize={'large'} />
-              <Container>
-                <Typography>Feedback? Bug reports?</Typography>
-                <Typography>
-                  Let us know in our{' '}
-                  <Link
-                    href="https://discord.gg/NJDm29eEa4"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    discord
-                  </Link>{' '}
-                  channel
-                </Typography>
-              </Container>
-            </Stack>
-          </Container>
-        </Box>
+            </Container>
+          </Box>
+          <Box
+            sx={{ border: 1, borderColor: '#2A2A2D' }}
+            style={{
+              background: 'linear-gradient(to bottom, #191935, #0D0D11)',
+            }}
+          >
+            <Container sx={{ pt: theme.spacing(1), pb: theme.spacing(1) }}>
+              <Stack direction={'row'}>
+                <CampaignIcon fontSize={'large'} color={'primary'} />
+                <Container>
+                  <Typography>Feedback? Bug reports?</Typography>
+                  <Typography>
+                    Let us know in our{' '}
+                    <Link
+                      href="https://discord.gg/NJDm29eEa4"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      discord
+                    </Link>{' '}
+                    channel
+                  </Typography>
+                </Container>
+              </Stack>
+            </Container>
+          </Box>
+        </Stack>
       </Stack>
-    </Stack>
+    </Box>
   )
 }

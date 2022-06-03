@@ -107,7 +107,7 @@ export default function OptionHeader(optionData: {
           target="_blank"
           href={getEtherscanLink(
             chainId,
-            shortenTokenAddress,
+            optionData.TokenAddress,
             EtherscanLinkType.ADDRESS
           )}
         >
