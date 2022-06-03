@@ -473,9 +473,11 @@ export const Tasks = (props: any) => {
         height="80%"
         width="90%"
       >
-        <Container sx={{ paddingRight: theme.spacing(40) }}>
+        <Container
+          sx={{ width: theme.spacing(99), marginLeft: theme.spacing(5) }}
+        >
           <DataGrid
-            sx={{ border: 0, paddingLeft: theme.spacing(5) }}
+            sx={{ border: 0 }}
             hideFooter={true}
             autoHeight={true}
             disableColumnMenu={true}
@@ -488,7 +490,7 @@ export const Tasks = (props: any) => {
 
         <Stack
           spacing={theme.spacing(6)}
-          sx={{ paddingLeft: theme.spacing(35) }}
+          sx={{ paddingLeft: theme.spacing(2) }}
         >
           <Box
             sx={{ mb: theme.spacing(-17), border: 1, borderColor: '#2A2A2D' }}
