@@ -22,7 +22,9 @@ export function calcPayoffPerToken(
     collateralBalanceLongInitial.mul(SCALING)
   const collateralBalanceShortInitialScaled =
     collateralBalanceShortInitial.mul(SCALING)
-  let payoffLong = BigENumber.from(0)
+
+  let payoffLong
+
   if (finalReferenceValue.eq(inflection)) {
     payoffLong = collateralBalanceLongInitialScaled
   } else if (finalReferenceValue.lt(inflection)) {
