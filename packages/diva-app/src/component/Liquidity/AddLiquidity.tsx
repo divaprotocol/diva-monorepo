@@ -306,7 +306,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                         ) *
                           100) /
                         100
-                      ).toString() + ' %'}
+                      ).toFixed(2) + ' %'}
                   </BlackTextTypography>
                   <BlackTextTypography>Share of Pool</BlackTextTypography>
                 </Container>

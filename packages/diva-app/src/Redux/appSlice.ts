@@ -440,12 +440,12 @@ export const selectBreakEven = (
 
 export const selectMainPools = (state: RootState) =>
   selectAppStateByChain(state).pools.filter(
-    (p) => p?.createdBy === whitelistedPoolCreatorAddress
+    (p) => p?.createdBy === whitelistedPoolCreatorAddress.toLowerCase()
   )
 
 export const selectOtherPools = (state: RootState) =>
   selectAppStateByChain(state).pools.filter(
-    (p) => p?.createdBy !== whitelistedPoolCreatorAddress
+    (p) => p?.createdBy !== whitelistedPoolCreatorAddress.toLowerCase()
   )
 
 export const selectChainId = (state: RootState) => state.appSlice.chainId
