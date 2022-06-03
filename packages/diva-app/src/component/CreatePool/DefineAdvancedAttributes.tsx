@@ -23,7 +23,6 @@ export function DefineAdvanced({
   const [expanded, setExpanded] = useState(false)
   const [unlimited, setUnlimited] = useState(true)
   const {
-    gradient,
     collateralBalanceShort,
     tokenSupply,
     collateralBalanceLong,
@@ -66,30 +65,6 @@ export function DefineAdvanced({
         <Typography variant="subtitle2">Advanced Settings</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ padding: 0 }}>
-        <Box pb={3}>
-          <FormControl fullWidth error={formik.errors.gradient != null}>
-            <Tooltip
-              placement="top-end"
-              title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
-            >
-              <TextField
-                name="gradient"
-                id="gradient"
-                label="Gradient"
-                onBlur={formik.handleBlur}
-                error={formik.errors.gradient != null}
-                inputProps={{ min: 0 }}
-                onChange={formik.handleChange}
-                value={gradient}
-                type="number"
-              />
-            </Tooltip>
-
-            {formik.errors.gradient != null && (
-              <FormHelperText>{formik.errors.gradient}</FormHelperText>
-            )}
-          </FormControl>
-        </Box>
         <Box pb={3}>
           <FormControl fullWidth error={formik.errors.tokenSupply != null}>
             <TextField

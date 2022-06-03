@@ -58,6 +58,7 @@ export function DefinePoolAttributes({
     inflection,
     cap,
     floor,
+    gradient,
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
   useEffect(() => {
@@ -75,7 +76,8 @@ export function DefinePoolAttributes({
       collateralToken != null &&
       formik.values.gradient.toString() != '' &&
       formik.values.gradient >= 0 &&
-      formik.values.gradient <= 1
+      formik.values.gradient <= 1 &&
+      formik.values.collateralBalance.toString() != ''
     ) {
       const collateralBalanceLong = parseUnits(
         formik.values.collateralBalance,
@@ -382,6 +384,7 @@ export function DefinePoolAttributes({
                   sx={{ width: '100%' }}
                 />
               </Tooltip>
+              <DefineAdvanced formik={formik} />
             </Stack>
           </Box>
         )}
@@ -420,6 +423,7 @@ export function DefinePoolAttributes({
                   onChange={formik.handleChange}
                 />
               </Tooltip>
+              <DefineAdvanced formik={formik} />
             </Stack>
           </Box>
         )}
@@ -490,7 +494,22 @@ export function DefinePoolAttributes({
                     onChange={formik.handleChange}
                   />
                 </Tooltip>
-
+                <Tooltip
+                  placement="top-end"
+                  title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
+                >
+                  <TextField
+                    name="gradient"
+                    id="gradient"
+                    label="Gradient"
+                    onBlur={formik.handleBlur}
+                    error={formik.errors.gradient != null}
+                    inputProps={{ min: 0 }}
+                    onChange={formik.handleChange}
+                    value={gradient}
+                    type="number"
+                  />
+                </Tooltip>
                 <DefineAdvanced formik={formik} />
               </Stack>
             </FormControl>
