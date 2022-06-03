@@ -156,6 +156,7 @@ export function DefinePoolAttributes({
           ..._values,
           cap: formik.values.inflection,
           floor: formik.values.inflection,
+          gradient: 1,
         }))
         break
       case 'linear':
