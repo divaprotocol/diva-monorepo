@@ -205,6 +205,10 @@ export default function OptionDetails({
         ) : (
           <>
             <FlexBox>
+              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxData>Custom</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
               <Tooltip
                 placement="top-end"
                 title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
