@@ -245,6 +245,7 @@ const SubmitButton = (props: any) => {
 
           <DialogActions>
             <TextField
+              autoFocus={true}
               defaultValue={textFieldValue}
               onChange={(e) => {
                 setTextFieldValue(e.target.value)
