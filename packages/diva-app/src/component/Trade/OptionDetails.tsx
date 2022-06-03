@@ -236,10 +236,7 @@ export default function OptionDetails({
               <FlexBoxData>{formatEther(pool.cap)}</FlexBoxData>
             </FlexBox>
             <FlexBox>
-              <Tooltip
-                placement="top-end"
-                title="Payout of long token at inflection."
-              >
+              <Tooltip placement="top-end" title="Payout at inflection.">
                 <FlexBoxHeader>Gradient</FlexBoxHeader>
               </Tooltip>
               {isLong ? (
