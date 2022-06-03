@@ -20,6 +20,7 @@ type Props = {
   textFieldValue: string
   transactionType: 'create' | 'liquidity'
   onTransactionSuccess: () => void
+  alert?: boolean
 }
 
 export const ApproveActionButtons = ({
@@ -29,6 +30,7 @@ export const ApproveActionButtons = ({
   textFieldValue,
   transactionType,
   onTransactionSuccess,
+  alert,
 }: Props) => {
   const [approveLoading, setApproveLoading] = React.useState(false)
   const [actionLoading, setActionLoading] = React.useState(false)
@@ -100,7 +102,8 @@ export const ApproveActionButtons = ({
                 approveEnabled === false ||
                 account == null ||
                 textFieldValue === '' ||
-                isPoolCreated === true
+                isPoolCreated === true ||
+                alert === true
               }
               onClick={() => {
                 setApproveLoading(true)
@@ -152,7 +155,8 @@ export const ApproveActionButtons = ({
               actionEnabled === false ||
               account == null ||
               textFieldValue === '' ||
-              isPoolCreated === true
+              isPoolCreated === true ||
+              alert === true
             }
             onClick={() => {
               setActionLoading(true)
