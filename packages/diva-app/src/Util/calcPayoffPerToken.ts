@@ -110,7 +110,7 @@ export function calcBreakEven(
         breakEven = price
           .sub(gradient)
           .mul(cap.sub(inflection))
-          .div(UNIT)
+          .div(UNIT.sub(gradient))
           .add(inflection)
       }
     } else {
