@@ -171,14 +171,22 @@ export default function OptionDetails({
               {isLong ? (
                 <Tooltip
                   placement="top-end"
-                  title="Value of the reference asset at or above which the LONG token pays 1."
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the LONG token pays 1.'
+                  }
                 >
                   <FlexBoxHeader>Inflection</FlexBoxHeader>
                 </Tooltip>
               ) : (
                 <Tooltip
                   placement="top-end"
-                  title="Value of the reference asset below which the SHORT token pays 1."
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' below which the SHORT token pays 1.'
+                  }
                 >
                   <FlexBoxHeader>Inflection</FlexBoxHeader>
                 </Tooltip>
@@ -196,14 +204,22 @@ export default function OptionDetails({
               {isLong ? (
                 <Tooltip
                   placement="top-end"
-                  title="Value of the reference asset at or below which the LONG token pays out 0."
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the LONG token pays out 0.'
+                  }
                 >
                   <FlexBoxHeader>Floor</FlexBoxHeader>
                 </Tooltip>
               ) : (
                 <Tooltip
                   placement="top-end"
-                  title="Value of the reference asset at or below which the SHORT token pays out 1."
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the SHORT token pays out 1.'
+                  }
                 >
                   <FlexBoxHeader>Floor</FlexBoxHeader>
                 </Tooltip>
@@ -214,14 +230,22 @@ export default function OptionDetails({
               {isLong ? (
                 <Tooltip
                   placement="top-end"
-                  title="Value of the reference asset at or above which the LONG token pays out 1."
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the LONG token pays out 1.'
+                  }
                 >
                   <FlexBoxHeader>Cap</FlexBoxHeader>
                 </Tooltip>
               ) : (
                 <Tooltip
                   placement="top-end"
-                  title="Value of the reference asset at or above which the SHORT token pays out 1."
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the SHORT token pays out 1.'
+                  }
                 >
                   <FlexBoxHeader>Cap</FlexBoxHeader>
                 </Tooltip>
@@ -239,14 +263,22 @@ export default function OptionDetails({
               {isLong ? (
                 <Tooltip
                   placement="top-end"
-                  title="Value of the reference asset at or below which the LONG token pays out 0."
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the LONG token pays out 0.'
+                  }
                 >
                   <FlexBoxHeader>Floor</FlexBoxHeader>
                 </Tooltip>
               ) : (
                 <Tooltip
                   placement="top-end"
-                  title="Value of the reference asset at or below which the SHORT token pays out 1."
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the SHORT token pays out 1.'
+                  }
                 >
                   <FlexBoxHeader>Floor</FlexBoxHeader>
                 </Tooltip>
@@ -258,14 +290,22 @@ export default function OptionDetails({
               {isLong ? (
                 <Tooltip
                   placement="top-end"
-                  title="Value of the reference asset at or above which the LONG token pays out 1."
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the LONG token pays out 1.'
+                  }
                 >
                   <FlexBoxHeader>Cap</FlexBoxHeader>
                 </Tooltip>
               ) : (
                 <Tooltip
                   placement="top-end"
-                  title="Value of the reference asset at or above which the SHORT token pays out 0."
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the SHORT token pays out 0.'
+                  }
                 >
                   <FlexBoxHeader>Cap</FlexBoxHeader>
                 </Tooltip>
@@ -275,7 +315,11 @@ export default function OptionDetails({
             <FlexBox>
               <Tooltip
                 placement="top-end"
-                title="Value of the reference asset at which the LONG token payout is equal to Gradient."
+                title={
+                  'Value of ' +
+                  pool.referenceAsset +
+                  ' at which the LONG token payout is equal to Gradient.'
+                }
               >
                 <FlexBoxHeader>Inflection</FlexBoxHeader>
               </Tooltip>
@@ -285,14 +329,22 @@ export default function OptionDetails({
               {isLong ? (
                 <Tooltip
                   placement="top-end"
-                  title="Payout per LONG token if the reference asset ends up at inflection."
+                  title={
+                    'Payout per LONG token if ' +
+                    pool.referenceAsset +
+                    ' ends up at inflection.'
+                  }
                 >
                   <FlexBoxHeader>Gradient</FlexBoxHeader>
                 </Tooltip>
               ) : (
                 <Tooltip
                   placement="top-end"
-                  title="Payout per SHORT token if the reference asset ends up at inflection."
+                  title={
+                    'Payout per SHORT token if ' +
+                    pool.referenceAsset +
+                    ' ends up at inflection.'
+                  }
                 >
                   <FlexBoxHeader>Gradient</FlexBoxHeader>
                 </Tooltip>
@@ -349,7 +401,7 @@ export default function OptionDetails({
               </Tooltip>
               {checkIcon ? (
                 <Tooltip
-                  title="Trusted data provider from the DIVA whitelist"
+                  title="Trusted data provider from the DIVA whitelist."
                   arrow
                 >
                   <CheckCircleSharpIcon
@@ -362,7 +414,10 @@ export default function OptionDetails({
                   />
                 </Tooltip>
               ) : (
-                <Tooltip title="Untrusted data provider" arrow>
+                <Tooltip
+                  title="Data provider is NOT part of DIVA's whitelist."
+                  arrow
+                >
                   <WarningAmberSharpIcon
                     sx={{
                       mt: 0.3,
