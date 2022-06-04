@@ -11,7 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
@@ -25,6 +25,7 @@ import { fetchPool, selectPools, selectUserAddress } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { ExpiresInCell } from '../Markets/Markets'
 
 export const DueInCell = (props: any) => {
   const expTimestamp = parseInt(props.row.Expiry)
@@ -247,9 +248,8 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     type: 'dateTime',
-    renderCell: (props) => {
-      return <div>{getDateTime(props.row.Expiry)}</div>
-    },
+    headerName: 'Expires in',
+    renderCell: (props) => <ExpiresInCell {...props} />,
   },
   {
     field: 'finalValue',
@@ -298,7 +298,7 @@ export function MyDataFeeds() {
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
 
-  const pools = useAppSelector(selectPools)
+  const pools = useAppSelector((state) => selectPools(state))
   const rows: GridRowModel[] = pools
     .filter(
       (pool) => pool.dataProvider.toLowerCase() === userAddress?.toLowerCase()
@@ -310,7 +310,7 @@ export function MyDataFeeds() {
         Floor: formatUnits(val.floor),
         Inflection: formatUnits(val.inflection),
         Cap: formatUnits(val.cap),
-        Expiry: val.expiryTime,
+        Expiry: getDateTime(val.expiryTime),
         Sell: 'TBD',
         Buy: 'TBD',
         MaxYield: 'TBD',

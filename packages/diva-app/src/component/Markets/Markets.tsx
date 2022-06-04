@@ -17,6 +17,7 @@ import { ShowChartOutlined } from '@mui/icons-material'
 
 export const ExpiresInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime()
+  const expDate = new Date(props.row.Expiry).toLocaleDateString()
   const minUntilExp = getExpiryMinutesFromNow(expTimestamp / 1000)
   if (minUntilExp > 0) {
     return minUntilExp === 1 ? (
@@ -24,7 +25,7 @@ export const ExpiresInCell = (props: any) => {
         <span className="table-cell-trucate">{'<1m'}</span>
       </Tooltip>
     ) : (
-      <Tooltip placement="top-end" title={props.row.Expiry}>
+      <Tooltip placement="top-end" title={expDate}>
         <span className="table-cell-trucate">
           {(minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) +
             'd ' +
@@ -37,7 +38,7 @@ export const ExpiresInCell = (props: any) => {
     )
   } else {
     return (
-      <Tooltip placement="top-end" title={props.row.Expiry}>
+      <Tooltip placement="top-end" title={expDate}>
         <span className="table-cell-trucate">{'-'}</span>
       </Tooltip>
     )
