@@ -1,8 +1,6 @@
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
-import { CollateralToken } from '../../../diva-whitelist-subgraph/generated/schema'
-import { selectBreakEven } from '../Redux/appSlice'
 
 // Returned values are expressed as integers with collateral token decimals
 export function calcPayoffPerToken(
