@@ -243,7 +243,7 @@ export default function OpenOrders(props: {
                           {order.orderType}
                         </Typography>
                         <Typography variant="caption" noWrap>
-                          {order.expiry}
+                          {order.expiryMins}
                         </Typography>
                       </Box>
                     </TableCell>

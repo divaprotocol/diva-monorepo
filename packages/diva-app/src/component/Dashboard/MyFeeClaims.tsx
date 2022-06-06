@@ -170,7 +170,7 @@ const AmountCell = (props: any) => {
 
 const columns: GridColDef[] = [
   {
-    field: 'TokenSymbol',
+    field: 'Underlying',
     align: 'left',
     headerAlign: 'left',
     minWidth: 200,
@@ -228,7 +228,7 @@ export function MyFeeClaims() {
       ...acc,
       {
         id: feeCount,
-        TokenSymbol: `${val.collateralToken.symbol}`,
+        Underlying: `${val.collateralToken.symbol}`,
         Amount: `${val.amount}`,
         Address: `${val.collateralToken.id}`,
       },

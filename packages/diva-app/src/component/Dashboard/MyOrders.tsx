@@ -1,19 +1,5 @@
-import {
-  Paper,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Box,
-  Typography,
-  Button,
-  Stack,
-  InputAdornment,
-  Input,
-} from '@mui/material'
+import { Box, Button, Stack, InputAdornment, Input } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
-import TableContainer from '@mui/material/TableContainer'
 import { formatUnits } from 'ethers/lib/utils'
 import { useState, useEffect } from 'react'
 import { getOrderDetails, getUserOrders } from '../../DataService/OpenOrders'
@@ -28,14 +14,26 @@ import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Search } from '@mui/icons-material'
 import { CoinIconPair } from '../CoinIcon'
 import { useHistory } from 'react-router-dom'
+import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { GrayText } from '../Trade/Orders/UiStyles'
+import { makeStyles } from '@mui/styles'
 
 export function MyOrders() {
   const chainId = useAppSelector(selectChainId)
   const makerAccount = useAppSelector(selectUserAddress)
   const [dataOrders, setDataOrders] = useState([])
+  const [page, setPage] = useState(0)
   const pools = useAppSelector((state) => selectPools(state))
   const [search, setSearch] = useState('')
   const history = useHistory()
+  const useStyles = makeStyles({
+    root: {
+      '&.MuiDataGrid-root .MuiDataGrid-cell:focus': {
+        outline: 'none',
+      },
+    },
+  })
+  const classes = useStyles()
   const trimPools = pools.map((pool) => {
     return {
       id: pool.id,
@@ -70,7 +68,8 @@ export function MyOrders() {
     price = Number(payReceive) / Number(takerAmount)
     return {
       type: type,
-      poolId: poolId,
+      Id: poolId,
+      icon: underlying,
       underlying: underlying,
       quantity: quantity,
       price: price,
@@ -106,7 +105,8 @@ export function MyOrders() {
     price = askAmount
     return {
       type: type,
-      poolId: poolId,
+      Id: poolId,
+      icon: underlying,
       underlying: underlying,
       quantity: quantity,
       price: price,
@@ -174,9 +174,8 @@ export function MyOrders() {
     return dataOrders
   }
 
-  async function cancelOrder(event, order, chainId) {
+  async function cancelOrder(event, orderHash, chainId) {
     event.stopPropagation()
-    const orderHash = order.orderHash
     //get the order details in current form from 0x before cancelling it.
     const cancelOrder = await getOrderDetails(orderHash, chainId)
     cancelLimitOrder(cancelOrder, chainId).then(function (
@@ -203,10 +202,92 @@ export function MyOrders() {
     componentDidMount()
   }, [])
 
-  function openTrade(order: any) {
-    history.push(`../../${order.poolId}/${order.position}`)
-  }
+  const filteredRows =
+    search != null && search.length > 0
+      ? dataOrders.filter((v) =>
+          v.underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      : dataOrders
 
+  const columns: GridColDef[] = [
+    {
+      field: 'symbol',
+      align: 'left',
+      renderHeader: (_header) => <GrayText>{'Asset Id'}</GrayText>,
+      renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+    },
+    {
+      field: 'icon',
+      align: 'right',
+      headerName: '',
+      disableReorder: true,
+      disableColumnMenu: true,
+      renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
+    },
+    {
+      field: 'underlying',
+      align: 'left',
+      minWidth: 100,
+      headerName: 'Underlying',
+    },
+    {
+      field: 'type',
+      align: 'center',
+      headerAlign: 'center',
+      headerName: 'Type',
+    },
+    {
+      field: 'quantity',
+      align: 'center',
+      headerAlign: 'center',
+      headerName: 'Quantity',
+      type: 'number',
+      renderCell: (cell) => cell.value.toFixed(2),
+    },
+    {
+      field: 'price',
+      align: 'center',
+      headerAlign: 'center',
+      headerName: 'Price',
+      type: 'number',
+      minWidth: 100,
+      renderCell: (cell) => cell.value.toFixed(4),
+    },
+    {
+      field: 'payReceive',
+      align: 'center',
+      headerAlign: 'center',
+      headerName: 'Pay/Receive',
+      type: 'number',
+      minWidth: 150,
+      renderCell: (cell) => cell.value.toFixed(4),
+    },
+    {
+      field: 'expiryMins',
+      minWidth: 170,
+      align: 'center',
+      headerAlign: 'center',
+      headerName: 'Order Expires In',
+      type: 'dateTime',
+    },
+    {
+      field: 'orderHash',
+      align: 'center',
+      headerAlign: 'center',
+      headerName: 'Cancel',
+      minWidth: 170,
+      renderCell: (cell) => (
+        <Button
+          variant="outlined"
+          startIcon={<DeleteIcon />}
+          size="small"
+          onClick={(event) => cancelOrder(event, cell.value, chainId)}
+        >
+          Cancel
+        </Button>
+      ),
+    },
+  ]
   return (
     <Stack
       direction="row"
@@ -237,115 +318,24 @@ export function MyOrders() {
               }
             />
           </Box>
-          <TableContainer component={Paper}>
-            <Table stickyHeader aria-label="sticky table">
-              <TableHead>
-                <TableRow>
-                  <TableCell align="left">Asset Id</TableCell>
-                  <TableCell align="left">Underlying</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell align="center">Quantity</TableCell>
-                  <TableCell align="center">Price</TableCell>
-                  <TableCell align="center">Pay/Receive</TableCell>
-                  <TableCell align="left">Cancel</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {dataOrders.length > 0 ? (
-                  dataOrders.map((order: any, index: number) => {
-                    const labelId = `enhanced-table-${index}`
-                    return (
-                      <TableRow
-                        key={index}
-                        hover
-                        onClick={() => openTrade(order)}
-                      >
-                        <TableCell align="left">
-                          <Box>
-                            <Typography variant="subtitle1">
-                              {order.symbol}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell align="left">
-                          <Stack direction={'row'}>
-                            <Stack direction={'row'} paddingRight={'0.5em'}>
-                              <CoinIconPair assetName={order.underlying} />
-                            </Stack>
-                            <Typography variant="subtitle1">
-                              {order.underlying}
-                            </Typography>
-                          </Stack>
-                        </TableCell>
-                        <TableCell
-                          component="th"
-                          id={labelId}
-                          scope="row"
-                          align="left"
-                        >
-                          <Box>
-                            <Typography variant="subtitle1">
-                              {order.type}
-                            </Typography>
-                            <Typography variant="caption" noWrap>
-                              {order.expiry}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Box>
-                            <Typography variant="subtitle1">
-                              {order.quantity === 0
-                                ? '-'
-                                : order.quantity.toFixed(2)}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Box>
-                            <Typography variant="subtitle1">
-                              {order.price.toFixed(4)}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Box>
-                            <Typography variant="subtitle1">
-                              {order.quantity === 0
-                                ? '-'
-                                : order.payReceive.toFixed(4)}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell align="left">
-                          <Box>
-                            <Typography variant="subtitle1">
-                              <Button
-                                variant="outlined"
-                                startIcon={<DeleteIcon />}
-                                size="small"
-                                onClick={(event) =>
-                                  cancelOrder(event, dataOrders[index], chainId)
-                                }
-                              >
-                                Cancel
-                              </Button>
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={7} align="center">
-                      None
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <DataGrid
+            className={classes.root}
+            rows={filteredRows}
+            pagination
+            columns={columns}
+            onPageChange={(page) => setPage(page)}
+            page={page}
+            onRowClick={(row) => {
+              history.push(`../../${row.row.Id}/${row.row.position}`)
+            }}
+            componentsProps={{
+              row: {
+                style: {
+                  cursor: 'pointer',
+                },
+              },
+            }}
+          />
         </Stack>
       </>
     </Stack>
