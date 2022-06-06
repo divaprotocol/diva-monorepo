@@ -1,7 +1,11 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import { formatUnits, formatEther } from 'ethers/lib/utils'
-import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
+import {
+  getDateTime,
+  getExpiryMinutesFromNow,
+  userTimeZone,
+} from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
@@ -18,27 +22,67 @@ import { ShowChartOutlined } from '@mui/icons-material'
 export const ExpiresInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime()
   const expDate = new Date(props.row.Expiry).toLocaleDateString()
+  console.log(props.row.Expiry.slice(11, 19))
   const minUntilExp = getExpiryMinutesFromNow(expTimestamp / 1000)
   if (minUntilExp > 0) {
-    return minUntilExp === 1 ? (
-      <Tooltip placement="top-end" title={props.row.Expiry}>
-        <span className="table-cell-trucate">{'<1m'}</span>
-      </Tooltip>
-    ) : (
-      <Tooltip placement="top-end" title={expDate}>
-        <span className="table-cell-trucate">
-          {(minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) +
-            'd ' +
-            ((minUntilExp % (60 * 24)) - (minUntilExp % 60)) / 60 +
-            'h ' +
-            (minUntilExp % 60) +
-            'm '}
-        </span>
-      </Tooltip>
-    )
+    if ((minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) > 0) {
+      return minUntilExp === 1 ? (
+        <Tooltip
+          placement="top-end"
+          title={props.row.Expiry + ', ' + userTimeZone()}
+        >
+          <span className="table-cell-trucate">{'<1m'}</span>
+        </Tooltip>
+      ) : (
+        <Tooltip
+          placement="top-end"
+          title={props.row.Expiry + ', ' + userTimeZone()}
+        >
+          <span className="table-cell-trucate">
+            {(minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) +
+              'd ' +
+              ((minUntilExp % (60 * 24)) - (minUntilExp % 60)) / 60 +
+              'h ' +
+              (minUntilExp % 60) +
+              'm '}
+          </span>
+        </Tooltip>
+      )
+    } else if (
+      (minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) === 0 &&
+      (minUntilExp - (minUntilExp % 60)) / 60 > 0
+    ) {
+      return (
+        <Tooltip
+          placement="top-end"
+          title={props.row.Expiry + ', ' + userTimeZone()}
+        >
+          <span className="table-cell-trucate">
+            {(minUntilExp - (minUntilExp % 60)) / 60 +
+              'h ' +
+              (minUntilExp % 60) +
+              'm '}
+          </span>
+        </Tooltip>
+      )
+    } else if ((minUntilExp - (minUntilExp % 60)) / 60 === 0) {
+      return (
+        <Tooltip
+          placement="top-end"
+          title={props.row.Expiry + ', ' + userTimeZone()}
+        >
+          <span className="table-cell-trucate">
+            {(minUntilExp % 60) + 'm '}
+          </span>
+        </Tooltip>
+      )
+    }
   } else {
     return (
-      <Tooltip placement="top-end" title={expDate}>
+      <Tooltip
+        placement="top-end"
+        title={props.row.Expiry + ', ' + userTimeZone()}
+      >
         <span className="table-cell-trucate">{'-'}</span>
       </Tooltip>
     )
