@@ -34,6 +34,7 @@ import {
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { ExpiresInCell } from '../Markets/Markets'
 
 type Response = {
   [token: string]: BigNumber
@@ -45,7 +46,6 @@ const MetaMaskImage = styled.img`
   cursor: pointer;
 `
 const ethereum = window?.ethereum
-
 const AddToMetamask = (props: any) => {
   const { provider } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
@@ -377,6 +377,8 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     type: 'dateTime',
+    headerName: 'Expires in',
+    renderCell: (props) => <ExpiresInCell {...props} />,
   },
   {
     field: 'TVL',
