@@ -607,7 +607,7 @@ export const Tasks = (props: any) => {
                     >
                       888Whales NFT
                     </Link>{' '}
-                    at DIVA token launch
+                    at the end of the testnet
                   </Typography>
                 </Stack>
                 <Stack spacing={theme.spacing(3)} direction={'row'}>
