@@ -164,7 +164,7 @@ export default function OptionDetails({
         {binary ? (
           <>
             <FlexBox>
-              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
               <FlexBoxData>Binary</FlexBoxData>
             </FlexBox>
             <FlexBox>
@@ -197,7 +197,7 @@ export default function OptionDetails({
         ) : linear ? (
           <>
             <FlexBox>
-              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
               <FlexBoxData>Linear</FlexBoxData>
             </FlexBox>
             <FlexBox>
@@ -256,7 +256,7 @@ export default function OptionDetails({
         ) : (
           <>
             <FlexBox>
-              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
               <FlexBoxData>Custom</FlexBoxData>
             </FlexBox>
             <FlexBox>
