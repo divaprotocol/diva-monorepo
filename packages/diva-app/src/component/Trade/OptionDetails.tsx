@@ -102,6 +102,23 @@ export default function OptionDetails({
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
+  const [binary, setBinary] = useState(false)
+  const [linear, setLinear] = useState(false)
+  useEffect(() => {
+    if (pool.cap === pool.floor) {
+      setBinary(true)
+      setLinear(false)
+    } else if (
+      BigNumber.from(pool.inflection).eq(
+        BigNumber.from(pool.floor)
+          .add(BigNumber.from(pool.cap))
+          .div(BigNumber.from('2'))
+      )
+    ) {
+      setBinary(false)
+      setLinear(true)
+    }
+  }, [pool])
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
       (dataName: { id: string }) => dataName?.id == pool?.dataProvider
@@ -114,7 +131,7 @@ export default function OptionDetails({
       setCheckIcon(false)
     }
   }, [dataSource.dataProviders, pool.dataProvider])
-
+  console.log('pool state', binary, linear)
   return (
     <PageDiv>
       <HeaderDiv>
@@ -144,56 +161,234 @@ export default function OptionDetails({
           <FlexBoxHeader>Direction</FlexBoxHeader>
           <FlexBoxData>{isLong ? 'Up' : 'Down'}</FlexBoxData>
         </FlexBox>
-        <FlexBox>
-          <Tooltip
-            placement="top-end"
-            title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
-          >
-            <FlexBoxHeader>Floor</FlexBoxHeader>
-          </Tooltip>
-          <FlexBoxData>{formatEther(pool.floor)}</FlexBoxData>
-        </FlexBox>
-        <FlexBox>
-          <Tooltip
-            placement="top-end"
-            title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
-          >
-            <FlexBoxHeader>Inflection</FlexBoxHeader>
-          </Tooltip>
-          <FlexBoxData>{formatEther(pool.inflection)}</FlexBoxData>
-        </FlexBox>
-        <FlexBox>
-          <Tooltip
-            placement="top-end"
-            title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
-          >
-            <FlexBoxHeader>Cap</FlexBoxHeader>
-          </Tooltip>
-          <FlexBoxData>{formatEther(pool.cap)}</FlexBoxData>
-        </FlexBox>
-        <FlexBox>
-          <Tooltip
-            placement="top-end"
-            title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
-          >
-            <FlexBoxHeader>Gradient</FlexBoxHeader>
-          </Tooltip>
-          <FlexBoxData>
-            {Number(
-              formatUnits(
-                BigNumber.from(pool.collateralBalanceLongInitial)
-                  .mul(parseUnits('1', pool.collateralToken.decimals))
-                  .div(
-                    BigNumber.from(pool.collateralBalanceLongInitial).add(
-                      BigNumber.from(pool.collateralBalanceShortInitial)
-                    )
-                  ),
+        {binary ? (
+          <>
+            <FlexBox>
+              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxData>Binary</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the LONG token pays 1.'
+                  }
+                >
+                  <FlexBoxHeader>Inflection</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' below which the SHORT token pays 1.'
+                  }
+                >
+                  <FlexBoxHeader>Inflection</FlexBoxHeader>
+                </Tooltip>
+              )}
+              <FlexBoxData>{formatEther(pool.inflection)}</FlexBoxData>
+            </FlexBox>
+          </>
+        ) : linear ? (
+          <>
+            <FlexBox>
+              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxData>Linear</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the LONG token pays out 0.'
+                  }
+                >
+                  <FlexBoxHeader>Floor</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the SHORT token pays out 1.'
+                  }
+                >
+                  <FlexBoxHeader>Floor</FlexBoxHeader>
+                </Tooltip>
+              )}
+              <FlexBoxData>{formatEther(pool.floor)}</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the LONG token pays out 1.'
+                  }
+                >
+                  <FlexBoxHeader>Cap</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the SHORT token pays out 1.'
+                  }
+                >
+                  <FlexBoxHeader>Cap</FlexBoxHeader>
+                </Tooltip>
+              )}
+              <FlexBoxData>{formatEther(pool.cap)}</FlexBoxData>
+            </FlexBox>
+          </>
+        ) : (
+          <>
+            <FlexBox>
+              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxData>Custom</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the LONG token pays out 0.'
+                  }
+                >
+                  <FlexBoxHeader>Floor</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the SHORT token pays out 1.'
+                  }
+                >
+                  <FlexBoxHeader>Floor</FlexBoxHeader>
+                </Tooltip>
+              )}
 
-                pool.collateralToken.decimals
-              )
-            ).toFixed(2)}
-          </FlexBoxData>
-        </FlexBox>
+              <FlexBoxData>{formatEther(pool.floor)}</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the LONG token pays out 1.'
+                  }
+                >
+                  <FlexBoxHeader>Cap</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the SHORT token pays out 0.'
+                  }
+                >
+                  <FlexBoxHeader>Cap</FlexBoxHeader>
+                </Tooltip>
+              )}
+              <FlexBoxData>{formatEther(pool.cap)}</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              <Tooltip
+                placement="top-end"
+                title={
+                  'Value of ' +
+                  pool.referenceAsset +
+                  ' at which the LONG token payout is equal to Gradient.'
+                }
+              >
+                <FlexBoxHeader>Inflection</FlexBoxHeader>
+              </Tooltip>
+              <FlexBoxData>{formatEther(pool.inflection)}</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Payout per LONG token if ' +
+                    pool.referenceAsset +
+                    ' ends up at inflection.'
+                  }
+                >
+                  <FlexBoxHeader>Gradient</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Payout per SHORT token if ' +
+                    pool.referenceAsset +
+                    ' ends up at inflection.'
+                  }
+                >
+                  <FlexBoxHeader>Gradient</FlexBoxHeader>
+                </Tooltip>
+              )}
+              {isLong ? (
+                <FlexBoxData>
+                  {Number(
+                    formatUnits(
+                      BigNumber.from(pool.collateralBalanceLongInitial)
+                        .mul(parseUnits('1', pool.collateralToken.decimals))
+                        .div(
+                          BigNumber.from(pool.collateralBalanceLongInitial).add(
+                            BigNumber.from(pool.collateralBalanceShortInitial)
+                          )
+                        ),
+
+                      pool.collateralToken.decimals
+                    )
+                  ).toFixed(2)}
+                </FlexBoxData>
+              ) : (
+                <FlexBoxData>
+                  {Number(
+                    formatUnits(
+                      parseUnits('1', pool.collateralToken.decimals).sub(
+                        BigNumber.from(pool.collateralBalanceLongInitial)
+                          .mul(parseUnits('1', pool.collateralToken.decimals))
+                          .div(
+                            BigNumber.from(
+                              pool.collateralBalanceLongInitial
+                            ).add(
+                              BigNumber.from(pool.collateralBalanceShortInitial)
+                            )
+                          )
+                      ),
+
+                      pool.collateralToken.decimals
+                    )
+                  ).toFixed(2)}
+                </FlexBoxData>
+              )}
+            </FlexBox>
+          </>
+        )}
       </FlexDiv>
       <FlexSecondLineDiv>
         <FlexBoxSecondLine>
@@ -206,7 +401,7 @@ export default function OptionDetails({
               </Tooltip>
               {checkIcon ? (
                 <Tooltip
-                  title="Trusted data provider from the DIVA whitelist"
+                  title="Trusted data provider from the DIVA whitelist."
                   arrow
                 >
                   <CheckCircleSharpIcon
@@ -219,7 +414,10 @@ export default function OptionDetails({
                   />
                 </Tooltip>
               ) : (
-                <Tooltip title="Untrusted data provider" arrow>
+                <Tooltip
+                  title="Data provider is NOT part of DIVA's whitelist."
+                  arrow
+                >
                   <WarningAmberSharpIcon
                     sx={{
                       mt: 0.3,
