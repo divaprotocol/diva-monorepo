@@ -105,7 +105,7 @@ export function calcBreakEven(
       if (price.eq(gradient)) {
         breakEven = inflection
       } else if (price.lt(gradient)) {
-        breakEven = price.mul(inflection.sub(floor)).div(gradient)
+        breakEven = price.mul(inflection.sub(floor)).div(gradient).add(floor)
       } else {
         breakEven = price
           .sub(gradient)
