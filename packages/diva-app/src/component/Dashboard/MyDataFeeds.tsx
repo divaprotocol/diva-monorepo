@@ -150,14 +150,15 @@ const SubmitCell = (props: any) => {
   const handleClose = () => {
     setOpen(false)
   }
-  const expiryTime = new Date(parseInt(props.row.Expiry) * 1000)
+  const expiryTime = new Date(props.row.Expiry)
   const now = new Date()
+  console.log('props.row.Expiry', props.row.Expiry)
   const enabled =
     (expiryTime.getTime() <= now.getTime() &&
       props.row.Status.toLowerCase() === 'open' &&
-      getExpiryMinutesFromNow(props.row.Expiry) + 24 * 60 - 5 > 0) ||
+      expiryTime.getTime() + (24 * 60 - 5) * 60 * 1000 > 0) ||
     (props.row.Status === 'Challenged' &&
-      getExpiryMinutesFromNow(props.row.StatusTimestamp) + 48 * 60 - 5 > 0)
+      expiryTime.getTime() + (48 * 60 - 5) * 60 * 1000 > 0)
 
   return (
     <Container>

@@ -22,7 +22,6 @@ import { ShowChartOutlined } from '@mui/icons-material'
 export const ExpiresInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime()
   const expDate = new Date(props.row.Expiry).toLocaleDateString()
-  console.log(props.row.Expiry.slice(11, 19))
   const minUntilExp = getExpiryMinutesFromNow(expTimestamp / 1000)
   if (minUntilExp > 0) {
     if ((minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) > 0) {

@@ -26,13 +26,18 @@ export type Values = {
 
 export const initialValues: Values = {
   step: 1,
-  referenceAsset: '',
+  referenceAsset: 'BTC/USD', // currently 1st in json so its hardcoded here
   expiryTime: defaultDate,
   floor: 100,
   cap: 300,
   inflection: 200,
   gradient: 0.5,
-  collateralToken: undefined,
+  collateralToken: {
+    id: '0x134e62bd2ee247d4186a1fdbaa9e076cb26c1355',
+    name: 'DIVA USD',
+    decimals: 18,
+    symbol: 'dUSD',
+  },
   collateralWalletBalance: '0',
   collateralBalance: '10',
   collateralBalanceShort: 5,
@@ -112,6 +117,9 @@ export const useCreatePoolFormik = () => {
       if (values.referenceAsset == null) {
         errors.referenceAsset = 'You must choose a reference asset'
       }
+      // if (values.referenceAsset == '') {
+      //   errors.referenceAsset = 'You must choose a reference asset'
+      // }
       if (values.collateralToken == null) {
         errors.collateralToken = 'You must choose a collateral asset'
       }
