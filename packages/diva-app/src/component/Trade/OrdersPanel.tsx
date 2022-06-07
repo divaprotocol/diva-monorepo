@@ -7,6 +7,7 @@ import Tab from '@mui/material/Tab'
 import { Pool } from '../../lib/queries'
 import OrderBook from './OrderBook'
 import OptionOrders from './OptionOrders'
+import { TradeHistory } from './TradeHistory'
 
 const PageDiv = styled.div`
   width: 200px;
@@ -59,6 +60,9 @@ export default function OrdersPanel(props: {
         />
       )
     }
+    if (orderType === 2) {
+      return <TradeHistory pool={props.option} />
+    }
   }
 
   return (
@@ -71,6 +75,7 @@ export default function OrdersPanel(props: {
         >
           <Tab label="Order Book" {...a11yProps(0)} />
           <Tab label="Your open orders" {...a11yProps(1)} />
+          <Tab label="Trade History" {...a11yProps(2)} />
         </Tabs>
       </TabsDiv>
       {renderOrderTables()}
