@@ -22,7 +22,7 @@ const Dashboard = (props: any) => {
     mydatafeeds: 2,
     myfeeclaims: 3,
   }
-  console.log(indexToTabName[page])
+
   const [value, setValue] = useState(indexToTabName[page])
   const handleChange = (event: any, newValue: any) => {
     history.push(`/dashboard/${tabNameToIndex[newValue]}`)

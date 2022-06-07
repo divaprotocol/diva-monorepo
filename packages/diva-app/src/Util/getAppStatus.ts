@@ -3,30 +3,30 @@ import { formatEther } from 'ethers/lib/utils'
 export function getAppStatus(
   expiryTime: string,
   statusTimestamp: string,
-  statusFinalReferenceValue: any,
-  finalReferenceValue: any,
-  inflection: any
-) {
-  const expiryTime2 = new Date(parseInt(expiryTime) * 1000)
-  const statusTimestamp2 = new Date(parseInt(statusTimestamp) * 1000)
+  statusFinalReferenceValue: string,
+  finalReferenceValue: string,
+  inflection: string
+): { finalValue: number | string; status: string } {
+  const dtExpiryTime = new Date(parseInt(expiryTime) * 1000)
+  const dtStatusTimestamp = new Date(parseInt(statusTimestamp) * 1000)
   const now = new Date().getTime()
   const submissionPeriodEnd = new Date(parseInt(expiryTime) * 1000).setMinutes(
-    expiryTime2.getMinutes() + 24 * 60 + 5
+    dtExpiryTime.getMinutes() + 24 * 60 + 5
   )
   const fallbackPeriodEnd = new Date(parseInt(expiryTime) * 1000).setMinutes(
-    expiryTime2.getMinutes() + 6 * 24 * 60 + 5
+    dtExpiryTime.getMinutes() + 6 * 24 * 60 + 5
   ) // 5 min delay built in to have a high confidence that block.timestamp during call will be > fallback period end
   const challengePeriodEnd = new Date(
     parseInt(statusTimestamp) * 1000
-  ).setMinutes(statusTimestamp2.getMinutes() + 1 * 24 * 60 + 5) // statusTimestamp is equal to time of submission when it's used below in the code. 5 min delay built in to have a high confidence that block.timestamp during call will be > challenge period end
+  ).setMinutes(dtStatusTimestamp.getMinutes() + 1 * 24 * 60 + 5) // statusTimestamp is equal to time of submission when it's used below in the code. 5 min delay built in to have a high confidence that block.timestamp during call will be > challenge period end
   const reviewPeriodEnd = new Date(parseInt(statusTimestamp) * 1000).setMinutes(
-    statusTimestamp2.getMinutes() + 2 * 24 * 60 + 5
+    dtStatusTimestamp.getMinutes() + 2 * 24 * 60 + 5
   ) // statusTimestamp is equal to time of first challenge following a submission when it's used down below in the code. 5 min delay built in to have a high confidence that block.timestamp during call will be > review period end
 
   let finalValue = '-'
   let status = statusFinalReferenceValue
 
-  if (now < expiryTime2.getTime()) {
+  if (now < dtExpiryTime.getTime()) {
     finalValue = '-'
     // statusFinalReferenceValue is 'Open' in that case
   } else {
