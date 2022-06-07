@@ -107,6 +107,10 @@ const SubmitButton = (props: any) => {
       diva
         .getPoolParameters(props.id.split('/')[0])
         .then((pool) => {
+          console.log(
+            'pool.statusFinalReferenceValue: ',
+            pool.statusFinalReferenceValue
+          )
           if (pool.statusFinalReferenceValue === 0) {
             token
               ?.balanceOf(userAddress)
@@ -472,7 +476,7 @@ export function MyPositions() {
     )
     const unchallengedPeriod = new Date(
       parseInt(val.expiryTime) * 1000
-    ).setMinutes(expiryTime.getMinutes() + 5 * 24 * 60 + 5)
+    ).setMinutes(expiryTime.getMinutes() + 6 * 24 * 60 + 5)
     const challengedPeriod = new Date(
       parseInt(val.expiryTime) * 1000
     ).setMinutes(expiryTime.getMinutes() + 2 * 24 * 60 + 5)
