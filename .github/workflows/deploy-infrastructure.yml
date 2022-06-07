@@ -47,8 +47,8 @@ jobs:
       - name: Build
         run: yarn turbo run build --scope="*-infrastructure" --scope="*-app" --cache-dir="./.turbo"
 
-      - name: Deploy Infra
-        run: yarn turbo run deploy --scope="*-infrastructure"
+#      - name: Deploy Infra
+#        run: yarn turbo run deploy --scope="*-infrastructure"
 
 
 #      - name: sync to s3
