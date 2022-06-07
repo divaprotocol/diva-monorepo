@@ -23,12 +23,12 @@ class DivaStack extends TerraformStack {
 
     orderBookApi(this)
 
-    new S3Bucket(this, id("app.diva.finance"), {
-      bucket: id("app.diva.finance"),
-      website: {
-        indexDocument: "index.html",
-      },
-    });
+    // new S3Bucket(this, id("app.diva.finance"), {
+    //   bucket: id("app.diva.finance"),
+    //   website: {
+    //     indexDocument: "index.html",
+    //   },
+    // });
   }
 }
 
