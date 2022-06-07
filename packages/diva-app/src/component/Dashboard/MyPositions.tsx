@@ -470,45 +470,64 @@ export function MyPositions() {
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
-    const now = new Date()
-    const fallbackPeriod = new Date(parseInt(val.expiryTime) * 1000).setMinutes(
-      expiryTime.getMinutes() + 24 * 60 + 5
-    )
-    const unchallengedPeriod = new Date(
+    const statusTimestamp = new Date(parseInt(val.statusTimestamp) * 1000)
+    const now = new Date().getTime()
+    const fallbackPeriodStart = new Date(
+      parseInt(val.expiryTime) * 1000
+    ).setMinutes(expiryTime.getMinutes() + 24 * 60 + 5)
+    const fallbackPeriodEnd = new Date(
       parseInt(val.expiryTime) * 1000
     ).setMinutes(expiryTime.getMinutes() + 6 * 24 * 60 + 5)
-    const challengedPeriod = new Date(
-      parseInt(val.expiryTime) * 1000
-    ).setMinutes(expiryTime.getMinutes() + 2 * 24 * 60 + 5)
+
     let finalValue = '-'
     let status = val.statusFinalReferenceValue
 
-    if (now.getTime() < expiryTime.getTime()) {
-      finalValue = '-'
-    } else if (val.statusFinalReferenceValue === 'Open') {
-      if (Date.now() > fallbackPeriod && Date.now() < unchallengedPeriod) {
-        status = 'Fallback'
-      } else if (now.getTime() > unchallengedPeriod) {
-        finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
-        status = 'Confirmed*'
-      } else if (
-        now.getTime() > expiryTime.getTime() &&
-        now.getTime() < unchallengedPeriod
-      ) {
-        status = 'Expired'
-        finalValue = '-'
-      } else {
-        finalValue = '-'
-      }
-    } else if (
-      val.statusFinalReferenceValue === 'Challenged' &&
-      Date.now() > challengedPeriod
-    ) {
-      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
-      status = 'Confirmed*'
+    let challengedPeriodEnd
+
+    if (val.statusFinalReferenceValue === 'Submitted') {
+      challengedPeriodEnd = new Date(
+        parseInt(val.statusTimestamp) * 1000
+      ).setMinutes(statusTimestamp.getMinutes() + 2 * 24 * 60 + 5) // starts from the time of submission
     } else {
-      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
-      status = val.statusFinalReferenceValue
+      challengedPeriodEnd = new Date(
+        parseInt(val.expiryTime) * 1000
+      ).setMinutes(expiryTime.getMinutes() + 2 * 24 * 60 + 5) // done just to have a value
+    }
+
+    console.log('val.id: ', val.id)
+    console.log('now', now)
+    console.log('expiryTime.getTime()', expiryTime.getTime())
+    console.log('fallbackPeriodStart: ', fallbackPeriodStart)
+    console.log('fallbackPeriodEnd: ', fallbackPeriodEnd)
+
+    console.log('challengedPeriodEnd: ', challengedPeriodEnd)
+    console.log('val.StatusTimestamp: ', val.statusTimestamp)
+    console.log('val.expiryTime: ', val.expiryTime)
+
+    if (now < expiryTime.getTime()) {
+      finalValue = '-'
+      // statusFinalReferenceValue is 'Open' in that case
+    } else {
+      if (val.statusFinalReferenceValue === 'Open') {
+        if (now <= fallbackPeriodStart) {
+          status = 'Expired'
+        } else if (now > fallbackPeriodStart && now <= fallbackPeriodEnd) {
+          status = 'Fallback'
+        } else if (now > fallbackPeriodEnd) {
+          finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
+          status = 'Confirmed*'
+        }
+      } else if (
+        val.statusFinalReferenceValue === 'Challenged' &&
+        now > challengedPeriodEnd
+      ) {
+        finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
+        status = 'Confirmed*'
+      } else {
+        // Submitted or (Challenged && within the challenge period)
+        finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
+        status = val.statusFinalReferenceValue
+      }
     }
     const shared = {
       Id: val.id,
@@ -543,12 +562,6 @@ export function MyPositions() {
       Cap: Number(formatEther(val.cap)),
       TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
-
-    const Status =
-      expiryTime.getTime() <= now.getTime() &&
-      val.statusFinalReferenceValue.toLowerCase() === 'open'
-        ? 'Expired'
-        : val.statusFinalReferenceValue
 
     return [
       ...acc,
