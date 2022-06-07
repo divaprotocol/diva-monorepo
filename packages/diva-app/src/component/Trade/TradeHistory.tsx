@@ -158,8 +158,8 @@ export const TradeHistory = ({ pool }: Props) => {
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell align="center">Type</TableCell>
-              <TableCell align="center">Amount Colateral</TableCell>
+              <TableCell align="left">Type</TableCell>
+              <TableCell align="center">Quantity</TableCell>
               <TableCell align="center">Amount Position</TableCell>
             </TableRow>
           </TableHead>
@@ -185,7 +185,7 @@ export const TradeHistory = ({ pool }: Props) => {
                       component="th"
                       id={labelId}
                       scope="row"
-                      align="left"
+                      align="center"
                     >
                       <Box>
                         <Typography variant="subtitle1">
@@ -197,7 +197,7 @@ export const TradeHistory = ({ pool }: Props) => {
                       component="th"
                       id={labelId}
                       scope="row"
-                      align="left"
+                      align="center"
                     >
                       <Box>
                         <Typography variant="subtitle1">
