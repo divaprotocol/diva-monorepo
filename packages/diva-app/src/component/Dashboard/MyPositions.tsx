@@ -107,10 +107,6 @@ const SubmitButton = (props: any) => {
       diva
         .getPoolParameters(props.id.split('/')[0])
         .then((pool) => {
-          console.log(
-            'pool.statusFinalReferenceValue: ',
-            pool.statusFinalReferenceValue
-          )
           if (pool.statusFinalReferenceValue === 0) {
             token
               ?.balanceOf(userAddress)
@@ -487,16 +483,6 @@ export function MyPositions() {
 
     let finalValue = '-'
     let status = val.statusFinalReferenceValue
-
-    console.log('val.id: ', val.id)
-    console.log('now', now)
-    console.log('expiryTime.getTime()', expiryTime.getTime())
-    console.log('submissionPeriodEnd: ', submissionPeriodEnd)
-    console.log('fallbackPeriodEnd: ', fallbackPeriodEnd)
-
-    console.log('reviewPeriodEnd: ', reviewPeriodEnd)
-    console.log('val.StatusTimestamp: ', val.statusTimestamp)
-    console.log('val.expiryTime: ', val.expiryTime)
 
     if (now < expiryTime.getTime()) {
       finalValue = '-'
