@@ -23,11 +23,25 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Install dependencies
-        run: yarn
+      - name: Cache Modules
+        id: cache-modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+            node_modules
+          key: ${{ hashFiles('**/yarn.lock', '**/package.json', 'yarn.lock') }}
 
       - name: Install dependencies
-        run: yarn build
+        if: steps.cache-modules.outputs.cache-hit != 'true'
+        run: yarn
+
+      - name: Build
+        run: yarn turbo run build --scope="*-infrastructure" --scope="*-app"
+
+      - name: Deploy Infra
+        run: yarn turbo run deploy --scope="*-infrastructure"
+
 
 #      - name: sync to s3
 #        run: aws s3 sync public s3://
