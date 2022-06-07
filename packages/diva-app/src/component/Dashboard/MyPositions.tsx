@@ -472,18 +472,18 @@ export function MyPositions() {
     const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
     const statusTimestamp = new Date(parseInt(val.statusTimestamp) * 1000)
     const now = new Date().getTime()
-    const fallbackPeriodStart = new Date(
+    const submissionPeriodEnd = new Date(
       parseInt(val.expiryTime) * 1000
     ).setMinutes(expiryTime.getMinutes() + 24 * 60 + 5)
     const fallbackPeriodEnd = new Date(
       parseInt(val.expiryTime) * 1000
-    ).setMinutes(expiryTime.getMinutes() + 6 * 24 * 60 + 5)
+    ).setMinutes(expiryTime.getMinutes() + 6 * 24 * 60 + 5) // 5 min delay built in to have a high confidence that block.timestamp during call will be > fallback period end
     const challengePeriodEnd = new Date(
       parseInt(val.statusTimestamp) * 1000
-    ).setMinutes(statusTimestamp.getMinutes() + 1 * 24 * 60 + 5) // statusTimestamp is equal to time of first value submission when it's used below in the code. 5 min delay built in to account for potential difference between actual time and block timestamp
+    ).setMinutes(statusTimestamp.getMinutes() + 1 * 24 * 60 + 5) // statusTimestamp is equal to time of submission when it's used below in the code. 5 min delay built in to have a high confidence that block.timestamp during call will be > challenge period end
     const reviewPeriodEnd = new Date(
       parseInt(val.statusTimestamp) * 1000
-    ).setMinutes(statusTimestamp.getMinutes() + 2 * 24 * 60 + 5) // statusTimestamp is equal to time of first challenge when it's used down below in the code
+    ).setMinutes(statusTimestamp.getMinutes() + 2 * 24 * 60 + 5) // statusTimestamp is equal to time of first challenge following a submission when it's used down below in the code. 5 min delay built in to have a high confidence that block.timestamp during call will be > review period end
 
     let finalValue = '-'
     let status = val.statusFinalReferenceValue
@@ -491,7 +491,7 @@ export function MyPositions() {
     console.log('val.id: ', val.id)
     console.log('now', now)
     console.log('expiryTime.getTime()', expiryTime.getTime())
-    console.log('fallbackPeriodStart: ', fallbackPeriodStart)
+    console.log('submissionPeriodEnd: ', submissionPeriodEnd)
     console.log('fallbackPeriodEnd: ', fallbackPeriodEnd)
 
     console.log('reviewPeriodEnd: ', reviewPeriodEnd)
@@ -503,9 +503,9 @@ export function MyPositions() {
       // statusFinalReferenceValue is 'Open' in that case
     } else {
       if (val.statusFinalReferenceValue === 'Open') {
-        if (now <= fallbackPeriodStart) {
+        if (now <= submissionPeriodEnd) {
           status = 'Expired'
-        } else if (now > fallbackPeriodStart && now <= fallbackPeriodEnd) {
+        } else if (now > submissionPeriodEnd && now <= fallbackPeriodEnd) {
           status = 'Fallback'
         } else if (now > fallbackPeriodEnd) {
           finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
