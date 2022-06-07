@@ -1,0 +1,28 @@
+on:
+  push:
+    branches:
+      - main
+      - add-just-infra
+  
+name: Deploy Infrastructure
+jobs:
+  pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AW0S credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+      - name: Checkout current branch
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Install dependencies
+        run: yarn
+
+#      - name: sync to s3
+#        run: aws s3 sync public s3://
+
