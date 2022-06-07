@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "get": "yarn cdktf get",
-    "build": "tsc && node buildLambda.js",
+    "build": "tsc && node dist/buildLambda.js",
     "synth": "yarn cdktf synth",
     "compile": "tsc --pretty",
     "deploy": "yarn build && cdktf deploy",
@@ -23,8 +23,8 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.100.0",
     "@cdktf/provider-aws": "^8.0.4",
-    "cdktf": "^0.11.1",
-    "constructs": "^10.1.31"
+    "cdktf": "^0.10.2",
+    "constructs": "^10.0.103"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",
