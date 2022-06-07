@@ -15,7 +15,7 @@ import { Search } from '@mui/icons-material'
 import { CoinIconPair } from '../CoinIcon'
 import { useHistory } from 'react-router-dom'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { GrayText } from '../Trade/Orders/UiStyles'
+import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { makeStyles } from '@mui/styles'
 
 export function MyOrders() {
@@ -47,7 +47,7 @@ export function MyOrders() {
   function getBuyOrderFields(record: any, pool: any) {
     const order = record.order
     const metaData = record.metaData
-    const type = 'Buy'
+    const type = 'BUY'
     const poolId = pool.id
     const underlying = pool.underlying
     const decimals = pool.collateralToken.decimals
@@ -82,7 +82,7 @@ export function MyOrders() {
   function getSellOrderFields(record: any, pool: any) {
     const order = record.order
     const metaData = record.metaData
-    const type = 'Sell'
+    const type = 'SELL'
     const poolId = pool.id
     const underlying = pool.underlying
     const decimals = pool.collateralToken.decimals
@@ -235,6 +235,12 @@ export function MyOrders() {
       align: 'center',
       headerAlign: 'center',
       headerName: 'Type',
+      renderCell: (cell) =>
+        cell.value === 'BUY' ? (
+          <GreenText>{cell.value}</GreenText>
+        ) : (
+          <RedText>{cell.value}</RedText>
+        ),
     },
     {
       field: 'quantity',
