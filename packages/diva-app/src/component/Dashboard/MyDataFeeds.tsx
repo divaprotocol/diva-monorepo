@@ -28,9 +28,9 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ExpiresInCell } from '../Markets/Markets'
 
 export const DueInCell = (props: any) => {
-  const expTimestamp = parseInt(props.row.Expiry)
+  const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
   const statusTimestamp = parseInt(props.row.StatusTimestamp)
-  const expiryTime = new Date(parseInt(props.row.Expiry) * 1000)
+  const expiryTime = new Date(props.row.Expiry)
   const now = new Date()
   if (
     expiryTime.getTime() <= now.getTime() &&
@@ -39,7 +39,6 @@ export const DueInCell = (props: any) => {
     const minUntilExp = getExpiryMinutesFromNow(
       expTimestamp + 24 * 3600 - 5 * 60
     )
-
     if (minUntilExp < 24 * 60 - 5 && minUntilExp > 0) {
       return minUntilExp === 1 ? (
         <Tooltip placement="top-end" title={props.row.Expiry}>
@@ -152,7 +151,6 @@ const SubmitCell = (props: any) => {
   }
   const expiryTime = new Date(props.row.Expiry)
   const now = new Date()
-  console.log('props.row.Expiry', props.row.Expiry)
   const enabled =
     (expiryTime.getTime() <= now.getTime() &&
       props.row.Status.toLowerCase() === 'open' &&
