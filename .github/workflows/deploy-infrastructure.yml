@@ -5,6 +5,7 @@ on:
       - add-just-infra
     paths:
       - 'packages/diva-infrastructure/**'
+      - '.github/workflows/deploy-infrastructure.yml'
   
 name: Deploy Infrastructure
 jobs:
