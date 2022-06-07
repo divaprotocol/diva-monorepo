@@ -33,15 +33,22 @@ jobs:
             node_modules
           key: ${{ hashFiles('**/yarn.lock', '**/package.json', 'yarn.lock') }}
 
+      - name: Cache Turbo Cache
+        id: build-turbo
+        uses: actions/cache@v2
+        with:
+          path: .turbo
+          key: ${{ hashFiles('packages/**/*') }}
+
       - name: Install dependencies
         if: steps.cache-modules.outputs.cache-hit != 'true'
         run: yarn
 
       - name: Build
-        run: yarn turbo run build --scope="*-infrastructure" --scope="*-app"
+        run: yarn turbo run build --scope="*-infrastructure" --scope="*-app" --cache-dir="./.turbo"
 
-#      - name: Deploy Infra
-#        run: yarn turbo run deploy --scope="*-infrastructure"
+      - name: Deploy Infra
+        run: yarn turbo run deploy --scope="*-infrastructure"
 
 
 #      - name: sync to s3
