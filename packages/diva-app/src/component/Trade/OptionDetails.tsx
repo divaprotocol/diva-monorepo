@@ -131,7 +131,7 @@ export default function OptionDetails({
       setCheckIcon(false)
     }
   }, [dataSource.dataProviders, pool.dataProvider])
-  console.log('pool state', binary, linear)
+
   return (
     <PageDiv>
       <HeaderDiv>
