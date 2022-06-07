@@ -160,53 +160,74 @@ export const TradeHistory = ({ pool }: Props) => {
             <TableRow>
               <TableCell align="left">Type</TableCell>
               <TableCell align="center">Quantity</TableCell>
-              <TableCell align="center">Amount Position</TableCell>
+              <TableCell align="center">Price</TableCell>
+              <TableCell align="center">Paid/Received</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {history.length > 0 ? (
               history.map((order: any, index: number) => {
-                const labelId = `enhanced-history-${index}`
-                return (
-                  <TableRow key={index} hover>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      align="left"
-                    >
-                      <Box>
-                        <Typography variant="subtitle1">
-                          {order.type}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      align="center"
-                    >
-                      <Box>
-                        <Typography variant="subtitle1">
-                          {order.amountPositionToken}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      align="center"
-                    >
-                      <Box>
-                        <Typography variant="subtitle1">
-                          {order.amountCollateral}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                )
+                if (order.amountPositionToken != 0) {
+                  const labelId = `enhanced-history-${index}`
+                  return (
+                    <TableRow key={index} hover>
+                      <TableCell
+                        component="th"
+                        id={labelId}
+                        scope="row"
+                        align="left"
+                      >
+                        <Box>
+                          {order.type === 'BUY' ? (
+                            <Typography variant="subtitle1" color="#66ffa6">
+                              {order.type}
+                            </Typography>
+                          ) : (
+                            <Typography variant="subtitle1" color="#ff5c8d">
+                              {order.type}
+                            </Typography>
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell
+                        component="th"
+                        id={labelId}
+                        scope="row"
+                        align="center"
+                      >
+                        <Box>
+                          <Typography variant="subtitle1">
+                            {Number(order.amountPositionToken).toFixed(2)}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell
+                        component="th"
+                        id={labelId}
+                        scope="row"
+                        align="center"
+                      >
+                        <Box>
+                          <Typography variant="subtitle1">
+                            {Number('0.55').toFixed(4)}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell
+                        component="th"
+                        id={labelId}
+                        scope="row"
+                        align="center"
+                      >
+                        <Box>
+                          <Typography variant="subtitle1">
+                            {Number(order.amountCollateral).toFixed(4)}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  )
+                }
               })
             ) : (
               <TableRow>
