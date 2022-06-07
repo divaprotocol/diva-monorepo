@@ -1,5 +1,5 @@
 {
-  "name": "diva-infrastructure",
+  "name": "@diva/infrastructure",
   "version": "1.0.0",
   "main": "dist/main.js",
   "types": "src/main.ts",

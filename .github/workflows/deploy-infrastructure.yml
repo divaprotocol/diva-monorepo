@@ -45,7 +45,7 @@ jobs:
         run: yarn
 
       - name: Build
-        run: yarn turbo run build --scope="*-infrastructure" --scope="*-app" --cache-dir="./.turbo"
+        run: yarn turbo run build --filter=@diva/infrastructure --filter=@diva/app --cache-dir="./.turbo"
 
       - name: Deploy Infra
         run: yarn turbo run deploy --scope="*-infrastructure"
