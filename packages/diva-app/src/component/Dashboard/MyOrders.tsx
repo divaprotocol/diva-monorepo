@@ -1,7 +1,7 @@
 import { Box, Button, Stack, InputAdornment, Input } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { formatUnits } from 'ethers/lib/utils'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { getOrderDetails, getUserOrders } from '../../DataService/OpenOrders'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import {
@@ -17,6 +17,7 @@ import { useHistory } from 'react-router-dom'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { makeStyles } from '@mui/styles'
+import { ExpiresInCell } from '../Markets/Markets'
 
 export function MyOrders() {
   const chainId = useAppSelector(selectChainId)
@@ -74,8 +75,7 @@ export function MyOrders() {
       quantity: quantity,
       price: price,
       payReceive: payReceive,
-      expiry: getDateTime(order.expiry),
-      expiryMins: getExpiryMinutesFromNow(order.expiry) + ' mins',
+      Expiry: getDateTime(order.expiry),
       orderHash: metaData.orderHash,
     }
   }
@@ -111,8 +111,7 @@ export function MyOrders() {
       quantity: quantity,
       price: price,
       payReceive: payReceive,
-      expiry: getDateTime(order.expiry),
-      expiryMins: getExpiryMinutesFromNow(order.expiry) + ' mins',
+      Expiry: getDateTime(order.expiry),
       orderHash: metaData.orderHash,
     }
   }
@@ -208,7 +207,6 @@ export function MyOrders() {
           v.underlying.toLowerCase().includes(search.toLowerCase())
         )
       : dataOrders
-
   const columns: GridColDef[] = [
     {
       field: 'symbol',
@@ -263,12 +261,13 @@ export function MyOrders() {
       renderCell: (cell) => cell.value.toFixed(4),
     },
     {
-      field: 'expiryMins',
+      field: 'Expiry',
       minWidth: 170,
       align: 'center',
       headerAlign: 'center',
       headerName: 'Order Expires In',
       type: 'dateTime',
+      renderCell: (props) => <ExpiresInCell {...props} />,
     },
     {
       field: 'orderHash',
