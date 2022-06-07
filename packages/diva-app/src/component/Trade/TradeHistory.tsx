@@ -31,6 +31,7 @@ type FilledOrder = {
   type: string
   amountPositionToken: string
   amountCollateral: string
+  price: number
 }
 export const TradeHistory = ({ pool }: Props) => {
   const userAddress = useAppSelector(selectUserAddress)
@@ -79,12 +80,15 @@ export const TradeHistory = ({ pool }: Props) => {
           ids.includes(order.id) === false
         ) {
           orders.push({
-            type: 'BUY',
+            type: 'SELL',
             amountCollateral: formatUnits(
               order.takerTokenFilledAmount,
               pool.collateralToken.decimals
             ),
             amountPositionToken: formatEther(order.makerTokenFilledAmount),
+            price:
+              Number(formatUnits(order.takerTokenFilledAmount)) /
+              Number(formatUnits(order.makerTokenFilledAmount)),
           })
           ids.push(order.id)
         } else if (
@@ -95,12 +99,15 @@ export const TradeHistory = ({ pool }: Props) => {
           ids.includes(order.id) === false
         ) {
           orders.push({
-            type: 'SELL',
+            type: 'BUY',
             amountCollateral: formatUnits(
               order.makerTokenFilledAmount,
               pool.collateralToken.decimals
             ),
             amountPositionToken: formatEther(order.takerTokenFilledAmount),
+            price:
+              Number(formatUnits(order.makerTokenFilledAmount)) /
+              Number(formatUnits(order.takerTokenFilledAmount)),
           })
           ids.push(order.id)
         }
@@ -120,6 +127,9 @@ export const TradeHistory = ({ pool }: Props) => {
               pool.collateralToken.decimals
             ),
             amountPositionToken: formatEther(order.makerTokenFilledAmount),
+            price:
+              Number(formatUnits(order.takerTokenFilledAmount)) /
+              Number(formatUnits(order.makerTokenFilledAmount)),
           })
           ids.push(order.id)
         } else if (
@@ -136,6 +146,9 @@ export const TradeHistory = ({ pool }: Props) => {
               pool.collateralToken.decimals
             ),
             amountPositionToken: formatEther(order.takerTokenFilledAmount),
+            price:
+              Number(formatUnits(order.makerTokenFilledAmount)) /
+              Number(formatUnits(order.takerTokenFilledAmount)),
           })
           ids.push(order.id)
         }
@@ -209,7 +222,7 @@ export const TradeHistory = ({ pool }: Props) => {
                       >
                         <Box>
                           <Typography variant="subtitle1">
-                            {Number('0.55').toFixed(4)}
+                            {Number(order.price).toFixed(4)}
                           </Typography>
                         </Box>
                       </TableCell>
