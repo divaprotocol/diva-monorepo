@@ -7,10 +7,10 @@
   "private": true,
   "scripts": {
     "get": "yarn cdktf get",
-    "build": "tsc && node buildLambda.js",
+    "build": "tsc && node dist/buildLambda.js",
     "synth": "yarn cdktf synth",
     "compile": "tsc --pretty",
-    "deploy": "yarn build && cdktf deploy",
+    "deploy": "yarn build && cdktf deploy --auto-approve",
     "watch": "tsc -w",
     "test": "jest",
     "test:watch": "jest --watch",
