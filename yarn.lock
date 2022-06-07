@@ -8330,10 +8330,18 @@ cdktf-cli@^0.10.2:
     tunnel-agent "^0.6.0"
     yargs "^17.4"
 
-cdktf@0.10.4, cdktf@^0.10.2:
+cdktf@0.10.4:
   version "0.10.4"
   resolved "https://registry.yarnpkg.com/cdktf/-/cdktf-0.10.4.tgz#df89c9257e27f9f29787bd06cad5fa74c0593a68"
   integrity sha512-jaNfN+DXGLGVsCWtAe9I6a+sYUPMqTf2e5oIvkk/j3qJBZTUKeuUcVFrjlvbLPsN3YkfNHwZQTK3mdJsIx3MdA==
+  dependencies:
+    archiver "5.3.0"
+    json-stable-stringify "^1.0.1"
+
+cdktf@^0.11.1:
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/cdktf/-/cdktf-0.11.1.tgz#1810b73c8bded1c68c451459f813c8921ca681ea"
+  integrity sha512-Y0aS1X2jFm8fmAcQ3vS/aDxtPgco6Kotk63+qxv5zUbl1i/cR7knyyAc9aFUEDa53NbAcQvQ0uPA4t1SzNcMzw==
   dependencies:
     archiver "5.3.0"
     json-stable-stringify "^1.0.1"
@@ -9103,7 +9111,7 @@ constants-browserify@~1.0.0:
   resolved "https://registry.yarnpkg.com/constants-browserify/-/constants-browserify-1.0.0.tgz#c20b96d8c617748aaf1c16021760cd27fcb8cb75"
   integrity sha1-wguW2MYXdIqvHBYCF2DNJ/y4y3U=
 
-constructs@^10.0.103, constructs@^10.0.25:
+constructs@^10.0.25, constructs@^10.1.31:
   version "10.1.31"
   resolved "https://registry.yarnpkg.com/constructs/-/constructs-10.1.31.tgz#5ff527578ca8e85320ff7da0b8a5569ee3bcd9c8"
   integrity sha512-rL5Vmy65kr+7n4swyEmD8gwrpiCtoUfhb1wNdg8UsdfzZT5AoU+fYx1shDOBpwAibm6yTim3Vjs/ZPR2iUFFQw==

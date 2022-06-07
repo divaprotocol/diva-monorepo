@@ -3,6 +3,8 @@ on:
     branches:
       - main
       - add-just-infra
+    paths:
+      - 'packages/diva-infrastructure/**'
   
 name: Deploy Infrastructure
 jobs:
@@ -14,7 +16,8 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
+          aws-region: eu-west-2
+
       - name: Checkout current branch
         uses: actions/checkout@v2
         with:
@@ -22,6 +25,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn
+
+      - name: Install dependencies
+        run: yarn build
 
 #      - name: sync to s3
 #        run: aws s3 sync public s3://
