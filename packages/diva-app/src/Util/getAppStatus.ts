@@ -1,5 +1,8 @@
 import { formatEther } from 'ethers/lib/utils'
 
+// Function to provide users more detailed settlement status information than is provided
+// in the smart contract. Function returns both, the status of the final reference value as well as the
+// (expected) final reference value itself.
 export function getAppStatus(
   expiryTime: string,
   statusTimestamp: string,
