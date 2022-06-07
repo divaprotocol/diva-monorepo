@@ -35,6 +35,7 @@ import {
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ExpiresInCell } from '../Markets/Markets'
+import { getAppStatus } from '../../Util/getAppStatus'
 
 type Response = {
   [token: string]: BigNumber
@@ -465,52 +466,14 @@ export function MyPositions() {
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
-    const statusTimestamp = new Date(parseInt(val.statusTimestamp) * 1000)
-    const now = new Date().getTime()
-    const submissionPeriodEnd = new Date(
-      parseInt(val.expiryTime) * 1000
-    ).setMinutes(expiryTime.getMinutes() + 24 * 60 + 5)
-    const fallbackPeriodEnd = new Date(
-      parseInt(val.expiryTime) * 1000
-    ).setMinutes(expiryTime.getMinutes() + 6 * 24 * 60 + 5) // 5 min delay built in to have a high confidence that block.timestamp during call will be > fallback period end
-    const challengePeriodEnd = new Date(
-      parseInt(val.statusTimestamp) * 1000
-    ).setMinutes(statusTimestamp.getMinutes() + 1 * 24 * 60 + 5) // statusTimestamp is equal to time of submission when it's used below in the code. 5 min delay built in to have a high confidence that block.timestamp during call will be > challenge period end
-    const reviewPeriodEnd = new Date(
-      parseInt(val.statusTimestamp) * 1000
-    ).setMinutes(statusTimestamp.getMinutes() + 2 * 24 * 60 + 5) // statusTimestamp is equal to time of first challenge following a submission when it's used down below in the code. 5 min delay built in to have a high confidence that block.timestamp during call will be > review period end
+    const { finalValue, status } = getAppStatus(
+      val.expiryTime,
+      val.statusTimestamp,
+      val.statusFinalReferenceValue,
+      val.finalReferenceValue,
+      val.inflection
+    )
 
-    let finalValue = '-'
-    let status = val.statusFinalReferenceValue
-
-    if (now < expiryTime.getTime()) {
-      finalValue = '-'
-      // statusFinalReferenceValue is 'Open' in that case
-    } else {
-      if (val.statusFinalReferenceValue === 'Open') {
-        if (now <= submissionPeriodEnd) {
-          status = 'Expired'
-        } else if (now > submissionPeriodEnd && now <= fallbackPeriodEnd) {
-          status = 'Fallback'
-        } else if (now > fallbackPeriodEnd) {
-          finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
-          status = 'Confirmed*'
-        }
-      } else if (
-        (val.statusFinalReferenceValue === 'Challenged' &&
-          now > reviewPeriodEnd) ||
-        (val.statusFinalReferenceValue === 'Submitted' &&
-          now > challengePeriodEnd)
-      ) {
-        finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
-        status = 'Confirmed*'
-      } else {
-        // Submitted or (Challenged && within the challenge period)
-        finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
-        status = val.statusFinalReferenceValue
-      }
-    }
     const shared = {
       Id: val.id,
       Icon: val.referenceAsset,
