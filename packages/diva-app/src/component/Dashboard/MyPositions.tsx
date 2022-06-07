@@ -478,21 +478,15 @@ export function MyPositions() {
     const fallbackPeriodEnd = new Date(
       parseInt(val.expiryTime) * 1000
     ).setMinutes(expiryTime.getMinutes() + 6 * 24 * 60 + 5)
+    const challengePeriodEnd = new Date(
+      parseInt(val.statusTimestamp) * 1000
+    ).setMinutes(statusTimestamp.getMinutes() + 1 * 24 * 60 + 5) // statusTimestamp is equal to time of first value submission when it's used below in the code. 5 min delay built in to account for potential difference between actual time and block timestamp
+    const reviewPeriodEnd = new Date(
+      parseInt(val.statusTimestamp) * 1000
+    ).setMinutes(statusTimestamp.getMinutes() + 2 * 24 * 60 + 5) // statusTimestamp is equal to time of first challenge when it's used down below in the code
 
     let finalValue = '-'
     let status = val.statusFinalReferenceValue
-
-    let challengedPeriodEnd
-
-    if (val.statusFinalReferenceValue === 'Submitted') {
-      challengedPeriodEnd = new Date(
-        parseInt(val.statusTimestamp) * 1000
-      ).setMinutes(statusTimestamp.getMinutes() + 2 * 24 * 60 + 5) // starts from the time of submission
-    } else {
-      challengedPeriodEnd = new Date(
-        parseInt(val.expiryTime) * 1000
-      ).setMinutes(expiryTime.getMinutes() + 2 * 24 * 60 + 5) // done just to have a value
-    }
 
     console.log('val.id: ', val.id)
     console.log('now', now)
@@ -500,7 +494,7 @@ export function MyPositions() {
     console.log('fallbackPeriodStart: ', fallbackPeriodStart)
     console.log('fallbackPeriodEnd: ', fallbackPeriodEnd)
 
-    console.log('challengedPeriodEnd: ', challengedPeriodEnd)
+    console.log('reviewPeriodEnd: ', reviewPeriodEnd)
     console.log('val.StatusTimestamp: ', val.statusTimestamp)
     console.log('val.expiryTime: ', val.expiryTime)
 
@@ -518,8 +512,10 @@ export function MyPositions() {
           status = 'Confirmed*'
         }
       } else if (
-        val.statusFinalReferenceValue === 'Challenged' &&
-        now > challengedPeriodEnd
+        (val.statusFinalReferenceValue === 'Challenged' &&
+          now > reviewPeriodEnd) ||
+        (val.statusFinalReferenceValue === 'Submitted' &&
+          now > challengePeriodEnd)
       ) {
         finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
         status = 'Confirmed*'
