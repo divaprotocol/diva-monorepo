@@ -414,10 +414,9 @@ const columns: GridColDef[] = [
           case 'Challenged':
             return `The final value submitted by the data provider has been challenged by position token holders.`
           case 'Fallback':
-            return `The data provider failed to submit a final value within the 24h submission period. The fallback data provider has 5 days to step in and submit a value. This is only to be expected for whitelisted data providers. For non-whitelisted data providers, the fallback data provider may not submit a value in which case it will default to inflection.
-Confirmed*: The final value will be confirmed inside the smart contract at the first user redemption.`
+            return `The data provider failed to submit a final value within the 24h submission period. The fallback data provider has 5 days to step in and submit a value. This is only to be expected for whitelisted data providers. For non-whitelisted data providers, the fallback data provider may not submit a value in which case it will default to inflection.`
           case 'Confirmed*':
-            return `The final value will be confirmed inside the smart contract at the first user redemption.`
+            return `The final value will be confirmed inside the smart contract at first user redemption.`
           case 'Confirmed':
             return `The final value has been confirmed and position token holders can start redeeming their LONG & SHORT position tokens.`
         }
