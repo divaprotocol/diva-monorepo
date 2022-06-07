@@ -161,7 +161,7 @@ export default function Markets() {
       expiryTime.getMinutes() + 24 * 60 + 5
     )
     const unchallengedPeriod = expiryTime.setMinutes(
-      expiryTime.getMinutes() + 5 * 24 * 60 + 5
+      expiryTime.getMinutes() + 6 * 24 * 60 + 5
     )
     const challengedPeriod = expiryTime.setMinutes(
       expiryTime.getMinutes() + 2 * 24 * 60 + 5
