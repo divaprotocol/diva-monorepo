@@ -347,7 +347,7 @@ export function DefinePoolAttributes({
         </Stack>
       </Box>
 
-      <h3>Payoff type</h3>
+      <h3>Payoff Type</h3>
       <FormControl>
         <RadioGroup
           row
