@@ -124,3 +124,11 @@ export const WhiteText = styled.div`
   font-size: 16px;
   color: white;
 `
+
+export const GreenText = styled.div`
+  color: #66ffa6;
+`
+
+export const RedText = styled.div`
+  color: #ff5c8d;
+`
