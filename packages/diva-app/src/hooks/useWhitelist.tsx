@@ -15,7 +15,7 @@ export function useWhitelist() {
 
   const dataFeeds = whitelistQuery.data?.dataFeeds
   const dataProviders = whitelistQuery.data?.dataProviders
-  const collateralTokens = whitelistQuery.data?.collateralTokens
+  const collateralTokens = whitelistQuery.data?.collateralTokens || []
 
   const referenceAssets = (dataFeeds || [])
     .filter((v) => v.active)
