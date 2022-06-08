@@ -124,7 +124,6 @@ export function TradeHistoryTab() {
   useEffect(() => {
     if (orderFills.data && orderFillsMaker.data && pools && collateralTokens) {
       orderFillsMaker.data.map((order) => {
-        console.log(order)
         collateralTokens.map((token) => {
           if (
             order.takerToken.toLowerCase() === token.id.toLowerCase() &&
@@ -362,7 +361,7 @@ export function TradeHistoryTab() {
         </Typography>
       ) : (
         <>
-          <PoolsTable
+          <DataGrid
             page={page}
             rows={rows}
             columns={columns}
