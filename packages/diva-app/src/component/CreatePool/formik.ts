@@ -26,7 +26,7 @@ export type Values = {
 
 export const initialValues: Values = {
   step: 1,
-  referenceAsset: 'BTC/USD', // currently 1st in json so its hardcoded here
+  referenceAsset: 'BTC/USD', // TODO: hard-coded for testnet; will break the app if reference asset is not whitelisted on the connected chain. Update towards mainnet launch
   expiryTime: defaultDate,
   floor: 100,
   cap: 300,
@@ -37,7 +37,7 @@ export const initialValues: Values = {
     name: 'DIVA USD',
     decimals: 18,
     symbol: 'dUSD',
-  },
+  }, // TODO: hard-coded for testnet; will break the app cross chain. Update towards mainnet launch
   collateralWalletBalance: '0',
   collateralBalance: '10',
   collateralBalanceShort: 5,
