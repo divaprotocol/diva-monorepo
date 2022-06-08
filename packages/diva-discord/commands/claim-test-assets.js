@@ -2,7 +2,7 @@ const ERC20_ABI = require('@diva/contracts/abis/erc20.json')
 const { parseEther, parseUnits, formatUnits } = require('@ethersproject/units')
 
 module.exports = {
-    name: 'claimtokens',
+    name: 'claim-test-assets',
     async execute(interaction, dbRegisteredUsers, DUSD_CONTRACT, senderAccount, nonceCounter) {
         try{
             console.log(`Function claimtokens called by ${interaction.user?.tag}`)

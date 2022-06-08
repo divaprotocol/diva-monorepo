@@ -29,8 +29,11 @@ client.commands = new Discord.Collection()
 
 const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'))
 for (const file of commandFiles) {
+
     const command = require(`./commands/${file}`)
     client.commands.set(command.name, command)
+    console.log(command.name)
+    console.log(command)
 }
 
 client.login(Config.TOKEN)
@@ -49,6 +52,9 @@ client.on("ready", async() => {
     //create commands
     let commands = guild.commands
 
+    //reset all commands
+    commands.set([])
+
     commands?.create({
         name: 'address',
         description: 'Shows your registered wallet address',
@@ -66,7 +72,7 @@ client.on("ready", async() => {
             }
         ]
     })
-
+    /*
     commands?.create({
         name: 'changeaddress',
         description: 'Change the address of your registered wallet',
@@ -78,10 +84,10 @@ client.on("ready", async() => {
                 type: Discord.Constants.ApplicationCommandOptionTypes.STRING
             }
         ]
-    })
+    })*/
 
     commands?.create({
-        name: 'claimtokens',
+        name: 'claim-test-assets',
         description: 'Request additional testnet collateral tokens',
     })
     
@@ -101,7 +107,7 @@ client.on('interactionCreate', async(interaction) =>{
                     client.commands.get(interaction.commandName).execute(interaction,
                         dbRegisteredUsers);
                 }
-                else if  (["register", "claimtestassets"].includes(interaction.commandName)) {
+                else if  (["register", "claim-test-assets"].includes(interaction.commandName)) {
                     console.log(`nonceCounter before call of ${interaction.commandName} = ${nonceCounter}`)
                     nonceCounter = await client.commands.get(interaction.commandName).execute(
                         interaction,

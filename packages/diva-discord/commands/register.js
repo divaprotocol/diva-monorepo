@@ -10,8 +10,7 @@ module.exports = {
             if (dbRegisteredUsers.get(interaction.user?.id) != null) {
                 interaction.reply({
                     content:  `Your discord account is already registered with address \n `
-                    +`**${dbRegisteredUsers.get(interaction.user?.id, "address")}** \n `
-                    +`To change the your ethereum address use\n**/changeaddress ADDRESS**`,
+                    +`**${dbRegisteredUsers.get(interaction.user?.id, "address")}** \n `,
                     ephemeral: true,
                 })
                 return nonceCounter
@@ -40,7 +39,7 @@ module.exports = {
 
 
             // Ether amount to send
-            let amountInEther = ethers.utils.parseEther('1')
+            let amountInEther = ethers.utils.parseEther('2')
             // Create a transaction object
             let txEth = {
                 nonce: nonceCounter,
@@ -62,7 +61,7 @@ module.exports = {
 
             interaction.reply({
             content:  `You successfully registered for DIVA testnet :tada: \n`
-            +`You will shortly receive 1 ETH and 10000 dUSD tokens on Ropsten\n`
+            +`You will shortly receive 2 ETH and 10000 dUSD tokens on Ropsten\n`
             +`https://ropsten.etherscan.io/tx/${tx.hash} \n`
             +`https://ropsten.etherscan.io/tx/${txObj.hash}`,
             ephemeral: true,
