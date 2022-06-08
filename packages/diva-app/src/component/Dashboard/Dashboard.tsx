@@ -5,6 +5,7 @@ import { MyDataFeeds } from './MyDataFeeds'
 import { MyFeeClaims } from './MyFeeClaims'
 import { MyOrders } from './MyOrders'
 import { MyPositions } from './MyPositions'
+import { TradeHistoryTab } from './TradeHistoryTab'
 const Dashboard = (props: any) => {
   const { match, history } = props
   const { params } = match
@@ -15,14 +16,15 @@ const Dashboard = (props: any) => {
     1: 'myorders',
     2: 'mydatafeeds',
     3: 'myfeeclaims',
+    4: 'tradehistory',
   }
   const indexToTabName = {
     mypositions: 0,
     myorders: 1,
     mydatafeeds: 2,
     myfeeclaims: 3,
+    tradehistory: 4,
   }
-  console.log(indexToTabName[page])
   const [value, setValue] = useState(indexToTabName[page])
   const handleChange = (event: any, newValue: any) => {
     history.push(`/dashboard/${tabNameToIndex[newValue]}`)
@@ -53,11 +55,13 @@ const Dashboard = (props: any) => {
           <Tab label="ORDERS" />
           <Tab label="DATA FEEDS" />
           <Tab label="FEE CLAIMS" />
+          <Tab label="TRADE HISTORY" />
         </Tabs>
         {value === 0 && <MyPositions />}
         {value === 1 && <MyOrders />}
         {value === 2 && <MyDataFeeds />}
         {value === 3 && <MyFeeClaims />}
+        {value === 4 && <TradeHistoryTab />}
       </Box>
     </>
   )
