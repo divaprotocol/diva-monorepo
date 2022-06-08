@@ -35,6 +35,7 @@ import {
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ExpiresInCell } from '../Markets/Markets'
+import { getAppStatus } from '../../Util/getAppStatus'
 
 type Response = {
   [token: string]: BigNumber
@@ -414,10 +415,9 @@ const columns: GridColDef[] = [
           case 'Challenged':
             return `The final value submitted by the data provider has been challenged by position token holders.`
           case 'Fallback':
-            return `The data provider failed to submit a final value within the 24h submission period. The fallback data provider has 5 days to step in and submit a value. This is only to be expected for whitelisted data providers. For non-whitelisted data providers, the fallback data provider may not submit a value in which case it will default to inflection.
-Confirmed*: The final value will be confirmed inside the smart contract at the first user redemption.`
+            return `The data provider failed to submit a final value within the 24h submission period. The fallback data provider has 5 days to step in and submit a value. This is only to be expected for whitelisted data providers. For non-whitelisted data providers, the fallback data provider may not submit a value in which case it will default to inflection.`
           case 'Confirmed*':
-            return `The final value will be confirmed inside the smart contract at the first user redemption.`
+            return `The final value will be confirmed inside the smart contract at first user redemption.`
           case 'Confirmed':
             return `The final value has been confirmed and position token holders can start redeeming their LONG & SHORT position tokens.`
         }
@@ -466,47 +466,14 @@ export function MyPositions() {
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
-    const now = new Date()
-    const fallbackPeriod = new Date(parseInt(val.expiryTime) * 1000).setMinutes(
-      expiryTime.getMinutes() + 24 * 60 + 5
+    const { finalValue, status } = getAppStatus(
+      val.expiryTime,
+      val.statusTimestamp,
+      val.statusFinalReferenceValue,
+      val.finalReferenceValue,
+      val.inflection
     )
-    const unchallengedPeriod = new Date(
-      parseInt(val.expiryTime) * 1000
-    ).setMinutes(expiryTime.getMinutes() + 5 * 24 * 60 + 5)
-    const challengedPeriod = new Date(
-      parseInt(val.expiryTime) * 1000
-    ).setMinutes(expiryTime.getMinutes() + 2 * 24 * 60 + 5)
-    let finalValue = '-'
-    let status = val.statusFinalReferenceValue
 
-    if (now.getTime() < expiryTime.getTime()) {
-      finalValue = '-'
-    } else if (val.statusFinalReferenceValue === 'Open') {
-      if (Date.now() > fallbackPeriod && Date.now() < unchallengedPeriod) {
-        status = 'Fallback'
-      } else if (now.getTime() > unchallengedPeriod) {
-        finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
-        status = 'Confirmed*'
-      } else if (
-        now.getTime() > expiryTime.getTime() &&
-        now.getTime() < unchallengedPeriod
-      ) {
-        status = 'Expired'
-        finalValue = '-'
-      } else {
-        finalValue = '-'
-      }
-    } else if (
-      val.statusFinalReferenceValue === 'Challenged' &&
-      Date.now() > challengedPeriod
-    ) {
-      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
-      status = 'Confirmed*'
-    } else {
-      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
-      status = val.statusFinalReferenceValue
-    }
     const shared = {
       Id: val.id,
       Icon: val.referenceAsset,
@@ -540,12 +507,6 @@ export function MyPositions() {
       Cap: Number(formatEther(val.cap)),
       TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
-
-    const Status =
-      expiryTime.getTime() <= now.getTime() &&
-      val.statusFinalReferenceValue.toLowerCase() === 'open'
-        ? 'Expired'
-        : val.statusFinalReferenceValue
 
     return [
       ...acc,

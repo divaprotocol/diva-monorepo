@@ -26,7 +26,6 @@ export const Liquidity = ({ pool }: Props) => {
     `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity/remove`
       ? 'remove'
       : 'add'
-  console.log('History path is:', history.location.pathname)
   const [value, setValue] = React.useState(currentTab)
 
   const theme = useTheme()

@@ -63,7 +63,6 @@ export default function Underlying() {
       ? 'liquidity'
       : 'trade'
   const [value, setValue] = useState(currentTab)
-  console.log('Tab Path is:', value)
 
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)

@@ -47,7 +47,6 @@ export function DefinePoolAttributes({
     setValue(event.target.value)
   }
   const { referenceAssets, collateralTokens } = useWhitelist()
-
   const {
     referenceAsset,
     expiryTime,

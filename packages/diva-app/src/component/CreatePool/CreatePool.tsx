@@ -45,7 +45,7 @@ export function CreatePool() {
       break
   }
   useEffect(() => {
-    if (formik.values.collateralToken != null) {
+    if (formik.values.collateralToken != null && provider != null) {
       const token = new ethers.Contract(
         formik.values.collateralToken.id,
         ERC20,
