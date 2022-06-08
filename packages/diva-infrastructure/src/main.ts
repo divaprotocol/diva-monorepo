@@ -24,7 +24,8 @@ class DivaStack extends TerraformStack {
     orderBookApi(this)
 
     new S3Bucket(this, id("app.diva.finance"), {
-      bucket: 'app.diva.finance',
+      bucket: "app.diva.finance",
+      acl: "public-read",
       website: {
         indexDocument: "index.html",
       },
