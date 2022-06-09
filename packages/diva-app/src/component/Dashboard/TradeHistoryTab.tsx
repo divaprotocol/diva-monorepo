@@ -27,6 +27,7 @@ import { CoinIconPair } from '../CoinIcon'
 import { Stack } from '@mui/material'
 import PoolsTable from '../PoolsTable'
 import { getDateTime } from '../../Util/Dates'
+import { ContinuousSizeLegend } from 'react-vis'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -155,6 +156,7 @@ export function TradeHistoryTab() {
         console.log('fucking ts', order)
         collateralTokens.map((token) => {
           if (order.takerToken.toLowerCase() === token.id.toLowerCase()) {
+            console.log('I shouldnt be here')
             pools.map((pool) => {
               if (
                 pool.shortToken.id.toLowerCase() ===
@@ -199,11 +201,16 @@ export function TradeHistoryTab() {
           } else if (
             order.makerToken.toLowerCase() === token.id.toLowerCase()
           ) {
+            console.log('I should be here instead')
             pools.map((pool) => {
               if (
                 pool.shortToken.id.toLowerCase() ===
                 order.takerToken.toLowerCase()
               ) {
+                // console.log(
+                //   'order.id (where makerToken = collateralToken): ',
+                //   order.id
+                // )
                 orders.push({
                   id: order.id,
                   underlying: pool.referenceAsset,
@@ -223,6 +230,8 @@ export function TradeHistoryTab() {
                 pool.longToken.id.toLowerCase() ===
                 order.takerToken.toLowerCase()
               ) {
+                console.log('hellooo')
+                console.log('order.id: ', order.id)
                 orders.push({
                   id: order.id,
                   underlying: pool.referenceAsset,
@@ -356,7 +365,7 @@ export function TradeHistoryTab() {
           console.log(order.timestamp)
           // console.log(getDateTime(order.timestamp))
           return [
-            acc,
+            ...acc,
             {
               id: order.id,
               symbol: order.symbol,
@@ -368,7 +377,7 @@ export function TradeHistoryTab() {
               timestamp: getDateTime(order.timestamp),
             },
           ]
-        })
+        }, [])
       : []
   return (
     <Stack
