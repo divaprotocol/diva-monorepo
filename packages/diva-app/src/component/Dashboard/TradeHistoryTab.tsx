@@ -181,7 +181,8 @@ export function TradeHistoryTab() {
                   id: order.id,
                   underlying: pool.referenceAsset,
                   symbol: pool.shortToken.symbol,
-                  type: 'SELL',
+                  type:
+                    order.taker == userAddress.toLowerCase() ? 'BUY' : 'SELL',
                   paidReceived: formatUnits(
                     order.takerTokenFilledAmount,
                     token.decimals
@@ -200,7 +201,8 @@ export function TradeHistoryTab() {
                   id: order.id,
                   underlying: pool.referenceAsset,
                   symbol: pool.longToken.symbol,
-                  type: 'SELL',
+                  type:
+                    order.taker == userAddress.toLowerCase() ? 'BUY' : 'SELL',
                   paidReceived: formatUnits(
                     order.takerTokenFilledAmount,
                     token.decimals
@@ -225,7 +227,8 @@ export function TradeHistoryTab() {
                   id: order.id,
                   underlying: pool.referenceAsset,
                   symbol: pool.shortToken.symbol,
-                  type: 'BUY',
+                  type:
+                    order.taker === userAddress.toLowerCase() ? 'SELL' : 'BUY',
                   paidReceived: formatUnits(
                     order.makerTokenFilledAmount,
                     token.decimals
@@ -244,7 +247,8 @@ export function TradeHistoryTab() {
                   id: order.id,
                   underlying: pool.referenceAsset,
                   symbol: pool.longToken.symbol,
-                  type: 'BUY',
+                  type:
+                    order.taker == userAddress.toLowerCase() ? 'SELL' : 'BUY',
                   paidReceived: formatUnits(
                     order.makerTokenFilledAmount,
                     token.decimals
