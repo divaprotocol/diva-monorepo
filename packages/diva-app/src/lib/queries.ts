@@ -350,6 +350,7 @@ export type OrderFill = {
   takerToken: string
   makerTokenFilledAmount: string
   takerTokenFilledAmount: string
+  timestamp: number
 }
 
 export const queryOrderFillsMaker = (address: string) => gql`
@@ -365,6 +366,7 @@ export const queryOrderFillsMaker = (address: string) => gql`
       takerToken
       makerTokenFilledAmount
       takerTokenFilledAmount
+      timestamp
     }
   }
 `
@@ -382,6 +384,7 @@ export const queryOrderFills = (address: string) => gql`
       takerToken
       makerTokenFilledAmount
       takerTokenFilledAmount
+      timestamp
     }
   }
 `

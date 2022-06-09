@@ -26,6 +26,7 @@ import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
 import { Stack } from '@mui/material'
 import PoolsTable from '../PoolsTable'
+import { getDateTime } from '../../Util/Dates'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -37,6 +38,7 @@ type FilledOrder = {
   quantity: string
   paidReceived: string
   price: number
+  timestamp: number
 }
 const columns: GridColDef[] = [
   {
@@ -56,6 +58,7 @@ const columns: GridColDef[] = [
     align: 'center',
     headerAlign: 'center',
     headerName: 'Type',
+    minWidth: 200,
     renderCell: (cell) =>
       cell.value === 'BUY' ? (
         <GreenText>{cell.value}</GreenText>
@@ -83,6 +86,13 @@ const columns: GridColDef[] = [
     headerName: 'Pay/Receive',
     minWidth: 150,
   },
+  {
+    field: 'timestamp',
+    align: 'center',
+    headerAlign: 'center',
+    headerName: 'Timestamp',
+    minWidth: 150,
+  },
 ]
 export function TradeHistoryTab() {
   const userAddress = useAppSelector(selectUserAddress)
@@ -91,44 +101,60 @@ export function TradeHistoryTab() {
   const { collateralTokens } = useWhitelist()
   const [history, setHistory] = useState<any[]>([])
   const [page, setPage] = useState(0)
-  const orders: FilledOrder[] = []
-  const ids: string[] = []
+  const orders: any[] = []
 
   const orderFills = useQuery<OrderFill[]>('orderFills', async () => {
-    const response = request(
-      config[chainId].zeroxSubgraph,
-      queryOrderFills(userAddress)
-    ).then((orders) => {
-      if (orders.nativeOrderFills != null) {
-        return orders.nativeOrderFills
-      } else {
-        return {}
-      }
-    })
-    return response
+    if (userAddress != null) {
+      const response = request(
+        config[chainId].zeroxSubgraph,
+        queryOrderFills(userAddress)
+      ).then((orders) => {
+        if (orders.nativeOrderFills != null) {
+          return orders.nativeOrderFills
+        } else {
+          return {}
+        }
+      })
+      return response
+    }
   })
   const orderFillsMaker = useQuery<OrderFill[]>('orderFillsMaker', async () => {
-    const response = request(
-      config[chainId].zeroxSubgraph,
-      queryOrderFillsMaker(userAddress)
-    ).then((orders) => {
-      if (orders.nativeOrderFills != null) {
-        return orders.nativeOrderFills
-      } else {
-        return {}
-      }
-    })
-    return response
+    if (userAddress != null) {
+      const response = request(
+        config[chainId].zeroxSubgraph,
+        queryOrderFillsMaker(userAddress)
+      ).then((orders) => {
+        if (orders.nativeOrderFills != null) {
+          return orders.nativeOrderFills
+        } else {
+          return {}
+        }
+      })
+      return response
+    }
   })
 
   useEffect(() => {
     if (orderFills.data && orderFillsMaker.data && pools && collateralTokens) {
-      orderFillsMaker.data.map((order) => {
+      const uniqueIds = []
+      console.log('orderFills.data', orderFills.data)
+      console.log('orderFillsMaker.data', orderFillsMaker.data)
+      const everyOrder = orderFills.data
+        .concat(orderFillsMaker.data)
+        .filter((order) => {
+          const isDuplicate = uniqueIds.includes(order.id)
+          if (!isDuplicate) {
+            uniqueIds.push(order.id)
+            return true
+          }
+          return false
+        })
+
+      console.log('everyOrder', everyOrder)
+      everyOrder.map((order) => {
+        console.log('fucking ts', order)
         collateralTokens.map((token) => {
-          if (
-            order.takerToken.toLowerCase() === token.id.toLowerCase() &&
-            ids.includes(order.id) === false
-          ) {
+          if (order.takerToken.toLowerCase() === token.id.toLowerCase()) {
             pools.map((pool) => {
               if (
                 pool.shortToken.id.toLowerCase() ===
@@ -147,8 +173,8 @@ export function TradeHistoryTab() {
                   price:
                     Number(formatUnits(order.takerTokenFilledAmount)) /
                     Number(formatUnits(order.makerTokenFilledAmount)),
+                  timestamp: order.timestamp,
                 })
-                ids.push(order.id)
               } else if (
                 pool.longToken.id.toLowerCase() ===
                 order.makerToken.toLowerCase()
@@ -166,13 +192,12 @@ export function TradeHistoryTab() {
                   price:
                     Number(formatUnits(order.takerTokenFilledAmount)) /
                     Number(formatUnits(order.makerTokenFilledAmount)),
+                  timestamp: order.timestamp,
                 })
-                ids.push(order.id)
               }
             })
           } else if (
-            order.makerToken.toLowerCase() === token.id.toLowerCase() &&
-            ids.includes(order.id) === false
+            order.makerToken.toLowerCase() === token.id.toLowerCase()
           ) {
             pools.map((pool) => {
               if (
@@ -192,8 +217,8 @@ export function TradeHistoryTab() {
                   price:
                     Number(formatUnits(order.makerTokenFilledAmount)) /
                     Number(formatUnits(order.takerTokenFilledAmount)),
+                  timestamp: order.timestamp,
                 })
-                ids.push(order.id)
               } else if (
                 pool.longToken.id.toLowerCase() ===
                 order.takerToken.toLowerCase()
@@ -211,119 +236,125 @@ export function TradeHistoryTab() {
                   price:
                     Number(formatUnits(order.makerTokenFilledAmount)) /
                     Number(formatUnits(order.takerTokenFilledAmount)),
+                  timestamp: order.timestamp,
                 })
-                ids.push(order.id)
               }
             })
           }
         })
       })
-      orderFills.data.map((order) => {
-        collateralTokens.map((token) => {
-          if (
-            order.takerToken.toLowerCase() === token.id.toLowerCase() &&
-            ids.includes(order.id) === false
-          ) {
-            pools.map((pool) => {
-              if (
-                pool.shortToken.id.toLowerCase() ===
-                order.makerToken.toLowerCase()
-              ) {
-                orders.push({
-                  id: order.id,
-                  underlying: pool.referenceAsset,
-                  symbol: pool.shortToken.symbol,
-                  type: 'BUY',
-                  paidReceived: formatUnits(
-                    order.takerTokenFilledAmount,
-                    token.decimals
-                  ),
-                  quantity: formatEther(order.makerTokenFilledAmount),
-                  price:
-                    Number(formatUnits(order.takerTokenFilledAmount)) /
-                    Number(formatUnits(order.makerTokenFilledAmount)),
-                })
-                ids.push(order.id)
-              } else if (
-                pool.longToken.id.toLowerCase() ===
-                order.makerToken.toLowerCase()
-              ) {
-                orders.push({
-                  id: order.id,
-                  underlying: pool.referenceAsset,
-                  symbol: pool.longToken.symbol,
-                  type: 'BUY',
-                  paidReceived: formatUnits(
-                    order.takerTokenFilledAmount,
-                    token.decimals
-                  ),
-                  quantity: formatEther(order.makerTokenFilledAmount),
-                  price:
-                    Number(formatUnits(order.takerTokenFilledAmount)) /
-                    Number(formatUnits(order.makerTokenFilledAmount)),
-                })
-                ids.push(order.id)
-              }
-            })
-          } else if (
-            order.makerToken.toLowerCase() === token.id.toLowerCase() &&
-            ids.includes(order.id) === false
-          ) {
-            pools.map((pool) => {
-              if (
-                pool.shortToken.id.toLowerCase() ===
-                order.takerToken.toLowerCase()
-              ) {
-                orders.push({
-                  id: order.id,
-                  underlying: pool.referenceAsset,
-                  symbol: pool.shortToken.symbol,
-                  type: 'SELL',
-                  paidReceived: formatUnits(
-                    order.makerTokenFilledAmount,
-                    token.decimals
-                  ),
-                  quantity: formatEther(order.takerTokenFilledAmount),
-                  price:
-                    Number(formatUnits(order.makerTokenFilledAmount)) /
-                    Number(formatUnits(order.takerTokenFilledAmount)),
-                })
-                ids.push(order.id)
-              } else if (
-                pool.longToken.id.toLowerCase() ===
-                order.takerToken.toLowerCase()
-              ) {
-                orders.push({
-                  id: order.id,
-                  underlying: pool.referenceAsset,
-                  symbol: pool.longToken.symbol,
-                  type: 'SELL',
-                  paidReceived: formatUnits(
-                    order.makerTokenFilledAmount,
-                    token.decimals
-                  ),
-                  quantity: formatEther(order.takerTokenFilledAmount),
-                  price:
-                    Number(formatUnits(order.makerTokenFilledAmount)) /
-                    Number(formatUnits(order.takerTokenFilledAmount)),
-                })
-                ids.push(order.id)
-              }
-            })
-          }
-        })
-      })
+      // orderFills.data.map((order) => {
+      //   collateralTokens.map((token) => {
+      //     if (
+      //       order.takerToken.toLowerCase() === token.id.toLowerCase() &&
+      //       ids.includes(order.id) === false
+      //     ) {
+      //       pools.map((pool) => {
+      //         if (
+      //           pool.shortToken.id.toLowerCase() ===
+      //           order.makerToken.toLowerCase()
+      //         ) {
+      //           orders.push({
+      //             id: order.id,
+      //             underlying: pool.referenceAsset,
+      //             symbol: pool.shortToken.symbol,
+      //             type: 'BUY',
+      //             paidReceived: formatUnits(
+      //               order.takerTokenFilledAmount,
+      //               token.decimals
+      //             ),
+      //             quantity: formatEther(order.makerTokenFilledAmount),
+      //             price:
+      //               Number(formatUnits(order.takerTokenFilledAmount)) /
+      //               Number(formatUnits(order.makerTokenFilledAmount)),
+      //             timestamp: order.timestamp,
+      //           })
+      //           ids.push(order.id)
+      //         } else if (
+      //           pool.longToken.id.toLowerCase() ===
+      //           order.makerToken.toLowerCase()
+      //         ) {
+      //           orders.push({
+      //             id: order.id,
+      //             underlying: pool.referenceAsset,
+      //             symbol: pool.longToken.symbol,
+      //             type: 'BUY',
+      //             paidReceived: formatUnits(
+      //               order.takerTokenFilledAmount,
+      //               token.decimals
+      //             ),
+      //             quantity: formatEther(order.makerTokenFilledAmount),
+      //             price:
+      //               Number(formatUnits(order.takerTokenFilledAmount)) /
+      //               Number(formatUnits(order.makerTokenFilledAmount)),
+      //             timestamp: order.timestamp,
+      //           })
+      //           ids.push(order.id)
+      //         }
+      //       })
+      //     } else if (
+      //       order.makerToken.toLowerCase() === token.id.toLowerCase() &&
+      //       ids.includes(order.id) === false
+      //     ) {
+      //       pools.map((pool) => {
+      //         if (
+      //           pool.shortToken.id.toLowerCase() ===
+      //           order.takerToken.toLowerCase()
+      //         ) {
+      //           orders.push({
+      //             id: order.id,
+      //             underlying: pool.referenceAsset,
+      //             symbol: pool.shortToken.symbol,
+      //             type: 'SELL',
+      //             paidReceived: formatUnits(
+      //               order.makerTokenFilledAmount,
+      //               token.decimals
+      //             ),
+      //             quantity: formatEther(order.takerTokenFilledAmount),
+      //             price:
+      //               Number(formatUnits(order.makerTokenFilledAmount)) /
+      //               Number(formatUnits(order.takerTokenFilledAmount)),
+      //             timestamp: order.timestamp,
+      //           })
+      //           ids.push(order.id)
+      //         } else if (
+      //           pool.longToken.id.toLowerCase() ===
+      //           order.takerToken.toLowerCase()
+      //         ) {
+      //           orders.push({
+      //             id: order.id,
+      //             underlying: pool.referenceAsset,
+      //             symbol: pool.longToken.symbol,
+      //             type: 'SELL',
+      //             paidReceived: formatUnits(
+      //               order.makerTokenFilledAmount,
+      //               token.decimals
+      //             ),
+      //             quantity: formatEther(order.takerTokenFilledAmount),
+      //             price:
+      //               Number(formatUnits(order.makerTokenFilledAmount)) /
+      //               Number(formatUnits(order.takerTokenFilledAmount)),
+      //             timestamp: order.timestamp,
+      //           })
+      //           ids.push(order.id)
+      //         }
+      //       })
+      //     }
+      //   })
+      // })
     }
     setHistory(orders)
   }, [
     orderFills.isSuccess,
     orderFillsMaker.isSuccess,
-    pools != null,
-    collateralTokens != null,
+    !pools,
+    !collateralTokens,
   ])
   const rows: GridRowModel[] =
     history.length != 0
       ? history.reduce((acc, order) => {
+          console.log(order.timestamp)
+          // console.log(getDateTime(order.timestamp))
           return [
             acc,
             {
@@ -334,6 +365,7 @@ export function TradeHistoryTab() {
               quantity: order.quantity,
               payReceive: order.paidReceived,
               price: order.price,
+              timestamp: getDateTime(order.timestamp),
             },
           ]
         })
@@ -371,93 +403,4 @@ export function TradeHistoryTab() {
       )}
     </Stack>
   )
-  // return (
-  //   <PageDiv>
-  //     <TableContainer component={Paper} sx={{ maxHeight: 550 }}>
-  //       <Table stickyHeader>
-  //         <TableHead>
-  //           <TableRow>
-  //             <TableCell align="left">Type</TableCell>
-  //             <TableCell align="center">Quantity</TableCell>
-  //             <TableCell align="center">Price</TableCell>
-  //             <TableCell align="center">Paid/Received</TableCell>
-  //           </TableRow>
-  //         </TableHead>
-  //         <TableBody>
-  //           {history.length > 0 ? (
-  //             history.map((order: any, index: number) => {
-  //               if (order.quantity != 0) {
-  //                 const labelId = `enhanced-history-${index}`
-  //                 return (
-  //                   <TableRow key={index} hover>
-  //                     <TableCell
-  //                       component="th"
-  //                       id={labelId}
-  //                       scope="row"
-  //                       align="left"
-  //                     >
-  //                       <Box>
-  //                         {order.type === 'BUY' ? (
-  //                           <Typography variant="subtitle1" color="#66ffa6">
-  //                             {order.type}
-  //                           </Typography>
-  //                         ) : (
-  //                           <Typography variant="subtitle1" color="#ff5c8d">
-  //                             {order.type}
-  //                           </Typography>
-  //                         )}
-  //                       </Box>
-  //                     </TableCell>
-  //                     <TableCell
-  //                       component="th"
-  //                       id={labelId}
-  //                       scope="row"
-  //                       align="center"
-  //                     >
-  //                       <Box>
-  //                         <Typography variant="subtitle1">
-  //                           {Number(order.quantity).toFixed(2)}
-  //                         </Typography>
-  //                       </Box>
-  //                     </TableCell>
-  //                     <TableCell
-  //                       component="th"
-  //                       id={labelId}
-  //                       scope="row"
-  //                       align="center"
-  //                     >
-  //                       <Box>
-  //                         <Typography variant="subtitle1">
-  //                           {Number(order.price).toFixed(4)}
-  //                         </Typography>
-  //                       </Box>
-  //                     </TableCell>
-  //                     <TableCell
-  //                       component="th"
-  //                       id={labelId}
-  //                       scope="row"
-  //                       align="center"
-  //                     >
-  //                       <Box>
-  //                         <Typography variant="subtitle1">
-  //                           {Number(order.paidReceived).toFixed(4)}
-  //                         </Typography>
-  //                       </Box>
-  //                     </TableCell>
-  //                   </TableRow>
-  //                 )
-  //               }
-  //             })
-  //           ) : (
-  //             <TableRow>
-  //               <TableCell colSpan={5} align="center">
-  //                 None
-  //               </TableCell>
-  //             </TableRow>
-  //           )}
-  //         </TableBody>
-  //       </Table>
-  //     </TableContainer>
-  //   </PageDiv>
-  // )
 }
