@@ -20,6 +20,9 @@ import Typography from '@mui/material/Typography'
 import styled from 'styled-components'
 import { useEffect, useState } from 'react'
 import { formatEther, formatUnits } from 'ethers/lib/utils'
+import { Stack } from '@mui/material'
+import { GrayText } from './Orders/UiStyles'
+import { getDateTime } from '../../Util/Dates'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -32,6 +35,7 @@ type FilledOrder = {
   quantity: string
   paidReceived: string
   price: number
+  timestamp: number
 }
 export const TradeHistory = ({ pool }: Props) => {
   const userAddress = useAppSelector(selectUserAddress)
@@ -89,6 +93,7 @@ export const TradeHistory = ({ pool }: Props) => {
             price:
               Number(formatUnits(order.takerTokenFilledAmount)) /
               Number(formatUnits(order.makerTokenFilledAmount)),
+            timestamp: order.timestamp,
           })
           ids.push(order.id)
         } else if (
@@ -108,6 +113,7 @@ export const TradeHistory = ({ pool }: Props) => {
             price:
               Number(formatUnits(order.makerTokenFilledAmount)) /
               Number(formatUnits(order.takerTokenFilledAmount)),
+            timestamp: order.timestamp,
           })
           ids.push(order.id)
         }
@@ -130,6 +136,7 @@ export const TradeHistory = ({ pool }: Props) => {
             price:
               Number(formatUnits(order.takerTokenFilledAmount)) /
               Number(formatUnits(order.makerTokenFilledAmount)),
+            timestamp: order.timestamp,
           })
           ids.push(order.id)
         } else if (
@@ -149,6 +156,7 @@ export const TradeHistory = ({ pool }: Props) => {
             price:
               Number(formatUnits(order.makerTokenFilledAmount)) /
               Number(formatUnits(order.takerTokenFilledAmount)),
+            timestamp: order.timestamp,
           })
           ids.push(order.id)
         }
@@ -192,13 +200,23 @@ export const TradeHistory = ({ pool }: Props) => {
                       >
                         <Box>
                           {order.type === 'BUY' ? (
-                            <Typography variant="subtitle1" color="#66ffa6">
-                              {order.type}
-                            </Typography>
+                            <Stack>
+                              <Typography variant="subtitle1" color="#66ffa6">
+                                {order.type}
+                              </Typography>
+                              <GrayText>
+                                {getDateTime(order.timestamp)}
+                              </GrayText>
+                            </Stack>
                           ) : (
-                            <Typography variant="subtitle1" color="#ff5c8d">
-                              {order.type}
-                            </Typography>
+                            <Stack>
+                              <Typography variant="subtitle1" color="#ff5c8d">
+                                {order.type}
+                              </Typography>
+                              <GrayText>
+                                {getDateTime(order.timestamp)}
+                              </GrayText>
+                            </Stack>
                           )}
                         </Box>
                       </TableCell>
