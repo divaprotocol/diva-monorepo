@@ -18,6 +18,7 @@ import { selectMainPools, selectOtherPools } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
 import { Box, Tooltip } from '@mui/material'
 import { ShowChartOutlined } from '@mui/icons-material'
+import { getAppStatus } from '../../Util/getAppStatus'
 
 export const ExpiresInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime()
@@ -156,32 +157,14 @@ export default function Markets() {
     setValue(newValue)
   }
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
-    const fallbackPeriod = expiryTime.setMinutes(
-      expiryTime.getMinutes() + 24 * 60 + 5
+    const { status } = getAppStatus(
+      val.expiryTime,
+      val.statusTimestamp,
+      val.statusFinalReferenceValue,
+      val.finalReferenceValue,
+      val.inflection
     )
-    const unchallengedPeriod = expiryTime.setMinutes(
-      expiryTime.getMinutes() + 5 * 24 * 60 + 5
-    )
-    const challengedPeriod = expiryTime.setMinutes(
-      expiryTime.getMinutes() + 2 * 24 * 60 + 5
-    )
-    let status = val.statusFinalReferenceValue
 
-    if (val.statusFinalReferenceValue === 'Open') {
-      if (Date.now() > fallbackPeriod && Date.now() < unchallengedPeriod) {
-        status = 'Fallback'
-      } else if (Date.now() > unchallengedPeriod) {
-        status = 'Confirmed*'
-      } else {
-        status = val.statusFinalReferenceValue
-      }
-    } else if (
-      val.statusFinalReferenceValue === 'Challenged' &&
-      Date.now() > challengedPeriod
-    ) {
-      status = 'Confirmed*'
-    }
     const shared = {
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,

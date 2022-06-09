@@ -25,6 +25,7 @@ const Dashboard = (props: any) => {
     myfeeclaims: 3,
     tradehistory: 4,
   }
+
   const [value, setValue] = useState(indexToTabName[page])
   const handleChange = (event: any, newValue: any) => {
     history.push(`/dashboard/${tabNameToIndex[newValue]}`)

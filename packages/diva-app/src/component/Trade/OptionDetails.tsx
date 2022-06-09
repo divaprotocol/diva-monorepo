@@ -131,7 +131,6 @@ export default function OptionDetails({
       setCheckIcon(false)
     }
   }, [dataSource.dataProviders, pool.dataProvider])
-
   return (
     <PageDiv>
       <HeaderDiv>

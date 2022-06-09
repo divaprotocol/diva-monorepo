@@ -74,7 +74,6 @@ export const ApproveActionButtons = ({
       })
     }
   }, [textFieldValue, chainId, pool, approveLoading, actionLoading])
-
   return (
     <div
       style={{

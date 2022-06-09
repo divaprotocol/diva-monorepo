@@ -26,19 +26,24 @@ export type Values = {
 
 export const initialValues: Values = {
   step: 1,
-  referenceAsset: '',
+  referenceAsset: 'BTC/USD', // TODO: hard-coded for testnet; will break the app if reference asset is not whitelisted on the connected chain. Update towards mainnet launch
   expiryTime: defaultDate,
   floor: 100,
   cap: 300,
   inflection: 200,
   gradient: 0.5,
-  collateralToken: undefined,
+  collateralToken: {
+    id: '0x134e62bd2ee247d4186a1fdbaa9e076cb26c1355',
+    name: 'DIVA USD',
+    decimals: 18,
+    symbol: 'dUSD',
+  }, // TODO: hard-coded for testnet; will break the app cross chain. Update towards mainnet launch
   collateralWalletBalance: '0',
   collateralBalance: '10',
   collateralBalanceShort: 5,
   collateralBalanceLong: 5,
   tokenSupply: 10,
-  capacity: '0',
+  capacity: 'Unlimited',
   dataProvider: '',
 }
 
@@ -112,6 +117,9 @@ export const useCreatePoolFormik = () => {
       if (values.referenceAsset == null) {
         errors.referenceAsset = 'You must choose a reference asset'
       }
+      // if (values.referenceAsset == '') {
+      //   errors.referenceAsset = 'You must choose a reference asset'
+      // }
       if (values.collateralToken == null) {
         errors.collateralToken = 'You must choose a collateral asset'
       }
