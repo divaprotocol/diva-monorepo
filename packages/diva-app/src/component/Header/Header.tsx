@@ -40,10 +40,20 @@ export default function Header() {
             </Box>
           </AppBar>
         )}
-        <Toolbar>
-          <NetworkTag />
-          <ConnectWalletButton />
-        </Toolbar>
+        <AppBar
+          position="fixed"
+          sx={{
+            background: 'none',
+            boxShadow: 'none',
+            marginX: '50px',
+            justifySelf: 'center',
+          }}
+        >
+          <Toolbar>
+            <NetworkTag />
+            <ConnectWalletButton />
+          </Toolbar>
+        </AppBar>
       </AppBar>
     </Box>
   )
