@@ -161,6 +161,11 @@ export const TradeHistory = ({ pool }: Props) => {
           ids.push(order.id)
         }
       })
+      orders.sort((a, b) => {
+        if (a.timestamp > b.timestamp) return -1
+        if (a.timestamp < b.timestamp) return 1
+        return 0
+      })
     }
     setHistory(orders)
   }, [
