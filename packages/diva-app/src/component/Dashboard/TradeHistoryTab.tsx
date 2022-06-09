@@ -49,6 +49,14 @@ const columns: GridColDef[] = [
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
   },
   {
+    field: 'icon',
+    align: 'right',
+    headerName: '',
+    disableReorder: true,
+    disableColumnMenu: true,
+    renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
+  },
+  {
     field: 'underlying',
     align: 'left',
     minWidth: 100,
@@ -84,7 +92,7 @@ const columns: GridColDef[] = [
     field: 'payReceive',
     align: 'center',
     headerAlign: 'center',
-    headerName: 'Pay/Receive',
+    headerName: 'Paid/Received',
     minWidth: 150,
   },
   {
@@ -92,7 +100,7 @@ const columns: GridColDef[] = [
     align: 'center',
     headerAlign: 'center',
     headerName: 'Timestamp',
-    minWidth: 150,
+    minWidth: 200,
   },
 ]
 export function TradeHistoryTab() {
@@ -138,25 +146,27 @@ export function TradeHistoryTab() {
   useEffect(() => {
     if (orderFills.data && orderFillsMaker.data && pools && collateralTokens) {
       const uniqueIds = []
-      console.log('orderFills.data', orderFills.data)
-      console.log('orderFillsMaker.data', orderFillsMaker.data)
       const everyOrder = orderFills.data
         .concat(orderFillsMaker.data)
         .filter((order) => {
           const isDuplicate = uniqueIds.includes(order.id)
           if (!isDuplicate) {
             uniqueIds.push(order.id)
-            return true
+            return (
+              order.makerTokenFilledAmount != '0' &&
+              order.takerTokenFilledAmount != '0' &&
+              true
+            )
           }
-          return false
+          return (
+            order.makerTokenFilledAmount != '0' &&
+            order.takerTokenFilledAmount != '0' &&
+            false
+          )
         })
-
-      console.log('everyOrder', everyOrder)
       everyOrder.map((order) => {
-        console.log('fucking ts', order)
         collateralTokens.map((token) => {
           if (order.takerToken.toLowerCase() === token.id.toLowerCase()) {
-            console.log('I shouldnt be here')
             pools.map((pool) => {
               if (
                 pool.shortToken.id.toLowerCase() ===
@@ -201,16 +211,11 @@ export function TradeHistoryTab() {
           } else if (
             order.makerToken.toLowerCase() === token.id.toLowerCase()
           ) {
-            console.log('I should be here instead')
             pools.map((pool) => {
               if (
                 pool.shortToken.id.toLowerCase() ===
                 order.takerToken.toLowerCase()
               ) {
-                // console.log(
-                //   'order.id (where makerToken = collateralToken): ',
-                //   order.id
-                // )
                 orders.push({
                   id: order.id,
                   underlying: pool.referenceAsset,
@@ -230,8 +235,6 @@ export function TradeHistoryTab() {
                 pool.longToken.id.toLowerCase() ===
                 order.takerToken.toLowerCase()
               ) {
-                console.log('hellooo')
-                console.log('order.id: ', order.id)
                 orders.push({
                   id: order.id,
                   underlying: pool.referenceAsset,
@@ -362,18 +365,17 @@ export function TradeHistoryTab() {
   const rows: GridRowModel[] =
     history.length != 0
       ? history.reduce((acc, order) => {
-          console.log(order.timestamp)
-          // console.log(getDateTime(order.timestamp))
           return [
             ...acc,
             {
               id: order.id,
               symbol: order.symbol,
+              icon: order.underlying,
               type: order.type,
               underlying: order.underlying,
-              quantity: order.quantity,
-              payReceive: order.paidReceived,
-              price: order.price,
+              quantity: parseFloat(order.quantity).toFixed(2),
+              payReceive: parseFloat(order.paidReceived).toFixed(4),
+              price: parseFloat(order.price).toFixed(4),
               timestamp: getDateTime(order.timestamp),
             },
           ]
