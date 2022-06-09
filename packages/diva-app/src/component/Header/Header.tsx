@@ -1,10 +1,11 @@
-import { AppBar, Box, Button, Toolbar } from '@mui/material'
+import { AppBar, Box, Button, Toolbar, useTheme } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { ConnectWalletButton } from '../Wallet/ConnectWalletButton'
 import CloseIcon from '@mui/icons-material/Close'
 import { NetworkTag } from './NetworkTag'
 
 export default function Header() {
+  const theme = useTheme()
   const [showBanner, setShowBanner] = useState(true)
   useEffect(() => {
     const data = window.localStorage.getItem('DIVA_BANNER')
@@ -16,8 +17,14 @@ export default function Header() {
   }, [showBanner])
 
   return (
-    <Box>
-      <AppBar position="static" sx={{ background: 'none', boxShadow: 'none' }}>
+    <>
+      <AppBar
+        sx={{
+          position: 'sticky',
+          background: theme.palette.background.default,
+          boxShadow: 'none',
+        }}
+      >
         {showBanner && (
           <AppBar
             position="static"
@@ -40,21 +47,11 @@ export default function Header() {
             </Box>
           </AppBar>
         )}
-        <AppBar
-          position="fixed"
-          sx={{
-            background: 'none',
-            boxShadow: 'none',
-            marginX: '50px',
-            justifySelf: 'center',
-          }}
-        >
-          <Toolbar>
-            <NetworkTag />
-            <ConnectWalletButton />
-          </Toolbar>
-        </AppBar>
+        <Toolbar>
+          <NetworkTag />
+          <ConnectWalletButton />
+        </Toolbar>
       </AppBar>
-    </Box>
+    </>
   )
 }
