@@ -204,18 +204,18 @@ export const TradeHistory = ({ pool }: Props) => {
                               <Typography variant="subtitle1" color="#66ffa6">
                                 {order.type}
                               </Typography>
-                              <GrayText>
+                              <Typography color="dimgray" fontSize={'0.75rem'}>
                                 {getDateTime(order.timestamp)}
-                              </GrayText>
+                              </Typography>
                             </Stack>
                           ) : (
                             <Stack>
                               <Typography variant="subtitle1" color="#ff5c8d">
                                 {order.type}
                               </Typography>
-                              <GrayText>
+                              <Typography color="dimgray" fontSize={'0.75rem'}>
                                 {getDateTime(order.timestamp)}
-                              </GrayText>
+                              </Typography>
                             </Stack>
                           )}
                         </Box>
