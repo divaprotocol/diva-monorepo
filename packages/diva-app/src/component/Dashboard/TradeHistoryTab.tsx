@@ -67,7 +67,7 @@ const columns: GridColDef[] = [
     align: 'center',
     headerAlign: 'center',
     headerName: 'Type',
-    minWidth: 200,
+    minWidth: 100,
     renderCell: (cell) =>
       cell.value === 'BUY' ? (
         <GreenText>{cell.value}</GreenText>
@@ -97,8 +97,8 @@ const columns: GridColDef[] = [
   },
   {
     field: 'timestamp',
-    align: 'center',
-    headerAlign: 'center',
+    align: 'right',
+    headerAlign: 'right',
     headerName: 'Timestamp',
     minWidth: 200,
   },
