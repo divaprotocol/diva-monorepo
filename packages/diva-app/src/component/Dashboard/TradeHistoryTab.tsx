@@ -164,6 +164,11 @@ export function TradeHistoryTab() {
             false
           )
         })
+        .sort((a, b) => {
+          if (a.timestamp > b.timestamp) return -1
+          if (a.timestamp < b.timestamp) return 1
+          return 0
+        })
       everyOrder.map((order) => {
         collateralTokens.map((token) => {
           if (order.takerToken.toLowerCase() === token.id.toLowerCase()) {
@@ -404,7 +409,7 @@ export function TradeHistoryTab() {
         </Typography>
       ) : (
         <>
-          <DataGrid
+          <PoolsTable
             page={page}
             rows={rows}
             columns={columns}
