@@ -22,18 +22,11 @@ import { getAppStatus } from '../../Util/getAppStatus'
 
 export const ExpiresInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime()
-  const expDate = new Date(props.row.Expiry).toLocaleDateString()
   const minUntilExp = getExpiryMinutesFromNow(expTimestamp / 1000)
-  if (minUntilExp > 0) {
+  if (minUntilExp >= 0) {
     if ((minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) > 0) {
-      return minUntilExp === 1 ? (
-        <Tooltip
-          placement="top-end"
-          title={props.row.Expiry + ', ' + userTimeZone()}
-        >
-          <span className="table-cell-trucate">{'<1m'}</span>
-        </Tooltip>
-      ) : (
+      // More than a day
+      return (
         <Tooltip
           placement="top-end"
           title={props.row.Expiry + ', ' + userTimeZone()}
@@ -52,6 +45,7 @@ export const ExpiresInCell = (props: any) => {
       (minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) === 0 &&
       (minUntilExp - (minUntilExp % 60)) / 60 > 0
     ) {
+      // Less than a day but more than an hour
       return (
         <Tooltip
           placement="top-end"
@@ -66,7 +60,15 @@ export const ExpiresInCell = (props: any) => {
         </Tooltip>
       )
     } else if ((minUntilExp - (minUntilExp % 60)) / 60 === 0) {
-      return (
+      // Less than an hour
+      return minUntilExp === 0 ? (
+        <Tooltip
+          placement="top-end"
+          title={props.row.Expiry + ', ' + userTimeZone()}
+        >
+          <span className="table-cell-trucate">{'<1m'}</span>
+        </Tooltip>
+      ) : (
         <Tooltip
           placement="top-end"
           title={props.row.Expiry + ', ' + userTimeZone()}
