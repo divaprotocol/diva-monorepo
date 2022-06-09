@@ -414,6 +414,7 @@ export function TradeHistoryTab() {
       ) : (
         <>
           <PoolsTable
+            disableRowClick
             page={page}
             rows={rows}
             columns={columns}
