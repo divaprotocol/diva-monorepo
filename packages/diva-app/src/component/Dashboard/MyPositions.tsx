@@ -16,7 +16,12 @@ import { config } from '../../constants'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
@@ -355,6 +360,7 @@ const columns: GridColDef[] = [
     disableReorder: true,
     disableColumnMenu: true,
     headerName: '',
+    width: 70,
     renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
   },
   {
@@ -371,8 +377,21 @@ const columns: GridColDef[] = [
     renderCell: (cell) => <PayoffCell data={cell.value} />,
   },
   { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
+  {
+    field: 'Inflection',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+    hide: true,
+  },
+  {
+    field: 'Gradient',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+    hide: true,
+  },
   {
     field: 'Expiry',
     minWidth: 170,
@@ -386,7 +405,7 @@ const columns: GridColDef[] = [
     field: 'TVL',
     align: 'right',
     headerAlign: 'right',
-    minWidth: 200,
+    minWidth: 150,
   },
   {
     field: 'finalValue',
@@ -454,7 +473,7 @@ const columns: GridColDef[] = [
     align: 'left',
     headerAlign: 'right',
     headerName: '',
-    minWidth: 100,
+    minWidth: 20,
     renderCell: (props) => <AddToMetamask {...props} />,
   },
 ]
@@ -515,13 +534,25 @@ export function MyPositions() {
         id: `${val.id}/long`,
         Id: 'L' + val.id,
         address: val.longToken,
+        Gradient: Number(
+          formatUnits(
+            BigNumber.from(val.collateralBalanceLongInitial)
+              .mul(parseUnits('1', val.collateralToken.decimals))
+              .div(
+                BigNumber.from(val.collateralBalanceLongInitial).add(
+                  BigNumber.from(val.collateralBalanceShortInitial)
+                )
+              ),
+            val.collateralToken.decimals
+          )
+        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
               BigNumber.from(val.collateralBalance),
               val.collateralToken.decimals
             )
-          ).toFixed(4) +
+          ).toFixed(2) +
           ' ' +
           val.collateralToken.symbol,
         PayoffProfile: generatePayoffChartData({
@@ -536,13 +567,25 @@ export function MyPositions() {
         id: `${val.id}/short`,
         Id: 'S' + val.id,
         address: val.shortToken,
+        Gradient: Number(
+          formatUnits(
+            BigNumber.from(val.collateralBalanceShortInitial)
+              .mul(parseUnits('1', val.collateralToken.decimals))
+              .div(
+                BigNumber.from(val.collateralBalanceLongInitial).add(
+                  BigNumber.from(val.collateralBalanceShortInitial)
+                )
+              ),
+            val.collateralToken.decimals
+          )
+        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
               BigNumber.from(val.collateralBalance),
               val.collateralToken.decimals
             )
-          ).toFixed(4) +
+          ).toFixed(2) +
           ' ' +
           val.collateralToken.symbol,
         PayoffProfile: generatePayoffChartData({

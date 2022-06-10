@@ -109,6 +109,7 @@ const columns: GridColDef[] = [
     disableReorder: true,
     disableColumnMenu: true,
     headerName: '',
+    width: 70,
     renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
   },
   {
@@ -125,8 +126,8 @@ const columns: GridColDef[] = [
     renderCell: (cell) => <PayoffCell data={cell.value} />,
   },
   { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Gradient', align: 'right', headerAlign: 'right', type: 'number' },
   {
     field: 'Expiry',
@@ -271,7 +272,7 @@ export default function Markets() {
               BigNumber.from(val.collateralBalance),
               val.collateralToken.decimals
             )
-          ).toFixed(4) +
+          ).toFixed(2) +
           ' ' +
           val.collateralToken.symbol,
         Status: status,
@@ -307,7 +308,7 @@ export default function Markets() {
               BigNumber.from(val.collateralBalance),
               val.collateralToken.decimals
             )
-          ).toFixed(4) +
+          ).toFixed(2) +
           ' ' +
           val.collateralToken.symbol,
         Status: status,
