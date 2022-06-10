@@ -57,7 +57,7 @@ const columns: GridColDef[] = [
     renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
   },
   {
-    field: 'underlying',
+    field: 'Underlying',
     align: 'left',
     minWidth: 100,
     headerName: 'Underlying',
@@ -381,7 +381,7 @@ export function TradeHistoryTab() {
               symbol: order.symbol,
               icon: order.underlying,
               type: order.type,
-              underlying: order.underlying,
+              Underlying: order.underlying,
               quantity: parseFloat(order.quantity).toFixed(2),
               payReceive: parseFloat(order.paidReceived).toFixed(4),
               price: parseFloat(order.price).toFixed(4),
