@@ -178,19 +178,19 @@ export const useCreatePoolFormik = () => {
         errors.capacity = `Capacity must be larger than ${collateralBalance}. For unlimited capacity, set to 0`
       }
 
-      // validate data feed provider
+      // validate data provider
       if (values.step > 1 && values.dataProvider !== null && provider != null) {
         if (
           values.dataProvider == null ||
           values.dataProvider.trim().length === 0
         ) {
-          errors.dataProvider = 'Must define dataProvider'
+          errors.dataProvider = 'You must define a data provider'
         } else {
           try {
             await provider.getSigner(values.dataProvider)
           } catch (err) {
             errors.dataProvider =
-              'You must specify a valid address as the data feed provider'
+              'You must specify a valid address as the data provider'
           }
         }
       }

@@ -170,7 +170,7 @@ export function DefinePoolAttributes({
   return (
     <Box>
       <Typography pb={theme.spacing(2)} variant="subtitle1">
-        Define all the parameters for your Contingent Pool below.
+        Define all the parameters for your contingent pool below.
       </Typography>
       <h3>Event</h3>
       <Stack spacing={2} direction="row">
