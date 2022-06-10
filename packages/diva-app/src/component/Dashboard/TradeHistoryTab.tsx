@@ -59,7 +59,7 @@ const columns: GridColDef[] = [
   {
     field: 'underlying',
     align: 'left',
-    minWidth: 100,
+    minWidth: 150,
     headerName: 'Underlying',
   },
   {
