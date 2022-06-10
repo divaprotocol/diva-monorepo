@@ -291,21 +291,15 @@ export const AddLiquidity = ({ pool }: Props) => {
                   <BlackTextTypography>
                     {pool &&
                       textFieldValue !== '' &&
-                      (
-                        (Math.round(
-                          (parseFloat(textFieldValue) * 100) /
+                      Number(
+                        (100 * parseFloat(textFieldValue)) /
+                          (parseFloat(textFieldValue) +
                             parseFloat(
                               formatUnits(
-                                parseUnits(textFieldValue, decimal).add(
-                                  BigNumber.from(pool.collateralBalance)
-                                ),
+                                BigNumber.from(pool.collateralBalance),
                                 decimal
                               )
-                            ) +
-                            Number.EPSILON
-                        ) *
-                          100) /
-                        100
+                            ))
                       ).toFixed(2) + ' %'}
                   </BlackTextTypography>
                   <BlackTextTypography>Share of Pool</BlackTextTypography>
