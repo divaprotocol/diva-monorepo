@@ -1,5 +1,16 @@
 [
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_contractOwner",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -127,6 +138,31 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "providerAddress",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint32",
+        "name": "oldMaxDurationInSeconds",
+        "type": "uint32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint32",
+        "name": "newMaxDurationInSeconds",
+        "type": "uint32"
+      }
+    ],
+    "name": "MaxDurationUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "previousOwner",
         "type": "address"
       },
@@ -234,6 +270,11 @@
             "internalType": "bool",
             "name": "publicTrigger",
             "type": "bool"
+          },
+          {
+            "internalType": "uint32",
+            "name": "maxDurationInSeconds",
+            "type": "uint32"
           }
         ],
         "internalType": "struct IWhitelist.DataProvider[]",
@@ -328,6 +369,11 @@
         "internalType": "bool",
         "name": "publicTrigger",
         "type": "bool"
+      },
+      {
+        "internalType": "uint32",
+        "name": "maxDurationInSeconds",
+        "type": "uint32"
       }
     ],
     "stateMutability": "view",
@@ -514,6 +560,11 @@
             "internalType": "bool",
             "name": "publicTrigger",
             "type": "bool"
+          },
+          {
+            "internalType": "uint32",
+            "name": "maxDurationInSeconds",
+            "type": "uint32"
           }
         ],
         "internalType": "struct IWhitelist.DataProvider",
@@ -571,6 +622,24 @@
       }
     ],
     "name": "updateDataProviderNames",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "_dataProvider",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint32[]",
+        "name": "_newMaxDurationInSeconds",
+        "type": "uint32[]"
+      }
+    ],
+    "name": "updateMaxDuration",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
