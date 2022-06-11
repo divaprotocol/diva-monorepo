@@ -42,7 +42,7 @@ def df_format_oracle_report(resp,  Asset_list, hours=24):
     return df_reporting_needed
 
 # This will report on email 
-def df_format_email_report(resp, Asset_list, notification_period=72):
+def df_format_email_report(resp, Asset_list, notification_period=720):
     df = pd.json_normalize(resp, ['data', 'pools'])
     df = normalize_data(df, Asset_list)
 
@@ -53,7 +53,7 @@ def df_format_email_report(resp, Asset_list, notification_period=72):
     df['createdAt'] = df['createdAt'].apply(lambda x: datetime.fromtimestamp(float(x)))
     df['Hours Before Expiry'] = df['expiryTime'].apply(lambda x: (x-datetime.now()).total_seconds()//60//60)
     print(df)
-    df_final = df#.loc[(df['Hours Before Expiry'] >= 24) & (df['Hours Before Expiry'] <= notification_period)] # normally we said at least after 24 hours
+    df_final = df.loc[(df['Hours Before Expiry'] >= 24) & (df['Hours Before Expiry'] <= notification_period)] # normally we said at least after 24 hours
     print(df_final)
     df_final = df_final.astype(str)
     return df_final

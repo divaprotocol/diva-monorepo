@@ -12,7 +12,7 @@ load_dotenv()
 class Chain:
     WALLET = os.getenv('WALLET')
     PRIVATE_KEY = os.getenv('PRIVATE_KEY')
-    CHAIN_ID = 4
+    CHAIN_ID = 3
     '''eth mainnet is 1
     ropsten is 3, 
     rinkeby is 4

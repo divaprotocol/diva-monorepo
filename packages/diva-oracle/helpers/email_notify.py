@@ -5,10 +5,10 @@ def sendEmail(df):
     smtp_server = "smtp.gmail.com"
     port = 587  # For starttls
     sender_email = "diva.protocol.bot@gmail.com"
-    password = ""
-    receiver_email = ""
-    message = """\
-    Subject: Hi there
+    password = "Divadiva5%"
+    receiver_email = "wladimir.weinbender@googlemail.com"
+    message = """
+    Subject: Diva message
 
     This message is sent from Python.
      """ 
@@ -30,8 +30,10 @@ def sendEmail(df):
         server.login(sender_email, password)
         # TODO: Send email here
         server.sendmail(sender_email, receiver_email, message)
+        print("Email sent")
     except Exception as e:
         # Print any error messages to stdout
         print(e)
     finally:
         server.quit() 
+    
