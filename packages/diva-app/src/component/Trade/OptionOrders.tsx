@@ -40,7 +40,7 @@ function mapOrderData(
     if (account === orderMaker) {
       const makerToken = order.makerToken
       const tokenAddress = optionTokenAddress.toLowerCase()
-      const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
+      const orderType = makerToken === tokenAddress ? 'SELL' : 'BUY'
       let nbrOptions = 0
       let pricePerOption = 0
       let payReceive = 0
@@ -239,10 +239,16 @@ export default function OpenOrders(props: {
                       align="left"
                     >
                       <Box>
-                        <Typography variant="subtitle1">
-                          {order.orderType}
-                        </Typography>
-                        <Typography variant="caption" noWrap>
+                        {order.orderType === 'BUY' ? (
+                          <Typography variant="subtitle1" color="#66ffa6">
+                            {order.orderType}
+                          </Typography>
+                        ) : (
+                          <Typography variant="subtitle1" color="#ff5c8d">
+                            {order.orderType}
+                          </Typography>
+                        )}
+                        <Typography variant="caption" color="#8e8e8e" noWrap>
                           {order.expiryMins}
                         </Typography>
                       </Box>

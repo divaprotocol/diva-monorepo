@@ -7,11 +7,11 @@
     "codegen": "graph codegen ropsten.subgraph.yaml",
     "build": "yarn codegen && graph build ropsten.subgraph.yaml",
     "graph:auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
-    "deploy": "run-s deploy-ropsten deploy-mumbai deploy-rinkeby deploy-kovan deploy-polygon",
+    "deploy": "run-s deploy-ropsten",
     "deploy-ropsten": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/zerox-exchange-proxy-ropsten ropsten.subgraph.yaml",
-    "create-local": "graph create --node http://localhost:8020/ divaprotocol/diva-ropsten",
-    "remove-local": "graph remove --node http://localhost:8020/ divaprotocol/diva-ropsten",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 divaprotocol/diva-ropsten"
+    "create-local": "graph create --node http://localhost:8020/ divaprotocol/zerox-exchange-proxy-ropsten",
+    "remove-local": "graph remove --node http://localhost:8020/ divaprotocol/zerox-exchange-proxy-ropsten",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 divaprotocol/zerox-exchange-proxy-ropsten"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.29.0",

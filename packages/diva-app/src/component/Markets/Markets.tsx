@@ -18,22 +18,16 @@ import { selectMainPools, selectOtherPools } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
 import { Box, Tooltip } from '@mui/material'
 import { ShowChartOutlined } from '@mui/icons-material'
+import { getAppStatus } from '../../Util/getAppStatus'
+import { isObject } from 'util'
 
 export const ExpiresInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime()
-  const expDate = new Date(props.row.Expiry).toLocaleDateString()
-  console.log(props.row.Expiry.slice(11, 19))
   const minUntilExp = getExpiryMinutesFromNow(expTimestamp / 1000)
   if (minUntilExp > 0) {
     if ((minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) > 0) {
-      return minUntilExp === 1 ? (
-        <Tooltip
-          placement="top-end"
-          title={props.row.Expiry + ', ' + userTimeZone()}
-        >
-          <span className="table-cell-trucate">{'<1m'}</span>
-        </Tooltip>
-      ) : (
+      // More than a day
+      return (
         <Tooltip
           placement="top-end"
           title={props.row.Expiry + ', ' + userTimeZone()}
@@ -52,6 +46,7 @@ export const ExpiresInCell = (props: any) => {
       (minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) === 0 &&
       (minUntilExp - (minUntilExp % 60)) / 60 > 0
     ) {
+      // Less than a day but more than an hour
       return (
         <Tooltip
           placement="top-end"
@@ -66,6 +61,7 @@ export const ExpiresInCell = (props: any) => {
         </Tooltip>
       )
     } else if ((minUntilExp - (minUntilExp % 60)) / 60 === 0) {
+      // Less than an hour
       return (
         <Tooltip
           placement="top-end"
@@ -77,6 +73,16 @@ export const ExpiresInCell = (props: any) => {
         </Tooltip>
       )
     }
+  } else if (Object.is(0, minUntilExp)) {
+    // Using Object.is() to differentiate between +0 and -0
+    return (
+      <Tooltip
+        placement="top-end"
+        title={props.row.Expiry + ', ' + userTimeZone()}
+      >
+        <span className="table-cell-trucate">{'<1m'}</span>
+      </Tooltip>
+    )
   } else {
     return (
       <Tooltip
@@ -157,32 +163,14 @@ export default function Markets() {
     setValue(newValue)
   }
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
-    const fallbackPeriod = expiryTime.setMinutes(
-      expiryTime.getMinutes() + 24 * 60 + 5
+    const { status } = getAppStatus(
+      val.expiryTime,
+      val.statusTimestamp,
+      val.statusFinalReferenceValue,
+      val.finalReferenceValue,
+      val.inflection
     )
-    const unchallengedPeriod = expiryTime.setMinutes(
-      expiryTime.getMinutes() + 5 * 24 * 60 + 5
-    )
-    const challengedPeriod = expiryTime.setMinutes(
-      expiryTime.getMinutes() + 2 * 24 * 60 + 5
-    )
-    let status = val.statusFinalReferenceValue
 
-    if (val.statusFinalReferenceValue === 'Open') {
-      if (Date.now() > fallbackPeriod && Date.now() < unchallengedPeriod) {
-        status = 'Fallback'
-      } else if (Date.now() > unchallengedPeriod) {
-        status = 'Confirmed*'
-      } else {
-        status = val.statusFinalReferenceValue
-      }
-    } else if (
-      val.statusFinalReferenceValue === 'Challenged' &&
-      Date.now() > challengedPeriod
-    ) {
-      status = 'Confirmed*'
-    }
     const shared = {
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,

@@ -131,7 +131,6 @@ export default function OptionDetails({
       setCheckIcon(false)
     }
   }, [dataSource.dataProviders, pool.dataProvider])
-  console.log('pool state', binary, linear)
   return (
     <PageDiv>
       <HeaderDiv>
@@ -164,7 +163,7 @@ export default function OptionDetails({
         {binary ? (
           <>
             <FlexBox>
-              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
               <FlexBoxData>Binary</FlexBoxData>
             </FlexBox>
             <FlexBox>
@@ -174,7 +173,9 @@ export default function OptionDetails({
                   title={
                     'Value of ' +
                     pool.referenceAsset +
-                    ' at or above which the LONG token pays 1.'
+                    ' at or above which the LONG token pays ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
                   }
                 >
                   <FlexBoxHeader>Inflection</FlexBoxHeader>
@@ -185,7 +186,9 @@ export default function OptionDetails({
                   title={
                     'Value of ' +
                     pool.referenceAsset +
-                    ' below which the SHORT token pays 1.'
+                    ' below which the SHORT token pays ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
                   }
                 >
                   <FlexBoxHeader>Inflection</FlexBoxHeader>
@@ -197,7 +200,7 @@ export default function OptionDetails({
         ) : linear ? (
           <>
             <FlexBox>
-              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
               <FlexBoxData>Linear</FlexBoxData>
             </FlexBox>
             <FlexBox>
@@ -207,7 +210,9 @@ export default function OptionDetails({
                   title={
                     'Value of ' +
                     pool.referenceAsset +
-                    ' at or below which the LONG token pays out 0.'
+                    ' at or below which the LONG token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 0.'
                   }
                 >
                   <FlexBoxHeader>Floor</FlexBoxHeader>
@@ -218,7 +223,9 @@ export default function OptionDetails({
                   title={
                     'Value of ' +
                     pool.referenceAsset +
-                    ' at or below which the SHORT token pays out 1.'
+                    ' at or below which the SHORT token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
                   }
                 >
                   <FlexBoxHeader>Floor</FlexBoxHeader>
@@ -233,7 +240,9 @@ export default function OptionDetails({
                   title={
                     'Value of ' +
                     pool.referenceAsset +
-                    ' at or above which the LONG token pays out 1.'
+                    ' at or above which the LONG token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
                   }
                 >
                   <FlexBoxHeader>Cap</FlexBoxHeader>
@@ -244,7 +253,9 @@ export default function OptionDetails({
                   title={
                     'Value of ' +
                     pool.referenceAsset +
-                    ' at or above which the SHORT token pays out 1.'
+                    ' at or above which the SHORT token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 0.'
                   }
                 >
                   <FlexBoxHeader>Cap</FlexBoxHeader>
@@ -256,7 +267,7 @@ export default function OptionDetails({
         ) : (
           <>
             <FlexBox>
-              <FlexBoxHeader>Payoff type</FlexBoxHeader>
+              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
               <FlexBoxData>Custom</FlexBoxData>
             </FlexBox>
             <FlexBox>
@@ -266,7 +277,9 @@ export default function OptionDetails({
                   title={
                     'Value of ' +
                     pool.referenceAsset +
-                    ' at or below which the LONG token pays out 0.'
+                    ' at or below which the LONG token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 0.'
                   }
                 >
                   <FlexBoxHeader>Floor</FlexBoxHeader>
@@ -277,7 +290,9 @@ export default function OptionDetails({
                   title={
                     'Value of ' +
                     pool.referenceAsset +
-                    ' at or below which the SHORT token pays out 1.'
+                    ' at or below which the SHORT token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
                   }
                 >
                   <FlexBoxHeader>Floor</FlexBoxHeader>
@@ -293,7 +308,9 @@ export default function OptionDetails({
                   title={
                     'Value of ' +
                     pool.referenceAsset +
-                    ' at or above which the LONG token pays out 1.'
+                    ' at or above which the LONG token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
                   }
                 >
                   <FlexBoxHeader>Cap</FlexBoxHeader>
@@ -304,7 +321,9 @@ export default function OptionDetails({
                   title={
                     'Value of ' +
                     pool.referenceAsset +
-                    ' at or above which the SHORT token pays out 0.'
+                    ' at or above which the SHORT token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 0.'
                   }
                 >
                   <FlexBoxHeader>Cap</FlexBoxHeader>

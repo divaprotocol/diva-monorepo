@@ -1,7 +1,7 @@
 import { Box, Button, Stack, InputAdornment, Input } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { formatUnits } from 'ethers/lib/utils'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { getOrderDetails, getUserOrders } from '../../DataService/OpenOrders'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import {
@@ -15,8 +15,9 @@ import { Search } from '@mui/icons-material'
 import { CoinIconPair } from '../CoinIcon'
 import { useHistory } from 'react-router-dom'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { GrayText } from '../Trade/Orders/UiStyles'
+import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { makeStyles } from '@mui/styles'
+import { ExpiresInCell } from '../Markets/Markets'
 
 export function MyOrders() {
   const chainId = useAppSelector(selectChainId)
@@ -47,7 +48,7 @@ export function MyOrders() {
   function getBuyOrderFields(record: any, pool: any) {
     const order = record.order
     const metaData = record.metaData
-    const type = 'Buy'
+    const type = 'BUY'
     const poolId = pool.id
     const underlying = pool.underlying
     const decimals = pool.collateralToken.decimals
@@ -74,15 +75,14 @@ export function MyOrders() {
       quantity: quantity,
       price: price,
       payReceive: payReceive,
-      expiry: getDateTime(order.expiry),
-      expiryMins: getExpiryMinutesFromNow(order.expiry) + ' mins',
+      Expiry: getDateTime(order.expiry),
       orderHash: metaData.orderHash,
     }
   }
   function getSellOrderFields(record: any, pool: any) {
     const order = record.order
     const metaData = record.metaData
-    const type = 'Sell'
+    const type = 'SELL'
     const poolId = pool.id
     const underlying = pool.underlying
     const decimals = pool.collateralToken.decimals
@@ -111,8 +111,7 @@ export function MyOrders() {
       quantity: quantity,
       price: price,
       payReceive: payReceive,
-      expiry: getDateTime(order.expiry),
-      expiryMins: getExpiryMinutesFromNow(order.expiry) + ' mins',
+      Expiry: getDateTime(order.expiry),
       orderHash: metaData.orderHash,
     }
   }
@@ -208,7 +207,6 @@ export function MyOrders() {
           v.underlying.toLowerCase().includes(search.toLowerCase())
         )
       : dataOrders
-
   const columns: GridColDef[] = [
     {
       field: 'symbol',
@@ -235,19 +233,25 @@ export function MyOrders() {
       align: 'center',
       headerAlign: 'center',
       headerName: 'Type',
+      renderCell: (cell) =>
+        cell.value === 'BUY' ? (
+          <GreenText>{cell.value}</GreenText>
+        ) : (
+          <RedText>{cell.value}</RedText>
+        ),
     },
     {
       field: 'quantity',
-      align: 'center',
-      headerAlign: 'center',
+      align: 'right',
+      headerAlign: 'right',
       headerName: 'Quantity',
       type: 'number',
       renderCell: (cell) => cell.value.toFixed(2),
     },
     {
       field: 'price',
-      align: 'center',
-      headerAlign: 'center',
+      align: 'right',
+      headerAlign: 'right',
       headerName: 'Price',
       type: 'number',
       minWidth: 100,
@@ -255,20 +259,21 @@ export function MyOrders() {
     },
     {
       field: 'payReceive',
-      align: 'center',
-      headerAlign: 'center',
+      align: 'right',
+      headerAlign: 'right',
       headerName: 'Pay/Receive',
       type: 'number',
       minWidth: 150,
       renderCell: (cell) => cell.value.toFixed(4),
     },
     {
-      field: 'expiryMins',
+      field: 'Expiry',
       minWidth: 170,
-      align: 'center',
-      headerAlign: 'center',
+      align: 'right',
+      headerAlign: 'right',
       headerName: 'Order Expires In',
       type: 'dateTime',
+      renderCell: (props) => <ExpiresInCell {...props} />,
     },
     {
       field: 'orderHash',
