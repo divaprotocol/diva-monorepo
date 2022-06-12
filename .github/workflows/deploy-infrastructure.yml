@@ -21,8 +21,6 @@ jobs:
 
       - name: Checkout current branch
         uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Cache Modules
         id: cache-modules
