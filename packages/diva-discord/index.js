@@ -102,7 +102,7 @@ client.on('interactionCreate', async(interaction) =>{
             //call function from the commands folder with the given commandName
                 
             //check if user has the needed role
-            if (interaction.member.roles.cache.some(r => r.name === "Team")){
+            if (interaction.member.roles.cache.some(r => r.name === "Verified")){
                 if (["address", "changeaddress"].includes(interaction.commandName)) {
                     client.commands.get(interaction.commandName).execute(interaction,
                         dbRegisteredUsers);
