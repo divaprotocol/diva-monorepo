@@ -40,7 +40,7 @@ class DivaStack extends TerraformStack {
       }),
     });
 
-    const originId = id("AppCloudFrontDistro")
+    const originId = id("AppCloudFront");
 
     new CloudfrontDistribution(this, id("AppCloudFrontDistro"), {
       enabled: true,
