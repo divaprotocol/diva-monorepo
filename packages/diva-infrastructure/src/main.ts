@@ -78,7 +78,7 @@ class DivaStack extends TerraformStack {
       customErrorResponse: [
         {
           errorCachingMinTtl: 60,
-          errorCode: 403,
+          errorCode: 404,
           responseCode: 200,
           responsePagePath: "/index.html",
         },
