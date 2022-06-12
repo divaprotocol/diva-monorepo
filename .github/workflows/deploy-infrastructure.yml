@@ -9,7 +9,7 @@ on:
   
 name: Deploy Infrastructure
 jobs:
-  pr:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Configure AW0S credentials
