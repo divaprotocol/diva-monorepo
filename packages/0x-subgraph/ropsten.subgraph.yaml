@@ -8,7 +8,7 @@ dataSources:
     source:
       address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
       abi: IZeroEx
-      startBlock: 12317906
+      startBlock: 12366610
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5

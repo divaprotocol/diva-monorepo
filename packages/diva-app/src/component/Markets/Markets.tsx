@@ -1,6 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
-import { formatUnits, formatEther } from 'ethers/lib/utils'
+import { formatUnits, formatEther, parseUnits } from 'ethers/lib/utils'
 import {
   getDateTime,
   getExpiryMinutesFromNow,
@@ -17,6 +17,7 @@ import { CoinIconPair } from '../CoinIcon'
 import { selectMainPools, selectOtherPools } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
 import { Box, Tooltip } from '@mui/material'
+import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { getAppStatus } from '../../Util/getAppStatus'
 import { isObject } from 'util'
@@ -108,6 +109,7 @@ const columns: GridColDef[] = [
     disableReorder: true,
     disableColumnMenu: true,
     headerName: '',
+    width: 70,
     renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
   },
   {
@@ -124,8 +126,9 @@ const columns: GridColDef[] = [
     renderCell: (cell) => <PayoffCell data={cell.value} />,
   },
   { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Gradient', align: 'right', headerAlign: 'right', type: 'number' },
   {
     field: 'Expiry',
     minWidth: 170,
@@ -135,9 +138,39 @@ const columns: GridColDef[] = [
     headerName: 'Expires in',
     renderCell: (props) => <ExpiresInCell {...props} />,
   },
-  { field: 'Sell', align: 'right', headerAlign: 'right' },
-  { field: 'Buy', align: 'right', headerAlign: 'right' },
-  { field: 'MaxYield', align: 'right', headerAlign: 'right' },
+  {
+    field: 'Sell',
+    align: 'right',
+    headerAlign: 'right',
+    renderHeader: (header) => <GrayText>{'Sell'}</GrayText>,
+    renderCell: (cell) => (
+      <Typography color="dimgray" fontSize={'0.875rem'}>
+        {cell.value}
+      </Typography>
+    ),
+  },
+  {
+    field: 'Buy',
+    align: 'right',
+    headerAlign: 'right',
+    renderHeader: (header) => <GrayText>{'Buy'}</GrayText>,
+    renderCell: (cell) => (
+      <Typography color="dimgray" fontSize={'0.875rem'}>
+        {cell.value}
+      </Typography>
+    ),
+  },
+  {
+    field: 'MaxYield',
+    align: 'right',
+    headerAlign: 'right',
+    renderHeader: (header) => <GrayText>{'MaxYield'}</GrayText>,
+    renderCell: (cell) => (
+      <Typography color="dimgray" fontSize={'0.875rem'}>
+        {cell.value}
+      </Typography>
+    ),
+  },
   {
     field: 'Status',
     align: 'right',
@@ -178,9 +211,9 @@ export default function Markets() {
       Inflection: formatUnits(val.inflection),
       Cap: formatUnits(val.cap),
       Expiry: getDateTime(val.expiryTime),
-      Sell: 'TBD',
-      Buy: 'TBD',
-      MaxYield: 'TBD',
+      Sell: '-',
+      Buy: '-',
+      MaxYield: '-',
     }
 
     const payOff = {
@@ -201,7 +234,15 @@ export default function Markets() {
       Cap: Number(formatEther(val.cap)),
       TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
-
+    // console.log(
+    //   BigNumber.from(val.collateralBalanceLongInitial)
+    //     .mul(parseUnits('1', val.collateralToken.decimals))
+    //     .div(
+    //       BigNumber.from(val.collateralBalanceLongInitial).add(
+    //         BigNumber.from(val.collateralBalanceShortInitial)
+    //       )
+    //     )
+    // )
     return [
       ...acc,
       {
@@ -213,13 +254,25 @@ export default function Markets() {
           ...payOff,
           IsLong: true,
         }),
+        Gradient: Number(
+          formatUnits(
+            BigNumber.from(val.collateralBalanceLongInitial)
+              .mul(parseUnits('1', val.collateralToken.decimals))
+              .div(
+                BigNumber.from(val.collateralBalanceLongInitial).add(
+                  BigNumber.from(val.collateralBalanceShortInitial)
+                )
+              ),
+            val.collateralToken.decimals
+          )
+        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
               BigNumber.from(val.collateralBalance),
               val.collateralToken.decimals
             )
-          ).toFixed(4) +
+          ).toFixed(2) +
           ' ' +
           val.collateralToken.symbol,
         Status: status,
@@ -237,13 +290,25 @@ export default function Markets() {
           ...payOff,
           IsLong: false,
         }),
+        Gradient: Number(
+          formatUnits(
+            BigNumber.from(val.collateralBalanceShortInitial)
+              .mul(parseUnits('1', val.collateralToken.decimals))
+              .div(
+                BigNumber.from(val.collateralBalanceLongInitial).add(
+                  BigNumber.from(val.collateralBalanceShortInitial)
+                )
+              ),
+            val.collateralToken.decimals
+          )
+        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
               BigNumber.from(val.collateralBalance),
               val.collateralToken.decimals
             )
-          ).toFixed(4) +
+          ).toFixed(2) +
           ' ' +
           val.collateralToken.symbol,
         Status: status,

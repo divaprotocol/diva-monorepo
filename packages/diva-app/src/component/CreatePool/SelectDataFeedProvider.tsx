@@ -66,7 +66,7 @@ export function SelectDataFeedProvider({
   return (
     <>
       <Typography pb={1} variant="subtitle1">
-        Select a <strong>trusted</strong> Data Feed Provider for this pool.
+        Select a <strong>trusted</strong> data provider for this pool.
       </Typography>
       <FormControl
         fullWidth
@@ -81,7 +81,7 @@ export function SelectDataFeedProvider({
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Data Feed Provider"
+              label="Data Provider"
               name="dataProvider"
               id="dataProvider"
               error={formik.errors.dataProvider != null}

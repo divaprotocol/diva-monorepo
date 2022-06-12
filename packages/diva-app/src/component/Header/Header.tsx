@@ -31,7 +31,10 @@ export default function Header() {
             sx={{ background: '#3393E0', boxShadow: 'none' }}
           >
             <Box textAlign="center">
-              <Button href="" sx={{ color: '#FFFFFF' }}>
+              <Button
+                href="https://divaprotocol.io/posts/diva-testnet-announcement"
+                sx={{ color: '#FFFFFF' }}
+              >
                 🚀 Learn how to earn $DIVA tokens for trying out the app
               </Button>
               <Button
