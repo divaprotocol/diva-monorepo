@@ -26,12 +26,26 @@ class DivaStack extends TerraformStack {
     const bucket = new S3Bucket(this, id("app.diva.finance"), {
       bucket: "app.diva.finance",
       acl: "public-read",
+      policy: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Sid: "PublicReadGetObject",
+            Effect: "Allow",
+            Principal: "*",
+            Action: "s3:GetObject",
+            Resource: "arn:aws:s3:::app.diva.finance/*",
+          },
+        ],
+      }),
     });
 
     const originId = id("AppCloudFrontDistro")
 
     new CloudfrontDistribution(this, id("AppCloudFrontDistro"), {
       enabled: true,
+      defaultRootObject: "index.html",
+      isIpv6Enabled: true,
       defaultCacheBehavior: {
         allowedMethods: [
           "DELETE",
@@ -49,7 +63,7 @@ class DivaStack extends TerraformStack {
             forward: "none",
           },
         },
-        viewerProtocolPolicy: "allow-all",
+        viewerProtocolPolicy: "redirect-to-https",
         minTtl: 0,
         defaultTtl: 3600,
         maxTtl: 86400,
@@ -61,9 +75,17 @@ class DivaStack extends TerraformStack {
           originId,
         },
       ],
+      customErrorResponse: [
+        {
+          errorCachingMinTtl: 60,
+          errorCode: 403,
+          responseCode: 200,
+          responsePagePath: "/index.html",
+        },
+      ],
       restrictions: {
         geoRestriction: {
-          restrictionType: "blacklist",
+          restrictionType: "none",
         },
       },
       viewerCertificate: {
