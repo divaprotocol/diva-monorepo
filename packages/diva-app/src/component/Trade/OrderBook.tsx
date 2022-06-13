@@ -282,7 +282,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.buyQuantity != ''
-                            ? row.buyQuantity?.toFixed(2)
+                            ? row.buyQuantity?.toFixed(4)
                             : '-'}
                         </Typography>
                         <label> </label>

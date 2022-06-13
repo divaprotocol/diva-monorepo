@@ -16,23 +16,24 @@ export const sellMarketOrder = async (orderData) => {
   let takerAssetAmounts = []
   const signatures = []
 
-  const fillOrderResponse = async (takerAssetFillAmounts) => {
-    orders.map(function (order) {
+  const fillOrderResponse = async (takerAssetFillAmounts, fillOrders) => {
+    fillOrders.map(function (order) {
       signatures.push(order.signature)
       delete order.signature
       return order
     })
     const response = await exchange
-      .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true)
+      .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
       .awaitTransactionSuccessAsync({ from: orderData.maker })
       .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
     return response
   }
 
+  let fillOrders = []
   orders.forEach((order) => {
     if (takerFillNbrOptions.gt(0)) {
+      fillOrders.push(order)
       const remainingNumber = order.remainingFillableTakerAmount
-
       if (takerFillNbrOptions.lte(remainingNumber)) {
         takerAssetAmounts.push(takerFillNbrOptions.toString())
         takerFillNbrOptions = parseEther('0') // "trick" to skip the remaining forEach loop
@@ -40,10 +41,10 @@ export const sellMarketOrder = async (orderData) => {
         takerAssetAmounts.push(order.remainingFillableTakerAmount)
         takerFillNbrOptions = takerFillNbrOptions.sub(remainingNumber) // Update the remaining amount to be filled; type: BigNumber
       }
-    } else {
-      takerAssetAmounts.push('0') // "trick" to skip the remaining forEach loop
     }
   })
-  filledOrder = await fillOrderResponse(takerAssetAmounts)
+  console.log(takerAssetAmounts)
+  console.log(JSON.stringify(fillOrders))
+  filledOrder = await fillOrderResponse(takerAssetAmounts, fillOrders)
   return filledOrder
 }

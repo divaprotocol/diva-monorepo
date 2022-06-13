@@ -33,21 +33,23 @@ export const buyMarketOrder = async (orderData) => {
   const signatures = []
 
   // Function to executed the 0x batchFillLimitOrders function
-  const fillOrderResponse = async (takerAssetFillAmounts) => {
-    orders.map(function (order) {
+  const fillOrderResponse = async (takerAssetFillAmounts, fillOrders) => {
+    fillOrders.map(function (order) {
       signatures.push(order.signature)
       delete order.signature
       return order
     })
     const response = await exchange
-      .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true) // takerAssetFillAmounts should be an array of stringified integer numbers
+      .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true) // takerAssetFillAmounts should be an array of stringified integer numbers
       .awaitTransactionSuccessAsync({ from: orderData.takerAccount })
       .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
     return response
   }
 
+  let fillOrders = []
   orders.forEach((order) => {
     if (takerFillNbrOptions.gt(0)) {
+      fillOrders.push(order)
       // Convert expected rate (of type number) into an integer with collateral token decimals
       const expectedRate = parseUnits(order.expectedRate.toString(), decimals)
 
@@ -79,11 +81,9 @@ export const buyMarketOrder = async (orderData) => {
           .div(expectedRate)
         takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled)
       }
-    } else {
-      takerAssetAmounts.push('0')
     }
   })
 
-  filledOrder = await fillOrderResponse(takerAssetAmounts)
+  filledOrder = await fillOrderResponse(takerAssetAmounts, fillOrders)
   return filledOrder
 }
