@@ -8,7 +8,7 @@ dataSources:
     source:
       address: "0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211"
       abi: DivaDiamond
-      startBlock: 12366610
+      startBlock: 12380045
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
