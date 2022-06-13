@@ -49,6 +49,7 @@ client.on("ready", async() => {
     const guild = client.guilds.cache.get(guildId)
 
     nonceCounter = await senderAccount.getTransactionCount('pending')
+    console.log(nonceCounter)
     //create commands
     let commands = guild.commands
 
@@ -109,12 +110,17 @@ client.on('interactionCreate', async(interaction) =>{
                 }
                 else if  (["register", "claim-test-assets"].includes(interaction.commandName)) {
                     console.log(`nonceCounter before call of ${interaction.commandName} = ${nonceCounter}`)
-                    nonceCounter = await client.commands.get(interaction.commandName).execute(
+                    boolTxSent = await client.commands.get(interaction.commandName).execute(
                         interaction,
                         dbRegisteredUsers,
                         Config.DUSD_CONTRACT,
                         senderAccount,
-                        nonceCounter);
+                        nonceCounter
+                        );
+                    if (boolTxSent) {
+                        console.log(`Increasing nonce counter`)
+                        nonceCounter = nonceCounter + 1;
+                    }
                     console.log(`nonceCounter after call of ${interaction.commandName} = ${nonceCounter}`)
                 }
             } else { 
@@ -126,6 +132,7 @@ client.on('interactionCreate', async(interaction) =>{
         }
     } 
     catch(e){
+        nonceCounter = await senderAccount.getTransactionCount('pending')
         console.log(e)
     }
 })

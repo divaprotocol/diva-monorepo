@@ -15,7 +15,7 @@ module.exports = {
                                 +`Register with **/register ADDRESS**`,
                     ephemeral: true,
                 })
-                return nonceCounter
+                return false
             }
 
             //next possible claim is 24h after last claim
@@ -26,7 +26,7 @@ module.exports = {
                                 +`You need to wait ${new Date(timeUntilNewClaim).toISOString().slice(11,19)} before the next claim`,
                     ephemeral: true,
                 })
-                return nonceCounter
+                return false
             }
 
             address = dbRegisteredUsers.get(userId, "address")
@@ -39,18 +39,18 @@ module.exports = {
             console.log(`sending ${parseEther("10000")} dUSD from ${senderAccount} to ${address}`)
 
             const tx = await erc20Contract.connect(senderAccount).transfer(address, parseEther("10000"), {nonce: nonceCounter, gasPrice: ethers.utils.parseUnits('40',9)})
-            nonceCounter = nonceCounter + 1
-            
+        
             interaction.reply({
                 content:  `You will shortly receive 10000 dUSD tokens on ropsten.\n  `
                         +`https://ropsten.etherscan.io/tx/${tx.hash}.`,
                 ephemeral: true,
             })
 
+            return true
+            
         } catch (e) {
             console.log(e);
-        } finally {
-            return nonceCounter
-        }
+            return false
+        } 
     }
 }
