@@ -423,6 +423,12 @@ export default function BuyMarket(props: {
         setYouPay(youPayAmount)
       }
     } else {
+      if (numberOfOptions == 0) {
+        if (existingSellLimitOrders.length > 0) {
+          const bestRate = existingSellLimitOrders[0].expectedRate
+          setAvgExpectedRate(Number(bestRate))
+        }
+      }
       setOrderBtnDisabled(true)
     }
   }, [numberOfOptions])
