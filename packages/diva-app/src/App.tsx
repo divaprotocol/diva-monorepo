@@ -19,13 +19,11 @@ import { config, divaGovernanceAddress } from './constants'
 import { WrongChain } from './component/Wallet/WrongChain'
 import { Tasks } from './component/Tasks/Tasks'
 import Dashboard from './component/Dashboard/Dashboard'
-import DisclaimerModal from './component/Header/DisclaimerModal'
 
 export const App = () => {
   const chainId = useAppSelector((state) => state.appSlice.chainId)
   return (
     <Router>
-      {<DisclaimerModal />}
       <Stack height="100%" direction="row" justifyContent="space-between">
         <MenuItems />
         <Divider orientation="vertical" />

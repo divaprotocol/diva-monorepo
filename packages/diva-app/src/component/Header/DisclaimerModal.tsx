@@ -2,9 +2,10 @@ import Backdrop from '@mui/material/Backdrop'
 import Box from '@mui/material/Box'
 import Modal from '@mui/material/Modal'
 import Fade from '@mui/material/Fade'
-import Button from '@mui/material/Button'
+//import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
+import { Button, Checkbox, FormControlLabel } from '@mui/material'
 
 const style = {
   position: 'absolute',
@@ -21,29 +22,22 @@ const style = {
 
 export default function DisclaimerModal() {
   const [open, setOpen] = useState(true)
-  const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
-
   return (
-    <Modal
-      aria-labelledby="transition-modal-title"
-      aria-describedby="transition-modal-description"
-      open={open}
-      onClose={handleClose}
-      closeAfterTransition
-      BackdropComponent={Backdrop}
-      BackdropProps={{
-        timeout: 500,
-      }}
-    >
-      <Fade in={open}>
+    <>
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        open={open}
+        // onClose={handleClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
         <Box sx={style}>
-          <Typography
-            id="transition-modal-title"
-            variant="h6"
-            component="h2"
-            color="white"
-          >
+          <Typography id="transition-modal-title" component="h2" color="white">
             <h2>Legal disclaimer</h2>
           </Typography>
           <Typography
@@ -65,8 +59,18 @@ export default function DisclaimerModal() {
               alias sit distinctio accusamus, sapiente nobis.
             </h5>
           </Typography>
+          <div style={{ display: 'flex' }}>
+            <FormControlLabel
+              control={<Checkbox />}
+              label="I agree the above statement"
+              sx={{ color: 'white' }}
+            />
+            <Button variant="contained" onClick={() => setOpen(false)}>
+              Agree and continue
+            </Button>
+          </div>
         </Box>
-      </Fade>
-    </Modal>
+      </Modal>
+    </>
   )
 }
