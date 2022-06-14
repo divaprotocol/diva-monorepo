@@ -56,8 +56,7 @@ export const sellMarketOrder = async (orderData) => {
             .toString()
         )
         //takerAssetAmounts.push(order.remainingFillableTakerAmount)
-        takerFillNbrOptions = takerFillNbrOptions.sub(remainingNumber)
-        // .sub(BigNumber.from(1)) // Update the remaining amount to be filled; type: BigNumber
+        takerFillNbrOptions = takerFillNbrOptions.sub(remainingNumber) // Update the remaining amount to be filled; type: BigNumber
       }
     }
   })
