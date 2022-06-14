@@ -2,6 +2,7 @@ import { IZeroExContract } from '@0x/contract-wrappers'
 import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
 import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
+// 0.000000000000000001
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
@@ -25,7 +26,7 @@ export const buyMarketOrder = async (orderData) => {
 
   // User input converted from decimal number into an integer with collateral decimals
   let takerFillNbrOptions = parseUnits(
-    orderData.nbrOptions.toString(),
+    convertExponentialToDecimal(orderData.nbrOptions).toString(),
     decimals
   )
 
@@ -40,6 +41,11 @@ export const buyMarketOrder = async (orderData) => {
       delete order.signature
       return order
     })
+    console.log('batchFill inputs')
+    console.log(fillOrders)
+    console.log(signatures[0])
+    console.log(takerAssetFillAmounts)
+    // const test = ['18749234398955577343']
     const response = await exchange
       .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true) // takerAssetFillAmounts should be an array of stringified integer numbers
       .awaitTransactionSuccessAsync({ from: orderData.takerAccount })

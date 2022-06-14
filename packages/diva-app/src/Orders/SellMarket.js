@@ -28,12 +28,11 @@ export const sellMarketOrder = async (orderData) => {
       console.log(order.signature)
       signatures.push(order.signature)
       delete order.signature
-      delete order.expectedRate
       return order
     })
     console.log('batchFill inputs')
     console.log(fillOrders)
-    console.log(signatures[0])
+    console.log(signatures)
     console.log(takerAssetFillAmounts)
     const response = await exchange
       .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
