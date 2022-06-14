@@ -425,8 +425,7 @@ export default function BuyMarket(props: {
     } else {
       if (numberOfOptions == 0) {
         if (existingSellLimitOrders.length > 0) {
-          const bestRate = existingSellLimitOrders[0].expectedRate
-          setAvgExpectedRate(Number(bestRate))
+          setAvgExpectedRate(Number(existingSellLimitOrders[0].expectedRate))
         }
       }
       setOrderBtnDisabled(true)
