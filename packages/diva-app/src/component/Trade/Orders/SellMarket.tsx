@@ -395,6 +395,11 @@ export default function SellMarket(props: {
         setYouReceive(youReceive)
       }
     } else {
+      if (numberOfOptions == 0) {
+        if (existingBuyLimitOrders.length > 0) {
+          setAvgExpectedRate(Number(existingBuyLimitOrders[0].expectedRate))
+        }
+      }
       setOrderBtnDisabled(true)
     }
   }, [numberOfOptions])
