@@ -495,7 +495,7 @@ export default function SellLimit(props: {
                 Remaining allowance:{' '}
                 {remainingApprovalAmount.toString().includes('e')
                   ? remainingApprovalAmount.toExponential(2)
-                  : remainingApprovalAmount}
+                  : remainingApprovalAmount.toFixed(4)}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>

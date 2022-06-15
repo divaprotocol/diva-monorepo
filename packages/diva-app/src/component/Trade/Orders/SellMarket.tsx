@@ -197,8 +197,10 @@ export default function SellMarket(props: {
           }
           sellMarketOrder(orderData).then((orderFillStatus: any) => {
             let orderFilled = false
+            console.log('orderFillStatus: ', orderFillStatus)
             if (!(orderFillStatus == undefined)) {
               if (!('logs' in orderFillStatus)) {
+                console.log('HIIIIIIi 1111')
                 alert('Order could not be filled.')
                 return
               } else {
@@ -218,12 +220,14 @@ export default function SellMarket(props: {
                       setYouReceive(0.0)
                       orderFilled = true
                     } else {
+                      console.log('HIIIIIIi 2222')
                       alert('Order could not be filled.')
                     }
                   }
                 })
               }
             } else {
+              console.log('HIIIIIIi 23333')
               alert('Order could not be filled.')
             }
             if (orderFilled) {
@@ -509,7 +513,7 @@ export default function SellMarket(props: {
                 Remaining allowance:{' '}
                 {remainingApprovalAmount.toString().includes('e')
                   ? remainingApprovalAmount.toExponential(2)
-                  : remainingApprovalAmount.toFixed(2)}
+                  : remainingApprovalAmount.toFixed(4)}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>
