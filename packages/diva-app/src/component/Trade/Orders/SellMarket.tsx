@@ -266,8 +266,8 @@ export default function SellMarket(props: {
 
       const remainingFillableTakerAmount =
         data.metaData.remainingFillableTakerAmount
-
-      if (BigENumber.from(remainingFillableTakerAmount).gt(0)) {
+      if (BigENumber.from(remainingFillableTakerAmount).gt(1)) {
+        // > 1 to filter out dust orders
         if (totalDecimals(makerAmount, takerAmount) > 1) {
           order['expectedRate'] = (makerAmount / takerAmount).toFixed(
             totalDecimals(makerAmount, takerAmount)
@@ -282,6 +282,7 @@ export default function SellMarket(props: {
     const sortOrder = 'desOrder'
     const orderBy = 'expectedRate'
     const sortedOrders = stableSort(orders, getComparator(sortOrder, orderBy))
+
     if (sortedOrders.length) {
       const bestRate = sortedOrders[0].expectedRate
       setAvgExpectedRate(Number(bestRate))

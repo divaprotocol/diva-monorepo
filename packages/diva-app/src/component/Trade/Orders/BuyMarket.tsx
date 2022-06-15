@@ -271,7 +271,8 @@ export default function BuyMarket(props: {
       const remainingFillableTakerAmount =
         data.metaData.remainingFillableTakerAmount
 
-      if (BigENumber.from(remainingFillableTakerAmount).gt(0)) {
+      if (BigENumber.from(remainingFillableTakerAmount).gt(1)) {
+        // > 1 to filter out dust orders
         if (totalDecimals(takerAmount, makerAmount) > 1) {
           order['expectedRate'] = (takerAmount / makerAmount).toFixed(
             totalDecimals(takerAmount, makerAmount)
