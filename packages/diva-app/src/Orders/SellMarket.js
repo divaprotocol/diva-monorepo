@@ -1,9 +1,9 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
-import { parseEther, formatUnits } from 'ethers/lib/utils'
+import { parseEther } from 'ethers/lib/utils'
 import { BigNumber } from '@ethersproject/bignumber/lib/bignumber'
+import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
-import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 
 export const sellMarketOrder = async (orderData) => {
   let filledOrder = {}
