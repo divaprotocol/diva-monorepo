@@ -2,7 +2,6 @@ import { IZeroExContract } from '@0x/contract-wrappers'
 import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
 import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
-// 0.000000000000000001
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')

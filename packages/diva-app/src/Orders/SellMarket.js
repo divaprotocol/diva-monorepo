@@ -2,7 +2,6 @@ import { IZeroExContract } from '@0x/contract-wrappers'
 import { parseEther, formatUnits } from 'ethers/lib/utils'
 import { BigNumber } from '@ethersproject/bignumber/lib/bignumber'
 import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
-// 0.000000000000000001
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
@@ -24,16 +23,10 @@ export const sellMarketOrder = async (orderData) => {
 
   const fillOrderResponse = async (takerAssetFillAmounts, fillOrders) => {
     fillOrders.map(function (order) {
-      console.log('Signature')
-      console.log(order.signature)
       signatures.push(order.signature)
       delete order.signature
       return order
     })
-    console.log('batchFill inputs')
-    console.log(fillOrders)
-    console.log(signatures)
-    console.log(takerAssetFillAmounts)
     const response = await exchange
       .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
       .awaitTransactionSuccessAsync({ from: orderData.maker })
@@ -42,15 +35,13 @@ export const sellMarketOrder = async (orderData) => {
   }
 
   let fillOrders = []
-  console.log('orders')
-  console.log(orders)
   orders.forEach((order) => {
     const remainingNumber = BigNumber.from(order.remainingFillableTakerAmount)
     if (
       takerFillNbrOptions.gt(0) &&
       remainingNumber.gt(1) // those are filtered out from the orderbook so should not be fillable
     ) {
-      fillOrders.push(order) // QUESTION: Why?
+      fillOrders.push(order)
       // const remainingNumber = BigNumber.from(order.remainingFillableTakerAmount)
       if (takerFillNbrOptions.lte(remainingNumber)) {
         takerAssetAmounts.push(takerFillNbrOptions.toString())
@@ -71,8 +62,6 @@ export const sellMarketOrder = async (orderData) => {
       }
     }
   })
-  console.log(takerAssetAmounts)
-  console.log(JSON.stringify(fillOrders))
   filledOrder = await fillOrderResponse(takerAssetAmounts, fillOrders)
   return filledOrder
 }
