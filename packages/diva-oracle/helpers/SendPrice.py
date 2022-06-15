@@ -3,6 +3,7 @@ import json
 import os
 
 from helpers.ChainSet import Chain
+from helpers.recorder import update_records
 
 # Set helper file
 config = Chain()

@@ -12,6 +12,7 @@ from helpers.QueryGraph import *
 from helpers.SendPrice import sendPrice
 from helpers.ChainSet import Chain
 from helpers.dataframe_formats import *
+from helpers.recorder import update_records
 
 
 # List of assets to choose from, if there are more from the Price Oracle
@@ -88,7 +89,9 @@ def main_send(df_reporting_needed):
           continue
         if (price, date) != (-1,-1):
             print("Submission for PoolId:", pool_id)
-            print("Price for pair ", pair, " at ", date,": ", price, " where time interval is from",date_max_away, " to expiryTime:", date_dt )
+            st = f"Price for pair {pair} at {date} : {price} where time interval is from {date_max_away} to expiryTime: {date_dt}"
+            print(st)
+            update_records(st)
         #send price to smart contract
         try:
           sendPrice(pool_id=pool_id, value=price)
@@ -103,6 +106,7 @@ if __name__ == "__main__":
 
   while True:
     # Iterate through the graph queries to pull selected data
+    print("Analyzing pools with Data Provider: ", Chain().WALLET)
     print("Activity on Chain ID", Chain().CHAIN_ID)
     for query in range(len(query_list)):
       

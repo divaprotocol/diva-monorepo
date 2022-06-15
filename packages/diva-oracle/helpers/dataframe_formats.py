@@ -12,6 +12,9 @@ from helpers.ChainSet import Chain
 def normalize_data(df, Asset_list):
     # Time filtering error, delete once resolved
     df = df[df['expiryTime'].apply(lambda x: float(x) < 16512056850 )]
+    df['expiryTime'] = df['expiryTime'].apply(lambda x: datetime.fromtimestamp(float(x)))
+
+    
 
     df = df.rename(columns={'id':'poolId'})
 
@@ -33,7 +36,7 @@ def df_format_oracle_report(resp,  Asset_list, hours=24):
         return df
     df = normalize_data(df, Asset_list)
     
-    df['expiryTime_datetime'] = df['expiryTime'].apply(lambda x: datetime.fromtimestamp(float(x)))
+    df['expiryTime_datetime'] = df['expiryTime']#.apply(lambda x: datetime.fromtimestamp(float(x)))
     df['Passed Hours After Expiry'] = df['expiryTime_datetime'].apply(lambda x: (datetime.now()-x).total_seconds()//60//60)
 
     #print(df)
@@ -49,7 +52,7 @@ def df_format_email_report(resp, Asset_list, notification_period=720):
 
     # Asset list of what assets the oracle resonds to
     
-    df['expiryTime'] = df['expiryTime'].apply(lambda x: datetime.fromtimestamp(float(x)))
+    #df['expiryTime'] = df['expiryTime'].apply(lambda x: datetime.fromtimestamp(float(x)))
     df['createdAt'] = df['createdAt'].apply(lambda x: datetime.fromtimestamp(float(x)))
     df['Hours Before Expiry'] = df['expiryTime'].apply(lambda x: (x-datetime.now()).total_seconds()//60//60)
     print(df)
