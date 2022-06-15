@@ -1,8 +1,6 @@
 import Backdrop from '@mui/material/Backdrop'
 import Box from '@mui/material/Box'
 import Modal from '@mui/material/Modal'
-import Fade from '@mui/material/Fade'
-//import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
 import { Button, Checkbox, FormControlLabel } from '@mui/material'
@@ -23,6 +21,7 @@ const style = {
 export default function DisclaimerModal() {
   const [open, setOpen] = useState(true)
   const handleClose = () => setOpen(false)
+  const [check, setCheck] = useState(true)
   return (
     <>
       <Modal
@@ -61,11 +60,21 @@ export default function DisclaimerModal() {
           </Typography>
           <div style={{ display: 'flex' }}>
             <FormControlLabel
-              control={<Checkbox />}
+              control={
+                <Checkbox
+                  onChange={() => {
+                    setCheck(false)
+                  }}
+                />
+              }
               label="I agree the above statement"
               sx={{ color: 'white' }}
             />
-            <Button variant="contained" onClick={() => setOpen(false)}>
+            <Button
+              variant="contained"
+              disabled={check}
+              onClick={() => setOpen(false)}
+            >
               Agree and continue
             </Button>
           </div>
