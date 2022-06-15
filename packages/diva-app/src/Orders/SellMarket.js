@@ -42,21 +42,32 @@ export const sellMarketOrder = async (orderData) => {
   }
 
   let fillOrders = []
+  console.log('orders')
+  console.log(orders)
   orders.forEach((order) => {
-    if (takerFillNbrOptions.gt(0)) {
+    const remainingNumber = BigNumber.from(order.remainingFillableTakerAmount)
+    if (
+      takerFillNbrOptions.gt(0) &&
+      remainingNumber.gt(1) // those are filtered out from the orderbook so should not be fillable
+    ) {
       fillOrders.push(order) // QUESTION: Why?
-      const remainingNumber = BigNumber.from(order.remainingFillableTakerAmount)
+      // const remainingNumber = BigNumber.from(order.remainingFillableTakerAmount)
       if (takerFillNbrOptions.lte(remainingNumber)) {
         takerAssetAmounts.push(takerFillNbrOptions.toString())
         takerFillNbrOptions = parseEther('0') // "trick" to skip the remaining forEach loop
       } else {
+        // Adjust takerAssetAmounts by deducting 1 to account for existing 0x issue:
+        // https://ethereum.stackexchange.com/questions/130227/0x-batchfilllimitorders-not-working-with-small-remainingfillabletakeramount
         takerAssetAmounts.push(
           BigNumber.from(order.remainingFillableTakerAmount)
             .sub(BigNumber.from(1))
             .toString()
         )
-        //takerAssetAmounts.push(order.remainingFillableTakerAmount)
-        takerFillNbrOptions = takerFillNbrOptions.sub(remainingNumber) // Update the remaining amount to be filled; type: BigNumber
+        // Update the remaining amount to be filled; type: BigNumber
+        // Note that 1 is add back due to adjust for the deduction in takerAssetAmounts
+        takerFillNbrOptions = takerFillNbrOptions
+          .sub(remainingNumber)
+          .add(BigNumber.from(1))
       }
     }
   })

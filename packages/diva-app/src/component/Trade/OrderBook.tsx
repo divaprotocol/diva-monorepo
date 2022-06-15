@@ -90,7 +90,7 @@ function mapOrderData(
       orders.id = 'buy' + records.indexOf(record as never)
       const bidAmount = Number(makerAmount) / Number(takerAmount)
       orders.bid = bidAmount
-      if (remainingTakerAmount < takerAmount) {
+      if (Number(remainingTakerAmount) < Number(takerAmount)) {
         const nbrOptions = Number(remainingTakerAmount)
         orders.nbrOptions = nbrOptions
       } else {
@@ -98,6 +98,7 @@ function mapOrderData(
         orders.nbrOptions = nbrOptions
       }
     }
+    // Sell Limit
     if (makerToken === tokenAddress && takerToken === collateralToken) {
       const takerAmount = formatUnits(
         order.takerAmount,
@@ -126,7 +127,7 @@ function mapOrderData(
 
   // Filter out orders with quantity = 0 (may happen if maker has revoked the approval)
   const orderbook = orderbookTemp.filter((object) => {
-    return object.nbrOptions !== 0
+    return object.nbrOptions !== 0 && object.nbrOptions !== 1e-18
   })
 
   if (sortOrder === 'ascOrder') {
