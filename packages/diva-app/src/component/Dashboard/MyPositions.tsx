@@ -485,6 +485,11 @@ export function MyPositions() {
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
 
+  // get all pools (via API call to subgraph)
+  // get all unique addresses
+  // filter where balance > 0
+  // draw table
+
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
       val.expiryTime,
@@ -624,12 +629,10 @@ export function MyPositions() {
       []
     )
     tokenAddressesChunks.map((batch) => {
-      getAddressBalances(ethers.getDefaultProvider(), userAddress, batch).then(
-        (res) => {
-          console.log('balRes', Object.values(res))
-          response = { ...response, ...res }
-        }
-      )
+      getAddressBalances(provider, userAddress, batch).then((res) => {
+        console.log('balRes', Object.values(res))
+        response = { ...response, ...res }
+      })
     })
 
     // await Promise.all(
