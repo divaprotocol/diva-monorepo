@@ -1,6 +1,7 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
 import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
+import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
@@ -24,7 +25,7 @@ export const buyMarketOrder = async (orderData) => {
 
   // User input converted from decimal number into an integer with collateral decimals
   let takerFillNbrOptions = parseUnits(
-    orderData.nbrOptions.toString(),
+    convertExponentialToDecimal(orderData.nbrOptions).toString(),
     decimals
   )
 
@@ -33,21 +34,23 @@ export const buyMarketOrder = async (orderData) => {
   const signatures = []
 
   // Function to executed the 0x batchFillLimitOrders function
-  const fillOrderResponse = async (takerAssetFillAmounts) => {
-    orders.map(function (order) {
+  const fillOrderResponse = async (takerAssetFillAmounts, fillOrders) => {
+    fillOrders.map(function (order) {
       signatures.push(order.signature)
       delete order.signature
       return order
     })
     const response = await exchange
-      .batchFillLimitOrders(orders, signatures, takerAssetFillAmounts, true) // takerAssetFillAmounts should be an array of stringified integer numbers
+      .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true) // takerAssetFillAmounts should be an array of stringified integer numbers
       .awaitTransactionSuccessAsync({ from: orderData.takerAccount })
       .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
     return response
   }
 
+  let fillOrders = []
   orders.forEach((order) => {
     if (takerFillNbrOptions.gt(0)) {
+      fillOrders.push(order)
       // Convert expected rate (of type number) into an integer with collateral token decimals
       const expectedRate = parseUnits(order.expectedRate.toString(), decimals)
 
@@ -84,6 +87,6 @@ export const buyMarketOrder = async (orderData) => {
     }
   })
 
-  filledOrder = await fillOrderResponse(takerAssetAmounts)
+  filledOrder = await fillOrderResponse(takerAssetAmounts, fillOrders)
   return filledOrder
 }
