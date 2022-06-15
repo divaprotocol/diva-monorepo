@@ -41,9 +41,10 @@ import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ExpiresInCell } from '../Markets/Markets'
 import { getAppStatus } from '../../Util/getAppStatus'
+import { getAddressBalances } from 'eth-balance-checker/lib/ethers'
 
 type Response = {
-  [token: string]: BigNumber
+  [token: string]: string
 }
 
 const MetaMaskImage = styled.img`
@@ -604,22 +605,44 @@ export function MyPositions() {
    * TODO: Move into redux
    */
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
-    const response: Response = {}
+    let response: Response = {}
     if (!userAddress) {
       console.warn('wallet not connected')
       return Promise.resolve({})
     }
-    await Promise.all(
-      tokenAddresses.map(async (tokenAddress) => {
-        const contract = new ethers.Contract(tokenAddress, ERC20, provider)
-        try {
-          const res: BigNumber = await contract.balanceOf(userAddress)
-          response[tokenAddress] = res
-        } catch (error) {
-          console.error(error)
+    console.log(tokenAddresses.length)
+    const batchSize = 400
+    const tokenAddressesChunks = tokenAddresses.reduce(
+      (resultArray, item, index) => {
+        const batchIndex = Math.floor(index / batchSize)
+        if (!resultArray[batchIndex]) {
+          resultArray[batchIndex] = []
         }
-      })
+        resultArray[batchIndex].push(item)
+        return resultArray
+      },
+      []
     )
+    tokenAddressesChunks.map((batch) => {
+      getAddressBalances(ethers.getDefaultProvider(), userAddress, batch).then(
+        (res) => {
+          console.log('balRes', Object.values(res))
+          response = { ...response, ...res }
+        }
+      )
+    })
+
+    // await Promise.all(
+    //   tokenAddresses.map(async (tokenAddress) => {
+    //     const contract = new ethers.Contract(tokenAddress, ERC20, provider)
+    //     try {
+    //       const res: BigNumber = await contract.balanceOf(userAddress)
+    //       response[tokenAddress] = res
+    //     } catch (error) {
+    //       console.error(error)
+    //     }
+    //   })
+    // )
     return response
   })
 
@@ -631,7 +654,7 @@ export function MyPositions() {
           .filter(
             (v) =>
               tokenBalances[v.address.id] != null &&
-              tokenBalances[v.address.id].gt(0)
+              tokenBalances[v.address.id] !== '0'
           )
           .map((v) => ({
             ...v,
