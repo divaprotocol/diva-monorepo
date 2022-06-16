@@ -89,7 +89,8 @@ class DivaStack extends TerraformStack {
         },
       },
       viewerCertificate: {
-        cloudfrontDefaultCertificate: true,
+        acmCertificateArn:
+          "arn:aws:acm:us-east-1:835435380872:certificate/000bd257-cfdb-4b5d-8a3e-264d3a6be7cf",
       },
     });
 
