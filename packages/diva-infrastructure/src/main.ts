@@ -83,6 +83,7 @@ class DivaStack extends TerraformStack {
           responsePagePath: "/index.html",
         },
       ],
+      aliases: ["app.diva.finance"],
       restrictions: {
         geoRestriction: {
           restrictionType: "none",
