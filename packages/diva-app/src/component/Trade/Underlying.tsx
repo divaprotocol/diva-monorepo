@@ -247,7 +247,7 @@ export default function Underlying() {
                   <Typography
                     sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
                   >
-                    {breakEven}
+                    {Number(breakEven).toFixed(2)}
                   </Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
