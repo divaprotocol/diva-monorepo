@@ -1,9 +1,6 @@
-const ERC20_ABI = require('@diva/contracts/abis/erc20.json')
-const { parseEther, parseUnits, formatUnits } = require('@ethersproject/units')
-
 module.exports = {
     name: 'claim-test-assets',
-    async execute(interaction, dbRegisteredUsers, DUSD_CONTRACT, senderAccount, nonceCounter, byMessage) {
+    async execute(interaction, dbRegisteredUsers, byMessage) {
         try{
             let userId =""
             let userName = ""
@@ -33,30 +30,20 @@ module.exports = {
                     replyText = `You can only claim tokens once per 24h.\n `
                     +`You need to wait ${new Date(timeUntilNewClaim).toISOString().slice(11,19)} before the next claim`
                 } else {
-                    address = dbRegisteredUsers.get(userId, "address")
-
-                    dbRegisteredUsers.set(userId, new Date(), 'timestampLastClaim')
-                    dbRegisteredUsers.set(userId, dbRegisteredUsers.get(userId, "nbrclaims") + 1, 'nbrClaims')
-        
-                    console.log(`Loading contract ${DUSD_CONTRACT}`)
-                    const erc20Contract = await ethers.getContractAt(ERC20_ABI, DUSD_CONTRACT)
-                    console.log(`sending ${parseEther("10000")} dUSD from ${senderAccount} to ${address}`)
-        
-                    const tx = await erc20Contract.connect(senderAccount).transfer(address, parseEther("10000"), {nonce: nonceCounter, gasPrice: ethers.utils.parseUnits('40',9)})
-                    replyText = `You will shortly receive 10000 dUSD tokens on ropsten.\n  `
-                        +`https://ropsten.etherscan.io/tx/${tx.hash}.`
                     blnIncreaseNonce = true
                 }
             }
 
             console.log(replyText)
-            if (byMessage) {
-                interaction.reply({
-                    content:  replyText,
-                    ephemeral: true,
-                    })
-            } else {
-                interaction.reply(replyText)
+            if (replyText != ""){
+                if (byMessage) {
+                    interaction.reply({
+                        content:  replyText,
+                        ephemeral: true,
+                        })
+                } else {
+                    interaction.reply(replyText)
+                }
             }
             return blnIncreaseNonce
             
