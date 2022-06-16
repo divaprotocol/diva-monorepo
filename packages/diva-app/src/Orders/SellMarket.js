@@ -26,6 +26,10 @@ export const sellMarketOrder = async (orderData) => {
       delete order.signature
       return order
     })
+    console.log('order')
+    console.log(fillOrders)
+    console.log('takerAssetFillAmounts SellMarket')
+    console.log(takerAssetFillAmounts)
     const response = await exchange
       .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
       .awaitTransactionSuccessAsync({ from: orderData.maker })
@@ -42,7 +46,7 @@ export const sellMarketOrder = async (orderData) => {
     ) {
       fillOrders.push(order)
 
-      if (takerFillNbrOptions.lt(remainingNumber)) {
+      if (takerFillNbrOptions.lte(remainingNumber)) {
         // equality in lte consciously removed due to 0x issue filling amounts equal to remainingFillableTakerAmount
         takerAssetAmounts.push(takerFillNbrOptions.toString())
         takerFillNbrOptions = parseEther('0') // "trick" to skip the remaining forEach loop
