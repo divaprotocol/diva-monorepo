@@ -37,15 +37,17 @@ for (const file of commandFiles) {
 }
 
 client.login(Config.TOKEN)
-//const channelId = "957700678254493776"
-
+const channelId = "957700678254493776" //register channel
+//const channelId = 986949347621097493 //register channel test
 let nonceCounter
+const permissionedRegisterRole = "Verified"
 
 client.on("ready", async() => {
 
     console.log(`Logged in as ${client.user.tag}!`)
     //set guild to DIVA server
-    const guildId = '928050978714976326'
+    const guildId = '928050978714976326' //DIVA server
+    //const guildId = '956290475113971772' //DIVA test server
     const guild = client.guilds.cache.get(guildId)
 
     nonceCounter = await senderAccount.getTransactionCount('pending')
@@ -103,10 +105,12 @@ client.on('interactionCreate', async(interaction) =>{
             //call function from the commands folder with the given commandName
                 
             //check if user has the needed role
-            if (interaction.member.roles.cache.some(r => r.name === "Verified")){
+            if (interaction.member.roles.cache.some(r => r.name === permissionedRegisterRole)){
                 if (["address", "changeaddress"].includes(interaction.commandName)) {
-                    client.commands.get(interaction.commandName).execute(interaction,
-                        dbRegisteredUsers);
+                    client.commands.get(interaction.commandName).execute(
+                        interaction,
+                        dbRegisteredUsers,
+                        false);
                 }
                 else if  (["register", "claim-test-assets"].includes(interaction.commandName)) {
                     console.log(`nonceCounter before call of ${interaction.commandName} = ${nonceCounter}`)
@@ -115,7 +119,8 @@ client.on('interactionCreate', async(interaction) =>{
                         dbRegisteredUsers,
                         Config.DUSD_CONTRACT,
                         senderAccount,
-                        nonceCounter
+                        nonceCounter,
+                        false
                         );
                     if (boolTxSent) {
                         console.log(`Increasing nonce counter`)
@@ -131,6 +136,46 @@ client.on('interactionCreate', async(interaction) =>{
             }
         }
     } 
+    catch(e){
+        nonceCounter = await senderAccount.getTransactionCount('pending')
+        console.log(e)
+    }
+})
+
+
+client.on("messageCreate", async (message) => {
+    try{
+        if(!message.content.startsWith(Config.PREFIX)) return;
+        let args = message.content.slice(Config.PREFIX.length).split(" ");
+        let commandName = args.shift().toLowerCase();
+
+        if (message.channel.id == channelId &&
+            message.member.roles.cache.some(r => r.name === permissionedRegisterRole) ) {
+            console.log(`${message.author.tag} sent "${message.content}".`);
+            if (commandName === 'register' || commandName === 'claim-test-assets' ) {
+                console.log(`nonceCounter before call of ${commandName} = ${nonceCounter}`)
+                boolTxSent = await client.commands.get(commandName).execute(
+                    message,
+                    dbRegisteredUsers,
+                    Config.DUSD_CONTRACT,
+                    senderAccount,
+                    nonceCounter,
+                    true
+                    );
+                console.log
+                if (boolTxSent) {
+                    console.log(`Increasing nonce counter`)
+                    nonceCounter = nonceCounter + 1;
+                }
+                console.log(`nonceCounter after call of ${commandName} = ${nonceCounter}`)
+            } else if (commandName === 'address') {
+                client.commands.get(commandName).execute(
+                    message,
+                    dbRegisteredUsers,
+                    true);
+            } 
+        }
+    }
     catch(e){
         nonceCounter = await senderAccount.getTransactionCount('pending')
         console.log(e)
