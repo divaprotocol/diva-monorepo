@@ -197,7 +197,7 @@ export default function BuyMarket(props: {
             existingLimitOrders: existingSellLimitOrders,
             chainId: props.chainId,
           }
-          buyMarketOrder(orderData).then((orderFillStatus: any) => {
+          buyMarketOrder(orderData).then(async (orderFillStatus: any) => {
             let orderFilled = false
             if (!(orderFillStatus === undefined)) {
               if (!('logs' in orderFillStatus)) {
@@ -227,6 +227,13 @@ export default function BuyMarket(props: {
               }
             } else {
               alert('Order could not be filled.')
+              await props.handleDisplayOrder()
+              //reset input & you pay fields
+              Array.from(document.querySelectorAll('input')).forEach(
+                (input) => (input.value = '')
+              )
+              setNumberOfOptions(0.0)
+              setYouPay(0.0)
             }
             if (orderFilled) {
               alert('Order successfully filled.')
