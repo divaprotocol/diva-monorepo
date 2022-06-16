@@ -63,15 +63,20 @@ export const ApproveActionButtons = ({
       setBtnName('Add')
     }
     if (textFieldValue !== '' && chainId) {
-      token.allowance(account, config[chainId]?.divaAddress).then((res) => {
-        if (res.lt(parseUnits(textFieldValue, decimal))) {
-          setApproveEnabled(true)
-          setActionEnabled(false)
-        } else {
-          setActionEnabled(true)
-          setApproveEnabled(false)
-        }
-      })
+      if (parseFloat(textFieldValue) === 0) {
+        setApproveEnabled(false)
+        setActionEnabled(false)
+      } else {
+        token.allowance(account, config[chainId]?.divaAddress).then((res) => {
+          if (res.lt(parseUnits(textFieldValue, decimal))) {
+            setApproveEnabled(true)
+            setActionEnabled(false)
+          } else {
+            setActionEnabled(true)
+            setApproveEnabled(false)
+          }
+        })
+      }
     }
   }, [textFieldValue, chainId, pool, approveLoading, actionLoading])
   return (
