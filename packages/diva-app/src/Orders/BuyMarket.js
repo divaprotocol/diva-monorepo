@@ -40,7 +40,10 @@ export const buyMarketOrder = async (orderData) => {
       delete order.signature
       return order
     })
-    console.log('takerAssetFillAmounts')
+
+    console.log('fillOrders')
+    console.log(fillOrders)
+    console.log('takerAssetFillAmounts BuyMarket')
     console.log(takerAssetFillAmounts)
     const response = await exchange
       .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true) // takerAssetFillAmounts should be an array of stringified integer numbers
@@ -84,8 +87,6 @@ export const buyMarketOrder = async (orderData) => {
           .div(expectedRate)
         takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled)
       }
-    } else {
-      takerAssetAmounts.push('0')
     }
   })
 
