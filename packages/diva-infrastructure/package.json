@@ -10,7 +10,7 @@
     "build": "tsc && node dist/buildLambda.js",
     "synth": "yarn cdktf synth",
     "compile": "tsc --pretty",
-    "deploy": "yarn build && cdktf deploy --auto-approve",
+    "deploy": "yarn build && cdktf deploy --output --auto-approve",
     "watch": "tsc -w",
     "test": "jest",
     "test:watch": "jest --watch",
