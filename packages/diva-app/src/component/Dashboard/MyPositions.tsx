@@ -52,9 +52,7 @@ const MetaMaskImage = styled.img`
   height: 20px;
   cursor: pointer;
 `
-const ethereum = window?.ethereum
 const AddToMetamask = (props: any) => {
-  const { provider } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
     e.stopPropagation()
     const tokenSymbol =
@@ -628,12 +626,18 @@ export function MyPositions() {
       },
       []
     )
-    tokenAddressesChunks.map((batch) => {
-      getAddressBalances(provider, userAddress, batch).then((res) => {
-        console.log('balRes', Object.values(res))
-        response = { ...response, ...res }
-      })
-    })
+    const date = new Date()
+    console.log('start', tokenAddressesChunks)
+    await Promise.all(
+      tokenAddressesChunks.map((batch) =>
+        getAddressBalances(provider, userAddress, batch).then((res) => {
+          console.log('balRes', { res })
+          response = { ...response, ...res }
+        })
+      )
+    ).catch((err) => console.error(err))
+    const endDate = new Date()
+    console.log('end', endDate.getTime() - date.getTime())
 
     // await Promise.all(
     //   tokenAddresses.map(async (tokenAddress) => {
