@@ -2,7 +2,7 @@ on:
   push:
     branches:
       - main
-      - add-just-infra
+      - fix-deployment
     paths:
       - 'packages/diva-infrastructure/**'
       - '.github/workflows/deploy-infrastructure.yml'

@@ -1,5 +1,5 @@
 import { Construct } from "constructs";
-import { App, S3Backend, TerraformStack } from "cdktf";
+import { App, S3Backend, TerraformOutput, TerraformStack } from "cdktf";
 import { AwsProvider } from "@cdktf/provider-aws";
 import { id } from "./lib/id";
 import { orderBookApi } from "./orderBookApi";
@@ -42,7 +42,7 @@ class DivaStack extends TerraformStack {
 
     const originId = id("AppCloudFront");
 
-    new CloudfrontDistribution(this, id("AppCloudFrontDistro"), {
+    const cf = new CloudfrontDistribution(this, id("AppCloudFrontDistro"), {
       enabled: true,
       defaultRootObject: "index.html",
       isIpv6Enabled: true,
@@ -91,6 +91,10 @@ class DivaStack extends TerraformStack {
       viewerCertificate: {
         cloudfrontDefaultCertificate: true,
       },
+    });
+
+    new TerraformOutput(this, "cloudfront_id", {
+      value: cf.id,
     });
   }
 }
