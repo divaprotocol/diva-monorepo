@@ -26,6 +26,17 @@ export const sellMarketOrder = async (orderData) => {
       delete order.signature
       return order
     })
+    console.log('fillOrders', fillOrders)
+    takerAssetFillAmounts = [
+      '9999999999999999',
+      '9999999999999999',
+      '9999999999999999',
+      '12',
+    ]
+    // 9999999999999999
+    // 1000000000000000000
+    console.log('takerAssetFillAmounts', takerAssetFillAmounts)
+
     const response = await exchange
       .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
       .awaitTransactionSuccessAsync({ from: orderData.maker })
