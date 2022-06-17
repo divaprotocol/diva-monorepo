@@ -130,7 +130,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 )
             )
           )
-
           setShortToken(
             formatEther(
               parseEther(textFieldValue)
@@ -148,6 +147,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 )
             )
           )
+          setActionEnabled(true)
         }
       }
     }
