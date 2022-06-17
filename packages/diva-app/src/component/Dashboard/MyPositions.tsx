@@ -494,13 +494,13 @@ export function MyPositions() {
   const [page, setPage] = useState(0)
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+  const [tokenPools, setTokenPools] = useState<Pool[]>([])
 
   // get all pools (via API call to subgraph)
   // get all unique addresses
   // filter where balance > 0
   // draw table
-
-  const rows: GridRowModel[] = pools.reduce((acc, val) => {
+  const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
       val.expiryTime,
       val.statusTimestamp,
@@ -634,6 +634,7 @@ export function MyPositions() {
   /**
    * TODO: Move into redux
    */
+
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
     const response: Response = {}
     if (!userAddress) {
@@ -645,6 +646,10 @@ export function MyPositions() {
       queryPositionTokens(userAddress)
     )
     console.log('position-tokens', result)
+    if (tokenPools.length == 0) {
+      setTokenPools(result.user.positionTokens.map((v) => v.positionToken.pool))
+    }
+
     await Promise.all(
       result.user.positionTokens
         .map((v) => v.positionToken.id)
@@ -664,7 +669,7 @@ export function MyPositions() {
   })
 
   const tokenBalances = balances.data
-
+  console.log('tokenPools', rows)
   const filteredRows =
     tokenBalances != null
       ? rows
@@ -717,11 +722,7 @@ export function MyPositions() {
           <PoolsTable
             page={page}
             rows={sortedRows}
-            loading={
-              !balances.isSuccess ||
-              balances.isLoading ||
-              poolsRequestStatus === 'pending'
-            }
+            loading={balances.isLoading || poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}
           />

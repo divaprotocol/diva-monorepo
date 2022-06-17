@@ -78,6 +78,56 @@ export const queryPositionTokens = (id: string) => gql`
         symbol
         decimals
         owner
+        pool {
+          id
+          referenceAsset
+          floor
+          inflection
+          cap
+          supplyInitial
+          supplyShort
+          supplyLong
+          expiryTime
+          collateralToken {
+            id
+            name
+            decimals
+            symbol
+          }
+          collateralBalanceShortInitial
+          collateralBalanceLongInitial
+          collateralBalance
+          shortToken {
+            id
+            name
+            symbol
+            decimals
+            owner
+          }
+          longToken {
+            id
+            name
+            symbol
+            decimals
+            owner
+          }
+          finalReferenceValue
+          statusFinalReferenceValue
+          redemptionAmountLongToken
+          redemptionAmountShortToken
+          statusTimestamp
+          dataProvider
+          redemptionFee
+          settlementFee
+          createdBy
+          createdAt
+          capacity
+          expiryTime
+          challenges {
+            challengedBy
+            proposedFinalReferenceValue
+          }
+        }
       }
     }
   }
