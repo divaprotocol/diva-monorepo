@@ -19,7 +19,9 @@ import {
   CollateralToken,
   FeeRecipientCollateralToken,
   PositionToken,
-  TestnetUser
+  TestnetUser,
+  UserPositionToken,
+  User
 } from "../generated/schema";
 
 /**
@@ -62,6 +64,29 @@ function handleLiquidityEvent(
   let longTokenContract = PositionTokenABI.bind(parameters.longToken);
 
   let entity = Pool.load(poolId.toString());
+  
+  //set user to position token mapping
+  let userEntity = User.load(msgSender.toHexString());
+  if (!userEntity) {
+    userEntity = new User(msgSender.toHexString());
+  }
+  let userShortPositionTokenEntity = UserPositionToken.load(
+    msgSender.toHexString() + "-" + parameters.shortToken.toHexString())
+  if (!userShortPositionTokenEntity) {
+    userShortPositionTokenEntity = new User(msgSender.toHexString() + "-" + parameters.shortToken.toHexString());
+    userShortPositionTokenEntity.user = msgSender.toHexString();
+    userShortPositionTokenEntity.positionToken = parameters.shortToken.toHexString();
+  }
+  let userLongPositionTokenEntity = UserPositionToken.load(
+    msgSender.toHexString() + "-" + parameters.longToken.toHexString())
+  if (!userLongPositionTokenEntity) {
+    userLongPositionTokenEntity = new User(msgSender.toHexString() + "-" + parameters.longToken.toHexString());
+    userLongPositionTokenEntity.user = msgSender.toHexString();
+    userLongPositionTokenEntity.positionToken = parameters.longToken.toHexString();
+  }
+
+
+  //pool entity
   if (!entity) {
     entity = new Pool(poolId.toString());
     entity.createdBy = msgSender;

@@ -21,6 +21,7 @@ dataSources:
         - FeeRecipientCollateralToken
         - PositionToken
         - TestnetUser
+        - UserPositionTokens
       abis:
         - name: DivaDiamond
           file: ../diva-contracts/abis/diamond.json

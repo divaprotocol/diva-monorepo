@@ -66,10 +66,12 @@ type PositionToken @entity {
   decimals: Int!
   pool: Pool!
   owner: Bytes!
+  users: [UserPositionToken!]
+    @derivedFrom(field: "positionToken")
 }
 
 type TestnetUser @entity {
-  id: ID! # Address
+  id: ID! # UserAddress
   binaryPoolCreated: Boolean!
   linearPoolCreated: Boolean!
   convexPoolCreated: Boolean!
@@ -82,3 +84,17 @@ type TestnetUser @entity {
   feesClaimed: Boolean!
   feeClaimsTransferred: Boolean!
 }
+
+type User @entity {
+  id: ID! # UserAddress
+  positionTokens: [UserPositionToken!]
+    @derivedFrom(field: "user")
+}
+
+type UserPositionToken @entity {
+  id: ID! # Set to `${user.id}-${positionToken.id}`
+  user: User!
+  positionToken: PositionToken!
+}
+
+
