@@ -3,5 +3,8 @@
 def update_records(record):
     file = open("oracle_records.csv", "a")
     file.write(record)
+    file.write(',')
+    file.write('\n')
+
     file.close()
 update_records("test")

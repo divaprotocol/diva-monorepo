@@ -38,6 +38,8 @@ def df_format_oracle_report(resp,  Asset_list, hours=24):
     
     df['expiryTime_datetime'] = df['expiryTime']#.apply(lambda x: datetime.fromtimestamp(float(x)))
     df['Passed Hours After Expiry'] = df['expiryTime_datetime'].apply(lambda x: (datetime.now()-x).total_seconds()//60//60)
+    df = df[df['statusFinalReferenceValue'] == 'Open']
+
 
     #print(df)
 

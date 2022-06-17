@@ -1,5 +1,5 @@
 import datetime as dt
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 import pandas as pd
 import json
@@ -21,6 +21,13 @@ Asset_list = ['BTC/USD', 'ETH/USD', 'ZRX/USD', '1INCH/USD', 'AAVE/USD', 'ALGO/US
 # How long the oracle sleeps in between checks in seconds
 SLEEP_TIME = 60 
 
+DAYS = 1
+# days to look past duery
+def date_time_addition(DAYS):
+  tim = datetime.now() + timedelta(DAYS)
+  #print(tim + timedelta(DAYS))
+  #print(int(tim.timestamp()))
+  return int(tim.timestamp())
 
 # Dataprovider is determined by who created the pool
 # Only the specified data provider can update the contract
@@ -28,9 +35,10 @@ SLEEP_TIME = 60
 dataprovider = Chain()
 dataprovider = Chain.WALLET
 #print("dataprovider", dataprovider)
+time_ahead = date_time_addition(DAYS)
 query = '''
             {
-              pools (where: {dataProvider: "%s"}) {
+              pools (first: 1000, where: {dataProvider: "%s", statusFinalReferenceValue: "Open", expiryTime_gt: "%s"}) {
                 id
                 dataProvider
                 referenceAsset
@@ -41,7 +49,7 @@ query = '''
                 statusFinalReferenceValue
               }
             }
-'''% dataprovider
+'''% (dataprovider, time_ahead )
 
 query2 = '''
             {
@@ -57,7 +65,6 @@ query2 = '''
               }
             }
 '''
-
 
 
 query_list = [query]
@@ -89,7 +96,7 @@ def main_send(df_reporting_needed):
           continue
         if (price, date) != (-1,-1):
             print("Submission for PoolId:", pool_id)
-            st = f"Price for pair {pair} at {date} : {price} where time interval is from {date_max_away} to expiryTime: {date_dt}"
+            st = f"PoolId: {pool_id}, Price for pair {pair} at {date} : {price} where time interval is from {date_max_away} to expiryTime: {date_dt}"
             print(st)
             update_records(st)
         #send price to smart contract
