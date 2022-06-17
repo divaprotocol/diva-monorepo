@@ -24,11 +24,12 @@ for (const file of commandFiles) {
     console.log(command)
 }
 
-//const channelId = "957700678254493776" //register channel
-const channelId = 986949347621097493 //register channel test
+const channelId = "957700678254493776" //register channel
+//const channelId = 986949347621097493 //register channel test
+//const channelId = 987257653807947798 ////register channel test2
+
 const permissionedRegisterRole = "Verified"
-let sendQuque = {}
-let nonceCounter = 0 
+let sendQueue = {}
 
 // set ethers sender account
 
@@ -43,56 +44,61 @@ const dbRegisteredUsers = new Enmap(
     }
 )
 
-async function watchQuque() {
+async function watchQueue() {
+    //initialze nonceCounter
+    let nonceCounter = await senderAccount.getTransactionCount('pending')
     while (true) {
-        console.log(`checking quque - lenght: ${Object.keys(sendQuque).length}`)
-        while  (Object.keys(sendQuque).length > 0 ) {
-            //get next receiver interaction/message from quque
-            
-            const userId = Object.keys(sendQuque)[0]
-            const [interaction,  blnNewUser,  byMessage] = sendQuque[userId]
+        while (Object.keys(sendQueue).length > 0 ) {
+            try {
+                //get next receiver interaction/message from queue
+                
+                const userId = Object.keys(sendQueue)[0]
+                const [interaction, blnNewUser] = sendQueue[userId]
+                
+                if (blnNewUser) {
+                    address = (interaction instanceof Discord.Interaction) ? 
+                        interaction.options.getString('address') :
+                        interaction.content.slice(1).split(" ")[1] 
+                } else {
+                    address = dbRegisteredUsers.get(userId, "address")
+                }
 
-            if (byMessage)  { 
-                userName = interaction.author.tag
-                address = interaction.content.slice(1).split(" ")[1]
-            } else {
-                userName = interaction.user?.tag
-                address = interaction.options.getString('address')
-            }
+                //send dusd
+                amountdUsd = parseEther("10000")
+                const erc20Contract = await ethers.getContractAt(ERC20_ABI, Config.DUSD_CONTRACT)
+                console.log(`sending ${amountdUsd} dUSD from ${senderAccount} to ${address}`)
+                
+                const tx = await erc20Contract.connect(senderAccount).transfer(address, amountdUsd, {nonce: nonceCounter, gasPrice: ethers.utils.parseUnits('40',9)})
+                //increment nonceCounter
+                nonceCounter = nonceCounter + 1
+                if (blnNewUser) {
+                    //add user to database
+                    dbRegisteredUsers.set(userId, {address: address, 
+                        timestampLastClaim: new Date(),
+                        nbrClaims:1})
+                    replyText = `You successfully registered for DIVA testnet :tada: \n`
+                        +`You will shortly receive 10000 dUSD tokens on Ropsten\n`
+                        +`https://ropsten.etherscan.io/tx/${tx.hash}`
+                } else {
+                    //update timestampLastClaim and counter
+                    dbRegisteredUsers.set(userId, new Date(), 'timestampLastClaim')
+                    dbRegisteredUsers.set(userId, dbRegisteredUsers.get(userId, "nbrclaims") + 1, 'nbrClaims')
+                    replyText = `You will shortly receive 10000 dUSD tokens on ropsten.\n  `
+                        +`https://ropsten.etherscan.io/tx/${tx.hash}.`
+                }
 
-            //send dusd 
-            amountdUsd = parseEther("10000")
-            const erc20Contract = await ethers.getContractAt(ERC20_ABI, Config.DUSD_CONTRACT)
-            console.log(`sending ${amountdUsd} dUSD from ${senderAccount} to ${address}`)
-            
-            const tx = await erc20Contract.connect(senderAccount).transfer(address, amountdUsd, {nonce: nonceCounter, gasPrice: ethers.utils.parseUnits('40',9)})
-
-            if (blnNewUser) {
-                //add user to database
-                dbRegisteredUsers.set(userId, {address: address, 
-                    timestampLastClaim: new Date(),
-                    nbrClaims:1})
-                replyText = `You successfully registered for DIVA testnet :tada: \n`
-                    +`You will shortly 10000 dUSD tokens on Ropsten\n`
-                    +`https://ropsten.etherscan.io/tx/${tx.hash}`
-            } else {
-                //update timestampLastClaim and counter
-                dbRegisteredUsers.set(userId, new Date(), 'timestampLastClaim')
-                dbRegisteredUsers.set(userId, dbRegisteredUsers.get(userId, "nbrclaims") + 1, 'nbrClaims')
-                replyText = `You will shortly receive 10000 dUSD tokens on ropsten.\n  `
-                    +`https://ropsten.etherscan.io/tx/${tx.hash}.`
-            }
-
-            if (byMessage) {
-                interaction.reply({
+                //console.log(interaction instanceof Discord.Integration);
+                (interaction instanceof Discord.Interaction) ? interaction.reply({
                     content:  replyText,
                     ephemeral: true,
-                })
-            } else {
-                interaction.reply(replyText)
+                }) : interaction.reply(replyText)
+
+                //remove user from queuedUsers dict
+                console.log(`removing user ${userId} from the queue`)
+                delete sendQueue[userId]
+            } catch(e){
+                console.error(e)
             }
-            //remove user from ququedUsers dict
-            delete sendQuque[userId]
         }
         await new Promise(resolve => setTimeout(resolve, 2000));
     } 
@@ -105,12 +111,12 @@ client.on("ready", async() => {
 
     console.log(`Logged in as ${client.user.tag}!`)
     //set guild to DIVA server
-    //const guildId = '928050978714976326' //DIVA server
-    const guildId = '956290475113971772' //DIVA test server
+    const guildId = '928050978714976326' //DIVA server
+    //const guildId = '956290475113971772' //DIVA test server
+    //const guildId = '987257653149438013' //DIVA test server2
+
     const guild = client.guilds.cache.get(guildId)
 
-    nonceCounter = await senderAccount.getTransactionCount('pending')
-    console.log(nonceCounter)
     //create commands
     let commands = guild.commands
 
@@ -140,8 +146,8 @@ client.on("ready", async() => {
         description: 'Request additional testnet collateral tokens',
     })
 
-    //start quque watcher
-    watchQuque()
+    //start queue watcher
+    watchQueue()
     
 })
 
@@ -156,26 +162,22 @@ client.on('interactionCreate', async(interaction) =>{
             //check if user has the needed role
             if (interaction.member.roles.cache.some(r => r.name === permissionedRegisterRole)){
                 if (["address", "changeaddress"].includes(interaction.commandName)) {
-                    client.commands.get(interaction.commandName).execute(
-                        interaction,
-                        dbRegisteredUsers,
-                        false);
+                    client.commands.get(interaction.commandName).execute(interaction,dbRegisteredUsers);
                 }
                 else if  (["register", "claim-test-assets"].includes(interaction.commandName)) {
-                    addToSendQuque = await client.commands.get(interaction.commandName).execute(
+                    addToSendQueue = await client.commands.get(interaction.commandName).execute(
                         interaction,
-                        dbRegisteredUsers,
-                        false
-                        );
-                    if (addToSendQuque) {
-                        if (ququedUsers in sendQuque) {
+                        dbRegisteredUsers);
+                    if (addToSendQueue) {
+                        let userId = interaction.user?.id
+                        if (userId in sendQueue) {
                             interaction.reply({
-                                content:  `You are already added to the quque. Please wait for the bot to process your request`,
+                                content:  `You are already added to the queue. Please wait for the bot to process your request.`,
                                 ephemeral: true,
                             })
                         } else {
-                            console.log(typeof(interaction))
-                            sendQuque[interaction] = [(interaction.commandName="register"), false]
+                            console.log(`Adding user ${userId} to the queue`)
+                            sendQueue[userId] = [interaction,(interaction.commandName=="register")]
                         }
                     }
                 }
@@ -188,8 +190,7 @@ client.on('interactionCreate', async(interaction) =>{
         }
     } 
     catch(e){
-        nonceCounter = await senderAccount.getTransactionCount('pending')
-        console.log(e)
+        console.error(e)
     }
 })
 
@@ -204,33 +205,24 @@ client.on("messageCreate", async (message) => {
             message.member.roles.cache.some(r => r.name === permissionedRegisterRole) ) {
             console.log(`${message.author.tag} sent "${message.content}".`);
             if (commandName === 'register' || commandName === 'claim-test-assets' ) {
-                addToSendQuque = await client.commands.get(commandName).execute(
-                    message,
-                    dbRegisteredUsers,
-                    true
-                    );
-                if (addToSendQuque) {
+                addToSendQueue = await client.commands.get(commandName).execute(message,dbRegisteredUsers);
+                if (addToSendQueue) {
                     let userId = message.author.id
-                    if (userId in sendQuque) {
-                        message.reply(`You are already added to the quque. Please wait for the bot to process your request`)
+                    if (userId in sendQueue) {
+                        message.reply(`You are already added to the queue. Please wait for the bot to process your request`)
                     }  else {
-                        console.log(typeof(message))
-                        sendQuque[userId] = [message, (commandName="register"), true]
+                        console.log(`adding user ${userId} to the queue`);
+                        sendQueue[userId] = [message, (commandName=="register")]
                     }
                 }
             } else if (commandName === 'address') {
-                client.commands.get(commandName).execute(
-                    message,
-                    dbRegisteredUsers,
-                    true);
+                client.commands.get(commandName).execute(message,dbRegisteredUsers);
             } 
         } else { 
             message.reply(`Sorry, you don't have the needed permissions`)
         }
     }
     catch(e){
-        nonceCounter = await senderAccount.getTransactionCount('pending')
-        console.log(e)
+        console.error(e)
     }
 })
-

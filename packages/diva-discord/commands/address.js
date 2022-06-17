@@ -1,6 +1,8 @@
+const Discord = require('discord.js')
+
 module.exports = {
     name: 'address',
-    async execute(interaction, dbRegisteredUsers, byMessage ) {
+    async execute(interaction, dbRegisteredUsers ) {
         try{
             let userId =""
             let userName = ""
@@ -8,7 +10,7 @@ module.exports = {
 
             //users can register by / command or via message. Depending on the way the parameters have to be read 
             // and the reply needs to be send different.
-            if (byMessage)  { 
+            if (interaction instanceof Discord.Message)  { 
                 userId = interaction.author.id
                 userName = interaction.author.tag
             } else {
@@ -25,18 +27,16 @@ module.exports = {
                                 +`**${dbRegisteredUsers.get(userId, "address")}**`
             }
         
-            console.log(replyText)
-            if (byMessage) {
+            console.log(replyText);
+            (interaction instanceof Discord.Message) ? 
+                interaction.reply(replyText) :
                 interaction.reply({
                     content:  replyText,
                     ephemeral: true,
-                    })
-            } else {
-                interaction.reply(replyText)
-            }
+                })
         }
         catch(e){
-            console.log(e)
+            console.error(e)
             return false
         }
     }

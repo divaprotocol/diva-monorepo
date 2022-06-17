@@ -1,3 +1,5 @@
+const Discord = require('discord.js')
+
 module.exports = {
     name: 'claim-test-assets',
     async execute(interaction, dbRegisteredUsers, byMessage) {
@@ -5,11 +7,11 @@ module.exports = {
             let userId =""
             let userName = ""
             let replyText = ""
-            let blnIncreaseNonce = false
+            let addToSendQueue = false
 
             //users can register by / command or via message. Depending on the way the parameters have to be read 
             // and the reply needs to be send different.
-            if (byMessage)  { 
+            if (interaction instanceof Discord.Message)  { 
                 userId = interaction.author.id
                 userName = interaction.author.tag
             } else {
@@ -30,25 +32,23 @@ module.exports = {
                     replyText = `You can only claim tokens once per 24h.\n `
                     +`You need to wait ${new Date(timeUntilNewClaim).toISOString().slice(11,19)} before the next claim`
                 } else {
-                    blnIncreaseNonce = true
+                    addToSendQueue = true
                 }
             }
 
-            console.log(replyText)
+            console.log(replyText);
             if (replyText != ""){
-                if (byMessage) {
+                (interaction instanceof Discord.Message) ? 
+                    interaction.reply(replyText) :
                     interaction.reply({
                         content:  replyText,
                         ephemeral: true,
                         })
-                } else {
-                    interaction.reply(replyText)
-                }
             }
-            return blnIncreaseNonce
+            return addToSendQueue
             
         } catch (e) {
-            console.log(e);
+            console.error(e);
             return false
         } 
     }

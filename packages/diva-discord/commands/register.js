@@ -1,17 +1,19 @@
+const Discord = require('discord.js')
+
 module.exports = {
     name: 'register',
-    async execute(interaction, dbRegisteredUsers, byMessage ) {
+    async execute(interaction, dbRegisteredUsers ) {
         try {
 
             let userId =""
             let userName = ""
             let address = ""
             let replyText = ""
-            let addToSendQuque = false
+            let addToSendQueue = false
 
             //users can register by / command or via message. Depending on the way the parameters have to be read 
             // and the reply needs to be send different.
-            if (byMessage)  { 
+            if (interaction instanceof Discord.Message)  { 
                 userId = interaction.author.id
                 userName = interaction.author.tag
                 address = interaction.content.slice(1).split(" ")[1]
@@ -25,28 +27,26 @@ module.exports = {
             //check is user is already registered
             if (dbRegisteredUsers.get(userId) != null) {
                 replyText = `Your discord account is already registered with address \n `
-                +`**${dbRegisteredUsers.get(userId, "address")}** \n `
+                    +`**${dbRegisteredUsers.get(userId, "address")}** \n `
             } else if (!ethers.utils.isAddress(address)) {
                 replyText = `The entered address ${address} is not a valid Ethereum wallet. Please check your input` 
             } else {
-                addToSendQuque = true
+                addToSendQueue = true
             }
 
-            console.log(replyText)
+            console.log(replyText);
             if (replyText != "") {
-                if (byMessage) {
+                (interaction instanceof Discord.Message) ?
+                    interaction.reply(replyText) :
                     interaction.reply({
                         content:  replyText,
                         ephemeral: true,
                         })
-                } else {
-                    interaction.reply(replyText)
-                }
             }
-            return addToSendQuque
+            return addToSendQueue
         }
         catch(e){
-            console.log(e)
+            console.error(e)
             return false
         }
     }
