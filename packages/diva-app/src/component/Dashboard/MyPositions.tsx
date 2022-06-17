@@ -64,9 +64,7 @@ const MetaMaskImage = styled.img`
   height: 20px;
   cursor: pointer;
 `
-const ethereum = window?.ethereum
 const AddToMetamask = (props: any) => {
-  const { provider } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
     e.stopPropagation()
     const tokenSymbol =
@@ -716,7 +714,7 @@ export function MyPositions() {
           <PoolsTable
             page={page}
             rows={sortedRows}
-            loading={!balances.isSuccess || poolsRequestStatus === 'pending'}
+            loading={balances.isLoading || poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}
           />
