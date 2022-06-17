@@ -64,7 +64,7 @@ export type Pool = {
 
 export const queryPools = (id: string) => gql`
   {
-    pools( first: 1000, where: { id_gt: "${id}" } ) {
+    pools(first: 1000, where: { id_gt: "${id}" } ) {
       id
       referenceAsset
       floor

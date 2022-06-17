@@ -195,7 +195,7 @@ export default function SellMarket(props: {
             existingLimitOrders: existingBuyLimitOrders,
             chainId: chainId,
           }
-          sellMarketOrder(orderData).then((orderFillStatus: any) => {
+          sellMarketOrder(orderData).then(async (orderFillStatus: any) => {
             let orderFilled = false
             if (!(orderFillStatus == undefined)) {
               if (!('logs' in orderFillStatus)) {
@@ -225,6 +225,13 @@ export default function SellMarket(props: {
               }
             } else {
               alert('Order could not be filled.')
+              await props.handleDisplayOrder()
+              //reset input & you pay fields
+              Array.from(document.querySelectorAll('input')).forEach(
+                (input) => (input.value = '')
+              )
+              setNumberOfOptions(0.0)
+              setYouReceive(0.0)
             }
             if (orderFilled) {
               alert('Order successfully filled.')
@@ -267,7 +274,8 @@ export default function SellMarket(props: {
       const remainingFillableTakerAmount =
         data.metaData.remainingFillableTakerAmount
 
-      if (BigENumber.from(remainingFillableTakerAmount).gt(0)) {
+      if (BigENumber.from(remainingFillableTakerAmount).gt(1)) {
+        // > 1 to filter out dust orders
         if (totalDecimals(makerAmount, takerAmount) > 1) {
           order['expectedRate'] = (makerAmount / takerAmount).toFixed(
             totalDecimals(makerAmount, takerAmount)
@@ -514,7 +522,7 @@ export default function SellMarket(props: {
                 Remaining allowance:{' '}
                 {remainingApprovalAmount.toString().includes('e')
                   ? remainingApprovalAmount.toExponential(2)
-                  : remainingApprovalAmount.toFixed(2)}
+                  : remainingApprovalAmount.toFixed(4)}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>

@@ -2,7 +2,7 @@ on:
   push:
     branches:
       - main
-      - add-just-infra
+      - fix-deployment
     paths:
       - 'packages/diva-infrastructure/**'
       - '.github/workflows/deploy-infrastructure.yml'
@@ -50,6 +50,7 @@ jobs:
       - name: Deploy Infra
         run: yarn turbo run deploy --scope="@diva/infrastructure"
 
-      - name: sync to s3
-        run: aws s3 sync packages/diva-app/build s3://app.diva.finance
-
+      - name: sync to s3 and invalidate cache
+        run: |
+          aws s3 sync packages/diva-app/build s3://app.diva.finance
+          aws cloudfront create-invalidation --distribution-id E2HCWZDF4NN8G6 --paths '/*'

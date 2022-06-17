@@ -1,5 +1,5 @@
 import { Construct } from "constructs";
-import { App, S3Backend, TerraformStack } from "cdktf";
+import { App, S3Backend, TerraformOutput, TerraformStack } from "cdktf";
 import { AwsProvider } from "@cdktf/provider-aws";
 import { id } from "./lib/id";
 import { orderBookApi } from "./orderBookApi";
@@ -42,7 +42,7 @@ class DivaStack extends TerraformStack {
 
     const originId = id("AppCloudFront");
 
-    new CloudfrontDistribution(this, id("AppCloudFrontDistro"), {
+    const cf = new CloudfrontDistribution(this, id("AppCloudFrontDistro"), {
       enabled: true,
       defaultRootObject: "index.html",
       isIpv6Enabled: true,
@@ -83,14 +83,21 @@ class DivaStack extends TerraformStack {
           responsePagePath: "/index.html",
         },
       ],
+      aliases: ["app.diva.finance"],
       restrictions: {
         geoRestriction: {
           restrictionType: "none",
         },
       },
       viewerCertificate: {
-        cloudfrontDefaultCertificate: true,
+        acmCertificateArn:
+          "arn:aws:acm:us-east-1:835435380872:certificate/000bd257-cfdb-4b5d-8a3e-264d3a6be7cf",
+        sslSupportMethod: "sni-only",
       },
+    });
+
+    new TerraformOutput(this, "cloudfront_id", {
+      value: cf.id,
     });
   }
 }
