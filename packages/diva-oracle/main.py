@@ -38,7 +38,7 @@ dataprovider = Chain.WALLET
 time_ahead = date_time_addition(DAYS)
 query = '''
             {
-              pools (first: 1000, where: {dataProvider: "%s", statusFinalReferenceValue: "Open", expiryTime_gt: "%s"}) {
+              pools (first: 1000, where: {dataProvider: "%s", statusFinalReferenceValue: "Open", expiryTime_lte: "%s"}) {
                 id
                 dataProvider
                 referenceAsset
