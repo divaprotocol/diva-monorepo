@@ -544,7 +544,6 @@ export function MyPositions() {
     }
 
     return [
-      ...acc,
       {
         ...shared,
         id: `${val.id}/long`,
