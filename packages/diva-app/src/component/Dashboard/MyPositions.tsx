@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material'
 import { BigNumber, ethers } from 'ethers'
-import { config, projectId } from '../../constants'
+import { config } from '../../constants'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
@@ -33,7 +33,6 @@ import { useAppSelector } from '../../Redux/hooks'
 import {
   fetchPool,
   selectIntrinsicValue,
-  selectPools,
   selectRequestStatus,
   selectUserAddress,
 } from '../../Redux/appSlice'
@@ -41,22 +40,12 @@ import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ExpiresInCell } from '../Markets/Markets'
 import { getAppStatus } from '../../Util/getAppStatus'
-import { getAddressBalances } from 'eth-balance-checker/lib/ethers'
-import { InfuraProvider } from '@ethersproject/providers'
-import { createAsyncThunk } from '@reduxjs/toolkit'
 import request from 'graphql-request'
-import {
-  User,
-  Pool,
-  queryPool,
-  queryPositionTokens,
-  PositionToken,
-  FeeRecipientCollateralToken,
-  queryMyFeeClaims,
-} from '../../lib/queries'
+import { Pool, queryPositionTokens } from '../../lib/queries'
+import { getAddressBalances } from 'eth-balance-checker/lib/ethers'
 
 type Response = {
-  [token: string]: BigNumber
+  [token: string]: string
 }
 
 const MetaMaskImage = styled.img`
@@ -492,14 +481,9 @@ const columns: GridColDef[] = [
 export function MyPositions() {
   const { provider, address: userAddress, chainId } = useConnectionContext()
   const [page, setPage] = useState(0)
-  const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const [tokenPools, setTokenPools] = useState<Pool[]>([])
 
-  // get all pools (via API call to subgraph)
-  // get all unique addresses
-  // filter where balance > 0
-  // draw table
   const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
       val.expiryTime,
@@ -613,29 +597,12 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
-  const tokenAddresses = rows.map((v) => v.address.id)
-  // const positionTokens = useQuery<any>(
-  //   `position-tokens-${userAddress}`,
-  //   async () => {
-  //     if (chainId != null) {
-  //       const result = await request(
-  //         config[chainId as number].divaSubgraph,
-  //         queryPositionTokens(userAddress)
-  //       )
-  //       console.log('position-tokens', result)
-  //       return result.user.positionTokens
-  //     }
-  //   }
-  // )
-  // console.log('data', positionTokens.data)
-  // const tokenData = positionTokens.data?.map((v) => v.positionToken.id)
-  // console.log('tokenData', tokenData)
   /**
    * TODO: Move into redux
    */
 
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
-    const response: Response = {}
+    let response: Response = {}
     if (!userAddress) {
       console.warn('wallet not connected')
       return Promise.resolve({})
@@ -644,38 +611,59 @@ export function MyPositions() {
       config[chainId as number].divaSubgraph,
       queryPositionTokens(userAddress)
     )
-    console.log('position-tokens', result)
     if (tokenPools.length == 0) {
       setTokenPools(result.user.positionTokens.map((v) => v.positionToken.pool))
     }
+    const tokenAddresses = result.user.positionTokens.map(
+      (v) => v.positionToken.id
+    )
+    console.log('tokenAddresses', tokenAddresses)
+    const tokenAddressesChunks = tokenAddresses.reduce(
+      (resultArray, item, index) => {
+        const batchIndex = Math.floor(index / 400)
+        if (!resultArray[batchIndex]) {
+          resultArray[batchIndex] = []
+        }
+        resultArray[batchIndex].push(item)
+        return resultArray
+      },
+      []
+    )
 
     await Promise.all(
       result.user.positionTokens
         .map((v) => v.positionToken.id)
         .map(async (token) => {
-          console.log('token check', token)
-          const contract = new ethers.Contract(token, ERC20, provider)
-          try {
-            const res: BigNumber = await contract.balanceOf(userAddress)
-            console.log('balance', res)
-            response[token] = res
-          } catch (error) {
-            console.error(error)
-          }
+          tokenAddressesChunks.map(async (batch) => {
+            try {
+              const res = await getAddressBalances(
+                ethers.getDefaultProvider(),
+                userAddress,
+                [
+                  ethers.utils.getAddress(
+                    '0x0a180a76e4466bf68a7f86fb029bed3cccfaaac5'
+                  ),
+                ]
+              )
+              console.log('res', res)
+              response = { ...response, ...res }
+            } catch (error) {
+              console.error(error)
+            }
+          })
         })
     )
     return response
   })
 
   const tokenBalances = balances.data
-  console.log('tokenPools', rows)
   const filteredRows =
     tokenBalances != null
       ? rows
           .filter(
             (v) =>
               tokenBalances[v.address.id] != null &&
-              tokenBalances[v.address.id].gt(0)
+              tokenBalances[v.address.id] != '0'
           )
           .map((v) => ({
             ...v,
