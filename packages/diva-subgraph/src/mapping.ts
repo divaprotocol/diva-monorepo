@@ -420,7 +420,7 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
   // buy limit: maker token = collateral token; taker token = position token
   // after fill, maker receives position tokens
   // check if taker token is a position token
-  let takerTokenEntity = PositionToken.load(event.params.takerToken);
+  let takerTokenEntity = PositionToken.load(event.params.takerToken.toHexString());
   if (takerTokenEntity) {
     // taker token is position token (buy limit order)
     // add buyer of position token to user list (seller already added before)
@@ -442,7 +442,7 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
   
   // sell limit: maker token = position token; taker token = collateral token
   // after fill, taker receives position tokens
-  let makerTokenEntity = PositionToken.load(event.params.makerToken);
+  let makerTokenEntity = PositionToken.load(event.params.makerToken.toHexString());
   if (makerTokenEntity) {
     let userEntity = User.load(event.params.taker.toHexString());
     if (!userEntity) {
