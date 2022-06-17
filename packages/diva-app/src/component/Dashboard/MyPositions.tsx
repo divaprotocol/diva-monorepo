@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material'
 import { BigNumber, ethers } from 'ethers'
-import { config } from '../../constants'
+import { config, projectId } from '../../constants'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
@@ -42,9 +42,21 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ExpiresInCell } from '../Markets/Markets'
 import { getAppStatus } from '../../Util/getAppStatus'
 import { getAddressBalances } from 'eth-balance-checker/lib/ethers'
+import { InfuraProvider } from '@ethersproject/providers'
+import { createAsyncThunk } from '@reduxjs/toolkit'
+import request from 'graphql-request'
+import {
+  User,
+  Pool,
+  queryPool,
+  queryPositionTokens,
+  PositionToken,
+  FeeRecipientCollateralToken,
+  queryMyFeeClaims,
+} from '../../lib/queries'
 
 type Response = {
-  [token: string]: string
+  [token: string]: BigNumber
 }
 
 const MetaMaskImage = styled.img`
@@ -480,7 +492,7 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const { provider, address: userAddress } = useConnectionContext()
+  const { provider, address: userAddress, chainId } = useConnectionContext()
   const [page, setPage] = useState(0)
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
@@ -604,49 +616,50 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
-  const tokenAddresses = rows.map((v) => v.address.id)
-
+  // const tokenAddresses = rows.map((v) => v.address.id)
+  const positionTokens = useQuery<any>(
+    `position-tokens-${userAddress}`,
+    async () => {
+      if (chainId != null) {
+        const result = await request(
+          config[chainId as number].divaSubgraph,
+          queryPositionTokens(userAddress)
+        )
+        console.log('position-tokens', result)
+        return result.user.positionTokens
+      }
+    }
+  )
+  console.log('data', positionTokens.data)
   /**
    * TODO: Move into redux
    */
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
-    let response: Response = {}
+    // if (positionTokens.isSuccess && poolsRequestStatus !== 'pending') {
+    const response: Response = {}
     if (!userAddress) {
       console.warn('wallet not connected')
       return Promise.resolve({})
     }
-    console.log(tokenAddresses.length)
-    const batchSize = 400
-    const tokenAddressesChunks = tokenAddresses.reduce(
-      (resultArray, item, index) => {
-        const batchIndex = Math.floor(index / batchSize)
-        if (!resultArray[batchIndex]) {
-          resultArray[batchIndex] = []
+    await Promise.all(
+      positionTokens.data.map(async (token) => {
+        console.log('token check', token.positionToken.id)
+        const contract = new ethers.Contract(
+          token.positionToken.id,
+          ERC20,
+          provider
+        )
+        try {
+          const res: BigNumber = await contract.balanceOf(userAddress)
+          console.log('balance', res)
+          response[token.positionToken.id] = res
+        } catch (error) {
+          console.error(error)
         }
-        resultArray[batchIndex].push(item)
-        return resultArray
-      },
-      []
-    )
-    tokenAddressesChunks.map((batch) => {
-      getAddressBalances(provider, userAddress, batch).then((res) => {
-        console.log('balRes', Object.values(res))
-        response = { ...response, ...res }
       })
-    })
-
-    // await Promise.all(
-    //   tokenAddresses.map(async (tokenAddress) => {
-    //     const contract = new ethers.Contract(tokenAddress, ERC20, provider)
-    //     try {
-    //       const res: BigNumber = await contract.balanceOf(userAddress)
-    //       response[tokenAddress] = res
-    //     } catch (error) {
-    //       console.error(error)
-    //     }
-    //   })
-    // )
+    )
     return response
+    // }
   })
 
   const tokenBalances = balances.data
@@ -657,7 +670,7 @@ export function MyPositions() {
           .filter(
             (v) =>
               tokenBalances[v.address.id] != null &&
-              tokenBalances[v.address.id] !== '0'
+              tokenBalances[v.address.id].gt(0)
           )
           .map((v) => ({
             ...v,
@@ -703,7 +716,7 @@ export function MyPositions() {
           <PoolsTable
             page={page}
             rows={sortedRows}
-            loading={balances.isLoading || poolsRequestStatus === 'pending'}
+            loading={!balances.isSuccess || poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}
           />
