@@ -69,20 +69,23 @@ function handleLiquidityEvent(
   let userEntity = User.load(msgSender.toHexString());
   if (!userEntity) {
     userEntity = new User(msgSender.toHexString());
+    userEntity.save();
   }
   let userShortPositionTokenEntity = UserPositionToken.load(
     msgSender.toHexString() + "-" + parameters.shortToken.toHexString())
   if (!userShortPositionTokenEntity) {
-    userShortPositionTokenEntity = new User(msgSender.toHexString() + "-" + parameters.shortToken.toHexString());
+    userShortPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.shortToken.toHexString());
     userShortPositionTokenEntity.user = msgSender.toHexString();
     userShortPositionTokenEntity.positionToken = parameters.shortToken.toHexString();
+    userShortPositionTokenEntity.save();
   }
   let userLongPositionTokenEntity = UserPositionToken.load(
     msgSender.toHexString() + "-" + parameters.longToken.toHexString())
   if (!userLongPositionTokenEntity) {
-    userLongPositionTokenEntity = new User(msgSender.toHexString() + "-" + parameters.longToken.toHexString());
+    userLongPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.longToken.toHexString());
     userLongPositionTokenEntity.user = msgSender.toHexString();
     userLongPositionTokenEntity.positionToken = parameters.longToken.toHexString();
+    userLongPositionTokenEntity.save();
   }
 
 
