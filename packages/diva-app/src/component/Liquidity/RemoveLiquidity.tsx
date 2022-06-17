@@ -333,7 +333,8 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                   !pool ||
                   openExpiredAlert ||
                   textFieldValue === '' ||
-                  chainId == null
+                  chainId == null ||
+                  openAlert === true
                 }
                 onClick={() => {
                   setLoading(true)
