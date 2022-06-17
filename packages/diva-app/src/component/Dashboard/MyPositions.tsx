@@ -614,50 +614,53 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
-  // const tokenAddresses = rows.map((v) => v.address.id)
-  const positionTokens = useQuery<any>(
-    `position-tokens-${userAddress}`,
-    async () => {
-      if (chainId != null) {
-        const result = await request(
-          config[chainId as number].divaSubgraph,
-          queryPositionTokens(userAddress)
-        )
-        console.log('position-tokens', result)
-        return result.user.positionTokens
-      }
-    }
-  )
-  console.log('data', positionTokens.data)
+  const tokenAddresses = rows.map((v) => v.address.id)
+  // const positionTokens = useQuery<any>(
+  //   `position-tokens-${userAddress}`,
+  //   async () => {
+  //     if (chainId != null) {
+  //       const result = await request(
+  //         config[chainId as number].divaSubgraph,
+  //         queryPositionTokens(userAddress)
+  //       )
+  //       console.log('position-tokens', result)
+  //       return result.user.positionTokens
+  //     }
+  //   }
+  // )
+  // console.log('data', positionTokens.data)
+  // const tokenData = positionTokens.data?.map((v) => v.positionToken.id)
+  // console.log('tokenData', tokenData)
   /**
    * TODO: Move into redux
    */
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
-    // if (positionTokens.isSuccess && poolsRequestStatus !== 'pending') {
     const response: Response = {}
     if (!userAddress) {
       console.warn('wallet not connected')
       return Promise.resolve({})
     }
+    const result = await request(
+      config[chainId as number].divaSubgraph,
+      queryPositionTokens(userAddress)
+    )
+    console.log('position-tokens', result)
     await Promise.all(
-      positionTokens.data.map(async (token) => {
-        console.log('token check', token.positionToken.id)
-        const contract = new ethers.Contract(
-          token.positionToken.id,
-          ERC20,
-          provider
-        )
-        try {
-          const res: BigNumber = await contract.balanceOf(userAddress)
-          console.log('balance', res)
-          response[token.positionToken.id] = res
-        } catch (error) {
-          console.error(error)
-        }
-      })
+      result.user.positionTokens
+        .map((v) => v.positionToken.id)
+        .map(async (token) => {
+          console.log('token check', token)
+          const contract = new ethers.Contract(token, ERC20, provider)
+          try {
+            const res: BigNumber = await contract.balanceOf(userAddress)
+            console.log('balance', res)
+            response[token] = res
+          } catch (error) {
+            console.error(error)
+          }
+        })
     )
     return response
-    // }
   })
 
   const tokenBalances = balances.data
@@ -714,7 +717,11 @@ export function MyPositions() {
           <PoolsTable
             page={page}
             rows={sortedRows}
-            loading={balances.isLoading || poolsRequestStatus === 'pending'}
+            loading={
+              !balances.isSuccess ||
+              balances.isLoading ||
+              poolsRequestStatus === 'pending'
+            }
             columns={columns}
             onPageChange={(page) => setPage(page)}
           />
