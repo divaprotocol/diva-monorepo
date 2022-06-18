@@ -608,6 +608,21 @@ export function MyPositions() {
       console.warn('wallet not connected')
       return Promise.resolve({})
     }
+    const contract = new ethers.Contract(
+      '0xD713aeC2156709A6AF392bb84018ACc6b44f1885', // BalanceChecker contract address on Ropsten -> move to config
+      BalanceCheckerABI,
+      provider
+    )
+    console.log(contract)
+    const resTest = await contract.balances(
+      [userAddress, userAddress],
+      [
+        '0x12aF69D32199f0205BCec380697Ea04B1cf26059',
+        '0xaD6D458402F60fD3Bd25163575031ACDce07538D',
+      ]
+    )
+    console.log('resTest')
+    console.log(resTest)
     const result = await request(
       config[chainId as number].divaSubgraph,
       queryPositionTokens(userAddress)
@@ -639,27 +654,14 @@ export function MyPositions() {
         .map((v) => v.positionToken.id)
         .map(async (token) => {
           tokenAddressesChunks.map(async (batch) => {
-            console.log('BalanceCheckerABI')
-            console.log(BalanceCheckerABI)
-            const contract = new ethers.Contract(
-              '0x12aF69D32199f0205BCec380697Ea04B1cf26059',
-              BalanceCheckerABI,
-              provider
-            )
             console.log('userAddress')
             console.log(typeof userAddress)
             try {
-              const res: any = await contract.balances(
-                [userAddress],
-                ['0x12aF69D32199f0205BCec380697Ea04B1cf26059']
+              const res = await getAddressBalances(
+                ethers.getDefaultProvider(),
+                userAddress,
+                ['0xaD6D458402F60fD3Bd25163575031ACDce07538D']
               )
-              console.log('res')
-              console.log(res)
-              // const res = await getAddressBalances(
-              //   ethers.getDefaultProvider(),
-              //   userAddress,
-              //   ['0xaD6D458402F60fD3Bd25163575031ACDce07538D']
-              // )
               console.log('res', res)
               response = { ...response, ...res }
             } catch (error) {
