@@ -22,6 +22,7 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
+import BalanceCheckerABI from '../../abi/BalanceChecker.json'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
@@ -611,6 +612,8 @@ export function MyPositions() {
       config[chainId as number].divaSubgraph,
       queryPositionTokens(userAddress)
     )
+    console.log('result')
+    console.log(result)
     if (tokenPools.length == 0) {
       setTokenPools(result.user.positionTokens.map((v) => v.positionToken.pool))
     }
@@ -629,22 +632,34 @@ export function MyPositions() {
       },
       []
     )
+    console.log('tokenAddressesChunks', tokenAddressesChunks)
 
     await Promise.all(
       result.user.positionTokens
         .map((v) => v.positionToken.id)
         .map(async (token) => {
           tokenAddressesChunks.map(async (batch) => {
+            console.log('BalanceCheckerABI')
+            console.log(BalanceCheckerABI)
+            const contract = new ethers.Contract(
+              '0x12aF69D32199f0205BCec380697Ea04B1cf26059',
+              BalanceCheckerABI,
+              provider
+            )
+            console.log('userAddress')
+            console.log(typeof userAddress)
             try {
-              const res = await getAddressBalances(
-                ethers.getDefaultProvider(),
-                userAddress,
-                [
-                  ethers.utils.getAddress(
-                    '0x0a180a76e4466bf68a7f86fb029bed3cccfaaac5'
-                  ),
-                ]
+              const res: any = await contract.balances(
+                [userAddress],
+                ['0x12aF69D32199f0205BCec380697Ea04B1cf26059']
               )
+              console.log('res')
+              console.log(res)
+              // const res = await getAddressBalances(
+              //   ethers.getDefaultProvider(),
+              //   userAddress,
+              //   ['0xaD6D458402F60fD3Bd25163575031ACDce07538D']
+              // )
               console.log('res', res)
               response = { ...response, ...res }
             } catch (error) {

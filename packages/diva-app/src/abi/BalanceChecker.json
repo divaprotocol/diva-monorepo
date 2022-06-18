@@ -1,0 +1,6 @@
+[
+    "function allowances(address[],address[],address[]) view returns (uint256[])",
+    "function balances(address[],address[]) view returns (uint256[])",
+    "function getMinOfBalancesOrAllowances(address[],address[],address) view returns (uint256[])"
+  ]
+  
