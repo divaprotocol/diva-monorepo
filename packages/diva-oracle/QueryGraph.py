@@ -19,7 +19,7 @@ def run_query(query, network):
 def get_required_reporting_df(resp, hours=24):
     df = pd.json_normalize(resp, ['data', 'pools'])
     if not df.empty:
-        df = df[df["statusFinalReferenceValue"] == "Open"]
+        #df = df[df["statusFinalReferenceValue"] == "Open"]
         df['expiryTime'] = df['expiryTime'].apply(lambda x: float(x))
         df = df[df['expiryTime'] <= 95617580400]  # 95617580400 = Year 5000
         df['expiryTime_datetime'] = df['expiryTime'].apply(lambda x: datetime.fromtimestamp(x))
