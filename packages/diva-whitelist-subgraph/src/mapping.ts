@@ -60,6 +60,18 @@ export function handleDataProviderAdded(event: DataProviderAdded): void {
 export function handleDataProviderDeleted(event: DataProviderDeleted): void {
   let id = event.params.providerAddress.toHexString();
   store.remove("DataProvider", id);
+
+  let i = 0;
+  let dataFeedId = id + "-" + i.toString();
+  let dataFeedEntity = DataFeed.load(dataFeedId);
+
+  while (dataFeedEntity) {
+    store.remove('DataFeed', dataFeedId);
+    
+    i = i + 1;
+    dataFeedId = id + "-" + i.toString()
+    dataFeedEntity = DataFeed.load(dataFeedId);
+  }
 }
 
 export function handleDataProviderNameUpdated(
