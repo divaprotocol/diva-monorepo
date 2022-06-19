@@ -35,6 +35,9 @@ export const sellLimitOrder = async (orderData) => {
     amount.toString(),
     orderData.collateralDecimals
   )
+  const takerFeeAmount = takerAmount
+    .mul(parseUnits('0.01', orderData.collateralDecimals)) // 1% fee paid in taker token,  i.e. collateral token in sell limit
+    .div(parseUnits('1', orderData.collateralDecimals))
   const networkUrl = config[orderData.chainId].order
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
@@ -44,6 +47,7 @@ export const sellLimitOrder = async (orderData) => {
     maker: orderData.maker,
     sender: NULL_ADDRESS,
     feeRecipient: '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E',
+    takerTokenFeeAmount: takerFeeAmount,
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
     chainId: orderData.chainId,

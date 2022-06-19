@@ -35,6 +35,9 @@ export const buylimitOrder = async (orderData) => {
     orderData.collateralDecimals
   )
   const takerAmount = parseEther(orderData.nbrOptions.toString())
+  const takerFeeAmount = takerAmount
+    .mul(parseUnits('0.01')) // 1% fee paid in taker token (i.e. position token in buy limit)
+    .div(parseUnits('1'))
   const networkUrl = config[orderData.chainId].order
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
@@ -43,6 +46,8 @@ export const buylimitOrder = async (orderData) => {
     takerAmount: takerAmount.toString(),
     maker: orderData.makerAccount,
     sender: NULL_ADDRESS,
+    feeRecipient: '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E',
+    takerTokenFeeAmount: takerFeeAmount,
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
     chainId: orderData.chainId,
