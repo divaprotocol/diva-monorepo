@@ -526,6 +526,7 @@ export function MyPositions() {
     }
 
     return [
+      ...acc,
       {
         ...shared,
         id: `${val.id}/long`,
@@ -609,9 +610,8 @@ export function MyPositions() {
       config[chainId as number].divaSubgraph,
       queryPositionTokens(userAddress)
     )
-    if (tokenPools.length == 0) {
-      setTokenPools(result.user.positionTokens.map((v) => v.positionToken.pool))
-    }
+    setTokenPools(result.user.positionTokens.map((v) => v.positionToken.pool))
+
     const tokenAddresses = result.user.positionTokens.map(
       (v) => v.positionToken.id
     )
@@ -649,9 +649,14 @@ export function MyPositions() {
   })
 
   const tokenBalances = balances.data
+
   const filteredRows =
     tokenBalances != null
       ? rows
+          .filter(
+            (value, index, self) =>
+              index === self.findIndex((t) => t.id === value.id)
+          )
           .filter(
             (v) =>
               tokenBalances[v.address.id] != null &&
