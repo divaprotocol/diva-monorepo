@@ -11,7 +11,7 @@ from sendEmail import sendEmail
 
 query = """
         { 
-            pools (first: 1000, where: {statusFinalReferenceValue: "Open", dataProvider: """ + """ "{}" """.format(config.dataprovider) + """}) {
+            pools (first: 1000, where: {expiryTime_gte: """ + """ "{}" """.format(int(datetime.now().timestamp()) - 86400) + """, expiryTime_lte: """ + """ "{}" """.format(int(datetime.now().timestamp()) - 300) + """ statusFinalReferenceValue: "Open", dataProvider: """ + """ "{}" """.format(config.dataprovider) + """}) {
                 id
                 dataProvider
                 referenceAsset
