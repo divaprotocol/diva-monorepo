@@ -33,7 +33,6 @@ import { useAppSelector } from '../../Redux/hooks'
 import {
   fetchPool,
   selectIntrinsicValue,
-  selectRequestStatus,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
@@ -42,10 +41,10 @@ import { ExpiresInCell } from '../Markets/Markets'
 import { getAppStatus } from '../../Util/getAppStatus'
 import request from 'graphql-request'
 import { Pool, queryPositionTokens } from '../../lib/queries'
-import { getAddressBalances } from 'eth-balance-checker/lib/ethers'
+import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
 
 type Response = {
-  [token: string]: string
+  [token: string]: BigNumber
 }
 
 const MetaMaskImage = styled.img`
@@ -481,7 +480,6 @@ const columns: GridColDef[] = [
 export function MyPositions() {
   const { provider, address: userAddress, chainId } = useConnectionContext()
   const [page, setPage] = useState(0)
-  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const [tokenPools, setTokenPools] = useState<Pool[]>([])
 
   const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
@@ -617,7 +615,6 @@ export function MyPositions() {
     const tokenAddresses = result.user.positionTokens.map(
       (v) => v.positionToken.id
     )
-    console.log('tokenAddresses', tokenAddresses)
     const tokenAddressesChunks = tokenAddresses.reduce(
       (resultArray, item, index) => {
         const batchIndex = Math.floor(index / 400)
@@ -629,29 +626,23 @@ export function MyPositions() {
       },
       []
     )
-
+    const contract = new ethers.Contract(
+      config[chainId].balanceCheckAddress,
+      BalanceCheckerABI,
+      provider
+    )
     await Promise.all(
-      result.user.positionTokens
-        .map((v) => v.positionToken.id)
-        .map(async (token) => {
-          tokenAddressesChunks.map(async (batch) => {
-            try {
-              const res = await getAddressBalances(
-                ethers.getDefaultProvider(),
-                userAddress,
-                [
-                  ethers.utils.getAddress(
-                    '0x0a180a76e4466bf68a7f86fb029bed3cccfaaac5'
-                  ),
-                ]
-              )
-              console.log('res', res)
-              response = { ...response, ...res }
-            } catch (error) {
-              console.error(error)
-            }
-          })
-        })
+      tokenAddressesChunks.map(async (batch) => {
+        try {
+          const res = await contract.balances([userAddress, userAddress], batch)
+          response = batch.reduce(
+            (obj, key, index) => ({ ...obj, [key]: res[index] }),
+            {}
+          )
+        } catch (error) {
+          console.error(error)
+        }
+      })
     )
     return response
   })
@@ -663,7 +654,7 @@ export function MyPositions() {
           .filter(
             (v) =>
               tokenBalances[v.address.id] != null &&
-              tokenBalances[v.address.id] != '0'
+              tokenBalances[v.address.id].gt(0)
           )
           .map((v) => ({
             ...v,
@@ -709,7 +700,7 @@ export function MyPositions() {
           <PoolsTable
             page={page}
             rows={sortedRows}
-            loading={balances.isLoading || poolsRequestStatus === 'pending'}
+            loading={balances.isLoading}
             columns={columns}
             onPageChange={(page) => setPage(page)}
           />
