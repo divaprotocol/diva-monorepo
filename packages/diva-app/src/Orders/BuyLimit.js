@@ -47,7 +47,7 @@ export const buylimitOrder = async (orderData) => {
     maker: orderData.makerAccount,
     sender: NULL_ADDRESS,
     feeRecipient: '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E',
-    takerTokenFeeAmount: takerFeeAmount,
+    takerTokenFeeAmount: takerFeeAmount.toString(),
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
     chainId: orderData.chainId,
