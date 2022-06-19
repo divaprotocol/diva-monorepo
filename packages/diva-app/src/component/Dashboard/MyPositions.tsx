@@ -634,7 +634,8 @@ export function MyPositions() {
     await Promise.all(
       tokenAddressesChunks.map(async (batch) => {
         try {
-          const res = await contract.balances([userAddress, userAddress], batch)
+          const userAddressArray = Array(batch.length).fill(userAddress)
+          const res = await contract.balances(userAddressArray, batch)
           response = batch.reduce(
             (obj, key, index) => ({ ...obj, [key]: res[index] }),
             {}
