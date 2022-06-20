@@ -8,6 +8,7 @@ export function ConnectWalletButton() {
   const { isConnected, disconnect, connect } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
   const chainId = useAppSelector(selectChainId)
+  console.log('wallet connect button component: isConnected: ', isConnected)
 
   return (
     <LoadingButton

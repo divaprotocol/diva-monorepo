@@ -7,7 +7,7 @@ import { useAppSelector } from '../../Redux/hooks'
 export function NetworkTag() {
   const { isConnected } = useConnectionContext()
   const chainId = useAppSelector(selectChainId)
-
+  console.log('isConnected', isConnected)
   if (isConnected) {
     return (
       <Chip
