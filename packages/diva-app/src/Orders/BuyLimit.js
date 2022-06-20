@@ -4,6 +4,7 @@ import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
 import { isFloat, decimalPlaces } from '../component/Trade/Orders/OrderHelper'
+import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 
 export const buylimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {

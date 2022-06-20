@@ -266,7 +266,7 @@ export const Tasks = (props: any) => {
   })
   const orderFills = useQuery<OrderFill[]>('orderFills', async () => {
     const response = request(
-      config[chainId].zeroxSubgraph,
+      config[chainId].divaSubgraph,
       queryOrderFills(userAddress)
     ).then((orders) => {
       if (orders.nativeOrderFills != null) {
@@ -279,7 +279,7 @@ export const Tasks = (props: any) => {
   })
   const orderFillsMaker = useQuery<OrderFill[]>('orderFillsMaker', async () => {
     const response = request(
-      config[chainId].zeroxSubgraph,
+      config[chainId].divaSubgraph,
       queryOrderFillsMaker(userAddress)
     ).then((orders) => {
       if (orders.nativeOrderFills != null) {
