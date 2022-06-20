@@ -51,7 +51,6 @@ export const ConnectionProvider = ({ children }) => {
 
   const connect = useCallback(async () => {
     const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
-    console.log('connected variable: ', connected)
     setState((_state) => ({
       ..._state,
       address: accounts[0],
@@ -84,14 +83,9 @@ export const ConnectionProvider = ({ children }) => {
     }
 
     ethereum.on('accountsChanged', (accounts) => {
-      console.log('accountsChanged')
       ethereum.request({ method: 'eth_accounts' }).then((res) => {
         if (res.length > 0) {
-          // connect()
-          setState((_state) => ({
-            ..._state,
-            address: accounts?.[0],
-          }))
+          connect()
         } else {
           disconnect()
         }
@@ -99,7 +93,6 @@ export const ConnectionProvider = ({ children }) => {
     })
 
     ethereum.on('chainChanged', (chainInfo) => {
-      console.log('chainChanged')
       setState((_state) => ({
         ..._state,
         chainId: BigNumber.from(ethereum.chainId).toNumber(),
@@ -107,9 +100,6 @@ export const ConnectionProvider = ({ children }) => {
     })
 
     ethereum.on('connect', (connectInfo) => {
-      console.log('connect')
-      console.log('isConnected: ', ethereum.isConnected())
-      console.log('state.isConnected: ', state.isConnected)
       setState((_state) => ({
         ..._state,
         isConnected: ethereum.isConnected(),
@@ -118,7 +108,6 @@ export const ConnectionProvider = ({ children }) => {
     })
 
     ethereum.on('disconnect', () => {
-      console.log('disconnect')
       setState((_state) => ({ ..._state, isConnected: ethereum.isConnected() }))
     })
 
@@ -129,7 +118,6 @@ export const ConnectionProvider = ({ children }) => {
       }))
     )
 
-    // connect()
     if (connected) connect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
