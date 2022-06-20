@@ -12,6 +12,7 @@ import {
 } from "../generated/DivaDiamond/DivaDiamond";
 import { Erc20Token } from "../generated/DivaDiamond/Erc20Token";
 import { PositionTokenABI } from "../generated/DivaDiamond/PositionTokenABI";
+import { LimitOrderFilled } from "../generated/ExchangeProxy/IZeroEx";
 import {
   Pool,
   Challenge,
@@ -19,7 +20,10 @@ import {
   CollateralToken,
   FeeRecipientCollateralToken,
   PositionToken,
-  TestnetUser
+  TestnetUser,
+  UserPositionToken,
+  User,
+  NativeOrderFill
 } from "../generated/schema";
 
 /**
@@ -62,6 +66,32 @@ function handleLiquidityEvent(
   let longTokenContract = PositionTokenABI.bind(parameters.longToken);
 
   let entity = Pool.load(poolId.toString());
+  
+  //set user to position token mapping
+  let userEntity = User.load(msgSender.toHexString());
+  if (!userEntity) {
+    userEntity = new User(msgSender.toHexString());
+    userEntity.save();
+  }
+  let userShortPositionTokenEntity = UserPositionToken.load(
+    msgSender.toHexString() + "-" + parameters.shortToken.toHexString())
+  if (!userShortPositionTokenEntity) {
+    userShortPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.shortToken.toHexString());
+    userShortPositionTokenEntity.user = msgSender.toHexString();
+    userShortPositionTokenEntity.positionToken = parameters.shortToken.toHexString();
+    userShortPositionTokenEntity.save();
+  }
+  let userLongPositionTokenEntity = UserPositionToken.load(
+    msgSender.toHexString() + "-" + parameters.longToken.toHexString())
+  if (!userLongPositionTokenEntity) {
+    userLongPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.longToken.toHexString());
+    userLongPositionTokenEntity.user = msgSender.toHexString();
+    userLongPositionTokenEntity.positionToken = parameters.longToken.toHexString();
+    userLongPositionTokenEntity.save();
+  }
+
+
+  //pool entity
   if (!entity) {
     entity = new Pool(poolId.toString());
     entity.createdBy = msgSender;
@@ -367,5 +397,68 @@ export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void 
 
 }
 
+export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
+  log.info("handleLimitOrderFilledEvent", []);
+
+  let id = event.transaction.hash.toHexString() + '-' + event.params.orderHash.toHex() + '-' + event.logIndex.toString();
+
+  let nativeOrderFillEntity = NativeOrderFill.load(id);
+
+  if (!nativeOrderFillEntity) {
+      nativeOrderFillEntity = new NativeOrderFill(id);
+      nativeOrderFillEntity.orderHash = event.params.orderHash;
+      nativeOrderFillEntity.maker = event.params.maker;
+      nativeOrderFillEntity.taker = event.params.taker;
+      nativeOrderFillEntity.makerToken = event.params.makerToken;
+      nativeOrderFillEntity.takerToken = event.params.takerToken;
+      nativeOrderFillEntity.makerTokenFilledAmount = event.params.makerTokenFilledAmount;
+      nativeOrderFillEntity.takerTokenFilledAmount = event.params.takerTokenFilledAmount;
+      nativeOrderFillEntity.timestamp = event.block.timestamp;
+      nativeOrderFillEntity.save();
+  }
+
+  // buy limit: maker token = collateral token; taker token = position token
+  // after fill, maker receives position tokens
+  // check if taker token is a position token
+  let takerTokenEntity = PositionToken.load(event.params.takerToken.toHexString());
+  if (takerTokenEntity) {
+    // taker token is position token (buy limit order)
+    // add buyer of position token to user list (seller already added before)
+    let userEntity = User.load(event.params.maker.toHexString());
+    if (!userEntity) {
+      userEntity = new User(event.params.maker.toHexString());
+      userEntity.save();
+    }
+
+    let userPositionTokenEntity = UserPositionToken.load(
+      event.params.maker.toHexString() + "-" + event.params.takerToken.toHexString())
+    if (!userPositionTokenEntity) {
+      userPositionTokenEntity = new UserPositionToken(event.params.maker.toHexString() + "-" + event.params.takerToken.toHexString());
+      userPositionTokenEntity.user = event.params.maker.toHexString();
+      userPositionTokenEntity.positionToken = event.params.takerToken.toHexString();
+      userPositionTokenEntity.save();
+    }
+  } 
+  
+  // sell limit: maker token = position token; taker token = collateral token
+  // after fill, taker receives position tokens
+  let makerTokenEntity = PositionToken.load(event.params.makerToken.toHexString());
+  if (makerTokenEntity) {
+    let userEntity = User.load(event.params.taker.toHexString());
+    if (!userEntity) {
+      userEntity = new User(event.params.taker.toHexString());
+      userEntity.save();
+    }
+
+    let userPositionTokenEntity = UserPositionToken.load(
+      event.params.taker.toHexString() + "-" + event.params.makerToken.toHexString())
+    if (!userPositionTokenEntity) {
+      userPositionTokenEntity = new UserPositionToken(event.params.taker.toHexString() + "-" + event.params.makerToken.toHexString());
+      userPositionTokenEntity.user = event.params.taker.toHexString();
+      userPositionTokenEntity.positionToken = event.params.makerToken.toHexString();
+      userPositionTokenEntity.save();
+    }
+  }
+}
 
 // IMPORTANT: Updated the ABI as well!!!

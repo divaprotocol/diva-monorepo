@@ -33,14 +33,15 @@ import { useAppSelector } from '../../Redux/hooks'
 import {
   fetchPool,
   selectIntrinsicValue,
-  selectPools,
-  selectRequestStatus,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ExpiresInCell } from '../Markets/Markets'
 import { getAppStatus } from '../../Util/getAppStatus'
+import request from 'graphql-request'
+import { Pool, queryPositionTokens } from '../../lib/queries'
+import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
 
 type Response = {
   [token: string]: BigNumber
@@ -51,9 +52,7 @@ const MetaMaskImage = styled.img`
   height: 20px;
   cursor: pointer;
 `
-const ethereum = window?.ethereum
 const AddToMetamask = (props: any) => {
-  const { provider } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
     e.stopPropagation()
     const tokenSymbol =
@@ -311,6 +310,7 @@ const Payoff = (props: any) => {
     )
   )
   if (
+    intrinsicValue != null &&
     props.row.finalValue != '-' &&
     intrinsicValue.payoffPerShortToken != null &&
     intrinsicValue.payoffPerLongToken != null
@@ -479,12 +479,11 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const { provider, address: userAddress } = useConnectionContext()
+  const { provider, address: userAddress, chainId } = useConnectionContext()
   const [page, setPage] = useState(0)
-  const pools = useAppSelector((state) => selectPools(state))
-  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+  const [tokenPools, setTokenPools] = useState<Pool[]>([])
 
-  const rows: GridRowModel[] = pools.reduce((acc, val) => {
+  const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
       val.expiryTime,
       val.statusTimestamp,
@@ -598,23 +597,50 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
-  const tokenAddresses = rows.map((v) => v.address.id)
-
   /**
    * TODO: Move into redux
    */
+
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
-    const response: Response = {}
+    let response: Response = {}
     if (!userAddress) {
       console.warn('wallet not connected')
       return Promise.resolve({})
     }
+    const result = await request(
+      config[chainId as number].divaSubgraph,
+      queryPositionTokens(userAddress)
+    )
+    setTokenPools(result.user.positionTokens.map((v) => v.positionToken.pool))
+
+    const tokenAddresses = result.user.positionTokens.map(
+      (v) => v.positionToken.id
+    )
+    const tokenAddressesChunks = tokenAddresses.reduce(
+      (resultArray, item, index) => {
+        const batchIndex = Math.floor(index / 400)
+        if (!resultArray[batchIndex]) {
+          resultArray[batchIndex] = []
+        }
+        resultArray[batchIndex].push(item)
+        return resultArray
+      },
+      []
+    )
+    const contract = new ethers.Contract(
+      config[chainId].balanceCheckAddress,
+      BalanceCheckerABI,
+      provider
+    )
     await Promise.all(
-      tokenAddresses.map(async (tokenAddress) => {
-        const contract = new ethers.Contract(tokenAddress, ERC20, provider)
+      tokenAddressesChunks.map(async (batch) => {
         try {
-          const res: BigNumber = await contract.balanceOf(userAddress)
-          response[tokenAddress] = res
+          const userAddressArray = Array(batch.length).fill(userAddress)
+          const res = await contract.balances(userAddressArray, batch)
+          response = batch.reduce(
+            (obj, key, index) => ({ ...obj, [key]: res[index] }),
+            {}
+          )
         } catch (error) {
           console.error(error)
         }
@@ -628,6 +654,10 @@ export function MyPositions() {
   const filteredRows =
     tokenBalances != null
       ? rows
+          .filter(
+            (value, index, self) =>
+              index === self.findIndex((t) => t.id === value.id)
+          )
           .filter(
             (v) =>
               tokenBalances[v.address.id] != null &&
@@ -677,7 +707,7 @@ export function MyPositions() {
           <PoolsTable
             page={page}
             rows={sortedRows}
-            loading={balances.isLoading || poolsRequestStatus === 'pending'}
+            loading={balances.isLoading}
             columns={columns}
             onPageChange={(page) => setPage(page)}
           />

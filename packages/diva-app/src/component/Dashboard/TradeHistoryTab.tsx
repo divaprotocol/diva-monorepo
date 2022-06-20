@@ -115,7 +115,7 @@ export function TradeHistoryTab() {
   const orderFills = useQuery<OrderFill[]>('orderFills', async () => {
     if (userAddress != null) {
       const response = request(
-        config[chainId].zeroxSubgraph,
+        config[chainId].divaSubgraph,
         queryOrderFills(userAddress)
       ).then((orders) => {
         if (orders.nativeOrderFills != null) {
@@ -130,7 +130,7 @@ export function TradeHistoryTab() {
   const orderFillsMaker = useQuery<OrderFill[]>('orderFillsMaker', async () => {
     if (userAddress != null) {
       const response = request(
-        config[chainId].zeroxSubgraph,
+        config[chainId].divaSubgraph,
         queryOrderFillsMaker(userAddress)
       ).then((orders) => {
         if (orders.nativeOrderFills != null) {

@@ -353,6 +353,7 @@ export default function Markets() {
           columns={columns}
           rows={filteredRows}
           page={page}
+          loading={mainPools.length === 0}
           rowCount={filteredRows.length}
           onPageChange={(page) => setPage(page)}
         />
