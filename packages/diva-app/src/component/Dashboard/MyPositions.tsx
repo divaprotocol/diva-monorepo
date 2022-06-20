@@ -310,6 +310,7 @@ const Payoff = (props: any) => {
     )
   )
   if (
+    intrinsicValue != null &&
     props.row.finalValue != '-' &&
     intrinsicValue.payoffPerShortToken != null &&
     intrinsicValue.payoffPerLongToken != null
