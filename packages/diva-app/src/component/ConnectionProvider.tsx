@@ -82,10 +82,20 @@ export const ConnectionProvider = ({ children }) => {
     }
 
     ethereum.on('accountsChanged', (accounts) => {
-      setState((_state) => ({
-        ..._state,
-        address: accounts?.[0],
-      }))
+      ethereum.request({ method: 'eth_accounts' }).then((res) => {
+        if (res.length > 0) {
+          setState((_state) => ({
+            ..._state,
+            address: accounts?.[0],
+          }))
+        } else {
+          setState((_state) => ({
+            ..._state,
+            address: undefined,
+            isConnected: false,
+          }))
+        }
+      })
     })
 
     ethereum.on('chainChanged', (chainInfo) => {
