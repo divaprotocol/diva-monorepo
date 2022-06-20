@@ -50,6 +50,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const [longToken, setLongToken] = React.useState('')
   const [shortToken, setShortToken] = React.useState('')
   const [decimal, setDecimal] = React.useState(18)
+  const [actionEnabled, setActionEnabled] = React.useState(false)
   const [openAlert, setOpenAlert] = React.useState(false)
   const [loading, setLoading] = useState(false)
   const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
@@ -109,41 +110,45 @@ export const RemoveLiquidity = ({ pool }: Props) => {
         }
       }
       if (textFieldValue !== '') {
-        setLongToken(
-          formatEther(
-            parseEther(textFieldValue)
-              .mul(parseEther('1'))
-              .div(
-                parseEther('1')
-                  .sub(BigNumber.from(pool.redemptionFee))
-                  .sub(BigNumber.from(pool.settlementFee))
-              )
-              .mul(BigNumber.from(pool.supplyInitial))
-              .div(
-                BigNumber.from(pool.collateralBalanceLongInitial)
-                  .add(BigNumber.from(pool.collateralBalanceShortInitial))
-                  .mul(parseUnits('1', 18 - decimal))
-              )
+        if (parseFloat(textFieldValue) === 0) {
+          setActionEnabled(false)
+        } else {
+          setLongToken(
+            formatEther(
+              parseEther(textFieldValue)
+                .mul(parseEther('1'))
+                .div(
+                  parseEther('1')
+                    .sub(BigNumber.from(pool.redemptionFee))
+                    .sub(BigNumber.from(pool.settlementFee))
+                )
+                .mul(BigNumber.from(pool.supplyInitial))
+                .div(
+                  BigNumber.from(pool.collateralBalanceLongInitial)
+                    .add(BigNumber.from(pool.collateralBalanceShortInitial))
+                    .mul(parseUnits('1', 18 - decimal))
+                )
+            )
           )
-        )
-
-        setShortToken(
-          formatEther(
-            parseEther(textFieldValue)
-              .mul(parseEther('1'))
-              .div(
-                parseEther('1')
-                  .sub(BigNumber.from(pool.redemptionFee))
-                  .sub(BigNumber.from(pool.settlementFee))
-              )
-              .mul(BigNumber.from(pool.supplyInitial))
-              .div(
-                BigNumber.from(pool.collateralBalanceLongInitial)
-                  .add(BigNumber.from(pool.collateralBalanceShortInitial))
-                  .mul(parseUnits('1', 18 - decimal))
-              )
+          setShortToken(
+            formatEther(
+              parseEther(textFieldValue)
+                .mul(parseEther('1'))
+                .div(
+                  parseEther('1')
+                    .sub(BigNumber.from(pool.redemptionFee))
+                    .sub(BigNumber.from(pool.settlementFee))
+                )
+                .mul(BigNumber.from(pool.supplyInitial))
+                .div(
+                  BigNumber.from(pool.collateralBalanceLongInitial)
+                    .add(BigNumber.from(pool.collateralBalanceShortInitial))
+                    .mul(parseUnits('1', 18 - decimal))
+                )
+            )
           )
-        )
+          setActionEnabled(true)
+        }
       }
     }
     if (
@@ -331,6 +336,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 value="Submit"
                 disabled={
                   !pool ||
+                  actionEnabled == false ||
                   openExpiredAlert ||
                   textFieldValue === '' ||
                   chainId == null
