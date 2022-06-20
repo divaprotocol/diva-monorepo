@@ -21,12 +21,12 @@ export type CollateralTokenEntity = {
   feeRecipients: FeeRecipientCollateralToken[]
 }
 
-type PositionToken = {
+export type PositionToken = {
   id: string
   name: string
   symbol: string
   decimals: number
-  pool: Pool
+  pool?: Pool
   owner: string
 }
 
@@ -61,6 +61,78 @@ export type Pool = {
   createdBy: string
   createdAt: string
 }
+
+export type User = {
+  id: string
+  positionTokens: PositionToken[]
+}
+
+export const queryPositionTokens = (id: string) => gql`
+{
+  user(id: "${id}" ){
+    id
+    positionTokens {
+      positionToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+        pool {
+          id
+          referenceAsset
+          floor
+          inflection
+          cap
+          supplyInitial
+          supplyShort
+          supplyLong
+          expiryTime
+          collateralToken {
+            id
+            name
+            decimals
+            symbol
+          }
+          collateralBalanceShortInitial
+          collateralBalanceLongInitial
+          collateralBalance
+          shortToken {
+            id
+            name
+            symbol
+            decimals
+            owner
+          }
+          longToken {
+            id
+            name
+            symbol
+            decimals
+            owner
+          }
+          finalReferenceValue
+          statusFinalReferenceValue
+          redemptionAmountLongToken
+          redemptionAmountShortToken
+          statusTimestamp
+          dataProvider
+          redemptionFee
+          settlementFee
+          createdBy
+          createdAt
+          capacity
+          expiryTime
+          challenges {
+            challengedBy
+            proposedFinalReferenceValue
+          }
+        }
+      }
+    }
+  }
+}
+`
 
 export const queryPools = (id: string) => gql`
   {

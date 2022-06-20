@@ -11776,6 +11776,11 @@ etag@~1.8.1:
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc=
 
+eth-balance-checker@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/eth-balance-checker/-/eth-balance-checker-0.2.0.tgz#e8b971a42010eec2287295d54a1533dfe1a0587c"
+  integrity sha512-gWD9lsQSN7Xup2+zsahGKZ1fAhoxs7vwMohCZYMzkr0YjIo6jcRiofptryiqfJGPYI2jE/C+9hMUz8sK/yf3PQ==
+
 eth-block-tracker@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/eth-block-tracker/-/eth-block-tracker-3.0.1.tgz#95cd5e763c7293e0b1b2790a2a39ac2ac188a5e1"

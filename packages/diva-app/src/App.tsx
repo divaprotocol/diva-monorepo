@@ -36,7 +36,7 @@ export const App = () => {
     /**
      * pool pools every minute
      */
-    const interval = setInterval(pollPools, 1000 * 30)
+    const interval = setInterval(pollPools, 1000 * 60)
 
     pollPools()
 

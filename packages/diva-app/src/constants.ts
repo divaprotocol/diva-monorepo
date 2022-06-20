@@ -1,6 +1,7 @@
 type SingleConfig = {
   name: string
   divaAddress: string
+  balanceCheckAddress: string
   whitelistAddress: string
   divaSubgraph: string
   whitelistSubgraph: string
@@ -9,7 +10,7 @@ type SingleConfig = {
   order: string
 }
 
-export const projectId = 'e3ea5575a42b4de7be15d7c197c12045'
+export const projectId = '9f5f0ef1c7544c029b0aa9ca622759c3'
 
 export const config: { [key: number]: SingleConfig } = {
   // 1: {
@@ -28,6 +29,7 @@ export const config: { [key: number]: SingleConfig } = {
   3: {
     name: 'Ropsten',
     divaAddress: '0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211',
+    balanceCheckAddress: '0xD713aeC2156709A6AF392bb84018ACc6b44f1885',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',

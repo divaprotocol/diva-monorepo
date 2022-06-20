@@ -6,7 +6,7 @@ on:
     paths:
       - 'packages/diva-infrastructure/**'
       - '.github/workflows/deploy-infrastructure.yml'
-  
+
 name: Deploy Infrastructure
 jobs:
   deploy:
@@ -53,4 +53,5 @@ jobs:
       - name: sync to s3 and invalidate cache
         run: |
           aws s3 sync packages/diva-app/build s3://app.diva.finance
-          aws cloudfront create-invalidation --distribution-id E2HCWZDF4NN8G6 --paths '/*'
+          aws cloudfront create-invalidation --distribution-id E2HCWZDF4NN8G6 --paths '*/*'
+
