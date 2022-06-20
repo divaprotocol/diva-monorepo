@@ -4,7 +4,7 @@ import { BigNumber, providers } from 'ethers'
 import useLocalStorage from 'use-local-storage'
 import detectEthereumProvider from '@metamask/detect-provider'
 import { useDispatch } from 'react-redux'
-import { setChainId, setUserAddress } from '../Redux/appSlice'
+import { setChainId, setUserAddress, setIsConnected } from '../Redux/appSlice'
 
 type MetamaskProvider = ExternalProvider &
   BaseProvider & {
@@ -47,7 +47,9 @@ export const ConnectionProvider = ({ children }) => {
 
   useEffect(() => {
     dispatch(setUserAddress(state.address))
-  }, [dispatch, state.address])
+    dispatch(setIsConnected(state.isConnected))
+    console.log('state.isConnected: ', state.isConnected)
+  }, [dispatch, state.address, state.isConnected])
 
   const connect = useCallback(async () => {
     const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
@@ -96,6 +98,10 @@ export const ConnectionProvider = ({ children }) => {
     })
 
     ethereum.on('connect', (connectInfo) => {
+      console.log('connect')
+      console.log('isConnected: ', ethereum.isConnected())
+      console.log('state.isConnected: ', state.isConnected)
+      console.log('connected state', connected)
       setState((_state) => ({
         ..._state,
         isConnected: ethereum.isConnected(),

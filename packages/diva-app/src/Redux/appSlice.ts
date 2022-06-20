@@ -14,6 +14,7 @@ type RequestState = 'pending' | 'fulfilled' | 'rejected'
 type AppStateByChain = {
   chainId?: number
   userAddress?: string
+  isConnected?: boolean
   [chainId: number]: {
     statusByName: Record<string, RequestState | undefined>
     pools: Pool[]
@@ -195,6 +196,9 @@ export const appSlice = createSlice({
     },
     setUserAddress: (state, action: PayloadAction<string>) => {
       state.userAddress = action.payload
+    },
+    setIsConnected: (state, action: PayloadAction<boolean>) => {
+      state.isConnected = action.payload
     },
     addPools: (state: AppStateByChain, action: PayloadAction<Pool[]>) => {
       addPools(state, action.payload)
@@ -453,9 +457,13 @@ export const selectChainId = (state: RootState) => state.appSlice.chainId
 export const selectUserAddress = (state: RootState) =>
   state.appSlice.userAddress
 
+export const selectIsConnected = (state: RootState) =>
+  state.appSlice.isConnected
+
 export const selectUnderlyingPrice =
   (asset: string) =>
   (state: RootState): string | undefined =>
     selectAppStateByChain(state).underlyingPrice[asset]
 
-export const { setIsBuy, setUserAddress, setChainId } = appSlice.actions
+export const { setIsBuy, setUserAddress, setChainId, setIsConnected } =
+  appSlice.actions
