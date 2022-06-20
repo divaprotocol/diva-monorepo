@@ -1,4 +1,5 @@
 import { LoadingButton } from '@mui/lab'
+import { useState } from 'react'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
@@ -9,6 +10,15 @@ export function ConnectWalletButton() {
   const userAddress = useAppSelector(selectUserAddress)
   const chainId = useAppSelector(selectChainId)
 
+  const [connected, setConnected] = useState(isConnected)
+
+  window.ethereum.request({ method: 'eth_accounts' }).then((res) => {
+    console.log('res.length', res.length)
+    if (res.length == 0) {
+      setConnected(false)
+    }
+  })
+
   return (
     <LoadingButton
       variant="contained"
@@ -18,7 +28,7 @@ export function ConnectWalletButton() {
       type="submit"
       value="Submit"
       sx={{ marginLeft: '10px' }}
-      onClick={() => (isConnected ? disconnect() : connect())}
+      onClick={() => (connected ? disconnect() : connect())}
     >
       {isConnected && userAddress
         ? getShortenedAddress(userAddress)
