@@ -11,24 +11,22 @@ type Pool @entity {
   floor: BigInt!
   inflection: BigInt!
   cap: BigInt!
-  supplyInitial: BigInt!
+  gradient: BigInt!
   supplyShort: BigInt!
   supplyLong: BigInt!
   expiryTime: BigInt!
   collateralToken: CollateralToken!
-  collateralBalanceShortInitial: BigInt!
-  collateralBalanceLongInitial: BigInt!
   collateralBalance: BigInt!
 
   shortToken: PositionToken!
   longToken: PositionToken!
   finalReferenceValue: BigInt!
   statusFinalReferenceValue: String!
-  redemptionAmountLongToken: BigInt!
-  redemptionAmountShortToken: BigInt!
+  payoutLong: BigInt!
+  payoutShort: BigInt!
   statusTimestamp: BigInt!
   dataProvider: Bytes!
-  redemptionFee: BigInt!
+  protocolFee: BigInt!
   settlementFee: BigInt!
 
   createdBy: Bytes!

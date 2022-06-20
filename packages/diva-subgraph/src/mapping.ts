@@ -65,7 +65,7 @@ function handleLiquidityEvent(
   let shortTokenContract = PositionTokenABI.bind(parameters.shortToken);
   let longTokenContract = PositionTokenABI.bind(parameters.longToken);
 
-  let entity = Pool.load(poolId.toString());
+  let poolEntity = Pool.load(poolId.toString());
   
   //set user to position token mapping
   let userEntity = User.load(msgSender.toHexString());
@@ -92,20 +92,19 @@ function handleLiquidityEvent(
 
 
   //pool entity
-  if (!entity) {
-    entity = new Pool(poolId.toString());
-    entity.createdBy = msgSender;
-    entity.createdAt = blockTimestamp;
+  if (!poolEntity) {
+    poolEntity = new Pool(poolId.toString());
+    poolEntity.createdBy = msgSender;
+    poolEntity.createdAt = blockTimestamp;
 
     let testnetUser = TestnetUser.load(msgSender.toHexString());
     if (!testnetUser) {
       testnetUser = new TestnetUser(msgSender.toHexString());
     }
 
-    const unit = BigInt.fromString("1000000000000000000") // 1e18
+    const unit = BigInt.fromString("1000000000000000000"); // 1e18
 
-    let gradient = parameters.collateralBalanceLongInitial.times(unit).div(
-      parameters.collateralBalanceLongInitial.plus(parameters.collateralBalanceShortInitial)) // TODO: account for collateral token decimals and then scale to 18 decimals
+    let gradient = parameters.gradient; // TODO: account for collateral token decimals and then scale to 18 decimals
 
     let gradientLinear = new BigInt(1); // CHECK with Sascha
     if (parameters.cap != parameters.floor) {
@@ -174,43 +173,40 @@ function handleLiquidityEvent(
     shortTokenEntity.save();
   }
 
-  entity.referenceAsset = parameters.referenceAsset;
-  entity.floor = parameters.floor;
-  entity.inflection = parameters.inflection;
-  entity.cap = parameters.cap;
-  entity.supplyInitial = parameters.supplyInitial;
-  entity.supplyShort = shortTokenContract.totalSupply();
-  entity.supplyLong = longTokenContract.totalSupply();
-  entity.expiryTime = parameters.expiryTime;
-  entity.collateralToken = collateralTokenEntity.id;
-  entity.collateralBalanceShortInitial =
-    parameters.collateralBalanceShortInitial;
-  entity.collateralBalanceLongInitial = parameters.collateralBalanceLongInitial;
-  entity.collateralBalance = parameters.collateralBalance;
-  entity.shortToken = parameters.shortToken.toHexString();
-  entity.longToken = parameters.longToken.toHexString();
-  entity.finalReferenceValue = parameters.finalReferenceValue;
-  entity.redemptionAmountLongToken = parameters.redemptionAmountLongToken;
-  entity.redemptionAmountShortToken = parameters.redemptionAmountShortToken;
-  entity.statusTimestamp = parameters.statusTimestamp;
-  entity.dataProvider = parameters.dataProvider;
-  entity.redemptionFee = parameters.redemptionFee;
-  entity.settlementFee = parameters.settlementFee;
-  entity.capacity = parameters.capacity;
+  poolEntity.referenceAsset = parameters.referenceAsset;
+  poolEntity.floor = parameters.floor;
+  poolEntity.inflection = parameters.inflection;
+  poolEntity.cap = parameters.cap;
+  poolEntity.gradient = parameters.gradient;
+  poolEntity.supplyShort = shortTokenContract.totalSupply();
+  poolEntity.supplyLong = longTokenContract.totalSupply();
+  poolEntity.expiryTime = parameters.expiryTime;
+  poolEntity.collateralToken = collateralTokenEntity.id;
+  poolEntity.collateralBalance = parameters.collateralBalance;
+  poolEntity.shortToken = parameters.shortToken.toHexString();
+  poolEntity.longToken = parameters.longToken.toHexString();
+  poolEntity.finalReferenceValue = parameters.finalReferenceValue;
+  poolEntity.payoutLong = parameters.payoutLong;
+  poolEntity.payoutShort = parameters.payoutShort;
+  poolEntity.statusTimestamp = parameters.statusTimestamp;
+  poolEntity.dataProvider = parameters.dataProvider;
+  poolEntity.protocolFee = parameters.protocolFee;
+  poolEntity.settlementFee = parameters.settlementFee;
+  poolEntity.capacity = parameters.capacity;
 
   let status = parameters.statusFinalReferenceValue;
 
   if (status === 0) {
-    entity.statusFinalReferenceValue = "Open";
+    poolEntity.statusFinalReferenceValue = "Open";
   } else if (status === 1) {
-    entity.statusFinalReferenceValue = "Submitted";
+    poolEntity.statusFinalReferenceValue = "Submitted";
   } else if (status === 2) {
-    entity.statusFinalReferenceValue = "Challenged";
+    poolEntity.statusFinalReferenceValue = "Challenged";
   } else if (status === 3) {
-    entity.statusFinalReferenceValue = "Confirmed";
+    poolEntity.statusFinalReferenceValue = "Confirmed";
   }
 
-  entity.save();
+  poolEntity.save();
 }
 
 function handleFeeClaimEvent(
