@@ -4,6 +4,7 @@ import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
 import { isFloat, decimalPlaces } from '../component/Trade/Orders/OrderHelper'
+import { divaGovernanceAddress } from '../constants'
 
 export const buylimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
@@ -46,7 +47,7 @@ export const buylimitOrder = async (orderData) => {
     takerAmount: takerAmount.toString(),
     maker: orderData.makerAccount,
     sender: NULL_ADDRESS,
-    feeRecipient: '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E',
+    feeRecipient: divaGovernanceAddress,
     takerTokenFeeAmount: takerFeeAmount.toString(),
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
