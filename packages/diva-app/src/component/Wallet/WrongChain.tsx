@@ -1,9 +1,16 @@
-import { Box, Typography, useTheme } from '@mui/material'
+import { Box, Button, Link, Typography, useTheme } from '@mui/material'
 import { useStyles } from '../Trade/Orders/UiStyles'
+import React from 'react'
 
 export const WrongChain = (props: any) => {
   const style = useStyles()
   const theme = useTheme()
+  const handleOpen = async () => {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: '0x3' }],
+    })
+  }
   return (
     <Box sx={style}>
       <Typography
@@ -16,8 +23,8 @@ export const WrongChain = (props: any) => {
           width: '100%',
         }}
       >
-        Unsupported network, please switch to Ropsten network in your Metamask
-        wallet.
+        Unsupported network, please <Button onClick={handleOpen}>Switch</Button>{' '}
+        to Ropsten network in your Metamask wallet.
       </Typography>
     </Box>
   )
