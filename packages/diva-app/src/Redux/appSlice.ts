@@ -7,7 +7,7 @@ import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
 import { RootState } from './Store'
 import { get0xOpenOrders } from '../DataService/OpenOrders'
-import { config, whitelistedPoolCreatorAddress } from '../constants'
+import { config, divaGovernanceAddress } from '../constants'
 
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
@@ -440,12 +440,12 @@ export const selectBreakEven = (
 
 export const selectMainPools = (state: RootState) =>
   selectAppStateByChain(state).pools.filter(
-    (p) => p?.createdBy === whitelistedPoolCreatorAddress.toLowerCase()
+    (p) => p?.createdBy === divaGovernanceAddress.toLowerCase()
   )
 
 export const selectOtherPools = (state: RootState) =>
   selectAppStateByChain(state).pools.filter(
-    (p) => p?.createdBy !== whitelistedPoolCreatorAddress.toLowerCase()
+    (p) => p?.createdBy !== divaGovernanceAddress.toLowerCase()
   )
 
 export const selectChainId = (state: RootState) => state.appSlice.chainId

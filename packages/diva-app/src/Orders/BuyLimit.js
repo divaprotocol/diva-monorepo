@@ -4,7 +4,7 @@ import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
 import { isFloat, decimalPlaces } from '../component/Trade/Orders/OrderHelper'
-import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
+import { divaGovernanceAddress } from '../constants'
 
 export const buylimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
@@ -36,6 +36,9 @@ export const buylimitOrder = async (orderData) => {
     orderData.collateralDecimals
   )
   const takerAmount = parseEther(orderData.nbrOptions.toString())
+  const takerFeeAmount = takerAmount
+    .mul(parseUnits('0.01')) // 1% fee paid in taker token (i.e. position token in buy limit)
+    .div(parseUnits('1'))
   const networkUrl = config[orderData.chainId].order
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
@@ -44,6 +47,8 @@ export const buylimitOrder = async (orderData) => {
     takerAmount: takerAmount.toString(),
     maker: orderData.makerAccount,
     sender: NULL_ADDRESS,
+    feeRecipient: divaGovernanceAddress,
+    takerTokenFeeAmount: takerFeeAmount.toString(),
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
     chainId: orderData.chainId,

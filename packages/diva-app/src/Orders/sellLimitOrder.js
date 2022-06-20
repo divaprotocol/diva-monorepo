@@ -4,6 +4,7 @@ import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
 import { isFloat, decimalPlaces } from '../component/Trade/Orders/OrderHelper'
+import { divaGovernanceAddress } from '../constants'
 
 export const sellLimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
@@ -35,6 +36,9 @@ export const sellLimitOrder = async (orderData) => {
     amount.toString(),
     orderData.collateralDecimals
   )
+  const takerFeeAmount = takerAmount
+    .mul(parseUnits('0.01', orderData.collateralDecimals)) // 1% fee paid in taker token,  i.e. collateral token in sell limit
+    .div(parseUnits('1', orderData.collateralDecimals))
   const networkUrl = config[orderData.chainId].order
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
@@ -43,6 +47,8 @@ export const sellLimitOrder = async (orderData) => {
     takerAmount: takerAmount.toString(),
     maker: orderData.maker,
     sender: NULL_ADDRESS,
+    feeRecipient: divaGovernanceAddress,
+    takerTokenFeeAmount: takerFeeAmount.toString(),
     expiry: getFutureExpiryInSeconds(),
     salt: Date.now().toString(),
     chainId: orderData.chainId,
