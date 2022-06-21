@@ -558,7 +558,7 @@ export default function BuyMarket(props: {
             {params.tokenType.toUpperCase() + ' '}
           </FormLabel>
           <FormInput
-            type="text"
+            type="number"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
         </FormDiv>

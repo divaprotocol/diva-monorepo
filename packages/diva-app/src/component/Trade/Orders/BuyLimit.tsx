@@ -503,7 +503,7 @@ export default function BuyLimit(props: {
             {params.tokenType.toUpperCase() + ' '}
           </FormLabel>
           <FormInput
-            type="text"
+            type="number"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
         </FormDiv>
@@ -522,7 +522,7 @@ export default function BuyLimit(props: {
             {params.tokenType.toUpperCase() + ' '}
           </FormLabel>
           <FormInput
-            type="text"
+            type="number"
             onChange={(event) => handlePricePerOptions(event.target.value)}
           />
         </FormDiv>
