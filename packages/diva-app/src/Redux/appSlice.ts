@@ -280,7 +280,9 @@ export const appSlice = createSlice({
       const newPools = tokens
         .map((token) => token.pool)
         .filter((pool) => pool != null)
-      poolState.pools = newPools
+      poolState.pools = newPools.filter(
+        (pool, index, self) => index === self.findIndex((t) => t.id === pool.id)
+      )
       poolState.positionTokens = tokens
     })
   },

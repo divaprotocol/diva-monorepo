@@ -98,7 +98,7 @@ export default function PoolsTable({
         columns={columns}
         loading={loading}
         rowCount={rowCount}
-        paginationMode="server"
+        paginationMode={rowCount != null ? 'server' : 'client'}
         onPageChange={onPageChange}
         page={page}
         onRowClick={
