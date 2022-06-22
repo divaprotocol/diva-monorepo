@@ -306,7 +306,7 @@ export function MyDataFeeds() {
   useEffect(() => {
     dispatch(
       fetchPools({
-        page: 1,
+        page: 0,
         dataProvider: userAddress,
       })
     )
