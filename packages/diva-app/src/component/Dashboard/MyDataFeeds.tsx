@@ -11,7 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
@@ -21,9 +21,14 @@ import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { fetchPool, selectPools, selectUserAddress } from '../../Redux/appSlice'
+import {
+  fetchPool,
+  fetchPools,
+  selectPools,
+  selectUserAddress,
+} from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
-import { useAppSelector } from '../../Redux/hooks'
+import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ExpiresInCell } from '../Markets/Markets'
 
@@ -296,6 +301,16 @@ const columns: GridColDef[] = [
 export function MyDataFeeds() {
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    dispatch(
+      fetchPools({
+        page: 1,
+        dataProvider: userAddress,
+      })
+    )
+  }, [dispatch, userAddress])
 
   const pools = useAppSelector((state) => selectPools(state))
   const rows: GridRowModel[] = pools

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
-import { Box, Input, InputAdornment, Stack } from '@mui/material'
+import { Box, Input, InputAdornment, Stack, TextField } from '@mui/material'
 import { LineSeries, XYPlot } from 'react-vis'
 import { Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
@@ -31,6 +31,8 @@ type Props = {
   loading?: boolean
   rows: GridRowModel[]
   onPageChange?: (page: number, details: any) => void
+  creatorAddress?: string
+  onCreatorChanged?: (createdBy: string) => void
   page: number
   rowCount?: number
 }
@@ -39,6 +41,8 @@ export default function PoolsTable({
   columns,
   disableRowClick,
   rows,
+  onCreatorChanged,
+  creatorAddress,
   loading,
   page,
   rowCount,
@@ -52,18 +56,29 @@ export default function PoolsTable({
           v.Underlying.toLowerCase().includes(search.toLowerCase())
         )
       : rows
+
   const classes = useStyles()
 
   return (
-    <Stack height="100%" width="100%">
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'end',
-          flexDirection: 'column',
-          paddingBottom: '1em',
-        }}
+    <Stack height="100%" width="100%" spacing={5}>
+      <Stack
+        direction="row"
+        alignItems="end"
+        spacing={4}
+        justifyContent="space-between"
       >
+        {onCreatorChanged != null ? (
+          <TextField
+            value={creatorAddress}
+            placeholder="0x..."
+            label="Filter by creator"
+            aria-label="Filter by creator"
+            onChange={(e) => onCreatorChanged(e.target.value)}
+          />
+        ) : (
+          <span />
+        )}
+
         <Input
           value={search}
           placeholder="Filter underlying"
@@ -75,7 +90,7 @@ export default function PoolsTable({
             </InputAdornment>
           }
         />
-      </Box>
+      </Stack>
       <DataGrid
         className={classes.root}
         rows={filteredRows}
@@ -83,6 +98,7 @@ export default function PoolsTable({
         columns={columns}
         loading={loading}
         rowCount={rowCount}
+        paginationMode="server"
         onPageChange={onPageChange}
         page={page}
         onRowClick={

@@ -64,10 +64,10 @@ export type Pool = {
 
 export type User = {
   id: string
-  positionTokens: PositionToken[]
+  positionTokens: { positionToken: PositionToken }[]
 }
 
-export const queryPositionTokens = (id: string) => gql`
+export const queryUser = (id: string) => gql`
 {
   user(id: "${id}" ){
     id
@@ -134,119 +134,21 @@ export const queryPositionTokens = (id: string) => gql`
 }
 `
 
-export const queryPools = (id: string) => gql`
+export const queryPools = (
+  skip: number,
+  pageSize: number,
+  createdBy = '',
+  dataProvider = ''
+) => gql`
   {
-    pools(first: 1000, where: { id_gt: "${id}" } ) {
-      id
-      referenceAsset
-      floor
-      inflection
-      cap
-      supplyInitial
-      supplyShort
-      supplyLong
-      expiryTime
-      collateralToken {
-        id
-        name
-        decimals
-        symbol
-      }
-      collateralBalanceShortInitial
-      collateralBalanceLongInitial
-      collateralBalance
-      shortToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      longToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      finalReferenceValue
-      statusFinalReferenceValue
-      redemptionAmountLongToken
-      redemptionAmountShortToken
-      statusTimestamp
-      dataProvider
-      redemptionFee
-      settlementFee
-      createdBy
-      createdAt
-      capacity
-      expiryTime
-      challenges {
-        challengedBy
-        proposedFinalReferenceValue
-      }
-    }
-  }
-`
-
-export const queryMarkets = (id: string) => gql`
-  {
-    pools( where: { statusFinalReferenceValue_not:"Confirmed" id_gt: "${id}" } ) {
-      id
-      referenceAsset
-      floor
-      inflection
-      cap
-      supplyInitial
-      supplyShort
-      supplyLong
-      expiryTime
-      collateralToken {
-        id
-        name
-        decimals
-        symbol
-      }
-      collateralBalanceShortInitial
-      collateralBalanceLongInitial
-      collateralBalance
-      shortToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      longToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      finalReferenceValue
-      statusFinalReferenceValue
-      redemptionAmountLongToken
-      redemptionAmountShortToken
-      statusTimestamp
-      dataProvider
-      redemptionFee
-      settlementFee
-      createdBy
-      createdAt
-      capacity
-      expiryTime
-      challenges {
-        challengedBy
-        proposedFinalReferenceValue
-      }
-    }
-  }
-`
-
-export const queryDatafeed = (address: string, id: string) => gql`
-  {
-    pools(first: 1000, where: { dataProvider: "${address}" id_gt: "${id}" } ) {
+    pools(first: ${pageSize}, skip: ${skip},
+      orderDirection: desc,
+      orderBy: createdAt,
+      where: { 
+        createdBy_contains: "${createdBy}"
+        statusFinalReferenceValue_not: "Confirmed"
+        dataProvider_contains: "${dataProvider}"
+      }) {
       id
       referenceAsset
       floor

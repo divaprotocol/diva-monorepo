@@ -61,9 +61,6 @@ export const sellLimitOrder = async (orderData) => {
       utils.SignatureType.EIP712 // Optional
     )
     const signedOrder = { ...order, signature }
-    console.log(
-      JSON.stringify({ signedOrder, typedData: order.getEIP712TypedData() })
-    )
     const resp = await fetch(networkUrl, {
       method: 'POST',
       body: JSON.stringify(signedOrder),

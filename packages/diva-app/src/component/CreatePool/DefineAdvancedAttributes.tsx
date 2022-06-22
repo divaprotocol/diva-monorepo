@@ -22,12 +22,7 @@ export function DefineAdvanced({
 }) {
   const [expanded, setExpanded] = useState(false)
   const [unlimited, setUnlimited] = useState(true)
-  const {
-    collateralBalanceShort,
-    tokenSupply,
-    collateralBalanceLong,
-    capacity,
-  } = formik.values
+  const { tokenSupply, capacity } = formik.values
 
   useEffect(() => {
     if (unlimited) {
