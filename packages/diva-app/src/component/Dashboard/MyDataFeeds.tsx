@@ -306,11 +306,11 @@ export function MyDataFeeds() {
   useEffect(() => {
     dispatch(
       fetchPools({
-        page: 0,
+        page,
         dataProvider: userAddress,
       })
     )
-  }, [dispatch, userAddress])
+  }, [dispatch, page, userAddress])
 
   const pools = useAppSelector((state) => selectPools(state))
   const rows: GridRowModel[] = pools
