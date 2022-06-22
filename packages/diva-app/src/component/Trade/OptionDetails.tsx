@@ -194,7 +194,9 @@ export default function OptionDetails({
                   <FlexBoxHeader>Inflection</FlexBoxHeader>
                 </Tooltip>
               )}
-              <FlexBoxData>{formatEther(pool.inflection)}</FlexBoxData>
+              <FlexBoxData>
+                {Number(formatEther(pool.inflection)).toFixed(2)}
+              </FlexBoxData>
             </FlexBox>
           </>
         ) : linear ? (
@@ -231,7 +233,9 @@ export default function OptionDetails({
                   <FlexBoxHeader>Floor</FlexBoxHeader>
                 </Tooltip>
               )}
-              <FlexBoxData>{formatEther(pool.floor)}</FlexBoxData>
+              <FlexBoxData>
+                {Number(formatEther(pool.floor)).toFixed(2)}
+              </FlexBoxData>
             </FlexBox>
             <FlexBox>
               {isLong ? (
@@ -261,7 +265,9 @@ export default function OptionDetails({
                   <FlexBoxHeader>Cap</FlexBoxHeader>
                 </Tooltip>
               )}
-              <FlexBoxData>{formatEther(pool.cap)}</FlexBoxData>
+              <FlexBoxData>
+                {Number(formatEther(pool.cap)).toFixed(2)}
+              </FlexBoxData>
             </FlexBox>
           </>
         ) : (
@@ -299,7 +305,9 @@ export default function OptionDetails({
                 </Tooltip>
               )}
 
-              <FlexBoxData>{formatEther(pool.floor)}</FlexBoxData>
+              <FlexBoxData>
+                {Number(formatEther(pool.floor)).toFixed(2)}
+              </FlexBoxData>
             </FlexBox>
             <FlexBox>
               {isLong ? (
@@ -329,7 +337,9 @@ export default function OptionDetails({
                   <FlexBoxHeader>Cap</FlexBoxHeader>
                 </Tooltip>
               )}
-              <FlexBoxData>{formatEther(pool.cap)}</FlexBoxData>
+              <FlexBoxData>
+                {Number(formatEther(pool.cap)).toFixed(2)}
+              </FlexBoxData>
             </FlexBox>
             <FlexBox>
               <Tooltip
@@ -342,7 +352,9 @@ export default function OptionDetails({
               >
                 <FlexBoxHeader>Inflection</FlexBoxHeader>
               </Tooltip>
-              <FlexBoxData>{formatEther(pool.inflection)}</FlexBoxData>
+              <FlexBoxData>
+                {Number(formatEther(pool.inflection)).toFixed(2)}
+              </FlexBoxData>
             </FlexBox>
             <FlexBox>
               {isLong ? (
