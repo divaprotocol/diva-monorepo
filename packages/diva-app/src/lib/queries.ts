@@ -345,7 +345,7 @@ export const queryOrderFillsMaker = (address: string) => gql`
   }
 `
 
-export const queryOrderFills = (address: string) => gql`
+export const queryOrderFillsTaker = (address: string) => gql`
   {
     nativeOrderFills(
       where: { taker: "${address}" }
