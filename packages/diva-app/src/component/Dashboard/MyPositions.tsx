@@ -27,12 +27,15 @@ import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import styled from 'styled-components'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import {
   fetchPool,
+  fetchPositionTokens,
   selectIntrinsicValue,
+  selectPools,
+  selectPositionTokens,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
@@ -40,7 +43,7 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ExpiresInCell } from '../Markets/Markets'
 import { getAppStatus } from '../../Util/getAppStatus'
 import request from 'graphql-request'
-import { Pool, queryPositionTokens } from '../../lib/queries'
+import { Pool, queryUser } from '../../lib/queries'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
 
 type Response = {
@@ -481,7 +484,13 @@ const columns: GridColDef[] = [
 export function MyPositions() {
   const { provider, address: userAddress, chainId } = useConnectionContext()
   const [page, setPage] = useState(0)
-  const [tokenPools, setTokenPools] = useState<Pool[]>([])
+  const tokenPools = useAppSelector(selectPools)
+  const positionTokens = useAppSelector(selectPositionTokens)
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(fetchPositionTokens())
+  }, [dispatch])
 
   const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
@@ -600,22 +609,14 @@ export function MyPositions() {
   /**
    * TODO: Move into redux
    */
-
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
     let response: Response = {}
     if (!userAddress) {
       console.warn('wallet not connected')
       return Promise.resolve({})
     }
-    const result = await request(
-      config[chainId as number].divaSubgraph,
-      queryPositionTokens(userAddress)
-    )
-    setTokenPools(result.user.positionTokens.map((v) => v.positionToken.pool))
 
-    const tokenAddresses = result.user.positionTokens.map(
-      (v) => v.positionToken.id
-    )
+    const tokenAddresses = positionTokens.map((v) => v.id)
     const tokenAddressesChunks = tokenAddresses.reduce(
       (resultArray, item, index) => {
         const batchIndex = Math.floor(index / 400)

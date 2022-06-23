@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { CreatePool } from './component/CreatePool/CreatePool'
 import Markets from './component/Markets/Markets'
 import { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
 import { fetchPools } from './Redux/appSlice'
 import MenuItems from './component/Header/MenuItems'
 import { useAppSelector } from './Redux/hooks'
@@ -19,32 +18,7 @@ import { Tasks } from './component/Tasks/Tasks'
 import Dashboard from './component/Dashboard/Dashboard'
 
 export const App = () => {
-  const dispatch = useDispatch()
   const chainId = useAppSelector((state) => state.appSlice.chainId)
-  /**
-   * Pooling fetchPools
-   */
-  useEffect(() => {
-    const pollPools = () => {
-      if (chainId != null && config[chainId]) {
-        dispatch(fetchPools())
-      } else {
-        console.warn('chain id undefined')
-      }
-    }
-
-    /**
-     * pool pools every minute
-     */
-    const interval = setInterval(pollPools, 1000 * 60)
-
-    pollPools()
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [chainId, dispatch])
-
   return (
     <Router>
       <Stack height="100%" direction="row" justifyContent="space-between">

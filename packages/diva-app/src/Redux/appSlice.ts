@@ -1,7 +1,16 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { BigNumber } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
-import { Pool, queryPool, queryPools } from '../lib/queries'
+import {
+  FeeRecipient,
+  Pool,
+  PositionToken,
+  queryFeeRecipients,
+  queryPool,
+  queryPools,
+  queryUser,
+  User,
+} from '../lib/queries'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
@@ -11,34 +20,40 @@ import { config, divaGovernanceAddress } from '../constants'
 
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
-type AppStateByChain = {
-  chainId?: number
-  userAddress?: string
-  [chainId: number]: {
-    statusByName: Record<string, RequestState | undefined>
-    pools: Pool[]
-    isBuy: boolean
-    underlyingPrice: {
-      [poolId: string]: string
-    }
-    orders: {
-      [poolId: string]: {
-        long: {
-          buy: any[]
-        }
-        short: {
-          sell: any[]
-          buy: any[]
-        }
+type AppState = {
+  statusByName: Record<string, RequestState | undefined>
+  pools: Pool[]
+  feeRecipients: FeeRecipient[]
+  positionTokens: PositionToken[]
+  isBuy: boolean
+  underlyingPrice: {
+    [poolId: string]: string
+  }
+  orders: {
+    [poolId: string]: {
+      long: {
+        buy: any[]
+      }
+      short: {
+        sell: any[]
+        buy: any[]
       }
     }
   }
+}
+
+type AppStateByChain = {
+  chainId?: number
+  userAddress?: string
+  [chainId: number]: AppState
 }
 
 export const defaultAppState = {
   statusByName: {},
   isBuy: true,
   pools: [],
+  feeRecipients: [],
+  positionTokens: [],
   underlyingPrice: {},
   orders: {},
 }
@@ -104,16 +119,40 @@ export const fetchPool = createAsyncThunk(
   }
 )
 
+export const fetchFeeRecipients = createAsyncThunk(
+  'app/feeRecipients',
+  async ({ address }: { address: string }, store) => {
+    const state = store.getState() as RootState
+    const { chainId } = state.appSlice
+
+    const graphUrl = config[chainId].divaSubgraph
+    const res = await request<{ feeRecipients: FeeRecipient[] }>(
+      graphUrl,
+      queryFeeRecipients(address)
+    )
+    return res.feeRecipients
+  }
+)
+
 export const fetchPools = createAsyncThunk(
   'app/pools',
   async (
-    args,
+    {
+      page,
+      createdBy,
+      pageSize = 100,
+      dataProvider,
+    }: {
+      page: number
+      createdBy?: string
+      pageSize?: number
+      dataProvider?: string
+    },
     store
   ): Promise<{
     pools: Pool[]
     chainId?: number
   }> => {
-    let res: Pool[] = []
     const state = store.getState() as RootState
     const { chainId } = state.appSlice
     if (chainId == null) {
@@ -128,30 +167,28 @@ export const fetchPools = createAsyncThunk(
 
     const graphUrl = config[chainId].divaSubgraph
 
-    let lastId = '0'
-    let lastRes: Pool[]
-    /**
-     * Fetches pools recursively (using the last id to paginate)
-     */
+    let res: Pool[]
 
-    while (lastRes == null || lastRes.length > 0) {
-      try {
-        const result = await request(graphUrl, queryPools(lastId))
+    try {
+      const result = await request(
+        graphUrl,
+        queryPools(
+          Math.max(page, 0) * pageSize,
+          pageSize,
+          createdBy,
+          dataProvider
+        )
+      )
 
-        if (result.pools.length > 0)
-          lastId = result.pools[result.pools?.length - 1].id
-
-        lastRes = result.pools
-        res = res.concat(lastRes)
-      } catch (err) {
-        /**
-         * Handle error and fail gracefully
-         */
-        console.error(err)
-        return {
-          pools: [],
-          chainId,
-        }
+      res = result.pools
+    } catch (err) {
+      /**
+       * Handle error and fail gracefully
+       */
+      console.error(err)
+      return {
+        pools: [],
+        chainId,
       }
     }
 
@@ -159,6 +196,21 @@ export const fetchPools = createAsyncThunk(
       pools: res,
       chainId,
     }
+  }
+)
+
+export const fetchPositionTokens = createAsyncThunk(
+  'app/positionTokens',
+  async (args, store) => {
+    const state = store.getState() as RootState
+    const { chainId, userAddress } = state.appSlice
+
+    const res = await request<{ user: User }>(
+      config[chainId as number].divaSubgraph,
+      queryUser(userAddress)
+    )
+
+    return res.user.positionTokens.map((token) => token.positionToken)
   }
 )
 
@@ -229,7 +281,7 @@ export const appSlice = createSlice({
       poolState.statusByName[
         action.type.substring(0, action.type.length - ('fulfilled'.length + 1))
       ] = 'fulfilled'
-      addPools(state, action.payload.pools, action.payload.chainId)
+      poolState.pools = action.payload.pools
     })
 
     builder.addCase(fetchOrders.fulfilled, (state, action) => {
@@ -240,11 +292,28 @@ export const appSlice = createSlice({
         [action.meta.arg.isLong ? 'long' : 'short']: action.payload,
       }
     })
+
+    builder.addCase(fetchPositionTokens.fulfilled, (state, action) => {
+      const poolState = state[state.chainId]
+      const tokens = action.payload
+      const newPools = tokens
+        .map((token) => token.pool)
+        .filter((pool) => pool != null)
+      poolState.pools = newPools.filter(
+        (pool, index, self) => index === self.findIndex((t) => t.id === pool.id)
+      )
+      poolState.positionTokens = tokens
+    })
+
+    builder.addCase(fetchFeeRecipients.fulfilled, (state, action) => {
+      const poolState = state[state.chainId]
+      poolState.feeRecipients = action.payload
+    })
   },
 })
 
 export const selectAppStateByChain = (state: RootState) => {
-  return state.appSlice[state.appSlice.chainId]
+  return state.appSlice[state.appSlice.chainId] as AppState
 }
 
 export const selectIsBuy = (state: RootState) =>
@@ -261,6 +330,9 @@ export const selectPools = (state: RootState) =>
     ...p,
     intrinsicValue: selectIntrinsicValue(state, p.id),
   })) || []
+
+export const selectPositionTokens = (state: RootState) =>
+  selectAppStateByChain(state).positionTokens || []
 
 export const selectMyDataFeeds = (state: RootState) =>
   selectPools(state).filter(
@@ -421,8 +493,6 @@ export const selectBreakEven = (
       )
     )
     .add(BigNumber.from(pool.inflection))
-  // console.log('be1', formatEther(be1))
-  // console.log('be2', formatEther(be2))
   if (
     BigNumber.from(pool.floor).lte(be1) &&
     be1.lte(BigNumber.from(pool.inflection))
@@ -457,5 +527,8 @@ export const selectUnderlyingPrice =
   (asset: string) =>
   (state: RootState): string | undefined =>
     selectAppStateByChain(state).underlyingPrice[asset]
+
+export const selectFeeRecipients = (state: RootState) =>
+  selectAppStateByChain(state).feeRecipients
 
 export const { setIsBuy, setUserAddress, setChainId } = appSlice.actions

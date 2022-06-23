@@ -125,7 +125,7 @@ export default function CreateOrder(props: {
         setUsdPrice(data)
       } else {
         //handle undefined object return
-        console.log('Please handle me i am undefined')
+        console.warn('Please handle me i am undefined')
       }
     })
   }, [option.referenceAsset])
