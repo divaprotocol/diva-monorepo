@@ -2,8 +2,10 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { BigNumber } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
 import {
+  FeeRecipient,
   Pool,
   PositionToken,
+  queryFeeRecipients,
   queryPool,
   queryPools,
   queryUser,
@@ -21,6 +23,7 @@ type RequestState = 'pending' | 'fulfilled' | 'rejected'
 type AppState = {
   statusByName: Record<string, RequestState | undefined>
   pools: Pool[]
+  feeRecipients: FeeRecipient[]
   positionTokens: PositionToken[]
   isBuy: boolean
   underlyingPrice: {
@@ -49,6 +52,7 @@ export const defaultAppState = {
   statusByName: {},
   isBuy: true,
   pools: [],
+  feeRecipients: [],
   positionTokens: [],
   underlyingPrice: {},
   orders: {},
@@ -112,6 +116,21 @@ export const fetchPool = createAsyncThunk(
       queryPool(parseInt(poolId))
     )
     return res.pool
+  }
+)
+
+export const fetchFeeRecipients = createAsyncThunk(
+  'app/feeRecipients',
+  async ({ address }: { address: string }, store) => {
+    const state = store.getState() as RootState
+    const { chainId } = state.appSlice
+
+    const graphUrl = config[chainId].divaSubgraph
+    const res = await request<{ feeRecipients: FeeRecipient[] }>(
+      graphUrl,
+      queryFeeRecipients(address)
+    )
+    return res.feeRecipients
   }
 )
 
@@ -284,6 +303,11 @@ export const appSlice = createSlice({
         (pool, index, self) => index === self.findIndex((t) => t.id === pool.id)
       )
       poolState.positionTokens = tokens
+    })
+
+    builder.addCase(fetchFeeRecipients.fulfilled, (state, action) => {
+      const poolState = state[state.chainId]
+      poolState.feeRecipients = action.payload
     })
   },
 })
@@ -503,5 +527,8 @@ export const selectUnderlyingPrice =
   (asset: string) =>
   (state: RootState): string | undefined =>
     selectAppStateByChain(state).underlyingPrice[asset]
+
+export const selectFeeRecipients = (state: RootState) =>
+  selectAppStateByChain(state).feeRecipients
 
 export const { setIsBuy, setUserAddress, setChainId } = appSlice.actions

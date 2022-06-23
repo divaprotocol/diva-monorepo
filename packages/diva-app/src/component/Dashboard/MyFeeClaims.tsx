@@ -8,7 +8,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import { request } from 'graphql-request'
 import { parseUnits } from 'ethers/lib/utils'
@@ -19,9 +19,11 @@ import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
 import {
   FeeRecipientCollateralToken,
-  queryMyFeeClaims,
+  queryFeeRecipients,
 } from '../../lib/queries'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { fetchFeeRecipients, selectFeeRecipients } from '../../Redux/appSlice'
+import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 
 const TransferFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
@@ -204,36 +206,40 @@ const columns: GridColDef[] = [
 ]
 
 export function MyFeeClaims() {
-  const { chainId, address: userAddress } = useConnectionContext()
+  const { address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
-  const query = useQuery<{ fees: FeeRecipientCollateralToken[] }>(
-    `pools-fees-${userAddress}`,
-    async () => {
-      if (chainId != null) {
-        const result = await request(
-          config[chainId as number].divaSubgraph,
-          queryMyFeeClaims(userAddress)
-        )
-        return { fees: result.feeRecipients[0].collateralTokens }
-      }
-    }
-  )
 
-  const feeRecipients =
-    query?.data?.fees || ([] as FeeRecipientCollateralToken[])
+  const dispatch = useAppDispatch()
+
+  const feeRecipients = useAppSelector(selectFeeRecipients)
+
+  useEffect(() => {
+    if (userAddress != null) {
+      dispatch(
+        fetchFeeRecipients({
+          address: userAddress,
+        })
+      )
+    }
+  }, [dispatch, page, userAddress])
+
   let feeCount = 0
-  const rows: GridRowModel[] = feeRecipients.reduce((acc, val) => {
-    feeCount = feeCount + 1
-    return [
-      ...acc,
-      {
-        id: feeCount,
-        Underlying: `${val.collateralToken.symbol}`,
-        Amount: `${val.amount}`,
-        Address: `${val.collateralToken.id}`,
-      },
-    ]
-  }, [] as GridRowModel[])
+  console.log({ feeRecipients })
+  const rows: GridRowModel[] = feeRecipients
+    .map((v) => v.collateralTokens)
+    .flat()
+    .reduce((acc, val) => {
+      feeCount = feeCount + 1
+      return [
+        ...acc,
+        {
+          id: feeCount,
+          Underlying: `${val.collateralToken.symbol}`,
+          Amount: `${val.amount}`,
+          Address: `${val.collateralToken.id}`,
+        },
+      ]
+    }, [] as GridRowModel[])
 
   const filtered = rows.filter((v) => v.Amount != 0)
   return (

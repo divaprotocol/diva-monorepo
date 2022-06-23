@@ -201,7 +201,7 @@ export const queryPools = (
   }
 `
 
-export const queryMyFeeClaims = (address: string) => gql`
+export const queryFeeRecipients = (address: string) => gql`
   {
     feeRecipients(where: { id: "${address}" }) {
       id
