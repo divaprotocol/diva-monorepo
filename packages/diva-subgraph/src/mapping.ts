@@ -417,9 +417,14 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       nativeOrderFillEntity.save();
   }
 
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
-  if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+  let testnetUserMaker = TestnetUser.load(event.params.maker.toHexString());
+  if (!testnetUserMaker) {
+    testnetUserMaker = new TestnetUser(event.params.maker.toHexString());
+  }
+
+  let testnetUserTaker = TestnetUser.load(event.params.taker.toHexString());
+  if (!testnetUserTaker) {
+    testnetUserTaker = new TestnetUser(event.params.taker.toHexString());
   }
 
   // buy limit: maker token = collateral token; taker token = position token
@@ -445,12 +450,10 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     }
 
     // Update TestnetUser entity
-    if (event.params.maker === event.transaction.from) {
-      testnetUser.buyLimitOrderCreatedAndFilled = true;
-    } else if (event.params.taker === event.transaction.from) {
-      testnetUser.buyLimitOrderFilled = true;
-    }
-    testnetUser.save();
+    testnetUserMaker.buyLimitOrderCreatedAndFilled = true;
+    testnetUserTaker.buyLimitOrderFilled = true;
+    testnetUserMaker.save();
+    testnetUserTaker.save();
   } 
   
   // sell limit: maker token = position token; taker token = collateral token
@@ -473,12 +476,10 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     }
 
     // Update TestnetUser entity
-    if (event.params.maker === event.transaction.from) {
-      testnetUser.sellLimitOrderCreatedAndFilled = true;
-    } else if (event.params.taker === event.transaction.from) {
-      testnetUser.sellLimitOrderFilled = true;
-    }
-    testnetUser.save();
+    testnetUserMaker.sellLimitOrderCreatedAndFilled = true;
+    testnetUserTaker.sellLimitOrderFilled = true;
+    testnetUserMaker.save();
+    testnetUserTaker.save();
   }
 
 }
