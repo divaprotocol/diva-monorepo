@@ -300,7 +300,6 @@ export function MyOrders() {
       ),
     },
   ]
-  console.log(poolsRequestStatus)
   return (
     <Stack
       direction="row"
