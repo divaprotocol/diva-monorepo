@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - main
+      - fix-deployment
     paths:
       - 'packages/diva-app/**'
       - 'packages/diva-infrastructure/**'
