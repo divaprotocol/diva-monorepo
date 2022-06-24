@@ -4,6 +4,7 @@ on:
       - main
       - fix-deployment
     paths:
+      - 'packages/diva-app/**'
       - 'packages/diva-infrastructure/**'
       - '.github/workflows/deploy-infrastructure.yml'
 
