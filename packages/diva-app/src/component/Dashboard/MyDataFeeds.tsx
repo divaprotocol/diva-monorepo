@@ -25,6 +25,7 @@ import {
   fetchPool,
   fetchPools,
   selectPools,
+  selectRequestStatus,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
@@ -315,6 +316,7 @@ export function MyDataFeeds() {
   }, [dispatch, page, userAddress])
 
   const pools = useAppSelector((state) => selectPools(state))
+  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,
@@ -406,6 +408,7 @@ export function MyDataFeeds() {
             disableRowClick={true}
             page={page}
             rowCount={9999}
+            loading={poolsRequestStatus === 'pending'}
             rows={rows}
             columns={columns}
             onPageChange={(page) => setPage(page)}

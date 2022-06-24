@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import {
   fetchPositionTokens,
   selectPools,
+  selectRequestStatus,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
@@ -102,6 +103,7 @@ export function TradeHistoryTab() {
   const userAddress = useAppSelector(selectUserAddress)
   const chainId = useAppSelector((state) => state.appSlice.chainId)
   const pools = useAppSelector((state) => selectPools(state))
+  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const { collateralTokens } = useWhitelist()
   const [history, setHistory] = useState<any[]>([])
   const [page, setPage] = useState(0)
@@ -319,6 +321,7 @@ export function TradeHistoryTab() {
             page={page}
             rows={rows}
             columns={columns}
+            loading={poolsRequestStatus === 'pending'}
             onPageChange={(page) => setPage(page)}
           />
         </>

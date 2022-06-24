@@ -7,6 +7,7 @@ import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import {
   selectChainId,
   selectPools,
+  selectRequestStatus,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
@@ -25,6 +26,7 @@ export function MyOrders() {
   const [dataOrders, setDataOrders] = useState([])
   const [page, setPage] = useState(0)
   const pools = useAppSelector((state) => selectPools(state))
+  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const [search, setSearch] = useState('')
   const history = useHistory()
   const useStyles = makeStyles({
@@ -329,6 +331,7 @@ export function MyOrders() {
             rows={filteredRows}
             pagination
             columns={columns}
+            loading={poolsRequestStatus === 'pending'}
             onPageChange={(page) => setPage(page)}
             page={page}
             onRowClick={(row) => {
