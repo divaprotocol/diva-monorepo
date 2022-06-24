@@ -308,6 +308,10 @@ export type TestUser = {
   concavePoolCreated: boolean
   liquidityAdded: boolean
   liquidityRemoved: boolean
+  buyLimitOrderCreatedAndFilled: boolean
+  sellLimitOrderCreatedAndFilled: boolean
+  buyLimitOrderFilled: boolean
+  sellLimitOrderFilled: boolean
   finalValueReported: boolean
   reportedValueChallenged: boolean
   positionTokenRedeemed: boolean
@@ -372,6 +376,10 @@ export const queryTestUser = (address: string) => gql`
     concavePoolCreated
     liquidityAdded
     liquidityRemoved
+    buyLimitOrderCreatedAndFilled
+    sellLimitOrderCreatedAndFilled
+    buyLimitOrderFilled
+    sellLimitOrderFilled
     finalValueReported
     reportedValueChallenged
     positionTokenRedeemed
