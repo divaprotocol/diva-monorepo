@@ -11,7 +11,11 @@ import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { useEffect, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
-import { fetchPools, selectPools } from '../../Redux/appSlice'
+import {
+  fetchPools,
+  selectPools,
+  selectRequestStatus,
+} from '../../Redux/appSlice'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { Box, Tooltip } from '@mui/material'
 import Typography from '@mui/material/Typography'
@@ -185,6 +189,7 @@ export default function Markets() {
   const [page, setPage] = useState(0)
   const [createdBy, setCreatedBy] = useState(divaGovernanceAddress)
   const pools = useAppSelector(selectPools)
+  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const dispatch = useAppDispatch()
 
   useEffect(() => {
@@ -350,7 +355,7 @@ export default function Markets() {
           rows={rows}
           rowCount={8000}
           page={page}
-          loading={false /*mainPools.length === 0*/}
+          loading={poolsRequestStatus === 'pending'}
           onPageChange={(page) => setPage(page)}
         />
       </Box>

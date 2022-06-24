@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import {
   fetchPositionTokens,
   selectPools,
+  selectRequestStatus,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
@@ -319,6 +320,7 @@ export function TradeHistoryTab() {
             page={page}
             rows={rows}
             columns={columns}
+            loading={orderFills.isLoading || orderFillsMaker.isLoading}
             onPageChange={(page) => setPage(page)}
           />
         </>

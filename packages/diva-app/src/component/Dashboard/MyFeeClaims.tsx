@@ -22,7 +22,11 @@ import {
   queryFeeRecipients,
 } from '../../lib/queries'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { fetchFeeRecipients, selectFeeRecipients } from '../../Redux/appSlice'
+import {
+  fetchFeeRecipients,
+  selectFeeRecipients,
+  selectRequestStatus,
+} from '../../Redux/appSlice'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 
 const TransferFeesCell = (props: any) => {
@@ -212,6 +216,9 @@ export function MyFeeClaims() {
   const dispatch = useAppDispatch()
 
   const feeRecipients = useAppSelector(selectFeeRecipients)
+  const poolsRequestStatus = useAppSelector(
+    selectRequestStatus('app/feeRecipients')
+  )
 
   useEffect(() => {
     if (userAddress != null) {
@@ -269,6 +276,7 @@ export function MyFeeClaims() {
             disableRowClick
             page={page}
             rows={filtered}
+            loading={poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}
           />

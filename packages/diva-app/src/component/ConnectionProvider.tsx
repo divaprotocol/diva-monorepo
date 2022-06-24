@@ -69,6 +69,7 @@ export const ConnectionProvider = ({ children }) => {
       chainId: 3,
     }))
     setConnectionState({})
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -82,10 +83,13 @@ export const ConnectionProvider = ({ children }) => {
     }
 
     ethereum.on('accountsChanged', (accounts) => {
-      setState((_state) => ({
-        ..._state,
-        address: accounts?.[0],
-      }))
+      ethereum.request({ method: 'eth_accounts' }).then((res) => {
+        if (res.length > 0) {
+          connect()
+        } else {
+          disconnect()
+        }
+      })
     })
 
     ethereum.on('chainChanged', (chainInfo) => {
@@ -114,7 +118,6 @@ export const ConnectionProvider = ({ children }) => {
       }))
     )
 
-    // connect()
     if (connected) connect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -125,7 +128,7 @@ export const ConnectionProvider = ({ children }) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (state.chainId == null) {
-        setState((_state) => ({ ..._state, chainId: 137 }))
+        setState((_state) => ({ ..._state, chainId: 3 }))
       }
     }, 3000)
     return () => clearTimeout(timeout)

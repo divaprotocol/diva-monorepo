@@ -1,14 +1,14 @@
 import { Chip } from '@mui/material'
 import { config } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { selectChainId } from '../../Redux/appSlice'
+import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
 
 export function NetworkTag() {
   const { isConnected } = useConnectionContext()
   const chainId = useAppSelector(selectChainId)
-
-  if (isConnected) {
+  const userAddress = useAppSelector(selectUserAddress)
+  if (isConnected && userAddress) {
     return (
       <Chip
         label={config[chainId]?.name || 'Unsupported'}
@@ -16,6 +16,6 @@ export function NetworkTag() {
       />
     )
   } else {
-    return <Chip label={'Preview (ropsten)'} sx={{ marginLeft: 'auto' }} />
+    return <Chip label={'Preview (Ropsten)'} sx={{ marginLeft: 'auto' }} />
   }
 }
