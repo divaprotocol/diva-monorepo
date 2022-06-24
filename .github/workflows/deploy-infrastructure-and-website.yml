@@ -6,7 +6,7 @@ on:
     paths:
       - 'packages/diva-app/**'
       - 'packages/diva-infrastructure/**'
-      - '.github/workflows/deploy-infrastructure.yml'
+      - '.github/workflows/deploy-infrastructure-and-website.yml'
 
 name: Deploy Infrastructure
 jobs:
