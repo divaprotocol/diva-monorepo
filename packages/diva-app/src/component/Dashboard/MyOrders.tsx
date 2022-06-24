@@ -5,12 +5,13 @@ import React, { useState, useEffect } from 'react'
 import { getOrderDetails, getUserOrders } from '../../DataService/OpenOrders'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import {
+  fetchPositionTokens,
   selectChainId,
   selectPools,
   selectRequestStatus,
   selectUserAddress,
 } from '../../Redux/appSlice'
-import { useAppSelector } from '../../Redux/hooks'
+import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Search } from '@mui/icons-material'
 import { CoinIconPair } from '../CoinIcon'
@@ -29,6 +30,7 @@ export function MyOrders() {
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const [search, setSearch] = useState('')
   const history = useHistory()
+  const dispatch = useAppDispatch()
   const useStyles = makeStyles({
     root: {
       '&.MuiDataGrid-root .MuiDataGrid-cell:focus': {
@@ -36,6 +38,9 @@ export function MyOrders() {
       },
     },
   })
+  useEffect(() => {
+    dispatch(fetchPositionTokens())
+  }, [dispatch])
   const classes = useStyles()
   const trimPools = pools.map((pool) => {
     return {
@@ -295,6 +300,7 @@ export function MyOrders() {
       ),
     },
   ]
+  console.log(poolsRequestStatus)
   return (
     <Stack
       direction="row"
@@ -331,7 +337,7 @@ export function MyOrders() {
             rows={filteredRows}
             pagination
             columns={columns}
-            loading={poolsRequestStatus === 'pending'}
+            loading={poolsRequestStatus !== 'fulfilled'}
             onPageChange={(page) => setPage(page)}
             page={page}
             onRowClick={(row) => {
