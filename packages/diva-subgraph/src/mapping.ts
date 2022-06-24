@@ -459,6 +459,17 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       userPositionTokenEntity.save();
     }
   }
+
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    if (nativeOrderFillEntity.taker == testnetUser.id && userPositionTokenEntity.taker) {
+
+    }
+    testnetUser.buyLimitOrderCreated = true;
+  }
+  
+  testnetUser.save();
 }
 
 // IMPORTANT: Updated the ABI as well!!!

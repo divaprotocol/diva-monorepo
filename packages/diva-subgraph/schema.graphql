@@ -78,6 +78,10 @@ type TestnetUser @entity {
   concavePoolCreated: Boolean!
   liquidityAdded: Boolean!
   liquidityRemoved: Boolean!
+  buyLimitOrderCreated: Boolean!
+  sellLimitOrderCreated: Boolean!
+  buyLimitOrderFilled: Boolean!
+  sellLimitOrderFilled: Boolean!
   finalValueReported: Boolean!
   reportedValueChallenged: Boolean!
   positionTokenRedeemed: Boolean!
