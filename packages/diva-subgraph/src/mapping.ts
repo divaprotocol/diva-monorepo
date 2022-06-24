@@ -438,6 +438,19 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       userPositionTokenEntity.positionToken = event.params.takerToken.toHexString();
       userPositionTokenEntity.save();
     }
+
+    // Update TestnetUser entity
+    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+    if (!testnetUser) {
+      testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    }
+
+    if (nativeOrderFillEntity.maker.toHexString() === event.transaction.from.toHexString()) {
+      testnetUser.buyLimitOrderCreatedAndFilled = true;
+    } else if (nativeOrderFillEntity.taker.toHexString() === event.transaction.from.toHexString()) {
+      testnetUser.buyLimitOrderFilled = true;
+    }
+    testnetUser.save();
   } 
   
   // sell limit: maker token = position token; taker token = collateral token
@@ -458,18 +471,19 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       userPositionTokenEntity.positionToken = event.params.makerToken.toHexString();
       userPositionTokenEntity.save();
     }
-  }
 
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
-  if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
-    if (nativeOrderFillEntity.taker == testnetUser.id && userPositionTokenEntity.taker) {
-
+    // Update TestnetUser entity
+    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+    if (!testnetUser) {
+      testnetUser = new TestnetUser(event.transaction.from.toHexString());
     }
-    testnetUser.buyLimitOrderCreated = true;
-  }
-  
-  testnetUser.save();
-}
 
-// IMPORTANT: Updated the ABI as well!!!
+    if (nativeOrderFillEntity.maker.toHexString() === event.transaction.from.toHexString()) {
+      testnetUser.sellLimitOrderCreatedAndFilled = true;
+    } else if (nativeOrderFillEntity.taker.toHexString() === event.transaction.from.toHexString()) {
+      testnetUser.sellLimitOrderFilled = true;
+    }
+    testnetUser.save();
+  }
+
+}
