@@ -300,6 +300,7 @@ export function MyOrders() {
         height: '100%',
       }}
       spacing={6}
+      paddingRight={6}
     >
       <>
         <Stack height="100%" width="100%">

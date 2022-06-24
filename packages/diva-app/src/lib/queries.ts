@@ -21,12 +21,12 @@ export type CollateralTokenEntity = {
   feeRecipients: FeeRecipientCollateralToken[]
 }
 
-type PositionToken = {
+export type PositionToken = {
   id: string
   name: string
   symbol: string
   decimals: number
-  pool: Pool
+  pool?: Pool
   owner: string
 }
 
@@ -62,9 +62,93 @@ export type Pool = {
   createdAt: string
 }
 
-export const queryPools = (id: string) => gql`
+export type User = {
+  id: string
+  positionTokens: { positionToken: PositionToken }[]
+}
+
+export const queryUser = (id: string) => gql`
+{
+  user(id: "${id}" ){
+    id
+    positionTokens {
+      positionToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+        pool {
+          id
+          referenceAsset
+          floor
+          inflection
+          cap
+          supplyInitial
+          supplyShort
+          supplyLong
+          expiryTime
+          collateralToken {
+            id
+            name
+            decimals
+            symbol
+          }
+          collateralBalanceShortInitial
+          collateralBalanceLongInitial
+          collateralBalance
+          shortToken {
+            id
+            name
+            symbol
+            decimals
+            owner
+          }
+          longToken {
+            id
+            name
+            symbol
+            decimals
+            owner
+          }
+          finalReferenceValue
+          statusFinalReferenceValue
+          redemptionAmountLongToken
+          redemptionAmountShortToken
+          statusTimestamp
+          dataProvider
+          redemptionFee
+          settlementFee
+          createdBy
+          createdAt
+          capacity
+          expiryTime
+          challenges {
+            challengedBy
+            proposedFinalReferenceValue
+          }
+        }
+      }
+    }
+  }
+}
+`
+
+export const queryPools = (
+  skip: number,
+  pageSize: number,
+  createdBy = '',
+  dataProvider = ''
+) => gql`
   {
-    pools(first: 1000, where: { id_gt: "${id}" } ) {
+    pools(first: ${pageSize}, skip: ${skip},
+      orderDirection: desc,
+      orderBy: createdAt,
+      where: { 
+        createdBy_contains: "${createdBy}"
+        statusFinalReferenceValue_not: "Confirmed"
+        dataProvider_contains: "${dataProvider}"
+      }) {
       id
       referenceAsset
       floor
@@ -117,117 +201,7 @@ export const queryPools = (id: string) => gql`
   }
 `
 
-export const queryMarkets = (id: string) => gql`
-  {
-    pools( where: { statusFinalReferenceValue_not:"Confirmed" id_gt: "${id}" } ) {
-      id
-      referenceAsset
-      floor
-      inflection
-      cap
-      supplyInitial
-      supplyShort
-      supplyLong
-      expiryTime
-      collateralToken {
-        id
-        name
-        decimals
-        symbol
-      }
-      collateralBalanceShortInitial
-      collateralBalanceLongInitial
-      collateralBalance
-      shortToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      longToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      finalReferenceValue
-      statusFinalReferenceValue
-      redemptionAmountLongToken
-      redemptionAmountShortToken
-      statusTimestamp
-      dataProvider
-      redemptionFee
-      settlementFee
-      createdBy
-      createdAt
-      capacity
-      expiryTime
-      challenges {
-        challengedBy
-        proposedFinalReferenceValue
-      }
-    }
-  }
-`
-
-export const queryDatafeed = (address: string, id: string) => gql`
-  {
-    pools(first: 1000, where: { dataProvider: "${address}" id_gt: "${id}" } ) {
-      id
-      referenceAsset
-      floor
-      inflection
-      cap
-      supplyInitial
-      supplyShort
-      supplyLong
-      expiryTime
-      collateralToken {
-        id
-        name
-        decimals
-        symbol
-      }
-      collateralBalanceShortInitial
-      collateralBalanceLongInitial
-      collateralBalance
-      shortToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      longToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      finalReferenceValue
-      statusFinalReferenceValue
-      redemptionAmountLongToken
-      redemptionAmountShortToken
-      statusTimestamp
-      dataProvider
-      redemptionFee
-      settlementFee
-      createdBy
-      createdAt
-      capacity
-      expiryTime
-      challenges {
-        challengedBy
-        proposedFinalReferenceValue
-      }
-    }
-  }
-`
-
-export const queryMyFeeClaims = (address: string) => gql`
+export const queryFeeRecipients = (address: string) => gql`
   {
     feeRecipients(where: { id: "${address}" }) {
       id
@@ -371,7 +345,7 @@ export const queryOrderFillsMaker = (address: string) => gql`
   }
 `
 
-export const queryOrderFills = (address: string) => gql`
+export const queryOrderFillsTaker = (address: string) => gql`
   {
     nativeOrderFills(
       where: { taker: "${address}" }

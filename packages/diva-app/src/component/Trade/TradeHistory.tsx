@@ -1,7 +1,7 @@
 import { useQuery } from 'react-query'
 import {
   OrderFill,
-  queryOrderFills,
+  queryOrderFillsTaker,
   queryOrderFillsMaker,
 } from '../../lib/queries'
 import request from 'graphql-request'
@@ -48,8 +48,8 @@ export const TradeHistory = ({ pool }: Props) => {
   const ids: string[] = []
   const orderFills = useQuery<OrderFill[]>('orderFills', async () => {
     const response = request(
-      config[chainId].zeroxSubgraph,
-      queryOrderFills(userAddress)
+      config[chainId].divaSubgraph,
+      queryOrderFillsTaker(userAddress)
     ).then((orders) => {
       if (orders.nativeOrderFills != null) {
         return orders.nativeOrderFills
@@ -61,7 +61,7 @@ export const TradeHistory = ({ pool }: Props) => {
   })
   const orderFillsMaker = useQuery<OrderFill[]>('orderFillsMaker', async () => {
     const response = request(
-      config[chainId].zeroxSubgraph,
+      config[chainId].divaSubgraph,
       queryOrderFillsMaker(userAddress)
     ).then((orders) => {
       if (orders.nativeOrderFills != null) {

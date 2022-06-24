@@ -1,25 +1,21 @@
 import { useQuery } from 'react-query'
 import {
   OrderFill,
-  queryOrderFills,
+  queryOrderFillsTaker,
   queryOrderFillsMaker,
 } from '../../lib/queries'
 import request from 'graphql-request'
 import { config } from '../../constants'
-import { useAppSelector } from '../../Redux/hooks'
-import { selectPools, selectUserAddress } from '../../Redux/appSlice'
-import { DataGrid, GridColDef, GridRowModel } from '@mui/x-data-grid'
+import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
+import {
+  fetchPositionTokens,
+  selectPools,
+  selectUserAddress,
+} from '../../Redux/appSlice'
+import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import { useWhitelist } from '../../hooks/useWhitelist'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { formatEther, formatUnits } from 'ethers/lib/utils'
-import TableContainer from '@mui/material/TableContainer'
-import Paper from '@mui/material/Paper'
-import Table from '@mui/material/Table'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import TableCell from '@mui/material/TableCell'
-import TableBody from '@mui/material/TableBody'
-import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import styled from 'styled-components'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
@@ -27,7 +23,6 @@ import { CoinIconPair } from '../CoinIcon'
 import { Stack } from '@mui/material'
 import PoolsTable from '../PoolsTable'
 import { getDateTime } from '../../Util/Dates'
-import { ContinuousSizeLegend } from 'react-vis'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -111,12 +106,17 @@ export function TradeHistoryTab() {
   const [history, setHistory] = useState<any[]>([])
   const [page, setPage] = useState(0)
   const orders: any[] = []
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    dispatch(fetchPositionTokens())
+  }, [dispatch])
 
   const orderFills = useQuery<OrderFill[]>('orderFills', async () => {
     if (userAddress != null) {
       const response = request(
-        config[chainId].zeroxSubgraph,
-        queryOrderFills(userAddress)
+        config[chainId].divaSubgraph,
+        queryOrderFillsTaker(userAddress)
       ).then((orders) => {
         if (orders.nativeOrderFills != null) {
           return orders.nativeOrderFills
@@ -130,7 +130,7 @@ export function TradeHistoryTab() {
   const orderFillsMaker = useQuery<OrderFill[]>('orderFillsMaker', async () => {
     if (userAddress != null) {
       const response = request(
-        config[chainId].zeroxSubgraph,
+        config[chainId].divaSubgraph,
         queryOrderFillsMaker(userAddress)
       ).then((orders) => {
         if (orders.nativeOrderFills != null) {
@@ -169,10 +169,10 @@ export function TradeHistoryTab() {
           if (a.timestamp < b.timestamp) return 1
           return 0
         })
-      everyOrder.map((order) => {
-        collateralTokens.map((token) => {
+      everyOrder.forEach((order) => {
+        collateralTokens.forEach((token) => {
           if (order.takerToken.toLowerCase() === token.id.toLowerCase()) {
-            pools.map((pool) => {
+            pools.forEach((pool) => {
               if (
                 pool.shortToken.id.toLowerCase() ===
                 order.makerToken.toLowerCase()

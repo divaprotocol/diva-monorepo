@@ -9,18 +9,15 @@ import {
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React, { useState } from 'react'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import styled from '@emotion/styled'
+import { useEffect, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
-import { selectMainPools, selectOtherPools } from '../../Redux/appSlice'
-import { useAppSelector } from '../../Redux/hooks'
+import { fetchPools, selectPools } from '../../Redux/appSlice'
+import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { Box, Tooltip } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { getAppStatus } from '../../Util/getAppStatus'
-import { isObject } from 'util'
+import { divaGovernanceAddress } from '../../constants'
 
 export const ExpiresInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime()
@@ -185,16 +182,19 @@ const columns: GridColDef[] = [
 ]
 
 export default function Markets() {
-  const [value, setValue] = useState(0)
   const [page, setPage] = useState(0)
-  const mainPools = useAppSelector(selectMainPools)
-  const otherPools = useAppSelector(selectOtherPools)
+  const [createdBy, setCreatedBy] = useState(divaGovernanceAddress)
+  const pools = useAppSelector(selectPools)
+  const dispatch = useAppDispatch()
 
-  const pools = value === 0 ? mainPools : otherPools
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      dispatch(fetchPools({ page, createdBy }))
+    }, 300)
 
-  const handleChange = (event: any, newValue: any) => {
-    setValue(newValue)
-  }
+    return () => clearTimeout(timeout)
+  }, [createdBy, dispatch, page])
+
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const { status } = getAppStatus(
       val.expiryTime,
@@ -319,9 +319,7 @@ export default function Markets() {
       },
     ]
   }, [] as GridRowModel[])
-  const filteredRows = rows.filter(
-    (v) => v.Status && !v.Status.startsWith('Confirmed')
-  )
+
   return (
     <>
       <Box
@@ -345,15 +343,14 @@ export default function Markets() {
           flexDirection: 'column',
         }}
       >
-        <Tabs value={value} onChange={handleChange} variant="standard">
-          <Tab label="Main" />
-          <Tab label="Other" />
-        </Tabs>
         <PoolsTable
           columns={columns}
-          rows={filteredRows}
+          onCreatorChanged={setCreatedBy}
+          creatorAddress={createdBy}
+          rows={rows}
+          rowCount={8000}
           page={page}
-          rowCount={filteredRows.length}
+          loading={false /*mainPools.length === 0*/}
           onPageChange={(page) => setPage(page)}
         />
       </Box>

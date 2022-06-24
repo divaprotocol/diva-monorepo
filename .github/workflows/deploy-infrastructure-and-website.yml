@@ -4,9 +4,10 @@ on:
       - main
       - fix-deployment
     paths:
+      - 'packages/diva-app/**'
       - 'packages/diva-infrastructure/**'
-      - '.github/workflows/deploy-infrastructure.yml'
-  
+      - '.github/workflows/deploy-infrastructure-and-website.yml'
+
 name: Deploy Infrastructure
 jobs:
   deploy:
@@ -54,3 +55,4 @@ jobs:
         run: |
           aws s3 sync packages/diva-app/build s3://app.diva.finance
           aws cloudfront create-invalidation --distribution-id E2HCWZDF4NN8G6 --paths '/*'
+

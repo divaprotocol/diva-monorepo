@@ -11,7 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
@@ -21,9 +21,14 @@ import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { fetchPool, selectPools, selectUserAddress } from '../../Redux/appSlice'
+import {
+  fetchPool,
+  fetchPools,
+  selectPools,
+  selectUserAddress,
+} from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
-import { useAppSelector } from '../../Redux/hooks'
+import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ExpiresInCell } from '../Markets/Markets'
 
@@ -296,75 +301,83 @@ const columns: GridColDef[] = [
 export function MyDataFeeds() {
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    if (userAddress != null) {
+      dispatch(
+        fetchPools({
+          page,
+          dataProvider: userAddress,
+        })
+      )
+    }
+  }, [dispatch, page, userAddress])
 
   const pools = useAppSelector((state) => selectPools(state))
-  const rows: GridRowModel[] = pools
-    .filter(
-      (pool) => pool.dataProvider.toLowerCase() === userAddress?.toLowerCase()
-    )
-    .reduce((acc, val) => {
-      const shared = {
-        Icon: val.referenceAsset,
-        Underlying: val.referenceAsset,
-        Floor: formatUnits(val.floor),
-        Inflection: formatUnits(val.inflection),
-        Cap: formatUnits(val.cap),
-        Expiry: getDateTime(val.expiryTime),
-        Sell: 'TBD',
-        Buy: 'TBD',
-        MaxYield: 'TBD',
-        Challenges: val.challenges,
-      }
+  const rows: GridRowModel[] = pools.reduce((acc, val) => {
+    const shared = {
+      Icon: val.referenceAsset,
+      Underlying: val.referenceAsset,
+      Floor: formatUnits(val.floor),
+      Inflection: formatUnits(val.inflection),
+      Cap: formatUnits(val.cap),
+      Expiry: getDateTime(val.expiryTime),
+      Sell: 'TBD',
+      Buy: 'TBD',
+      MaxYield: 'TBD',
+      Challenges: val.challenges,
+    }
 
-      const payOff = {
-        CollateralBalanceLong: Number(
-          formatUnits(
-            val.collateralBalanceLongInitial,
-            val.collateralToken.decimals
-          )
-        ),
-        CollateralBalanceShort: Number(
-          formatUnits(
-            val.collateralBalanceShortInitial,
-            val.collateralToken.decimals
-          )
-        ),
-        Floor: Number(formatEther(val.floor)),
-        Inflection: Number(formatEther(val.inflection)),
-        Cap: Number(formatEther(val.cap)),
-        TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
-      }
+    const payOff = {
+      CollateralBalanceLong: Number(
+        formatUnits(
+          val.collateralBalanceLongInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      CollateralBalanceShort: Number(
+        formatUnits(
+          val.collateralBalanceShortInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      Floor: Number(formatEther(val.floor)),
+      Inflection: Number(formatEther(val.inflection)),
+      Cap: Number(formatEther(val.cap)),
+      TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
+    }
 
-      const Status = val.statusFinalReferenceValue
-      return [
-        ...acc,
-        {
-          ...shared,
-          id: `${val.id}/long`,
-          Id: val.id,
-          address: val.longToken,
-          PayoffProfile: generatePayoffChartData({
-            ...payOff,
-            IsLong: true,
-          }),
-          TVL:
-            parseFloat(
-              formatUnits(
-                BigNumber.from(val.collateralBalance),
-                val.collateralToken.decimals
-              )
-            ).toFixed(4) +
-            ' ' +
-            val.collateralToken.symbol,
-          Status,
-          StatusTimestamp: val.statusTimestamp,
-          finalValue:
-            val.statusFinalReferenceValue === 'Open'
-              ? '-'
-              : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
-        },
-      ]
-    }, [] as GridRowModel[])
+    const Status = val.statusFinalReferenceValue
+    return [
+      ...acc,
+      {
+        ...shared,
+        id: `${val.id}/long`,
+        Id: val.id,
+        address: val.longToken,
+        PayoffProfile: generatePayoffChartData({
+          ...payOff,
+          IsLong: true,
+        }),
+        TVL:
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalance),
+              val.collateralToken.decimals
+            )
+          ).toFixed(4) +
+          ' ' +
+          val.collateralToken.symbol,
+        Status,
+        StatusTimestamp: val.statusTimestamp,
+        finalValue:
+          val.statusFinalReferenceValue === 'Open'
+            ? '-'
+            : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
+      },
+    ]
+  }, [] as GridRowModel[])
 
   return (
     <Stack
@@ -392,6 +405,7 @@ export function MyDataFeeds() {
           <PoolsTable
             disableRowClick={true}
             page={page}
+            rowCount={9999}
             rows={rows}
             columns={columns}
             onPageChange={(page) => setPage(page)}

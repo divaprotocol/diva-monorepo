@@ -18,7 +18,7 @@ import { selectPools, selectUserAddress } from '../../Redux/appSlice'
 import { useQuery } from 'react-query'
 import {
   OrderFill,
-  queryOrderFills,
+  queryOrderFillsTaker,
   queryOrderFillsMaker,
   queryTestUser,
   TestUser,
@@ -266,8 +266,8 @@ export const Tasks = (props: any) => {
   })
   const orderFills = useQuery<OrderFill[]>('orderFills', async () => {
     const response = request(
-      config[chainId].zeroxSubgraph,
-      queryOrderFills(userAddress)
+      config[chainId].divaSubgraph,
+      queryOrderFillsTaker(userAddress)
     ).then((orders) => {
       if (orders.nativeOrderFills != null) {
         return orders.nativeOrderFills
@@ -279,7 +279,7 @@ export const Tasks = (props: any) => {
   })
   const orderFillsMaker = useQuery<OrderFill[]>('orderFillsMaker', async () => {
     const response = request(
-      config[chainId].zeroxSubgraph,
+      config[chainId].divaSubgraph,
       queryOrderFillsMaker(userAddress)
     ).then((orders) => {
       if (orders.nativeOrderFills != null) {

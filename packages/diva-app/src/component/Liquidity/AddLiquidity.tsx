@@ -318,7 +318,7 @@ export const AddLiquidity = ({ pool }: Props) => {
               textFieldValue={textFieldValue}
               transactionType={'liquidity'}
               onTransactionSuccess={() => setBalanceUpdated(!balanceUpdated)}
-              alert={openExpiredAlert}
+              alert={openExpiredAlert || openAlert}
             />
           </Container>
         </Container>
