@@ -8,7 +8,7 @@ dataSources:
     source:
       address: "0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211"
       abi: DivaDiamond
-      startBlock: 12380045
+      startBlock: 12419675
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -53,7 +53,7 @@ dataSources:
     source:
       address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
       abi: IZeroEx
-      startBlock: 12380045
+      startBlock: 12419675
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5

@@ -417,6 +417,11 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       nativeOrderFillEntity.save();
   }
 
+  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  if (!testnetUser) {
+    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+  }
+
   // buy limit: maker token = collateral token; taker token = position token
   // after fill, maker receives position tokens
   // check if taker token is a position token
@@ -440,14 +445,9 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     }
 
     // Update TestnetUser entity
-    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
-    if (!testnetUser) {
-      testnetUser = new TestnetUser(event.transaction.from.toHexString());
-    }
-
-    if (nativeOrderFillEntity.maker.toHexString() === event.transaction.from.toHexString()) {
+    if (event.params.maker === event.transaction.from) {
       testnetUser.buyLimitOrderCreatedAndFilled = true;
-    } else if (nativeOrderFillEntity.taker.toHexString() === event.transaction.from.toHexString()) {
+    } else if (event.params.taker === event.transaction.from) {
       testnetUser.buyLimitOrderFilled = true;
     }
     testnetUser.save();
@@ -473,14 +473,9 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     }
 
     // Update TestnetUser entity
-    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
-    if (!testnetUser) {
-      testnetUser = new TestnetUser(event.transaction.from.toHexString());
-    }
-
-    if (nativeOrderFillEntity.maker.toHexString() === event.transaction.from.toHexString()) {
+    if (event.params.maker === event.transaction.from) {
       testnetUser.sellLimitOrderCreatedAndFilled = true;
-    } else if (nativeOrderFillEntity.taker.toHexString() === event.transaction.from.toHexString()) {
+    } else if (event.params.taker === event.transaction.from) {
       testnetUser.sellLimitOrderFilled = true;
     }
     testnetUser.save();
