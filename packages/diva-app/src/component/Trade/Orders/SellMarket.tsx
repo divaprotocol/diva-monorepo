@@ -297,8 +297,11 @@ export default function SellMarket(props: {
     return sortedOrders
   }
 
+  // Check how many existing sell limit orders the user has outstanding in the orderbook.
+  // Note that in Sell Limit, the makerToken is the position token which is the relevant token for approval in Sell Market.
+  // As remainingFillableMakerAmount is not directly available, it has to be backed out from remainingFillableTakerAmount, takerAmount and makerAmount
   const getMakerOrdersTotalAmount = async (maker) => {
-    let existingOrderAmount = new BigNumber('0')
+    let existingOrderAmount = BigENumber.from(0)
     if (responseSell.length == 0) {
       //Double check the any limit orders exists
       const rSell: any = await get0xOpenOrders(
@@ -310,19 +313,31 @@ export default function SellMarket(props: {
     }
     responseSell.forEach((data: any) => {
       const order = data.order
+
       if (maker == order.maker) {
         const metaData = data.metaData
-        const remainingTakerAmount = new BigNumber(
-          metaData.remainingFillableTakerAmount.toString()
+        const remainingFillableTakerAmount = BigENumber.from(
+          metaData.remainingFillableTakerAmount
         )
-        if (remainingTakerAmount == order.makerAmount) {
-          existingOrderAmount = existingOrderAmount.plus(order.makerAmount)
+        const takerAmount = BigENumber.from(order.takerAmount) // collateral token
+        const makerAmount = BigENumber.from(order.makerAmount) // position token
+
+        if (remainingFillableTakerAmount.lt(makerAmount)) {
+          // const makerAmount = new BigNumber(makerAmount)
+          // const takerAmount = new BigNumber(takerAmount)
+          // const askAmount = takerAmount.div(makerAmount)
+          // const quantity = remainingFillableTakerAmount.div(askAmount)
+
+          // Note: the resulting remainingFillableMakerAmount has 18 decimals
+          // Scaling factors cancel out, hence it's straightforward calcs in that case
+          const remainingFillableMakerAmount = remainingFillableTakerAmount
+            .mul(makerAmount)
+            .div(takerAmount)
+          existingOrderAmount = existingOrderAmount.add(
+            remainingFillableMakerAmount
+          )
         } else {
-          const makerAmount = new BigNumber(order.makerAmount)
-          const takerAmount = new BigNumber(order.takerAmount)
-          const askAmount = takerAmount.dividedBy(makerAmount)
-          const quantity = remainingTakerAmount.dividedBy(askAmount)
-          existingOrderAmount = existingOrderAmount.plus(quantity)
+          existingOrderAmount = existingOrderAmount.add(makerAmount)
         }
       }
     })

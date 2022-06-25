@@ -270,23 +270,35 @@ export default function BuyMarket(props: {
     const orders: any = []
     responseSell.forEach((data: any) => {
       const order = JSON.parse(JSON.stringify(data.order))
-      const takerAmount = Number(
-        formatUnits(order.takerAmount, option.collateralToken.decimals)
-      )
-      const makerAmount = Number(formatUnits(order.makerAmount))
+      const takerAmount2 = BigENumber.from(order.takerAmount) // collateral token (<= 18 decimals)
+      const makerAmount2 = BigENumber.from(order.makerAmount) // position token (18 decimals)
+      console.log('takerAmount2', takerAmount2.toString())
+      // const takerAmount = Number(
+      //   formatUnits(order.takerAmount, option.collateralToken.decimals)
+      // )
+      // const makerAmount = Number(formatUnits(order.makerAmount))
 
       const remainingFillableTakerAmount =
         data.metaData.remainingFillableTakerAmount
 
       if (BigENumber.from(remainingFillableTakerAmount).gt(1)) {
         // > 1 to filter out dust orders
-        if (totalDecimals(takerAmount, makerAmount) > 1) {
-          order['expectedRate'] = (takerAmount / makerAmount).toFixed(
-            totalDecimals(takerAmount, makerAmount)
-          )
-        } else {
-          order['expectedRate'] = takerAmount / makerAmount
-        }
+
+        // console.log('totalDecimals', totalDecimals(takerAmount, makerAmount))
+        // if (totalDecimals(takerAmount, makerAmount) > 1) {
+        //   order['expectedRate'] = (takerAmount / makerAmount).toFixed(
+        //     totalDecimals(takerAmount, makerAmount)
+        //     // TODO Why is this part needed? I don't think it's needed when doing BigNumber operations
+        //   )
+        // } else {
+        // console.log('takerAmount', takerAmount)
+        // console.log('makerAmount', makerAmount)
+        order['expectedRate'] = takerAmount2
+          .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+          .mul(parseUnits('1'))
+          .div(makerAmount2) // result has 18 decimals
+        console.log('expectedRate', formatUnits(order['expectedRate']))
+        // }
         order['remainingFillableTakerAmount'] =
           data.metaData.remainingFillableTakerAmount
         orders.push(order)
@@ -296,9 +308,13 @@ export default function BuyMarket(props: {
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedOrders = stableSort(orders, getComparator(sortOrder, orderBy))
+    console.log('sortedOrders')
+    console.log(sortedOrders)
     if (sortedOrders.length > 0) {
       const bestRate = sortedOrders[0].expectedRate
-      const rate = Number(bestRate)
+      console.log('bestRate', bestRate.toString())
+      // TODO: Test whether bestRate is correct when multiple orders in the orderbook
+      const rate = Number(formatUnits(bestRate)) // has 18 decimals
       setAvgExpectedRate(rate)
     }
     return {
@@ -307,7 +323,7 @@ export default function BuyMarket(props: {
   }
 
   const getTakerOrdersTotalAmount = async (taker) => {
-    let existingOrdersAmount = new BigNumber(0)
+    let existingOrdersAmount = BigENumber.from(0)
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
       const rBuy = await get0xOpenOrders(
@@ -319,21 +335,43 @@ export default function BuyMarket(props: {
         responseBuy = rBuy
       }
     }
+    // Check how many existing buy limit orders the user has outstanding in the orderbook.
+    // Note that in Buy Limit, the makerToken is the collateral token which is the relevant token for approval in Buy Market.
+    // As remainingFillableMakerAmount is not directly available, it has to be backed out from remainingFillableTakerAmount, takerAmount and makerAmount
     responseBuy.forEach((data: any) => {
       const order = data.order
       const metaData = data.metaData
+
       if (taker == order.maker) {
-        const remainingFillableTakerAmount = new BigNumber(
-          metaData.remainingFillableTakerAmount.toString()
+        const remainingFillableTakerAmount = BigENumber.from(
+          metaData.remainingFillableTakerAmount
         )
-        if (remainingFillableTakerAmount < order.takerAmount) {
-          const makerAmount = new BigNumber(order.makerAmount)
-          const takerAmount = new BigNumber(order.takerAmount)
-          const bidAmount = makerAmount.dividedBy(takerAmount)
-          const youPay = bidAmount.multipliedBy(remainingFillableTakerAmount)
-          existingOrdersAmount = existingOrdersAmount.plus(youPay)
+        const takerAmount = BigENumber.from(order.takerAmount) // position token
+        const makerAmount = BigENumber.from(order.makerAmount) // collateral token
+
+        // As remainingFillableMakerAmount is not directly available
+        // it has to be calculated based on remainingFillableTakerAmount, takerAmount and makerAmount
+        if (remainingFillableTakerAmount.lt(takerAmount)) {
+          // const makerAmount = new BigNumber(order.makerAmount)
+          // const takerAmount = new BigNumber(order.takerAmount)
+
+          // const bidAmount = makerAmount
+          //   .mul(parseUnits('1', 18 - option.collateralToken.decimals)) // scale to 18 decimals
+          //   .mul(parseUnits('1')) // scale to achieve high precision in integer math
+          //   .div(takerAmount) // division by amount with 18 decimals
+          // Note: the resulting remainingFillableMakerAmount may have less than 18 decimals
+          const remainingFillableMakerAmount = remainingFillableTakerAmount
+            .mul(makerAmount)
+            .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+            .div(takerAmount)
+          // bidAmount
+          //   .mul(remainingFillableTakerAmount)
+          //   .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+          existingOrdersAmount = existingOrdersAmount.add(
+            remainingFillableMakerAmount
+          )
         } else {
-          existingOrdersAmount = existingOrdersAmount.plus(order.makerAmount)
+          existingOrdersAmount = existingOrdersAmount.add(makerAmount)
         }
       }
     })
