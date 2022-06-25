@@ -16,13 +16,7 @@ import { config } from '../../constants'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectPools, selectUserAddress } from '../../Redux/appSlice'
 import { useQuery } from 'react-query'
-import {
-  OrderFill,
-  queryOrderFillsTaker,
-  queryOrderFillsMaker,
-  queryTestUser,
-  TestUser,
-} from '../../lib/queries'
+import { OrderFill, queryTestUser, TestUser } from '../../lib/queries'
 import request from 'graphql-request'
 import TaskIcon from '@mui/icons-material/Task'
 
@@ -243,14 +237,8 @@ export const Tasks = (props: any) => {
   const pools = useAppSelector((state) => selectPools(state))
   const [calcRows, setCalcRows] = useState(rows)
   const [points, setPoints] = useState(0)
-  const [buyLimit, setBuyLimit] = useState('Open')
-  const [buyLimitFilled, setBuyLimitFilled] = useState('Open')
-  const [sellLimit, setSellLimit] = useState('Open')
-  const [sellLimitFilled, setSellLimitFilled] = useState('Open')
   const [multiplier, setMultiplier] = useState('1.0')
   let score = 0
-  //  setBuyLimitFilled
-  const myPositionTokens: string[] = []
   const testnetUser = useQuery<TestUser>('testnetUser', async () => {
     const response = request(
       config[chainId].divaSubgraph,
@@ -264,60 +252,9 @@ export const Tasks = (props: any) => {
     })
     return response
   })
-  const orderFills = useQuery<OrderFill[]>('orderFills', async () => {
-    const response = request(
-      config[chainId].divaSubgraph,
-      queryOrderFillsTaker(userAddress)
-    ).then((orders) => {
-      if (orders.nativeOrderFills != null) {
-        return orders.nativeOrderFills
-      } else {
-        return {}
-      }
-    })
-    return response
-  })
-  const orderFillsMaker = useQuery<OrderFill[]>('orderFillsMaker', async () => {
-    const response = request(
-      config[chainId].divaSubgraph,
-      queryOrderFillsMaker(userAddress)
-    ).then((orders) => {
-      if (orders.nativeOrderFills != null) {
-        return orders.nativeOrderFills
-      } else {
-        return {}
-      }
-    })
-    return response
-  })
+
   useEffect(() => {
-    if (
-      pools != null &&
-      orderFills.data != null &&
-      orderFillsMaker.data != null &&
-      testnetUser.data != null &&
-      userAddress != null
-    ) {
-      pools.map((pool) => {
-        myPositionTokens.push(pool.longToken.id.toLowerCase())
-        myPositionTokens.push(pool.shortToken.id.toLowerCase())
-      })
-
-      orderFillsMaker.data.map((order) => {
-        if (myPositionTokens.includes(order.takerToken.toLowerCase())) {
-          setBuyLimit('Completed')
-        } else if (myPositionTokens.includes(order.makerToken.toLowerCase())) {
-          setSellLimit('Completed')
-        }
-      })
-
-      orderFills.data.map((order) => {
-        if (myPositionTokens.includes(order.takerToken.toLowerCase())) {
-          setBuyLimitFilled('Completed')
-        } else if (myPositionTokens.includes(order.makerToken.toLowerCase())) {
-          setSellLimitFilled('Completed')
-        }
-      })
+    if (pools != null && testnetUser.data != null && userAddress != null) {
       setCalcRows(
         rows.map((v) => {
           switch (v.id) {
@@ -373,22 +310,34 @@ export const Tasks = (props: any) => {
             case 7:
               return {
                 ...v,
-                Status: buyLimit,
+                Status:
+                  testnetUser.data?.buyLimitOrderCreatedAndFilled == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 8:
               return {
                 ...v,
-                Status: sellLimit,
+                Status:
+                  testnetUser.data?.sellLimitOrderCreatedAndFilled == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 9:
               return {
                 ...v,
-                Status: buyLimitFilled,
+                Status:
+                  testnetUser.data?.buyLimitOrderFilled == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 10:
               return {
                 ...v,
-                Status: sellLimitFilled,
+                Status:
+                  testnetUser.data?.sellLimitOrderFilled == true
+                    ? 'Completed'
+                    : 'Open',
               }
             case 11:
               return {
@@ -432,17 +381,7 @@ export const Tasks = (props: any) => {
         })
       )
     }
-  }, [
-    testnetUser.isSuccess,
-    orderFillsMaker.isSuccess,
-    orderFills.isSuccess,
-    userAddress,
-    myPositionTokens != null,
-    buyLimitFilled,
-    buyLimit,
-    sellLimitFilled,
-    sellLimit,
-  ])
+  }, [testnetUser.isSuccess, userAddress])
 
   useEffect(() => {
     calcRows.map((row) => {
