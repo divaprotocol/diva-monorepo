@@ -346,9 +346,7 @@ export default function SellMarket(props: {
 
   useEffect(() => {
     getOptionsInWallet().then((val) => {
-      !Number.isNaN(val.balance)
-        ? setWalletBalance(Number(val.balance))
-        : setWalletBalance(0)
+      !isNaN(val.balance) ? setWalletBalance(val.balance) : setWalletBalance(0)
       setAllowance(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
