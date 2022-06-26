@@ -115,6 +115,7 @@ export default function BuyMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
+      console.log('HI')
       if (numberOfOptions > 0) {
         // Calculate required allowance amount (expressed as an integer with collateral token decimals)
         const amount = allowance.add(youPay)
@@ -125,7 +126,9 @@ export default function BuyMarket(props: {
         setAllowance(collateralAllowance)
         setIsApproved(true)
         alert(
-          `Allowance for ${collateralAllowance} ${option.collateralToken.name} successfully set.`
+          `Allowance for ${Number(
+            formatUnits(collateralAllowance, decimals)
+          ).toFixed(2)} ${option.collateralToken.symbol} successfully set.`
         )
       } else {
         alert(
@@ -298,7 +301,6 @@ export default function BuyMarket(props: {
       // TODO: Test whether bestRate is correct when multiple orders in the orderbook
       // const rate = Number(formatUnits(bestRate)) // has 18 decimals
       setAvgExpectedRate(bestRate)
-      console.log('bestRate', bestRate)
     }
     return {
       sortedOrders: sortedOrders,
