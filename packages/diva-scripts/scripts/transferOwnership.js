@@ -6,6 +6,12 @@ async function main() {
   
   // INPUTS: network name
   const network = "goerli" // has to be one of the networks included in constants.js
+  const newOwner = "0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E"
+
+  // Get signers
+  const [acc1, acc2, acc3] = await ethers.getSigners();
+  const owner = acc3;
+  console.log('contract owner address: ', owner.address)
 
   // Connect to DIVA contract
   let diva = await ethers.getContractAt(
@@ -16,6 +22,13 @@ async function main() {
 
   // Get current owner
   console.log("Current owner: " + (await diva.owner()));
+
+  // Transfer ownership
+  const tx = await diva.connect(owner).transferOwnership(newOwner)
+  await tx.wait()
+
+  // Get new owner
+  console.log("New owner: " + (await diva.owner()));
   
 }
 
