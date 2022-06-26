@@ -116,12 +116,12 @@ export default function BuyMarket(props: {
     event.preventDefault()
     if (!isApproved) {
       if (numberOfOptions > 0) {
-        const amount = allowance.add(youPay) // collateral token decimals
+        // Calculate required allowance amount (expressed as an integer with collateral token decimals)
+        const amount = allowance.add(youPay)
+        // Set allowance equal to amount
         const collateralAllowance = await approveBuyAmount(amount)
-        // collateralAllowance = Number(
-        //   formatUnits(collateralAllowance.toString(), decimals)
-        // )
-        setRemainingApprovalAmount(collateralAllowance)
+
+        setRemainingApprovalAmount(collateralAllowance) // QUESTION: Why collateralAllowance here? What if I have existing orders in the orderbook?
         setAllowance(collateralAllowance)
         setIsApproved(true)
         alert(
@@ -134,8 +134,14 @@ export default function BuyMarket(props: {
       }
     } else {
       if (collateralBalance.gt(0)) {
+        // User owns collateral tokens ...
+
         if (youPay.gt(remainingApprovalAmount)) {
+          // Collateral token amount to pay is greater than remaining allowance ...
+
           if (youPay.gt(collateralBalance)) {
+            // User not enough collateral tokens to pay for the purchase ...
+
             alert('Insufficient balance')
           } else {
             const additionalApproval = youPay.sub(remainingApprovalAmount)
@@ -156,7 +162,7 @@ export default function BuyMarket(props: {
               // )
 
               // const remainingApproval = Number(newAllowance)
-              setRemainingApprovalAmount(newAllowance)
+              setRemainingApprovalAmount(newAllowance) // QUESTION: same as above, why same value as in setAllowance?
               setAllowance(newAllowance)
             } else {
               //TBD discuss this case
@@ -229,18 +235,16 @@ export default function BuyMarket(props: {
   const userAddress = useAppSelector(selectUserAddress)
 
   const getCollateralInWallet = async (takerAccount: string) => {
-    let allowance = await takerTokenContract.methods
+    const allowance = await takerTokenContract.methods
       .allowance(takerAccount, exchangeProxy)
       .call()
-    allowance = Number(formatUnits(allowance, decimals))
-    let balance = await takerTokenContract.methods
+    const balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
-    balance = Number(formatUnits(balance.toString(), decimals))
     return {
-      balance: balance,
+      balance: BigENumber.from(balance),
       account: takerAccount,
-      approvalAmount: allowance,
+      approvalAmount: BigENumber.from(allowance),
     }
   }
 
@@ -248,9 +252,9 @@ export default function BuyMarket(props: {
     const orders: any = []
     responseSell.forEach((data: any) => {
       const order = JSON.parse(JSON.stringify(data.order))
-      const takerAmount2 = BigENumber.from(order.takerAmount) // collateral token (<= 18 decimals)
-      const makerAmount2 = BigENumber.from(order.makerAmount) // position token (18 decimals)
-      console.log('takerAmount2', takerAmount2.toString())
+      const takerAmount = BigENumber.from(order.takerAmount) // collateral token (<= 18 decimals)
+      const makerAmount = BigENumber.from(order.makerAmount) // position token (18 decimals)
+      console.log('takerAmount', takerAmount.toString())
       // const takerAmount = Number(
       //   formatUnits(order.takerAmount, option.collateralToken.decimals)
       // )
@@ -271,10 +275,10 @@ export default function BuyMarket(props: {
         // } else {
         // console.log('takerAmount', takerAmount)
         // console.log('makerAmount', makerAmount)
-        order['expectedRate'] = takerAmount2
+        order['expectedRate'] = takerAmount
           .mul(parseUnits('1', 18 - decimals))
           .mul(parseUnits('1'))
-          .div(makerAmount2) // result has 18 decimals
+          .div(makerAmount) // result has 18 decimals
         console.log('expectedRate', formatUnits(order['expectedRate']))
         // }
         order['remainingFillableTakerAmount'] =
@@ -354,31 +358,27 @@ export default function BuyMarket(props: {
         }
       }
     })
-    return Number(formatUnits(existingOrdersAmount.toString(), decimals))
+    return existingOrdersAmount
   }
 
   useEffect(() => {
     if (userAddress != null) {
       getCollateralInWallet(userAddress).then(async (val) => {
-        console.log('val.approvalAmount', val.approvalAmount)
-        !isNaN(val.balance)
-          ? setCollateralBalance(val.balance)
-          : setCollateralBalance(0)
+        // !val.balance.isNaN()
+        // ? setCollateralBalance(val.balance)
+        // : setCollateralBalance(BigENumber.from(0))
+        setCollateralBalance(val.balance)
         setAllowance(val.approvalAmount)
         setRemainingApprovalAmount(val.approvalAmount)
-        val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true) // QUESTION: when can approvalAmount be negative? -> "==" should work as well
+        val.approvalAmount.lte(0) ? setIsApproved(false) : setIsApproved(true) // QUESTION: when can approvalAmount be negative? -> "==" should work as well
         if (responseSell.length > 0) {
           const data = await getSellLimitOrders()
           setExistingSellLimitOrders(data.sortedOrders)
         }
         getTakerOrdersTotalAmount(val.account).then((amount) => {
-          const remainingAmount = Number(
-            (val.approvalAmount - amount).toFixed(
-              totalDecimals(val.approvalAmount, amount)
-            )
-          )
+          const remainingAmount = val.approvalAmount.sub(amount)
           setRemainingApprovalAmount(remainingAmount)
-          remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+          remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })
         //}
       })
@@ -624,9 +624,9 @@ export default function BuyMarket(props: {
               <FormLabel sx={{ color: 'White' }}>You Pay</FormLabel>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {remainingApprovalAmount.toString().includes('e')
-                  ? remainingApprovalAmount.toExponential(2)
-                  : remainingApprovalAmount.toFixed(4)}
+                {Number(
+                  formatUnits(remainingApprovalAmount.toString(), decimals)
+                ).toFixed(4)}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>
@@ -650,7 +650,11 @@ export default function BuyMarket(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
-              <FormLabel>{collateralBalance.toFixed(4)}</FormLabel>
+              <FormLabel>
+                {Number(
+                  formatUnits(collateralBalance.toString(), decimals)
+                ).toFixed(4)}
+              </FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>

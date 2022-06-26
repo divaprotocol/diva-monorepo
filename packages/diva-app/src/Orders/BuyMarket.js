@@ -1,5 +1,5 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
+import { parseUnits } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
 import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 
@@ -16,17 +16,18 @@ export const buyMarketOrder = async (orderData) => {
   const exchangeProxyAddress = address.exchangeProxy
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
 
-  // Get existing SELL LIMIT Orders where makerToken = position token and takerToken = collateral token
+  // Get existing SELL LIMIT orders (where makerToken = position token and takerToken = collateral token) to fill
   const orders = orderData.existingLimitOrders
 
   // Define variables for integer math
   const decimals = orderData.collateralDecimals
+  const unit = parseUnits('1')
   const collateralUnit = parseUnits('1', decimals)
+  const scaling = parseUnits('1', 18 - decimals)
 
-  // User input converted from decimal number into an integer with collateral decimals
+  // User input converted from decimal number into an integer with 18 decimals
   let takerFillNbrOptions = parseUnits(
-    convertExponentialToDecimal(orderData.nbrOptions).toString(),
-    decimals
+    convertExponentialToDecimal(orderData.nbrOptions).toString()
   )
 
   // Initialize input arrays for batchFillLimitOrders function
@@ -51,13 +52,14 @@ export const buyMarketOrder = async (orderData) => {
   orders.forEach((order) => {
     if (takerFillNbrOptions.gt(0)) {
       fillOrders.push(order)
-      // Convert expected rate (of type number) into an integer with collateral token decimals
-      const expectedRate = parseUnits(order.expectedRate.toString(), decimals)
+      // Convert expected rate (of type number) into an integer with 18 decimals
+      const expectedRate = order.expectedRate
 
       // Calculate taker fill amount implied by user input and expected rate; expressed as an integer with collateral token decimals.
       const takerFillAmount = expectedRate
         .mul(takerFillNbrOptions)
-        .div(collateralUnit)
+        .div(unit)
+        .div(scaling)
 
       // Convert string into BigNumber; already expressed in collateral token decimals
       const remainingFillableTakerAmount = BigNumber.from(
@@ -66,25 +68,20 @@ export const buyMarketOrder = async (orderData) => {
 
       // Add elements to the takerAssetAmounts array which will be used as input in batchFillLimitOrders
       if (takerFillAmount.lte(remainingFillableTakerAmount)) {
-        // Add element
         takerAssetAmounts.push(takerFillAmount.toString())
-
-        // Update nbrOptionsFilled and overwrite takerFillNbrOptions with remaining number of position tokens to fill
-        const nbrOptionsFilled = remainingFillableTakerAmount
-          .mul(collateralUnit)
-          .div(expectedRate)
-        takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled) // This will drop to zero and hence will not enter this if block anymore but will add '0' for the remaining orders
       } else {
         takerAssetAmounts.push(remainingFillableTakerAmount.toString())
-
-        const nbrOptionsFilled = remainingFillableTakerAmount
-          .mul(collateralUnit)
-          .div(expectedRate)
-        takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled)
       }
+
+      // Update nbrOptionsFilled and overwrite takerFillNbrOptions with remaining number of position tokens to fill
+      const nbrOptionsFilled = remainingFillableTakerAmount
+        .mul(scaling) // scale to 18 decimals
+        .mul(unit) // multiply for high precision
+        .div(expectedRate) // divide by expectedRate which has 18 decimals
+      takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled) // This will drop to zero and hence will not enter this if block anymore but will add '0' for the remaining orders
     }
   })
-
+  console.log('takerAssetAmounts', takerAssetAmounts)
   filledOrder = await fillOrderResponse(takerAssetAmounts, fillOrders)
   return filledOrder
 }
