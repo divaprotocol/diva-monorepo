@@ -282,7 +282,7 @@ export default function BuyMarket(props: {
           .mul(parseUnits('1', 18 - decimals))
           .mul(parseUnits('1'))
           .div(makerAmount) // result has 18 decimals
-        console.log('expectedRate', formatUnits(order['expectedRate']))
+        console.log('expectedRate', order['expectedRate'].toString())
         // }
         order['remainingFillableTakerAmount'] =
           data.metaData.remainingFillableTakerAmount
@@ -463,9 +463,11 @@ export default function BuyMarket(props: {
       // }
 
       if (cumulativeAvg.gt(0)) {
-        console.log('cumulativeAvg', cumulativeAvg)
+        console.log('cumulativeAvg', cumulativeAvg.toString())
         setAvgExpectedRate(cumulativeAvg)
-        const youPayAmount = cumulativeAvg.mul(BigENumber.from(numberOfOptions))
+        const youPayAmount = cumulativeAvg
+          .mul(parseUnits(numberOfOptions.toString()))
+          .div(parseUnits('1'))
         setYouPay(youPayAmount)
       }
     } else {

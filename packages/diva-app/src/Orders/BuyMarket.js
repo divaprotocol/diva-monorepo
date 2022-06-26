@@ -70,7 +70,7 @@ export const buyMarketOrder = async (orderData) => {
       if (takerFillAmount.lte(remainingFillableTakerAmount)) {
         takerAssetAmounts.push(takerFillAmount.toString())
       } else {
-        takerAssetAmounts.push(remainingFillableTakerAmount.toString())
+        takerAssetAmounts.push(order.remainingFillableTakerAmount.toString())
       }
 
       // Update nbrOptionsFilled and overwrite takerFillNbrOptions with remaining number of position tokens to fill
