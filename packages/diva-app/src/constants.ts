@@ -23,17 +23,17 @@ export const config: { [key: number]: SingleConfig } = {
   //   allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
   //   order: 'https://ropsten.api.0x.org/orderbook/v1/order/',
   // },
-  3: {
-    name: 'Ropsten',
-    divaAddress: '0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211',
-    balanceCheckAddress: '0xD713aeC2156709A6AF392bb84018ACc6b44f1885',
-    whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
+  420: {
+    name: 'Goerli',
+    divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
+    balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
+    whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
     whitelistSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
-    allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
-    order: 'https://ropsten.api.0x.org/orderbook/v1/order/',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
+    allOrders: 'https://goerli.api.0x.org/orderbook/v1/orders/',
+    order: 'https://goerli.api.0x.org/orderbook/v1/order/',
   },
   // 4: {
   //   name: 'Rinkeby',
