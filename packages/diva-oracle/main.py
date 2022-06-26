@@ -9,20 +9,25 @@ import time
 import diva
 from sendEmail import sendEmail
 
-query = """
-        { 
-            pools (first: 1000, where: {expiryTime_gte: """ + """ "{}" """.format(int(datetime.now().timestamp()) - 86400) + """, expiryTime_lte: """ + """ "{}" """.format(int(datetime.now().timestamp()) - 300) + """ statusFinalReferenceValue: "Open", dataProvider: """ + """ "{}" """.format(config.dataprovider) + """}) {
-                id
-                dataProvider
-                referenceAsset
-                floor
-                inflection
-                cap
-                statusFinalReferenceValue
-                expiryTime
-              }
-            }
-        """
+def extend_DataFrame(df, resp):
+    df = pd.concat([df, pd.json_normalize(resp, ["data", "pools"])], ignore_index=True)
+    return df
+
+def query(lastId):
+    return """
+            { 
+                pools (first: 1000, where: {id_gt: %s, expiryTime_gte: "%s", expiryTime_lte: "%s", statusFinalReferenceValue: "Open", dataProvider: "%s"}) {
+                    id
+                    dataProvider
+                    referenceAsset
+                    floor
+                    inflection
+                    cap
+                    statusFinalReferenceValue
+                    expiryTime
+                  }
+                }
+            """ % (lastId, (int(datetime.now().timestamp()) - 86400), (int(datetime.now().timestamp()) - 300), config.dataprovider)
 
 message = "Subject: Pending Pool Transactions \n"
 
@@ -30,17 +35,30 @@ def run(network, w3, contract):
     print("#########################################")
     print('\033[1m' + "Network: {}".format(network) + '\033[0m')
     max_time_away = dt.timedelta(minutes=config.max_time_away)
-    resp = run_query(query, network)
-    df_reporting_needed = get_required_reporting_df(resp, hours=config.max_reporting_frame)
+
+    resp = run_query(query(0), network)
+    df = pd.json_normalize(resp, ['data', 'pools'])
+    numberPools = 0
+
+    while True:
+        lastId = df.id.iloc[-1]
+        if numberPools == df.shape[0]:
+            break
+        numberPools = df.shape[0]
+        resp = run_query(query(lastId), network)
+        df = extend_DataFrame(df, resp)
+
+    df = transform_expiryTimes(df)
+    df = df.sort_values(by=['expiryTime'], ignore_index=True)
 
     for j in pendingPools[network]:
-        df_reporting_needed = df_reporting_needed[df_reporting_needed["id"] != j]
+        df = df[df["id"] != j]
 
-    for i in range(df_reporting_needed.shape[0]):
-        pair = df_reporting_needed['referenceAsset'].iloc[i]
+    for i in range(df.shape[0]):
+        pair = df['referenceAsset'].iloc[i]
         pair = pair.replace("/", "")
-        date_dt = df_reporting_needed['expiryTime_datetime'].iloc[i]
-        pool_id = df_reporting_needed['id'].iloc[i]
+        date_dt = df['expiryTime_datetime'].iloc[i]
+        pool_id = df['id'].iloc[i]
 
         date_max_away = date_dt - max_time_away
         # convert times to timestamp
@@ -61,7 +79,7 @@ def run(network, w3, contract):
                 print("Nonce of pending pool transaction: {}".format(nonces[nt]))
                 print("Pool Id of pending pool: {}".format(pool_id))
             nonces[nt] += 1
-    if df_reporting_needed.shape[0] == 0:
+    if df.shape[0] == 0:
         print("No pools that require price now.")
 
 
@@ -121,18 +139,18 @@ while True:
     time.sleep(waiting_sec)
     iter += 1
     # Send email with pending pool transactions.
-    bool_var = False
-    for nt in networks:
-        bool_var = (pendingPools_len[nt][-1] != len(pendingPools[nt]))
-        if bool_var:
-            break
-    if (iter % 5 == 0) and bool_var:
-        for nt in networks:
-            message += "########## Pending transactions #################\n" \
-                       + "Network: {} \n".format(nt) \
-                       + "Pool ids: {} \n".format(pendingPools[nt]) \
-                       + "Nonces: {} \n".format(pendingPools_nonces[nt])
-            pendingPools_len[nt].append(len(pendingPools[nt]))
-        print("Sending Email...")
-        sendEmail(message)
-        message = "Subject: Pending Pool Transactions \n"
+    # bool_var = False
+    # for nt in networks:
+    #     bool_var = (pendingPools_len[nt][-1] != len(pendingPools[nt]))
+    #     if bool_var:
+    #         break
+    # if (iter % 5 == 0) and bool_var:
+    #     for nt in networks:
+    #         message += "########## Pending transactions #################\n" \
+    #                    + "Network: {} \n".format(nt) \
+    #                    + "Pool ids: {} \n".format(pendingPools[nt]) \
+    #                    + "Nonces: {} \n".format(pendingPools_nonces[nt])
+    #         pendingPools_len[nt].append(len(pendingPools[nt]))
+    #     print("Sending Email...")
+    #     sendEmail(message)
+    #     message = "Subject: Pending Pool Transactions \n"
