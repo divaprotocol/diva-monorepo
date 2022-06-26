@@ -24,7 +24,7 @@ export const WrongChain = (props: any) => {
         }}
       >
         Unsupported network, please <Button onClick={handleOpen}>Switch</Button>{' '}
-        to Ropsten network in your Metamask wallet.
+        to Goerli network in your Metamask wallet.
       </Typography>
     </Box>
   )
