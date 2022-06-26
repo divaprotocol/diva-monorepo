@@ -1,3 +1,11 @@
+# Running with Docker
+Upon a working script and configuration docker can be used to run  the oracle
+Simply run the shell script to compile and run the docker image
+
+```
+sh docker_run.sh
+```
+## Poetry installation for local development and troubleshooting
 1. Install poetry: 
 
 * osx / linux / bashonwindows install instructions:

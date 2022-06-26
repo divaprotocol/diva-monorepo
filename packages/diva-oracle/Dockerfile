@@ -7,4 +7,5 @@ RUN pip3 install poetry
 
 RUN poetry install
 
-CMD ["poetry", "run", "python3", "main.py"]
+# u is unbuffered output to see python returns
+CMD ["poetry", "run", "python3", "-u", "main.py"]

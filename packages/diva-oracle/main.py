@@ -8,6 +8,7 @@ from web3 import Web3
 import time
 import diva
 from sendEmail import sendEmail
+from recorder import update_records
 
 query = """
         { 
@@ -50,10 +51,12 @@ def run(network, w3, contract):
         price, date = getKrakenPrice(pair=pair, ts_date=ts_date, ts_date_max_away=ts_date_max_away)
         if (price, date) != (-1, -1):
             print("-----------------------------------------")
-            print("Pool id {} :".format(pool_id),"Price for pair ", pair, " at ", date, ": ", price)
+            message = "Pool id {} : Price for pair {}  date: {} : Price {}  ".format(pool_id, pair, date, price)
+            print(message)
 
             try:
                 sendPrice(pool_id=pool_id, value=price, network=network, w3=w3, my_contract=contract, nonce=nonces[nt])
+                update_records(message)
             except:
                 print("Transaction is still pending...")
                 pendingPools[nt].append(pool_id)
