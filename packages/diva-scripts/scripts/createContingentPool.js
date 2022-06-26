@@ -1,7 +1,7 @@
 /**
  * Script to create a contingent pool
- * Run: `yarn hardhat run scripts/createContingentPool.js --network ropsten`
- * Replace ropsten with any other network that is listed in constants.js
+ * Run: `yarn hardhat run scripts/createContingentPool.js --network goerli`
+ * Replace goerli with any other network that is listed in constants.js
  */
 
 const { ethers } = require('hardhat');
@@ -15,7 +15,7 @@ const { getExpiryInSeconds, AddressZero } = require('./utils.js')
 async function main() {
 
   // INPUT: network, collateral token symbol (check constants.js for available values)
-  const network = "ropsten" 
+  const network = "goerli" 
   const collateralTokenSymbol = "dUSD"
 
   // Get signers
