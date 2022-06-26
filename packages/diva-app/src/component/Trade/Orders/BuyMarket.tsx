@@ -25,17 +25,14 @@ import {
   totalDecimals,
   convertExponentialToDecimal,
 } from './OrderHelper'
-import { BigNumber } from '@0x/utils'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { useParams } from 'react-router-dom'
-import { FormLabel, Stack, Tooltip, useTheme } from '@mui/material'
+import { FormLabel, Stack, Tooltip } from '@mui/material'
 import { selectUserAddress } from '../../../Redux/appSlice'
 import { BigNumber as BigENumber } from 'ethers'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
-import { parseUnits } from 'ethers/lib/utils'
 import {
   setBreakEven,
   setIntrinsicValue,
@@ -317,7 +314,7 @@ export default function BuyMarket(props: {
         responseBuy = rBuy
       }
     }
-    // Check how many existing buy limit orders the user has outstanding in the orderbook.
+    // Check how many existing Buy Limit orders the user has currently outstanding in the orderbook.
     // Note that in Buy Limit, the makerToken is the collateral token which is the relevant token for approval in Buy Market.
     // As remainingFillableMakerAmount is not directly available, it has to be backed out from remainingFillableTakerAmount, takerAmount and makerAmount
     responseBuy.forEach((data: any) => {
