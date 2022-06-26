@@ -19,7 +19,7 @@ chain_id = {
     "kovan": 42,
     "mumbai": 80001,
     "polygon": 137,
-    "goerli": 420
+    "goerli": 5
 }
 
 # PARAMETERS
