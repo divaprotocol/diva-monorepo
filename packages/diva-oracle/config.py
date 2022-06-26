@@ -6,7 +6,8 @@ dataprovider = PUBLIC_KEY
 
 PROVIDER_URL = {
     "ropsten": 'https://ropsten.infura.io/v3/a6b3d560ce544297b265bb09f0d4bfa8',
-    "rinkeby": 'https://rinkeby.infura.io/v3/<YOUR_API_KEY>',
+    "goerli": 'https://goerli.infura.io/v3/a6b3d560ce544297b265bb09f0d4bfa8',
+    "rinkeby": 'https://rinkeby.infura.io/v3/a6b3d560ce544297b265bb09f0d4bfa8',
     "mumbai": ''
 }
 
@@ -15,7 +16,8 @@ chain_id = {
     "rinkeby": 4,
     "kovan": 42,
     "mumbai": 80001,
-    "polygon": 137
+    "polygon": 137,
+    "goerli": 420
 }
 
 # PARAMETERS
