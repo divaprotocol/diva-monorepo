@@ -2,7 +2,7 @@ const ETHERSCAN_PREFIXES: { [chainId: number]: string } = {
   [1]: '',
   [3]: 'ropsten.',
   [4]: 'rinkeby.',
-  [420]: 'goerli.',
+  [5]: 'goerli.',
   [42]: 'kovan.',
 }
 
@@ -12,7 +12,7 @@ export enum EtherscanLinkType {
 }
 
 export function getEtherscanLink(
-  chainId = 420,
+  chainId = 5,
   address: string,
   type: EtherscanLinkType
 ): string {

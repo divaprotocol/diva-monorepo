@@ -66,7 +66,7 @@ export const ConnectionProvider = ({ children }) => {
       ..._state,
       address: undefined,
       isConnected: false,
-      chainId: 420,
+      chainId: 5,
     }))
     setConnectionState({})
 
@@ -128,7 +128,7 @@ export const ConnectionProvider = ({ children }) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (state.chainId == null) {
-        setState((_state) => ({ ..._state, chainId: 420 }))
+        setState((_state) => ({ ..._state, chainId: 5 }))
       }
     }, 3000)
     return () => clearTimeout(timeout)

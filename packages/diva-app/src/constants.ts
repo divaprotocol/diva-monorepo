@@ -23,7 +23,7 @@ export const config: { [key: number]: SingleConfig } = {
   //   allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
   //   order: 'https://ropsten.api.0x.org/orderbook/v1/order/',
   // },
-  420: {
+  5: {
     name: 'Goerli',
     divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
     balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',

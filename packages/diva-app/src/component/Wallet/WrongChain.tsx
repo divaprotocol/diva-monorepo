@@ -8,7 +8,7 @@ export const WrongChain = (props: any) => {
   const handleOpen = async () => {
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x1A4' }],
+      params: [{ chainId: '0x5' }],
     })
   }
   return (
