@@ -64,11 +64,10 @@ class DIVATradeChart extends Component {
       .attr('class', 'xAxisG')
       .attr('transform', 'translate(0,' + height + ')')
       .call(d3.axisBottom(x).tickSize(0)) // .tickSize to remove the ticks at the ends
-
-    // Remove axis labels
-    d3.selectAll('.tick').remove()
-
+    // Remove X- axis labels
+    d3.select('.xAxisG').selectAll('.tick').remove()
     // Add Y axis
+    console.log('value', data)
     const y = d3
       .scaleLinear()
       .domain([
@@ -78,7 +77,31 @@ class DIVATradeChart extends Component {
         }),
       ])
       .range([height, 60])
-    svg.append('g').attr('class', 'yAxisG')
+    svg
+      .append('g')
+      .attr('class', 'yAxisG')
+      .attr('transform', `translate(${margin.left},0)`)
+      .call(
+        d3
+          .axisRight(y)
+          .tickSize(width - margin.left - margin.right)
+          .tickValues([
+            0,
+            data[2].y,
+            d3.max(data, function (d) {
+              return d.y
+            }),
+          ])
+          .ticks(3)
+      )
+      .call((g) => g.select('.domain').remove())
+      .call((g) =>
+        g
+          .selectAll('.tick:not(:first-of-type) line')
+          .attr('stroke-opacity', 0.5)
+          .style('stroke', '#3393E0')
+      )
+      .call((g) => g.selectAll('.tick text').attr('x', 4).attr('dy', -4))
 
     // Add the line
     const valueline = d3
@@ -99,13 +122,14 @@ class DIVATradeChart extends Component {
     d3.select('.line')
       .style('fill', 'none')
       .style('stroke', 'grey')
-      .style('stroke-width', '5px')
+      .style('stroke-width', '1px')
 
     // Format x axis
     d3.select('.xAxisG path')
       .style('stroke', '#B8B8B8')
-      .style('stroke-width', '3px')
-
+      .style('stroke-width', '0.75px')
+    //for Y axis
+    //for line gradient
     // Add mouseover effects
     const mouseG = svg
       .append('g') // corresponds to the first part of focus/focusText in the other example but without the circle/text, this will be added later
@@ -117,11 +141,10 @@ class DIVATradeChart extends Component {
       .append('path')
       .attr('class', 'mouse-line')
       .style('stroke', 'black')
-      .style('stroke-width', '2px')
+      .style('stroke-width', '1px')
       .style('opacity', '0')
 
     const lines = document.getElementsByClassName('line')
-
     const mousePerLine = mouseG
       .data([data])
       .append('g')
@@ -212,7 +235,7 @@ class DIVATradeChart extends Component {
       d3.selectAll('.tooltip-per-line text').style('opacity', '0')
     }
 
-    const greenColorCode = '#07CAA7'
+    const blueColorCode = '#3393E0'
     const redColorCode = '#F77F99'
 
     var formatDecimalComma = d3.format(',.2f') // For more formats check here: http://bl.ocks.org/mstanaland/6106487
@@ -247,25 +270,25 @@ class DIVATradeChart extends Component {
         })
         .style('stroke', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
-          return y.invert(pos.y) >= breakEven ? greenColorCode : redColorCode
+          return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
         })
 
       d3.select('.mouse-per-line circle').style('fill', function (d, i) {
         var pos = yPos(d, i, mouse[0], lines)
-        return y.invert(pos.y) >= breakEven ? greenColorCode : redColorCode
+        return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
       })
 
       d3.select('.tooltip-per-line .tooltip-payout').style(
         'fill',
         function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
-          return y.invert(pos.y) >= breakEven ? greenColorCode : redColorCode
+          return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
         }
       )
 
       d3.select('.line').style('stroke', function (d, i) {
         var pos = yPos(d, i, mouse[0], lines)
-        return y.invert(pos.y) >= breakEven ? greenColorCode : redColorCode
+        return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
       })
 
       d3.selectAll('.mouse-per-line').attr('transform', function (d, i) {

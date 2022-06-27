@@ -180,6 +180,15 @@ export default function Underlying() {
                   />
                   <OptionDetails pool={pool} isLong={isLong} />
                 </Paper>
+                <TradeChart
+                  data={data}
+                  refAsset={pool.referenceAsset}
+                  payOut={pool.collateralToken.symbol}
+                  w={762}
+                  h={336}
+                  isLong={OptionParams.IsLong}
+                  breakEven={breakEvenOptionPrice}
+                />
                 <Paper>
                   <LeftCompFlexContainer>
                     <OrdersPanel
@@ -200,17 +209,6 @@ export default function Underlying() {
                     exchangeProxy={exchangeProxy}
                     chainId={chainId}
                     provider={provider}
-                  />
-                </Paper>
-                <Paper>
-                  <TradeChart
-                    data={data}
-                    refAsset={pool.referenceAsset}
-                    payOut={pool.collateralToken.symbol}
-                    w={380}
-                    h={220}
-                    isLong={OptionParams.IsLong}
-                    breakEven={breakEvenOptionPrice}
                   />
                 </Paper>
                 <Typography
