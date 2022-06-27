@@ -22,7 +22,6 @@ import {
 import {
   getComparator,
   stableSort,
-  totalDecimals,
   convertExponentialToDecimal,
 } from './OrderHelper'
 import Web3 from 'web3'
@@ -159,7 +158,7 @@ export default function BuyMarket(props: {
             if (
               confirm(
                 'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
-                  Number(formatUnits(additionalApproval, decimals)).toFixed(2) +
+                  Number(formatUnits(additionalApproval, decimals)).toFixed(4) +
                   ' ' +
                   option.collateralToken.name +
                   '. Click Fill Order after the allowance has been updated.'
@@ -437,19 +436,20 @@ export default function BuyMarket(props: {
           }
         }
       })
-      // Calculate average price to pay including 1% fee (result is expressed as an integer with 18 decimals)
+      // Calculate average price to pay excluding 1% fee (result is expressed as an integer with 18 decimals)
       cumulativeAvg = cumulativeTaker
         .mul(parseUnits('1', 18 - decimals))
-        .mul(feeMultiplier)
+        .mul(parseUnits('1')) // scaling for high precision integer math
         .div(cumulativeMaker)
 
       if (cumulativeAvg.gt(0)) {
         console.log('cumulativeAvg', cumulativeAvg.toString())
         setAvgExpectedRate(cumulativeAvg)
-        // youPayAmount is including fee as cumulativeAvg is including fee; result is expressed as an integer with collateral token decimals
+        // Amount to pay by taker including fee; result is expressed as an integer with collateral token decimals
         const youPayAmount = cumulativeAvg
           .mul(parseUnits(numberOfOptions.toString()))
-          .div(parseUnits('1', 18 + 18 - decimals))
+          .mul(feeMultiplier)
+          .div(parseUnits('1', 18 + 18 + 18 - decimals))
         setYouPay(youPayAmount)
       }
     } else {
@@ -607,7 +607,9 @@ export default function BuyMarket(props: {
         <FormDiv>
           <LabelStyleDiv>
             <Stack>
-              <FormLabel sx={{ color: 'White' }}>You Pay</FormLabel>
+              <FormLabel sx={{ color: 'White' }}>
+                You Pay (incl. 1% fee)
+              </FormLabel>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
                 {Number(

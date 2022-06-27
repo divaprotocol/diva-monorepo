@@ -5,6 +5,7 @@ import { utils } from './Config'
 import { config } from '../constants'
 import { isFloat, decimalPlaces } from '../component/Trade/Orders/OrderHelper'
 import { divaGovernanceAddress } from '../constants'
+import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 
 export const sellLimitOrder = async (orderData) => {
   const getFutureExpiryInSeconds = () => {
@@ -13,13 +14,19 @@ export const sellLimitOrder = async (orderData) => {
 
   const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
-  const makerAmount = parseEther(orderData.nbrOptions.toString())
+  const makerAmount = parseEther(
+    convertExponentialToDecimal(orderData.nbrOptions).toString()
+  )
+
+  // TODO: Refactor that part using BigNumbers! as it fails for 1e-18 numbers, for instance
   const nbrOptionsDecimals = isFloat(orderData.nbrOptions)
     ? decimalPlaces(orderData.nbrOptions)
     : 0
+  console.log('nbrOptionsDecimals', nbrOptionsDecimals)
   const limitPriceDecimals = isFloat(orderData.limitPrice)
     ? decimalPlaces(orderData.limitPrice)
     : 0
+  console.log('limitPriceDecimals', limitPriceDecimals)
 
   const totalDecimalPlaces = nbrOptionsDecimals + limitPriceDecimals
   /**Floating point multiplication some times give erronious results

@@ -22,7 +22,6 @@ export const buyMarketOrder = async (orderData) => {
   // Define variables for integer math
   const decimals = orderData.collateralDecimals
   const unit = parseUnits('1')
-  const collateralUnit = parseUnits('1', decimals)
   const scaling = parseUnits('1', 18 - decimals)
 
   // User input converted from decimal number into an integer with 18 decimals
