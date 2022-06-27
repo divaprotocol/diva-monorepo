@@ -45,6 +45,8 @@ import {
 } from '../../../Util/calcPayoffPerToken'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
+const ZERO = BigENumber.from(0)
+const feeMultiplier = parseUnits('1.01')
 export default function BuyMarket(props: {
   option: Pool
   handleDisplayOrder: () => any
@@ -68,21 +70,21 @@ export default function BuyMarket(props: {
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(
-    BigENumber.from(0)
+    ZERO
   )
-  const [youPay, setYouPay] = React.useState(BigENumber.from(0))
+  const [youPay, setYouPay] = React.useState(ZERO)
   const [existingSellLimitOrders, setExistingSellLimitOrders] = React.useState(
     []
   )
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
-  const [allowance, setAllowance] = React.useState(BigENumber.from(0))
+  const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingApprovalAmount, setRemainingApprovalAmount] = React.useState(
-    BigENumber.from(0)
+    ZERO
   )
   // eslint-disable-next-line prettier/prettier
   const [collateralBalance, setCollateralBalance] = React.useState(
-    BigENumber.from(0)
+    ZERO
   )
 
   const params: { tokenType: string } = useParams()
@@ -95,7 +97,7 @@ export default function BuyMarket(props: {
       const nbrOptions = parseFloat(value)
       setNumberOfOptions(nbrOptions)
     } else {
-      setYouPay(BigENumber.from(0))
+      setYouPay(ZERO)
       setNumberOfOptions(0.0)
       setOrderBtnDisabled(true)
     }
@@ -215,7 +217,7 @@ export default function BuyMarket(props: {
                         (input) => (input.value = '')
                       )
                       setNumberOfOptions(0.0)
-                      setYouPay(BigENumber.from(0))
+                      setYouPay(ZERO)
                       orderFilled = true
                     } else {
                       alert('Order could not be filled.')
@@ -231,7 +233,7 @@ export default function BuyMarket(props: {
                 (input) => (input.value = '')
               )
               setNumberOfOptions(0.0)
-              setYouPay(BigENumber.from(0))
+              setYouPay(ZERO)
             }
             if (orderFilled) {
               alert('Order successfully filled.')
@@ -317,7 +319,7 @@ export default function BuyMarket(props: {
   }
 
   const getTakerOrdersTotalAmount = async (taker) => {
-    let existingOrdersAmount = BigENumber.from(0)
+    let existingOrdersAmount = ZERO
     if (responseBuy.length == 0) {
       //Double check if any limit orders exists
       const rBuy = await get0xOpenOrders(
@@ -377,7 +379,7 @@ export default function BuyMarket(props: {
       getCollateralInWallet(userAddress).then(async (val) => {
         // !val.balance.isNaN()
         // ? setCollateralBalance(val.balance)
-        // : setCollateralBalance(BigENumber.from(0))
+        // : setCollateralBalance(ZERO)
         setCollateralBalance(val.balance)
         setAllowance(val.approvalAmount)
         setRemainingApprovalAmount(val.approvalAmount)
@@ -401,11 +403,11 @@ export default function BuyMarket(props: {
       // If user has entered an input into the Number field and there are existing Sell Limit orders to fill in the orderbook
       setOrderBtnDisabled(false)
       let makerAmountToFill = parseUnits(numberOfOptions.toString()) // 18 decimals as makerToken is position token
-      let cumulativeAvg = BigENumber.from(0)
-      let cumulativeTaker = BigENumber.from(0)
-      let cumulativeMaker = BigENumber.from(0)
+      let cumulativeAvg = ZERO
+      let cumulativeTaker = ZERO
+      let cumulativeMaker = ZERO
       existingSellLimitOrders.forEach((order: any) => {
-        const takerAmount = BigENumber.from(order.takerAmount) // collateral token amount (<= 18 decimals)
+        let takerAmount = BigENumber.from(order.takerAmount) // collateral token amount (<= 18 decimals)
         let makerAmount = BigENumber.from(order.makerAmount) // position token amount (18 decimals)
         const remainingFillableTakerAmount = BigENumber.from(
           order.remainingFillableTakerAmount
@@ -415,6 +417,7 @@ export default function BuyMarket(props: {
         if (remainingFillableTakerAmount.lt(takerAmount)) {
           // Existing Sell Limit order was already partially filled
 
+          takerAmount = remainingFillableTakerAmount
           makerAmount = remainingFillableTakerAmount
             .mul(parseUnits('1', 18 - decimals)) // scaling to 18 decimals
             .mul(parseUnits('1')) // scaling for high precision integer math
@@ -429,27 +432,27 @@ export default function BuyMarket(props: {
               .div(parseUnits('1', 18 - decimals))
             cumulativeTaker = cumulativeTaker.add(takerAmountToFill)
             cumulativeMaker = cumulativeMaker.add(makerAmountToFill)
-            makerAmountToFill = BigENumber.from(0)
+            makerAmountToFill = ZERO // This condition ensures that we don't enter into the makerAmountToFill.gt(0) if-clause again
           } else {
-            cumulativeTaker = cumulativeTaker.add(remainingFillableTakerAmount)
+            cumulativeTaker = cumulativeTaker.add(takerAmount)
             cumulativeMaker = cumulativeMaker.add(makerAmount)
             makerAmountToFill = makerAmountToFill.sub(makerAmount)
           }
         }
       })
-      // Calculate average price to pay (result is expressed as an integer with 18 decimals)
+      // Calculate average price to pay including 1% fee (result is expressed as an integer with 18 decimals)
       cumulativeAvg = cumulativeTaker
         .mul(parseUnits('1', 18 - decimals))
-        .mul(parseUnits('1'))
+        .mul(feeMultiplier)
         .div(cumulativeMaker)
 
       if (cumulativeAvg.gt(0)) {
         console.log('cumulativeAvg', cumulativeAvg.toString())
         setAvgExpectedRate(cumulativeAvg)
+        // youPayAmount is including fee as cumulativeAvg is including fee; result is expressed as an integer with collateral token decimals
         const youPayAmount = cumulativeAvg
           .mul(parseUnits(numberOfOptions.toString()))
-          .mul(parseUnits('1.01')) // Adding 1% fee as it also requires approval
-          .div(parseUnits('1', 18 + 18 + 18 - decimals))
+          .div(parseUnits('1', 18 + 18 - decimals))
         setYouPay(youPayAmount)
       }
     } else {
@@ -457,7 +460,7 @@ export default function BuyMarket(props: {
         if (existingSellLimitOrders.length > 0) {
           console.log(
             'existingSellLimitOrders[0].expectedRate',
-            existingSellLimitOrders[0].expectedRate
+            formatUnits(existingSellLimitOrders[0].expectedRate)
           )
           setAvgExpectedRate(existingSellLimitOrders[0].expectedRate)
         }
