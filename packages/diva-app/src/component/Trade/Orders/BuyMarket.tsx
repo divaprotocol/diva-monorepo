@@ -103,7 +103,7 @@ export default function BuyMarket(props: {
 
   const approveBuyAmount = async (amount) => {
     await takerTokenContract.methods
-      .approve(exchangeProxy, amount.add(parseUnits('0.0284')))
+      .approve(exchangeProxy, amount)
       .send({ from: userAddress })
 
     const collateralAllowance = await takerTokenContract.methods
@@ -120,7 +120,11 @@ export default function BuyMarket(props: {
       console.log('HI')
       if (numberOfOptions > 0) {
         // Calculate required allowance amount (expressed as an integer with collateral token decimals)
-        const amount = allowance.add(youPay)
+        const amount = allowance
+          .add(youPay)
+          .mul(parseUnits('1.01', decimals)) // Adding 1% fee as it also requires approval
+          .div(parseUnits('1', decimals))
+          .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
         // Set allowance equal to amount
         const collateralAllowance = await approveBuyAmount(amount)
 
@@ -130,7 +134,7 @@ export default function BuyMarket(props: {
         alert(
           `Allowance for ${Number(
             formatUnits(collateralAllowance, decimals)
-          ).toFixed(2)} ${option.collateralToken.symbol} successfully set.`
+          ).toFixed(4)} ${option.collateralToken.symbol} successfully set.`
         )
       } else {
         alert(
@@ -396,59 +400,40 @@ export default function BuyMarket(props: {
     if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {
       // If user has entered an input into the Number field and there are existing Sell Limit orders to fill in the orderbook
       setOrderBtnDisabled(false)
-      let count = parseUnits(numberOfOptions.toString())
+      let makerAmountToFill = parseUnits(numberOfOptions.toString()) // 18 decimals as makerToken is position token
       let cumulativeAvg = BigENumber.from(0)
       let cumulativeTaker = BigENumber.from(0)
       let cumulativeMaker = BigENumber.from(0)
       existingSellLimitOrders.forEach((order: any) => {
-        // let takerAmount = Number(
-        //   formatUnits(order.takerAmount, option.collateralToken.decimals)
-        // )
-        // let makerAmount = Number(formatUnits(order.makerAmount))
-
-        let takerAmount = BigENumber.from(order.takerAmount)
-        let makerAmount = BigENumber.from(order.makerAmount)
-
+        const takerAmount = BigENumber.from(order.takerAmount) // collateral token amount (<= 18 decimals)
+        let makerAmount = BigENumber.from(order.makerAmount) // position token amount (18 decimals)
         const remainingFillableTakerAmount = BigENumber.from(
           order.remainingFillableTakerAmount
         )
-
         const expectedRate = BigENumber.from(order.expectedRate)
 
         if (remainingFillableTakerAmount.lt(takerAmount)) {
-          //Order partially filled
-          takerAmount = remainingFillableTakerAmount
-          // const decimals = totalDecimals(
-          //   remainingFillableTakerAmount,
-          //   order.expectedRate
-          // )
+          // Existing Sell Limit order was already partially filled
 
           makerAmount = remainingFillableTakerAmount
-            .mul(parseUnits('1', 18 - decimals))
-            .mul(parseUnits('1'))
+            .mul(parseUnits('1', 18 - decimals)) // scaling to 18 decimals
+            .mul(parseUnits('1')) // scaling for high precision integer math
             .div(expectedRate)
-          // decimals > 1
-          //   ? Number(
-          //       (remainingFillableTakerAmount / order.expectedRate).toFixed(
-          //         decimals
-          //       )
-          //     )
-          //   : Number(remainingFillableTakerAmount / order.expectedRate)
-        }
-        // const expectedRate = order.expectedRate
-        if (count.gt(0)) {
-          if (count.lte(makerAmount)) {
-            const orderTotalAmount = expectedRate
-              .mul(count)
+        } // else takerAmount = remainingFillableTakerAmount and makerAmount = remainingFillableMakerAmount
+
+        if (makerAmountToFill.gt(0)) {
+          if (makerAmountToFill.lte(makerAmount)) {
+            const takerAmountToFill = expectedRate
+              .mul(makerAmountToFill)
               .div(parseUnits('1'))
               .div(parseUnits('1', 18 - decimals))
-            cumulativeTaker = cumulativeTaker.add(orderTotalAmount)
-            cumulativeMaker = cumulativeMaker.add(count)
-            count = BigENumber.from(0)
+            cumulativeTaker = cumulativeTaker.add(takerAmountToFill)
+            cumulativeMaker = cumulativeMaker.add(makerAmountToFill)
+            makerAmountToFill = BigENumber.from(0)
           } else {
-            cumulativeTaker = cumulativeTaker.add(takerAmount)
+            cumulativeTaker = cumulativeTaker.add(remainingFillableTakerAmount)
             cumulativeMaker = cumulativeMaker.add(makerAmount)
-            count = count.sub(makerAmount)
+            makerAmountToFill = makerAmountToFill.sub(makerAmount)
           }
         }
       })
@@ -457,22 +442,14 @@ export default function BuyMarket(props: {
         .mul(parseUnits('1', 18 - decimals))
         .mul(parseUnits('1'))
         .div(cumulativeMaker)
-      // if (totalDecimals(cumulativeTaker, cumulativeMaker) > 1) {
-      //   cumulativeAvg = Number(
-      //     (cumulativeTaker / cumulativeMaker).toFixed(
-      //       totalDecimals(cumulativeTaker, cumulativeMaker)
-      //     )
-      //   )
-      // } else {
-      //   cumulativeAvg = Number(cumulativeTaker / cumulativeMaker)
-      // }
 
       if (cumulativeAvg.gt(0)) {
         console.log('cumulativeAvg', cumulativeAvg.toString())
         setAvgExpectedRate(cumulativeAvg)
         const youPayAmount = cumulativeAvg
           .mul(parseUnits(numberOfOptions.toString()))
-          .div(parseUnits('1'))
+          .mul(parseUnits('1.01')) // Adding 1% fee as it also requires approval
+          .div(parseUnits('1', 18 + 18 + 18 - decimals))
         setYouPay(youPayAmount)
       }
     } else {
