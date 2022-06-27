@@ -37,7 +37,7 @@ export const buylimitOrder = async (orderData) => {
   )
   const takerAmount = parseEther(orderData.nbrOptions.toString())
   const takerFeeAmount = takerAmount
-    .mul(parseUnits('0.01')) // 1% fee paid in taker token (i.e. position token in buy limit)
+    .mul(parseUnits('0.00')) // 0% fee paid in taker token (i.e. position token in buy limit)
     .div(parseUnits('1'))
   const networkUrl = config[orderData.chainId].order
   const order = new utils.LimitOrder({
