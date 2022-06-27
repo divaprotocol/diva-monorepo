@@ -103,7 +103,7 @@ export default function BuyMarket(props: {
 
   const approveBuyAmount = async (amount) => {
     await takerTokenContract.methods
-      .approve(exchangeProxy, amount)
+      .approve(exchangeProxy, amount.add(parseUnits('0.000001')))
       .send({ from: userAddress })
 
     const collateralAllowance = await takerTokenContract.methods
@@ -138,7 +138,10 @@ export default function BuyMarket(props: {
     } else {
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
-
+        console.log(
+          'remainingApprovalAmount',
+          remainingApprovalAmount.toString()
+        )
         if (youPay.gt(remainingApprovalAmount)) {
           // Collateral token amount to pay is greater than remaining allowance ...
 

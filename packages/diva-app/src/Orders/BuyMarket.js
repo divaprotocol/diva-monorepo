@@ -78,6 +78,7 @@ export const buyMarketOrder = async (orderData) => {
         .mul(scaling) // scale to 18 decimals
         .mul(unit) // multiply for high precision
         .div(expectedRate) // divide by expectedRate which has 18 decimals
+      console.log('nbrOptionsFilled', nbrOptionsFilled.toString())
       takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled) // This will drop to zero and hence will not enter this if block anymore but will add '0' for the remaining orders
     }
   })
