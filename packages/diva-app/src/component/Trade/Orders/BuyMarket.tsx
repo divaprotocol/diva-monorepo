@@ -69,9 +69,7 @@ export default function BuyMarket(props: {
     takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
-  const [avgExpectedRate, setAvgExpectedRate] = React.useState(
-    ZERO
-  )
+  const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
   const [youPay, setYouPay] = React.useState(ZERO)
   const [existingSellLimitOrders, setExistingSellLimitOrders] = React.useState(
     []
@@ -79,9 +77,8 @@ export default function BuyMarket(props: {
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(ZERO)
-  const [remainingApprovalAmount, setRemainingApprovalAmount] = React.useState(
-    ZERO
-  )
+  const [remainingApprovalAmount, setRemainingApprovalAmount] =
+    React.useState(ZERO)
   // eslint-disable-next-line prettier/prettier
   const [collateralBalance, setCollateralBalance] = React.useState(
     ZERO
