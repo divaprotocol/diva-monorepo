@@ -103,12 +103,14 @@ export default function BuyMarket(props: {
 
   const approveBuyAmount = async (amount) => {
     await takerTokenContract.methods
-      .approve(exchangeProxy, amount.add(parseUnits('0.000001')))
+      .approve(exchangeProxy, amount.add(parseUnits('0.0284')))
       .send({ from: userAddress })
 
     const collateralAllowance = await takerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
       .call()
+    console.log('collateralAllowance', collateralAllowance)
+
     return collateralAllowance
   }
 
