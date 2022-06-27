@@ -3,7 +3,6 @@ export function generatePayoffChartData(data) {
   const CollateralBalanceLong = data.CollateralBalanceLong // temporarily hard-coded
   const CollateralBalanceShort = data.CollateralBalanceShort // temporarily hard-coded
   const TokenSupply = data.TokenSupply // temporarily hard-coded
-
   let chartData = []
 
   if (optionData.IsLong === true) {
