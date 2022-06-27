@@ -71,6 +71,7 @@ export default function PoolsTable({
           <TextField
             value={creatorAddress}
             placeholder="0x..."
+            sx={{ minWidth: 420 }}
             label="Filter by creator"
             aria-label="Filter by creator"
             onChange={(e) => onCreatorChanged(e.target.value)}
