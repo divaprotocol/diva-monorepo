@@ -23,6 +23,7 @@ import { ApproveActionButtons } from '../ApproveActionButtons'
 import { useHistory } from 'react-router-dom'
 import { Add } from '@mui/icons-material'
 import { Success } from './Success'
+import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
 
 export function CreatePool() {
   const [decimal, setDecimal] = useState(18)
@@ -63,7 +64,6 @@ export function CreatePool() {
 
   // actions after pool is successfully created
   const handlePoolSuccess = () => {
-    setIsSnackbarOpen(true)
     formik.setFieldValue('step', formik.values.step + 1, true)
   }
 
@@ -90,9 +90,6 @@ export function CreatePool() {
             </Step>
             <Step>
               <StepLabel>Review</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Success</StepLabel>
             </Step>
           </Stepper>
           <Box pt={8}>
@@ -149,6 +146,7 @@ export function CreatePool() {
                 }}
               >
                 My Positions
+                <ArrowForwardOutlinedIcon sx={{ ml: theme.spacing(1) }} />
               </Button>
             ) : (
               <LoadingButton

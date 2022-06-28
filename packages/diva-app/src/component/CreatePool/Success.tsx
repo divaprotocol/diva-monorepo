@@ -1,4 +1,11 @@
-import { Container, Stack, Tooltip, Typography, useTheme } from '@mui/material'
+import {
+  Container,
+  Link,
+  Stack,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material'
 import { Box } from '@mui/material'
 import { config } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -7,6 +14,11 @@ import { useCreatePoolFormik } from './formik'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { ethers } from 'ethers'
+import {
+  EtherscanLinkType,
+  getEtherscanLink,
+} from '../../Util/getEtherscanLink'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -145,10 +157,9 @@ export function Success({
       : null
   diva.getLatestPoolId().then((id) => {
     diva.getPoolParameters(id).then((pool) => {
-      console.log(pool)
       setShortToken(pool.longToken)
       setLongToken(pool.shortToken)
-      setPoolId(pool.id)
+      setPoolId(id.toNumber())
     })
   })
 
@@ -166,20 +177,46 @@ export function Success({
         alignItems="center"
         // minHeight="100vh"
       >
-        <Stack>
+        <Stack display="flex" justifyContent="center" alignItems="center">
           <Container sx={{ ml: theme.spacing(15) }}>{congratsSvg}</Container>
           <h2>Congratulations</h2>
           <h4>Your pool has been created successfully</h4>
           <h4>Pool ID: {poolId}</h4>
           <Stack direction={'row'} spacing={5}>
             <Typography>
-              Long token: {'L' + poolId + ' - ' + longToken}{' '}
+              Long token: {'L' + poolId + ' - '}
+              <Link
+                style={{ color: 'gray' }}
+                underline={'none'}
+                rel="noopener noreferrer"
+                target="_blank"
+                href={getEtherscanLink(
+                  chainId,
+                  longToken,
+                  EtherscanLinkType.ADDRESS
+                )}
+              >
+                {getShortenedAddress(longToken)}
+              </Link>{' '}
             </Typography>
             <AddToMetamask address={longToken} symbol={'L-' + poolId} />
           </Stack>
           <Stack direction={'row'} spacing={5}>
             <Typography>
-              Short token: {'S' + poolId + ' - ' + shortToken}{' '}
+              Short token: {'S' + poolId + ' - '}
+              <Link
+                style={{ color: 'gray' }}
+                underline={'none'}
+                rel="noopener noreferrer"
+                target="_blank"
+                href={getEtherscanLink(
+                  chainId,
+                  shortToken,
+                  EtherscanLinkType.ADDRESS
+                )}
+              >
+                {getShortenedAddress(shortToken)}
+              </Link>{' '}
             </Typography>
             <AddToMetamask address={shortToken} symbol={'s-' + poolId} />
           </Stack>
