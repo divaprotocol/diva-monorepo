@@ -127,7 +127,7 @@ export default function PoolsTable({
             >
               <MenuItem sx={{ width: '300px', height: '50px' }}>
                 <Input
-                  value={creatorAddress}
+                  value={null}
                   placeholder="Enter the address"
                   aria-label="Filter creator"
                   sx={{ width: '300px', height: '50px' }}
