@@ -358,16 +358,13 @@ export default function BuyMarket(props: {
   useEffect(() => {
     if (userAddress != null) {
       getCollateralInWallet(userAddress).then(async (val) => {
-        // !val.balance.isNaN()
-        // ? setCollateralBalance(val.balance)
-        // : setCollateralBalance(ZERO)
         setCollateralBalance(val.balance)
         setAllowance(val.approvalAmount)
-        setRemainingApprovalAmount(val.approvalAmount)
+        setRemainingApprovalAmount(val.approvalAmount) // QUESTION: Why not taking into account existing Buy Limit orders here??
         val.approvalAmount.lte(0) ? setIsApproved(false) : setIsApproved(true) // QUESTION: when can approvalAmount be negative? -> "==" should work as well
         if (responseSell.length > 0) {
           const data = await getSellLimitOrders()
-          setExistingSellLimitOrders(data.sortedOrders)
+          setExistingSellLimitOrders(data.sortedOrders) // Sell Limit orders which the user is going to fill during Buy Market operation
         }
         getTakerOrdersTotalAmount(val.account).then((amount) => {
           const remainingAmount = val.approvalAmount.sub(amount)
