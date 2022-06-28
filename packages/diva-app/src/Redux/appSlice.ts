@@ -264,6 +264,7 @@ export const appSlice = createSlice({
 
     builder.addCase(fetchPools.pending, (state, action) => {
       const poolState = state[state.chainId]
+      poolState.pools = []
       poolState.statusByName[
         action.type.substring(0, action.type.length - ('pending'.length + 1))
       ] = 'pending'
