@@ -55,7 +55,7 @@ export const buyMarketOrder = async (orderData) => {
   orders.forEach((order) => {
     if (takerFillNbrOptions.gt(0)) {
       fillOrders.push(order)
-      // Convert expected rate (of type number) into an integer with 18 decimals
+      // Expected rate is an integer with 18 decimals of type BigNumber
       const expectedRate = order.expectedRate
 
       // Calculate taker fill amount implied by user input and expected rate; expressed as an integer with collateral token decimals.
