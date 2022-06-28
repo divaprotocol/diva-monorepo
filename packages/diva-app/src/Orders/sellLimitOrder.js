@@ -15,7 +15,7 @@ export const sellLimitOrder = async (orderData) => {
   const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
   const makerAmount = parseEther(
-    convertExponentialToDecimal(orderData.nbrOptions).toString()
+    convertExponentialToDecimal(orderData.nbrOptions)
   )
 
   // TODO: Refactor that part using BigNumbers! as it fails for 1e-18 numbers, for instance

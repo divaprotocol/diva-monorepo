@@ -119,7 +119,7 @@ export default function SellMarket(props: {
         )
         // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
         let approvedAllowance = await approveSellAmount(
-          parseUnits(convertExponentialToDecimal(amount).toString(), 18)
+          parseUnits(convertExponentialToDecimal(amount), 18)
         )
         approvedAllowance = Number(
           formatUnits(approvedAllowance.toString(), 18)
@@ -169,7 +169,7 @@ export default function SellMarket(props: {
 
               newAllowance = await approveSellAmount(
                 parseUnits(
-                  convertExponentialToDecimal(newAllowance).toString(),
+                  convertExponentialToDecimal(newAllowance),
                   option.collateralToken.decimals
                 )
               )
@@ -446,11 +446,7 @@ export default function SellMarket(props: {
             formatEther(
               parseEther(maxPayout)
                 .mul(parseEther('1'))
-                .div(
-                  parseEther(
-                    convertExponentialToDecimal(avgExpectedRate).toString()
-                  )
-                )
+                .div(parseEther(convertExponentialToDecimal(avgExpectedRate)))
             )
           ).toFixed(2) + 'x'
         )

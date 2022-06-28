@@ -39,9 +39,7 @@ export const isFloat = (number) => {
 }
 
 // Source: https://blog.davidjs.com/2018/07/convert-exponential-numbers-to-decimal-in-javascript/
-export function convertExponentialToDecimal(
-  exponentialNumber: number
-): number | string {
+export function convertExponentialToDecimal(exponentialNumber: number): string {
   // Check whether number has exponential format
   const str = exponentialNumber.toString()
   if (str.indexOf('e') !== -1) {
@@ -52,13 +50,13 @@ export function convertExponentialToDecimal(
     const result = exponentialNumber.toFixed(exponent)
     return result
   } else {
-    return exponentialNumber
+    return exponentialNumber.toString()
   }
 }
 
 export const decimalPlaces = (number) => {
-  number = convertExponentialToDecimal(number) // returns the number in number format if it's not exponential
-  return number.toString().split('.')?.[1].length
+  number = convertExponentialToDecimal(number) // returns the number in string format
+  return number.split('.')?.[1].length
 }
 
 export const totalDecimals = (a: number, b: number) => {

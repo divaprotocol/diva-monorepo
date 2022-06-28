@@ -488,11 +488,7 @@ export default function BuyMarket(props: {
             formatEther(
               parseEther(maxPayout)
                 .mul(parseEther('1'))
-                .div(
-                  parseEther(
-                    convertExponentialToDecimal(expectedPrice).toString()
-                  )
-                )
+                .div(parseEther(convertExponentialToDecimal(expectedPrice)))
             )
           ).toFixed(2) + 'x'
         )

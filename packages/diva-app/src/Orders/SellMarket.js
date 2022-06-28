@@ -15,7 +15,7 @@ export const sellMarketOrder = async (orderData) => {
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
   const orders = orderData.existingLimitOrders // Existing BUY LIMIT orders where makerToken = collateral token and takerToken = position token
   let takerFillNbrOptions = parseEther(
-    convertExponentialToDecimal(orderData.nbrOptions).toString()
+    convertExponentialToDecimal(orderData.nbrOptions)
   ) // user input * 1e18; note that this part needs adjustment when we move to smart contracts v1.0.0
   let takerAssetAmounts = []
   const signatures = []

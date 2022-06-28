@@ -179,7 +179,7 @@ export default function SellLimit(props: {
         )
         // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
         let approvedAllowance = await approveSellAmount(
-          parseUnits(convertExponentialToDecimal(amount).toString(), 18)
+          parseUnits(convertExponentialToDecimal(amount), 18)
         )
         if (approvedAllowance == 'undefined') {
           alert('Metamask could not finish approval.')
@@ -236,10 +236,7 @@ export default function SellLimit(props: {
                 )
               )
               const approvedAllowance = await approveSellAmount(
-                parseUnits(
-                  convertExponentialToDecimal(newAllowance).toString(),
-                  18
-                )
+                parseUnits(convertExponentialToDecimal(newAllowance), 18)
               )
 
               if (approvedAllowance == 'undefined') {
@@ -404,11 +401,7 @@ export default function SellLimit(props: {
             formatEther(
               parseEther(maxPayout)
                 .mul(parseEther('1'))
-                .div(
-                  parseEther(
-                    convertExponentialToDecimal(pricePerOption).toString()
-                  )
-                )
+                .div(parseEther(convertExponentialToDecimal(pricePerOption)))
             )
           ).toFixed(2) + 'x'
         )

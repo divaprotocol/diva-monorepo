@@ -40,7 +40,6 @@ import {
   setIntrinsicValue,
   setMaxPayout,
 } from '../../../Redux/Stats'
-import { getUnderlyingPrice } from '../../../lib/getUnderlyingPrice'
 import {
   calcPayoffPerToken,
   calcBreakEven,
@@ -183,7 +182,7 @@ export default function BuyLimit(props: {
         )
         let collateralAllowance = await approveBuyAmount(
           parseUnits(
-            convertExponentialToDecimal(amount).toString(),
+            convertExponentialToDecimal(amount),
             option.collateralToken.decimals
           )
         )
@@ -238,7 +237,7 @@ export default function BuyLimit(props: {
               )
               const approvedAllowance = await approveBuyAmount(
                 parseUnits(
-                  convertExponentialToDecimal(newAllowance).toString(),
+                  convertExponentialToDecimal(newAllowance),
                   option.collateralToken.decimals
                 )
               )
@@ -405,11 +404,7 @@ export default function BuyLimit(props: {
             formatEther(
               parseEther(maxPayout)
                 .mul(parseEther('1'))
-                .div(
-                  parseEther(
-                    convertExponentialToDecimal(pricePerOption).toString()
-                  )
-                )
+                .div(parseEther(convertExponentialToDecimal(pricePerOption)))
             )
           ).toFixed(2) + 'x'
         )

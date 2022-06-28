@@ -26,7 +26,7 @@ export const buyMarketOrder = async (orderData) => {
 
   // User input converted from decimal number into an integer with 18 decimals
   let takerFillNbrOptions = parseUnits(
-    convertExponentialToDecimal(orderData.nbrOptions).toString()
+    convertExponentialToDecimal(orderData.nbrOptions)
   )
 
   // Initialize input arrays for batchFillLimitOrders function
