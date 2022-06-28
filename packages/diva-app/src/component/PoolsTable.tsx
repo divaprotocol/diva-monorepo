@@ -1,11 +1,28 @@
 import React, { useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
-import { Box, Input, InputAdornment, Stack, TextField } from '@mui/material'
+import {
+  AppBar,
+  Box,
+  Button,
+  Input,
+  InputAdornment,
+  Menu,
+  MenuItem,
+  Stack,
+  TextField,
+  Toolbar,
+  Typography,
+  useTheme,
+} from '@mui/material'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { LineSeries, XYPlot } from 'react-vis'
 import { Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
 import { makeStyles } from '@mui/styles'
+import { getShortenedAddress } from '../Util/getShortenedAddress'
+import { divaGovernanceAddress } from '../constants'
+import { useWhitelist } from '../hooks/useWhitelist'
 
 const useStyles = makeStyles({
   root: {
@@ -50,6 +67,21 @@ export default function PoolsTable({
 }: Props) {
   const history = useHistory()
   const [search, setSearch] = useState('')
+  const [creatorButtonLabel, setCreatorButtonLabel] = useState('Creator')
+  const [underlyingLabel, setUnderlyingLabel] = useState('Underlying')
+  const [creatorMenuValue, setCreatorMenuValue] = useState(null)
+  const [underlyingValue, setUnderlyingValue] = useState(null)
+
+  const classes = useStyles()
+  const theme = useTheme()
+  const CreatorMenuOpen = Boolean(creatorMenuValue)
+  const UnderlyingMenuOpen = Boolean(underlyingValue)
+  const handleCreatorInput = (e) => {
+    onCreatorChanged(e.target.value)
+    setCreatorButtonLabel(
+      e.target.value === '' ? 'Creator' : getShortenedAddress(e.target.value)
+    )
+  }
   const filteredRows =
     search != null && search.length > 0
       ? rows.filter((v) =>
@@ -57,41 +89,111 @@ export default function PoolsTable({
         )
       : rows
 
-  const classes = useStyles()
-
+  const handleUnderlyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingLabel(e.target.value === '' ? 'Underlying' : e.target.value)
+  }
   return (
     <Stack height="100%" width="100%" spacing={5}>
-      <Stack
-        direction="row"
-        alignItems="end"
-        spacing={4}
-        justifyContent="space-between"
+      <AppBar
+        position="static"
+        sx={{ background: theme.palette.background.default, boxShadow: 'none' }}
       >
-        {onCreatorChanged != null ? (
-          <TextField
-            value={creatorAddress}
-            placeholder="0x..."
-            sx={{ minWidth: 420 }}
-            label="Filter by creator"
-            aria-label="Filter by creator"
-            onChange={(e) => onCreatorChanged(e.target.value)}
-          />
-        ) : (
-          <span />
-        )}
-
-        <Input
-          value={search}
-          placeholder="Filter underlying"
-          aria-label="Filter underlying"
-          onChange={(e) => setSearch(e.target.value)}
-          startAdornment={
-            <InputAdornment position="start">
-              <Search />
-            </InputAdornment>
-          }
-        />
-      </Stack>
+        <Toolbar>
+          <Typography>Filters:</Typography>
+          <Box>
+            <Button
+              id="creator-filter-button"
+              aria-controls={CreatorMenuOpen ? 'creator-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={CreatorMenuOpen ? 'true' : undefined}
+              endIcon={<ArrowDropDownIcon />}
+              sx={{
+                color: '#ffffff',
+                fontSize: '16px',
+                textTransform: 'capitalize',
+              }}
+              onClick={(e) => {
+                setCreatorMenuValue(e.currentTarget)
+              }}
+            >
+              {creatorButtonLabel}
+            </Button>
+            <Menu
+              id="creator-filter-menu"
+              anchorEl={creatorMenuValue}
+              open={CreatorMenuOpen}
+              onClose={() => setCreatorMenuValue(null)}
+            >
+              <MenuItem sx={{ width: '300px', height: '50px' }}>
+                <Input
+                  value={creatorAddress}
+                  placeholder="Enter the address"
+                  aria-label="Filter creator"
+                  sx={{ width: '300px', height: '50px' }}
+                  onChange={handleCreatorInput}
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <Search />
+                    </InputAdornment>
+                  }
+                />
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  onCreatorChanged(divaGovernanceAddress)
+                  setCreatorButtonLabel(
+                    getShortenedAddress(divaGovernanceAddress)
+                  )
+                  setCreatorMenuValue(null)
+                }}
+              >
+                Diva Governance
+              </MenuItem>
+            </Menu>
+          </Box>
+          <Box>
+            <Button
+              id="underlying-filter-button"
+              aria-controls={UnderlyingMenuOpen ? 'creator-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={UnderlyingMenuOpen ? 'true' : undefined}
+              endIcon={<ArrowDropDownIcon />}
+              sx={{
+                color: '#ffffff',
+                fontSize: '16px',
+                textTransform: 'capitalize',
+              }}
+              onClick={(e) => {
+                setUnderlyingValue(e.currentTarget)
+              }}
+            >
+              {underlyingLabel}
+            </Button>
+            <Menu
+              id="underlying-Menu"
+              anchorEl={underlyingValue}
+              open={UnderlyingMenuOpen}
+              onClose={() => setUnderlyingValue(null)}
+            >
+              <MenuItem sx={{ width: '300px', height: '50px' }}>
+                <Input
+                  value={search}
+                  placeholder="Filter underlying"
+                  aria-label="Filter underlying"
+                  sx={{ width: '300px', height: '50px' }}
+                  onChange={handleUnderlyingInput}
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <Search />
+                    </InputAdornment>
+                  }
+                />
+              </MenuItem>
+            </Menu>
+          </Box>
+        </Toolbar>
+      </AppBar>
       <DataGrid
         className={classes.root}
         rows={filteredRows}
