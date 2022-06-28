@@ -120,23 +120,16 @@ export default function SellMarket(props: {
       if (numberOfOptions > 0) {
         // Calculate required allowance amount for position token (expressed as an integer with 18 decimals)
         const amount = allowance
-          .add(parseUnits(convertExponentialToDecimal(numberOfOptions)))
+          .add(parseUnits(numberOfOptions.toString()))
           .mul(parseUnits(feeMultiplier)) // Adding 1% fee as it also requires approval
           .div(parseUnits('1'))
-          .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always
+          .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
         // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
-        let approvedAllowance = await approveSellAmount(
-          parseUnits(convertExponentialToDecimal(amount), 18)
-        )
-        approvedAllowance = Number(
-          formatUnits(approvedAllowance.toString(), 18)
-        )
-        const remainingApproval = Number(
-          (approvedAllowance - existingOrdersAmount).toFixed(
-            totalDecimals(approvedAllowance, existingOrdersAmount)
-          )
-        )
+        const approvedAllowance = await approveSellAmount(amount)
+
+        const remainingApproval = approvedAllowance.sub(existingOrdersAmount)
+
         setRemainingApprovalAmount(remainingApproval)
         setAllowance(allowance)
         setIsApproved(true)
