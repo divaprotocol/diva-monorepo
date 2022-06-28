@@ -16,7 +16,6 @@ import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { BigNumber } from '@0x/utils'
 import { sellMarketOrder } from '../../../Orders/SellMarket'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'

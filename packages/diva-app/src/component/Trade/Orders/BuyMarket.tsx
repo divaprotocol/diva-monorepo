@@ -266,32 +266,16 @@ export default function BuyMarket(props: {
       const takerAmount = BigENumber.from(order.takerAmount) // collateral token (<= 18 decimals)
       const makerAmount = BigENumber.from(order.makerAmount) // position token (18 decimals)
       console.log('takerAmount', takerAmount.toString())
-      // const takerAmount = Number(
-      //   formatUnits(order.takerAmount, option.collateralToken.decimals)
-      // )
-      // const makerAmount = Number(formatUnits(order.makerAmount))
 
       const remainingFillableTakerAmount =
         data.metaData.remainingFillableTakerAmount
 
       if (BigENumber.from(remainingFillableTakerAmount).gt(1)) {
-        // > 1 to filter out dust orders
-
-        // console.log('totalDecimals', totalDecimals(takerAmount, makerAmount))
-        // if (totalDecimals(takerAmount, makerAmount) > 1) {
-        //   order['expectedRate'] = (takerAmount / makerAmount).toFixed(
-        //     totalDecimals(takerAmount, makerAmount)
-        //     // TODO Why is this part needed? I don't think it's needed when doing BigNumber operations
-        //   )
-        // } else {
-        // console.log('takerAmount', takerAmount)
-        // console.log('makerAmount', makerAmount)
         order['expectedRate'] = takerAmount
           .mul(parseUnits('1', 18 - decimals))
           .mul(parseUnits('1'))
           .div(makerAmount) // result has 18 decimals
         console.log('expectedRate', order['expectedRate'].toString())
-        // }
         order['remainingFillableTakerAmount'] =
           data.metaData.remainingFillableTakerAmount
         orders.push(order)
