@@ -14,6 +14,7 @@ import { CreateButtonWrapper } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
 import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
+import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BigNumber } from '@0x/utils'
 import { sellMarketOrder } from '../../../Orders/SellMarket'
@@ -524,6 +525,7 @@ export default function SellMarket(props: {
       )
     }
   }, [option, avgExpectedRate, usdPrice])
+
   return (
     <div>
       <form onSubmit={handleOrderSubmit}>
@@ -533,9 +535,7 @@ export default function SellMarket(props: {
               <LabelStyle>Number </LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {remainingApprovalAmount.toString().includes('e')
-                  ? remainingApprovalAmount.toExponential(2)
-                  : remainingApprovalAmount.toFixed(4)}
+                {toExponentialOrNumber(remainingApprovalAmount)}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>
@@ -557,7 +557,7 @@ export default function SellMarket(props: {
         <FormDiv>
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
-              <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
+              <LabelStyle>Expected Price </LabelStyle>
               <Tooltip
                 title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
                 sx={{ color: 'Gray', fontSize: 2 }}
@@ -584,7 +584,7 @@ export default function SellMarket(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
-              <FormLabel>{youReceive.toFixed(4)}</FormLabel>
+              <FormLabel>{toExponentialOrNumber(youReceive)}</FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
@@ -597,7 +597,7 @@ export default function SellMarket(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {params.tokenType.toUpperCase() + ' '}
               </FormLabel>
-              <FormLabel>{walletBalance.toFixed(4)}</FormLabel>
+              <FormLabel>{toExponentialOrNumber(walletBalance)}</FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>

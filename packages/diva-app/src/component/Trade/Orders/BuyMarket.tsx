@@ -19,6 +19,7 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
+import { toExponentialOrNumber } from '../../../Util/utils'
 import {
   getComparator,
   stableSort,
@@ -584,7 +585,7 @@ export default function BuyMarket(props: {
         <FormDiv>
           <LabelStyleDiv>
             <Stack direction={'row'} spacing={0.5}>
-              <FormLabel sx={{ color: 'White' }}>Expected Price </FormLabel>
+              <LabelStyle>Expected Price </LabelStyle>
               <Tooltip
                 title={<React.Fragment>{ExpectedRateInfoText}</React.Fragment>}
                 sx={{ color: 'Gray', fontSize: 2 }}
@@ -607,14 +608,14 @@ export default function BuyMarket(props: {
         <FormDiv>
           <LabelStyleDiv>
             <Stack>
-              <FormLabel sx={{ color: 'White' }}>
-                You Pay (incl. 1% fee)
-              </FormLabel>
+              <LabelStyle>You Pay (incl. 1% fee) </LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {Number(
-                  formatUnits(remainingApprovalAmount.toString(), decimals)
-                ).toFixed(4)}
+                {toExponentialOrNumber(
+                  Number(
+                    formatUnits(remainingApprovalAmount.toString(), decimals)
+                  )
+                )}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>
@@ -624,14 +625,15 @@ export default function BuyMarket(props: {
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
               <FormLabel>
-                {Number(formatUnits(youPay, decimals)).toFixed(4) + ' '}
+                {toExponentialOrNumber(Number(formatUnits(youPay, decimals))) +
+                  ' '}
               </FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <FormLabel sx={{ color: 'White' }}>Wallet Balance</FormLabel>
+            <LabelStyle>Wallet Balance </LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
             <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
@@ -639,9 +641,9 @@ export default function BuyMarket(props: {
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
               <FormLabel>
-                {Number(
-                  formatUnits(collateralBalance.toString(), decimals)
-                ).toFixed(4)}
+                {toExponentialOrNumber(
+                  Number(formatUnits(collateralBalance.toString(), decimals))
+                )}
               </FormLabel>
             </Stack>
           </RightSideLabel>

@@ -16,7 +16,7 @@ export const buyMarketOrder = async (orderData) => {
   const exchangeProxyAddress = address.exchangeProxy
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
 
-  // Get existing SELL LIMIT orders (where makerToken = position token and takerToken = collateral token) to fill
+  // Get existing SELL LIMIT orders to fill. Note that makerToken = position token and takerToken = collateral token.
   const orders = orderData.existingLimitOrders
 
   // Define variables for integer math
