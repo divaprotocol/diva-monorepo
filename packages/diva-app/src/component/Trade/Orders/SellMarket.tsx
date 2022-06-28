@@ -49,6 +49,8 @@ import {
 } from '../../../Util/calcPayoffPerToken'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
+const ZERO = BigENumber.from(0)
+const feeMultiplier = '1.01' // 1.01 represents 1% fee
 
 export default function SellMarket(props: {
   option: Pool
@@ -60,37 +62,39 @@ export default function SellMarket(props: {
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
+
   const chainId = useAppSelector(selectChainId)
   const option = props.option
-  const optionTokenAddress = props.tokenAddress
+  const exchangeProxyAddress = props.exchangeProxy
+  const takerToken = props.tokenAddress
+  const optionTokenAddress = props.tokenAddress // QUESTION: Why the same as takerToken?
+  const usdPrice = props.usdPrice
+  const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
+
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
-  const [avgExpectedRate, setAvgExpectedRate] = React.useState(0.0)
-  const [youReceive, setYouReceive] = React.useState(0.0)
+  const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
+  const [youReceive, setYouReceive] = React.useState(ZERO)
   const [existingBuyLimitOrders, setExistingBuyLimitOrders] = React.useState([])
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
-    React.useState(0.0)
-  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
-  const [allowance, setAllowance] = React.useState(0.0)
+    React.useState(ZERO)
+  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(ZERO)
+  const [allowance, setAllowance] = React.useState(ZERO)
   // eslint-disable-next-line prettier/prettier
-  const exchangeProxyAddress = props.exchangeProxy
-  const [walletBalance, setWalletBalance] = React.useState(0)
-  const takerToken = props.tokenAddress
-  const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
-  const params: { tokenType: string } = useParams()
+  const [walletBalance, setWalletBalance] = React.useState(ZERO) // QUESTION: Why differently implemented in BuyMarket.tsx?
 
-  const usdPrice = props.usdPrice
+  const params: { tokenType: string } = useParams()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const dispatch = useAppDispatch()
-
   const isLong = window.location.pathname.split('/')[2] === 'long'
+
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseFloat(value)
       setNumberOfOptions(nbrOptions)
     } else {
-      setYouReceive(0.0)
+      setYouReceive(ZERO)
       setNumberOfOptions(0.0)
       setOrderBtnDisabled(true)
     }
@@ -101,9 +105,12 @@ export default function SellMarket(props: {
       .approve(exchangeProxyAddress, amount)
       .send({ from: makerAccount })
 
+    // set allowance for position token (18 decimals)
     const allowance = await takerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()
+    console.log('allowance', allowance)
+
     return allowance
   }
 
@@ -111,11 +118,13 @@ export default function SellMarket(props: {
     event.preventDefault()
     if (!isApproved) {
       if (numberOfOptions > 0) {
-        const amount = Number(
-          (allowance + numberOfOptions).toFixed(
-            totalDecimals(allowance, numberOfOptions)
-          )
-        )
+        // Calculate required allowance amount for position token (expressed as an integer with 18 decimals)
+        const amount = allowance
+          .add(parseUnits(convertExponentialToDecimal(numberOfOptions)))
+          .mul(parseUnits(feeMultiplier)) // Adding 1% fee as it also requires approval
+          .div(parseUnits('1'))
+          .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always
+
         // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
         let approvedAllowance = await approveSellAmount(
           parseUnits(convertExponentialToDecimal(amount), 18)

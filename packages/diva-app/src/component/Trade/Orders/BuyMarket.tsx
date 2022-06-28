@@ -46,7 +46,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigENumber.from(0)
-const feeMultiplier = parseUnits('1.01')
+const feeMultiplier = '1.01' // 1.01 represents 1% fee
 export default function BuyMarket(props: {
   option: Pool
   handleDisplayOrder: () => any
@@ -118,10 +118,10 @@ export default function BuyMarket(props: {
     if (!isApproved) {
       console.log('HI')
       if (numberOfOptions > 0) {
-        // Calculate required allowance amount (expressed as an integer with collateral token decimals)
+        // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals)
         const amount = allowance
           .add(youPay)
-          .mul(parseUnits('1.01', decimals)) // Adding 1% fee as it also requires approval
+          .mul(parseUnits(feeMultiplier, decimals)) // Adding 1% fee as it also requires approval
           .div(parseUnits('1', decimals))
           .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
         // Set allowance equal to amount
@@ -433,7 +433,7 @@ export default function BuyMarket(props: {
         // Amount to pay by taker including fee; result is expressed as an integer with collateral token decimals
         const youPayAmount = cumulativeAvg
           .mul(parseUnits(numberOfOptions.toString()))
-          .mul(feeMultiplier)
+          .mul(parseUnits(feeMultiplier))
           .div(parseUnits('1', 18 + 18 + 18 - decimals))
         setYouPay(youPayAmount)
       }
