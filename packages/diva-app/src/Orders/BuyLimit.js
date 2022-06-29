@@ -69,18 +69,11 @@ export const buylimitOrder = async (orderData) => {
         'Content-Type': 'application/json',
       },
     })
-
     if (resp.status === 200) {
       alert('Order successfully created')
     } else {
       const body = await resp.json()
-      alert(
-        `ERROR(status code ${resp.status}): ${JSON.stringify(
-          body,
-          undefined,
-          2
-        )}`
-      )
+      alert('Failed to create order. Please try again.')
     }
     return resp
   } catch (error) {

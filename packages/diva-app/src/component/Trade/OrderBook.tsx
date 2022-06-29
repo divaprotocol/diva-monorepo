@@ -59,7 +59,7 @@ function stableSort(array: any, comparator: (a: string, b: string) => number) {
 }
 
 function mapOrderData(
-  records: [],
+  records: any[],
   option: Pool,
   optionTokenAddress: string,
   sortOrder: string
@@ -196,8 +196,12 @@ export default function OrderBook(props: {
 }) {
   const option = props.option
   const optionTokenAddress = props.tokenAddress
-  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
+  let responseBuy: any[] = useAppSelector(
+    (state) => state.tradeOption.responseBuy
+  )
+  let responseSell: any[] = useAppSelector(
+    (state) => state.tradeOption.responseSell
+  )
   const [orderBook, setOrderBook] = useState([] as any)
   const OrderType = {
     BUY: 0,
@@ -207,7 +211,7 @@ export default function OrderBook(props: {
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
-      const rSell = await get0xOpenOrders(
+      const rSell: any[] = await get0xOpenOrders(
         optionTokenAddress,
         option.collateralToken.id,
         chainId
@@ -216,9 +220,8 @@ export default function OrderBook(props: {
         responseSell = rSell
       }
     }
-
     if (responseBuy.length === 0) {
-      const rBuy = await get0xOpenOrders(
+      const rBuy: any[] = await get0xOpenOrders(
         option.collateralToken.id,
         optionTokenAddress,
         chainId
@@ -227,7 +230,6 @@ export default function OrderBook(props: {
         responseBuy = rBuy
       }
     }
-
     const orderBookBuy = mapOrderData(
       responseBuy,
       option,
