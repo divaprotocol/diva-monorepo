@@ -212,7 +212,6 @@ export default function OrderBook(props: {
   const chainId = useAppSelector(selectChainId)
   const componentDidMount = async () => {
     const orders = []
-    console.log('optionTokenAddress', optionTokenAddress)
     if (responseSell.length === 0) {
       const rSell: any[] = await get0xOpenOrders(
         optionTokenAddress,

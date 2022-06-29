@@ -5,6 +5,7 @@ export const get0xOpenOrders = (
   TakerToken: string,
   chainId: number
 ) => {
+  console.log('MakerToken', MakerToken)
   // Config parameters
   const perPage = 1000
   const MAX_PAGES = 2 // parameter to control the maximum number of pages to query and with that the number 0x API requests; if set to 0/1, only the first page will be queried
@@ -16,6 +17,7 @@ export const get0xOpenOrders = (
     MakerToken +
     '&takerToken=' +
     TakerToken
+  console.log('url', url)
   const res = axios
     .get(url)
     .then(async function (response) {
