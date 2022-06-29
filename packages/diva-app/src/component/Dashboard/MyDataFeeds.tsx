@@ -313,7 +313,7 @@ export function MyDataFeeds() {
         })
       )
     }
-  }, [dispatch, page, userAddress])
+  }, [])
 
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))

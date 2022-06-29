@@ -201,15 +201,6 @@ export const ApproveActionButtons = ({
                           setActionLoading(false)
                           setTimeout(() => {
                             onTransactionSuccess()
-                            diva.getLatestPoolId().then((id) => {
-                              dispatch(
-                                fetchPool({
-                                  graphUrl:
-                                    config[chainId as number].divaSubgraph,
-                                  poolId: id.toNumber(),
-                                })
-                              )
-                            })
                           }, 2000)
                         })
                         .catch((err: any) => {
