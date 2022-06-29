@@ -5,7 +5,10 @@ export const get0xOpenOrders = (
   TokenAddress: string,
   chainId: number
 ) => {
+  // Config parameters
   const perPage = 1000
+  const MAX_PAGES = 2 // parameter to control the maximum number of pages to query and with that the number 0x API requests; if set to 0/1, only the first page will be queried
+
   const url =
     config[chainId].allOrders +
     `?page=1&perPage=${perPage}` +
@@ -21,34 +24,33 @@ export const get0xOpenOrders = (
       orders = response.data.records
       if (total > perPage) {
         // in case the total orders are over 1000 maximum pages we want to request
-        const MAX_PAGES = 2
+
         const pages =
           total % perPage > 0
             ? Math.floor(total / perPage) + 1
             : Math.floor(total / perPage)
         const resultPages = pages > MAX_PAGES ? MAX_PAGES : pages
-        //start for from the second page as the first page results are already stored in orders array
-        for (let page = 2; page <= resultPages; page++) {
-          const url =
-            config[chainId].allOrders +
-            `?page=${page}&perPage=${perPage}` +
-            '/makerToken=' +
-            CollateralToken +
-            '&takerToken=' +
-            TokenAddress
-          const resp = await axios.get(url)
-          orders.concat(resp.data.records)
+        //start from the second page as the first page results are already stored in orders array
+        if (MAX_PAGES >= 2) {
+          for (let page = 2; page <= resultPages; page++) {
+            const url =
+              config[chainId].allOrders +
+              `?page=${page}&perPage=${perPage}` +
+              '/makerToken=' +
+              CollateralToken +
+              '&takerToken=' +
+              TokenAddress
+            const resp = await axios.get(url)
+            orders.concat(resp.data.records)
+          }
         }
-        return orders
-      } else {
-        return orders
       }
+      return orders
     })
     .catch((err) => {
       console.error(err)
       return []
     })
-
   return res
 }
 

@@ -154,6 +154,8 @@ function getTableLength(buyOrdersCount: number, sellOrdersCount: number) {
     return buyOrdersCount
   }
   if (buyOrdersCount > 0 && sellOrdersCount > 0) {
+    console.log('sellOrdersCount', sellOrdersCount)
+    console.log('buyOrdersCount', buyOrdersCount)
     if (buyOrdersCount > sellOrdersCount) {
       return buyOrdersCount
     } else {
@@ -244,6 +246,8 @@ export default function OrderBook(props: {
       'ascOrder'
     )
     orders.push(orderBookSell)
+    console.log('orderBookBuy')
+    console.log(orderBookBuy)
     //put both buy & sell orders in one array to format table rows
     const completeOrderBook = createTable(
       orders[OrderType.BUY],

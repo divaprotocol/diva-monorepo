@@ -596,7 +596,7 @@ export default function BuyLimit(props: {
                 <MenuItem value={60}>
                   <LabelGrayStyle>1 Hour</LabelGrayStyle>
                 </MenuItem>
-                <MenuItem value={60 * 4}>
+                {/* <MenuItem value={60 * 4}>
                   <LabelGrayStyle>4 Hours</LabelGrayStyle>
                 </MenuItem>
                 <MenuItem value={60 * 12}>
@@ -604,7 +604,7 @@ export default function BuyLimit(props: {
                 </MenuItem>
                 <MenuItem value={60 * 24}>
                   <LabelGrayStyle>1 Day</LabelGrayStyle>
-                </MenuItem>
+                </MenuItem> */}
               </Select>
             </FormControl>
           </LimitOrderExpiryDiv>
