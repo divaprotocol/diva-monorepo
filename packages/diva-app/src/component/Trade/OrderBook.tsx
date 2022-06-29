@@ -239,10 +239,13 @@ export default function OrderBook(props: {
       'desOrder'
     )
     orders.push(orderBookBuy)
-    console.log('responseSell***')
-    console.log(responseSell)
+    //TODO remove tempRespSell once the 0x issue is fixed
+    //0xIssue link - https://github.com/0xProject/0x-api/issues/880
+    const tempRespSell = responseSell.filter((sellOrder) => {
+      sellOrder.makerToken == optionTokenAddress
+    })
     const orderBookSell = mapOrderData(
-      responseSell,
+      tempRespSell,
       option,
       optionTokenAddress,
       'ascOrder'

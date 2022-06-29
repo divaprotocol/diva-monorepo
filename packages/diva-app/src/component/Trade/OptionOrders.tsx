@@ -146,7 +146,6 @@ export default function OpenOrders(props: {
       optionTokenAddress,
       address
     )
-
     const orderBookSell = mapOrderData(
       responseSell,
       option,
