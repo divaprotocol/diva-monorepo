@@ -16,11 +16,18 @@ export const sellMarketOrder = async (orderData) => {
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
 
   // Get existing BUY LIMIT orders to fill. Note that makerToken = collateral token and takerToken = position token.
-  const orders = orderData.existingLimitOrders
+  const orders = orderData.existingLimitOrders // QUESTION: Are these sorted? -> see useEffect in SellMarket.tsx
 
+  // Define variables for integer math
+  const decimals = orderData.collateralDecimals
+
+  // User input converted from decimal number into an integer with 18 decimals
   let takerFillNbrOptions = parseUnits(
-    convertExponentialToDecimal(orderData.nbrOptions)
-  ) // user input * 1e18; note that this part needs adjustment when we move to smart contracts v1.0.0
+    convertExponentialToDecimal(orderData.nbrOptions),
+    decimals
+  )
+
+  // Initialize input arrays for batchFillLimitOrders function
   let takerAssetAmounts = []
   const signatures = []
 
@@ -32,38 +39,29 @@ export const sellMarketOrder = async (orderData) => {
     })
     const response = await exchange
       .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
-      .awaitTransactionSuccessAsync({ from: orderData.maker })
+      .awaitTransactionSuccessAsync({ from: orderData.taker })
       .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
     return response
   }
 
   let fillOrders = []
   orders.forEach((order) => {
-    const remainingNumber = BigNumber.from(order.remainingFillableTakerAmount)
-    if (
-      takerFillNbrOptions.gt(0) &&
-      remainingNumber.gt(1) // those are filtered out from the orderbook so should not be fillable
-    ) {
+    // Convert string into BigNumber; already expressed in collateral token decimals
+    const remainingFillableTakerAmount = BigNumber.from(
+      order.remainingFillableTakerAmount
+    )
+    if (takerFillNbrOptions.gt(0)) {
       fillOrders.push(order)
 
-      if (takerFillNbrOptions.lte(remainingNumber)) {
-        // equality in lte consciously removed due to 0x issue filling amounts equal to remainingFillableTakerAmount
+      if (takerFillNbrOptions.lte(remainingFillableTakerAmount)) {
         takerAssetAmounts.push(takerFillNbrOptions.toString())
-        takerFillNbrOptions = parseUnits('0') // "trick" to skip the remaining forEach loop
       } else {
-        // Adjust takerAssetAmounts by deducting 1 to account for existing 0x issue:
-        // https://ethereum.stackexchange.com/questions/130227/0x-batchfilllimitorders-not-working-with-small-remainingfillabletakeramount
-        takerAssetAmounts.push(
-          BigNumber.from(order.remainingFillableTakerAmount)
-            .sub(BigNumber.from(1))
-            .toString()
-        )
-        // Update the remaining amount to be filled; type: BigNumber
-        // Note that 1 is add back due to adjust for the deduction in takerAssetAmounts
-        takerFillNbrOptions = takerFillNbrOptions
-          .sub(remainingNumber)
-          .add(BigNumber.from(1))
+        takerAssetAmounts.push(order.remainingFillableTakerAmount)
       }
+      // Update the remaining amount to be filled
+      takerFillNbrOptions = takerFillNbrOptions.sub(
+        remainingFillableTakerAmount
+      )
     }
   })
   filledOrder = await fillOrderResponse(takerAssetAmounts, fillOrders)

@@ -186,7 +186,7 @@ export default function BuyMarket(props: {
           }
         } else {
           const orderData = {
-            takerAccount: userAddress,
+            taker: userAddress,
             provider: web3,
             isBuy: true,
             nbrOptions: numberOfOptions,

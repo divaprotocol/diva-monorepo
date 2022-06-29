@@ -104,11 +104,11 @@ export default function SellMarket(props: {
   const approveSellAmount = async (amount) => {
     await takerTokenContract.methods
       .approve(exchangeProxyAddress, amount)
-      .send({ from: makerAccount })
+      .send({ from: userAddress })
 
     // set allowance for position token (18 decimals)
     const allowance = await takerTokenContract.methods
-      .allowance(makerAccount, exchangeProxyAddress)
+      .allowance(userAddress, exchangeProxyAddress)
       .call()
     console.log('allowance', allowance)
 
@@ -191,7 +191,7 @@ export default function SellMarket(props: {
           }
         } else {
           const orderData = {
-            maker: makerAccount,
+            taker: userAddress,
             provider: web3,
             isBuy: false,
             nbrOptions: numberOfOptions, // Number of position tokens the user wants to sell
@@ -254,20 +254,20 @@ export default function SellMarket(props: {
     }
   }
 
-  const makerAccount = useAppSelector(selectUserAddress)
+  const userAddress = useAppSelector(selectUserAddress)
 
-  const getOptionsInWallet = async () => {
+  const getOptionsInWallet = async (takerAccount: string) => {
     let allowance = await takerTokenContract.methods
-      .allowance(makerAccount, exchangeProxyAddress)
+      .allowance(takerAccount, exchangeProxyAddress)
       .call()
     let balance = await takerTokenContract.methods
-      .balanceOf(makerAccount)
+      .balanceOf(takerAccount)
       .call()
     balance = Number(formatUnits(balance.toString(), 18))
     allowance = Number(formatUnits(allowance.toString(), 18))
     return {
       balance: balance,
-      account: makerAccount,
+      account: takerAccount,
       approvalAmount: allowance,
     }
   }
@@ -353,7 +353,7 @@ export default function SellMarket(props: {
   }
 
   useEffect(() => {
-    getOptionsInWallet().then((val) => {
+    getOptionsInWallet(userAddress).then((val) => {
       !isNaN(val.balance) ? setWalletBalance(val.balance) : setWalletBalance(0)
       setAllowance(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)

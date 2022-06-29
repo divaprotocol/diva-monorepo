@@ -39,22 +39,23 @@ export const buyMarketOrder = async (orderData) => {
       delete order.signature
       return order
     })
-    console.log(
-      'takerAssetAmounts (inside fillOrderResponse)',
-      takerAssetAmounts
-    )
     const response = await exchange
-      .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true) // takerAssetFillAmounts should be an array of stringified integer numbers
-      .awaitTransactionSuccessAsync({ from: orderData.takerAccount })
+      .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
+      .awaitTransactionSuccessAsync({ from: orderData.taker })
       .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
     return response
   }
 
   let fillOrders = []
   orders.forEach((order) => {
+    // Convert string into BigNumber; already expressed in collateral token decimals
+    const remainingFillableTakerAmount = BigNumber.from(
+      order.remainingFillableTakerAmount
+    )
     if (takerFillNbrOptions.gt(0)) {
       fillOrders.push(order)
-      // Expected rate is an integer with 18 decimals of type BigNumber
+      // Expected rate is an integer with collateral token decimals of type BigNumber; 18 decimals
+      // QUESTION: expectedRate having collateral token decimals might have been more intuitive
       const expectedRate = order.expectedRate
 
       // Calculate taker fill amount implied by user input and expected rate; expressed as an integer with collateral token decimals.
@@ -62,11 +63,6 @@ export const buyMarketOrder = async (orderData) => {
         .mul(takerFillNbrOptions)
         .div(unit)
         .div(scaling)
-
-      // Convert string into BigNumber; already expressed in collateral token decimals
-      const remainingFillableTakerAmount = BigNumber.from(
-        order.remainingFillableTakerAmount
-      )
 
       // Add elements to the takerAssetAmounts array which will be used as input in batchFillLimitOrders
       if (takerFillAmount.lte(remainingFillableTakerAmount)) {
