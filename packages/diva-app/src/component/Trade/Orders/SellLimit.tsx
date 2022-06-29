@@ -76,6 +76,7 @@ export default function SellLimit(props: {
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const params: { tokenType: string } = useParams()
   const usdPrice = props.usdPrice
+  const decimals = option.collateralToken.decimals
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const isLong = window.location.pathname.split('/')[2] === 'long'
   const dispatch = useAppDispatch()
@@ -177,7 +178,7 @@ export default function SellLimit(props: {
             totalDecimals(allowance, numberOfOptions)
           )
         )
-        // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
+        // NOTE: decimals will need adjustment to decimals when we switch to contracts version 1.0.0
         let approvedAllowance = await approveSellAmount(
           parseUnits(convertExponentialToDecimal(amount), 18)
         )
@@ -274,7 +275,7 @@ export default function SellLimit(props: {
             isBuy: false,
             nbrOptions: numberOfOptions,
             limitPrice: pricePerOption,
-            collateralDecimals: option.collateralToken.decimals,
+            collateralDecimals: decimals,
             orderExpiry: expiry,
             chainId: chainId,
             exchangeProxy: exchangeProxyAddress,
@@ -392,7 +393,7 @@ export default function SellLimit(props: {
         ? parseEther(usdPrice)
         : BigENumber.from(option.finalReferenceValue),
       BigENumber.from(option.supplyInitial),
-      option.collateralToken.decimals
+      decimals
     )
     if (pricePerOption > 0) {
       dispatch(
@@ -438,7 +439,7 @@ export default function SellLimit(props: {
       } else {
         dispatch(
           setIntrinsicValue(
-            formatUnits(payoffPerLongToken, option.collateralToken.decimals)
+            formatUnits(payoffPerLongToken, decimals)
           )
         )
       }
@@ -447,7 +448,7 @@ export default function SellLimit(props: {
           formatEther(
             BigENumber.from(option.collateralBalanceLongInitial)
               .add(BigENumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+              .mul(parseUnits('1', 18 - decimals))
               .mul(parseEther('1'))
               .div(BigENumber.from(option.supplyInitial))
           )
@@ -459,7 +460,7 @@ export default function SellLimit(props: {
       } else {
         dispatch(
           setIntrinsicValue(
-            formatUnits(payoffPerShortToken, option.collateralToken.decimals)
+            formatUnits(payoffPerShortToken, decimals)
           )
         )
       }
@@ -468,7 +469,7 @@ export default function SellLimit(props: {
           formatEther(
             BigENumber.from(option.collateralBalanceLongInitial)
               .add(BigENumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+              .mul(parseUnits('1', 18 - decimals))
               .mul(parseEther('1'))
               .div(BigENumber.from(option.supplyInitial))
           )

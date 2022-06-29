@@ -69,6 +69,7 @@ export default function SellMarket(props: {
   const takerToken = props.tokenAddress
   const optionTokenAddress = props.tokenAddress // QUESTION: Why the same as takerToken?
   const usdPrice = props.usdPrice
+  const decimals = option.collateralToken.decimals
   const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
@@ -119,13 +120,12 @@ export default function SellMarket(props: {
     if (!isApproved) {
       if (numberOfOptions > 0) {
         // Calculate required allowance amount for position token (expressed as an integer with 18 decimals)
+        // No accounting for fees needed as paid in taker token and not in maker token
         const amount = allowance
-          .add(parseUnits(numberOfOptions.toString()))
-          .mul(parseUnits(feeMultiplier)) // Adding 1% fee as it also requires approval
-          .div(parseUnits('1'))
+          .add(parseUnits(convertExponentialToDecimal(numberOfOptions)))
           .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
-        // NOTE: decimals will need adjustment to option.collateralToken.decimals when we switch to contracts version 1.0.0
+        // NOTE: decimals will need adjustment to decimals when we switch to contracts version 1.0.0
         const approvedAllowance = await approveSellAmount(amount)
 
         const remainingApproval = approvedAllowance.sub(existingOrdersAmount)
@@ -169,10 +169,7 @@ export default function SellMarket(props: {
               )
 
               newAllowance = await approveSellAmount(
-                parseUnits(
-                  convertExponentialToDecimal(newAllowance),
-                  option.collateralToken.decimals
-                )
+                parseUnits(convertExponentialToDecimal(newAllowance), decimals)
               )
               newAllowance = Number(formatUnits(newAllowance.toString(), 18))
               setRemainingApprovalAmount(newAllowance)
@@ -189,7 +186,7 @@ export default function SellMarket(props: {
             provider: web3,
             isBuy: false,
             nbrOptions: numberOfOptions, // Number of position tokens the user wants to sell
-            collateralDecimals: option.collateralToken.decimals,
+            collateralDecimals: decimals,
             makerToken: optionTokenAddress,
             takerToken: option.collateralToken.id,
             ERC20_ABI: ERC20_ABI,
@@ -268,9 +265,7 @@ export default function SellMarket(props: {
     const orders: any = []
     responseBuy.forEach((data: any) => {
       const order = JSON.parse(JSON.stringify(data.order))
-      const makerAmount = Number(
-        formatUnits(order.makerAmount, option.collateralToken.decimals)
-      )
+      const makerAmount = Number(formatUnits(order.makerAmount, decimals))
       const takerAmount = Number(formatUnits(order.takerAmount))
 
       const remainingFillableTakerAmount =
@@ -378,9 +373,7 @@ export default function SellMarket(props: {
       let cumulativeTaker = 0
       let cumulativeMaker = 0
       existingBuyLimitOrders.forEach((order: any) => {
-        let makerAmount = Number(
-          formatUnits(order.makerAmount, option.collateralToken.decimals)
-        )
+        let makerAmount = Number(formatUnits(order.makerAmount, decimals))
         let takerAmount = Number(formatUnits(order.takerAmount))
         const remainingFillableTakerAmount = order.remainingFillableTakerAmount
 
@@ -438,7 +431,7 @@ export default function SellMarket(props: {
         ? parseEther(usdPrice)
         : BigENumber.from(option.finalReferenceValue),
       BigENumber.from(option.supplyInitial),
-      option.collateralToken.decimals
+      decimals
     )
     if (avgExpectedRate > 0) {
       dispatch(
@@ -482,18 +475,14 @@ export default function SellMarket(props: {
       if (option.statusFinalReferenceValue === 'Open' && usdPrice === '') {
         dispatch(setIntrinsicValue('n/a'))
       } else {
-        dispatch(
-          setIntrinsicValue(
-            formatUnits(payoffPerLongToken, option.collateralToken.decimals)
-          )
-        )
+        dispatch(setIntrinsicValue(formatUnits(payoffPerLongToken, decimals)))
       }
       dispatch(
         setMaxPayout(
           formatEther(
             BigENumber.from(option.collateralBalanceLongInitial)
               .add(BigENumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+              .mul(parseUnits('1', 18 - decimals))
               .mul(parseEther('1'))
               .div(BigENumber.from(option.supplyInitial))
           )
@@ -503,18 +492,14 @@ export default function SellMarket(props: {
       if (option.statusFinalReferenceValue === 'Open' && usdPrice == '') {
         dispatch(setIntrinsicValue('n/a'))
       } else {
-        dispatch(
-          setIntrinsicValue(
-            formatUnits(payoffPerShortToken, option.collateralToken.decimals)
-          )
-        )
+        dispatch(setIntrinsicValue(formatUnits(payoffPerShortToken, decimals)))
       }
       dispatch(
         setMaxPayout(
           formatEther(
             BigENumber.from(option.collateralBalanceLongInitial)
               .add(BigENumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+              .mul(parseUnits('1', 18 - decimals))
               .mul(parseEther('1'))
               .div(BigENumber.from(option.supplyInitial))
           )
@@ -532,7 +517,9 @@ export default function SellMarket(props: {
               <LabelStyle>Number </LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {toExponentialOrNumber(remainingApprovalAmount)}
+                {toExponentialOrNumber(
+                  Number(formatUnits(remainingApprovalAmount))
+                )}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>
@@ -581,7 +568,11 @@ export default function SellMarket(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
-              <FormLabel>{toExponentialOrNumber(youReceive)}</FormLabel>
+              <FormLabel>
+                {toExponentialOrNumber(
+                  Number(formatUnits(youReceive, decimals))
+                )}
+              </FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>

@@ -45,6 +45,7 @@ import {
   calcBreakEven,
 } from '../../../Util/calcPayoffPerToken'
 const web3 = new Web3(Web3.givenProvider)
+const feeMultiplier = '1.01' // 1.01 represents 1% fee
 
 export default function BuyLimit(props: {
   option: Pool
@@ -75,9 +76,9 @@ export default function BuyLimit(props: {
   const [collateralBalance, setCollateralBalance] = React.useState(0)
   const takerToken = option.collateralToken.id
   const params: { tokenType: string } = useParams()
-  const theme = useTheme()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const usdPrice = props.usdPrice
+  const decimals = option.collateralToken.decimals
 
   const dispatch = useAppDispatch()
 
@@ -132,13 +133,14 @@ export default function BuyLimit(props: {
     let allowance = await takerTokenContract.methods
       .allowance(userAdress, exchangeProxyAddress)
       .call()
-    allowance = Number(formatUnits(allowance, option.collateralToken.decimals))
+    allowance = Number(formatUnits(allowance, decimals))
 
-    const remainingApproval = Number(
-      (allowance - existingOrdersAmount).toFixed(
-        totalDecimals(allowance, existingOrdersAmount)
-      )
-    )
+    const remainingApproval = allowance
+      .sub(existingOrdersAmount)
+      .mul(parseUnits(feeMultiplier, decimals)) // Adding 1% fee as it also requires approval
+      .div(parseUnits('1', decimals))
+      .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
+
     setRemainingApprovalAmount(remainingApproval)
   }
 
@@ -181,10 +183,7 @@ export default function BuyLimit(props: {
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
         let collateralAllowance = await approveBuyAmount(
-          parseUnits(
-            convertExponentialToDecimal(amount),
-            option.collateralToken.decimals
-          )
+          parseUnits(convertExponentialToDecimal(amount), decimals)
         )
         if (collateralAllowance == 'undefined') {
           alert('Metamask could not finish approval please check gas limit')
@@ -236,10 +235,7 @@ export default function BuyLimit(props: {
                 )
               )
               const approvedAllowance = await approveBuyAmount(
-                parseUnits(
-                  convertExponentialToDecimal(newAllowance),
-                  option.collateralToken.decimals
-                )
+                parseUnits(convertExponentialToDecimal(newAllowance), decimals)
               )
               if (approvedAllowance == 'undefined') {
                 alert('Metamask could not finish approval.')
@@ -275,7 +271,7 @@ export default function BuyLimit(props: {
             isBuy: true,
             chainId,
             nbrOptions: numberOfOptions,
-            collateralDecimals: option.collateralToken.decimals,
+            collateralDecimals: decimals,
             limitPrice: pricePerOption,
             orderExpiry: expiry,
             exchangeProxy: exchangeProxyAddress,
@@ -334,12 +330,7 @@ export default function BuyLimit(props: {
         }
       }
     })
-    return Number(
-      formatUnits(
-        existingOrdersAmount.toString(),
-        option.collateralToken.decimals
-      )
-    )
+    return Number(formatUnits(existingOrdersAmount.toString(), decimals))
   }
 
   const userAddress = useAppSelector(selectUserAddress)
@@ -348,15 +339,11 @@ export default function BuyLimit(props: {
       let allowance = await takerTokenContract.methods
         .allowance(userAdress, exchangeProxyAddress)
         .call()
-      allowance = Number(
-        formatUnits(allowance, option.collateralToken.decimals)
-      )
+      allowance = Number(formatUnits(allowance, decimals))
       let balance = await takerTokenContract.methods
         .balanceOf(userAdress)
         .call()
-      balance = Number(
-        formatUnits(balance.toString(), option.collateralToken.decimals)
-      )
+      balance = Number(formatUnits(balance.toString(), decimals))
       return {
         balance: balance,
         account: userAdress,
@@ -395,7 +382,7 @@ export default function BuyLimit(props: {
         ? parseEther(usdPrice)
         : BigENumber.from(option.finalReferenceValue),
       BigENumber.from(option.supplyInitial),
-      option.collateralToken.decimals
+      decimals
     )
     if (pricePerOption > 0) {
       dispatch(
@@ -439,18 +426,14 @@ export default function BuyLimit(props: {
       if (option.statusFinalReferenceValue === 'Open' && usdPrice === '') {
         dispatch(setIntrinsicValue('n/a'))
       } else {
-        dispatch(
-          setIntrinsicValue(
-            formatUnits(payoffPerLongToken, option.collateralToken.decimals)
-          )
-        )
+        dispatch(setIntrinsicValue(formatUnits(payoffPerLongToken, decimals)))
       }
       dispatch(
         setMaxPayout(
           formatEther(
             BigENumber.from(option.collateralBalanceLongInitial)
               .add(BigENumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+              .mul(parseUnits('1', 18 - decimals))
               .mul(parseEther('1'))
               .div(BigENumber.from(option.supplyInitial))
           )
@@ -460,18 +443,14 @@ export default function BuyLimit(props: {
       if (option.statusFinalReferenceValue === 'Open' && usdPrice == '') {
         dispatch(setIntrinsicValue('n/a'))
       } else {
-        dispatch(
-          setIntrinsicValue(
-            formatUnits(payoffPerShortToken, option.collateralToken.decimals)
-          )
-        )
+        dispatch(setIntrinsicValue(formatUnits(payoffPerShortToken, decimals)))
       }
       dispatch(
         setMaxPayout(
           formatEther(
             BigENumber.from(option.collateralBalanceLongInitial)
               .add(BigENumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - option.collateralToken.decimals))
+              .mul(parseUnits('1', 18 - decimals))
               .mul(parseEther('1'))
               .div(BigENumber.from(option.supplyInitial))
           )

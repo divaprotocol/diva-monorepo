@@ -274,7 +274,7 @@ export default function BuyMarket(props: {
         order['expectedRate'] = takerAmount
           .mul(parseUnits('1', 18 - decimals))
           .mul(parseUnits('1'))
-          .div(makerAmount) // result has 18 decimals
+          .div(makerAmount) // result has 18 decimals // QUESTION: Change result to collateral token decimals? Would be more intuitive
         console.log('expectedRate', order['expectedRate'].toString())
         order['remainingFillableTakerAmount'] =
           data.metaData.remainingFillableTakerAmount
@@ -429,7 +429,7 @@ export default function BuyMarket(props: {
         setAvgExpectedRate(cumulativeAvg)
         // Amount to pay by taker including fee; result is expressed as an integer with collateral token decimals
         const youPayAmount = cumulativeAvg
-          .mul(parseUnits(numberOfOptions.toString()))
+          .mul(parseUnits(convertExponentialToDecimal(numberOfOptions)))
           .mul(parseUnits(feeMultiplier))
           .div(parseUnits('1', 18 + 18 + 18 - decimals))
         setYouPay(youPayAmount)
