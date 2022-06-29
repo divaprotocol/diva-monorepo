@@ -11,14 +11,17 @@ import { config } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { useCreatePoolFormik } from './formik'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { ethers } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import {
   EtherscanLinkType,
   getEtherscanLink,
 } from '../../Util/getEtherscanLink'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { useAppSelector } from '../../Redux/hooks'
+import { selectUserAddress } from '../../Redux/appSlice'
+import { formatEther } from 'ethers/lib/utils'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -142,9 +145,12 @@ export function Success({
 }) {
   const [longToken, setLongToken] = useState()
   const [shortToken, setShortToken] = useState()
-  const [poolId, setPoolId] = useState()
+  const [poolId, setPoolId] = useState<number>()
   const theme = useTheme()
   const { provider } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+  const etherscanProvider = new ethers.providers.EtherscanProvider(3)
+
   const chainId = provider?.network?.chainId
 
   const diva =
@@ -155,27 +161,25 @@ export function Success({
           provider.getSigner()
         )
       : null
-  diva.getLatestPoolId().then((id) => {
-    diva.getPoolParameters(id).then((pool) => {
-      setShortToken(pool.longToken)
-      setLongToken(pool.shortToken)
-      setPoolId(id.toNumber())
+  useEffect(() => {
+    etherscanProvider.getHistory(userAddress).then((txs) => {
+      provider.getTransactionReceipt(txs[txs.length - 1].hash).then((txRc) => {
+        const id = BigNumber.from(txRc.logs[4].topics[1]).toNumber()
+        diva.getPoolParameters(id).then((pool) => {
+          setShortToken(pool.shortToken)
+          setLongToken(pool.longToken)
+          setPoolId(id)
+        })
+      })
     })
-  })
+  }, [diva])
 
   return (
-    <Container
-      sx={
-        {
-          // marginLeft: theme.spacing(30),
-        }
-      }
-    >
+    <Container>
       <Box
         display="flex"
         justifyContent="center"
         alignItems="center"
-        // minHeight="100vh"
       >
         <Stack display="flex" justifyContent="center" alignItems="center">
           <Container sx={{ ml: theme.spacing(15) }}>{congratsSvg}</Container>
@@ -218,7 +222,7 @@ export function Success({
                 {getShortenedAddress(shortToken)}
               </Link>{' '}
             </Typography>
-            <AddToMetamask address={shortToken} symbol={'s-' + poolId} />
+            <AddToMetamask address={shortToken} symbol={'S-' + poolId} />
           </Stack>
         </Stack>
       </Box>
