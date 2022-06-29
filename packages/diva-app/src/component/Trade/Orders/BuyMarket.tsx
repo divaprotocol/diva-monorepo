@@ -116,7 +116,8 @@ export default function BuyMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
-      console.log('HI')
+      // Amount is not yet approved ...
+
       if (numberOfOptions > 0) {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals)
         const amount = allowance
@@ -141,6 +142,8 @@ export default function BuyMarket(props: {
         )
       }
     } else {
+      // Amount is already approved ...
+
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
         console.log(
@@ -155,25 +158,26 @@ export default function BuyMarket(props: {
 
             alert('Insufficient balance')
           } else {
+            // Integer with collateral token decimals
             const additionalApproval = youPay.sub(remainingApprovalAmount)
             if (
               confirm(
                 'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
-                  Number(formatUnits(additionalApproval, decimals)).toFixed(4) +
+                  toExponentialOrNumber(
+                    Number(formatUnits(additionalApproval, decimals))
+                  ) +
                   ' ' +
                   option.collateralToken.name +
-                  '. Click Fill Order after the allowance has been updated.'
+                  ' tokens. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              let newAllowance = additionalApproval.add(allowance)
+              let newAllowance = additionalApproval
+                .add(allowance)
+                .add(BigENumber.from(10)) // Buffer to ensure that there is always sufficient approval
 
               newAllowance = await approveBuyAmount(newAllowance)
-              // newAllowance = Number(
-              //   formatUnits(newAllowance.toString(), decimals)
-              // )
 
-              // const remainingApproval = Number(newAllowance)
-              setRemainingApprovalAmount(newAllowance) // QUESTION: same as above, why same value as in setAllowance?
+              setRemainingApprovalAmount(newAllowance) // QUESTION: why same as in setAllowance?
               setAllowance(newAllowance)
             } else {
               //TBD discuss this case

@@ -1,20 +1,24 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
-import { parseEther } from 'ethers/lib/utils'
-import { BigNumber } from '@ethersproject/bignumber/lib/bignumber'
+import { parseUnits } from 'ethers/lib/utils'
+import { BigNumber } from 'ethers'
 import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 
 export const sellMarketOrder = async (orderData) => {
   let filledOrder = {}
+
+  // Connect to 0x exchange contract
   const address = contractAddress.getContractAddressesForChainOrThrow(
     orderData.chainId
   )
   const exchangeProxyAddress = address.exchangeProxy
-  // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
-  const orders = orderData.existingLimitOrders // Existing BUY LIMIT orders where makerToken = collateral token and takerToken = position token
-  let takerFillNbrOptions = parseEther(
+
+  // Get existing BUY LIMIT orders to fill. Note that makerToken = collateral token and takerToken = position token.
+  const orders = orderData.existingLimitOrders
+
+  let takerFillNbrOptions = parseUnits(
     convertExponentialToDecimal(orderData.nbrOptions)
   ) // user input * 1e18; note that this part needs adjustment when we move to smart contracts v1.0.0
   let takerAssetAmounts = []
@@ -45,7 +49,7 @@ export const sellMarketOrder = async (orderData) => {
       if (takerFillNbrOptions.lte(remainingNumber)) {
         // equality in lte consciously removed due to 0x issue filling amounts equal to remainingFillableTakerAmount
         takerAssetAmounts.push(takerFillNbrOptions.toString())
-        takerFillNbrOptions = parseEther('0') // "trick" to skip the remaining forEach loop
+        takerFillNbrOptions = parseUnits('0') // "trick" to skip the remaining forEach loop
       } else {
         // Adjust takerAssetAmounts by deducting 1 to account for existing 0x issue:
         // https://ethereum.stackexchange.com/questions/130227/0x-batchfilllimitorders-not-working-with-small-remainingfillabletakeramount

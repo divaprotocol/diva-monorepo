@@ -80,7 +80,7 @@ export default function SellMarket(props: {
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(ZERO)
-  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(ZERO)
+  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(ZERO) // QUESTION: Needed in Buy Market?
   const [allowance, setAllowance] = React.useState(ZERO)
   // eslint-disable-next-line prettier/prettier
   const [walletBalance, setWalletBalance] = React.useState(ZERO) // QUESTION: Why differently implemented in BuyMarket.tsx?
@@ -118,11 +118,14 @@ export default function SellMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
+      // Amount is not yet approved ...
+
       if (numberOfOptions > 0) {
-        // Calculate required allowance amount for position token (expressed as an integer with 18 decimals)
-        // No accounting for fees needed as paid in taker token and not in maker token
+        // Calculate required allowance amount for position token incl. 1% fee (expressed as an integer with 18 decimals)
         const amount = allowance
           .add(parseUnits(convertExponentialToDecimal(numberOfOptions)))
+          .mul(parseUnits(feeMultiplier)) // Adding 1% fee as position token acts as taker token in SELL MARKET which also requires approval
+          .div(parseUnits('1'))
           .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
         // NOTE: decimals will need adjustment to decimals when we switch to contracts version 1.0.0
@@ -142,41 +145,47 @@ export default function SellMarket(props: {
         alert('Please enter a positive amount for approval.')
       }
     } else {
-      if (walletBalance > 0) {
-        const totalAmount = numberOfOptions + existingOrdersAmount
-        if (numberOfOptions > remainingApprovalAmount) {
-          if (totalAmount > walletBalance) {
+      // Amount is already approved ...
+
+      if (walletBalance.gt(0)) {
+        // User owns position tokens ...
+
+        // Convert numberOfOptions into an integer of type BigNumber with 18 decimals to be used in integer math
+        const numberOfOptionsBN = parseUnits(numberOfOptions.toString())
+
+        // Get total amount of position tokens that the user wants to sell (incl. the user's Sell Limit orders)
+        const totalAmount = numberOfOptionsBN.add(existingOrdersAmount)
+
+        if (numberOfOptionsBN.gt(remainingApprovalAmount)) {
+          if (totalAmount.gt(walletBalance)) {
+            // QUESTION: Why is this inside this if block and not earlier?
             alert('Insufficient balance')
           } else {
-            const additionalApproval = Number(
-              (numberOfOptions - remainingApprovalAmount).toFixed(
-                totalDecimals(numberOfOptions, remainingApprovalAmount)
-              )
+            const additionalApproval = numberOfOptionsBN.sub(
+              remainingApprovalAmount
             )
             if (
               confirm(
                 'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
-                  additionalApproval +
+                  toExponentialOrNumber(
+                    Number(formatUnits(additionalApproval))
+                  ) +
                   ' ' +
                   params.tokenType.toUpperCase() +
-                  '. Click Fill Order after the allowance has been updated.'
+                  ' tokens. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              let newAllowance = Number(
-                (additionalApproval + allowance).toFixed(
-                  totalDecimals(additionalApproval, allowance)
-                )
-              )
+              let newAllowance = additionalApproval
+                .add(allowance)
+                .add(BigENumber.from(10)) // Buffer to make sure there is always sufficient approval
 
-              newAllowance = await approveSellAmount(
-                parseUnits(convertExponentialToDecimal(newAllowance), decimals)
-              )
-              newAllowance = Number(formatUnits(newAllowance.toString(), 18))
-              setRemainingApprovalAmount(newAllowance)
+              newAllowance = await approveSellAmount(newAllowance)
+
+              setRemainingApprovalAmount(newAllowance) // QUESTION: why same as in setAllowance?
               setAllowance(newAllowance)
             } else {
               //TBD discuss this case
-              setIsApproved(true)
+              setIsApproved(true) // QUESTION: not in line with BuyMarket -> Check with Harsh
               console.log('nothing done')
             }
           }
@@ -238,7 +247,9 @@ export default function SellMarket(props: {
           })
         }
       } else {
-        alert('No ' + params.tokenType.toUpperCase() + ' available to sell.')
+        alert(
+          'No ' + params.tokenType.toUpperCase() + ' tokens available to sell.'
+        )
       }
     }
   }

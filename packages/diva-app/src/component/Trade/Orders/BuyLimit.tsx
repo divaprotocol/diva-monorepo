@@ -291,7 +291,9 @@ export default function BuyLimit(props: {
         }
       } else {
         alert(
-          'No collateral available to Buy ' + params.tokenType.toUpperCase()
+          'No collateral tokens available to Buy ' +
+            params.tokenType.toUpperCase() +
+            ' tokens'
         )
       }
     }
