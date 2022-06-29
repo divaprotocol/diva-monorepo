@@ -176,11 +176,7 @@ export function Success({
 
   return (
     <Container>
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-      >
+      <Box display="flex" justifyContent="center" alignItems="center">
         <Stack display="flex" justifyContent="center" alignItems="center">
           <Container sx={{ ml: theme.spacing(15) }}>{congratsSvg}</Container>
           <h2>Congratulations</h2>
