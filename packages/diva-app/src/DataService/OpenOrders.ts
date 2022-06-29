@@ -1,8 +1,8 @@
 import axios from 'axios'
 import { config } from '../constants'
 export const get0xOpenOrders = (
-  CollateralToken: string,
-  TokenAddress: string,
+  MakerToken: string,
+  TakerToken: string,
   chainId: number
 ) => {
   // Config parameters
@@ -13,9 +13,9 @@ export const get0xOpenOrders = (
     config[chainId].allOrders +
     `?page=1&perPage=${perPage}` +
     '?makerToken=' +
-    CollateralToken +
+    MakerToken +
     '&takerToken=' +
-    TokenAddress
+    TakerToken
   const res = axios
     .get(url)
     .then(async function (response) {
@@ -36,10 +36,10 @@ export const get0xOpenOrders = (
             const url =
               config[chainId].allOrders +
               `?page=${page}&perPage=${perPage}` +
-              '/makerToken=' +
-              CollateralToken +
+              '?makerToken=' +
+              MakerToken +
               '&takerToken=' +
-              TokenAddress
+              TakerToken
             const resp = await axios.get(url)
             orders.concat(resp.data.records)
           }
