@@ -197,11 +197,11 @@ export const ApproveActionButtons = ({
                        */
                       tx.wait()
                         .then(() => {
-                          setIsPoolCreated(true)
-                          setActionLoading(false)
                           setTimeout(() => {
+                            setActionLoading(false)
+                            setIsPoolCreated(true)
                             onTransactionSuccess()
-                          }, 2000)
+                          }, 15000)
                         })
                         .catch((err: any) => {
                           setActionLoading(false)

@@ -489,8 +489,12 @@ export function MyPositions() {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    dispatch(fetchPositionTokens())
-  }, [dispatch])
+    dispatch(
+      fetchPositionTokens({
+        page,
+      })
+    )
+  }, [dispatch, page])
 
   const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
@@ -606,6 +610,8 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
+  const tokenAddresses = positionTokens.map((v) => v.id)
+
   /**
    * TODO: Move into redux
    */
@@ -616,7 +622,6 @@ export function MyPositions() {
       return Promise.resolve({})
     }
 
-    const tokenAddresses = positionTokens.map((v) => v.id)
     const tokenAddressesChunks = tokenAddresses.reduce(
       (resultArray, item, index) => {
         const batchIndex = Math.floor(index / 400)
@@ -650,6 +655,10 @@ export function MyPositions() {
     return response
   })
 
+  useEffect(() => {
+    balances.refetch()
+  }, [balances, tokenAddresses])
+
   const tokenBalances = balances.data
 
   const filteredRows =
@@ -659,15 +668,17 @@ export function MyPositions() {
             (value, index, self) =>
               index === self.findIndex((t) => t.id === value.id)
           )
-          .filter(
-            (v) =>
-              tokenBalances[v.address.id] != null &&
-              tokenBalances[v.address.id].gt(0)
-          )
+          // .filter(
+          //   (v) =>
+          //     tokenBalances[v.address.id] != null &&
+          //     tokenBalances[v.address.id].gt(0)
+          // )
           .map((v) => ({
             ...v,
             Balance:
-              parseInt(formatUnits(tokenBalances[v.address.id])) < 0.01
+              tokenBalances[v.address.id] == null
+                ? 'n/a'
+                : parseInt(formatUnits(tokenBalances[v.address.id])) < 0.01
                 ? '<0.01'
                 : parseFloat(formatUnits(tokenBalances[v.address.id])).toFixed(
                     4
@@ -681,6 +692,8 @@ export function MyPositions() {
 
     return bId - aId
   })
+
+  // console.log(JSON.stringify(sortedRows))
 
   return (
     <Stack
@@ -709,6 +722,7 @@ export function MyPositions() {
             page={page}
             rows={sortedRows}
             loading={balances.isLoading}
+            rowCount={3000}
             columns={columns}
             onPageChange={(page) => setPage(page)}
           />

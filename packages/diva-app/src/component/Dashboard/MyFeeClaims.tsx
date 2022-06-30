@@ -231,7 +231,6 @@ export function MyFeeClaims() {
   }, [dispatch, page, userAddress])
 
   let feeCount = 0
-  console.log({ feeRecipients })
   const rows: GridRowModel[] = feeRecipients
     .map((v) => v.collateralTokens)
     .flat()
