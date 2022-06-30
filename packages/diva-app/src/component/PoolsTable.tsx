@@ -5,12 +5,13 @@ import {
   AppBar,
   Box,
   Button,
+  FormControlLabel,
   Input,
   InputAdornment,
   Menu,
   MenuItem,
   Stack,
-  TextField,
+  Switch,
   Toolbar,
   Typography,
   useTheme,
@@ -48,6 +49,7 @@ type Props = {
   loading?: boolean
   rows: GridRowModel[]
   onPageChange?: (page: number, details: any) => void
+  expiryPools?: () => void
   creatorAddress?: string
   onCreatorChanged?: (createdBy: string) => void
   page: number
@@ -59,6 +61,7 @@ export default function PoolsTable({
   disableRowClick,
   rows,
   onCreatorChanged,
+  expiryPools,
   creatorAddress,
   loading,
   page,
@@ -88,6 +91,9 @@ export default function PoolsTable({
           v.Underlying.toLowerCase().includes(search.toLowerCase())
         )
       : rows
+  const handleExpiryPools = () => {
+    rows.filter((v) => v.statusFinalReferenceValue.includes('open'))
+  }
 
   const handleUnderlyingInput = (e) => {
     setSearch(e.target.value)
@@ -97,11 +103,16 @@ export default function PoolsTable({
     <Stack height="100%" width="100%" spacing={5}>
       <AppBar
         position="static"
-        sx={{ background: theme.palette.background.default, boxShadow: 'none' }}
+        sx={{
+          background: theme.palette.background.default,
+          boxShadow: 'none',
+        }}
       >
         <Toolbar>
-          <Typography>Filters:</Typography>
-          <Box>
+          <Typography color="#A4A4A4" sx={{ marginRight: '10px' }}>
+            Filters:
+          </Typography>
+          <Box marginRight="35px">
             <Button
               id="creator-filter-button"
               aria-controls={CreatorMenuOpen ? 'creator-menu' : undefined}
@@ -152,7 +163,7 @@ export default function PoolsTable({
               </MenuItem>
             </Menu>
           </Box>
-          <Box>
+          <Box marginRight="30px">
             <Button
               id="underlying-filter-button"
               aria-controls={UnderlyingMenuOpen ? 'creator-menu' : undefined}
@@ -192,11 +203,19 @@ export default function PoolsTable({
               </MenuItem>
             </Menu>
           </Box>
+          <Box>
+            <FormControlLabel
+              value="start"
+              control={<Switch color="primary" onChange={expiryPools} />}
+              label="Hide Expired Pools"
+              labelPlacement="start"
+            />
+          </Box>
         </Toolbar>
       </AppBar>
       <DataGrid
         className={classes.root}
-        rows={filteredRows}
+        rows={filteredRows || handleExpiryPools}
         pagination
         columns={columns}
         loading={loading}

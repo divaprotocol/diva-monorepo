@@ -191,8 +191,9 @@ export default function Markets() {
   const pools = useAppSelector(selectPools)
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const dispatch = useAppDispatch()
-  const params = useParams() as { creatorAddress: string }
+  const params = useParams() as { creatorAddress: string; status: string }
   const [createdBy, setCreatedBy] = useState(params.creatorAddress)
+  /* const [status] = useState(params.status) */
   const history = useHistory()
 
   useEffect(() => {
@@ -219,7 +220,6 @@ export default function Markets() {
       val.finalReferenceValue,
       val.inflection
     )
-
     const shared = {
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,
@@ -335,7 +335,11 @@ export default function Markets() {
       },
     ]
   }, [] as GridRowModel[])
+  const expiredPools = () => {
+    rows.filter((v) => v.status.includes(v.status == 'open'))
+  }
 
+  console.log('Status is:', rows)
   return (
     <>
       <Box
@@ -363,6 +367,7 @@ export default function Markets() {
           columns={columns}
           onCreatorChanged={setCreatedBy}
           creatorAddress={createdBy}
+          expiryPools={expiredPools}
           rows={rows}
           rowCount={8000}
           page={page}
