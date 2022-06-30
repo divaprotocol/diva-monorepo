@@ -17,11 +17,10 @@ def run_query(query, network):
 
 
 def transform_expiryTimes(df):
-    if not df.empty:
-        df['expiryTime'] = df['expiryTime'].apply(lambda x: float(x))
-        df['expiryTime_datetime'] = df['expiryTime'].apply(lambda x: datetime.fromtimestamp(x))
-        df['Passed Seconds After Expiry'] = df['expiryTime_datetime'].apply(lambda x: (datetime.now()-x).total_seconds())
-        return df
+    df['expiryTime'] = df['expiryTime'].apply(lambda x: float(x))
+    df['expiryTime_datetime'] = df['expiryTime'].apply(lambda x: datetime.fromtimestamp(x))
+    df['Passed Seconds After Expiry'] = df['expiryTime_datetime'].apply(lambda x: (datetime.now()-x).total_seconds())
     return df
+
 
 
