@@ -104,18 +104,18 @@ export default function SellMarket(props: {
     }
   }
 
-  const approveSellAmount = async (amount) => {
+  const approve = async (amount) => {
     await takerTokenContract.methods
       .approve(exchangeProxy, amount)
       .send({ from: userAddress })
 
-    // set allowance for position token (18 decimals)
-    const allowance = await takerTokenContract.methods
+    // Set allowance for position token (18 decimals)
+    const optionAllowance = await takerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
       .call()
-    console.log('allowance', allowance)
+    console.log('allowance', optionAllowance)
 
-    return allowance
+    return optionAllowance
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -132,7 +132,7 @@ export default function SellMarket(props: {
           .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
         // NOTE: decimals will need adjustment to decimals when we switch to contracts version 1.0.0
-        const approvedAllowance = await approveSellAmount(amount)
+        const approvedAllowance = await approve(amount)
 
         const remainingApproval = approvedAllowance.sub(
           existingSellLimitOrdersAmountUser
@@ -186,7 +186,7 @@ export default function SellMarket(props: {
                 .add(allowance)
                 .add(BigENumber.from(10)) // Buffer to make sure there is always sufficient approval
 
-              newAllowance = await approveSellAmount(newAllowance)
+              newAllowance = await approve(newAllowance)
 
               setRemainingApprovalAmount(newAllowance) // QUESTION: why same as in setAllowance?
               setAllowance(newAllowance)

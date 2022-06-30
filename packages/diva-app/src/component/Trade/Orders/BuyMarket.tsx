@@ -108,11 +108,12 @@ export default function BuyMarket(props: {
     }
   }
 
-  const approveBuyAmount = async (amount) => {
+  const approve = async (amount) => {
     await takerTokenContract.methods
       .approve(exchangeProxy, amount)
       .send({ from: userAddress })
 
+    // Set allowance for collateral token (<=18 decimals)
     const collateralAllowance = await takerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
       .call()
@@ -134,7 +135,7 @@ export default function BuyMarket(props: {
           .div(parseUnits('1', decimals))
           .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
         // Set allowance equal to amount
-        const collateralAllowance = await approveBuyAmount(amount)
+        const collateralAllowance = await approve(amount)
 
         setRemainingApprovalAmount(collateralAllowance) // QUESTION: Why collateralAllowance here? What if I have existing orders in the orderbook?
         setAllowance(collateralAllowance)
@@ -183,7 +184,7 @@ export default function BuyMarket(props: {
                 .add(allowance)
                 .add(BigENumber.from(10)) // Buffer to ensure that there is always sufficient approval
 
-              newAllowance = await approveBuyAmount(newAllowance)
+              newAllowance = await approve(newAllowance)
 
               setRemainingApprovalAmount(newAllowance) // QUESTION: why same as in setAllowance?
               setAllowance(newAllowance)
