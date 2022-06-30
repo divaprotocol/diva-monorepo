@@ -83,8 +83,7 @@ export default function SellMarket(props: {
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(ZERO)
-  const [remainingApprovalAmount, setRemainingApprovalAmount] =
-    React.useState(ZERO)
+  const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
   // eslint-disable-next-line prettier/prettier
   const [optionBalance, setOptionBalance] = React.useState(ZERO) // QUESTION: Why differently implemented in BuyMarket.tsx?
 
@@ -137,7 +136,7 @@ export default function SellMarket(props: {
           existingSellLimitOrdersAmountUser
         )
 
-        setRemainingApprovalAmount(remainingAllowance)
+        setRemainingAllowance(remainingAllowance)
         setAllowance(optionAllowance)
         setIsApproved(true)
         alert(
@@ -162,32 +161,30 @@ export default function SellMarket(props: {
           existingSellLimitOrdersAmountUser
         )
 
-        if (numberOfOptionsBN.gt(remainingApprovalAmount)) {
+        if (numberOfOptionsBN.gt(remainingAllowance)) {
           if (totalAmount.gt(optionBalance)) {
             // QUESTION: Why is this inside this if block and not earlier?
             alert('Insufficient balance')
           } else {
-            const additionalApproval = numberOfOptionsBN.sub(
-              remainingApprovalAmount
-            )
+            const additionalAllowance = numberOfOptionsBN.sub(remainingAllowance)
             if (
               confirm(
                 'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
                   toExponentialOrNumber(
-                    Number(formatUnits(additionalApproval))
+                    Number(formatUnits(additionalAllowance))
                   ) +
                   ' ' +
                   params.tokenType.toUpperCase() +
                   ' tokens. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              let newAllowance = additionalApproval
+              let newAllowance = additionalAllowance
                 .add(allowance)
                 .add(BigENumber.from(10)) // Buffer to make sure there is always sufficient approval
 
               newAllowance = await approve(newAllowance)
 
-              setRemainingApprovalAmount(newAllowance) // QUESTION: why same as in setAllowance?
+              setRemainingAllowance(newAllowance) // QUESTION: why same as in setAllowance?
               setAllowance(newAllowance)
             } else {
               //TBD discuss this case
@@ -362,7 +359,7 @@ export default function SellMarket(props: {
     getOptionsInWallet(userAddress).then((val) => {
       !isNaN(val.balance) ? setOptionBalance(val.balance) : setOptionBalance(0)
       setAllowance(val.approvalAmount)
-      setRemainingApprovalAmount(val.approvalAmount)
+      setRemainingAllowance(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
       if (responseBuy.length > 0) {
         getBuyLimitOrders().then((orders) => {
@@ -376,7 +373,7 @@ export default function SellMarket(props: {
             totalDecimals(val.approvalAmount, amount)
           )
         )
-        setRemainingApprovalAmount(remainingAmount)
+        setRemainingAllowance(remainingAmount)
         remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
       })
     })
@@ -534,9 +531,7 @@ export default function SellMarket(props: {
               <LabelStyle>Number </LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {toExponentialOrNumber(
-                  Number(formatUnits(remainingApprovalAmount))
-                )}
+                {toExponentialOrNumber(Number(formatUnits(remainingAllowance)))}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>

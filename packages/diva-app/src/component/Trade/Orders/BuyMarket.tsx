@@ -85,8 +85,7 @@ export default function BuyMarket(props: {
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(ZERO)
-  const [remainingApprovalAmount, setRemainingApprovalAmount] =
-    React.useState(ZERO)
+  const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
   // eslint-disable-next-line prettier/prettier
   const [collateralBalance, setCollateralBalance] = React.useState(
     ZERO
@@ -137,7 +136,11 @@ export default function BuyMarket(props: {
         // Set allowance
         const collateralAllowance = await approve(amountToApprove)
 
-        setRemainingApprovalAmount(collateralAllowance) // QUESTION: Why collateralAllowance here? What if I have existing orders in the orderbook?
+        const remainingAllowance = collateralAllowance.sub(
+          existingBuyLimitOrdersAmountUser
+        )
+
+        setRemainingAllowance(remainingAllowance)
         setAllowance(collateralAllowance)
         setIsApproved(true)
         alert(
@@ -147,7 +150,7 @@ export default function BuyMarket(props: {
         )
       } else {
         alert(
-          `Please enter the number of ${params.tokenType.toUpperCase()} you want to buy.`
+          `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to buy.`
         )
       }
     } else {
@@ -155,12 +158,9 @@ export default function BuyMarket(props: {
 
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
-        console.log(
-          'remainingApprovalAmount',
-          remainingApprovalAmount.toString()
-        )
-        if (youPay.gt(remainingApprovalAmount)) {
-          // Collateral token amount to pay is greater than remaining allowance ...
+        console.log('remainingAllowance', remainingAllowance.toString())
+        if (youPay.gt(remainingAllowance)) {
+          // Collateral token amount to pay exceeds remaining allowance ...
 
           if (youPay.gt(collateralBalance)) {
             // User not enough collateral tokens to pay for the purchase ...
@@ -168,25 +168,25 @@ export default function BuyMarket(props: {
             alert('Insufficient balance')
           } else {
             // Integer with collateral token decimals
-            const additionalApproval = youPay.sub(remainingApprovalAmount)
+            const additionalAllowance = youPay.sub(remainingAllowance)
             if (
               confirm(
                 'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
                   toExponentialOrNumber(
-                    Number(formatUnits(additionalApproval, decimals))
+                    Number(formatUnits(additionalAllowance, decimals))
                   ) +
                   ' ' +
                   option.collateralToken.name +
                   ' tokens. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              let newAllowance = additionalApproval
+              let newAllowance = additionalAllowance
                 .add(allowance)
                 .add(BigENumber.from(10)) // Buffer to ensure that there is always sufficient approval
 
               newAllowance = await approve(newAllowance)
 
-              setRemainingApprovalAmount(newAllowance) // QUESTION: why same as in setAllowance?
+              setRemainingAllowance(newAllowance) // QUESTION: why same as in setAllowance?
               setAllowance(newAllowance)
             } else {
               //TBD discuss this case
@@ -369,7 +369,7 @@ export default function BuyMarket(props: {
       getCollateralInWallet(userAddress).then(async (val) => {
         setCollateralBalance(val.balance)
         setAllowance(val.approvalAmount)
-        setRemainingApprovalAmount(val.approvalAmount) // QUESTION: Why not taking into account existing Buy Limit orders here??
+        setRemainingAllowance(val.approvalAmount) // QUESTION: Why not taking into account existing Buy Limit orders here??
         val.approvalAmount.lte(0) ? setIsApproved(false) : setIsApproved(true) // QUESTION: when can approvalAmount be negative? -> "==" should work as well
         if (responseSell.length > 0) {
           const data = await getSellLimitOrders()
@@ -377,7 +377,7 @@ export default function BuyMarket(props: {
         }
         getTakerOrdersTotalAmount(val.account).then((amount) => {
           const remainingAmount = val.approvalAmount.sub(amount)
-          setRemainingApprovalAmount(remainingAmount)
+          setRemainingAllowance(remainingAmount)
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })
         //}
@@ -598,9 +598,7 @@ export default function BuyMarket(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
                 {toExponentialOrNumber(
-                  Number(
-                    formatUnits(remainingApprovalAmount.toString(), decimals)
-                  )
+                  Number(formatUnits(remainingAllowance.toString(), decimals))
                 )}
               </FormLabel>
             </Stack>
