@@ -156,17 +156,22 @@ export default function SellMarket(props: {
         // Convert numberOfOptions into an integer of type BigNumber with 18 decimals to be used in integer math
         const numberOfOptionsBN = parseUnits(numberOfOptions.toString())
 
-        // Get total amount of position tokens that the user wants to sell (incl. the user's Sell Limit orders)
-        const totalAmount = numberOfOptionsBN.add(
-          existingSellLimitOrdersAmountUser
-        )
-
         if (numberOfOptionsBN.gt(remainingAllowance)) {
-          if (totalAmount.gt(optionBalance)) {
-            // QUESTION: Why is this inside this if block and not earlier?
-            alert('Insufficient balance')
+          // Entered position token amount exceeds remaining allowance ...
+
+          // Get total amount of position tokens that the user wants to sell (incl. the user's Sell Limit orders)
+          const totalSellAmount = numberOfOptionsBN.add(
+            existingSellLimitOrdersAmountUser
+          )
+
+          if (totalSellAmount.gt(optionBalance)) {
+            // User has not enough position tokens to sell ...
+
+            alert('Insufficient position token balance')
           } else {
-            const additionalAllowance = numberOfOptionsBN.sub(remainingAllowance)
+            // Calculate additional allowance required to executed the Sell Market order
+            const additionalAllowance =
+              numberOfOptionsBN.sub(remainingAllowance)
             if (
               confirm(
                 'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
@@ -184,12 +189,15 @@ export default function SellMarket(props: {
 
               newAllowance = await approve(newAllowance)
 
-              setRemainingAllowance(newAllowance) // QUESTION: why same as in setAllowance?
+              const remainingAllowance = newAllowance.sub(
+                existingSellLimitOrdersAmountUser
+              )
+
+              setRemainingAllowance(remainingAllowance) // QUESTION: why same as in setAllowance?
               setAllowance(newAllowance)
             } else {
-              //TBD discuss this case
               setIsApproved(true) // QUESTION: not in line with BuyMarket -> Check with Harsh
-              console.log('nothing done')
+              console.log('Additional approval rejected by user.')
             }
           }
         } else {

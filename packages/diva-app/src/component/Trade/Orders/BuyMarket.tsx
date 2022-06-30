@@ -159,13 +159,16 @@ export default function BuyMarket(props: {
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
         console.log('remainingAllowance', remainingAllowance.toString())
+
+        // QUESTION: Do we have to consider existing buy limit orders here? 
+
         if (youPay.gt(remainingAllowance)) {
           // Collateral token amount to pay exceeds remaining allowance ...
 
           if (youPay.gt(collateralBalance)) {
             // User not enough collateral tokens to pay for the purchase ...
 
-            alert('Insufficient balance')
+            alert('Insufficient collateral token balance')
           } else {
             // Integer with collateral token decimals
             const additionalAllowance = youPay.sub(remainingAllowance)
@@ -189,8 +192,8 @@ export default function BuyMarket(props: {
               setRemainingAllowance(newAllowance) // QUESTION: why same as in setAllowance?
               setAllowance(newAllowance)
             } else {
-              //TBD discuss this case
-              console.log('nothing done')
+              // QUESTION: setIsApproved(true) needed here (see SellMarket)?
+              console.log('Additional approval rejected by user.')
             }
           }
         } else {
