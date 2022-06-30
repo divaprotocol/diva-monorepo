@@ -52,7 +52,6 @@ import {
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigENumber.from(0)
 const feeMultiplier = (1 + tradingFee).toString()
-
 export default function SellMarket(props: {
   option: Pool
   handleDisplayOrder: () => any

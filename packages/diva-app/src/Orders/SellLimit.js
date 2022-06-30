@@ -10,27 +10,24 @@ import { getFutureExpiryInSeconds } from '../Util/utils'
 export const sellLimitOrder = async (orderData) => {
   const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
-  // Define variables for integer math
-  const decimals = orderData.collateralDecimals
-  const unit = parseUnits('1')
-  const scaling = parseUnits('1', 18 - decimals)
+  const collateralTokenUnit = parseUnits('1', orderData.collateralDecimals)
+  const positionTokenUnit = parseUnits('1')
 
   // User input converted from decimal number into an integer with 18 decimals of type BigNumber
   const nbrOptionsToSell = parseUnits(
     convertExponentialToDecimal(orderData.nbrOptions)
   )
 
-  // Collateral token amount to receive
-  // TODO: In SellLimit.tsx, adjust limitPrice to type BigNumber and in collateral token decimals
-  const takerAmount = nbrOptionsToSell
+  // In Sell Limit, the taker token is the collateral token. collateralTokenAmount is in collateral token decimals.
+  const collateralTokenAmount = nbrOptionsToSell
     .mul(orderData.limitPrice) // limitPrice is expressed as an integer with collateral token decimals
-    .mul(scaling) // scale up to 18 decimals
-    .div(unit) // "correct" for integer multiplication
+    .div(positionTokenUnit) // "correction" for integer multiplication
 
-  // Calculate trading fee amount (in collateral token decimals)
-  const takerFeeAmount = takerAmount
+  // Calculate trading fee amount (expressed as an integer with collateral token decimals)
+  // Note that the fee is paid in collateral token which is the taker token in Sell Limit
+  const collateralTokenFeeAmount = collateralTokenAmount
     .mul(parseUnits(tradingFee.toString(), orderData.collateralDecimals))
-    .div(parseUnits('1', orderData.collateralDecimals))
+    .div(collateralTokenUnit)
 
   // Get 0x API url to post order
   const networkUrl = config[orderData.chainId].order
@@ -40,17 +37,18 @@ export const sellLimitOrder = async (orderData) => {
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
     makerAmount: nbrOptionsToSell.toString(),
-    takerAmount: takerAmount.toString(),
+    takerAmount: collateralTokenAmount.toString(),
     maker: orderData.maker,
     sender: NULL_ADDRESS,
     feeRecipient: divaGovernanceAddress,
-    takerTokenFeeAmount: takerFeeAmount.toString(),
+    takerTokenFeeAmount: collateralTokenFeeAmount.toString(),
     expiry: getFutureExpiryInSeconds(orderData.orderExpiry),
     salt: Date.now().toString(),
     chainId: orderData.chainId,
     verifyingContract: orderData.exchangeProxy,
   })
 
+  // TODO: Export this part into a separate function
   try {
     const signature = await order.getSignatureWithProviderAsync(
       metamaskProvider,
@@ -78,8 +76,8 @@ export const sellLimitOrder = async (orderData) => {
       )
     }
     return resp
-  } catch (e) {
-    console.error(e)
+  } catch (error) {
+    console.error('error ' + JSON.stringify(error))
     alert('You need to sign the order')
   }
 }

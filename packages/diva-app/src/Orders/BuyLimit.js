@@ -10,24 +10,24 @@ import { getFutureExpiryInSeconds } from '../Util/utils'
 export const buylimitOrder = async (orderData) => {
   const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
-  // Define variables for integer math
-  const decimals = orderData.collateralDecimals
-  const unit = parseUnits('1')
-  const scaling = parseUnits('1', 18 - decimals)
+  const positionTokenUnit = parseUnits('1')
 
   // User input converted from decimal number into an integer with 18 decimals of type BigNumber
   const nbrOptionsToBuy = parseUnits(
     convertExponentialToDecimal(orderData.nbrOptions)
   )
 
-  // Collateral token amount to give up / pay
-  // TODO: In BuyLimit.tsx, adjust limitPrice to type BigNumber and in collateral token decimals
-  const makerAmount = nbrOptionsToBuy.mul(orderData.limitPrice).div(unit) // mul(scaling).div(scaling) cancel out
+  // In Buy Limit, the maker token is the collateral token. collateralTokenAmount is in collateral token decimals.
+  const collateralTokenAmount = nbrOptionsToBuy
+    .mul(orderData.limitPrice) // limitPrice is expressed as an integer with collateral token decimals
+    .div(positionTokenUnit) // "correction" for integer multiplication
 
-  const takerAmount = parseUnits(orderData.nbrOptions.toString())
-  const takerFeeAmount = takerAmount
+  // Calculate trading fee amount (expressed as an integer with position token decimals).
+  // NOTE: The fee is paid in position token which is the taker token in Buy Limit. In the context of DIVA,
+  // this has the implication that for deep-out-of the money position tokens, the trading fee may end up being zero for the feeRecipient.
+  const positionTokenFeeAmount = nbrOptionsToBuy
     .mul(parseUnits(tradingFee.toString()))
-    .div(parseUnits('1'))
+    .div(positionTokenUnit)
 
   // Get 0x API url to post order
   const networkUrl = config[orderData.chainId].order
@@ -36,24 +36,24 @@ export const buylimitOrder = async (orderData) => {
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
-    makerAmount: makerAmount.toString(),
+    makerAmount: collateralTokenAmount.toString(),
     takerAmount: nbrOptionsToBuy.toString(),
     maker: orderData.makerAccount,
     sender: NULL_ADDRESS,
     feeRecipient: divaGovernanceAddress,
-    takerTokenFeeAmount: takerFeeAmount.toString(),
+    takerTokenFeeAmount: positionTokenFeeAmount.toString(),
     expiry: getFutureExpiryInSeconds(orderData.orderExpiry),
     salt: Date.now().toString(),
     chainId: orderData.chainId,
     verifyingContract: orderData.exchangeProxy,
   })
 
+  // TODO: Export this part into a separate function
   try {
     const signature = await order.getSignatureWithProviderAsync(
       metamaskProvider,
       utils.SignatureType.EIP712 // Optional
     )
-
     const signedOrder = { ...order, signature }
     const resp = await fetch(networkUrl, {
       method: 'POST',
