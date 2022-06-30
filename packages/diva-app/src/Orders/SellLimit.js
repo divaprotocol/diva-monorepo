@@ -18,15 +18,15 @@ export const sellLimitOrder = async (orderData) => {
     convertExponentialToDecimal(orderData.nbrOptions)
   )
 
-  // In Sell Limit, the taker token is the collateral token. collateralTokenAmount is in collateral token decimals.
+  // Derive the collateralTokenAmount (takerAmount in Sell Limit) from the user's nbrOptionsToSell input.
   const collateralTokenAmount = nbrOptionsToSell
     .mul(orderData.limitPrice) // limitPrice is expressed as an integer with collateral token decimals
-    .div(positionTokenUnit) // "correction" for integer multiplication
+    .div(positionTokenUnit) // correction factor in integer multiplication
 
   // Calculate trading fee amount (expressed as an integer with collateral token decimals)
   // Note that the fee is paid in collateral token which is the taker token in Sell Limit
   const collateralTokenFeeAmount = collateralTokenAmount
-    .mul(parseUnits(tradingFee.toString(), orderData.collateralDecimals))
+    .mul(parseUnits(tradingFee.toString(), orderData.collateralDecimals)) // TODO: Revisit fee logic for trade mining program at a later stage
     .div(collateralTokenUnit)
 
   // Get 0x API url to post order
@@ -38,7 +38,7 @@ export const sellLimitOrder = async (orderData) => {
     takerToken: orderData.takerToken,
     makerAmount: nbrOptionsToSell.toString(),
     takerAmount: collateralTokenAmount.toString(),
-    maker: orderData.maker,
+    maker: orderData.makerAccount,
     sender: NULL_ADDRESS,
     feeRecipient: divaGovernanceAddress,
     takerTokenFeeAmount: collateralTokenFeeAmount.toString(),

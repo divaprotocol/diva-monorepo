@@ -17,16 +17,16 @@ export const buylimitOrder = async (orderData) => {
     convertExponentialToDecimal(orderData.nbrOptions)
   )
 
-  // In Buy Limit, the maker token is the collateral token. collateralTokenAmount is in collateral token decimals.
+  // Derive the collateralTokenAmount (makerAmount in Buy Limit) from the user's nbrOptionsToBuy input.
   const collateralTokenAmount = nbrOptionsToBuy
     .mul(orderData.limitPrice) // limitPrice is expressed as an integer with collateral token decimals
-    .div(positionTokenUnit) // "correction" for integer multiplication
+    .div(positionTokenUnit) // correction factor in integer multiplication
 
   // Calculate trading fee amount (expressed as an integer with position token decimals).
   // NOTE: The fee is paid in position token which is the taker token in Buy Limit. In the context of DIVA,
   // this has the implication that for deep-out-of the money position tokens, the trading fee may end up being zero for the feeRecipient.
   const positionTokenFeeAmount = nbrOptionsToBuy
-    .mul(parseUnits(tradingFee.toString()))
+    .mul(parseUnits(tradingFee.toString())) // TODO: Revisit fee logic for trade mining program at a later stage
     .div(positionTokenUnit)
 
   // Get 0x API url to post order

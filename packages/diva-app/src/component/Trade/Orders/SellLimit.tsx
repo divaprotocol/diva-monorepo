@@ -137,7 +137,7 @@ export default function SellLimit(props: {
     setPricePerOption(parseFloat('0.0'))
     setOrderBtnDisabled(true)
     let approvedAllowance = await makerTokenContract.methods
-      .allowance(makerAccount, exchangeProxyAddress)
+      .allowance(userAddress, exchangeProxyAddress)
       .call()
     approvedAllowance = Number(formatUnits(approvedAllowance.toString(), 18)) // NOTE: decimals need adjustment when we switch to smart contracts version 1.0.0
     const remainingAmount = Number(
@@ -152,14 +152,14 @@ export default function SellLimit(props: {
     try {
       const approveResponse = await makerTokenContract.methods
         .approve(exchangeProxyAddress, amount)
-        .send({ from: makerAccount })
+        .send({ from: userAddress })
       if ('events' in approveResponse) {
         return approveResponse.events.Approval.returnValues.value
       } else {
         //in case the approve call does not or delay emit events read the allowance again
         await new Promise((resolve) => setTimeout(resolve, 4000))
         const approvedAllowance = await makerTokenContract.methods
-          .allowance(makerAccount, exchangeProxyAddress)
+          .allowance(userAddress, exchangeProxyAddress)
           .call()
         return approvedAllowance
       }
@@ -268,7 +268,7 @@ export default function SellLimit(props: {
           }
         } else {
           const orderData = {
-            maker: makerAccount,
+            makerAccount: userAddress,
             makerToken: optionTokenAddress,
             takerToken: option.collateralToken.id,
             provider: web3,
@@ -333,20 +333,20 @@ export default function SellLimit(props: {
     //return existingOrderAmount
     return Number(formatUnits(existingOrderAmount.toString(), 18))
   }
-  const makerAccount = useAppSelector(selectUserAddress)
+  const userAddress = useAppSelector(selectUserAddress)
 
   const getOptionsInWallet = async () => {
     let allowance = await makerTokenContract.methods
-      .allowance(makerAccount, exchangeProxyAddress)
+      .allowance(userAddress, exchangeProxyAddress)
       .call()
     let balance = await makerTokenContract.methods
-      .balanceOf(makerAccount)
+      .balanceOf(userAddress)
       .call()
     balance = Number(formatUnits(balance.toString(), 18))
     allowance = Number(formatUnits(allowance.toString(), 18))
     return {
       balance: balance,
-      account: makerAccount,
+      account: userAddress,
       approvalAmount: allowance,
     }
   }
