@@ -66,42 +66,40 @@ function handleLiquidityEvent(
   let longTokenContract = PositionTokenABI.bind(parameters.longToken);
 
   //set user to position token mapping
-  let userEntity = User.load(msgSender.toHexString());
+  let userEntity = User.load(msgSender);
   if (!userEntity) {
-    userEntity = new User(msgSender.toHexString());
+    userEntity = new User(msgSender);
     userEntity.save();
   }
   let userShortPositionTokenEntity = UserPositionToken.load(
     msgSender.toHexString() + "-" + parameters.shortToken.toHexString())
   if (!userShortPositionTokenEntity) {
     userShortPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.shortToken.toHexString());
-    userShortPositionTokenEntity.user = msgSender.toHexString();
-    userShortPositionTokenEntity.positionToken = parameters.shortToken.toHexString();
+    userShortPositionTokenEntity.user = msgSender;
+    userShortPositionTokenEntity.positionToken = parameters.shortToken;
     userShortPositionTokenEntity.save();
   }
   let userLongPositionTokenEntity = UserPositionToken.load(
     msgSender.toHexString() + "-" + parameters.longToken.toHexString())
   if (!userLongPositionTokenEntity) {
     userLongPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.longToken.toHexString());
-    userLongPositionTokenEntity.user = msgSender.toHexString();
-    userLongPositionTokenEntity.positionToken = parameters.longToken.toHexString();
+    userLongPositionTokenEntity.user = msgSender;
+    userLongPositionTokenEntity.positionToken = parameters.longToken;
     userLongPositionTokenEntity.save();
   }
 
   //pool entity
   let bytesId = Bytes.fromI64(poolId.toI64())
-  // let poolEntityId = ByteArray.fromHexString(poolId.toHex())
   let entity = Pool.load(bytesId);
   
-
   if (!entity) {
     entity = new Pool(bytesId);
     entity.createdBy = msgSender;
     entity.createdAt = blockTimestamp;
 
-    let testnetUser = TestnetUser.load(msgSender.toHexString());
+    let testnetUser = TestnetUser.load(msgSender);
     if (!testnetUser) {
-      testnetUser = new TestnetUser(msgSender.toHexString());
+      testnetUser = new TestnetUser(msgSender);
     }
 
     const unit = BigInt.fromString("1000000000000000000") // 1e18
@@ -129,11 +127,11 @@ function handleLiquidityEvent(
   }
 
   let collateralTokenEntity = CollateralToken.load(
-    parameters.collateralToken.toHexString()
+    parameters.collateralToken
   );
   if (!collateralTokenEntity) {
     collateralTokenEntity = new CollateralToken(
-      parameters.collateralToken.toHexString()
+      parameters.collateralToken
     );
 
     let tokenContract = Erc20Token.bind(parameters.collateralToken);
@@ -144,33 +142,33 @@ function handleLiquidityEvent(
     collateralTokenEntity.save();
   }
 
-  let longTokenEntity = PositionToken.load(parameters.longToken.toHexString());
+  let longTokenEntity = PositionToken.load(parameters.longToken);
   if (!longTokenEntity) {
-    longTokenEntity = new PositionToken(parameters.longToken.toHexString());
+    longTokenEntity = new PositionToken(parameters.longToken);
 
     let longTokenContract = PositionTokenABI.bind(parameters.longToken);
 
     longTokenEntity.name = longTokenContract.name();
     longTokenEntity.symbol = longTokenContract.symbol();
     longTokenEntity.decimals = longTokenContract.decimals();
-    longTokenEntity.pool = Bytes.fromByteArray(ByteArray.fromI32(longTokenContract.poolId().toI32()));
+    longTokenEntity.pool = Bytes.fromI64(longTokenContract.poolId().toI64());
     longTokenEntity.owner = longTokenContract.owner();
 
     longTokenEntity.save();
   }
 
   let shortTokenEntity = PositionToken.load(
-    parameters.shortToken.toHexString()
+    parameters.shortToken
   );
   if (!shortTokenEntity) {
-    shortTokenEntity = new PositionToken(parameters.shortToken.toHexString());
+    shortTokenEntity = new PositionToken(parameters.shortToken);
 
     let shortTokenContract = PositionTokenABI.bind(parameters.shortToken);
 
     shortTokenEntity.name = shortTokenContract.name();
     shortTokenEntity.symbol = shortTokenContract.symbol();
     shortTokenEntity.decimals = shortTokenContract.decimals();
-    shortTokenEntity.pool = Bytes.fromByteArray(ByteArray.fromI32(shortTokenContract.poolId().toI32()));
+    shortTokenEntity.pool = Bytes.fromI64(shortTokenContract.poolId().toI64());
     shortTokenEntity.owner = shortTokenContract.owner();
 
     shortTokenEntity.save();
@@ -189,8 +187,8 @@ function handleLiquidityEvent(
     parameters.collateralBalanceShortInitial;
   entity.collateralBalanceLongInitial = parameters.collateralBalanceLongInitial;
   entity.collateralBalance = parameters.collateralBalance;
-  entity.shortToken = parameters.shortToken.toHexString();
-  entity.longToken = parameters.longToken.toHexString();
+  entity.shortToken = parameters.shortToken;
+  entity.longToken = parameters.longToken;
   entity.finalReferenceValue = parameters.finalReferenceValue;
   entity.redemptionAmountLongToken = parameters.redemptionAmountLongToken;
   entity.redemptionAmountShortToken = parameters.redemptionAmountShortToken;
@@ -221,22 +219,22 @@ function handleFeeClaimEvent(
   amount: BigInt,
   isIncrease: bool
 ): void {
-  let feeRecipientEntity = FeeRecipient.load(recipient.toHexString());
+  let feeRecipientEntity = FeeRecipient.load(recipient);
   let feeRecipientCollateralTokenEntity = FeeRecipientCollateralToken.load(
     recipient.toHexString() + "-" + collateralTokenAddress.toHexString()
   );
 
   if (!feeRecipientEntity) {
-    feeRecipientEntity = new FeeRecipient(recipient.toHexString());
+    feeRecipientEntity = new FeeRecipient(recipient);
   }
 
   if (!feeRecipientCollateralTokenEntity) {
     feeRecipientCollateralTokenEntity = new FeeRecipientCollateralToken(
       recipient.toHexString() + "-" + collateralTokenAddress.toHexString()
     );
-    feeRecipientCollateralTokenEntity.feeRecipient = recipient.toHexString();
+    feeRecipientCollateralTokenEntity.feeRecipient = recipient;
     feeRecipientCollateralTokenEntity.collateralToken =
-      collateralTokenAddress.toHexString();
+      collateralTokenAddress;
   }
 
   if (isIncrease) {
@@ -260,9 +258,9 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
     event.block.timestamp
   );
 
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  let testnetUser = TestnetUser.load(event.transaction.from);
   if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    testnetUser = new TestnetUser(event.transaction.from);
   }
   testnetUser.liquidityAdded = true;
   testnetUser.save();
@@ -278,9 +276,9 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
     event.block.timestamp
   );
 
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  let testnetUser = TestnetUser.load(event.transaction.from);
   if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    testnetUser = new TestnetUser(event.transaction.from);
   }
   testnetUser.liquidityRemoved = true;
   testnetUser.save();
@@ -313,19 +311,17 @@ export function handleStatusChanged(event: StatusChanged): void {
       event.transaction.hash.toHex() + "-" + event.logIndex.toString()
     );
 
-    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+    let testnetUser = TestnetUser.load(event.transaction.from);
     if (!testnetUser) {
-      testnetUser = new TestnetUser(event.transaction.from.toHexString());
+      testnetUser = new TestnetUser(event.transaction.from);
     }
     testnetUser.reportedValueChallenged = true;
     testnetUser.save();
 
   } else if (event.params.statusFinalReferenceValue === 1) {
-    // log.info("event.address: ", [event.address.toHexString()])
-    // log.info("event.transaction.from: ", [event.transaction.from.toHexString()])
-    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+    let testnetUser = TestnetUser.load(event.transaction.from);
     if (!testnetUser) {
-      testnetUser = new TestnetUser(event.transaction.from.toHexString());
+      testnetUser = new TestnetUser(event.transaction.from);
     }
     testnetUser.finalValueReported = true;
     testnetUser.save();
@@ -361,9 +357,9 @@ export function handleFeeClaimTransferred(event: FeeClaimTransferred): void {
     false
   ); // false is decrease
 
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  let testnetUser = TestnetUser.load(event.transaction.from);
   if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    testnetUser = new TestnetUser(event.transaction.from);
   }
   testnetUser.feeClaimsTransferred = true;
   testnetUser.save();
@@ -379,9 +375,9 @@ export function handleFeesClaimed(event: FeesClaimed): void {
     false
   );
 
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  let testnetUser = TestnetUser.load(event.transaction.from);
   if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    testnetUser = new TestnetUser(event.transaction.from);
   }
   testnetUser.feesClaimed = true;
   testnetUser.save();
@@ -390,9 +386,9 @@ export function handleFeesClaimed(event: FeesClaimed): void {
 export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void {
   log.info("handlePositionTokenRedeemed fired", []);
 
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
+  let testnetUser = TestnetUser.load(event.transaction.from);
   if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    testnetUser = new TestnetUser(event.transaction.from);
   }
   testnetUser.positionTokenRedeemed = true;
   testnetUser.save();
@@ -419,26 +415,26 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       nativeOrderFillEntity.save();
   }
 
-  let testnetUserMaker = TestnetUser.load(event.params.maker.toHexString());
+  let testnetUserMaker = TestnetUser.load(event.params.maker);
   if (!testnetUserMaker) {
-    testnetUserMaker = new TestnetUser(event.params.maker.toHexString());
+    testnetUserMaker = new TestnetUser(event.params.maker);
   }
 
-  let testnetUserTaker = TestnetUser.load(event.params.taker.toHexString());
+  let testnetUserTaker = TestnetUser.load(event.params.taker);
   if (!testnetUserTaker) {
-    testnetUserTaker = new TestnetUser(event.params.taker.toHexString());
+    testnetUserTaker = new TestnetUser(event.params.taker);
   }
 
   // buy limit: maker token = collateral token; taker token = position token
   // after fill, maker receives position tokens
   // check if taker token is a position token
-  let takerTokenEntity = PositionToken.load(event.params.takerToken.toHexString());
+  let takerTokenEntity = PositionToken.load(event.params.takerToken);
   if (takerTokenEntity) {
     // taker token is position token (buy limit order)
     // add buyer of position token to user list (seller already added before)
-    let userEntity = User.load(event.params.maker.toHexString());
+    let userEntity = User.load(event.params.maker);
     if (!userEntity) {
-      userEntity = new User(event.params.maker.toHexString());
+      userEntity = new User(event.params.maker);
       userEntity.save();
     }
 
@@ -446,8 +442,8 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       event.params.maker.toHexString() + "-" + event.params.takerToken.toHexString())
     if (!userPositionTokenEntity) {
       userPositionTokenEntity = new UserPositionToken(event.params.maker.toHexString() + "-" + event.params.takerToken.toHexString());
-      userPositionTokenEntity.user = event.params.maker.toHexString();
-      userPositionTokenEntity.positionToken = event.params.takerToken.toHexString();
+      userPositionTokenEntity.user = event.params.maker;
+      userPositionTokenEntity.positionToken = event.params.takerToken;
       userPositionTokenEntity.save();
     }
 
@@ -460,11 +456,11 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
   
   // sell limit: maker token = position token; taker token = collateral token
   // after fill, taker receives position tokens
-  let makerTokenEntity = PositionToken.load(event.params.makerToken.toHexString());
+  let makerTokenEntity = PositionToken.load(event.params.makerToken);
   if (makerTokenEntity) {
-    let userEntity = User.load(event.params.taker.toHexString());
+    let userEntity = User.load(event.params.taker);
     if (!userEntity) {
-      userEntity = new User(event.params.taker.toHexString());
+      userEntity = new User(event.params.taker);
       userEntity.save();
     }
 
@@ -472,8 +468,8 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       event.params.taker.toHexString() + "-" + event.params.makerToken.toHexString())
     if (!userPositionTokenEntity) {
       userPositionTokenEntity = new UserPositionToken(event.params.taker.toHexString() + "-" + event.params.makerToken.toHexString());
-      userPositionTokenEntity.user = event.params.taker.toHexString();
-      userPositionTokenEntity.positionToken = event.params.makerToken.toHexString();
+      userPositionTokenEntity.user = event.params.taker;
+      userPositionTokenEntity.positionToken = event.params.makerToken;
       userPositionTokenEntity.save();
     }
 
