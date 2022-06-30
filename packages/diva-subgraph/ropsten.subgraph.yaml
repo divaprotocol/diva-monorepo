@@ -56,7 +56,7 @@ dataSources:
       startBlock: 12380045
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - NativeOrderFill

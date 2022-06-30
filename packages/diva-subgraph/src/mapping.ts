@@ -41,7 +41,7 @@ function handleChallengeEvent(
 ): void {
   let challenge = new Challenge(challengeId);
 
-  challenge.pool = Bytes.fromI64(poolId.toI64());
+  challenge.pool = Bytes.fromI32(poolId.toI32());
   challenge.challengedBy = challengedBy;
   challenge.proposedFinalReferenceValue = proposedFinalReferenceValue;
   challenge.save();
@@ -89,7 +89,7 @@ function handleLiquidityEvent(
   }
 
   //pool entity
-  let bytesId = Bytes.fromI64(poolId.toI64())
+  let bytesId = Bytes.fromI32(poolId.toI32())
   let entity = Pool.load(bytesId);
   
   if (!entity) {
@@ -151,7 +151,7 @@ function handleLiquidityEvent(
     longTokenEntity.name = longTokenContract.name();
     longTokenEntity.symbol = longTokenContract.symbol();
     longTokenEntity.decimals = longTokenContract.decimals();
-    longTokenEntity.pool = Bytes.fromI64(longTokenContract.poolId().toI64());
+    longTokenEntity.pool = Bytes.fromI32(longTokenContract.poolId().toI32());
     longTokenEntity.owner = longTokenContract.owner();
 
     longTokenEntity.save();
@@ -168,7 +168,7 @@ function handleLiquidityEvent(
     shortTokenEntity.name = shortTokenContract.name();
     shortTokenEntity.symbol = shortTokenContract.symbol();
     shortTokenEntity.decimals = shortTokenContract.decimals();
-    shortTokenEntity.pool = Bytes.fromI64(shortTokenContract.poolId().toI64());
+    shortTokenEntity.pool = Bytes.fromI32(shortTokenContract.poolId().toI32());
     shortTokenEntity.owner = shortTokenContract.owner();
 
     shortTokenEntity.save();
