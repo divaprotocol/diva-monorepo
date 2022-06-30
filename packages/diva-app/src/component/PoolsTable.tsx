@@ -49,7 +49,6 @@ type Props = {
   loading?: boolean
   rows: GridRowModel[]
   onPageChange?: (page: number, details: any) => void
-  expiryPools?: () => void
   creatorAddress?: string
   onCreatorChanged?: (createdBy: string) => void
   page: number
@@ -61,7 +60,6 @@ export default function PoolsTable({
   disableRowClick,
   rows,
   onCreatorChanged,
-  expiryPools,
   creatorAddress,
   loading,
   page,
@@ -74,7 +72,7 @@ export default function PoolsTable({
   const [underlyingLabel, setUnderlyingLabel] = useState('Underlying')
   const [creatorMenuValue, setCreatorMenuValue] = useState(null)
   const [underlyingValue, setUnderlyingValue] = useState(null)
-
+  const [expiredClicked, setExpiredClicked] = useState(false)
   const classes = useStyles()
   const theme = useTheme()
   const CreatorMenuOpen = Boolean(creatorMenuValue)
@@ -90,9 +88,15 @@ export default function PoolsTable({
       ? rows.filter((v) =>
           v.Underlying.toLowerCase().includes(search.toLowerCase())
         )
+      : expiredClicked
+      ? rows.filter((v) => v.Status.includes('Open'))
       : rows
   const handleExpiryPools = () => {
-    rows.filter((v) => v.statusFinalReferenceValue.includes('open'))
+    if (expiredClicked) {
+      setExpiredClicked(false)
+    } else {
+      setExpiredClicked(true)
+    }
   }
 
   const handleUnderlyingInput = (e) => {
@@ -206,7 +210,7 @@ export default function PoolsTable({
           <Box>
             <FormControlLabel
               value="start"
-              control={<Switch color="primary" onChange={expiryPools} />}
+              control={<Switch color="primary" onChange={handleExpiryPools} />}
               label="Hide Expired Pools"
               labelPlacement="start"
             />
@@ -215,7 +219,7 @@ export default function PoolsTable({
       </AppBar>
       <DataGrid
         className={classes.root}
-        rows={filteredRows || handleExpiryPools}
+        rows={filteredRows}
         pagination
         columns={columns}
         loading={loading}
