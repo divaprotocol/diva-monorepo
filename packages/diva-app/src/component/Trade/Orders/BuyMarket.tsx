@@ -65,12 +65,12 @@ export default function BuyMarket(props: {
   const option = props.option
   const exchangeProxy = props.exchangeProxy
   const makerToken = props.tokenAddress
-  const usdPrice = props.usdPrice
-  const decimals = option.collateralToken.decimals
   const takerToken = option.collateralToken.id
   // TODO: check again why we need to use "any" here
   const takerTokenContract =
     takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
+  const usdPrice = props.usdPrice
+  const decimals = option.collateralToken.decimals
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
@@ -78,6 +78,10 @@ export default function BuyMarket(props: {
   const [existingSellLimitOrders, setExistingSellLimitOrders] = React.useState(
     []
   )
+  const [
+    existingBuyLimitOrdersAmountUser,
+    setExistingBuyLimitOrdersAmountUser,
+  ] = React.useState(ZERO)
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(ZERO)
@@ -196,7 +200,7 @@ export default function BuyMarket(props: {
             nbrOptions: numberOfOptions,
             collateralDecimals: decimals,
             makerToken: makerToken,
-            takerToken: option.collateralToken.id,
+            takerToken: takerToken,
             ERC20_ABI: ERC20_ABI,
             avgExpectedRate: avgExpectedRate,
             existingLimitOrders: existingSellLimitOrders,
@@ -311,11 +315,7 @@ export default function BuyMarket(props: {
     let existingOrdersAmount = ZERO
     if (responseBuy.length == 0) {
       //Double check if any limit orders exists
-      const rBuy = await get0xOpenOrders(
-        option.collateralToken.id,
-        makerToken,
-        props.chainId
-      )
+      const rBuy = await get0xOpenOrders(takerToken, makerToken, props.chainId)
       if (rBuy.length > 0) {
         responseBuy = rBuy
       }

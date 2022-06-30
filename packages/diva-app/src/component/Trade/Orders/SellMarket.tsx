@@ -63,25 +63,30 @@ export default function SellMarket(props: {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
 
   const option = props.option
-  const exchangeProxyAddress = props.exchangeProxy
+  const exchangeProxy = props.exchangeProxy
+  const makerToken = option.collateralToken.id
   const takerToken = props.tokenAddress
-  const optionTokenAddress = props.tokenAddress // QUESTION: Why the same as takerToken?
+  // TODO: check again why we need to use "any" here
+  const takerTokenContract =
+    takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const usdPrice = props.usdPrice
   const decimals = option.collateralToken.decimals
-  const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
   const [youReceive, setYouReceive] = React.useState(ZERO)
   const [existingBuyLimitOrders, setExistingBuyLimitOrders] = React.useState([])
+  const [
+    existingSellLimitOrdersAmountUser,
+    setExistingSellLimitOrdersAmountUser,
+  ] = React.useState(ZERO)
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
+  const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(ZERO)
-  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(ZERO) // QUESTION: Needed in Buy Market?
-  const [allowance, setAllowance] = React.useState(ZERO)
   // eslint-disable-next-line prettier/prettier
-  const [walletBalance, setWalletBalance] = React.useState(ZERO) // QUESTION: Why differently implemented in BuyMarket.tsx?
+  const [optionBalance, setOptionBalance] = React.useState(ZERO) // QUESTION: Why differently implemented in BuyMarket.tsx?
 
   const params: { tokenType: string } = useParams()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
@@ -101,12 +106,12 @@ export default function SellMarket(props: {
 
   const approveSellAmount = async (amount) => {
     await takerTokenContract.methods
-      .approve(exchangeProxyAddress, amount)
+      .approve(exchangeProxy, amount)
       .send({ from: userAddress })
 
     // set allowance for position token (18 decimals)
     const allowance = await takerTokenContract.methods
-      .allowance(userAddress, exchangeProxyAddress)
+      .allowance(userAddress, exchangeProxy)
       .call()
     console.log('allowance', allowance)
 
@@ -129,7 +134,9 @@ export default function SellMarket(props: {
         // NOTE: decimals will need adjustment to decimals when we switch to contracts version 1.0.0
         const approvedAllowance = await approveSellAmount(amount)
 
-        const remainingApproval = approvedAllowance.sub(existingOrdersAmount)
+        const remainingApproval = approvedAllowance.sub(
+          existingSellLimitOrdersAmountUser
+        )
 
         setRemainingApprovalAmount(remainingApproval)
         setAllowance(allowance)
@@ -145,17 +152,19 @@ export default function SellMarket(props: {
     } else {
       // Amount is already approved ...
 
-      if (walletBalance.gt(0)) {
+      if (optionBalance.gt(0)) {
         // User owns position tokens ...
 
         // Convert numberOfOptions into an integer of type BigNumber with 18 decimals to be used in integer math
         const numberOfOptionsBN = parseUnits(numberOfOptions.toString())
 
         // Get total amount of position tokens that the user wants to sell (incl. the user's Sell Limit orders)
-        const totalAmount = numberOfOptionsBN.add(existingOrdersAmount)
+        const totalAmount = numberOfOptionsBN.add(
+          existingSellLimitOrdersAmountUser
+        )
 
         if (numberOfOptionsBN.gt(remainingApprovalAmount)) {
-          if (totalAmount.gt(walletBalance)) {
+          if (totalAmount.gt(optionBalance)) {
             // QUESTION: Why is this inside this if block and not earlier?
             alert('Insufficient balance')
           } else {
@@ -194,8 +203,8 @@ export default function SellMarket(props: {
             isBuy: false,
             nbrOptions: numberOfOptions, // Number of position tokens the user wants to sell
             collateralDecimals: decimals,
-            makerToken: optionTokenAddress,
-            takerToken: option.collateralToken.id,
+            makerToken: makerToken,
+            takerToken: takerToken,
             ERC20_ABI: ERC20_ABI,
             avgExpectedRate: avgExpectedRate,
             existingLimitOrders: existingBuyLimitOrders,
@@ -256,7 +265,7 @@ export default function SellMarket(props: {
 
   const getOptionsInWallet = async (takerAccount: string) => {
     let allowance = await takerTokenContract.methods
-      .allowance(takerAccount, exchangeProxyAddress)
+      .allowance(takerAccount, exchangeProxy)
       .call()
     let balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
@@ -311,8 +320,8 @@ export default function SellMarket(props: {
     if (responseSell.length == 0) {
       //Double check the any limit orders exists
       const rSell: any = await get0xOpenOrders(
-        optionTokenAddress,
-        option.collateralToken.id,
+        takerToken,
+        makerToken,
         props.chainId
       )
       responseSell = rSell
@@ -352,7 +361,7 @@ export default function SellMarket(props: {
 
   useEffect(() => {
     getOptionsInWallet(userAddress).then((val) => {
-      !isNaN(val.balance) ? setWalletBalance(val.balance) : setWalletBalance(0)
+      !isNaN(val.balance) ? setOptionBalance(val.balance) : setOptionBalance(0)
       setAllowance(val.approvalAmount)
       setRemainingApprovalAmount(val.approvalAmount)
       val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
@@ -362,7 +371,7 @@ export default function SellMarket(props: {
         })
       }
       getMakerOrdersTotalAmount(val.account).then((amount) => {
-        setExistingOrdersAmount(amount)
+        setExistingSellLimitOrdersAmountUser(amount)
         const remainingAmount = Number(
           (val.approvalAmount - amount).toFixed(
             totalDecimals(val.approvalAmount, amount)
@@ -594,7 +603,7 @@ export default function SellMarket(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {params.tokenType.toUpperCase() + ' '}
               </FormLabel>
-              <FormLabel>{toExponentialOrNumber(walletBalance)}</FormLabel>
+              <FormLabel>{toExponentialOrNumber(optionBalance)}</FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
