@@ -4,8 +4,8 @@ import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Box from '@mui/material/Box'
+import { sellMarketOrder } from '../../../Orders/SellMarket'
 import { LabelStyle } from './UiStyles'
-import { LabelGrayStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
 import { FormDiv } from './UiStyles'
 import { FormInput } from './UiStyles'
@@ -16,7 +16,6 @@ import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { sellMarketOrder } from '../../../Orders/SellMarket'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import {
@@ -28,14 +27,13 @@ import {
 import {
   getComparator,
   stableSort,
-  totalDecimals,
   convertExponentialToDecimal,
 } from './OrderHelper'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
 import { useParams } from 'react-router-dom'
-import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
+import { selectUserAddress } from '../../../Redux/appSlice'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 import {
   setBreakEven,
@@ -52,6 +50,7 @@ import {
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigENumber.from(0)
 const feeMultiplier = (1 + tradingFee).toString()
+
 export default function SellMarket(props: {
   option: Pool
   handleDisplayOrder: () => any
@@ -63,7 +62,6 @@ export default function SellMarket(props: {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
 
-  const chainId = useAppSelector(selectChainId)
   const option = props.option
   const exchangeProxyAddress = props.exchangeProxy
   const takerToken = props.tokenAddress
@@ -201,7 +199,7 @@ export default function SellMarket(props: {
             ERC20_ABI: ERC20_ABI,
             avgExpectedRate: avgExpectedRate,
             existingLimitOrders: existingBuyLimitOrders,
-            chainId: chainId,
+            chainId: props.chainId,
           }
           sellMarketOrder(orderData).then(async (orderFillStatus: any) => {
             let orderFilled = false
@@ -315,7 +313,7 @@ export default function SellMarket(props: {
       const rSell: any = await get0xOpenOrders(
         optionTokenAddress,
         option.collateralToken.id,
-        chainId
+        props.chainId
       )
       responseSell = rSell
     }
@@ -589,7 +587,7 @@ export default function SellMarket(props: {
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
-            <LabelGrayStyle>Wallet Balance</LabelGrayStyle>
+            <LabelStyle>Wallet Balance</LabelStyle>
           </LabelStyleDiv>
           <RightSideLabel>
             <Stack direction={'row'} justifyContent="flex-end" spacing={1}>

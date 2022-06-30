@@ -12,6 +12,11 @@ import { FormInput } from './UiStyles'
 import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
 import { ExpectedRateInfoText } from './UiStyles'
+import Web3 from 'web3'
+import { Pool } from '../../../lib/queries'
+import { toExponentialOrNumber } from '../../../Util/utils'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import {
   formatEther,
@@ -19,18 +24,15 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
-import { toExponentialOrNumber } from '../../../Util/utils'
 import {
   getComparator,
   stableSort,
   convertExponentialToDecimal,
 } from './OrderHelper'
-import Web3 from 'web3'
-import { Pool } from '../../../lib/queries'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
-import { useParams } from 'react-router-dom'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
+import { useParams } from 'react-router-dom'
 import { selectUserAddress } from '../../../Redux/appSlice'
 import { BigNumber as BigENumber } from 'ethers'
 import {
