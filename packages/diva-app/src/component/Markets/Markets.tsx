@@ -193,7 +193,6 @@ export default function Markets() {
   const dispatch = useAppDispatch()
   const params = useParams() as { creatorAddress: string; status: string }
   const [createdBy, setCreatedBy] = useState(params.creatorAddress)
-  /* const [status] = useState(params.status) */
   const history = useHistory()
 
   useEffect(() => {

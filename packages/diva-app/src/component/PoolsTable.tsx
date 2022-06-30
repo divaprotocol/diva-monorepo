@@ -22,6 +22,8 @@ import { Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
 import { makeStyles } from '@mui/styles'
 import { getShortenedAddress } from '../Util/getShortenedAddress'
+import { selectUserAddress } from '../Redux/appSlice'
+import { useAppSelector } from '../Redux/hooks'
 import { divaGovernanceAddress } from '../constants'
 import { useWhitelist } from '../hooks/useWhitelist'
 
@@ -75,6 +77,7 @@ export default function PoolsTable({
   const [expiredClicked, setExpiredClicked] = useState(false)
   const classes = useStyles()
   const theme = useTheme()
+  const userAddress = useAppSelector(selectUserAddress)
   const CreatorMenuOpen = Boolean(creatorMenuValue)
   const UnderlyingMenuOpen = Boolean(underlyingValue)
   const handleCreatorInput = (e) => {
@@ -164,6 +167,15 @@ export default function PoolsTable({
                 }}
               >
                 Diva Governance
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  onCreatorChanged(userAddress)
+                  setCreatorButtonLabel(getShortenedAddress(userAddress))
+                  setCreatorMenuValue(null)
+                }}
+              >
+                Your Pools
               </MenuItem>
             </Menu>
           </Box>
