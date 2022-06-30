@@ -6,12 +6,9 @@ import { config } from '../constants'
 import { isFloat, decimalPlaces } from '../component/Trade/Orders/OrderHelper'
 import { divaGovernanceAddress } from '../constants'
 import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
+import { getFutureExpiryInSeconds } from '../Util/utils'
 
 export const sellLimitOrder = async (orderData) => {
-  const getFutureExpiryInSeconds = () => {
-    return Math.floor(Date.now() / 1000 + orderData.orderExpiry * 60).toString()
-  }
-
   const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
   const makerAmount = parseEther(
@@ -56,7 +53,7 @@ export const sellLimitOrder = async (orderData) => {
     sender: NULL_ADDRESS,
     feeRecipient: divaGovernanceAddress,
     takerTokenFeeAmount: takerFeeAmount.toString(),
-    expiry: getFutureExpiryInSeconds(),
+    expiry: getFutureExpiryInSeconds(orderData.orderExpiry),
     salt: Date.now().toString(),
     chainId: orderData.chainId,
     verifyingContract: orderData.exchangeProxy,
