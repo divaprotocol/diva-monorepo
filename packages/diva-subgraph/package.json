@@ -6,9 +6,9 @@
     "lint": "yarn codegen && yarn build",
     "codegen": "graph codegen ropsten.subgraph.yaml",
     "build": "yarn codegen && graph build ropsten.subgraph.yaml",
-    "graph:auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
+    "graph:auth": "graph auth --product hosted-service ff2680f86d9a4651b6f92c9e23b89019",
     "deploy": "run-s deploy-ropsten deploy-mumbai deploy-rinkeby deploy-kovan deploy-polygon",
-    "deploy-ropsten": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-ropsten ropsten.subgraph.yaml",
+    "deploy-ropsten": "graph deploy --node https://api.thegraph.com/deploy/ walodja1987/diva-ropsten ropsten.subgraph.yaml",
     "deploy-staging": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-ropsten-staging ropsten.subgraph.yaml",
     "deploy-mumbai": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-mumbai mumbai.subgraph.yaml",
     "deploy-rinkeby": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-rinkeby rinkeby.subgraph.yaml",
@@ -19,8 +19,8 @@
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 divaprotocol/diva-ropsten"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.23.2",
-    "@graphprotocol/graph-ts": "0.23.1"
+    "@graphprotocol/graph-cli": "^0.31.0",
+    "@graphprotocol/graph-ts": "^0.27.0"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5"

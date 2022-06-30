@@ -1,12 +1,12 @@
 type Challenge @entity {
-  id: ID!
+  id: ID! # tx hash - log index
   challengedBy: Bytes!
   proposedFinalReferenceValue: BigInt!
   pool: Pool!
 }
 
 type Pool @entity {
-  id: ID! # original -> poolId
+  id: Bytes! # original -> poolId
   referenceAsset: String!
   floor: BigInt!
   inflection: BigInt!
@@ -38,7 +38,7 @@ type Pool @entity {
 }
 
 type CollateralToken @entity {
-  id: ID! # original -> collateral token address
+  id: Bytes! # original -> collateral token address
   name: String!
   decimals: Int!
   symbol: String!
@@ -47,7 +47,7 @@ type CollateralToken @entity {
 }
 
 type FeeRecipient @entity {
-  id: ID! # feeRecipient address
+  id: Bytes! # feeRecipient address
   collateralTokens: [FeeRecipientCollateralToken!]
     @derivedFrom(field: "feeRecipient")
 }
@@ -60,7 +60,7 @@ type FeeRecipientCollateralToken @entity {
 }
 
 type PositionToken @entity {
-  id: ID! # Address
+  id: Bytes! # Address
   name: String!
   symbol: String!
   decimals: Int!
@@ -71,7 +71,7 @@ type PositionToken @entity {
 }
 
 type TestnetUser @entity {
-  id: ID! # UserAddress
+  id: Bytes! # UserAddress
   binaryPoolCreated: Boolean!
   linearPoolCreated: Boolean!
   convexPoolCreated: Boolean!
@@ -90,7 +90,7 @@ type TestnetUser @entity {
 }
 
 type User @entity {
-  id: ID! # UserAddress
+  id: Bytes! # UserAddress
   positionTokens: [UserPositionToken!]
     @derivedFrom(field: "user")
 }
@@ -102,8 +102,7 @@ type UserPositionToken @entity {
 }
 
 type NativeOrderFill @entity {
-    # tx hash - order hash - log index
-    id: ID!
+    id: ID! # tx hash - order hash - log index
     orderHash: Bytes!
     maker: Bytes!
     taker: Bytes!

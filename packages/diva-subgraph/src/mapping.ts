@@ -1,4 +1,4 @@
-import { Address, BigInt, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes, ByteArray, log } from "@graphprotocol/graph-ts";
 import {
   DivaDiamond,
   LiquidityAdded,
@@ -41,7 +41,7 @@ function handleChallengeEvent(
 ): void {
   let challenge = new Challenge(challengeId);
 
-  challenge.pool = poolId.toString();
+  challenge.pool = Bytes.fromI64(poolId.toI64());
   challenge.challengedBy = challengedBy;
   challenge.proposedFinalReferenceValue = proposedFinalReferenceValue;
   challenge.save();
@@ -65,8 +65,6 @@ function handleLiquidityEvent(
   let shortTokenContract = PositionTokenABI.bind(parameters.shortToken);
   let longTokenContract = PositionTokenABI.bind(parameters.longToken);
 
-  let entity = Pool.load(poolId.toString());
-  
   //set user to position token mapping
   let userEntity = User.load(msgSender.toHexString());
   if (!userEntity) {
@@ -90,10 +88,14 @@ function handleLiquidityEvent(
     userLongPositionTokenEntity.save();
   }
 
-
   //pool entity
+  let bytesId = Bytes.fromI64(poolId.toI64())
+  // let poolEntityId = ByteArray.fromHexString(poolId.toHex())
+  let entity = Pool.load(bytesId);
+  
+
   if (!entity) {
-    entity = new Pool(poolId.toString());
+    entity = new Pool(bytesId);
     entity.createdBy = msgSender;
     entity.createdAt = blockTimestamp;
 
@@ -151,7 +153,7 @@ function handleLiquidityEvent(
     longTokenEntity.name = longTokenContract.name();
     longTokenEntity.symbol = longTokenContract.symbol();
     longTokenEntity.decimals = longTokenContract.decimals();
-    longTokenEntity.pool = longTokenContract.poolId().toString();
+    longTokenEntity.pool = Bytes.fromByteArray(ByteArray.fromI32(longTokenContract.poolId().toI32()));
     longTokenEntity.owner = longTokenContract.owner();
 
     longTokenEntity.save();
@@ -168,7 +170,7 @@ function handleLiquidityEvent(
     shortTokenEntity.name = shortTokenContract.name();
     shortTokenEntity.symbol = shortTokenContract.symbol();
     shortTokenEntity.decimals = shortTokenContract.decimals();
-    shortTokenEntity.pool = shortTokenContract.poolId().toString();
+    shortTokenEntity.pool = Bytes.fromByteArray(ByteArray.fromI32(shortTokenContract.poolId().toI32()));
     shortTokenEntity.owner = shortTokenContract.owner();
 
     shortTokenEntity.save();

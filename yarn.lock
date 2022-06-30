@@ -3260,7 +3260,7 @@
     "@ethersproject/properties" "^5.6.0"
     "@ethersproject/strings" "^5.6.0"
 
-"@graphprotocol/graph-cli@*", "@graphprotocol/graph-cli@0.29.0":
+"@graphprotocol/graph-cli@*":
   version "0.29.0"
   resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.29.0.tgz#bf723ea95736462684eca8a816934800aa467148"
   integrity sha512-bO7dVqVfPXwtXqTHO8NHyWafJQ+Umdom5DrXXlWbSUoZYHpNQ+gIPQM91kLxY9JouL/lrSu79zRsC0+ynlRhdA==
@@ -3291,35 +3291,6 @@
     which "2.0.2"
     yaml "1.9.2"
 
-"@graphprotocol/graph-cli@0.23.2":
-  version "0.23.2"
-  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.23.2.tgz#cfb3787bd1b571b28fed05a748116579f01cda19"
-  integrity sha512-1JDyCwaAIeKsEPYPlsJ7IiAB5BhQ+v2fvmDIJTcLfRIYmTKsoETdjrw9qUGJtjICVXIGuL9DeNVhQgKgTMCQZQ==
-  dependencies:
-    assemblyscript "0.19.10"
-    binary-install-raw "0.0.13"
-    chalk "^3.0.0"
-    chokidar "^3.0.2"
-    debug "^4.1.1"
-    docker-compose "^0.23.2"
-    dockerode "^2.5.8"
-    fs-extra "^9.0.0"
-    glob "^7.1.2"
-    gluegun "^4.3.1"
-    graphql "^15.5.0"
-    immutable "^3.8.2"
-    ipfs-http-client "^34.0.0"
-    jayson "^3.0.2"
-    js-yaml "^3.13.1"
-    node-fetch "^2.3.0"
-    pkginfo "^0.4.1"
-    prettier "^1.13.5"
-    request "^2.88.0"
-    semver "7.3.5"
-    tmp-promise "^3.0.2"
-    which "2.0.2"
-    yaml "^1.5.1"
-
 "@graphprotocol/graph-cli@0.25.1":
   version "0.25.1"
   resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.25.1.tgz#32a6c078f1cc3458a3f43c4205c2ae6f5c35725f"
@@ -3349,12 +3320,36 @@
     which "2.0.2"
     yaml "^1.5.1"
 
-"@graphprotocol/graph-ts@0.23.1":
-  version "0.23.1"
-  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.23.1.tgz#76e595d26ec5672f3778b1d3830e4640a57aec1b"
-  integrity sha512-pipofvN1LlwLOXrS7IWy8hSBFZzVyVHdLXDpQskl9nKqdbb3chelj4JoVEzCl7klvomDpP84ngLpW17fBh5vww==
+"@graphprotocol/graph-cli@^0.31.0":
+  version "0.31.0"
+  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.31.0.tgz#06587c54f40caf5ab8b20e15ff1a5063159d0256"
+  integrity sha512-U8G3tPXch+KUlcTC4Wct5u/+G7555Vebo2WjV5mlvVTa0r5JfdY+NUcVot0kt2MZ0a/T+ksLhGT/jgJ1QDt86A==
   dependencies:
     assemblyscript "0.19.10"
+    binary-install-raw "0.0.13"
+    chalk "3.0.0"
+    chokidar "3.5.1"
+    debug "4.3.1"
+    docker-compose "0.23.4"
+    dockerode "2.5.8"
+    fs-extra "9.0.0"
+    glob "7.1.6"
+    gluegun "https://github.com/edgeandnode/gluegun#v4.3.1-pin-colors-dep"
+    graphql "15.5.0"
+    immutable "3.8.2"
+    ipfs-http-client "34.0.0"
+    jayson "3.6.6"
+    js-yaml "3.13.1"
+    node-fetch "2.6.0"
+    pkginfo "0.4.1"
+    prettier "1.19.1"
+    request "2.88.2"
+    semver "7.3.5"
+    sync-request "6.1.0"
+    tmp-promise "3.0.2"
+    web3-eth-abi "1.7.0"
+    which "2.0.2"
+    yaml "1.9.2"
 
 "@graphprotocol/graph-ts@0.24.1":
   version "0.24.1"
@@ -3363,7 +3358,7 @@
   dependencies:
     assemblyscript "0.19.10"
 
-"@graphprotocol/graph-ts@0.27.0":
+"@graphprotocol/graph-ts@^0.27.0":
   version "0.27.0"
   resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.27.0.tgz#948fe1716f6082964a01a63a19bcbf9ac44e06ff"
   integrity sha512-r1SPDIZVQiGMxcY8rhFSM0y7d/xAbQf5vHMWUf59js1KgoyWpM6P3tczZqmQd7JTmeyNsDGIPzd9FeaxllsU4w==
@@ -10140,6 +10135,13 @@ debug@4.1.1:
   dependencies:
     ms "^2.1.1"
 
+debug@4.3.1:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.1.tgz#f0d229c505e0c6d8c49ac553d1b13dc183f6b2ee"
+  integrity sha512-doEwdvm4PCeK4K3RQN2ZC2BYUBaxwLARCqZmMjtF8a51J2Rb0xpVloFRnCODwqjpwnAoao4pelN8l3RJdv3gRQ==
+  dependencies:
+    ms "2.1.2"
+
 debug@4.3.2:
   version "4.3.2"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.2.tgz#f0a49c18ac8779e31d4a0c6029dfb76873c7428b"
@@ -11775,11 +11777,6 @@ etag@~1.8.1:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc=
-
-eth-balance-checker@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/eth-balance-checker/-/eth-balance-checker-0.2.0.tgz#e8b971a42010eec2287295d54a1533dfe1a0587c"
-  integrity sha512-gWD9lsQSN7Xup2+zsahGKZ1fAhoxs7vwMohCZYMzkr0YjIo6jcRiofptryiqfJGPYI2jE/C+9hMUz8sK/yf3PQ==
 
 eth-block-tracker@^3.0.0:
   version "3.0.1"
@@ -15662,7 +15659,7 @@ jayson@3.2.0:
     lodash "^4.17.15"
     uuid "^3.2.1"
 
-jayson@^3.0.2:
+jayson@3.6.6, jayson@^3.0.2:
   version "3.6.6"
   resolved "https://registry.yarnpkg.com/jayson/-/jayson-3.6.6.tgz#189984f624e398f831bd2be8e8c80eb3abf764a1"
   integrity sha512-f71uvrAWTtrwoww6MKcl9phQTC+56AopLyEenWvKVAIMz+q0oVGj6tenLZ7Z6UiPBkJtKLj4kt0tACllFQruGQ==
@@ -20767,10 +20764,10 @@ react-dom@^17.0.2:
     object-assign "^4.1.1"
     scheduler "^0.20.2"
 
-react-error-overlay@6.0.9, react-error-overlay@^6.0.11:
-  version "6.0.9"
-  resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-6.0.9.tgz#3c743010c9359608c375ecd6bc76f35d93995b0a"
-  integrity sha512-nQTTcUu+ATDbrSD1BZHr5kgSD4oF8OFjxun8uAaL8RwPBacGBNPf/yAuVVdx17N8XNzRDMrZ9XcKZHCjPW+9ew==
+react-error-overlay@^6.0.11:
+  version "6.0.11"
+  resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-6.0.11.tgz#92835de5841c5cf08ba00ddd2d677b6d17ff9adb"
+  integrity sha512-/6UZ2qgEyH2aqzYZgQPxEnz33NJ2gNsnHA2o5+o4wW9bLM/JYQitNP9xPhsXwC08hMMovfGe/8retsdDsczPRg==
 
 react-fast-compare@^2.0.1:
   version "2.0.4"
