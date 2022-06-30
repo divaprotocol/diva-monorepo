@@ -83,3 +83,5 @@ export const config: { [key: number]: SingleConfig } = {
 
 export const divaGovernanceAddress =
   '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E' // creator of pools on Main Markets page and trading fee recipient
+
+export const tradingFee = 0.01 // 1%

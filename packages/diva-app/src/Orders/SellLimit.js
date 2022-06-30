@@ -1,53 +1,45 @@
 import { MetamaskSubprovider } from '@0x/subproviders'
-import { parseEther, parseUnits } from 'ethers/lib/utils'
+import { parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
-import { isFloat, decimalPlaces } from '../component/Trade/Orders/OrderHelper'
-import { divaGovernanceAddress } from '../constants'
+import { divaGovernanceAddress, tradingFee } from '../constants'
 import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 import { getFutureExpiryInSeconds } from '../Util/utils'
 
 export const sellLimitOrder = async (orderData) => {
   const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
-  const makerAmount = parseEther(
+  // Define variables for integer math
+  const decimals = orderData.collateralDecimals
+  const unit = parseUnits('1')
+  const scaling = parseUnits('1', 18 - decimals)
+
+  // User input converted from decimal number into an integer with 18 decimals of type BigNumber
+  const nbrOptionsToSell = parseUnits(
     convertExponentialToDecimal(orderData.nbrOptions)
   )
 
-  // TODO: Refactor that part using BigNumbers! as it fails for 1e-18 numbers, for instance
-  const nbrOptionsDecimals = isFloat(orderData.nbrOptions)
-    ? decimalPlaces(orderData.nbrOptions)
-    : 0
-  console.log('nbrOptionsDecimals', nbrOptionsDecimals)
-  const limitPriceDecimals = isFloat(orderData.limitPrice)
-    ? decimalPlaces(orderData.limitPrice)
-    : 0
-  console.log('limitPriceDecimals', limitPriceDecimals)
+  // Collateral token amount to receive
+  // TODO: In SellLimit.tsx, adjust limitPrice to type BigNumber and in collateral token decimals
+  const takerAmount = nbrOptionsToSell
+    .mul(orderData.limitPrice) // limitPrice is expressed as an integer with collateral token decimals
+    .mul(scaling) // scale up to 18 decimals
+    .div(unit) // "correct" for integer multiplication
 
-  const totalDecimalPlaces = nbrOptionsDecimals + limitPriceDecimals
-  /**Floating point multiplication some times give erronious results
-   * for example. 1.1 * 1.5 = 1.65 however the javascript multiplication give
-   * 1.6500000000000001 as a result. The 1 digit at the end cause lot of issues
-   * to resolve this problem we need to calculate the total number of digit by
-   * addition of individual floating point number
-   */
-  const amount = Number(orderData.nbrOptions * orderData.limitPrice).toFixed(
-    totalDecimalPlaces
-  )
-
-  const takerAmount = parseUnits(
-    amount.toString(),
-    orderData.collateralDecimals
-  )
+  // Calculate trading fee amount (in collateral token decimals)
   const takerFeeAmount = takerAmount
-    .mul(parseUnits('0.01', orderData.collateralDecimals)) // 1% fee paid in taker token,  i.e. collateral token in sell limit
+    .mul(parseUnits(tradingFee.toString(), orderData.collateralDecimals))
     .div(parseUnits('1', orderData.collateralDecimals))
+
+  // Get 0x API url to post order
   const networkUrl = config[orderData.chainId].order
+
+  // Construct order object
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
-    makerAmount: makerAmount.toString(),
+    makerAmount: nbrOptionsToSell.toString(),
     takerAmount: takerAmount.toString(),
     maker: orderData.maker,
     sender: NULL_ADDRESS,

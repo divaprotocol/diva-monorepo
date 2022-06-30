@@ -1,47 +1,43 @@
 import { MetamaskSubprovider } from '@0x/subproviders'
-import { parseEther, parseUnits } from 'ethers/lib/utils'
+import { parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
-import { isFloat, decimalPlaces } from '../component/Trade/Orders/OrderHelper'
-import { divaGovernanceAddress } from '../constants'
+import { divaGovernanceAddress, tradingFee } from '../constants'
+import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 import { getFutureExpiryInSeconds } from '../Util/utils'
 
 export const buylimitOrder = async (orderData) => {
   const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
-  const nbrOptionsDecimals = isFloat(orderData.nbrOptions)
-    ? decimalPlaces(orderData.nbrOptions)
-    : 0
-  const limitPriceDecimals = isFloat(orderData.limitPrice)
-    ? decimalPlaces(orderData.limitPrice)
-    : 0
-  const totalDecimalPlaces = nbrOptionsDecimals + limitPriceDecimals
+  // Define variables for integer math
+  const decimals = orderData.collateralDecimals
+  const unit = parseUnits('1')
+  const scaling = parseUnits('1', 18 - decimals)
 
-  /**Floating point multiplication some times give erronious results
-   * for example. 1.1 * 1.5 = 1.65 however the javascript multiplication give
-   * 1.6500000000000001 as a result. The 1 digit at the end cause lot of issues
-   * to resolve this problem we need to calculate the total number of digit by
-   * addition of individual floating point number
-   */
-  const amount = Number(orderData.nbrOptions * orderData.limitPrice).toFixed(
-    totalDecimalPlaces
+  // User input converted from decimal number into an integer with 18 decimals of type BigNumber
+  const nbrOptionsToBuy = parseUnits(
+    convertExponentialToDecimal(orderData.nbrOptions)
   )
 
-  const makerAmount = parseUnits(
-    amount.toString(),
-    orderData.collateralDecimals
-  )
-  const takerAmount = parseEther(orderData.nbrOptions.toString())
+  // Collateral token amount to give up / pay
+  // TODO: In BuyLimit.tsx, adjust limitPrice to type BigNumber and in collateral token decimals
+  const makerAmount = nbrOptionsToBuy.mul(orderData.limitPrice).div(unit) // mul(scaling).div(scaling) cancel out
+
+  const takerAmount = parseUnits(orderData.nbrOptions.toString())
   const takerFeeAmount = takerAmount
-    .mul(parseUnits('0.01')) // 1% fee paid in taker token (i.e. position token in buy limit)
+    .mul(parseUnits(tradingFee.toString()))
     .div(parseUnits('1'))
+
+  // Get 0x API url to post order
   const networkUrl = config[orderData.chainId].order
+
+  // Construct order object
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
     makerAmount: makerAmount.toString(),
-    takerAmount: takerAmount.toString(),
+    takerAmount: nbrOptionsToBuy.toString(),
     maker: orderData.makerAccount,
     sender: NULL_ADDRESS,
     feeRecipient: divaGovernanceAddress,
