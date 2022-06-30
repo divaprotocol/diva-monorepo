@@ -66,6 +66,7 @@ type PositionToken @entity {
   decimals: Int!
   pool: Pool!
   owner: Bytes!
+  createdAt: BigInt!
   users: [UserPositionToken!]
     @derivedFrom(field: "positionToken")
 }

@@ -153,6 +153,7 @@ function handleLiquidityEvent(
     longTokenEntity.decimals = longTokenContract.decimals();
     longTokenEntity.pool = longTokenContract.poolId().toString();
     longTokenEntity.owner = longTokenContract.owner();
+    longTokenEntity.createdAt = blockTimestamp;
 
     longTokenEntity.save();
   }
@@ -170,6 +171,7 @@ function handleLiquidityEvent(
     shortTokenEntity.decimals = shortTokenContract.decimals();
     shortTokenEntity.pool = shortTokenContract.poolId().toString();
     shortTokenEntity.owner = shortTokenContract.owner();
+    shortTokenEntity.createdAt = blockTimestamp;
 
     shortTokenEntity.save();
   }
