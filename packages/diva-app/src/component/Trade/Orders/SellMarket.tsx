@@ -125,26 +125,25 @@ export default function SellMarket(props: {
 
       if (numberOfOptions > 0) {
         // Calculate required allowance amount for position token incl. 1% fee (expressed as an integer with 18 decimals)
-        const amount = allowance
+        const amountToApprove = allowance
           .add(parseUnits(convertExponentialToDecimal(numberOfOptions)))
           .mul(parseUnits(feeMultiplier)) // Adding 1% fee as position token acts as taker token in SELL MARKET which also requires approval
           .div(parseUnits('1'))
           .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
+        // Set allowance
+        const optionAllowance = await approve(amountToApprove)
 
-        // NOTE: decimals will need adjustment to decimals when we switch to contracts version 1.0.0
-        const approvedAllowance = await approve(amount)
-
-        const remainingApproval = approvedAllowance.sub(
+        const remainingAllowance = optionAllowance.sub(
           existingSellLimitOrdersAmountUser
         )
 
-        setRemainingApprovalAmount(remainingApproval)
-        setAllowance(allowance)
+        setRemainingApprovalAmount(remainingAllowance)
+        setAllowance(optionAllowance)
         setIsApproved(true)
         alert(
           'Allowance for ' +
-            approvedAllowance +
-            ` ${params.tokenType.toUpperCase()} successfully set.`
+            toExponentialOrNumber(Number(formatUnits(optionAllowance))) +
+            ` ${params.tokenType.toUpperCase()} tokens successfully set.`
         )
       } else {
         alert('Please enter a positive amount for approval.')

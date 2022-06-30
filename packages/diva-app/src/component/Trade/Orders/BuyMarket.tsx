@@ -129,21 +129,21 @@ export default function BuyMarket(props: {
 
       if (numberOfOptions > 0) {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals)
-        const amount = allowance
+        const amountToApprove = allowance
           .add(youPay)
           .mul(parseUnits(feeMultiplier, decimals)) // Adding 1% fee as it also requires approval
           .div(parseUnits('1', decimals))
           .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
-        // Set allowance equal to amount
-        const collateralAllowance = await approve(amount)
+        // Set allowance
+        const collateralAllowance = await approve(amountToApprove)
 
         setRemainingApprovalAmount(collateralAllowance) // QUESTION: Why collateralAllowance here? What if I have existing orders in the orderbook?
         setAllowance(collateralAllowance)
         setIsApproved(true)
         alert(
-          `Allowance for ${Number(
-            formatUnits(collateralAllowance, decimals)
-          ).toFixed(4)} ${option.collateralToken.symbol} successfully set.`
+          `Allowance for ${toExponentialOrNumber(
+            Number(formatUnits(collateralAllowance, decimals))
+          )} ${option.collateralToken.symbol} tokens successfully set.`
         )
       } else {
         alert(
