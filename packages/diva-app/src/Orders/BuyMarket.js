@@ -51,36 +51,38 @@ export const buyMarketOrder = async (orderData) => {
     if (nbrOptionsToBuy.gt(0)) {
       fillOrders.push(order)
 
-      // Expected rate is an integer with collateral token decimals of type BigNumber; 18 decimals
-      const expectedRate = order.expectedRate // QUESTION: expectedRate having collateral token decimals might have been more intuitive
+      // Expected rate is specific to an an order and has to be calculated inside the forEach order part.
+      // Expected rate is expressed as an integer with collateral token decimals of type BigNumber.
+      const expectedRate = order.expectedRate // TODO: Adjust BuyMarket.tsx for the change to collateral token decimals
 
       // The position token amount to buy entered by the user (nbrOptionsToBuy) represents the MAKER token amount in
       // Sell Limit (the orders the user is going to fill), hence conversion to taker token amount via expectedRate is required as this
       // serves as the input in batchFillLimitOrders function.
       // Taker asset is the collateral token and impliedTakerAssetAmount is expressed as an integer with collateral token decimals.
       const impliedTakerAssetAmount = expectedRate
+        .mul(scaling)
         .mul(nbrOptionsToBuy)
         .div(unit)
         .div(scaling)
 
       let takerAssetFillAmount
+      let nbrOptionsFilled
 
       // Add elements to the takerAssetFillAmounts array which will be used as input in batchFillLimitOrders
       if (impliedTakerAssetAmount.lte(order.remainingFillableTakerAmount)) {
         takerAssetFillAmount = impliedTakerAssetAmount.toString()
-        nbrOptionsToBuy = parseUnits('0') // To prevent that it enters the if statement at the beginning of the forEach part (could happen due to rounding issues)
+        nbrOptionsFilled = nbrOptionsToBuy // Precautionary measure to prevent that it enters the if statement at the beginning of the forEach part (could happen due to rounding issues for instance)
       } else {
         takerAssetFillAmount = order.remainingFillableTakerAmount
+        // Update nbrOptionsFilled and overwrite nbrOptionsToBuy with remaining number of position tokens to fill
+        nbrOptionsFilled = BigNumber.from(takerAssetFillAmount)
+          .mul(scaling) // scale to 18 decimals
+          .mul(unit) // multiply for high precision
+          .div(expectedRate.mul(scaling)) // divide by expectedRate which has collateral token decimals, hence needs to be scaled up to 18 decimals as
       }
       takerAssetFillAmounts.push(takerAssetFillAmount)
-
-      // Update nbrOptionsFilled and overwrite nbrOptionsToBuy with remaining number of position tokens to fill
-      const nbrOptionsFilled = BigNumber.from(takerAssetFillAmount)
-        .mul(scaling) // scale to 18 decimals
-        .mul(unit) // multiply for high precision
-        .div(expectedRate) // divide by expectedRate which has 18 decimals
       console.log('nbrOptionsFilled', nbrOptionsFilled.toString())
-      nbrOptionsToBuy = nbrOptionsToBuy.sub(nbrOptionsFilled) // This will drop to zero and hence will not enter this if block anymore but will add '0' for the remaining orders
+      nbrOptionsToBuy = nbrOptionsToBuy.sub(nbrOptionsFilled) // When nbrOptionsToBuy turns zero, it will not add any new orders to fillOrders array
     }
   })
   console.log('takerAssetFillAmounts', takerAssetFillAmounts)
