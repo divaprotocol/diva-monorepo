@@ -15,7 +15,7 @@ export const buyMarketOrder = async (orderData) => {
   const exchangeProxyAddress = address.exchangeProxy
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
 
-  // Get existing SELL LIMIT orders to fill. Note that makerToken = position token and takerToken = collateral token.
+  // Get existing SELL LIMIT orders to fill, already sorted by best price. Note that makerToken = position token and takerToken = collateral token.
   const orders = orderData.existingLimitOrders
 
   // Define variables for integer math
@@ -23,13 +23,13 @@ export const buyMarketOrder = async (orderData) => {
   const unit = parseUnits('1')
   const scaling = parseUnits('1', 18 - decimals)
 
-  // User input converted from decimal number into an integer with 18 decimals
-  let takerFillNbrOptions = parseUnits(
+  // User input converted from decimal number into an integer with 18 decimals of type BigNumber
+  let nbrOptionsToBuy = parseUnits(
     convertExponentialToDecimal(orderData.nbrOptions)
   )
 
   // Initialize input arrays for batchFillLimitOrders function
-  let takerAssetAmounts = []
+  let takerAssetFillAmounts = []
   const signatures = []
 
   // Function to executed the 0x batchFillLimitOrders function
@@ -48,39 +48,42 @@ export const buyMarketOrder = async (orderData) => {
 
   let fillOrders = []
   orders.forEach((order) => {
-    // Convert string into BigNumber; already expressed in collateral token decimals
-    const remainingFillableTakerAmount = BigNumber.from(
-      order.remainingFillableTakerAmount
-    )
-    if (takerFillNbrOptions.gt(0)) {
+    if (nbrOptionsToBuy.gt(0)) {
       fillOrders.push(order)
-      // Expected rate is an integer with collateral token decimals of type BigNumber; 18 decimals
-      // QUESTION: expectedRate having collateral token decimals might have been more intuitive
-      const expectedRate = order.expectedRate
 
-      // Calculate taker fill amount implied by user input and expected rate; expressed as an integer with collateral token decimals.
-      const takerFillAmount = expectedRate
-        .mul(takerFillNbrOptions)
+      // Expected rate is an integer with collateral token decimals of type BigNumber; 18 decimals
+      const expectedRate = order.expectedRate // QUESTION: expectedRate having collateral token decimals might have been more intuitive
+
+      // The position token amount to buy entered by the user (nbrOptionsToBuy) represents the MAKER token amount in
+      // Sell Limit (the orders the user is going to fill), hence conversion to taker token amount via expectedRate is required as this
+      // serves as the input in batchFillLimitOrders function.
+      // Taker asset is the collateral token and impliedTakerAssetAmount is expressed as an integer with collateral token decimals.
+      const impliedTakerAssetAmount = expectedRate
+        .mul(nbrOptionsToBuy)
         .div(unit)
         .div(scaling)
 
-      // Add elements to the takerAssetAmounts array which will be used as input in batchFillLimitOrders
-      if (takerFillAmount.lte(remainingFillableTakerAmount)) {
-        takerAssetAmounts.push(takerFillAmount.toString())
-      } else {
-        takerAssetAmounts.push(order.remainingFillableTakerAmount)
-      }
+      let takerAssetFillAmount
 
-      // Update nbrOptionsFilled and overwrite takerFillNbrOptions with remaining number of position tokens to fill
-      const nbrOptionsFilled = remainingFillableTakerAmount
+      // Add elements to the takerAssetFillAmounts array which will be used as input in batchFillLimitOrders
+      if (impliedTakerAssetAmount.lte(order.remainingFillableTakerAmount)) {
+        takerAssetFillAmount = impliedTakerAssetAmount.toString()
+        nbrOptionsToBuy = parseUnits('0') // To prevent that it enters the if statement at the beginning of the forEach part (could happen due to rounding issues)
+      } else {
+        takerAssetFillAmount = order.remainingFillableTakerAmount
+      }
+      takerAssetFillAmounts.push(takerAssetFillAmount)
+
+      // Update nbrOptionsFilled and overwrite nbrOptionsToBuy with remaining number of position tokens to fill
+      const nbrOptionsFilled = BigNumber.from(takerAssetFillAmount)
         .mul(scaling) // scale to 18 decimals
         .mul(unit) // multiply for high precision
         .div(expectedRate) // divide by expectedRate which has 18 decimals
       console.log('nbrOptionsFilled', nbrOptionsFilled.toString())
-      takerFillNbrOptions = takerFillNbrOptions.sub(nbrOptionsFilled) // This will drop to zero and hence will not enter this if block anymore but will add '0' for the remaining orders
+      nbrOptionsToBuy = nbrOptionsToBuy.sub(nbrOptionsFilled) // This will drop to zero and hence will not enter this if block anymore but will add '0' for the remaining orders
     }
   })
-  console.log('takerAssetAmounts', takerAssetAmounts)
-  filledOrder = await fillOrderResponse(takerAssetAmounts, fillOrders)
+  console.log('takerAssetFillAmounts', takerAssetFillAmounts)
+  filledOrder = await fillOrderResponse(takerAssetFillAmounts, fillOrders)
   return filledOrder
 }

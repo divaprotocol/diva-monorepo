@@ -15,20 +15,20 @@ export const sellMarketOrder = async (orderData) => {
   const exchangeProxyAddress = address.exchangeProxy
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
 
-  // Get existing BUY LIMIT orders to fill. Note that makerToken = collateral token and takerToken = position token.
-  const orders = orderData.existingLimitOrders // QUESTION: Are these sorted? -> see useEffect in SellMarket.tsx
+  // Get existing BUY LIMIT orders to fill, already sorted by best price. Note that makerToken = collateral token and takerToken = position token.
+  const orders = orderData.existingLimitOrders
 
   // Define variables for integer math
   const decimals = orderData.collateralDecimals
 
-  // User input converted from decimal number into an integer with 18 decimals
-  let takerFillNbrOptions = parseUnits(
+  // User input converted from decimal number into an integer with 18 decimals of type BigNumber
+  let nbrOptionsToSell = parseUnits(
     convertExponentialToDecimal(orderData.nbrOptions),
     decimals
   )
 
   // Initialize input arrays for batchFillLimitOrders function
-  let takerAssetAmounts = []
+  let takerAssetFillAmounts = []
   const signatures = []
 
   const fillOrderResponse = async (takerAssetFillAmounts, fillOrders) => {
@@ -46,24 +46,27 @@ export const sellMarketOrder = async (orderData) => {
 
   let fillOrders = []
   orders.forEach((order) => {
-    // Convert string into BigNumber; already expressed in collateral token decimals
-    const remainingFillableTakerAmount = BigNumber.from(
-      order.remainingFillableTakerAmount
-    )
-    if (takerFillNbrOptions.gt(0)) {
+    if (nbrOptionsToSell.gt(0)) {
       fillOrders.push(order)
 
-      if (takerFillNbrOptions.lte(remainingFillableTakerAmount)) {
-        takerAssetAmounts.push(takerFillNbrOptions.toString())
+      // Note: As opposed to BuyMarket.js, the position token amount to sell entered by the user (nbrOptionsToSell) represents the TAKER token amount in
+      // Buy Limit (the orders the user is going to fill), hence no conversion to taker token amount is required.
+
+      let takerAssetFillAmount
+
+      // takerAssetFillAmount = Min(nbrOptionsToSell, order.remainingFillableTakerAmount)
+      if (nbrOptionsToSell.lte(order.remainingFillableTakerAmount)) {
+        takerAssetFillAmount = nbrOptionsToSell.toString()
       } else {
-        takerAssetAmounts.push(order.remainingFillableTakerAmount)
+        takerAssetFillAmount = order.remainingFillableTakerAmount
       }
-      // Update the remaining amount to be filled
-      takerFillNbrOptions = takerFillNbrOptions.sub(
-        remainingFillableTakerAmount
-      )
+      takerAssetFillAmounts.push(takerAssetFillAmount)
+
+      // Update the remaining amount to be filled.
+      // Note that nbrOptionsToSell = 0 if equal to order.remainingFillableTakerAmount. Hence, it won't enter the if statement at the beginning of the forEach part.
+      nbrOptionsToSell = nbrOptionsToSell.sub(takerAssetFillAmount)
     }
   })
-  filledOrder = await fillOrderResponse(takerAssetAmounts, fillOrders)
+  filledOrder = await fillOrderResponse(takerAssetFillAmounts, fillOrders)
   return filledOrder
 }
