@@ -18,10 +18,7 @@ import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import {
-  formatUnits,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import {
   getComparator,
   stableSort,
@@ -32,7 +29,7 @@ import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { selectUserAddress } from '../../../Redux/appSlice'
-import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
+import { BigNumber as BigENumber } from 'ethers'
 import {
   setBreakEven,
   setIntrinsicValue,
@@ -482,7 +479,7 @@ export default function SellMarket(props: {
           parseFloat(
             formatUnits(
               parseUnits(maxPayout)
-                .mul(parseUnits('1'))
+                .mul(positionTokenUnit)
                 .div(parseUnits(convertExponentialToDecimal(expectedPrice)))
             )
           ).toFixed(2) + 'x'
@@ -526,7 +523,7 @@ export default function SellMarket(props: {
             BigENumber.from(option.collateralBalanceLongInitial)
               .add(BigENumber.from(option.collateralBalanceShortInitial))
               .mul(parseUnits('1', 18 - decimals))
-              .mul(parseUnits('1'))
+              .mul(positionTokenUnit)
               .div(BigENumber.from(option.supplyInitial))
           )
         )
@@ -543,7 +540,7 @@ export default function SellMarket(props: {
             BigENumber.from(option.collateralBalanceLongInitial)
               .add(BigENumber.from(option.collateralBalanceShortInitial))
               .mul(parseUnits('1', 18 - decimals))
-              .mul(parseUnits('1'))
+              .mul(positionTokenUnit)
               .div(BigENumber.from(option.supplyInitial))
           )
         )

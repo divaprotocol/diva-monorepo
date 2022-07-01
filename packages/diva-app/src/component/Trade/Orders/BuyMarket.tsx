@@ -530,7 +530,7 @@ export default function BuyMarket(props: {
             BigENumber.from(option.collateralBalanceLongInitial)
               .add(BigENumber.from(option.collateralBalanceShortInitial))
               .mul(parseUnits('1', 18 - decimals))
-              .mul(parseUnits('1'))
+              .mul(positionTokenUnit)
               .div(BigENumber.from(option.supplyInitial))
           )
         )
