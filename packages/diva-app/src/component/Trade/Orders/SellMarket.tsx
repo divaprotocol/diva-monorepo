@@ -389,10 +389,11 @@ export default function SellMarket(props: {
   }, [responseBuy, responseSell, userAddress])
 
   useEffect(() => {
+    // Calculate expected price
     if (numberOfOptions > 0 && existingBuyLimitOrders.length > 0) {
       // If user has entered an input into the Number field and there are existing Buy Limit orders to fill in the orderbook
       setOrderBtnDisabled(false)
-      const makerAmountToFill = parseUnits(numberOfOptions.toString()) // <=18 decimals as makerToken is collateral token
+      let makerAmountToFill = parseUnits(numberOfOptions.toString()) // <=18 decimals as makerToken is collateral token
       let cumulativeAvg = ZERO
       let cumulativeTaker = ZERO
       let cumulativeMaker = ZERO
@@ -417,15 +418,15 @@ export default function SellMarket(props: {
         }
 
         if (makerAmountToFill.gt(0)) {
-          if (makerAmountToFill.lte(takerAmount)) {
+          if (makerAmountToFill.lte(makerAmount)) {
             const orderTotalAmount = expectedRate.mul(makerAmountToFill)
-            cumulativeMaker = cumulativeMaker + orderTotalAmount
-            cumulativeTaker = cumulativeTaker + makerAmountToFill
-            makerAmountToFill = 0
+            cumulativeMaker = cumulativeMaker.add(orderTotalAmount)
+            cumulativeTaker = cumulativeTaker.add(makerAmountToFill)
+            makerAmountToFill = ZERO
           } else {
-            cumulativeTaker = cumulativeTaker + takerAmount
-            cumulativeMaker = cumulativeMaker + makerAmount
-            makerAmountToFill = makerAmountToFill - takerAmount
+            cumulativeTaker = cumulativeTaker.add(takerAmount)
+            cumulativeMaker = cumulativeMaker.add(makerAmount)
+            makerAmountToFill = makerAmountToFill.sub(takerAmount)
           }
         }
       })

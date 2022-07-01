@@ -377,6 +377,7 @@ export default function BuyMarket(props: {
   }, [responseSell, responseBuy, userAddress])
 
   useEffect(() => {
+    // Calculate expected price
     if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {
       // If user has entered an input into the Number field and there are existing Sell Limit orders to fill in the orderbook
       setOrderBtnDisabled(false)
@@ -394,12 +395,11 @@ export default function BuyMarket(props: {
         ) // <= 18 decimals
         const expectedRate = BigENumber.from(order.expectedRate) // <= 18 decimals
 
-        let remainingFillableMakerAmount
-
         if (remainingFillableTakerAmount.lt(takerAmount)) {
           // Existing Sell Limit order was already partially filled
 
-          remainingFillableMakerAmount = remainingFillableTakerAmount
+          takerAmount = remainingFillableTakerAmount
+          makerAmount = remainingFillableTakerAmount
             .mul(collateralTokenUnit) // scaling for high precision integer math
             .div(expectedRate)
         } 
@@ -408,7 +408,7 @@ export default function BuyMarket(props: {
         // }
 
         if (makerAmountToFill.gt(0)) {
-          if (makerAmountToFill.lte(remainingFillableMakerAmount)) {
+          if (makerAmountToFill.lte(makerAmount)) {
             const takerAmountToFill = expectedRate
               .mul(makerAmountToFill)
               .div(parseUnits('1'))
@@ -418,8 +418,8 @@ export default function BuyMarket(props: {
             makerAmountToFill = ZERO // This condition ensures that we don't enter into the makerAmountToFill.gt(0) if-clause again
           } else {
             cumulativeTaker = cumulativeTaker.add(takerAmount)
-            cumulativeMaker = cumulativeMaker.add(remainingFillableMakerAmount)
-            makerAmountToFill = makerAmountToFill.sub(remainingFillableMakerAmount)
+            cumulativeMaker = cumulativeMaker.add(makerAmount)
+            makerAmountToFill = makerAmountToFill.sub(makerAmount)
           }
         }
       })
