@@ -43,6 +43,10 @@ import {
 } from '../../../Redux/Stats'
 import { tradingFee } from '../../../constants'
 import {
+  CollateralToken,
+  PositionToken,
+} from '../../../../../diva-subgraph/generated/schema'
+import {
   calcPayoffPerToken,
   calcBreakEven,
 } from '../../../Util/calcPayoffPerToken'
@@ -71,6 +75,8 @@ export default function SellMarket(props: {
     takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const usdPrice = props.usdPrice
   const decimals = option.collateralToken.decimals
+  const positionTokenUnit = parseUnits('1')
+  const collateralTokenUnit = parseUnits('1', decimals)
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
@@ -384,31 +390,39 @@ export default function SellMarket(props: {
 
   useEffect(() => {
     if (numberOfOptions > 0 && existingBuyLimitOrders.length > 0) {
+      // If user has entered an input into the Number field and there are existing Buy Limit orders to fill in the orderbook
       setOrderBtnDisabled(false)
-      let count = numberOfOptions
-      let cumulativeAvg = 0
-      let cumulativeTaker = 0
-      let cumulativeMaker = 0
+      const makerAmountToFill = parseUnits(numberOfOptions.toString()) // <=18 decimals as makerToken is collateral token
+      let cumulativeAvg = ZERO
+      let cumulativeTaker = ZERO
+      let cumulativeMaker = ZERO
       existingBuyLimitOrders.forEach((order: any) => {
-        let makerAmount = Number(formatUnits(order.makerAmount, decimals))
-        let takerAmount = Number(formatUnits(order.takerAmount))
-        const remainingFillableTakerAmount = order.remainingFillableTakerAmount
+        let takerAmount = BigENumber.from(order.takerAmount) // position token amount (18 decimals)
+        let makerAmount = BigENumber.from(order.makerAmount) // collateral token amount (<= 18 decimals)
+        const remainingFillableTakerAmount = BigENumber.from(
+          order.remainingFillableTakerAmount
+        )
+        const expectedRate = BigENumber.from(order.expectedRate)
 
-        if (remainingFillableTakerAmount < takerAmount) {
+        if (remainingFillableTakerAmount.lt(takerAmount)) {
+          // Existing Buy Limit order was already partially filled
+
           takerAmount = remainingFillableTakerAmount
-          makerAmount = remainingFillableTakerAmount * order.expectedRate
+          makerAmount = remainingFillableTakerAmount
+            .mul(order.expectedRate)
+            .div(collateralTokenUnit)
         }
-        const expectedRate = order.expectedRate
-        if (count > 0) {
-          if (count <= takerAmount) {
-            const orderTotalAmount = Number(expectedRate * count)
+
+        if (makerAmountToFill > 0) {
+          if (makerAmountToFill <= takerAmount) {
+            const orderTotalAmount = Number(expectedRate * makerAmountToFill)
             cumulativeMaker = cumulativeMaker + orderTotalAmount
-            cumulativeTaker = cumulativeTaker + count
-            count = 0
+            cumulativeTaker = cumulativeTaker + makerAmountToFill
+            makerAmountToFill = 0
           } else {
             cumulativeTaker = cumulativeTaker + takerAmount
             cumulativeMaker = cumulativeMaker + makerAmount
-            count = count - takerAmount
+            makerAmountToFill = makerAmountToFill - takerAmount
           }
         }
       })

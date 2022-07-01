@@ -71,6 +71,8 @@ export default function BuyMarket(props: {
     takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const usdPrice = props.usdPrice
   const decimals = option.collateralToken.decimals
+  const positionTokenUnit = parseUnits('1')
+  const collateralTokenUnit = parseUnits('1', decimals)
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
