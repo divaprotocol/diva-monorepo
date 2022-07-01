@@ -130,6 +130,7 @@ export default function SellMarket(props: {
         // Set allowance
         const optionAllowance = await approve(amountToApprove)
 
+        // No fee considerations required here as in a Sell Limit order, the taker will have to pay the fee
         const remainingAllowance = optionAllowance.sub(
           existingSellLimitOrdersAmountUser
         )
@@ -153,8 +154,13 @@ export default function SellMarket(props: {
       if (optionBalance.gt(0)) {
         // User owns position tokens ...
 
-        // Convert numberOfOptions into an integer of type BigNumber with 18 decimals to be used in integer math
+        // Convert numberOfOptions into an integer of type BigNumber with 18 decimals to be used in integer math.
+        // NOTE: As the seller will have to pay fees in position token, the actual amount sold will be less than entered by the user.
+        // E.g., if user entered to sell 10 position tokens, then 9.9 will actually matched and 0.1 will go to the feeRecipient.
+        // TODO: Show the fee amount somewhere in the order widget
         const numberOfOptionsBN = parseUnits(numberOfOptions.toString())
+          .mul(positionTokenUnit)
+          .div(parseUnits(feeMultiplier))
 
         if (numberOfOptionsBN.gt(remainingAllowance)) {
           // Entered position token amount exceeds remaining allowance ...
@@ -268,14 +274,12 @@ export default function SellMarket(props: {
   const userAddress = useAppSelector(selectUserAddress)
 
   const getOptionsInWallet = async (takerAccount: string) => {
-    let allowance = await takerTokenContract.methods
+    const allowance = await takerTokenContract.methods
       .allowance(takerAccount, exchangeProxy)
       .call()
-    let balance = await takerTokenContract.methods
+    const balance = await takerTokenContract.methods
       .balanceOf(takerAccount)
       .call()
-    balance = Number(formatUnits(balance.toString(), 18))
-    allowance = Number(formatUnits(allowance.toString(), 18))
     return {
       balance: BigENumber.from(balance),
       account: takerAccount,
@@ -295,9 +299,8 @@ export default function SellMarket(props: {
 
       if (BigENumber.from(remainingFillableTakerAmount).gt(0)) {
         order['expectedRate'] = makerAmount
-          .mul(parseUnits('1'))
+          .mul(positionTokenUnit)
           .div(takerAmount) // result has collateral token decimals
-        console.log('expectedRate', order['expectedRate'].toString())
         order['remainingFillableTakerAmount'] = remainingFillableTakerAmount
         orders.push(order)
       }
@@ -426,7 +429,7 @@ export default function SellMarket(props: {
           if (takerAmountToFill.lt(takerAmount)) {
             const makerAmountToFill = expectedRate
               .mul(takerAmountToFill)
-              .div(positionTokenUnit) // result has <= 18 decimals
+              .div(positionTokenUnit)
             cumulativeMaker = cumulativeMaker.add(makerAmountToFill)
             cumulativeTaker = cumulativeTaker.add(takerAmountToFill)
             takerAmountToFill = ZERO // With that, it will not enter this if block again

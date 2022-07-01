@@ -289,9 +289,8 @@ export default function BuyMarket(props: {
 
       if (BigENumber.from(remainingFillableTakerAmount).gt(0)) {
         order['expectedRate'] = takerAmount
-          .mul(parseUnits('1'))
+          .mul(positionTokenUnit)
           .div(makerAmount) // result has collateral token decimals
-        console.log('expectedRate', order['expectedRate'].toString())
         order['remainingFillableTakerAmount'] = remainingFillableTakerAmount
         orders.push(order)
       }
@@ -421,12 +420,12 @@ export default function BuyMarket(props: {
             const takerAmountToFill = expectedRate
               .mul(makerAmountToFill)
               .div(positionTokenUnit)
-            cumulativeTaker = cumulativeTaker.add(takerAmountToFill) // <= 18 decimals
-            cumulativeMaker = cumulativeMaker.add(makerAmountToFill) // 18 decimals
+            cumulativeTaker = cumulativeTaker.add(takerAmountToFill)
+            cumulativeMaker = cumulativeMaker.add(makerAmountToFill)
             makerAmountToFill = ZERO // With that, it will not enter this if block again
           } else {
-            cumulativeTaker = cumulativeTaker.add(takerAmount) // <= 18 decimals
-            cumulativeMaker = cumulativeMaker.add(makerAmount) // 18 decimals
+            cumulativeTaker = cumulativeTaker.add(takerAmount)
+            cumulativeMaker = cumulativeMaker.add(makerAmount)
             makerAmountToFill = makerAmountToFill.sub(makerAmount)
           }
         }
