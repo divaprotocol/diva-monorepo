@@ -25,7 +25,8 @@ import { divaGovernanceAddress } from '../../constants'
 import { useHistory, useLocation, useParams } from 'react-router-dom'
 
 export const ExpiresInCell = (props: any) => {
-  const expTimestamp = new Date(props.row.Expiry).getTime()
+  //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
+  const expTimestamp = new Date(props.row.Expiry.replace(/-/g, '/')).getTime()
   const minUntilExp = getExpiryMinutesFromNow(expTimestamp / 1000)
   if (minUntilExp > 0) {
     if ((minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) > 0) {
