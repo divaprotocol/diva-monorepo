@@ -29,7 +29,7 @@ import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { selectUserAddress } from '../../../Redux/appSlice'
-import { BigNumber as BigENumber } from 'ethers'
+import { BigNumber } from 'ethers'
 import {
   setBreakEven,
   setIntrinsicValue,
@@ -43,7 +43,7 @@ import {
 } from '../../../Util/calcPayoffPerToken'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
-const ZERO = BigENumber.from(0)
+const ZERO = BigNumber.from(0)
 const feeMultiplier = (1 + tradingFee).toString()
 
 export default function BuyMarket(props: {
@@ -124,14 +124,13 @@ export default function BuyMarket(props: {
       // Approved amount is 0 ...
 
       if (numberOfOptions > 0) {
-        // Calculate required allowance amount for collateral token assuming 1% fee (expressed as an integer with collateral token decimals (<= 18))
-        // NOTE: The assumption that the maximum fee is 1% may not be valid in the future as market makers start posting orders.
+        // Calculate required allowance amount for collateral token assuming 1% fee (expressed as an integer with collateral token decimals (<= 18)).
+        // NOTE: The assumption that the maximum fee is 1% may not be valid in the future as market makers start posting orders with higher fees.
         // In the worst case, the amountToApprove will be too small due to fees being higher than 1% and the fill transaction may fail.
+        // TODO: Exclude orders that have a fee higher than 1% from the orderbook so that users will not get screwed.
         const amountToApprove = allowance
-          .add(youPay)
-          .mul(parseUnits(feeMultiplier, decimals)) // Adding 1% fee as it also requires approval
-          .div(parseUnits('1', decimals))
-          .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
+          .add(youPay) // youPay is already including fee, hence no feeMultiplier needed in that case
+          .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
         // Set allowance
         const collateralAllowance = await approve(amountToApprove)
 
@@ -183,7 +182,7 @@ export default function BuyMarket(props: {
             ) {
               let newAllowance = additionalAllowance
                 .add(allowance)
-                .add(BigENumber.from(10)) // Buffer to ensure that there is always sufficient approval
+                .add(BigNumber.from(100)) // Buffer to ensure that there is always sufficient approval
 
               newAllowance = await approve(newAllowance)
 
@@ -271,9 +270,9 @@ export default function BuyMarket(props: {
       .balanceOf(takerAccount)
       .call()
     return {
-      balance: BigENumber.from(balance),
+      balance: BigNumber.from(balance),
       account: takerAccount,
-      allowance: BigENumber.from(allowance),
+      allowance: BigNumber.from(allowance),
     }
   }
 
@@ -281,13 +280,13 @@ export default function BuyMarket(props: {
     const orders: any = []
     responseSell.forEach((data: any) => {
       const order = JSON.parse(JSON.stringify(data.order))
-      const takerAmount = BigENumber.from(order.takerAmount) // collateral token (<= 18 decimals)
-      const makerAmount = BigENumber.from(order.makerAmount) // position token (18 decimals)
+      const takerAmount = BigNumber.from(order.takerAmount) // collateral token (<= 18 decimals)
+      const makerAmount = BigNumber.from(order.makerAmount) // position token (18 decimals)
 
       const remainingFillableTakerAmount =
         data.metaData.remainingFillableTakerAmount
 
-      if (BigENumber.from(remainingFillableTakerAmount).gt(0)) {
+      if (BigNumber.from(remainingFillableTakerAmount).gt(0)) {
         order['expectedRate'] = takerAmount
           .mul(positionTokenUnit)
           .div(makerAmount) // result has collateral token decimals
@@ -326,11 +325,11 @@ export default function BuyMarket(props: {
 
       if (order.maker == maker) {
         const metaData = data.metaData
-        const remainingFillableTakerAmount = BigENumber.from(
+        const remainingFillableTakerAmount = BigNumber.from(
           metaData.remainingFillableTakerAmount
         )
-        const takerAmount = BigENumber.from(order.takerAmount) // position token
-        const makerAmount = BigENumber.from(order.makerAmount) // collateral token
+        const takerAmount = BigNumber.from(order.takerAmount) // position token
+        const makerAmount = BigNumber.from(order.makerAmount) // collateral token
 
         if (remainingFillableTakerAmount.lt(takerAmount)) {
           // As remainingFillableMakerAmount is not directly available
@@ -396,12 +395,12 @@ export default function BuyMarket(props: {
       existingSellLimitOrders.forEach((order: any) => {
         // Loop through each Sell Limit order where makerToken = position token (18 decimals) and takerToken = collateral token (<= 18 decimals)
 
-        let takerAmount = BigENumber.from(order.takerAmount)
-        let makerAmount = BigENumber.from(order.makerAmount)
-        const remainingFillableTakerAmount = BigENumber.from(
+        let takerAmount = BigNumber.from(order.takerAmount)
+        let makerAmount = BigNumber.from(order.makerAmount)
+        const remainingFillableTakerAmount = BigNumber.from(
           order.remainingFillableTakerAmount
         )
-        const expectedRate = BigENumber.from(order.expectedRate) // <= 18 decimals
+        const expectedRate = BigNumber.from(order.expectedRate) // <= 18 decimals
 
         // If order is already partially filled, set takerAmount equal to remainingFillableTakerAmount and makerAmount to the corresponding pro-rata fillable makerAmount
         if (remainingFillableTakerAmount.lt(takerAmount)) {
@@ -437,9 +436,11 @@ export default function BuyMarket(props: {
 
       if (cumulativeAvgRate.gt(0)) {
         setAvgExpectedRate(cumulativeAvgRate)
-        // Amount that the buyer/user has to pay including fee; result is expressed as an integer with collateral token decimals
+        // Amount that the buyer/user has to pay including fee; result is expressed as an integer with collateral token decimals.
+        // NOTE: youPay is including fees. It assumes that the maximum average fee is 1% which may not be the case if market makers
+        // start posting orders with higher fee. Prevent this by excludings such orders from the orderbook.
         const youPay = cumulativeTaker
-          .mul(parseUnits(feeMultiplier, decimals)) // NOTE: This assumes that the fee is the same for all orders which may not be the case -> fine-tune
+          .mul(parseUnits(feeMultiplier, decimals))
           .div(collateralTokenUnit)
         setYouPay(youPay)
       }
@@ -455,15 +456,15 @@ export default function BuyMarket(props: {
 
   useEffect(() => {
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
-      BigENumber.from(option.floor),
-      BigENumber.from(option.inflection),
-      BigENumber.from(option.cap),
-      BigENumber.from(option.collateralBalanceLongInitial),
-      BigENumber.from(option.collateralBalanceShortInitial),
+      BigNumber.from(option.floor),
+      BigNumber.from(option.inflection),
+      BigNumber.from(option.cap),
+      BigNumber.from(option.collateralBalanceLongInitial),
+      BigNumber.from(option.collateralBalanceShortInitial),
       option.statusFinalReferenceValue === 'Open' && usdPrice != ''
         ? parseUnits(usdPrice)
-        : BigENumber.from(option.finalReferenceValue),
-      BigENumber.from(option.supplyInitial),
+        : BigNumber.from(option.finalReferenceValue),
+      BigNumber.from(option.supplyInitial),
       decimals
     )
     const expectedPrice = Number(formatUnits(avgExpectedRate)) // ok to convert to number here as it's only for displaying stats
@@ -514,11 +515,11 @@ export default function BuyMarket(props: {
       dispatch(
         setMaxPayout(
           formatUnits(
-            BigENumber.from(option.collateralBalanceLongInitial)
-              .add(BigENumber.from(option.collateralBalanceShortInitial))
+            BigNumber.from(option.collateralBalanceLongInitial)
+              .add(BigNumber.from(option.collateralBalanceShortInitial))
               .mul(parseUnits('1', 18 - decimals))
               .mul(positionTokenUnit)
-              .div(BigENumber.from(option.supplyInitial))
+              .div(BigNumber.from(option.supplyInitial))
           )
         )
       )
@@ -531,11 +532,11 @@ export default function BuyMarket(props: {
       dispatch(
         setMaxPayout(
           formatUnits(
-            BigENumber.from(option.collateralBalanceLongInitial)
-              .add(BigENumber.from(option.collateralBalanceShortInitial))
+            BigNumber.from(option.collateralBalanceLongInitial)
+              .add(BigNumber.from(option.collateralBalanceShortInitial))
               .mul(parseUnits('1', 18 - decimals))
               .mul(positionTokenUnit)
-              .div(BigENumber.from(option.supplyInitial))
+              .div(BigNumber.from(option.supplyInitial))
           )
         )
       )

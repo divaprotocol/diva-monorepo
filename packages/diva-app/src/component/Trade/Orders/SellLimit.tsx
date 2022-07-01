@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
@@ -17,28 +17,23 @@ import { RightSideLabel } from './UiStyles'
 import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
-import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
-import Web3 from 'web3'
 import { Pool } from '../../../lib/queries'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import Web3 from 'web3'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
+import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { totalDecimals, convertExponentialToDecimal } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
-import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
+import { BigNumber } from 'ethers'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import { BigNumber } from '@0x/utils'
 import { useParams } from 'react-router-dom'
 import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
 import {
   setBreakEven,
   setIntrinsicValue,
-  setMaxPayout,
   setMaxYield,
+  setMaxPayout,
 } from '../../../Redux/Stats'
 import {
   calcPayoffPerToken,
@@ -301,7 +296,7 @@ export default function SellLimit(props: {
   }
 
   const getMakerOrdersTotalAmount = async (maker) => {
-    let existingOrderAmount = new BigNumber(0)
+    let existingOrderAmount = BigNumber.from(0)
     if (responseSell.length == 0) {
       //Double check any limit orders exists
       const rSell: any = await get0xOpenOrders(
@@ -316,14 +311,14 @@ export default function SellLimit(props: {
       const order = data.order
       if (maker == order.maker) {
         const metaData = data.metaData
-        const remainingTakerAmount = new BigNumber(
+        const remainingTakerAmount = BigNumber.from(
           metaData.remainingFillableTakerAmount.toString()
         )
         if (remainingTakerAmount == order.makerAmount) {
           existingOrderAmount = existingOrderAmount.plus(order.makerAmount)
         } else {
-          const makerAmount = new BigNumber(order.makerAmount)
-          const takerAmount = new BigNumber(order.takerAmount)
+          const makerAmount = BigNumber.from(order.makerAmount)
+          const takerAmount = BigNumber.from(order.takerAmount)
           const askAmount = takerAmount.dividedBy(makerAmount)
           const quantity = remainingTakerAmount.dividedBy(askAmount)
           existingOrderAmount = existingOrderAmount.plus(quantity)
@@ -339,9 +334,7 @@ export default function SellLimit(props: {
     let allowance = await makerTokenContract.methods
       .allowance(userAddress, exchangeProxyAddress)
       .call()
-    let balance = await makerTokenContract.methods
-      .balanceOf(userAddress)
-      .call()
+    let balance = await makerTokenContract.methods.balanceOf(userAddress).call()
     balance = Number(formatUnits(balance.toString(), 18))
     allowance = Number(formatUnits(allowance.toString(), 18))
     return {
@@ -384,25 +377,25 @@ export default function SellLimit(props: {
 
   useEffect(() => {
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
-      BigENumber.from(option.floor),
-      BigENumber.from(option.inflection),
-      BigENumber.from(option.cap),
-      BigENumber.from(option.collateralBalanceLongInitial),
-      BigENumber.from(option.collateralBalanceShortInitial),
+      BigNumber.from(option.floor),
+      BigNumber.from(option.inflection),
+      BigNumber.from(option.cap),
+      BigNumber.from(option.collateralBalanceLongInitial),
+      BigNumber.from(option.collateralBalanceShortInitial),
       option.statusFinalReferenceValue === 'Open' && usdPrice != ''
-        ? parseEther(usdPrice)
-        : BigENumber.from(option.finalReferenceValue),
-      BigENumber.from(option.supplyInitial),
+        ? parseUnits(usdPrice)
+        : BigNumber.from(option.finalReferenceValue),
+      BigNumber.from(option.supplyInitial),
       decimals
     )
     if (pricePerOption > 0) {
       dispatch(
         setMaxYield(
           parseFloat(
-            formatEther(
-              parseEther(maxPayout)
-                .mul(parseEther('1'))
-                .div(parseEther(convertExponentialToDecimal(pricePerOption)))
+            formatUnits(
+              parseUnits(maxPayout)
+                .mul(parseUnits('1'))
+                .div(parseUnits(convertExponentialToDecimal(pricePerOption)))
             )
           ).toFixed(2) + 'x'
         )
@@ -430,27 +423,23 @@ export default function SellLimit(props: {
     if (breakEven == 'n/a') {
       dispatch(setBreakEven('n/a'))
     } else {
-      dispatch(setBreakEven(formatEther(breakEven)))
+      dispatch(setBreakEven(formatUnits(breakEven)))
     }
 
     if (isLong) {
       if (option.statusFinalReferenceValue === 'Open' && usdPrice === '') {
         dispatch(setIntrinsicValue('n/a'))
       } else {
-        dispatch(
-          setIntrinsicValue(
-            formatUnits(payoffPerLongToken, decimals)
-          )
-        )
+        dispatch(setIntrinsicValue(formatUnits(payoffPerLongToken, decimals)))
       }
       dispatch(
         setMaxPayout(
-          formatEther(
-            BigENumber.from(option.collateralBalanceLongInitial)
-              .add(BigENumber.from(option.collateralBalanceShortInitial))
+          formatUnits(
+            BigNumber.from(option.collateralBalanceLongInitial)
+              .add(BigNumber.from(option.collateralBalanceShortInitial))
               .mul(parseUnits('1', 18 - decimals))
-              .mul(parseEther('1'))
-              .div(BigENumber.from(option.supplyInitial))
+              .mul(parseUnits('1'))
+              .div(BigNumber.from(option.supplyInitial))
           )
         )
       )
@@ -458,20 +447,16 @@ export default function SellLimit(props: {
       if (option.statusFinalReferenceValue === 'Open' && usdPrice == '') {
         dispatch(setIntrinsicValue('n/a'))
       } else {
-        dispatch(
-          setIntrinsicValue(
-            formatUnits(payoffPerShortToken, decimals)
-          )
-        )
+        dispatch(setIntrinsicValue(formatUnits(payoffPerShortToken, decimals)))
       }
       dispatch(
         setMaxPayout(
-          formatEther(
-            BigENumber.from(option.collateralBalanceLongInitial)
-              .add(BigENumber.from(option.collateralBalanceShortInitial))
+          formatUnits(
+            BigNumber.from(option.collateralBalanceLongInitial)
+              .add(BigNumber.from(option.collateralBalanceShortInitial))
               .mul(parseUnits('1', 18 - decimals))
-              .mul(parseEther('1'))
-              .div(BigENumber.from(option.supplyInitial))
+              .mul(parseUnits('1'))
+              .div(BigNumber.from(option.supplyInitial))
           )
         )
       )

@@ -2,7 +2,7 @@ import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { FormLabel, MenuItem, Stack, Tooltip, useTheme } from '@mui/material'
+import { FormLabel, MenuItem, Stack, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
@@ -19,25 +19,20 @@ import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import { Pool } from '../../../lib/queries'
 import Web3 from 'web3'
-import { BigNumber } from '@0x/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { totalDecimals, convertExponentialToDecimal } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
+import { BigNumber } from 'ethers'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 import { useParams } from 'react-router-dom'
 import { selectChainId, selectUserAddress } from '../../../Redux/appSlice'
-import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 import {
   setBreakEven,
-  setMaxYield,
   setIntrinsicValue,
+  setMaxYield,
   setMaxPayout,
 } from '../../../Redux/Stats'
 import {
@@ -139,7 +134,7 @@ export default function BuyLimit(props: {
       .sub(existingOrdersAmount)
       .mul(parseUnits(feeMultiplier, decimals)) // Adding 1% fee as it also requires approval
       .div(parseUnits('1', decimals))
-      .add(BigENumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
+      .add(BigNumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
     setRemainingApprovalAmount(remainingApproval)
   }
@@ -300,7 +295,7 @@ export default function BuyLimit(props: {
   }
 
   const getTakerOrdersTotalAmount = async (taker) => {
-    let existingOrdersAmount = new BigNumber(0)
+    let existingOrdersAmount = BigNumber.from(0)
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
       const rBuy = await get0xOpenOrders(
@@ -317,13 +312,13 @@ export default function BuyLimit(props: {
       const metaData = data.metaData
 
       if (taker == order.maker) {
-        const remainingFillableTakerAmount = new BigNumber(
+        const remainingFillableTakerAmount = BigNumber.from(
           metaData.remainingFillableTakerAmount.toString()
         )
 
         if (remainingFillableTakerAmount < order.takerAmount) {
-          const makerAmount = new BigNumber(order.makerAmount)
-          const takerAmount = new BigNumber(order.takerAmount)
+          const makerAmount = BigNumber.from(order.makerAmount)
+          const takerAmount = BigNumber.from(order.takerAmount)
           const bidAmount = makerAmount.dividedBy(takerAmount)
           const youPay = bidAmount.multipliedBy(remainingFillableTakerAmount)
           existingOrdersAmount = existingOrdersAmount.plus(youPay)
@@ -375,25 +370,25 @@ export default function BuyLimit(props: {
 
   useEffect(() => {
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
-      BigENumber.from(option.floor),
-      BigENumber.from(option.inflection),
-      BigENumber.from(option.cap),
-      BigENumber.from(option.collateralBalanceLongInitial),
-      BigENumber.from(option.collateralBalanceShortInitial),
+      BigNumber.from(option.floor),
+      BigNumber.from(option.inflection),
+      BigNumber.from(option.cap),
+      BigNumber.from(option.collateralBalanceLongInitial),
+      BigNumber.from(option.collateralBalanceShortInitial),
       option.statusFinalReferenceValue === 'Open' && usdPrice != ''
-        ? parseEther(usdPrice)
-        : BigENumber.from(option.finalReferenceValue),
-      BigENumber.from(option.supplyInitial),
+        ? parseUnits(usdPrice)
+        : BigNumber.from(option.finalReferenceValue),
+      BigNumber.from(option.supplyInitial),
       decimals
     )
     if (pricePerOption > 0) {
       dispatch(
         setMaxYield(
           parseFloat(
-            formatEther(
-              parseEther(maxPayout)
-                .mul(parseEther('1'))
-                .div(parseEther(convertExponentialToDecimal(pricePerOption)))
+            formatUnits(
+              parseUnits(maxPayout)
+                .mul(parseUnits('1'))
+                .div(parseUnits(convertExponentialToDecimal(pricePerOption)))
             )
           ).toFixed(2) + 'x'
         )
@@ -421,7 +416,7 @@ export default function BuyLimit(props: {
     if (breakEven == 'n/a') {
       dispatch(setBreakEven('n/a'))
     } else {
-      dispatch(setBreakEven(formatEther(breakEven)))
+      dispatch(setBreakEven(formatUnits(breakEven)))
     }
 
     if (isLong) {
@@ -432,12 +427,12 @@ export default function BuyLimit(props: {
       }
       dispatch(
         setMaxPayout(
-          formatEther(
-            BigENumber.from(option.collateralBalanceLongInitial)
-              .add(BigENumber.from(option.collateralBalanceShortInitial))
+          formatUnits(
+            BigNumber.from(option.collateralBalanceLongInitial)
+              .add(BigNumber.from(option.collateralBalanceShortInitial))
               .mul(parseUnits('1', 18 - decimals))
-              .mul(parseEther('1'))
-              .div(BigENumber.from(option.supplyInitial))
+              .mul(parseUnits('1'))
+              .div(BigNumber.from(option.supplyInitial))
           )
         )
       )
@@ -449,12 +444,12 @@ export default function BuyLimit(props: {
       }
       dispatch(
         setMaxPayout(
-          formatEther(
-            BigENumber.from(option.collateralBalanceLongInitial)
-              .add(BigENumber.from(option.collateralBalanceShortInitial))
+          formatUnits(
+            BigNumber.from(option.collateralBalanceLongInitial)
+              .add(BigNumber.from(option.collateralBalanceShortInitial))
               .mul(parseUnits('1', 18 - decimals))
-              .mul(parseEther('1'))
-              .div(BigENumber.from(option.supplyInitial))
+              .mul(parseUnits('1'))
+              .div(BigNumber.from(option.supplyInitial))
           )
         )
       )
