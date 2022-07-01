@@ -119,7 +119,9 @@ export default function SellMarket(props: {
       // Approved amount is 0 ...
 
       if (numberOfOptions > 0) {
-        // Calculate required allowance amount for position token incl. 1% fee (expressed as an integer with 18 decimals)
+        // Calculate required allowance amount for position token assuming 1% fee (expressed as an integer with 18 decimals)
+        // NOTE: The assumption that the maximum fee is 1% may not be valid in the future as market makers start posting orders.
+        // In the worst case, the amountToApprove will be too small due to fees being higher than 1% and the fill transaction may fail.
         const amountToApprove = allowance
           .add(parseUnits(convertExponentialToDecimal(numberOfOptions)))
           .mul(parseUnits(feeMultiplier)) // Adding 1% fee as position token acts as taker token in SELL MARKET which also requires approval
@@ -232,7 +234,7 @@ export default function SellMarket(props: {
                         (input) => (input.value = '')
                       )
                       setNumberOfOptions(0.0)
-                      setYouReceive(0.0)
+                      setYouReceive(ZERO)
                       orderFilled = true
                     } else {
                       alert('Order could not be filled.')
@@ -248,7 +250,7 @@ export default function SellMarket(props: {
                 (input) => (input.value = '')
               )
               setNumberOfOptions(0.0)
-              setYouReceive(0.0)
+              setYouReceive(ZERO)
             }
             if (orderFilled) {
               alert('Order successfully filled.')

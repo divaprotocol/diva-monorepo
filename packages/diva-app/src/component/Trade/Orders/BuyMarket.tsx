@@ -124,7 +124,9 @@ export default function BuyMarket(props: {
       // Approved amount is 0 ...
 
       if (numberOfOptions > 0) {
-        // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals)
+        // Calculate required allowance amount for collateral token assuming 1% fee (expressed as an integer with collateral token decimals (<= 18))
+        // NOTE: The assumption that the maximum fee is 1% may not be valid in the future as market makers start posting orders.
+        // In the worst case, the amountToApprove will be too small due to fees being higher than 1% and the fill transaction may fail.
         const amountToApprove = allowance
           .add(youPay)
           .mul(parseUnits(feeMultiplier, decimals)) // Adding 1% fee as it also requires approval
@@ -254,7 +256,7 @@ export default function BuyMarket(props: {
           })
         }
       } else {
-        alert('Collateral balance is zero')
+        alert('No collateral tokens availabe to buy.')
       }
     }
   }
