@@ -59,20 +59,26 @@ export default function SellLimit(props: {
   const makerToken = props.tokenAddress
   const takerToken = option.collateralToken.id
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
+  const usdPrice = props.usdPrice
+  const decimals = option.collateralToken.decimals
+  const positionTokenUnit = parseUnits('1')
+  const collateralTokenUnit = parseUnits('1', decimals)
+
   const classes = useStyles()
-  const [expiry, setExpiry] = React.useState(5)
+
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
+  const [expiry, setExpiry] = React.useState(5)
+  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
+
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
   const [walletBalance, setWalletBalance] = React.useState(0)
-  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
+
   const params: { tokenType: string } = useParams()
-  const usdPrice = props.usdPrice
-  const decimals = option.collateralToken.decimals
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const isLong = window.location.pathname.split('/')[2] === 'long'
   const dispatch = useAppDispatch()

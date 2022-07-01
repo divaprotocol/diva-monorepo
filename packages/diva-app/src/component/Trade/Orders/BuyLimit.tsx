@@ -59,22 +59,27 @@ export default function BuyLimit(props: {
   const makerToken = option.collateralToken.id
   const takerToken = props.tokenAddress
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
+  const usdPrice = props.usdPrice
+  const decimals = option.collateralToken.decimals
+  const positionTokenUnit = parseUnits('1')
+
   const classes = useStyles()
-  const [expiry, setExpiry] = React.useState(5)
+
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
   const [youPay, setYouPay] = React.useState(0.0)
+  const [expiry, setExpiry] = React.useState(5)
+  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
+
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(0.0)
-  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
   const [collateralBalance, setCollateralBalance] = React.useState(0)
+
   const params: { tokenType: string } = useParams()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const usdPrice = props.usdPrice
-  const decimals = option.collateralToken.decimals
 
   const dispatch = useAppDispatch()
 
