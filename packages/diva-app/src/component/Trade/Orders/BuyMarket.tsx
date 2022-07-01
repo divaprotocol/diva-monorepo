@@ -354,18 +354,22 @@ export default function BuyMarket(props: {
         // Use values returned from getCollateralInWallet to initialize variables
         setCollateralBalance(val.balance)
         setAllowance(val.allowance)
-        val.allowance.eq(0) ? setIsApproved(false) : setIsApproved(true)
+        val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
+        // Get Sell Limit orders which the user is going to fill during the Buy Market operation
         if (responseSell.length > 0) {
-          const data = await getSellLimitOrders()
-          setExistingSellLimitOrders(data.sortedOrders) // Sell Limit orders which the user is going to fill during Buy Market operation
+          getSellLimitOrders().then((orders) => {
+            setExistingSellLimitOrders(orders)
+          })
         }
+
+        // Get the user's existing Buy Limit orders which block some of the user's allowance
         getTakerOrdersTotalAmount(val.account).then((amount) => {
+          setExistingBuyLimitOrdersAmountUser(amount)
           const remainingAmount = val.allowance.sub(amount)
           setRemainingAllowance(remainingAmount)
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })
-        //}
       })
     }
   }, [responseSell, responseBuy, userAddress])

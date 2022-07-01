@@ -362,26 +362,25 @@ export default function SellMarket(props: {
         // Use values returned from getOptionsInWallet to initialize variables
         setOptionBalance(val.balance)
         setAllowance(val.allowance)
-        val.allowance.eq(0) ? setIsApproved(false) : setIsApproved(true)
+        val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
+        // Get Buy Limit orders which the user is going to fill during the Sell Market operation
         if (responseBuy.length > 0) {
           getBuyLimitOrders().then((orders) => {
             setExistingBuyLimitOrders(orders)
           })
         }
+
+        // Get the user's existing Sell Limit orders which block some of the user's allowance
         getMakerOrdersTotalAmount(val.account).then((amount) => {
           setExistingSellLimitOrdersAmountUser(amount)
-          const remainingAmount = Number(
-            (val.allowance - amount).toFixed(
-              totalDecimals(val.allowance, amount)
-            )
-          )
+          const remainingAmount = val.allowance.sub(amount)
           setRemainingAllowance(remainingAmount)
-          remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+          remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })
       })
     }
-  }, [responseBuy, responseSell])
+  }, [responseBuy, responseSell, userAddress])
 
   useEffect(() => {
     if (numberOfOptions > 0 && existingBuyLimitOrders.length > 0) {
