@@ -39,7 +39,7 @@ import {
   calcPayoffPerToken,
   calcBreakEven,
 } from '../../../Util/calcPayoffPerToken'
-import { setResponseSell } from '../../../Redux/TradeOption'
+import { setResponseSell } from '../../../Redux/TradeOption' // QUESTION: Why is this not in BuyLimit
 const web3 = new Web3(Web3.givenProvider)
 
 export default function SellLimit(props: {
@@ -51,11 +51,15 @@ export default function SellLimit(props: {
   usdPrice: string
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const chainId = useAppSelector(selectChainId)
-  const classes = useStyles()
-  const exchangeProxyAddress = props.exchangeProxy
+
+  const userAddress = useAppSelector(selectUserAddress)
+
   const option = props.option
-  const optionTokenAddress = props.tokenAddress
+  const exchangeProxyAddress = props.exchangeProxy
+  const makerToken = props.tokenAddress
+  const takerToken = option.collateralToken.id
+  const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
+  const classes = useStyles()
   const [expiry, setExpiry] = React.useState(5)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
@@ -66,9 +70,6 @@ export default function SellLimit(props: {
   const [allowance, setAllowance] = React.useState(0.0)
   const [walletBalance, setWalletBalance] = React.useState(0)
   const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
-  const makerToken = optionTokenAddress
-  //const takerToken = option.collateralToken
-  const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const params: { tokenType: string } = useParams()
   const usdPrice = props.usdPrice
   const decimals = option.collateralToken.decimals
@@ -263,16 +264,16 @@ export default function SellLimit(props: {
           }
         } else {
           const orderData = {
-            makerAccount: userAddress,
-            makerToken: optionTokenAddress,
-            takerToken: option.collateralToken.id,
+            maker: userAddress,
             provider: web3,
             isBuy: false,
             nbrOptions: numberOfOptions,
-            limitPrice: pricePerOption,
             collateralDecimals: decimals,
+            makerToken: makerToken,
+            takerToken: takerToken,
+            limitPrice: pricePerOption,
             orderExpiry: expiry,
-            chainId: chainId,
+            chainId: props.chainId,
             exchangeProxy: exchangeProxyAddress,
           }
           sellLimitOrder(orderData)
@@ -299,11 +300,7 @@ export default function SellLimit(props: {
     let existingOrderAmount = BigNumber.from(0)
     if (responseSell.length == 0) {
       //Double check any limit orders exists
-      const rSell: any = await get0xOpenOrders(
-        optionTokenAddress,
-        option.collateralToken.id,
-        chainId
-      )
+      const rSell: any = await get0xOpenOrders(makerToken, taker, props.chainId)
       responseSell = rSell
     }
 
@@ -328,7 +325,6 @@ export default function SellLimit(props: {
     //return existingOrderAmount
     return Number(formatUnits(existingOrderAmount.toString(), 18))
   }
-  const userAddress = useAppSelector(selectUserAddress)
 
   const getOptionsInWallet = async () => {
     let allowance = await makerTokenContract.methods

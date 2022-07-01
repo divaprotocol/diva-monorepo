@@ -38,7 +38,7 @@ export const sellLimitOrder = async (orderData) => {
     takerToken: orderData.takerToken,
     makerAmount: nbrOptionsToSell.toString(),
     takerAmount: collateralTokenAmount.toString(),
-    maker: orderData.makerAccount,
+    maker: orderData.maker,
     sender: NULL_ADDRESS,
     feeRecipient: divaGovernanceAddress,
     takerTokenFeeAmount: collateralTokenFeeAmount.toString(),

@@ -51,12 +51,14 @@ export default function BuyLimit(props: {
   usdPrice: string
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  const chainId = useAppSelector(selectChainId)
+
   const userAdress = useAppSelector(selectUserAddress)
 
-  const exchangeProxyAddress = props.exchangeProxy
   const option = props.option
-  const makerToken = props.tokenAddress
+  const exchangeProxyAddress = props.exchangeProxy
+  const makerToken = option.collateralToken.id
+  const takerToken = props.tokenAddress
+  const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const classes = useStyles()
   const [expiry, setExpiry] = React.useState(5)
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
@@ -69,7 +71,6 @@ export default function BuyLimit(props: {
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
   const [collateralBalance, setCollateralBalance] = React.useState(0)
-  const takerToken = option.collateralToken.id
   const params: { tokenType: string } = useParams()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const usdPrice = props.usdPrice
@@ -78,8 +79,6 @@ export default function BuyLimit(props: {
   const dispatch = useAppDispatch()
 
   const isLong = window.location.pathname.split('/')[2] === 'long'
-  // TODO: Check why any is required
-  const takerTokenContract = new web3.eth.Contract(ERC20_ABI as any, takerToken)
 
   const handleNumberOfOptions = (value: string) => {
     const nbrOptions = parseFloat(value)
@@ -125,7 +124,7 @@ export default function BuyLimit(props: {
     setPricePerOption(parseFloat('0.0'))
     setYouPay(parseFloat('0.0'))
     setOrderBtnDisabled(true)
-    let allowance = await takerTokenContract.methods
+    let allowance = await makerTokenContract.methods
       .allowance(userAdress, exchangeProxyAddress)
       .call()
     allowance = Number(formatUnits(allowance, decimals))
@@ -150,7 +149,7 @@ export default function BuyLimit(props: {
 
   const approveBuyAmount = async (amount) => {
     try {
-      const approveResponse = await takerTokenContract.methods
+      const approveResponse = await makerTokenContract.methods
         .approve(exchangeProxyAddress, amount)
         .send({ from: userAdress })
 
@@ -159,7 +158,7 @@ export default function BuyLimit(props: {
       } else {
         //in case the approve call does not or delay emit events, read the allowance again
         await new Promise((resolve) => setTimeout(resolve, 4000))
-        const approvedAllowance = await takerTokenContract.methods
+        const approvedAllowance = await makerTokenContract.methods
           .allowance(userAdress, exchangeProxyAddress)
           .call()
         return approvedAllowance
@@ -259,16 +258,16 @@ export default function BuyLimit(props: {
           }
         } else {
           const orderData = {
-            makerAccount: userAdress,
-            makerToken: option.collateralToken.id,
-            takerToken: makerToken,
+            maker: userAdress,
             provider: web3,
             isBuy: true,
-            chainId,
             nbrOptions: numberOfOptions,
             collateralDecimals: decimals,
+            makerToken: takerToken,
+            takerToken: makerToken,
             limitPrice: pricePerOption,
             orderExpiry: expiry,
+            chainId: props.chainId,
             exchangeProxy: exchangeProxyAddress,
           }
 
@@ -298,11 +297,7 @@ export default function BuyLimit(props: {
     let existingOrdersAmount = BigNumber.from(0)
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
-      const rBuy = await get0xOpenOrders(
-        option.collateralToken.id,
-        makerToken,
-        chainId
-      )
+      const rBuy = await get0xOpenOrders(takerToken, makerToken, props.chainId)
       if (rBuy.length > 0) {
         responseBuy = rBuy
       }
@@ -333,11 +328,11 @@ export default function BuyLimit(props: {
   const userAddress = useAppSelector(selectUserAddress)
   useEffect(() => {
     const getCollateralInWallet = async () => {
-      let allowance = await takerTokenContract.methods
+      let allowance = await makerTokenContract.methods
         .allowance(userAdress, exchangeProxyAddress)
         .call()
       allowance = Number(formatUnits(allowance, decimals))
-      let balance = await takerTokenContract.methods
+      let balance = await makerTokenContract.methods
         .balanceOf(userAdress)
         .call()
       balance = Number(formatUnits(balance.toString(), decimals))

@@ -38,7 +38,7 @@ export const buylimitOrder = async (orderData) => {
     takerToken: orderData.takerToken,
     makerAmount: collateralTokenAmount.toString(),
     takerAmount: nbrOptionsToBuy.toString(),
-    maker: orderData.makerAccount,
+    maker: orderData.maker,
     sender: NULL_ADDRESS,
     feeRecipient: divaGovernanceAddress,
     takerTokenFeeAmount: positionTokenFeeAmount.toString(),

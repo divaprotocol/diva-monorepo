@@ -57,11 +57,12 @@ export default function SellMarket(props: {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
 
+  const userAddress = useAppSelector(selectUserAddress)
+
   const option = props.option
   const exchangeProxy = props.exchangeProxy
   const makerToken = option.collateralToken.id
   const takerToken = props.tokenAddress
-  // TODO: check again why we need to use "any" here
   const takerTokenContract =
     takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const usdPrice = props.usdPrice
@@ -216,7 +217,6 @@ export default function SellMarket(props: {
             collateralDecimals: decimals,
             makerToken: makerToken,
             takerToken: takerToken,
-            ERC20_ABI: ERC20_ABI,
             avgExpectedRate: avgExpectedRate,
             existingLimitOrders: existingBuyLimitOrders,
             chainId: props.chainId,
@@ -271,8 +271,6 @@ export default function SellMarket(props: {
       }
     }
   }
-
-  const userAddress = useAppSelector(selectUserAddress)
 
   const getOptionsInWallet = async (takerAccount: string) => {
     const allowance = await takerTokenContract.methods
