@@ -19,9 +19,7 @@ import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import {
-  formatEther,
   formatUnits,
-  parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
 import {
@@ -472,19 +470,20 @@ export default function SellMarket(props: {
       BigENumber.from(option.collateralBalanceLongInitial),
       BigENumber.from(option.collateralBalanceShortInitial),
       option.statusFinalReferenceValue === 'Open' && usdPrice != ''
-        ? parseEther(usdPrice)
+        ? parseUnits(usdPrice)
         : BigENumber.from(option.finalReferenceValue),
       BigENumber.from(option.supplyInitial),
       decimals
     )
-    if (avgExpectedRate > 0) {
+    const expectedPrice = Number(formatUnits(avgExpectedRate)) // ok to convert to number here as it's only for displaying stats
+    if (expectedPrice > 0 && !isNaN(expectedPrice)) {
       dispatch(
         setMaxYield(
           parseFloat(
-            formatEther(
-              parseEther(maxPayout)
-                .mul(parseEther('1'))
-                .div(parseEther(convertExponentialToDecimal(avgExpectedRate)))
+            formatUnits(
+              parseUnits(maxPayout)
+                .mul(parseUnits('1'))
+                .div(parseUnits(convertExponentialToDecimal(expectedPrice)))
             )
           ).toFixed(2) + 'x'
         )
@@ -495,9 +494,9 @@ export default function SellMarket(props: {
 
     let breakEven: number | string
 
-    if (avgExpectedRate != 0) {
+    if (expectedPrice != 0) {
       breakEven = calcBreakEven(
-        avgExpectedRate,
+        expectedPrice,
         option.floor,
         option.inflection,
         option.cap,
@@ -512,7 +511,7 @@ export default function SellMarket(props: {
     if (breakEven == 'n/a') {
       dispatch(setBreakEven('n/a'))
     } else {
-      dispatch(setBreakEven(formatEther(breakEven)))
+      dispatch(setBreakEven(formatUnits(breakEven)))
     }
 
     if (isLong) {
@@ -523,11 +522,11 @@ export default function SellMarket(props: {
       }
       dispatch(
         setMaxPayout(
-          formatEther(
+          formatUnits(
             BigENumber.from(option.collateralBalanceLongInitial)
               .add(BigENumber.from(option.collateralBalanceShortInitial))
               .mul(parseUnits('1', 18 - decimals))
-              .mul(parseEther('1'))
+              .mul(parseUnits('1'))
               .div(BigENumber.from(option.supplyInitial))
           )
         )
@@ -540,11 +539,11 @@ export default function SellMarket(props: {
       }
       dispatch(
         setMaxPayout(
-          formatEther(
+          formatUnits(
             BigENumber.from(option.collateralBalanceLongInitial)
               .add(BigENumber.from(option.collateralBalanceShortInitial))
               .mul(parseUnits('1', 18 - decimals))
-              .mul(parseEther('1'))
+              .mul(parseUnits('1'))
               .div(BigENumber.from(option.supplyInitial))
           )
         )
