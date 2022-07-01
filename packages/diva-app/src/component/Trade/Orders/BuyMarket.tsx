@@ -383,9 +383,11 @@ export default function BuyMarket(props: {
 
       setOrderBtnDisabled(false)
       // User input (numberOfOptions) corresponds to the maker token in Sell Limit.
-      let makerAmountToFill = parseUnits(numberOfOptions.toString()) // 18 decimals
+      let makerAmountToFill = parseUnits(
+        convertExponentialToDecimal(numberOfOptions)
+      ) // 18 decimals
 
-      let cumulativeAvg = ZERO
+      let cumulativeAvgRate = ZERO
       let cumulativeTaker = ZERO
       let cumulativeMaker = ZERO
 
@@ -402,6 +404,7 @@ export default function BuyMarket(props: {
         )
         const expectedRate = BigENumber.from(order.expectedRate) // <= 18 decimals
 
+        // If order is already partially filled, set takerAmount equal to remainingFillableTakerAmount and makerAmount to the corresponding pro-rata fillable makerAmount
         if (remainingFillableTakerAmount.lt(takerAmount)) {
           // Existing Sell Limit order was already partially filled
 
@@ -412,6 +415,7 @@ export default function BuyMarket(props: {
             .div(expectedRate)
         }
 
+        // If there are remaining nbrOfOptions (takerAmountToFill), then check whether the current order under consideration will be fully filled or only partially
         if (makerAmountToFill.gt(0)) {
           if (makerAmountToFill.lt(makerAmount)) {
             const takerAmountToFill = expectedRate
@@ -419,7 +423,7 @@ export default function BuyMarket(props: {
               .div(positionTokenUnit)
             cumulativeTaker = cumulativeTaker.add(takerAmountToFill) // <= 18 decimals
             cumulativeMaker = cumulativeMaker.add(makerAmountToFill) // 18 decimals
-            makerAmountToFill = ZERO // This condition ensures that we don't enter into the makerAmountToFill.gt(0) if-clause again
+            makerAmountToFill = ZERO // With that, it will not enter this if block again
           } else {
             cumulativeTaker = cumulativeTaker.add(takerAmount) // <= 18 decimals
             cumulativeMaker = cumulativeMaker.add(makerAmount) // 18 decimals
@@ -428,17 +432,16 @@ export default function BuyMarket(props: {
         }
       })
       // Calculate average price to pay excluding 1% fee (result is expressed as an integer with collateral token decimals (<= 18))
-      cumulativeAvg = cumulativeTaker
+      cumulativeAvgRate = cumulativeTaker
         .mul(positionTokenUnit) // scaling for high precision integer math
         .div(cumulativeMaker)
 
-      if (cumulativeAvg.gt(0)) {
-        setAvgExpectedRate(cumulativeAvg)
-        // Amount to pay by taker including fee; result is expressed as an integer with collateral token decimals
-        const youPayAmount = cumulativeAvg
-          .mul(parseUnits(convertExponentialToDecimal(numberOfOptions)))
+      if (cumulativeAvgRate.gt(0)) {
+        setAvgExpectedRate(cumulativeAvgRate)
+        // Amount that the buyer/user has to pay including fee; result is expressed as an integer with collateral token decimals
+        const youPayAmount = cumulativeTaker
           .mul(parseUnits(feeMultiplier, decimals))
-          .div(parseUnits('1', 18 + 18))
+          .div(collateralTokenUnit)
         setYouPay(youPayAmount)
       }
     } else {

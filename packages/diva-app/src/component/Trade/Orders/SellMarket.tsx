@@ -395,9 +395,11 @@ export default function SellMarket(props: {
 
       setOrderBtnDisabled(false)
       // User input (numberOfOptions) corresponds to the taker token in Buy Limit.
-      let takerAmountToFill = parseUnits(numberOfOptions.toString()) // <=18 decimals
+      let takerAmountToFill = parseUnits(
+        convertExponentialToDecimal(numberOfOptions)
+      ) // <= 18 decimals
 
-      let cumulativeAvg = ZERO
+      let cumulativeAvgRate = ZERO
       let cumulativeTaker = ZERO
       let cumulativeMaker = ZERO
 
@@ -414,6 +416,7 @@ export default function SellMarket(props: {
         )
         const expectedRate = BigENumber.from(order.expectedRate) // <= 18 decimals
 
+        // If order is already partially filled, set takerAmount equal to remainingFillableTakerAmount and makerAmount to the corresponding pro-rata fillable makerAmount
         if (remainingFillableTakerAmount.lt(takerAmount)) {
           // Existing Buy Limit order was already partially filled
 
@@ -424,6 +427,7 @@ export default function SellMarket(props: {
             .div(positionTokenUnit) // result has <= 18 decimals
         }
 
+        // If there are remaining nbrOfOptions (takerAmountToFill), then check whether the current order under consideration will be fully filled or only partially
         if (takerAmountToFill.gt(0)) {
           if (takerAmountToFill.lt(takerAmount)) {
             const makerAmountToFill = expectedRate
@@ -431,7 +435,7 @@ export default function SellMarket(props: {
               .div(positionTokenUnit) // result has <= 18 decimals
             cumulativeMaker = cumulativeMaker.add(makerAmountToFill)
             cumulativeTaker = cumulativeTaker.add(takerAmountToFill)
-            takerAmountToFill = ZERO
+            takerAmountToFill = ZERO // With that, it will not enter this if block again
           } else {
             cumulativeTaker = cumulativeTaker.add(takerAmount)
             cumulativeMaker = cumulativeMaker.add(makerAmount)
@@ -439,25 +443,21 @@ export default function SellMarket(props: {
           }
         }
       })
-      if (totalDecimals(cumulativeMaker, cumulativeTaker) > 1) {
-        cumulativeAvg = Number(
-          (cumulativeMaker / cumulativeTaker).toFixed(
-            totalDecimals(cumulativeMaker, cumulativeTaker)
-          )
-        )
-      } else {
-        cumulativeAvg = Number(cumulativeMaker / cumulativeTaker)
-      }
-      if (cumulativeAvg > 0) {
-        const avg = cumulativeAvg
-        setAvgExpectedRate(avg)
-        const youReceive = avg * numberOfOptions
+      // Calculate average price to pay excluding 1% fee (result is expressed as an integer with collateral token decimals (<= 18))
+      cumulativeAvgRate = cumulativeMaker
+        .mul(positionTokenUnit) // scaling for high precision integer math
+        .div(cumulativeTaker)
+
+      if (cumulativeAvgRate.gt(0)) {
+        setAvgExpectedRate(cumulativeAvgRate)
+        // Amount to that the seller/user will receive; result is expressed as an integer with collateral token decimals
+        const youReceive = cumulativeMaker
         setYouReceive(youReceive)
       }
     } else {
       if (numberOfOptions == 0) {
         if (existingBuyLimitOrders.length > 0) {
-          setAvgExpectedRate(Number(existingBuyLimitOrders[0].expectedRate))
+          setAvgExpectedRate(existingBuyLimitOrders[0].expectedRate)
         }
       }
       setOrderBtnDisabled(true)
