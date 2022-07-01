@@ -13,6 +13,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectChainId } from '../../Redux/appSlice'
 import { utils } from 'ethers'
+import Tooltip from '@mui/material/Tooltip'
 
 interface ChainSelectorModalProps {
   onClose: () => void
@@ -27,7 +28,7 @@ const NetworkInfoContainer = styled.div<{
   padding: 14px;
   align-items: center;
   border: 1px solid rgb(67, 72, 77);
-  cursor: pointer;
+  cursor: ${(props) => (props.isSupportedChain ? 'pointer' : 'not-allowed')};
   opacity: ${(props) => (props.isSupportedChain ? 1 : 0.5)};
 
   &:hover {
@@ -40,44 +41,56 @@ const NetworkInfoContainer = styled.div<{
   }
 `
 
-const NetworkInfo = ({ chainId }: { chainId: SupportedChainId }) => {
+const NetworkInfo = ({
+  chainId,
+  onClose,
+}: {
+  chainId: SupportedChainId
+  onClose: () => void
+}) => {
   const { label, logoUrl } = CHAIN_INFO[chainId]
   const theme = useTheme()
   const connectedChainId = useAppSelector(selectChainId)
   const isSupportedChain = CURRENT_SUPPORTED_CHAIN_ID.includes(chainId)
 
   const handleNetworkClick = async () => {
+    if (!isSupportedChain) return // do nothing if the chain is not supported
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: utils.hexStripZeros(utils.hexlify(chainId)) }],
       })
+      onClose()
     } catch (err) {
       console.error(err)
     }
   }
 
   return (
-    <NetworkInfoContainer
-      theme={theme}
-      onClick={handleNetworkClick}
-      isSupportedChain={isSupportedChain}
-    >
-      <div>
-        <img src={logoUrl} alt={label} />
-      </div>
-      <div>
-        <Typography variant="h3">{label}</Typography>
-        <Typography
-          variant="h6"
-          sx={{
-            opacity: 0.5,
-          }}
-        >
-          {connectedChainId === chainId ? 'Connected' : ''}
-        </Typography>
-      </div>
-    </NetworkInfoContainer>
+    <Tooltip title={!isSupportedChain ? 'Coming soon' : ''}>
+      <NetworkInfoContainer
+        theme={theme}
+        onClick={handleNetworkClick}
+        isSupportedChain={isSupportedChain}
+      >
+        <>
+          <div>
+            <img src={logoUrl} alt={label} />
+          </div>
+          <div>
+            <Typography variant="h3">{label}</Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                opacity: 0.5,
+              }}
+            >
+              {connectedChainId === chainId ? 'Connected' : ''}
+            </Typography>
+          </div>
+        </>
+      </NetworkInfoContainer>
+    </Tooltip>
   )
 }
 
@@ -90,6 +103,9 @@ const ChainSelectorModal = ({ onClose, isOpen }: ChainSelectorModalProps) => {
       onClose={onClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
+      sx={{
+        backdropFilter: 'blur(5px)',
+      }}
     >
       <Box
         sx={{
@@ -135,7 +151,7 @@ const ChainSelectorModal = ({ onClose, isOpen }: ChainSelectorModalProps) => {
           }}
         >
           {ALL_SUPPORTED_CHAIN_IDS.map((chainId) => (
-            <NetworkInfo key={chainId} chainId={chainId} />
+            <NetworkInfo key={chainId} chainId={chainId} onClose={onClose} />
           ))}
         </Box>
       </Box>
