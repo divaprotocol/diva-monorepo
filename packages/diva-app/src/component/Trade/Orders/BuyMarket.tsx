@@ -151,14 +151,13 @@ export default function BuyMarket(props: {
         )
       }
     } else {
-      // Amount is already approved ...
+      // Approved amount is > 0 ...
 
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
-        console.log('remainingAllowance', remainingAllowance.toString())
 
-        // QUESTION: Do we have to consider existing buy limit orders here?
-
+        // youPay is the amount of collateral token that the user would need to pay for the nbrOfOptions entered.
+        // It is calculated further down in the code based on the nbrOfOptions to buy entered by the user.
         if (youPay.gt(remainingAllowance)) {
           // Collateral token amount to pay exceeds remaining allowance ...
 
@@ -176,7 +175,7 @@ export default function BuyMarket(props: {
                     Number(formatUnits(additionalAllowance, decimals))
                   ) +
                   ' ' +
-                  option.collateralToken.name +
+                  option.collateralToken.symbol +
                   ' tokens. Click Fill Order after the allowance has been updated.'
               )
             ) {
@@ -186,7 +185,11 @@ export default function BuyMarket(props: {
 
               newAllowance = await approve(newAllowance)
 
-              setRemainingAllowance(newAllowance) // QUESTION: why same as in setAllowance?
+              const remainingAllowance = newAllowance.sub(
+                existingBuyLimitOrdersAmountUser
+              )
+
+              setRemainingAllowance(remainingAllowance)
               setAllowance(newAllowance)
             } else {
               // QUESTION: setIsApproved(true) needed here (see SellMarket)?
@@ -434,10 +437,10 @@ export default function BuyMarket(props: {
       if (cumulativeAvgRate.gt(0)) {
         setAvgExpectedRate(cumulativeAvgRate)
         // Amount that the buyer/user has to pay including fee; result is expressed as an integer with collateral token decimals
-        const youPayAmount = cumulativeTaker
-          .mul(parseUnits(feeMultiplier, decimals))
+        const youPay = cumulativeTaker
+          .mul(parseUnits(feeMultiplier, decimals)) // NOTE: This assumes that the fee is the same for all orders which may not be the case -> fine-tune
           .div(collateralTokenUnit)
-        setYouPay(youPayAmount)
+        setYouPay(youPay)
       }
     } else {
       if (numberOfOptions == 0) {

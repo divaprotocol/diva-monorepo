@@ -38,10 +38,6 @@ import {
 } from '../../../Redux/Stats'
 import { tradingFee } from '../../../constants'
 import {
-  CollateralToken,
-  PositionToken,
-} from '../../../../../diva-subgraph/generated/schema'
-import {
   calcPayoffPerToken,
   calcBreakEven,
 } from '../../../Util/calcPayoffPerToken'
@@ -71,7 +67,6 @@ export default function SellMarket(props: {
   const usdPrice = props.usdPrice
   const decimals = option.collateralToken.decimals
   const positionTokenUnit = parseUnits('1')
-  const collateralTokenUnit = parseUnits('1', decimals)
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
@@ -86,7 +81,7 @@ export default function SellMarket(props: {
   const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
   // eslint-disable-next-line prettier/prettier
-  const [optionBalance, setOptionBalance] = React.useState(ZERO) // QUESTION: Why differently implemented in BuyMarket.tsx?
+  const [optionBalance, setOptionBalance] = React.useState(ZERO)
 
   const params: { tokenType: string } = useParams()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
@@ -113,7 +108,7 @@ export default function SellMarket(props: {
     const optionAllowance = await takerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
       .call()
-    console.log('allowance', optionAllowance)
+    console.log('optionAllowance', optionAllowance)
 
     return optionAllowance
   }
@@ -141,15 +136,17 @@ export default function SellMarket(props: {
         setAllowance(optionAllowance)
         setIsApproved(true)
         alert(
-          'Allowance for ' +
-            toExponentialOrNumber(Number(formatUnits(optionAllowance))) +
-            ` ${params.tokenType.toUpperCase()} tokens successfully set.`
+          `Allowance for ${toExponentialOrNumber(
+            Number(formatUnits(optionAllowance))
+          )} ${params.tokenType.toUpperCase()} tokens successfully set.`
         )
       } else {
-        alert('Please enter a positive amount for approval.')
+        alert(
+          `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to buy.`
+        )
       }
     } else {
-      // Amount is already approved ...
+      // Approved amount is > 0 ...
 
       if (optionBalance.gt(0)) {
         // User owns position tokens ...
@@ -194,7 +191,7 @@ export default function SellMarket(props: {
                 existingSellLimitOrdersAmountUser
               )
 
-              setRemainingAllowance(remainingAllowance) // QUESTION: why same as in setAllowance?
+              setRemainingAllowance(remainingAllowance)
               setAllowance(newAllowance)
             } else {
               setIsApproved(true) // QUESTION: not in line with BuyMarket -> Check with Harsh
