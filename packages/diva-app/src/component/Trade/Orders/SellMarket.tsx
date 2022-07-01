@@ -204,7 +204,6 @@ export default function SellMarket(props: {
               setRemainingAllowance(remainingAllowance)
               setAllowance(newAllowance)
             } else {
-              setIsApproved(true) // QUESTION: not in line with BuyMarket -> Check with Harsh
               console.log('Additional approval rejected by user.')
             }
           }
