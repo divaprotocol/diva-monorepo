@@ -124,7 +124,7 @@ export default function BuyMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
-      // Amount is not yet approved ...
+      // Approved amount is 0 ...
 
       if (numberOfOptions > 0) {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals)
@@ -160,7 +160,7 @@ export default function BuyMarket(props: {
         // User owns collateral tokens ...
         console.log('remainingAllowance', remainingAllowance.toString())
 
-        // QUESTION: Do we have to consider existing buy limit orders here? 
+        // QUESTION: Do we have to consider existing buy limit orders here?
 
         if (youPay.gt(remainingAllowance)) {
           // Collateral token amount to pay exceeds remaining allowance ...
@@ -271,7 +271,7 @@ export default function BuyMarket(props: {
     return {
       balance: BigENumber.from(balance),
       account: takerAccount,
-      approvalAmount: BigENumber.from(allowance),
+      allowance: BigENumber.from(allowance),
     }
   }
 
@@ -281,19 +281,16 @@ export default function BuyMarket(props: {
       const order = JSON.parse(JSON.stringify(data.order))
       const takerAmount = BigENumber.from(order.takerAmount) // collateral token (<= 18 decimals)
       const makerAmount = BigENumber.from(order.makerAmount) // position token (18 decimals)
-      console.log('takerAmount', takerAmount.toString())
 
       const remainingFillableTakerAmount =
         data.metaData.remainingFillableTakerAmount
 
-      if (BigENumber.from(remainingFillableTakerAmount).gt(1)) {
+      if (BigENumber.from(remainingFillableTakerAmount).gt(0)) {
         order['expectedRate'] = takerAmount
-          .mul(parseUnits('1', 18 - decimals))
           .mul(parseUnits('1'))
-          .div(makerAmount) // result has 18 decimals // QUESTION: Change result to collateral token decimals? Would be more intuitive
+          .div(makerAmount) // result has collateral token decimals
         console.log('expectedRate', order['expectedRate'].toString())
-        order['remainingFillableTakerAmount'] =
-          data.metaData.remainingFillableTakerAmount
+        order['remainingFillableTakerAmount'] = remainingFillableTakerAmount
         orders.push(order)
       }
     })
@@ -301,85 +298,70 @@ export default function BuyMarket(props: {
     const sortOrder = 'ascOrder'
     const orderBy = 'expectedRate'
     const sortedOrders = stableSort(orders, getComparator(sortOrder, orderBy))
-    console.log('sortedOrders')
-    console.log(sortedOrders)
     if (sortedOrders.length > 0) {
       const bestRate = sortedOrders[0].expectedRate
-      console.log('bestRate', bestRate.toString())
       // TODO: Test whether bestRate is correct when multiple orders in the orderbook
-      // const rate = Number(formatUnits(bestRate)) // has 18 decimals
       setAvgExpectedRate(bestRate)
     }
-    return {
-      sortedOrders: sortedOrders,
-    }
+    return sortedOrders
   }
 
-  const getTakerOrdersTotalAmount = async (taker) => {
-    let existingOrdersAmount = ZERO
+  // Check how many existing Buy Limit orders the user has outstanding in the orderbook.
+  // Note that in Buy Limit, the makerToken is the collateral token which is the relevant token for approval in Buy Market.
+  // As remainingFillableMakerAmount is not directly available, it has to be backed out from remainingFillableTakerAmount, takerAmount and makerAmount
+  const getTakerOrdersTotalAmount = async (maker) => {
+    let existingOrderAmount = ZERO
     if (responseBuy.length == 0) {
-      //Double check if any limit orders exists
-      const rBuy = await get0xOpenOrders(takerToken, makerToken, props.chainId)
-      if (rBuy.length > 0) {
-        responseBuy = rBuy
-      }
+      // Double check if any limit orders exists
+      const rBuy: any = await get0xOpenOrders(
+        takerToken,
+        makerToken,
+        props.chainId
+      )
+      responseBuy = rBuy
     }
-    // Check how many existing Buy Limit orders the user has currently outstanding in the orderbook.
-    // Note that in Buy Limit, the makerToken is the collateral token which is the relevant token for approval in Buy Market.
-    // As remainingFillableMakerAmount is not directly available, it has to be backed out from remainingFillableTakerAmount, takerAmount and makerAmount
     responseBuy.forEach((data: any) => {
       const order = data.order
-      const metaData = data.metaData
 
-      if (taker == order.maker) {
+      if (order.maker == maker) {
+        const metaData = data.metaData
         const remainingFillableTakerAmount = BigENumber.from(
           metaData.remainingFillableTakerAmount
         )
         const takerAmount = BigENumber.from(order.takerAmount) // position token
         const makerAmount = BigENumber.from(order.makerAmount) // collateral token
 
-        // As remainingFillableMakerAmount is not directly available
-        // it has to be calculated based on remainingFillableTakerAmount, takerAmount and makerAmount
         if (remainingFillableTakerAmount.lt(takerAmount)) {
-          // const makerAmount = new BigNumber(order.makerAmount)
-          // const takerAmount = new BigNumber(order.takerAmount)
-
-          // const bidAmount = makerAmount
-          //   .mul(parseUnits('1', 18 - option.collateralToken.decimals)) // scale to 18 decimals
-          //   .mul(parseUnits('1')) // scale to achieve high precision in integer math
-          //   .div(takerAmount) // division by amount with 18 decimals
-          // Note: the resulting remainingFillableMakerAmount may have less than 18 decimals
+          // As remainingFillableMakerAmount is not directly available
+          // it has to be calculated based on remainingFillableTakerAmount, takerAmount and makerAmount
           const remainingFillableMakerAmount = remainingFillableTakerAmount
             .mul(makerAmount)
-            .mul(parseUnits('1', 18 - decimals))
             .div(takerAmount)
-          // bidAmount
-          //   .mul(remainingFillableTakerAmount)
-          //   .mul(parseUnits('1', 18 - option.collateralToken.decimals))
-          existingOrdersAmount = existingOrdersAmount.add(
+          existingOrderAmount = existingOrderAmount.add(
             remainingFillableMakerAmount
           )
         } else {
-          existingOrdersAmount = existingOrdersAmount.add(makerAmount)
+          existingOrderAmount = existingOrderAmount.add(makerAmount)
         }
       }
     })
-    return existingOrdersAmount
+    return existingOrderAmount
   }
 
   useEffect(() => {
     if (userAddress != null) {
       getCollateralInWallet(userAddress).then(async (val) => {
+        // Use values returned from getCollateralInWallet to initialize variables
         setCollateralBalance(val.balance)
-        setAllowance(val.approvalAmount)
-        setRemainingAllowance(val.approvalAmount) // QUESTION: Why not taking into account existing Buy Limit orders here??
-        val.approvalAmount.lte(0) ? setIsApproved(false) : setIsApproved(true) // QUESTION: when can approvalAmount be negative? -> "==" should work as well
+        setAllowance(val.allowance)
+        val.allowance.eq(0) ? setIsApproved(false) : setIsApproved(true)
+
         if (responseSell.length > 0) {
           const data = await getSellLimitOrders()
           setExistingSellLimitOrders(data.sortedOrders) // Sell Limit orders which the user is going to fill during Buy Market operation
         }
         getTakerOrdersTotalAmount(val.account).then((amount) => {
-          const remainingAmount = val.approvalAmount.sub(amount)
+          const remainingAmount = val.allowance.sub(amount)
           setRemainingAllowance(remainingAmount)
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })

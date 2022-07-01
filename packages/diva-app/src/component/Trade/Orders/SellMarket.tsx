@@ -120,7 +120,7 @@ export default function SellMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
-      // Amount is not yet approved ...
+      // Approved amount is 0 ...
 
       if (numberOfOptions > 0) {
         // Calculate required allowance amount for position token incl. 1% fee (expressed as an integer with 18 decimals)
@@ -277,9 +277,9 @@ export default function SellMarket(props: {
     balance = Number(formatUnits(balance.toString(), 18))
     allowance = Number(formatUnits(allowance.toString(), 18))
     return {
-      balance: balance,
+      balance: BigENumber.from(balance),
       account: takerAccount,
-      approvalAmount: allowance,
+      allowance: BigENumber.from(allowance),
     }
   }
 
@@ -287,42 +287,40 @@ export default function SellMarket(props: {
     const orders: any = []
     responseBuy.forEach((data: any) => {
       const order = JSON.parse(JSON.stringify(data.order))
-      const makerAmount = Number(formatUnits(order.makerAmount, decimals))
-      const takerAmount = Number(formatUnits(order.takerAmount))
+      const takerAmount = BigENumber.from(order.takerAmount) // position token (18 decimals)
+      const makerAmount = BigENumber.from(order.makerAmount) // collateral token (<= 18 decimals)
 
       const remainingFillableTakerAmount =
         data.metaData.remainingFillableTakerAmount
 
-      if (BigENumber.from(remainingFillableTakerAmount).gt(1)) {
-        // > 1 to filter out dust orders
-        if (totalDecimals(makerAmount, takerAmount) > 1) {
-          order['expectedRate'] = (makerAmount / takerAmount).toFixed(
-            totalDecimals(makerAmount, takerAmount)
-          )
-        } else {
-          order['expectedRate'] = makerAmount / takerAmount
-        }
+      if (BigENumber.from(remainingFillableTakerAmount).gt(0)) {
+        order['expectedRate'] = makerAmount
+          .mul(parseUnits('1'))
+          .div(takerAmount) // result has collateral token decimals
+        console.log('expectedRate', order['expectedRate'].toString())
         order['remainingFillableTakerAmount'] = remainingFillableTakerAmount
         orders.push(order)
       }
     })
+
     const sortOrder = 'desOrder'
     const orderBy = 'expectedRate'
     const sortedOrders = stableSort(orders, getComparator(sortOrder, orderBy))
-    if (sortedOrders.length) {
+    if (sortedOrders.length > 0) {
       const bestRate = sortedOrders[0].expectedRate
-      setAvgExpectedRate(Number(bestRate))
+      // TODO: Test whether bestRate is correct when multiple orders in the orderbook
+      setAvgExpectedRate(bestRate)
     }
     return sortedOrders
   }
 
-  // Check how many existing sell limit orders the user has outstanding in the orderbook.
+  // Check how many existing Sell Limit orders the user has outstanding in the orderbook.
   // Note that in Sell Limit, the makerToken is the position token which is the relevant token for approval in Sell Market.
   // As remainingFillableMakerAmount is not directly available, it has to be backed out from remainingFillableTakerAmount, takerAmount and makerAmount
   const getMakerOrdersTotalAmount = async (maker) => {
-    let existingOrderAmount = BigENumber.from(0)
+    let existingOrderAmount = ZERO
     if (responseSell.length == 0) {
-      //Double check the any limit orders exists
+      // Double check the any limit orders exists
       const rSell: any = await get0xOpenOrders(
         takerToken,
         makerToken,
@@ -333,7 +331,7 @@ export default function SellMarket(props: {
     responseSell.forEach((data: any) => {
       const order = data.order
 
-      if (maker == order.maker) {
+      if (order.maker == maker) {
         const metaData = data.metaData
         const remainingFillableTakerAmount = BigENumber.from(
           metaData.remainingFillableTakerAmount
@@ -341,14 +339,9 @@ export default function SellMarket(props: {
         const takerAmount = BigENumber.from(order.takerAmount) // collateral token
         const makerAmount = BigENumber.from(order.makerAmount) // position token
 
-        if (remainingFillableTakerAmount.lt(makerAmount)) {
-          // const makerAmount = new BigNumber(makerAmount)
-          // const takerAmount = new BigNumber(takerAmount)
-          // const askAmount = takerAmount.div(makerAmount)
-          // const quantity = remainingFillableTakerAmount.div(askAmount)
-
-          // Note: the resulting remainingFillableMakerAmount has 18 decimals
-          // Scaling factors cancel out, hence it's straightforward calcs in that case
+        if (remainingFillableTakerAmount.lt(takerAmount)) {
+          // As remainingFillableMakerAmount is not directly available
+          // it has to be calculated based on remainingFillableTakerAmount, takerAmount and makerAmount
           const remainingFillableMakerAmount = remainingFillableTakerAmount
             .mul(makerAmount)
             .div(takerAmount)
@@ -360,31 +353,34 @@ export default function SellMarket(props: {
         }
       }
     })
-    return Number(formatUnits(existingOrderAmount.toString(), 18))
+    return existingOrderAmount
   }
 
   useEffect(() => {
-    getOptionsInWallet(userAddress).then((val) => {
-      !isNaN(val.balance) ? setOptionBalance(val.balance) : setOptionBalance(0)
-      setAllowance(val.approvalAmount)
-      setRemainingAllowance(val.approvalAmount)
-      val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
-      if (responseBuy.length > 0) {
-        getBuyLimitOrders().then((orders) => {
-          setExistingBuyLimitOrders(orders)
-        })
-      }
-      getMakerOrdersTotalAmount(val.account).then((amount) => {
-        setExistingSellLimitOrdersAmountUser(amount)
-        const remainingAmount = Number(
-          (val.approvalAmount - amount).toFixed(
-            totalDecimals(val.approvalAmount, amount)
+    if (userAddress != null) {
+      getOptionsInWallet(userAddress).then((val) => {
+        // Use values returned from getOptionsInWallet to initialize variables
+        setOptionBalance(val.balance)
+        setAllowance(val.allowance)
+        val.allowance.eq(0) ? setIsApproved(false) : setIsApproved(true)
+
+        if (responseBuy.length > 0) {
+          getBuyLimitOrders().then((orders) => {
+            setExistingBuyLimitOrders(orders)
+          })
+        }
+        getMakerOrdersTotalAmount(val.account).then((amount) => {
+          setExistingSellLimitOrdersAmountUser(amount)
+          const remainingAmount = Number(
+            (val.allowance - amount).toFixed(
+              totalDecimals(val.allowance, amount)
+            )
           )
-        )
-        setRemainingAllowance(remainingAmount)
-        remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+          setRemainingAllowance(remainingAmount)
+          remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+        })
       })
-    })
+    }
   }, [responseBuy, responseSell])
 
   useEffect(() => {
