@@ -377,75 +377,73 @@ export default function BuyMarket(props: {
   }, [responseSell, responseBuy, userAddress])
 
   useEffect(() => {
-    // Calculate expected price
+    // Calculate average price
     if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {
-      // If user has entered an input into the Number field and there are existing Sell Limit orders to fill in the orderbook
+      // If user has entered an input into the Number field and there are existing Sell Limit orders to fill in the orderbook...
+
       setOrderBtnDisabled(false)
-      let makerAmountToFill = parseUnits(numberOfOptions.toString()) // 18 decimals as makerToken is position token
+      // User input (numberOfOptions) corresponds to the maker token in Sell Limit.
+      let makerAmountToFill = parseUnits(numberOfOptions.toString()) // 18 decimals
+
       let cumulativeAvg = ZERO
       let cumulativeTaker = ZERO
       let cumulativeMaker = ZERO
 
-      // Calculate collateral amount to pay for numberOfOptions
+      // Calculate average price. Note that if numberOfOptions exceeds the amount in the orderbook,
+      // existing orders will be cleared and a portion will remain unfilled.
+      // TODO: Consider showing a message to user when desired buy amount exceeds the available amount in the orderbook.
       existingSellLimitOrders.forEach((order: any) => {
-        let takerAmount = BigENumber.from(order.takerAmount) // collateral token amount (<= 18 decimals)
-        let makerAmount = BigENumber.from(order.makerAmount) // position token amount (18 decimals)
+        // Loop through each Sell Limit order where makerToken = position token (18 decimals) and takerToken = collateral token (<= 18 decimals)
+
+        let takerAmount = BigENumber.from(order.takerAmount)
+        let makerAmount = BigENumber.from(order.makerAmount)
         const remainingFillableTakerAmount = BigENumber.from(
           order.remainingFillableTakerAmount
-        ) // <= 18 decimals
+        )
         const expectedRate = BigENumber.from(order.expectedRate) // <= 18 decimals
 
         if (remainingFillableTakerAmount.lt(takerAmount)) {
           // Existing Sell Limit order was already partially filled
 
-          takerAmount = remainingFillableTakerAmount
-          makerAmount = remainingFillableTakerAmount
+          // Overwrite takerAmount and makerAmount with remaining amounts
+          takerAmount = remainingFillableTakerAmount // <= 18 decimals
+          makerAmount = remainingFillableTakerAmount // 18 decimals
             .mul(collateralTokenUnit) // scaling for high precision integer math
             .div(expectedRate)
-        } 
-        // else {
-        //   takerAmount = remainingFillableTakerAmount and makerAmount = remainingFillableMakerAmount
-        // }
+        }
 
         if (makerAmountToFill.gt(0)) {
-          if (makerAmountToFill.lte(makerAmount)) {
+          if (makerAmountToFill.lt(makerAmount)) {
             const takerAmountToFill = expectedRate
               .mul(makerAmountToFill)
-              .div(parseUnits('1'))
-              .div(parseUnits('1', 18 - decimals))
-            cumulativeTaker = cumulativeTaker.add(takerAmountToFill)
-            cumulativeMaker = cumulativeMaker.add(makerAmountToFill)
+              .div(positionTokenUnit)
+            cumulativeTaker = cumulativeTaker.add(takerAmountToFill) // <= 18 decimals
+            cumulativeMaker = cumulativeMaker.add(makerAmountToFill) // 18 decimals
             makerAmountToFill = ZERO // This condition ensures that we don't enter into the makerAmountToFill.gt(0) if-clause again
           } else {
-            cumulativeTaker = cumulativeTaker.add(takerAmount)
-            cumulativeMaker = cumulativeMaker.add(makerAmount)
+            cumulativeTaker = cumulativeTaker.add(takerAmount) // <= 18 decimals
+            cumulativeMaker = cumulativeMaker.add(makerAmount) // 18 decimals
             makerAmountToFill = makerAmountToFill.sub(makerAmount)
           }
         }
       })
-      // Calculate average price to pay excluding 1% fee (result is expressed as an integer with 18 decimals)
+      // Calculate average price to pay excluding 1% fee (result is expressed as an integer with collateral token decimals (<= 18))
       cumulativeAvg = cumulativeTaker
-        .mul(parseUnits('1', 18 - decimals))
-        .mul(parseUnits('1')) // scaling for high precision integer math
+        .mul(positionTokenUnit) // scaling for high precision integer math
         .div(cumulativeMaker)
 
       if (cumulativeAvg.gt(0)) {
-        console.log('cumulativeAvg', cumulativeAvg.toString())
         setAvgExpectedRate(cumulativeAvg)
         // Amount to pay by taker including fee; result is expressed as an integer with collateral token decimals
         const youPayAmount = cumulativeAvg
           .mul(parseUnits(convertExponentialToDecimal(numberOfOptions)))
-          .mul(parseUnits(feeMultiplier))
-          .div(parseUnits('1', 18 + 18 + 18 - decimals))
+          .mul(parseUnits(feeMultiplier, decimals))
+          .div(parseUnits('1', 18 + 18))
         setYouPay(youPayAmount)
       }
     } else {
       if (numberOfOptions == 0) {
         if (existingSellLimitOrders.length > 0) {
-          console.log(
-            'existingSellLimitOrders[0].expectedRate',
-            formatUnits(existingSellLimitOrders[0].expectedRate)
-          )
           setAvgExpectedRate(existingSellLimitOrders[0].expectedRate)
         }
       }

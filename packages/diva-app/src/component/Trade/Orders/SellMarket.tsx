@@ -389,19 +389,26 @@ export default function SellMarket(props: {
   }, [responseBuy, responseSell, userAddress])
 
   useEffect(() => {
-    // Calculate expected price
+    // Calculate average price
     if (numberOfOptions > 0 && existingBuyLimitOrders.length > 0) {
-      // If user has entered an input into the Number field and there are existing Buy Limit orders to fill in the orderbook
+      // If user has entered an input into the Number field and there are existing Buy Limit orders to fill in the orderbook...
+
       setOrderBtnDisabled(false)
-      let makerAmountToFill = parseUnits(numberOfOptions.toString()) // <=18 decimals as makerToken is collateral token
+      // User input (numberOfOptions) corresponds to the taker token in Buy Limit.
+      let takerAmountToFill = parseUnits(numberOfOptions.toString()) // <=18 decimals
+
       let cumulativeAvg = ZERO
       let cumulativeTaker = ZERO
       let cumulativeMaker = ZERO
 
-      // Calculate collateral amount to ... TODO
+      // Calculate average price. Note that if numberOfOptions exceeds the amount in the orderbook,
+      // existing orders will be cleared and a portion will remain unfilled.
+      // TODO: Consider showing a message to user when desired sell amount exceeds the available amount in the orderbook.
       existingBuyLimitOrders.forEach((order: any) => {
-        let takerAmount = BigENumber.from(order.takerAmount) // position token amount (18 decimals)
-        let makerAmount = BigENumber.from(order.makerAmount) // collateral token amount (<= 18 decimals)
+        // Loop through each Buy Limit order where makerToken = collateral token (<= 18 decimals) and takerToken = position token (18 decimals)
+
+        let takerAmount = BigENumber.from(order.takerAmount)
+        let makerAmount = BigENumber.from(order.makerAmount)
         const remainingFillableTakerAmount = BigENumber.from(
           order.remainingFillableTakerAmount
         )
@@ -417,16 +424,18 @@ export default function SellMarket(props: {
             .div(positionTokenUnit) // result has <= 18 decimals
         }
 
-        if (makerAmountToFill.gt(0)) {
-          if (makerAmountToFill.lte(makerAmount)) {
-            const orderTotalAmount = expectedRate.mul(makerAmountToFill)
-            cumulativeMaker = cumulativeMaker.add(orderTotalAmount)
-            cumulativeTaker = cumulativeTaker.add(makerAmountToFill)
-            makerAmountToFill = ZERO
+        if (takerAmountToFill.gt(0)) {
+          if (takerAmountToFill.lt(takerAmount)) {
+            const makerAmountToFill = expectedRate
+              .mul(takerAmountToFill)
+              .div(positionTokenUnit) // result has <= 18 decimals
+            cumulativeMaker = cumulativeMaker.add(makerAmountToFill)
+            cumulativeTaker = cumulativeTaker.add(takerAmountToFill)
+            takerAmountToFill = ZERO
           } else {
             cumulativeTaker = cumulativeTaker.add(takerAmount)
             cumulativeMaker = cumulativeMaker.add(makerAmount)
-            makerAmountToFill = makerAmountToFill.sub(takerAmount)
+            takerAmountToFill = takerAmountToFill.sub(takerAmount)
           }
         }
       })
