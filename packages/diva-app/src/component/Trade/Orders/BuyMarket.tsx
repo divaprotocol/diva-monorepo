@@ -384,26 +384,31 @@ export default function BuyMarket(props: {
       let cumulativeAvg = ZERO
       let cumulativeTaker = ZERO
       let cumulativeMaker = ZERO
+
+      // Calculate collateral amount to pay for numberOfOptions
       existingSellLimitOrders.forEach((order: any) => {
         let takerAmount = BigENumber.from(order.takerAmount) // collateral token amount (<= 18 decimals)
         let makerAmount = BigENumber.from(order.makerAmount) // position token amount (18 decimals)
         const remainingFillableTakerAmount = BigENumber.from(
           order.remainingFillableTakerAmount
-        )
-        const expectedRate = BigENumber.from(order.expectedRate)
+        ) // <= 18 decimals
+        const expectedRate = BigENumber.from(order.expectedRate) // <= 18 decimals
+
+        let remainingFillableMakerAmount
 
         if (remainingFillableTakerAmount.lt(takerAmount)) {
           // Existing Sell Limit order was already partially filled
 
-          takerAmount = remainingFillableTakerAmount
-          makerAmount = remainingFillableTakerAmount
-            .mul(parseUnits('1', 18 - decimals)) // scaling to 18 decimals
-            .mul(parseUnits('1')) // scaling for high precision integer math
+          remainingFillableMakerAmount = remainingFillableTakerAmount
+            .mul(collateralTokenUnit) // scaling for high precision integer math
             .div(expectedRate)
-        } // else takerAmount = remainingFillableTakerAmount and makerAmount = remainingFillableMakerAmount
+        } 
+        // else {
+        //   takerAmount = remainingFillableTakerAmount and makerAmount = remainingFillableMakerAmount
+        // }
 
         if (makerAmountToFill.gt(0)) {
-          if (makerAmountToFill.lte(makerAmount)) {
+          if (makerAmountToFill.lte(remainingFillableMakerAmount)) {
             const takerAmountToFill = expectedRate
               .mul(makerAmountToFill)
               .div(parseUnits('1'))
@@ -413,8 +418,8 @@ export default function BuyMarket(props: {
             makerAmountToFill = ZERO // This condition ensures that we don't enter into the makerAmountToFill.gt(0) if-clause again
           } else {
             cumulativeTaker = cumulativeTaker.add(takerAmount)
-            cumulativeMaker = cumulativeMaker.add(makerAmount)
-            makerAmountToFill = makerAmountToFill.sub(makerAmount)
+            cumulativeMaker = cumulativeMaker.add(remainingFillableMakerAmount)
+            makerAmountToFill = makerAmountToFill.sub(remainingFillableMakerAmount)
           }
         }
       })

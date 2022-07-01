@@ -396,26 +396,29 @@ export default function SellMarket(props: {
       let cumulativeAvg = ZERO
       let cumulativeTaker = ZERO
       let cumulativeMaker = ZERO
+
+      // Calculate collateral amount to ... TODO
       existingBuyLimitOrders.forEach((order: any) => {
         let takerAmount = BigENumber.from(order.takerAmount) // position token amount (18 decimals)
         let makerAmount = BigENumber.from(order.makerAmount) // collateral token amount (<= 18 decimals)
         const remainingFillableTakerAmount = BigENumber.from(
           order.remainingFillableTakerAmount
         )
-        const expectedRate = BigENumber.from(order.expectedRate)
+        const expectedRate = BigENumber.from(order.expectedRate) // <= 18 decimals
 
         if (remainingFillableTakerAmount.lt(takerAmount)) {
           // Existing Buy Limit order was already partially filled
 
-          takerAmount = remainingFillableTakerAmount
+          // Overwrite takerAmount and makerAmount with remaining amounts
+          takerAmount = remainingFillableTakerAmount // 18 decimals
           makerAmount = remainingFillableTakerAmount
             .mul(order.expectedRate)
-            .div(collateralTokenUnit)
+            .div(positionTokenUnit) // result has <= 18 decimals
         }
 
-        if (makerAmountToFill > 0) {
-          if (makerAmountToFill <= takerAmount) {
-            const orderTotalAmount = Number(expectedRate * makerAmountToFill)
+        if (makerAmountToFill.gt(0)) {
+          if (makerAmountToFill.lte(takerAmount)) {
+            const orderTotalAmount = expectedRate.mul(makerAmountToFill)
             cumulativeMaker = cumulativeMaker + orderTotalAmount
             cumulativeTaker = cumulativeTaker + makerAmountToFill
             makerAmountToFill = 0
