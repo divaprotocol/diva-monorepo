@@ -511,6 +511,8 @@ export default function SellLimit(props: {
           </FormLabel>
           <FormInput
             type="number"
+            step="0.1"
+            min="0"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
         </FormDiv>
@@ -530,6 +532,8 @@ export default function SellLimit(props: {
           </FormLabel>
           <FormInput
             type="number"
+            step="0.1"
+            min="0"
             onChange={(event) => handlePricePerOptions(event.target.value)}
           />
         </FormDiv>

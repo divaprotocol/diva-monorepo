@@ -538,6 +538,8 @@ export default function SellMarket(props: {
           </FormLabel>
           <FormInput
             type="number"
+            step="0.01"
+            min="0"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
         </FormDiv>

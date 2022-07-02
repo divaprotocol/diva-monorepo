@@ -90,7 +90,7 @@ export default function BuyLimit(props: {
     const nbrOptions = parseFloat(value)
     if (!isNaN(nbrOptions)) {
       setNumberOfOptions(nbrOptions)
-      if (pricePerOption > 0 && nbrOptions > 0) {
+      if (pricePerOption > 0 && nbrOptions > 0.0) {
         const youPay = pricePerOption * nbrOptions
         setYouPay(youPay)
         setOrderBtnDisabled(false)
@@ -504,6 +504,8 @@ export default function BuyLimit(props: {
           </FormLabel>
           <FormInput
             type="number"
+            step="0.01"
+            min="0"
             onChange={(event) => handleNumberOfOptions(event.target.value)}
           />
         </FormDiv>
@@ -523,6 +525,8 @@ export default function BuyLimit(props: {
           </FormLabel>
           <FormInput
             type="number"
+            step="0.01"
+            min="0"
             onChange={(event) => handlePricePerOptions(event.target.value)}
           />
         </FormDiv>
