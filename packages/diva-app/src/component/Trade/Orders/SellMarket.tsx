@@ -129,6 +129,7 @@ export default function SellMarket(props: {
           .mul(parseUnits(feeMultiplier))
           .div(positionTokenUnit)
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
+
         // Set allowance
         const optionAllowance = await approve(amountToApprove)
 
@@ -205,6 +206,13 @@ export default function SellMarket(props: {
 
               setRemainingAllowance(remainingAllowance)
               setAllowance(newAllowance)
+              alert(
+                `Additional 
+                    ${toExponentialOrNumber(
+                      Number(formatUnits(additionalAllowance.toString()))
+                    )} 
+                    ${params.tokenType.toUpperCase()} approved. Please proceed with the order.`
+              )
             } else {
               console.log('Additional approval rejected by user.')
             }

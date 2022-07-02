@@ -188,6 +188,7 @@ export default function SellLimit(props: {
           .add(parseUnits(convertExponentialToDecimal(numberOfOptions)))
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
+        // Set allowance
         const collateralAllowance = await approve(amountToApprove)
 
         const remainingAllowance = collateralAllowance.sub(
@@ -241,52 +242,41 @@ export default function SellLimit(props: {
 
             alert('Insufficient position token balance')
           } else {
-            const additionalApproval = Number(
-              (numberOfOptions - remainingAllowance).toFixed(
-                totalDecimals(numberOfOptions, remainingAllowance)
-              )
-            )
+            // Calculate additional allowance required to executed the Sell Limit order
+            const additionalAllowance =
+              numberOfOptionsBN.sub(remainingAllowance)
             if (
               confirm(
-                'Required collateral balance exceeds approved limit. Do you want to approve an additional ' +
-                  +additionalApproval +
+                'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
+                  toExponentialOrNumber(
+                    Number(formatUnits(additionalAllowance))
+                  ) +
                   ' ' +
                   params.tokenType.toUpperCase() +
-                  ' to complete this order?'
+                  ' tokens. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              let newAllowance = additionalApproval
+              let newAllowance = additionalAllowance
                 .add(allowance)
                 .add(BigNumber.from(100))
 
               newAllowance = await approve(newAllowance)
 
-              if (newAllowance == 'undefined') {
-                alert('Metamask could not finish approval.') // QUESTION: Why not included in Markets?
-              } else {
-                newAllowance = approvedAllowance
-                newAllowance = Number(formatUnits(newAllowance.toString(), 18))
-                const remainingAllowance = Number(
-                  (newAllowance - existingSellLimitOrdersAmountUser).toFixed(
-                    totalDecimals(
-                      newAllowance,
-                      existingSellLimitOrdersAmountUser
-                    )
-                  )
-                )
+              const remainingAllowance = newAllowance.sub(
+                existingSellLimitOrdersAmountUser
+              )
 
-                setRemainingAllowance(remainingAllowance)
-                setAllowance(newAllowance)
-                alert(
-                  `Additional 
-                    ${toExponentialOrNumber(additionalApproval)} 
+              setRemainingAllowance(remainingAllowance)
+              setAllowance(newAllowance)
+              alert(
+                `Additional 
+                    ${toExponentialOrNumber(
+                      Number(formatUnits(additionalAllowance.toString()))
+                    )} 
                     ${params.tokenType.toUpperCase()} approved. Please proceed with the order.`
-                )
-              }
+              )
             } else {
-              //TBD discuss this case
-              setIsApproved(true)
-              console.log('nothing done')
+              console.log('Additional approval rejected by user.')
             }
           }
         } else {
@@ -318,7 +308,9 @@ export default function SellLimit(props: {
             })
         }
       } else {
-        alert('No ' + params.tokenType.toUpperCase() + ' available to sell.')
+        alert(
+          'No ' + params.tokenType.toUpperCase() + ' tokens available to sell.'
+        )
       }
     }
   }

@@ -142,13 +142,13 @@ export default function BuyLimit(props: {
       .call()
     allowance = Number(formatUnits(allowance, decimals))
 
-    const remainingApproval = allowance
+    const remainingAllowance = allowance
       .sub(existingBuyLimitOrdersAmountUser)
       .mul(parseUnits(feeMultiplier, decimals)) // Adding 1% fee as it also requires approval
       .div(parseUnits('1', decimals))
       .add(BigNumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
-    setRemainingAllowance(remainingApproval)
+    setRemainingAllowance(remainingAllowance)
   }
 
   const handleExpirySelection = (event: SelectChangeEvent<number>) => {
@@ -190,59 +190,58 @@ export default function BuyLimit(props: {
       if (numberOfOptions > 0) {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals (<= 18)).
         const amountToApprove = allowance.add(youPay).add(BigNumber.from(100))
+
+        // Set allowance
         const collateralAllowance = await approve(amountToApprove)
+
+        const remainingAllowance = collateralAllowance.sub(
+          existingBuyLimitOrdersAmountUser
+        )
 
         // QUESTION: Why is this if statement is not included in Markets files?
         if (collateralAllowance == 'undefined') {
           alert('Metamask could not finish approval please check gas limit')
         } else {
-          collateralAllowance = Number(
-            formatUnits(collateralAllowance.toString())
-          )
-          const remainingApproval = Number(
-            (collateralAllowance - existingBuyLimitOrdersAmountUser).toFixed(
-              totalDecimals(
-                collateralAllowance,
-                existingBuyLimitOrdersAmountUser
-              )
-            )
-          )
-          setRemainingAllowance(remainingApproval)
+          setRemainingAllowance(remainingAllowance)
           setAllowance(collateralAllowance)
           setIsApproved(true)
           alert(
-            `Allowance for ${youPay} ${option.collateralToken.symbol} successfully set.`
+            `Allowance for ${toExponentialOrNumber(
+              Number(formatUnits(collateralAllowance, decimals))
+            )} ${option.collateralToken.symbol} tokens successfully set.`
           )
         }
       } else {
         alert(
-          `Please enter the number of ${params.tokenType.toUpperCase()} you want to buy.`
+          `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to buy.`
         )
       }
     } else {
+      // Approved amount is > 0 ...
+
       if (collateralBalance > 0) {
-        const totalAmount = youPay + existingBuyLimitOrdersAmountUser
-        if (youPay > remainingAllowance) {
-          if (totalAmount > collateralBalance) {
+        // User owns collateral tokens ...
+
+        const totalBuyAmount = youPay.add(existingBuyLimitOrdersAmountUser)
+
+        if (youPay.gt(remainingAllowance)) {
+          if (totalBuyAmount.gt(collateralBalance)) {
             alert('Not sufficient balance')
           } else {
-            const additionalApproval = Number(
-              (youPay - remainingAllowance).toFixed(
-                totalDecimals(youPay, remainingAllowance)
-              )
-            )
+            const additionalAllowance = youPay.sub(remainingAllowance)
+            // HERE continue ...
             if (
               confirm(
                 'Required collateral balance exceeds approved limit. Do you want to approve an additional ' +
-                  additionalApproval +
+                  additionalAllowance +
                   ' ' +
                   option.collateralToken.name +
                   ' to complete this order?'
               )
             ) {
               let newAllowance = Number(
-                (additionalApproval + allowance).toFixed(
-                  totalDecimals(additionalApproval, allowance)
+                (additionalAllowance + allowance).toFixed(
+                  totalDecimals(additionalAllowance, allowance)
                 )
               )
               const approvedAllowance = await approve(
@@ -253,7 +252,7 @@ export default function BuyLimit(props: {
               } else {
                 newAllowance = approvedAllowance
                 newAllowance = Number(formatUnits(newAllowance.toString()))
-                const remainingApproval = Number(
+                const remainingAllowance = Number(
                   (newAllowance - existingBuyLimitOrdersAmountUser).toFixed(
                     totalDecimals(
                       newAllowance,
@@ -261,19 +260,22 @@ export default function BuyLimit(props: {
                     )
                   )
                 )
-                setRemainingAllowance(remainingApproval)
+                setRemainingAllowance(remainingAllowance)
                 setAllowance(newAllowance)
                 alert(
-                  'Additional ' +
-                    additionalApproval +
-                    ' ' +
-                    option.collateralToken.symbol +
-                    ' approved. Please proceed with the order.'
+                  `Additional 
+                      ${toExponentialOrNumber(
+                        Number(
+                          formatUnits(additionalAllowance.toString(), decimals)
+                        )
+                      )} 
+                      ${
+                        option.collateralToken.symbol
+                      } approved. Please proceed with the order.`
                 )
               }
             } else {
-              //TBD discuss this case
-              console.log('nothing done')
+              console.log('Additional approval rejected by user.')
             }
           }
         } else {

@@ -132,6 +132,7 @@ export default function BuyMarket(props: {
         const amountToApprove = allowance
           .add(youPay) // youPay is already including fee, hence no feeMultiplier needed in that case
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
+
         // Set allowance
         const collateralAllowance = await approve(amountToApprove)
 
@@ -193,6 +194,17 @@ export default function BuyMarket(props: {
 
               setRemainingAllowance(remainingAllowance)
               setAllowance(newAllowance)
+              alert(
+                `Additional 
+                    ${toExponentialOrNumber(
+                      Number(
+                        formatUnits(additionalAllowance.toString(), decimals)
+                      )
+                    )} 
+                    ${
+                      option.collateralToken.symbol
+                    } approved. Please proceed with the order.`
+              )
             } else {
               console.log('Additional approval rejected by user.')
             }
