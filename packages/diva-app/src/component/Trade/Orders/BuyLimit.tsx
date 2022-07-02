@@ -28,7 +28,11 @@ import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { BigNumber } from 'ethers'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import { useParams } from 'react-router-dom'
-import { selectChainId, selectUserAddress, setUserAddress } from '../../../Redux/appSlice'
+import {
+  selectChainId,
+  selectUserAddress,
+  setUserAddress,
+} from '../../../Redux/appSlice'
 import {
   setBreakEven,
   setIntrinsicValue,
@@ -53,7 +57,7 @@ export default function BuyLimit(props: {
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
 
-  const userAdress = useAppSelector(selectUserAddress)
+  const userAddress = useAppSelector(selectUserAddress)
 
   const option = props.option
   const exchangeProxy = props.exchangeProxy
@@ -70,13 +74,15 @@ export default function BuyLimit(props: {
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
   const [youPay, setYouPay] = React.useState(0.0)
   const [expiry, setExpiry] = React.useState(5)
-  const [existingBuyLimitOrdersAmountUser, setExistingBuyLimitOrdersAmountUser] = React.useState(0.0)
+  const [
+    existingBuyLimitOrdersAmountUser,
+    setExistingBuyLimitOrdersAmountUser,
+  ] = React.useState(0.0)
 
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(0.0)
-  const [remainingAllowance, setRemainingAllowance] =
-    React.useState(0.0)
+  const [remainingAllowance, setRemainingAllowance] = React.useState(0.0)
   const [collateralBalance, setCollateralBalance] = React.useState(0)
 
   const params: { tokenType: string } = useParams()
@@ -131,7 +137,7 @@ export default function BuyLimit(props: {
     setYouPay(parseFloat('0.0'))
     setOrderBtnDisabled(true)
     let allowance = await makerTokenContract.methods
-      .allowance(userAdress, exchangeProxy)
+      .allowance(userAddress, exchangeProxy)
       .call()
     allowance = Number(formatUnits(allowance, decimals))
 
@@ -153,19 +159,18 @@ export default function BuyLimit(props: {
     )
   }
 
-  const approveBuyAmount = async (amount) => {
+  const approve = async (amount) => {
     try {
       const approveResponse = await makerTokenContract.methods
         .approve(exchangeProxy, amount)
-        .send({ from: userAdress })
-
+        .send({ from: userAddress })
       if ('events' in approveResponse) {
-        return approveResponse.events.Approval.returnValues.value
+        return approveResponse.events.Approval.returnValues.value // QUESTION: Why not included in Buy/Sell Market?
       } else {
         //in case the approve call does not or delay emit events, read the allowance again
-        await new Promise((resolve) => setTimeout(resolve, 4000))
+        await new Promise((resolve) => setTimeout(resolve, 4000)) // QUESTION: Why not included in Buy/Sell Market?
         const approvedAllowance = await makerTokenContract.methods
-          .allowance(userAdress, exchangeProxy)
+          .allowance(userAddress, exchangeProxy)
           .call()
         return approvedAllowance
       }
@@ -182,7 +187,7 @@ export default function BuyLimit(props: {
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
-        let collateralAllowance = await approveBuyAmount(
+        let collateralAllowance = await approve(
           parseUnits(convertExponentialToDecimal(amount), decimals)
         )
         if (collateralAllowance == 'undefined') {
@@ -193,7 +198,10 @@ export default function BuyLimit(props: {
           )
           const remainingApproval = Number(
             (collateralAllowance - existingBuyLimitOrdersAmountUser).toFixed(
-              totalDecimals(collateralAllowance, existingBuyLimitOrdersAmountUser)
+              totalDecimals(
+                collateralAllowance,
+                existingBuyLimitOrdersAmountUser
+              )
             )
           )
           setRemainingAllowance(remainingApproval)
@@ -234,7 +242,7 @@ export default function BuyLimit(props: {
                   totalDecimals(additionalApproval, allowance)
                 )
               )
-              const approvedAllowance = await approveBuyAmount(
+              const approvedAllowance = await approve(
                 parseUnits(convertExponentialToDecimal(newAllowance), decimals)
               )
               if (approvedAllowance == 'undefined') {
@@ -244,7 +252,10 @@ export default function BuyLimit(props: {
                 newAllowance = Number(formatUnits(newAllowance.toString()))
                 const remainingApproval = Number(
                   (newAllowance - existingBuyLimitOrdersAmountUser).toFixed(
-                    totalDecimals(newAllowance, existingBuyLimitOrdersAmountUser)
+                    totalDecimals(
+                      newAllowance,
+                      existingBuyLimitOrdersAmountUser
+                    )
                   )
                 )
                 setRemainingAllowance(remainingApproval)
@@ -264,7 +275,7 @@ export default function BuyLimit(props: {
           }
         } else {
           const orderData = {
-            maker: userAdress,
+            maker: userAddress,
             provider: web3,
             isBuy: true,
             nbrOptions: numberOfOptions,
@@ -315,36 +326,44 @@ export default function BuyLimit(props: {
 
   // Check how many existing Buy Limit orders the user has outstanding in the orderbook.
   // Note that in Buy Limit, the makerToken is the collateral token which is the relevant token for approval.
+  // TODO: Outsource this function into OpenOrders.ts, potentially integrate into getUserOrders function
   const getTotalBuyLimitOrderAmountUser = async (maker) => {
     let existingOrdersAmount = ZERO
     if (responseBuy.length == 0) {
-      //Double check any limit orders exists
-      const rBuy = await get0xOpenOrders(makerToken, takerToken, props.chainId)
-      if (rBuy.length > 0) {
-        responseBuy = rBuy
-      }
+      // Double check any limit orders exists
+      const rBuy: any = await get0xOpenOrders(
+        makerToken,
+        takerToken,
+        props.chainId
+      )
+      responseBuy = rBuy
     }
     responseBuy.forEach((data: any) => {
       const order = data.order
-      const metaData = data.metaData
 
-      if (maker == order.maker) {
+      if (order.maker == maker) {
+        const metaData = data.metaData
         const remainingFillableTakerAmount = BigNumber.from(
-          metaData.remainingFillableTakerAmount.toString()
+          metaData.remainingFillableTakerAmount
         )
+        const takerAmount = BigNumber.from(order.takerAmount)
+        const makerAmount = BigNumber.from(order.makerAmount)
 
-        if (remainingFillableTakerAmount < order.takerAmount) {
-          const makerAmount = BigNumber.from(order.makerAmount)
-          const takerAmount = BigNumber.from(order.takerAmount)
-          const bidAmount = makerAmount.dividedBy(takerAmount)
-          const youPay = bidAmount.multipliedBy(remainingFillableTakerAmount)
-          existingOrdersAmount = existingOrdersAmount.plus(youPay)
+        if (remainingFillableTakerAmount.lt(takerAmount)) {
+          // As remainingFillableMakerAmount is not directly available
+          // it has to be calculated based on remainingFillableTakerAmount, takerAmount and makerAmount
+          const remainingFillableMakerAmount = remainingFillableTakerAmount
+            .mul(makerAmount)
+            .div(takerAmount)
+          existingOrdersAmount = existingOrdersAmount.add(
+            remainingFillableMakerAmount
+          )
         } else {
-          existingOrdersAmount = existingOrdersAmount.plus(order.makerAmount)
+          existingOrdersAmount = existingOrdersAmount.add(makerAmount)
         }
       }
     })
-    return Number(formatUnits(existingOrdersAmount.toString(), decimals))
+    return existingOrdersAmount
   }
 
   useEffect(() => {
@@ -357,7 +376,7 @@ export default function BuyLimit(props: {
 
         // Get the user's (maker) existing Buy Limit orders which block some of the user's allowance
         getTotalBuyLimitOrderAmountUser(userAddress).then((amount) => {
-          const remainingAmount = val.allowance.sub(amount) // QUESTION: Can this be negative?
+          const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance
           setExistingBuyLimitOrdersAmountUser(amount)
           setRemainingAllowance(remainingAmount)
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)

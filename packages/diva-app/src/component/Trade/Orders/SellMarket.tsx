@@ -318,6 +318,7 @@ export default function SellMarket(props: {
   // Check how many existing Sell Limit orders the user has outstanding in the orderbook.
   // Note that in Sell Limit, the makerToken is the position token which is the relevant token for approval.
   // As remainingFillableMakerAmount is not directly available, it has to be backed out from remainingFillableTakerAmount, takerAmount and makerAmount
+  // TODO: Outsource this function into OpenOrders.ts, potentially integrate into getUserOrders function
   const getTotalSellLimitOrderAmountUser = async (maker) => {
     let existingOrdersAmount = ZERO
     if (responseSell.length == 0) {
@@ -374,7 +375,7 @@ export default function SellMarket(props: {
 
         // Get the user's (taker) existing Sell Limit orders which block some of the user's allowance
         getTotalSellLimitOrderAmountUser(userAddress).then((amount) => {
-          const remainingAmount = val.allowance.sub(amount) // QUESTION: Can this be negative?
+          const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance
           setExistingSellLimitOrdersAmountUser(amount)
           setRemainingAllowance(remainingAmount)
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)

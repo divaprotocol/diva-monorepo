@@ -154,16 +154,16 @@ export default function SellLimit(props: {
     setRemainingAllowance(remainingAmount)
   }
 
-  const approveSellAmount = async (amount) => {
+  const approve = async (amount) => {
     try {
       const approveResponse = await makerTokenContract.methods
         .approve(exchangeProxy, amount)
         .send({ from: userAddress })
       if ('events' in approveResponse) {
-        return approveResponse.events.Approval.returnValues.value
+        return approveResponse.events.Approval.returnValues.value // QUESTION: Why not included in Buy/Sell Market?
       } else {
         //in case the approve call does not or delay emit events read the allowance again
-        await new Promise((resolve) => setTimeout(resolve, 4000))
+        await new Promise((resolve) => setTimeout(resolve, 4000)) // QUESTION: Why not included in Buy/Sell Market?
         const approvedAllowance = await makerTokenContract.methods
           .allowance(userAddress, exchangeProxy)
           .call()
@@ -185,7 +185,7 @@ export default function SellLimit(props: {
           )
         )
         // NOTE: decimals will need adjustment to decimals when we switch to contracts version 1.0.0
-        let approvedAllowance = await approveSellAmount(
+        let approvedAllowance = await approve(
           parseUnits(convertExponentialToDecimal(amount), 18)
         )
         if (approvedAllowance == 'undefined') {
@@ -245,7 +245,7 @@ export default function SellLimit(props: {
                   totalDecimals(additionalApproval, allowance)
                 )
               )
-              const approvedAllowance = await approveSellAmount(
+              const approvedAllowance = await approve(
                 parseUnits(convertExponentialToDecimal(newAllowance), 18)
               )
 
@@ -328,10 +328,11 @@ export default function SellLimit(props: {
 
   // Check how many existing Sell Limit orders the user has outstanding in the orderbook.
   // Note that in Sell Limit, the makerToken is the collateral token which is the relevant token for approval.
+  // TODO: Outsource this function into OpenOrders.ts, potentially integrate into getUserOrders function
   const getTotalSellLimitOrderAmountUser = async (maker) => {
-    let existingOrderAmount = ZERO
+    let existingOrdersAmount = ZERO
     if (responseSell.length == 0) {
-      //Double check any limit orders exists
+      // Double check any limit orders exists
       const rSell: any = await get0xOpenOrders(
         makerToken,
         takerToken,
@@ -339,27 +340,32 @@ export default function SellLimit(props: {
       )
       responseSell = rSell
     }
-
-    responseSell?.forEach((data: any) => {
+    responseSell.forEach((data: any) => {
       const order = data.order
-      if (maker == order.maker) {
+
+      if (order.maker == maker) {
         const metaData = data.metaData
-        const remainingTakerAmount = BigNumber.from(
-          metaData.remainingFillableTakerAmount.toString()
+        const remainingFillableTakerAmount = BigNumber.from(
+          metaData.remainingFillableTakerAmount
         )
-        if (remainingTakerAmount == order.makerAmount) {
-          existingOrderAmount = existingOrderAmount.plus(order.makerAmount)
+        const takerAmount = BigNumber.from(order.takerAmount)
+        const makerAmount = BigNumber.from(order.makerAmount)
+
+        if (remainingFillableTakerAmount.lt(takerAmount)) {
+          // As remainingFillableMakerAmount is not directly available
+          // it has to be calculated based on remainingFillableTakerAmount, takerAmount and makerAmount
+          const remainingFillableMakerAmount = remainingFillableTakerAmount
+            .mul(makerAmount)
+            .div(takerAmount)
+          existingOrdersAmount = existingOrdersAmount.add(
+            remainingFillableMakerAmount
+          )
         } else {
-          const makerAmount = BigNumber.from(order.makerAmount)
-          const takerAmount = BigNumber.from(order.takerAmount)
-          const askAmount = takerAmount.dividedBy(makerAmount)
-          const quantity = remainingTakerAmount.dividedBy(askAmount)
-          existingOrderAmount = existingOrderAmount.plus(quantity)
+          existingOrdersAmount = existingOrdersAmount.add(makerAmount)
         }
       }
     })
-    //return existingOrderAmount
-    return Number(formatUnits(existingOrderAmount.toString(), 18))
+    return existingOrdersAmount
   }
 
   useEffect(() => {
@@ -372,7 +378,7 @@ export default function SellLimit(props: {
 
         // Get the user's (maker) existing Sell Limit orders which block some of the user's allowance
         getTotalSellLimitOrderAmountUser(userAddress).then((amount) => {
-          const remainingAmount = val.allowance.sub(amount) // QUESTION: Can this be negative?
+          const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance
           setExistingSellLimitOrdersAmountUser(amount)
           setRemainingAllowance(remainingAmount)
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
