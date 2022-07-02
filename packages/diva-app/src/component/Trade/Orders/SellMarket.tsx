@@ -271,6 +271,7 @@ export default function SellMarket(props: {
     }
   }
 
+  // TODO: Outsource this function into a separate file as it's the same across Buy/Sell Limit/Market
   const getOptionsInWallet = async (takerAccount: string) => {
     const allowance = await takerTokenContract.methods
       .allowance(takerAccount, exchangeProxy)
@@ -280,7 +281,6 @@ export default function SellMarket(props: {
       .call()
     return {
       balance: BigNumber.from(balance),
-      account: takerAccount,
       allowance: BigNumber.from(allowance),
     }
   }
@@ -318,8 +318,8 @@ export default function SellMarket(props: {
   // Check how many existing Sell Limit orders the user has outstanding in the orderbook.
   // Note that in Sell Limit, the makerToken is the position token which is the relevant token for approval in Sell Market.
   // As remainingFillableMakerAmount is not directly available, it has to be backed out from remainingFillableTakerAmount, takerAmount and makerAmount
-  const getMakerOrdersTotalAmount = async (maker) => {
-    let existingOrderAmount = ZERO
+  const getTakerOrdersTotalAmount = async (maker) => {
+    let existingOrdersAmount = ZERO
     if (responseSell.length == 0) {
       // Double check the any limit orders exists
       const rSell: any = await get0xOpenOrders(
@@ -346,20 +346,20 @@ export default function SellMarket(props: {
           const remainingFillableMakerAmount = remainingFillableTakerAmount
             .mul(makerAmount)
             .div(takerAmount)
-          existingOrderAmount = existingOrderAmount.add(
+          existingOrdersAmount = existingOrdersAmount.add(
             remainingFillableMakerAmount
           )
         } else {
-          existingOrderAmount = existingOrderAmount.add(makerAmount)
+          existingOrdersAmount = existingOrdersAmount.add(makerAmount)
         }
       }
     })
-    return existingOrderAmount
+    return existingOrdersAmount
   }
 
   useEffect(() => {
     if (userAddress != null) {
-      getOptionsInWallet(userAddress).then((val) => {
+      getOptionsInWallet(userAddress).then(async (val) => {
         // Use values returned from getOptionsInWallet to initialize variables
         setOptionBalance(val.balance)
         setAllowance(val.allowance)
@@ -372,10 +372,10 @@ export default function SellMarket(props: {
           })
         }
 
-        // Get the user's existing Sell Limit orders which block some of the user's allowance
-        getMakerOrdersTotalAmount(val.account).then((amount) => {
-          setExistingSellLimitOrdersAmountUser(amount)
+        // Get the user's (taker) existing Sell Limit orders which block some of the user's allowance
+        getTakerOrdersTotalAmount(userAddress).then((amount) => {
           const remainingAmount = val.allowance.sub(amount)
+          setExistingSellLimitOrdersAmountUser(amount)
           setRemainingAllowance(remainingAmount)
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })

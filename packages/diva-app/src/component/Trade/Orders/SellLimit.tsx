@@ -41,6 +41,8 @@ import {
 } from '../../../Util/calcPayoffPerToken'
 import { setResponseSell } from '../../../Redux/TradeOption' // QUESTION: Why is this not in BuyLimit
 const web3 = new Web3(Web3.givenProvider)
+const ZERO = BigNumber.from(0)
+const feeMultiplier = (1 + tradingFee).toString()
 
 export default function SellLimit(props: {
   option: Pool
@@ -55,7 +57,7 @@ export default function SellLimit(props: {
   const userAddress = useAppSelector(selectUserAddress)
 
   const option = props.option
-  const exchangeProxyAddress = props.exchangeProxy
+  const exchangeProxy = props.exchangeProxy
   const makerToken = props.tokenAddress
   const takerToken = option.collateralToken.id
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
@@ -69,14 +71,17 @@ export default function SellLimit(props: {
   const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
   const [pricePerOption, setPricePerOption] = React.useState(0.0)
   const [expiry, setExpiry] = React.useState(5)
-  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
+  const [
+    existingSellLimitOrdersAmountUser,
+    setExistingSellLimitOrdersAmountUser,
+  ] = React.useState(0.0)
 
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [remainingApprovalAmount, setRemainingApprovalAmount] =
     React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
-  const [walletBalance, setWalletBalance] = React.useState(0)
+  const [optionBalance, setOptionBalance] = React.useState(0)
 
   const params: { tokenType: string } = useParams()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
@@ -139,12 +144,12 @@ export default function SellLimit(props: {
     setPricePerOption(parseFloat('0.0'))
     setOrderBtnDisabled(true)
     let approvedAllowance = await makerTokenContract.methods
-      .allowance(userAddress, exchangeProxyAddress)
+      .allowance(userAddress, exchangeProxy)
       .call()
     approvedAllowance = Number(formatUnits(approvedAllowance.toString(), 18)) // NOTE: decimals need adjustment when we switch to smart contracts version 1.0.0
     const remainingAmount = Number(
-      (approvedAllowance - existingOrdersAmount).toFixed(
-        totalDecimals(approvedAllowance, existingOrdersAmount)
+      (approvedAllowance - existingSellLimitOrdersAmountUser).toFixed(
+        totalDecimals(approvedAllowance, existingSellLimitOrdersAmountUser)
       )
     )
     setRemainingApprovalAmount(remainingAmount)
@@ -153,7 +158,7 @@ export default function SellLimit(props: {
   const approveSellAmount = async (amount) => {
     try {
       const approveResponse = await makerTokenContract.methods
-        .approve(exchangeProxyAddress, amount)
+        .approve(exchangeProxy, amount)
         .send({ from: userAddress })
       if ('events' in approveResponse) {
         return approveResponse.events.Approval.returnValues.value
@@ -161,7 +166,7 @@ export default function SellLimit(props: {
         //in case the approve call does not or delay emit events read the allowance again
         await new Promise((resolve) => setTimeout(resolve, 4000))
         const approvedAllowance = await makerTokenContract.methods
-          .allowance(userAddress, exchangeProxyAddress)
+          .allowance(userAddress, exchangeProxy)
           .call()
         return approvedAllowance
       }
@@ -191,8 +196,11 @@ export default function SellLimit(props: {
             formatUnits(approvedAllowance.toString(), 18)
           )
           const remainingApproval = Number(
-            (approvedAllowance - existingOrdersAmount).toFixed(
-              totalDecimals(approvedAllowance, existingOrdersAmount)
+            (approvedAllowance - existingSellLimitOrdersAmountUser).toFixed(
+              totalDecimals(
+                approvedAllowance,
+                existingSellLimitOrdersAmountUser
+              )
             )
           )
           setRemainingApprovalAmount(remainingApproval)
@@ -213,10 +221,10 @@ export default function SellLimit(props: {
         alert('Please enter a positive amount for approval.')
       }
     } else {
-      if (walletBalance > 0) {
-        const totalAmount = numberOfOptions + existingOrdersAmount
+      if (optionBalance > 0) {
+        const totalAmount = numberOfOptions + existingSellLimitOrdersAmountUser
         if (numberOfOptions > remainingApprovalAmount) {
-          if (totalAmount > walletBalance) {
+          if (totalAmount > optionBalance) {
             alert('Not sufficient balance')
           } else {
             const additionalApproval = Number(
@@ -248,8 +256,11 @@ export default function SellLimit(props: {
                 newAllowance = approvedAllowance
                 newAllowance = Number(formatUnits(newAllowance.toString(), 18))
                 const remainingApproval = Number(
-                  (newAllowance - existingOrdersAmount).toFixed(
-                    totalDecimals(newAllowance, existingOrdersAmount)
+                  (newAllowance - existingSellLimitOrdersAmountUser).toFixed(
+                    totalDecimals(
+                      newAllowance,
+                      existingSellLimitOrdersAmountUser
+                    )
                   )
                 )
                 setRemainingApprovalAmount(remainingApproval)
@@ -280,7 +291,7 @@ export default function SellLimit(props: {
             limitPrice: pricePerOption,
             orderExpiry: expiry,
             chainId: props.chainId,
-            exchangeProxy: exchangeProxyAddress,
+            exchangeProxy: exchangeProxy,
           }
           sellLimitOrder(orderData)
             .then(async (response) => {
@@ -302,8 +313,22 @@ export default function SellLimit(props: {
     }
   }
 
+  // TODO: Outsource this function into a separate file as it's the same across Buy/Sell Limit/Market
+  const getOptionsInWallet = async (makerAccount) => {
+    const allowance = await makerTokenContract.methods
+      .allowance(makerAccount, exchangeProxy)
+      .call()
+    const balance = await makerTokenContract.methods
+      .balanceOf(makerAccount)
+      .call()
+    return {
+      balance: BigNumber.from(balance),
+      allowance: BigNumber.from(allowance),
+    }
+  }
+
   const getMakerOrdersTotalAmount = async (maker) => {
-    let existingOrderAmount = BigNumber.from(0)
+    let existingOrderAmount = ZERO
     if (responseSell.length == 0) {
       //Double check any limit orders exists
       const rSell: any = await get0xOpenOrders(makerToken, taker, props.chainId)
@@ -332,40 +357,23 @@ export default function SellLimit(props: {
     return Number(formatUnits(existingOrderAmount.toString(), 18))
   }
 
-  const getOptionsInWallet = async () => {
-    let allowance = await makerTokenContract.methods
-      .allowance(userAddress, exchangeProxyAddress)
-      .call()
-    let balance = await makerTokenContract.methods.balanceOf(userAddress).call()
-    balance = Number(formatUnits(balance.toString(), 18))
-    allowance = Number(formatUnits(allowance.toString(), 18))
-    return {
-      balance: balance,
-      account: userAddress,
-      approvalAmount: allowance,
-    }
-  }
-
   useEffect(() => {
-    getOptionsInWallet().then((val) => {
-      !Number.isNaN(val.balance)
-        ? setWalletBalance(Number(val.balance))
-        : setWalletBalance(0)
-      setAllowance(val.approvalAmount)
-      setRemainingApprovalAmount(val.approvalAmount)
-      val.approvalAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
-      getMakerOrdersTotalAmount(val.account).then((existingOrdersAmount) => {
-        setExistingOrdersAmount(existingOrdersAmount)
-        const remainingAmount = Number(
-          (val.approvalAmount - existingOrdersAmount).toFixed(
-            totalDecimals(val.approvalAmount, existingOrdersAmount)
-          )
-        )
-        setRemainingApprovalAmount(remainingAmount)
-        remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
+    if (userAddress != null) {
+      getOptionsInWallet(userAddress).then(async (val) => {
+        // Use values returned from getOptionsInWallet to initialize variables
+        setOptionBalance(val.balance)
+        setAllowance(val.allowance)
+        val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
+
+        // Get the user's (maker) existing Sell Limit orders which block some of the user's allowance
+        getMakerOrdersTotalAmount(userAddress).then((amount) => {
+          const remainingAmount = val.allowance.sub(amount)
+          setExistingSellLimitOrdersAmountUser(amount)
+          setRemainingApprovalAmount(remainingAmount)
+          remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
+        })
       })
-      //}
-    })
+    }
   }, [responseSell])
 
   const handleExpirySelection = (event: SelectChangeEvent<number>) => {
@@ -463,7 +471,7 @@ export default function SellLimit(props: {
         )
       )
     }
-  }, [option, pricePerOption, usdPrice, existingOrdersAmount])
+  }, [option, pricePerOption, usdPrice, existingSellLimitOrdersAmountUser])
 
   return (
     <div>
@@ -540,7 +548,7 @@ export default function SellLimit(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {params.tokenType.toUpperCase() + ' '}
               </FormLabel>
-              <FormLabel>{walletBalance.toFixed(4)}</FormLabel>
+              <FormLabel>{optionBalance.toFixed(4)}</FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>

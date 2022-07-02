@@ -259,6 +259,7 @@ export default function BuyMarket(props: {
     }
   }
 
+  // TODO: Outsource this function into a separate file as it's the same across Buy/Sell Limit/Market
   const getCollateralInWallet = async (takerAccount: string) => {
     const allowance = await takerTokenContract.methods
       .allowance(takerAccount, exchangeProxy)
@@ -268,7 +269,6 @@ export default function BuyMarket(props: {
       .call()
     return {
       balance: BigNumber.from(balance),
-      account: takerAccount,
       allowance: BigNumber.from(allowance),
     }
   }
@@ -307,7 +307,7 @@ export default function BuyMarket(props: {
   // Note that in Buy Limit, the makerToken is the collateral token which is the relevant token for approval in Buy Market.
   // As remainingFillableMakerAmount is not directly available, it has to be backed out from remainingFillableTakerAmount, takerAmount and makerAmount
   const getTakerOrdersTotalAmount = async (maker) => {
-    let existingOrderAmount = ZERO
+    let existingOrdersAmount = ZERO
     if (responseBuy.length == 0) {
       // Double check if any limit orders exists
       const rBuy: any = await get0xOpenOrders(
@@ -334,15 +334,15 @@ export default function BuyMarket(props: {
           const remainingFillableMakerAmount = remainingFillableTakerAmount
             .mul(makerAmount)
             .div(takerAmount)
-          existingOrderAmount = existingOrderAmount.add(
+          existingOrdersAmount = existingOrdersAmount.add(
             remainingFillableMakerAmount
           )
         } else {
-          existingOrderAmount = existingOrderAmount.add(makerAmount)
+          existingOrdersAmount = existingOrdersAmount.add(makerAmount)
         }
       }
     })
-    return existingOrderAmount
+    return existingOrdersAmount
   }
 
   useEffect(() => {
@@ -360,10 +360,10 @@ export default function BuyMarket(props: {
           })
         }
 
-        // Get the user's existing Buy Limit orders which block some of the user's allowance
-        getTakerOrdersTotalAmount(val.account).then((amount) => {
-          setExistingBuyLimitOrdersAmountUser(amount)
+        // Get the user's (taker) existing Buy Limit orders which block some of the user's allowance
+        getTakerOrdersTotalAmount(userAddress).then((amount) => {
           const remainingAmount = val.allowance.sub(amount)
+          setExistingBuyLimitOrdersAmountUser(amount)
           setRemainingAllowance(remainingAmount)
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })
