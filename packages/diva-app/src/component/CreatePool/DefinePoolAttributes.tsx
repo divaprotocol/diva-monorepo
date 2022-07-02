@@ -41,7 +41,7 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-  const [value, setValue] = useState('binary')
+  const [value, setValue] = useState('linear')
 
   const handleChange = (event) => {
     setValue(event.target.value)
@@ -150,19 +150,19 @@ export function DefinePoolAttributes({
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
   useEffect(() => {
     switch (value) {
-      case 'binary':
-        formik.setValues((_values) => ({
-          ..._values,
-          cap: formik.values.inflection,
-          floor: formik.values.inflection,
-          gradient: 1,
-        }))
-        break
       case 'linear':
         formik.setValues((_values) => ({
           ..._values,
           inflection: (formik.values.cap + formik.values.floor) / 2,
           gradient: 0.5,
+        }))
+        break
+      case 'binary':
+        formik.setValues((_values) => ({
+          ..._values,
+          floor: formik.values.inflection,
+          cap: formik.values.inflection,
+          gradient: 1,
         }))
         break
     }
@@ -355,39 +355,12 @@ export function DefinePoolAttributes({
           value={value}
           onChange={handleChange}
         >
-          <FormControlLabel value="binary" control={<Radio />} label="Binary" />
           <FormControlLabel value="linear" control={<Radio />} label="Linear" />
+          <FormControlLabel value="binary" control={<Radio />} label="Binary" />
           <FormControlLabel value="custom" control={<Radio />} label="Custom" />
         </RadioGroup>
       </FormControl>
       <Stack pb={3} spacing={2} direction="row">
-        {value === 'binary' && (
-          <Box pt={2} width="50%">
-            <Stack spacing={3}>
-              <Tooltip
-                placement="top-end"
-                title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
-              >
-                <TextField
-                  id="inflection"
-                  error={formik.errors.inflection != null}
-                  name="inflection"
-                  onBlur={formik.handleBlur}
-                  label="Inflection"
-                  inputProps={{
-                    min: floor,
-                    max: cap,
-                  }}
-                  type="number"
-                  onChange={formik.handleChange}
-                  value={inflection}
-                  sx={{ width: '100%' }}
-                />
-              </Tooltip>
-              <DefineAdvanced formik={formik} />
-            </Stack>
-          </Box>
-        )}
         {value === 'linear' && (
           <Box pt={2} width="50%">
             <Stack spacing={3}>
@@ -427,6 +400,34 @@ export function DefinePoolAttributes({
             </Stack>
           </Box>
         )}
+        {value === 'binary' && (
+          <Box pt={2} width="50%">
+            <Stack spacing={3}>
+              <Tooltip
+                placement="top-end"
+                title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+              >
+                <TextField
+                  id="inflection"
+                  error={formik.errors.inflection != null}
+                  name="inflection"
+                  onBlur={formik.handleBlur}
+                  label="Inflection"
+                  inputProps={{
+                    min: floor,
+                    max: cap,
+                  }}
+                  type="number"
+                  onChange={formik.handleChange}
+                  value={inflection}
+                  sx={{ width: '100%' }}
+                />
+              </Tooltip>
+              <DefineAdvanced formik={formik} />
+            </Stack>
+          </Box>
+        )}
+
         {value === 'custom' && (
           <Box pt={2} width="50%">
             <FormControl fullWidth error={hasPaymentProfileError}>
