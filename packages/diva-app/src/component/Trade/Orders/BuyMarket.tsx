@@ -304,9 +304,9 @@ export default function BuyMarket(props: {
   }
 
   // Check how many existing Buy Limit orders the user has outstanding in the orderbook.
-  // Note that in Buy Limit, the makerToken is the collateral token which is the relevant token for approval in Buy Market.
+  // Note that in Buy Limit, the makerToken is the collateral token which is the relevant token for approval.
   // As remainingFillableMakerAmount is not directly available, it has to be backed out from remainingFillableTakerAmount, takerAmount and makerAmount
-  const getTakerOrdersTotalAmount = async (maker) => {
+  const getTotalBuyLimitOrderAmountUser = async (maker) => {
     let existingOrdersAmount = ZERO
     if (responseBuy.length == 0) {
       // Double check if any limit orders exists
@@ -361,8 +361,8 @@ export default function BuyMarket(props: {
         }
 
         // Get the user's (taker) existing Buy Limit orders which block some of the user's allowance
-        getTakerOrdersTotalAmount(userAddress).then((amount) => {
-          const remainingAmount = val.allowance.sub(amount)
+        getTotalBuyLimitOrderAmountUser(userAddress).then((amount) => {
+          const remainingAmount = val.allowance.sub(amount) // QUESTION: Can this be negative?
           setExistingBuyLimitOrdersAmountUser(amount)
           setRemainingAllowance(remainingAmount)
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)

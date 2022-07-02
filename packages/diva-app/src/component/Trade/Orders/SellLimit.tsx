@@ -78,8 +78,7 @@ export default function SellLimit(props: {
 
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
-  const [remainingApprovalAmount, setRemainingApprovalAmount] =
-    React.useState(0.0)
+  const [remainingAllowance, setRemainingAllowance] = React.useState(0.0)
   const [allowance, setAllowance] = React.useState(0.0)
   const [optionBalance, setOptionBalance] = React.useState(0)
 
@@ -152,7 +151,7 @@ export default function SellLimit(props: {
         totalDecimals(approvedAllowance, existingSellLimitOrdersAmountUser)
       )
     )
-    setRemainingApprovalAmount(remainingAmount)
+    setRemainingAllowance(remainingAmount)
   }
 
   const approveSellAmount = async (amount) => {
@@ -203,7 +202,7 @@ export default function SellLimit(props: {
               )
             )
           )
-          setRemainingApprovalAmount(remainingApproval)
+          setRemainingAllowance(remainingApproval)
           setAllowance(approvedAllowance)
           setIsApproved(true)
           if (pricePerOption <= 0) {
@@ -223,13 +222,13 @@ export default function SellLimit(props: {
     } else {
       if (optionBalance > 0) {
         const totalAmount = numberOfOptions + existingSellLimitOrdersAmountUser
-        if (numberOfOptions > remainingApprovalAmount) {
+        if (numberOfOptions > remainingAllowance) {
           if (totalAmount > optionBalance) {
             alert('Not sufficient balance')
           } else {
             const additionalApproval = Number(
-              (numberOfOptions - remainingApprovalAmount).toFixed(
-                totalDecimals(numberOfOptions, remainingApprovalAmount)
+              (numberOfOptions - remainingAllowance).toFixed(
+                totalDecimals(numberOfOptions, remainingAllowance)
               )
             )
             if (
@@ -263,7 +262,7 @@ export default function SellLimit(props: {
                     )
                   )
                 )
-                setRemainingApprovalAmount(remainingApproval)
+                setRemainingAllowance(remainingApproval)
                 setAllowance(newAllowance)
                 alert(
                   'Additional ' +
@@ -327,11 +326,17 @@ export default function SellLimit(props: {
     }
   }
 
-  const getMakerOrdersTotalAmount = async (maker) => {
+  // Check how many existing Sell Limit orders the user has outstanding in the orderbook.
+  // Note that in Sell Limit, the makerToken is the collateral token which is the relevant token for approval.
+  const getTotalSellLimitOrderAmountUser = async (maker) => {
     let existingOrderAmount = ZERO
     if (responseSell.length == 0) {
       //Double check any limit orders exists
-      const rSell: any = await get0xOpenOrders(makerToken, taker, props.chainId)
+      const rSell: any = await get0xOpenOrders(
+        makerToken,
+        takerToken,
+        props.chainId
+      )
       responseSell = rSell
     }
 
@@ -366,10 +371,10 @@ export default function SellLimit(props: {
         val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
         // Get the user's (maker) existing Sell Limit orders which block some of the user's allowance
-        getMakerOrdersTotalAmount(userAddress).then((amount) => {
-          const remainingAmount = val.allowance.sub(amount)
+        getTotalSellLimitOrderAmountUser(userAddress).then((amount) => {
+          const remainingAmount = val.allowance.sub(amount) // QUESTION: Can this be negative?
           setExistingSellLimitOrdersAmountUser(amount)
-          setRemainingApprovalAmount(remainingAmount)
+          setRemainingAllowance(remainingAmount)
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })
       })
@@ -482,9 +487,9 @@ export default function SellLimit(props: {
               <LabelStyle>Number</LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {remainingApprovalAmount.toString().includes('e')
-                  ? remainingApprovalAmount.toExponential(2)
-                  : remainingApprovalAmount.toFixed(4)}
+                {remainingAllowance.toString().includes('e')
+                  ? remainingAllowance.toExponential(2)
+                  : remainingAllowance.toFixed(4)}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>

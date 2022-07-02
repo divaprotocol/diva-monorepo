@@ -1,17 +1,17 @@
 import axios from 'axios'
 import { config } from '../constants'
 export const get0xOpenOrders = (
-  CollateralToken: string,
-  TokenAddress: string,
+  makerToken: string,
+  takerToken: string,
   chainId: number
 ) => {
   const res = axios
     .get(
       config[chainId].allOrders +
         '?makerToken=' +
-        CollateralToken +
+        makerToken +
         '&takerToken=' +
-        TokenAddress
+        takerToken
     )
     .then(function (response) {
       return response.data.records

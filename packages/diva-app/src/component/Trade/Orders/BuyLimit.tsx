@@ -313,11 +313,13 @@ export default function BuyLimit(props: {
     }
   }
 
-  const getMakerOrdersTotalAmount = async (taker) => {
+  // Check how many existing Buy Limit orders the user has outstanding in the orderbook.
+  // Note that in Buy Limit, the makerToken is the collateral token which is the relevant token for approval.
+  const getTotalBuyLimitOrderAmountUser = async (maker) => {
     let existingOrdersAmount = ZERO
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
-      const rBuy = await get0xOpenOrders(takerToken, makerToken, props.chainId)
+      const rBuy = await get0xOpenOrders(makerToken, takerToken, props.chainId)
       if (rBuy.length > 0) {
         responseBuy = rBuy
       }
@@ -326,7 +328,7 @@ export default function BuyLimit(props: {
       const order = data.order
       const metaData = data.metaData
 
-      if (taker == order.maker) {
+      if (maker == order.maker) {
         const remainingFillableTakerAmount = BigNumber.from(
           metaData.remainingFillableTakerAmount.toString()
         )
@@ -354,8 +356,8 @@ export default function BuyLimit(props: {
         val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
         // Get the user's (maker) existing Buy Limit orders which block some of the user's allowance
-        getMakerOrdersTotalAmount(userAddress).then((amount) => {
-          const remainingAmount = val.allowance.sub(amount)
+        getTotalBuyLimitOrderAmountUser(userAddress).then((amount) => {
+          const remainingAmount = val.allowance.sub(amount) // QUESTION: Can this be negative?
           setExistingBuyLimitOrdersAmountUser(amount)
           setRemainingAllowance(remainingAmount)
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
