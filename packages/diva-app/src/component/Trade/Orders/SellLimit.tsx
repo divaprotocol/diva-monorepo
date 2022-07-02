@@ -18,6 +18,7 @@ import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import { Pool } from '../../../lib/queries'
+import { toExponentialOrNumber } from '../../../Util/utils'
 import Web3 from 'web3'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
@@ -154,6 +155,7 @@ export default function SellLimit(props: {
     setRemainingAllowance(remainingAmount)
   }
 
+  // TODO: Align with Markets files as this function here contains a try catch block but the Markets files don't
   const approve = async (amount) => {
     try {
       const approveResponse = await makerTokenContract.methods
@@ -164,10 +166,10 @@ export default function SellLimit(props: {
       } else {
         //in case the approve call does not or delay emit events read the allowance again
         await new Promise((resolve) => setTimeout(resolve, 4000)) // QUESTION: Why not included in Buy/Sell Market?
-        const approvedAllowance = await makerTokenContract.methods
+        const allowance = await makerTokenContract.methods
           .allowance(userAddress, exchangeProxy)
           .call()
-        return approvedAllowance
+        return allowance
       }
     } catch (error) {
       console.error('error ' + JSON.stringify(error))
@@ -178,53 +180,66 @@ export default function SellLimit(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
+      // Approved amount is 0 ...
+
       if (numberOfOptions > 0) {
-        const amount = Number(
-          (allowance + numberOfOptions).toFixed(
-            totalDecimals(allowance, numberOfOptions)
-          )
+        // Calculate required allowance amount for position token (expressed as an integer with 18 decimals).
+        const amountToApprove = allowance
+          .add(parseUnits(convertExponentialToDecimal(numberOfOptions)))
+          .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
+
+        const collateralAllowance = await approve(amountToApprove)
+
+        const remainingAllowance = collateralAllowance.sub(
+          existingSellLimitOrdersAmountUser
         )
-        // NOTE: decimals will need adjustment to decimals when we switch to contracts version 1.0.0
-        let approvedAllowance = await approve(
-          parseUnits(convertExponentialToDecimal(amount), 18)
-        )
-        if (approvedAllowance == 'undefined') {
+
+        // QUESTION: Why is this if statement is not included in Markets files?
+        if (collateralAllowance == 'undefined') {
           alert('Metamask could not finish approval.')
         } else {
-          approvedAllowance = Number(
-            formatUnits(approvedAllowance.toString(), 18)
-          )
-          const remainingApproval = Number(
-            (approvedAllowance - existingSellLimitOrdersAmountUser).toFixed(
-              totalDecimals(
-                approvedAllowance,
-                existingSellLimitOrdersAmountUser
-              )
-            )
-          )
-          setRemainingAllowance(remainingApproval)
-          setAllowance(approvedAllowance)
+          setRemainingAllowance(remainingAllowance)
+          setAllowance(collateralAllowance)
           setIsApproved(true)
-          if (pricePerOption <= 0) {
+          if (pricePerOption.lte(0)) {
             setOrderBtnDisabled(true)
           }
           alert(
-            `Allowance for ` +
-              approvedAllowance +
-              ` ` +
-              params.tokenType.toUpperCase() +
-              ` successfully set.`
+            `Allowance for 
+              ${toExponentialOrNumber(
+                Number(formatUnits(collateralAllowance, decimals))
+              )} 
+              ${params.tokenType.toUpperCase()} tokens successfully set.`
           )
         }
       } else {
-        alert('Please enter a positive amount for approval.')
+        alert(
+          `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to sell.`
+        )
       }
     } else {
-      if (optionBalance > 0) {
-        const totalAmount = numberOfOptions + existingSellLimitOrdersAmountUser
-        if (numberOfOptions > remainingAllowance) {
-          if (totalAmount > optionBalance) {
-            alert('Not sufficient balance')
+      // Approved amount is > 0 ...
+
+      if (optionBalance.gt(0)) {
+        // User owns position tokens ...
+
+        // Convert numberOfOptions into an integer of type BigNumber with 18 decimals to be used in integer math.
+        const numberOfOptionsBN = parseUnits(
+          convertExponentialToDecimal(numberOfOptions)
+        )
+
+        if (numberOfOptionsBN.gt(remainingAllowance)) {
+          // Entered position token amount exceeds remaining allowance ...
+
+          // Get total amount of position tokens that the user wants to sell (incl. the user's existing Sell Limit orders)
+          const totalSellAmount = numberOfOptionsBN.add(
+            existingSellLimitOrdersAmountUser
+          )
+
+          if (totalSellAmount.gt(optionBalance)) {
+            // User has not enough position tokens to sell ...
+
+            alert('Insufficient position token balance')
           } else {
             const additionalApproval = Number(
               (numberOfOptions - remainingAllowance).toFixed(
@@ -240,21 +255,18 @@ export default function SellLimit(props: {
                   ' to complete this order?'
               )
             ) {
-              let newAllowance = Number(
-                (additionalApproval + allowance).toFixed(
-                  totalDecimals(additionalApproval, allowance)
-                )
-              )
-              const approvedAllowance = await approve(
-                parseUnits(convertExponentialToDecimal(newAllowance), 18)
-              )
+              let newAllowance = additionalApproval
+                .add(allowance)
+                .add(BigNumber.from(100))
 
-              if (approvedAllowance == 'undefined') {
-                alert('Metamask could not finish approval.')
+              newAllowance = await approve(newAllowance)
+
+              if (newAllowance == 'undefined') {
+                alert('Metamask could not finish approval.') // QUESTION: Why not included in Markets?
               } else {
                 newAllowance = approvedAllowance
                 newAllowance = Number(formatUnits(newAllowance.toString(), 18))
-                const remainingApproval = Number(
+                const remainingAllowance = Number(
                   (newAllowance - existingSellLimitOrdersAmountUser).toFixed(
                     totalDecimals(
                       newAllowance,
@@ -262,14 +274,13 @@ export default function SellLimit(props: {
                     )
                   )
                 )
-                setRemainingAllowance(remainingApproval)
+
+                setRemainingAllowance(remainingAllowance)
                 setAllowance(newAllowance)
                 alert(
-                  'Additional ' +
-                    additionalApproval +
-                    ' ' +
-                    params.tokenType.toUpperCase() +
-                    ' approved. Please proceed with the order.'
+                  `Additional 
+                    ${toExponentialOrNumber(additionalApproval)} 
+                    ${params.tokenType.toUpperCase()} approved. Please proceed with the order.`
                 )
               }
             } else {

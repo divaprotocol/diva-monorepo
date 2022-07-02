@@ -106,12 +106,12 @@ export default function SellMarket(props: {
       .send({ from: userAddress })
 
     // Set allowance for position token (18 decimals)
-    const optionAllowance = await takerTokenContract.methods
+    const allowance = await takerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
       .call()
-    console.log('optionAllowance', optionAllowance)
+    console.log('optionAllowance', allowance)
 
-    return optionAllowance
+    return allowance
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -160,7 +160,9 @@ export default function SellMarket(props: {
         // Further, note that this assume a maximum average fee of 1%. If this is higher, then this simplified math may fail as the user will not have enough
         // allowance/balance.
         // TODO: Show the additional fee amount somewhere in the order widget
-        const numberOfOptionsInclFees = parseUnits(numberOfOptions.toString())
+        const numberOfOptionsInclFees = parseUnits(
+          convertExponentialToDecimal(numberOfOptions)
+        )
           .mul(parseUnits(feeMultiplier))
           .div(positionTokenUnit)
 

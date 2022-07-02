@@ -18,6 +18,7 @@ import { CreateButtonWrapper } from './UiStyles'
 import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import { Pool } from '../../../lib/queries'
+import { toExponentialOrNumber } from '../../../Util/utils'
 import Web3 from 'web3'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
@@ -159,6 +160,7 @@ export default function BuyLimit(props: {
     )
   }
 
+  // TODO: Align with Markets files as this function here contains a try catch block but the Markets files don't
   const approve = async (amount) => {
     try {
       const approveResponse = await makerTokenContract.methods
@@ -169,10 +171,10 @@ export default function BuyLimit(props: {
       } else {
         //in case the approve call does not or delay emit events, read the allowance again
         await new Promise((resolve) => setTimeout(resolve, 4000)) // QUESTION: Why not included in Buy/Sell Market?
-        const approvedAllowance = await makerTokenContract.methods
+        const allowance = await makerTokenContract.methods
           .allowance(userAddress, exchangeProxy)
           .call()
-        return approvedAllowance
+        return allowance
       }
     } catch (error) {
       console.error('error ' + JSON.stringify(error))
@@ -183,13 +185,14 @@ export default function BuyLimit(props: {
   const handleOrderSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
+      // Approved amount is 0 ...
+
       if (numberOfOptions > 0) {
-        const amount = Number(
-          (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
-        )
-        let collateralAllowance = await approve(
-          parseUnits(convertExponentialToDecimal(amount), decimals)
-        )
+        // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals (<= 18)).
+        const amountToApprove = allowance.add(youPay).add(BigNumber.from(100))
+        const collateralAllowance = await approve(amountToApprove)
+
+        // QUESTION: Why is this if statement is not included in Markets files?
         if (collateralAllowance == 'undefined') {
           alert('Metamask could not finish approval please check gas limit')
         } else {

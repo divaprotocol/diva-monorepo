@@ -111,12 +111,12 @@ export default function BuyMarket(props: {
       .send({ from: userAddress })
 
     // Set allowance for collateral token (<=18 decimals)
-    const collateralAllowance = await takerTokenContract.methods
+    const allowance = await takerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
       .call()
-    console.log('collateralAllowance', collateralAllowance)
+    console.log('collateralAllowance', allowance)
 
-    return collateralAllowance
+    return allowance
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -149,7 +149,7 @@ export default function BuyMarket(props: {
         )
       } else {
         alert(
-          `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to buy.`
+          `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to sell.`
         )
       }
     } else {
