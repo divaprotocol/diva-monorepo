@@ -7,6 +7,7 @@ type SingleConfig = {
   whitelistSubgraph: string
   allOrders: string
   order: string
+  orderbook: string
 }
 
 export const projectId = '9f5f0ef1c7544c029b0aa9ca622759c3'
@@ -34,6 +35,7 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
     allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
     order: 'https://ropsten.api.0x.org/orderbook/v1/order/',
+    orderbook: 'https://ropsten.api.0x.org/orderbook/v1',
   },
   // 4: {
   //   name: 'Rinkeby',

@@ -237,13 +237,9 @@ export default function OrderBook(props: {
       'desOrder'
     )
     orders.push(orderBookBuy)
-    //TODO remove tempRespSell once the 0x issue is fixed
-    //0xIssue link - https://github.com/0xProject/0x-api/issues/880
-    const tempRespSell = responseSell.filter((sellOrder) => {
-      sellOrder.makerToken == optionTokenAddress
-    })
+
     const orderBookSell = mapOrderData(
-      tempRespSell,
+      responseSell,
       option,
       optionTokenAddress,
       'ascOrder'
@@ -290,7 +286,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.buyQuantity != ''
-                            ? row.buyQuantity?.toFixed(2)
+                            ? row.buyQuantity?.toFixed(4)
                             : '-'}
                         </Typography>
                         <label> </label>
@@ -320,7 +316,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.sellQuantity != ''
-                            ? row.sellQuantity?.toFixed(2)
+                            ? row.sellQuantity?.toFixed(4)
                             : '-'}
                         </Typography>
                       </Box>

@@ -150,7 +150,7 @@ export default function SellLimit(props: {
   const approveSellAmount = async (amount) => {
     try {
       const approveResponse = await makerTokenContract.methods
-        .approve(exchangeProxyAddress, amount)
+        .approve(exchangeProxyAddress, amount.add(BigENumber.from(10000))) // Added buffer to ensure sufficient approval in case of rounding errors))
         .send({ from: makerAccount })
       if ('events' in approveResponse) {
         return approveResponse.events.Approval.returnValues.value

@@ -9,19 +9,26 @@ export const get0xOpenOrders = (
   const perPage = 1000
   const MAX_PAGES = 2 // parameter to control the maximum number of pages to query and with that the number 0x API requests; if set to 0/1, only the first page will be queried
 
-  const url =
-    config[chainId].allOrders +
-    `?page=1&perPage=${perPage}` +
-    '?makerToken=' +
+  // bids:
+  // - makerToken = quoteToken
+  // - takerToken = baseToken
+  // asks:
+  // - makerToken = baseToken
+  // - takerToken = quoteToken
+  const urlPrefix =
+    config[chainId].orderbook +
+    '?quoteToken=' +
     MakerToken +
-    '&takerToken=' +
+    '&baseToken=' +
     TakerToken
+  const url = urlPrefix + `&page=1&perPage=${perPage}`
+
   const res = axios
     .get(url)
     .then(async function (response) {
       let orders: any[] = []
-      const total = response.data.total //total number of existing orders for option
-      orders = response.data.records
+      const total = response.data.bids.total //total number of existing orders for option
+      orders = response.data.bids.records
       if (total > perPage) {
         // in case the total orders are over 1000 maximum pages we want to request
         const pages =
@@ -32,15 +39,9 @@ export const get0xOpenOrders = (
         //start from the second page as the first page results are already stored in orders array
         if (MAX_PAGES >= 2) {
           for (let page = 2; page <= resultPages; page++) {
-            const url =
-              config[chainId].allOrders +
-              `?page=${page}&perPage=${perPage}` +
-              '?makerToken=' +
-              MakerToken +
-              '&takerToken=' +
-              TakerToken
+            const url = urlPrefix + `&page=${page}&perPage=${perPage}`
             const resp = await axios.get(url)
-            orders.concat(resp.data.records)
+            orders.concat(resp.data.bids.records)
           }
         }
       }
