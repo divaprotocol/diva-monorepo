@@ -125,10 +125,15 @@ function mapOrderData(
     return orders
   })
 
-  // Filter out orders with quantity = 0 (may happen if maker has revoked the approval)
+  console.log('orderbook before filter')
+  console.log(orderbookTemp)
+  // Filter out orders with quantity = 0 and 1 (may happen if maker has revoked the approval)
   const orderbook = orderbookTemp.filter((object) => {
     return object.nbrOptions !== 0 && object.nbrOptions !== 1e-18
   })
+
+  console.log('orderbook after filter')
+  console.log(orderbook)
 
   if (sortOrder === 'ascOrder') {
     orderBy = 'ask'

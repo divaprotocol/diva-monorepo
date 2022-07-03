@@ -155,7 +155,10 @@ export default function BuyLimit(props: {
   const approveBuyAmount = async (amount) => {
     try {
       const approveResponse = await takerTokenContract.methods
-        .approve(exchangeProxyAddress, amount.add(BigENumber.from(10000))) // Added buffer to ensure sufficient approval in case of rounding errors)
+        .approve(
+          exchangeProxyAddress,
+          amount.add(BigENumber.from(100000)) // Added buffer to ensure sufficient approval in case of rounding errors)
+        )
         .send({ from: userAdress })
 
       if ('events' in approveResponse) {

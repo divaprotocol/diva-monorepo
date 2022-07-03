@@ -97,7 +97,13 @@ export default function BuyMarket(props: {
 
   const approveBuyAmount = async (amount) => {
     await takerTokenContract.methods
-      .approve(exchangeProxy, amount.add(BigENumber.from(10000))) // Added buffer to ensure sufficient approval in case of rounding errors)
+      .approve(
+        exchangeProxy,
+        amount
+          .mul(parseUnits('1.01', option.collateralToken.decimals)) // accounting for fees that existing orders may have attached
+          .div(parseUnits('1', option.collateralToken.decimals))
+          .add(BigENumber.from(100000)) // Added buffer to ensure sufficient approval in case of rounding errors)
+      )
       .send({ from: userAddress })
 
     const collateralAllowance = await takerTokenContract.methods

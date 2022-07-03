@@ -98,7 +98,13 @@ export default function SellMarket(props: {
 
   const approveSellAmount = async (amount) => {
     await takerTokenContract.methods
-      .approve(exchangeProxyAddress, amount.add(BigENumber.from(10000))) // Added buffer to ensure sufficient approval in case of rounding errors)
+      .approve(
+        exchangeProxyAddress,
+        amount
+          .mul(parseUnits('1.01')) // accounting for fees that existing orders may have attached
+          .div(parseUnits('1'))
+          .add(BigENumber.from(100000)) // Added buffer to ensure sufficient approval in case of rounding errors)
+      )
       .send({ from: makerAccount })
 
     const allowance = await takerTokenContract.methods
