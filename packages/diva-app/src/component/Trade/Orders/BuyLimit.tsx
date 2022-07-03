@@ -40,6 +40,7 @@ import {
   setMaxYield,
   setMaxPayout,
 } from '../../../Redux/Stats'
+import { tradingFee } from '../../../constants'
 import {
   calcPayoffPerToken,
   calcBreakEven,
@@ -71,60 +72,62 @@ export default function BuyLimit(props: {
 
   const classes = useStyles()
 
-  const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
-  const [pricePerOption, setPricePerOption] = React.useState(0.0)
-  const [youPay, setYouPay] = React.useState(0.0)
+  const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
+  const [pricePerOption, setPricePerOption] = React.useState(ZERO) // User input field
+  const [youPay, setYouPay] = React.useState(ZERO)
   const [expiry, setExpiry] = React.useState(5)
   const [
     existingBuyLimitOrdersAmountUser,
     setExistingBuyLimitOrdersAmountUser,
-  ] = React.useState(0.0)
+  ] = React.useState(ZERO)
 
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
-  const [allowance, setAllowance] = React.useState(0.0)
-  const [remainingAllowance, setRemainingAllowance] = React.useState(0.0)
-  const [collateralBalance, setCollateralBalance] = React.useState(0)
+  const [allowance, setAllowance] = React.useState(ZERO)
+  const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
+  const [collateralBalance, setCollateralBalance] = React.useState(ZERO)
 
   const params: { tokenType: string } = useParams()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-
   const dispatch = useAppDispatch()
-
   const isLong = window.location.pathname.split('/')[2] === 'long'
 
   const handleNumberOfOptions = (value: string) => {
-    const nbrOptions = parseFloat(value)
-    if (!isNaN(nbrOptions)) {
+    if (value !== '') {
+      const nbrOptions = BigNumber.from(value)
       setNumberOfOptions(nbrOptions)
-      if (pricePerOption > 0 && nbrOptions > 0) {
-        const youPay = pricePerOption * nbrOptions
+      if (pricePerOption.gt(0) && nbrOptions.gt(0)) {
+        const youPay = pricePerOption.mul(nbrOptions).div(positionTokenUnit)
         setYouPay(youPay)
         setOrderBtnDisabled(false)
       } else {
+        // Disable button if only one pricePerOption or nbrOptions were entered as
+        // the product of both is what the user has to approve
         setOrderBtnDisabled(true)
       }
     } else {
-      setYouPay(0.0)
-      setNumberOfOptions(0.0)
+      setYouPay(ZERO)
+      setNumberOfOptions(ZERO)
       setOrderBtnDisabled(true)
     }
   }
 
   const handlePricePerOptions = (value: string) => {
-    const pricePerOption = parseFloat(value)
-    if (!isNaN(pricePerOption)) {
+    if (value !== '') {
+      const pricePerOption = BigNumber.from(value)
       setPricePerOption(pricePerOption)
-      if (numberOfOptions > 0 && pricePerOption > 0) {
-        const youPay = numberOfOptions * pricePerOption
+      if (numberOfOptions.gt(0) && pricePerOption.gt(0)) {
+        const youPay = numberOfOptions
+          .mul(pricePerOption)
+          .div(positionTokenUnit)
         setYouPay(youPay)
         setOrderBtnDisabled(false)
       } else {
         setOrderBtnDisabled(true)
       }
     } else {
-      setYouPay(0.0)
-      setPricePerOption(0.0)
+      setYouPay(ZERO)
+      setPricePerOption(ZERO)
       setOrderBtnDisabled(true)
     }
   }

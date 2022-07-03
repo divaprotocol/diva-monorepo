@@ -69,7 +69,7 @@ export default function SellMarket(props: {
   const decimals = option.collateralToken.decimals
   const positionTokenUnit = parseUnits('1')
 
-  const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
+  const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
   const [youReceive, setYouReceive] = React.useState(ZERO)
   const [existingBuyLimitOrders, setExistingBuyLimitOrders] = React.useState([])
@@ -91,11 +91,10 @@ export default function SellMarket(props: {
 
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
-      const nbrOptions = parseFloat(value)
-      setNumberOfOptions(nbrOptions)
+      setNumberOfOptions(BigNumber.from(value))
     } else {
       setYouReceive(ZERO)
-      setNumberOfOptions(0.0)
+      setNumberOfOptions(ZERO)
       setOrderBtnDisabled(true)
     }
   }
@@ -119,13 +118,13 @@ export default function SellMarket(props: {
     if (!isApproved) {
       // Approved amount is 0 ...
 
-      if (numberOfOptions > 0) {
+      if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for position token assuming 1% fee (expressed as an integer with 18 decimals).
         // NOTE: The assumption that the maximum fee is 1% may not be valid in the future as market makers start posting orders with higher fees.
         // In the worst case, the amountToApprove will be too small due to fees being higher than 1% and the fill transaction may fail.
         // TODO: Exclude orders that have a fee higher than 1% from the orderbook so that users will not get screwed.
         const amountToApprove = allowance
-          .add(parseUnits(convertExponentialToDecimal(numberOfOptions)))
+          .add(numberOfOptions)
           .mul(parseUnits(feeMultiplier))
           .div(positionTokenUnit)
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
@@ -160,12 +159,12 @@ export default function SellMarket(props: {
         // NOTE: As the seller will have to pay fees in position token, the user is required to have more than the nbrOfOptions entered in his wallet.
         // Further, note that this assume a maximum average fee of 1%. If this is higher, then this simplified math may fail as the user will not have enough
         // allowance/balance.
-        // TODO: Show the additional fee amount somewhere in the order widget
-        const numberOfOptionsInclFees = parseUnits(
-          convertExponentialToDecimal(numberOfOptions)
-        )
+        const numberOfOptionsInclFees = numberOfOptions
           .mul(parseUnits(feeMultiplier))
           .div(positionTokenUnit)
+
+        // TODO: Show the additional fee amount somewhere in the order widget
+        const feeAmount = numberOfOptionsInclFees.sub(numberOfOptions)
 
         if (numberOfOptionsInclFees.gt(remainingAllowance)) {
           // Entered position token amount exceeds remaining allowance ...
@@ -250,7 +249,7 @@ export default function SellMarket(props: {
                       Array.from(document.querySelectorAll('input')).forEach(
                         (input) => (input.value = '')
                       )
-                      setNumberOfOptions(0.0)
+                      setNumberOfOptions(ZERO)
                       setYouReceive(ZERO)
                       orderFilled = true
                     } else {
@@ -266,7 +265,7 @@ export default function SellMarket(props: {
               Array.from(document.querySelectorAll('input')).forEach(
                 (input) => (input.value = '')
               )
-              setNumberOfOptions(0.0)
+              setNumberOfOptions(ZERO)
               setYouReceive(ZERO)
             }
             if (orderFilled) {
@@ -397,14 +396,12 @@ export default function SellMarket(props: {
 
   useEffect(() => {
     // Calculate average price
-    if (numberOfOptions > 0 && existingBuyLimitOrders.length > 0) {
+    if (numberOfOptions.gt(0) && existingBuyLimitOrders.length > 0) {
       // If user has entered an input into the Number field and there are existing Buy Limit orders to fill in the orderbook...
 
       setOrderBtnDisabled(false)
       // User input (numberOfOptions) corresponds to the taker token in Buy Limit.
-      let takerAmountToFill = parseUnits(
-        convertExponentialToDecimal(numberOfOptions)
-      ) // <= 18 decimals
+      let takerAmountToFill = numberOfOptions // <= 18 decimals
 
       let cumulativeAvgRate = ZERO
       let cumulativeTaker = ZERO
@@ -462,7 +459,7 @@ export default function SellMarket(props: {
         setYouReceive(youReceive)
       }
     } else {
-      if (numberOfOptions == 0) {
+      if (numberOfOptions.eq(0)) {
         if (existingBuyLimitOrders.length > 0) {
           setAvgExpectedRate(existingBuyLimitOrders[0].expectedRate)
         }

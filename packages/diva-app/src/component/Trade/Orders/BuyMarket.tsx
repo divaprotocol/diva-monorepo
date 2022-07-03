@@ -18,7 +18,7 @@ import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits, stripZeros } from 'ethers/lib/utils'
 import {
   getComparator,
   stableSort,
@@ -70,7 +70,7 @@ export default function BuyMarket(props: {
   const positionTokenUnit = parseUnits('1')
   const collateralTokenUnit = parseUnits('1', decimals)
 
-  const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
+  const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
   const [youPay, setYouPay] = React.useState(ZERO)
   const [existingSellLimitOrders, setExistingSellLimitOrders] = React.useState(
@@ -96,11 +96,10 @@ export default function BuyMarket(props: {
 
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
-      const nbrOptions = parseFloat(value)
-      setNumberOfOptions(nbrOptions)
+      setNumberOfOptions(BigNumber.from(value))
     } else {
       setYouPay(ZERO)
-      setNumberOfOptions(0.0)
+      setNumberOfOptions(ZERO)
       setOrderBtnDisabled(true)
     }
   }
@@ -124,7 +123,7 @@ export default function BuyMarket(props: {
     if (!isApproved) {
       // Approved amount is 0 ...
 
-      if (numberOfOptions > 0) {
+      if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for collateral token assuming 1% fee (expressed as an integer with collateral token decimals (<= 18)).
         // NOTE: The assumption that the maximum fee is 1% may not be valid in the future as market makers start posting orders with higher fees.
         // In the worst case, the amountToApprove will be too small due to fees being higher than 1% and the fill transaction may fail.
@@ -242,7 +241,7 @@ export default function BuyMarket(props: {
                       Array.from(document.querySelectorAll('input')).forEach(
                         (input) => (input.value = '')
                       )
-                      setNumberOfOptions(0.0)
+                      setNumberOfOptions(ZERO)
                       setYouPay(ZERO)
                       orderFilled = true
                     } else {
@@ -258,7 +257,7 @@ export default function BuyMarket(props: {
               Array.from(document.querySelectorAll('input')).forEach(
                 (input) => (input.value = '')
               )
-              setNumberOfOptions(0.0)
+              setNumberOfOptions(ZERO)
               setYouPay(ZERO)
             }
             if (orderFilled) {
@@ -387,14 +386,12 @@ export default function BuyMarket(props: {
 
   useEffect(() => {
     // Calculate average price
-    if (numberOfOptions > 0 && existingSellLimitOrders.length > 0) {
+    if (numberOfOptions.gt(0) && existingSellLimitOrders.length > 0) {
       // If user has entered an input into the Number field and there are existing Sell Limit orders to fill in the orderbook...
 
       setOrderBtnDisabled(false)
       // User input (numberOfOptions) corresponds to the maker token in Sell Limit.
-      let makerAmountToFill = parseUnits(
-        convertExponentialToDecimal(numberOfOptions)
-      ) // 18 decimals
+      let makerAmountToFill = numberOfOptions // 18 decimals
 
       let cumulativeAvgRate = ZERO
       let cumulativeTaker = ZERO
@@ -456,7 +453,7 @@ export default function BuyMarket(props: {
         setYouPay(youPay)
       }
     } else {
-      if (numberOfOptions == 0) {
+      if (numberOfOptions.eq(0)) {
         if (existingSellLimitOrders.length > 0) {
           setAvgExpectedRate(existingSellLimitOrders[0].expectedRate)
         }

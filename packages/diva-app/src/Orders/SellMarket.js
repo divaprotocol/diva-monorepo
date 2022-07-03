@@ -18,9 +18,7 @@ export const sellMarketOrder = async (orderData) => {
   const orders = orderData.existingLimitOrders
 
   // User input converted from decimal number into an integer with 18 decimals of type BigNumber
-  let nbrOptionsToSell = parseUnits(
-    convertExponentialToDecimal(orderData.nbrOptions)
-  )
+  let nbrOptionsToSell = orderData.nbrOptions
 
   // Initialize input arrays for batchFillLimitOrders function
   let takerAssetFillAmounts = []

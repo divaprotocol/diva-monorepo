@@ -36,6 +36,7 @@ import {
   setMaxYield,
   setMaxPayout,
 } from '../../../Redux/Stats'
+import { tradingFee } from '../../../constants'
 import {
   calcPayoffPerToken,
   calcBreakEven,
@@ -69,33 +70,35 @@ export default function SellLimit(props: {
 
   const classes = useStyles()
 
-  const [numberOfOptions, setNumberOfOptions] = React.useState(0.0)
-  const [pricePerOption, setPricePerOption] = React.useState(0.0)
+  const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
+  const [pricePerOption, setPricePerOption] = React.useState(ZERO) // User input field
   const [expiry, setExpiry] = React.useState(5)
   const [
     existingSellLimitOrdersAmountUser,
     setExistingSellLimitOrdersAmountUser,
-  ] = React.useState(0.0)
+  ] = React.useState(ZERO)
 
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
-  const [remainingAllowance, setRemainingAllowance] = React.useState(0.0)
-  const [allowance, setAllowance] = React.useState(0.0)
-  const [optionBalance, setOptionBalance] = React.useState(0)
+  const [allowance, setAllowance] = React.useState(ZERO)
+  const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
+  const [optionBalance, setOptionBalance] = React.useState(ZERO)
 
   const params: { tokenType: string } = useParams()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const isLong = window.location.pathname.split('/')[2] === 'long'
   const dispatch = useAppDispatch()
+  const isLong = window.location.pathname.split('/')[2] === 'long'
+
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
-      const nbrOptions = parseFloat(value)
-      if (!isNaN(nbrOptions) && nbrOptions > 0) {
+      const nbrOptions = BigNumber.from(value)
+      if (nbrOptions.gt(0)) {
         setNumberOfOptions(nbrOptions)
         if (isApproved === false) {
+          // Activate button for approval
           setOrderBtnDisabled(false)
         } else {
-          if (pricePerOption > 0) {
+          if (pricePerOption.gt(0)) {
             setOrderBtnDisabled(false)
           }
         }
@@ -105,31 +108,31 @@ export default function SellLimit(props: {
         }
       }
     } else {
-      setNumberOfOptions(0.0)
+      setNumberOfOptions(ZERO)
       setOrderBtnDisabled(true)
     }
   }
 
   const handlePricePerOptions = (value: string) => {
     if (value !== '') {
-      const pricePerOption = parseFloat(value)
-      if (!isNaN(pricePerOption) && pricePerOption > 0) {
+      const pricePerOption = BigNumber.from(value)
+      if (pricePerOption.gt(0)) {
         setPricePerOption(pricePerOption)
-        if (numberOfOptions > 0) setOrderBtnDisabled(false)
+        if (numberOfOptions.gt(0)) setOrderBtnDisabled(false)
       } else {
         //in case invalid/empty value pricePer option
-        setPricePerOption(0.0)
+        setPricePerOption(ZERO)
         //disable btn if approval is positive & number of options entered
         if (isApproved == true) {
-          if (numberOfOptions > 0) {
+          if (numberOfOptions.gt(0)) {
             setOrderBtnDisabled(true)
           }
         }
       }
     } else {
-      setPricePerOption(0.0)
+      setPricePerOption(ZERO)
       if (isApproved == true) {
-        if (numberOfOptions > 0) {
+        if (numberOfOptions.gt(0)) {
           setOrderBtnDisabled(true)
         }
       }
