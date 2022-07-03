@@ -21,6 +21,9 @@ export const sellMarketOrder = async (orderData) => {
   const signatures = []
 
   const fillOrderResponse = async (takerAssetFillAmounts, fillOrders) => {
+    console.log('fillOrders')
+    console.log(fillOrders)
+
     fillOrders.map(function (order) {
       signatures.push(order.signature)
       delete order.signature
@@ -36,7 +39,8 @@ export const sellMarketOrder = async (orderData) => {
   let fillOrders = []
   orders.forEach((order) => {
     const remainingNumber = BigNumber.from(order.remainingFillableTakerAmount)
-    if (takerFillNbrOptions.gt(0)) {
+    if (takerFillNbrOptions.gt(0) && remainingNumber.gt(1)) {
+      // those are filtered out from the orderbook so should not be fillable)
       fillOrders.push(order)
 
       if (takerFillNbrOptions.lte(remainingNumber)) {
