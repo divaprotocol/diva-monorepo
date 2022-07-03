@@ -175,6 +175,7 @@ export default function SellMarket(props: {
             existingSellLimitOrdersAmountUser
           )
 
+          // TODO: Consider refactoring the if clauses a bit
           if (totalSellAmount.gt(optionBalance)) {
             // User has not enough position tokens to sell ...
 
@@ -211,7 +212,7 @@ export default function SellMarket(props: {
                     ${toExponentialOrNumber(
                       Number(formatUnits(additionalAllowance.toString()))
                     )} 
-                    ${params.tokenType.toUpperCase()} approved. Please proceed with the order.`
+                    ${params.tokenType.toUpperCase()} tokens approved. Please proceed with the order.`
               )
             } else {
               console.log('Additional approval rejected by user.')

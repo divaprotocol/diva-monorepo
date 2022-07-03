@@ -229,6 +229,7 @@ export default function SellLimit(props: {
           convertExponentialToDecimal(numberOfOptions)
         )
 
+        // TODO: Consider refactoring the if clauses a bit
         if (numberOfOptionsBN.gt(remainingAllowance)) {
           // Entered position token amount exceeds remaining allowance ...
 
@@ -273,7 +274,7 @@ export default function SellLimit(props: {
                     ${toExponentialOrNumber(
                       Number(formatUnits(additionalAllowance.toString()))
                     )} 
-                    ${params.tokenType.toUpperCase()} approved. Please proceed with the order.`
+                    ${params.tokenType.toUpperCase()} tokens approved. Please proceed with the order.`
               )
             } else {
               console.log('Additional approval rejected by user.')

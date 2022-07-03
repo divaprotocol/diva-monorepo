@@ -164,6 +164,7 @@ export default function BuyMarket(props: {
         if (youPay.gt(remainingAllowance)) {
           // Collateral token amount to pay exceeds remaining allowance ...
 
+          // TODO: Consider refactoring the if clauses a bit
           if (youPay.gt(collateralBalance)) {
             // User not enough collateral tokens to pay for the purchase ...
 
@@ -203,7 +204,7 @@ export default function BuyMarket(props: {
                     )} 
                     ${
                       option.collateralToken.symbol
-                    } approved. Please proceed with the order.`
+                    } tokens approved. Please proceed with the order.`
               )
             } else {
               console.log('Additional approval rejected by user.')
@@ -266,7 +267,7 @@ export default function BuyMarket(props: {
           })
         }
       } else {
-        alert('No collateral tokens availabe to buy.')
+        alert(`No ${option.collateralToken.symbol} tokens available to buy.`)
       }
     }
   }

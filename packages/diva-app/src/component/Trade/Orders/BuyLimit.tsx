@@ -219,51 +219,43 @@ export default function BuyLimit(props: {
     } else {
       // Approved amount is > 0 ...
 
-      if (collateralBalance > 0) {
+      if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
 
-        const totalBuyAmount = youPay.add(existingBuyLimitOrdersAmountUser)
-
         if (youPay.gt(remainingAllowance)) {
+          const totalBuyAmount = youPay.add(existingBuyLimitOrdersAmountUser)
+
+          // TODO: Consider refactoring the if clauses a bit
           if (totalBuyAmount.gt(collateralBalance)) {
             alert('Not sufficient balance')
           } else {
+            // Integer with collateral token decimals
             const additionalAllowance = youPay.sub(remainingAllowance)
-            // HERE continue ...
             if (
               confirm(
-                'Required collateral balance exceeds approved limit. Do you want to approve an additional ' +
-                  additionalAllowance +
+                'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
+                  toExponentialOrNumber(
+                    Number(formatUnits(additionalAllowance, decimals))
+                  ) +
                   ' ' +
-                  option.collateralToken.name +
-                  ' to complete this order?'
+                  option.collateralToken.symbol +
+                  ' tokens. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              let newAllowance = Number(
-                (additionalAllowance + allowance).toFixed(
-                  totalDecimals(additionalAllowance, allowance)
-                )
+              let newAllowance = additionalAllowance
+                .add(allowance)
+                .add(BigNumber.from(100))
+
+              newAllowance = await approve(newAllowance)
+
+              const remainingAllowance = newAllowance.sub(
+                existingBuyLimitOrdersAmountUser
               )
-              const approvedAllowance = await approve(
-                parseUnits(convertExponentialToDecimal(newAllowance), decimals)
-              )
-              if (approvedAllowance == 'undefined') {
-                alert('Metamask could not finish approval.')
-              } else {
-                newAllowance = approvedAllowance
-                newAllowance = Number(formatUnits(newAllowance.toString()))
-                const remainingAllowance = Number(
-                  (newAllowance - existingBuyLimitOrdersAmountUser).toFixed(
-                    totalDecimals(
-                      newAllowance,
-                      existingBuyLimitOrdersAmountUser
-                    )
-                  )
-                )
-                setRemainingAllowance(remainingAllowance)
-                setAllowance(newAllowance)
-                alert(
-                  `Additional 
+
+              setRemainingAllowance(remainingAllowance)
+              setAllowance(newAllowance)
+              alert(
+                `Additional 
                       ${toExponentialOrNumber(
                         Number(
                           formatUnits(additionalAllowance.toString(), decimals)
@@ -271,9 +263,8 @@ export default function BuyLimit(props: {
                       )} 
                       ${
                         option.collateralToken.symbol
-                      } approved. Please proceed with the order.`
-                )
-              }
+                      } tokens approved. Please proceed with the order.`
+              )
             } else {
               console.log('Additional approval rejected by user.')
             }
@@ -292,7 +283,6 @@ export default function BuyLimit(props: {
             chainId: props.chainId,
             exchangeProxy: exchangeProxy,
           }
-
           buylimitOrder(orderData)
             .then(async (response) => {
               if (response.status === 200) {
@@ -306,11 +296,7 @@ export default function BuyLimit(props: {
             })
         }
       } else {
-        alert(
-          'No collateral tokens available to Buy ' +
-            params.tokenType.toUpperCase() +
-            ' tokens'
-        )
+        alert(`No ${option.collateralToken.symbol} tokens available to buy.`)
       }
     }
   }
