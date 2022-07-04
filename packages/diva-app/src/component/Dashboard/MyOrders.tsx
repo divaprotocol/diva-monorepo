@@ -253,7 +253,7 @@ export function MyOrders() {
       headerAlign: 'right',
       headerName: 'Quantity',
       type: 'number',
-      renderCell: (cell) => cell.value.toFixed(2),
+      renderCell: (cell) => cell.value.toFixed(4),
     },
     {
       field: 'price',

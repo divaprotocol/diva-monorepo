@@ -117,7 +117,7 @@ function mapOrderData(
       if (remainingTakerAmount == makerAmount) {
         orders.nbrOptions = Number(makerAmount)
       } else {
-        const quantity = Number(remainingTakerAmount) / askAmount
+        const quantity = Number(remainingTakerAmount) / askAmount // TODO 
         orders.nbrOptions = quantity
       }
     }
@@ -127,7 +127,7 @@ function mapOrderData(
 
   // Filter out orders with quantity = 0 (may happen if maker has revoked the approval)
   const orderbook = orderbookTemp.filter((object) => {
-    return object.nbrOptions !== 0 && object.nbrOptions !== 1e-18
+    return object.nbrOptions !== 0
   })
 
   if (sortOrder === 'ascOrder') {
@@ -283,7 +283,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.buyQuantity != ''
-                            ? row.buyQuantity?.toFixed(2)
+                            ? row.buyQuantity?.toFixed(4)
                             : '-'}
                         </Typography>
                         <label> </label>
@@ -313,7 +313,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.sellQuantity != ''
-                            ? row.sellQuantity?.toFixed(2)
+                            ? row.sellQuantity?.toFixed(4)
                             : '-'}
                         </Typography>
                       </Box>
