@@ -73,7 +73,7 @@ export const queryUser = (id: string, pageSize: number, skip: number) => gql`
     id
     positionTokens(first: ${pageSize}, skip: ${skip},
       orderDirection: desc,
-      orderBy: createdAt,) {
+      orderBy: receivedAt,) {
       positionToken {
         id
         name
