@@ -359,7 +359,7 @@ export default function SellMarket(props: {
         remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
       })
     })
-  }, [responseBuy, responseSell])
+  }, [responseBuy, responseSell, makerAccount])
 
   useEffect(() => {
     if (numberOfOptions > 0 && existingBuyLimitOrders.length > 0) {

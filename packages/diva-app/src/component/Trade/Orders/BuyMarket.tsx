@@ -152,10 +152,17 @@ export default function BuyMarket(props: {
       }
     } else {
       if (collateralBalance > 0) {
+        console.log('collateralBalance > 0')
         if (youPay > remainingApprovalAmount) {
           if (youPay > collateralBalance) {
             alert('Insufficient balance')
           } else {
+            console.log('youPay****', youPay.toString())
+            console.log(
+              'remainingApprovalAmount****',
+              remainingApprovalAmount.toString()
+            )
+
             const additionalApproval = Number(
               (youPay - remainingApprovalAmount).toFixed(
                 totalDecimals(youPay, remainingApprovalAmount)
@@ -189,7 +196,17 @@ export default function BuyMarket(props: {
                 )
               )
 
-              const remainingApproval = Number(newAllowance)
+              console.log('after approval:')
+              console.log('allowance', allowance)
+              console.log('additionalApproval', additionalApproval)
+              console.log('newAllowance', newAllowance)
+              const remainingApproval = Number(
+                (newAllowance - allowance).toFixed(
+                  totalDecimals(additionalApproval, allowance)
+                )
+              )
+              console.log('remainingApproval', remainingApproval)
+
               setRemainingApprovalAmount(remainingApproval)
               setAllowance(newAllowance)
             } else {
@@ -373,6 +390,10 @@ export default function BuyMarket(props: {
         }
       }
     })
+    console.log(
+      'existingOrdersAmount.toString()',
+      existingOrdersAmount.toString()
+    )
     return Number(
       formatUnits(
         existingOrdersAmount.toString(),
@@ -398,13 +419,15 @@ export default function BuyMarket(props: {
           setExistingSellLimitOrders(data.sortedOrders)
         }
         getTakerOrdersTotalAmount(val.account).then((amount) => {
-          setExistingOrdersAmount(amount)
+          // setExistingOrdersAmount(amount)
+          console.log('val.approvalAmount', val.approvalAmount)
           console.log('ordersAmount: ', amount)
           const remainingAmount = Number(
             (val.approvalAmount - amount).toFixed(
               totalDecimals(val.approvalAmount, amount)
             )
           )
+          console.log('remainingAmount in useEffect', remainingAmount)
           setRemainingApprovalAmount(remainingAmount)
           remainingAmount <= 0 ? setIsApproved(false) : setIsApproved(true)
         })
