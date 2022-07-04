@@ -257,7 +257,7 @@ export default function OpenOrders(props: {
                         <Typography variant="subtitle1">
                           {order.nbrOptions === 0
                             ? '-'
-                            : order.nbrOptions.toFixed(2)}
+                            : order.nbrOptions.toFixed(4)}
                         </Typography>
                       </Box>
                     </TableCell>
