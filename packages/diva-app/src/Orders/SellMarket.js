@@ -21,9 +21,6 @@ export const sellMarketOrder = async (orderData) => {
   const signatures = []
 
   const fillOrderResponse = async (takerAssetFillAmounts, fillOrders) => {
-    console.log('fillOrders')
-    console.log(fillOrders)
-
     fillOrders.map(function (order) {
       signatures.push(order.signature)
       delete order.signature
@@ -63,8 +60,6 @@ export const sellMarketOrder = async (orderData) => {
       }
     }
   })
-  console.log('takerAssetAmounts')
-  console.log(takerAssetAmounts)
   filledOrder = await fillOrderResponse(takerAssetAmounts, fillOrders)
   return filledOrder
 }
