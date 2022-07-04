@@ -58,6 +58,8 @@ function mapOrderData(
         )
         const askAmount = Number(takerAmount) / Number(makerAmount)
 
+        console.log('remainingTakerAmount (OptionOrders)', remainingTakerAmount)
+        console.log('makerAmount (OptionOrders)', makerAmount)
         if (remainingTakerAmount == makerAmount) {
           nbrOptions = Number(makerAmount)
         } else {

@@ -65,6 +65,7 @@ export default function BuyMarket(props: {
   const [existingSellLimitOrders, setExistingSellLimitOrders] = React.useState(
     []
   )
+  const [existingOrdersAmount, setExistingOrdersAmount] = React.useState(0.0)
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(0.0)
@@ -119,6 +120,7 @@ export default function BuyMarket(props: {
         const amount = Number(
           (allowance + youPay).toFixed(totalDecimals(allowance, youPay))
         )
+        console.log('amount: ', amount)
         let collateralAllowance = await approveBuyAmount(
           parseUnits(
             convertExponentialToDecimal(amount).toString(),
@@ -131,7 +133,13 @@ export default function BuyMarket(props: {
             option.collateralToken.decimals
           )
         )
-        setRemainingApprovalAmount(collateralAllowance)
+        const remainingApproval = Number(
+          (collateralAllowance - existingOrdersAmount).toFixed(
+            totalDecimals(collateralAllowance, existingOrdersAmount)
+          )
+        )
+        console.log('remainingApproval: ', remainingApproval)
+        setRemainingApprovalAmount(remainingApproval)
         setAllowance(collateralAllowance)
         setIsApproved(true)
         alert(
@@ -313,33 +321,55 @@ export default function BuyMarket(props: {
   }
 
   const getTakerOrdersTotalAmount = async (taker) => {
-    let existingOrdersAmount = new BigNumber(0)
+    let existingOrdersAmount = BigENumber.from(0)
     if (responseBuy.length == 0) {
       //Double check any limit orders exists
-      const rBuy = await get0xOpenOrders(
+      const rBuy: any = await get0xOpenOrders(
         option.collateralToken.id,
         makerToken,
         props.chainId
       )
-      if (rBuy.length > 0) {
-        responseBuy = rBuy
-      }
+      // if (rBuy.length > 0) {
+      responseBuy = rBuy
+      // }
+      console.log(responseBuy)
     }
     responseBuy.forEach((data: any) => {
       const order = data.order
       const metaData = data.metaData
-      if (taker == order.maker) {
+      if (order.maker == taker) {
         const remainingFillableTakerAmount = new BigNumber(
           metaData.remainingFillableTakerAmount.toString()
         )
-        if (remainingFillableTakerAmount < order.takerAmount) {
+        console.log(
+          'remainingFillableTakerAmount',
+          metaData.remainingFillableTakerAmount.toString()
+        )
+        console.log('takerAmount', order.takerAmount)
+        console.log('order', order)
+        if (remainingFillableTakerAmount == order.takerAmount) {
+          console.log('Hi1')
+          existingOrdersAmount = BigENumber.from(existingOrdersAmount).add(
+            order.makerAmount
+          )
+        } else {
+          console.log('Hi2')
           const makerAmount = new BigNumber(order.makerAmount)
           const takerAmount = new BigNumber(order.takerAmount)
           const bidAmount = makerAmount.dividedBy(takerAmount)
-          const youPay = bidAmount.multipliedBy(remainingFillableTakerAmount)
-          existingOrdersAmount = existingOrdersAmount.plus(youPay)
-        } else {
-          existingOrdersAmount = existingOrdersAmount.plus(order.makerAmount)
+          const youPay = parseUnits(
+            bidAmount.toString(),
+            option.collateralToken.decimals
+          )
+            .mul(remainingFillableTakerAmount.toString())
+            .div(parseUnits('1')) // .multipliedBy(remainingFillableTakerAmount)
+          console.log('makerAmount', makerAmount.toString())
+          console.log('takerAmount', takerAmount.toString())
+          console.log('bidAmount', bidAmount.toString())
+          console.log('youPay', youPay.toString())
+          console.log('allowance', allowance.toString())
+          existingOrdersAmount =
+            BigENumber.from(existingOrdersAmount).add(youPay)
         }
       }
     })
@@ -353,7 +383,10 @@ export default function BuyMarket(props: {
 
   useEffect(() => {
     if (userAddress != null) {
+      console.log('allowance', allowance)
+      console.log('remainingAllowance', remainingApprovalAmount)
       getCollateralInWallet(userAddress).then(async (val) => {
+        console.log('approvalAmount', val.approvalAmount)
         !Number.isNaN(val.balance)
           ? setCollateralBalance(Number(val.balance))
           : setCollateralBalance(0)
@@ -365,6 +398,8 @@ export default function BuyMarket(props: {
           setExistingSellLimitOrders(data.sortedOrders)
         }
         getTakerOrdersTotalAmount(val.account).then((amount) => {
+          setExistingOrdersAmount(amount)
+          console.log('ordersAmount: ', amount)
           const remainingAmount = Number(
             (val.approvalAmount - amount).toFixed(
               totalDecimals(val.approvalAmount, amount)
