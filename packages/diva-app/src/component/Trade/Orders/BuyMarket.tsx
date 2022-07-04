@@ -591,7 +591,7 @@ export default function BuyMarket(props: {
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
               <FormLabel>
-                {Number(formatUnits(avgExpectedRate)).toFixed(4)}
+                {Number(formatUnits(avgExpectedRate, decimals)).toFixed(4)}
               </FormLabel>
             </Stack>
           </RightSideLabel>

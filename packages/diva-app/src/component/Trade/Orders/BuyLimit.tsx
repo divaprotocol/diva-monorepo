@@ -94,7 +94,7 @@ export default function BuyLimit(props: {
 
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
-      const nbrOptions = BigNumber.from(value)
+      const nbrOptions = parseUnits(value)
       setNumberOfOptions(nbrOptions)
       if (pricePerOption.gt(0) && nbrOptions.gt(0)) {
         const youPay = pricePerOption.mul(nbrOptions).div(positionTokenUnit)
@@ -114,7 +114,7 @@ export default function BuyLimit(props: {
 
   const handlePricePerOptions = (value: string) => {
     if (value !== '') {
-      const pricePerOption = BigNumber.from(value)
+      const pricePerOption = parseUnits(value, decimals)
       setPricePerOption(pricePerOption)
       if (numberOfOptions.gt(0) && pricePerOption.gt(0)) {
         const youPay = numberOfOptions
@@ -136,9 +136,9 @@ export default function BuyLimit(props: {
     Array.from(document.querySelectorAll('input')).forEach(
       (input) => (input.value = '')
     )
-    setNumberOfOptions(parseFloat('0.0'))
-    setPricePerOption(parseFloat('0.0'))
-    setYouPay(parseFloat('0.0'))
+    setNumberOfOptions(ZERO)
+    setPricePerOption(ZERO)
+    setYouPay(ZERO)
     setOrderBtnDisabled(true)
     let allowance = await makerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
@@ -190,7 +190,7 @@ export default function BuyLimit(props: {
     if (!isApproved) {
       // Approved amount is 0 ...
 
-      if (numberOfOptions > 0) {
+      if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals (<= 18)).
         const amountToApprove = allowance.add(youPay).add(BigNumber.from(100))
 
@@ -392,14 +392,12 @@ export default function BuyLimit(props: {
       BigNumber.from(option.supplyInitial),
       decimals
     )
-    if (pricePerOption > 0) {
+    if (pricePerOption.gt(0)) {
       dispatch(
         setMaxYield(
           parseFloat(
             formatUnits(
-              parseUnits(maxPayout)
-                .mul(parseUnits('1'))
-                .div(parseUnits(convertExponentialToDecimal(pricePerOption)))
+              parseUnits(maxPayout).mul(parseUnits('1')).div(pricePerOption)
             )
           ).toFixed(2) + 'x'
         )
@@ -410,7 +408,7 @@ export default function BuyLimit(props: {
 
     let breakEven: number | string
 
-    if (pricePerOption != 0) {
+    if (!pricePerOption.eq(0)) {
       breakEven = calcBreakEven(
         pricePerOption,
         option.floor,

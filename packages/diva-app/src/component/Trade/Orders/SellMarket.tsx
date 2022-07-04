@@ -602,7 +602,9 @@ export default function SellMarket(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
-              <FormLabel>{avgExpectedRate.toFixed(4)}</FormLabel>
+              <FormLabel>
+                {Number(formatUnits(avgExpectedRate, decimals)).toFixed(4)}
+              </FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>

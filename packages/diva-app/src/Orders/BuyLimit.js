@@ -4,7 +4,6 @@ import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
 import { divaGovernanceAddress, tradingFee } from '../constants'
-import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 import { getFutureExpiryInSeconds } from '../Util/utils'
 
 export const buylimitOrder = async (orderData) => {
@@ -12,10 +11,7 @@ export const buylimitOrder = async (orderData) => {
 
   const positionTokenUnit = parseUnits('1')
 
-  // User input converted from decimal number into an integer with 18 decimals of type BigNumber
-  const nbrOptionsToBuy = parseUnits(
-    convertExponentialToDecimal(orderData.nbrOptions)
-  )
+  const nbrOptionsToBuy = orderData.nbrOptions
 
   // Derive the collateralTokenAmount (makerAmount in Buy Limit) from the user's nbrOptionsToBuy input.
   const collateralTokenAmount = nbrOptionsToBuy

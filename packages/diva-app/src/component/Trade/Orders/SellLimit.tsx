@@ -66,7 +66,6 @@ export default function SellLimit(props: {
   const usdPrice = props.usdPrice
   const decimals = option.collateralToken.decimals
   const positionTokenUnit = parseUnits('1')
-  const collateralTokenUnit = parseUnits('1', decimals)
 
   const classes = useStyles()
 
@@ -91,7 +90,7 @@ export default function SellLimit(props: {
 
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
-      const nbrOptions = BigNumber.from(value)
+      const nbrOptions = parseUnits(value)
       if (nbrOptions.gt(0)) {
         setNumberOfOptions(nbrOptions)
         if (isApproved === false) {
@@ -115,7 +114,7 @@ export default function SellLimit(props: {
 
   const handlePricePerOptions = (value: string) => {
     if (value !== '') {
-      const pricePerOption = BigNumber.from(value)
+      const pricePerOption = parseUnits(value, decimals)
       if (pricePerOption.gt(0)) {
         setPricePerOption(pricePerOption)
         if (numberOfOptions.gt(0)) setOrderBtnDisabled(false)
@@ -143,8 +142,8 @@ export default function SellLimit(props: {
     Array.from(document.querySelectorAll('input')).forEach(
       (input) => (input.value = '')
     )
-    setNumberOfOptions(parseFloat('0.0'))
-    setPricePerOption(parseFloat('0.0'))
+    setNumberOfOptions(ZERO)
+    setPricePerOption(ZERO)
     setOrderBtnDisabled(true)
     let approvedAllowance = await makerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
@@ -185,10 +184,10 @@ export default function SellLimit(props: {
     if (!isApproved) {
       // Approved amount is 0 ...
 
-      if (numberOfOptions > 0) {
+      if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for position token (expressed as an integer with 18 decimals).
         const amountToApprove = allowance
-          .add(parseUnits(convertExponentialToDecimal(numberOfOptions)))
+          .add(numberOfOptions)
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
         // Set allowance
@@ -227,17 +226,12 @@ export default function SellLimit(props: {
       if (optionBalance.gt(0)) {
         // User owns position tokens ...
 
-        // Convert numberOfOptions into an integer of type BigNumber with 18 decimals to be used in integer math.
-        const numberOfOptionsBN = parseUnits(
-          convertExponentialToDecimal(numberOfOptions)
-        )
-
         // TODO: Consider refactoring the if clauses a bit
-        if (numberOfOptionsBN.gt(remainingAllowance)) {
+        if (numberOfOptions.gt(remainingAllowance)) {
           // Entered position token amount exceeds remaining allowance ...
 
           // Get total amount of position tokens that the user wants to sell (incl. the user's existing Sell Limit orders)
-          const totalSellAmount = numberOfOptionsBN.add(
+          const totalSellAmount = numberOfOptions.add(
             existingSellLimitOrdersAmountUser
           )
 
@@ -247,8 +241,7 @@ export default function SellLimit(props: {
             alert('Insufficient position token balance')
           } else {
             // Calculate additional allowance required to executed the Sell Limit order
-            const additionalAllowance =
-              numberOfOptionsBN.sub(remainingAllowance)
+            const additionalAllowance = numberOfOptions.sub(remainingAllowance)
             if (
               confirm(
                 'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
@@ -416,14 +409,12 @@ export default function SellLimit(props: {
       BigNumber.from(option.supplyInitial),
       decimals
     )
-    if (pricePerOption > 0) {
+    if (pricePerOption.gt(0)) {
       dispatch(
         setMaxYield(
           parseFloat(
             formatUnits(
-              parseUnits(maxPayout)
-                .mul(parseUnits('1'))
-                .div(parseUnits(convertExponentialToDecimal(pricePerOption)))
+              parseUnits(maxPayout).mul(parseUnits('1')).div(pricePerOption)
             )
           ).toFixed(2) + 'x'
         )
@@ -434,7 +425,7 @@ export default function SellLimit(props: {
 
     let breakEven: number | string
 
-    if (pricePerOption != 0) {
+    if (!pricePerOption.eq(0)) {
       breakEven = calcBreakEven(
         pricePerOption,
         option.floor,
@@ -550,8 +541,18 @@ export default function SellLimit(props: {
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
               <FormLabel>
-                {pricePerOption * numberOfOptions > 0
-                  ? (pricePerOption * numberOfOptions).toFixed(4)
+                {pricePerOption
+                  .mul(numberOfOptions)
+                  .div(positionTokenUnit)
+                  .gt(0)
+                  ? Number(
+                      formatUnits(
+                        pricePerOption
+                          .mul(numberOfOptions)
+                          .div(positionTokenUnit),
+                        decimals
+                      )
+                    ).toFixed(4)
                   : (0).toFixed(4)}
               </FormLabel>
             </Stack>
