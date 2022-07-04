@@ -110,8 +110,6 @@ export default function SellMarket(props: {
     const allowance = await takerTokenContract.methods
       .allowance(makerAccount, exchangeProxyAddress)
       .call()
-    console.log('allowance')
-    console.log(allowance)
     return allowance
   }
 

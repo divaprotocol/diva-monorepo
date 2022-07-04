@@ -111,8 +111,6 @@ export default function CreateOrder(props: {
       props.tokenAddress,
       props.chainId
     )
-    console.log('responseBuy')
-    console.log(responseBuy)
     if (responseSell.length > 0) {
       dispatch(setResponseSell(responseSell))
     }
