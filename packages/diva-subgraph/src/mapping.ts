@@ -79,6 +79,7 @@ function handleLiquidityEvent(
     userShortPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.shortToken.toHexString());
     userShortPositionTokenEntity.user = msgSender.toHexString();
     userShortPositionTokenEntity.positionToken = parameters.shortToken.toHexString();
+    userShortPositionTokenEntity.receivedAt = blockTimestamp; // doesn't enter this if clause on remove assuming user is only using the app
     userShortPositionTokenEntity.save();
   }
   let userLongPositionTokenEntity = UserPositionToken.load(
@@ -87,6 +88,7 @@ function handleLiquidityEvent(
     userLongPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.longToken.toHexString());
     userLongPositionTokenEntity.user = msgSender.toHexString();
     userLongPositionTokenEntity.positionToken = parameters.longToken.toHexString();
+    userLongPositionTokenEntity.receivedAt = blockTimestamp;
     userLongPositionTokenEntity.save();
   }
 
@@ -153,7 +155,6 @@ function handleLiquidityEvent(
     longTokenEntity.decimals = longTokenContract.decimals();
     longTokenEntity.pool = longTokenContract.poolId().toString();
     longTokenEntity.owner = longTokenContract.owner();
-    longTokenEntity.createdAt = blockTimestamp;
 
     longTokenEntity.save();
   }
@@ -171,7 +172,6 @@ function handleLiquidityEvent(
     shortTokenEntity.decimals = shortTokenContract.decimals();
     shortTokenEntity.pool = shortTokenContract.poolId().toString();
     shortTokenEntity.owner = shortTokenContract.owner();
-    shortTokenEntity.createdAt = blockTimestamp;
 
     shortTokenEntity.save();
   }
@@ -448,6 +448,7 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       userPositionTokenEntity = new UserPositionToken(event.params.maker.toHexString() + "-" + event.params.takerToken.toHexString());
       userPositionTokenEntity.user = event.params.maker.toHexString();
       userPositionTokenEntity.positionToken = event.params.takerToken.toHexString();
+      userPositionTokenEntity.receivedAt = event.block.timestamp;
       userPositionTokenEntity.save();
     }
 
@@ -474,6 +475,7 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       userPositionTokenEntity = new UserPositionToken(event.params.taker.toHexString() + "-" + event.params.makerToken.toHexString());
       userPositionTokenEntity.user = event.params.taker.toHexString();
       userPositionTokenEntity.positionToken = event.params.makerToken.toHexString();
+      userPositionTokenEntity.receivedAt = event.block.timestamp;
       userPositionTokenEntity.save();
     }
 
