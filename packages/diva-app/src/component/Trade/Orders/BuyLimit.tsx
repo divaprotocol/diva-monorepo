@@ -112,7 +112,7 @@ export default function BuyLimit(props: {
     }
   }
 
-  const handlePricePerOptions = (value: string) => {
+  const handlePricePerOption = (value: string) => {
     if (value !== '') {
       const pricePerOption = parseUnits(value, decimals)
       setPricePerOption(pricePerOption)
@@ -140,17 +140,11 @@ export default function BuyLimit(props: {
     setPricePerOption(ZERO)
     setYouPay(ZERO)
     setOrderBtnDisabled(true)
-    let allowance = await makerTokenContract.methods
+
+    const allowance = await makerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
       .call()
-    allowance = Number(formatUnits(allowance, decimals))
-
-    const remainingAllowance = allowance
-      .sub(existingBuyLimitOrdersAmountUser)
-      .mul(parseUnits(feeMultiplier, decimals)) // Adding 1% fee as it also requires approval
-      .div(parseUnits('1', decimals))
-      .add(BigNumber.from(10)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
-
+    const remainingAllowance = allowance.sub(existingBuyLimitOrdersAmountUser)
     setRemainingAllowance(remainingAllowance)
   }
 
@@ -172,7 +166,7 @@ export default function BuyLimit(props: {
       if ('events' in approveResponse) {
         return approveResponse.events.Approval.returnValues.value // QUESTION: Why not included in Buy/Sell Market?
       } else {
-        //in case the approve call does not or delay emit events, read the allowance again
+        // In case the approve call does not or delay emit events, read the allowance again
         await new Promise((resolve) => setTimeout(resolve, 4000)) // QUESTION: Why not included in Buy/Sell Market?
         const allowance = await makerTokenContract.methods
           .allowance(userAddress, exchangeProxy)
@@ -503,7 +497,7 @@ export default function BuyLimit(props: {
           </FormLabel>
           <FormInput
             type="text"
-            onChange={(event) => handlePricePerOptions(event.target.value)}
+            onChange={(event) => handlePricePerOption(event.target.value)}
           />
         </FormDiv>
         <FormDiv>
@@ -512,9 +506,9 @@ export default function BuyLimit(props: {
               <LabelStyle>You Pay </LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {remainingAllowance.toString().includes('e')
-                  ? remainingAllowance.toExponential(2)
-                  : remainingAllowance.toFixed(4)}
+                {toExponentialOrNumber(
+                  Number(formatUnits(remainingAllowance, decimals))
+                )}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>
@@ -523,7 +517,10 @@ export default function BuyLimit(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.6 }}>
                 {option.collateralToken.symbol}
               </FormLabel>
-              <FormLabel>{youPay.toFixed(4) + ' '}</FormLabel>
+              <FormLabel>
+                {toExponentialOrNumber(Number(formatUnits(youPay, decimals))) +
+                  ' '}
+              </FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
@@ -536,7 +533,11 @@ export default function BuyLimit(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {option.collateralToken.symbol}
               </FormLabel>
-              <FormLabel>{collateralBalance.toFixed(4)}</FormLabel>
+              <FormLabel>
+                {toExponentialOrNumber(
+                  Number(formatUnits(collateralBalance, decimals))
+                )}
+              </FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
@@ -576,7 +577,7 @@ export default function BuyLimit(props: {
                 <MenuItem value={60}>
                   <LabelGrayStyle>1 Hour</LabelGrayStyle>
                 </MenuItem>
-                <MenuItem value={60 * 4}>
+                {/* <MenuItem value={60 * 4}>
                   <LabelGrayStyle>4 Hours</LabelGrayStyle>
                 </MenuItem>
                 <MenuItem value={60 * 12}>
@@ -593,7 +594,7 @@ export default function BuyLimit(props: {
                 </MenuItem>
                 <MenuItem value={60 * 24 * 30}>
                   <LabelGrayStyle>1 Month</LabelGrayStyle>
-                </MenuItem>
+                </MenuItem> */}
               </Select>
             </FormControl>
           </LimitOrderExpiryDiv>

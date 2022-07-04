@@ -71,6 +71,7 @@ export default function SellLimit(props: {
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
   const [pricePerOption, setPricePerOption] = React.useState(ZERO) // User input field
+  const [youReceive, setYouReceive] = React.useState(ZERO)
   const [expiry, setExpiry] = React.useState(5)
   const [
     existingSellLimitOrdersAmountUser,
@@ -98,6 +99,10 @@ export default function SellLimit(props: {
           setOrderBtnDisabled(false)
         } else {
           if (pricePerOption.gt(0)) {
+            const youReceive = pricePerOption
+              .mul(numberOfOptions)
+              .div(positionTokenUnit)
+            setYouReceive(youReceive)
             setOrderBtnDisabled(false)
           }
         }
@@ -107,21 +112,28 @@ export default function SellLimit(props: {
         }
       }
     } else {
+      setYouReceive(ZERO)
       setNumberOfOptions(ZERO)
       setOrderBtnDisabled(true)
     }
   }
 
-  const handlePricePerOptions = (value: string) => {
+  const handlePricePerOption = (value: string) => {
     if (value !== '') {
       const pricePerOption = parseUnits(value, decimals)
+      setPricePerOption(pricePerOption)
       if (pricePerOption.gt(0)) {
-        setPricePerOption(pricePerOption)
-        if (numberOfOptions.gt(0)) setOrderBtnDisabled(false)
+        if (numberOfOptions.gt(0)) {
+          const youReceive = pricePerOption
+            .mul(numberOfOptions)
+            .div(positionTokenUnit)
+          setYouReceive(youReceive)
+          setOrderBtnDisabled(false)
+        }
       } else {
-        //in case invalid/empty value pricePer option
+        // In case invalid/empty value pricePerOption
         setPricePerOption(ZERO)
-        //disable btn if approval is positive & number of options entered
+        // Disable btn if approval is positive & number of options entered
         if (isApproved == true) {
           if (numberOfOptions.gt(0)) {
             setOrderBtnDisabled(true)
@@ -129,6 +141,7 @@ export default function SellLimit(props: {
         }
       }
     } else {
+      setYouReceive(ZERO)
       setPricePerOption(ZERO)
       if (isApproved == true) {
         if (numberOfOptions.gt(0)) {
@@ -145,16 +158,21 @@ export default function SellLimit(props: {
     setNumberOfOptions(ZERO)
     setPricePerOption(ZERO)
     setOrderBtnDisabled(true)
-    let approvedAllowance = await makerTokenContract.methods
+
+    const allowance = await makerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
       .call()
-    approvedAllowance = Number(formatUnits(approvedAllowance.toString(), 18)) // NOTE: decimals need adjustment when we switch to smart contracts version 1.0.0
-    const remainingAmount = Number(
-      (approvedAllowance - existingSellLimitOrdersAmountUser).toFixed(
-        totalDecimals(approvedAllowance, existingSellLimitOrdersAmountUser)
-      )
+    const remainingAllowance = allowance.sub(existingSellLimitOrdersAmountUser)
+    setRemainingAllowance(remainingAllowance)
+  }
+
+  const handleExpirySelection = (event: SelectChangeEvent<number>) => {
+    event.preventDefault()
+    setExpiry(
+      typeof event.target.value === 'string'
+        ? parseInt(event.target.value)
+        : event.target.value
     )
-    setRemainingAllowance(remainingAmount)
   }
 
   // TODO: Align with Markets files as this function here contains a try catch block but the Markets files don't
@@ -166,7 +184,7 @@ export default function SellLimit(props: {
       if ('events' in approveResponse) {
         return approveResponse.events.Approval.returnValues.value // QUESTION: Why not included in Buy/Sell Market?
       } else {
-        //in case the approve call does not or delay emit events read the allowance again
+        // In case the approve call does not or delay emit events read the allowance again
         await new Promise((resolve) => setTimeout(resolve, 4000)) // QUESTION: Why not included in Buy/Sell Market?
         const allowance = await makerTokenContract.methods
           .allowance(userAddress, exchangeProxy)
@@ -387,15 +405,6 @@ export default function SellLimit(props: {
     }
   }, [responseSell])
 
-  const handleExpirySelection = (event: SelectChangeEvent<number>) => {
-    event.preventDefault()
-    setExpiry(
-      typeof event.target.value === 'string'
-        ? parseInt(event.target.value)
-        : event.target.value
-    )
-  }
-
   useEffect(() => {
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
@@ -528,7 +537,7 @@ export default function SellLimit(props: {
           </FormLabel>
           <FormInput
             type="text"
-            onChange={(event) => handlePricePerOptions(event.target.value)}
+            onChange={(event) => handlePricePerOption(event.target.value)}
           />
         </FormDiv>
         <FormDiv>
@@ -541,19 +550,9 @@ export default function SellLimit(props: {
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
               <FormLabel>
-                {pricePerOption
-                  .mul(numberOfOptions)
-                  .div(positionTokenUnit)
-                  .gt(0)
-                  ? Number(
-                      formatUnits(
-                        pricePerOption
-                          .mul(numberOfOptions)
-                          .div(positionTokenUnit),
-                        decimals
-                      )
-                    ).toFixed(4)
-                  : (0).toFixed(4)}
+                {toExponentialOrNumber(
+                  Number(formatUnits(youReceive, decimals))
+                )}
               </FormLabel>
             </Stack>
           </RightSideLabel>
@@ -567,7 +566,9 @@ export default function SellLimit(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {params.tokenType.toUpperCase() + ' '}
               </FormLabel>
-              <FormLabel>{optionBalance.toFixed(4)}</FormLabel>
+              <FormLabel>
+                {toExponentialOrNumber(Number(formatUnits(optionBalance)))}
+              </FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>
@@ -587,7 +588,7 @@ export default function SellLimit(props: {
             <FormControl className={classes.formControl}>
               <Select
                 value={expiry}
-                onChange={handleExpirySelection}
+                onChange={(event) => handleExpirySelection(event)}
                 displayEmpty
                 className={classes.selectEmpty}
                 inputProps={{ 'aria-label': 'Without label' }}
@@ -607,7 +608,7 @@ export default function SellLimit(props: {
                 <MenuItem value={60}>
                   <LabelGrayStyle>1 Hour</LabelGrayStyle>
                 </MenuItem>
-                <MenuItem value={60 * 4}>
+                {/* <MenuItem value={60 * 4}>
                   <LabelGrayStyle>4 Hours</LabelGrayStyle>
                 </MenuItem>
                 <MenuItem value={60 * 12}>
@@ -624,7 +625,7 @@ export default function SellLimit(props: {
                 </MenuItem>
                 <MenuItem value={60 * 24 * 30}>
                   <LabelGrayStyle>1 Month</LabelGrayStyle>
-                </MenuItem>
+                </MenuItem> */}
               </Select>
             </FormControl>
           </LimitOrderExpiryDiv>

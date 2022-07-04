@@ -603,7 +603,9 @@ export default function SellMarket(props: {
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
               <FormLabel>
-                {Number(formatUnits(avgExpectedRate, decimals)).toFixed(4)}
+                {toExponentialOrNumber(
+                  Number(formatUnits(avgExpectedRate, decimals))
+                )}
               </FormLabel>
             </Stack>
           </RightSideLabel>
@@ -634,7 +636,9 @@ export default function SellMarket(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 {params.tokenType.toUpperCase() + ' '}
               </FormLabel>
-              <FormLabel>{toExponentialOrNumber(optionBalance)}</FormLabel>
+              <FormLabel>
+                {toExponentialOrNumber(Number(formatUnits(optionBalance)))}
+              </FormLabel>
             </Stack>
           </RightSideLabel>
         </FormDiv>

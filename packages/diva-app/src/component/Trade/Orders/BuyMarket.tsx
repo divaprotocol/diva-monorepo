@@ -591,7 +591,9 @@ export default function BuyMarket(props: {
                 {option.collateralToken.symbol + ' '}
               </FormLabel>
               <FormLabel>
-                {Number(formatUnits(avgExpectedRate, decimals)).toFixed(4)}
+                {toExponentialOrNumber(
+                  Number(formatUnits(avgExpectedRate, decimals))
+                )}
               </FormLabel>
             </Stack>
           </RightSideLabel>
@@ -603,7 +605,7 @@ export default function BuyMarket(props: {
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
                 {toExponentialOrNumber(
-                  Number(formatUnits(remainingAllowance.toString(), decimals))
+                  Number(formatUnits(remainingAllowance, decimals))
                 )}
               </FormLabel>
             </Stack>
@@ -631,7 +633,7 @@ export default function BuyMarket(props: {
               </FormLabel>
               <FormLabel>
                 {toExponentialOrNumber(
-                  Number(formatUnits(collateralBalance.toString(), decimals))
+                  Number(formatUnits(collateralBalance, decimals))
                 )}
               </FormLabel>
             </Stack>
