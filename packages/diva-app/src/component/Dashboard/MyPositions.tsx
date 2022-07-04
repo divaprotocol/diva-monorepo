@@ -656,8 +656,10 @@ export function MyPositions() {
   })
 
   useEffect(() => {
-    balances.refetch()
-  }, [balances, tokenAddresses])
+    if (userAddress) {
+      balances.refetch()
+    }
+  }, [balances, tokenAddresses, userAddress])
 
   const tokenBalances = balances.data
 
