@@ -68,6 +68,7 @@ export default function SellMarket(props: {
   const usdPrice = props.usdPrice
   const decimals = option.collateralToken.decimals
   const positionTokenUnit = parseUnits('1')
+  const collateralTokenUnit = parseUnits('1', decimals)
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
@@ -481,15 +482,14 @@ export default function SellMarket(props: {
       BigNumber.from(option.supplyInitial),
       decimals
     )
-    const expectedPrice = Number(formatUnits(avgExpectedRate)) // ok to convert to number here as it's only for displaying stats
-    if (expectedPrice > 0 && !isNaN(expectedPrice)) {
+    if (avgExpectedRate.gt(0)) {
       dispatch(
         setMaxYield(
           parseFloat(
             formatUnits(
-              parseUnits(maxPayout)
-                .mul(positionTokenUnit)
-                .div(parseUnits(convertExponentialToDecimal(expectedPrice)))
+              parseUnits(maxPayout, decimals)
+                .mul(collateralTokenUnit)
+                .div(avgExpectedRate)
             )
           ).toFixed(2) + 'x'
         )
@@ -500,9 +500,9 @@ export default function SellMarket(props: {
 
     let breakEven: number | string
 
-    if (expectedPrice != 0) {
+    if (!avgExpectedRate.eq(0)) {
       breakEven = calcBreakEven(
-        expectedPrice,
+        avgExpectedRate,
         option.floor,
         option.inflection,
         option.cap,

@@ -69,6 +69,7 @@ export default function BuyLimit(props: {
   const usdPrice = props.usdPrice
   const decimals = option.collateralToken.decimals
   const positionTokenUnit = parseUnits('1')
+  const collateralTokenUnit = parseUnits('1', decimals)
 
   const classes = useStyles()
 
@@ -391,7 +392,9 @@ export default function BuyLimit(props: {
         setMaxYield(
           parseFloat(
             formatUnits(
-              parseUnits(maxPayout).mul(parseUnits('1')).div(pricePerOption)
+              parseUnits(maxPayout, decimals)
+                .mul(collateralTokenUnit)
+                .div(pricePerOption)
             )
           ).toFixed(2) + 'x'
         )

@@ -500,9 +500,7 @@ export default function SellLimit(props: {
               <LabelStyle>Number</LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {remainingAllowance.toString().includes('e')
-                  ? remainingAllowance.toExponential(2)
-                  : remainingAllowance.toFixed(4)}
+                {toExponentialOrNumber(Number(formatUnits(remainingAllowance)))}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>

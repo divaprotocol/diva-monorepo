@@ -475,15 +475,14 @@ export default function BuyMarket(props: {
       BigNumber.from(option.supplyInitial),
       decimals
     )
-    const expectedPrice = Number(formatUnits(avgExpectedRate)) // ok to convert to number here as it's only for displaying stats
-    if (expectedPrice > 0 && !isNaN(expectedPrice)) {
+    if (avgExpectedRate.gt(0)) {
       dispatch(
         setMaxYield(
           parseFloat(
             formatUnits(
-              parseUnits(maxPayout)
-                .mul(positionTokenUnit)
-                .div(parseUnits(convertExponentialToDecimal(expectedPrice)))
+              parseUnits(maxPayout, decimals)
+                .mul(collateralTokenUnit)
+                .div(avgExpectedRate)
             )
           ).toFixed(2) + 'x'
         )
@@ -494,9 +493,9 @@ export default function BuyMarket(props: {
 
     let breakEven: number | string
 
-    if (expectedPrice != 0) {
+    if (!avgExpectedRate.eq(0)) {
       breakEven = calcBreakEven(
-        expectedPrice,
+        avgExpectedRate,
         option.floor,
         option.inflection,
         option.cap,

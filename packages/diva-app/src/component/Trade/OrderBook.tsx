@@ -117,7 +117,7 @@ function mapOrderData(
       if (remainingTakerAmount == makerAmount) {
         orders.nbrOptions = Number(makerAmount)
       } else {
-        const quantity = Number(remainingTakerAmount) / askAmount // TODO 
+        const quantity = Number(remainingTakerAmount) / askAmount // TODO
         orders.nbrOptions = quantity
       }
     }
