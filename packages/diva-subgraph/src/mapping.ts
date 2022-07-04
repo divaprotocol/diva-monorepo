@@ -64,7 +64,6 @@ function handleLiquidityEvent(
   let parameters = contract.getPoolParameters(poolId);
   let shortTokenContract = PositionTokenABI.bind(parameters.shortToken);
   let longTokenContract = PositionTokenABI.bind(parameters.longToken);
-
   let entity = Pool.load(poolId.toString());
   
   //set user to position token mapping

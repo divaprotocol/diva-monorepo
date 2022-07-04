@@ -3,7 +3,7 @@ on:
     branches:
       - main
     paths:
-      - packages/*-subgraph/**
+      - packages/*-subgraph/**/*
 
 name: Deploy production subgraph
 jobs:
