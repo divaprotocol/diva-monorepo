@@ -166,6 +166,7 @@ export default function SellMarket(props: {
                   '. Click Fill Order after the allowance has been updated.'
               )
             ) {
+              const amount = existingOrdersAmount
               let newAllowance = Number(
                 (additionalApproval + allowance).toFixed(
                   totalDecimals(additionalApproval, allowance)
@@ -179,7 +180,8 @@ export default function SellMarket(props: {
                 )
               )
               newAllowance = Number(formatUnits(newAllowance.toString(), 18))
-              setRemainingApprovalAmount(newAllowance)
+              const remainingApprovalAmount = newAllowance - amount
+              setRemainingApprovalAmount(remainingApprovalAmount)
               setAllowance(newAllowance)
             } else {
               //TBD discuss this case

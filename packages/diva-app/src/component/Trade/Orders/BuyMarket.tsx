@@ -177,6 +177,7 @@ export default function BuyMarket(props: {
                   '. Click Fill Order after the allowance has been updated.'
               )
             ) {
+              const amount = existingOrdersAmount
               let newAllowance = Number(
                 (additionalApproval + allowance).toFixed(
                   totalDecimals(additionalApproval, allowance)
@@ -196,18 +197,14 @@ export default function BuyMarket(props: {
                 )
               )
 
-              console.log('after approval:')
-              console.log('allowance', allowance)
-              console.log('additionalApproval', additionalApproval)
-              console.log('newAllowance', newAllowance)
-              //const remainingApproval = Number(
-              //  (newAllowance + allowance).toFixed(
-              //    totalDecimals(additionalApproval, allowance)
-              //  )
-              //)
-              //console.log('remainingApproval', remainingApproval)
+              const remainingApproval = Number(
+                (newAllowance - amount).toFixed(
+                  totalDecimals(newAllowance, existingOrdersAmount)
+                )
+              )
+              console.log('remainingApproval', remainingApproval)
 
-              setRemainingApprovalAmount(newAllowance)
+              setRemainingApprovalAmount(remainingApproval)
               setAllowance(newAllowance)
             } else {
               //TBD discuss this case
@@ -419,7 +416,7 @@ export default function BuyMarket(props: {
           setExistingSellLimitOrders(data.sortedOrders)
         }
         getTakerOrdersTotalAmount(val.account).then((amount) => {
-          // setExistingOrdersAmount(amount)
+          setExistingOrdersAmount(amount)
           console.log('val.approvalAmount', val.approvalAmount)
           console.log('ordersAmount: ', amount)
           const remainingAmount = Number(
