@@ -110,7 +110,7 @@ export function TradeHistoryTab() {
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    dispatch(fetchPositionTokens())
+    dispatch(fetchPositionTokens({ page }))
   }, [dispatch])
 
   const orderFills = useQuery<OrderFill[]>('orderFills', async () => {

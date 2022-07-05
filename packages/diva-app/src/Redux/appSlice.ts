@@ -201,13 +201,22 @@ export const fetchPools = createAsyncThunk(
 
 export const fetchPositionTokens = createAsyncThunk(
   'app/positionTokens',
-  async (args, store) => {
+  async (
+    {
+      page,
+      pageSize = 300,
+    }: {
+      page: number
+      pageSize?: number
+    },
+    store
+  ) => {
     const state = store.getState() as RootState
     const { chainId, userAddress } = state.appSlice
 
     const res = await request<{ user: User }>(
       config[chainId as number].divaSubgraph,
-      queryUser(userAddress)
+      queryUser(userAddress, pageSize, Math.max(page, 0) * pageSize)
     )
 
     return res.user.positionTokens.map((token) => token.positionToken)

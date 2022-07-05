@@ -67,14 +67,17 @@ export type User = {
   positionTokens: { positionToken: PositionToken }[]
 }
 
-export const queryUser = (id: string) => gql`
+export const queryUser = (id: string, pageSize: number, skip: number) => gql`
 {
   user(id: "${id}" ){
     id
-    positionTokens {
+    positionTokens(first: ${pageSize}, skip: ${skip},
+      orderDirection: desc,
+      orderBy: receivedAt,) {
       positionToken {
         id
         name
+        createdAt
         symbol
         decimals
         owner
