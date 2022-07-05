@@ -200,7 +200,7 @@ export default function SellMarket(props: {
                   ) +
                   ' ' +
                   params.tokenType.toUpperCase() +
-                  ' tokens. Click Fill Order after the allowance has been updated.'
+                  ' tokens (includes allowance for 1% fee payment). Click FILL ORDER after the allowance has been updated.'
               )
             ) {
               const amountToApprove = additionalAllowance

@@ -187,7 +187,7 @@ export default function BuyMarket(props: {
                   ) +
                   ' ' +
                   option.collateralToken.symbol +
-                  ' tokens. Click Fill Order after the allowance has been updated.'
+                  ' tokens. Click FILL ORDER after the allowance has been updated.'
               )
             ) {
               const amountToApprove = additionalAllowance
