@@ -657,13 +657,15 @@ export function MyPositions() {
 
   /**
    * After navigating from success page we need to refetch balances in order
-   * to capture the newly added pool
+   * to capture the newly added pool. We only want to do this once to not overfetch
    */
   useEffect(() => {
-    if (userAddress != null && balances != null) {
-      balances.refetch()
-    }
-  }, [userAddress])
+    setTimeout(() => {
+      if (userAddress != null && balances != null) {
+        balances.refetch()
+      }
+    }, 3000)
+  }, [])
 
   const tokenBalances = balances.data
 
