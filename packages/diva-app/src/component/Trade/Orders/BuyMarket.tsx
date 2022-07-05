@@ -200,14 +200,14 @@ export default function BuyMarket(props: {
               console.log('allowance', allowance)
               console.log('additionalApproval', additionalApproval)
               console.log('newAllowance', newAllowance)
-              const remainingApproval = Number(
-                (newAllowance - allowance).toFixed(
-                  totalDecimals(additionalApproval, allowance)
-                )
-              )
-              console.log('remainingApproval', remainingApproval)
+              //const remainingApproval = Number(
+              //  (newAllowance + allowance).toFixed(
+              //    totalDecimals(additionalApproval, allowance)
+              //  )
+              //)
+              //console.log('remainingApproval', remainingApproval)
 
-              setRemainingApprovalAmount(remainingApproval)
+              setRemainingApprovalAmount(newAllowance)
               setAllowance(newAllowance)
             } else {
               //TBD discuss this case
