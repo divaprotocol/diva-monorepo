@@ -96,7 +96,8 @@ export default function BuyMarket(props: {
 
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
-      setNumberOfOptions(BigNumber.from(value))
+      const nbrOptions = parseUnits(value)
+      setNumberOfOptions(nbrOptions)
     } else {
       setYouPay(ZERO)
       setNumberOfOptions(ZERO)
