@@ -165,7 +165,7 @@ export default function BuyMarket(props: {
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
 
-        // youPay is the amount of collateral token that the user would need to pay for the nbrOfOptions entered.
+        // youPay is the amount of collateral token that the user would need to pay (incl. fee) for the nbrOfOptions entered.
         // It is calculated further down in the code based on the nbrOfOptions to buy entered by the user.
         if (youPay.gt(remainingAllowance)) {
           // Collateral token amount to pay exceeds remaining allowance ...
@@ -189,29 +189,29 @@ export default function BuyMarket(props: {
                   ' tokens. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              let newAllowance = additionalAllowance
+              const amountToApprove = additionalAllowance
                 .add(allowance)
                 .add(BigNumber.from(100)) // Buffer to ensure that there is always sufficient approval
 
-              newAllowance = await approve(newAllowance)
+              // Set allowance. Returns 'undefined' if rejected by user.
+              const approveResponse = await approve(amountToApprove)
 
-              const remainingAllowance = newAllowance.sub(
-                existingBuyLimitOrdersAmountUser
-              )
+              if (approveResponse !== 'undefined') {
+                const newAllowance = BigNumber.from(approveResponse)
+                const remainingAllowance = newAllowance.sub(
+                  existingBuyLimitOrdersAmountUser
+                )
 
-              setRemainingAllowance(remainingAllowance)
-              setAllowance(newAllowance)
-              alert(
-                `Additional 
-                    ${toExponentialOrNumber(
-                      Number(
-                        formatUnits(additionalAllowance.toString(), decimals)
-                      )
-                    )} 
-                    ${
-                      option.collateralToken.symbol
-                    } tokens approved. Please proceed with the order.`
-              )
+                setRemainingAllowance(remainingAllowance)
+                setAllowance(newAllowance)
+                alert(
+                  `Additional ${toExponentialOrNumber(
+                    Number(formatUnits(additionalAllowance, decimals))
+                  )} ${
+                    option.collateralToken.symbol
+                  } tokens approved. Please proceed with the order.`
+                )
+              }
             } else {
               console.log('Additional approval rejected by user.')
             }

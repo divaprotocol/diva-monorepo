@@ -237,29 +237,29 @@ export default function BuyLimit(props: {
                   ' tokens. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              let newAllowance = additionalAllowance
+              const amountToApprove = additionalAllowance
                 .add(allowance)
                 .add(BigNumber.from(100))
 
-              newAllowance = BigNumber.from(await approve(newAllowance))
+              // Set allowance. Returns 'undefined' if rejected by user.
+              const approveResponse = await approve(amountToApprove)
 
-              const remainingAllowance = newAllowance.sub(
-                existingBuyLimitOrdersAmountUser
-              )
+              if (approveResponse !== 'undefined') {
+                const newAllowance = BigNumber.from(approveResponse)
+                const remainingAllowance = newAllowance.sub(
+                  existingBuyLimitOrdersAmountUser
+                )
 
-              setRemainingAllowance(remainingAllowance)
-              setAllowance(newAllowance)
-              alert(
-                `Additional 
-                      ${toExponentialOrNumber(
-                        Number(
-                          formatUnits(additionalAllowance.toString(), decimals)
-                        )
-                      )} 
-                      ${
-                        option.collateralToken.symbol
-                      } tokens approved. Please proceed with the order.`
-              )
+                setRemainingAllowance(remainingAllowance)
+                setAllowance(newAllowance)
+                alert(
+                  `Additional ${toExponentialOrNumber(
+                    Number(formatUnits(additionalAllowance, decimals))
+                  )} ${
+                    option.collateralToken.symbol
+                  } tokens approved. Please proceed with the order.`
+                )
+              }
             } else {
               console.log('Additional approval rejected by user.')
             }

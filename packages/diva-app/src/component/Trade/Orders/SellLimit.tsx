@@ -265,25 +265,27 @@ export default function SellLimit(props: {
                   ' tokens. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              let newAllowance = additionalAllowance
+              const amountToApprove = additionalAllowance
                 .add(allowance)
                 .add(BigNumber.from(100))
 
-              newAllowance = BigNumber.from(await approve(newAllowance))
+              // Set allowance. Returns 'undefined' if rejected by user.
+              const approveResponse = await approve(amountToApprove)
 
-              const remainingAllowance = newAllowance.sub(
-                existingSellLimitOrdersAmountUser
-              )
+              if (approveResponse !== 'undefined') {
+                const newAllowance = BigNumber.from(approveResponse)
+                const remainingAllowance = newAllowance.sub(
+                  existingSellLimitOrdersAmountUser
+                )
 
-              setRemainingAllowance(remainingAllowance)
-              setAllowance(newAllowance)
-              alert(
-                `Additional 
-                    ${toExponentialOrNumber(
-                      Number(formatUnits(additionalAllowance.toString()))
-                    )} 
-                    ${params.tokenType.toUpperCase()} tokens approved. Please proceed with the order.`
-              )
+                setRemainingAllowance(remainingAllowance)
+                setAllowance(newAllowance)
+                alert(
+                  `Additional ${toExponentialOrNumber(
+                    Number(formatUnits(additionalAllowance))
+                  )} ${params.tokenType.toUpperCase()} tokens approved. Please proceed with the order.`
+                )
+              }
             } else {
               console.log('Additional approval rejected by user.')
             }

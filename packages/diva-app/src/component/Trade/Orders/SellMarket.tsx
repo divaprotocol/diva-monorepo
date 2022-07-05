@@ -163,9 +163,9 @@ export default function SellMarket(props: {
       if (optionBalance.gt(0)) {
         // User owns position tokens ...
 
-        // Convert numberOfOptions into an integer of type BigNumber with 18 decimals to be used in integer math.
-        // NOTE: As the seller will have to pay fees in position token, the user is required to have more than the nbrOfOptions entered in his wallet.
-        // Further, note that this assume a maximum average fee of 1%. If this is higher, then this simplified math may fail as the user will not have enough
+        // NOTE: As the seller will have to pay fees in position token, the user is required to have more than the nbrOfOptions in his wallet.
+        // User has to approve a higher amount (due to fees) that they are selling.
+        // Further, note below calcs assume a maximum average fee of 1%. If this is higher, then this simplified math may fail as the user will not have enough
         // allowance/balance.
         const numberOfOptionsInclFees = numberOfOptions
           .mul(parseUnits(feeMultiplier))
@@ -202,25 +202,27 @@ export default function SellMarket(props: {
                   ' tokens. Click Fill Order after the allowance has been updated.'
               )
             ) {
-              let newAllowance = additionalAllowance
+              const amountToApprove = additionalAllowance
                 .add(allowance)
                 .add(BigNumber.from(100)) // Buffer to make sure there is always sufficient approval
 
-              newAllowance = await approve(newAllowance)
+              // Set allowance. Returns 'undefined' if rejected by user.
+              const approveResponse = await approve(amountToApprove)
 
-              const remainingAllowance = newAllowance.sub(
-                existingSellLimitOrdersAmountUser
-              )
+              if (approveResponse !== 'undefined') {
+                const newAllowance = BigNumber.from(approveResponse)
+                const remainingAllowance = newAllowance.sub(
+                  existingSellLimitOrdersAmountUser
+                )
 
-              setRemainingAllowance(remainingAllowance)
-              setAllowance(newAllowance)
-              alert(
-                `Additional 
-                    ${toExponentialOrNumber(
-                      Number(formatUnits(additionalAllowance.toString()))
-                    )} 
-                    ${params.tokenType.toUpperCase()} tokens approved. Please proceed with the order.`
-              )
+                setRemainingAllowance(remainingAllowance)
+                setAllowance(newAllowance)
+                alert(
+                  `Additional ${toExponentialOrNumber(
+                    Number(formatUnits(additionalAllowance))
+                  )} ${params.tokenType.toUpperCase()} tokens approved. Please proceed with the order.`
+                )
+              }
             } else {
               console.log('Additional approval rejected by user.')
             }
