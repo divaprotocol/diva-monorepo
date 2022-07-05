@@ -262,7 +262,7 @@ export default function SellLimit(props: {
                   ) +
                   ' ' +
                   params.tokenType.toUpperCase() +
-                  ' tokens. Click Fill Order after the allowance has been updated.'
+                  ' tokens. Click CREATE ORDER after the allowance has been updated.'
               )
             ) {
               const amountToApprove = additionalAllowance

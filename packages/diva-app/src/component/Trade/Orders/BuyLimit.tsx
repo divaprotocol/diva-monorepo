@@ -234,7 +234,7 @@ export default function BuyLimit(props: {
                   ) +
                   ' ' +
                   option.collateralToken.symbol +
-                  ' tokens. Click Fill Order after the allowance has been updated.'
+                  ' tokens. Click CREATE ORDER after the allowance has been updated.'
               )
             ) {
               const amountToApprove = additionalAllowance

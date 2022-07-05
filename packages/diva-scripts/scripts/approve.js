@@ -13,12 +13,12 @@
  
     // INPUT: 0x exchange proxy address, token to approve, amount to approve
     const exchangeProxyAddress = "0xdef1c0ded9bec7f1a1670819833240f027b25eff" // same for several chains including Mainnet and Ropsten     
-    const tokenToApprove = "0x6465c6b5bfd9ec71e93e0664b2f88d8ef6a31b42"
+    const tokenToApprove = "0x134e62bd2ee247d4186a1fdbaa9e076cb26c1355"
     let allowance = 0 // conversion into BigNumber with the respective number of decimals is done below 
 
     // Get signers
     const [acc1, acc2, acc3] = await ethers.getSigners();
-    const user = acc1;
+    const user = acc2;
 
     console.log("Approved by: " + user.address)
     console.log("Approved for: " + exchangeProxyAddress)

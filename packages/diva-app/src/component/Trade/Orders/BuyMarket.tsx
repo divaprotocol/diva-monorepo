@@ -392,6 +392,8 @@ export default function BuyMarket(props: {
   }, [responseSell, responseBuy, userAddress])
 
   useEffect(() => {
+    console.log('numberOfOptions', numberOfOptions.toString())
+
     // Calculate average price
     if (numberOfOptions.gt(0) && existingSellLimitOrders.length > 0) {
       // If user has entered an input into the Number field and there are existing Sell Limit orders to fill in the orderbook...
