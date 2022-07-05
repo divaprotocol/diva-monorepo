@@ -18,7 +18,7 @@
 
     // Get signers
     const [acc1, acc2, acc3] = await ethers.getSigners();
-    const user = acc3;
+    const user = acc1;
 
     console.log("Approved by: " + user.address)
     console.log("Approved for: " + exchangeProxyAddress)

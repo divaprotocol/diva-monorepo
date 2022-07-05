@@ -162,7 +162,9 @@ export default function SellLimit(props: {
     const allowance = await makerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
       .call()
-    const remainingAllowance = allowance.sub(existingSellLimitOrdersAmountUser)
+    const remainingAllowance = BigNumber.from(allowance).sub(
+      existingSellLimitOrdersAmountUser
+    )
     setRemainingAllowance(remainingAllowance)
   }
 
@@ -211,28 +213,23 @@ export default function SellLimit(props: {
         // Set allowance
         const collateralAllowance = await approve(amountToApprove)
 
-        const remainingAllowance = collateralAllowance.sub(
+        const remainingAllowance = BigNumber.from(collateralAllowance).sub(
           existingSellLimitOrdersAmountUser
         )
 
-        // QUESTION: Why is this if statement is not included in Markets files?
-        if (collateralAllowance == 'undefined') {
-          alert('Metamask could not finish approval.')
-        } else {
-          setRemainingAllowance(remainingAllowance)
-          setAllowance(collateralAllowance)
-          setIsApproved(true)
-          if (pricePerOption.lte(0)) {
-            setOrderBtnDisabled(true)
-          }
-          alert(
-            `Allowance for 
+        setRemainingAllowance(remainingAllowance)
+        setAllowance(collateralAllowance)
+        setIsApproved(true)
+        if (pricePerOption.lte(0)) {
+          setOrderBtnDisabled(true)
+        }
+        alert(
+          `Allowance for 
               ${toExponentialOrNumber(
                 Number(formatUnits(collateralAllowance, decimals))
               )} 
               ${params.tokenType.toUpperCase()} tokens successfully set.`
-          )
-        }
+        )
       } else {
         alert(
           `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to sell.`
@@ -275,7 +272,7 @@ export default function SellLimit(props: {
                 .add(allowance)
                 .add(BigNumber.from(100))
 
-              newAllowance = await approve(newAllowance)
+              newAllowance = BigNumber.from(await approve(newAllowance))
 
               const remainingAllowance = newAllowance.sub(
                 existingSellLimitOrdersAmountUser

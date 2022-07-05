@@ -145,7 +145,10 @@ export default function BuyLimit(props: {
     const allowance = await makerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
       .call()
-    const remainingAllowance = allowance.sub(existingBuyLimitOrdersAmountUser)
+
+    const remainingAllowance = BigNumber.from(allowance).sub(
+      existingBuyLimitOrdersAmountUser
+    )
     setRemainingAllowance(remainingAllowance)
   }
 
@@ -172,6 +175,7 @@ export default function BuyLimit(props: {
         const allowance = await makerTokenContract.methods
           .allowance(userAddress, exchangeProxy)
           .call()
+        console.log('***allowance', allowance.toString())
         return allowance
       }
     } catch (error) {
@@ -190,25 +194,23 @@ export default function BuyLimit(props: {
         const amountToApprove = allowance.add(youPay).add(BigNumber.from(100))
 
         // Set allowance
-        const collateralAllowance = await approve(amountToApprove)
+        const collateralAllowance = BigNumber.from(
+          await approve(amountToApprove)
+        )
 
         const remainingAllowance = collateralAllowance.sub(
           existingBuyLimitOrdersAmountUser
         )
 
-        // QUESTION: Why is this if statement is not included in Markets files?
-        if (collateralAllowance == 'undefined') {
-          alert('Metamask could not finish approval please check gas limit')
-        } else {
-          setRemainingAllowance(remainingAllowance)
-          setAllowance(collateralAllowance)
-          setIsApproved(true)
-          alert(
-            `Allowance for ${toExponentialOrNumber(
-              Number(formatUnits(collateralAllowance, decimals))
-            )} ${option.collateralToken.symbol} tokens successfully set.`
-          )
-        }
+        setRemainingAllowance(remainingAllowance)
+        setAllowance(collateralAllowance)
+        setIsApproved(true)
+        alert(
+          `Allowance for ${toExponentialOrNumber(
+            Number(formatUnits(collateralAllowance, decimals))
+          )} ${option.collateralToken.symbol} tokens successfully set.`
+        )
+        // }
       } else {
         alert(
           `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to buy.`
@@ -244,7 +246,7 @@ export default function BuyLimit(props: {
                 .add(allowance)
                 .add(BigNumber.from(100))
 
-              newAllowance = await approve(newAllowance)
+              newAllowance = BigNumber.from(await approve(newAllowance))
 
               const remainingAllowance = newAllowance.sub(
                 existingBuyLimitOrdersAmountUser
@@ -509,6 +511,7 @@ export default function BuyLimit(props: {
               <LabelStyle>You Pay </LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
+                {console.log('check', remainingAllowance.toString())}
                 {toExponentialOrNumber(
                   Number(formatUnits(remainingAllowance, decimals))
                 )}
