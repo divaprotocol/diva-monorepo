@@ -101,17 +101,25 @@ export default function SellMarket(props: {
   }
 
   const approve = async (amount) => {
-    await takerTokenContract.methods
-      .approve(exchangeProxy, amount)
-      .send({ from: userAddress })
+    try {
+      await takerTokenContract.methods
+        .approve(exchangeProxy, amount)
+        .send({ from: userAddress })
 
-    // Set allowance for position token (18 decimals)
-    const allowance = await takerTokenContract.methods
-      .allowance(userAddress, exchangeProxy)
-      .call()
-    console.log('optionAllowance', allowance)
+      // QUESTION: Why is this part needed?
+      // In case the approve call does not or delay emit events, read the allowance again
+      await new Promise((resolve) => setTimeout(resolve, 4000))
 
-    return allowance
+      // Set allowance for position token (18 decimals)
+      const allowance = await takerTokenContract.methods
+        .allowance(userAddress, exchangeProxy)
+        .call()
+      return allowance
+    } catch (error) {
+      // If rejected by user in Metamask pop-up
+      console.error('error ' + JSON.stringify(error))
+      return 'undefined'
+    }
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -130,25 +138,24 @@ export default function SellMarket(props: {
           .div(positionTokenUnit)
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
-        // Set allowance
-        const optionAllowance = await approve(amountToApprove)
+        // Set allowance. Returns 'undefined' if rejected by user.
+        const approveResponse = await approve(amountToApprove)
 
-        const remainingAllowance = optionAllowance.sub(
-          existingSellLimitOrdersAmountUser
-        ) // QUESTION: Do we have to deduct fees here?
+        if (approveResponse !== 'undefined') {
+          const optionAllowance = BigNumber.from(approveResponse)
+          const remainingAllowance = optionAllowance.sub(
+            existingSellLimitOrdersAmountUser
+          ) // QUESTION: Do we have to deduct fees here?
 
-        setRemainingAllowance(remainingAllowance)
-        setAllowance(optionAllowance)
-        setIsApproved(true)
-        alert(
-          `Allowance for ${toExponentialOrNumber(
-            Number(formatUnits(optionAllowance))
-          )} ${params.tokenType.toUpperCase()} tokens successfully set (includes allowance for 1% fee payment).`
-        )
-      } else {
-        alert(
-          `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to buy.`
-        )
+          setRemainingAllowance(remainingAllowance)
+          setAllowance(optionAllowance)
+          setIsApproved(true)
+          alert(
+            `Allowance for ${toExponentialOrNumber(
+              Number(formatUnits(optionAllowance))
+            )} ${params.tokenType.toUpperCase()} tokens successfully set (includes allowance for 1% fee payment).`
+          )
+        }
       }
     } else {
       // Approved amount is > 0 ...

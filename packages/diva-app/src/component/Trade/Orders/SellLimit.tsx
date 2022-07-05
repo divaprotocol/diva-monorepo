@@ -177,23 +177,23 @@ export default function SellLimit(props: {
     )
   }
 
-  // TODO: Align with Markets files as this function here contains a try catch block but the Markets files don't
   const approve = async (amount) => {
     try {
       const approveResponse = await makerTokenContract.methods
         .approve(exchangeProxy, amount)
         .send({ from: userAddress })
-      if ('events' in approveResponse) {
-        return approveResponse.events.Approval.returnValues.value // QUESTION: Why not included in Buy/Sell Market?
-      } else {
-        // In case the approve call does not or delay emit events read the allowance again
-        await new Promise((resolve) => setTimeout(resolve, 4000)) // QUESTION: Why not included in Buy/Sell Market?
-        const allowance = await makerTokenContract.methods
-          .allowance(userAddress, exchangeProxy)
-          .call()
-        return allowance
-      }
+
+      // QUESTION: Why is this part needed?
+      // In case the approve call does not or delay emit events, read the allowance again
+      await new Promise((resolve) => setTimeout(resolve, 4000)) // QUESTION: Why not included in Buy/Sell Market?
+
+      // Set allowance for collateral token (18 decimals)
+      const allowance = await makerTokenContract.methods
+        .allowance(userAddress, exchangeProxy)
+        .call()
+      return allowance
     } catch (error) {
+      // If rejected by user in Metamask pop-up
       console.error('error ' + JSON.stringify(error))
       return 'undefined'
     }
@@ -210,30 +210,29 @@ export default function SellLimit(props: {
           .add(numberOfOptions)
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
-        // Set allowance
-        const collateralAllowance = await approve(amountToApprove)
+        // Set allowance. Returns 'undefined' if rejected by user.
+        const approveResponse = await approve(amountToApprove)
 
-        const remainingAllowance = BigNumber.from(collateralAllowance).sub(
-          existingSellLimitOrdersAmountUser
-        )
+        if (approveResponse !== 'undefined') {
+          const collateralAllowance = BigNumber.from(approveResponse)
+          const remainingAllowance = BigNumber.from(collateralAllowance).sub(
+            existingSellLimitOrdersAmountUser
+          )
 
-        setRemainingAllowance(remainingAllowance)
-        setAllowance(collateralAllowance)
-        setIsApproved(true)
-        if (pricePerOption.lte(0)) {
-          setOrderBtnDisabled(true)
+          setRemainingAllowance(remainingAllowance)
+          setAllowance(collateralAllowance)
+          setIsApproved(true)
+          if (pricePerOption.lte(0)) {
+            setOrderBtnDisabled(true)
+          }
+          alert(
+            `Allowance for 
+                ${toExponentialOrNumber(
+                  Number(formatUnits(collateralAllowance, decimals))
+                )} 
+                ${params.tokenType.toUpperCase()} tokens successfully set.`
+          )
         }
-        alert(
-          `Allowance for 
-              ${toExponentialOrNumber(
-                Number(formatUnits(collateralAllowance, decimals))
-              )} 
-              ${params.tokenType.toUpperCase()} tokens successfully set.`
-        )
-      } else {
-        alert(
-          `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to sell.`
-        )
       }
     } else {
       // Approved amount is > 0 ...

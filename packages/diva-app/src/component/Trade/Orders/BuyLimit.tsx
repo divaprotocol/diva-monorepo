@@ -161,24 +161,23 @@ export default function BuyLimit(props: {
     )
   }
 
-  // TODO: Align with Markets files as this function here contains a try catch block but the Markets files don't
   const approve = async (amount) => {
     try {
-      const approveResponse = await makerTokenContract.methods
+      await makerTokenContract.methods
         .approve(exchangeProxy, amount)
         .send({ from: userAddress })
-      if ('events' in approveResponse) {
-        return approveResponse.events.Approval.returnValues.value // QUESTION: Why not included in Buy/Sell Market?
-      } else {
-        // In case the approve call does not or delay emit events, read the allowance again
-        await new Promise((resolve) => setTimeout(resolve, 4000)) // QUESTION: Why not included in Buy/Sell Market?
-        const allowance = await makerTokenContract.methods
-          .allowance(userAddress, exchangeProxy)
-          .call()
-        console.log('***allowance', allowance.toString())
-        return allowance
-      }
+
+      // QUESTION: Why is this part needed?
+      // In case the approve call does not or delay emit events, read the allowance again
+      await new Promise((resolve) => setTimeout(resolve, 4000))
+
+      // Set allowance for collateral token (<= 18 decimals)
+      const allowance = await makerTokenContract.methods
+        .allowance(userAddress, exchangeProxy)
+        .call()
+      return allowance
     } catch (error) {
+      // If rejected by user in Metamask pop-up
       console.error('error ' + JSON.stringify(error))
       return 'undefined'
     }
@@ -193,28 +192,24 @@ export default function BuyLimit(props: {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals (<= 18)).
         const amountToApprove = allowance.add(youPay).add(BigNumber.from(100))
 
-        // Set allowance
-        const collateralAllowance = BigNumber.from(
-          await approve(amountToApprove)
-        )
+        // Set allowance. Returns 'undefined' if rejected by user.
+        const approveResponse = await approve(amountToApprove)
 
-        const remainingAllowance = collateralAllowance.sub(
-          existingBuyLimitOrdersAmountUser
-        )
+        if (approveResponse !== 'undefined') {
+          const collateralAllowance = BigNumber.from(approveResponse)
+          const remainingAllowance = collateralAllowance.sub(
+            existingBuyLimitOrdersAmountUser
+          )
 
-        setRemainingAllowance(remainingAllowance)
-        setAllowance(collateralAllowance)
-        setIsApproved(true)
-        alert(
-          `Allowance for ${toExponentialOrNumber(
-            Number(formatUnits(collateralAllowance, decimals))
-          )} ${option.collateralToken.symbol} tokens successfully set.`
-        )
-        // }
-      } else {
-        alert(
-          `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to buy.`
-        )
+          setRemainingAllowance(remainingAllowance)
+          setAllowance(collateralAllowance)
+          setIsApproved(true)
+          alert(
+            `Allowance for ${toExponentialOrNumber(
+              Number(formatUnits(collateralAllowance, decimals))
+            )} ${option.collateralToken.symbol} tokens successfully set.`
+          )
+        }
       }
     } else {
       // Approved amount is > 0 ...
@@ -511,7 +506,6 @@ export default function BuyLimit(props: {
               <LabelStyle>You Pay </LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {console.log('check', remainingAllowance.toString())}
                 {toExponentialOrNumber(
                   Number(formatUnits(remainingAllowance, decimals))
                 )}

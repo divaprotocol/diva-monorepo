@@ -105,17 +105,25 @@ export default function BuyMarket(props: {
   }
 
   const approve = async (amount) => {
-    await takerTokenContract.methods
-      .approve(exchangeProxy, amount)
-      .send({ from: userAddress })
+    try {
+      await takerTokenContract.methods
+        .approve(exchangeProxy, amount)
+        .send({ from: userAddress })
 
-    // Set allowance for collateral token (<=18 decimals)
-    const allowance = await takerTokenContract.methods
-      .allowance(userAddress, exchangeProxy)
-      .call()
-    console.log('collateralAllowance', allowance)
+      // QUESTION: Why is this part needed?
+      // In case the approve call does not or delay emit events, read the allowance again
+      await new Promise((resolve) => setTimeout(resolve, 4000))
 
-    return allowance
+      // Set allowance for collateral token (<= 18 decimals)
+      const allowance = await takerTokenContract.methods
+        .allowance(userAddress, exchangeProxy)
+        .call()
+      return allowance
+    } catch (error) {
+      // If rejected by user in Metamask pop-up
+      console.error('error ' + JSON.stringify(error))
+      return 'undefined'
+    }
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -132,25 +140,24 @@ export default function BuyMarket(props: {
           .add(youPay) // youPay is already including fee, hence no feeMultiplier needed in that case
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
-        // Set allowance
-        const collateralAllowance = await approve(amountToApprove)
+        // Set allowance. Returns 'undefined' if rejected by user.
+        const approveResponse = await approve(amountToApprove)
 
-        const remainingAllowance = collateralAllowance.sub(
-          existingBuyLimitOrdersAmountUser
-        )
+        if (approveResponse !== 'undefined') {
+          const collateralAllowance = BigNumber.from(approveResponse)
+          const remainingAllowance = collateralAllowance.sub(
+            existingBuyLimitOrdersAmountUser
+          )
 
-        setRemainingAllowance(remainingAllowance)
-        setAllowance(collateralAllowance)
-        setIsApproved(true)
-        alert(
-          `Allowance for ${toExponentialOrNumber(
-            Number(formatUnits(collateralAllowance, decimals))
-          )} ${option.collateralToken.symbol} tokens successfully set.`
-        )
-      } else {
-        alert(
-          `Please enter the number of ${params.tokenType.toUpperCase()} tokens you want to sell.`
-        )
+          setRemainingAllowance(remainingAllowance)
+          setAllowance(collateralAllowance)
+          setIsApproved(true)
+          alert(
+            `Allowance for ${toExponentialOrNumber(
+              Number(formatUnits(collateralAllowance, decimals))
+            )} ${option.collateralToken.symbol} tokens successfully set.`
+          )
+        }
       }
     } else {
       // Approved amount is > 0 ...
