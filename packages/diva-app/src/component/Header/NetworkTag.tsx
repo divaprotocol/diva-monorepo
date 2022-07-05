@@ -1,10 +1,10 @@
 import { Chip } from '@mui/material'
-import { CHAIN_INFO } from '../../constants/index'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 import { useAppSelector } from '../../Redux/hooks'
 import ChainSelectorModal from './ChainSelectorModal'
 import { useState } from 'react'
+import { config } from '../../constants'
 
 export function NetworkTag() {
   const { isConnected } = useConnectionContext()
@@ -18,7 +18,7 @@ export function NetworkTag() {
     return (
       <>
         <Chip
-          label={CHAIN_INFO[chainId].label || 'Unsupported'}
+          label={config[chainId]?.name || 'Unsupported'}
           sx={{ marginLeft: 'auto' }}
           onClick={() => setIsChainSelectorModalOpen(true)}
         />

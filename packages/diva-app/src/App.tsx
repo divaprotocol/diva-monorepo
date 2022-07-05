@@ -35,7 +35,7 @@ export const App = () => {
           <Header />
           {chainId == null ? (
             <LoadingBox />
-          ) : config[chainId] ? (
+          ) : config[chainId]?.isSupported ? (
             <Switch>
               <Route exact path="/tasks">
                 <Tasks />

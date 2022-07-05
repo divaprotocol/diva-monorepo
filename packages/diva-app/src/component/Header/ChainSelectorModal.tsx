@@ -4,10 +4,10 @@ import Modal from '@mui/material/Modal'
 import { useTheme, Theme } from '@mui/material/styles'
 import {
   ALL_SUPPORTED_CHAIN_IDS,
-  CHAIN_INFO,
+  config,
   CURRENT_SUPPORTED_CHAIN_ID,
   SupportedChainId,
-} from '../../constants/index'
+} from '../../constants'
 import styled from '@emotion/styled'
 import CloseIcon from '@mui/icons-material/Close'
 import { useAppSelector } from '../../Redux/hooks'
@@ -34,11 +34,6 @@ const NetworkInfoContainer = styled.div<{
   &:hover {
     border: 1px solid ${(props) => props.theme.palette.primary.main};
   }
-
-  img {
-    width: 40px;
-    margin-right: 12px;
-  }
 `
 
 const NetworkInfo = ({
@@ -48,7 +43,7 @@ const NetworkInfo = ({
   chainId: SupportedChainId
   onClose: () => void
 }) => {
-  const { label, logoUrl } = CHAIN_INFO[chainId]
+  const { name, logoUrl } = config[chainId]
   const theme = useTheme()
   const connectedChainId = useAppSelector(selectChainId)
   const isSupportedChain = CURRENT_SUPPORTED_CHAIN_ID.includes(chainId)
@@ -75,10 +70,17 @@ const NetworkInfo = ({
       >
         <>
           <div>
-            <img src={logoUrl} alt={label} />
+            <img
+              src={logoUrl}
+              alt={name}
+              style={{
+                width: '40px',
+                marginRight: '12px',
+              }}
+            />
           </div>
           <div>
-            <Typography variant="h3">{label}</Typography>
+            <Typography variant="h3">{name}</Typography>
             <Typography
               variant="h6"
               sx={{

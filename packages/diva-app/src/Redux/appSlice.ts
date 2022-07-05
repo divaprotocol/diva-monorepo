@@ -17,7 +17,6 @@ import request from 'graphql-request'
 import { RootState } from './Store'
 import { get0xOpenOrders } from '../DataService/OpenOrders'
 import { config, divaGovernanceAddress } from '../constants'
-import { SupportedChainId } from '../constants/chains'
 
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
@@ -44,7 +43,7 @@ type AppState = {
 }
 
 type AppStateByChain = {
-  chainId?: number | SupportedChainId
+  chainId?: number
   userAddress?: string
   [chainId: number]: AppState
 }
