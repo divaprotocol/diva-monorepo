@@ -35,6 +35,7 @@ export const buyMarketOrder = async (orderData) => {
 
   // Function to executed the 0x batchFillLimitOrders function
   const fillOrderResponse = async (takerAssetFillAmounts, fillOrders) => {
+    console.log('fillOrders', fillOrders)
     fillOrders.map(function (order) {
       signatures.push(order.signature)
       delete order.signature
@@ -52,6 +53,7 @@ export const buyMarketOrder = async (orderData) => {
     if (takerFillNbrOptions.gt(0)) {
       fillOrders.push(order)
       // Convert expected rate (of type number) into an integer with collateral token decimals
+      console.log('order.expectedRate', order.expectedRate)
       const expectedRate = parseUnits(order.expectedRate.toString(), decimals)
 
       // Calculate taker fill amount implied by user input and expected rate; expressed as an integer with collateral token decimals.

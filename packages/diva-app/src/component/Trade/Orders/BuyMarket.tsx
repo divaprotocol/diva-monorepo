@@ -177,6 +177,8 @@ export default function BuyMarket(props: {
                   '. Click Fill Order after the allowance has been updated.'
               )
             ) {
+              // Defining the variable here so that it has time to calculate before setRemainingApprovalAmount
+              // is called and updated in the frontend
               const amount = existingOrdersAmount
               let newAllowance = Number(
                 (additionalApproval + allowance).toFixed(

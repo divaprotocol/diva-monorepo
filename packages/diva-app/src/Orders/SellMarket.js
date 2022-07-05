@@ -21,6 +21,7 @@ export const sellMarketOrder = async (orderData) => {
   const signatures = []
 
   const fillOrderResponse = async (takerAssetFillAmounts, fillOrders) => {
+    console.log('fillOrders', fillOrders)
     fillOrders.map(function (order) {
       signatures.push(order.signature)
       delete order.signature
