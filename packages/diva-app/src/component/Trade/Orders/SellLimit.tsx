@@ -226,11 +226,9 @@ export default function SellLimit(props: {
             setOrderBtnDisabled(true)
           }
           alert(
-            `Allowance for 
-                ${toExponentialOrNumber(
-                  Number(formatUnits(collateralAllowance, decimals))
-                )} 
-                ${params.tokenType.toUpperCase()} tokens successfully set.`
+            `Allowance for ${toExponentialOrNumber(
+              Number(formatUnits(collateralAllowance, decimals))
+            )} ${params.tokenType.toUpperCase()} tokens successfully set.`
           )
         }
       }
