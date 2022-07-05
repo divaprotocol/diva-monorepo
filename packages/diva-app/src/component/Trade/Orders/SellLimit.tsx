@@ -179,7 +179,7 @@ export default function SellLimit(props: {
 
   const approve = async (amount) => {
     try {
-      const approveResponse = await makerTokenContract.methods
+      await makerTokenContract.methods
         .approve(exchangeProxy, amount)
         .send({ from: userAddress })
 
