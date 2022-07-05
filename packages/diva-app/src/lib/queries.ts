@@ -74,10 +74,10 @@ export const queryUser = (id: string, pageSize: number, skip: number) => gql`
     positionTokens(first: ${pageSize}, skip: ${skip},
       orderDirection: desc,
       orderBy: receivedAt,) {
-      positionToken {
+        receivedAt,
+        positionToken {
         id
         name
-        createdAt
         symbol
         decimals
         owner
