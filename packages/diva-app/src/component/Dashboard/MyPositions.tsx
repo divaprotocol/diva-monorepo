@@ -655,11 +655,17 @@ export function MyPositions() {
     return response
   })
 
+  /**
+   * After navigating from success page we need to refetch balances in order
+   * to capture the newly added pool. We only want to do this once to not overfetch
+   */
   useEffect(() => {
-    if (userAddress) {
-      balances.refetch()
-    }
-  }, [balances, tokenAddresses, userAddress])
+    setTimeout(() => {
+      if (userAddress != null && balances != null) {
+        balances.refetch()
+      }
+    }, 3000)
+  }, [])
 
   const tokenBalances = balances.data
 
@@ -694,8 +700,6 @@ export function MyPositions() {
 
     return bId - aId
   })
-
-  // console.log(JSON.stringify(sortedRows))
 
   return (
     <Stack
