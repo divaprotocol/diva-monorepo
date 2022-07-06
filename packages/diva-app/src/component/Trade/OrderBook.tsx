@@ -91,6 +91,7 @@ async function getFillableOrders(
   const makers = orders.map((data) => {
     return data.order.maker
   })
+  // TODO: Filter out duplicates to reduce the size of the array and the number of allowances calls
   const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
 
   // Prepare token address input for allowances function (array of same length as maker addresses array
@@ -98,6 +99,7 @@ async function getFillableOrders(
   const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
   //console.log('tokens ' + JSON.stringify(tokens))
 
+  // TODO: query in batches of max 400
   // Get allowances
   const res = await contract.allowances(makers, addresses, tokens)
 
@@ -112,14 +114,25 @@ async function getFillableOrders(
     makerAllowances.push(makerAllowance)
   })
 
+  // // Map maker token allowances to orders object
+  // // const makerAllowances = []
+  // orders.forEach((order) => {
+  //   const makerAllowance = {}
+  //   const index = makers.indexOf(maker)
+  //   const allowance = res[index]
+  //   makerAllowance['maker'] = maker
+  //   makerAllowance['allowance'] = allowance.toString()
+  //   makerAllowances.push(makerAllowance)
+  // })
+
   console.log('makerAllowances', makerAllowances)
 
   orders.forEach((order) => {
-    const makerAllowance = makerAllowances.filter((x) => {
-      x.maker == order.order.maker
+    const makerAllowance = makerAllowances.filter((item) => {
+      item.maker == order.order.maker
     })
     const ord = { ...order }
-    ord.mataData.remainingTakerAmountRaw = res[orders.indexOf(order)]
+    ord.metaData.remainingTakerAmountRaw = res[orders.indexOf(order)]
     makerAllowances.push(ord)
   })
   console.log('response ', res)
