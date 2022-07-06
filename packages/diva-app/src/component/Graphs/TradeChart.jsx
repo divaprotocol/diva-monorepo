@@ -39,7 +39,6 @@ export default function DIVATradeChart(props) {
       width = w - margin.left - margin.right,
       height = h - margin.top - margin.bottom
 
-    console.log('breakEven', breakEven)
     // Append the svg object to the reference element of the page
     // Appends a 'group' element to 'svg'
     // Moves the 'group' element to the top left margin
@@ -72,75 +71,29 @@ export default function DIVATradeChart(props) {
     // legends
     svg
       .append('circle')
-      .attr('cx', width * 0.0083)
-      .attr('cy', legendHeight)
+      .attr('cx', 5)
+      .attr('cy', h)
       .attr('r', 6)
-      .style('fill', '#F7931A')
+      .style('fill', '#4C0D46')
     svg
       .append('circle')
-      .attr('cx', width * 0.3)
-      .attr('cy', legendHeight)
-      .attr('r', function () {
-        return cap == floor ? 0 : 6
-      })
-      .style('fill', '#83BD67')
-    svg
-      .append('circle')
-      .attr('cx', width * 0.58)
-      .attr('cy', legendHeight)
-      .attr('r', currentPrice ? 6 : 0)
-      .style('fill', '#3393E0')
-    svg
-      .append('circle')
-      .attr('cx', width * 0.8)
-      .attr('cy', legendHeight)
-      .attr('r', showBreakEven && breakEven != 'n/a' ? 6 : 0)
-      .style('fill', '#9747FF')
+      .attr('cx', 180)
+      .attr('cy', h)
+      .attr('r', 6)
+      .style('fill', '#1B394F')
     svg
       .append('text')
-      .attr('x', width * 0.033)
-      .attr('y', legendHeight)
-      .attr('opacity', function () {
-        return cap == floor ? 0 : 1
-      })
-      .text('Floor' + ' ' + '(' + floor + ')')
-      .style('font-size', '12px')
+      .attr('x', 20)
+      .attr('y', h)
+      .text('Break even' + ' ' + '(' + breakEven + ')')
+      .style('font-size', '15px')
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
-      .attr('x', width * 0.033)
-      .attr('y', legendHeight)
-      .attr('opacity', function () {
-        return cap == floor ? 1 : 0
-      })
-      .text('Inflection' + ' ' + '(' + cap + ')') //Binary payoff
-      .style('font-size', '12px')
-      .attr('alignment-baseline', 'middle')
-    svg
-      .append('text')
-      .attr('x', width * 0.32)
-      .attr('y', legendHeight)
-      .attr('opacity', function () {
-        return cap == floor ? 0 : 1
-      })
-      .text('Cap' + ' ' + '(' + cap + ')')
-      .style('font-size', '12px')
-      .attr('alignment-baseline', 'middle')
-    svg
-      .append('text')
-      .attr('x', width * 0.6)
-      .attr('y', legendHeight)
-      .attr('opacity', currentPrice ? 1 : 0)
+      .attr('x', 195)
+      .attr('y', h)
       .text('Current price' + ' ' + '(' + currentPrice + ')')
-      .style('font-size', '12px')
-      .attr('alignment-baseline', 'middle')
-    svg
-      .append('text')
-      .attr('x', width * 0.83)
-      .attr('y', legendHeight)
-      .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
-      .text('Break Even' + ' ' + '(' + breakEven + ')')
-      .style('font-size', '12px')
+      .style('font-size', '15px')
       .attr('alignment-baseline', 'middle')
 
     // Add X axis
@@ -161,22 +114,7 @@ export default function DIVATradeChart(props) {
       .append('g')
       .attr('class', 'xAxisG')
       .attr('transform', 'translate(0,' + height + ')')
-      // .call(d3.axisBottom(x).tickSize(0)).call // .tickSize to remove the ticks at the ends
-      .call(
-        d3
-          .axisBottom(x)
-          .tickValues([
-            breakEven,
-            currentPrice,
-            d3.max(data, function (d) {
-              return d.x
-            }),
-          ])
-          .ticks(3)
-      )
-
     // Add Y axis
-    console.log('value', data)
     const y = d3
       .scaleLinear()
       .domain([
@@ -189,7 +127,7 @@ export default function DIVATradeChart(props) {
     svg
       .append('g')
       .attr('class', 'yAxisG')
-      .attr('transform', `translate(${margin.left},0)`)
+      .attr('transform', `translate(0)`)
       .call(
         d3
           .axisRight(y)

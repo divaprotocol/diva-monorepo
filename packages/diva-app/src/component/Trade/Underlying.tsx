@@ -69,7 +69,6 @@ export default function Underlying() {
   const maxYield = useAppSelector((state) => state.stats.maxYield)
   const breakEven = useAppSelector((state) => state.stats.breakEven)
   const isBuy = useAppSelector((state) => selectIsBuy(state))
-  const breakEvenOptionPrice = 0
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
   const chainContractAddress =
@@ -95,7 +94,7 @@ export default function Underlying() {
   const currentPrice = useAppSelector(
     selectUnderlyingPrice(pool?.referenceAsset)
   )
-
+  console.log('curent', currentPrice)
   useEffect(() => {
     if (pool?.referenceAsset != null)
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
@@ -194,7 +193,7 @@ export default function Underlying() {
                   w={762}
                   h={336}
                   isLong={OptionParams.IsLong}
-                  breakEven={Number(breakEven)}
+                  breakEven={Number(breakEven).toFixed(2)}
                 />
                 <Paper>
                   <LeftCompFlexContainer>
