@@ -67,7 +67,8 @@ async function getFillableSellOrders(
   sellOrders,
   chainId,
   provider,
-  optionTokenAddress
+  optionTokenAddress,
+  exchangeProxy
 ) {
   const orders: any = {}
   const contract = new ethers.Contract(
@@ -81,19 +82,30 @@ async function getFillableSellOrders(
     return data.order.maker
   })
 
-  const addresses = Array.from({ length: makers.length }).fill(
-    '0xdef1c0ded9bec7f1a1670819833240f027b25eff'
-  )
+  const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
   const tokens = Array.from({ length: makers.length }).fill(optionTokenAddress)
   //console.log('tokens ' + JSON.stringify(tokens))
   console.log(makers, ['0xdef1c0ded9bec7f1a1670819833240f027b25eff'], tokens)
   const res = await contract.allowances(makers, addresses, tokens)
-  const sOrders = []
-  /*sellOrders.forEach((order) => {
+
+  let sOrders = []
+  makers.forEach((maker) => {
+    const makerAllowance = {}
+    const index = makers.indexOd(maker)
+    const allowance = res[index]
+    makerAllowance.maker = maker
+    makerAllowance.allowance = allowance
+    sOrders.push(makerAllowance)
+  })
+
+  sellOrders.forEach((order) => {
+    const makerAllowance = sOrders.filter((x) => {
+      x.maker == order.order.maker
+    })
     const ord = { ...order }
     ord.mataData.remainingTakerAmountRaw = res[sellOrders.indexOf(order)]
     sOrders.push(ord)
-  })*/
+  })
   console.log('response ', res)
   return res
 }
@@ -232,6 +244,7 @@ function createTable(buyOrders: any, sellOrders: any) {
 export default function OrderBook(props: {
   option: Pool
   tokenAddress: string
+  exchangeProxy: string
 }) {
   const option = props.option
   const optionTokenAddress = props.tokenAddress
@@ -271,7 +284,8 @@ export default function OrderBook(props: {
       responseSell,
       chainId,
       provider,
-      optionTokenAddress
+      optionTokenAddress,
+      props.exchangeProxy
     )
 
     console.log('fillable sell orders ' + JSON.stringify(fillableSellOrders))
