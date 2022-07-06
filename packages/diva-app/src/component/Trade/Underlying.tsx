@@ -28,11 +28,10 @@ import {
   selectIntrinsicValue,
   selectIsBuy,
   selectMaxPayout,
-  selectMaxYield,
   selectPool,
   selectChainId,
   selectPrice,
-  selectPools,
+  selectUnderlyingPrice,
 } from '../../Redux/appSlice'
 import { formatUnits, parseEther, formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
@@ -89,6 +88,10 @@ export default function Underlying() {
   }, [chainId, dispatch, params.poolId])
 
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
+
+  const currentPrice = useAppSelector(
+    selectUnderlyingPrice(pool?.referenceAsset)
+  )
 
   useEffect(() => {
     if (pool?.referenceAsset != null)
@@ -184,10 +187,11 @@ export default function Underlying() {
                   data={data}
                   refAsset={pool.referenceAsset}
                   payOut={pool.collateralToken.symbol}
+                  currentPrice={currentPrice}
                   w={762}
                   h={336}
                   isLong={OptionParams.IsLong}
-                  breakEven={breakEvenOptionPrice}
+                  breakEven={Number(breakEven)}
                 />
                 <Paper>
                   <LeftCompFlexContainer>
