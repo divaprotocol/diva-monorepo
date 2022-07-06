@@ -23,12 +23,23 @@ export default function DIVATradeChart(props) {
       y: parseFloat(y),
     }))
 
+  // }
+  constructor(props) {
+    super(props)
+    this.myRef = React.createRef()
+  }
+
+  componentDidMount() {
+    const { data, w, h, refAsset, payOut, isLong, breakEven, currentPrice } =
+      this.props
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
     const reffeenceAsset = refAsset.slice(0, 8)
     // Set the dimensions and margins of the graph
     var margin = { top: 15, right: 2, bottom: 40, left: 20 },
       width = w - margin.left - margin.right,
       height = h - margin.top - margin.bottom
+
+    console.log('breakEven', breakEven)
     // Append the svg object to the reference element of the page
     // Appends a 'group' element to 'svg'
     // Moves the 'group' element to the top left margin
@@ -150,9 +161,20 @@ export default function DIVATradeChart(props) {
       .append('g')
       .attr('class', 'xAxisG')
       .attr('transform', 'translate(0,' + height + ')')
-      .call(d3.axisBottom(x).tickSize(0)) // .tickSize to remove the ticks at the ends
-    // Remove X- axis labels
-    d3.select('.xAxisG').selectAll('.tick').remove()
+      // .call(d3.axisBottom(x).tickSize(0)).call // .tickSize to remove the ticks at the ends
+      .call(
+        d3
+          .axisBottom(x)
+          .tickValues([
+            breakEven,
+            currentPrice,
+            d3.max(data, function (d) {
+              return d.x
+            }),
+          ])
+          .ticks(3)
+      )
+
     // Add Y axis
     console.log('value', data)
     const y = d3
@@ -185,7 +207,7 @@ export default function DIVATradeChart(props) {
       .call((g) =>
         g
           .selectAll('.tick:not(:first-of-type) line')
-          .attr('stroke-opacity', 0.5)
+          .attr('stroke-opacity', 0.3)
           .style('stroke', '#3393E0')
       )
       .call((g) => g.selectAll('.tick text').attr('x', 4).attr('dy', -4))
@@ -212,7 +234,43 @@ export default function DIVATradeChart(props) {
       .style('stroke', '#B8B8B8')
       .style('stroke-width', '0.75px')
     //for Y axis
-    //for line gradient
+    // for cuurent price point
+    svg
+      .append('g')
+      .selectAll('dot')
+      .data(data)
+      .enter()
+      .append('circle')
+      .filter(function (d) {
+        return (d.x = currentPrice)
+      })
+      .attr('cx', function (d) {
+        return x(d.x)
+      })
+      .attr('cy', function (d) {
+        return y(0)
+      })
+      .attr('r', 5)
+      .style('fill', '#1B394F')
+    //for break-even point
+    svg
+      .append('g')
+      .selectAll('dot')
+      .data(data)
+      .enter()
+      .append('circle')
+      .filter(function (d) {
+        return (d.x = breakEven)
+      })
+      .attr('cx', function (d) {
+        return x(d.x)
+      })
+      .attr('cy', function (d) {
+        return y(0)
+      })
+      .attr('r', 5)
+      .style('fill', '#4C0D46')
+
     // Add mouseover effects
     const mouseG = svg
       .append('g') // corresponds to the first part of focus/focusText in the other example but without the circle/text, this will be added later
@@ -302,7 +360,7 @@ export default function DIVATradeChart(props) {
       .attr('r', 5)
       .style('fill', '#83BD67')
 
-    const blueColorCode = '#3393E0'
+    const blueColorCode = '#3B8DCA'
     const redColorCode = '#F77F99'
 
       var mouseout = function () {
@@ -342,23 +400,23 @@ export default function DIVATradeChart(props) {
         })
         d3.select('.mouse-line').style('stroke', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
-          return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
+          return y.invert(pos.y) >= breakEven ? redColorCode : blueColorCode
         })
 
       d3.select('.mouse-per-line circle').style('fill', function (d, i) {
         var pos = yPos(d, i, mouse[0], lines)
-        return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
+        return y.invert(pos.y) >= breakEven ? redColorCode : blueColorCode
       })
 
         d3.select('.line').style('stroke', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
-          return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
+          return y.invert(pos.y) >= breakEven ? redColorCode : blueColorCode
         }
       )
 
       d3.select('.line').style('stroke', function (d, i) {
         var pos = yPos(d, i, mouse[0], lines)
-        return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
+        return y.invert(pos.y) >= breakEven ? redColorCode : blueColorCode
       })
 
           return 'translate(' + mouse[0] + ',' + pos.y + ')'
