@@ -121,24 +121,29 @@ async function getFillableOrders(
 
   orders.forEach((order) => {
     // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
-    const remainingFillableMakerAmount = BigNumber.from(order.makerAmount)
-      .mul(BigNumber.from(order.remainingFillableTakerAmount))
-      .div(order.takerAmount)
+    const remainingFillableMakerAmount = BigNumber.from(order.order.makerAmount)
+      .mul(BigNumber.from(order.metaData.remainingFillableTakerAmount))
+      .div(order.order.takerAmount)
     order.metaData.remainingFillableMakerAmount =
       remainingFillableMakerAmount.toString()
 
-    const remainingMakerAllowance = BigNumber.from(makerAllowances[order.maker])
-    order.metaData.remainingMakerAllowance = remainingMakerAllowance
+    const remainingMakerAllowance = BigNumber.from(
+      makerAllowances[order.order.maker]
+    )
+    order.metaData.remainingMakerAllowance = remainingMakerAllowance.toString()
+    console.log('order', order)
 
     if (remainingMakerAllowance.gt(0)) {
       if (remainingFillableMakerAmount.lte(remainingMakerAllowance)) {
         filteredOrders.push(order)
+        console.log('filteredOrders', filteredOrders)
       } else {
         filteredOrders.push(order)
         // Overwrite remainingFillableMakerAmount with remainingMakerAllowance which will result in remainingMakerAllowance = 0 for next iteration
-        filteredOrders.metaData.remainingFillableMakerAmount = remainingMakerAllowance.toString()
+        // filteredOrders.metaData.remainingFillableMakerAmount =
+        //   remainingMakerAllowance.toString()
       }
-      makerAllowances[order.maker] = remainingMakerAllowance
+      makerAllowances[order.order.maker] = remainingMakerAllowance
         .sub(remainingFillableMakerAmount)
         .toString()
     }
