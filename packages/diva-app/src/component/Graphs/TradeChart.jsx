@@ -25,7 +25,6 @@ class DIVATradeChart extends Component {
       width = w - margin.left - margin.right,
       height = h - margin.top - margin.bottom
 
-    console.log('breakEven', breakEven)
     // Append the svg object to the reference element of the page
     // Appends a 'group' element to 'svg'
     // Moves the 'group' element to the top left margin
@@ -52,6 +51,34 @@ class DIVATradeChart extends Component {
       .style('fill', 'white')
       .text(' Payout per ' + optionTypeText + ' token (' + 'in ' + payOut + ')')
 
+    // legends
+    svg
+      .append('circle')
+      .attr('cx', 5)
+      .attr('cy', h)
+      .attr('r', 6)
+      .style('fill', '#4C0D46')
+    svg
+      .append('circle')
+      .attr('cx', 180)
+      .attr('cy', h)
+      .attr('r', 6)
+      .style('fill', '#1B394F')
+    svg
+      .append('text')
+      .attr('x', 20)
+      .attr('y', h)
+      .text('Break even' + ' ' + '(' + breakEven + ')')
+      .style('font-size', '15px')
+      .attr('alignment-baseline', 'middle')
+    svg
+      .append('text')
+      .attr('x', 195)
+      .attr('y', h)
+      .text('Current price' + ' ' + '(' + currentPrice + ')')
+      .style('font-size', '15px')
+      .attr('alignment-baseline', 'middle')
+
     // Add X axis
     const x = d3
       .scaleLinear()
@@ -66,22 +93,7 @@ class DIVATradeChart extends Component {
       .append('g')
       .attr('class', 'xAxisG')
       .attr('transform', 'translate(0,' + height + ')')
-      // .call(d3.axisBottom(x).tickSize(0)).call // .tickSize to remove the ticks at the ends
-      .call(
-        d3
-          .axisBottom(x)
-          .tickValues([
-            breakEven,
-            currentPrice,
-            d3.max(data, function (d) {
-              return d.x
-            }),
-          ])
-          .ticks(3)
-      )
-
     // Add Y axis
-    console.log('value', data)
     const y = d3
       .scaleLinear()
       .domain([
@@ -94,7 +106,7 @@ class DIVATradeChart extends Component {
     svg
       .append('g')
       .attr('class', 'yAxisG')
-      .attr('transform', `translate(${margin.left},0)`)
+      .attr('transform', `translate(0)`)
       .call(
         d3
           .axisRight(y)
