@@ -17,6 +17,11 @@ import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { selectChainId } from '../../Redux/appSlice'
+import { config } from '../../constants'
+import { ethers } from 'ethers'
+import { response } from 'express'
+import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -58,6 +63,40 @@ function stableSort(array: any, comparator: (a: string, b: string) => number) {
   return stabilizedThis.map((el: any) => el[0])
 }
 
+async function getFillableSellOrders(
+  sellOrders,
+  chainId,
+  provider,
+  optionTokenAddress
+) {
+  const orders: any = {}
+  const contract = new ethers.Contract(
+    config[chainId].balanceCheckAddress,
+    BalanceCheckerABI,
+    provider
+  )
+  console.log('sell ' + JSON.stringify(sellOrders))
+  const makers = sellOrders.map((data) => {
+    console.log('maker ' + data.order.maker)
+    return data.order.maker
+  })
+
+  const addresses = Array.from({ length: makers.length }).fill(
+    '0xdef1c0ded9bec7f1a1670819833240f027b25eff'
+  )
+  const tokens = Array.from({ length: makers.length }).fill(optionTokenAddress)
+  //console.log('tokens ' + JSON.stringify(tokens))
+  console.log(makers, ['0xdef1c0ded9bec7f1a1670819833240f027b25eff'], tokens)
+  const res = await contract.allowances(makers, addresses, tokens)
+  const sOrders = []
+  /*sellOrders.forEach((order) => {
+    const ord = { ...order }
+    ord.mataData.remainingTakerAmountRaw = res[sellOrders.indexOf(order)]
+    sOrders.push(ord)
+  })*/
+  console.log('response ', res)
+  return res
+}
 function mapOrderData(
   records: [],
   option: Pool,
@@ -204,6 +243,7 @@ export default function OrderBook(props: {
     SELL: 1,
   }
   const chainId = useAppSelector(selectChainId)
+  const { provider } = useConnectionContext()
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
@@ -227,7 +267,14 @@ export default function OrderBook(props: {
         responseBuy = rBuy
       }
     }
+    const fillableSellOrders = getFillableSellOrders(
+      responseSell,
+      chainId,
+      provider,
+      optionTokenAddress
+    )
 
+    console.log('fillable sell orders ' + JSON.stringify(fillableSellOrders))
     const orderBookBuy = mapOrderData(
       responseBuy,
       option,
