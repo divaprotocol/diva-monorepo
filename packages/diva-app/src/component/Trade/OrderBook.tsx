@@ -18,8 +18,7 @@ import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { selectChainId } from '../../Redux/appSlice'
 import { config } from '../../constants'
-import { ethers } from 'ethers'
-import { response } from 'express'
+import { BigNumber, ethers } from 'ethers'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 
@@ -63,6 +62,10 @@ function stableSort(array: any, comparator: (a: string, b: string) => number) {
   return stabilizedThis.map((el: any) => el[0])
 }
 
+/**
+ * gets only oders that can be filled and where makers
+ * have sufficient allowances
+ */
 async function getFillableOrders(
   orders,
   chainId,
@@ -88,7 +91,7 @@ async function getFillableOrders(
   console.log('orders[1] ' + JSON.stringify(orders[1]))
 
   // Get all maker addresses from orders array
-  const makers = orders.map((data) => {
+  const makers: string[] = orders.map((data) => {
     return data.order.maker
   })
   // TODO: Filter out duplicates to reduce the size of the array and the number of allowances calls
@@ -103,41 +106,35 @@ async function getFillableOrders(
   // Get allowances
   const res = await contract.allowances(makers, addresses, tokens)
 
-  // Map allowances to maker
-  const makerAllowances = []
-  makers.forEach((maker) => {
-    const makerAllowance = {}
-    const index = makers.indexOf(maker)
-    const allowance = res[index]
-    makerAllowance['maker'] = maker
-    makerAllowance['allowance'] = allowance.toString()
-    makerAllowances.push(makerAllowance)
+  const makerAllowances: {
+    [address: string]: string
+  } = {}
+
+  makers.forEach((maker, index) => {
+    if (makerAllowances[maker] != null) {
+      makerAllowances[maker] = res[index].toString()
+    }
   })
 
-  // // Map maker token allowances to orders object
-  // // const makerAllowances = []
-  // orders.forEach((order) => {
-  //   const makerAllowance = {}
-  //   const index = makers.indexOf(maker)
-  //   const allowance = res[index]
-  //   makerAllowance['maker'] = maker
-  //   makerAllowance['allowance'] = allowance.toString()
-  //   makerAllowances.push(makerAllowance)
-  // })
-
-  console.log('makerAllowances', makerAllowances)
+  const filteredOrders = []
 
   orders.forEach((order) => {
-    const makerAllowance = makerAllowances.filter((item) => {
-      item.maker == order.order.maker
-    })
-    const ord = { ...order }
-    ord.metaData.remainingTakerAmountRaw = res[orders.indexOf(order)]
-    makerAllowances.push(ord)
+    const remainingMakerAllowance = BigNumber.from(makerAllowances[order.maker])
+    order.metaData.remainingMakerAllowance = remainingMakerAllowance
+    // makerAmount * remainingFillableTakerAmount / takerAmount = Remaining fillable maker amount
+    const makerAmount = BigNumber.from(order.makerAmount)
+    if (makerAmount.lte(remainingMakerAllowance)) {
+      filteredOrders.push(order)
+    }
+
+    makerAllowances[order.maker] = remainingMakerAllowance
+      .sub(makerAmount)
+      .toString()
   })
-  console.log('response ', res)
-  return res
+
+  return filteredOrders
 }
+
 function mapOrderData(
   records: [],
   option: Pool,
@@ -317,7 +314,7 @@ export default function OrderBook(props: {
     //   props.exchangeProxy
     // )
 
-    const fillableBuyOrders = getFillableOrders(
+    const fillableBuyOrders = await getFillableOrders(
       responseBuy,
       chainId,
       provider,
