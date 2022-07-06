@@ -115,6 +115,7 @@ export const fetchPool = createAsyncThunk(
       graphUrl,
       queryPool(parseInt(poolId))
     )
+
     return res.pool
   }
 )
@@ -268,7 +269,7 @@ export const appSlice = createSlice({
     })
 
     builder.addCase(fetchPool.fulfilled, (state, action) => {
-      addPools(state, [action.payload])
+      addPools(state, [action.payload], state.chainId)
     })
 
     builder.addCase(fetchPools.pending, (state, action) => {
