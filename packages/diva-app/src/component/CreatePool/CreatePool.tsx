@@ -79,7 +79,7 @@ export function CreatePool() {
         <Add style={{ fontSize: 34, padding: 20, paddingRight: 10 }} />
         <h2> Create Pool</h2>
       </Box>
-      <Container maxWidth="md">
+      <Container maxWidth="xl">
         <Box pt={5} pb={10}>
           <Stepper activeStep={formik.values.step - 1} alternativeLabel>
             <Step>
@@ -157,6 +157,7 @@ export function CreatePool() {
                 sx={{
                   paddingLeft:
                     formik.status != null ? theme.spacing(6) : undefined,
+                  ml: theme.spacing(6),
                 }}
                 loading={
                   formik.status != null &&
