@@ -1,0 +1,4 @@
+services:
+  oracle:
+    image: python:3.8
+    build: .
