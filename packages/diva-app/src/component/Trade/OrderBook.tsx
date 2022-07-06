@@ -63,48 +63,64 @@ function stableSort(array: any, comparator: (a: string, b: string) => number) {
   return stabilizedThis.map((el: any) => el[0])
 }
 
-async function getFillableSellOrders(
-  sellOrders,
+async function getFillableOrders(
+  orders,
   chainId,
   provider,
-  optionTokenAddress,
+  tokenAddress,
   exchangeProxy
 ) {
-  const orders: any = {}
+  // Connect to BalanceChecker contract which implements a function (called allowances)
+  // to obtain multiple allowances with one single call
   const contract = new ethers.Contract(
     config[chainId].balanceCheckAddress,
     BalanceCheckerABI,
     provider
   )
-  console.log('sell ' + JSON.stringify(sellOrders))
-  const makers = sellOrders.map((data) => {
-    console.log('maker ' + data.order.maker)
+
+  console.log('orders[0] ' + JSON.stringify(orders[0]))
+  // takerAmount: 100000000000000000 // 0.1 positionTokens
+  // makerAmount: 80000000000000000000 // 80 dUSD
+  // -> price: 800 dUSD / position token
+  // remainingFillableTakerAmount: 1
+  // -> remainigFillableMakerAmount = 800
+  // makerToken allowance: 30 instead of 800
+  console.log('orders[1] ' + JSON.stringify(orders[1]))
+
+  // Get all maker addresses from orders array
+  const makers = orders.map((data) => {
     return data.order.maker
   })
-
   const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
-  const tokens = Array.from({ length: makers.length }).fill(optionTokenAddress)
+
+  // Prepare token address input for allowances function (array of same length as maker addresses array
+  // populated with the position token address)
+  const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
   //console.log('tokens ' + JSON.stringify(tokens))
-  console.log(makers, ['0xdef1c0ded9bec7f1a1670819833240f027b25eff'], tokens)
+
+  // Get allowances
   const res = await contract.allowances(makers, addresses, tokens)
 
-  let sOrders = []
+  // Map allowances to maker
+  const makerAllowances = []
   makers.forEach((maker) => {
     const makerAllowance = {}
-    const index = makers.indexOd(maker)
+    const index = makers.indexOf(maker)
     const allowance = res[index]
-    makerAllowance.maker = maker
-    makerAllowance.allowance = allowance
-    sOrders.push(makerAllowance)
+    makerAllowance['maker'] = maker
+    makerAllowance['allowance'] = allowance.toString()
+    makerAllowances.push(makerAllowance)
   })
 
-  sellOrders.forEach((order) => {
-    const makerAllowance = sOrders.filter((x) => {
+  console.log('makerAllowances', makerAllowances)
+
+  orders.forEach((order) => {
+    const makerAllowance = makerAllowances.filter((x) => {
       x.maker == order.order.maker
     })
     const ord = { ...order }
-    ord.mataData.remainingTakerAmountRaw = res[sellOrders.indexOf(order)]
-    sOrders.push(ord)
+    ord.mataData.remainingTakerAmountRaw = res[orders.indexOf(order)]
+    makerAllowances.push(ord)
   })
   console.log('response ', res)
   return res
@@ -280,15 +296,23 @@ export default function OrderBook(props: {
         responseBuy = rBuy
       }
     }
-    const fillableSellOrders = getFillableSellOrders(
-      responseSell,
+    // const fillableSellOrders = getFillableOrders(
+    //   responseSell,
+    //   chainId,
+    //   provider,
+    //   optionTokenAddress,
+    //   props.exchangeProxy
+    // )
+
+    const fillableBuyOrders = getFillableOrders(
+      responseBuy,
       chainId,
       provider,
-      optionTokenAddress,
+      option.collateralToken.id,
       props.exchangeProxy
     )
+    console.log('fillable buy orders ' + JSON.stringify(fillableBuyOrders))
 
-    console.log('fillable sell orders ' + JSON.stringify(fillableSellOrders))
     const orderBookBuy = mapOrderData(
       responseBuy,
       option,
