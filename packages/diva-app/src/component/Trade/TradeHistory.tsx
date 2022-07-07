@@ -170,6 +170,8 @@ export const TradeHistory = ({ pool }: Props) => {
     setHistory(orders)
   }, [
     collateralTokenAddress,
+    orderFills.data,
+    orderFillsMaker.data,
     pool.collateralToken.decimals,
     positionTokenAddress,
   ])
