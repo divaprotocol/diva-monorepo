@@ -66,14 +66,11 @@ function stableSort(array: any, comparator: (a: string, b: string) => number) {
 /**
  * TODO: Add purpose of function ...
  */
-function mapOrderData(
-  records: [],
-  option: Pool,
-  optionTokenAddress: string,
-  sortOrder: string
-) {
+function mapOrderData(records: [], option: Pool, optionTokenAddress: string) {
   let orderBy: string
-  let sortedRecords: any = []
+  const sortedRecords: any = []
+
+  // Get orderbook (before filtering out 0 quantities)
   const orderbookTemp: any = records.map((record: any) => {
     const order = record.order
     const metaData = record.metaData
@@ -98,7 +95,7 @@ function mapOrderData(
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
       // TODO change those Number operations to BigNumber
-      const bidAmount = Number(makerAmount) / Number(takerAmount)
+      const bidAmount = Number(makerAmount) / Number(takerAmount) // ok to have it that way as this is just for displaying information
       orders.bid = bidAmount
       if (Number(remainingTakerAmount) < Number(takerAmount)) {
         const nbrOptions = Number(remainingTakerAmount)
@@ -140,19 +137,7 @@ function mapOrderData(
     return object.nbrOptions !== 0
   })
 
-  // TODO: Drop that part as orders received from 0x api are now sorted
-  // QUESTION Can we drop?
-  if (sortOrder === 'ascOrder') {
-    orderBy = 'ask'
-    const comparator = getComparator(sortOrder, orderBy)
-    sortedRecords = stableSort(orderbook, comparator)
-  }
-  if (sortOrder === 'desOrder') {
-    orderBy = 'bid'
-    sortedRecords = stableSort(orderbook, getComparator(sortOrder, orderBy))
-  }
-
-  return sortedRecords
+  return orderbook
 }
 
 function getTableLength(buyOrdersCount: number, sellOrdersCount: number) {
@@ -246,20 +231,12 @@ export default function OrderBook(props: {
       }
     }
 
-    const orderBookBuy = mapOrderData(
-      responseBuy,
-      option,
-      optionTokenAddress,
-      'desOrder'
-    )
+    const orderBookBuy = mapOrderData(responseBuy, option, optionTokenAddress)
     orders.push(orderBookBuy)
-    const orderBookSell = mapOrderData(
-      responseSell,
-      option,
-      optionTokenAddress,
-      'ascOrder'
-    )
+
+    const orderBookSell = mapOrderData(responseSell, option, optionTokenAddress)
     orders.push(orderBookSell)
+
     //put both buy & sell orders in one array to format table rows
     const completeOrderBook = createTable(
       orders[OrderType.BUY],
