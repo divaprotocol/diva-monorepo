@@ -49,6 +49,12 @@ export default function BuyMarket(props: {
   chainId: number
   usdPrice: string
   provider: any
+  approve: (
+    amount: BigNumber,
+    tokenContract: any,
+    spender: string,
+    owner: string
+  ) => any
 }) {
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
@@ -101,28 +107,6 @@ export default function BuyMarket(props: {
     }
   }
 
-  const approve = async (amount) => {
-    try {
-      await takerTokenContract.methods
-        .approve(exchangeProxy, amount)
-        .send({ from: userAddress })
-
-      // QUESTION: Why is this part needed?
-      // In case the approve call does not or delay emit events, read the allowance again
-      await new Promise((resolve) => setTimeout(resolve, 4000))
-
-      // Set allowance for collateral token (<= 18 decimals)
-      const allowance = await takerTokenContract.methods
-        .allowance(userAddress, exchangeProxy)
-        .call()
-      return allowance
-    } catch (error) {
-      // If rejected by user in Metamask pop-up
-      console.error('error ' + JSON.stringify(error))
-      return 'undefined'
-    }
-  }
-
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
@@ -138,7 +122,12 @@ export default function BuyMarket(props: {
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
         // Set allowance. Returns 'undefined' if rejected by user.
-        const approveResponse = await approve(amountToApprove)
+        const approveResponse = await props.approve(
+          amountToApprove,
+          takerTokenContract,
+          exchangeProxy,
+          userAddress
+        )
 
         if (approveResponse !== 'undefined') {
           const collateralAllowance = BigNumber.from(approveResponse)
@@ -191,7 +180,12 @@ export default function BuyMarket(props: {
                 .add(BigNumber.from(100)) // Buffer to ensure that there is always sufficient approval
 
               // Set allowance. Returns 'undefined' if rejected by user.
-              const approveResponse = await approve(amountToApprove)
+              const approveResponse = await props.approve(
+                amountToApprove,
+                takerTokenContract,
+                exchangeProxy,
+                userAddress
+              )
 
               if (approveResponse !== 'undefined') {
                 const newAllowance = BigNumber.from(approveResponse)

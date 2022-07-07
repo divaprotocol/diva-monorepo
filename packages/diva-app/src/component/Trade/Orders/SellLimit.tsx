@@ -51,6 +51,12 @@ export default function SellLimit(props: {
   chainId: number
   usdPrice: string
   provider: any
+  approve: (
+    amount: BigNumber,
+    tokenContract: any,
+    spender: string,
+    owner: string
+  ) => any
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
 
@@ -175,31 +181,6 @@ export default function SellLimit(props: {
     )
   }
 
-  const approve = async (amount) => {
-    try {
-      const approveResponse = await makerTokenContract.methods
-        .approve(exchangeProxy, amount)
-        .send({ from: userAddress })
-      if ('events' in approveResponse) {
-        // Check allowance amount in events to avoid another contract call
-        return approveResponse.events.Approval.returnValues.value
-      } else {
-        // In case the approve call does not or delay emit events, read the allowance again
-        await new Promise((resolve) => setTimeout(resolve, 4000))
-
-        // Set allowance for collateral token (<= 18 decimals)
-        const allowance = await makerTokenContract.methods
-          .allowance(userAddress, exchangeProxy)
-          .call()
-        return allowance
-      }
-    } catch (error) {
-      // If rejected by user in Metamask pop-up
-      console.error('error ' + JSON.stringify(error))
-      return 'undefined'
-    }
-  }
-
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
@@ -212,7 +193,12 @@ export default function SellLimit(props: {
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
         // Set allowance. Returns 'undefined' if rejected by user.
-        const approveResponse = await approve(amountToApprove)
+        const approveResponse = await props.approve(
+          amountToApprove,
+          makerTokenContract,
+          exchangeProxy,
+          userAddress
+        )
 
         if (approveResponse !== 'undefined') {
           const collateralAllowance = BigNumber.from(approveResponse)
@@ -271,7 +257,12 @@ export default function SellLimit(props: {
                 .add(BigNumber.from(100))
 
               // Set allowance. Returns 'undefined' if rejected by user.
-              const approveResponse = await approve(amountToApprove)
+              const approveResponse = await props.approve(
+                amountToApprove,
+                makerTokenContract,
+                exchangeProxy,
+                userAddress
+              )
 
               if (approveResponse !== 'undefined') {
                 const newAllowance = BigNumber.from(approveResponse)
