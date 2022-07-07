@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
@@ -91,9 +91,11 @@ export default function PoolsTable({
       ? rows.filter((v) =>
           v.Underlying.toLowerCase().includes(search.toLowerCase())
         )
-      : expiredClicked
-      ? rows.filter((v) => v.Status.includes('Open'))
       : rows
+
+  const openRows = expiredClicked
+    ? filteredRows.filter((v) => v.Status.includes('Open'))
+    : filteredRows
   const handleExpiryPools = () => {
     if (expiredClicked) {
       setExpiredClicked(false)
@@ -231,7 +233,7 @@ export default function PoolsTable({
       </AppBar>
       <DataGrid
         className={classes.root}
-        rows={filteredRows}
+        rows={expiredClicked ? openRows : filteredRows}
         pagination
         columns={columns}
         loading={loading}
