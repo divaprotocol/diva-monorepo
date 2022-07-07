@@ -125,6 +125,7 @@ async function getFillableOrders(
     // Convert order object into a Javascript object
     const extendedOrder = JSON.parse(JSON.stringify(order))
     if (ordersType == 'Buy') {
+      // QUESTION: Why is orderType needed? It's implied by the token that is passed as an argument into that function
       // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
       const remainingFillableMakerAmount = BigNumber.from(
         order.order.makerAmount
@@ -142,12 +143,13 @@ async function getFillableOrders(
         remainingMakerAllowance.toString()
 
       if (remainingMakerAllowance.gt(0)) {
-        // Update
+        // remainingFillableMakerAmount is the minimum of remainingMakerAllowance and remainingFillableMakerAmount implied by remainingFillableTakerAmount
         extendedOrder.metaData.remainingFillableMakerAmount =
           remainingFillableMakerAmount.lte(remainingMakerAllowance)
             ? remainingFillableMakerAmount.toString()
             : remainingMakerAllowance.toString()
 
+        // Add to fillable orders
         filteredOrders.push(extendedOrder)
         // Update the makerAllowances mapping to reflect the remainingAllowance after
         // deducting remainingFillableMakerAmount
