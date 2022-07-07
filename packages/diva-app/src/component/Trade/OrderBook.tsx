@@ -64,7 +64,7 @@ function stableSort(array: any, comparator: (a: string, b: string) => number) {
 }
 
 /**
- * gets only oders that can be filled and where makers
+ * Filter for orders that can actually be filled, i.e. where makers
  * have sufficient allowances
  */
 async function getFillableOrders(
@@ -94,7 +94,7 @@ async function getFillableOrders(
   let makers: string[] = orders.map((data) => {
     return data.order.maker
   })
-  //remove duplicates
+  // Get iteratable set of maker addresses excluding duplicates
   makers = [...new Set(makers)]
   console.log('makers ', makers)
   const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
@@ -105,23 +105,25 @@ async function getFillableOrders(
 
   // TODO: query in batches of max 400
   // Get allowances
-
   const res = await contract.allowances(makers, addresses, tokens)
   const makerAllowances: {
     [address: string]: string
   } = {}
 
+  // Map allowances to maker address
   makers.forEach((maker, index) => {
     if (makerAllowances[maker] == null) {
-      // filter out duplicates
+      // if condition ensures that we don't have duplicates
       makerAllowances[maker] = res[index].toString()
     }
   })
+
+  // Initialize array that will hold the filtered order objects
   const filteredOrders = []
 
   orders.forEach((order) => {
-    //feel free to change updatedOrder variable name
-    const updatedOrder = JSON.parse(JSON.stringify(order))
+    // Convert order object into a Javascript object
+    const extendedOrder = JSON.parse(JSON.stringify(order))
     if (ordersType == 'Buy') {
       // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
       const remainingFillableMakerAmount = BigNumber.from(
@@ -129,41 +131,36 @@ async function getFillableOrders(
       )
         .mul(BigNumber.from(order.metaData.remainingFillableTakerAmount))
         .div(order.order.takerAmount)
-      updatedOrder.metaData.remainingFillableMakerAmount =
-        remainingFillableMakerAmount.toString()
+
+      // Get maker allowance and include it as a new field in order metaData
+      // Note that remainingMakerAllowance is the full makerAllowance for the first (best) order
+      // and then decreases for the following orders as the remainingFillableMakerAmount gets deducted
       const remainingMakerAllowance = BigNumber.from(
-        makerAllowances[updatedOrder.order.maker]
+        makerAllowances[extendedOrder.order.maker]
       )
-      updatedOrder.metaData.remainingMakerAllowance =
+      extendedOrder.metaData.remainingMakerAllowance =
         remainingMakerAllowance.toString()
 
       if (remainingMakerAllowance.gt(0)) {
-        if (remainingFillableMakerAmount.lte(remainingMakerAllowance)) {
-          filteredOrders.push(updatedOrder)
-          console.log('filteredOrders', filteredOrders)
-        } else {
-          //filteredOrders.push(order)
-          // Overwrite remainingFillableMakerAmount with remainingMakerAllowance which will result in remainingMakerAllowance = 0 for next iteration
-          // filteredOrders.metaData.remainingFillableMakerAmount =
-          //   remainingMakerAllowance.toString()
-          //Harsh comment** - if remainingFillableMakerAmount is greater than allowance then
-          //reduce the remainingFillableMakerAmount of the order to equal the remaining maker allowance
-          //and then push the order in filtered Orders
-          updatedOrder.metaData.remainingFillableMakerAmount =
-            remainingMakerAllowance.toString()
-          filteredOrders.push(updatedOrder)
-        }
+        // Update
+        extendedOrder.metaData.remainingFillableMakerAmount =
+          remainingFillableMakerAmount.lte(remainingMakerAllowance)
+            ? remainingFillableMakerAmount.toString()
+            : remainingMakerAllowance.toString()
 
+        filteredOrders.push(extendedOrder)
+        // Update the makerAllowances mapping to reflect the remainingAllowance after
+        // deducting remainingFillableMakerAmount
         makerAllowances[order.order.maker] = remainingMakerAllowance
           .sub(remainingFillableMakerAmount)
           .toString()
       }
     } else {
       //Sell Orders
-      console.log('Sell orders')
+      console.log('Sell orders') // QUESTION Why that here?
     }
   })
-
+  console.log('filteredOrders', filteredOrders)
   return filteredOrders
 }
 
