@@ -64,22 +64,22 @@ function stableSort(array: any, comparator: (a: string, b: string) => number) {
 }
 
 /**
- * TODO: Add purpose of function ...
+ * Prepare all data to be displayed in the orderbook (price, quantity and expires in)
  */
-function mapOrderData(records: [], option: Pool, optionTokenAddress: string) {
+function mapOrderData(
+  records: [],
+  option: Pool,
+  orderType: number // 0 = BUY, 1 = SELL
+) {
   // Get orderbook (before filtering out 0 quantities)
   const orderbookTemp: any = records.map((record: any) => {
     const order = record.order
     const metaData = record.metaData
-
-    const makerToken = order.makerToken
-    const takerToken = order.takerToken
-    const collateralToken = option.collateralToken.id.toLowerCase()
-    const tokenAddress = optionTokenAddress.toLowerCase()
     const orders: any = {}
 
     // Buy Limit
-    if (makerToken === collateralToken && takerToken === tokenAddress) {
+    // TODO This condition is no longer needed as we get that data already returned
+    if (orderType === 0) {
       const takerAmount = formatUnits(order.takerAmount)
       const makerAmount = formatUnits(
         order.makerAmount.toString(),
@@ -103,7 +103,7 @@ function mapOrderData(records: [], option: Pool, optionTokenAddress: string) {
       }
     }
     // Sell Limit
-    if (makerToken === tokenAddress && takerToken === collateralToken) {
+    if (orderType === 1) {
       const takerAmount = formatUnits(
         order.takerAmount,
         option.collateralToken.decimals
@@ -215,11 +215,11 @@ export default function OrderBook(props: {
       }
     }
 
-    orderBookBuy = mapOrderData(responseBuy, option, optionTokenAddress)
+    orderBookBuy = mapOrderData(responseBuy, option, OrderType.BUY)
     console.log('orderBookBuy', orderBookBuy)
     orders.push(orderBookBuy)
 
-    orderBookSell = mapOrderData(responseSell, option, optionTokenAddress)
+    orderBookSell = mapOrderData(responseSell, option, OrderType.SELL)
     orders.push(orderBookSell)
     console.log('orderBookSell', orderBookSell)
 
@@ -228,6 +228,7 @@ export default function OrderBook(props: {
       orders[OrderType.BUY],
       orders[OrderType.SELL]
     )
+    console.log('completeOrderBook', completeOrderBook)
     setOrderBook(completeOrderBook)
   }
 

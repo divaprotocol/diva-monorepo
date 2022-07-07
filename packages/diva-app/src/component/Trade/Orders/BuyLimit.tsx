@@ -39,6 +39,7 @@ import {
   calcPayoffPerToken,
   calcBreakEven,
 } from '../../../Util/calcPayoffPerToken'
+import { setResponseBuy } from '../../../Redux/TradeOption'
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigNumber.from(0)
 
@@ -275,6 +276,8 @@ export default function BuyLimit(props: {
           buylimitOrder(orderData)
             .then(async (response) => {
               if (response.status === 200) {
+                //need to invalidate cache order response since orderbook is updated
+                dispatch(setResponseBuy([]))
                 await new Promise((resolve) => setTimeout(resolve, 2000))
                 await props.handleDisplayOrder()
                 handleFormReset()

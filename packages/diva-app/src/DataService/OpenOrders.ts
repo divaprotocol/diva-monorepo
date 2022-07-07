@@ -107,6 +107,7 @@ async function getFillableOrders(
       makerAllowances[order.order.maker] = remainingMakerAllowance
         .sub(remainingFillableMakerAmount)
         .toString()
+      // TODO Consider adding the expected price at this stage
     }
   })
 
