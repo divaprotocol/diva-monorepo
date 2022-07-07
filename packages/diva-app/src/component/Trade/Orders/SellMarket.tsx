@@ -242,6 +242,7 @@ export default function SellMarket(props: {
             existingLimitOrders: existingBuyLimitOrders,
             chainId: props.chainId,
           }
+          console.log('orderData', orderData)
           sellMarketOrder(orderData).then(async (orderFillStatus: any) => {
             let orderFilled = false
             if (!(orderFillStatus == undefined)) {
@@ -318,6 +319,7 @@ export default function SellMarket(props: {
         data.metaData.remainingFillableTakerAmount
 
       if (BigNumber.from(remainingFillableTakerAmount).gt(0)) {
+        // TODO Consider moving the expectedRate calcs inside get0xOpenOrders
         order['expectedRate'] = makerAmount
           .mul(positionTokenUnit)
           .div(takerAmount) // result has collateral token decimals
@@ -326,14 +328,18 @@ export default function SellMarket(props: {
       }
     })
 
-    const sortOrder = 'desOrder'
-    const orderBy = 'expectedRate'
-    const sortedOrders = stableSort(orders, getComparator(sortOrder, orderBy))
+    // const sortOrder = 'desOrder'
+    // const orderBy = 'expectedRate'
+    console.log('orders before stableSort', orders)
+    const sortedOrders = orders // stableSort(orders, getComparator(sortOrder, orderBy))
+    console.log('sortedOrders.length', sortedOrders.length)
     if (sortedOrders.length > 0) {
       const bestRate = sortedOrders[0].expectedRate
+      console.log('bestRate', bestRate.toString())
       // TODO: Test whether bestRate is correct when multiple orders in the orderbook
       setAvgExpectedRate(bestRate)
     }
+    console.log('sortedOrders', sortedOrders)
     return sortedOrders
   }
 
