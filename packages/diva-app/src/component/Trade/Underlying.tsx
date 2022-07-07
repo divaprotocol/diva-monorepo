@@ -31,6 +31,7 @@ import {
   selectPool,
   selectChainId,
   selectPrice,
+  selectPools,
 } from '../../Redux/appSlice'
 import { formatUnits, parseEther, formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
@@ -83,7 +84,7 @@ export default function Underlying() {
         poolId: params.poolId,
       })
     )
-  }, [chainId, params.poolId, dispatch])
+  }, [chainId, dispatch, params.poolId])
 
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
 
