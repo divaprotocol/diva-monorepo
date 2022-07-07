@@ -23,7 +23,12 @@ import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
-import { CheckCircle, Report } from '@mui/icons-material'
+import {
+  CheckCircle,
+  Circle,
+  FormatListBulleted,
+  Report,
+} from '@mui/icons-material'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
@@ -567,17 +572,17 @@ export function DefinePoolAttributes({
           </Container>
         </Box>
       </Container>
-      <Container maxWidth="xs">
+      <Container>
         <Stack>
+          <Typography pb={theme.spacing(2)} variant="subtitle1">
+            Payoff Profile
+          </Typography>
           {floor != null &&
             cap != null &&
             inflection != null &&
             tokenSupply != null &&
             tokenSupply > 0 && (
               <Box width="50%">
-                <Typography pb={theme.spacing(2)} variant="subtitle1">
-                  Payoff Profile
-                </Typography>
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
@@ -589,6 +594,38 @@ export function DefinePoolAttributes({
                 />
               </Box>
             )}
+          <Box maxWidth="xs">
+            <Typography pb={theme.spacing(2)} variant="subtitle1">
+              Payoff Scenarios
+            </Typography>
+            <Typography
+              fontSize={'0.85rem'}
+              sx={{ mt: theme.spacing(2) }}
+              style={{ color: 'gray' }}
+            >
+              <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is at
+              or below 100 on 31/12/2022 (08:12am CET), the payout will be 0.0
+              WAGM18 per long and 1.0 WAGMI18 per short position token
+            </Typography>
+            <Typography
+              fontSize={'0.85rem'}
+              sx={{ mt: theme.spacing(2) }}
+              style={{ color: 'gray' }}
+            >
+              <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is at
+              or above 300 on 31/12/2022 (08:12am CET), the payout will be 1.0
+              WAGM18 per long and 0.0 WAGMI18 per short position token
+            </Typography>
+            <Typography
+              fontSize={'0.85rem'}
+              sx={{ mt: theme.spacing(2) }}
+              style={{ color: 'gray' }}
+            >
+              <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is at
+              200 on 31/12/2022 (08:12am CET), the payout will be 0.5 WAGM18 per
+              long and 0.0 WAGMI18 per short position token
+            </Typography>
+          </Box>
         </Stack>
       </Container>
     </Stack>
