@@ -21,6 +21,7 @@ import { config } from '../../constants'
 import { BigNumber, ethers } from 'ethers'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { resolveTxt } from 'dns'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -71,7 +72,8 @@ async function getFillableOrders(
   chainId,
   provider,
   tokenAddress,
-  exchangeProxy
+  exchangeProxy,
+  ordersType
 ) {
   // Connect to BalanceChecker contract which implements a function (called allowances)
   // to obtain multiple allowances with one single call
@@ -81,71 +83,84 @@ async function getFillableOrders(
     provider
   )
 
-  console.log('orders[0] ' + JSON.stringify(orders[0]))
   // takerAmount: 100000000000000000 // 0.1 positionTokens
   // makerAmount: 80000000000000000000 // 80 dUSD
   // -> price: 800 dUSD / position token
   // remainingFillableTakerAmount: 1
   // -> remainigFillableMakerAmount = 800
   // makerToken allowance: 30 instead of 800
-  console.log('orders[1] ' + JSON.stringify(orders[1]))
 
   // Get all maker addresses from orders array
-  const makers: string[] = orders.map((data) => {
+  let makers: string[] = orders.map((data) => {
     return data.order.maker
   })
-  // TODO: Filter out duplicates to reduce the size of the array and the number of allowances calls
+  //remove duplicates
+  makers = [...new Set(makers)]
+  console.log('makers ', makers)
   const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
 
   // Prepare token address input for allowances function (array of same length as maker addresses array
   // populated with the position token address)
   const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
-  //console.log('tokens ' + JSON.stringify(tokens))
 
   // TODO: query in batches of max 400
   // Get allowances
-  const res = await contract.allowances(makers, addresses, tokens)
 
+  const res = await contract.allowances(makers, addresses, tokens)
   const makerAllowances: {
     [address: string]: string
   } = {}
 
   makers.forEach((maker, index) => {
-    if (makerAllowances[maker] != null) {
+    if (makerAllowances[maker] == null) {
       // filter out duplicates
       makerAllowances[maker] = res[index].toString()
     }
   })
-
   const filteredOrders = []
 
   orders.forEach((order) => {
-    // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
-    const remainingFillableMakerAmount = BigNumber.from(order.order.makerAmount)
-      .mul(BigNumber.from(order.metaData.remainingFillableTakerAmount))
-      .div(order.order.takerAmount)
-    order.metaData.remainingFillableMakerAmount =
-      remainingFillableMakerAmount.toString()
+    //feel free to change updatedOrder variable name
+    const updatedOrder = JSON.parse(JSON.stringify(order))
+    if (ordersType == 'Buy') {
+      // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
+      const remainingFillableMakerAmount = BigNumber.from(
+        order.order.makerAmount
+      )
+        .mul(BigNumber.from(order.metaData.remainingFillableTakerAmount))
+        .div(order.order.takerAmount)
+      updatedOrder.metaData.remainingFillableMakerAmount =
+        remainingFillableMakerAmount.toString()
+      const remainingMakerAllowance = BigNumber.from(
+        makerAllowances[updatedOrder.order.maker]
+      )
+      updatedOrder.metaData.remainingMakerAllowance =
+        remainingMakerAllowance.toString()
 
-    const remainingMakerAllowance = BigNumber.from(
-      makerAllowances[order.order.maker]
-    )
-    order.metaData.remainingMakerAllowance = remainingMakerAllowance.toString()
-    console.log('order', order)
+      if (remainingMakerAllowance.gt(0)) {
+        if (remainingFillableMakerAmount.lte(remainingMakerAllowance)) {
+          filteredOrders.push(updatedOrder)
+          console.log('filteredOrders', filteredOrders)
+        } else {
+          //filteredOrders.push(order)
+          // Overwrite remainingFillableMakerAmount with remainingMakerAllowance which will result in remainingMakerAllowance = 0 for next iteration
+          // filteredOrders.metaData.remainingFillableMakerAmount =
+          //   remainingMakerAllowance.toString()
+          //Harsh comment** - if remainingFillableMakerAmount is greater than allowance then
+          //reduce the remainingFillableMakerAmount of the order to equal the remaining maker allowance
+          //and then push the order in filtered Orders
+          updatedOrder.metaData.remainingFillableMakerAmount =
+            remainingMakerAllowance.toString()
+          filteredOrders.push(updatedOrder)
+        }
 
-    if (remainingMakerAllowance.gt(0)) {
-      if (remainingFillableMakerAmount.lte(remainingMakerAllowance)) {
-        filteredOrders.push(order)
-        console.log('filteredOrders', filteredOrders)
-      } else {
-        filteredOrders.push(order)
-        // Overwrite remainingFillableMakerAmount with remainingMakerAllowance which will result in remainingMakerAllowance = 0 for next iteration
-        // filteredOrders.metaData.remainingFillableMakerAmount =
-        //   remainingMakerAllowance.toString()
+        makerAllowances[order.order.maker] = remainingMakerAllowance
+          .sub(remainingFillableMakerAmount)
+          .toString()
       }
-      makerAllowances[order.order.maker] = remainingMakerAllowance
-        .sub(remainingFillableMakerAmount)
-        .toString()
+    } else {
+      //Sell Orders
+      console.log('Sell orders')
     }
   })
 
@@ -323,20 +338,23 @@ export default function OrderBook(props: {
         responseBuy = rBuy
       }
     }
-    // const fillableSellOrders = getFillableOrders(
-    //   responseSell,
-    //   chainId,
-    //   provider,
-    //   optionTokenAddress,
-    //   props.exchangeProxy
-    // )
+    //const fillableSellOrders = getFillableOrders(
+    //  responseSell,
+    //  chainId,
+    //  provider,
+    //  optionTokenAddress,
+    //  props.exchangeProxy,
+    //  'Sell'
+    //)
+    //console.log('fillable sell orders ' + JSON.stringify(fillableSellOrders))
 
     const fillableBuyOrders = await getFillableOrders(
       responseBuy,
       chainId,
       provider,
       option.collateralToken.id,
-      props.exchangeProxy
+      props.exchangeProxy,
+      'Buy'
     )
     console.log('fillable buy orders ' + JSON.stringify(fillableBuyOrders))
 
