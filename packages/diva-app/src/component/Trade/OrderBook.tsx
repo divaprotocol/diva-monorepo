@@ -96,7 +96,6 @@ async function getFillableOrders(
   })
   // Get iteratable set of maker addresses excluding duplicates
   makers = [...new Set(makers)]
-  console.log('makers ', makers)
   const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
 
   // Prepare token address input for allowances function (array of same length as maker addresses array
@@ -157,12 +156,8 @@ async function getFillableOrders(
           .sub(remainingFillableMakerAmount)
           .toString()
       }
-    } else {
-      //Sell Orders
-      console.log('Sell orders') // QUESTION Why that here?
     }
   })
-  console.log('filteredOrders', filteredOrders)
   return filteredOrders
 }
 
@@ -355,7 +350,6 @@ export default function OrderBook(props: {
       props.exchangeProxy,
       'Buy'
     )
-    console.log('fillable buy orders ' + JSON.stringify(fillableBuyOrders))
 
     const orderBookBuy = mapOrderData(
       responseBuy,

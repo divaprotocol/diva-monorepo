@@ -6,7 +6,8 @@ import { LineSeries, XYPlot } from 'react-vis'
 import { Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
 import { makeStyles } from '@mui/styles'
-
+import { setResponseBuy, setResponseSell } from '../Redux/TradeOption'
+import { useDispatch } from 'react-redux'
 const useStyles = makeStyles({
   root: {
     '&.MuiDataGrid-root .MuiDataGrid-cell:focus': {
@@ -56,7 +57,7 @@ export default function PoolsTable({
           v.Underlying.toLowerCase().includes(search.toLowerCase())
         )
       : rows
-
+  const dispatch = useDispatch()
   const classes = useStyles()
 
   return (
@@ -105,6 +106,11 @@ export default function PoolsTable({
           disableRowClick
             ? undefined
             : (row) => {
+                //Invalidate cache responses before navigating to trades page.
+                //This will fix the following issue
+                //Fix issue with empty rows in orderbook (e.g., when you open up L94 and then switch to the first product in the list)
+                dispatch(setResponseSell([]))
+                dispatch(setResponseBuy([]))
                 history.push(`../../${row.id}`)
               }
         }
