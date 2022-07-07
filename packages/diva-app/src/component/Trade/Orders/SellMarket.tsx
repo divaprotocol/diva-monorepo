@@ -237,7 +237,6 @@ export default function SellMarket(props: {
             existingLimitOrders: existingBuyLimitOrders,
             chainId: props.chainId,
           }
-          console.log('orderData', orderData)
           sellMarketOrder(orderData).then(async (orderFillStatus: any) => {
             let orderFilled = false
             if (!(orderFillStatus == undefined)) {
