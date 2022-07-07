@@ -312,6 +312,8 @@ export default function SellMarket(props: {
     const orders: any = []
     responseBuy.forEach((data: any) => {
       const order = JSON.parse(JSON.stringify(data.order))
+      const metaData = JSON.parse(JSON.stringify(data.metaData))
+      console.log('metaData', metaData)
       const takerAmount = BigNumber.from(order.takerAmount) // position token (18 decimals)
       const makerAmount = BigNumber.from(order.makerAmount) // collateral token (<= 18 decimals)
 

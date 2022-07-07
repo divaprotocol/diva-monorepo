@@ -65,11 +65,16 @@ async function getFillableOrders(
   orders.forEach((order) => {
     // Convert order object into a Javascript object
     const extendedOrder = JSON.parse(JSON.stringify(order))
+    console.log('extendedOrder', extendedOrder)
     // QUESTION: Why is orderType needed? It's implied by the token that is passed as an argument into that function
     // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
-    const remainingFillableMakerAmount = BigNumber.from(order.order.makerAmount)
+
+    const makerAmount = BigNumber.from(order.order.makerAmount)
+    const takerAmount = BigNumber.from(order.order.takerAmount)
+
+    const remainingFillableMakerAmount = makerAmount
       .mul(BigNumber.from(order.metaData.remainingFillableTakerAmount))
-      .div(order.order.takerAmount)
+      .div(takerAmount)
 
     // Get maker allowance and include it as a new field in order metaData
     // Note that remainingMakerAllowance is the full makerAllowance for the first (best) order
@@ -77,15 +82,26 @@ async function getFillableOrders(
     const remainingMakerAllowance = BigNumber.from(
       makerAllowances[extendedOrder.order.maker]
     )
+
+    // Add remainingMakerAllowance fiedl to the order object
     extendedOrder.metaData.remainingMakerAllowance =
       remainingMakerAllowance.toString()
 
     if (remainingMakerAllowance.gt(0)) {
       // remainingFillableMakerAmount is the minimum of remainingMakerAllowance and remainingFillableMakerAmount implied by remainingFillableTakerAmount
-      extendedOrder.metaData.remainingFillableMakerAmount =
-        remainingFillableMakerAmount.lte(remainingMakerAllowance)
-          ? remainingFillableMakerAmount.toString()
-          : remainingMakerAllowance.toString()
+      // if remainingMakerAllowance < remainingFillableMakerAmount, then remainingFillableTakerAmount needs to be reduced as well
+      if (remainingFillableMakerAmount.lte(remainingMakerAllowance)) {
+        extendedOrder.metaData.remainingFillableMakerAmount =
+          remainingFillableMakerAmount.toString()
+      } else {
+        extendedOrder.metaData.remainingFillableMakerAmount =
+          remainingMakerAllowance.toString()
+        // If makerAllowance is lower than remainingFillabelMakerAmount, then remainingFillableTakerAmount needs to be reduced
+        // e.g., if remainingTakerFillableAmount = 1 and implied remainingTakerFillableAmount = 500 but remainingMakerAllowance = 100
+        // then new remainingTakerFillableAmount = 1 * 100 / 500 = 1/5 = 0 -> gets filtered out from the orderbook automatically
+        extendedOrder.metaData.remainingFillableTakerAmount =
+          remainingMakerAllowance.mul(takerAmount).div(makerAmount).toString()
+      }
 
       // Add to fillable orders
       filteredOrders.push(extendedOrder)
