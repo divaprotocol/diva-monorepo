@@ -138,10 +138,14 @@ function mapOrderData(records: [], option: Pool, optionTokenAddress: string) {
 }
 
 function createTable(buyOrders: any, sellOrders: any) {
+  console.log('buyOrders', buyOrders.length === 0)
+  console.log('sellOrders', sellOrders.length === 0)
+  // Get orderbook table length
   const buyOrdersCount = buyOrders !== 'undefined' ? buyOrders.length : 0
   const sellOrdersCount = sellOrders !== 'undefined' ? sellOrders.length : 0
   const tableLength =
     buyOrdersCount >= sellOrdersCount ? buyOrdersCount : sellOrdersCount
+  console.log('tableLength', tableLength)
 
   const table: any = []
   if (tableLength === 0) {
@@ -181,6 +185,8 @@ export default function OrderBook(props: {
   }
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
+  let orderBookBuy = []
+  let orderBookSell = []
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
@@ -195,7 +201,7 @@ export default function OrderBook(props: {
         responseSell = rSell
       }
     }
-
+    console.log('responseBuy.length', responseBuy.length)
     if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
@@ -209,11 +215,13 @@ export default function OrderBook(props: {
       }
     }
 
-    const orderBookBuy = mapOrderData(responseBuy, option, optionTokenAddress)
+    orderBookBuy = mapOrderData(responseBuy, option, optionTokenAddress)
+    console.log('orderBookBuy', orderBookBuy)
     orders.push(orderBookBuy)
 
-    const orderBookSell = mapOrderData(responseSell, option, optionTokenAddress)
+    orderBookSell = mapOrderData(responseSell, option, optionTokenAddress)
     orders.push(orderBookSell)
+    console.log('orderBookSell', orderBookSell)
 
     //put both buy & sell orders in one array to format table rows
     const completeOrderBook = createTable(
