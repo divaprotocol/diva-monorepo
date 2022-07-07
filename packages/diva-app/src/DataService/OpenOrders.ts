@@ -14,6 +14,7 @@ async function getFillableOrders(
   chainId,
   provider
 ) {
+  console.log('orders', orders)
   // Connect to BalanceChecker contract which implements a function (called allowances)
   // to obtain multiple allowances with one single call
   const contract = new ethers.Contract(
@@ -124,7 +125,7 @@ export const get0xOpenOrders = async (
     takerToken
   const url = urlPrefix + `&page=1&perPage=${perPage}`
 
-  const res = axios
+  const res = await axios
     .get(url)
     .then(async function (response) {
       let orders: any[] = []
