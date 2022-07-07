@@ -67,9 +67,6 @@ function stableSort(array: any, comparator: (a: string, b: string) => number) {
  * TODO: Add purpose of function ...
  */
 function mapOrderData(records: [], option: Pool, optionTokenAddress: string) {
-  let orderBy: string
-  const sortedRecords: any = []
-
   // Get orderbook (before filtering out 0 quantities)
   const orderbookTemp: any = records.map((record: any) => {
     const order = record.order
@@ -140,31 +137,12 @@ function mapOrderData(records: [], option: Pool, optionTokenAddress: string) {
   return orderbook
 }
 
-function getTableLength(buyOrdersCount: number, sellOrdersCount: number) {
-  if (buyOrdersCount === 0 && sellOrdersCount === 0) {
-    return 0
-  }
-  if (buyOrdersCount === 0) {
-    return sellOrdersCount
-  }
-  if (sellOrdersCount === 0) {
-    return buyOrdersCount
-  }
-  if (buyOrdersCount > 0 && sellOrdersCount > 0) {
-    if (buyOrdersCount > sellOrdersCount) {
-      return buyOrdersCount
-    } else {
-      //This else will also satisfy the condition of both counts being equal
-      return sellOrdersCount
-    }
-  }
-  return 0
-}
-
 function createTable(buyOrders: any, sellOrders: any) {
   const buyOrdersCount = buyOrders !== 'undefined' ? buyOrders.length : 0
   const sellOrdersCount = sellOrders !== 'undefined' ? sellOrders.length : 0
-  const tableLength = getTableLength(buyOrdersCount, sellOrdersCount)
+  const tableLength =
+    buyOrdersCount >= sellOrdersCount ? buyOrdersCount : sellOrdersCount
+
   const table: any = []
   if (tableLength === 0) {
     return table
