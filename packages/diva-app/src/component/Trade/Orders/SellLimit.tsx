@@ -35,7 +35,6 @@ import {
   setMaxYield,
   setMaxPayout,
 } from '../../../Redux/Stats'
-import { tradingFee } from '../../../constants'
 import {
   calcPayoffPerToken,
   calcBreakEven,

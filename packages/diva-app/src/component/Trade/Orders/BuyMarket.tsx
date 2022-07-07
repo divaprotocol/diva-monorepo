@@ -18,7 +18,7 @@ import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { formatUnits, parseUnits, stripZeros } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
@@ -388,8 +388,6 @@ export default function BuyMarket(props: {
   }, [responseSell, responseBuy, userAddress])
 
   useEffect(() => {
-    console.log('numberOfOptions', numberOfOptions.toString())
-
     // Calculate average price
     if (numberOfOptions.gt(0) && existingSellLimitOrders.length > 0) {
       // If user has entered an input into the Number field and there are existing Sell Limit orders to fill in the orderbook...

@@ -326,7 +326,6 @@ export default function SellMarket(props: {
 
     if (orders.length > 0) {
       const bestRate = orders[0].expectedRate
-      console.log('bestRate', bestRate.toString())
       setAvgExpectedRate(bestRate)
     }
 

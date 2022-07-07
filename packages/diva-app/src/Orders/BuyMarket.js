@@ -81,10 +81,10 @@ export const buyMarketOrder = async (orderData) => {
           .div(expectedRate.mul(scaling)) // divide by expectedRate which has collateral token decimals and hence needs to be scaled up to 18 decimals
       }
       takerAssetFillAmounts.push(takerAssetFillAmount)
-      console.log('nbrOptionsFilled', nbrOptionsFilled.toString())
       nbrOptionsToBuy = nbrOptionsToBuy.sub(nbrOptionsFilled) // When nbrOptionsToBuy turns zero, it will not add any new orders to fillOrders array
     }
   })
+  console.log('fillOrders', fillOrders)
   console.log('takerAssetFillAmounts', takerAssetFillAmounts)
   filledOrder = await fillOrderResponse(takerAssetFillAmounts, fillOrders)
   return filledOrder
