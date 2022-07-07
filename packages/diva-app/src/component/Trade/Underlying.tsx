@@ -17,6 +17,7 @@ import { Liquidity } from '../Liquidity/Liquidity'
 import OrdersPanel from './OrdersPanel'
 import Typography from '@mui/material/Typography'
 import { useAppSelector } from '../../Redux/hooks'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 import { useDispatch } from 'react-redux'
@@ -71,6 +72,8 @@ export default function Underlying() {
   const isBuy = useAppSelector((state) => selectIsBuy(state))
   const breakEvenOptionPrice = 0
   const chainId = useAppSelector(selectChainId)
+  const { provider } = useConnectionContext()
+
   const chainContractAddress =
     contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxy = chainContractAddress.exchangeProxy
@@ -196,6 +199,7 @@ export default function Underlying() {
                     tokenAddress={tokenAddress}
                     exchangeProxy={exchangeProxy}
                     chainId={chainId}
+                    provider={provider}
                   />
                 </Paper>
                 <Paper>

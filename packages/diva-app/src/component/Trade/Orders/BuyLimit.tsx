@@ -56,6 +56,7 @@ export default function BuyLimit(props: {
   exchangeProxy: string
   chainId: number
   usdPrice: string
+  provider: any
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
 
@@ -320,7 +321,9 @@ export default function BuyLimit(props: {
       const rBuy: any = await get0xOpenOrders(
         makerToken,
         takerToken,
-        props.chainId
+        props.chainId,
+        props.provider,
+        props.exchangeProxy
       )
       responseBuy = rBuy
     }

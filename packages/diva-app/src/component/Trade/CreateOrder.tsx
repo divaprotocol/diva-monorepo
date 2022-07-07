@@ -74,6 +74,7 @@ export default function CreateOrder(props: {
   tokenAddress: string
   exchangeProxy: string
   chainId: number
+  provider: any
 }) {
   //const op = useSelector((state) => state.tradeOption.option)
   const option = props.option
@@ -104,12 +105,16 @@ export default function CreateOrder(props: {
     responseSell = await get0xOpenOrders(
       props.tokenAddress,
       option.collateralToken.id,
-      props.chainId
+      props.chainId,
+      props.provider,
+      props.exchangeProxy
     )
     responseBuy = await get0xOpenOrders(
       option.collateralToken.id,
       props.tokenAddress,
-      props.chainId
+      props.chainId,
+      props.provider,
+      props.exchangeProxy
     )
     if (responseSell.length > 0) {
       dispatch(setResponseSell(responseSell))
@@ -141,6 +146,7 @@ export default function CreateOrder(props: {
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
           usdPrice={usdPrice}
+          provider={props.provider}
         />
       )
     }
@@ -154,6 +160,7 @@ export default function CreateOrder(props: {
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
           usdPrice={usdPrice}
+          provider={props.provider}
         />
       )
     }
@@ -167,6 +174,7 @@ export default function CreateOrder(props: {
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
           usdPrice={usdPrice}
+          provider={props.provider}
         />
       )
     }
@@ -180,6 +188,7 @@ export default function CreateOrder(props: {
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
           usdPrice={usdPrice}
+          provider={props.provider}
         />
       )
     }

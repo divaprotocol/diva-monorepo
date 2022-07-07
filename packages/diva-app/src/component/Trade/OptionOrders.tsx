@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAppSelector } from '../../Redux/hooks'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
@@ -113,6 +114,7 @@ export default function OpenOrders(props: {
   const dispatch = useDispatch()
   const [orders, setOrders] = useState([])
   const chainId = useAppSelector(selectChainId)
+  const { provider } = useConnectionContext()
   const address = useAppSelector(selectUserAddress)
 
   const componentDidMount = async () => {
@@ -121,7 +123,9 @@ export default function OpenOrders(props: {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
         option.collateralToken.id,
-        chainId
+        chainId,
+        provider,
+        props.exchangeProxy
       )
       if (rSell.length > 0) {
         responseSell = rSell
@@ -133,7 +137,9 @@ export default function OpenOrders(props: {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
         optionTokenAddress,
-        chainId
+        chainId,
+        provider,
+        props.exchangeProxy
       )
       if (rBuy.length > 0) {
         responseBuy = rBuy

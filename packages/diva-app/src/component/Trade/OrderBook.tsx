@@ -63,109 +63,113 @@ function stableSort(array: any, comparator: (a: string, b: string) => number) {
   return stabilizedThis.map((el: any) => el[0])
 }
 
+// /**
+//  * Filter for orders that can actually be filled, i.e. where makers
+//  * have sufficient allowances
+//  */
+// async function getFillableOrders(
+//   orders,
+//   chainId,
+//   provider,
+//   tokenAddress,
+//   exchangeProxy,
+//   ordersType
+// ) {
+//   // Connect to BalanceChecker contract which implements a function (called allowances)
+//   // to obtain multiple allowances with one single call
+//   const contract = new ethers.Contract(
+//     config[chainId].balanceCheckAddress,
+//     BalanceCheckerABI,
+//     provider
+//   )
+//   console.log('orders[0]', orders[0])
+//   console.log('orders[1]', orders[1])
+//   // takerAmount: 100000000000000000 // 0.1 positionTokens
+//   // makerAmount: 80000000000000000000 // 80 dUSD
+//   // -> price: 800 dUSD / position token
+//   // remainingFillableTakerAmount: 1
+//   // -> remainigFillableMakerAmount = 800
+//   // makerToken allowance: 30 instead of 800
+
+//   // Get all maker addresses from orders array
+//   let makers: string[] = orders.map((data) => {
+//     return data.order.maker
+//   })
+//   // Get iteratable set of maker addresses excluding duplicates
+//   makers = [...new Set(makers)]
+//   console.log('makers ', makers)
+//   const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
+
+//   // Prepare token address input for allowances function (array of same length as maker addresses array
+//   // populated with the position token address)
+//   const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
+
+//   // TODO: query in batches of max 400
+//   // Get allowances
+//   const res = await contract.allowances(makers, addresses, tokens)
+//   const makerAllowances: {
+//     [address: string]: string
+//   } = {}
+
+//   // Map allowances to maker address
+//   makers.forEach((maker, index) => {
+//     if (makerAllowances[maker] == null) {
+//       // if condition ensures that we don't have duplicates
+//       makerAllowances[maker] = res[index].toString()
+//     }
+//   })
+
+//   // Initialize array that will hold the filtered order objects
+//   const filteredOrders = []
+
+//   orders.forEach((order) => {
+//     // Convert order object into a Javascript object
+//     const extendedOrder = JSON.parse(JSON.stringify(order))
+//     if (ordersType == 'Buy') {
+//       // QUESTION: Why is orderType needed? It's implied by the token that is passed as an argument into that function
+//       // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
+//       const remainingFillableMakerAmount = BigNumber.from(
+//         order.order.makerAmount
+//       )
+//         .mul(BigNumber.from(order.metaData.remainingFillableTakerAmount))
+//         .div(order.order.takerAmount)
+
+//       // Get maker allowance and include it as a new field in order metaData
+//       // Note that remainingMakerAllowance is the full makerAllowance for the first (best) order
+//       // and then decreases for the following orders as the remainingFillableMakerAmount gets deducted
+//       const remainingMakerAllowance = BigNumber.from(
+//         makerAllowances[extendedOrder.order.maker]
+//       )
+//       extendedOrder.metaData.remainingMakerAllowance =
+//         remainingMakerAllowance.toString()
+
+//       if (remainingMakerAllowance.gt(0)) {
+//         // remainingFillableMakerAmount is the minimum of remainingMakerAllowance and remainingFillableMakerAmount implied by remainingFillableTakerAmount
+//         extendedOrder.metaData.remainingFillableMakerAmount =
+//           remainingFillableMakerAmount.lte(remainingMakerAllowance)
+//             ? remainingFillableMakerAmount.toString()
+//             : remainingMakerAllowance.toString()
+
+//         // Add to fillable orders
+//         filteredOrders.push(extendedOrder)
+//         // Update the makerAllowances mapping to reflect the remainingAllowance after
+//         // deducting remainingFillableMakerAmount
+//         makerAllowances[order.order.maker] = remainingMakerAllowance
+//           .sub(remainingFillableMakerAmount)
+//           .toString()
+//       }
+//     } else {
+//       //Sell Orders
+//       console.log('Sell orders') // QUESTION Why that here?
+//     }
+//   })
+//   console.log('filteredOrders', filteredOrders)
+//   return filteredOrders
+// }
+
 /**
- * Filter for orders that can actually be filled, i.e. where makers
- * have sufficient allowances
+ * Purpose of function ...
  */
-async function getFillableOrders(
-  orders,
-  chainId,
-  provider,
-  tokenAddress,
-  exchangeProxy,
-  ordersType
-) {
-  // Connect to BalanceChecker contract which implements a function (called allowances)
-  // to obtain multiple allowances with one single call
-  const contract = new ethers.Contract(
-    config[chainId].balanceCheckAddress,
-    BalanceCheckerABI,
-    provider
-  )
-
-  // takerAmount: 100000000000000000 // 0.1 positionTokens
-  // makerAmount: 80000000000000000000 // 80 dUSD
-  // -> price: 800 dUSD / position token
-  // remainingFillableTakerAmount: 1
-  // -> remainigFillableMakerAmount = 800
-  // makerToken allowance: 30 instead of 800
-
-  // Get all maker addresses from orders array
-  let makers: string[] = orders.map((data) => {
-    return data.order.maker
-  })
-  // Get iteratable set of maker addresses excluding duplicates
-  makers = [...new Set(makers)]
-  console.log('makers ', makers)
-  const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
-
-  // Prepare token address input for allowances function (array of same length as maker addresses array
-  // populated with the position token address)
-  const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
-
-  // TODO: query in batches of max 400
-  // Get allowances
-  const res = await contract.allowances(makers, addresses, tokens)
-  const makerAllowances: {
-    [address: string]: string
-  } = {}
-
-  // Map allowances to maker address
-  makers.forEach((maker, index) => {
-    if (makerAllowances[maker] == null) {
-      // if condition ensures that we don't have duplicates
-      makerAllowances[maker] = res[index].toString()
-    }
-  })
-
-  // Initialize array that will hold the filtered order objects
-  const filteredOrders = []
-
-  orders.forEach((order) => {
-    // Convert order object into a Javascript object
-    const extendedOrder = JSON.parse(JSON.stringify(order))
-    if (ordersType == 'Buy') {
-      // QUESTION: Why is orderType needed? It's implied by the token that is passed as an argument into that function
-      // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
-      const remainingFillableMakerAmount = BigNumber.from(
-        order.order.makerAmount
-      )
-        .mul(BigNumber.from(order.metaData.remainingFillableTakerAmount))
-        .div(order.order.takerAmount)
-
-      // Get maker allowance and include it as a new field in order metaData
-      // Note that remainingMakerAllowance is the full makerAllowance for the first (best) order
-      // and then decreases for the following orders as the remainingFillableMakerAmount gets deducted
-      const remainingMakerAllowance = BigNumber.from(
-        makerAllowances[extendedOrder.order.maker]
-      )
-      extendedOrder.metaData.remainingMakerAllowance =
-        remainingMakerAllowance.toString()
-
-      if (remainingMakerAllowance.gt(0)) {
-        // remainingFillableMakerAmount is the minimum of remainingMakerAllowance and remainingFillableMakerAmount implied by remainingFillableTakerAmount
-        extendedOrder.metaData.remainingFillableMakerAmount =
-          remainingFillableMakerAmount.lte(remainingMakerAllowance)
-            ? remainingFillableMakerAmount.toString()
-            : remainingMakerAllowance.toString()
-
-        // Add to fillable orders
-        filteredOrders.push(extendedOrder)
-        // Update the makerAllowances mapping to reflect the remainingAllowance after
-        // deducting remainingFillableMakerAmount
-        makerAllowances[order.order.maker] = remainingMakerAllowance
-          .sub(remainingFillableMakerAmount)
-          .toString()
-      }
-    } else {
-      //Sell Orders
-      console.log('Sell orders') // QUESTION Why that here?
-    }
-  })
-  console.log('filteredOrders', filteredOrders)
-  return filteredOrders
-}
-
 function mapOrderData(
   records: [],
   option: Pool,
@@ -176,13 +180,14 @@ function mapOrderData(
   let sortedRecords: any = []
   const orderbookTemp: any = records.map((record: any) => {
     const order = record.order
-
     const metaData = record.metaData
+
     const makerToken = order.makerToken
     const takerToken = order.takerToken
     const collateralToken = option.collateralToken.id.toLowerCase()
     const tokenAddress = optionTokenAddress.toLowerCase()
     const orders: any = {}
+
     // Buy Limit
     if (makerToken === collateralToken && takerToken === tokenAddress) {
       const takerAmount = formatUnits(order.takerAmount)
@@ -196,6 +201,7 @@ function mapOrderData(
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
+      // TODO change those Number operations to BigNumber
       const bidAmount = Number(makerAmount) / Number(takerAmount)
       orders.bid = bidAmount
       if (Number(remainingTakerAmount) < Number(takerAmount)) {
@@ -238,6 +244,7 @@ function mapOrderData(
     return object.nbrOptions !== 0
   })
 
+  // TODO: Drop that part as orders received from 0x api are now sorted
   if (sortOrder === 'ascOrder') {
     orderBy = 'ask'
     const comparator = getComparator(sortOrder, orderBy)
@@ -320,7 +327,9 @@ export default function OrderBook(props: {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
         option.collateralToken.id,
-        chainId
+        chainId,
+        provider,
+        props.exchangeProxy
       )
       if (rSell.length > 0) {
         responseSell = rSell
@@ -331,7 +340,9 @@ export default function OrderBook(props: {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
         optionTokenAddress,
-        chainId
+        chainId,
+        provider,
+        props.exchangeProxy
       )
       if (rBuy.length > 0) {
         responseBuy = rBuy
@@ -347,15 +358,28 @@ export default function OrderBook(props: {
     //)
     //console.log('fillable sell orders ' + JSON.stringify(fillableSellOrders))
 
-    const fillableBuyOrders = await getFillableOrders(
-      responseBuy,
-      chainId,
-      provider,
-      option.collateralToken.id,
-      props.exchangeProxy,
-      'Buy'
-    )
-    console.log('fillable buy orders ' + JSON.stringify(fillableBuyOrders))
+    // const fillableBuyOrders = await getFillableOrders(
+    //   responseBuy,
+    //   chainId,
+    //   provider,
+    //   option.collateralToken.id,
+    //   props.exchangeProxy,
+    //   'Buy'
+    // )
+    // // console.log('fillable buy orders ' + JSON.stringify(fillableBuyOrders))
+
+    // // Start: For TESTING purposes ***
+    // const x = fillableBuyOrders.map((obj) => {
+    //   if (obj.order.maker === '0x3a93a61f2432eae1f4b643ccdfefcd37eef58d26') {
+    //     obj.order.maker
+    //     return obj
+    //   }
+    // })
+    // const y = fillableBuyOrders.filter(
+    //   (obj) => obj.order.maker === '0x3a93a61f2432eae1f4b643ccdfefcd37eef58d26'
+    // )
+    // console.log('y', y)
+    // // End: For TESTING purposes ***
 
     const orderBookBuy = mapOrderData(
       responseBuy,

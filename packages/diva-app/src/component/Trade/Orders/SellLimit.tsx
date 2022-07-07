@@ -53,6 +53,7 @@ export default function SellLimit(props: {
   exchangeProxy: string
   chainId: number
   usdPrice: string
+  provider: any
 }) {
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
 
@@ -350,7 +351,9 @@ export default function SellLimit(props: {
       const rSell: any = await get0xOpenOrders(
         makerToken,
         takerToken,
-        props.chainId
+        props.chainId,
+        props.provider,
+        props.exchangeProxy
       )
       responseSell = rSell
     }

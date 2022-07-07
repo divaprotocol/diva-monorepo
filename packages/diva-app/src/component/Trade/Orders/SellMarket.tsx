@@ -53,6 +53,7 @@ export default function SellMarket(props: {
   exchangeProxy: string
   chainId: number
   usdPrice: string
+  provider: any
 }) {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
@@ -347,7 +348,9 @@ export default function SellMarket(props: {
       const rSell: any = await get0xOpenOrders(
         takerToken,
         makerToken,
-        props.chainId
+        props.chainId,
+        props.provider,
+        props.exchangeProxy
       )
       responseSell = rSell
     }

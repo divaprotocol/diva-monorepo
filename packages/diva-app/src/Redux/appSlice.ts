@@ -85,12 +85,16 @@ export const fetchOrders = createAsyncThunk(
     const sellOrders: any = await get0xOpenOrders(
       tokenAddress,
       pool.collateralToken.id,
-      Number(config[state.appSlice.chainId])
+      Number(config[state.appSlice.chainId]),
+      provider,
+      exchangeProxy
     )
     const buyOrders: any = await get0xOpenOrders(
       pool.collateralToken.id,
       tokenAddress,
-      Number(config[state.appSlice.chainId])
+      Number(config[state.appSlice.chainId]),
+      provider,
+      exchangeProxy
     )
 
     return {
