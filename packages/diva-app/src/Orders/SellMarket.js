@@ -60,8 +60,6 @@ export const sellMarketOrder = async (orderData) => {
       nbrOptionsToSell = nbrOptionsToSell.sub(takerAssetFillAmount)
     }
   })
-  console.log('fillOrders', fillOrders)
-  console.log('takerAssetFillAmounts', takerAssetFillAmounts)
   filledOrder = await fillOrderResponse(takerAssetFillAmounts, fillOrders)
   return filledOrder
 }

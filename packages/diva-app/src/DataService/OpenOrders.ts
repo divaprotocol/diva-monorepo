@@ -6,6 +6,15 @@ import BalanceCheckerABI from '../abi/BalanceCheckerABI.json'
 /**
  * Filter for orders that can actually be filled, i.e. where makers
  * have sufficient allowances
+ * Example of an invalid order:
+ * - takerAmount: 100000000000000000 // 0.1 positionTokens
+ * - makerAmount: 80000000000000000000 // 80 dUSD
+ * - -> price: 800 dUSD / position token
+ * - remainingFillableTakerAmount: 1
+ * - -> remainigFillableMakerAmount = 800
+ * - makerToken allowance: 30 instead of 800
+ * - -> remainingFillableTakerAmount has to be reduced to 30 * takerAmount / makerAmount
+ * - -> = 0 in this particular example which would result in this order being filtered out from the orders
  */
 async function getFillableOrders(
   orders,
@@ -14,7 +23,6 @@ async function getFillableOrders(
   chainId,
   provider
 ) {
-  console.log('orders', orders)
   // Connect to BalanceChecker contract which implements a function (called allowances)
   // to obtain multiple allowances with one single call
   const contract = new ethers.Contract(
@@ -22,14 +30,6 @@ async function getFillableOrders(
     BalanceCheckerABI,
     provider
   )
-  console.log('orders[0]', orders[0])
-  console.log('orders[1]', orders[1])
-  // takerAmount: 100000000000000000 // 0.1 positionTokens
-  // makerAmount: 80000000000000000000 // 80 dUSD
-  // -> price: 800 dUSD / position token
-  // remainingFillableTakerAmount: 1
-  // -> remainigFillableMakerAmount = 800
-  // makerToken allowance: 30 instead of 800
 
   // Get all maker addresses from orders array
   let makers: string[] = orders.map((data) => {
@@ -37,7 +37,6 @@ async function getFillableOrders(
   })
   // Get iteratable set of maker addresses excluding duplicates
   makers = [...new Set(makers)]
-  console.log('makers ', makers)
   const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
 
   // Prepare token address input for allowances function (array of same length as maker addresses array
@@ -65,13 +64,11 @@ async function getFillableOrders(
   orders.forEach((order) => {
     // Convert order object into a Javascript object
     const extendedOrder = JSON.parse(JSON.stringify(order))
-    console.log('extendedOrder', extendedOrder)
-    // QUESTION: Why is orderType needed? It's implied by the token that is passed as an argument into that function
-    // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
 
     const makerAmount = BigNumber.from(order.order.makerAmount)
     const takerAmount = BigNumber.from(order.order.takerAmount)
 
+    // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
     const remainingFillableMakerAmount = makerAmount
       .mul(BigNumber.from(order.metaData.remainingFillableTakerAmount))
       .div(takerAmount)
@@ -112,7 +109,7 @@ async function getFillableOrders(
         .toString()
     }
   })
-  console.log('filteredOrders', filteredOrders)
+
   return filteredOrders
 }
 

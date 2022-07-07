@@ -19,11 +19,6 @@ import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { formatUnits, parseUnits, stripZeros } from 'ethers/lib/utils'
-import {
-  getComparator,
-  stableSort,
-  convertExponentialToDecimal,
-} from './OrderHelper'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
@@ -313,15 +308,12 @@ export default function BuyMarket(props: {
       }
     })
 
-    const sortOrder = 'ascOrder'
-    const orderBy = 'expectedRate'
-    const sortedOrders = stableSort(orders, getComparator(sortOrder, orderBy))
-    if (sortedOrders.length > 0) {
-      const bestRate = sortedOrders[0].expectedRate
-      // TODO: Test whether bestRate is correct when multiple orders in the orderbook
+    if (orders.length > 0) {
+      const bestRate = orders[0].expectedRate
       setAvgExpectedRate(bestRate)
     }
-    return sortedOrders
+
+    return orders
   }
 
   // Check how many existing Buy Limit orders the user has outstanding in the orderbook.

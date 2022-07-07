@@ -24,16 +24,11 @@ import Web3 from 'web3'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
-import { totalDecimals, convertExponentialToDecimal } from './OrderHelper'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { BigNumber } from 'ethers'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import { useParams } from 'react-router-dom'
-import {
-  selectChainId,
-  selectUserAddress,
-  setUserAddress,
-} from '../../../Redux/appSlice'
+import { selectUserAddress } from '../../../Redux/appSlice'
 import {
   setBreakEven,
   setIntrinsicValue,
@@ -47,7 +42,6 @@ import {
 } from '../../../Util/calcPayoffPerToken'
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigNumber.from(0)
-const feeMultiplier = (1 + tradingFee).toString()
 
 export default function BuyLimit(props: {
   option: Pool

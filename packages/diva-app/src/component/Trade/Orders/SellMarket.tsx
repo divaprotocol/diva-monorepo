@@ -19,11 +19,6 @@ import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
-import {
-  getComparator,
-  stableSort,
-  convertExponentialToDecimal,
-} from './OrderHelper'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { FormLabel, Stack, Tooltip } from '@mui/material'
@@ -312,8 +307,7 @@ export default function SellMarket(props: {
     const orders: any = []
     responseBuy.forEach((data: any) => {
       const order = JSON.parse(JSON.stringify(data.order))
-      const metaData = JSON.parse(JSON.stringify(data.metaData))
-      console.log('metaData', metaData)
+
       const takerAmount = BigNumber.from(order.takerAmount) // position token (18 decimals)
       const makerAmount = BigNumber.from(order.makerAmount) // collateral token (<= 18 decimals)
 
@@ -330,19 +324,13 @@ export default function SellMarket(props: {
       }
     })
 
-    // const sortOrder = 'desOrder'
-    // const orderBy = 'expectedRate'
-    console.log('orders before stableSort', orders)
-    const sortedOrders = orders // stableSort(orders, getComparator(sortOrder, orderBy))
-    console.log('sortedOrders.length', sortedOrders.length)
-    if (sortedOrders.length > 0) {
-      const bestRate = sortedOrders[0].expectedRate
+    if (orders.length > 0) {
+      const bestRate = orders[0].expectedRate
       console.log('bestRate', bestRate.toString())
-      // TODO: Test whether bestRate is correct when multiple orders in the orderbook
       setAvgExpectedRate(bestRate)
     }
-    console.log('sortedOrders', sortedOrders)
-    return sortedOrders
+
+    return orders
   }
 
   // Check how many existing Sell Limit orders the user has outstanding in the orderbook.
