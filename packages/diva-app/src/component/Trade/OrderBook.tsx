@@ -141,6 +141,7 @@ function mapOrderData(
   })
 
   // TODO: Drop that part as orders received from 0x api are now sorted
+  // QUESTION Can we drop?
   if (sortOrder === 'ascOrder') {
     orderBy = 'ask'
     const comparator = getComparator(sortOrder, orderBy)
