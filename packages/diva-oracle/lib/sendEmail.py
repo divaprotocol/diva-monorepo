@@ -1,5 +1,5 @@
 import smtplib, ssl
-import config
+import config.config as config
 
 
 def sendEmail(message, receiver_email="divapoolmail@gmail.com", port=465):

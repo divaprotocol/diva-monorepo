@@ -1,14 +1,14 @@
 import datetime as dt
-from Prices import getKrakenPrice
-from QueryGraph import *
-from SendPrice import sendPrice
-import config
+from lib.Prices import getKrakenPrice
+from lib.QueryGraph import *
+from lib.SendPrice import sendPrice
+import config.config as config
 import threading
 from web3 import Web3
 import time
-import diva
-from sendEmail import sendEmail
-from recorder import update_records
+import lib.diva as diva
+from lib.sendEmail import sendEmail
+from lib.recorder import update_records
 
 query = """
         { 

@@ -1,7 +1,8 @@
 FROM python:3.8
 
 # copy all contents into the Docker file
-COPY . .
+WORKDIR /app
+COPY . /app
 
 RUN pip3 install poetry
 
