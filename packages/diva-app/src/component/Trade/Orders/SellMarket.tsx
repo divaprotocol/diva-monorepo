@@ -99,19 +99,22 @@ export default function SellMarket(props: {
 
   const approve = async (amount) => {
     try {
-      await takerTokenContract.methods
+      const approveResponse = await takerTokenContract.methods
         .approve(exchangeProxy, amount)
         .send({ from: userAddress })
+      if ('events' in approveResponse) {
+        // Check allowance amount in events to avoid another contract call
+        return approveResponse.events.Approval.returnValues.value
+      } else {
+        // In case the approve call does not or delay emit events, read the allowance again
+        await new Promise((resolve) => setTimeout(resolve, 4000))
 
-      // QUESTION: Why is this part needed?
-      // In case the approve call does not or delay emit events, read the allowance again
-      await new Promise((resolve) => setTimeout(resolve, 4000))
-
-      // Set allowance for position token (18 decimals)
-      const allowance = await takerTokenContract.methods
-        .allowance(userAddress, exchangeProxy)
-        .call()
-      return allowance
+        // Set allowance for collateral token (<= 18 decimals)
+        const allowance = await takerTokenContract.methods
+          .allowance(userAddress, exchangeProxy)
+          .call()
+        return allowance
+      }
     } catch (error) {
       // If rejected by user in Metamask pop-up
       console.error('error ' + JSON.stringify(error))

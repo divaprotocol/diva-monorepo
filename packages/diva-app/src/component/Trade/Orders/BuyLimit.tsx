@@ -158,19 +158,22 @@ export default function BuyLimit(props: {
 
   const approve = async (amount) => {
     try {
-      await makerTokenContract.methods
+      const approveResponse = await makerTokenContract.methods
         .approve(exchangeProxy, amount)
         .send({ from: userAddress })
+      if ('events' in approveResponse) {
+        // Check allowance amount in events to avoid another contract call
+        return approveResponse.events.Approval.returnValues.value
+      } else {
+        // In case the approve call does not or delay emit events, read the allowance again
+        await new Promise((resolve) => setTimeout(resolve, 4000))
 
-      // QUESTION: Why is this part needed?
-      // In case the approve call does not or delay emit events, read the allowance again
-      await new Promise((resolve) => setTimeout(resolve, 4000))
-
-      // Set allowance for collateral token (<= 18 decimals)
-      const allowance = await makerTokenContract.methods
-        .allowance(userAddress, exchangeProxy)
-        .call()
-      return allowance
+        // Set allowance for collateral token (<= 18 decimals)
+        const allowance = await makerTokenContract.methods
+          .allowance(userAddress, exchangeProxy)
+          .call()
+        return allowance
+      }
     } catch (error) {
       // If rejected by user in Metamask pop-up
       console.error('error ' + JSON.stringify(error))
