@@ -15,6 +15,7 @@ import {
   FormControlLabel,
   Radio,
   Container,
+  Card,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 
@@ -550,24 +551,6 @@ export function DefinePoolAttributes({
                   </FormControl>
                 </Box>
               )}
-
-              {/*{floor != null &&*/}
-              {/*  cap != null &&*/}
-              {/*  inflection != null &&*/}
-              {/*  tokenSupply != null &&*/}
-              {/*  tokenSupply > 0 && (*/}
-              {/*    <Box width="50%">*/}
-              {/*      <PayoffProfile*/}
-              {/*        floor={floor}*/}
-              {/*        cap={cap}*/}
-              {/*        inflection={inflection}*/}
-              {/*        hasError={hasPaymentProfileError}*/}
-              {/*        collateralBalanceLong={collateralBalanceLong}*/}
-              {/*        collateralBalanceShort={collateralBalanceShort}*/}
-              {/*        tokenSupply={tokenSupply}*/}
-              {/*      />*/}
-              {/*    </Box>*/}
-              {/*  )}*/}
             </Stack>
           </Container>
         </Box>
@@ -594,38 +577,53 @@ export function DefinePoolAttributes({
                 />
               </Box>
             )}
-          <Box maxWidth="xs">
-            <Typography pb={theme.spacing(2)} variant="subtitle1">
-              Payoff Scenarios
-            </Typography>
-            <Typography
-              fontSize={'0.85rem'}
-              sx={{ mt: theme.spacing(2) }}
-              style={{ color: 'gray' }}
-            >
-              <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is at
-              or below 100 on 31/12/2022 (08:12am CET), the payout will be 0.0
-              WAGM18 per long and 1.0 WAGMI18 per short position token
-            </Typography>
-            <Typography
-              fontSize={'0.85rem'}
-              sx={{ mt: theme.spacing(2) }}
-              style={{ color: 'gray' }}
-            >
-              <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is at
-              or above 300 on 31/12/2022 (08:12am CET), the payout will be 1.0
-              WAGM18 per long and 0.0 WAGMI18 per short position token
-            </Typography>
-            <Typography
-              fontSize={'0.85rem'}
-              sx={{ mt: theme.spacing(2) }}
-              style={{ color: 'gray' }}
-            >
-              <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is at
-              200 on 31/12/2022 (08:12am CET), the payout will be 0.5 WAGM18 per
-              long and 0.0 WAGMI18 per short position token
-            </Typography>
-          </Box>
+          <Card
+            style={{
+              maxWidth: theme.spacing(60),
+              border: '1px solid #1B3448',
+              // border-radius: '5px',
+              background:
+                'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
+            }}
+          >
+            <Container>
+              <Typography
+                pb={theme.spacing(1)}
+                pt={theme.spacing(1)}
+                variant="subtitle1"
+              >
+                Payoff Scenarios
+              </Typography>
+              <Typography
+                fontSize={'0.85rem'}
+                sx={{ mt: theme.spacing(2) }}
+                style={{ color: 'gray' }}
+              >
+                <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
+                at or below {floor} on 31/12/2022 (08:12am CET), the payout will
+                be 0.0 WAGM18 per long and 1.0 WAGMI18 per short position token
+              </Typography>
+              <Typography
+                fontSize={'0.85rem'}
+                sx={{ mt: theme.spacing(2) }}
+                style={{ color: 'gray' }}
+              >
+                <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
+                at or above {cap} on 31/12/2022 (08:12am CET), the payout will
+                be 1.0 WAGM18 per long and 0.0 WAGMI18 per short position token
+              </Typography>
+              <Typography
+                fontSize={'0.85rem'}
+                sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                style={{ color: 'gray' }}
+              >
+                <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
+                at
+                {' ' + inflection} on 31/12/2022 (08:12am CET), the payout will
+                be 0.5 WAGM18 per long and 0.5 WAGMI18 per short position token
+              </Typography>
+            </Container>
+          </Card>
         </Stack>
       </Container>
     </Stack>
