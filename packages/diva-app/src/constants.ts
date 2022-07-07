@@ -2,6 +2,7 @@ type SingleConfig = {
   name: string
   divaAddress: string
   balanceCheckAddress: string
+  exchangeProxy: string
   whitelistAddress: string
   divaSubgraph: string
   whitelistSubgraph: string
@@ -28,6 +29,7 @@ export const config: { [key: number]: SingleConfig } = {
     name: 'Ropsten',
     divaAddress: '0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211',
     balanceCheckAddress: '0xD713aeC2156709A6AF392bb84018ACc6b44f1885',
+    exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
