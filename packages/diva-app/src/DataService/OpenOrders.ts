@@ -43,9 +43,38 @@ async function getFillableOrders(
   // populated with the position token address)
   const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
 
-  // TODO: query in batches of max 400
+  // As allowances function (see below) does not allow query more than 400-500 entries at once
+  // cut the makers address array into batches of 400
+  const makersChunks = makers.reduce((resultArray, item, index) => {
+    const batchIndex = Math.floor(index / 4)
+    if (!resultArray[batchIndex]) {
+      resultArray[batchIndex] = []
+    }
+    resultArray[batchIndex].push(item)
+    return resultArray
+  }, [])
+
   // Get allowances
-  const res = await contract.allowances(makers, addresses, tokens)
+  // const res = await contract.allowances(makers, addresses, tokens)
+
+  const res = await Promise.all(
+    makersChunks.map(async (batch) => {
+      try {
+        const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
+        const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
+        const res = await contract.allowances(batch, addresses, tokens)
+        response = batch.reduce(
+          (obj, key, index) => ({ ...obj, [key]: res[index] }),
+          {}
+        )
+      } catch (error) {
+        console.error(error)
+      }
+    })
+  )
+
+
+
   const makerAllowances: {
     [address: string]: string
   } = {}

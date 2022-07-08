@@ -37,8 +37,7 @@ function mapOrderData(
     const metaData = record.metaData
     const orders: any = {}
 
-    // Buy Limit
-    // TODO This condition is no longer needed as we get that data already returned
+    // Buy Limit (orderType = 0)
     if (orderType === 0) {
       const takerAmount = formatUnits(order.takerAmount)
       const makerAmount = formatUnits(
@@ -51,18 +50,16 @@ function mapOrderData(
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
-      // TODO change those Number operations to BigNumber
-      const bidAmount = Number(makerAmount) / Number(takerAmount) // ok to have it that way as this is just for displaying information
+      const bidAmount = Number(makerAmount) / Number(takerAmount) // ok to have it that way as this is just for displaying information in the frontend and not for transactions
       orders.bid = bidAmount
       if (Number(remainingTakerAmount) < Number(takerAmount)) {
         const nbrOptions = Number(remainingTakerAmount)
         orders.nbrOptions = nbrOptions
       } else {
-        const nbrOptions = Number(takerAmount)
-        orders.nbrOptions = nbrOptions
+        orders.nbrOptions = Number(takerAmount)
       }
     }
-    // Sell Limit
+    // Sell Limit (orderType = 1)
     if (orderType === 1) {
       const takerAmount = formatUnits(
         order.takerAmount,
@@ -98,14 +95,11 @@ function mapOrderData(
 }
 
 function createTable(buyOrders: any, sellOrders: any) {
-  console.log('buyOrders', buyOrders.length === 0)
-  console.log('sellOrders', sellOrders.length === 0)
   // Get orderbook table length
   const buyOrdersCount = buyOrders !== 'undefined' ? buyOrders.length : 0
   const sellOrdersCount = sellOrders !== 'undefined' ? sellOrders.length : 0
   const tableLength =
     buyOrdersCount >= sellOrdersCount ? buyOrdersCount : sellOrdersCount
-  console.log('tableLength', tableLength)
 
   const table: any = []
   if (tableLength === 0) {
@@ -145,8 +139,6 @@ export default function OrderBook(props: {
   }
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
-  let orderBookBuy = []
-  let orderBookSell = []
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
@@ -161,7 +153,6 @@ export default function OrderBook(props: {
         responseSell = rSell
       }
     }
-    console.log('responseBuy.length', responseBuy.length)
     if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
@@ -175,20 +166,17 @@ export default function OrderBook(props: {
       }
     }
 
-    orderBookBuy = mapOrderData(responseBuy, option, OrderType.BUY)
-    console.log('orderBookBuy', orderBookBuy)
+    const orderBookBuy = mapOrderData(responseBuy, option, OrderType.BUY)
     orders.push(orderBookBuy)
 
-    orderBookSell = mapOrderData(responseSell, option, OrderType.SELL)
+    const orderBookSell = mapOrderData(responseSell, option, OrderType.SELL)
     orders.push(orderBookSell)
-    console.log('orderBookSell', orderBookSell)
 
     //put both buy & sell orders in one array to format table rows
     const completeOrderBook = createTable(
       orders[OrderType.BUY],
       orders[OrderType.SELL]
     )
-    console.log('completeOrderBook', completeOrderBook)
     setOrderBook(completeOrderBook)
   }
 
