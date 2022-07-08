@@ -6,6 +6,8 @@ import { LineSeries, XYPlot } from 'react-vis'
 import { Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
 import { makeStyles } from '@mui/styles'
+import { setResponseBuy, setResponseSell } from '../Redux/TradeOption'
+import { useDispatch } from 'react-redux'
 
 const useStyles = makeStyles({
   root: {
@@ -57,6 +59,7 @@ export default function PoolsTable({
         )
       : rows
 
+  const dispatch = useDispatch()
   const classes = useStyles()
 
   return (
@@ -105,6 +108,12 @@ export default function PoolsTable({
           disableRowClick
             ? undefined
             : (row) => {
+                // Invalidate cache responses before navigating to trades page.
+                // This ensures that the orderbook does not have empty rows included after switching from a market
+                // with non-empty orderbook rows
+                dispatch(setResponseSell([]))
+                dispatch(setResponseBuy([]))
+                history.push(`../../${row.id}`)
                 history.push(`../../${row.id}`)
               }
         }
