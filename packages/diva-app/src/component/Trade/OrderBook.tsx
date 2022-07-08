@@ -17,51 +17,11 @@ import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { selectChainId } from '../../Redux/appSlice'
-import { config } from '../../constants'
-import { BigNumber, ethers } from 'ethers'
-import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { resolveTxt } from 'dns'
 
 const PageDiv = styled.div`
   width: 100%;
 `
-function descendingComparator(a: [], b: [], orderBy: any) {
-  let comparator = 0
-  if (b[orderBy] < a[orderBy]) {
-    comparator = -1
-  }
-  if (b[orderBy] > a[orderBy]) {
-    comparator = 1
-  }
-  return comparator
-}
-
-function getComparator(
-  order: string,
-  orderBy: string
-): (a: string, b: string) => number {
-  if (order === 'ascOrder') {
-    return (a: any, b: any) => -descendingComparator(a, b, orderBy)
-  }
-  if (order === 'desOrder') {
-    return (a: any, b: any): number => descendingComparator(a, b, orderBy)
-  }
-  //this step will never reached however need it to silent typescript
-  return (a: any, b: any): number => descendingComparator(a, b, orderBy)
-}
-
-function stableSort(array: any, comparator: (a: string, b: string) => number) {
-  const stabilizedThis: any = array.map((el: any, index: number) => [el, index])
-  stabilizedThis.sort((a: any, b: any) => {
-    const order = comparator(a[0], b[0])
-    if (order !== 0) {
-      return order
-    }
-    return a[1] - b[1]
-  })
-  return stabilizedThis.map((el: any) => el[0])
-}
 
 /**
  * Prepare all data to be displayed in the orderbook (price, quantity and expires in)
