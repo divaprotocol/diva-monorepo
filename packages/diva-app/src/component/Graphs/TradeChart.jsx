@@ -90,13 +90,13 @@ export default function DIVATradeChart(props) {
       .attr('cx', 150)
       .attr('cy', h)
       .attr('r', 6)
-      .style('fill', '#1B394F')
+      .style('fill', '#83BD67')
     svg
       .append('circle')
       .attr('cx', 300)
       .attr('cy', h)
       .attr('r', 6)
-      .style('fill', '#4C0D46')
+      .style('fill', '#3393E0')
     svg
       .append('text')
       .attr('x', 20)
@@ -195,7 +195,7 @@ export default function DIVATradeChart(props) {
       .style('stroke', '#B8B8B8')
       .style('stroke-width', '0.75px')
     //for Y axis
-    // for cuurent price point
+    // for current price point
     svg
       .append('g')
       .selectAll('dot')
