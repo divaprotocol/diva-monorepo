@@ -69,8 +69,11 @@ export default function PoolsTable({
   onPageChange,
 }: Props) {
   const history = useHistory()
+  const currentAddress = history.location.pathname.split('/')
   const [search, setSearch] = useState('')
-  const [creatorButtonLabel, setCreatorButtonLabel] = useState('Creator')
+  const [creatorButtonLabel, setCreatorButtonLabel] = useState(
+    getShortenedAddress(currentAddress[2])
+  )
   const [underlyingLabel, setUnderlyingLabel] = useState('Underlying')
   const [creatorMenuValue, setCreatorMenuValue] = useState(null)
   const [underlyingValue, setUnderlyingValue] = useState(null)
@@ -137,7 +140,9 @@ export default function PoolsTable({
                 setCreatorMenuValue(e.currentTarget)
               }}
             >
-              {creatorButtonLabel}
+              {history.location.pathname === `/markets/`
+                ? 'Creator'
+                : creatorButtonLabel}
             </Button>
             <Menu
               id="creator-filter-menu"
@@ -147,7 +152,7 @@ export default function PoolsTable({
             >
               <MenuItem sx={{ width: '300px', height: '50px' }}>
                 <Input
-                  value={null}
+                  value={creatorAddress}
                   placeholder="Enter the address"
                   aria-label="Filter creator"
                   sx={{ width: '300px', height: '50px' }}
