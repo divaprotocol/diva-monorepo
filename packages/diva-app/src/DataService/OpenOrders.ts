@@ -23,6 +23,9 @@ async function getFillableOrders(
   chainId,
   provider
 ) {
+  // const allowances = useQuery<Response>(`allowances-${userAddress}`, async () => {
+
+  // }
   // Connect to BalanceChecker contract which implements a function (called allowances)
   // to obtain multiple allowances with one single call
   const contract = new ethers.Contract(
@@ -37,11 +40,12 @@ async function getFillableOrders(
   })
   // Get iteratable set of maker addresses excluding duplicates
   makers = [...new Set(makers)]
-  const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
+  // console.log('makers', makers)
+  // const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
 
   // Prepare token address input for allowances function (array of same length as maker addresses array
   // populated with the position token address)
-  const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
+  // const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
 
   // As allowances function (see below) does not allow query more than 400-500 entries at once
   // cut the makers address array into batches of 400
@@ -54,38 +58,56 @@ async function getFillableOrders(
     return resultArray
   }, [])
 
+  console.log('makers', makers)
+  // console.log('makersChunks', makersChunks)
+  // console.log('makersChunks[0]', makersChunks[0])
+  // console.log('makersChunks[1]', makersChunks[1])
+  // console.log('makersChunks[2]', makersChunks[2])
+
   // Get allowances
   // const res = await contract.allowances(makers, addresses, tokens)
-
+  // console.log('res', res)
   const res = await Promise.all(
     makersChunks.map(async (batch) => {
+      let response: any = {}
       try {
-        const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
-        const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
+        const addresses = Array.from({ length: batch.length }).fill(
+          exchangeProxy
+        )
+        const tokens = Array.from({ length: batch.length }).fill(tokenAddress)
         const res = await contract.allowances(batch, addresses, tokens)
         response = batch.reduce(
           (obj, key, index) => ({ ...obj, [key]: res[index] }),
           {}
         )
+        return response
       } catch (error) {
         console.error(error)
       }
     })
   )
-
-
+  console.log('res', res)
+  console.log(
+    'res[0x4d005eea5139a0c2f2b7469838994f61692c0dcb]',
+    res[0]['0x4d005eea5139a0c2f2b7469838994f61692c0dcb']
+  )
 
   const makerAllowances: {
     [address: string]: string
   } = {}
 
+  // const res2 = res.reduce((acc, val) => acc.concat(val), [])
+  const res2 = res.flat(1)
+  console.log('res2', res2)
+
   // Map allowances to maker address
   makers.forEach((maker, index) => {
     if (makerAllowances[maker] == null) {
       // if condition ensures that we don't have duplicates
-      makerAllowances[maker] = res[index].toString()
+      makerAllowances[maker] = res[index][maker].toString() // [maker]
     }
   })
+  console.log('makerAllowance', makerAllowances)
 
   // Initialize array that will hold the filtered order objects
   const filteredOrders = []
