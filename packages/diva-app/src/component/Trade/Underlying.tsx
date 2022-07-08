@@ -194,6 +194,8 @@ export default function Underlying() {
                   h={336}
                   isLong={OptionParams.IsLong}
                   breakEven={Number(breakEven).toFixed(2)}
+                  floor={OptionParams.Floor}
+                  cap={OptionParams.Cap}
                 />
                 <Paper>
                   <LeftCompFlexContainer>
