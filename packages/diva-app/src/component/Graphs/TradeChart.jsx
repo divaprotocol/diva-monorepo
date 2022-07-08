@@ -16,8 +16,18 @@ class DIVATradeChart extends Component {
   }
 
   componentDidMount() {
-    const { data, w, h, refAsset, payOut, isLong, breakEven, currentPrice } =
-      this.props
+    const {
+      data,
+      w,
+      h,
+      refAsset,
+      payOut,
+      isLong,
+      breakEven,
+      currentPrice,
+      floor,
+      cap,
+    } = this.props
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
     // Set the dimensions and margins of the graph
     // var margin = {top: 50, right: 20, bottom: 30, left: 50},
@@ -48,7 +58,7 @@ class DIVATradeChart extends Component {
       .attr('y', 15)
       .style('padding', 10)
       .style('text-align', 'left')
-      .style('fill', 'white')
+      .style('fill', '#A4A4A4')
       .text(' Payout per ' + optionTypeText + ' token (' + 'in ' + payOut + ')')
 
     // legends
@@ -57,23 +67,36 @@ class DIVATradeChart extends Component {
       .attr('cx', 5)
       .attr('cy', h)
       .attr('r', 6)
-      .style('fill', '#4C0D46')
+      .style('fill', '#F7931A')
     svg
       .append('circle')
-      .attr('cx', 180)
+      .attr('cx', 150)
       .attr('cy', h)
       .attr('r', 6)
       .style('fill', '#1B394F')
     svg
+      .append('circle')
+      .attr('cx', 300)
+      .attr('cy', h)
+      .attr('r', 6)
+      .style('fill', '#4C0D46')
+    svg
       .append('text')
       .attr('x', 20)
       .attr('y', h)
-      .text('Break even' + ' ' + '(' + breakEven + ')')
+      .text('Floor' + ' ' + '(' + floor + ')')
       .style('font-size', '15px')
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
-      .attr('x', 195)
+      .attr('x', 165)
+      .attr('y', h)
+      .text('Cap' + ' ' + '(' + cap + ')')
+      .style('font-size', '15px')
+      .attr('alignment-baseline', 'middle')
+    svg
+      .append('text')
+      .attr('x', 315)
       .attr('y', h)
       .text('Current price' + ' ' + '(' + currentPrice + ')')
       .style('font-size', '15px')
@@ -172,8 +195,8 @@ class DIVATradeChart extends Component {
         return y(0)
       })
       .attr('r', 5)
-      .style('fill', '#1B394F')
-    //for break-even point
+      .style('fill', '#3393E0')
+    //for floor point
     svg
       .append('g')
       .selectAll('dot')
@@ -181,7 +204,7 @@ class DIVATradeChart extends Component {
       .enter()
       .append('circle')
       .filter(function (d) {
-        return (d.x = breakEven)
+        return (d.x = floor)
       })
       .attr('cx', function (d) {
         return x(d.x)
@@ -190,7 +213,25 @@ class DIVATradeChart extends Component {
         return y(0)
       })
       .attr('r', 5)
-      .style('fill', '#4C0D46')
+      .style('fill', '#F7931A')
+    //for cap point
+    svg
+      .append('g')
+      .selectAll('dot')
+      .data(data)
+      .enter()
+      .append('circle')
+      .filter(function (d) {
+        return (d.x = cap)
+      })
+      .attr('cx', function (d) {
+        return x(d.x)
+      })
+      .attr('cy', function (d) {
+        return y(0)
+      })
+      .attr('r', 5)
+      .style('fill', '#83BD67')
 
     // Add mouseover effects
     const mouseG = svg
