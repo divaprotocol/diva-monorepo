@@ -96,6 +96,7 @@ export default function SellLimit(props: {
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseUnits(value)
+      console.log('nbrOptions', nbrOptions.toString())
       if (nbrOptions.gt(0)) {
         setNumberOfOptions(nbrOptions)
         if (isApproved === false) {
@@ -214,7 +215,7 @@ export default function SellLimit(props: {
           }
           alert(
             `Allowance for ${toExponentialOrNumber(
-              Number(formatUnits(collateralAllowance, decimals))
+              Number(formatUnits(collateralAllowance))
             )} ${params.tokenType.toUpperCase()} tokens successfully set.`
           )
         }
