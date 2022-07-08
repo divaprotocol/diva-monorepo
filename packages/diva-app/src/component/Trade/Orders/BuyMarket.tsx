@@ -479,7 +479,8 @@ export default function BuyMarket(props: {
             formatUnits(
               parseUnits(maxPayout, decimals)
                 .mul(collateralTokenUnit)
-                .div(avgExpectedRate)
+                .div(avgExpectedRate),
+              decimals
             )
           ).toFixed(2) + 'x'
         )

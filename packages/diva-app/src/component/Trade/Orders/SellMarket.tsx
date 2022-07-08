@@ -490,7 +490,8 @@ export default function SellMarket(props: {
             formatUnits(
               parseUnits(maxPayout, decimals)
                 .mul(collateralTokenUnit)
-                .div(avgExpectedRate)
+                .div(avgExpectedRate),
+              decimals
             )
           ).toFixed(2) + 'x'
         )
