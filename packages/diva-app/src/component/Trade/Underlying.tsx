@@ -186,6 +186,7 @@ export default function Underlying() {
                       option={pool}
                       tokenAddress={tokenAddress}
                       exchangeProxy={exchangeProxy}
+                      provider={provider}
                     />
                   </LeftCompFlexContainer>
                 </Paper>
