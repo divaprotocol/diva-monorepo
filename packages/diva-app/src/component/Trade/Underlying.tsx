@@ -64,7 +64,6 @@ export default function Underlying() {
       ? 'liquidity'
       : 'trade'
   const [value, setValue] = useState(currentTab)
-
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
   const maxYield = useAppSelector((state) => state.stats.maxYield)
@@ -73,12 +72,13 @@ export default function Underlying() {
   const breakEvenOptionPrice = 0
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
-
   const chainContractAddress =
     contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxy = chainContractAddress.exchangeProxy
   const theme = useTheme()
   const dispatch = useDispatch()
+
+  console.log('underlying provider ', provider)
   useEffect(() => {
     dispatch(
       fetchPool({

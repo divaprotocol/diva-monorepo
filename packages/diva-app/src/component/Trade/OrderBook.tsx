@@ -134,21 +134,19 @@ export default function OrderBook(props: {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const [orderBook, setOrderBook] = useState([] as any)
-  let provider = props.provider
+  const provider = props.provider
   const OrderType = {
     BUY: 0,
     SELL: 1,
   }
+  console.log('orderbook provider ', provider)
   const chainId = useAppSelector(selectChainId)
   //const { provider } = useConnectionContext()
   const componentDidMount = async () => {
     const orders = []
-    console.log('provider orderbook', provider)
-    if (provider == null) {
-      provider = await detectEthereumProvider()
-      console.log('eth provider ', provider)
-    }
     if (responseSell.length === 0) {
+      console.log('orderbook component ', provider)
+
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
         option.collateralToken.id,

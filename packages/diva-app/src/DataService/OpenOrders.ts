@@ -28,7 +28,7 @@ async function getFillableOrders(
     'config[chainId].balanceCheckAddress',
     config[chainId].balanceCheckAddress
   )
-  console.log('provider', provider)
+  console.log('provider-getFillableOrders', provider)
   // Connect to BalanceChecker contract which implements a function (called allowances)
   // to obtain multiple allowances with one single call
   const contract = new ethers.Contract(
