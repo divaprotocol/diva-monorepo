@@ -37,7 +37,6 @@ export default function OrdersPanel(props: {
   option: Pool
   tokenAddress: string
   exchangeProxy: string
-  provider: any
 }) {
   const [orderType, setOrderTypeValue] = React.useState(0)
   const classes = useStyles()
@@ -53,7 +52,6 @@ export default function OrdersPanel(props: {
           option={props.option}
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
-          provider={props.provider}
         />
       )
     }

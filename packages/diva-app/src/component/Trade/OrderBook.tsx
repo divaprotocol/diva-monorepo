@@ -18,7 +18,6 @@ import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { selectChainId } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import detectEthereumProvider from '@metamask/detect-provider'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -127,28 +126,28 @@ export default function OrderBook(props: {
   option: Pool
   tokenAddress: string
   exchangeProxy: string
-  provider: any
 }) {
   const option = props.option
   const optionTokenAddress = props.tokenAddress
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const [orderBook, setOrderBook] = useState([] as any)
-  const provider = props.provider
   const OrderType = {
     BUY: 0,
     SELL: 1,
   }
   const chainId = useAppSelector(selectChainId)
-  //const { provider } = useConnectionContext()
+  const { provider } = useConnectionContext()
   const componentDidMount = async () => {
     const orders = []
+    console.log('Hi', provider)
+    console.log('chainId', chainId)
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
         option.collateralToken.id,
         chainId,
-        props.provider,
+        provider,
         props.exchangeProxy
       )
       if (rSell.length > 0) {
@@ -160,7 +159,7 @@ export default function OrderBook(props: {
         option.collateralToken.id,
         optionTokenAddress,
         chainId,
-        props.provider,
+        provider,
         props.exchangeProxy
       )
       if (rBuy.length > 0) {
