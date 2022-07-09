@@ -140,8 +140,6 @@ export default function OrderBook(props: {
   const { provider } = useConnectionContext()
   const componentDidMount = async () => {
     const orders = []
-    console.log('Hi', provider)
-    console.log('chainId', chainId)
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,

@@ -114,7 +114,6 @@ export default function PoolsTable({
                 dispatch(setResponseSell([]))
                 dispatch(setResponseBuy([]))
                 history.push(`../../${row.id}`)
-                history.push(`../../${row.id}`)
               }
         }
         componentsProps={{
