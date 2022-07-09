@@ -38,28 +38,66 @@ async function getFillableOrders(
   // Get iteratable set of maker addresses excluding duplicates
   makers = [...new Set(makers)]
 
+  const makersChunks = makers.reduce((resultArray, item, index) => {
+    const batchIndex = Math.floor(index / 4)
+    if (!resultArray[batchIndex]) {
+      resultArray[batchIndex] = []
+    }
+    resultArray[batchIndex].push(item)
+    return resultArray
+  }, [])
+
+  const makerAllowances: any = []
+  const allMakers = []
+  const batchResponse = await Promise.all(
+    makersChunks.map(async (batch) => {
+      let response: any = {}
+      try {
+        const addresses = Array.from({ length: batch.length }).fill(
+          exchangeProxy
+        )
+        const tokens = Array.from({ length: batch.length }).fill(tokenAddress)
+        const res = await contract.allowances(batch, addresses, tokens)
+        response = batch.reduce(
+          (obj, key, index) => ({ ...obj, [key]: res[index] }),
+          {}
+        )
+        makerAllowances.push(res)
+        return response
+        console.log('response', response)
+      } catch (error) {
+        console.error(error)
+      }
+    })
+  )
+  batchResponse.forEach((res) => {
+    allMakers.push(res)
+  })
+
+  console.log('allMakers', allMakers)
+
   // Prepare address inputs for allowances function (two arrays, both same length as maker addresses array
   // populated with exchange contract address and position token address, respectively)
-  const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
-  const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
+  // const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
+  // const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
 
-  // Get allowances
-  const res = await contract.allowances(makers, addresses, tokens)
+  // // Get allowances
+  // const res = await contract.allowances(makers, addresses, tokens)
 
-  const makerAllowances: {
-    [address: string]: BigNumber
-  } = {}
+  // const makerAllowances: {
+  //   [address: string]: BigNumber
+  // } = {}
 
   // TODO Add batching logic here to handle cases where makers length is more than 400-500. Reason is
   // that allowances function cannot handle more at one time.
 
   // Map allowances to maker address
-  makers.forEach((maker, index) => {
-    if (makerAllowances[maker] == null) {
-      // if condition ensures that we don't have duplicates
-      makerAllowances[maker] = res[index] // [maker]
-    }
-  })
+  // makers.forEach((maker, index) => {
+  //   if (makerAllowances[maker] == null) {
+  //     // if condition ensures that we don't have duplicates
+  //     makerAllowances[maker] = res[index] // [maker]
+  //   }
+  // })
 
   // Initialize array that will hold the filtered order objects
   const filteredOrders = []
