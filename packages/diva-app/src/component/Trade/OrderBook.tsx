@@ -184,7 +184,7 @@ export default function OrderBook(props: {
   useEffect(() => {
     componentDidMount()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [responseBuy, responseSell])
+  }, [responseBuy, responseSell, provider])
 
   return (
     <PageDiv>
