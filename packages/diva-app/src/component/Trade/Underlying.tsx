@@ -78,7 +78,6 @@ export default function Underlying() {
   const theme = useTheme()
   const dispatch = useDispatch()
 
-  console.log('underlying provider ', provider)
   useEffect(() => {
     dispatch(
       fetchPool({

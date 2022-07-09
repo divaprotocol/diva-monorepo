@@ -23,12 +23,6 @@ async function getFillableOrders(
   chainId,
   provider // TODO: provider is undefined
 ) {
-  console.log('chainId', chainId)
-  console.log(
-    'config[chainId].balanceCheckAddress',
-    config[chainId].balanceCheckAddress
-  )
-  console.log('provider-getFillableOrders', provider)
   // Connect to BalanceChecker contract which implements a function (called allowances)
   // to obtain multiple allowances with one single call
   const contract = new ethers.Contract(
@@ -43,11 +37,10 @@ async function getFillableOrders(
   })
   // Get iteratable set of maker addresses excluding duplicates
   makers = [...new Set(makers)]
-  console.log('makers', makers)
-  const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
 
-  // Prepare token address input for allowances function (array of same length as maker addresses array
-  // populated with the position token address)
+  // Prepare address inputs for allowances function (two arrays, both same length as maker addresses array
+  // populated with exchange contract address and position token address, respectively)
+  const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
   const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
 
   // Get allowances
@@ -57,6 +50,9 @@ async function getFillableOrders(
     [address: string]: BigNumber
   } = {}
 
+  // TODO Add batching logic here to handle cases where makers length is more than 400-500. Reason is
+  // that allowances function cannot handle more at one time.
+
   // Map allowances to maker address
   makers.forEach((maker, index) => {
     if (makerAllowances[maker] == null) {
@@ -64,7 +60,6 @@ async function getFillableOrders(
       makerAllowances[maker] = res[index] // [maker]
     }
   })
-  console.log('makerAllowances', makerAllowances)
 
   // Initialize array that will hold the filtered order objects
   const filteredOrders = []
