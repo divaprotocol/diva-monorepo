@@ -21,7 +21,7 @@ async function getFillableOrders(
   tokenAddress,
   exchangeProxy,
   chainId,
-  provider // TODO: provider is undefined
+  provider
 ) {
   // Connect to BalanceChecker contract which implements a function (called allowances)
   // to obtain multiple allowances with one single call
@@ -35,12 +35,15 @@ async function getFillableOrders(
   let makers: string[] = orders.map((data) => {
     return data.order.maker
   })
+
   // Get iteratable set of maker addresses excluding duplicates
   makers = [...new Set(makers)]
 
   // Prepare address inputs for allowances function (two arrays, both same length as maker addresses array
   // populated with exchange contract address and position token address, respectively)
 
+  // Cut maker address array into chunks of 400 as BalanceChecker's allowance function
+  // cannot consume more than 400-500 as the gas limit also applies to read-only functions of smart contracts
   const makersChunks = makers.reduce((resultArray, item, index) => {
     const batchIndex = Math.floor(index / 4)
     if (!resultArray[batchIndex]) {
@@ -49,6 +52,7 @@ async function getFillableOrders(
     resultArray[batchIndex].push(item)
     return resultArray
   }, [])
+
   let response: any = {}
   let makerAllowances: {
     [address: string]: BigNumber
@@ -76,9 +80,6 @@ async function getFillableOrders(
   )
   console.log('maker allowance', makerAllowances)
 
-  // TODO Add batching logic here to handle cases where makers length is more than 400-500. Reason is
-  // that allowances function cannot handle more at one time.
-
   // Map allowances to maker address
   //makers.forEach((maker, index) => {
   //  if (makerAllowances[maker] == null) {
@@ -105,9 +106,7 @@ async function getFillableOrders(
     // Get maker allowance and include it as a new field in order metaData
     // Note that remainingMakerAllowance is the full makerAllowance for the first (best) order
     // and then decreases for the following orders as the remainingFillableMakerAmount gets deducted
-    const remainingMakerAllowance = BigNumber.from(
-      makerAllowances[extendedOrder.order.maker]
-    )
+    const remainingMakerAllowance = makerAllowances[extendedOrder.order.maker]
     console.log('remainging maker allowance ', remainingMakerAllowance)
     // Add remainingMakerAllowance fiedl to the order object
     extendedOrder.metaData.remainingMakerAllowance =
@@ -136,7 +135,7 @@ async function getFillableOrders(
       makerAllowances[order.order.maker] = remainingMakerAllowance.sub(
         remainingFillableMakerAmount
       )
-      // TODO Consider adding the expected price at this stage
+      // TODO Consider adding the expected price here
     }
   })
 
