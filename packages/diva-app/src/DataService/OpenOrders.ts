@@ -40,26 +40,52 @@ async function getFillableOrders(
 
   // Prepare address inputs for allowances function (two arrays, both same length as maker addresses array
   // populated with exchange contract address and position token address, respectively)
-  const addresses = Array.from({ length: makers.length }).fill(exchangeProxy)
-  const tokens = Array.from({ length: makers.length }).fill(tokenAddress)
 
-  // Get allowances
-  const res = await contract.allowances(makers, addresses, tokens)
-
-  const makerAllowances: {
+  const makersChunks = makers.reduce((resultArray, item, index) => {
+    const batchIndex = Math.floor(index / 4)
+    if (!resultArray[batchIndex]) {
+      resultArray[batchIndex] = []
+    }
+    resultArray[batchIndex].push(item)
+    return resultArray
+  }, [])
+  let response: any = {}
+  let makerAllowances: {
     [address: string]: BigNumber
   } = {}
+  await Promise.all(
+    makersChunks.map(async (makersBatch) => {
+      try {
+        const addresses = Array.from({ length: makersBatch.length }).fill(
+          exchangeProxy
+        )
+        const tokens = Array.from({ length: makersBatch.length }).fill(
+          tokenAddress
+        )
+        // Get allowances
+        const res = await contract.allowances(makersBatch, addresses, tokens)
+        response = makersBatch.reduce(
+          (obj, key, index) => ({ ...obj, [key]: res[index] }),
+          {}
+        )
+        makerAllowances = Object.assign(makerAllowances, response)
+      } catch (error) {
+        console.error(error)
+      }
+    })
+  )
+  console.log('maker allowance', makerAllowances)
 
   // TODO Add batching logic here to handle cases where makers length is more than 400-500. Reason is
   // that allowances function cannot handle more at one time.
 
   // Map allowances to maker address
-  makers.forEach((maker, index) => {
-    if (makerAllowances[maker] == null) {
-      // if condition ensures that we don't have duplicates
-      makerAllowances[maker] = res[index] // [maker]
-    }
-  })
+  //makers.forEach((maker, index) => {
+  //  if (makerAllowances[maker] == null) {
+  // if condition ensures that we don't have duplicates
+  //    makerAllowances[maker] = res[index] // [maker]
+  //  }
+  //})
 
   // Initialize array that will hold the filtered order objects
   const filteredOrders = []
@@ -82,7 +108,7 @@ async function getFillableOrders(
     const remainingMakerAllowance = BigNumber.from(
       makerAllowances[extendedOrder.order.maker]
     )
-
+    console.log('remainging maker allowance ', remainingMakerAllowance)
     // Add remainingMakerAllowance fiedl to the order object
     extendedOrder.metaData.remainingMakerAllowance =
       remainingMakerAllowance.toString()
