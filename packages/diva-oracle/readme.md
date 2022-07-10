@@ -1,9 +1,14 @@
 # Running with Docker
 Upon a working script and configuration docker can be used to run  the oracle
-Simply run the shell script to compile and run the docker image
+This will build the image, a rebuild is needed on every new file change
 
 ```
-sh docker_run.sh
+docker-compose up --build
+```
+This will run and build the image. Once the image is built. simply use below to run. This can easily spin up spin down along with development
+
+```
+docker-compose up
 ```
 ## Poetry installation for local development and troubleshooting
 1. Install poetry: 

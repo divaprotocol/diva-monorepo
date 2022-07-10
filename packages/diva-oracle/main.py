@@ -1,14 +1,14 @@
 import datetime as dt
-from Prices import getKrakenPrice
-from QueryGraph import *
-from SendPrice import sendPrice
-import config
+from lib.Prices import getKrakenPrice
+from lib.QueryGraph import *
+from lib.SendPrice import sendPrice
+import config.config as config
 import threading
 from web3 import Web3
 import time
-import diva
-from sendEmail import sendEmail
-from recorder import *
+import config.diva as diva
+from lib.sendEmail import sendEmail
+from lib.recorder import *
 
 def extend_DataFrame(df, resp):
     df = pd.concat([df, pd.json_normalize(resp, ["data", "pools"])], ignore_index=True)

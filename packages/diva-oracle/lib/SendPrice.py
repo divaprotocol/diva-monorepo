@@ -1,4 +1,4 @@
-import config
+import config.config as config
 
 PRIVATE_KEY = config.PRIVATE_KEY
 PUBLIC_KEY = config.PUBLIC_KEY
