@@ -39,11 +39,8 @@ async function getFillableOrders(
   // Get iteratable set of maker addresses excluding duplicates
   makers = [...new Set(makers)]
 
-  // Prepare address inputs for allowances function (two arrays, both same length as maker addresses array
-  // populated with exchange contract address and position token address, respectively)
-
-  // Cut maker address array into chunks of 400 as BalanceChecker's allowance function
-  // cannot consume more than 400-500 as the gas limit also applies to read-only functions of smart contracts
+  // Cut maker address array into batches of 400 as BalanceChecker's allowances function
+  // cannot consume more than 400-500 as gas limits also applies for read-only calls
   const makersChunks = makers.reduce((resultArray, item, index) => {
     const batchIndex = Math.floor(index / 4)
     if (!resultArray[batchIndex]) {
@@ -52,14 +49,18 @@ async function getFillableOrders(
     resultArray[batchIndex].push(item)
     return resultArray
   }, [])
+  console.log('makersChunks', makersChunks)
 
   let response: any = {}
   let makerAllowances: {
     [address: string]: BigNumber
   } = {}
+
   await Promise.all(
     makersChunks.map(async (makersBatch) => {
       try {
+        // Prepare address inputs for allowances function (two arrays, both same length as maker addresses array
+        // populated with exchange contract address and position token address, respectively)
         const addresses = Array.from({ length: makersBatch.length }).fill(
           exchangeProxy
         )
@@ -72,6 +73,7 @@ async function getFillableOrders(
           (obj, key, index) => ({ ...obj, [key]: res[index] }),
           {}
         )
+        // Add entries to maker => allowance mapping
         makerAllowances = Object.assign(makerAllowances, response)
       } catch (error) {
         console.error(error)
@@ -79,14 +81,6 @@ async function getFillableOrders(
     })
   )
   console.log('maker allowance', makerAllowances)
-
-  // Map allowances to maker address
-  //makers.forEach((maker, index) => {
-  //  if (makerAllowances[maker] == null) {
-  // if condition ensures that we don't have duplicates
-  //    makerAllowances[maker] = res[index] // [maker]
-  //  }
-  //})
 
   // Initialize array that will hold the filtered order objects
   const filteredOrders = []
@@ -107,7 +101,7 @@ async function getFillableOrders(
     // Note that remainingMakerAllowance is the full makerAllowance for the first (best) order
     // and then decreases for the following orders as the remainingFillableMakerAmount gets deducted
     const remainingMakerAllowance = makerAllowances[extendedOrder.order.maker]
-    console.log('remainging maker allowance ', remainingMakerAllowance)
+
     // Add remainingMakerAllowance fiedl to the order object
     extendedOrder.metaData.remainingMakerAllowance =
       remainingMakerAllowance.toString()
