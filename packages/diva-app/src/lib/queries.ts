@@ -67,12 +67,15 @@ export type User = {
   positionTokens: { positionToken: PositionToken }[]
 }
 
-export const queryUser = (id: string) => gql`
+export const queryUser = (id: string, pageSize: number, skip: number) => gql`
 {
   user(id: "${id}" ){
     id
-    positionTokens {
-      positionToken {
+    positionTokens(first: ${pageSize}, skip: ${skip},
+      orderDirection: desc,
+      orderBy: receivedAt,) {
+        receivedAt,
+        positionToken {
         id
         name
         symbol
@@ -308,6 +311,10 @@ export type TestUser = {
   concavePoolCreated: boolean
   liquidityAdded: boolean
   liquidityRemoved: boolean
+  buyLimitOrderCreatedAndFilled: boolean
+  sellLimitOrderCreatedAndFilled: boolean
+  buyLimitOrderFilled: boolean
+  sellLimitOrderFilled: boolean
   finalValueReported: boolean
   reportedValueChallenged: boolean
   positionTokenRedeemed: boolean
@@ -372,6 +379,10 @@ export const queryTestUser = (address: string) => gql`
     concavePoolCreated
     liquidityAdded
     liquidityRemoved
+    buyLimitOrderCreatedAndFilled
+    sellLimitOrderCreatedAndFilled
+    buyLimitOrderFilled
+    sellLimitOrderFilled
     finalValueReported
     reportedValueChallenged
     positionTokenRedeemed

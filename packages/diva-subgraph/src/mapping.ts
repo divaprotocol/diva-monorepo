@@ -64,7 +64,6 @@ function handleLiquidityEvent(
   let parameters = contract.getPoolParameters(poolId);
   let shortTokenContract = PositionTokenABI.bind(parameters.shortToken);
   let longTokenContract = PositionTokenABI.bind(parameters.longToken);
-
   let entity = Pool.load(poolId.toString());
   
   //set user to position token mapping
@@ -79,6 +78,7 @@ function handleLiquidityEvent(
     userShortPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.shortToken.toHexString());
     userShortPositionTokenEntity.user = msgSender.toHexString();
     userShortPositionTokenEntity.positionToken = parameters.shortToken.toHexString();
+    userShortPositionTokenEntity.receivedAt = blockTimestamp; // doesn't enter this if clause on remove assuming user is only using the app
     userShortPositionTokenEntity.save();
   }
   let userLongPositionTokenEntity = UserPositionToken.load(
@@ -87,6 +87,7 @@ function handleLiquidityEvent(
     userLongPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.longToken.toHexString());
     userLongPositionTokenEntity.user = msgSender.toHexString();
     userLongPositionTokenEntity.positionToken = parameters.longToken.toHexString();
+    userLongPositionTokenEntity.receivedAt = blockTimestamp;
     userLongPositionTokenEntity.save();
   }
 
@@ -417,6 +418,16 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       nativeOrderFillEntity.save();
   }
 
+  let testnetUserMaker = TestnetUser.load(event.params.maker.toHexString());
+  if (!testnetUserMaker) {
+    testnetUserMaker = new TestnetUser(event.params.maker.toHexString());
+  }
+
+  let testnetUserTaker = TestnetUser.load(event.params.taker.toHexString());
+  if (!testnetUserTaker) {
+    testnetUserTaker = new TestnetUser(event.params.taker.toHexString());
+  }
+
   // buy limit: maker token = collateral token; taker token = position token
   // after fill, maker receives position tokens
   // check if taker token is a position token
@@ -436,8 +447,15 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       userPositionTokenEntity = new UserPositionToken(event.params.maker.toHexString() + "-" + event.params.takerToken.toHexString());
       userPositionTokenEntity.user = event.params.maker.toHexString();
       userPositionTokenEntity.positionToken = event.params.takerToken.toHexString();
+      userPositionTokenEntity.receivedAt = event.block.timestamp;
       userPositionTokenEntity.save();
     }
+
+    // Update TestnetUser entity
+    testnetUserMaker.buyLimitOrderCreatedAndFilled = true;
+    testnetUserTaker.buyLimitOrderFilled = true;
+    testnetUserMaker.save();
+    testnetUserTaker.save();
   } 
   
   // sell limit: maker token = position token; taker token = collateral token
@@ -456,9 +474,15 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       userPositionTokenEntity = new UserPositionToken(event.params.taker.toHexString() + "-" + event.params.makerToken.toHexString());
       userPositionTokenEntity.user = event.params.taker.toHexString();
       userPositionTokenEntity.positionToken = event.params.makerToken.toHexString();
+      userPositionTokenEntity.receivedAt = event.block.timestamp;
       userPositionTokenEntity.save();
     }
-  }
-}
 
-// IMPORTANT: Updated the ABI as well!!!
+    // Update TestnetUser entity
+    testnetUserMaker.sellLimitOrderCreatedAndFilled = true;
+    testnetUserTaker.sellLimitOrderFilled = true;
+    testnetUserMaker.save();
+    testnetUserTaker.save();
+  }
+
+}

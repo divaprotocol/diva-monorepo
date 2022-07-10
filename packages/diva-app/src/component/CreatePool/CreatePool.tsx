@@ -22,6 +22,8 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ApproveActionButtons } from '../ApproveActionButtons'
 import { useHistory } from 'react-router-dom'
 import { Add } from '@mui/icons-material'
+import { Success } from './Success'
+import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
 
 export function CreatePool() {
   const [decimal, setDecimal] = useState(18)
@@ -43,6 +45,9 @@ export function CreatePool() {
     case 3:
       step = <ReviewAndSubmit formik={formik} />
       break
+    case 4:
+      step = <Success formik={formik} />
+      break
   }
   useEffect(() => {
     if (formik.values.collateralToken != null && provider != null) {
@@ -59,11 +64,7 @@ export function CreatePool() {
 
   // actions after pool is successfully created
   const handlePoolSuccess = () => {
-    setIsSnackbarOpen(true)
-
-    setTimeout(() => {
-      history.push('/dashboard/mypositions')
-    }, 2000)
+    formik.setFieldValue('step', formik.values.step + 1, true)
   }
 
   return (
@@ -114,7 +115,7 @@ export function CreatePool() {
             justifyContent="space-between"
             alignItems="center"
           >
-            {formik.values.step > 1 && (
+            {formik.values.step > 1 && formik.values.step !== 4 && (
               <Button
                 sx={{ width: theme.spacing(16) }}
                 onClick={() => {
@@ -133,6 +134,20 @@ export function CreatePool() {
                 textFieldValue={formik.values.collateralBalance}
                 transactionType={'create'}
               />
+            ) : formik.values.step === 4 ? (
+              <Button
+                variant="text"
+                sx={{
+                  mt: theme.spacing(8),
+                  ml: theme.spacing(80),
+                }}
+                onClick={() => {
+                  history.push('/dashboard/mypositions')
+                }}
+              >
+                My Positions
+                <ArrowForwardOutlinedIcon sx={{ ml: theme.spacing(1) }} />
+              </Button>
             ) : (
               <LoadingButton
                 variant="contained"

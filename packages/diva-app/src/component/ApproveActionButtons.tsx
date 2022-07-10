@@ -197,18 +197,11 @@ export const ApproveActionButtons = ({
                        */
                       tx.wait()
                         .then(() => {
-                          setIsPoolCreated(true)
-                          setActionLoading(false)
                           setTimeout(() => {
+                            setActionLoading(false)
+                            setIsPoolCreated(true)
                             onTransactionSuccess()
-                            dispatch(
-                              fetchPool({
-                                graphUrl:
-                                  config[chainId as number].divaSubgraph,
-                                poolId: window.location.pathname.split('/')[1],
-                              })
-                            )
-                          }, 5000)
+                          }, 15000)
                         })
                         .catch((err: any) => {
                           setActionLoading(false)

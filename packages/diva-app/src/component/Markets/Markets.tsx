@@ -22,9 +22,11 @@ import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { getAppStatus } from '../../Util/getAppStatus'
 import { divaGovernanceAddress } from '../../constants'
+import { useHistory, useLocation, useParams } from 'react-router-dom'
 
 export const ExpiresInCell = (props: any) => {
-  const expTimestamp = new Date(props.row.Expiry).getTime()
+  //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
+  const expTimestamp = new Date(props.row.Expiry.replace(/-/g, '/')).getTime()
   const minUntilExp = getExpiryMinutesFromNow(expTimestamp / 1000)
   if (minUntilExp > 0) {
     if ((minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) > 0) {
@@ -187,10 +189,12 @@ const columns: GridColDef[] = [
 
 export default function Markets() {
   const [page, setPage] = useState(0)
-  const [createdBy, setCreatedBy] = useState(divaGovernanceAddress)
   const pools = useAppSelector(selectPools)
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const dispatch = useAppDispatch()
+  const params = useParams() as { creatorAddress: string; status: string }
+  const [createdBy, setCreatedBy] = useState(params.creatorAddress)
+  const history = useHistory()
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -198,7 +202,15 @@ export default function Markets() {
     }, 300)
 
     return () => clearTimeout(timeout)
-  }, [createdBy, dispatch, page])
+  }, [createdBy, dispatch, history, page])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      history.replace(`/markets/${createdBy || ''}`)
+    }, 100)
+
+    return () => clearTimeout(timeout)
+  }, [createdBy, history])
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const { status } = getAppStatus(
@@ -208,7 +220,6 @@ export default function Markets() {
       val.finalReferenceValue,
       val.inflection
     )
-
     const shared = {
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,

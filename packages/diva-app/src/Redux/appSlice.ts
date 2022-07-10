@@ -121,6 +121,7 @@ export const fetchPool = createAsyncThunk(
       graphUrl,
       queryPool(parseInt(poolId))
     )
+
     return res.pool
   }
 )
@@ -207,13 +208,22 @@ export const fetchPools = createAsyncThunk(
 
 export const fetchPositionTokens = createAsyncThunk(
   'app/positionTokens',
-  async (args, store) => {
+  async (
+    {
+      page,
+      pageSize = 300,
+    }: {
+      page: number
+      pageSize?: number
+    },
+    store
+  ) => {
     const state = store.getState() as RootState
     const { chainId, userAddress } = state.appSlice
 
     const res = await request<{ user: User }>(
       config[chainId as number].divaSubgraph,
-      queryUser(userAddress)
+      queryUser(userAddress, pageSize, Math.max(page, 0) * pageSize)
     )
 
     return res.user.positionTokens.map((token) => token.positionToken)
@@ -265,11 +275,12 @@ export const appSlice = createSlice({
     })
 
     builder.addCase(fetchPool.fulfilled, (state, action) => {
-      addPools(state, [action.payload])
+      addPools(state, [action.payload], state.chainId)
     })
 
     builder.addCase(fetchPools.pending, (state, action) => {
       const poolState = state[state.chainId]
+      poolState.pools = []
       poolState.statusByName[
         action.type.substring(0, action.type.length - ('pending'.length + 1))
       ] = 'pending'

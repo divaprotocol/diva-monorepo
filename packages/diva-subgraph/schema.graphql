@@ -78,6 +78,10 @@ type TestnetUser @entity {
   concavePoolCreated: Boolean!
   liquidityAdded: Boolean!
   liquidityRemoved: Boolean!
+  buyLimitOrderCreatedAndFilled: Boolean!
+  sellLimitOrderCreatedAndFilled: Boolean!
+  buyLimitOrderFilled: Boolean!
+  sellLimitOrderFilled: Boolean!
   finalValueReported: Boolean!
   reportedValueChallenged: Boolean!
   positionTokenRedeemed: Boolean!
@@ -95,6 +99,7 @@ type UserPositionToken @entity {
   id: ID! # Set to `${user.id}-${positionToken.id}`
   user: User!
   positionToken: PositionToken!
+  receivedAt: BigInt! # timestamp when user received position token via create pool, add liquidity or trading 
 }
 
 type NativeOrderFill @entity {

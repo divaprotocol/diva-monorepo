@@ -4,6 +4,7 @@ import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
 import { Link, useLocation } from 'react-router-dom'
 import { Logo } from '../Logo'
 import TaskIcon from '@mui/icons-material/Task'
+import { divaGovernanceAddress } from '../../constants'
 export default function MenuItems() {
   const location = useLocation()
 
@@ -21,7 +22,7 @@ export default function MenuItems() {
           <Logo />
         </Box>
       </Link>
-      <Link to="/">
+      <Link to={`/${divaGovernanceAddress}`}>
         <Tooltip title="Markets">
           <ShowChartOutlined
             color={location.pathname === '/' ? 'primary' : 'action'}
@@ -29,7 +30,7 @@ export default function MenuItems() {
         </Tooltip>
       </Link>
       <Link to="/dashboard/mypositions">
-        <Tooltip title=" My Dashboard">
+        <Tooltip title="My Dashboard">
           <Person
             color={
               location.pathname.startsWith('/dashboard') ? 'primary' : 'action'
