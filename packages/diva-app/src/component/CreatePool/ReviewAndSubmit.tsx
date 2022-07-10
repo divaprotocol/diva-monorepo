@@ -1,15 +1,4 @@
-import {
-  Card,
-  Container,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  Typography,
-  useTheme,
-} from '@mui/material'
+import { Card, Container, Stack, Typography, useTheme } from '@mui/material'
 import { Box } from '@mui/material'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
@@ -19,37 +8,8 @@ import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { useCreatePoolFormik } from './formik'
 import { Circle } from '@mui/icons-material'
 import { PayoffProfile } from './PayoffProfile'
-
-const stringifyValue = (val: any) => {
-  if (val?.symbol) return val.symbol
-  if (val instanceof Date) {
-    return val.toDateString()
-  } else if (typeof val === 'string') {
-    return val
-  } else if (typeof val === 'number') {
-    return `${val}`
-  }
-  return ''
-}
-
-const dict: {
-  [key: string]: any
-} = {
-  referenceAsset: 'Reference Asset',
-  expiryTime: 'Expiry Time',
-  floor: 'Floor',
-  cap: 'Cap',
-  inflection: 'Inflection',
-  gradient: 'Gradient',
-  collateralBalance: 'Collateral Balance ',
-  collateralBalanceLong: 'Collateral Balance (Long)',
-  shortTokenSupply: 'Token Supply (Short)',
-  longTokenSupply: 'Token Supply (Long)',
-  dataProvider: 'Data Provider',
-  collateralToken: 'Collateral Token',
-  tokenSupply: 'Position Token Supply',
-  capacity: 'Maximum Pool Capacity',
-}
+import { useWhitelist } from '../../hooks/useWhitelist'
+import { useEffect, useState } from 'react'
 
 export function ReviewAndSubmit({
   formik,
@@ -60,6 +20,18 @@ export function ReviewAndSubmit({
   const theme = useTheme()
   const { provider } = useConnectionContext()
   const chainId = provider?.network?.chainId
+  const dataSource = useWhitelist()
+  const [dataSourceName, setDataSourceName] = useState('')
+  useEffect(() => {
+    const dataName = dataSource?.dataProviders?.find(
+      (dataName: { id: string }) => dataName?.id == values.dataProvider
+    )
+    if (dataName?.name != null) {
+      setDataSourceName(dataName?.name)
+    } else {
+      setDataSourceName('Unknown')
+    }
+  }, [dataSource.dataProviders, values.dataProvider])
 
   const whitelistQuery = useQuery<WhitelistQueryResponse>('whitelist', () =>
     request(config[chainId].whitelistSubgraph, queryWhitelist)
@@ -117,7 +89,7 @@ export function ReviewAndSubmit({
                   Expiry Time
                 </Typography>
                 <Typography fontSize={'0.85rem'}>
-                  {values.expiryTime.toString()}
+                  {values.expiryTime.toLocaleString()}
                 </Typography>
               </Stack>
               <Typography
@@ -133,18 +105,54 @@ export function ReviewAndSubmit({
                 </Typography>
                 <Typography fontSize={'0.85rem'}>placeholder</Typography>
               </Stack>
-              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Floor
-                </Typography>
-                <Typography fontSize={'0.85rem'}>{values.floor}</Typography>
-              </Stack>
-              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Cap
-                </Typography>
-                <Typography fontSize={'0.85rem'}>{values.cap}</Typography>
-              </Stack>
+              {!isNaN(values.floor) && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Floor
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>{values.floor}</Typography>
+                </Stack>
+              )}
+              {!isNaN(values.inflection) && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Inflection
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.inflection}
+                  </Typography>
+                </Stack>
+              )}
+              {!isNaN(values.cap) && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Cap
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>{values.cap}</Typography>
+                </Stack>
+              )}
+              {!isNaN(values.gradient) && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Gradient
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.gradient}
+                  </Typography>
+                </Stack>
+              )}
               <Typography
                 variant="subtitle1"
                 sx={{ fontWeight: 'bold' }}
@@ -157,7 +165,7 @@ export function ReviewAndSubmit({
                   Collateral Token
                 </Typography>
                 <Typography fontSize={'0.85rem'}>
-                  {values.collateralToken.name}
+                  {values.collateralToken.symbol}
                 </Typography>
               </Stack>
               <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
@@ -170,7 +178,7 @@ export function ReviewAndSubmit({
               </Stack>
               <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                 <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Position Token Supply
+                  Long / Short Token Supply
                 </Typography>
                 <Typography fontSize={'0.85rem'}>
                   {values.tokenSupply}
@@ -189,12 +197,12 @@ export function ReviewAndSubmit({
                 </Typography>
                 <Typography fontSize={'0.85rem'}>{values.capacity}</Typography>
               </Stack>
-              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Pool Description
-                </Typography>
-                <Typography fontSize={'0.85rem'}>TBD</Typography>
-              </Stack>
+              {/*<Stack direction="row" sx={{ justifyContent: 'space-between' }}>*/}
+              {/*  <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>*/}
+              {/*    Pool Description*/}
+              {/*  </Typography>*/}
+              {/*  <Typography fontSize={'0.85rem'}>TBD</Typography>*/}
+              {/*</Stack>*/}
               <Typography
                 variant="subtitle1"
                 sx={{ fontWeight: 'bold' }}
@@ -206,9 +214,7 @@ export function ReviewAndSubmit({
                 <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
                   Data Provider
                 </Typography>
-                <Typography fontSize={'0.85rem'}>
-                  {values.dataProvider}
-                </Typography>
+                <Typography fontSize={'0.85rem'}>{dataSourceName}</Typography>
               </Stack>
             </Stack>
           </Container>
@@ -224,7 +230,7 @@ export function ReviewAndSubmit({
             values.inflection != null &&
             values.tokenSupply != null &&
             values.tokenSupply > 0 && (
-              <Box width="50%">
+              <Box sx={{ maxWidth: '85%' }}>
                 <PayoffProfile
                   floor={values.floor}
                   cap={values.cap}
@@ -240,7 +246,6 @@ export function ReviewAndSubmit({
             style={{
               maxWidth: theme.spacing(60),
               border: '1px solid #1B3448',
-              // border-radius: '5px',
               background:
                 'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
             }}
@@ -256,32 +261,36 @@ export function ReviewAndSubmit({
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'gray' }}
+                style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at or below {values.floor} on 31/12/2022 (08:12am CET), the
-                payout will be 0.0 WAGM18 per long and 1.0 WAGMI18 per short
-                position token
+                at or below {values.floor} on{' '}
+                {values.expiryTime.toLocaleString()}, the payout will be 0.0{' '}
+                {values.collateralToken.symbol} per long and 1.0{' '}
+                {values.collateralToken.symbol} per short position token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'gray' }}
+                style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at or above {values.cap} on 31/12/2022 (08:12am CET), the payout
-                will be 1.0 WAGM18 per long and 0.0 WAGMI18 per short position
+                at or above {values.cap} on {values.expiryTime.toLocaleString()}
+                , the payout will be 1.0 {values.collateralToken.symbol} per
+                long and 0.0 {values.collateralToken.symbol} per short position
                 token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                style={{ color: 'gray' }}
+                style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
                 at
-                {' ' + values.inflection} on 31/12/2022 (08:12am CET), the
-                payout will be 0.5 WAGM18 per long and 0.5 WAGMI18 per short
+                {' ' + values.inflection} on{' '}
+                {values.expiryTime.toLocaleString()}, the payout will be{' '}
+                {values.gradient} {values.collateralToken.symbol} per long and{' '}
+                {1 - values.gradient} {values.collateralToken.symbol} per short
                 position token
               </Typography>
             </Container>

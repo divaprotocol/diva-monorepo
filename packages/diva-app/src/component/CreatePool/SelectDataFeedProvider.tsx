@@ -84,14 +84,14 @@ export function SelectDataFeedProvider({
   return (
     <Stack direction="row" spacing={theme.spacing(2)}>
       <Container>
-        <Typography pb={1} variant="subtitle1">
+        <Typography variant="subtitle1">
           Select a <strong>trusted</strong> data provider for this pool.
         </Typography>
         <FormControl
           fullWidth
           error={formik.errors.dataProvider != null}
           sx={{
-            paddingTop: theme.spacing(5),
+            paddingTop: theme.spacing(1),
             paddingBottom: theme.spacing(5),
           }}
         >

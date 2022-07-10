@@ -176,11 +176,19 @@ export function DefinePoolAttributes({
   }, [value, formik.values.cap, formik.values.floor, formik.values.inflection])
   return (
     <Stack direction={'row'}>
-      <Container>
-        <Typography pb={theme.spacing(2)} variant="subtitle1">
+      <Container sx={{ minWidth: '60%' }}>
+        <Typography
+          style={{ color: 'white' }}
+          pb={theme.spacing(2)}
+          variant="subtitle1"
+        >
           Pool Configuration
         </Typography>
-        <Box border={1} borderColor="secondary.dark">
+        <Box
+          sx={{ pb: theme.spacing(5) }}
+          border={1}
+          borderColor="secondary.dark"
+        >
           <Container>
             <h3>Event</h3>
             <Stack spacing={2} direction="row">
@@ -366,6 +374,12 @@ export function DefinePoolAttributes({
                       {formik.errors.collateralBalance}
                     </FormHelperText>
                   )}
+                  {!isNaN(formik.values.tokenSupply) && (
+                    <FormHelperText>
+                      You recieve {formik.values.tokenSupply} Long Tokens and{' '}
+                      {formik.values.tokenSupply} Short Tokens
+                    </FormHelperText>
+                  )}
                 </FormControl>
               </Stack>
             </Box>
@@ -398,7 +412,7 @@ export function DefinePoolAttributes({
             </FormControl>
             <Stack pb={3} spacing={2} direction="row">
               {value === 'binary' && (
-                <Box pt={2} width="50%">
+                <Box pt={2} width="90%">
                   <Stack spacing={3}>
                     <Tooltip
                       placement="top-end"
@@ -425,8 +439,12 @@ export function DefinePoolAttributes({
                 </Box>
               )}
               {value === 'linear' && (
-                <Box pt={2} width="50%">
-                  <Stack spacing={3}>
+                <Box pt={2} width="90%">
+                  <Stack
+                    // sx={{ justifyContent: 'space-between' }}
+                    direction="row"
+                    spacing={3}
+                  >
                     <Tooltip
                       placement="top-end"
                       title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
@@ -441,6 +459,7 @@ export function DefinePoolAttributes({
                         value={floor}
                         type="number"
                         onChange={formik.handleChange}
+                        sx={{ width: '100%' }}
                       />
                     </Tooltip>
                     <Tooltip
@@ -457,14 +476,15 @@ export function DefinePoolAttributes({
                         value={cap}
                         type="number"
                         onChange={formik.handleChange}
+                        sx={{ width: '100%' }}
                       />
                     </Tooltip>
-                    <DefineAdvanced formik={formik} />
                   </Stack>
+                  <DefineAdvanced formik={formik} />
                 </Box>
               )}
               {value === 'custom' && (
-                <Box pt={2} width="50%">
+                <Box pt={2} width="90%">
                   <FormControl fullWidth error={hasPaymentProfileError}>
                     {hasPaymentProfileError && (
                       <FormHelperText
@@ -477,7 +497,11 @@ export function DefinePoolAttributes({
                         </code>
                       </FormHelperText>
                     )}
-                    <Stack spacing={3}>
+                    <Stack
+                      sx={{ justifyContent: 'space-between' }}
+                      direction="row"
+                      spacing={3}
+                    >
                       <Tooltip
                         placement="top-end"
                         title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
@@ -492,6 +516,7 @@ export function DefinePoolAttributes({
                           value={floor}
                           type="number"
                           onChange={formik.handleChange}
+                          sx={{ width: '100%' }}
                         />
                       </Tooltip>
                       <Tooltip
@@ -528,6 +553,7 @@ export function DefinePoolAttributes({
                           value={cap}
                           type="number"
                           onChange={formik.handleChange}
+                          sx={{ width: '100%' }}
                         />
                       </Tooltip>
                       <Tooltip
@@ -544,10 +570,11 @@ export function DefinePoolAttributes({
                           onChange={formik.handleChange}
                           value={gradient}
                           type="number"
+                          sx={{ width: '100%' }}
                         />
                       </Tooltip>
-                      <DefineAdvanced formik={formik} />
                     </Stack>
+                    <DefineAdvanced formik={formik} />
                   </FormControl>
                 </Box>
               )}
@@ -557,7 +584,11 @@ export function DefinePoolAttributes({
       </Container>
       <Container>
         <Stack>
-          <Typography pb={theme.spacing(2)} variant="subtitle1">
+          <Typography
+            style={{ color: 'white' }}
+            pb={theme.spacing(2)}
+            variant="subtitle1"
+          >
             Payoff Profile
           </Typography>
           {floor != null &&
@@ -565,7 +596,7 @@ export function DefinePoolAttributes({
             inflection != null &&
             tokenSupply != null &&
             tokenSupply > 0 && (
-              <Box width="50%">
+              <Box sx={{ maxWidth: '85%' }}>
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
@@ -581,7 +612,6 @@ export function DefinePoolAttributes({
             style={{
               maxWidth: theme.spacing(60),
               border: '1px solid #1B3448',
-              // border-radius: '5px',
               background:
                 'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
             }}
@@ -597,30 +627,33 @@ export function DefinePoolAttributes({
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'gray' }}
+                style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at or below {floor} on 31/12/2022 (08:12am CET), the payout will
-                be 0.0 WAGM18 per long and 1.0 WAGMI18 per short position token
+                at or below {floor} on {expiryTime.toLocaleString()}, the payout
+                will be 0.0 {collateralToken.symbol} per long and 1.0{' '}
+                {collateralToken.symbol} per short position token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'gray' }}
+                style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at or above {cap} on 31/12/2022 (08:12am CET), the payout will
-                be 1.0 WAGM18 per long and 0.0 WAGMI18 per short position token
+                at or above {cap} on {expiryTime.toLocaleString()}, the payout
+                will be 1.0 {collateralToken.symbol} per long and 0.0{' '}
+                {collateralToken.symbol} per short position token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                style={{ color: 'gray' }}
+                style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
                 at
-                {' ' + inflection} on 31/12/2022 (08:12am CET), the payout will
-                be 0.5 WAGM18 per long and 0.5 WAGMI18 per short position token
+                {' ' + inflection} on {expiryTime.toLocaleString()}, the payout
+                will be {gradient} {collateralToken.symbol} per long and{' '}
+                {1 - gradient} {collateralToken.symbol} per short position token
               </Typography>
             </Container>
           </Card>
