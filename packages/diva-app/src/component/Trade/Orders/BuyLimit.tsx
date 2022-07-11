@@ -378,7 +378,6 @@ export default function BuyLimit(props: {
       decimals
     )
     if (pricePerOption.gt(0)) {
-      console.log('maxPayout', parseUnits(maxPayout, decimals).toString())
       dispatch(
         setMaxYield(
           parseFloat(
