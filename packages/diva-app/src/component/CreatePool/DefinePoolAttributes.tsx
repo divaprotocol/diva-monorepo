@@ -648,8 +648,10 @@ export function DefinePoolAttributes({
                   {floor}{' '}
                 </strong>{' '}
                 on{' '}
-                {getDateTime(Number(expiryTime) / 1000) + ' ' + userTimeZone()},
-                the payout will be {collateralToken.symbol} 0.00 per LONG and{' '}
+                {getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
+                  ' ' +
+                  userTimeZone()}
+                , the payout will be {collateralToken.symbol} 0.00 per LONG and{' '}
                 {collateralToken.symbol} 1.00 per SHORT token
               </Typography>
               <Typography

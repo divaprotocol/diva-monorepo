@@ -87,7 +87,12 @@ export function ReviewAndSubmit({
                   Expiry Time
                 </Typography>
                 <Typography fontSize={'0.85rem'}>
-                  {getDateTime(values.expiryTime).slice(11, 19) +
+                  {values.expiryTime.toLocaleString().slice(0, 11) +
+                    ' ' +
+                    getDateTime(Number(values.expiryTime) / 1000).slice(
+                      11,
+                      19
+                    ) +
                     ' ' +
                     userTimeZone()}
                 </Typography>
