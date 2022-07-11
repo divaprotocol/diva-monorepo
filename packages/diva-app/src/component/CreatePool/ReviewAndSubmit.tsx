@@ -10,6 +10,7 @@ import { Circle } from '@mui/icons-material'
 import { PayoffProfile } from './PayoffProfile'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { useEffect, useState } from 'react'
+import { getDateTime, userTimeZone } from '../../Util/Dates'
 
 export function ReviewAndSubmit({
   formik,
@@ -265,9 +266,12 @@ export function ReviewAndSubmit({
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
                 at or below {values.floor} on{' '}
-                {values.expiryTime.toLocaleString()}, the payout will be 0.0{' '}
-                {values.collateralToken.symbol} per long and 1.0{' '}
-                {values.collateralToken.symbol} per short position token
+                {getDateTime(values.expiryTime).slice(11, 19) +
+                  ' ' +
+                  userTimeZone()}
+                , the payout will be 0.0 {values.collateralToken.symbol} per
+                long and 1.0 {values.collateralToken.symbol} per short position
+                token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
@@ -275,7 +279,10 @@ export function ReviewAndSubmit({
                 style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at or above {values.cap} on {values.expiryTime.toLocaleString()}
+                at or above {values.cap} on{' '}
+                {getDateTime(values.expiryTime).slice(11, 19) +
+                  ' ' +
+                  userTimeZone()}
                 , the payout will be 1.0 {values.collateralToken.symbol} per
                 long and 0.0 {values.collateralToken.symbol} per short position
                 token
@@ -288,8 +295,11 @@ export function ReviewAndSubmit({
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
                 at
                 {' ' + values.inflection} on{' '}
-                {values.expiryTime.toLocaleString()}, the payout will be{' '}
-                {values.gradient} {values.collateralToken.symbol} per long and{' '}
+                {getDateTime(values.expiryTime).slice(11, 19) +
+                  ' ' +
+                  userTimeZone()}
+                , the payout will be {values.gradient}{' '}
+                {values.collateralToken.symbol} per long and{' '}
                 {1 - values.gradient} {values.collateralToken.symbol} per short
                 position token
               </Typography>

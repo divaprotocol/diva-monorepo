@@ -33,6 +33,7 @@ import {
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { getDateTime, userTimeZone } from '../../Util/Dates'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -630,8 +631,10 @@ export function DefinePoolAttributes({
                 style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at or below {floor} on {expiryTime.toLocaleString()}, the payout
-                will be 0.0 {collateralToken.symbol} per long and 1.0{' '}
+                <strong> at or below {floor} </strong>
+                on{' '}
+                {getDateTime(expiryTime).slice(11, 19) + ' ' + userTimeZone()},
+                the payout will be 0.0 {collateralToken.symbol} per long and 1.0{' '}
                 {collateralToken.symbol} per short position token
               </Typography>
               <Typography
@@ -640,8 +643,9 @@ export function DefinePoolAttributes({
                 style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at or above {cap} on {expiryTime.toLocaleString()}, the payout
-                will be 1.0 {collateralToken.symbol} per long and 0.0{' '}
+                <strong> at or above {cap} on </strong>
+                {getDateTime(expiryTime).slice(11, 19) + ' ' + userTimeZone()},
+                the payout will be 1.0 {collateralToken.symbol} per long and 0.0{' '}
                 {collateralToken.symbol} per short position token
               </Typography>
               <Typography
@@ -650,10 +654,15 @@ export function DefinePoolAttributes({
                 style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at
-                {' ' + inflection} on {expiryTime.toLocaleString()}, the payout
-                will be {gradient} {collateralToken.symbol} per long and{' '}
-                {1 - gradient} {collateralToken.symbol} per short position token
+                <strong>
+                  {' '}
+                  at
+                  {' ' + inflection} on{' '}
+                </strong>
+                {getDateTime(expiryTime).slice(11, 19) + ' ' + userTimeZone()},
+                the payout will be {gradient} {collateralToken.symbol} per long
+                and {1 - gradient} {collateralToken.symbol} per short position
+                token
               </Typography>
             </Container>
           </Card>
