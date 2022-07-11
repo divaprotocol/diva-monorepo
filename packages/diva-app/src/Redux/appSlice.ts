@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { BigNumber } from 'ethers'
+import { BigNumber, providers } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
 import {
   FeeRecipient,
@@ -45,6 +45,7 @@ type AppState = {
 type AppStateByChain = {
   chainId?: number
   userAddress?: string
+  provider?: providers.Web3Provider
   [chainId: number]: AppState
 }
 
@@ -72,6 +73,7 @@ export const fetchOrders = createAsyncThunk(
   async ({ pool, isLong }: { pool: Pool; isLong: boolean }, store) => {
     const tokenAddress = pool[isLong ? 'longToken' : 'shortToken'].id
     const state = store.getState() as RootState
+    const { provider } = state.appSlice
 
     if (state.appSlice.chainId == null) {
       console.warn('fetchOrders was called even though chainId is undefined')
@@ -85,12 +87,16 @@ export const fetchOrders = createAsyncThunk(
     const sellOrders: any = await get0xOpenOrders(
       tokenAddress,
       pool.collateralToken.id,
-      Number(config[state.appSlice.chainId])
+      Number(config[state.appSlice.chainId]),
+      provider,
+      config[state.appSlice.chainId].exchangeProxy
     )
     const buyOrders: any = await get0xOpenOrders(
       pool.collateralToken.id,
       tokenAddress,
-      Number(config[state.appSlice.chainId])
+      Number(config[state.appSlice.chainId]),
+      provider,
+      config[state.appSlice.chainId].exchangeProxy
     )
 
     return {

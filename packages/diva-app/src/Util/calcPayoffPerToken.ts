@@ -84,7 +84,6 @@ export function calcBreakEven(
   const UNIT = parseEther('1')
 
   // Convert inputs into Big Numbers
-  price = parseEther(convertExponentialToDecimal(price).toString())
   floor = BigENumber.from(floor)
   inflection = BigENumber.from(inflection)
   cap = BigENumber.from(cap)

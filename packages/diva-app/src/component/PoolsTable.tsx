@@ -21,6 +21,8 @@ import { LineSeries, XYPlot } from 'react-vis'
 import { Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
 import { makeStyles } from '@mui/styles'
+import { setResponseBuy, setResponseSell } from '../Redux/TradeOption'
+import { useDispatch } from 'react-redux'
 import { getShortenedAddress } from '../Util/getShortenedAddress'
 import { selectUserAddress } from '../Redux/appSlice'
 import { useAppSelector } from '../Redux/hooks'
@@ -95,6 +97,8 @@ export default function PoolsTable({
           v.Underlying.toLowerCase().includes(search.toLowerCase())
         )
       : rows
+
+  const dispatch = useDispatch()
 
   const openRows = expiredClicked
     ? filteredRows.filter((v) => v.Status.includes('Open'))
@@ -250,6 +254,11 @@ export default function PoolsTable({
           disableRowClick
             ? undefined
             : (row) => {
+                // Invalidate cache responses before navigating to trades page.
+                // This ensures that the orderbook does not have empty rows included after switching from a market
+                // with non-empty orderbook rows
+                dispatch(setResponseSell([]))
+                dispatch(setResponseBuy([]))
                 history.push(`../../${row.id}`)
               }
         }
