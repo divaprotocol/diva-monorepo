@@ -10,8 +10,7 @@ export function ConnectWalletButton() {
   const userAddress = useAppSelector(selectUserAddress)
   const [openModal, setOpenModal] = useState(false)
   const chainId = useAppSelector(selectChainId)
-  const modal = () => setOpenModal(true)
-
+  const modal = () => (isConnected ? setOpenModal(false) : setOpenModal(true))
   return (
     <>
       <LoadingButton
