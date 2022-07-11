@@ -93,6 +93,8 @@ export default function Underlying() {
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
   }, [pool, dispatch])
 
+  console.log(pool)
+
   // const intrinsicValue = useAppSelector((state) =>
   //   selectIntrinsicValue(state, params.poolId)
   // )

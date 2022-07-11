@@ -116,6 +116,7 @@ export const fetchPool = createAsyncThunk(
       queryPool(parseInt(poolId))
     )
 
+    console.log(res.pool)
     return res.pool
   }
 )

@@ -194,6 +194,7 @@ export default function Markets() {
   const dispatch = useAppDispatch()
   const params = useParams() as { creatorAddress: string }
   const [createdBy, setCreatedBy] = useState(params.creatorAddress)
+
   const history = useHistory()
 
   useEffect(() => {
@@ -336,6 +337,8 @@ export default function Markets() {
       },
     ]
   }, [] as GridRowModel[])
+
+  console.log(rows[0])
 
   return (
     <>

@@ -1,11 +1,24 @@
 import React, { useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
-import { Box, Input, InputAdornment, Stack, TextField } from '@mui/material'
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  Input,
+  InputAdornment,
+  Stack,
+  TextField,
+} from '@mui/material'
 import { LineSeries, XYPlot } from 'react-vis'
 import { Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
 import { makeStyles } from '@mui/styles'
+import ViewModuleIcon from '@mui/icons-material/ViewModule'
+import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
+import PoolCard from './PoolCard'
+import styled from 'styled-components'
 
 const useStyles = makeStyles({
   root: {
@@ -50,6 +63,9 @@ export default function PoolsTable({
 }: Props) {
   const history = useHistory()
   const [search, setSearch] = useState('')
+  const [selectedPoolsView, setSelectedPoolsView] = useState<'Grid' | 'Table'>(
+    'Table'
+  )
   const filteredRows =
     search != null && search.length > 0
       ? rows.filter((v) =>
@@ -80,43 +96,104 @@ export default function PoolsTable({
           <span />
         )}
 
-        <Input
-          value={search}
-          placeholder="Filter underlying"
-          aria-label="Filter underlying"
-          onChange={(e) => setSearch(e.target.value)}
-          startAdornment={
-            <InputAdornment position="start">
-              <Search />
-            </InputAdornment>
-          }
-        />
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gridGap: '24px',
+          }}
+        >
+          <Input
+            value={search}
+            placeholder="Filter underlying"
+            aria-label="Filter underlying"
+            onChange={(e) => setSearch(e.target.value)}
+            startAdornment={
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            }
+          />
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Button
+              sx={{
+                padding: '0px',
+                height: '36px',
+                width: '10px',
+              }}
+              onClick={() => setSelectedPoolsView('Grid')}
+            >
+              <ViewModuleIcon
+                sx={{
+                  color:
+                    selectedPoolsView === 'Grid' ? 'primary' : 'text.primary',
+                }}
+              />
+            </Button>
+            <Button
+              sx={{
+                padding: '0px',
+                height: '36px',
+              }}
+              onClick={() => setSelectedPoolsView('Table')}
+            >
+              <ViewHeadlineIcon
+                sx={{
+                  color:
+                    selectedPoolsView === 'Table' ? 'primary' : 'text.primary',
+                }}
+              />
+            </Button>
+          </Box>
+        </Box>
       </Stack>
-      <DataGrid
-        className={classes.root}
-        rows={filteredRows}
-        pagination
-        columns={columns}
-        loading={loading}
-        rowCount={rowCount}
-        paginationMode={rowCount != null ? 'server' : 'client'}
-        onPageChange={onPageChange}
-        page={page}
-        onRowClick={
-          disableRowClick
-            ? undefined
-            : (row) => {
-                history.push(`../../${row.id}`)
-              }
-        }
-        componentsProps={{
-          row: {
-            style: {
-              cursor: 'pointer',
+      {selectedPoolsView === 'Table' ? (
+        <DataGrid
+          className={classes.root}
+          rows={filteredRows}
+          pagination
+          columns={columns}
+          loading={loading}
+          rowCount={rowCount}
+          paginationMode={rowCount != null ? 'server' : 'client'}
+          onPageChange={onPageChange}
+          page={page}
+          onRowClick={
+            disableRowClick
+              ? undefined
+              : (row) => {
+                  history.push(`../../${row.id}`)
+                }
+          }
+          componentsProps={{
+            row: {
+              style: {
+                cursor: 'pointer',
+              },
             },
-          },
-        }}
-      />
+          }}
+        />
+      ) : (
+        <Box>
+          <Grid
+            container
+            spacing={'76px'}
+            rowSpacing={'42px'}
+            justifyContent="center"
+          >
+            {filteredRows.map((row) => (
+              <Grid item key={row.Id}>
+                <PoolCard row={row} />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
     </Stack>
   )
 }
