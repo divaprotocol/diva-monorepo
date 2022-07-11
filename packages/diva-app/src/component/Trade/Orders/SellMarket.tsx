@@ -161,6 +161,7 @@ export default function SellMarket(props: {
         } else {
           // TODO: Show the additional fee amount somewhere in the order widget
           const feeAmount = numberOfOptionsInclFees.sub(numberOfOptions)
+          // TODO: Add state hook for fees
 
           if (numberOfOptionsInclFees.gt(remainingAllowance)) {
             // Entered position token amount exceeds remaining allowance ...
@@ -587,13 +588,18 @@ export default function SellMarket(props: {
           >
             {params.tokenType.toUpperCase() + ' '}
           </FormLabel>
-          <Stack justifyContent="flex" spacing={0.5}>
+          <Stack spacing={0.7} justifyContent="flex" width={'100%'}>
             <FormInput
               width={'85%'}
               type="text"
               onChange={(event) => handleNumberOfOptions(event.target.value)}
             />
-            <FormLabel sx={{ color: 'Gray', fontSize: 11 }}>Fees 1%</FormLabel>
+            <FormLabel sx={{ color: 'Gray', fontSize: 11 }}>
+              {toExponentialOrNumber(
+                Number(formatUnits(numberOfOptions.add(feeAmount)))
+              )}{' '}
+              (incl. 1% fee)
+            </FormLabel>
           </Stack>
         </FormDiv>
         <FormDiv>
