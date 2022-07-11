@@ -192,7 +192,7 @@ export default function Markets() {
   const pools = useAppSelector(selectPools)
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const dispatch = useAppDispatch()
-  const params = useParams() as { creatorAddress: string }
+  const params = useParams() as { creatorAddress: string; status: string }
   const [createdBy, setCreatedBy] = useState(params.creatorAddress)
 
   const history = useHistory()
@@ -221,7 +221,6 @@ export default function Markets() {
       val.finalReferenceValue,
       val.inflection
     )
-
     const shared = {
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,
