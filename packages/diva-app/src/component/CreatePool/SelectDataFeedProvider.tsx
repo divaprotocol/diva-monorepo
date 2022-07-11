@@ -4,6 +4,7 @@ import {
   Card,
   Container,
   FormControl,
+  Link,
   Stack,
   TextField,
   Typography,
@@ -13,11 +14,19 @@ import { config } from '../../constants'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { useCreatePoolFormik } from './formik'
+import {
+  EtherscanLinkType,
+  getEtherscanLink,
+} from '../../Util/getEtherscanLink'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import React from 'react'
+import { useAppSelector } from '../../Redux/hooks'
+import { selectChainId } from '../../Redux/appSlice'
 const linkSVG = (
   <svg
     width="16"
     height="16"
-    viewBox="0 0 16 16"
+    viewBox="0 -2 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -37,7 +46,7 @@ export function SelectDataFeedProvider({
 }) {
   const { referenceAsset } = formik.values
   const whitelist = useWhitelist()
-
+  const chainId = useAppSelector(selectChainId)
   const matchingDataFeedProviders = whitelist.dataProviders.filter((p) =>
     p.dataFeeds.some((f) => f.referenceAssetUnified === referenceAsset)
   )
@@ -151,7 +160,19 @@ export function SelectDataFeedProvider({
               sx={{ mt: theme.spacing(2) }}
               style={{ color: 'gray' }}
             >
-              {formik.values.dataProvider}
+              <Link
+                style={{ color: 'gray' }}
+                underline={'none'}
+                rel="noopener noreferrer"
+                target="_blank"
+                href={getEtherscanLink(
+                  chainId,
+                  formik.values.dataProvider,
+                  EtherscanLinkType.ADDRESS
+                )}
+              >
+                {formik.values.dataProvider}
+              </Link>
             </Typography>
             <Typography pt={theme.spacing(2)} variant="subtitle1">
               Data Fact Sheet

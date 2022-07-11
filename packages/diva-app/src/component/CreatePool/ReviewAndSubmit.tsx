@@ -28,9 +28,9 @@ export function ReviewAndSubmit({
       (dataName: { id: string }) => dataName?.id == values.dataProvider
     )
     if (dataName?.name != null) {
-      setDataSourceName(dataName?.name)
+      setDataSourceName(dataName.name + ' (' + values.dataProvider + ')')
     } else {
-      setDataSourceName('Unknown')
+      setDataSourceName(values.dataProvider)
     }
   }, [dataSource.dataProviders, values.dataProvider])
 
@@ -51,19 +51,16 @@ export function ReviewAndSubmit({
 
   return (
     <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-      <Stack>
+      <Container sx={{ minWidth: '60%' }}>
         <Typography
           pb={theme.spacing(1)}
           pt={theme.spacing(1)}
           variant="subtitle1"
+          color="white"
         >
           Review
         </Typography>
-        <Box
-          border={1}
-          borderColor="secondary.dark"
-          minWidth={theme.spacing(120)}
-        >
+        <Box border={1} borderColor="secondary.dark">
           <Container sx={{ pb: theme.spacing(4) }}>
             <Stack spacing={theme.spacing(2)}>
               <Typography pt={theme.spacing(2)} variant="subtitle1">
@@ -90,7 +87,9 @@ export function ReviewAndSubmit({
                   Expiry Time
                 </Typography>
                 <Typography fontSize={'0.85rem'}>
-                  {values.expiryTime.toLocaleString()}
+                  {getDateTime(values.expiryTime).slice(11, 19) +
+                    ' ' +
+                    userTimeZone()}
                 </Typography>
               </Stack>
               <Typography
@@ -104,7 +103,9 @@ export function ReviewAndSubmit({
                 <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
                   Payoff Profile
                 </Typography>
-                <Typography fontSize={'0.85rem'}>placeholder</Typography>
+                <Typography fontSize={'0.85rem'}>
+                  {values.payoutProfile}
+                </Typography>
               </Stack>
               {!isNaN(values.floor) && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
@@ -220,10 +221,10 @@ export function ReviewAndSubmit({
             </Stack>
           </Container>
         </Box>
-      </Stack>
+      </Container>
       <Container>
         <Stack>
-          <Typography pb={theme.spacing(2)} variant="subtitle1">
+          <Typography color="white" pb={theme.spacing(2)} variant="subtitle1">
             Payoff Profile
           </Typography>
           {values.floor != null &&
@@ -266,13 +267,19 @@ export function ReviewAndSubmit({
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
                 {values.referenceAsset} is{' '}
-                {values.floor < values.inflection &&
-                values.inflection < values.cap
-                  ? 'at or '
-                  : ''}{' '}
-                below {values.floor} on {values.expiryTime.toLocaleString()},
-                the payout will be {values.collateralToken.symbol} 0.00 per LONG
-                and {values.collateralToken.symbol} 1.00 per SHORT token
+                <strong>
+                  {values.floor < values.inflection &&
+                  values.inflection < values.cap
+                    ? 'at or '
+                    : ''}{' '}
+                  below {values.floor}
+                </strong>{' '}
+                on{' '}
+                {getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
+                  ' ' +
+                  userTimeZone()}
+                , the payout will be {values.collateralToken.symbol} 0.00 per
+                LONG and {values.collateralToken.symbol} 1.00 per SHORT token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
@@ -281,13 +288,19 @@ export function ReviewAndSubmit({
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
                 {values.referenceAsset} is{' '}
-                {values.floor < values.inflection &&
-                values.inflection < values.cap
-                  ? 'at or '
-                  : ''}{' '}
-                above {values.cap} on {values.expiryTime.toLocaleString()}, the
-                payout will be 1.00 {values.collateralToken.symbol} per LONG and
-                0.00 {values.collateralToken.symbol} per SHORT token
+                <strong>
+                  {values.floor < values.inflection &&
+                  values.inflection < values.cap
+                    ? 'at or '
+                    : ''}{' '}
+                  above {values.cap}{' '}
+                </strong>{' '}
+                on{' '}
+                {getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
+                  ' ' +
+                  userTimeZone()}
+                , the payout will be 1.00 {values.collateralToken.symbol} per
+                LONG and 0.00 {values.collateralToken.symbol} per SHORT token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
@@ -295,11 +308,19 @@ export function ReviewAndSubmit({
                 style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {values.referenceAsset} is at
-                {' ' + values.inflection} on{' '}
-                {values.expiryTime.toLocaleString()}, the payout will be{' '}
-                {values.gradient.toFixed(2)} {values.collateralToken.symbol} per
-                LONG and {(1 - values.gradient).toFixed(2)}{' '}
+                {values.referenceAsset} is{' '}
+                <strong>
+                  {' '}
+                  at
+                  {' ' + values.inflection}{' '}
+                </strong>{' '}
+                on{' '}
+                {getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
+                  ' ' +
+                  userTimeZone()}
+                , the payout will be {values.gradient.toFixed(2)}{' '}
+                {values.collateralToken.symbol} per LONG and{' '}
+                {(1 - values.gradient).toFixed(2)}{' '}
                 {values.collateralToken.symbol} per SHORT token
               </Typography>
             </Container>

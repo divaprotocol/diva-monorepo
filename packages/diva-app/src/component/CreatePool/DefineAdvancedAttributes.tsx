@@ -43,6 +43,7 @@ export function DefineAdvanced({
       expanded={expanded}
       onChange={() => setExpanded(!expanded)}
       sx={{
+        maxWidth: '48%',
         background: 'none',
         padding: 0,
         borderTop: 'none',

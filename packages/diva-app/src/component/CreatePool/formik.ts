@@ -22,6 +22,7 @@ export type Values = {
   tokenSupply: number
   capacity: string
   dataProvider: string
+  payoutProfile: string
 }
 
 export const initialValues: Values = {
@@ -45,6 +46,7 @@ export const initialValues: Values = {
   tokenSupply: 10,
   capacity: 'Unlimited',
   dataProvider: '',
+  payoutProfile: 'linear',
 }
 
 type Errors = {

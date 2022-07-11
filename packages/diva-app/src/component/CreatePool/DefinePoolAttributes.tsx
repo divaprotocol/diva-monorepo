@@ -49,10 +49,11 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-  const [value, setValue] = useState('binary')
+  const [value, setValue] = useState('linear')
 
   const handleChange = (event) => {
     setValue(event.target.value)
+    formik.setFieldValue('payoutProfile', event.target.value)
   }
   const { referenceAssets, collateralTokens } = useWhitelist()
   const {
@@ -175,6 +176,8 @@ export function DefinePoolAttributes({
         break
     }
   }, [value, formik.values.cap, formik.values.floor, formik.values.inflection])
+
+  console.log(gradient != null)
   return (
     <Stack direction={'row'}>
       <Container sx={{ minWidth: '60%' }}>
@@ -395,14 +398,14 @@ export function DefinePoolAttributes({
                 onChange={handleChange}
               >
                 <FormControlLabel
-                  value="binary"
-                  control={<Radio />}
-                  label="Binary"
-                />
-                <FormControlLabel
                   value="linear"
                   control={<Radio />}
                   label="Linear"
+                />
+                <FormControlLabel
+                  value="binary"
+                  control={<Radio />}
+                  label="Binary"
                 />
                 <FormControlLabel
                   value="custom"
@@ -498,82 +501,90 @@ export function DefinePoolAttributes({
                         </code>
                       </FormHelperText>
                     )}
-                    <Stack
-                      sx={{ justifyContent: 'space-between' }}
-                      direction="row"
-                      spacing={3}
-                    >
-                      <Tooltip
-                        placement="top-end"
-                        title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+                    <Stack sx={{ justifyContent: 'space-between' }} spacing={3}>
+                      <Stack
+                        sx={{ justifyContent: 'space-between' }}
+                        direction="row"
+                        spacing={3}
                       >
-                        <TextField
-                          inputProps={{ min: 0, max: inflection }}
-                          name="floor"
-                          error={formik.errors.floor != null}
-                          id="floor"
-                          onBlur={formik.handleBlur}
-                          label="Floor"
-                          value={floor}
-                          type="number"
-                          onChange={formik.handleChange}
-                          sx={{ width: '100%' }}
-                        />
-                      </Tooltip>
-                      <Tooltip
-                        placement="top-end"
-                        title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+                        <Tooltip
+                          placement="top-end"
+                          title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+                        >
+                          <TextField
+                            inputProps={{ min: 0, max: inflection }}
+                            name="floor"
+                            error={formik.errors.floor != null}
+                            id="floor"
+                            onBlur={formik.handleBlur}
+                            label="Floor"
+                            value={floor}
+                            type="number"
+                            onChange={formik.handleChange}
+                            sx={{ width: '100%' }}
+                          />
+                        </Tooltip>
+                        <Tooltip
+                          placement="top-end"
+                          title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
+                        >
+                          <TextField
+                            error={formik.errors.cap != null}
+                            inputProps={{ min: inflection }}
+                            onBlur={formik.handleBlur}
+                            name="cap"
+                            id="cap"
+                            label="Cap"
+                            value={cap}
+                            type="number"
+                            onChange={formik.handleChange}
+                            sx={{ width: '100%' }}
+                          />
+                        </Tooltip>
+                      </Stack>
+                      <Stack
+                        sx={{ justifyContent: 'space-between' }}
+                        direction="row"
+                        spacing={3}
                       >
-                        <TextField
-                          id="inflection"
-                          error={formik.errors.inflection != null}
-                          name="inflection"
-                          onBlur={formik.handleBlur}
-                          label="Inflection"
-                          inputProps={{
-                            min: floor,
-                            max: cap,
-                          }}
-                          type="number"
-                          onChange={formik.handleChange}
-                          value={inflection}
-                          sx={{ width: '100%' }}
-                        />
-                      </Tooltip>
-                      <Tooltip
-                        placement="top-end"
-                        title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
-                      >
-                        <TextField
-                          error={formik.errors.cap != null}
-                          inputProps={{ min: inflection }}
-                          onBlur={formik.handleBlur}
-                          name="cap"
-                          id="cap"
-                          label="Cap"
-                          value={cap}
-                          type="number"
-                          onChange={formik.handleChange}
-                          sx={{ width: '100%' }}
-                        />
-                      </Tooltip>
-                      <Tooltip
-                        placement="top-end"
-                        title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
-                      >
-                        <TextField
-                          name="gradient"
-                          id="gradient"
-                          label="Gradient"
-                          onBlur={formik.handleBlur}
-                          error={formik.errors.gradient != null}
-                          inputProps={{ min: 0 }}
-                          onChange={formik.handleChange}
-                          value={Number(gradient).toFixed(2)}
-                          type="number"
-                          sx={{ width: '100%' }}
-                        />
-                      </Tooltip>
+                        <Tooltip
+                          placement="top-end"
+                          title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+                        >
+                          <TextField
+                            id="inflection"
+                            error={formik.errors.inflection != null}
+                            name="inflection"
+                            onBlur={formik.handleBlur}
+                            label="Inflection"
+                            inputProps={{
+                              min: floor,
+                              max: cap,
+                            }}
+                            type="number"
+                            onChange={formik.handleChange}
+                            value={inflection}
+                            sx={{ width: '100%' }}
+                          />
+                        </Tooltip>
+                        <Tooltip
+                          placement="top-end"
+                          title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
+                        >
+                          <TextField
+                            name="gradient"
+                            id="gradient"
+                            label="Gradient"
+                            onBlur={formik.handleBlur}
+                            error={formik.errors.gradient != null}
+                            inputProps={{ step: 0.01, min: 0 }}
+                            onChange={formik.handleChange}
+                            value={gradient}
+                            type="number"
+                            sx={{ width: '100%' }}
+                          />
+                        </Tooltip>
+                      </Stack>
                     </Stack>
                     <DefineAdvanced formik={formik} />
                   </FormControl>
@@ -632,9 +643,13 @@ export function DefinePoolAttributes({
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
                 {referenceAsset} is{' '}
-                {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
-                {floor} on {expiryTime.toLocaleString()}, the payout will be{' '}
-                {collateralToken.symbol} 0.00 per LONG and{' '}
+                <strong>
+                  {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
+                  {floor}{' '}
+                </strong>{' '}
+                on{' '}
+                {getDateTime(Number(expiryTime) / 1000) + ' ' + userTimeZone()},
+                the payout will be {collateralToken.symbol} 0.00 per LONG and{' '}
                 {collateralToken.symbol} 1.00 per SHORT token
               </Typography>
               <Typography
@@ -644,10 +659,16 @@ export function DefinePoolAttributes({
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
                 {referenceAsset} is{' '}
-                {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
-                {cap} on {expiryTime.toLocaleString()}, the payout will be 1.00{' '}
-                {collateralToken.symbol} per LONG and 0.00{' '}
-                {collateralToken.symbol} per SHORT token
+                <strong>
+                  {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
+                  {cap}{' '}
+                </strong>{' '}
+                on{' '}
+                {getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
+                  ' ' +
+                  userTimeZone()}
+                , the payout will be 1.00 {collateralToken.symbol} per LONG and
+                0.00 {collateralToken.symbol} per SHORT token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
@@ -655,11 +676,21 @@ export function DefinePoolAttributes({
                 style={{ color: 'white' }}
               >
                 <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is at
-                {' ' + inflection} on {expiryTime.toLocaleString()}, the payout
-                will be {gradient.toFixed(2)} {collateralToken.symbol} per LONG
-                and {(1 - gradient).toFixed(2)} {collateralToken.symbol} per
-                SHORT token
+                {referenceAsset} is{' '}
+                <strong>
+                  {' '}
+                  at
+                  {' ' + inflection}{' '}
+                </strong>{' '}
+                on{' '}
+                {getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
+                  ' ' +
+                  userTimeZone()}
+                , the payout will be{' '}
+                {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
+                {collateralToken.symbol} per LONG and{' '}
+                {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
+                {collateralToken.symbol} per SHORT token
               </Typography>
             </Container>
           </Card>
