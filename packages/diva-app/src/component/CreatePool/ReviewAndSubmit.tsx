@@ -263,35 +263,43 @@ export function ReviewAndSubmit({
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at or below {values.floor} on{' '}
-                {values.expiryTime.toLocaleString()}, the payout will be 0.0{' '}
-                {values.collateralToken.symbol} per long and 1.0{' '}
-                {values.collateralToken.symbol} per short position token
+                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
+                {values.referenceAsset} is{' '}
+                {values.floor < values.inflection &&
+                values.inflection < values.cap
+                  ? 'at or '
+                  : ''}{' '}
+                below {values.floor} on {values.expiryTime.toLocaleString()},
+                the payout will be {values.collateralToken.symbol} 0.00 per LONG
+                and {values.collateralToken.symbol} 1.00 per SHORT token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at or above {values.cap} on {values.expiryTime.toLocaleString()}
-                , the payout will be 1.0 {values.collateralToken.symbol} per
-                long and 0.0 {values.collateralToken.symbol} per short position
-                token
+                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
+                {values.referenceAsset} is{' '}
+                {values.floor < values.inflection &&
+                values.inflection < values.cap
+                  ? 'at or '
+                  : ''}{' '}
+                above {values.cap} on {values.expiryTime.toLocaleString()}, the
+                payout will be 1.00 {values.collateralToken.symbol} per LONG and
+                0.00 {values.collateralToken.symbol} per SHORT token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at
+                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
+                {values.referenceAsset} is at
                 {' ' + values.inflection} on{' '}
                 {values.expiryTime.toLocaleString()}, the payout will be{' '}
-                {values.gradient} {values.collateralToken.symbol} per long and{' '}
-                {1 - values.gradient} {values.collateralToken.symbol} per short
-                position token
+                {values.gradient.toFixed(2)} {values.collateralToken.symbol} per
+                LONG and {(1 - values.gradient).toFixed(2)}{' '}
+                {values.collateralToken.symbol} per SHORT token
               </Typography>
             </Container>
           </Card>

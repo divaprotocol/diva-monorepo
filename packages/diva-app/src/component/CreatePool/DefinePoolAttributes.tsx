@@ -376,8 +376,8 @@ export function DefinePoolAttributes({
                   )}
                   {!isNaN(formik.values.tokenSupply) && (
                     <FormHelperText>
-                      You recieve {formik.values.tokenSupply} Long Tokens and{' '}
-                      {formik.values.tokenSupply} Short Tokens
+                      You receive {formik.values.tokenSupply} LONG and{' '}
+                      {formik.values.tokenSupply} SHORT tokens
                     </FormHelperText>
                   )}
                 </FormControl>
@@ -568,7 +568,7 @@ export function DefinePoolAttributes({
                           error={formik.errors.gradient != null}
                           inputProps={{ min: 0 }}
                           onChange={formik.handleChange}
-                          value={gradient}
+                          value={Number(gradient).toFixed(2)}
                           type="number"
                           sx={{ width: '100%' }}
                         />
@@ -629,31 +629,36 @@ export function DefinePoolAttributes({
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at or below {floor} on {expiryTime.toLocaleString()}, the payout
-                will be 0.0 {collateralToken.symbol} per long and 1.0{' '}
-                {collateralToken.symbol} per short position token
+                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
+                {referenceAsset} is{' '}
+                {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
+                {floor} on {expiryTime.toLocaleString()}, the payout will be{' '}
+                {collateralToken.symbol} 0.00 per LONG and{' '}
+                {collateralToken.symbol} 1.00 per SHORT token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at or above {cap} on {expiryTime.toLocaleString()}, the payout
-                will be 1.0 {collateralToken.symbol} per long and 0.0{' '}
-                {collateralToken.symbol} per short position token
+                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
+                {referenceAsset} is{' '}
+                {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
+                {cap} on {expiryTime.toLocaleString()}, the payout will be 1.00{' '}
+                {collateralToken.symbol} per LONG and 0.00{' '}
+                {collateralToken.symbol} per SHORT token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.01 }} /> If ETH/USD is
-                at
+                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
+                {referenceAsset} is at
                 {' ' + inflection} on {expiryTime.toLocaleString()}, the payout
-                will be {gradient} {collateralToken.symbol} per long and{' '}
-                {1 - gradient} {collateralToken.symbol} per short position token
+                will be {gradient.toFixed(2)} {collateralToken.symbol} per LONG
+                and {(1 - gradient).toFixed(2)} {collateralToken.symbol} per
+                SHORT token
               </Typography>
             </Container>
           </Card>

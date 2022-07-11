@@ -161,7 +161,7 @@ export function SelectDataFeedProvider({
               sx={{ mt: theme.spacing(2), pb: theme.spacing(2) }}
               style={{ color: 'gray' }}
             >
-              url dot com {linkSVG}
+              n/a {linkSVG}
             </Typography>
           </Container>
         </Card>
