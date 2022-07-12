@@ -123,6 +123,17 @@ export function ReviewAndSubmit({
                   <Typography fontSize={'0.85rem'}>{values.floor}</Typography>
                 </Stack>
               )}
+              {!isNaN(values.cap) && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Cap
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>{values.cap}</Typography>
+                </Stack>
+              )}
               {!isNaN(values.inflection) && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
@@ -134,17 +145,6 @@ export function ReviewAndSubmit({
                   <Typography fontSize={'0.85rem'}>
                     {values.inflection}
                   </Typography>
-                </Stack>
-              )}
-              {!isNaN(values.cap) && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Cap
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>{values.cap}</Typography>
                 </Stack>
               )}
               {!isNaN(values.gradient) && (
@@ -185,7 +185,7 @@ export function ReviewAndSubmit({
               </Stack>
               <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                 <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Long / Short Token Supply
+                  LONG / SHORT Token Supply
                 </Typography>
                 <Typography fontSize={'0.85rem'}>
                   {values.tokenSupply}
