@@ -178,12 +178,14 @@ export function DefinePoolAttributes({
     }
   }, [value, formik.values.cap, formik.values.floor, formik.values.inflection])
   useEffect(() => {
-    switch (payoutProfile) {
+    switch (formik.values.payoutProfile) {
       case 'Binary':
         formik.setFieldValue('cap', formik.values.inflection)
         formik.setFieldValue('floor', formik.values.inflection)
+        formik.setFieldValue('gradient', 1)
         break
       case 'Linear':
+        formik.setFieldValue('gradient', 0.5)
         formik.setFieldValue(
           'cap',
           formik.values.inflection + formik.values.inflection / 2
@@ -191,10 +193,6 @@ export function DefinePoolAttributes({
         formik.setFieldValue(
           'floor',
           formik.values.inflection - formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'inflection',
-          (formik.values.cap + formik.values.floor) / 2
         )
         break
       case 'Custom':
@@ -467,7 +465,13 @@ export function DefinePoolAttributes({
                         max: cap,
                       }}
                       type="number"
-                      onChange={formik.handleChange}
+                      onChange={(event) => {
+                        formik.handleChange(event)
+                        if (payoutProfile === 'Binary') {
+                          formik.setFieldValue('cap', event.target.value)
+                          formik.setFieldValue('floor', event.target.value)
+                        }
+                      }}
                       value={inflection}
                       sx={{ width: '48%' }}
                     />
