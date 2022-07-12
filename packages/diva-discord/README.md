@@ -8,9 +8,11 @@ invite link:
 https://discord.com/api/oauth2/authorize?client_id=960213520836862073&permissions=1644905889015&scope=bot%20applications.commands
 
 start bot in powershell via:
-
 - cd packages/diva-discord
 - yarn hardhat run index.js --network ropsten
+
+extract list of users
+- node readData.js
 
 test cases (each should be tested as / command and as message):
 

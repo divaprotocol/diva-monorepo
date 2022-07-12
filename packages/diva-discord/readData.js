@@ -12,9 +12,9 @@ const dbRegisteredUsers = new Enmap(
 var regUsers = [];
 var counter = 0
 
-dbRegisteredUsers.forEach((map) => {
+dbRegisteredUsers.forEach((value, map) => {
     // stringify JSON Object
-    regUsers.push(map);
+    regUsers.push([map, value]);
     counter= counter+1
 });
 

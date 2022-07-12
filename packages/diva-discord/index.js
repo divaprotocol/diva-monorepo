@@ -13,6 +13,8 @@ const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS,
                                         ]});
 
 const fs = require('fs')
+// add timestamps in front of log messages
+require('console-stamp')(console, '[yyyy/mm/dd HH:MM:ss.l]');
 
 client.commands = new Discord.Collection()
 const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'))
@@ -47,14 +49,21 @@ const dbRegisteredUsers = new Enmap(
 async function watchQueue() {
     //initialze nonceCounter
     let nonceCounter = await senderAccount.getTransactionCount('pending')
+    let loopCounter = 0
     while (true) {
+        loopCounter = loopCounter + 1
+        if (loopCounter == 30) {
+            console.log("watchQueue still running")
+            loopCounter = 0
+        }
         while (Object.keys(sendQueue).length > 0 ) {
             try {
+                console.log(`Getting next item of queue - current length: ${Object.keys(sendQueue).length}`)
                 //get next receiver interaction/message from queue
-                
                 const userId = Object.keys(sendQueue)[0]
                 const [interaction, blnNewUser] = sendQueue[userId]
-                
+                delete sendQueue[userId]
+
                 if (blnNewUser) {
                     address = (interaction instanceof Discord.Interaction) ? 
                         interaction.options.getString('address') :
@@ -86,16 +95,18 @@ async function watchQueue() {
                     replyText = `You will shortly receive 10000 dUSD tokens on ropsten.\n  `
                         +`https://ropsten.etherscan.io/tx/${tx.hash}.`
                 }
-
-                //console.log(interaction instanceof Discord.Integration);
-                (interaction instanceof Discord.Interaction) ? interaction.reply({
-                    content:  replyText,
-                    ephemeral: true,
-                }) : interaction.reply(replyText)
-
+                
+                console.log(replyText);
+                // we need await to be able to catch an error if a user deleted the original message
+                if  (interaction instanceof Discord.Interaction) {
+                    await interaction.editReply({
+                        content:  replyText,
+                        ephemeral: true })
+                } else {
+                    await interaction.reply(replyText)
+                }
                 //remove user from queuedUsers dict
                 console.log(`removing user ${userId} from the queue`)
-                delete sendQueue[userId]
             } catch(e){
                 console.error(e)
             }
@@ -171,7 +182,7 @@ client.on('interactionCreate', async(interaction) =>{
                     if (addToSendQueue) {
                         let userId = interaction.user?.id
                         if (userId in sendQueue) {
-                            interaction.reply({
+                            await interaction.reply({
                                 content:  `You are already added to the queue. Please wait for the bot to process your request.`,
                                 ephemeral: true,
                             })
@@ -197,19 +208,20 @@ client.on('interactionCreate', async(interaction) =>{
 
 client.on("messageCreate", async (message) => {
     try{
+
         if(!message.content.startsWith(Config.PREFIX)) return;
         let args = message.content.slice(Config.PREFIX.length).split(" ");
         let commandName = args.shift().toLowerCase();
-
+        console.log(`${message.author.tag} sent "${message.content}".`);
         if (message.channel.id == channelId &&
             message.member.roles.cache.some(r => r.name === permissionedRegisterRole) ) {
-            console.log(`${message.author.tag} sent "${message.content}".`);
+            
             if (commandName === 'register' || commandName === 'claim-test-assets' ) {
                 addToSendQueue = await client.commands.get(commandName).execute(message,dbRegisteredUsers);
                 if (addToSendQueue) {
                     let userId = message.author.id
                     if (userId in sendQueue) {
-                        message.reply(`You are already added to the queue. Please wait for the bot to process your request`)
+                        await message.reply(`You are already added to the queue. Please wait for the bot to process your request`)
                     }  else {
                         console.log(`adding user ${userId} to the queue`);
                         sendQueue[userId] = [message, (commandName=="register")]

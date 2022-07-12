@@ -33,14 +33,17 @@ module.exports = {
                     +`You need to wait ${new Date(timeUntilNewClaim).toISOString().slice(11,19)} before the next claim`
                 } else {
                     addToSendQueue = true
+                    if (interaction instanceof Discord.Interaction) {
+                        await interaction.deferReply({ephemeral: true})
+                    }
                 }
             }
 
             console.log(replyText);
             if (replyText != ""){
                 (interaction instanceof Discord.Message) ? 
-                    interaction.reply(replyText) :
-                    interaction.reply({
+                await interaction.reply(replyText) :
+                await interaction.reply({
                         content:  replyText,
                         ephemeral: true,
                         })

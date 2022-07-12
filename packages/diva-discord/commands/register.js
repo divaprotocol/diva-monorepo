@@ -32,13 +32,16 @@ module.exports = {
                 replyText = `The entered address ${address} is not a valid Ethereum wallet. Please check your input` 
             } else {
                 addToSendQueue = true
+                if (interaction instanceof Discord.Interaction) {
+                    await interaction.deferReply({ephemeral: true})
+                }
             }
 
             console.log(replyText);
             if (replyText != "") {
                 (interaction instanceof Discord.Message) ?
-                    interaction.reply(replyText) :
-                    interaction.reply({
+                    await interaction.reply(replyText) :
+                    await interaction.reply({
                         content:  replyText,
                         ephemeral: true,
                         })
