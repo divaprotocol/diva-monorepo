@@ -67,6 +67,7 @@ export function DefinePoolAttributes({
     cap,
     floor,
     gradient,
+    payoutProfile,
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
   useEffect(() => {
@@ -176,7 +177,42 @@ export function DefinePoolAttributes({
         break
     }
   }, [value, formik.values.cap, formik.values.floor, formik.values.inflection])
-
+  useEffect(() => {
+    switch (payoutProfile) {
+      case 'Binary':
+        formik.setFieldValue('cap', formik.values.inflection)
+        formik.setFieldValue('floor', formik.values.inflection)
+        break
+      case 'Linear':
+        formik.setFieldValue(
+          'cap',
+          formik.values.inflection + formik.values.inflection / 2
+        )
+        formik.setFieldValue(
+          'floor',
+          formik.values.inflection - formik.values.inflection / 2
+        )
+        formik.setFieldValue(
+          'inflection',
+          (formik.values.cap + formik.values.floor) / 2
+        )
+        break
+      case 'Custom':
+        formik.setFieldValue(
+          'cap',
+          formik.values.inflection + formik.values.inflection / 2
+        )
+        formik.setFieldValue(
+          'floor',
+          formik.values.inflection - formik.values.inflection / 2
+        )
+        formik.setFieldValue(
+          'inflection',
+          (formik.values.cap + formik.values.floor) / 2
+        )
+        break
+    }
+  }, [payoutProfile])
   return (
     <Stack direction={'row'}>
       <Container sx={{ minWidth: '60%' }}>
