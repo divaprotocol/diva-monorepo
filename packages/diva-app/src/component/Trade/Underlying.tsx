@@ -186,7 +186,7 @@ export default function Underlying() {
                   refAsset={pool.referenceAsset}
                   payOut={pool.collateralToken.symbol}
                   currentPrice={currentPrice}
-                  w={762}
+                  w={600}
                   h={336}
                   isLong={OptionParams.IsLong}
                   breakEven={Number(breakEven).toFixed(2)}
