@@ -73,6 +73,7 @@ export default function SellMarket(props: {
   const collateralTokenUnit = parseUnits('1', decimals)
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
+  const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
   const [youReceive, setYouReceive] = React.useState(ZERO)
   const [existingBuyLimitOrders, setExistingBuyLimitOrders] = React.useState([])
@@ -96,10 +97,17 @@ export default function SellMarket(props: {
     if (value !== '') {
       const nbrOptions = parseUnits(value)
       setNumberOfOptions(nbrOptions)
+
+      // Set trading fee
+      const feeAmount = nbrOptions
+        .mul(parseUnits(tradingFee.toString()))
+        .div(positionTokenUnit)
+      setFeeAmount(feeAmount)
     } else {
       setYouReceive(ZERO)
       setNumberOfOptions(ZERO)
       setOrderBtnDisabled(true)
+      setFeeAmount(ZERO)
     }
   }
 
@@ -159,10 +167,6 @@ export default function SellMarket(props: {
         if (optionBalance.lt(numberOfOptionsInclFees)) {
           alert(`you don't have sufficient balance to complete order`)
         } else {
-          // TODO: Show the additional fee amount somewhere in the order widget
-          const feeAmount = numberOfOptionsInclFees.sub(numberOfOptions)
-          // TODO: Add state hook for fees
-
           if (numberOfOptionsInclFees.gt(remainingAllowance)) {
             // Entered position token amount exceeds remaining allowance ...
 
@@ -588,16 +592,31 @@ export default function SellMarket(props: {
           >
             {params.tokenType.toUpperCase() + ' '}
           </FormLabel>
-          <Stack spacing={0.7} alignItems="flex-end">
+          <Stack alignItems="flex-end">
             <FormInput
               width={'78.3px'}
               type="text"
               onChange={(event) => handleNumberOfOptions(event.target.value)}
             />
-            <FormLabel sx={{ color: 'Gray', fontSize: 11 }}>
+            <FormLabel
+              sx={{
+                color: 'Gray',
+                fontSize: 11,
+                alignItems: 'flex-end',
+                marginTop: '2px',
+              }}
+            >
               {toExponentialOrNumber(
-                Number(formatUnits(numberOfOptions.add(0)))
-              )}{' '}
+                Number(formatUnits(numberOfOptions.add(feeAmount)))
+              )}
+            </FormLabel>
+            <FormLabel
+              sx={{
+                color: 'Gray',
+                fontSize: 11,
+                alignItems: 'flex-end',
+              }}
+            >
               (incl. 1% fee)
             </FormLabel>
           </Stack>
