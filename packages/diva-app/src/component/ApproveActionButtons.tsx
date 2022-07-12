@@ -89,7 +89,7 @@ export const ApproveActionButtons = ({
         justifyContent: 'flex-end',
       }}
     >
-      <Stack direction="row" spacing={theme.spacing(2)}>
+      <Stack direction="row" spacing={theme.spacing(3)}>
         {approveLoading ? (
           <Container sx={{ minWidth: theme.spacing(20) }}>
             <CircularProgress />
@@ -133,9 +133,9 @@ export const ApproveActionButtons = ({
                   })
               }}
               style={{
-                maxWidth: theme.spacing(28),
+                maxWidth: theme.spacing(26),
                 maxHeight: theme.spacing(5),
-                minWidth: theme.spacing(28),
+                minWidth: theme.spacing(26),
                 minHeight: theme.spacing(5),
               }}
             >
@@ -250,9 +250,9 @@ export const ApproveActionButtons = ({
               }
             }}
             style={{
-              maxWidth: theme.spacing(28),
+              maxWidth: theme.spacing(26),
               maxHeight: theme.spacing(5),
-              minWidth: theme.spacing(28),
+              minWidth: theme.spacing(26),
               minHeight: theme.spacing(5),
             }}
           >

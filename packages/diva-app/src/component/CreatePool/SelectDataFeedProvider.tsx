@@ -97,11 +97,11 @@ export function SelectDataFeedProvider({
           Select a <strong>trusted</strong> data provider for this pool.
         </Typography>
         <FormControl
-          fullWidth
           error={formik.errors.dataProvider != null}
           sx={{
             paddingTop: theme.spacing(1),
             paddingBottom: theme.spacing(5),
+            width: '50%',
           }}
         >
           <Autocomplete
@@ -138,7 +138,7 @@ export function SelectDataFeedProvider({
           />
         </FormControl>
       </Container>
-      <Stack>
+      <Stack pr={theme.spacing(12)}>
         <Typography pb={1} variant="subtitle1">
           Info
         </Typography>
@@ -151,7 +151,7 @@ export function SelectDataFeedProvider({
               'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
           }}
         >
-          <Container>
+          <Container maxWidth="sm">
             <Typography pt={theme.spacing(1)} variant="subtitle1">
               Oracle Address
             </Typography>

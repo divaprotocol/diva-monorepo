@@ -177,7 +177,6 @@ export function DefinePoolAttributes({
     }
   }, [value, formik.values.cap, formik.values.floor, formik.values.inflection])
 
-  console.log(gradient != null)
   return (
     <Stack direction={'row'}>
       <Container sx={{ minWidth: '60%' }}>
@@ -445,7 +444,7 @@ export function DefinePoolAttributes({
                   <Stack
                     // sx={{ justifyContent: 'space-between' }}
                     direction="row"
-                    spacing={3}
+                    spacing={2}
                   >
                     <Tooltip
                       placement="top-end"
@@ -503,7 +502,7 @@ export function DefinePoolAttributes({
                       <Stack
                         sx={{ justifyContent: 'space-between' }}
                         direction="row"
-                        spacing={3}
+                        spacing={2}
                       >
                         <Tooltip
                           placement="top-end"
@@ -543,7 +542,7 @@ export function DefinePoolAttributes({
                       <Stack
                         sx={{ justifyContent: 'space-between' }}
                         direction="row"
-                        spacing={3}
+                        spacing={2}
                       >
                         <Tooltip
                           placement="top-end"
