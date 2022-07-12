@@ -157,7 +157,7 @@ export function CreatePool() {
                 variant="text"
                 sx={{
                   mt: theme.spacing(8),
-                  ml: theme.spacing(80),
+                  ml: theme.spacing(115),
                 }}
                 onClick={() => {
                   history.push('/dashboard/mypositions')

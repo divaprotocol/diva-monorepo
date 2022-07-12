@@ -729,8 +729,10 @@ export function DefinePoolAttributes({
                 sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
+                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} />
+                <span style={{ color: 'blue' }}>I am blue</span>
+                <span style={{ color: 'red' }}>i am red</span>
+                If {referenceAsset} is{' '}
                 <strong>
                   {' '}
                   at
