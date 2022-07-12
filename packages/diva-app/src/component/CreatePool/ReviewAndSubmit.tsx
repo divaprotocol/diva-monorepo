@@ -156,7 +156,7 @@ export function ReviewAndSubmit({
                     Gradient
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.gradient}
+                    {Number(values.gradient).toFixed(2)}
                   </Typography>
                 </Stack>
               )}
@@ -280,7 +280,9 @@ export function ReviewAndSubmit({
                   below {values.floor}
                 </strong>{' '}
                 on{' '}
-                {getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
+                {values.expiryTime.toLocaleString().slice(0, 11) +
+                  ' ' +
+                  getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
                   ' ' +
                   userTimeZone()}
                 , the payout will be {values.collateralToken.symbol} 0.00 per
@@ -301,7 +303,9 @@ export function ReviewAndSubmit({
                   above {values.cap}{' '}
                 </strong>{' '}
                 on{' '}
-                {getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
+                {values.expiryTime.toLocaleString().slice(0, 11) +
+                  ' ' +
+                  getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
                   ' ' +
                   userTimeZone()}
                 , the payout will be 1.00 {values.collateralToken.symbol} per
@@ -320,7 +324,9 @@ export function ReviewAndSubmit({
                   {' ' + values.inflection}{' '}
                 </strong>{' '}
                 on{' '}
-                {getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
+                {values.expiryTime.toLocaleString().slice(0, 11) +
+                  ' ' +
+                  getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
                   ' ' +
                   userTimeZone()}
                 , the payout will be {values.gradient.toFixed(2)}{' '}

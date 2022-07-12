@@ -49,7 +49,7 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-  const [value, setValue] = useState('linear')
+  const [value, setValue] = useState('Binary')
 
   const handleChange = (event) => {
     setValue(event.target.value)
@@ -398,52 +398,50 @@ export function DefinePoolAttributes({
                 onChange={handleChange}
               >
                 <FormControlLabel
-                  value="linear"
-                  control={<Radio />}
-                  label="Linear"
-                />
-                <FormControlLabel
-                  value="binary"
+                  value="Binary"
                   control={<Radio />}
                   label="Binary"
                 />
                 <FormControlLabel
-                  value="custom"
+                  value="Linear"
+                  control={<Radio />}
+                  label="Linear"
+                />
+                <FormControlLabel
+                  value="Custom"
                   control={<Radio />}
                   label="Custom"
                 />
               </RadioGroup>
             </FormControl>
-            <Stack pb={3} spacing={2} direction="row">
-              {value === 'binary' && (
-                <Box pt={2} width="90%">
-                  <Stack spacing={3}>
-                    <Tooltip
-                      placement="top-end"
-                      title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
-                    >
-                      <TextField
-                        id="inflection"
-                        error={formik.errors.inflection != null}
-                        name="inflection"
-                        onBlur={formik.handleBlur}
-                        label="Inflection"
-                        inputProps={{
-                          min: floor,
-                          max: cap,
-                        }}
-                        type="number"
-                        onChange={formik.handleChange}
-                        value={inflection}
-                        sx={{ width: '100%' }}
-                      />
-                    </Tooltip>
-                    <DefineAdvanced formik={formik} />
-                  </Stack>
+            <Stack pr={-5} pb={3} spacing={2} direction="row">
+              {value === 'Binary' && (
+                <Box pt={2} width="100%">
+                  <Tooltip
+                    placement="top-end"
+                    title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+                  >
+                    <TextField
+                      id="inflection"
+                      error={formik.errors.inflection != null}
+                      name="inflection"
+                      onBlur={formik.handleBlur}
+                      label="Inflection"
+                      inputProps={{
+                        min: floor,
+                        max: cap,
+                      }}
+                      type="number"
+                      onChange={formik.handleChange}
+                      value={inflection}
+                      sx={{ width: '48%' }}
+                    />
+                  </Tooltip>
+                  <DefineAdvanced formik={formik} />
                 </Box>
               )}
-              {value === 'linear' && (
-                <Box pt={2} width="90%">
+              {value === 'Linear' && (
+                <Box pt={2} width="100%">
                   <Stack
                     // sx={{ justifyContent: 'space-between' }}
                     direction="row"
@@ -487,8 +485,8 @@ export function DefinePoolAttributes({
                   <DefineAdvanced formik={formik} />
                 </Box>
               )}
-              {value === 'custom' && (
-                <Box pt={2} width="90%">
+              {value === 'Custom' && (
+                <Box pt={2} width="100%">
                   <FormControl fullWidth error={hasPaymentProfileError}>
                     {hasPaymentProfileError && (
                       <FormHelperText
@@ -648,7 +646,9 @@ export function DefinePoolAttributes({
                   {floor}{' '}
                 </strong>{' '}
                 on{' '}
-                {getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
+                {expiryTime.toLocaleString().slice(0, 11) +
+                  ' ' +
+                  getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
                   ' ' +
                   userTimeZone()}
                 , the payout will be {collateralToken.symbol} 0.00 per LONG and{' '}
@@ -666,7 +666,9 @@ export function DefinePoolAttributes({
                   {cap}{' '}
                 </strong>{' '}
                 on{' '}
-                {getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
+                {expiryTime.toLocaleString().slice(0, 11) +
+                  ' ' +
+                  getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
                   ' ' +
                   userTimeZone()}
                 , the payout will be 1.00 {collateralToken.symbol} per LONG and
@@ -685,7 +687,9 @@ export function DefinePoolAttributes({
                   {' ' + inflection}{' '}
                 </strong>{' '}
                 on{' '}
-                {getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
+                {expiryTime.toLocaleString().slice(0, 11) +
+                  ' ' +
+                  getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
                   ' ' +
                   userTimeZone()}
                 , the payout will be{' '}

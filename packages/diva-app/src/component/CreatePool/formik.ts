@@ -46,7 +46,7 @@ export const initialValues: Values = {
   tokenSupply: 10,
   capacity: 'Unlimited',
   dataProvider: '',
-  payoutProfile: 'linear',
+  payoutProfile: 'Binary',
 }
 
 type Errors = {
