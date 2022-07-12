@@ -6,6 +6,7 @@ import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
+import { BigNumber } from 'ethers'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
@@ -77,13 +78,21 @@ function mapOrderData(
       if (remainingTakerAmount == makerAmount) {
         orders.nbrOptions = Number(makerAmount)
       } else {
+        const quantity2 = Number(
+          formatUnits(
+            BigNumber.from(metaData.remainingFillableTakerAmount)
+              .mul(BigNumber.from(order.takerAmount))
+              .div(BigNumber.from(order.makerAmount))
+          )
+        )
         const quantity = Number(remainingTakerAmount) / askAmount // TODO
         orders.nbrOptions = quantity
+        orders.nbrOptions2 = quantity2
       }
     }
-
     return orders
   })
+  console.log('orderbookTemp', orderbookTemp)
 
   // Filter out orders with quantity = 0 (may happen if maker has revoked the approval)
   const orderbook = orderbookTemp.filter((object) => {
@@ -164,6 +173,7 @@ export default function OrderBook(props: {
         responseBuy = rBuy
       }
     }
+    console.log('responseBuy', responseBuy)
 
     const orderBookBuy = mapOrderData(responseBuy, option, OrderType.BUY)
     orders.push(orderBookBuy)

@@ -203,7 +203,6 @@ export const get0xOpenOrders = async (
     chainId,
     provider
   )
-
   return fillableOrders
 }
 
