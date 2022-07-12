@@ -147,7 +147,7 @@ class DIVATradeChart extends Component {
       .call((g) =>
         g
           .selectAll('.tick:not(:first-of-type) line')
-          .attr('stroke-opacity', 0.3)
+          .attr('stroke-opacity', 0.5)
           .style('stroke', '#3393E0')
       )
       .call((g) => g.selectAll('.tick text').attr('x', 4).attr('dy', -4))
@@ -373,25 +373,25 @@ class DIVATradeChart extends Component {
         })
         .style('stroke', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
-          return y.invert(pos.y) >= breakEven ? redColorCode : blueColorCode
+          return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
         })
 
       d3.select('.mouse-per-line circle').style('fill', function (d, i) {
         var pos = yPos(d, i, mouse[0], lines)
-        return y.invert(pos.y) >= breakEven ? redColorCode : blueColorCode
+        return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
       })
 
       d3.select('.tooltip-per-line .tooltip-payout').style(
         'fill',
         function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
-          return y.invert(pos.y) >= breakEven ? redColorCode : blueColorCode
+          return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
         }
       )
 
       d3.select('.line').style('stroke', function (d, i) {
         var pos = yPos(d, i, mouse[0], lines)
-        return y.invert(pos.y) >= breakEven ? redColorCode : blueColorCode
+        return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
       })
 
       d3.selectAll('.mouse-per-line').attr('transform', function (d, i) {

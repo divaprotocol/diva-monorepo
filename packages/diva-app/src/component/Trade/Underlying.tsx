@@ -91,7 +91,6 @@ export default function Underlying() {
   const currentPrice = useAppSelector(
     selectUnderlyingPrice(pool?.referenceAsset)
   )
-  console.log('curent', currentPrice)
   useEffect(() => {
     if (pool?.referenceAsset != null)
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
