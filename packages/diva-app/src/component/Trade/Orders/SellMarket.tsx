@@ -165,7 +165,9 @@ export default function SellMarket(props: {
           .mul(parseUnits(feeMultiplier))
           .div(positionTokenUnit)
         if (optionBalance.lt(numberOfOptionsInclFees)) {
-          alert(`you don't have sufficient balance to complete order`)
+          alert(
+            `Insufficient ${params.tokenType.toUpperCase()} token balance. Try to reduce the entered amount to account for fees.`
+          )
         } else {
           if (numberOfOptionsInclFees.gt(remainingAllowance)) {
             // Entered position token amount exceeds remaining allowance ...
