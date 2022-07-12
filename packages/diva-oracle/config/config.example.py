@@ -2,9 +2,11 @@ PRIVATE_KEY = ''
 PUBLIC_KEY = ''
 dataprovider = PUBLIC_KEY
 
-
-email = ""
-emailpassword = ""
+# This is for gmail
+# This requires 2FA along with
+# https://stackoverflow.com/questions/46445269/gmail-blocks-login-attempt-from-python-with-app-specific-password
+sender_email = ""
+pass_code = ""
 
 PROVIDER_URL = {
     "ropsten": 'https://ropsten.infura.io/v3/<YOUR_API_KEY>',

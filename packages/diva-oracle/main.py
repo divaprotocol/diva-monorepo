@@ -33,6 +33,7 @@ def query(lastId):
 message = "Subject: Pending Pool Transactions \n"
 
 def run(network, w3, contract):
+    #sendEmail()
     print("#########################################")
     print('\033[1m' + "Network: {}".format(network) + '\033[0m')
     max_time_away = dt.timedelta(minutes=config.max_time_away)
