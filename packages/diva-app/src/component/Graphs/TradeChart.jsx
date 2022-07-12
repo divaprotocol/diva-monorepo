@@ -32,9 +32,9 @@ export default function DIVATradeChart(props) {
   componentDidMount() {
     const {
       data,
-      w,
-      h,
-      refAsset,
+      w, //Width
+      h, //Height
+      refAsset, //ReferenceAsset
       payOut,
       isLong,
       breakEven,
@@ -44,8 +44,9 @@ export default function DIVATradeChart(props) {
     } = this.props
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
     const reffeenceAsset = refAsset.slice(0, 8)
+    console.log('data again', reffeenceAsset)
     // Set the dimensions and margins of the graph
-    var margin = { top: 15, right: 2, bottom: 40, left: 20 },
+    var margin = { top: 15, right: 2, bottom: 20, left: 20 },
       width = w - margin.left - margin.right,
       height = h - margin.top - margin.bottom
 
@@ -89,25 +90,43 @@ export default function DIVATradeChart(props) {
       .append('circle')
       .attr('cx', 150)
       .attr('cy', h)
-      .attr('r', 6)
+      .attr('r', function () {
+        return cap == floor ? 0 : 6
+      })
       .style('fill', '#83BD67')
     svg
       .append('circle')
       .attr('cx', 300)
       .attr('cy', h)
-      .attr('r', 6)
+      .attr('r', currentPrice ? 6 : 0)
       .style('fill', '#3393E0')
     svg
       .append('text')
       .attr('x', 20)
       .attr('y', h)
+      .attr('opacity', function () {
+        return cap == floor ? 0 : 1
+      })
       .text('Floor' + ' ' + '(' + floor + ')')
+      .style('font-size', '15px')
+      .attr('alignment-baseline', 'middle')
+    svg
+      .append('text')
+      .attr('x', 20)
+      .attr('y', h)
+      .attr('opacity', function () {
+        return cap == floor ? 1 : 0
+      })
+      .text('Inflection' + ' ' + '(' + cap + ')') //Binary payoff
       .style('font-size', '15px')
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
       .attr('x', 165)
       .attr('y', h)
+      .attr('opacity', function () {
+        return cap == floor ? 0 : 1
+      })
       .text('Cap' + ' ' + '(' + cap + ')')
       .style('font-size', '15px')
       .attr('alignment-baseline', 'middle')
@@ -115,6 +134,7 @@ export default function DIVATradeChart(props) {
       .append('text')
       .attr('x', 315)
       .attr('y', h)
+      .attr('opacity', currentPrice ? 1 : 0)
       .text('Current price' + ' ' + '(' + currentPrice + ')')
       .style('font-size', '15px')
       .attr('alignment-baseline', 'middle')
@@ -188,7 +208,7 @@ export default function DIVATradeChart(props) {
       .attr('d', valueline)
       .style('fill', 'none')
       .style('stroke', 'grey')
-      .style('stroke-width', '1px')
+      .style('stroke-width', '4px')
 
     // Format x axis
     d3.select('.xAxisG path')
@@ -203,7 +223,7 @@ export default function DIVATradeChart(props) {
       .enter()
       .append('circle')
       .filter(function (d) {
-        return (d.x = currentPrice)
+        return (d.x = currentPrice ? currentPrice : null)
       })
       .attr('cx', function (d) {
         return x(d.x)
@@ -272,72 +292,82 @@ export default function DIVATradeChart(props) {
       .data(data)
       .enter()
       .append('circle')
-      .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
-      .filter(function (d) {
-        return (d.x = breakEven ? breakEven : null)
-      })
-      .attr('cx', function (d) {
-        return x(d.x)
-      })
-      .attr('cy', function () {
-        return y(0)
-      })
-      .attr('r', 5)
-      .style('fill', '#9747FF')
-    // for current price point
-    svg
-      .append('g')
-      .selectAll('dot')
-      .data(data)
-      .enter()
-      .append('circle')
-      .filter(function (d) {
-        return (d.x = currentPrice ? currentPrice : null)
-      })
-      .attr('cx', function (d) {
-        return x(d.x)
-      })
-      .attr('cy', function () {
-        return y(0)
-      })
-      .attr('r', 5)
-      .style('fill', '#3393E0')
-    //for floor point
-    svg
-      .append('g')
-      .selectAll('dot')
-      .data(data)
-      .enter()
-      .append('circle')
-      .filter(function (d) {
-        return (d.x = floor)
-      })
-      .attr('cx', function (d) {
-        return x(d.x)
-      })
-      .attr('cy', function () {
-        return y(0)
-      })
-      .attr('r', 5)
-      .style('fill', '#F7931A')
-    //for cap point
-    svg
-      .append('g')
-      .selectAll('dot')
-      .data(data)
-      .enter()
-      .append('circle')
-      .filter(function (d) {
-        return cap == floor ? null : (d.x = cap)
-      })
-      .attr('cx', function (d) {
-        return x(d.x)
-      })
-      .attr('cy', function () {
-        return y(0)
-      })
-      .attr('r', 5)
-      .style('fill', '#83BD67')
+      .attr('r', 7)
+      .style('stroke', 'white')
+      .style('fill', 'white')
+      .style('stroke-width', '2px')
+      .style('opacity', '0')
+
+    const tooltipBoxWidth = 215
+    const tooltipBoxHeight = 55
+
+    tooltipPerLine
+      .append('rect')
+      .attr('class', 'tooltip')
+      .attr('width', tooltipBoxWidth)
+      .attr('height', tooltipBoxHeight)
+      .attr('x', 10)
+      .attr('y', 0)
+      .attr('rx', 4)
+      .attr('ry', 4)
+      .style('fill', 'none')
+      .style('opacity', '0')
+
+    tooltipPerLine
+      .append('text')
+      .attr('x', 18)
+      .attr('y', 40)
+      .attr('font-size', '14')
+      .text(reffeenceAsset + '...' + ' at Expiry:')
+
+    tooltipPerLine
+      .append('text')
+      .attr('class', 'tooltip-underlying')
+      .attr('text-anchor', 'end')
+      .attr('x', tooltipBoxWidth)
+      .attr('y', 40)
+      .attr('font-size', '14')
+
+    tooltipPerLine
+      .append('text')
+      .attr('x', 18)
+      .attr('y', 55)
+      .attr('font-size', '14')
+      .text(' Payout:')
+
+    tooltipPerLine
+      .append('text')
+      .attr('class', 'tooltip-payout')
+      .attr('text-anchor', 'end')
+      .attr('x', tooltipBoxWidth)
+      .attr('y', 55)
+      .attr('font-weight', 'bold')
+      .attr('font-size', '14')
+
+    // Create the text that travels along the curve of chart and the position relative to the mouse location
+    tooltipPerLine
+      .append('text')
+      .attr('class', 'topRow')
+      .attr('transform', 'translate(10,3)')
+
+    tooltipPerLine
+      .append('text')
+      .attr('class', 'bottomRow')
+      .attr('transform', 'translate(10,30)')
+
+    var mouseover = function () {
+      d3.select('.mouse-line').style('opacity', '1')
+      d3.selectAll('.mouse-per-line circle').style('opacity', '1')
+      d3.selectAll('.tooltip-per-line rect').style('opacity', '1')
+      d3.selectAll('.tooltip-per-line text').style('opacity', '1')
+    }
+
+    var mouseout = function () {
+      d3.select('.mouse-line').style('opacity', '0')
+      d3.selectAll('.mouse-per-line circle').style('opacity', '0')
+      d3.selectAll('.tooltip-per-line rect').style('opacity', '0')
+      d3.selectAll('.tooltip-per-line text').style('opacity', '0')
+    }
 
     const blueColorCode = '#3B8DCA'
     const redColorCode = '#F77F99'
@@ -379,23 +409,23 @@ export default function DIVATradeChart(props) {
         })
         d3.select('.mouse-line').style('stroke', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
-          return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
+          return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
         })
 
       d3.select('.mouse-per-line circle').style('fill', function (d, i) {
         var pos = yPos(d, i, mouse[0], lines)
-        return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
+        return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
       })
 
         d3.select('.line').style('stroke', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
-          return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
+          return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
         }
       )
 
       d3.select('.line').style('stroke', function (d, i) {
         var pos = yPos(d, i, mouse[0], lines)
-        return y.invert(pos.y) >= breakEven ? blueColorCode : redColorCode
+        return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
       })
 
           return 'translate(' + mouse[0] + ',' + pos.y + ')'
