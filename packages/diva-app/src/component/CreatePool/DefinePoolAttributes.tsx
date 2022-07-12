@@ -651,8 +651,9 @@ export function DefinePoolAttributes({
                   getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
                   ' ' +
                   userTimeZone()}
-                , the payout will be {collateralToken.symbol} 0.00 per LONG and{' '}
-                {collateralToken.symbol} 1.00 per SHORT token
+                , the payout will be{' '}
+                <strong>0.00 {collateralToken.symbol} per LONG</strong> and
+                <strong> 1.00 {collateralToken.symbol} per SHORT</strong> token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
@@ -671,8 +672,9 @@ export function DefinePoolAttributes({
                   getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
                   ' ' +
                   userTimeZone()}
-                , the payout will be 1.00 {collateralToken.symbol} per LONG and
-                0.00 {collateralToken.symbol} per SHORT token
+                , the payout will be{' '}
+                <strong>1.00 {collateralToken.symbol} per LONG</strong> and
+                <strong> 0.00 {collateralToken.symbol} per SHORT</strong> token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
@@ -693,10 +695,16 @@ export function DefinePoolAttributes({
                   ' ' +
                   userTimeZone()}
                 , the payout will be{' '}
-                {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
-                {collateralToken.symbol} per LONG and{' '}
-                {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
-                {collateralToken.symbol} per SHORT token
+                <strong>
+                  {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
+                  {collateralToken.symbol} per LONG
+                </strong>{' '}
+                and{' '}
+                <strong>
+                  {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
+                  {collateralToken.symbol} per SHORT
+                </strong>{' '}
+                token
               </Typography>
             </Container>
           </Card>

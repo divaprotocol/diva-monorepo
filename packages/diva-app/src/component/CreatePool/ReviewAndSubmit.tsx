@@ -285,8 +285,11 @@ export function ReviewAndSubmit({
                   getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
                   ' ' +
                   userTimeZone()}
-                , the payout will be {values.collateralToken.symbol} 0.00 per
-                LONG and {values.collateralToken.symbol} 1.00 per SHORT token
+                , the payout will be{' '}
+                <strong>0.00 {values.collateralToken.symbol} per LONG</strong>{' '}
+                and{' '}
+                <strong> 1.00 {values.collateralToken.symbol} per SHORT</strong>{' '}
+                token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
@@ -308,8 +311,11 @@ export function ReviewAndSubmit({
                   getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
                   ' ' +
                   userTimeZone()}
-                , the payout will be 1.00 {values.collateralToken.symbol} per
-                LONG and 0.00 {values.collateralToken.symbol} per SHORT token
+                , the payout will be{' '}
+                <strong>1.00 {values.collateralToken.symbol} per LONG</strong>{' '}
+                and{' '}
+                <strong> 0.00 {values.collateralToken.symbol} per SHORT</strong>{' '}
+                token
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
@@ -329,10 +335,17 @@ export function ReviewAndSubmit({
                   getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
                   ' ' +
                   userTimeZone()}
-                , the payout will be {values.gradient.toFixed(2)}{' '}
-                {values.collateralToken.symbol} per LONG and{' '}
-                {(1 - values.gradient).toFixed(2)}{' '}
-                {values.collateralToken.symbol} per SHORT token
+                , the payout will be{' '}
+                <strong>
+                  {values.gradient.toFixed(2)} {values.collateralToken.symbol}{' '}
+                  per LONG
+                </strong>{' '}
+                and{' '}
+                <strong>
+                  {(1 - values.gradient).toFixed(2)}{' '}
+                  {values.collateralToken.symbol} per SHORT
+                </strong>{' '}
+                token
               </Typography>
             </Container>
           </Card>
