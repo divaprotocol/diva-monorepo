@@ -590,7 +590,7 @@ export default function SellMarket(props: {
           </FormLabel>
           <Stack spacing={0.7} alignItems="flex-end">
             <FormInput
-              width={'85%'}
+              width={'78.3px'}
               type="text"
               onChange={(event) => handleNumberOfOptions(event.target.value)}
             />
