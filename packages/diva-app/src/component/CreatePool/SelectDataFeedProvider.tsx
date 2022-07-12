@@ -101,7 +101,7 @@ export function SelectDataFeedProvider({
           sx={{
             paddingTop: theme.spacing(1),
             paddingBottom: theme.spacing(5),
-            width: '50%',
+            width: '100%',
           }}
         >
           <Autocomplete
