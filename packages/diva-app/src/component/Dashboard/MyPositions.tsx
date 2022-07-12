@@ -11,6 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
@@ -94,6 +95,7 @@ const AddToMetamask = (props: any) => {
 const SubmitButton = (props: any) => {
   const [open, setOpen] = React.useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
+  const [loadingValue, setLoadingValue] = useState(false)
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
 
@@ -110,6 +112,7 @@ const SubmitButton = (props: any) => {
   const token =
     provider && new ethers.Contract(props.row.address.id, ERC20, provider)
   const handleRedeem = (e) => {
+    setLoadingValue(true)
     e.stopPropagation()
     if (props.row.Status === 'Confirmed*') {
       diva
@@ -129,6 +132,9 @@ const SubmitButton = (props: any) => {
                     tx.wait().then(() => {
                       diva
                         .redeemPositionToken(props.row.address.id, bal)
+                        .then(() => {
+                          setLoadingValue(false)
+                        })
                         .then((tx) => {
                           /**
                            * dispatch action to refetch the pool after action
@@ -154,6 +160,7 @@ const SubmitButton = (props: any) => {
               })
               .catch((err) => {
                 console.error(err)
+                setLoadingValue(false)
               })
           } else {
             token
@@ -161,8 +168,12 @@ const SubmitButton = (props: any) => {
               .then((bal: BigNumber) => {
                 diva
                   .redeemPositionToken(props.row.address.id, bal)
+                  .then(() => {
+                    setLoadingValue(false)
+                  })
                   .catch((err) => {
                     console.error(err)
+                    setLoadingValue(false)
                   })
               })
               .catch((err) => {
@@ -177,9 +188,15 @@ const SubmitButton = (props: any) => {
       token
         ?.balanceOf(userAddress)
         .then((bal: BigNumber) => {
-          diva.redeemPositionToken(props.row.address.id, bal).catch((err) => {
-            console.error(err)
-          })
+          diva
+            .redeemPositionToken(props.row.address.id, bal)
+            .then(() => {
+              setLoadingValue(false)
+            })
+            .catch((err) => {
+              console.error(err)
+              setLoadingValue(false)
+            })
         })
         .catch((err) => {
           console.error(err)
@@ -223,27 +240,29 @@ const SubmitButton = (props: any) => {
   if (buttonName === 'Redeem') {
     return (
       <Container>
-        <Button
+        <LoadingButton
           variant="contained"
           color={buttonName === 'Redeem' ? 'success' : 'primary'}
+          loading={loadingValue}
           onClick={handleRedeem}
         >
           {buttonName}
-        </Button>
+        </LoadingButton>
       </Container>
     )
   } else if (buttonName === 'Challenge') {
     return (
       <Container>
-        <Button
+        <LoadingButton
           variant="contained"
+          loading={loadingValue}
           onClick={(e) => {
             e.stopPropagation()
             handleOpen()
           }}
         >
           Challenge
-        </Button>
+        </LoadingButton>
         <Dialog open={open} onClose={handleClose}>
           <DialogContent>
             <DialogContentText>
@@ -259,7 +278,7 @@ const SubmitButton = (props: any) => {
                 setTextFieldValue(e.target.value)
               }}
             />
-            <Button
+            <LoadingButton
               color="primary"
               type="submit"
               onClick={(e) => {
@@ -292,7 +311,7 @@ const SubmitButton = (props: any) => {
               }}
             >
               Challenge
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </Dialog>
       </Container>
