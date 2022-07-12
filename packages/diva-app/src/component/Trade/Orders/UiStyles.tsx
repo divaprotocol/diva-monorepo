@@ -119,3 +119,16 @@ export const GrayText = styled.div`
   font-size: 16px;
   color: dimgray;
 `
+export const WhiteText = styled.div`
+  aligned: left;
+  font-size: 16px;
+  color: white;
+`
+
+export const GreenText = styled.div`
+  color: #66ffa6;
+`
+
+export const RedText = styled.div`
+  color: #ff5c8d;
+`

@@ -13,27 +13,38 @@ import {
 } from '@mui/material'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
-import { SideMenu } from './SideMenu'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import styled from 'styled-components'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import {
   fetchPool,
+  fetchPositionTokens,
+  selectIntrinsicValue,
   selectPools,
-  selectRequestStatus,
+  selectPositionTokens,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { ExpiresInCell } from '../Markets/Markets'
+import { getAppStatus } from '../../Util/getAppStatus'
+import request from 'graphql-request'
+import { Pool, queryUser } from '../../lib/queries'
+import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
 
 type Response = {
   [token: string]: BigNumber
@@ -44,10 +55,7 @@ const MetaMaskImage = styled.img`
   height: 20px;
   cursor: pointer;
 `
-const ethereum = window?.ethereum
-
 const AddToMetamask = (props: any) => {
-  const { provider } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
     e.stopPropagation()
     const tokenSymbol =
@@ -245,6 +253,7 @@ const SubmitButton = (props: any) => {
 
           <DialogActions>
             <TextField
+              autoFocus={true}
               defaultValue={textFieldValue}
               onChange={(e) => {
                 setTextFieldValue(e.target.value)
@@ -293,6 +302,54 @@ const SubmitButton = (props: any) => {
   }
 }
 
+const Payoff = (props: any) => {
+  const intrinsicValue = useAppSelector((state) =>
+    selectIntrinsicValue(
+      state,
+      props.row.Payoff.id,
+      props.row.finalValue != '-'
+        ? parseEther(props.row.finalValue).toString()
+        : '-'
+    )
+  )
+  if (
+    intrinsicValue != null &&
+    props.row.finalValue != '-' &&
+    intrinsicValue.payoffPerShortToken != null &&
+    intrinsicValue.payoffPerLongToken != null
+  ) {
+    if (props.row.Id.toLowerCase().startsWith('s')) {
+      return (
+        <div>
+          {(
+            parseFloat(
+              formatUnits(
+                intrinsicValue.payoffPerShortToken,
+                props.row.Payoff.collateralToken.decimals
+              )
+            ) * props.row.Balance
+          ).toFixed(4)}
+        </div>
+      )
+    } else {
+      return (
+        <div>
+          {(
+            parseFloat(
+              formatUnits(
+                intrinsicValue.payoffPerLongToken,
+                props.row.Payoff.collateralToken.decimals
+              )
+            ) * props.row.Balance
+          ).toFixed(4)}
+        </div>
+      )
+    }
+  } else {
+    return <>-</>
+  }
+}
+
 const columns: GridColDef[] = [
   {
     field: 'Id',
@@ -306,6 +363,7 @@ const columns: GridColDef[] = [
     disableReorder: true,
     disableColumnMenu: true,
     headerName: '',
+    width: 70,
     renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
   },
   {
@@ -322,20 +380,35 @@ const columns: GridColDef[] = [
     renderCell: (cell) => <PayoffCell data={cell.value} />,
   },
   { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
+  {
+    field: 'Inflection',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+    hide: true,
+  },
+  {
+    field: 'Gradient',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+    hide: true,
+  },
   {
     field: 'Expiry',
     minWidth: 170,
     align: 'right',
     headerAlign: 'right',
     type: 'dateTime',
+    headerName: 'Expires in',
+    renderCell: (props) => <ExpiresInCell {...props} />,
   },
   {
     field: 'TVL',
     align: 'right',
     headerAlign: 'right',
-    minWidth: 200,
+    minWidth: 150,
   },
   {
     field: 'finalValue',
@@ -352,11 +425,42 @@ const columns: GridColDef[] = [
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
+    renderCell: (cell: any) => {
+      const description = (status: string) => {
+        switch (status) {
+          case 'Open':
+            return `Pool has not expired yet.`
+          case 'Expired':
+            return `Pool expired and the final value input from the data provider is pending.`
+          case 'Submitted':
+            return `A final value has been submitted by the data provider.`
+          case 'Challenged':
+            return `The final value submitted by the data provider has been challenged by position token holders.`
+          case 'Fallback':
+            return `The data provider failed to submit a final value within the 24h submission period. The fallback data provider has 5 days to step in and submit a value. This is only to be expected for whitelisted data providers. For non-whitelisted data providers, the fallback data provider may not submit a value in which case it will default to inflection.`
+          case 'Confirmed*':
+            return `The final value will be confirmed inside the smart contract at first user redemption.`
+          case 'Confirmed':
+            return `The final value has been confirmed and position token holders can start redeeming their LONG & SHORT position tokens.`
+        }
+      }
+      return (
+        <Tooltip placement="top-end" title={description(cell.value)}>
+          <span className="table-cell-trucate">{cell.value}</span>
+        </Tooltip>
+      )
+    },
   },
   {
     field: 'Balance',
     align: 'right',
     headerAlign: 'right',
+  },
+  {
+    field: 'Payoff',
+    align: 'right',
+    headerAlign: 'right',
+    renderCell: (props) => <Payoff {...props} />,
   },
   {
     field: 'submitValue',
@@ -372,59 +476,35 @@ const columns: GridColDef[] = [
     align: 'left',
     headerAlign: 'right',
     headerName: '',
-    minWidth: 100,
+    minWidth: 20,
     renderCell: (props) => <AddToMetamask {...props} />,
   },
 ]
 
 export function MyPositions() {
-  const { provider, address: userAddress } = useConnectionContext()
+  const { provider, address: userAddress, chainId } = useConnectionContext()
   const [page, setPage] = useState(0)
-  const pools = useAppSelector((state) => selectPools(state))
-  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+  const tokenPools = useAppSelector(selectPools)
+  const positionTokens = useAppSelector(selectPositionTokens)
+  const dispatch = useDispatch()
 
-  const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
-    const now = new Date()
-    const fallbackPeriod = new Date(parseInt(val.expiryTime) * 1000).setMinutes(
-      expiryTime.getMinutes() + 24 * 60 + 5
+  useEffect(() => {
+    dispatch(
+      fetchPositionTokens({
+        page,
+      })
     )
-    const unchallengedPeriod = new Date(
-      parseInt(val.expiryTime) * 1000
-    ).setMinutes(expiryTime.getMinutes() + 5 * 24 * 60 + 5)
-    const challengedPeriod = new Date(
-      parseInt(val.expiryTime) * 1000
-    ).setMinutes(expiryTime.getMinutes() + 2 * 24 * 60 + 5)
-    let finalValue = '-'
-    let status = val.statusFinalReferenceValue
-    if (Date.now() > fallbackPeriod) {
-      status = 'Fallback'
-    }
-    if (now.getTime() < expiryTime.getTime()) {
-      finalValue = '-'
-    } else if (val.statusFinalReferenceValue === 'Open') {
-      if (now.getTime() > unchallengedPeriod) {
-        finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
-        status = 'Confirmed*'
-      } else if (
-        now.getTime() > expiryTime.getTime() &&
-        now.getTime() < unchallengedPeriod
-      ) {
-        status = 'Expired'
-        finalValue = '-'
-      } else {
-        finalValue = '-'
-      }
-    } else if (
-      val.statusFinalReferenceValue === 'Challenged' &&
-      Date.now() > challengedPeriod
-    ) {
-      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
-      status = 'Confirmed*'
-    } else {
-      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
-      status = val.statusFinalReferenceValue
-    }
+  }, [dispatch, page])
+
+  const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
+    const { finalValue, status } = getAppStatus(
+      val.expiryTime,
+      val.statusTimestamp,
+      val.statusFinalReferenceValue,
+      val.finalReferenceValue,
+      val.inflection
+    )
+
     const shared = {
       Id: val.id,
       Icon: val.referenceAsset,
@@ -437,19 +517,27 @@ export function MyPositions() {
       Buy: 'TBD',
       MaxYield: 'TBD',
       StatusTimestamp: val.statusTimestamp,
+      Payoff: val,
     }
 
     const payOff = {
-      Floor: parseInt(val.floor) / 1e18,
-      Inflection: parseInt(val.inflection) / 1e18,
-      Cap: parseInt(val.cap) / 1e18,
+      CollateralBalanceLong: Number(
+        formatUnits(
+          val.collateralBalanceLongInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      CollateralBalanceShort: Number(
+        formatUnits(
+          val.collateralBalanceShortInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      Floor: Number(formatEther(val.floor)),
+      Inflection: Number(formatEther(val.inflection)),
+      Cap: Number(formatEther(val.cap)),
+      TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
-
-    const Status =
-      expiryTime.getTime() <= now.getTime() &&
-      val.statusFinalReferenceValue.toLowerCase() === 'open'
-        ? 'Expired'
-        : val.statusFinalReferenceValue
 
     return [
       ...acc,
@@ -458,13 +546,25 @@ export function MyPositions() {
         id: `${val.id}/long`,
         Id: 'L' + val.id,
         address: val.longToken,
+        Gradient: Number(
+          formatUnits(
+            BigNumber.from(val.collateralBalanceLongInitial)
+              .mul(parseUnits('1', val.collateralToken.decimals))
+              .div(
+                BigNumber.from(val.collateralBalanceLongInitial).add(
+                  BigNumber.from(val.collateralBalanceShortInitial)
+                )
+              ),
+            val.collateralToken.decimals
+          )
+        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
               BigNumber.from(val.collateralBalance),
               val.collateralToken.decimals
             )
-          ).toFixed(4) +
+          ).toFixed(2) +
           ' ' +
           val.collateralToken.symbol,
         PayoffProfile: generatePayoffChartData({
@@ -479,13 +579,25 @@ export function MyPositions() {
         id: `${val.id}/short`,
         Id: 'S' + val.id,
         address: val.shortToken,
+        Gradient: Number(
+          formatUnits(
+            BigNumber.from(val.collateralBalanceShortInitial)
+              .mul(parseUnits('1', val.collateralToken.decimals))
+              .div(
+                BigNumber.from(val.collateralBalanceLongInitial).add(
+                  BigNumber.from(val.collateralBalanceShortInitial)
+                )
+              ),
+            val.collateralToken.decimals
+          )
+        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
               BigNumber.from(val.collateralBalance),
               val.collateralToken.decimals
             )
-          ).toFixed(4) +
+          ).toFixed(2) +
           ' ' +
           val.collateralToken.symbol,
         PayoffProfile: generatePayoffChartData({
@@ -498,23 +610,43 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
-  const tokenAddresses = rows.map((v) => v.address.id)
+  const tokenAddresses = positionTokens.map((v) => v.id)
 
   /**
    * TODO: Move into redux
    */
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
-    const response: Response = {}
+    let response: Response = {}
     if (!userAddress) {
       console.warn('wallet not connected')
       return Promise.resolve({})
     }
+
+    const tokenAddressesChunks = tokenAddresses.reduce(
+      (resultArray, item, index) => {
+        const batchIndex = Math.floor(index / 400)
+        if (!resultArray[batchIndex]) {
+          resultArray[batchIndex] = []
+        }
+        resultArray[batchIndex].push(item)
+        return resultArray
+      },
+      []
+    )
+    const contract = new ethers.Contract(
+      config[chainId].balanceCheckAddress,
+      BalanceCheckerABI,
+      provider
+    )
     await Promise.all(
-      tokenAddresses.map(async (tokenAddress) => {
-        const contract = new ethers.Contract(tokenAddress, ERC20, provider)
+      tokenAddressesChunks.map(async (batch) => {
         try {
-          const res: BigNumber = await contract.balanceOf(userAddress)
-          response[tokenAddress] = res
+          const userAddressArray = Array(batch.length).fill(userAddress)
+          const res = await contract.balances(userAddressArray, batch)
+          response = batch.reduce(
+            (obj, key, index) => ({ ...obj, [key]: res[index] }),
+            {}
+          )
         } catch (error) {
           console.error(error)
         }
@@ -523,20 +655,38 @@ export function MyPositions() {
     return response
   })
 
+  /**
+   * After navigating from success page we need to refetch balances in order
+   * to capture the newly added pool. We only want to do this once to not overfetch
+   */
+  useEffect(() => {
+    setTimeout(() => {
+      if (userAddress != null && balances != null) {
+        balances.refetch()
+      }
+    }, 3000)
+  }, [])
+
   const tokenBalances = balances.data
 
   const filteredRows =
     tokenBalances != null
       ? rows
           .filter(
-            (v) =>
-              tokenBalances[v.address.id] != null &&
-              tokenBalances[v.address.id].gt(0)
+            (value, index, self) =>
+              index === self.findIndex((t) => t.id === value.id)
           )
+          // .filter(
+          //   (v) =>
+          //     tokenBalances[v.address.id] != null &&
+          //     tokenBalances[v.address.id].gt(0)
+          // )
           .map((v) => ({
             ...v,
             Balance:
-              parseInt(formatUnits(tokenBalances[v.address.id])) < 0.01
+              tokenBalances[v.address.id] == null
+                ? 'n/a'
+                : parseInt(formatUnits(tokenBalances[v.address.id])) < 0.01
                 ? '<0.01'
                 : parseFloat(formatUnits(tokenBalances[v.address.id])).toFixed(
                     4
@@ -544,15 +694,20 @@ export function MyPositions() {
           }))
       : []
 
+  const sortedRows = filteredRows.sort((a, b) => {
+    const aId = parseFloat(a.Id.substring(1))
+    const bId = parseFloat(b.Id.substring(1))
+
+    return bId - aId
+  })
+
   return (
     <Stack
       direction="row"
       sx={{
         height: '100%',
-        maxHeight: 'calc(100% - 6em)',
       }}
       spacing={6}
-      paddingTop={2}
       paddingRight={6}
     >
       {!userAddress ? (
@@ -569,11 +724,11 @@ export function MyPositions() {
         </Typography>
       ) : (
         <>
-          <SideMenu />
           <PoolsTable
             page={page}
-            rows={filteredRows}
-            loading={balances.isLoading || poolsRequestStatus === 'pending'}
+            rows={sortedRows}
+            loading={balances.isLoading}
+            rowCount={3000}
             columns={columns}
             onPageChange={(page) => setPage(page)}
           />

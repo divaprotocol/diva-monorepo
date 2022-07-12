@@ -17,64 +17,27 @@ import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { selectChainId } from '../../Redux/appSlice'
-
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 const PageDiv = styled.div`
   width: 100%;
 `
-function descendingComparator(a: [], b: [], orderBy: any) {
-  let comparator = 0
-  if (b[orderBy] < a[orderBy]) {
-    comparator = -1
-  }
-  if (b[orderBy] > a[orderBy]) {
-    comparator = 1
-  }
-  return comparator
-}
 
-function getComparator(
-  order: string,
-  orderBy: string
-): (a: string, b: string) => number {
-  if (order === 'ascOrder') {
-    return (a: any, b: any) => -descendingComparator(a, b, orderBy)
-  }
-  if (order === 'desOrder') {
-    return (a: any, b: any): number => descendingComparator(a, b, orderBy)
-  }
-  //this step will never reached however need it to silent typescript
-  return (a: any, b: any): number => descendingComparator(a, b, orderBy)
-}
-
-function stableSort(array: any, comparator: (a: string, b: string) => number) {
-  const stabilizedThis: any = array.map((el: any, index: number) => [el, index])
-  stabilizedThis.sort((a: any, b: any) => {
-    const order = comparator(a[0], b[0])
-    if (order !== 0) {
-      return order
-    }
-    return a[1] - b[1]
-  })
-  return stabilizedThis.map((el: any) => el[0])
-}
-
+/**
+ * Prepare all data to be displayed in the orderbook (price, quantity and expires in)
+ */
 function mapOrderData(
   records: [],
   option: Pool,
-  optionTokenAddress: string,
-  sortOrder: string
+  orderType: number // 0 = BUY, 1 = SELL
 ) {
-  let orderBy: string
-  let sortedRecords: any = []
-  const orderbook: any = records.map((record: any) => {
+  // Get orderbook (before filtering out 0 quantities)
+  const orderbookTemp: any = records.map((record: any) => {
     const order = record.order
     const metaData = record.metaData
-    const makerToken = order.makerToken
-    const takerToken = order.takerToken
-    const collateralToken = option.collateralToken.id.toLowerCase()
-    const tokenAddress = optionTokenAddress.toLowerCase()
     const orders: any = {}
-    if (makerToken === collateralToken && takerToken === tokenAddress) {
+
+    // Buy Limit (orderType = 0)
+    if (orderType === 0) {
       const takerAmount = formatUnits(order.takerAmount)
       const makerAmount = formatUnits(
         order.makerAmount.toString(),
@@ -86,17 +49,17 @@ function mapOrderData(
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
-      const bidAmount = Number(makerAmount) / Number(takerAmount)
+      const bidAmount = Number(makerAmount) / Number(takerAmount) // ok to have it that way as this is just for displaying information in the frontend and not for transactions
       orders.bid = bidAmount
-      if (remainingTakerAmount < takerAmount) {
+      if (Number(remainingTakerAmount) < Number(takerAmount)) {
         const nbrOptions = Number(remainingTakerAmount)
         orders.nbrOptions = nbrOptions
       } else {
-        const nbrOptions = Number(takerAmount)
-        orders.nbrOptions = nbrOptions
+        orders.nbrOptions = Number(takerAmount)
       }
     }
-    if (makerToken === tokenAddress && takerToken === collateralToken) {
+    // Sell Limit (orderType = 1)
+    if (orderType === 1) {
       const takerAmount = formatUnits(
         order.takerAmount,
         option.collateralToken.decimals
@@ -114,51 +77,29 @@ function mapOrderData(
       if (remainingTakerAmount == makerAmount) {
         orders.nbrOptions = Number(makerAmount)
       } else {
-        const quantity = Number(remainingTakerAmount) / askAmount
+        const quantity = Number(remainingTakerAmount) / askAmount // TODO
         orders.nbrOptions = quantity
       }
     }
+
     return orders
   })
 
-  if (sortOrder === 'ascOrder') {
-    orderBy = 'ask'
-    const comparator = getComparator(sortOrder, orderBy)
-    sortedRecords = stableSort(orderbook, comparator)
-  }
-  if (sortOrder === 'desOrder') {
-    orderBy = 'bid'
-    sortedRecords = stableSort(orderbook, getComparator(sortOrder, orderBy))
-  }
+  // Filter out orders with quantity = 0 (may happen if maker has revoked the approval)
+  const orderbook = orderbookTemp.filter((object) => {
+    return object.nbrOptions !== 0
+  })
 
-  return sortedRecords
-}
-
-function getTableLength(buyOrdersCount: number, sellOrdersCount: number) {
-  if (buyOrdersCount === 0 && sellOrdersCount === 0) {
-    return 0
-  }
-  if (buyOrdersCount === 0) {
-    return sellOrdersCount
-  }
-  if (sellOrdersCount === 0) {
-    return buyOrdersCount
-  }
-  if (buyOrdersCount > 0 && sellOrdersCount > 0) {
-    if (buyOrdersCount > sellOrdersCount) {
-      return buyOrdersCount
-    } else {
-      //This else will also satisfy the condition of both counts being equal
-      return sellOrdersCount
-    }
-  }
-  return 0
+  return orderbook
 }
 
 function createTable(buyOrders: any, sellOrders: any) {
+  // Get orderbook table length
   const buyOrdersCount = buyOrders !== 'undefined' ? buyOrders.length : 0
   const sellOrdersCount = sellOrders !== 'undefined' ? sellOrders.length : 0
-  const tableLength = getTableLength(buyOrdersCount, sellOrdersCount)
+  const tableLength =
+    buyOrdersCount >= sellOrdersCount ? buyOrdersCount : sellOrdersCount
+
   const table: any = []
   if (tableLength === 0) {
     return table
@@ -184,6 +125,7 @@ function createTable(buyOrders: any, sellOrders: any) {
 export default function OrderBook(props: {
   option: Pool
   tokenAddress: string
+  exchangeProxy: string
 }) {
   const option = props.option
   const optionTokenAddress = props.tokenAddress
@@ -195,44 +137,40 @@ export default function OrderBook(props: {
     SELL: 1,
   }
   const chainId = useAppSelector(selectChainId)
+  const { provider } = useConnectionContext()
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
         option.collateralToken.id,
-        chainId
+        chainId,
+        provider,
+        props.exchangeProxy
       )
       if (rSell.length > 0) {
         responseSell = rSell
       }
     }
-
     if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
         optionTokenAddress,
-        chainId
+        chainId,
+        provider,
+        props.exchangeProxy
       )
       if (rBuy.length > 0) {
         responseBuy = rBuy
       }
     }
 
-    const orderBookBuy = mapOrderData(
-      responseBuy,
-      option,
-      optionTokenAddress,
-      'desOrder'
-    )
+    const orderBookBuy = mapOrderData(responseBuy, option, OrderType.BUY)
     orders.push(orderBookBuy)
-    const orderBookSell = mapOrderData(
-      responseSell,
-      option,
-      optionTokenAddress,
-      'ascOrder'
-    )
+
+    const orderBookSell = mapOrderData(responseSell, option, OrderType.SELL)
     orders.push(orderBookSell)
+
     //put both buy & sell orders in one array to format table rows
     const completeOrderBook = createTable(
       orders[OrderType.BUY],
@@ -244,11 +182,11 @@ export default function OrderBook(props: {
   useEffect(() => {
     componentDidMount()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [responseBuy, responseSell])
+  }, [responseBuy, responseSell, provider])
 
   return (
     <PageDiv>
-      <TableContainer component={Paper} sx={{ maxHeight: 340 }}>
+      <TableContainer component={Paper} sx={{ maxHeight: 550 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -274,7 +212,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.buyQuantity != ''
-                            ? row.buyQuantity?.toFixed(2).toString()
+                            ? row.buyQuantity?.toFixed(4)
                             : '-'}
                         </Typography>
                         <label> </label>
@@ -282,20 +220,20 @@ export default function OrderBook(props: {
                     </TableCell>
                     <TableCell align="center">
                       <Box>
-                        <Typography variant="subtitle1">
-                          {row.bid != '' ? Number(row.bid)?.toFixed(2) : '-'}
+                        <Typography variant="subtitle1" color="#66ffa6">
+                          {row.bid != '' ? Number(row.bid)?.toFixed(4) : '-'}
                         </Typography>
-                        <Typography variant="caption" noWrap>
+                        <Typography variant="caption" color="#8e8e8e" noWrap>
                           {row.buyExpiry}
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell align="center">
                       <Box>
-                        <Typography variant="subtitle1">
-                          {row.ask != '' ? row.ask?.toFixed(2).toString() : '-'}
+                        <Typography variant="subtitle1" color="#ff5c8d">
+                          {row.ask != '' ? row.ask?.toFixed(4) : '-'}
                         </Typography>
-                        <Typography variant="caption" noWrap>
+                        <Typography variant="caption" color="#8e8e8e" noWrap>
                           {row.sellExpiry}
                         </Typography>
                       </Box>
@@ -304,7 +242,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.sellQuantity != ''
-                            ? row.sellQuantity?.toFixed(2).toString()
+                            ? row.sellQuantity?.toFixed(4)
                             : '-'}
                         </Typography>
                       </Box>

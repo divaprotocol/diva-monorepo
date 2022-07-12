@@ -11,11 +11,9 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
-
 import { config } from '../../constants'
-import { SideMenu } from './SideMenu'
 import PoolsTable from '../PoolsTable'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
@@ -23,15 +21,22 @@ import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { fetchPool, selectPools, selectUserAddress } from '../../Redux/appSlice'
+import {
+  fetchPool,
+  fetchPools,
+  selectPools,
+  selectRequestStatus,
+  selectUserAddress,
+} from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
-import { useAppSelector } from '../../Redux/hooks'
+import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { ExpiresInCell } from '../Markets/Markets'
 
-const DueInCell = (props: any) => {
-  const expTimestamp = parseInt(props.row.Expiry)
+export const DueInCell = (props: any) => {
+  const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
   const statusTimestamp = parseInt(props.row.StatusTimestamp)
-  const expiryTime = new Date(parseInt(props.row.Expiry) * 1000)
+  const expiryTime = new Date(props.row.Expiry)
   const now = new Date()
   if (
     expiryTime.getTime() <= now.getTime() &&
@@ -40,33 +45,36 @@ const DueInCell = (props: any) => {
     const minUntilExp = getExpiryMinutesFromNow(
       expTimestamp + 24 * 3600 - 5 * 60
     )
-
     if (minUntilExp < 24 * 60 - 5 && minUntilExp > 0) {
       return minUntilExp === 1 ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {'<1m'}
-        </div>
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '150vh',
+            }}
+          >
+            {'<1m'}
+          </div>
+        </Tooltip>
       ) : (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {(minUntilExp - (minUntilExp % 60)) / 60 +
-            'h ' +
-            (minUntilExp % 60) +
-            'm '}
-        </div>
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '150vh',
+            }}
+          >
+            {(minUntilExp - (minUntilExp % 60)) / 60 +
+              'h ' +
+              (minUntilExp % 60) +
+              'm '}
+          </div>
+        </Tooltip>
       )
     }
   }
@@ -76,45 +84,51 @@ const DueInCell = (props: any) => {
     )
     if (minUntilExp < 48 * 60 - 5 && minUntilExp > 0) {
       return minUntilExp === 1 ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {'<1m'}
-        </div>
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '150vh',
+            }}
+          >
+            {'<1m'}
+          </div>
+        </Tooltip>
       ) : (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '150vh',
-          }}
-        >
-          {(minUntilExp - (minUntilExp % 60)) / 60 +
-            'h ' +
-            (minUntilExp % 60) +
-            'm '}
-        </div>
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '150vh',
+            }}
+          >
+            {(minUntilExp - (minUntilExp % 60)) / 60 +
+              'h ' +
+              (minUntilExp % 60) +
+              'm '}
+          </div>
+        </Tooltip>
       )
     }
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '150vh',
-      }}
-    >
-      {'-'}
-    </div>
+    <Tooltip placement="top-end" title={props.row.Expiry}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '150vh',
+        }}
+      >
+        {'-'}
+      </div>
+    </Tooltip>
   )
 }
 const SubmitCell = (props: any) => {
@@ -141,14 +155,14 @@ const SubmitCell = (props: any) => {
   const handleClose = () => {
     setOpen(false)
   }
-  const expiryTime = new Date(parseInt(props.row.Expiry) * 1000)
+  const expiryTime = new Date(props.row.Expiry)
   const now = new Date()
   const enabled =
     (expiryTime.getTime() <= now.getTime() &&
       props.row.Status.toLowerCase() === 'open' &&
-      getExpiryMinutesFromNow(props.row.Expiry) + 24 * 60 - 5 > 0) ||
+      expiryTime.getTime() + (24 * 60 - 5) * 60 * 1000 > 0) ||
     (props.row.Status === 'Challenged' &&
-      getExpiryMinutesFromNow(props.row.StatusTimestamp) + 48 * 60 - 5 > 0)
+      expiryTime.getTime() + (48 * 60 - 5) * 60 * 1000 > 0)
 
   return (
     <Container>
@@ -239,9 +253,8 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     type: 'dateTime',
-    renderCell: (props) => {
-      return <div>{getDateTime(props.row.Expiry)}</div>
-    },
+    headerName: 'Expires in',
+    renderCell: (props) => <ExpiresInCell {...props} />,
   },
   {
     field: 'finalValue',
@@ -289,72 +302,92 @@ const columns: GridColDef[] = [
 export function MyDataFeeds() {
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
+  const dispatch = useAppDispatch()
 
-  const pools = useAppSelector(selectPools)
-  const rows: GridRowModel[] = pools
-    .filter(
-      (pool) => pool.dataProvider.toLowerCase() === userAddress?.toLowerCase()
-    )
-    .reduce((acc, val) => {
-      const shared = {
-        Icon: val.referenceAsset,
-        Underlying: val.referenceAsset,
-        Floor: formatUnits(val.floor),
-        Inflection: formatUnits(val.inflection),
-        Cap: formatUnits(val.cap),
-        Expiry: val.expiryTime,
-        Sell: 'TBD',
-        Buy: 'TBD',
-        MaxYield: 'TBD',
-        Challenges: val.challenges,
-      }
+  useEffect(() => {
+    if (userAddress != null) {
+      dispatch(
+        fetchPools({
+          page,
+          dataProvider: userAddress,
+        })
+      )
+    }
+  }, [dispatch, page, userAddress])
 
-      const payOff = {
-        Floor: parseInt(val.floor) / 1e18,
-        Inflection: parseInt(val.inflection) / 1e18,
-        Cap: parseInt(val.cap) / 1e18,
-      }
+  const pools = useAppSelector((state) => selectPools(state))
+  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+  const rows: GridRowModel[] = pools.reduce((acc, val) => {
+    const shared = {
+      Icon: val.referenceAsset,
+      Underlying: val.referenceAsset,
+      Floor: formatUnits(val.floor),
+      Inflection: formatUnits(val.inflection),
+      Cap: formatUnits(val.cap),
+      Expiry: getDateTime(val.expiryTime),
+      Sell: 'TBD',
+      Buy: 'TBD',
+      MaxYield: 'TBD',
+      Challenges: val.challenges,
+    }
 
-      const Status = val.statusFinalReferenceValue
-      return [
-        ...acc,
-        {
-          ...shared,
-          id: `${val.id}/long`,
-          Id: val.id,
-          address: val.longToken,
-          PayoffProfile: generatePayoffChartData({
-            ...payOff,
-            IsLong: true,
-          }),
-          TVL:
-            parseFloat(
-              formatUnits(
-                BigNumber.from(val.collateralBalance),
-                val.collateralToken.decimals
-              )
-            ).toFixed(4) +
-            ' ' +
-            val.collateralToken.symbol,
-          Status,
-          StatusTimestamp: val.statusTimestamp,
-          finalValue:
-            val.statusFinalReferenceValue === 'Open'
-              ? '-'
-              : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
-        },
-      ]
-    }, [] as GridRowModel[])
+    const payOff = {
+      CollateralBalanceLong: Number(
+        formatUnits(
+          val.collateralBalanceLongInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      CollateralBalanceShort: Number(
+        formatUnits(
+          val.collateralBalanceShortInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      Floor: Number(formatEther(val.floor)),
+      Inflection: Number(formatEther(val.inflection)),
+      Cap: Number(formatEther(val.cap)),
+      TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
+    }
+
+    const Status = val.statusFinalReferenceValue
+    return [
+      ...acc,
+      {
+        ...shared,
+        id: `${val.id}/long`,
+        Id: val.id,
+        address: val.longToken,
+        PayoffProfile: generatePayoffChartData({
+          ...payOff,
+          IsLong: true,
+        }),
+        TVL:
+          parseFloat(
+            formatUnits(
+              BigNumber.from(val.collateralBalance),
+              val.collateralToken.decimals
+            )
+          ).toFixed(4) +
+          ' ' +
+          val.collateralToken.symbol,
+        Status,
+        StatusTimestamp: val.statusTimestamp,
+        finalValue:
+          val.statusFinalReferenceValue === 'Open'
+            ? '-'
+            : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
+      },
+    ]
+  }, [] as GridRowModel[])
 
   return (
     <Stack
       direction="row"
       sx={{
         height: '100%',
-        maxHeight: 'calc(100% - 6em)',
       }}
       spacing={6}
-      paddingTop={2}
       paddingRight={6}
     >
       {!userAddress ? (
@@ -371,10 +404,11 @@ export function MyDataFeeds() {
         </Typography>
       ) : (
         <>
-          <SideMenu />
           <PoolsTable
             disableRowClick={true}
             page={page}
+            rowCount={9999}
+            loading={poolsRequestStatus === 'pending'}
             rows={rows}
             columns={columns}
             onPageChange={(page) => setPage(page)}

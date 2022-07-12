@@ -2,7 +2,7 @@ import { CircularProgress, Container, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import { ethers } from 'ethers'
 import { config } from '../constants'
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
+import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { fetchPool, selectUserAddress } from '../Redux/appSlice'
 import React, { useEffect } from 'react'
 import { useConnectionContext } from '../hooks/useConnectionContext'
@@ -20,6 +20,7 @@ type Props = {
   textFieldValue: string
   transactionType: 'create' | 'liquidity'
   onTransactionSuccess: () => void
+  alert?: boolean
 }
 
 export const ApproveActionButtons = ({
@@ -29,11 +30,13 @@ export const ApproveActionButtons = ({
   textFieldValue,
   transactionType,
   onTransactionSuccess,
+  alert,
 }: Props) => {
   const [approveLoading, setApproveLoading] = React.useState(false)
   const [actionLoading, setActionLoading] = React.useState(false)
   const [approveEnabled, setApproveEnabled] = React.useState(false)
   const [actionEnabled, setActionEnabled] = React.useState(false)
+  const [isPoolCreated, setIsPoolCreated] = React.useState(false)
   const [btnName, setBtnName] = React.useState('Add')
   const { provider } = useConnectionContext()
   const account = useAppSelector(selectUserAddress)
@@ -45,11 +48,14 @@ export const ApproveActionButtons = ({
     ERC20,
     provider?.getSigner()
   )
-  const diva = new ethers.Contract(
-    config[provider?.network?.chainId].divaAddress,
-    DIVA_ABI,
-    provider?.getSigner()
-  )
+  const diva =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider.getSigner()
+        )
+      : null
   useEffect(() => {
     if (transactionType === 'create') {
       setBtnName('Create')
@@ -57,18 +63,22 @@ export const ApproveActionButtons = ({
       setBtnName('Add')
     }
     if (textFieldValue !== '' && chainId) {
-      token.allowance(account, config[chainId]?.divaAddress).then((res) => {
-        if (res.lt(parseUnits(textFieldValue, decimal))) {
-          setApproveEnabled(true)
-          setActionEnabled(false)
-        } else {
-          setActionEnabled(true)
-          setApproveEnabled(false)
-        }
-      })
+      if (parseFloat(textFieldValue) === 0) {
+        setApproveEnabled(false)
+        setActionEnabled(false)
+      } else {
+        token.allowance(account, config[chainId]?.divaAddress).then((res) => {
+          if (res.lt(parseUnits(textFieldValue, decimal))) {
+            setApproveEnabled(true)
+            setActionEnabled(false)
+          } else {
+            setActionEnabled(true)
+            setApproveEnabled(false)
+          }
+        })
+      }
     }
   }, [textFieldValue, chainId, pool, approveLoading, actionLoading])
-
   return (
     <div
       style={{
@@ -76,7 +86,7 @@ export const ApproveActionButtons = ({
         height: '100px',
         width: '100%',
         display: 'flex',
-        justifyContent: 'space-evenly',
+        justifyContent: 'flex-end',
       }}
     >
       <Stack direction="row" spacing={theme.spacing(2)}>
@@ -92,7 +102,13 @@ export const ApproveActionButtons = ({
               size="large"
               type="submit"
               value="Submit"
-              disabled={approveEnabled === false}
+              disabled={
+                approveEnabled === false ||
+                account == null ||
+                textFieldValue === '' ||
+                isPoolCreated === true ||
+                alert === true
+              }
               onClick={() => {
                 setApproveLoading(true)
 
@@ -139,7 +155,13 @@ export const ApproveActionButtons = ({
             size="large"
             type="submit"
             value="Submit"
-            disabled={actionEnabled === false}
+            disabled={
+              actionEnabled === false ||
+              account == null ||
+              textFieldValue === '' ||
+              isPoolCreated === true ||
+              alert === true
+            }
             onClick={() => {
               setActionLoading(true)
               switch (transactionType) {
@@ -164,7 +186,10 @@ export const ApproveActionButtons = ({
                       referenceAsset: pool.referenceAsset.toString(),
                       collateralToken: pool.collateralToken.id.toString(),
                       dataProvider: pool.dataProvider.toString(),
-                      capacity: parseEther('0'),
+                      capacity:
+                        pool.capacity === 'Unlimited'
+                          ? ethers.constants.MaxUint256
+                          : parseUnits(pool.capacity.toString(), decimal),
                     })
                     .then((tx) => {
                       /**
@@ -172,17 +197,11 @@ export const ApproveActionButtons = ({
                        */
                       tx.wait()
                         .then(() => {
-                          setActionLoading(false)
                           setTimeout(() => {
+                            setActionLoading(false)
+                            setIsPoolCreated(true)
                             onTransactionSuccess()
-                            dispatch(
-                              fetchPool({
-                                graphUrl:
-                                  config[chainId as number].divaSubgraph,
-                                poolId: window.location.pathname.split('/')[1],
-                              })
-                            )
-                          }, 5000)
+                          }, 15000)
                         })
                         .catch((err: any) => {
                           setActionLoading(false)

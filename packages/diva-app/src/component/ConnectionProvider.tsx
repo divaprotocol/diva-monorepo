@@ -55,7 +55,7 @@ export const ConnectionProvider = ({ children }) => {
       ..._state,
       address: accounts[0],
       chainId: BigNumber.from(ethereum.chainId).toNumber(),
-      isConnected: ethereum.isConnected(),
+      isConnected: ethereum.isConnected() && accounts.length > 0,
     }))
     setConnectionState({ connected: 'metamask' })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -66,8 +66,10 @@ export const ConnectionProvider = ({ children }) => {
       ..._state,
       address: undefined,
       isConnected: false,
+      chainId: 3,
     }))
     setConnectionState({})
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -81,10 +83,13 @@ export const ConnectionProvider = ({ children }) => {
     }
 
     ethereum.on('accountsChanged', (accounts) => {
-      setState((_state) => ({
-        ..._state,
-        address: accounts?.[0],
-      }))
+      ethereum.request({ method: 'eth_accounts' }).then((res) => {
+        if (res.length > 0) {
+          connect()
+        } else {
+          disconnect()
+        }
+      })
     })
 
     ethereum.on('chainChanged', (chainInfo) => {
@@ -112,8 +117,7 @@ export const ConnectionProvider = ({ children }) => {
         provider: new providers.Web3Provider(provider),
       }))
     )
-
-    // connect()
+    console.log('context state ', JSON.stringify(state))
     if (connected) connect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -124,7 +128,7 @@ export const ConnectionProvider = ({ children }) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (state.chainId == null) {
-        setState((_state) => ({ ..._state, chainId: 137 }))
+        setState((_state) => ({ ..._state, chainId: 3 }))
       }
     }, 3000)
     return () => clearTimeout(timeout)

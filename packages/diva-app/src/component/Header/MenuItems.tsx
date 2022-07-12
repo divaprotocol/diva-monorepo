@@ -1,10 +1,13 @@
-import { Box, Divider, Tooltip } from '@mui/material'
+import { Box, Tooltip } from '@mui/material'
 import { Stack } from '@mui/material'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Logo } from '../Logo'
-
+import TaskIcon from '@mui/icons-material/Task'
+import { divaGovernanceAddress } from '../../constants'
 export default function MenuItems() {
+  const location = useLocation()
+
   return (
     <Stack
       width="70px"
@@ -14,22 +17,47 @@ export default function MenuItems() {
       marginTop="16px"
       spacing={3}
     >
-      <Box sx={{ padding: '10px', width: 30, marginBottom: 5 }}>
-        <Logo />
-      </Box>
       <Link to="/">
-        <Tooltip title="Market">
-          <ShowChartOutlined color="action" />
+        <Box sx={{ width: 30, marginBottom: 5 }}>
+          <Logo />
+        </Box>
+      </Link>
+      <Link to={`/${divaGovernanceAddress}`}>
+        <Tooltip title="Markets">
+          <ShowChartOutlined
+            color={location.pathname === '/' ? 'primary' : 'action'}
+          />
         </Tooltip>
       </Link>
       <Link to="/dashboard/mypositions">
-        <Tooltip title=" My Dashboard">
-          <Person color="action" />
+        <Tooltip title="My Dashboard">
+          <Person
+            color={
+              location.pathname.startsWith('/dashboard') ? 'primary' : 'action'
+            }
+          />
         </Tooltip>
       </Link>
       <Link to="/Create">
         <Tooltip title="Create Pool">
-          <Add color="action" />
+          <Add
+            color={
+              location.pathname.toLowerCase() === '/create'
+                ? 'primary'
+                : 'action'
+            }
+          />
+        </Tooltip>
+      </Link>
+      <Link to="/tasks">
+        <Tooltip title="Testnet Tasks">
+          <TaskIcon
+            color={
+              location.pathname.toLowerCase() === '/tasks'
+                ? 'primary'
+                : 'action'
+            }
+          />
         </Tooltip>
       </Link>
     </Stack>

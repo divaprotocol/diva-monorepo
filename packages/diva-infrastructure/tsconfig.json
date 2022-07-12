@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "module": "CommonJS",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "isolatedModules": true,
+    "downlevelIteration": true,
+    "target": "ES2018",
+    "incremental": true,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "exclude": [
+    "node_modules",
+    "cdktf.out"
+  ]
+}

@@ -1,6 +1,7 @@
 import { ExpandMoreOutlined } from '@mui/icons-material'
 import {
   Accordion,
+  Checkbox,
   AccordionSummary,
   Typography,
   AccordionDetails,
@@ -8,8 +9,10 @@ import {
   FormControl,
   TextField,
   FormHelperText,
+  FormControlLabel,
+  Tooltip,
 } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCreatePoolFormik } from './formik'
 
 export function DefineAdvanced({
@@ -18,13 +21,22 @@ export function DefineAdvanced({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [unlimited, setUnlimited] = useState(true)
+  const { tokenSupply, capacity } = formik.values
 
-  const {
-    collateralBalanceShort,
-    tokenSupply,
-    collateralBalanceLong,
-    capacity,
-  } = formik.values
+  useEffect(() => {
+    if (unlimited) {
+      formik.setValues((_values) => ({
+        ..._values,
+        capacity: 'Unlimited',
+      }))
+    } else {
+      formik.setValues((_values) => ({
+        ..._values,
+        capacity: formik.values.collateralBalance,
+      }))
+    }
+  }, [unlimited, formik.values.collateralBalance])
 
   return (
     <Accordion
@@ -49,52 +61,6 @@ export function DefineAdvanced({
       </AccordionSummary>
       <AccordionDetails sx={{ padding: 0 }}>
         <Box pb={3}>
-          <FormControl
-            fullWidth
-            error={formik.errors.collateralBalanceShort != null}
-          >
-            <TextField
-              name="collateralBalanceShort"
-              id="collateralBalanceShort"
-              label="Short Pool Balance"
-              onBlur={formik.handleBlur}
-              error={formik.errors.collateralBalanceShort != null}
-              inputProps={{ min: 0 }}
-              onChange={formik.handleChange}
-              value={collateralBalanceShort}
-              type="number"
-            />
-            {formik.errors.collateralBalanceShort != null && (
-              <FormHelperText>
-                {formik.errors.collateralBalanceShort}
-              </FormHelperText>
-            )}
-          </FormControl>
-        </Box>
-        <Box pb={3}>
-          <FormControl
-            fullWidth
-            error={formik.errors.collateralBalanceLong != null}
-          >
-            <TextField
-              name="collateralBalanceLong"
-              id="collateralBalanceLong"
-              label="Long Pool Balance"
-              onBlur={formik.handleBlur}
-              error={formik.errors.collateralBalanceLong != null}
-              inputProps={{ min: 0 }}
-              value={collateralBalanceLong}
-              type="number"
-              onChange={formik.handleChange}
-            />
-            {formik.errors.collateralBalanceLong != null && (
-              <FormHelperText>
-                {formik.errors.collateralBalanceLong}
-              </FormHelperText>
-            )}
-          </FormControl>
-        </Box>
-        <Box pb={3}>
           <FormControl fullWidth error={formik.errors.tokenSupply != null}>
             <TextField
               name="Position Token Supply"
@@ -103,8 +69,9 @@ export function DefineAdvanced({
               error={formik.errors.tokenSupply != null}
               label="Position Token Supply"
               value={tokenSupply}
+              disabled
               type="number"
-              onChange={formik.handleChange}
+              inputProps={{ readOnly: true }}
             />
             {formik.errors.tokenSupply != null && (
               <FormHelperText>{formik.errors.tokenSupply}</FormHelperText>
@@ -113,22 +80,35 @@ export function DefineAdvanced({
         </Box>
         <Box pb={3}>
           <FormControl fullWidth error={formik.errors.capacity != null}>
-            <TextField
-              name="capacity"
-              error={formik.errors.capacity != null}
-              onBlur={formik.handleBlur}
-              id="capacity"
-              label="Maximum Pool Capacity"
-              value={capacity}
-              helperText={
-                formik.errors.capacity != null
-                  ? formik.errors.capacity
-                  : 'A value of 0 means no limit is imposed.'
-              }
-              type="number"
-              onChange={formik.handleChange}
-            />
+            <Tooltip
+              placement="top-end"
+              title="Maximum collateral that the pool can accept."
+            >
+              <TextField
+                name="capacity"
+                error={formik.errors.capacity != null}
+                disabled={unlimited}
+                onBlur={formik.handleBlur}
+                id="capacity"
+                label="Maximum Pool Capacity"
+                value={capacity}
+                helperText={
+                  formik.errors.capacity != null ? formik.errors.capacity : ''
+                }
+                type="number"
+                onChange={formik.handleChange}
+              />
+            </Tooltip>
           </FormControl>
+          <FormControlLabel
+            control={
+              <Checkbox
+                defaultChecked={unlimited}
+                onChange={() => setUnlimited(!unlimited)}
+              />
+            }
+            label="Unlimited"
+          />
         </Box>
       </AccordionDetails>
     </Accordion>

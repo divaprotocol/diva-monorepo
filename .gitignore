@@ -42,3 +42,8 @@ generated
 **/coverage.json
 **/coverage
 **/config.py
+
+
+tsconfig.tsbuildinfo
+dist
+cdktf.out

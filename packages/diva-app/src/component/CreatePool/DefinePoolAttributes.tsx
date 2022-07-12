@@ -9,6 +9,11 @@ import {
   Stack,
   Typography,
   useTheme,
+  Tooltip,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 
@@ -20,6 +25,7 @@ import { DefineAdvanced } from './DefineAdvancedAttributes'
 import { CheckCircle, Report } from '@mui/icons-material'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistCollateralToken } from '../../lib/queries'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -35,9 +41,12 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
+  const [value, setValue] = useState('binary')
 
+  const handleChange = (event) => {
+    setValue(event.target.value)
+  }
   const { referenceAssets, collateralTokens } = useWhitelist()
-
   const {
     referenceAsset,
     expiryTime,
@@ -48,10 +57,9 @@ export function DefinePoolAttributes({
     inflection,
     cap,
     floor,
+    gradient,
   } = formik.values
-
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
-
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
@@ -64,31 +72,56 @@ export function DefinePoolAttributes({
 
   useEffect(() => {
     if (
-      formik.touched.collateralBalanceLong ||
-      formik.touched.collateralBalanceShort
+      collateralToken != null &&
+      formik.values.gradient.toString() != '' &&
+      formik.values.gradient >= 0 &&
+      formik.values.gradient <= 1 &&
+      formik.values.collateralBalance.toString() != ''
     ) {
-      const collateralBalance =
-        formik.values.collateralBalanceLong +
-        formik.values.collateralBalanceShort
+      const collateralBalanceLong = parseUnits(
+        formik.values.collateralBalance,
+        collateralToken.decimals
+      )
+        .mul(
+          parseUnits(
+            formik.values.gradient.toString(),
+            collateralToken.decimals
+          )
+        )
+        .div(parseUnits('1', collateralToken.decimals))
+      const collateralBalanceShort = parseUnits(
+        formik.values.collateralBalance,
+        collateralToken.decimals
+      )
+        .mul(
+          parseUnits('1', collateralToken.decimals).sub(
+            parseUnits(
+              formik.values.gradient.toString(),
+              collateralToken.decimals
+            )
+          )
+        )
+        .div(parseUnits('1', collateralToken.decimals))
+
       formik.setValues((_values) => ({
         ..._values,
-        collateralBalance: `${collateralBalance}`,
-        tokenSupply: parseFloat(collateralBalance.toString()),
+        collateralBalanceLong: parseFloat(
+          formatUnits(collateralBalanceLong, collateralToken.decimals)
+        ),
+        collateralBalanceShort: parseFloat(
+          formatUnits(collateralBalanceShort, collateralToken.decimals)
+        ),
+        tokenSupply: parseFloat(formik.values.collateralBalance),
       }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    formik.touched.collateralBalanceLong,
-    formik.touched.collateralBalanceShort,
-    formik.values.collateralBalanceLong,
-    formik.values.collateralBalanceShort,
-  ])
+  }, [formik.values.collateralBalance, formik.values.gradient])
 
   const theme = useTheme()
 
   const possibleOptions =
     collateralTokens?.filter((v) =>
-      v.name.includes(referenceAssetSearch.trim())
+      v.symbol.includes(referenceAssetSearch.trim())
     ) || []
 
   const setCollateralBalance = (num: number) => {
@@ -115,12 +148,31 @@ export function DefinePoolAttributes({
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
-
+  useEffect(() => {
+    switch (value) {
+      case 'binary':
+        formik.setValues((_values) => ({
+          ..._values,
+          cap: formik.values.inflection,
+          floor: formik.values.inflection,
+          gradient: 1,
+        }))
+        break
+      case 'linear':
+        formik.setValues((_values) => ({
+          ..._values,
+          inflection: (formik.values.cap + formik.values.floor) / 2,
+          gradient: 0.5,
+        }))
+        break
+    }
+  }, [value, formik.values.cap, formik.values.floor, formik.values.inflection])
   return (
     <Box>
-      <Typography pb={theme.spacing(5)} variant="subtitle1">
-        Define all the parameters for your Contingent Pool below.
+      <Typography pb={theme.spacing(2)} variant="subtitle1">
+        Define all the parameters for your contingent pool below.
       </Typography>
+      <h3>Event</h3>
       <Stack spacing={2} direction="row">
         <FormControl fullWidth error={formik.errors.referenceAsset != null}>
           <Autocomplete
@@ -144,7 +196,11 @@ export function DefinePoolAttributes({
                   pt={2}
                   pb={4}
                 >
-                  {isCustomReferenceAsset ? (
+                  {formik.errors.referenceAsset != null ? (
+                    <FormHelperText>
+                      {formik.errors.referenceAsset}
+                    </FormHelperText>
+                  ) : isCustomReferenceAsset ? (
                     <>
                       <CheckCircle
                         fontSize="small"
@@ -221,7 +277,7 @@ export function DefinePoolAttributes({
                 formik.setFieldValue('collateralToken', newValue)
               }}
               getOptionLabel={(option: WhitelistCollateralToken) =>
-                option?.name || ''
+                option?.symbol || ''
               }
               onInputChange={(event) => {
                 if (event != null && event.target != null) {
@@ -248,7 +304,10 @@ export function DefinePoolAttributes({
                   role="button"
                   onClick={() => {
                     if (collateralWalletBalance != null) {
-                      setCollateralBalance(parseFloat(collateralWalletBalance))
+                      formik.setFieldValue(
+                        'collateralBalance',
+                        collateralWalletBalance
+                      )
                     }
                   }}
                 >
@@ -264,7 +323,7 @@ export function DefinePoolAttributes({
             <TextField
               id="collateralBalance"
               name="collateralBalance"
-              label="Collateral Balance"
+              label="Collateral Amount"
               inputProps={{ min: 0 }}
               onBlur={formik.handleBlur}
               error={formik.errors.collateralBalance != null}
@@ -272,16 +331,10 @@ export function DefinePoolAttributes({
               type="number"
               onChange={(event) => {
                 const collateralBalance = event.target.value
-                const half =
-                  collateralBalance != null
-                    ? parseFloat(collateralBalance) / 2
-                    : 0
 
                 formik.setValues((values) => ({
                   ...values,
                   collateralBalance,
-                  collateralBalanceShort: half,
-                  collateralBalanceLong: half,
                   tokenSupply: parseFloat(collateralBalance),
                 }))
               }}
@@ -293,64 +346,175 @@ export function DefinePoolAttributes({
         </Stack>
       </Box>
 
-      <h3>Payoff</h3>
-
+      <h3>Payoff Type</h3>
+      <FormControl>
+        <RadioGroup
+          row
+          aria-labelledby="demo-row-radio-buttons-group-label"
+          name="row-radio-buttons-group"
+          value={value}
+          onChange={handleChange}
+        >
+          <FormControlLabel value="binary" control={<Radio />} label="Binary" />
+          <FormControlLabel value="linear" control={<Radio />} label="Linear" />
+          <FormControlLabel value="custom" control={<Radio />} label="Custom" />
+        </RadioGroup>
+      </FormControl>
       <Stack pb={3} spacing={2} direction="row">
-        <Box pt={2} width="50%">
-          <FormControl fullWidth error={hasPaymentProfileError}>
-            {hasPaymentProfileError && (
-              <FormHelperText
-                sx={{ marginLeft: 0, paddingBottom: theme.spacing(3) }}
-              >
-                Invalid input. Please ensure that the following is true: <br />
-                <code>
-                  Floor {'<='} Inflection {'<='} Cap
-                </code>
-              </FormHelperText>
-            )}
+        {value === 'binary' && (
+          <Box pt={2} width="50%">
             <Stack spacing={3}>
-              <TextField
-                inputProps={{ min: 0, max: inflection }}
-                name="floor"
-                error={formik.errors.floor != null}
-                id="floor"
-                onBlur={formik.handleBlur}
-                label="Floor"
-                value={floor}
-                type="number"
-                onChange={formik.handleChange}
-              />
-              <TextField
-                id="inflection"
-                error={formik.errors.inflection != null}
-                name="inflection"
-                onBlur={formik.handleBlur}
-                label="Inflection"
-                inputProps={{
-                  min: floor,
-                  max: cap,
-                }}
-                type="number"
-                onChange={formik.handleChange}
-                value={inflection}
-                sx={{ width: '100%' }}
-              />
-
-              <TextField
-                error={formik.errors.cap != null}
-                inputProps={{ min: inflection }}
-                onBlur={formik.handleBlur}
-                name="cap"
-                id="cap"
-                label="Cap"
-                value={cap}
-                type="number"
-                onChange={formik.handleChange}
-              />
+              <Tooltip
+                placement="top-end"
+                title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+              >
+                <TextField
+                  id="inflection"
+                  error={formik.errors.inflection != null}
+                  name="inflection"
+                  onBlur={formik.handleBlur}
+                  label="Inflection"
+                  inputProps={{
+                    min: floor,
+                    max: cap,
+                  }}
+                  type="number"
+                  onChange={formik.handleChange}
+                  value={inflection}
+                  sx={{ width: '100%' }}
+                />
+              </Tooltip>
               <DefineAdvanced formik={formik} />
             </Stack>
-          </FormControl>
-        </Box>
+          </Box>
+        )}
+        {value === 'linear' && (
+          <Box pt={2} width="50%">
+            <Stack spacing={3}>
+              <Tooltip
+                placement="top-end"
+                title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+              >
+                <TextField
+                  inputProps={{ min: 0, max: inflection }}
+                  name="floor"
+                  error={formik.errors.floor != null}
+                  id="floor"
+                  onBlur={formik.handleBlur}
+                  label="Floor"
+                  value={floor}
+                  type="number"
+                  onChange={formik.handleChange}
+                />
+              </Tooltip>
+              <Tooltip
+                placement="top-end"
+                title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
+              >
+                <TextField
+                  error={formik.errors.cap != null}
+                  inputProps={{ min: inflection }}
+                  onBlur={formik.handleBlur}
+                  name="cap"
+                  id="cap"
+                  label="Cap"
+                  value={cap}
+                  type="number"
+                  onChange={formik.handleChange}
+                />
+              </Tooltip>
+              <DefineAdvanced formik={formik} />
+            </Stack>
+          </Box>
+        )}
+        {value === 'custom' && (
+          <Box pt={2} width="50%">
+            <FormControl fullWidth error={hasPaymentProfileError}>
+              {hasPaymentProfileError && (
+                <FormHelperText
+                  sx={{ marginLeft: 0, paddingBottom: theme.spacing(3) }}
+                >
+                  Invalid input. Please ensure that the following is true:{' '}
+                  <br />
+                  <code>
+                    Floor {'<='} Inflection {'<='} Cap
+                  </code>
+                </FormHelperText>
+              )}
+              <Stack spacing={3}>
+                <Tooltip
+                  placement="top-end"
+                  title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+                >
+                  <TextField
+                    inputProps={{ min: 0, max: inflection }}
+                    name="floor"
+                    error={formik.errors.floor != null}
+                    id="floor"
+                    onBlur={formik.handleBlur}
+                    label="Floor"
+                    value={floor}
+                    type="number"
+                    onChange={formik.handleChange}
+                  />
+                </Tooltip>
+                <Tooltip
+                  placement="top-end"
+                  title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+                >
+                  <TextField
+                    id="inflection"
+                    error={formik.errors.inflection != null}
+                    name="inflection"
+                    onBlur={formik.handleBlur}
+                    label="Inflection"
+                    inputProps={{
+                      min: floor,
+                      max: cap,
+                    }}
+                    type="number"
+                    onChange={formik.handleChange}
+                    value={inflection}
+                    sx={{ width: '100%' }}
+                  />
+                </Tooltip>
+                <Tooltip
+                  placement="top-end"
+                  title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
+                >
+                  <TextField
+                    error={formik.errors.cap != null}
+                    inputProps={{ min: inflection }}
+                    onBlur={formik.handleBlur}
+                    name="cap"
+                    id="cap"
+                    label="Cap"
+                    value={cap}
+                    type="number"
+                    onChange={formik.handleChange}
+                  />
+                </Tooltip>
+                <Tooltip
+                  placement="top-end"
+                  title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
+                >
+                  <TextField
+                    name="gradient"
+                    id="gradient"
+                    label="Gradient"
+                    onBlur={formik.handleBlur}
+                    error={formik.errors.gradient != null}
+                    inputProps={{ min: 0 }}
+                    onChange={formik.handleChange}
+                    value={gradient}
+                    type="number"
+                  />
+                </Tooltip>
+                <DefineAdvanced formik={formik} />
+              </Stack>
+            </FormControl>
+          </Box>
+        )}
 
         {floor != null &&
           cap != null &&

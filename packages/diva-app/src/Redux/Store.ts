@@ -2,6 +2,7 @@ import { configureStore, ConfigureStoreOptions } from '@reduxjs/toolkit'
 import { appSlice, defaultAppState, initialState } from './appSlice'
 import { debounce } from '../lib/debounce'
 import { tradeOptionSlice } from './TradeOption'
+import statsReducer from './Stats'
 
 const validState = (state) => {
   if (
@@ -23,7 +24,7 @@ const validState = (state) => {
       return res
     })
   ) {
-    console.error('previous app state is invalid, resetting it', preloadedState)
+    console.error('previous app state is invalid, resetting it', state)
     return undefined
   }
 
@@ -34,10 +35,11 @@ const preloadedState = validState(
   JSON.parse(localStorage.getItem('diva-app-state-local'))
 )
 
-const storeConfig: ConfigureStoreOptions = {
+const storeConfig: any = {
   reducer: {
     tradeOption: tradeOptionSlice.reducer,
     appSlice: appSlice.reducer,
+    stats: statsReducer,
   },
 }
 

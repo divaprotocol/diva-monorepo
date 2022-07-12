@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { getDateTime } from '../../Util/Dates'
+import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
 import { Pool } from '../../lib/queries'
-import { formatEther, formatUnits } from 'ethers/lib/utils'
+import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import CheckCircleSharpIcon from '@mui/icons-material/CheckCircleSharp'
 import WarningAmberSharpIcon from '@mui/icons-material/WarningAmberSharp'
+import { BigNumber } from 'ethers'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -28,13 +29,15 @@ const FlexBoxHeader = styled.div`
   font-size: 0.9rem;
   font-weight: solid;
   text-align: left;
+  width: max-content;
   padding-left: 15px;
+  color: gray;
 `
 
 const FlexBoxData = styled.div`
   padding: 15px;
-  font-size: 0.9rem;
-  font-weight: bold;
+  width: 100%;
+  font-size: 1rem;
   text-align: left;
 `
 
@@ -55,7 +58,7 @@ const FlexBox = styled.div`
 `
 
 const FlexSecondLineDiv = styled.div`
-  width: 65%;
+  width: 34%;
   margin-top: 15px;
   display: -webkit-box;
   display: -moz-box;
@@ -67,29 +70,22 @@ const FlexSecondLineDiv = styled.div`
 `
 
 const FlexBoxSecondLine = styled.div`
-  width: 100%;
   flex: 1;
-`
-
-const FlexToolTipBoxData = styled.div`
-  margin-left: 15px;
-  padding-top: 15px;
-  font-size: 0.9rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: bold;
-  text-align: left;
 `
 
 const FlexBoxSecondLineData = styled.div`
   padding: 15px;
-  font-size: 0.9rem;
+  width: max-content;
+  font-size: 1rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: bold;
   text-align: left;
 `
 const FlexCheckIcon = styled.div`
+  display: flex;
+  flex-direction: row;
+`
+const FlexDataDiv = styled.div`
   display: flex;
   flex-direction: row;
 `
@@ -103,27 +99,26 @@ export default function OptionDetails({
   //Instead of calling redux to get selected option at each component level
   //we can call at root component of trade that is underlying and pass as porps
   //to each child component.
-  const collateralBalanceLongInitial = Number(
-    formatUnits(
-      pool.collateralBalanceLongInitial,
-      pool.collateralToken.decimals
-    )
-  )
-  const collateralBalanceShortInitial = Number(
-    formatUnits(
-      pool.collateralBalanceShortInitial,
-      pool.collateralToken.decimals
-    )
-  )
-  const longShortCollateralSum =
-    collateralBalanceLongInitial + collateralBalanceShortInitial
-  const longCollateralRatio =
-    (collateralBalanceLongInitial / longShortCollateralSum) * 100
-  const shortCollateralRatio =
-    (collateralBalanceShortInitial / longShortCollateralSum) * 100
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
+  const [binary, setBinary] = useState(false)
+  const [linear, setLinear] = useState(false)
+  useEffect(() => {
+    if (pool.cap === pool.floor) {
+      setBinary(true)
+      setLinear(false)
+    } else if (
+      BigNumber.from(pool.inflection).eq(
+        BigNumber.from(pool.floor)
+          .add(BigNumber.from(pool.cap))
+          .div(BigNumber.from('2'))
+      )
+    ) {
+      setBinary(false)
+      setLinear(true)
+    }
+  }, [pool])
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
       (dataName: { id: string }) => dataName?.id == pool?.dataProvider
@@ -136,7 +131,6 @@ export default function OptionDetails({
       setCheckIcon(false)
     }
   }, [dataSource.dataProviders, pool.dataProvider])
-
   return (
     <PageDiv>
       <HeaderDiv>
@@ -145,56 +139,302 @@ export default function OptionDetails({
       <FlexDiv>
         <FlexBox>
           <FlexBoxHeader>Expires at</FlexBoxHeader>
-          <FlexBoxData>{getDateTime(pool.expiryTime).slice(0, 10)}</FlexBoxData>
+          <FlexBoxData>
+            <Tooltip
+              title={
+                getDateTime(pool.expiryTime).slice(11, 19) +
+                ' ' +
+                userTimeZone()
+              }
+              arrow
+            >
+              <FlexDataDiv>
+                {getDateTime(pool.expiryTime).slice(0, 10)}
+                {'  '}
+              </FlexDataDiv>
+            </Tooltip>
+          </FlexBoxData>
         </FlexBox>
+
         <FlexBox>
           <FlexBoxHeader>Direction</FlexBoxHeader>
           <FlexBoxData>{isLong ? 'Up' : 'Down'}</FlexBoxData>
         </FlexBox>
-        <FlexBox>
-          <FlexBoxHeader>Floor</FlexBoxHeader>
-          <FlexBoxData>{parseInt(pool.floor) / 1e18}</FlexBoxData>
-        </FlexBox>
-        <FlexBox>
-          <FlexBoxHeader>Inflection</FlexBoxHeader>
-          <FlexBoxData>{parseInt(pool.inflection) / 1e18}</FlexBoxData>
-        </FlexBox>
-        <FlexBox>
-          <FlexBoxHeader>Cap</FlexBoxHeader>
-          <FlexBoxData>{Number(formatEther(pool.cap))}</FlexBoxData>
-        </FlexBox>
-        <FlexBox>
-          <FlexBoxHeader>Collateral</FlexBoxHeader>
-          <FlexBoxData>
-            {Number(
-              formatUnits(pool.collateralBalance, pool.collateralToken.decimals)
-            ).toFixed(2) +
-              ' ' +
-              pool.collateralToken.symbol}
-          </FlexBoxData>
-        </FlexBox>
+        {binary ? (
+          <>
+            <FlexBox>
+              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
+              <FlexBoxData>Binary</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the LONG token pays ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
+                  }
+                >
+                  <FlexBoxHeader>Inflection</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' below which the SHORT token pays ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
+                  }
+                >
+                  <FlexBoxHeader>Inflection</FlexBoxHeader>
+                </Tooltip>
+              )}
+              <FlexBoxData>
+                {Number(formatEther(pool.inflection)).toFixed(2)}
+              </FlexBoxData>
+            </FlexBox>
+          </>
+        ) : linear ? (
+          <>
+            <FlexBox>
+              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
+              <FlexBoxData>Linear</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the LONG token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 0.'
+                  }
+                >
+                  <FlexBoxHeader>Floor</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the SHORT token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
+                  }
+                >
+                  <FlexBoxHeader>Floor</FlexBoxHeader>
+                </Tooltip>
+              )}
+              <FlexBoxData>
+                {Number(formatEther(pool.floor)).toFixed(2)}
+              </FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the LONG token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
+                  }
+                >
+                  <FlexBoxHeader>Cap</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the SHORT token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 0.'
+                  }
+                >
+                  <FlexBoxHeader>Cap</FlexBoxHeader>
+                </Tooltip>
+              )}
+              <FlexBoxData>
+                {Number(formatEther(pool.cap)).toFixed(2)}
+              </FlexBoxData>
+            </FlexBox>
+          </>
+        ) : (
+          <>
+            <FlexBox>
+              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
+              <FlexBoxData>Custom</FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the LONG token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 0.'
+                  }
+                >
+                  <FlexBoxHeader>Floor</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or below which the SHORT token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
+                  }
+                >
+                  <FlexBoxHeader>Floor</FlexBoxHeader>
+                </Tooltip>
+              )}
+
+              <FlexBoxData>
+                {Number(formatEther(pool.floor)).toFixed(2)}
+              </FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the LONG token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 1.0.'
+                  }
+                >
+                  <FlexBoxHeader>Cap</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Value of ' +
+                    pool.referenceAsset +
+                    ' at or above which the SHORT token pays out ' +
+                    pool.collateralToken.symbol +
+                    ' 0.'
+                  }
+                >
+                  <FlexBoxHeader>Cap</FlexBoxHeader>
+                </Tooltip>
+              )}
+              <FlexBoxData>
+                {Number(formatEther(pool.cap)).toFixed(2)}
+              </FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              <Tooltip
+                placement="top-end"
+                title={
+                  'Value of ' +
+                  pool.referenceAsset +
+                  ' at which the LONG token payout is equal to Gradient.'
+                }
+              >
+                <FlexBoxHeader>Inflection</FlexBoxHeader>
+              </Tooltip>
+              <FlexBoxData>
+                {Number(formatEther(pool.inflection)).toFixed(2)}
+              </FlexBoxData>
+            </FlexBox>
+            <FlexBox>
+              {isLong ? (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Payout per LONG token if ' +
+                    pool.referenceAsset +
+                    ' ends up at inflection.'
+                  }
+                >
+                  <FlexBoxHeader>Gradient</FlexBoxHeader>
+                </Tooltip>
+              ) : (
+                <Tooltip
+                  placement="top-end"
+                  title={
+                    'Payout per SHORT token if ' +
+                    pool.referenceAsset +
+                    ' ends up at inflection.'
+                  }
+                >
+                  <FlexBoxHeader>Gradient</FlexBoxHeader>
+                </Tooltip>
+              )}
+              {isLong ? (
+                <FlexBoxData>
+                  {Number(
+                    formatUnits(
+                      BigNumber.from(pool.collateralBalanceLongInitial)
+                        .mul(parseUnits('1', pool.collateralToken.decimals))
+                        .div(
+                          BigNumber.from(pool.collateralBalanceLongInitial).add(
+                            BigNumber.from(pool.collateralBalanceShortInitial)
+                          )
+                        ),
+
+                      pool.collateralToken.decimals
+                    )
+                  ).toFixed(2)}
+                </FlexBoxData>
+              ) : (
+                <FlexBoxData>
+                  {Number(
+                    formatUnits(
+                      parseUnits('1', pool.collateralToken.decimals).sub(
+                        BigNumber.from(pool.collateralBalanceLongInitial)
+                          .mul(parseUnits('1', pool.collateralToken.decimals))
+                          .div(
+                            BigNumber.from(
+                              pool.collateralBalanceLongInitial
+                            ).add(
+                              BigNumber.from(pool.collateralBalanceShortInitial)
+                            )
+                          )
+                      ),
+
+                      pool.collateralToken.decimals
+                    )
+                  ).toFixed(2)}
+                </FlexBoxData>
+              )}
+            </FlexBox>
+          </>
+        )}
       </FlexDiv>
       <FlexSecondLineDiv>
         <FlexBoxSecondLine>
-          <FlexBoxHeader>Data provider</FlexBoxHeader>
-          <Tooltip title={pool.dataProvider} arrow>
-            <FlexToolTipBoxData>
-              {pool.dataProvider.length > 0
-                ? String(pool.dataProvider).substring(0, 6) +
-                  '...' +
-                  String(pool.dataProvider).substring(38)
-                : 'n/a'}
-            </FlexToolTipBoxData>
-          </Tooltip>
-        </FlexBoxSecondLine>
-        <FlexBoxSecondLine>
-          <FlexBoxHeader>Data source</FlexBoxHeader>
-          <FlexBoxSecondLineData>
-            <FlexCheckIcon>
-              {dataSourceName}
+          <FlexBoxHeader>Data Provider</FlexBoxHeader>
 
+          <FlexBoxSecondLineData>
+            <FlexDataDiv>
+              <Tooltip title={pool.dataProvider} arrow>
+                <FlexCheckIcon>{dataSourceName}</FlexCheckIcon>
+              </Tooltip>
               {checkIcon ? (
-                <Tooltip title="Trusted data provider from the DIVA whitelist">
+                <Tooltip
+                  title="Trusted data provider from the DIVA whitelist."
+                  arrow
+                >
                   <CheckCircleSharpIcon
                     sx={{
                       mt: 0.3,
@@ -205,7 +445,10 @@ export default function OptionDetails({
                   />
                 </Tooltip>
               ) : (
-                <Tooltip title="Untrusted data provider">
+                <Tooltip
+                  title="Data provider is NOT part of DIVA's whitelist."
+                  arrow
+                >
                   <WarningAmberSharpIcon
                     sx={{
                       mt: 0.3,
@@ -216,14 +459,24 @@ export default function OptionDetails({
                   />
                 </Tooltip>
               )}
-            </FlexCheckIcon>
+            </FlexDataDiv>
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
-
         <FlexBoxSecondLine>
-          <FlexBoxHeader>Short/Long ratio</FlexBoxHeader>
+          <FlexBoxHeader>Collateral</FlexBoxHeader>
           <FlexBoxSecondLineData>
-            {shortCollateralRatio.toFixed()} / {longCollateralRatio.toFixed()}
+            <Tooltip title={pool.collateralToken.id} arrow placement="bottom">
+              <FlexDataDiv>
+                {Number(
+                  formatUnits(
+                    pool.collateralBalance,
+                    pool.collateralToken.decimals
+                  )
+                ).toFixed(2) +
+                  ' ' +
+                  pool.collateralToken.symbol}
+              </FlexDataDiv>
+            </Tooltip>
           </FlexBoxSecondLineData>
         </FlexBoxSecondLine>
       </FlexSecondLineDiv>
