@@ -588,7 +588,7 @@ export default function SellMarket(props: {
           >
             {params.tokenType.toUpperCase() + ' '}
           </FormLabel>
-          <Stack spacing={0.7} justifyContent="flex" width={'100%'}>
+          <Stack spacing={0.7} alignItems="flex-end">
             <FormInput
               width={'85%'}
               type="text"
@@ -596,7 +596,7 @@ export default function SellMarket(props: {
             />
             <FormLabel sx={{ color: 'Gray', fontSize: 11 }}>
               {toExponentialOrNumber(
-                Number(formatUnits(numberOfOptions.add(feeAmount)))
+                Number(formatUnits(numberOfOptions.add(0)))
               )}{' '}
               (incl. 1% fee)
             </FormLabel>
