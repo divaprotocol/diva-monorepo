@@ -159,25 +159,6 @@ export function DefinePoolAttributes({
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
   useEffect(() => {
-    switch (value) {
-      case 'binary':
-        formik.setValues((_values) => ({
-          ..._values,
-          cap: formik.values.inflection,
-          floor: formik.values.inflection,
-          gradient: 1,
-        }))
-        break
-      case 'linear':
-        formik.setValues((_values) => ({
-          ..._values,
-          inflection: (formik.values.cap + formik.values.floor) / 2,
-          gradient: 0.5,
-        }))
-        break
-    }
-  }, [value, formik.values.cap, formik.values.floor, formik.values.inflection])
-  useEffect(() => {
     switch (payoutProfile) {
       case 'Binary':
         formik.setFieldValue('cap', formik.values.inflection)
@@ -193,10 +174,6 @@ export function DefinePoolAttributes({
         formik.setFieldValue(
           'floor',
           formik.values.inflection - formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'inflection',
-          (formik.values.cap + formik.values.floor) / 2
         )
         break
       case 'Custom':
