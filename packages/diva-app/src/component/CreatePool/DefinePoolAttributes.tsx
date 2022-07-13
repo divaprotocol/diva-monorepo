@@ -508,7 +508,17 @@ export function DefinePoolAttributes({
                         label="Floor"
                         value={floor}
                         type="number"
-                        onChange={formik.handleChange}
+                        onChange={(event) => {
+                          if (payoutProfile === 'Linear') {
+                            formik.handleChange(event)
+                            formik.setValues((values) => ({
+                              ...values,
+                              floor: parseFloat(event.target.value),
+                              inflection:
+                                (parseFloat(event.target.value) + cap) / 2,
+                            }))
+                          }
+                        }}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
@@ -525,7 +535,15 @@ export function DefinePoolAttributes({
                         label="Cap"
                         value={cap}
                         type="number"
-                        onChange={formik.handleChange}
+                        onChange={(event) => {
+                          formik.handleChange(event)
+                          formik.setValues((values) => ({
+                            ...values,
+                            cap: parseFloat(event.target.value),
+                            inflection:
+                              (parseFloat(event.target.value) + floor) / 2,
+                          }))
+                        }}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
