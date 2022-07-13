@@ -27,7 +27,9 @@ async function getFillableOrders(
   tokenAddress,
   exchangeProxy,
   chainId,
-  provider
+  provider,
+  makerTokenUnit,
+  takerTokenUnit
 ) {
   // Connect to BalanceChecker contract which implements a function (called allowances)
   // to obtain multiple allowances with one single call
@@ -99,6 +101,20 @@ async function getFillableOrders(
 
     const makerAmount = BigNumber.from(order.order.makerAmount)
     const takerAmount = BigNumber.from(order.order.takerAmount)
+
+    // Calculate prices
+    const ratioMakerAmountToTakerAmount = makerAmount
+      .mul(takerTokenUnit)
+      .div(takerAmount) // in maker token decimals
+    const ratioTakerAmountToMakerAmount = takerAmount
+      .mul(makerTokenUnit)
+      .div(makerAmount) // in taker token decimals
+
+    // Add to extendedOrder object
+    extendedOrder.order.ratioMakerAmountToTakerAmount =
+      ratioMakerAmountToTakerAmount.toString()
+    extendedOrder.order.ratioTakerAmountToMakerAmount =
+      ratioTakerAmountToMakerAmount.toString()
 
     // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
     const remainingFillableMakerAmount = makerAmount
@@ -202,8 +218,13 @@ export const get0xOpenOrders = async (
 
   // Get taker and maker token decimals to be used in takerTokenFeeAmount calcs
   const takerTokenContract = new ethers.Contract(takerToken, ERC20ABI, provider)
+  const makerTokenContract = new ethers.Contract(makerToken, ERC20ABI, provider)
+
   const takerTokenDecimals = await takerTokenContract.decimals()
+  const makerTokenDecimals = await makerTokenContract.decimals()
+
   const takerTokenUnit = parseUnits('1', takerTokenDecimals)
+  const makerTokenUnit = parseUnits('1', makerTokenDecimals)
 
   // Get actually fillable orders by checking the maker allowance. Reasons for this filter is that
   // 0x may return orders that are not mutually fillable. This can happen if a maker
@@ -213,7 +234,9 @@ export const get0xOpenOrders = async (
     makerToken,
     exchangeProxy,
     chainId,
-    provider
+    provider,
+    makerTokenUnit,
+    takerTokenUnit
   )
 
   // Apply additional filters to ensure fillability of orders displayed in the orderbook
