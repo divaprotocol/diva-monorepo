@@ -23,11 +23,11 @@ export const buyMarketOrder = async (orderData) => {
   const scaling = parseUnits('1', 18 - decimals)
   const collateralTokenUnit = parseUnits('1', decimals)
 
-  // Slightly reduce nbrOptionsToBuy entered by the user to account for failing to fill orders with exact/close to remainingFillableTakerAmount.
+  // Slightly reduce nbrOptionsToBuy entered by the user to account for order fills when using exact/close to remainingFillableTakerAmount.
   // IMPORTANT: As minRemainingFillableTakerAmount = 100 (see OpenOrders.tsx), there is no risk of ending up with a negative
   // nbrOptionsToBuy as orders with less than 10 remaininigFillableTakerAmount are filtered out from the orderbook
   const buffer = BigNumber.from(10)
-  let nbrOptionsToBuy = orderData.nbrOptions.sub(buffer)
+  let nbrOptionsToBuy = orderData.nbrOptions.sub(buffer) // TODO: reduce the takerAssetFillAmount instead of this input?
 
   // Initialize input arrays for batchFillLimitOrders function
   let takerAssetFillAmounts = []
@@ -74,23 +74,26 @@ export const buyMarketOrder = async (orderData) => {
       // The position token amount to buy entered by the user (nbrOptionsToBuy) represents the MAKER token amount in
       // Sell Limit (the orders the user is going to fill). As batchFillLimitOrder requires the taker asset amounts as input,
       // conversion to taker token amount via expectedRate is required.
-      // Taker asset is the collateral token and impliedTakerAssetAmount is expressed as an integer with collateral token decimals.
+
+      // Taker asset is the collateral token and impliedTakerAssetAmount is takerFillAmount derived from the users input.
       // IMPORTANT: impliedTakerAssetAmount could end up being 1 unit less than remainingTakerAssetFillableAmount.
       // E.g., impliedTakerAssetAmount = 5013272727 but remainingTakerAssetFillableAmount = 5013272728
       let impliedTakerAssetAmount = expectedRate
         .mul(nbrOptionsToBuy)
         .div(collateralTokenUnit)
+        .sub(BigNumber.from(10)) // Account for problem with filling exact/close to exact remainingFillableTakerAmount; if 10 is remaining, those orders will be filtered out in OpenOrders.tsx
       console.log('impliedTakerAssetAmount', impliedTakerAssetAmount.toString())
 
-      // It can happen that impliedTakerAssetAmount results in zero (e.g., price < 1 and quantity = 1e-18)
-      // or 1 unit less than remainingFillableTakerAmount due to rounding. Adjust for that accordingly
-      impliedTakerAssetAmount = BigNumber.from(
-        order.remainingFillableTakerAmount
-      )
-        .sub(impliedTakerAssetAmount)
-        .eq(BigNumber.from(1))
-        ? BigNumber.from(order.remainingFillableTakerAmount)
-        : impliedTakerAssetAmount
+      // DROPPING this logic as it doesn't matter if 1 is left as it will get filtered out from the orderbook
+      // // It can happen that impliedTakerAssetAmount results in zero (e.g., price < 1 and quantity = 1e-18)
+      // // or 1 unit less than remainingFillableTakerAmount due to rounding. Adjust for that accordingly
+      // impliedTakerAssetAmount = BigNumber.from(
+      //   order.remainingFillableTakerAmount
+      // )
+      //   .sub(impliedTakerAssetAmount)
+      //   .eq(BigNumber.from(1))
+      //   ? BigNumber.from(order.remainingFillableTakerAmount)
+      //   : impliedTakerAssetAmount
       // const impliedTakerAssetAmount2 = impliedTakerAssetAmount.lt(order.metaData) ?
       let takerAssetFillAmount
       let nbrOptionsFilled

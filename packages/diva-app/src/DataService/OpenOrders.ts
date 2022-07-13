@@ -211,6 +211,9 @@ export const get0xOpenOrders = async (
     provider
   )
 
+  // IDEA calculate min impliedTakerAssetAmount with a fictional nbrOptions via expectedRate * nbrOptions / scaling and if that number is 0, then filter out those orders?
+  // Think about whether this would affect normal orders as well.
+
   // Additional filters to ensure fillability via the app
   const filteredOrders = []
 
