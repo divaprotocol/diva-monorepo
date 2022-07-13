@@ -24,14 +24,14 @@ const PageDiv = styled.div`
 `
 
 /**
- * Prepare all data to be displayed in the orderbook (price, quantity and expires in)
+ * Prepare the data to be displayed in the orderbook (price, quantity and expires in)
  */
 function mapOrderData(
   records: [],
   option: Pool,
   orderType: number // 0 = BUY, 1 = SELL
 ) {
-  // Get orderbook (before filtering out 0 quantities)
+  // Get orderbook (comes already filtered and clean-up; see OpenOrders.tsx)
   const orderbook: any = records.map((record: any) => {
     const order = record.order
     const metaData = record.metaData
@@ -39,90 +39,43 @@ function mapOrderData(
 
     // Buy Limit (orderType = 0)
     if (orderType === 0) {
-      const takerAmount = formatUnits(order.takerAmount)
-      const makerAmount = formatUnits(
-        order.makerAmount.toString(),
-        option.collateralToken.decimals
-      )
-      const remainingTakerAmount = formatUnits(
-        metaData.remainingFillableTakerAmount
-      )
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
-      // const bidAmount = Number(makerAmount) / Number(takerAmount) // ok to have it that way as this is just for displaying information in the frontend and not for transactions
-      // orders.bid = bidAmount
-      // if (Number(remainingTakerAmount) < Number(takerAmount)) {
-      //   const nbrOptions = Number(remainingTakerAmount)
-      //   orders.nbrOptions = nbrOptions
-      // } else {
-      //   orders.nbrOptions = Number(takerAmount)
-      // }
+
+      // Calculate Bid amount
       const bidAmount = BigNumber.from(order.makerAmount)
         .mul(parseUnits('1'))
         .div(BigNumber.from(order.takerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
       orders.bid = formatUnits(bidAmount, option.collateralToken.decimals)
-      // Take minimum of remainingFillableTakerAmount and takerAmount to be displayed as the quantity in the orderbook
-      orders.nbrOptions = BigNumber.from(
-        metaData.remainingFillableTakerAmount
-      ).lt(BigNumber.from(order.takerAmount))
-        ? formatUnits(metaData.remainingFillableTakerAmount)
-        : formatUnits(order.takerAmount)
-      // if (
-      //   BigNumber.from(order.takerAmount).gt(
-      //     BigNumber.from(metaData.remainingFillableTakerAmount)
-      //   )
-      // ) {
-      //   const nbrOptions = formatUnits(metaData.remainingFillableTakerAmount)
-      //   orders.nbrOptions = nbrOptions
-      // } else {
-      //   orders.nbrOptions = formatUnits(order.takerAmount)
-      // }
+
+      // Display remainingFillableTakerAmount as the quantity in the orderbook
+      orders.nbrOptions = formatUnits(
+        BigNumber.from(metaData.remainingFillableTakerAmount)
+      )
     }
+
     // Sell Limit (orderType = 1)
     if (orderType === 1) {
-      const takerAmount = formatUnits(
-        order.takerAmount,
-        option.collateralToken.decimals
-      )
-      const remainingTakerAmount = formatUnits(
-        metaData.remainingFillableTakerAmount,
-        option.collateralToken.decimals
-      )
-      const makerAmount = formatUnits(order.makerAmount)
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'sell'
       orders.id = 'sell' + records.indexOf(record as never)
-      // const askAmount = Number(takerAmount) / Number(makerAmount)
-      // orders.ask = askAmount
-      // if (remainingTakerAmount == makerAmount) {
-      //   orders.nbrOptions = Number(makerAmount)
-      // } else {
-      //   const quantity2 = Number(
-      //     formatUnits(
-      //       BigNumber.from(metaData.remainingFillableTakerAmount)
-      //         .mul(BigNumber.from(order.takerAmount))
-      //         .div(BigNumber.from(order.makerAmount))
-      //     )
-      //   )
-      //   const quantity = Number(remainingTakerAmount) / askAmount // TODO
-      //   orders.nbrOptions = quantity
-      // }
+
+      // Calculate Ask amount
       const askAmount = BigNumber.from(order.takerAmount)
         .mul(parseUnits('1'))
         .div(BigNumber.from(order.makerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
       orders.ask = formatUnits(askAmount, option.collateralToken.decimals)
-      // const remainingFillableMakerAmount = BigNumber.from(
-      //   metaData.remainingFillableTakerAmount
-      // )
-      //   .mul(BigNumber.from(order.makerAmount))
-      //   .div(order.takerAmount)
+
       if (
         BigNumber.from(metaData.remainingFillableTakerAmount).lt(
-          BigNumber.from(order.takerAmount) // That doesn't make sense here
+          BigNumber.from(order.takerAmount)
         )
       ) {
-        // Scale quantity to be displayed in the orderbook if remainingFillableTakerAmount < takerAmount
         const remainingFillableMakerAmount = BigNumber.from(
           metaData.remainingFillableTakerAmount
         )
@@ -136,7 +89,6 @@ function mapOrderData(
     return orders
   })
 
-  console.log('orderbook clean', orderbook)
   return orderbook
 }
 
@@ -211,8 +163,6 @@ export default function OrderBook(props: {
         responseBuy = rBuy
       }
     }
-    console.log('responseBuy', responseBuy)
-    console.log('responseSell', responseSell)
 
     // Keep this for debugging
     // const buyOrdersByMakerAddress = responseBuy.filter((v) =>

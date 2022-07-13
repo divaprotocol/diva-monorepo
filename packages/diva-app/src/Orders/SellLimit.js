@@ -22,15 +22,11 @@ export const sellLimitOrder = async (orderData) => {
   // Calculate trading fee amount (expressed as an integer with collateral token decimals)
   // Note that the fee is paid in collateral token which is the taker token in Sell Limit
   const collateralTokenFeeAmount = collateralTokenAmount
-    .mul(parseUnits(tradingFee.toString(), orderData.collateralDecimals)) // TODO: Revisit fee logic for trade mining program at a later stage
+    .mul(parseUnits(tradingFee.toString(), orderData.collateralDecimals))
     .div(collateralTokenUnit)
 
   // Get 0x API url to post order
   const networkUrl = config[orderData.chainId].order
-
-  console.log('ordeorderData.limitPricer', orderData.limitPrice.toString())
-  console.log('makerAmount', nbrOptionsToSell.toString())
-  console.log('takerAmount', collateralTokenAmount.toString())
 
   // Construct order object
   const order = new utils.LimitOrder({
