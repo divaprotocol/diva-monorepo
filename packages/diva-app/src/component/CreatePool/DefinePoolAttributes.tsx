@@ -372,7 +372,7 @@ export function DefinePoolAttributes({
                     id="collateralBalance"
                     name="collateralBalance"
                     label="Collateral Amount"
-                    inputProps={{ min: 0 }}
+                    inputProps={{ step: 1, min: 0 }}
                     onBlur={formik.handleBlur}
                     error={formik.errors.collateralBalance != null}
                     value={formik.values.collateralBalance}
@@ -442,6 +442,7 @@ export function DefinePoolAttributes({
                       onBlur={formik.handleBlur}
                       label="Inflection"
                       inputProps={{
+                        step: 1,
                         min: floor,
                         max: cap,
                       }}
@@ -477,7 +478,7 @@ export function DefinePoolAttributes({
                       title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
                     >
                       <TextField
-                        inputProps={{ min: 0, max: inflection }}
+                        inputProps={{ step: 1, min: 0, max: inflection }}
                         name="floor"
                         error={formik.errors.floor != null}
                         id="floor"
@@ -505,7 +506,7 @@ export function DefinePoolAttributes({
                     >
                       <TextField
                         error={formik.errors.cap != null}
-                        inputProps={{ min: inflection }}
+                        inputProps={{ step: 1, min: inflection }}
                         onBlur={formik.handleBlur}
                         name="cap"
                         id="cap"
@@ -553,7 +554,7 @@ export function DefinePoolAttributes({
                           title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
                         >
                           <TextField
-                            inputProps={{ min: 0, max: inflection }}
+                            inputProps={{ step: 1, min: 0, max: inflection }}
                             name="floor"
                             error={formik.errors.floor != null}
                             id="floor"
@@ -571,7 +572,7 @@ export function DefinePoolAttributes({
                         >
                           <TextField
                             error={formik.errors.cap != null}
-                            inputProps={{ min: inflection }}
+                            inputProps={{ step: 1, min: inflection }}
                             onBlur={formik.handleBlur}
                             name="cap"
                             id="cap"
@@ -599,6 +600,7 @@ export function DefinePoolAttributes({
                             onBlur={formik.handleBlur}
                             label="Inflection"
                             inputProps={{
+                              step: 1,
                               min: floor,
                               max: cap,
                             }}
