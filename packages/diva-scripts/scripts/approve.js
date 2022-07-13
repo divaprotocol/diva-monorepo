@@ -13,14 +13,14 @@
  
     // INPUT: 0x exchange proxy address, token to approve, amount to approve
     const exchangeProxyAddress = "0xdef1c0ded9bec7f1a1670819833240f027b25eff" // same for several chains including Mainnet and Ropsten     
-    const tokenToApprove = "0x992c404eb327e60b81107408b9c1cfaff60f9ae9"
+    const tokenToApprove = "0x134e62bd2ee247d4186a1fdbaa9e076cb26c1355"
     let allowance = 0 // conversion into BigNumber with the respective number of decimals is done below 
 
     // Get signers
     const [acc1, acc2, acc3] = await ethers.getSigners();
-    const user = "0xade6209a546a20e7885ef20ede1678fdd3e9c2d2";
+    const user = acc1;
 
-    console.log("Approved by: " + user)
+    console.log("Approved by: " + user.address)
     console.log("Approved for: " + exchangeProxyAddress)
 
     // Connect to token to approve
@@ -31,18 +31,18 @@
     allowance = parseUnits(allowance.toString(), decimals)
     
     // Allowance before
-    const allowanceBefore = await erc20.allowance(user, exchangeProxyAddress)
+    const allowanceBefore = await erc20.allowance(user.address, exchangeProxyAddress)
     console.log("Current approved amount (integer): " + allowanceBefore.toString())
     console.log("Current approved amount (decimals): " + formatUnits(allowanceBefore, decimals))
 
-    // // Set allowance for exchangeProxyAddress
-    // const tx = await erc20.connect(user).approve(exchangeProxyAddress, allowance)
-    // await tx.wait()
+    // Set allowance for exchangeProxyAddress
+    const tx = await erc20.connect(user).approve(exchangeProxyAddress, allowance)
+    await tx.wait()
 
-    // // Print
-    // const allowanceAfter = await erc20.allowance(user.address, exchangeProxyAddress)
-    // console.log("New approved amount (integer): " + allowanceAfter.toString())
-    // console.log("New approved amount (decimals): " + formatUnits(allowanceAfter, decimals))
+    // Print
+    const allowanceAfter = await erc20.allowance(user.address, exchangeProxyAddress)
+    console.log("New approved amount (integer): " + allowanceAfter.toString())
+    console.log("New approved amount (decimals): " + formatUnits(allowanceAfter, decimals))
  
  }
  
