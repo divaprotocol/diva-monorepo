@@ -78,7 +78,7 @@ export const buyMarketOrder = async (orderData) => {
       // Taker asset is the collateral token and impliedTakerAssetAmount is takerFillAmount derived from the users input.
       // IMPORTANT: impliedTakerAssetAmount could end up being 1 unit less than remainingTakerAssetFillableAmount.
       // E.g., impliedTakerAssetAmount = 5013272727 but remainingTakerAssetFillableAmount = 5013272728
-      let impliedTakerAssetAmount = expectedRate
+      const impliedTakerAssetAmount = expectedRate
         .mul(nbrOptionsToBuy)
         .div(collateralTokenUnit)
         .sub(BigNumber.from(10)) // Account for problem with filling exact/close to exact remainingFillableTakerAmount; if 10 is remaining, those orders will be filtered out in OpenOrders.tsx

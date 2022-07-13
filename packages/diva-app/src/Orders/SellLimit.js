@@ -28,6 +28,10 @@ export const sellLimitOrder = async (orderData) => {
   // Get 0x API url to post order
   const networkUrl = config[orderData.chainId].order
 
+  console.log('ordeorderData.limitPricer', orderData.limitPrice.toString())
+  console.log('makerAmount', nbrOptionsToSell.toString())
+  console.log('takerAmount', collateralTokenAmount.toString())
+
   // Construct order object
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,

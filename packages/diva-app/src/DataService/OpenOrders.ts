@@ -91,7 +91,7 @@ async function getFillableOrders(
   )
 
   // Initialize array that will hold the filtered order objects
-  const filteredOrders = []
+  const fillableOrders = []
 
   orders.forEach((order) => {
     // Convert order object into a Javascript object
@@ -131,7 +131,7 @@ async function getFillableOrders(
       }
 
       // Add to fillable orders
-      filteredOrders.push(extendedOrder)
+      fillableOrders.push(extendedOrder)
 
       // Update the makerAllowances mapping to reflect the remainingAllowance after
       // deducting remainingFillableMakerAmount
@@ -142,7 +142,7 @@ async function getFillableOrders(
     }
   })
 
-  return filteredOrders
+  return fillableOrders
 }
 
 export const get0xOpenOrders = async (
@@ -200,7 +200,12 @@ export const get0xOpenOrders = async (
       return []
     })
 
-  // Get actually fillable orders. Reasons for this filter is that
+  // Get taker and maker token decimals to be used in takerTokenFeeAmount and expectedRate calcs
+  const takerTokenContract = new ethers.Contract(takerToken, ERC20ABI, provider)
+  const takerTokenDecimals = await takerTokenContract.decimals()
+  const takerTokenUnit = parseUnits('1', takerTokenDecimals)
+
+  // Get actually fillable orders by checking the maker allowance. Reasons for this filter is that
   // 0x may return orders that are not mutually fillable. This can happen if a maker
   // revokes/reduces the allowance for the makerToken after the order creation.
   const fillableOrders = await getFillableOrders(
@@ -210,7 +215,8 @@ export const get0xOpenOrders = async (
     chainId,
     provider
   )
-  // TODO: Filter out orders that have a very low expected price. This could result in small impliedTakerAssetFillAmounts and then the deduction by 10 in negative numbers
+
+  console.log('fillableOrders before filters', fillableOrders)
 
   // IDEA calculate min impliedTakerAssetAmount with a fictional nbrOptions via expectedRate * nbrOptions / scaling and if that number is 0, then filter out those orders?
   // Think about whether this would affect normal orders as well.
@@ -218,26 +224,23 @@ export const get0xOpenOrders = async (
   // Additional filters to ensure fillability via the app
   const filteredOrders = []
 
-  // Threshold for small order exclusion
-  // NOTE: Choosing a minRemainingFillableTakerAmount allows to deduct 10 from nbrOptions input without the risk of ending up with a negative amount to be filled
+  // Threshold for small orders. All orders with remainingFillableTakerAmount greater than this value will be filtered out.
+  // NOTE: Choosing a minRemainingFillableTakerAmount of 100 allows to deduct a small buffer of 10 from takerAssetFillAmount without the risk of ending up with a negative amount to be filled.
+  // This buffer is required to account for failing orders when takerAssetFillAmount is too close to the remainingFillableTakerAmount.
   const minRemainingFillableTakerAmount = 100
 
   // Max absolute deviation between actual fee and expected fee allowed; expressed as an integer in smallest unit of collateral token
   const toleranceTakerTokenFeeAmount = 1
 
-  // Get base token decimals to be used in takerTokenFeeAmount calcs
-  const contract = new ethers.Contract(takerToken, ERC20ABI, provider)
-  const takerTokenDecimals = await contract.decimals()
-  console.log('decimals', takerTokenDecimals)
-  const takerTokenUnit = parseUnits('1', takerTokenDecimals)
-
   fillableOrders.forEach((order) => {
     const takerTokenFeeAmountExpected = BigNumber.from(
+      BigNumber.from(order.order.takerAmount)
+        .mul(parseUnits(tradingFee.toString(), takerTokenDecimals))
+        .div(takerTokenUnit)
+    )
+    const takerTokenFeeAmountActual = BigNumber.from(
       order.order.takerTokenFeeAmount
     )
-    const takerTokenFeeAmountActual = BigNumber.from(order.order.takerAmount)
-      .mul(parseUnits(tradingFee.toString(), takerTokenDecimals))
-      .div(takerTokenUnit)
     if (
       BigNumber.from(order.metaData.remainingFillableTakerAmount).gt(
         minRemainingFillableTakerAmount
@@ -249,12 +252,13 @@ export const get0xOpenOrders = async (
       ) &&
       takerTokenFeeAmountActual.lte(
         takerTokenFeeAmountExpected.add(toleranceTakerTokenFeeAmount)
-      ) // Ensure that attached fee is correct (allowing for some pre-defined tolerance)
+      )
     ) {
       filteredOrders.push(order)
     }
   })
 
+  console.log('fillableOrders AFTER filters', filteredOrders)
   return filteredOrders
 }
 

@@ -32,7 +32,7 @@ function mapOrderData(
   orderType: number // 0 = BUY, 1 = SELL
 ) {
   // Get orderbook (before filtering out 0 quantities)
-  const orderbookTemp: any = records.map((record: any) => {
+  const orderbook: any = records.map((record: any) => {
     const order = record.order
     const metaData = record.metaData
     const orders: any = {}
@@ -136,10 +136,6 @@ function mapOrderData(
     return orders
   })
 
-  // Filter out orders with quantity = 0 (may happen if maker has revoked the approval)
-  const orderbook = orderbookTemp.filter((object) => {
-    return object.nbrOptions !== '0.0'
-  })
   console.log('orderbook clean', orderbook)
   return orderbook
 }
@@ -277,7 +273,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.buyQuantity != ''
-                            ? Number(row.buyQuantity)?.toFixed(18)
+                            ? Number(row.buyQuantity)?.toFixed(4)
                             : '-'}
                         </Typography>
                         <label> </label>
@@ -307,7 +303,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.sellQuantity != ''
-                            ? Number(row.sellQuantity)?.toFixed(18)
+                            ? Number(row.sellQuantity)?.toFixed(4)
                             : '-'}
                         </Typography>
                       </Box>
