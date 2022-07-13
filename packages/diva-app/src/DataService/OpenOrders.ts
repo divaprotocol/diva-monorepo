@@ -210,6 +210,7 @@ export const get0xOpenOrders = async (
     chainId,
     provider
   )
+  // TODO: Filter out orders that have a very low expected price. This could result in small impliedTakerAssetFillAmounts and then the deduction by 10 in negative numbers
 
   // IDEA calculate min impliedTakerAssetAmount with a fictional nbrOptions via expectedRate * nbrOptions / scaling and if that number is 0, then filter out those orders?
   // Think about whether this would affect normal orders as well.
