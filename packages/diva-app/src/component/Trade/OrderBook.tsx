@@ -16,7 +16,7 @@ import { useAppSelector } from '../../Redux/hooks'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { selectChainId } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 const PageDiv = styled.div`
@@ -50,14 +50,34 @@ function mapOrderData(
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
-      const bidAmount = Number(makerAmount) / Number(takerAmount) // ok to have it that way as this is just for displaying information in the frontend and not for transactions
-      orders.bid = bidAmount
-      if (Number(remainingTakerAmount) < Number(takerAmount)) {
-        const nbrOptions = Number(remainingTakerAmount)
-        orders.nbrOptions = nbrOptions
-      } else {
-        orders.nbrOptions = Number(takerAmount)
-      }
+      // const bidAmount = Number(makerAmount) / Number(takerAmount) // ok to have it that way as this is just for displaying information in the frontend and not for transactions
+      // orders.bid = bidAmount
+      // if (Number(remainingTakerAmount) < Number(takerAmount)) {
+      //   const nbrOptions = Number(remainingTakerAmount)
+      //   orders.nbrOptions = nbrOptions
+      // } else {
+      //   orders.nbrOptions = Number(takerAmount)
+      // }
+      const bidAmount = BigNumber.from(order.makerAmount)
+        .mul(parseUnits('1'))
+        .div(BigNumber.from(order.takerAmount)) // result is in collateral token decimals
+      orders.bid = formatUnits(bidAmount, option.collateralToken.decimals)
+      // Take minimum of remainingFillableTakerAmount and takerAmount to be displayed as the quantity in the orderbook
+      orders.nbrOptions = BigNumber.from(
+        metaData.remainingFillableTakerAmount
+      ).lt(BigNumber.from(order.takerAmount))
+        ? formatUnits(metaData.remainingFillableTakerAmount)
+        : formatUnits(order.takerAmount)
+      // if (
+      //   BigNumber.from(order.takerAmount).gt(
+      //     BigNumber.from(metaData.remainingFillableTakerAmount)
+      //   )
+      // ) {
+      //   const nbrOptions = formatUnits(metaData.remainingFillableTakerAmount)
+      //   orders.nbrOptions = nbrOptions
+      // } else {
+      //   orders.nbrOptions = formatUnits(order.takerAmount)
+      // }
     }
     // Sell Limit (orderType = 1)
     if (orderType === 1) {
@@ -73,32 +93,54 @@ function mapOrderData(
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'sell'
       orders.id = 'sell' + records.indexOf(record as never)
-      const askAmount = Number(takerAmount) / Number(makerAmount)
-      orders.ask = askAmount
-      if (remainingTakerAmount == makerAmount) {
-        orders.nbrOptions = Number(makerAmount)
-      } else {
-        const quantity2 = Number(
-          formatUnits(
-            BigNumber.from(metaData.remainingFillableTakerAmount)
-              .mul(BigNumber.from(order.takerAmount))
-              .div(BigNumber.from(order.makerAmount))
-          )
+      // const askAmount = Number(takerAmount) / Number(makerAmount)
+      // orders.ask = askAmount
+      // if (remainingTakerAmount == makerAmount) {
+      //   orders.nbrOptions = Number(makerAmount)
+      // } else {
+      //   const quantity2 = Number(
+      //     formatUnits(
+      //       BigNumber.from(metaData.remainingFillableTakerAmount)
+      //         .mul(BigNumber.from(order.takerAmount))
+      //         .div(BigNumber.from(order.makerAmount))
+      //     )
+      //   )
+      //   const quantity = Number(remainingTakerAmount) / askAmount // TODO
+      //   orders.nbrOptions = quantity
+      // }
+      const askAmount = BigNumber.from(order.takerAmount)
+        .mul(parseUnits('1'))
+        .div(BigNumber.from(order.makerAmount)) // result is in collateral token decimals
+      orders.ask = formatUnits(askAmount, option.collateralToken.decimals)
+      // const remainingFillableMakerAmount = BigNumber.from(
+      //   metaData.remainingFillableTakerAmount
+      // )
+      //   .mul(BigNumber.from(order.makerAmount))
+      //   .div(order.takerAmount)
+      if (
+        BigNumber.from(metaData.remainingFillableTakerAmount).lt(
+          BigNumber.from(order.takerAmount) // That doesn't make sense here
         )
-        const quantity = Number(remainingTakerAmount) / askAmount // TODO
-        orders.nbrOptions = quantity
-        orders.nbrOptions2 = quantity2
+      ) {
+        // Scale quantity to be displayed in the orderbook if remainingFillableTakerAmount < takerAmount
+        const remainingFillableMakerAmount = BigNumber.from(
+          metaData.remainingFillableTakerAmount
+        )
+          .mul(BigNumber.from(order.makerAmount))
+          .div(BigNumber.from(order.takerAmount))
+        orders.nbrOptions = formatUnits(remainingFillableMakerAmount)
+      } else {
+        orders.nbrOptions = formatUnits(BigNumber.from(order.makerAmount))
       }
     }
     return orders
   })
-  console.log('orderbookTemp', orderbookTemp)
 
   // Filter out orders with quantity = 0 (may happen if maker has revoked the approval)
   const orderbook = orderbookTemp.filter((object) => {
-    return object.nbrOptions !== 0
+    return object.nbrOptions !== '0.0'
   })
-
+  console.log('orderbook clean', orderbook)
   return orderbook
 }
 
@@ -174,6 +216,19 @@ export default function OrderBook(props: {
       }
     }
     console.log('responseBuy', responseBuy)
+    console.log('responseSell', responseSell)
+
+    // Keep this for debugging
+    // const buyOrdersByMakerAddress = responseBuy.filter((v) =>
+    //   v.order.maker.includes('0xfb34097980eb94bdec8ee4a1eafab92d29d177d9')
+    // )
+    // console.log('buyOrdersByMakerAddress', buyOrdersByMakerAddress)
+
+    // Keep for debugging
+    // const sellOrdersByMakerAddress = responseSell.filter((v) =>
+    //   v.order.maker.includes('0xfb34097980eb94bdec8ee4a1eafab92d29d177d9')
+    // )
+    // console.log('sellOrdersByMakerAddress', sellOrdersByMakerAddress)
 
     const orderBookBuy = mapOrderData(responseBuy, option, OrderType.BUY)
     orders.push(orderBookBuy)
@@ -222,7 +277,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.buyQuantity != ''
-                            ? row.buyQuantity?.toFixed(4)
+                            ? Number(row.buyQuantity)?.toFixed(18)
                             : '-'}
                         </Typography>
                         <label> </label>
@@ -241,7 +296,7 @@ export default function OrderBook(props: {
                     <TableCell align="center">
                       <Box>
                         <Typography variant="subtitle1" color="#ff5c8d">
-                          {row.ask != '' ? row.ask?.toFixed(4) : '-'}
+                          {row.ask != '' ? Number(row.ask)?.toFixed(4) : '-'}
                         </Typography>
                         <Typography variant="caption" color="#8e8e8e" noWrap>
                           {row.sellExpiry}
@@ -252,7 +307,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.sellQuantity != ''
-                            ? row.sellQuantity?.toFixed(4)
+                            ? Number(row.sellQuantity)?.toFixed(18)
                             : '-'}
                         </Typography>
                       </Box>

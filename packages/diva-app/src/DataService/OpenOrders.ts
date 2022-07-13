@@ -1,8 +1,14 @@
 import axios from 'axios'
-import { config } from '../constants'
+import {
+  config,
+  NULL_ADDRESS,
+  divaGovernanceAddress,
+  tradingFee,
+} from '../constants'
 import { BigNumber, ethers } from 'ethers'
 import BalanceCheckerABI from '../abi/BalanceCheckerABI.json'
-
+import ERC20ABI from '../abi/ERC20ABI.json'
+import { parseUnits } from 'ethers/lib/utils'
 /**
  * Filter for orders that can actually be filled, i.e. where makers
  * have sufficient allowances
@@ -168,6 +174,7 @@ export const get0xOpenOrders = async (
     .get(url)
     .then(async function (response) {
       let orders: any[] = []
+      // TODO: Capture bids and asks with one single call instead of two separate calls
       const total = response.data.bids.total //total number of existing orders for option
       orders = response.data.bids.records
       if (total > perPage) {
@@ -203,7 +210,48 @@ export const get0xOpenOrders = async (
     chainId,
     provider
   )
-  return fillableOrders
+
+  // Additional filters to ensure fillability via the app
+  const filteredOrders = []
+
+  // Threshold for small order exclusion
+  // NOTE: Choosing a minRemainingFillableTakerAmount allows to deduct 10 from nbrOptions input without the risk of ending up with a negative amount to be filled
+  const minRemainingFillableTakerAmount = 100
+
+  // Max absolute deviation between actual fee and expected fee allowed; expressed as an integer in smallest unit of collateral token
+  const toleranceTakerTokenFeeAmount = 1
+
+  // Get base token decimals to be used in takerTokenFeeAmount calcs
+  const contract = new ethers.Contract(takerToken, ERC20ABI, provider)
+  const takerTokenDecimals = await contract.decimals()
+  console.log('decimals', takerTokenDecimals)
+  const takerTokenUnit = parseUnits('1', takerTokenDecimals)
+
+  fillableOrders.forEach((order) => {
+    const takerTokenFeeAmountExpected = BigNumber.from(
+      order.order.takerTokenFeeAmount
+    )
+    const takerTokenFeeAmountActual = BigNumber.from(order.order.takerAmount)
+      .mul(parseUnits(tradingFee.toString(), takerTokenDecimals))
+      .div(takerTokenUnit)
+    if (
+      BigNumber.from(order.metaData.remainingFillableTakerAmount).gt(
+        minRemainingFillableTakerAmount
+      ) && // Ensure some minimum amount for the order size to avoid any rounding related issues when dealing with small amounts
+      order.order.taker === NULL_ADDRESS && // Ensure that orders are fillable by anyone and not reserved for a specific address
+      order.order.feeRecipient === divaGovernanceAddress.toLowerCase() && // Ensure that the feeRecipient is DIVA Governance address
+      takerTokenFeeAmountActual.gte(
+        takerTokenFeeAmountExpected.sub(toleranceTakerTokenFeeAmount)
+      ) &&
+      takerTokenFeeAmountActual.lte(
+        takerTokenFeeAmountExpected.add(toleranceTakerTokenFeeAmount)
+      ) // Ensure that attached fee is correct (allowing for some pre-defined tolerance)
+    ) {
+      filteredOrders.push(order)
+    }
+  })
+
+  return filteredOrders
 }
 
 export const getOrderDetails = (orderHash: string, chainId) => {

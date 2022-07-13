@@ -1,7 +1,6 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
 import { parseUnits } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
-import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 
@@ -22,9 +21,13 @@ export const buyMarketOrder = async (orderData) => {
   const decimals = orderData.collateralDecimals
   const unit = parseUnits('1')
   const scaling = parseUnits('1', 18 - decimals)
+  const collateralTokenUnit = parseUnits('1', decimals)
 
-  // User input converted from decimal number into an integer with 18 decimals of type BigNumber
-  let nbrOptionsToBuy = orderData.nbrOptions
+  // Slightly reduce nbrOptionsToBuy entered by the user to account for failing to fill orders with exact/close to remainingFillableTakerAmount.
+  // IMPORTANT: As minRemainingFillableTakerAmount = 100 (see OpenOrders.tsx), there is no risk of ending up with a negative
+  // nbrOptionsToBuy as orders with less than 10 remaininigFillableTakerAmount are filtered out from the orderbook
+  const buffer = BigNumber.from(10)
+  let nbrOptionsToBuy = orderData.nbrOptions.sub(buffer)
 
   // Initialize input arrays for batchFillLimitOrders function
   let takerAssetFillAmounts = []
@@ -37,6 +40,18 @@ export const buyMarketOrder = async (orderData) => {
       delete order.signature
       return order
     })
+
+    // Keep for debugging
+    // const res = await exchange
+    //   .getLimitOrderInfo(fillOrders[0])
+    //   .callAsync({ from: orderData.maker })
+    //   .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
+    // console.log(
+    //   'order 1 status (res.takerTokenFilledAmount): ',
+    //   res.takerTokenFilledAmount.toString()
+    // )
+    // console.log(res)
+
     const response = await exchange
       .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
       .awaitTransactionSuccessAsync({ from: orderData.taker })
@@ -48,23 +63,35 @@ export const buyMarketOrder = async (orderData) => {
   orders.forEach((order) => {
     if (nbrOptionsToBuy.gt(0)) {
       fillOrders.push(order)
-
+      console.log('fillOrders', fillOrders)
       // Expected rate is specific to an an order, hence the implied taker asset amount calcs need to be done for every single order and
       // cannot be put outside the forEach part.
       // Expected rate is expressed as an integer with collateral token decimals of type BigNumber.
       // TODO: Adjust BuyMarket.tsx for the change to collateral token decimals
       const expectedRate = order.expectedRate
-
+      console.log('expectedRate', expectedRate.toString())
+      console.log('nbrOptionsToBuy', nbrOptionsToBuy.toString())
       // The position token amount to buy entered by the user (nbrOptionsToBuy) represents the MAKER token amount in
       // Sell Limit (the orders the user is going to fill). As batchFillLimitOrder requires the taker asset amounts as input,
       // conversion to taker token amount via expectedRate is required.
       // Taker asset is the collateral token and impliedTakerAssetAmount is expressed as an integer with collateral token decimals.
-      const impliedTakerAssetAmount = expectedRate
-        .mul(scaling) // scale up to 18 decimals
+      // IMPORTANT: impliedTakerAssetAmount could end up being 1 unit less than remainingTakerAssetFillableAmount.
+      // E.g., impliedTakerAssetAmount = 5013272727 but remainingTakerAssetFillableAmount = 5013272728
+      let impliedTakerAssetAmount = expectedRate
         .mul(nbrOptionsToBuy)
-        .div(unit) // "correct" for integer multiplication
-        .div(scaling) // scale down to collateral token decimals
+        .div(collateralTokenUnit)
+      console.log('impliedTakerAssetAmount', impliedTakerAssetAmount.toString())
 
+      // It can happen that impliedTakerAssetAmount results in zero (e.g., price < 1 and quantity = 1e-18)
+      // or 1 unit less than remainingFillableTakerAmount due to rounding. Adjust for that accordingly
+      impliedTakerAssetAmount = BigNumber.from(
+        order.remainingFillableTakerAmount
+      )
+        .sub(impliedTakerAssetAmount)
+        .eq(BigNumber.from(1))
+        ? BigNumber.from(order.remainingFillableTakerAmount)
+        : impliedTakerAssetAmount
+      // const impliedTakerAssetAmount2 = impliedTakerAssetAmount.lt(order.metaData) ?
       let takerAssetFillAmount
       let nbrOptionsFilled
 
