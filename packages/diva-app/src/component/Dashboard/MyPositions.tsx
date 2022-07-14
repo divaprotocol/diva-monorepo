@@ -487,14 +487,14 @@ export function MyPositions() {
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
-
+  console.log('addr', userAddress)
   useEffect(() => {
     dispatch(
       fetchPositionTokens({
         page,
       })
     )
-  }, [dispatch, page])
+  }, [dispatch, page, userAddress])
 
   const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
@@ -665,7 +665,7 @@ export function MyPositions() {
         balances.refetch()
       }
     }, 3000)
-  }, [])
+  }, [userAddress])
 
   const tokenBalances = balances.data
 
@@ -676,11 +676,11 @@ export function MyPositions() {
             (value, index, self) =>
               index === self.findIndex((t) => t.id === value.id)
           )
-          // .filter(
-          //   (v) =>
-          //     tokenBalances[v.address.id] != null &&
-          //     tokenBalances[v.address.id].gt(0)
-          // )
+          .filter(
+            (v) =>
+              tokenBalances[v.address.id] != null &&
+              tokenBalances[v.address.id].gt(0)
+          )
           .map((v) => ({
             ...v,
             Balance:

@@ -17,6 +17,7 @@ import request from 'graphql-request'
 import { RootState } from './Store'
 import { get0xOpenOrders } from '../DataService/OpenOrders'
 import { config, divaGovernanceAddress } from '../constants'
+import { useConnectionContext } from '../hooks/useConnectionContext'
 
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
@@ -219,8 +220,8 @@ export const fetchPositionTokens = createAsyncThunk(
     store
   ) => {
     const state = store.getState() as RootState
-    const { chainId, userAddress } = state.appSlice
-
+    // const { chainId, userAddress } = state.appSlice
+    const { address: userAddress, chainId } = useConnectionContext()
     const res = await request<{ user: User }>(
       config[chainId as number].divaSubgraph,
       queryUser(userAddress, pageSize, Math.max(page, 0) * pageSize)
