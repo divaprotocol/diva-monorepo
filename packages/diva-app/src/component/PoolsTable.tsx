@@ -300,7 +300,7 @@ export default function PoolsTable({
           }}
         />
       ) : (
-        <Box>
+        <Box className={classes.root}>
           <Grid
             container
             spacing={'76px'}
