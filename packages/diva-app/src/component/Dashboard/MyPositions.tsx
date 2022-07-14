@@ -482,7 +482,8 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const { provider, address: userAddress, chainId } = useConnectionContext()
+  const { provider, chainId } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)

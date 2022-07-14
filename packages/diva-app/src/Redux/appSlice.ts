@@ -220,8 +220,7 @@ export const fetchPositionTokens = createAsyncThunk(
     store
   ) => {
     const state = store.getState() as RootState
-    // const { chainId, userAddress } = state.appSlice
-    const { address: userAddress, chainId } = useConnectionContext()
+    const { chainId, userAddress } = state.appSlice
     const res = await request<{ user: User }>(
       config[chainId as number].divaSubgraph,
       queryUser(userAddress, pageSize, Math.max(page, 0) * pageSize)
