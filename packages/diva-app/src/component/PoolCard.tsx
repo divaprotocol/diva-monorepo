@@ -229,7 +229,7 @@ const PoolCard = ({ row }: Props) => {
             }}
           >
             <Tooltip title={pool.dataProvider} arrow>
-              <Typography>{dataSourceName}</Typography>
+              <Typography color={'#FFFFFF'}>{dataSourceName}</Typography>
             </Tooltip>
             {checkIcon ? (
               <Tooltip

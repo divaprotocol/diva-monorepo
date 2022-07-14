@@ -47,7 +47,7 @@ class DIVATradeChart extends Component {
       .attr('y', 15)
       .style('padding', 10)
       .style('text-align', 'left')
-      .style('fill', 'white')
+      .style('fill', '#A4A4A4')
       .text(' Payout per ' + optionTypeText + ' token (' + 'in ' + payOut + ')')
 
     // Add X axis
