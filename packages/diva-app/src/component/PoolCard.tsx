@@ -26,6 +26,7 @@ import TradeChart from './Graphs/TradeChart'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import styled from 'styled-components'
+import { ExpiresInCell } from './Markets/Markets'
 
 interface Props {
   row: GridRowModel
@@ -105,15 +106,7 @@ const PoolCard = ({ row }: Props) => {
   const intrinsicValue = formatUnits(
     IsLong ? payoffPerLongToken : payoffPerShortToken,
     decimals
-  )
-
-  const maxPayout = formatUnits(
-    BigNumber.from(pool.collateralBalanceLongInitial)
-      .add(BigNumber.from(pool.collateralBalanceShortInitial))
-      .mul(parseUnits('1', 18 - decimals))
-      .mul(parseUnits('1'))
-      .div(BigNumber.from(pool.supplyInitial))
-  )
+  ).slice(0, 4)
 
   return (
     <Box
@@ -187,19 +180,17 @@ const PoolCard = ({ row }: Props) => {
               <Typography variant="h6" color={'#A4A4A4'}>
                 Expires in
               </Typography>
-              <Tooltip title={`${row.Expiry}`}>
-                <Typography
-                  variant="h4"
-                  color={'#FFFFFF'}
-                  align="right"
-                  sx={{
-                    maxWidth: '107px',
-                  }}
-                  noWrap
-                >
-                  {row.Expiry}
-                </Typography>
-              </Tooltip>
+              <Typography
+                variant="h4"
+                color={'#FFFFFF'}
+                align="right"
+                sx={{
+                  maxWidth: '107px',
+                }}
+                noWrap
+              >
+                <ExpiresInCell row={row} />
+              </Typography>
             </>
           )}
         </Box>
@@ -291,7 +282,9 @@ const PoolCard = ({ row }: Props) => {
           }}
         >
           <Typography color={'#A4A4A4'}>Intrinsic Value</Typography>
-          <Typography color={'#FFFFFF'}>{intrinsicValue}</Typography>
+          <Typography color={'#FFFFFF'}>
+            {Number(intrinsicValue).toFixed(2)}
+          </Typography>
         </Box>
       </Stack>
       <Stack
