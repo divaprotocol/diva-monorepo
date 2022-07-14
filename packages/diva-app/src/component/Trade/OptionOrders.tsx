@@ -194,7 +194,7 @@ export default function OpenOrders(props: {
         dispatch(setResponseBuy([]))
       }
     }
-  }, [responseBuy, responseSell])
+  }, [responseBuy.length, responseSell.length])
 
   async function cancelOrder(order, chainId) {
     const orderHash = order.orderHash
