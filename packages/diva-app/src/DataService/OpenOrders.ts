@@ -185,14 +185,17 @@ export const get0xOpenOrders = async (
     '&baseToken=' +
     takerToken
   const url = urlPrefix + `&page=1&perPage=${perPage}`
-
-  const res = await axios
+  const orders: any[] = []
+  await axios
     .get(url)
     .then(async function (response) {
-      let orders: any[] = []
+      let buyOrders: any[] = []
+      let sellOrders: any[] = []
       // TODO: Capture bids and asks with one single call instead of two separate calls
       const total = response.data.bids.total //total number of existing orders for option
-      orders = response.data.bids.records
+      console.log('response ', JSON.stringify(response))
+      buyOrders = response.data.bids.records
+      sellOrders = response.data.asks.records
       if (total > perPage) {
         // in case the total orders are over 1000 maximum pages we want to request
         const pages =
@@ -205,15 +208,17 @@ export const get0xOpenOrders = async (
           for (let page = 2; page <= resultPages; page++) {
             const url = urlPrefix + `&page=${page}&perPage=${perPage}`
             const resp = await axios.get(url)
-            orders.concat(resp.data.bids.records)
+            buyOrders.concat(resp.data.bids.records)
+            sellOrders.concat(resp.data.asks.records)
           }
         }
       }
-      return orders
+
+      orders.push(buyOrders)
+      orders.push(sellOrders)
     })
     .catch((err) => {
       console.error(err)
-      return []
     })
 
   // Get taker and maker token decimals to be used in takerTokenFeeAmount calcs
@@ -229,8 +234,18 @@ export const get0xOpenOrders = async (
   // Get actually fillable orders by checking the maker allowance. Reasons for this filter is that
   // 0x may return orders that are not mutually fillable. This can happen if a maker
   // revokes/reduces the allowance for the makerToken after the order creation.
-  const fillableOrders = await getFillableOrders(
-    res,
+  const buyFillableOrders = await getFillableOrders(
+    orders[0],
+    makerToken,
+    exchangeProxy,
+    chainId,
+    provider,
+    makerTokenUnit,
+    takerTokenUnit
+  )
+
+  const sellFillableOrders = await getFillableOrders(
+    orders[1],
     makerToken,
     exchangeProxy,
     chainId,
@@ -240,7 +255,8 @@ export const get0xOpenOrders = async (
   )
 
   // Apply additional filters to ensure fillability of orders displayed in the orderbook
-  const filteredOrders = []
+  const buyFilteredOrders = []
+  const sellFilteredOrders = []
 
   // Threshold for small orders. All orders with remainingFillableTakerAmount smaller than or equal to this value will be filtered out.
   // NOTE: Choosing a minRemainingFillableTakerAmount of 100 allows to deduct a small buffer of 10 from takerAssetFillAmount without the risk of ending up with a negative amount to be filled.
@@ -251,7 +267,7 @@ export const get0xOpenOrders = async (
   const toleranceTakerTokenFeeAmount = 1
 
   // Apply filters
-  fillableOrders.forEach((order) => {
+  buyFillableOrders.forEach((order) => {
     // Calculate expected fee amount and that actually attached to the order
     const takerTokenFeeAmountExpected = BigNumber.from(
       BigNumber.from(order.order.takerAmount)
@@ -274,11 +290,17 @@ export const get0xOpenOrders = async (
         takerTokenFeeAmountExpected.add(toleranceTakerTokenFeeAmount)
       ) // Ensure correct fee is attached
     ) {
-      filteredOrders.push(order)
+      buyFilteredOrders.push(order)
     }
   })
+  //**Harsh** comments Similar to buyOrders apply filters to sell orders
+  //sellFillableOrders.forEach((order) => {})
 
-  return filteredOrders
+  //Construct final return object
+  return {
+    buyOrders: buyFilteredOrders,
+    sellOrders: sellFilteredOrders,
+  }
 }
 
 export const getOrderDetails = (orderHash: string, chainId) => {

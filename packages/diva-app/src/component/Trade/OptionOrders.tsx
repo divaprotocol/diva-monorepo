@@ -119,31 +119,20 @@ export default function OpenOrders(props: {
 
   const componentDidMount = async () => {
     const orderBook: any = []
-    if (responseSell.length === 0) {
-      const rSell = await get0xOpenOrders(
-        optionTokenAddress,
-        option.collateralToken.id,
-        chainId,
-        provider,
-        props.exchangeProxy
-      )
-      if (rSell.length > 0) {
-        responseSell = rSell
-        dispatch(setResponseSell(responseSell))
-      }
-    }
 
-    if (responseBuy.length === 0) {
-      const rBuy = await get0xOpenOrders(
-        option.collateralToken.id,
+    if (responseSell.length == 0 || responseBuy.length == 0) {
+      const openOrders = await get0xOpenOrders(
         optionTokenAddress,
+        option.collateralToken.id,
         chainId,
         provider,
         props.exchangeProxy
       )
-      if (rBuy.length > 0) {
-        responseBuy = rBuy
+      if (openOrders != null) {
+        responseBuy = openOrders.buyOrders
+        responseSell = openOrders.sellOrders
         dispatch(setResponseBuy(responseBuy))
+        dispatch(setResponseSell(responseSell))
       }
     }
     const orderBookBuy = mapOrderData(

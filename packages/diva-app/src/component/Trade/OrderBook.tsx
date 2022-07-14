@@ -139,7 +139,20 @@ export default function OrderBook(props: {
   const { provider } = useConnectionContext()
   const componentDidMount = async () => {
     const orders = []
-    if (responseSell.length === 0) {
+    if (responseSell.length == 0 || responseBuy.length == 0) {
+      const openOrders = await get0xOpenOrders(
+        optionTokenAddress,
+        option.collateralToken.id,
+        chainId,
+        provider,
+        props.exchangeProxy
+      )
+      if (openOrders != null) {
+        responseBuy = openOrders.buyOrders
+        responseSell = openOrders.sellOrders
+      }
+    }
+    /*if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
         option.collateralToken.id,
@@ -162,7 +175,7 @@ export default function OrderBook(props: {
       if (rBuy.length > 0) {
         responseBuy = rBuy
       }
-    }
+    }*/
 
     // Keep this for debugging
     // const buyOrdersByMakerAddress = responseBuy.filter((v) =>
