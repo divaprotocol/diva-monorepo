@@ -665,7 +665,7 @@ export function MyPositions() {
       if (userAddress != null && balances != null) {
         balances.refetch()
       }
-    }, 3000)
+    }, 1000)
   }, [userAddress])
 
   const tokenBalances = balances.data
@@ -687,7 +687,7 @@ export function MyPositions() {
             Balance:
               tokenBalances[v.address.id] == null
                 ? 'n/a'
-                : parseInt(formatUnits(tokenBalances[v.address.id])) < 0.01
+                : tokenBalances[v.address.id].lt(parseUnits('1', 16))
                 ? '<0.01'
                 : parseFloat(formatUnits(tokenBalances[v.address.id])).toFixed(
                     4
