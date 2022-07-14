@@ -139,7 +139,10 @@ export const useCreatePoolFormik = () => {
         errors.collateralBalance = 'Collateral can not be 0'
       }
 
-      if (values.expiryTime == null) {
+      if (
+        values.expiryTime == null ||
+        values.expiryTime.toLocaleString().length < 19
+      ) {
         errors.expiryTime = 'You must set an expiry time'
       }
       if (

@@ -691,7 +691,7 @@ export function DefinePoolAttributes({
                   {floor}{' '}
                 </strong>{' '}
                 on{' '}
-                {expiryTime != null
+                {expiryTime != null && expiryTime.toLocaleString().length > 19
                   ? expiryTime.toLocaleString().slice(0, 11) +
                     ' ' +
                     getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
@@ -725,7 +725,7 @@ export function DefinePoolAttributes({
                   {cap}{' '}
                 </strong>{' '}
                 on{' '}
-                {expiryTime != null
+                {expiryTime != null && expiryTime.toLocaleString().length > 19
                   ? expiryTime.toLocaleString().slice(0, 11) +
                     ' ' +
                     getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
@@ -760,7 +760,7 @@ export function DefinePoolAttributes({
                   {' ' + inflection}{' '}
                 </strong>{' '}
                 on{' '}
-                {expiryTime != null
+                {expiryTime != null && expiryTime.toLocaleString().length > 19
                   ? expiryTime.toLocaleString().slice(0, 11) +
                     ' ' +
                     getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
