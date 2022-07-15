@@ -559,7 +559,7 @@ export default function BuyMarket(props: {
             sx={{
               color: 'Gray',
               fontSize: 11,
-              paddingTop: 2.5,
+              paddingTop: 2,
               paddingRight: 1.5,
             }}
           >
@@ -585,7 +585,9 @@ export default function BuyMarket(props: {
           <RightSideLabel>
             <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
-                {option.collateralToken.symbol + ' '}
+                {option.collateralToken.symbol +
+                  '/' +
+                  params.tokenType.toUpperCase()}
               </FormLabel>
               <FormLabel>
                 {toExponentialOrNumber(

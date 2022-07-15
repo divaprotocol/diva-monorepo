@@ -1,7 +1,6 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
 import { parseUnits } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
-import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 
@@ -20,10 +19,9 @@ export const buyMarketOrder = async (orderData) => {
 
   // Define variables for integer math
   const decimals = orderData.collateralDecimals
-  const unit = parseUnits('1')
-  const scaling = parseUnits('1', 18 - decimals)
+  const positionTokenUnit = parseUnits('1')
+  const collateralTokenUnit = parseUnits('1', decimals)
 
-  // User input converted from decimal number into an integer with 18 decimals of type BigNumber
   let nbrOptionsToBuy = orderData.nbrOptions
 
   // Initialize input arrays for batchFillLimitOrders function
@@ -37,6 +35,18 @@ export const buyMarketOrder = async (orderData) => {
       delete order.signature
       return order
     })
+
+    // Keep for debugging
+    // const res = await exchange
+    //   .getLimitOrderInfo(fillOrders[0])
+    //   .callAsync({ from: orderData.maker })
+    //   .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
+    // console.log(
+    //   'order 1 status (res.takerTokenFilledAmount): ',
+    //   res.takerTokenFilledAmount.toString()
+    // )
+    // console.log(res)
+
     const response = await exchange
       .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
       .awaitTransactionSuccessAsync({ from: orderData.taker })
@@ -58,12 +68,17 @@ export const buyMarketOrder = async (orderData) => {
       // The position token amount to buy entered by the user (nbrOptionsToBuy) represents the MAKER token amount in
       // Sell Limit (the orders the user is going to fill). As batchFillLimitOrder requires the taker asset amounts as input,
       // conversion to taker token amount via expectedRate is required.
-      // Taker asset is the collateral token and impliedTakerAssetAmount is expressed as an integer with collateral token decimals.
+      // Taker asset is the collateral token and impliedTakerAssetAmount is takerFillAmount derived from the users input.
+      // Note that a small amount (10) is deducted to ensure that the order can be filled as we experienced issues when trying
+      // to fill an amount equal to or close to remainingFillableTakerAmount. Note that there is not risk of impliedTakerAssetAmount
+      // turning negative as orders with remainingFillableTakerAmount <= 100 are filtered out in OpenOrders.tsx.
+      // Note that because of this logic, orders will have a non-zero remainingFillableTakerAmount but as this will be <=100, they will
+      // be filtered out on data load. An alternative logic could be to fill the missing amount in a second order but this option has not been implemented
+      // as the additional gas costs incurred from filling another order might not be worth it.
       const impliedTakerAssetAmount = expectedRate
-        .mul(scaling) // scale up to 18 decimals
         .mul(nbrOptionsToBuy)
-        .div(unit) // "correct" for integer multiplication
-        .div(scaling) // scale down to collateral token decimals
+        .div(collateralTokenUnit)
+        .sub(BigNumber.from(10))
 
       let takerAssetFillAmount
       let nbrOptionsFilled
@@ -76,16 +91,14 @@ export const buyMarketOrder = async (orderData) => {
         takerAssetFillAmount = order.remainingFillableTakerAmount
         // Update nbrOptionsFilled and overwrite nbrOptionsToBuy with remaining number of position tokens to fill
         nbrOptionsFilled = BigNumber.from(takerAssetFillAmount)
-          .mul(scaling) // scale to 18 decimals
-          .mul(unit) // multiply for high precision
-          .div(expectedRate.mul(scaling)) // divide by expectedRate which has collateral token decimals and hence needs to be scaled up to 18 decimals
+          .mul(positionTokenUnit)
+          .div(expectedRate) // result has 18 decimals
       }
       takerAssetFillAmounts.push(takerAssetFillAmount)
       nbrOptionsToBuy = nbrOptionsToBuy.sub(nbrOptionsFilled) // When nbrOptionsToBuy turns zero, it will not add any new orders to fillOrders array
     }
   })
-  console.log('fillOrders', fillOrders)
-  console.log('takerAssetFillAmounts', takerAssetFillAmounts)
+
   filledOrder = await fillOrderResponse(takerAssetFillAmounts, fillOrders)
   return filledOrder
 }

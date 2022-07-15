@@ -1,8 +1,14 @@
 import axios from 'axios'
-import { config } from '../constants'
+import {
+  config,
+  NULL_ADDRESS,
+  divaGovernanceAddress,
+  tradingFee,
+} from '../constants'
 import { BigNumber, ethers } from 'ethers'
 import BalanceCheckerABI from '../abi/BalanceCheckerABI.json'
-
+import ERC20ABI from '../abi/ERC20ABI.json'
+import { parseUnits } from 'ethers/lib/utils'
 /**
  * Filter for orders that can actually be filled, i.e. where makers
  * have sufficient allowances
@@ -21,7 +27,9 @@ async function getFillableOrders(
   tokenAddress,
   exchangeProxy,
   chainId,
-  provider
+  provider,
+  makerTokenUnit,
+  takerTokenUnit
 ) {
   // Connect to BalanceChecker contract which implements a function (called allowances)
   // to obtain multiple allowances with one single call
@@ -85,7 +93,7 @@ async function getFillableOrders(
   )
 
   // Initialize array that will hold the filtered order objects
-  const filteredOrders = []
+  const fillableOrders = []
 
   orders.forEach((order) => {
     // Convert order object into a Javascript object
@@ -93,6 +101,20 @@ async function getFillableOrders(
 
     const makerAmount = BigNumber.from(order.order.makerAmount)
     const takerAmount = BigNumber.from(order.order.takerAmount)
+
+    // Calculate prices
+    const ratioMakerAmountToTakerAmount = makerAmount
+      .mul(takerTokenUnit)
+      .div(takerAmount) // in maker token decimals
+    const ratioTakerAmountToMakerAmount = takerAmount
+      .mul(makerTokenUnit)
+      .div(makerAmount) // in taker token decimals
+
+    // Add to extendedOrder object
+    extendedOrder.order.ratioMakerAmountToTakerAmount =
+      ratioMakerAmountToTakerAmount.toString()
+    extendedOrder.order.ratioTakerAmountToMakerAmount =
+      ratioTakerAmountToMakerAmount.toString()
 
     // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
     const remainingFillableMakerAmount = makerAmount
@@ -125,7 +147,7 @@ async function getFillableOrders(
       }
 
       // Add to fillable orders
-      filteredOrders.push(extendedOrder)
+      fillableOrders.push(extendedOrder)
 
       // Update the makerAllowances mapping to reflect the remainingAllowance after
       // deducting remainingFillableMakerAmount
@@ -136,7 +158,7 @@ async function getFillableOrders(
     }
   })
 
-  return filteredOrders
+  return fillableOrders
 }
 
 export const get0xOpenOrders = async (
@@ -168,6 +190,7 @@ export const get0xOpenOrders = async (
     .get(url)
     .then(async function (response) {
       let orders: any[] = []
+      // TODO: Capture bids and asks with one single call instead of two separate calls
       const total = response.data.bids.total //total number of existing orders for option
       orders = response.data.bids.records
       if (total > perPage) {
@@ -193,7 +216,17 @@ export const get0xOpenOrders = async (
       return []
     })
 
-  // Get actually fillable orders. Reasons for this filter is that
+  // Get taker and maker token decimals to be used in takerTokenFeeAmount calcs
+  const takerTokenContract = new ethers.Contract(takerToken, ERC20ABI, provider)
+  const makerTokenContract = new ethers.Contract(makerToken, ERC20ABI, provider)
+
+  const takerTokenDecimals = await takerTokenContract.decimals()
+  const makerTokenDecimals = await makerTokenContract.decimals()
+
+  const takerTokenUnit = parseUnits('1', takerTokenDecimals)
+  const makerTokenUnit = parseUnits('1', makerTokenDecimals)
+
+  // Get actually fillable orders by checking the maker allowance. Reasons for this filter is that
   // 0x may return orders that are not mutually fillable. This can happen if a maker
   // revokes/reduces the allowance for the makerToken after the order creation.
   const fillableOrders = await getFillableOrders(
@@ -201,10 +234,51 @@ export const get0xOpenOrders = async (
     makerToken,
     exchangeProxy,
     chainId,
-    provider
+    provider,
+    makerTokenUnit,
+    takerTokenUnit
   )
 
-  return fillableOrders
+  // Apply additional filters to ensure fillability of orders displayed in the orderbook
+  const filteredOrders = []
+
+  // Threshold for small orders. All orders with remainingFillableTakerAmount smaller than or equal to this value will be filtered out.
+  // NOTE: Choosing a minRemainingFillableTakerAmount of 100 allows to deduct a small buffer of 10 from takerAssetFillAmount without the risk of ending up with a negative amount to be filled.
+  // This buffer is required to account for order fill failures experienced when trying to set takerAssetFillAmount equal to or close to remainingFillableTakerAmount.
+  const minRemainingFillableTakerAmount = 100
+
+  // Max absolute deviation between actual fee and expected fee allowed; expressed as an integer in smallest unit of taker token
+  const toleranceTakerTokenFeeAmount = 1
+
+  // Apply filters
+  fillableOrders.forEach((order) => {
+    // Calculate expected fee amount and that actually attached to the order
+    const takerTokenFeeAmountExpected = BigNumber.from(
+      BigNumber.from(order.order.takerAmount)
+        .mul(parseUnits(tradingFee.toString(), takerTokenDecimals))
+        .div(takerTokenUnit)
+    )
+    const takerTokenFeeAmountActual = BigNumber.from(
+      order.order.takerTokenFeeAmount
+    )
+    if (
+      BigNumber.from(order.metaData.remainingFillableTakerAmount).gt(
+        minRemainingFillableTakerAmount
+      ) && // Ensure some minimum amount for the order size to avoid any rounding related issues when dealing with small amounts
+      order.order.taker === NULL_ADDRESS && // Ensure that orders are fillable by anyone and not reserved for a specific address
+      order.order.feeRecipient === divaGovernanceAddress.toLowerCase() && // Ensure that the feeRecipient is DIVA Governance address
+      takerTokenFeeAmountActual.gte(
+        takerTokenFeeAmountExpected.sub(toleranceTakerTokenFeeAmount)
+      ) &&
+      takerTokenFeeAmountActual.lte(
+        takerTokenFeeAmountExpected.add(toleranceTakerTokenFeeAmount)
+      ) // Ensure correct fee is attached
+    ) {
+      filteredOrders.push(order)
+    }
+  })
+
+  return filteredOrders
 }
 
 export const getOrderDetails = (orderHash: string, chainId) => {

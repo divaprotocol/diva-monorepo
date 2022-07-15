@@ -503,7 +503,7 @@ export default function SellLimit(props: {
             sx={{
               color: 'Gray',
               fontSize: 11,
-              paddingTop: 2.5,
+              paddingTop: 2,
               paddingRight: 1.5,
             }}
           >
@@ -522,13 +522,18 @@ export default function SellLimit(props: {
             sx={{
               color: 'Gray',
               fontSize: 11,
-              paddingTop: 2.5,
+              paddingTop: 2,
               paddingRight: 1.5,
+              width: '60px',
             }}
           >
-            {params.tokenType.toUpperCase() + ' '}
+            {option.collateralToken.symbol +
+              '/' +
+              params.tokenType.toUpperCase() +
+              ' '}
           </FormLabel>
           <FormInput
+            width={'37%'}
             type="text"
             onChange={(event) => handlePricePerOption(event.target.value)}
           />
@@ -610,7 +615,7 @@ export default function SellLimit(props: {
                 <MenuItem value={60 * 24}>
                   <LabelGrayStyle>1 Day</LabelGrayStyle>
                 </MenuItem>
-                <MenuItem value={60 * 24 * 7}>
+                {/* <MenuItem value={60 * 24 * 7}>
                   <LabelGrayStyle>7 Days</LabelGrayStyle>
                 </MenuItem>
                 <MenuItem value={60 * 24 * 14}>
@@ -618,7 +623,7 @@ export default function SellLimit(props: {
                 </MenuItem>
                 <MenuItem value={60 * 24 * 30}>
                   <LabelGrayStyle>1 Month</LabelGrayStyle>
-                </MenuItem>
+                </MenuItem> */}
               </Select>
             </FormControl>
           </LimitOrderExpiryDiv>
