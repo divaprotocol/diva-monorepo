@@ -482,19 +482,19 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const { provider, address: userAddress, chainId } = useConnectionContext()
+  const { provider, chainId } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
-
   useEffect(() => {
     dispatch(
       fetchPositionTokens({
         page,
       })
     )
-  }, [dispatch, page])
+  }, [dispatch, page, userAddress])
 
   const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
@@ -664,8 +664,8 @@ export function MyPositions() {
       if (userAddress != null && balances != null) {
         balances.refetch()
       }
-    }, 3000)
-  }, [])
+    }, 1000)
+  }, [userAddress])
 
   const tokenBalances = balances.data
 
@@ -676,17 +676,17 @@ export function MyPositions() {
             (value, index, self) =>
               index === self.findIndex((t) => t.id === value.id)
           )
-          // .filter(
-          //   (v) =>
-          //     tokenBalances[v.address.id] != null &&
-          //     tokenBalances[v.address.id].gt(0)
-          // )
+          .filter(
+            (v) =>
+              tokenBalances[v.address.id] != null &&
+              tokenBalances[v.address.id].gt(0)
+          )
           .map((v) => ({
             ...v,
             Balance:
               tokenBalances[v.address.id] == null
                 ? 'n/a'
-                : parseInt(formatUnits(tokenBalances[v.address.id])) < 0.01
+                : tokenBalances[v.address.id].lt(parseUnits('1', 16))
                 ? '<0.01'
                 : parseFloat(formatUnits(tokenBalances[v.address.id])).toFixed(
                     4
