@@ -1,23 +1,26 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
-import { parseEther } from 'ethers/lib/utils'
-import { BigNumber } from '@ethersproject/bignumber/lib/bignumber'
-import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
+import { BigNumber } from 'ethers'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 
 export const sellMarketOrder = async (orderData) => {
   let filledOrder = {}
+
+  // Connect to 0x exchange contract
   const address = contractAddress.getContractAddressesForChainOrThrow(
     orderData.chainId
   )
   const exchangeProxyAddress = address.exchangeProxy
-  // Connect to 0x exchange contract
   const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
-  const orders = orderData.existingLimitOrders // Existing BUY LIMIT orders where makerToken = collateral token and takerToken = position token
-  let takerFillNbrOptions = parseEther(
-    convertExponentialToDecimal(orderData.nbrOptions).toString()
-  ) // user input * 1e18; note that this part needs adjustment when we move to smart contracts v1.0.0
-  let takerAssetAmounts = []
+
+  // Get existing BUY LIMIT orders to fill, already sorted by best price. Note that makerToken = collateral token and takerToken = position token.
+  const orders = orderData.existingLimitOrders
+
+  // User input converted from decimal number into an integer with 18 decimals of type BigNumber
+  let nbrOptionsToSell = orderData.nbrOptions
+
+  // Initialize input arrays for batchFillLimitOrders function
+  let takerAssetFillAmounts = []
   const signatures = []
 
   const fillOrderResponse = async (takerAssetFillAmounts, fillOrders) => {
@@ -28,40 +31,44 @@ export const sellMarketOrder = async (orderData) => {
     })
     const response = await exchange
       .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
-      .awaitTransactionSuccessAsync({ from: orderData.maker })
+      .awaitTransactionSuccessAsync({ from: orderData.taker })
       .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
     return response
   }
 
   let fillOrders = []
   orders.forEach((order) => {
-    const remainingNumber = BigNumber.from(order.remainingFillableTakerAmount)
-    if (
-      takerFillNbrOptions.gt(0) &&
-      remainingNumber.gt(1) // those are filtered out from the orderbook so should not be fillable
-    ) {
+    if (nbrOptionsToSell.gt(0)) {
       fillOrders.push(order)
 
-      if (takerFillNbrOptions.lte(remainingNumber)) {
-        // equality in lte consciously removed due to 0x issue filling amounts equal to remainingFillableTakerAmount
-        takerAssetAmounts.push(takerFillNbrOptions.toString())
-        takerFillNbrOptions = parseEther('0') // "trick" to skip the remaining forEach loop
+      // Note: As opposed to BuyMarket.js, the position token amount to sell entered by the user (nbrOptionsToSell) represents the TAKER token amount in
+      // Buy Limit (the orders the user is going to fill), hence no conversion to taker token amount is required.
+
+      let takerAssetFillAmount
+
+      // takerAssetFillAmount = Min(nbrOptionsToSell, order.remainingFillableTakerAmount)
+      if (nbrOptionsToSell.lte(order.remainingFillableTakerAmount)) {
+        takerAssetFillAmount = nbrOptionsToSell.toString()
       } else {
-        // Adjust takerAssetAmounts by deducting 1 to account for existing 0x issue:
-        // https://ethereum.stackexchange.com/questions/130227/0x-batchfilllimitorders-not-working-with-small-remainingfillabletakeramount
-        takerAssetAmounts.push(
-          BigNumber.from(order.remainingFillableTakerAmount)
-            .sub(BigNumber.from(1))
-            .toString()
-        )
-        // Update the remaining amount to be filled; type: BigNumber
-        // Note that 1 is add back due to adjust for the deduction in takerAssetAmounts
-        takerFillNbrOptions = takerFillNbrOptions
-          .sub(remainingNumber)
-          .add(BigNumber.from(1))
+        takerAssetFillAmount = order.remainingFillableTakerAmount
       }
+      // Add the takerAssetFillAmount to the takerAssetFillAmounts array.
+      // Slightly reduce the amount to account for issues experienced when trying to fill an amount equal to or close to remainingFillableTakerAmount.
+      // The offset should not exceed minRemainingFillableTakerAmount in OpenOrders.tsx (currently set to 100).
+      // Note that because of this logic, orders will have a non-zero remainingFillableTakerAmount but as this will be <=100, they will
+      // be filtered out on data load. An alternative logic could be to fill the missing amount in a second order but this option has not been implemented
+      // as the additional gas costs incurred from filling another order might not be worth it.
+      takerAssetFillAmounts.push(
+        BigNumber.from(takerAssetFillAmount).sub(BigNumber.from(10)).toString()
+      )
+
+      // Update the remaining amount to be filled.
+      // Note that nbrOptionsToSell = 0 if equal to order.remainingFillableTakerAmount. Hence, it won't enter the if statement at the beginning of the forEach part.
+      nbrOptionsToSell = nbrOptionsToSell.sub(takerAssetFillAmount)
     }
   })
-  filledOrder = await fillOrderResponse(takerAssetAmounts, fillOrders)
+  console.log('fillOrders', fillOrders)
+  console.log('takerAssetFillAmounts', takerAssetFillAmounts)
+  filledOrder = await fillOrderResponse(takerAssetFillAmounts, fillOrders)
   return filledOrder
 }

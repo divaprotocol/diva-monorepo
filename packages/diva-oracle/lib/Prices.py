@@ -1,10 +1,7 @@
-import datetime as dt
 from datetime import datetime
 import requests
 import pandas as pd
 import json
-
-
 
 def getKrakenPrice(pair, ts_date, ts_date_max_away):
     url = 'https://api.kraken.com/0/public/Trades?pair={}'.format(pair) + '&since={}'.format(ts_date_max_away)
@@ -12,9 +9,6 @@ def getKrakenPrice(pair, ts_date, ts_date_max_away):
     resp = requests.get(url)
 
     data =json.loads(resp.content.decode('utf-8'))
-
-    # Normalize JSON data into a flat table
-    #df = pd.json_normalize(data, ['result', 'XETHZUSD'])
 
     keys = list(data)
     if data[keys[0]] == []:
@@ -32,10 +26,10 @@ def getKrakenPrice(pair, ts_date, ts_date_max_away):
             return(price_kraken_rounded, date_kraken)
         else:
             print("No available price for pair ", pair, " between ", datetime.fromtimestamp(ts_date_max_away), " and ", datetime.fromtimestamp(ts_date))
-            return -1,-1, -1
+            return -1,-1
     else:
         print("Error: ", data[keys[0]][0], "for pair ", pair)
-        return -1,-1, -1
+        return -1,-1
 
 
 

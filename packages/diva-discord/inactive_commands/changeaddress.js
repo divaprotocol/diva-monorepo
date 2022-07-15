@@ -9,7 +9,7 @@ module.exports = {
                             +`Register with **/register ADDRESS**`,
                 ephemeral: true,
             })
-            return
+            return 
         }
 
         //get user input for 'address'
