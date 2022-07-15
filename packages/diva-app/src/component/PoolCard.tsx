@@ -108,6 +108,10 @@ const PoolCard = ({ row }: Props) => {
     decimals
   ).slice(0, 4)
 
+  const handleBuyAndSellClick = () => {
+    history.push(`../../${row.id}`)
+  }
+
   return (
     <Box
       sx={{
@@ -116,10 +120,7 @@ const PoolCard = ({ row }: Props) => {
         border: '1px solid #383838',
         background: theme.palette.background.default,
         borderRadius: '8px',
-        cursor: 'pointer',
-      }}
-      onClick={() => {
-        history.push(`../../${row.id}`)
+        overflow: 'hidden',
       }}
     >
       <Box
@@ -195,17 +196,15 @@ const PoolCard = ({ row }: Props) => {
           )}
         </Box>
       </Box>
-      <Paper>
-        <TradeChart
-          data={row.PayoffProfile}
-          refAsset={pool.referenceAsset}
-          payOut={pool.collateralToken.symbol}
-          w={380}
-          h={220}
-          isLong={IsLong}
-          breakEven={breakEvenOptionPrice}
-        />
-      </Paper>
+      <TradeChart
+        data={row.PayoffProfile}
+        refAsset={pool.referenceAsset}
+        payOut={pool.collateralToken.symbol}
+        w={380}
+        h={220}
+        isLong={IsLong}
+        breakEven={breakEvenOptionPrice}
+      />
       <Stack
         sx={{
           padding: '0 20px',
@@ -298,6 +297,7 @@ const PoolCard = ({ row }: Props) => {
         <BuyAndSellButton
           backgroundColor="linear-gradient(180deg, rgba(18, 18, 18, 0) -60%, rgba(51, 147, 224, 0.3) 100%)"
           borderColor="#3393E0"
+          onClick={handleBuyAndSellClick}
         >
           <Stack>
             <div>BUY</div>
@@ -307,6 +307,7 @@ const PoolCard = ({ row }: Props) => {
         <BuyAndSellButton
           backgroundColor="linear-gradient(180deg, rgba(18, 18, 18, 0) -33.33%, rgba(211, 47, 47, 0.6) 100%)"
           borderColor="#D32F2F"
+          onClick={handleBuyAndSellClick}
         >
           <Stack>
             <div>SELL</div>
