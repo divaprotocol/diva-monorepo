@@ -3,19 +3,12 @@
 // * Chart: https://bl.ocks.org/d3noob/402dd382a51a4f6eea487f9a35566de0
 // * D3 in React: https://youtu.be/YKDIsXA4OAc
 
-import React, { Component } from 'react'
+import React, { useLayoutEffect } from 'react'
 import * as d3 from 'd3'
 
-class DIVATradeChart extends Component {
-  // export default function DIVATradeChart {
-
-  // }
-  constructor(props) {
-    super(props)
-    this.myRef = React.createRef()
-  }
-
-  componentDidMount() {
+export default function DIVATradeChart(props) {
+  const ref = React.useRef()
+  useLayoutEffect(() => {
     const {
       data,
       w, //Width
@@ -27,7 +20,7 @@ class DIVATradeChart extends Component {
       currentPrice,
       floor,
       cap,
-    } = this.props
+    } = props
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
     const reffeenceAsset = refAsset.slice(0, 8)
     console.log('data again', reffeenceAsset)
@@ -40,7 +33,7 @@ class DIVATradeChart extends Component {
     // Appends a 'group' element to 'svg'
     // Moves the 'group' element to the top left margin
     var svg = d3
-      .select(this.myRef.current)
+      .select(ref.current)
       .append('svg')
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
@@ -183,7 +176,7 @@ class DIVATradeChart extends Component {
       })
     svg
       .append('path')
-      .datum(data) // or data([data])
+      .data([data]) // or data([data])
       .attr('class', 'line')
       .attr('d', valueline)
 
@@ -211,7 +204,7 @@ class DIVATradeChart extends Component {
       .attr('cx', function (d) {
         return x(d.x)
       })
-      .attr('cy', function (d) {
+      .attr('cy', function () {
         return y(0)
       })
       .attr('r', 5)
@@ -229,7 +222,7 @@ class DIVATradeChart extends Component {
       .attr('cx', function (d) {
         return x(d.x)
       })
-      .attr('cy', function (d) {
+      .attr('cy', function () {
         return y(0)
       })
       .attr('r', 5)
@@ -247,7 +240,7 @@ class DIVATradeChart extends Component {
       .attr('cx', function (d) {
         return x(d.x)
       })
-      .attr('cy', function (d) {
+      .attr('cy', function () {
         return y(0)
       })
       .attr('r', 5)
@@ -347,14 +340,14 @@ class DIVATradeChart extends Component {
     var mouseover = function () {
       d3.select('.mouse-line').style('opacity', '1')
       d3.selectAll('.mouse-per-line circle').style('opacity', '1')
-      d3.selectAll('.tooltip-per-line rect').style('opacity', '1')
+      d3.selectAll('.tooltip-pper-line rect').style('opacity', '1')
       d3.selectAll('.tooltip-per-line text').style('opacity', '1')
     }
 
     var mouseout = function () {
       d3.select('.mouse-line').style('opacity', '0')
       d3.selectAll('.mouse-per-line circle').style('opacity', '0')
-      d3.selectAll('.tooltip-per-line rect').style('opacity', '0')
+      d3.selectAll('.tooltip-pper-line rect').style('opacity', '0')
       d3.selectAll('.tooltip-per-line text').style('opacity', '0')
     }
 
@@ -435,7 +428,6 @@ class DIVATradeChart extends Component {
         )
       })
     }
-
     // Create a rect on top of the svg area to catch mouse movements on canvas (can't catch mouse events on a g element)
     mouseG
       .append('svg:rect')
@@ -446,11 +438,7 @@ class DIVATradeChart extends Component {
       .on('mouseout', mouseout)
       .on('mouseover', mouseover)
       .on('mousemove', mousemove)
-  }
+  }, [props.w])
 
-  render() {
-    return <div ref={this.myRef}></div>
-  }
+  return <div id="DivaTradeChart" ref={ref}></div>
 }
-
-export default DIVATradeChart

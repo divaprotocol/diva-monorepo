@@ -47,6 +47,30 @@ const LeftDiv = styled.div`
 const RightDiv = styled.div`
   width: 35%;
 `
+const data1 = [
+  {
+    x: 0.7545000000000001,
+    y: 0,
+  },
+  { x: 0.9, y: 0 },
+
+  { x: 0.97, y: 0.8 },
+
+  { x: 0.97, y: 1 },
+  { x: 1.1155, y: 1 },
+]
+const data2 = [
+  {
+    x: 0.645000000000001,
+    y: 0,
+  },
+  { x: 0.8, y: 0 },
+
+  { x: 0.89, y: 0.7 },
+
+  { x: 0.9, y: 1 },
+  { x: 1.3, y: 1 },
+]
 
 export default function Underlying() {
   const history = useHistory()
@@ -154,7 +178,6 @@ export default function Underlying() {
     history.push(`/${params.poolId}/${isLong ? 'long' : 'short'}/` + newValue)
     setValue(newValue)
   }
-
   return (
     <Container sx={{ paddingTop: '1em', paddingBottom: '3em' }}>
       <TabContext value={value}>
@@ -192,6 +215,18 @@ export default function Underlying() {
                   breakEven={Number(breakEven).toFixed(2)}
                   floor={OptionParams.Floor}
                   cap={OptionParams.Cap}
+                />
+                <TradeChart
+                  data={data2}
+                  refAsset={pool.referenceAsset}
+                  payOut={pool.collateralToken.symbol}
+                  currentPrice={0.9}
+                  w={600}
+                  h={336}
+                  isLong={OptionParams.IsLong}
+                  breakEven={Number(breakEven).toFixed(2)}
+                  floor={OptionParams.Floor}
+                  cap={1.1}
                 />
                 <Paper>
                   <LeftCompFlexContainer>
