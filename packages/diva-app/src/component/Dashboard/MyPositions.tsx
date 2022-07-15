@@ -488,7 +488,6 @@ export function MyPositions() {
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
-  console.log('addr', userAddress)
   useEffect(() => {
     dispatch(
       fetchPositionTokens({
