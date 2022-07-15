@@ -132,6 +132,9 @@ const SubmitButton = (props: any) => {
                     tx.wait().then(() => {
                       diva
                         .redeemPositionToken(props.row.address.id, bal)
+                        .then((tx: any) => {
+                          tx.wait()
+                        })
                         .then(() => {
                           setLoadingValue(false)
                         })
@@ -168,6 +171,9 @@ const SubmitButton = (props: any) => {
               .then((bal: BigNumber) => {
                 diva
                   .redeemPositionToken(props.row.address.id, bal)
+                  .then((tx: any) => {
+                    tx.wait()
+                  })
                   .then(() => {
                     setLoadingValue(false)
                   })
@@ -190,6 +196,9 @@ const SubmitButton = (props: any) => {
         .then((bal: BigNumber) => {
           diva
             .redeemPositionToken(props.row.address.id, bal)
+            .then((tx: any) => {
+              tx.wait()
+            })
             .then(() => {
               setLoadingValue(false)
             })
@@ -292,22 +301,29 @@ const SubmitButton = (props: any) => {
                       /**
                        * dispatch action to refetch the pool after action
                        */
-                      tx.wait().then(() => {
-                        setTimeout(() => {
-                          dispatch(
-                            fetchPool({
-                              graphUrl: config[chainId as number].divaSubgraph,
-                              poolId: props.id.split('/')[0],
-                            })
-                          )
-                        }, 10000)
-                      })
+                      tx.wait()
+                        .then(() => {
+                          setLoadingValue(false)
+                          handleClose()
+                        })
+                        .then(() => {
+                          setTimeout(() => {
+                            dispatch(
+                              fetchPool({
+                                graphUrl:
+                                  config[chainId as number].divaSubgraph,
+                                poolId: props.id.split('/')[0],
+                              })
+                            )
+                          }, 10000)
+                        })
                     })
                     .catch((err) => {
                       console.error(err)
+                      setLoadingValue(false)
+                      handleClose()
                     })
                 }
-                handleClose()
               }}
             >
               Challenge

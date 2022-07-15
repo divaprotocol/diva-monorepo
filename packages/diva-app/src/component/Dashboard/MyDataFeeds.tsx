@@ -185,7 +185,7 @@ const SubmitCell = (props: any) => {
 
         <DialogActions>
           <TextField
-            defaultValue={textFieldValue}
+            defaultValue=""
             onChange={(e) => {
               setTextFieldValue(e.target.value)
             }}
@@ -203,24 +203,25 @@ const SubmitCell = (props: any) => {
                     parseEther(textFieldValue),
                     true
                   )
-                  .then(() => {
-                    setLoadingValue(false)
-                    handleClose()
-                  })
                   .then((tx) => {
                     /**
                      * dispatch action to refetch the pool after action
                      */
-                    tx.wait().then(() => {
-                      setTimeout(() => {
-                        dispatch(
-                          fetchPool({
-                            graphUrl: config[chainId as number].divaSubgraph,
-                            poolId: props.id.split('/')[0],
-                          })
-                        )
-                      }, 10000)
-                    })
+                    tx.wait()
+                      .then(() => {
+                        setLoadingValue(false)
+                        handleClose()
+                      })
+                      .then(() => {
+                        setTimeout(() => {
+                          dispatch(
+                            fetchPool({
+                              graphUrl: config[chainId as number].divaSubgraph,
+                              poolId: props.id.split('/')[0],
+                            })
+                          )
+                        }, 10000)
+                      })
                   })
                   .catch((err) => {
                     console.error(err)
