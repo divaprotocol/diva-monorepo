@@ -140,8 +140,8 @@ export const useCreatePoolFormik = () => {
       }
 
       if (
-        values.expiryTime == null ||
-        values.expiryTime.toLocaleString().length < 19
+        values.expiryTime == null &&
+        Object.prototype.toString.call(values.expiryTime) === '[object Date]'
       ) {
         errors.expiryTime = 'You must set an expiry time'
       }
