@@ -192,7 +192,7 @@ export function DefinePoolAttributes({
         break
     }
   }, [payoutProfile])
-  console.log(formik.values.expiryTime)
+
   return (
     <Stack direction={'row'}>
       <Container sx={{ minWidth: '60%' }}>
