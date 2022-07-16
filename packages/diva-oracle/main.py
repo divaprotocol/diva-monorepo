@@ -68,38 +68,23 @@ for network in networks:
 iter = 0
 
 
+if __name__ == "__main__":
+    while True:
+        jobs = []
+        for (network, w3, contract) in zip(networks, w3_instances, contract_instances):
+            thread = threading.Thread(target=run(network, w3, contract))
+            jobs.append(thread)
 
-while True:
-    jobs = []
-    for (network, w3, contract) in zip(networks, w3_instances, contract_instances):
-        thread = threading.Thread(target=run(network, w3, contract))
-        jobs.append(thread)
+        for j in jobs:
+            j.start()
 
-    for j in jobs:
-        j.start()
-
-    for j in jobs:
-        j.join()
+        for j in jobs:
+            j.join()
 
 
-    print("#########################################")
-    print("Waiting {} sec before next iteration...".format(waiting_sec))
-    # Wait before next iteration
-    time.sleep(waiting_sec)
-    iter += 1
-    # Send email with pending pool transactions.
-    # bool_var = False
-    # for nt in networks:
-    #     bool_var = (pendingPools_len[nt][-1] != len(pendingPools[nt]))
-    #     if bool_var:
-    #         break
-    # if (iter % 5 == 0) and bool_var:
-    #     for nt in networks:
-    #         message += "########## Pending transactions #################\n" \
-    #                    + "Network: {} \n".format(nt) \
-    #                    + "Pool ids: {} \n".format(pendingPools[nt]) \
-    #                    + "Nonces: {} \n".format(pendingPools_nonces[nt])
-    #         pendingPools_len[nt].append(len(pendingPools[nt]))
-    #     print("Sending Email...")
-    #     sendEmail(message)
-    #     message = "Subject: Pending Pool Transactions \n"
+        print("#########################################")
+        print("Waiting {} sec before next iteration...".format(waiting_sec))
+        # Wait before next iteration
+        time.sleep(waiting_sec)
+        iter += 1
+

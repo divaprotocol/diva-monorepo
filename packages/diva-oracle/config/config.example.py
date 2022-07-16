@@ -37,6 +37,6 @@ max_reporting_frame = 24
 
 # Networks
 networks = ["ropsten"]  # write ["ropsten","mumbai"] for multiple networks
-
+network = "ropsten"
 # Waiting time (in seconds) before next iteration
 waiting_next_iteration = 120

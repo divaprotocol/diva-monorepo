@@ -17,3 +17,20 @@ def query(lastId):
                   }
                 }
             """ % (lastId, (int(dt.now().timestamp()) - 86400), (int(dt.now().timestamp()) - 300), config.dataprovider)
+
+def email_query():
+    return """
+            { 
+                pools (where: {dataProvider: "%s", createdAt_gte: "%s" }) {
+                    id
+                    dataProvider
+                    referenceAsset
+                    floor
+                    inflection
+                    cap
+                    statusFinalReferenceValue
+                    expiryTime
+                    createdAt
+                  }
+                }
+            """ % (config.dataprovider, (int(dt.now().timestamp()) - 30000))
