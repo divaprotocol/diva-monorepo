@@ -139,10 +139,7 @@ export const useCreatePoolFormik = () => {
         errors.collateralBalance = 'Collateral can not be 0'
       }
 
-      if (
-        values.expiryTime == null &&
-        Object.prototype.toString.call(values.expiryTime) === '[object Date]'
-      ) {
+      if (values.expiryTime == null || isNaN(values.expiryTime.getTime())) {
         errors.expiryTime = 'You must set an expiry time'
       }
       if (
