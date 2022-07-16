@@ -1,9 +1,14 @@
-export function generatePayoffChartData(data) {
+export function generatePayoffChartData(data, currentPrice) {
   const optionData = data
   const CollateralBalanceLong = data.CollateralBalanceLong // temporarily hard-coded
   const CollateralBalanceShort = data.CollateralBalanceShort // temporarily hard-coded
   const TokenSupply = data.TokenSupply // temporarily hard-coded
-
+  // const xValue1 = () => {
+  //   return optionData.Floor - optionData.Cap * 0.18 <= currentPrice
+  //     ? currentPrice
+  //     : optionData.Floor - optionData.Cap * 0.18 ||
+  //         optionData.Floor - optionData.Cap * 0.18
+  // }
   let chartData = []
 
   if (optionData.IsLong === true) {
