@@ -175,12 +175,13 @@ export default function Underlying() {
     TokenSupply: Number(formatEther(pool.supplyInitial)),
     IsLong: isLong,
   }
-  const data = generatePayoffChartData(OptionParams)
+  const data = generatePayoffChartData(OptionParams, currentPrice)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
   const handleChange = (event: any, newValue: string) => {
     history.push(`/${params.poolId}/${isLong ? 'long' : 'short'}/` + newValue)
     setValue(newValue)
   }
+
   return (
     <Container sx={{ paddingTop: '1em', paddingBottom: '3em' }}>
       <TabContext value={value}>
@@ -218,18 +219,20 @@ export default function Underlying() {
                   breakEven={Number(breakEven).toFixed(2)}
                   floor={OptionParams.Floor}
                   cap={OptionParams.Cap}
+                  mouseHover={false}
                 />
                 <TradeChart
-                  data={data2}
+                  data={data}
                   refAsset={pool.referenceAsset}
                   payOut={pool.collateralToken.symbol}
-                  currentPrice={0.9}
+                  currentPrice={currentPrice}
                   w={600}
                   h={336}
                   isLong={OptionParams.IsLong}
                   breakEven={Number(breakEven).toFixed(2)}
                   floor={OptionParams.Floor}
-                  cap={1.1}
+                  cap={OptionParams.Cap}
+                  mouseHover={false}
                 />
                 <Paper>
                   <LeftCompFlexContainer>

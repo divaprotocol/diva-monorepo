@@ -20,10 +20,10 @@ export default function DIVATradeChart(props) {
       currentPrice,
       floor,
       cap,
+      mouseHover,
     } = props
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
     const reffeenceAsset = refAsset.slice(0, 8)
-    console.log('data again', reffeenceAsset)
     // Set the dimensions and margins of the graph
     var margin = { top: 15, right: 2, bottom: 20, left: 20 },
       width = w - margin.left - margin.right,
@@ -46,7 +46,6 @@ export default function DIVATradeChart(props) {
     const labelHeight = 10
     const blueColorCode = '#3B8DCA'
     const redColorCode = '#F77F99'
-    const legendHeight = height + 30
     svg
       .append('text')
       .attr('width', labelWidth)
@@ -130,7 +129,7 @@ export default function DIVATradeChart(props) {
           return d.x
         }),
       ])
-      .range([0, width])
+      .range([0, width - margin.left - margin.right])
     // Remove X- axis labels
     svg
       .append('g')
@@ -184,11 +183,15 @@ export default function DIVATradeChart(props) {
     svg
       .append('path')
       .data([data]) // or data([data])
-      .attr('class', 'line')
       .attr('d', valueline)
       .style('fill', 'none')
-      .style('stroke', 'grey')
+      .style('stroke', function () {
+        return mouseHover ? 'grey' : blueColorCode
+      })
       .style('stroke-width', '4px')
+      .attr('class', function () {
+        return mouseHover ? 'line' : null
+      })
 
     // Format x axis
     d3.select('.xAxisG path')
@@ -251,106 +254,103 @@ export default function DIVATradeChart(props) {
       .style('fill', '#83BD67')
 
     // Add mouseover effects
-    const mouseG = svg
-      .append('g') // corresponds to the first part of focus/focusText in the other example but without the circle/text, this will be added later
-      .attr('class', 'mouse-over-effects')
+    const mouseHoverEffect = () => {
+      const mouseG = svg
+        .append('g') // corresponds to the first part of focus/focusText in the other example but without the circle/text, this will be added later
+        .attr('class', 'mouse-over-effects')
 
-    // This is the black vertical line to follow mouse
-    // The values for the path are passed as the "d" attribute later
-    mouseG
-      .append('path')
-      .attr('class', 'mouse-line')
-      .style('stroke', 'black')
-      .style('stroke-width', '1px')
-      .style('opacity', '0')
+      // This is the black vertical line to follow mouse
+      // The values for the path are passed as the "d" attribute later
+      mouseG
+        .append('path')
+        .attr('class', 'mouse-line')
+        .style('stroke', 'black')
+        .style('stroke-width', '1px')
+        .style('opacity', '0')
 
-    const lines = document.getElementsByClassName('line')
-    const mousePerLine = mouseG
-      .data([data])
-      .append('g')
-      .selectAll('dot')
-      .data(data)
-      .enter()
-      .append('circle')
-      .attr('r', 7)
-      .style('stroke', 'white')
-      .style('fill', 'white')
-      .style('stroke-width', '2px')
-      .style('opacity', '0')
+      const lines = document.getElementsByClassName('line')
+      const mousePerLine = mouseG
+        .data([data])
+        .append('g')
+        .attr('class', 'mouse-per-line')
 
-    const tooltipBoxWidth = 215
-    const tooltipBoxHeight = 55
+      const tooltipPerLine = mouseG
+        .data([data])
+        .append('g')
+        .attr('class', 'tooltip-per-line')
 
-    tooltipPerLine
-      .append('rect')
-      .attr('class', 'tooltip')
-      .attr('width', tooltipBoxWidth)
-      .attr('height', tooltipBoxHeight)
-      .attr('x', 10)
-      .attr('y', 0)
-      .attr('rx', 4)
-      .attr('ry', 4)
-      .style('fill', 'none')
-      .style('opacity', '0')
+      // Create the circle that travels along the curve of chart
+      mousePerLine
+        .append('circle')
+        .attr('r', 7)
+        .style('stroke', 'white')
+        .style('fill', 'white')
+        .style('stroke-width', '2px')
+        .style('opacity', '0')
 
-    tooltipPerLine
-      .append('text')
-      .attr('x', 18)
-      .attr('y', 40)
-      .attr('font-size', '14')
-      .text(reffeenceAsset + '...' + ' at Expiry:')
+      const tooltipBoxWidth = 215
+      const tooltipBoxHeight = 55
 
-    tooltipPerLine
-      .append('text')
-      .attr('class', 'tooltip-underlying')
-      .attr('text-anchor', 'end')
-      .attr('x', tooltipBoxWidth)
-      .attr('y', 40)
-      .attr('font-size', '14')
+      tooltipPerLine
+        .append('rect')
+        .attr('class', 'tooltip')
+        .attr('width', tooltipBoxWidth)
+        .attr('height', tooltipBoxHeight)
+        .attr('x', 10)
+        .attr('y', 0)
+        .attr('rx', 4)
+        .attr('ry', 4)
+        .style('fill', 'none')
+        .style('opacity', '0')
 
-    tooltipPerLine
-      .append('text')
-      .attr('x', 18)
-      .attr('y', 55)
-      .attr('font-size', '14')
-      .text(' Payout:')
+      tooltipPerLine
+        .append('text')
+        .attr('x', 18)
+        .attr('y', 40)
+        .attr('font-size', '14')
+        .text(reffeenceAsset + '...' + ' at Expiry:')
 
-    tooltipPerLine
-      .append('text')
-      .attr('class', 'tooltip-payout')
-      .attr('text-anchor', 'end')
-      .attr('x', tooltipBoxWidth)
-      .attr('y', 55)
-      .attr('font-weight', 'bold')
-      .attr('font-size', '14')
+      tooltipPerLine
+        .append('text')
+        .attr('class', 'tooltip-underlying')
+        .attr('text-anchor', 'end')
+        .attr('x', tooltipBoxWidth)
+        .attr('y', 40)
+        .attr('font-size', '14')
 
-    // Create the text that travels along the curve of chart and the position relative to the mouse location
-    tooltipPerLine
-      .append('text')
-      .attr('class', 'topRow')
-      .attr('transform', 'translate(10,3)')
+      tooltipPerLine
+        .append('text')
+        .attr('x', 18)
+        .attr('y', 55)
+        .attr('font-size', '14')
+        .text(' Payout:')
 
-    tooltipPerLine
-      .append('text')
-      .attr('class', 'bottomRow')
-      .attr('transform', 'translate(10,30)')
+      tooltipPerLine
+        .append('text')
+        .attr('class', 'tooltip-payout')
+        .attr('text-anchor', 'end')
+        .attr('x', tooltipBoxWidth)
+        .attr('y', 55)
+        .attr('font-weight', 'bold')
+        .attr('font-size', '14')
 
-    var mouseover = function () {
-      d3.select('.mouse-line').style('opacity', '1')
-      d3.selectAll('.mouse-per-line circle').style('opacity', '1')
-      d3.selectAll('.tooltip-pper-line rect').style('opacity', '1')
-      d3.selectAll('.tooltip-per-line text').style('opacity', '1')
-    }
+      // Create the text that travels along the curve of chart and the position relative to the mouse location
+      tooltipPerLine
+        .append('text')
+        .attr('class', 'topRow')
+        .attr('transform', 'translate(10,3)')
 
-    var mouseout = function () {
-      d3.select('.mouse-line').style('opacity', '0')
-      d3.selectAll('.mouse-per-line circle').style('opacity', '0')
-      d3.selectAll('.tooltip-pper-line rect').style('opacity', '0')
-      d3.selectAll('.tooltip-per-line text').style('opacity', '0')
-    }
+      tooltipPerLine
+        .append('text')
+        .attr('class', 'bottomRow')
+        .attr('transform', 'translate(10,30)')
 
-    const blueColorCode = '#3B8DCA'
-    const redColorCode = '#F77F99'
+      var mouseover = function () {
+        d3.select('.mouse-line').style('opacity', '1')
+        d3.selectAll('.mouse-per-line circle').style('opacity', '1')
+        d3.selectAll('.tooltip-pper-line rect').style('opacity', '1')
+        d3.selectAll('.tooltip-per-line text').style('opacity', '1')
+      }
 
       var mouseout = function () {
         d3.select('.mouse-line').style('opacity', '0')
@@ -382,31 +382,37 @@ export default function DIVATradeChart(props) {
 
       var mousemove = function (event) {
         var mouse = d3.pointer(event)
-        d3.select('.mouse-line').attr('d', function () {
-          var d = 'M' + mouse[0] + ',' + height
-          d += ' ' + mouse[0] + ',' + 60
-          return d
-        })
-        d3.select('.mouse-line').style('stroke', function (d, i) {
+        d3.select('.mouse-line')
+          .attr('d', function () {
+            var d = 'M' + mouse[0] + ',' + height
+            d += ' ' + mouse[0] + ',' + 60
+            return d
+          })
+          .style('stroke', function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
+          })
+
+        d3.select('.mouse-per-line circle').style('fill', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
           return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
         })
 
-      d3.select('.mouse-per-line circle').style('fill', function (d, i) {
-        var pos = yPos(d, i, mouse[0], lines)
-        return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
-      })
+        d3.select('.tooltip-per-line .tooltip-payout').style(
+          'fill',
+          function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
+          }
+        )
 
         d3.select('.line').style('stroke', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
           return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
-        }
-      )
+        })
 
-      d3.select('.line').style('stroke', function (d, i) {
-        var pos = yPos(d, i, mouse[0], lines)
-        return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
-      })
+        d3.selectAll('.mouse-per-line').attr('transform', function (d, i) {
+          var pos = yPos(d, i, mouse[0], lines)
 
           return 'translate(' + mouse[0] + ',' + pos.y + ')'
         })
@@ -437,16 +443,9 @@ export default function DIVATradeChart(props) {
         .on('mouseover', mouseover)
         .on('mousemove', mousemove)
     }
-    // Create a rect on top of the svg area to catch mouse movements on canvas (can't catch mouse events on a g element)
-    mouseG
-      .append('svg:rect')
-      .attr('width', width)
-      .attr('height', height)
-      .attr('fill', 'none')
-      .attr('pointer-events', 'all')
-      .on('mouseout', mouseout)
-      .on('mouseover', mouseover)
-      .on('mousemove', mousemove)
+    if (mouseHover) {
+      mouseHoverEffect()
+    }
   }, [props.w])
 
   return <div id="DivaTradeChart" ref={ref}></div>
