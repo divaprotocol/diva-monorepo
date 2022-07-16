@@ -19,9 +19,10 @@ import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
+import CheckIcon from '@mui/icons-material/Check'
 import Web3 from 'web3'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
@@ -365,6 +366,12 @@ export default function BuyLimit(props: {
   }, [responseBuy])
 
   useEffect(() => {
+    if (allowance.sub(youPay).gt(0)) {
+      setIsApproved(false)
+    }
+    if (allowance.sub(youPay).lte(0)) {
+      setIsApproved(true)
+    }
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
@@ -452,7 +459,7 @@ export default function BuyLimit(props: {
       )
     }
   }, [option, pricePerOption, usdPrice, existingBuyLimitOrdersAmountUser])
-
+  console.log('isApproved', isApproved)
   return (
     <div>
       <form onSubmit={(event) => handleOrderSubmit(event)}>
@@ -605,18 +612,31 @@ export default function BuyLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft={isApproved ? 13 : 16} marginBottom={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            startIcon={<AddIcon />}
-            type="submit"
-            value="Submit"
-            disabled={orderBtnDisabled}
-          >
-            {isApproved ? 'Create Order' : 'Approve'}
-          </Button>
+        <Box marginLeft={3} marginBottom={2}>
+          <Stack direction={'row'} spacing={1}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              startIcon={<CheckIcon />}
+              type="submit"
+              value="Submit"
+              disabled={!isApproved || orderBtnDisabled}
+            >
+              {'Approve'}
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              startIcon={<AddIcon />}
+              type="submit"
+              value="Submit"
+              disabled={isApproved || orderBtnDisabled}
+            >
+              {'Create Order'}
+            </Button>
+          </Stack>
         </Box>
       </form>
     </div>
