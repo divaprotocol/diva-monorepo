@@ -155,7 +155,9 @@ const SubmitCell = (props: any) => {
   }
 
   const handleClose = () => {
-    setOpen(false)
+    if (loadingValue === false) {
+      setOpen(false)
+    }
   }
   const expiryTime = new Date(props.row.Expiry)
   const now = new Date()

@@ -133,10 +133,9 @@ const SubmitButton = (props: any) => {
                       diva
                         .redeemPositionToken(props.row.address.id, bal)
                         .then((tx: any) => {
-                          tx.wait()
-                        })
-                        .then(() => {
-                          setLoadingValue(false)
+                          tx.wait().then(() => {
+                            setLoadingValue(false)
+                          })
                         })
                         .then((tx) => {
                           /**
@@ -159,6 +158,7 @@ const SubmitButton = (props: any) => {
                   })
                   .catch((err) => {
                     console.error(err)
+                    setLoadingValue(false)
                   })
               })
               .catch((err) => {
@@ -172,11 +172,11 @@ const SubmitButton = (props: any) => {
                 diva
                   .redeemPositionToken(props.row.address.id, bal)
                   .then((tx: any) => {
-                    tx.wait()
+                    tx.wait().then(() => {
+                      setLoadingValue(false)
+                    })
                   })
-                  .then(() => {
-                    setLoadingValue(false)
-                  })
+
                   .catch((err) => {
                     console.error(err)
                     setLoadingValue(false)
@@ -197,10 +197,9 @@ const SubmitButton = (props: any) => {
           diva
             .redeemPositionToken(props.row.address.id, bal)
             .then((tx: any) => {
-              tx.wait()
-            })
-            .then(() => {
-              setLoadingValue(false)
+              tx.wait().then(() => {
+                setLoadingValue(false)
+              })
             })
             .catch((err) => {
               console.error(err)
@@ -243,7 +242,9 @@ const SubmitButton = (props: any) => {
   }
 
   const handleClose = () => {
-    setOpen(false)
+    if (loadingValue === false) {
+      setOpen(false)
+    }
   }
 
   if (buttonName === 'Redeem') {
@@ -264,7 +265,7 @@ const SubmitButton = (props: any) => {
       <Container>
         <LoadingButton
           variant="contained"
-          loading={loadingValue}
+          loading={open}
           onClick={(e) => {
             e.stopPropagation()
             handleOpen()
@@ -282,7 +283,7 @@ const SubmitButton = (props: any) => {
           <DialogActions>
             <TextField
               autoFocus={true}
-              defaultValue={textFieldValue}
+              defaultValue=""
               onChange={(e) => {
                 setTextFieldValue(e.target.value)
               }}
@@ -290,7 +291,9 @@ const SubmitButton = (props: any) => {
             <LoadingButton
               color="primary"
               type="submit"
+              loading={loadingValue}
               onClick={(e) => {
+                setLoadingValue(textFieldValue ? true : false)
                 if (diva != null) {
                   diva
                     .challengeFinalReferenceValue(
@@ -303,10 +306,6 @@ const SubmitButton = (props: any) => {
                        */
                       tx.wait()
                         .then(() => {
-                          setLoadingValue(false)
-                          handleClose()
-                        })
-                        .then(() => {
                           setTimeout(() => {
                             dispatch(
                               fetchPool({
@@ -316,6 +315,10 @@ const SubmitButton = (props: any) => {
                               })
                             )
                           }, 10000)
+                        })
+                        .then(() => {
+                          setLoadingValue(false)
+                          handleClose()
                         })
                     })
                     .catch((err) => {
