@@ -66,6 +66,20 @@ export function CreatePool() {
   const handlePoolSuccess = () => {
     formik.setFieldValue('step', formik.values.step + 1, true)
   }
+  const arrowSvg = (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 4L10.59 5.41L16.17 11H4V13H16.17L10.59 18.59L12 20L20 12L12 4Z"
+        fill="white"
+      />
+    </svg>
+  )
 
   return (
     <Box>
@@ -79,9 +93,13 @@ export function CreatePool() {
         <Add style={{ fontSize: 34, padding: 20, paddingRight: 10 }} />
         <h2> Create Pool</h2>
       </Box>
-      <Container maxWidth="md">
+      <Container maxWidth="xl">
         <Box pt={5} pb={10}>
-          <Stepper activeStep={formik.values.step - 1} alternativeLabel>
+          <Stepper
+            sx={{ pl: theme.spacing(35), maxWidth: 'md' }}
+            activeStep={formik.values.step - 1}
+            alternativeLabel
+          >
             <Step>
               <StepLabel>Pool</StepLabel>
             </Step>
@@ -109,20 +127,20 @@ export function CreatePool() {
           )}
 
           <Stack
-            sx={{ paddingTop: theme.spacing(3) }}
+            sx={{ pr: theme.spacing(12), paddingTop: theme.spacing(3) }}
             direction="row"
             spacing={3}
             justifyContent="space-between"
             alignItems="center"
           >
-            {formik.values.step > 1 && formik.values.step !== 4 && (
+            {formik.values.step !== 4 && (
               <Button
                 sx={{ width: theme.spacing(16) }}
                 onClick={() => {
                   formik.setFieldValue('step', formik.values.step - 1, true)
                 }}
               >
-                Go Back
+                {formik.values.step > 1 ? 'Go Back' : ''}
               </Button>
             )}
             {formik.values.step === 3 ? (
@@ -139,7 +157,7 @@ export function CreatePool() {
                 variant="text"
                 sx={{
                   mt: theme.spacing(8),
-                  ml: theme.spacing(80),
+                  ml: theme.spacing(115),
                 }}
                 onClick={() => {
                   history.push('/dashboard/mypositions')
@@ -154,10 +172,6 @@ export function CreatePool() {
                 onClick={() => {
                   formik.handleSubmit()
                 }}
-                sx={{
-                  paddingLeft:
-                    formik.status != null ? theme.spacing(6) : undefined,
-                }}
                 loading={
                   formik.status != null &&
                   !formik.status.startsWith('Error:') &&
@@ -165,7 +179,8 @@ export function CreatePool() {
                 }
                 disabled={!formik.isValid}
               >
-                {formik.values.step === 3 ? formik.status || 'Create' : 'Next'}
+                {formik.values.step === 3 ? formik.status || 'Create' : 'Next '}
+                <ArrowForwardOutlinedIcon sx={{ ml: theme.spacing(1) }} />
               </LoadingButton>
             )}
           </Stack>
