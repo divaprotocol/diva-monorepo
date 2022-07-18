@@ -56,7 +56,7 @@ export const buyMarketOrder = async (orderData) => {
 
   let fillOrders = []
   orders.forEach((order) => {
-    if (nbrOptionsToBuy.gt(0)) {
+    if (nbrOptionsToBuy.gt(10)) {
       fillOrders.push(order)
 
       // Expected rate is specific to an an order, hence the implied taker asset amount calcs need to be done for every single order and

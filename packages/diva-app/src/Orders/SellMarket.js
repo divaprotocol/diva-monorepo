@@ -38,14 +38,18 @@ export const sellMarketOrder = async (orderData) => {
 
   let fillOrders = []
   orders.forEach((order) => {
-    if (nbrOptionsToSell.gt(0)) {
+    if (nbrOptionsToSell.gt(10)) {
       fillOrders.push(order)
 
       // Note: As opposed to BuyMarket.js, the position token amount to sell entered by the user (nbrOptionsToSell) represents the TAKER token amount in
       // Buy Limit (the orders the user is going to fill), hence no conversion to taker token amount is required.
 
       let takerAssetFillAmount
-
+      console.log('nbrOptionsToSell', nbrOptionsToSell.toString())
+      console.log(
+        'order.remainingFillableTakerAmount',
+        order.remainingFillableTakerAmount.toString()
+      )
       // takerAssetFillAmount = Min(nbrOptionsToSell, order.remainingFillableTakerAmount)
       if (nbrOptionsToSell.lte(order.remainingFillableTakerAmount)) {
         takerAssetFillAmount = nbrOptionsToSell.toString()
