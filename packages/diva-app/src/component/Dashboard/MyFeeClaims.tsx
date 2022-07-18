@@ -66,7 +66,11 @@ const TransferFeesCell = (props: any) => {
 
   return (
     <Container>
-      <LoadingButton variant="contained" onClick={handleOpen}>
+      <LoadingButton
+        variant="contained"
+        onClick={handleOpen}
+        loading={loadingValue}
+      >
         Transfer Fees
       </LoadingButton>
       <Dialog open={open} onClose={handleClose}>
@@ -101,15 +105,17 @@ const TransferFeesCell = (props: any) => {
                       props.row.Address,
                       parseUnits(amountValue, decimal)
                     )
-                    .then(() => {
-                      setLoadingValue(false)
-                      handleClose()
+                    .then((tx) => {
+                      tx.wait().then(() => {
+                        setLoadingValue(false)
+                      })
                     })
                     .catch((err) => {
                       console.error(err)
                       setLoadingValue(false)
                     })
                 }
+                handleClose()
               }}
             >
               Transfer Fees
@@ -147,9 +153,12 @@ const ClaimFeesCell = (props: any) => {
         if (diva != null) {
           diva
             .claimFees(props.row.Address)
-            .then(() => {
-              setLoadingValue(false)
+            .then((tx) => {
+              tx.wait().then(() => {
+                setLoadingValue(false)
+              })
             })
+
             .catch((err) => {
               console.error(err)
               setLoadingValue(false)

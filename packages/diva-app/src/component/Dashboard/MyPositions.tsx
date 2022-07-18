@@ -96,6 +96,7 @@ const SubmitButton = (props: any) => {
   const [open, setOpen] = React.useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
   const [loadingValue, setLoadingValue] = useState(false)
+  const [disabledButton, setDisabledButton] = useState(false)
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
 
@@ -135,6 +136,7 @@ const SubmitButton = (props: any) => {
                         .then((tx: any) => {
                           tx.wait().then(() => {
                             setLoadingValue(false)
+                            setDisabledButton(true)
                           })
                         })
                         .then((tx) => {
@@ -174,6 +176,7 @@ const SubmitButton = (props: any) => {
                   .then((tx: any) => {
                     tx.wait().then(() => {
                       setLoadingValue(false)
+                      setDisabledButton(true)
                     })
                   })
 
@@ -199,6 +202,7 @@ const SubmitButton = (props: any) => {
             .then((tx: any) => {
               tx.wait().then(() => {
                 setLoadingValue(false)
+                setDisabledButton(true)
               })
             })
             .catch((err) => {
@@ -253,6 +257,7 @@ const SubmitButton = (props: any) => {
         <LoadingButton
           variant="contained"
           color={buttonName === 'Redeem' ? 'success' : 'primary'}
+          disabled={disabledButton}
           loading={loadingValue}
           onClick={handleRedeem}
         >
@@ -265,7 +270,7 @@ const SubmitButton = (props: any) => {
       <Container>
         <LoadingButton
           variant="contained"
-          loading={open}
+          loading={loadingValue}
           onClick={(e) => {
             e.stopPropagation()
             handleOpen()
@@ -318,15 +323,14 @@ const SubmitButton = (props: any) => {
                         })
                         .then(() => {
                           setLoadingValue(false)
-                          handleClose()
                         })
                     })
                     .catch((err) => {
                       console.error(err)
                       setLoadingValue(false)
-                      handleClose()
                     })
                 }
+                handleClose()
               }}
             >
               Challenge

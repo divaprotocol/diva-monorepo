@@ -150,14 +150,13 @@ const SubmitCell = (props: any) => {
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
   const [loadingValue, setLoadingValue] = useState(false)
+  const [disabledButton, setDisabledButton] = useState(false)
   const handleOpen = () => {
     setOpen(true)
   }
 
   const handleClose = () => {
-    if (loadingValue === false) {
-      setOpen(false)
-    }
+    setOpen(false)
   }
   const expiryTime = new Date(props.row.Expiry)
   const now = new Date()
@@ -173,8 +172,8 @@ const SubmitCell = (props: any) => {
       <LoadingButton
         variant="contained"
         onClick={handleOpen}
-        disabled={!enabled}
-        loading={open}
+        disabled={!enabled || disabledButton}
+        loading={loadingValue}
       >
         Submit value
       </LoadingButton>
@@ -212,7 +211,7 @@ const SubmitCell = (props: any) => {
                     tx.wait()
                       .then(() => {
                         setLoadingValue(false)
-                        handleClose()
+                        setDisabledButton(true)
                       })
                       .then(() => {
                         setTimeout(() => {
@@ -228,9 +227,9 @@ const SubmitCell = (props: any) => {
                   .catch((err) => {
                     console.error(err)
                     setLoadingValue(false)
-                    handleClose()
                   })
               }
+              handleClose()
             }}
           >
             Submit value
