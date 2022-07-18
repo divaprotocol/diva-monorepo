@@ -1,9 +1,4 @@
-// Payoff chart for DIVA Markets page
-// Sources:
-// * Chart: https://bl.ocks.org/d3noob/402dd382a51a4f6eea487f9a35566de0
-// * D3 in React: https://youtu.be/YKDIsXA4OAc
-
-import React, { useLayoutEffect } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import * as d3 from 'd3'
 
 export default function DIVATradeChart(props) {
@@ -28,7 +23,7 @@ export default function DIVATradeChart(props) {
     var margin = { top: 15, right: 2, bottom: 20, left: 20 },
       width = w - margin.left - margin.right,
       height = h - margin.top - margin.bottom
-
+    console.log('breakeven', breakEven)
     // Append the svg object to the reference element of the page
     // Appends a 'group' element to 'svg'
     // Moves the 'group' element to the top left margin
@@ -61,13 +56,13 @@ export default function DIVATradeChart(props) {
     // legends
     svg
       .append('circle')
-      .attr('cx', 5)
+      .attr('cx', w * 0.0083)
       .attr('cy', h)
       .attr('r', 6)
       .style('fill', '#F7931A')
     svg
       .append('circle')
-      .attr('cx', 150)
+      .attr('cx', w * 0.3)
       .attr('cy', h)
       .attr('r', function () {
         return cap == floor ? 0 : 6
@@ -75,47 +70,47 @@ export default function DIVATradeChart(props) {
       .style('fill', '#83BD67')
     svg
       .append('circle')
-      .attr('cx', 300)
+      .attr('cx', w * 0.53)
       .attr('cy', h)
       .attr('r', currentPrice ? 6 : 0)
       .style('fill', '#3393E0')
     svg
       .append('text')
-      .attr('x', 20)
+      .attr('x', w * 0.033)
       .attr('y', h)
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
       })
       .text('Floor' + ' ' + '(' + floor + ')')
-      .style('font-size', '15px')
+      .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
-      .attr('x', 20)
+      .attr('x', w * 0.033)
       .attr('y', h)
       .attr('opacity', function () {
         return cap == floor ? 1 : 0
       })
       .text('Inflection' + ' ' + '(' + cap + ')') //Binary payoff
-      .style('font-size', '15px')
+      .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
-      .attr('x', 165)
+      .attr('x', w * 0.32)
       .attr('y', h)
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
       })
       .text('Cap' + ' ' + '(' + cap + ')')
-      .style('font-size', '15px')
+      .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
-      .attr('x', 315)
+      .attr('x', w * 0.55)
       .attr('y', h)
       .attr('opacity', currentPrice ? 1 : 0)
       .text('Current price' + ' ' + '(' + currentPrice + ')')
-      .style('font-size', '15px')
+      .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 
     // Add X axis
@@ -130,7 +125,7 @@ export default function DIVATradeChart(props) {
           return d.x
         }),
       ])
-      .range([0, width - margin.left - margin.right])
+      .range([0, width])
     // Remove X- axis labels
     svg
       .append('g')
@@ -153,7 +148,7 @@ export default function DIVATradeChart(props) {
       .call(
         d3
           .axisRight(y)
-          .tickSize(width - margin.left - margin.right)
+          .tickSize(width)
           .tickValues([
             0,
             data[2].y,
@@ -243,7 +238,7 @@ export default function DIVATradeChart(props) {
       .enter()
       .append('circle')
       .filter(function (d) {
-        return (d.x = cap)
+        return cap == floor ? null : (d.x = cap)
       })
       .attr('cx', function (d) {
         return x(d.x)
@@ -265,7 +260,7 @@ export default function DIVATradeChart(props) {
       mouseG
         .append('path')
         .attr('class', 'mouse-line')
-        .style('stroke', 'black')
+        .style('stroke', 'grey')
         .style('stroke-width', '1px')
         .style('opacity', '0')
 
@@ -285,7 +280,7 @@ export default function DIVATradeChart(props) {
         .append('circle')
         .attr('r', 7)
         .style('stroke', 'white')
-        .style('fill', 'white')
+        .style('fill', blueColorCode)
         .style('stroke-width', '2px')
         .style('opacity', '0')
 
@@ -383,33 +378,40 @@ export default function DIVATradeChart(props) {
 
       var mousemove = function (event) {
         var mouse = d3.pointer(event)
-        d3.select('.mouse-line')
-          .attr('d', function () {
-            var d = 'M' + mouse[0] + ',' + height
-            d += ' ' + mouse[0] + ',' + 60
-            return d
-          })
-          .style('stroke', function (d, i) {
-            var pos = yPos(d, i, mouse[0], lines)
-            return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
-          })
+        d3.select('.mouse-line').attr('d', function () {
+          var d = 'M' + mouse[0] + ',' + height
+          d += ' ' + mouse[0] + ',' + 60
+          return d
+        })
+        d3.select('.mouse-line').style('stroke', function (d, i) {
+          var pos = yPos(d, i, mouse[0], lines)
+          return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
+            ? blueColorCode
+            : redColorCode
+        })
 
         d3.select('.mouse-per-line circle').style('fill', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
-          return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
+          return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
+            ? blueColorCode
+            : redColorCode
         })
 
         d3.select('.tooltip-per-line .tooltip-payout').style(
           'fill',
           function (d, i) {
             var pos = yPos(d, i, mouse[0], lines)
-            return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
+            return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
+              ? blueColorCode
+              : redColorCode
           }
         )
 
         d3.select('.line').style('stroke', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
-          return x.invert(pos.x) >= breakEven ? blueColorCode : redColorCode
+          return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
+            ? blueColorCode
+            : redColorCode
         })
 
         d3.selectAll('.mouse-per-line').attr('transform', function (d, i) {

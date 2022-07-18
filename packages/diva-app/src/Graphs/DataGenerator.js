@@ -3,17 +3,16 @@ export function generatePayoffChartData(data, currentPrice) {
   const CollateralBalanceLong = data.CollateralBalanceLong // temporarily hard-coded
   const CollateralBalanceShort = data.CollateralBalanceShort // temporarily hard-coded
   const TokenSupply = data.TokenSupply // temporarily hard-coded
-  // const xValue1 = () => {
-  //   return optionData.Floor - optionData.Cap * 0.18 <= currentPrice
-  //     ? currentPrice
-  //     : optionData.Floor - optionData.Cap * 0.18 ||
-  //         optionData.Floor - optionData.Cap * 0.18
-  // }
+  const minXValue = () => {
+    return optionData.Floor - optionData.Cap * 0.15 <= currentPrice
+      ? optionData.Floor - optionData.Cap * 0.15
+      : currentPrice || optionData.Floor - optionData.Cap * 0.15
+  }
   let chartData = []
 
   if (optionData.IsLong === true) {
     chartData = [
-      { x: optionData.Floor - optionData.Cap * 0.15, y: 0 },
+      { x: minXValue(), y: 0 },
       { x: optionData.Floor, y: 0 },
       { x: optionData.Inflection, y: CollateralBalanceLong / TokenSupply },
       {
@@ -28,7 +27,7 @@ export function generatePayoffChartData(data, currentPrice) {
   } else {
     chartData = [
       {
-        x: optionData.Floor - optionData.Cap * 0.15,
+        x: minXValue(),
         y: (CollateralBalanceLong + CollateralBalanceShort) / TokenSupply,
       },
       {
