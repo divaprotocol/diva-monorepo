@@ -239,6 +239,11 @@ export const get0xOpenOrders = async (
     takerTokenUnit
   )
 
+  const test = fillableOrders.filter(
+    (item) => item.order.maker === '0x8836a16db8db1cba0890f0ee97a9926cb47b4101'
+  )
+  console.log('test', test)
+
   // Apply additional filters to ensure fillability of orders displayed in the orderbook
   const filteredOrders = []
 
