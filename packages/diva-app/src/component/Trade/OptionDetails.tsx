@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { Tooltip } from '@mui/material'
 import { Pool } from '../../lib/queries'
-import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import CheckCircleSharpIcon from '@mui/icons-material/CheckCircleSharp'
 import WarningAmberSharpIcon from '@mui/icons-material/WarningAmberSharp'
@@ -57,30 +57,6 @@ const FlexBox = styled.div`
   justify-content: flex-start;
 `
 
-const FlexSecondLineDiv = styled.div`
-  width: 34%;
-  margin-top: 15px;
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-`
-
-const FlexBoxSecondLine = styled.div`
-  flex: 1;
-`
-
-const FlexBoxSecondLineData = styled.div`
-  padding: 15px;
-  width: max-content;
-  font-size: 1rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: left;
-`
 const FlexCheckIcon = styled.div`
   display: flex;
   flex-direction: row;
@@ -91,7 +67,6 @@ const FlexDataDiv = styled.div`
 `
 export default function OptionDetails({
   pool,
-  isLong,
 }: {
   pool: Pool
   isLong: boolean
