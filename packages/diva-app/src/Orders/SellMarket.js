@@ -29,6 +29,7 @@ export const sellMarketOrder = async (orderData) => {
       delete order.signature
       return order
     })
+
     const response = await exchange
       .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
       .awaitTransactionSuccessAsync({ from: orderData.taker })
@@ -73,6 +74,68 @@ export const sellMarketOrder = async (orderData) => {
   })
   console.log('fillOrders', fillOrders)
   console.log('takerAssetFillAmounts', takerAssetFillAmounts)
+  // Keep for debugging
+  const res = await exchange
+    .getLimitOrderInfo(fillOrders[0])
+    .callAsync({ from: orderData.maker })
+    .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
+  console.log(
+    'order 1 status (res.takerTokenFilledAmount): ',
+    res.takerTokenFilledAmount.toString()
+  )
+  console.log('order1 takerAmount', fillOrders[0].takerAmount.toString())
+  console.log(
+    'order 1 remainingFillableTakerAmount',
+    fillOrders[0].remainingFillableTakerAmount.toString()
+  )
+  console.log(
+    'order 1 takerAmount - filled',
+    BigNumber.from(fillOrders[0].takerAmount)
+      .sub(BigNumber.from(res.takerTokenFilledAmount.toString()))
+      .toString()
+  )
+  // Order 2
+  // const res2 = await exchange
+  //   .getLimitOrderInfo(fillOrders[1])
+  //   .callAsync({ from: orderData.maker })
+  //   .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
+  // console.log(
+  //   'order 2 status (res2.takerTokenFilledAmount): ',
+  //   res2.takerTokenFilledAmount.toString()
+  // )
+  // console.log('order 2 takerAmount', fillOrders[1].takerAmount.toString())
+  // console.log(
+  //   'order 2 remainingFillableTakerAmount',
+  //   fillOrders[1].remainingFillableTakerAmount.toString()
+  // )
+  // console.log(
+  //   'order 2 takerAmount - filled',
+  //   BigNumber.from(fillOrders[1].takerAmount)
+  //     .sub(BigNumber.from(res2.takerTokenFilledAmount.toString()))
+  //     .toString()
+  // )
+  // // Order 3
+  // const res3 = await exchange
+  //   .getLimitOrderInfo(fillOrders[2])
+  //   .callAsync({ from: orderData.maker })
+  //   .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
+  // console.log(
+  //   'order 3 status (res2.takerTokenFilledAmount): ',
+  //   res3.takerTokenFilledAmount.toString()
+  // )
+  // console.log('order 3 takerAmount', fillOrders[2].takerAmount.toString())
+  // console.log(
+  //   'order 3 remainingFillableTakerAmount',
+  //   fillOrders[2].remainingFillableTakerAmount.toString()
+  // )
+  // console.log(
+  //   'order 3 takerAmount - filled',
+  //   BigNumber.from(fillOrders[2].takerAmount)
+  //     .sub(BigNumber.from(res3.takerTokenFilledAmount.toString()))
+  //     .toString()
+  // )
+
+  // console.log(res)
   filledOrder = await fillOrderResponse(takerAssetFillAmounts, fillOrders)
   return filledOrder
 }

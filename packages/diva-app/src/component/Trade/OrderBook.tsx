@@ -163,6 +163,7 @@ export default function OrderBook(props: {
         responseBuy = rBuy
       }
     }
+    console.log('responseBuy', responseBuy)
 
     // Keep this for debugging
     // const buyOrdersByMakerAddress = responseBuy.filter((v) =>

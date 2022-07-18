@@ -142,8 +142,27 @@ async function getFillableOrders(
         // If makerAllowance is lower than remainingFillabelMakerAmount, then remainingFillableTakerAmount needs to be reduced
         // e.g., if remainingTakerFillableAmount = 1 and implied remainingTakerFillableAmount = 500 but remainingMakerAllowance = 100
         // then new remainingTakerFillableAmount = 1 * 100 / 500 = 1/5 = 0 -> gets filtered out from the orderbook automatically
+        if (
+          extendedOrder.order.maker ===
+          '0x8836a16db8db1cba0890f0ee97a9926cb47b4101'
+        ) {
+          console.log(
+            'remainingFillableTakerAmount before overwrite',
+            extendedOrder.metaData.remainingFillableTakerAmount
+          )
+        }
+
         extendedOrder.metaData.remainingFillableTakerAmount =
           remainingMakerAllowance.mul(takerAmount).div(makerAmount).toString()
+        if (
+          extendedOrder.order.maker ===
+          '0x8836a16db8db1cba0890f0ee97a9926cb47b4101'
+        ) {
+          console.log(
+            'remainingFillableTakerAmount overwritten',
+            extendedOrder.metaData.remainingFillableTakerAmount
+          )
+        }
       }
 
       // Add to fillable orders

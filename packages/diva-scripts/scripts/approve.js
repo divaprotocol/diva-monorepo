@@ -18,9 +18,9 @@
 
     // Get signers
     const [acc1, acc2, acc3] = await ethers.getSigners();
-    const user = acc1;
+    const user = "0x8836a16db8db1cba0890f0ee97a9926cb47b4101";
 
-    console.log("Approved by: " + user.address)
+    console.log("Approved by: " + user)
     console.log("Approved for: " + exchangeProxyAddress)
 
     // Connect to token to approve
@@ -31,18 +31,18 @@
     allowance = parseUnits(allowance.toString(), decimals)
     
     // Allowance before
-    const allowanceBefore = await erc20.allowance(user.address, exchangeProxyAddress)
+    const allowanceBefore = await erc20.allowance(user, exchangeProxyAddress)
     console.log("Current approved amount (integer): " + allowanceBefore.toString())
     console.log("Current approved amount (decimals): " + formatUnits(allowanceBefore, decimals))
 
     // Set allowance for exchangeProxyAddress
-    const tx = await erc20.connect(user).approve(exchangeProxyAddress, allowance)
-    await tx.wait()
+    // const tx = await erc20.connect(user).approve(exchangeProxyAddress, allowance)
+    // await tx.wait()
 
-    // Print
-    const allowanceAfter = await erc20.allowance(user.address, exchangeProxyAddress)
-    console.log("New approved amount (integer): " + allowanceAfter.toString())
-    console.log("New approved amount (decimals): " + formatUnits(allowanceAfter, decimals))
+    // // Print
+    // const allowanceAfter = await erc20.allowance(user.address, exchangeProxyAddress)
+    // console.log("New approved amount (integer): " + allowanceAfter.toString())
+    // console.log("New approved amount (decimals): " + formatUnits(allowanceAfter, decimals))
  
  }
  
