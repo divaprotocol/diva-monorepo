@@ -222,7 +222,8 @@ export const get0xOpenOrders = async (
 
   const takerTokenDecimals = await takerTokenContract.decimals()
   const makerTokenDecimals = await makerTokenContract.decimals()
-
+  console.log('takerTokenDecimals', takerTokenDecimals)
+  console.log('makerTokenDecimals', makerTokenDecimals)
   const takerTokenUnit = parseUnits('1', takerTokenDecimals)
   const makerTokenUnit = parseUnits('1', makerTokenDecimals)
 
