@@ -47,31 +47,6 @@ const LeftDiv = styled.div`
 const RightDiv = styled.div`
   width: 35%;
 `
-const data1 = [
-  {
-    x: 0.7545000000000001,
-    y: 0,
-  },
-  { x: 0.9, y: 0 },
-
-  { x: 0.97, y: 0.8 },
-
-  { x: 0.97, y: 1 },
-  { x: 1.1155, y: 1 },
-]
-const data2 = [
-  {
-    x: 0.645000000000001,
-    y: 0,
-  },
-  { x: 0.8, y: 0 },
-
-  { x: 0.89, y: 0.7 },
-
-  { x: 0.9, y: 1 },
-  { x: 1.3, y: 1 },
-]
-
 export default function Underlying() {
   const history = useHistory()
   const params: { poolId: string; tokenType: string } = useParams()
@@ -182,6 +157,7 @@ export default function Underlying() {
     setValue(newValue)
   }
 
+  console.log('break even===', breakEven)
   return (
     <Container sx={{ paddingTop: '1em', paddingBottom: '3em' }}>
       <TabContext value={value}>
@@ -216,23 +192,10 @@ export default function Underlying() {
                   w={600}
                   h={336}
                   isLong={OptionParams.IsLong}
-                  breakEven={Number(breakEven).toFixed(2)}
+                  breakEven={breakEven}
                   floor={OptionParams.Floor}
                   cap={OptionParams.Cap}
-                  mouseHover={false}
-                />
-                <TradeChart
-                  data={data}
-                  refAsset={pool.referenceAsset}
-                  payOut={pool.collateralToken.symbol}
-                  currentPrice={currentPrice}
-                  w={600}
-                  h={336}
-                  isLong={OptionParams.IsLong}
-                  breakEven={Number(breakEven).toFixed(2)}
-                  floor={OptionParams.Floor}
-                  cap={OptionParams.Cap}
-                  mouseHover={false}
+                  mouseHover={true}
                 />
                 <Paper>
                   <LeftCompFlexContainer>
