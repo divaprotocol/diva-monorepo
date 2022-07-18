@@ -100,6 +100,7 @@ export default function SellLimit(props: {
       const nbrOptions = parseUnits(value)
       console.log('nbrOptions', nbrOptions.toString())
       if (nbrOptions.gt(0)) {
+        setOrderBtnDisabled(false)
         setNumberOfOptions(nbrOptions)
         if (isApproved === false) {
           // Activate button for approval
@@ -115,12 +116,14 @@ export default function SellLimit(props: {
         }
       } else {
         if (orderBtnDisabled == false) {
+          console.log('aaa')
           setOrderBtnDisabled(true)
         }
       }
     } else {
       setYouReceive(ZERO)
       setNumberOfOptions(ZERO)
+      console.log('bbb')
       setOrderBtnDisabled(true)
     }
   }
@@ -143,7 +146,7 @@ export default function SellLimit(props: {
         // Disable btn if approval is positive & number of options entered
         if (isApproved == true) {
           if (numberOfOptions.gt(0)) {
-            setOrderBtnDisabled(true)
+            setOrderBtnDisabled(false)
           }
         }
       }
@@ -152,7 +155,7 @@ export default function SellLimit(props: {
       setPricePerOption(ZERO)
       if (isApproved == true) {
         if (numberOfOptions.gt(0)) {
-          setOrderBtnDisabled(true)
+          setOrderBtnDisabled(false)
         }
       }
     }
@@ -183,7 +186,8 @@ export default function SellLimit(props: {
         : event.target.value
     )
   }
-
+  console.log(isApproved, 'isApproved')
+  console.log(orderBtnDisabled, 'orderBtnDisabled')
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
@@ -212,9 +216,7 @@ export default function SellLimit(props: {
           setRemainingAllowance(remainingAllowance)
           setAllowance(collateralAllowance)
           setIsApproved(true)
-          if (pricePerOption.lte(0)) {
-            setOrderBtnDisabled(true)
-          }
+
           alert(
             `Allowance for ${toExponentialOrNumber(
               Number(formatUnits(collateralAllowance))
@@ -392,11 +394,13 @@ export default function SellLimit(props: {
           const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance
           setExistingSellLimitOrdersAmountUser(amount)
           setRemainingAllowance(remainingAmount)
+          console.log(formatEther(amount), 'amount')
+          console.log(formatEther(remainingAmount), 'remainingAmount')
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })
       })
     }
-  }, [responseSell])
+  }, [numberOfOptions, responseSell])
 
   useEffect(() => {
     if (allowance.sub(youReceive).gt(0)) {
@@ -491,7 +495,13 @@ export default function SellLimit(props: {
         )
       )
     }
-  }, [option, pricePerOption, usdPrice, existingSellLimitOrdersAmountUser])
+  }, [
+    allowance,
+    option,
+    pricePerOption,
+    usdPrice,
+    existingSellLimitOrdersAmountUser,
+  ])
 
   return (
     <div>
@@ -622,15 +632,6 @@ export default function SellLimit(props: {
                 <MenuItem value={60 * 24}>
                   <LabelGrayStyle>1 Day</LabelGrayStyle>
                 </MenuItem>
-                {/* <MenuItem value={60 * 24 * 7}>
-                  <LabelGrayStyle>7 Days</LabelGrayStyle>
-                </MenuItem>
-                <MenuItem value={60 * 24 * 14}>
-                  <LabelGrayStyle>14 Days</LabelGrayStyle>
-                </MenuItem>
-                <MenuItem value={60 * 24 * 30}>
-                  <LabelGrayStyle>1 Month</LabelGrayStyle>
-                </MenuItem> */}
               </Select>
             </FormControl>
           </LimitOrderExpiryDiv>

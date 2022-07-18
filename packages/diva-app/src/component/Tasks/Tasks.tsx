@@ -257,7 +257,6 @@ export const Tasks = (props: any) => {
   )
 
   useEffect(() => {
-    // testnetUser.refetch()
     if (pools != null && testnetUser.data != null && userAddress != null) {
       setCalcRows(
         rows.map((v) => {
