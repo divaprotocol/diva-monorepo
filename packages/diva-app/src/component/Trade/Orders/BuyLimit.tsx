@@ -85,7 +85,6 @@ export default function BuyLimit(props: {
   ] = React.useState(ZERO)
 
   const [isApproved, setIsApproved] = React.useState(false)
-  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
   const [collateralBalance, setCollateralBalance] = React.useState(ZERO)
@@ -102,16 +101,10 @@ export default function BuyLimit(props: {
       if (pricePerOption.gt(0) && nbrOptions.gt(0)) {
         const youPay = pricePerOption.mul(nbrOptions).div(positionTokenUnit)
         setYouPay(youPay)
-        setOrderBtnDisabled(false)
-      } else {
-        // Disable button if only one pricePerOption or nbrOptions were entered as
-        // the product of both is what the user has to approve
-        setOrderBtnDisabled(true)
       }
     } else {
       setYouPay(ZERO)
       setNumberOfOptions(ZERO)
-      setOrderBtnDisabled(true)
     }
   }
 
@@ -124,14 +117,10 @@ export default function BuyLimit(props: {
           .mul(pricePerOption)
           .div(positionTokenUnit)
         setYouPay(youPay)
-        setOrderBtnDisabled(false)
-      } else {
-        setOrderBtnDisabled(true)
       }
     } else {
       setYouPay(ZERO)
       setPricePerOption(ZERO)
-      setOrderBtnDisabled(true)
     }
   }
 
@@ -142,7 +131,6 @@ export default function BuyLimit(props: {
     setNumberOfOptions(ZERO)
     setPricePerOption(ZERO)
     setYouPay(ZERO)
-    setOrderBtnDisabled(true)
 
     const allowance = await makerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
@@ -352,26 +340,18 @@ export default function BuyLimit(props: {
         // Use values returned from getCollateralInWallet to initialize variables
         setCollateralBalance(val.balance)
         setAllowance(val.allowance)
-        val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
         // Get the user's (maker) existing Buy Limit orders which block some of the user's allowance
         getTotalBuyLimitOrderAmountUser(userAddress).then((amount) => {
           const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance
           setExistingBuyLimitOrdersAmountUser(amount)
           setRemainingAllowance(remainingAmount)
-          remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })
       })
     }
   }, [responseBuy])
 
   useEffect(() => {
-    if (allowance.sub(youPay).gt(0)) {
-      setIsApproved(false)
-    }
-    if (allowance.sub(youPay).lte(0)) {
-      setIsApproved(true)
-    }
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
@@ -465,7 +445,18 @@ export default function BuyLimit(props: {
     usdPrice,
     existingBuyLimitOrdersAmountUser,
   ])
-  console.log('isApproved', isApproved)
+
+  useEffect(() => {
+    if (remainingAllowance.sub(youPay).lte(0)) {
+      setIsApproved(false)
+    } else {
+      setIsApproved(true)
+    }
+  }, [remainingAllowance, youPay])
+
+  const orderBtnDisabled = !isApproved || youPay.lte(0)
+  const approveBtnDisabled = isApproved || youPay.lte(0)
+
   return (
     <div>
       <form onSubmit={(event) => handleOrderSubmit(event)}>
@@ -618,7 +609,7 @@ export default function BuyLimit(props: {
               startIcon={<CheckIcon />}
               type="submit"
               value="Submit"
-              disabled={!isApproved || orderBtnDisabled}
+              disabled={approveBtnDisabled}
             >
               {'Approve'}
             </Button>
@@ -629,7 +620,7 @@ export default function BuyLimit(props: {
               startIcon={<AddIcon />}
               type="submit"
               value="Submit"
-              disabled={isApproved || orderBtnDisabled}
+              disabled={orderBtnDisabled}
             >
               {'Create Order'}
             </Button>
