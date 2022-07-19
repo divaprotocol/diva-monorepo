@@ -9,9 +9,15 @@ import { BigNumber, ethers } from 'ethers'
 import BalanceCheckerABI from '../abi/BalanceCheckerABI.json'
 import ERC20ABI from '../abi/ERC20ABI.json'
 import { parseUnits } from 'ethers/lib/utils'
+
 /**
  * Filter for orders that can actually be filled, i.e. where makers
- * have sufficient allowances
+ * have sufficient allowance AND balance. This filter is required because 0x api
+ * returns all maker orders by default. The problem is that if the balance or the allowance drops below the required
+ * level to fill all maker orders, those orders are no longer mutually fillable
+ * resulting in fill order errors. To prevent this, additional logic has to be implemented where
+ * orders are checked for fillability starting with the best price orders. Non-fillable orders are filtered out and not displayed
+ * in the orderbook.
  * Example of an invalid order:
  * - takerAmount: 100000000000000000 // 0.1 positionTokens
  * - makerAmount: 80000000000000000000 // 80 dUSD
@@ -21,6 +27,8 @@ import { parseUnits } from 'ethers/lib/utils'
  * - makerToken allowance: 30 instead of 800
  * - -> remainingFillableTakerAmount has to be reduced to 30 * takerAmount / makerAmount
  * - -> = 0 in this particular example which would result in this order being filtered out from the orders
+ * Similarly, an invalid order may result from insufficient maker token balance
+ * The BalanceChecker contract's `getMinOfBalancesOrAllowances` function is used to assess the fillability of orders.
  */
 async function getFillableOrders(
   orders,
@@ -31,8 +39,8 @@ async function getFillableOrders(
   makerTokenUnit,
   takerTokenUnit
 ) {
-  // Connect to BalanceChecker contract which implements a function (called allowances)
-  // to obtain multiple allowances with one single call
+  // Connect to BalanceChecker contract which implements the `getMinOfBalancesOrAllowances` which allows to
+  // obtain the minimum of allowance and balance for an array of maker address with one single call
   const contract = new ethers.Contract(
     config[chainId].balanceCheckAddress,
     BalanceCheckerABI,
@@ -47,7 +55,7 @@ async function getFillableOrders(
   // Get iteratable set of maker addresses excluding duplicates
   makers = [...new Set(makers)]
 
-  // Cut maker address array into batches of 400 as BalanceChecker's allowances function
+  // Cut maker address array into batches of 400 as BalanceChecker's `getMinOfBalancesOrAllowances` function
   // cannot consume more than 400-500 as gas limits also applies for read-only calls
   const makersChunks = makers.reduce((resultArray, item, index) => {
     const batchIndex = Math.floor(index / 400)
@@ -71,7 +79,7 @@ async function getFillableOrders(
         const tokens = Array.from({ length: makersBatch.length }).fill(
           tokenAddress
         )
-        // Get allowances
+        // Get minimum of balances and allowances for given batch of maker addresses
         const res: BigNumber[] = await contract.getMinOfBalancesOrAllowances(
           makersBatch,
           tokens,
@@ -81,7 +89,7 @@ async function getFillableOrders(
           (obj, key, index) => ({ ...obj, [key]: res[index] }),
           {}
         )
-        // Add entries to maker => allowance mapping
+        // Add entries to makerMinOfBalancesOrAllowances mapping
         makerMinOfBalancesOrAllowances = Object.assign(
           makerMinOfBalancesOrAllowances,
           response
@@ -111,19 +119,21 @@ async function getFillableOrders(
       .div(makerAmount) // in taker token decimals
 
     // Add to extendedOrder object
+    // TODO Consider using those ratios in the trade related code rather than calculating the expected price over and over again
     extendedOrder.order.ratioMakerAmountToTakerAmount =
       ratioMakerAmountToTakerAmount.toString()
     extendedOrder.order.ratioTakerAmountToMakerAmount =
       ratioTakerAmountToMakerAmount.toString()
 
-    // Calculate remainingFillableMakerAmount based using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
+    // Calculate remainingFillableMakerAmount using remainingFillableTakerAmount, makerAmount and takerAmount information received from 0x api
+    // This new variable is compared to the maker's maker token balance and allowance to assess fillability.
     const remainingFillableMakerAmount = makerAmount
       .mul(BigNumber.from(order.metaData.remainingFillableTakerAmount))
       .div(takerAmount)
 
-    // Get maker allowance and include it as a new field in order metaData
-    // Note that remainingMakerMinOfBalancesOrAllowances is the minimum of full makerAllowance or balance for the first (best) order
-    // and then decreases for the following orders as the remainingFillableMakerAmount gets deducted
+    // Get minimum of maker's maker token balance and allowance and include it as a new field in order metaData.
+    // Note that remainingMakerMinOfBalancesOrAllowances is the minimum of full makerAllowance and balance for the first (best) order
+    // and then decreases for the following orders as the remainingFillableMakerAmount gets reduced.
     const remainingMakerMinOfBalancesOrAllowances =
       makerMinOfBalancesOrAllowances[extendedOrder.order.maker]
 
@@ -132,8 +142,8 @@ async function getFillableOrders(
       remainingMakerMinOfBalancesOrAllowances.toString()
 
     if (remainingMakerMinOfBalancesOrAllowances.gt(0)) {
-      // remainingFillableMakerAmount is the minimum of remainingMakerMinOfBalancesOrAllowances and remainingFillableMakerAmount implied by remainingFillableTakerAmount
-      // if remainingMakerMinOfBalancesOrAllowances < remainingFillableMakerAmount, then remainingFillableTakerAmount needs to be reduced as well
+      // remainingFillableMakerAmount is the minimum of remainingMakerMinOfBalancesOrAllowances and remainingFillableMakerAmount implied by remainingFillableTakerAmount.
+      // If remainingMakerMinOfBalancesOrAllowances < remainingFillableMakerAmount, then remainingFillableTakerAmount needs to be reduced as well.
       if (
         remainingFillableMakerAmount.lte(
           remainingMakerMinOfBalancesOrAllowances
@@ -157,13 +167,12 @@ async function getFillableOrders(
       // Add to fillable orders
       fillableOrders.push(extendedOrder)
 
-      // Update the makerMinOfBalancesOrAllowances mapping to reflect the remainingAllowance after
-      // deducting remainingFillableMakerAmount
+      // Update the makerMinOfBalancesOrAllowances mapping to reflect the remainingMakerMinOfBalancesOrAllowances after
+      // reducing remainingFillableMakerAmount
       makerMinOfBalancesOrAllowances[order.order.maker] =
         remainingMakerMinOfBalancesOrAllowances.sub(
           BigNumber.from(extendedOrder.metaData.remainingFillableMakerAmount)
         )
-      // TODO Consider adding the expected price here
     }
   })
 
