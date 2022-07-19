@@ -66,19 +66,16 @@ async function getFillableOrders(
     makersChunks.map(async (makersBatch) => {
       try {
         let response: any = {}
-        // Prepare address inputs for allowances function (two arrays, both same length as maker addresses array
-        // populated with exchange contract address and position token address, respectively)
-        const addresses = Array.from({ length: makersBatch.length }).fill(
-          exchangeProxy
-        )
+        // Prepare tokens argument for getMinOfBalancesOrAllowances function (array with the same length as maker addresses array
+        // populated with position token address)
         const tokens = Array.from({ length: makersBatch.length }).fill(
           tokenAddress
         )
         // Get allowances
-        const res: BigNumber[] = await contract.allowances(
+        const res: BigNumber[] = await contract.getMinOfBalancesOrAllowances(
           makersBatch,
-          addresses,
-          tokens
+          tokens,
+          exchangeProxy
         )
         response = makersBatch.reduce(
           (obj, key, index) => ({ ...obj, [key]: res[index] }),

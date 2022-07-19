@@ -103,7 +103,8 @@ export const buyMarketOrder = async (orderData) => {
       }
     }
   })
-
+  console.log('takerAssetFillAmounts', takerAssetFillAmounts)
+  console.log('fillOrders', fillOrders)
   filledOrder = await fillOrderResponse(takerAssetFillAmounts, fillOrders)
   return filledOrder
 }
