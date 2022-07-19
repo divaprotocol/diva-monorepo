@@ -85,7 +85,6 @@ export default function SellLimit(props: {
   ] = React.useState(ZERO)
 
   const [isApproved, setIsApproved] = React.useState(false)
-  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
   const [optionBalance, setOptionBalance] = React.useState(ZERO)
@@ -98,33 +97,22 @@ export default function SellLimit(props: {
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseUnits(value)
-      console.log('nbrOptions', nbrOptions.toString())
       if (nbrOptions.gt(0)) {
-        setOrderBtnDisabled(false)
         setNumberOfOptions(nbrOptions)
         if (isApproved === false) {
           // Activate button for approval
-          setOrderBtnDisabled(false)
         } else {
           if (pricePerOption.gt(0)) {
             const youReceive = pricePerOption
               .mul(numberOfOptions)
               .div(positionTokenUnit)
             setYouReceive(youReceive)
-            setOrderBtnDisabled(false)
           }
-        }
-      } else {
-        if (orderBtnDisabled == false) {
-          console.log('aaa')
-          setOrderBtnDisabled(true)
         }
       }
     } else {
       setYouReceive(ZERO)
       setNumberOfOptions(ZERO)
-      console.log('bbb')
-      setOrderBtnDisabled(true)
     }
   }
 
@@ -138,26 +126,15 @@ export default function SellLimit(props: {
             .mul(numberOfOptions)
             .div(positionTokenUnit)
           setYouReceive(youReceive)
-          setOrderBtnDisabled(false)
         }
       } else {
         // In case invalid/empty value pricePerOption
         setPricePerOption(ZERO)
         // Disable btn if approval is positive & number of options entered
-        if (isApproved == true) {
-          if (numberOfOptions.gt(0)) {
-            setOrderBtnDisabled(false)
-          }
-        }
       }
     } else {
       setYouReceive(ZERO)
       setPricePerOption(ZERO)
-      if (isApproved == true) {
-        if (numberOfOptions.gt(0)) {
-          setOrderBtnDisabled(false)
-        }
-      }
     }
   }
 
@@ -167,7 +144,6 @@ export default function SellLimit(props: {
     )
     setNumberOfOptions(ZERO)
     setPricePerOption(ZERO)
-    setOrderBtnDisabled(true)
 
     const allowance = await makerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
@@ -186,8 +162,6 @@ export default function SellLimit(props: {
         : event.target.value
     )
   }
-  console.log(isApproved, 'isApproved')
-  console.log(orderBtnDisabled, 'orderBtnDisabled')
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
@@ -382,11 +356,14 @@ export default function SellLimit(props: {
   }
 
   useEffect(() => {
+    console.log({ userAddress })
     if (userAddress != null) {
-      getOptionsInWallet(userAddress).then(async (val) => {
+      console.log('fetch options in wallet')
+      getOptionsInWallet(userAddress).then((val) => {
         // Use values returned from getOptionsInWallet to initialize variables
         setOptionBalance(val.balance)
         setAllowance(val.allowance)
+        console.log('getOptionsInWallet', val.allowance, val.allowance.lte(0))
         val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
         // Get the user's (maker) existing Sell Limit orders which block some of the user's allowance
@@ -400,15 +377,12 @@ export default function SellLimit(props: {
         })
       })
     }
-  }, [numberOfOptions, responseSell])
+  }, [responseSell])
 
   useEffect(() => {
-    if (allowance.sub(youReceive).gt(0)) {
-      setIsApproved(false)
-    }
-    if (allowance.sub(youReceive).lte(0)) {
-      setIsApproved(true)
-    }
+    // if (allowance.sub(youReceive).lte(0)) {
+    //   setIsApproved(true)
+    // }
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
@@ -502,6 +476,19 @@ export default function SellLimit(props: {
     usdPrice,
     existingSellLimitOrdersAmountUser,
   ])
+
+  useEffect(() => {
+    if (remainingAllowance.sub(numberOfOptions).lte(0)) {
+      setIsApproved(false)
+    } else {
+      setIsApproved(true)
+    }
+  }, [remainingAllowance, numberOfOptions])
+
+  const _orderBtnDisabled =
+    !numberOfOptions.gt(0) || !pricePerOption.gt(0) || !isApproved
+
+  const _approveBtnDisabled = !numberOfOptions.gt(0) || isApproved
 
   return (
     <div>
@@ -646,7 +633,7 @@ export default function SellLimit(props: {
               startIcon={<CheckIcon />}
               type="submit"
               value="Submit"
-              disabled={!isApproved || orderBtnDisabled}
+              disabled={_approveBtnDisabled}
             >
               {'Approve'}
             </Button>
@@ -657,7 +644,7 @@ export default function SellLimit(props: {
               startIcon={<AddIcon />}
               type="submit"
               value="Submit"
-              disabled={isApproved || orderBtnDisabled}
+              disabled={_orderBtnDisabled}
             >
               {'Create Order'}
             </Button>
