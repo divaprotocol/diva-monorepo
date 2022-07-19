@@ -4,7 +4,6 @@ import {
   Tooltip,
   Typography,
   useTheme,
-  Paper,
   Stack,
   Button,
   ButtonProps,
@@ -204,6 +203,9 @@ const PoolCard = ({ row }: Props) => {
         h={220}
         isLong={IsLong}
         breakEven={breakEvenOptionPrice}
+        currentPrice={usdPrice}
+        floor={row.Floor}
+        cap={row.Cap}
       />
       <Stack
         sx={{
@@ -301,7 +303,7 @@ const PoolCard = ({ row }: Props) => {
         >
           <Stack>
             <div>BUY</div>
-            <div>0.81</div>
+            <div>-</div>
           </Stack>
         </BuyAndSellButton>
         <BuyAndSellButton
@@ -311,7 +313,7 @@ const PoolCard = ({ row }: Props) => {
         >
           <Stack>
             <div>SELL</div>
-            <div>0.81</div>
+            <div>-</div>
           </Stack>
         </BuyAndSellButton>
       </Stack>
@@ -331,7 +333,7 @@ const PoolCard = ({ row }: Props) => {
               color: '#3393E0',
             }}
           >
-            1.23x
+            -
           </Typography>
         </Box>
         <Box>
@@ -344,7 +346,7 @@ const PoolCard = ({ row }: Props) => {
               color: '#3393E0',
             }}
           >
-            1.23x
+            -
           </Typography>
         </Box>
       </Stack>

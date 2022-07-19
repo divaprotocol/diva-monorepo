@@ -117,7 +117,6 @@ export const ConnectionProvider = ({ children }) => {
         provider: new providers.Web3Provider(provider),
       }))
     )
-    console.log('context state ', JSON.stringify(state))
     if (connected) connect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

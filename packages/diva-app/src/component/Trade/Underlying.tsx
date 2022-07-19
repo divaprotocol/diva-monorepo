@@ -33,6 +33,7 @@ import {
   selectChainId,
   selectPrice,
   selectPools,
+  selectUnderlyingPrice,
 } from '../../Redux/appSlice'
 import { formatUnits, parseEther, formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
@@ -89,6 +90,9 @@ export default function Underlying() {
   }, [chainId, dispatch, params.poolId])
 
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
+  const currentPrice = useAppSelector(
+    selectUnderlyingPrice(pool?.referenceAsset)
+  )
 
   useEffect(() => {
     if (pool?.referenceAsset != null)
@@ -207,10 +211,14 @@ export default function Underlying() {
                     data={data}
                     refAsset={pool.referenceAsset}
                     payOut={pool.collateralToken.symbol}
+                    currentPrice={currentPrice}
                     w={380}
                     h={220}
                     isLong={OptionParams.IsLong}
-                    breakEven={breakEvenOptionPrice}
+                    breakEven={breakEven}
+                    floor={OptionParams.Floor}
+                    cap={OptionParams.Cap}
+                    mouseHover={true}
                   />
                 </Paper>
                 <Typography
