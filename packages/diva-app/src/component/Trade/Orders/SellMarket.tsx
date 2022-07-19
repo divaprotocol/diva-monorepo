@@ -606,6 +606,7 @@ export default function SellMarket(props: {
                 fontSize: 11,
                 alignItems: 'flex-end',
                 marginTop: '2px',
+                paddingRight: 1.4,
               }}
             >
               {toExponentialOrNumber(
@@ -617,6 +618,7 @@ export default function SellMarket(props: {
                 color: 'Gray',
                 fontSize: 11,
                 alignItems: 'flex-end',
+                paddingRight: 1.4,
               }}
             >
               (incl. 1% fee)
