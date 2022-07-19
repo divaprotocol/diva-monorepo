@@ -11,6 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
 import React, { useEffect, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
@@ -147,6 +148,8 @@ const SubmitCell = (props: any) => {
 
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
+  const [loadingValue, setLoadingValue] = useState(false)
+  const [disabledButton, setDisabledButton] = useState(false)
   const handleOpen = () => {
     setOpen(true)
   }
@@ -165,9 +168,14 @@ const SubmitCell = (props: any) => {
 
   return (
     <Container>
-      <Button variant="contained" onClick={handleOpen} disabled={!enabled}>
+      <LoadingButton
+        variant="contained"
+        onClick={handleOpen}
+        disabled={!enabled || disabledButton}
+        loading={loadingValue}
+      >
         Submit value
-      </Button>
+      </LoadingButton>
       <Dialog open={open} onClose={handleClose}>
         <DialogContent>
           <DialogContentText>
@@ -177,15 +185,17 @@ const SubmitCell = (props: any) => {
 
         <DialogActions>
           <TextField
-            defaultValue={textFieldValue}
+            defaultValue=""
             onChange={(e) => {
               setTextFieldValue(e.target.value)
             }}
           />
-          <Button
+          <LoadingButton
             color="primary"
             type="submit"
+            loading={loadingValue}
             onClick={() => {
+              setLoadingValue(textFieldValue ? true : false)
               if (diva != null) {
                 diva
                   .setFinalReferenceValue(
@@ -197,26 +207,32 @@ const SubmitCell = (props: any) => {
                     /**
                      * dispatch action to refetch the pool after action
                      */
-                    tx.wait().then(() => {
-                      setTimeout(() => {
-                        dispatch(
-                          fetchPool({
-                            graphUrl: config[chainId as number].divaSubgraph,
-                            poolId: props.id.split('/')[0],
-                          })
-                        )
-                      }, 10000)
-                    })
+                    tx.wait()
+                      .then(() => {
+                        setLoadingValue(false)
+                        setDisabledButton(true)
+                      })
+                      .then(() => {
+                        setTimeout(() => {
+                          dispatch(
+                            fetchPool({
+                              graphUrl: config[chainId as number].divaSubgraph,
+                              poolId: props.id.split('/')[0],
+                            })
+                          )
+                        }, 10000)
+                      })
                   })
                   .catch((err) => {
                     console.error(err)
+                    setLoadingValue(false)
                   })
               }
               handleClose()
             }}
           >
             Submit value
-          </Button>
+          </LoadingButton>
         </DialogActions>
       </Dialog>
     </Container>
