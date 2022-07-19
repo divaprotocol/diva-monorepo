@@ -58,7 +58,7 @@ async function getFillableOrders(
     return resultArray
   }, [])
 
-  let makerAllowances: {
+  let makerMinOfBalancesOrAllowances: {
     [address: string]: BigNumber
   } = {}
 
@@ -82,7 +82,10 @@ async function getFillableOrders(
           {}
         )
         // Add entries to maker => allowance mapping
-        makerAllowances = Object.assign(makerAllowances, response)
+        makerMinOfBalancesOrAllowances = Object.assign(
+          makerMinOfBalancesOrAllowances,
+          response
+        )
       } catch (error) {
         console.error(error)
       }
@@ -119,38 +122,47 @@ async function getFillableOrders(
       .div(takerAmount)
 
     // Get maker allowance and include it as a new field in order metaData
-    // Note that remainingMakerAllowance is the full makerAllowance for the first (best) order
+    // Note that remainingMakerMinOfBalancesOrAllowances is the minimum of full makerAllowance or balance for the first (best) order
     // and then decreases for the following orders as the remainingFillableMakerAmount gets deducted
-    const remainingMakerAllowance = makerAllowances[extendedOrder.order.maker]
+    const remainingMakerMinOfBalancesOrAllowances =
+      makerMinOfBalancesOrAllowances[extendedOrder.order.maker]
 
-    // Add remainingMakerAllowance field to the order object
-    extendedOrder.metaData.remainingMakerAllowance =
-      remainingMakerAllowance.toString()
+    // Add remainingMakerMinOfBalancesOrAllowances field to the order object
+    extendedOrder.metaData.remainingMakerMinOfBalancesOrAllowances =
+      remainingMakerMinOfBalancesOrAllowances.toString()
 
-    if (remainingMakerAllowance.gt(0)) {
-      // remainingFillableMakerAmount is the minimum of remainingMakerAllowance and remainingFillableMakerAmount implied by remainingFillableTakerAmount
-      // if remainingMakerAllowance < remainingFillableMakerAmount, then remainingFillableTakerAmount needs to be reduced as well
-      if (remainingFillableMakerAmount.lte(remainingMakerAllowance)) {
+    if (remainingMakerMinOfBalancesOrAllowances.gt(0)) {
+      // remainingFillableMakerAmount is the minimum of remainingMakerMinOfBalancesOrAllowances and remainingFillableMakerAmount implied by remainingFillableTakerAmount
+      // if remainingMakerMinOfBalancesOrAllowances < remainingFillableMakerAmount, then remainingFillableTakerAmount needs to be reduced as well
+      if (
+        remainingFillableMakerAmount.lte(
+          remainingMakerMinOfBalancesOrAllowances
+        )
+      ) {
         extendedOrder.metaData.remainingFillableMakerAmount =
           remainingFillableMakerAmount.toString()
       } else {
         extendedOrder.metaData.remainingFillableMakerAmount =
-          remainingMakerAllowance.toString()
+          remainingMakerMinOfBalancesOrAllowances.toString()
         // If makerAllowance is lower than remainingFillabelMakerAmount, then remainingFillableTakerAmount needs to be reduced
-        // e.g., if remainingTakerFillableAmount = 1 and implied remainingTakerFillableAmount = 500 but remainingMakerAllowance = 100
+        // e.g., if remainingTakerFillableAmount = 1 and implied remainingTakerFillableAmount = 500 but remainingMakerMinOfBalancesOrAllowances = 100
         // then new remainingTakerFillableAmount = 1 * 100 / 500 = 1/5 = 0 -> gets filtered out from the orderbook automatically
         extendedOrder.metaData.remainingFillableTakerAmount =
-          remainingMakerAllowance.mul(takerAmount).div(makerAmount).toString()
+          remainingMakerMinOfBalancesOrAllowances
+            .mul(takerAmount)
+            .div(makerAmount)
+            .toString()
       }
 
       // Add to fillable orders
       fillableOrders.push(extendedOrder)
 
-      // Update the makerAllowances mapping to reflect the remainingAllowance after
+      // Update the makerMinOfBalancesOrAllowances mapping to reflect the remainingAllowance after
       // deducting remainingFillableMakerAmount
-      makerAllowances[order.order.maker] = remainingMakerAllowance.sub(
-        BigNumber.from(extendedOrder.metaData.remainingFillableMakerAmount)
-      )
+      makerMinOfBalancesOrAllowances[order.order.maker] =
+        remainingMakerMinOfBalancesOrAllowances.sub(
+          BigNumber.from(extendedOrder.metaData.remainingFillableMakerAmount)
+        )
       // TODO Consider adding the expected price here
     }
   })
