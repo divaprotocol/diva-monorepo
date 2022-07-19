@@ -125,7 +125,7 @@ export default function SellMarket(props: {
           .add(numberOfOptions)
           .mul(parseUnits(feeMultiplier))
           .div(positionTokenUnit)
-          .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
+          .add(BigNumber.from(100)) // Adding a buffer of 100 to make sure that there will be always sufficient approval
 
         // Set allowance. Returns 'undefined' if rejected by user.
         const approveResponse = await props.approve(
@@ -606,6 +606,7 @@ export default function SellMarket(props: {
                 fontSize: 11,
                 alignItems: 'flex-end',
                 marginTop: '2px',
+                paddingRight: 1.4,
               }}
             >
               {toExponentialOrNumber(
@@ -617,6 +618,7 @@ export default function SellMarket(props: {
                 color: 'Gray',
                 fontSize: 11,
                 alignItems: 'flex-end',
+                paddingRight: 1.4,
               }}
             >
               (incl. 1% fee)
