@@ -38,7 +38,7 @@ export const sellMarketOrder = async (orderData) => {
 
   let fillOrders = []
   orders.forEach((order) => {
-    if (nbrOptionsToSell.gt(0)) {
+    if (nbrOptionsToSell.gt(10)) {
       fillOrders.push(order)
 
       // Note: As opposed to BuyMarket.js, the position token amount to sell entered by the user (nbrOptionsToSell) represents the TAKER token amount in
@@ -67,8 +67,6 @@ export const sellMarketOrder = async (orderData) => {
       nbrOptionsToSell = nbrOptionsToSell.sub(takerAssetFillAmount)
     }
   })
-  console.log('fillOrders', fillOrders)
-  console.log('takerAssetFillAmounts', takerAssetFillAmounts)
   filledOrder = await fillOrderResponse(takerAssetFillAmounts, fillOrders)
   return filledOrder
 }
