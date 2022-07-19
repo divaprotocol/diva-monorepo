@@ -111,7 +111,7 @@ export function TradeHistoryTab() {
 
   useEffect(() => {
     dispatch(fetchPositionTokens({ page }))
-  }, [dispatch])
+  }, [dispatch, page])
 
   const orderFills = useQuery<OrderFill[]>('orderFills', async () => {
     if (userAddress != null) {
@@ -273,6 +273,7 @@ export function TradeHistoryTab() {
     !pools,
     !collateralTokens,
   ])
+
   const rows: GridRowModel[] =
     history.length != 0
       ? history.reduce((acc, order) => {
@@ -292,6 +293,7 @@ export function TradeHistoryTab() {
           ]
         }, [])
       : []
+
   return (
     <Stack
       direction="row"

@@ -40,7 +40,7 @@ export function MyOrders() {
   })
   useEffect(() => {
     dispatch(fetchPositionTokens({ page }))
-  }, [dispatch])
+  }, [dispatch, page])
   const classes = useStyles()
   const trimPools = pools.map((pool) => {
     return {
