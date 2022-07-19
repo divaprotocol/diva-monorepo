@@ -82,10 +82,6 @@ export const buyMarketOrder = async (orderData) => {
         .div(collateralTokenUnit)
 
       if (impliedTakerAssetAmount.gt(10)) {
-        impliedTakerAssetAmount = impliedTakerAssetAmount.sub(
-          BigNumber.from(10)
-        )
-
         let takerAssetFillAmount
         let nbrOptionsFilled
 
@@ -100,7 +96,11 @@ export const buyMarketOrder = async (orderData) => {
             .mul(positionTokenUnit)
             .div(expectedRate) // result has 18 decimals
         }
-        takerAssetFillAmounts.push(takerAssetFillAmount)
+        takerAssetFillAmounts.push(
+          BigNumber.from(takerAssetFillAmount)
+            .sub(BigNumber.from(10))
+            .toString()
+        )
         nbrOptionsToBuy = nbrOptionsToBuy.sub(nbrOptionsFilled) // When nbrOptionsToBuy turns zero, it will not add any new orders to fillOrders array
       }
     }
