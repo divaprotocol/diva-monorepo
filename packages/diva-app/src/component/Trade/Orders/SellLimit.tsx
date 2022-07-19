@@ -356,14 +356,11 @@ export default function SellLimit(props: {
   }
 
   useEffect(() => {
-    console.log({ userAddress })
     if (userAddress != null) {
-      console.log('fetch options in wallet')
       getOptionsInWallet(userAddress).then((val) => {
         // Use values returned from getOptionsInWallet to initialize variables
         setOptionBalance(val.balance)
         setAllowance(val.allowance)
-        console.log('getOptionsInWallet', val.allowance, val.allowance.lte(0))
         val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
         // Get the user's (maker) existing Sell Limit orders which block some of the user's allowance
@@ -371,8 +368,6 @@ export default function SellLimit(props: {
           const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance
           setExistingSellLimitOrdersAmountUser(amount)
           setRemainingAllowance(remainingAmount)
-          console.log(formatEther(amount), 'amount')
-          console.log(formatEther(remainingAmount), 'remainingAmount')
           remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })
       })
@@ -380,9 +375,6 @@ export default function SellLimit(props: {
   }, [responseSell])
 
   useEffect(() => {
-    // if (allowance.sub(youReceive).lte(0)) {
-    //   setIsApproved(true)
-    // }
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
