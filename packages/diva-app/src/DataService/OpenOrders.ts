@@ -241,8 +241,6 @@ export const get0xOpenOrders = async (
 
   const takerTokenDecimals = await takerTokenContract.decimals()
   const makerTokenDecimals = await makerTokenContract.decimals()
-  console.log('takerTokenDecimals', takerTokenDecimals)
-  console.log('makerTokenDecimals', makerTokenDecimals)
   const takerTokenUnit = parseUnits('1', takerTokenDecimals)
   const makerTokenUnit = parseUnits('1', makerTokenDecimals)
 
@@ -307,25 +305,26 @@ export const get0xOpenOrders = async (
     [address: string]: boolean | undefined
   } = {}
 
-  const ress = []
-  // Filter out orders where remainingFillableTakerAmount < takerAmount for the second time for a given maker
-  filteredOrders.forEach((order) => {
-    const x = makersCountLowerFillableTakerAmount[order.order.maker]
-    console.log('x', x)
-    if (x == null) {
-      ress.push(order)
-      if (
-        BigNumber.from(order.metaData.remainingFillableTakerAmount).lt(
-          BigNumber.from(order.order.takerAmount)
-        )
-      ) {
-        makersCountLowerFillableTakerAmount[order.order.maker] = true
-      }
-    }
-  })
+  // Problem: if partially filled, then also remaioningFillableTakerAmount < takerAmount
+  // const ress = []
+  // // Filter out orders where remainingFillableTakerAmount < takerAmount for the second time for a given maker
+  // filteredOrders.forEach((order) => {
+  //   const x = makersCountLowerFillableTakerAmount[order.order.maker]
+  //   console.log('x', x)
+  //   if (x == null) {
+  //     ress.push(order)
+  //     if (
+  //       BigNumber.from(order.metaData.remainingFillableTakerAmount).lt(
+  //         BigNumber.from(order.order.takerAmount)
+  //       )
+  //     ) {
+  //       makersCountLowerFillableTakerAmount[order.order.maker] = true
+  //     }
+  //   }
+  // })
 
-  // return filteredOrders
-  return ress
+  return filteredOrders
+  // return ress
 }
 
 export const getOrderDetails = (orderHash: string, chainId) => {
