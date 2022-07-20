@@ -46,7 +46,7 @@ const LeftDiv = styled.div`
   width: 60%;
 `
 const RightDiv = styled.div`
-  width: 35%;
+  width: 40%;
 `
 
 export default function Underlying() {

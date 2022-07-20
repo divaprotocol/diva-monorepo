@@ -21,7 +21,7 @@ import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
-import { FormLabel, Stack, Tooltip } from '@mui/material'
+import { Container, FormLabel, Stack, Tooltip } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { selectUserAddress } from '../../../Redux/appSlice'
 import { BigNumber } from 'ethers'
@@ -659,10 +659,11 @@ export default function BuyMarket(props: {
           </RightSideLabel>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft={4} marginBottom={2}>
+        <Container>
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"
+              sx={{ width: '50%' }}
               loading={approveLoading}
               color="primary"
               size="large"
@@ -675,6 +676,7 @@ export default function BuyMarket(props: {
             </LoadingButton>
             <LoadingButton
               variant="contained"
+              sx={{ width: '50%' }}
               loading={fillLoading}
               color="primary"
               size="large"
@@ -686,7 +688,7 @@ export default function BuyMarket(props: {
               {'Fill Order'}
             </LoadingButton>
           </Stack>
-        </Box>
+        </Container>
       </form>
     </div>
   )

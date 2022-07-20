@@ -2,7 +2,7 @@ import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { FormLabel, MenuItem, Stack, Tooltip } from '@mui/material'
+import { Container, FormLabel, MenuItem, Stack, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
@@ -610,13 +610,13 @@ export default function BuyLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft={3} marginBottom={2}>
+        <Container>
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"
+              sx={{ width: '50%' }}
               loading={approveLoading}
               color="primary"
-              size="large"
               startIcon={<CheckIcon />}
               type="submit"
               value="Submit"
@@ -626,9 +626,9 @@ export default function BuyLimit(props: {
             </LoadingButton>
             <LoadingButton
               variant="contained"
+              sx={{ width: '50%' }}
               loading={fillLoading}
               color="primary"
-              size="large"
               startIcon={<AddIcon />}
               type="submit"
               value="Submit"
@@ -637,7 +637,7 @@ export default function BuyLimit(props: {
               {'Create Order'}
             </LoadingButton>
           </Stack>
-        </Box>
+        </Container>
       </form>
     </div>
   )
