@@ -242,7 +242,7 @@ export default function BuyMarket(props: {
                   } else {
                     if (eventData.event === 'LimitOrderFilled') {
                       //wait for 4 secs for 0x to update orders then handle order book display
-                      await new Promise((resolve) => setTimeout(resolve, 4000))
+                      // await new Promise((resolve) => setTimeout(resolve, 4000))
                       await props.handleDisplayOrder()
                       //reset input & you pay fields
                       Array.from(document.querySelectorAll('input')).forEach(
@@ -659,7 +659,7 @@ export default function BuyMarket(props: {
           </RightSideLabel>
         </FormDiv>
         <CreateButtonWrapper />
-        <Container>
+        <Container sx={{ marginBottom: 2 }}>
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"

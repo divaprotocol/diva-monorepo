@@ -268,7 +268,7 @@ export default function BuyLimit(props: {
               if (response.status === 200) {
                 //need to invalidate cache order response since orderbook is updated
                 dispatch(setResponseBuy([]))
-                await new Promise((resolve) => setTimeout(resolve, 2000))
+                // await new Promise((resolve) => setTimeout(resolve, 2000))
                 await props.handleDisplayOrder()
                 setFillLoading(false)
                 handleFormReset()
@@ -610,7 +610,7 @@ export default function BuyLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Container>
+        <Container sx={{ marginBottom: 2 }}>
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"

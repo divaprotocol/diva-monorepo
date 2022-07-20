@@ -286,7 +286,7 @@ export default function SellLimit(props: {
               if (response?.status === 200) {
                 //need to invalidate cache order response since orderbook is updated
                 dispatch(setResponseSell([]))
-                await new Promise((resolve) => setTimeout(resolve, 2000))
+                // await new Promise((resolve) => setTimeout(resolve, 2000))
                 await props.handleDisplayOrder()
                 setFillLoading(false)
                 handleFormReset()
@@ -567,7 +567,7 @@ export default function SellLimit(props: {
           <RightSideLabel>
             <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
-                {params.tokenType.toUpperCase() + ' '}
+                {params.tokenType.toUpperCase()}
               </FormLabel>
               <FormLabel>
                 {toExponentialOrNumber(Number(formatUnits(optionBalance)))}
@@ -625,7 +625,7 @@ export default function SellLimit(props: {
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Container>
+        <Container sx={{ marginBottom: 2 }}>
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"
