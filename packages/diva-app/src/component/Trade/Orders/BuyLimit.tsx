@@ -41,6 +41,7 @@ import {
   calcBreakEven,
 } from '../../../Util/calcPayoffPerToken'
 import { setResponseBuy } from '../../../Redux/TradeOption'
+import { LoadingButton } from '@mui/lab'
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigNumber.from(0)
 
@@ -85,6 +86,8 @@ export default function BuyLimit(props: {
   ] = React.useState(ZERO)
 
   const [isApproved, setIsApproved] = React.useState(false)
+  const [approveLoading, setApproveLoading] = React.useState(false)
+  const [fillLoading, setFillLoading] = React.useState(false)
   const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
   const [collateralBalance, setCollateralBalance] = React.useState(ZERO)
@@ -155,7 +158,7 @@ export default function BuyLimit(props: {
     event.preventDefault()
     if (!isApproved) {
       // Approved amount is 0 ...
-
+      setApproveLoading(true)
       if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals (<= 18)).
         const amountToApprove = allowance.add(youPay).add(BigNumber.from(100))
@@ -177,6 +180,7 @@ export default function BuyLimit(props: {
           setRemainingAllowance(remainingAllowance)
           setAllowance(collateralAllowance)
           setIsApproved(true)
+          setApproveLoading(false)
           alert(
             `Allowance for ${toExponentialOrNumber(
               Number(formatUnits(collateralAllowance, decimals))
@@ -186,7 +190,7 @@ export default function BuyLimit(props: {
       }
     } else {
       // Approved amount is > 0 ...
-
+      setFillLoading(true)
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
 
@@ -213,7 +217,7 @@ export default function BuyLimit(props: {
               const amountToApprove = additionalAllowance
                 .add(allowance)
                 .add(BigNumber.from(100))
-
+              setApproveLoading(true)
               // Set allowance. Returns 'undefined' if rejected by user.
               const approveResponse = await props.approve(
                 amountToApprove,
@@ -223,6 +227,7 @@ export default function BuyLimit(props: {
               )
 
               if (approveResponse !== 'undefined') {
+                setApproveLoading(false)
                 const newAllowance = BigNumber.from(approveResponse)
                 const remainingAllowance = newAllowance.sub(
                   existingBuyLimitOrdersAmountUser
@@ -239,6 +244,7 @@ export default function BuyLimit(props: {
                 )
               }
             } else {
+              setApproveLoading(false)
               console.log('Additional approval rejected by user.')
             }
           }
@@ -256,6 +262,7 @@ export default function BuyLimit(props: {
             chainId: props.chainId,
             exchangeProxy: exchangeProxy,
           }
+          setFillLoading(true)
           buylimitOrder(orderData)
             .then(async (response) => {
               if (response.status === 200) {
@@ -263,14 +270,17 @@ export default function BuyLimit(props: {
                 dispatch(setResponseBuy([]))
                 await new Promise((resolve) => setTimeout(resolve, 2000))
                 await props.handleDisplayOrder()
+                setFillLoading(false)
                 handleFormReset()
               }
             })
             .catch(function (error) {
+              setFillLoading(false)
               console.error('Error' + error)
             })
         }
       } else {
+        setFillLoading(false)
         alert(`No ${option.collateralToken.symbol} tokens available to buy.`)
       }
     }
@@ -488,8 +498,8 @@ export default function BuyLimit(props: {
               color: 'Gray',
               fontSize: 11,
               paddingTop: 2,
-              paddingRight: 1.5,
-              width: '60px',
+              marginRight: 1.5,
+              width: '80px',
             }}
           >
             {option.collateralToken.symbol +
@@ -498,7 +508,7 @@ export default function BuyLimit(props: {
               ' '}
           </FormLabel>
           <FormInput
-            width={'37%'}
+            width={'40%'}
             type="text"
             onChange={(event) => handlePricePerOption(event.target.value)}
           />
@@ -602,8 +612,9 @@ export default function BuyLimit(props: {
         <CreateButtonWrapper />
         <Box marginLeft={3} marginBottom={2}>
           <Stack direction={'row'} spacing={1}>
-            <Button
+            <LoadingButton
               variant="contained"
+              loading={approveLoading}
               color="primary"
               size="large"
               startIcon={<CheckIcon />}
@@ -612,9 +623,10 @@ export default function BuyLimit(props: {
               disabled={approveBtnDisabled}
             >
               {'Approve'}
-            </Button>
-            <Button
+            </LoadingButton>
+            <LoadingButton
               variant="contained"
+              loading={fillLoading}
               color="primary"
               size="large"
               startIcon={<AddIcon />}
@@ -623,7 +635,7 @@ export default function BuyLimit(props: {
               disabled={orderBtnDisabled}
             >
               {'Create Order'}
-            </Button>
+            </LoadingButton>
           </Stack>
         </Box>
       </form>

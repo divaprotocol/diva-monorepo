@@ -37,6 +37,7 @@ import {
   calcBreakEven,
 } from '../../../Util/calcPayoffPerToken'
 import CheckIcon from '@mui/icons-material/Check'
+import { LoadingButton } from '@mui/lab'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigNumber.from(0)
@@ -84,6 +85,8 @@ export default function SellMarket(props: {
   ] = React.useState(ZERO)
   const [isApproved, setIsApproved] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
+  const [approveLoading, setApproveLoading] = React.useState(false)
+  const [fillLoading, setFillLoading] = React.useState(false)
   const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
   // eslint-disable-next-line prettier/prettier
@@ -115,6 +118,7 @@ export default function SellMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
+      setApproveLoading(true)
       // Approved amount is 0 ...
 
       if (numberOfOptions.gt(0)) {
@@ -145,6 +149,7 @@ export default function SellMarket(props: {
           setRemainingAllowance(remainingAllowance)
           setAllowance(optionAllowance)
           setIsApproved(true)
+          setApproveLoading(false)
           alert(
             `Allowance for ${toExponentialOrNumber(
               Number(formatUnits(optionAllowance))
@@ -154,7 +159,7 @@ export default function SellMarket(props: {
       }
     } else {
       // Approved amount is > 0 ...
-
+      setFillLoading(true)
       if (optionBalance.gt(0)) {
         // User owns position tokens ...
 
@@ -201,7 +206,7 @@ export default function SellMarket(props: {
                 const amountToApprove = additionalAllowance
                   .add(allowance)
                   .add(BigNumber.from(100)) // Buffer to make sure there is always sufficient approval
-
+                setApproveLoading(true)
                 // Set allowance. Returns 'undefined' if rejected by user.
                 const approveResponse = await props.approve(
                   amountToApprove,
@@ -211,6 +216,7 @@ export default function SellMarket(props: {
                 )
 
                 if (approveResponse !== 'undefined') {
+                  setApproveLoading(false)
                   const newAllowance = BigNumber.from(approveResponse)
                   const remainingAllowance = newAllowance.sub(
                     existingSellLimitOrdersAmountUser
@@ -225,6 +231,7 @@ export default function SellMarket(props: {
                   )
                 }
               } else {
+                setApproveLoading(false)
                 console.log('Additional approval rejected by user.')
               }
             }
@@ -243,6 +250,7 @@ export default function SellMarket(props: {
             }
             sellMarketOrder(orderData).then(async (orderFillStatus: any) => {
               let orderFilled = false
+              setFillLoading(true)
               if (!(orderFillStatus == undefined)) {
                 if (!('logs' in orderFillStatus)) {
                   alert('Order could not be filled.')
@@ -263,9 +271,11 @@ export default function SellMarket(props: {
                           (input) => (input.value = '')
                         )
                         setNumberOfOptions(ZERO)
+                        setFillLoading(false)
                         setYouReceive(ZERO)
                         orderFilled = true
                       } else {
+                        setFillLoading(false)
                         alert('Order could not be filled.')
                       }
                     }
@@ -273,6 +283,7 @@ export default function SellMarket(props: {
                 }
               } else {
                 alert('Order could not be filled.')
+                setFillLoading(false)
                 await props.handleDisplayOrder()
                 //reset input & you pay fields
                 Array.from(document.querySelectorAll('input')).forEach(
@@ -282,12 +293,14 @@ export default function SellMarket(props: {
                 setYouReceive(ZERO)
               }
               if (orderFilled) {
+                setFillLoading(false)
                 alert('Order successfully filled.')
               }
             })
           }
         }
       } else {
+        setFillLoading(false)
         alert(
           'No ' + params.tokenType.toUpperCase() + ' tokens available to sell.'
         )
@@ -484,11 +497,11 @@ export default function SellMarket(props: {
   }, [numberOfOptions])
 
   useEffect(() => {
-    if (allowance.sub(youReceive).gt(0)) {
-      setIsApproved(false)
-    }
-    if (allowance.sub(youReceive).lte(0)) {
+    if (remainingAllowance.sub(numberOfOptions).gt(0)) {
       setIsApproved(true)
+    }
+    if (remainingAllowance.sub(numberOfOptions).lte(0)) {
+      setIsApproved(false)
     }
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
@@ -692,28 +705,30 @@ export default function SellMarket(props: {
         <CreateButtonWrapper />
         <Box marginLeft={4} marginBottom={2}>
           <Stack direction={'row'} spacing={1}>
-            <Button
+            <LoadingButton
               variant="contained"
+              loading={approveLoading}
               color="primary"
               size="large"
               startIcon={<CheckIcon />}
               type="submit"
               value="Submit"
-              disabled={!isApproved || orderBtnDisabled}
+              disabled={isApproved || orderBtnDisabled}
             >
               {'Approve'}
-            </Button>
-            <Button
+            </LoadingButton>
+            <LoadingButton
               variant="contained"
+              loading={fillLoading}
               color="primary"
               size="large"
               startIcon={<AddIcon />}
               type="submit"
               value="Submit"
-              disabled={isApproved || orderBtnDisabled}
+              disabled={!isApproved || orderBtnDisabled}
             >
               {'Fill Order'}
-            </Button>
+            </LoadingButton>
           </Stack>
         </Box>
       </form>
