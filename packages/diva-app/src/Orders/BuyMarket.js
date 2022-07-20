@@ -81,7 +81,8 @@ export const buyMarketOrder = async (orderData) => {
         .mul(nbrOptionsToBuy)
         .div(collateralTokenUnit)
 
-      if (impliedTakerAssetAmount.gt(10)) {
+      // TODO: If 0 works, then you can remove this if
+      if (impliedTakerAssetAmount.gt(0)) {
         let takerAssetFillAmount
         let nbrOptionsFilled
 
@@ -97,9 +98,7 @@ export const buyMarketOrder = async (orderData) => {
             .div(expectedRate) // result has 18 decimals
         }
         takerAssetFillAmounts.push(
-          BigNumber.from(takerAssetFillAmount)
-            .sub(BigNumber.from(10))
-            .toString()
+          BigNumber.from(takerAssetFillAmount).sub(BigNumber.from(0)).toString()
         )
         nbrOptionsToBuy = nbrOptionsToBuy.sub(nbrOptionsFilled) // When nbrOptionsToBuy turns zero, it will not add any new orders to fillOrders array
       }

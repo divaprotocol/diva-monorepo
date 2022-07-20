@@ -38,7 +38,7 @@ export const sellMarketOrder = async (orderData) => {
 
   let fillOrders = []
   orders.forEach((order) => {
-    if (nbrOptionsToSell.gt(10)) {
+    if (nbrOptionsToSell.gt(0)) {
       fillOrders.push(order)
 
       // Note: As opposed to BuyMarket.js, the position token amount to sell entered by the user (nbrOptionsToSell) represents the TAKER token amount in
@@ -59,7 +59,7 @@ export const sellMarketOrder = async (orderData) => {
       // be filtered out on data load. An alternative logic could be to fill the missing amount in a second order but this option has not been implemented
       // as the additional gas costs incurred from filling another order might not be worth it.
       takerAssetFillAmounts.push(
-        BigNumber.from(takerAssetFillAmount).sub(BigNumber.from(10)).toString()
+        BigNumber.from(takerAssetFillAmount).sub(BigNumber.from(0)).toString()
       )
 
       // Update the remaining amount to be filled.
