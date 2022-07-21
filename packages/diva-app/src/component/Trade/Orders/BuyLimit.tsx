@@ -19,10 +19,9 @@ import { LimitOrderExpiryDiv } from './UiStyles'
 import { useStyles } from './UiStyles'
 import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
-import CheckIcon from '@mui/icons-material/Check'
 import Web3 from 'web3'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
@@ -41,6 +40,7 @@ import {
   calcBreakEven,
 } from '../../../Util/calcPayoffPerToken'
 import { setResponseBuy } from '../../../Redux/TradeOption'
+import CheckIcon from '@mui/icons-material/Check'
 import { LoadingButton } from '@mui/lab'
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigNumber.from(0)
@@ -157,7 +157,8 @@ export default function BuyLimit(props: {
   const handleOrderSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
-      // Approved amount is 0 ...
+      // Remaining allowance - youPay <= 0
+      console.log('222222222')
       setApproveLoading(true)
       if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals (<= 18)).
@@ -189,8 +190,9 @@ export default function BuyLimit(props: {
         }
       }
     } else {
-      // Approved amount is > 0 ...
+      // Remaining allowance - youPay > 0
       setFillLoading(true)
+      console.log('222222222')
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
 
@@ -464,7 +466,7 @@ export default function BuyLimit(props: {
     }
   }, [remainingAllowance, youPay])
 
-  const orderBtnDisabled = !isApproved || youPay.lte(0)
+  const createBtnDisabled = !isApproved || youPay.lte(0)
   const approveBtnDisabled = isApproved || youPay.lte(0)
 
   return (
@@ -614,7 +616,7 @@ export default function BuyLimit(props: {
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%', height: '50px' }}
+              sx={{ width: '50%', height: '45px' }}
               loading={approveLoading}
               color="primary"
               startIcon={<CheckIcon />}
@@ -626,13 +628,13 @@ export default function BuyLimit(props: {
             </LoadingButton>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%', height: '50px' }}
+              sx={{ width: '50%', height: '45px' }}
               loading={fillLoading}
               color="primary"
               startIcon={<AddIcon />}
               type="submit"
               value="Submit"
-              disabled={orderBtnDisabled}
+              disabled={createBtnDisabled}
             >
               {'Create'}
             </LoadingButton>

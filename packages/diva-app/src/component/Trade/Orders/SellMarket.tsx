@@ -84,9 +84,9 @@ export default function SellMarket(props: {
     setExistingSellLimitOrdersAmountUser,
   ] = React.useState(ZERO)
   const [isApproved, setIsApproved] = React.useState(false)
-  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [approveLoading, setApproveLoading] = React.useState(false)
   const [fillLoading, setFillLoading] = React.useState(false)
+  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
   // eslint-disable-next-line prettier/prettier
@@ -118,8 +118,8 @@ export default function SellMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
+      // Remaining allowance - nbrOptions <= 0
       setApproveLoading(true)
-      // Approved amount is 0 ...
 
       if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for position token assuming 1% fee (expressed as an integer with 18 decimals).
@@ -158,7 +158,7 @@ export default function SellMarket(props: {
         }
       }
     } else {
-      // Approved amount is > 0 ...
+      // Remaining allowance - nbrOptions > 0
       setFillLoading(true)
       if (optionBalance.gt(0)) {
         // User owns position tokens ...
@@ -707,7 +707,7 @@ export default function SellMarket(props: {
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%', height: '50px' }}
+              sx={{ width: '50%', height: '45px' }}
               loading={approveLoading}
               color="primary"
               size="large"
@@ -720,7 +720,7 @@ export default function SellMarket(props: {
             </LoadingButton>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%', height: '50px' }}
+              sx={{ width: '50%', height: '45px' }}
               loading={fillLoading}
               color="primary"
               size="large"

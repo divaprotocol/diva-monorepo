@@ -18,7 +18,7 @@ import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
-import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { Container, FormLabel, Stack, Tooltip } from '@mui/material'
@@ -114,8 +114,8 @@ export default function BuyMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
+      // Remaining allowance - youPay <= 0
       setApproveLoading(true)
-      // Approved amount is 0 ...
 
       if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for collateral token assuming 1% fee (expressed as an integer with collateral token decimals (<= 18)).
@@ -152,7 +152,7 @@ export default function BuyMarket(props: {
         }
       }
     } else {
-      // Approved amount is > 0 ...
+      // Remaining allowance - youPay > 0
       setFillLoading(true)
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
@@ -663,7 +663,7 @@ export default function BuyMarket(props: {
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%', height: '50px' }}
+              sx={{ width: '50%', height: '45px' }}
               loading={approveLoading}
               color="primary"
               size="large"
@@ -676,7 +676,7 @@ export default function BuyMarket(props: {
             </LoadingButton>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%', height: '50px' }}
+              sx={{ width: '50%', height: '45px' }}
               loading={fillLoading}
               color="primary"
               size="large"

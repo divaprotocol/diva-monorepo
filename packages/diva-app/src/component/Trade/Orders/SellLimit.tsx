@@ -168,7 +168,7 @@ export default function SellLimit(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
-      // Approved amount is 0 ...
+      // Remaining allowance - nbrOptions <= 0
       setApproveLoading(true)
       if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for position token (expressed as an integer with 18 decimals).
@@ -202,7 +202,7 @@ export default function SellLimit(props: {
         }
       }
     } else {
-      // Approved amount is > 0 ...
+      // Remaining allowance - nbrOptions > 0
       setFillLoading(true)
       if (optionBalance.gt(0)) {
         // User owns position tokens ...
@@ -486,10 +486,10 @@ export default function SellLimit(props: {
     }
   }, [remainingAllowance, numberOfOptions])
 
-  const _orderBtnDisabled =
+  const createBtnDisabled =
     !numberOfOptions.gt(0) || !pricePerOption.gt(0) || !isApproved
 
-  const _approveBtnDisabled = !numberOfOptions.gt(0) || isApproved
+  const approveBtnDisabled = !numberOfOptions.gt(0) || isApproved
 
   return (
     <div>
@@ -629,25 +629,25 @@ export default function SellLimit(props: {
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"
-              sx={{ minWidth: '50%', height: '50px' }}
+              sx={{ minWidth: '50%', height: '45px' }}
               loading={approveLoading}
               color="primary"
               startIcon={<CheckIcon />}
               type="submit"
               value="Submit"
-              disabled={_approveBtnDisabled}
+              disabled={approveBtnDisabled}
             >
               {'Approve'}
             </LoadingButton>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%', height: '50px' }}
+              sx={{ width: '50%', height: '45px' }}
               loading={fillLoading}
               color="primary"
               startIcon={<AddIcon />}
               type="submit"
               value="Submit"
-              disabled={_orderBtnDisabled}
+              disabled={createBtnDisabled}
             >
               {'Create'}
             </LoadingButton>
