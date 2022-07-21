@@ -8,21 +8,9 @@ import { useWhitelist } from '../../hooks/useWhitelist'
 import CheckCircleSharpIcon from '@mui/icons-material/CheckCircleSharp'
 import WarningAmberSharpIcon from '@mui/icons-material/WarningAmberSharp'
 import { BigNumber } from 'ethers'
+import { useAppSelector } from '../../Redux/hooks'
 const PageDiv = styled.div`
   width: 100%;
-`
-
-const HeaderDiv = styled.div`
-  width: 100%;
-  border-bottom: 1px solid rgba(224, 224, 224, 1);
-  text-align: left;
-  padding-bottom: 15px;
-`
-
-const HeaderLabel = styled.label`
-  font-size: 1rem;
-  font-weight: bold;
-  margin-left: 15px;
 `
 
 const FlexBoxHeader = styled.div`
@@ -79,6 +67,8 @@ export default function OptionDetails({
   const [checkIcon, setCheckIcon] = useState(true)
   const [binary, setBinary] = useState(false)
   const [linear, setLinear] = useState(false)
+  const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
+  const maxYield = useAppSelector((state) => state.stats.maxYield)
   useEffect(() => {
     if (pool.cap === pool.floor) {
       setBinary(true)
@@ -108,9 +98,6 @@ export default function OptionDetails({
   }, [dataSource.dataProviders, pool.dataProvider])
   return (
     <PageDiv>
-      <HeaderDiv>
-        <HeaderLabel>Details</HeaderLabel>
-      </HeaderDiv>
       <FlexDiv>
         <FlexBox>
           <FlexBoxHeader>Expires at</FlexBoxHeader>
@@ -205,6 +192,18 @@ export default function OptionDetails({
                 pool.collateralToken.symbol}
             </FlexBoxData>
           </Tooltip>
+        </FlexBox>
+        <FlexBox>
+          <FlexBoxHeader>Intrinsic Value</FlexBoxHeader>
+          <FlexBoxData>
+            {parseFloat(intrinsicValue).toFixed(2) +
+              ' ' +
+              pool.collateralToken.symbol}
+          </FlexBoxData>
+        </FlexBox>
+        <FlexBox>
+          <FlexBoxHeader>Max yield</FlexBoxHeader>
+          <FlexBoxData>{maxYield}</FlexBoxData>
         </FlexBox>
       </FlexDiv>
     </PageDiv>
