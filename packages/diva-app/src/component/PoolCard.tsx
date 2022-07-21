@@ -62,7 +62,6 @@ const PoolCard = ({ row }: Props) => {
   const history = useHistory()
   const dataSource = useWhitelist()
 
-  const breakEvenOptionPrice = 0
   const IsLong = row.id.split('/')[1] === 'long'
   const decimals = pool.collateralToken.decimals
 
@@ -206,10 +205,10 @@ const PoolCard = ({ row }: Props) => {
         w={380}
         h={220}
         isLong={IsLong}
-        breakEven={breakEvenOptionPrice}
         currentPrice={currentPrice}
         floor={row.Floor}
         cap={row.Cap}
+        showBreakEven={false}
       />
       <Stack
         sx={{
