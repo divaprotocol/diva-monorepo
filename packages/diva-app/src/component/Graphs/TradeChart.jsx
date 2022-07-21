@@ -16,6 +16,7 @@ export default function DIVATradeChart(props) {
       floor,
       cap,
       mouseHover,
+      showBreakEven,
     } = props
     data = data.map(({ x, y }) => ({
       x: parseFloat(x),
@@ -74,7 +75,7 @@ export default function DIVATradeChart(props) {
       .style('fill', '#83BD67')
     svg
       .append('circle')
-      .attr('cx', width * 0.53)
+      .attr('cx', width * 0.58)
       .attr('cy', legendHeight)
       .attr('r', currentPrice ? 6 : 0)
       .style('fill', '#3393E0')
@@ -82,7 +83,7 @@ export default function DIVATradeChart(props) {
       .append('circle')
       .attr('cx', width * 0.8)
       .attr('cy', legendHeight)
-      .attr('r', breakEven != 'n/a' ? 6 : 0)
+      .attr('r', showBreakEven && breakEven != 'n/a' ? 6 : 0)
       .style('fill', '#9747FF')
     svg
       .append('text')
@@ -116,7 +117,7 @@ export default function DIVATradeChart(props) {
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
-      .attr('x', width * 0.55)
+      .attr('x', width * 0.6)
       .attr('y', legendHeight)
       .attr('opacity', currentPrice ? 1 : 0)
       .text('Current price' + ' ' + '(' + currentPrice + ')')
@@ -126,7 +127,7 @@ export default function DIVATradeChart(props) {
       .append('text')
       .attr('x', width * 0.83)
       .attr('y', legendHeight)
-      .attr('opacity', breakEven != 'n/a' ? 1 : 0)
+      .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
       .text('Break Even' + ' ' + '(' + breakEven + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
@@ -212,6 +213,25 @@ export default function DIVATradeChart(props) {
       .style('stroke', '#B8B8B8')
       .style('stroke-width', '0.75px')
     //for Y axis
+    //or breakEven point
+    svg
+      .append('g')
+      .selectAll('dot')
+      .data(data)
+      .enter()
+      .append('circle')
+      .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
+      .filter(function (d) {
+        return (d.x = breakEven ? breakEven : null)
+      })
+      .attr('cx', function (d) {
+        return x(d.x)
+      })
+      .attr('cy', function () {
+        return y(0)
+      })
+      .attr('r', 5)
+      .style('fill', '#9747FF')
     // for current price point
     svg
       .append('g')
@@ -381,7 +401,7 @@ export default function DIVATradeChart(props) {
           pos = null
 
         // eslint-disable-next-line
-        while (true) {
+      while (true) {
           target = Math.floor((beginning + end) / 2)
           pos = l[i].getPointAtLength(target)
           if ((target === end || target === beginning) && pos.x !== m) {
