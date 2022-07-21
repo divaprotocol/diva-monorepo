@@ -158,6 +158,7 @@ export default function Underlying() {
                   floor={OptionParams.Floor}
                   cap={OptionParams.Cap}
                   mouseHover={true}
+                  showBreakEven={true}
                 />
                 <Paper>
                   <LeftCompFlexContainer>

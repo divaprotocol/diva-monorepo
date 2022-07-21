@@ -16,6 +16,7 @@ export default function DIVATradeChart(props) {
       floor,
       cap,
       mouseHover,
+      showBreakEven,
     } = props
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
     const reffeenceAsset = refAsset.slice(0, 8)
@@ -61,7 +62,7 @@ export default function DIVATradeChart(props) {
       .style('fill', '#F7931A')
     svg
       .append('circle')
-      .attr('cx', width * 0.3)
+      .attr('cx', width * 0.25)
       .attr('cy', legendHeight)
       .attr('r', function () {
         return cap == floor ? 0 : 6
@@ -69,15 +70,15 @@ export default function DIVATradeChart(props) {
       .style('fill', '#83BD67')
     svg
       .append('circle')
-      .attr('cx', width * 0.53)
+      .attr('cx', width * 0.42)
       .attr('cy', legendHeight)
       .attr('r', currentPrice ? 6 : 0)
       .style('fill', '#3393E0')
     svg
       .append('circle')
-      .attr('cx', width * 0.8)
+      .attr('cx', width * 0.75)
       .attr('cy', legendHeight)
-      .attr('r', breakEven != 'n/a' ? 6 : 0)
+      .attr('r', showBreakEven && breakEven != 'n/a' ? 6 : 0)
       .style('fill', '#9747FF')
     svg
       .append('text')
@@ -101,7 +102,7 @@ export default function DIVATradeChart(props) {
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
-      .attr('x', width * 0.32)
+      .attr('x', width * 0.27)
       .attr('y', legendHeight)
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
@@ -111,7 +112,7 @@ export default function DIVATradeChart(props) {
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
-      .attr('x', width * 0.55)
+      .attr('x', width * 0.45)
       .attr('y', legendHeight)
       .attr('opacity', currentPrice ? 1 : 0)
       .text('Current price' + ' ' + '(' + currentPrice + ')')
@@ -119,9 +120,9 @@ export default function DIVATradeChart(props) {
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
-      .attr('x', width * 0.83)
+      .attr('x', width * 0.77)
       .attr('y', legendHeight)
-      .attr('opacity', breakEven != 'n/a' ? 1 : 0)
+      .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
       .text('Break Even' + ' ' + '(' + breakEven + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
@@ -207,6 +208,25 @@ export default function DIVATradeChart(props) {
       .style('stroke', '#B8B8B8')
       .style('stroke-width', '0.75px')
     //for Y axis
+    //or breakEven point
+    svg
+      .append('g')
+      .selectAll('dot')
+      .data(data)
+      .enter()
+      .append('circle')
+      .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
+      .filter(function (d) {
+        return (d.x = breakEven ? breakEven : null)
+      })
+      .attr('cx', function (d) {
+        return x(d.x)
+      })
+      .attr('cy', function () {
+        return y(0)
+      })
+      .attr('r', 5)
+      .style('fill', '#9747FF')
     // for current price point
     svg
       .append('g')
