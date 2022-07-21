@@ -155,6 +155,8 @@ export default function SellMarket(props: {
               Number(formatUnits(optionAllowance))
             )} ${params.tokenType.toUpperCase()} tokens successfully set (includes allowance for 1% fee payment).`
           )
+        } else {
+          setApproveLoading(false)
         }
       }
     } else {

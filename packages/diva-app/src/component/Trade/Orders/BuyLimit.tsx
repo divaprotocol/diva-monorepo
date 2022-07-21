@@ -187,6 +187,8 @@ export default function BuyLimit(props: {
               Number(formatUnits(collateralAllowance, decimals))
             )} ${option.collateralToken.symbol} tokens successfully set.`
           )
+        } else {
+          setApproveLoading(false)
         }
       }
     } else {

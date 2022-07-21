@@ -149,6 +149,8 @@ export default function BuyMarket(props: {
               Number(formatUnits(collateralAllowance, decimals))
             )} ${option.collateralToken.symbol} tokens successfully set.`
           )
+        } else {
+          setApproveLoading(false)
         }
       }
     } else {

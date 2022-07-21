@@ -199,6 +199,8 @@ export default function SellLimit(props: {
               Number(formatUnits(collateralAllowance))
             )} ${params.tokenType.toUpperCase()} tokens successfully set.`
           )
+        } else {
+          setApproveLoading(false)
         }
       }
     } else {
