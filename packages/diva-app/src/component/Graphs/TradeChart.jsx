@@ -4,7 +4,7 @@ import * as d3 from 'd3'
 export default function DIVATradeChart(props) {
   const ref = React.useRef()
   useLayoutEffect(() => {
-    const {
+    let {
       data,
       w, //Width
       h, //Height
@@ -17,6 +17,11 @@ export default function DIVATradeChart(props) {
       cap,
       mouseHover,
     } = props
+    data = data.map(({ x, y }) => ({
+      x: parseFloat(x),
+      y: parseFloat(y),
+    }))
+
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
     const reffeenceAsset = refAsset.slice(0, 8)
     // Set the dimensions and margins of the graph
