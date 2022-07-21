@@ -17,7 +17,7 @@ import WarningAmberSharpIcon from '@mui/icons-material/WarningAmberSharp'
 import CheckCircleSharpIcon from '@mui/icons-material/CheckCircleSharp'
 
 import { useWhitelist } from '../hooks/useWhitelist'
-import { selectPool } from '../Redux/appSlice'
+import { selectPool, selectUnderlyingPrice } from '../Redux/appSlice'
 import { useAppSelector } from '../Redux/hooks'
 import { isExpired } from '../Util/Dates'
 import { CoinIconPair } from './CoinIcon'
@@ -111,6 +111,10 @@ const PoolCard = ({ row }: Props) => {
     history.push(`../../${row.id}`)
   }
 
+  const currentPrice = useAppSelector(
+    selectUnderlyingPrice(pool?.referenceAsset)
+  )
+
   return (
     <Box
       sx={{
@@ -203,7 +207,7 @@ const PoolCard = ({ row }: Props) => {
         h={220}
         isLong={IsLong}
         breakEven={breakEvenOptionPrice}
-        currentPrice={usdPrice}
+        currentPrice={currentPrice}
         floor={row.Floor}
         cap={row.Cap}
       />
