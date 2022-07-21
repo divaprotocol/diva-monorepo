@@ -15,22 +15,17 @@ import Tab from '@mui/material/Tab'
 import React, { useState, useEffect } from 'react'
 import { Liquidity } from '../Liquidity/Liquidity'
 import OrdersPanel from './OrdersPanel'
-import Typography from '@mui/material/Typography'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 import { useDispatch } from 'react-redux'
 import {
-  selectBreakEven,
   fetchPool,
   fetchUnderlyingPrice,
-  selectIntrinsicValue,
   selectIsBuy,
-  selectMaxPayout,
   selectPool,
   selectChainId,
-  selectPrice,
   selectUnderlyingPrice,
 } from '../../Redux/appSlice'
 import { formatUnits, parseEther, formatEther } from 'ethers/lib/utils'
@@ -63,11 +58,7 @@ export default function Underlying() {
       ? 'liquidity'
       : 'trade'
   const [value, setValue] = useState(currentTab)
-  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
-  const maxYield = useAppSelector((state) => state.stats.maxYield)
   const breakEven = useAppSelector((state) => state.stats.breakEven)
-  const isBuy = useAppSelector((state) => selectIsBuy(state))
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
   const chainContractAddress =
@@ -98,35 +89,6 @@ export default function Underlying() {
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
   }, [pool, dispatch])
 
-  // const intrinsicValue = useAppSelector((state) =>
-  //   selectIntrinsicValue(state, params.poolId)
-  // )
-  // const intValDisplay =
-  //   intrinsicValue != 'n/a' && intrinsicValue != null
-  //     ? isLong
-  //       ? formatEther(intrinsicValue?.payoffPerLongToken)
-  //       : formatEther(intrinsicValue?.payoffPerShortToken)
-  //     : 'n/a'
-
-  // not open final value
-  // open if less
-  // const confirmed =
-  //   pool.statusFinalReferenceValue === 'Open'
-  //     ? Date.now() - Number(pool.expiryTime) * 1000 >
-  //       6 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000
-  //     : false
-  // const usdPrice = useAppSelector((state) =>
-  //   selectPrice(state, pool?.referenceAsset)
-  // )
-  // const priceValue = usdPrice == null ? '-' : parseEther(usdPrice).toString()
-  // const inflectionValue = confirmed ? pool.inflection : priceValue
-  // const finalValue =
-  //   pool.statusFinalReferenceValue !== 'Open' && pool != null
-  //     ? pool?.finalReferenceValue
-  //     : inflectionValue
-  // const intrinsicValue = useAppSelector((state) =>
-  //   selectIntrinsicValue(state, params?.poolId, finalValue)
-  // )
   if (pool == null) {
     return <LoadingBox />
   }
@@ -209,82 +171,15 @@ export default function Underlying() {
               </Stack>
             </LeftDiv>
             <RightDiv>
-              <Stack spacing={2}>
-                <Paper>
-                  <CreateOrder
-                    option={pool}
-                    tokenAddress={tokenAddress}
-                    exchangeProxy={exchangeProxy}
-                    chainId={chainId}
-                    provider={provider}
-                  />
-                </Paper>
-                <Typography
-                  sx={{
-                    paddingLeft: theme.spacing(3),
-                    mt: theme.spacing(1),
-                  }}
-                >
-                  Buyers statistics:
-                </Typography>
-                <Divider />
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography
-                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    Max yield
-                  </Typography>
-                  {isBuy ? (
-                    <Typography
-                      sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                    >
-                      {maxYield}
-                    </Typography>
-                  ) : (
-                    <Typography
-                      sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                    >
-                      {maxYield}
-                    </Typography>
-                  )}
-                </Stack>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography
-                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    Break-even
-                  </Typography>
-                  <Typography
-                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    {Number(breakEven).toFixed(2)}
-                  </Typography>
-                </Stack>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography
-                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    Intrinsic value per token
-                  </Typography>
-                  <Typography
-                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    {parseFloat(intrinsicValue).toFixed(2)}
-                  </Typography>
-                </Stack>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography
-                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    Max payout per token
-                  </Typography>
-                  <Typography
-                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    {maxPayout}
-                  </Typography>
-                </Stack>
-              </Stack>
+              <Paper>
+                <CreateOrder
+                  option={pool}
+                  tokenAddress={tokenAddress}
+                  exchangeProxy={exchangeProxy}
+                  chainId={chainId}
+                  provider={provider}
+                />
+              </Paper>
             </RightDiv>
           </Stack>
         </TabPanel>
