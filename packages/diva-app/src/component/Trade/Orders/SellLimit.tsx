@@ -538,7 +538,7 @@ export default function SellLimit(props: {
               ' '}
           </FormLabel>
           <FormInput
-            width={'40%'}
+            width={'36.5%'}
             type="text"
             onChange={(event) => handlePricePerOption(event.target.value)}
           />
@@ -629,8 +629,8 @@ export default function SellLimit(props: {
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"
+              sx={{ minWidth: '50%', height: '50px' }}
               loading={approveLoading}
-              sx={{ minWidth: '50%' }}
               color="primary"
               startIcon={<CheckIcon />}
               type="submit"
@@ -641,7 +641,7 @@ export default function SellLimit(props: {
             </LoadingButton>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%' }}
+              sx={{ width: '50%', height: '50px' }}
               loading={fillLoading}
               color="primary"
               startIcon={<AddIcon />}
@@ -649,7 +649,7 @@ export default function SellLimit(props: {
               value="Submit"
               disabled={_orderBtnDisabled}
             >
-              {'Create Order'}
+              {'Create'}
             </LoadingButton>
           </Stack>
         </Container>

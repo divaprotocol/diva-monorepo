@@ -663,7 +663,7 @@ export default function BuyMarket(props: {
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%' }}
+              sx={{ width: '50%', height: '50px' }}
               loading={approveLoading}
               color="primary"
               size="large"
@@ -676,7 +676,7 @@ export default function BuyMarket(props: {
             </LoadingButton>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%' }}
+              sx={{ width: '50%', height: '50px' }}
               loading={fillLoading}
               color="primary"
               size="large"
@@ -685,7 +685,7 @@ export default function BuyMarket(props: {
               value="Submit"
               disabled={!isApproved || orderBtnDisabled}
             >
-              {'Fill Order'}
+              {'Fill'}
             </LoadingButton>
           </Stack>
         </Container>

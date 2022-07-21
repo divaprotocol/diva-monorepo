@@ -508,7 +508,7 @@ export default function BuyLimit(props: {
               ' '}
           </FormLabel>
           <FormInput
-            width={'40%'}
+            width={'36.5%'}
             type="text"
             onChange={(event) => handlePricePerOption(event.target.value)}
           />
@@ -614,7 +614,7 @@ export default function BuyLimit(props: {
           <Stack direction={'row'} spacing={1}>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%' }}
+              sx={{ width: '50%', height: '50px' }}
               loading={approveLoading}
               color="primary"
               startIcon={<CheckIcon />}
@@ -626,7 +626,7 @@ export default function BuyLimit(props: {
             </LoadingButton>
             <LoadingButton
               variant="contained"
-              sx={{ width: '50%' }}
+              sx={{ width: '50%', height: '50px' }}
               loading={fillLoading}
               color="primary"
               startIcon={<AddIcon />}
@@ -634,7 +634,7 @@ export default function BuyLimit(props: {
               value="Submit"
               disabled={orderBtnDisabled}
             >
-              {'Create Order'}
+              {'Create'}
             </LoadingButton>
           </Stack>
         </Container>
