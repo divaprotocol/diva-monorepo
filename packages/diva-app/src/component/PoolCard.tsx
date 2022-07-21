@@ -63,7 +63,7 @@ const PoolCard = ({ row }: Props) => {
   const dataSource = useWhitelist()
 
   const breakEvenOptionPrice = 0
-  const IsLong = row.id.split('/')[2] === 'long'
+  const IsLong = row.id.split('/')[1] === 'long'
   const decimals = pool.collateralToken.decimals
 
   useEffect(() => {
