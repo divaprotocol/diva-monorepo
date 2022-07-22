@@ -63,7 +63,6 @@ export const sellLimitOrder = async (orderData) => {
       alert('Order successfully created')
     } else {
       const body = await resp.json()
-      console.error(body)
       alert(
         `ERROR(status code ${resp.status}): ${JSON.stringify(
           body,
