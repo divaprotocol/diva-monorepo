@@ -134,10 +134,7 @@ const SubmitButton = (props: any) => {
                       diva
                         .redeemPositionToken(props.row.address.id, bal)
                         .then((tx: any) => {
-                          tx.wait().then(() => {
-                            setLoadingValue(false)
-                            setDisabledButton(true)
-                          })
+                          tx.wait()
                         })
                         .then((tx) => {
                           /**
@@ -151,10 +148,12 @@ const SubmitButton = (props: any) => {
                                 poolId: props.id.split('/')[0],
                               })
                             )
+                            setLoadingValue(false)
                           })
                         })
                         .catch((err) => {
                           console.error(err)
+                          setLoadingValue(false)
                         })
                     })
                   })
@@ -179,7 +178,6 @@ const SubmitButton = (props: any) => {
                       setDisabledButton(true)
                     })
                   })
-
                   .catch((err) => {
                     console.error(err)
                     setLoadingValue(false)
@@ -187,11 +185,13 @@ const SubmitButton = (props: any) => {
               })
               .catch((err) => {
                 console.error(err)
+                setLoadingValue(false)
               })
           }
         })
         .catch((err) => {
           console.error(err)
+          setLoadingValue(false)
         })
     } else {
       token
@@ -212,6 +212,7 @@ const SubmitButton = (props: any) => {
         })
         .catch((err) => {
           console.error(err)
+          setLoadingValue(false)
         })
     }
   }
@@ -309,21 +310,17 @@ const SubmitButton = (props: any) => {
                       /**
                        * dispatch action to refetch the pool after action
                        */
-                      tx.wait()
-                        .then(() => {
-                          setTimeout(() => {
-                            dispatch(
-                              fetchPool({
-                                graphUrl:
-                                  config[chainId as number].divaSubgraph,
-                                poolId: props.id.split('/')[0],
-                              })
-                            )
-                          }, 10000)
-                        })
-                        .then(() => {
-                          setLoadingValue(false)
-                        })
+                      tx.wait().then(() => {
+                        setTimeout(() => {
+                          dispatch(
+                            fetchPool({
+                              graphUrl: config[chainId as number].divaSubgraph,
+                              poolId: props.id.split('/')[0],
+                            })
+                          )
+                        }, 10000)
+                        setLoadingValue(false)
+                      })
                     })
                     .catch((err) => {
                       console.error(err)

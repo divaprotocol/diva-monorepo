@@ -150,7 +150,7 @@ const SubmitCell = (props: any) => {
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
   const [loadingValue, setLoadingValue] = useState(false)
-  const [disabledButton, setDisabledButton] = useState(false)
+  // const [disabledButton, setDisabledButton] = useState(false)
   const handleOpen = () => {
     setOpen(true)
   }
@@ -159,20 +159,26 @@ const SubmitCell = (props: any) => {
     setOpen(false)
   }
   const expiryTime = new Date(props.row.Expiry)
+  const statusTimestamp = props.row.StatusTimestamp * 1000
   const now = new Date()
+  const relevantTime =
+    statusTimestamp < expiryTime.getTime()
+      ? expiryTime.getTime()
+      : statusTimestamp
   const enabled =
-    (expiryTime.getTime() <= now.getTime() &&
+    (relevantTime <= now.getTime() &&
       props.row.Status.toLowerCase() === 'open' &&
-      expiryTime.getTime() + (24 * 60 - 5) * 60 * 1000 > now.getTime()) ||
+      relevantTime + (24 * 60 - 5) * 60 * 1000 > now.getTime()) ||
     (props.row.Status === 'Challenged' &&
-      expiryTime.getTime() + (48 * 60 - 5) * 60 * 1000 > now.getTime())
+      relevantTime + (48 * 60 - 5) * 60 * 1000 > now.getTime())
 
   return (
     <Container>
       <LoadingButton
         variant="contained"
         onClick={handleOpen}
-        disabled={!enabled || disabledButton}
+        // disabled={!enabled || disabledButton}
+        disabled={!enabled}
         loading={loadingValue}
       >
         Submit value
@@ -208,21 +214,17 @@ const SubmitCell = (props: any) => {
                     /**
                      * dispatch action to refetch the pool after action
                      */
-                    tx.wait()
-                      .then(() => {
+                    tx.wait().then(() => {
+                      setTimeout(() => {
+                        dispatch(
+                          fetchPools({
+                            page: 0,
+                            dataProvider: userAddress,
+                          })
+                        )
                         setLoadingValue(false)
-                        setDisabledButton(true)
-                      })
-                      .then(() => {
-                        setTimeout(() => {
-                          dispatch(
-                            fetchPools({
-                              page: 0,
-                              dataProvider: userAddress,
-                            })
-                          )
-                        }, 2000)
-                      })
+                      }, 10000)
+                    })
                   })
                   .catch((err) => {
                     console.error(err)

@@ -111,7 +111,7 @@ export const useCreatePoolFormik = () => {
     validate: async (values) => {
       const errors: Errors = {}
 
-      const threshold = 300000
+      const threshold = 30000
 
       const collateralBalance =
         values.collateralBalanceLong + values.collateralBalanceShort
