@@ -1,20 +1,39 @@
-import smtplib, ssl
+import smtplib
+import ssl
 import config.config as config
 import pandas as pd
-from datetime import datetime  as dt
+from datetime import datetime as dt
 
 ON = True
 
-def message_craft(df):
+
+def message_craft_new_pool(df):
     message = "Subject: Diva - New Pools"
     message += "\n"
     message += "\n"
     message += "New Pool created notification \n"
-    for key,i in df.iterrows():
-         print(i)
-         message += "New Pool {}, created at {}, set to expire at {}".format(i['id'], dt.fromtimestamp(int(i['createdAt'])), dt.fromtimestamp(int(i['expiryTime'])) )
-         message += "\n"
+    for key, i in df.iterrows():
+        print(i)
+        message += "New Pool {}, created at {}, set to expire at {}".format(
+            i['id'], dt.fromtimestamp(int(i['createdAt'])), dt.fromtimestamp(int(i['expiryTime'])))
+        message += "\n"
     return message
+
+
+def message_craft_pool_expiry(df):
+    message = "Subject: Diva - Pool Expiry"
+    message += "\n"
+    message += "\n"
+    message += "Pool Expirty notification \n"
+    for key, i in df.iterrows():
+        print(i)
+        print("now")
+        print(dt.now())
+        message += "New Pool {}, Expires in {} hours, set to expire at {}".format(
+            i['id'], int((int(i['expiryTime']) - dt.now().timestamp())/(60*60)), dt.fromtimestamp(int(i['expiryTime'])))
+        message += "\n"
+    return message
+
 
 def sendEmail(ON, df):
     smtp_server = "smtp.gmail.com"
@@ -25,23 +44,23 @@ def sendEmail(ON, df):
     #receiver_email = "wladimir.weinbender@googlemail.com"
     # Wlad's email googlemail
     # wladimir.weinbender@googlemail.com
-    message = message_craft(df)
+    message = message_craft_pool_expiry(df)
     message1 = """
     Subject: Diva message
     This message is sent from Python.
-     """ 
+     """
     print(message)
     if ON == True:
-    # Create a secure SSL contexßt
+        # Create a secure SSL contexßt
         context = ssl.create_default_context()
 
         # Try to log in to server and send email
         try:
-            server = smtplib.SMTP(smtp_server,port)
+            server = smtplib.SMTP(smtp_server, port)
             # Below commands are for secure sending of emails
-            server.ehlo() # Can be omitted
-            server.starttls(context=context) # Secure the connection
-            server.ehlo() # Can be omitted
+            server.ehlo()  # Can be omitted
+            server.starttls(context=context)  # Secure the connection
+            server.ehlo()  # Can be omitted
             server.login(sender_email, password)
             # TODO: Send email here
             server.sendmail(sender_email, receiver_email, message)
@@ -50,4 +69,4 @@ def sendEmail(ON, df):
             # Print any error messages to stdout
             print(e)
         finally:
-            server.quit() 
+            server.quit()
