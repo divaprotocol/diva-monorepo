@@ -291,7 +291,6 @@ export function MyFeeClaims() {
       ]
     }, [] as GridRowModel[])
 
-  const filtered = rows.filter((v) => v.Amount != 0)
   return (
     <Stack
       direction="row"
@@ -318,7 +317,7 @@ export function MyFeeClaims() {
           <PoolsTable
             disableRowClick
             page={page}
-            rows={filtered}
+            rows={rows}
             loading={poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}
