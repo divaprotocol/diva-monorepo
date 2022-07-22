@@ -134,7 +134,7 @@ export const DueInCell = (props: any) => {
 }
 const SubmitCell = (props: any) => {
   const { provider } = useConnectionContext()
-
+  const userAddress = useAppSelector(selectUserAddress)
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
 
@@ -216,12 +216,12 @@ const SubmitCell = (props: any) => {
                       .then(() => {
                         setTimeout(() => {
                           dispatch(
-                            fetchPool({
-                              graphUrl: config[chainId as number].divaSubgraph,
-                              poolId: props.id.split('/')[0],
+                            fetchPools({
+                              page: 0,
+                              dataProvider: userAddress,
                             })
                           )
-                        }, 10000)
+                        }, 2000)
                       })
                   })
                   .catch((err) => {
