@@ -143,20 +143,22 @@ export default function Underlying() {
                   />
                   <OptionDetails pool={pool} isLong={isLong} />
                 </Paper>
-                <TradeChart
-                  data={data}
-                  refAsset={pool.referenceAsset}
-                  payOut={pool.collateralToken.symbol}
-                  currentPrice={currentPrice}
-                  w={600}
-                  h={336}
-                  isLong={OptionParams.IsLong}
-                  breakEven={breakEven}
-                  floor={OptionParams.Floor}
-                  cap={OptionParams.Cap}
-                  mouseHover={true}
-                  showBreakEven={true}
-                />
+                <Paper>
+                  <TradeChart
+                    data={data}
+                    refAsset={pool.referenceAsset}
+                    payOut={pool.collateralToken.symbol}
+                    currentPrice={currentPrice}
+                    w={650}
+                    h={336}
+                    isLong={OptionParams.IsLong}
+                    breakEven={breakEven}
+                    floor={OptionParams.Floor}
+                    cap={OptionParams.Cap}
+                    mouseHover={true}
+                    showBreakEven={true}
+                  />
+                </Paper>
                 <Paper>
                   <LeftCompFlexContainer>
                     <OrdersPanel

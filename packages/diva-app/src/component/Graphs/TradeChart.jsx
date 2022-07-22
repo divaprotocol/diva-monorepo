@@ -128,7 +128,7 @@ export default function DIVATradeChart(props) {
       .attr('x', width * 0.77)
       .attr('y', legendHeight)
       .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
-      .text('Break Even' + ' ' + '(' + breakEven + ')')
+      .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(2) + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 
