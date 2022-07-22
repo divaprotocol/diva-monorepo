@@ -24,6 +24,7 @@ import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
 import {
   fetchPool,
+  fetchPools,
   selectPools,
   selectRequestStatus,
   selectUserAddress,
@@ -133,7 +134,7 @@ export const DueInCell = (props: any) => {
 }
 const SubmitCell = (props: any) => {
   const { provider } = useConnectionContext()
-
+  const userAddress = useAppSelector(selectUserAddress)
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
 
@@ -149,7 +150,6 @@ const SubmitCell = (props: any) => {
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
   const [loadingValue, setLoadingValue] = useState(false)
-  const [disabledButton, setDisabledButton] = useState(false)
   const handleOpen = () => {
     setOpen(true)
   }
@@ -158,20 +158,26 @@ const SubmitCell = (props: any) => {
     setOpen(false)
   }
   const expiryTime = new Date(props.row.Expiry)
+  const statusTimestamp = props.row.StatusTimestamp * 1000
   const now = new Date()
+  const relevantTime =
+    statusTimestamp < expiryTime.getTime()
+      ? expiryTime.getTime()
+      : statusTimestamp
   const enabled =
-    (expiryTime.getTime() <= now.getTime() &&
+    (relevantTime <= now.getTime() &&
       props.row.Status.toLowerCase() === 'open' &&
-      expiryTime.getTime() + (24 * 60 - 5) * 60 * 1000 > 0) ||
+      relevantTime + (24 * 60 - 5) * 60 * 1000 > now.getTime()) ||
     (props.row.Status === 'Challenged' &&
-      expiryTime.getTime() + (48 * 60 - 5) * 60 * 1000 > 0)
+      relevantTime + (48 * 60 - 5) * 60 * 1000 > now.getTime())
 
   return (
     <Container>
       <LoadingButton
         variant="contained"
         onClick={handleOpen}
-        disabled={!enabled || disabledButton}
+        // disabled={!enabled || disabledButton}
+        disabled={!enabled}
         loading={loadingValue}
       >
         Submit value
@@ -207,21 +213,17 @@ const SubmitCell = (props: any) => {
                     /**
                      * dispatch action to refetch the pool after action
                      */
-                    tx.wait()
-                      .then(() => {
+                    tx.wait().then(() => {
+                      setTimeout(() => {
+                        dispatch(
+                          fetchPools({
+                            page: 0,
+                            dataProvider: userAddress,
+                          })
+                        )
                         setLoadingValue(false)
-                        setDisabledButton(true)
-                      })
-                      .then(() => {
-                        setTimeout(() => {
-                          dispatch(
-                            fetchPool({
-                              graphUrl: config[chainId as number].divaSubgraph,
-                              poolId: props.id.split('/')[0],
-                            })
-                          )
-                        }, 10000)
-                      })
+                      }, 10000)
+                    })
                   })
                   .catch((err) => {
                     console.error(err)
@@ -317,9 +319,20 @@ const columns: GridColDef[] = [
 export function MyDataFeeds() {
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
-
+  const dispatch = useDispatch()
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+
+  useEffect(() => {
+    if (userAddress != null) {
+      dispatch(
+        fetchPools({
+          page,
+          dataProvider: userAddress,
+        })
+      )
+    }
+  }, [dispatch, page, userAddress])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,

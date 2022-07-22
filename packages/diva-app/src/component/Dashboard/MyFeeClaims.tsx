@@ -27,11 +27,15 @@ import {
   fetchFeeRecipients,
   selectFeeRecipients,
   selectRequestStatus,
+  selectUserAddress,
 } from '../../Redux/appSlice'
+import { useDispatch } from 'react-redux'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 
 const TransferFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+  const dispatch = useDispatch()
   const [decimal, setDecimal] = useState(18)
   const chainId = provider?.network?.chainId
   const token = new ethers.Contract(
@@ -107,7 +111,14 @@ const TransferFeesCell = (props: any) => {
                     )
                     .then((tx) => {
                       tx.wait().then(() => {
-                        setLoadingValue(false)
+                        setTimeout(() => {
+                          dispatch(
+                            fetchFeeRecipients({
+                              address: userAddress,
+                            })
+                          )
+                          setLoadingValue(false)
+                        }, 10000)
                       })
                     })
                     .catch((err) => {
@@ -129,7 +140,8 @@ const TransferFeesCell = (props: any) => {
 
 const ClaimFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
-
+  const userAddress = useAppSelector(selectUserAddress)
+  const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
   const [loadingValue, setLoadingValue] = useState(false)
 
@@ -155,7 +167,14 @@ const ClaimFeesCell = (props: any) => {
             .claimFees(props.row.Address)
             .then((tx) => {
               tx.wait().then(() => {
-                setLoadingValue(false)
+                setTimeout(() => {
+                  dispatch(
+                    fetchFeeRecipients({
+                      address: userAddress,
+                    })
+                  )
+                  setLoadingValue(false)
+                }, 10000)
               })
             })
 
@@ -272,7 +291,6 @@ export function MyFeeClaims() {
       ]
     }, [] as GridRowModel[])
 
-  const filtered = rows.filter((v) => v.Amount != 0)
   return (
     <Stack
       direction="row"
@@ -299,7 +317,7 @@ export function MyFeeClaims() {
           <PoolsTable
             disableRowClick
             page={page}
-            rows={filtered}
+            rows={rows}
             loading={poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}

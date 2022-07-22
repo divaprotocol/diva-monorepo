@@ -208,7 +208,7 @@ export const queryFeeRecipients = (address: string) => gql`
   {
     feeRecipients(where: { id: "${address}" }) {
       id
-      collateralTokens {
+      collateralTokens(where: {amount_gt: 0}) {
         amount
         collateralToken {
           id
