@@ -24,6 +24,7 @@ import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
 import {
   fetchPool,
+  fetchPools,
   selectPools,
   selectRequestStatus,
   selectUserAddress,
@@ -317,9 +318,20 @@ const columns: GridColDef[] = [
 export function MyDataFeeds() {
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
-
+  const dispatch = useDispatch()
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+
+  useEffect(() => {
+    if (userAddress != null) {
+      dispatch(
+        fetchPools({
+          page,
+          dataProvider: userAddress,
+        })
+      )
+    }
+  }, [dispatch, page, userAddress])
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,
