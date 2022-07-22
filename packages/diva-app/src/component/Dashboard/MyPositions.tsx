@@ -134,7 +134,10 @@ const SubmitButton = (props: any) => {
                       diva
                         .redeemPositionToken(props.row.address.id, bal)
                         .then((tx: any) => {
-                          tx.wait()
+                          tx.wait().then(() => {
+                            setLoadingValue(false)
+                            setDisabledButton(true)
+                          })
                         })
                         .then((tx) => {
                           /**
@@ -148,12 +151,10 @@ const SubmitButton = (props: any) => {
                                 poolId: props.id.split('/')[0],
                               })
                             )
-                            setLoadingValue(false)
                           })
                         })
                         .catch((err) => {
                           console.error(err)
-                          setLoadingValue(false)
                         })
                     })
                   })
