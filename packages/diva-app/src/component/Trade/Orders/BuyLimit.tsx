@@ -158,7 +158,6 @@ export default function BuyLimit(props: {
     event.preventDefault()
     if (!isApproved) {
       // Remaining allowance - youPay <= 0
-      console.log('222222222')
       setApproveLoading(true)
       if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals (<= 18)).
@@ -194,7 +193,6 @@ export default function BuyLimit(props: {
     } else {
       // Remaining allowance - youPay > 0
       setFillLoading(true)
-      console.log('222222222')
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
 
