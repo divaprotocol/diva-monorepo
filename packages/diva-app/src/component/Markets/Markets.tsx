@@ -368,6 +368,7 @@ export default function Markets() {
           page={page}
           loading={poolsRequestStatus === 'pending'}
           onPageChange={(page) => setPage(page)}
+          isViewToggle={true}
         />
       </Box>
     </>
