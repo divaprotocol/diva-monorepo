@@ -2,7 +2,7 @@ import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { FormLabel, MenuItem, Stack, Tooltip } from '@mui/material'
+import { Container, FormLabel, MenuItem, Stack, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
@@ -21,7 +21,7 @@ import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
 import Web3 from 'web3'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
@@ -40,6 +40,8 @@ import {
   calcBreakEven,
 } from '../../../Util/calcPayoffPerToken'
 import { setResponseSell } from '../../../Redux/TradeOption'
+import CheckIcon from '@mui/icons-material/Check'
+import { LoadingButton } from '@mui/lab'
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigNumber.from(0)
 
@@ -84,7 +86,8 @@ export default function SellLimit(props: {
   ] = React.useState(ZERO)
 
   const [isApproved, setIsApproved] = React.useState(false)
-  const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
+  const [approveLoading, setApproveLoading] = React.useState(false)
+  const [fillLoading, setFillLoading] = React.useState(false)
   const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
   const [optionBalance, setOptionBalance] = React.useState(ZERO)
@@ -97,30 +100,22 @@ export default function SellLimit(props: {
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseUnits(value)
-      console.log('nbrOptions', nbrOptions.toString())
       if (nbrOptions.gt(0)) {
         setNumberOfOptions(nbrOptions)
         if (isApproved === false) {
           // Activate button for approval
-          setOrderBtnDisabled(false)
         } else {
           if (pricePerOption.gt(0)) {
             const youReceive = pricePerOption
               .mul(numberOfOptions)
               .div(positionTokenUnit)
             setYouReceive(youReceive)
-            setOrderBtnDisabled(false)
           }
-        }
-      } else {
-        if (orderBtnDisabled == false) {
-          setOrderBtnDisabled(true)
         }
       }
     } else {
       setYouReceive(ZERO)
       setNumberOfOptions(ZERO)
-      setOrderBtnDisabled(true)
     }
   }
 
@@ -134,26 +129,15 @@ export default function SellLimit(props: {
             .mul(numberOfOptions)
             .div(positionTokenUnit)
           setYouReceive(youReceive)
-          setOrderBtnDisabled(false)
         }
       } else {
         // In case invalid/empty value pricePerOption
         setPricePerOption(ZERO)
         // Disable btn if approval is positive & number of options entered
-        if (isApproved == true) {
-          if (numberOfOptions.gt(0)) {
-            setOrderBtnDisabled(true)
-          }
-        }
       }
     } else {
       setYouReceive(ZERO)
       setPricePerOption(ZERO)
-      if (isApproved == true) {
-        if (numberOfOptions.gt(0)) {
-          setOrderBtnDisabled(true)
-        }
-      }
     }
   }
 
@@ -163,7 +147,6 @@ export default function SellLimit(props: {
     )
     setNumberOfOptions(ZERO)
     setPricePerOption(ZERO)
-    setOrderBtnDisabled(true)
 
     const allowance = await makerTokenContract.methods
       .allowance(userAddress, exchangeProxy)
@@ -182,12 +165,11 @@ export default function SellLimit(props: {
         : event.target.value
     )
   }
-
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
-      // Approved amount is 0 ...
-
+      // Remaining allowance - nbrOptions <= 0
+      setApproveLoading(true)
       if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for position token (expressed as an integer with 18 decimals).
         const amountToApprove = allowance
@@ -211,19 +193,19 @@ export default function SellLimit(props: {
           setRemainingAllowance(remainingAllowance)
           setAllowance(collateralAllowance)
           setIsApproved(true)
-          if (pricePerOption.lte(0)) {
-            setOrderBtnDisabled(true)
-          }
+          setApproveLoading(false)
           alert(
             `Allowance for ${toExponentialOrNumber(
               Number(formatUnits(collateralAllowance))
             )} ${params.tokenType.toUpperCase()} tokens successfully set.`
           )
+        } else {
+          setApproveLoading(false)
         }
       }
     } else {
-      // Approved amount is > 0 ...
-
+      // Remaining allowance - nbrOptions > 0
+      setFillLoading(true)
       if (optionBalance.gt(0)) {
         // User owns position tokens ...
 
@@ -257,7 +239,7 @@ export default function SellLimit(props: {
               const amountToApprove = additionalAllowance
                 .add(allowance)
                 .add(BigNumber.from(100))
-
+              setApproveLoading(true)
               // Set allowance. Returns 'undefined' if rejected by user.
               const approveResponse = await props.approve(
                 amountToApprove,
@@ -267,6 +249,7 @@ export default function SellLimit(props: {
               )
 
               if (approveResponse !== 'undefined') {
+                setApproveLoading(false)
                 const newAllowance = BigNumber.from(approveResponse)
                 const remainingAllowance = newAllowance.sub(
                   existingSellLimitOrdersAmountUser
@@ -281,6 +264,7 @@ export default function SellLimit(props: {
                 )
               }
             } else {
+              setApproveLoading(false)
               console.log('Additional approval rejected by user.')
             }
           }
@@ -298,21 +282,25 @@ export default function SellLimit(props: {
             chainId: props.chainId,
             exchangeProxy: exchangeProxy,
           }
+          setFillLoading(true)
           sellLimitOrder(orderData)
             .then(async (response) => {
               if (response?.status === 200) {
                 //need to invalidate cache order response since orderbook is updated
                 dispatch(setResponseSell([]))
-                await new Promise((resolve) => setTimeout(resolve, 2000))
+                // await new Promise((resolve) => setTimeout(resolve, 2000))
                 await props.handleDisplayOrder()
+                setFillLoading(false)
                 handleFormReset()
               }
             })
             .catch(function (error) {
+              setFillLoading(false)
               console.error(error)
             })
         }
       } else {
+        setFillLoading(false)
         alert(
           'No ' + params.tokenType.toUpperCase() + ' tokens available to sell.'
         )
@@ -380,7 +368,7 @@ export default function SellLimit(props: {
 
   useEffect(() => {
     if (userAddress != null) {
-      getOptionsInWallet(userAddress).then(async (val) => {
+      getOptionsInWallet(userAddress).then((val) => {
         // Use values returned from getOptionsInWallet to initialize variables
         setOptionBalance(val.balance)
         setAllowance(val.allowance)
@@ -484,7 +472,26 @@ export default function SellLimit(props: {
         )
       )
     }
-  }, [option, pricePerOption, usdPrice, existingSellLimitOrdersAmountUser])
+  }, [
+    allowance,
+    option,
+    pricePerOption,
+    usdPrice,
+    existingSellLimitOrdersAmountUser,
+  ])
+
+  useEffect(() => {
+    if (remainingAllowance.sub(numberOfOptions).lte(0)) {
+      setIsApproved(false)
+    } else {
+      setIsApproved(true)
+    }
+  }, [remainingAllowance, numberOfOptions])
+
+  const createBtnDisabled =
+    !numberOfOptions.gt(0) || !pricePerOption.gt(0) || !isApproved
+
+  const approveBtnDisabled = !numberOfOptions.gt(0) || isApproved
 
   return (
     <div>
@@ -523,8 +530,8 @@ export default function SellLimit(props: {
               color: 'Gray',
               fontSize: 11,
               paddingTop: 2,
-              paddingRight: 1.5,
-              width: '60px',
+              marginRight: 1.5,
+              width: '80px',
             }}
           >
             {option.collateralToken.symbol +
@@ -533,7 +540,7 @@ export default function SellLimit(props: {
               ' '}
           </FormLabel>
           <FormInput
-            width={'37%'}
+            width={'36.5%'}
             type="text"
             onChange={(event) => handlePricePerOption(event.target.value)}
           />
@@ -562,7 +569,7 @@ export default function SellLimit(props: {
           <RightSideLabel>
             <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
-                {params.tokenType.toUpperCase() + ' '}
+                {params.tokenType.toUpperCase()}
               </FormLabel>
               <FormLabel>
                 {toExponentialOrNumber(Number(formatUnits(optionBalance)))}
@@ -615,33 +622,39 @@ export default function SellLimit(props: {
                 <MenuItem value={60 * 24}>
                   <LabelGrayStyle>1 Day</LabelGrayStyle>
                 </MenuItem>
-                {/* <MenuItem value={60 * 24 * 7}>
-                  <LabelGrayStyle>7 Days</LabelGrayStyle>
-                </MenuItem>
-                <MenuItem value={60 * 24 * 14}>
-                  <LabelGrayStyle>14 Days</LabelGrayStyle>
-                </MenuItem>
-                <MenuItem value={60 * 24 * 30}>
-                  <LabelGrayStyle>1 Month</LabelGrayStyle>
-                </MenuItem> */}
               </Select>
             </FormControl>
           </LimitOrderExpiryDiv>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft={isApproved ? 13 : 16} marginBottom={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            startIcon={<AddIcon />}
-            type="submit"
-            value="Submit"
-            disabled={orderBtnDisabled}
-          >
-            {isApproved ? 'Create Order' : 'Approve'}
-          </Button>
-        </Box>
+        <Container sx={{ marginBottom: 2 }}>
+          <Stack direction={'row'} spacing={1}>
+            <LoadingButton
+              variant="contained"
+              sx={{ minWidth: '50%', height: '45px' }}
+              loading={approveLoading}
+              color="primary"
+              startIcon={<CheckIcon />}
+              type="submit"
+              value="Submit"
+              disabled={approveBtnDisabled}
+            >
+              {'Approve'}
+            </LoadingButton>
+            <LoadingButton
+              variant="contained"
+              sx={{ width: '50%', height: '45px' }}
+              loading={fillLoading}
+              color="primary"
+              startIcon={<AddIcon />}
+              type="submit"
+              value="Submit"
+              disabled={createBtnDisabled}
+            >
+              {'Create'}
+            </LoadingButton>
+          </Stack>
+        </Container>
       </form>
     </div>
   )
