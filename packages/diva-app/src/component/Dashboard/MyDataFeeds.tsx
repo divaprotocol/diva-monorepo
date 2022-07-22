@@ -150,7 +150,6 @@ const SubmitCell = (props: any) => {
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
   const [loadingValue, setLoadingValue] = useState(false)
-  // const [disabledButton, setDisabledButton] = useState(false)
   const handleOpen = () => {
     setOpen(true)
   }
