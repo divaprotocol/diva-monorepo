@@ -64,6 +64,7 @@ type Props = {
   onCreatorChanged?: (createdBy: string) => void
   page: number
   rowCount?: number
+  isViewToggle?: boolean
 }
 
 export default function PoolsTable({
@@ -76,6 +77,7 @@ export default function PoolsTable({
   page,
   rowCount,
   onPageChange,
+  isViewToggle,
 }: Props) {
   const history = useHistory()
   const currentAddress = history.location.pathname.split('/')
@@ -248,24 +250,26 @@ export default function PoolsTable({
               labelPlacement="start"
             />
           </Box>
-          <Box
-            sx={{
-              marginLeft: 'auto',
-            }}
-          >
-            <Button
-              onClick={() => setSelectedPoolsView('Table')}
-              color={selectedPoolsView === 'Table' ? 'primary' : 'inherit'}
+          {isViewToggle && (
+            <Box
+              sx={{
+                marginLeft: 'auto',
+              }}
             >
-              <ViewHeadlineIcon />
-            </Button>
-            <Button
-              onClick={() => setSelectedPoolsView('Grid')}
-              color={selectedPoolsView === 'Grid' ? 'primary' : 'inherit'}
-            >
-              <ViewModuleIcon />
-            </Button>
-          </Box>
+              <Button
+                onClick={() => setSelectedPoolsView('Table')}
+                color={selectedPoolsView === 'Table' ? 'primary' : 'inherit'}
+              >
+                <ViewHeadlineIcon />
+              </Button>
+              <Button
+                onClick={() => setSelectedPoolsView('Grid')}
+                color={selectedPoolsView === 'Grid' ? 'primary' : 'inherit'}
+              >
+                <ViewModuleIcon />
+              </Button>
+            </Box>
+          )}
         </Toolbar>
       </AppBar>
       {selectedPoolsView === 'Table' ? (
