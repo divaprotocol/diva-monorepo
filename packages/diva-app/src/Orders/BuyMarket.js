@@ -62,7 +62,6 @@ export const buyMarketOrder = async (orderData) => {
       // Expected rate is specific to an an order, hence the implied taker asset amount calcs need to be done for every single order and
       // cannot be put outside the forEach part.
       // Expected rate is expressed as an integer with collateral token decimals of type BigNumber.
-      // TODO: Adjust BuyMarket.tsx for the change to collateral token decimals
       const expectedRate = order.expectedRate
 
       // The position token amount to buy entered by the user (nbrOptionsToBuy) represents the MAKER token amount in
@@ -70,35 +69,42 @@ export const buyMarketOrder = async (orderData) => {
       // conversion to taker token amount via expectedRate is required.
       // Taker asset is the collateral token and impliedTakerAssetAmount is takerFillAmount derived from the users input.
       // Note that a small amount (10) is deducted to ensure that the order can be filled as we experienced issues when trying
-      // to fill an amount equal to or close to remainingFillableTakerAmount. Note that there is not risk of impliedTakerAssetAmount
+      // to fill an amount equal to or close to remainingFillableTakerAmount. Note that there should be no risk of impliedTakerAssetAmount
       // turning negative as orders with remainingFillableTakerAmount <= 100 are filtered out in OpenOrders.tsx.
       // Note that because of this logic, orders will have a non-zero remainingFillableTakerAmount but as this will be <=100, they will
-      // be filtered out on data load. An alternative logic could be to fill the missing amount in a second order but this option has not been implemented
-      // as the additional gas costs incurred from filling another order might not be worth it.
-      const impliedTakerAssetAmount = expectedRate
+      // be filtered out on data load. Nevertheless, an additional check has been introduced to ensure that impliedTakerAssetAmount can never to negative.
+      // Note that instead of deducting 10 from each takerAssetAmount and hence leaving outstanding dust orders on the 0x server, an alternative logic could
+      // be to fill the missing amount in a following order. This option has not been implemented as the additional gas costs incurred from filling another order
+      // might not be worth it.
+
+      let impliedTakerAssetAmount = expectedRate
         .mul(nbrOptionsToBuy)
         .div(collateralTokenUnit)
-        .sub(BigNumber.from(10))
 
-      let takerAssetFillAmount
-      let nbrOptionsFilled
+      if (impliedTakerAssetAmount.gt(10)) {
+        let takerAssetFillAmount
+        let nbrOptionsFilled
 
-      // Add elements to the takerAssetFillAmounts array which will be used as input in batchFillLimitOrders
-      if (impliedTakerAssetAmount.lte(order.remainingFillableTakerAmount)) {
-        takerAssetFillAmount = impliedTakerAssetAmount.toString()
-        nbrOptionsFilled = nbrOptionsToBuy
-      } else {
-        takerAssetFillAmount = order.remainingFillableTakerAmount
-        // Update nbrOptionsFilled and overwrite nbrOptionsToBuy with remaining number of position tokens to fill
-        nbrOptionsFilled = BigNumber.from(takerAssetFillAmount)
-          .mul(positionTokenUnit)
-          .div(expectedRate) // result has 18 decimals
+        // Add elements to the takerAssetFillAmounts array which will be used as input in batchFillLimitOrders
+        if (impliedTakerAssetAmount.lte(order.remainingFillableTakerAmount)) {
+          takerAssetFillAmount = impliedTakerAssetAmount.toString()
+          nbrOptionsFilled = nbrOptionsToBuy
+        } else {
+          takerAssetFillAmount = order.remainingFillableTakerAmount
+          // Update nbrOptionsFilled and overwrite nbrOptionsToBuy with remaining number of position tokens to fill
+          nbrOptionsFilled = BigNumber.from(takerAssetFillAmount)
+            .mul(positionTokenUnit)
+            .div(expectedRate) // result has 18 decimals
+        }
+        takerAssetFillAmounts.push(
+          BigNumber.from(takerAssetFillAmount)
+            .sub(BigNumber.from(10))
+            .toString()
+        )
+        nbrOptionsToBuy = nbrOptionsToBuy.sub(nbrOptionsFilled) // When nbrOptionsToBuy turns zero, it will not add any new orders to fillOrders array
       }
-      takerAssetFillAmounts.push(takerAssetFillAmount)
-      nbrOptionsToBuy = nbrOptionsToBuy.sub(nbrOptionsFilled) // When nbrOptionsToBuy turns zero, it will not add any new orders to fillOrders array
     }
   })
-
   filledOrder = await fillOrderResponse(takerAssetFillAmounts, fillOrders)
   return filledOrder
 }

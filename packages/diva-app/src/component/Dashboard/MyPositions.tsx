@@ -11,6 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
@@ -94,6 +95,8 @@ const AddToMetamask = (props: any) => {
 const SubmitButton = (props: any) => {
   const [open, setOpen] = React.useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
+  const [loadingValue, setLoadingValue] = useState(false)
+  const [disabledButton, setDisabledButton] = useState(false)
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
 
@@ -110,6 +113,7 @@ const SubmitButton = (props: any) => {
   const token =
     provider && new ethers.Contract(props.row.address.id, ERC20, provider)
   const handleRedeem = (e) => {
+    setLoadingValue(true)
     e.stopPropagation()
     if (props.row.Status === 'Confirmed*') {
       diva
@@ -129,6 +133,12 @@ const SubmitButton = (props: any) => {
                     tx.wait().then(() => {
                       diva
                         .redeemPositionToken(props.row.address.id, bal)
+                        .then((tx: any) => {
+                          tx.wait().then(() => {
+                            setLoadingValue(false)
+                            setDisabledButton(true)
+                          })
+                        })
                         .then((tx) => {
                           /**
                            * dispatch action to refetch the pool after action
@@ -150,10 +160,12 @@ const SubmitButton = (props: any) => {
                   })
                   .catch((err) => {
                     console.error(err)
+                    setLoadingValue(false)
                   })
               })
               .catch((err) => {
                 console.error(err)
+                setLoadingValue(false)
               })
           } else {
             token
@@ -161,8 +173,16 @@ const SubmitButton = (props: any) => {
               .then((bal: BigNumber) => {
                 diva
                   .redeemPositionToken(props.row.address.id, bal)
+                  .then((tx: any) => {
+                    tx.wait().then(() => {
+                      setLoadingValue(false)
+                      setDisabledButton(true)
+                    })
+                  })
+
                   .catch((err) => {
                     console.error(err)
+                    setLoadingValue(false)
                   })
               })
               .catch((err) => {
@@ -177,9 +197,18 @@ const SubmitButton = (props: any) => {
       token
         ?.balanceOf(userAddress)
         .then((bal: BigNumber) => {
-          diva.redeemPositionToken(props.row.address.id, bal).catch((err) => {
-            console.error(err)
-          })
+          diva
+            .redeemPositionToken(props.row.address.id, bal)
+            .then((tx: any) => {
+              tx.wait().then(() => {
+                setLoadingValue(false)
+                setDisabledButton(true)
+              })
+            })
+            .catch((err) => {
+              console.error(err)
+              setLoadingValue(false)
+            })
         })
         .catch((err) => {
           console.error(err)
@@ -217,33 +246,38 @@ const SubmitButton = (props: any) => {
   }
 
   const handleClose = () => {
-    setOpen(false)
+    if (loadingValue === false) {
+      setOpen(false)
+    }
   }
 
   if (buttonName === 'Redeem') {
     return (
       <Container>
-        <Button
+        <LoadingButton
           variant="contained"
           color={buttonName === 'Redeem' ? 'success' : 'primary'}
+          disabled={disabledButton}
+          loading={loadingValue}
           onClick={handleRedeem}
         >
           {buttonName}
-        </Button>
+        </LoadingButton>
       </Container>
     )
   } else if (buttonName === 'Challenge') {
     return (
       <Container>
-        <Button
+        <LoadingButton
           variant="contained"
+          loading={loadingValue}
           onClick={(e) => {
             e.stopPropagation()
             handleOpen()
           }}
         >
           Challenge
-        </Button>
+        </LoadingButton>
         <Dialog open={open} onClose={handleClose}>
           <DialogContent>
             <DialogContentText>
@@ -254,15 +288,17 @@ const SubmitButton = (props: any) => {
           <DialogActions>
             <TextField
               autoFocus={true}
-              defaultValue={textFieldValue}
+              defaultValue=""
               onChange={(e) => {
                 setTextFieldValue(e.target.value)
               }}
             />
-            <Button
+            <LoadingButton
               color="primary"
               type="submit"
+              loading={loadingValue}
               onClick={(e) => {
+                setLoadingValue(textFieldValue ? true : false)
                 if (diva != null) {
                   diva
                     .challengeFinalReferenceValue(
@@ -273,26 +309,32 @@ const SubmitButton = (props: any) => {
                       /**
                        * dispatch action to refetch the pool after action
                        */
-                      tx.wait().then(() => {
-                        setTimeout(() => {
-                          dispatch(
-                            fetchPool({
-                              graphUrl: config[chainId as number].divaSubgraph,
-                              poolId: props.id.split('/')[0],
-                            })
-                          )
-                        }, 10000)
-                      })
+                      tx.wait()
+                        .then(() => {
+                          setTimeout(() => {
+                            dispatch(
+                              fetchPool({
+                                graphUrl:
+                                  config[chainId as number].divaSubgraph,
+                                poolId: props.id.split('/')[0],
+                              })
+                            )
+                          }, 10000)
+                        })
+                        .then(() => {
+                          setLoadingValue(false)
+                        })
                     })
                     .catch((err) => {
                       console.error(err)
+                      setLoadingValue(false)
                     })
                 }
                 handleClose()
               }}
             >
               Challenge
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </Dialog>
       </Container>

@@ -18,7 +18,7 @@
 
     // Get signers
     const [acc1, acc2, acc3] = await ethers.getSigners();
-    const user = acc1;
+    const user = acc3;
 
     console.log("Approved by: " + user.address)
     console.log("Approved for: " + exchangeProxyAddress)
@@ -34,6 +34,11 @@
     const allowanceBefore = await erc20.allowance(user.address, exchangeProxyAddress)
     console.log("Current approved amount (integer): " + allowanceBefore.toString())
     console.log("Current approved amount (decimals): " + formatUnits(allowanceBefore, decimals))
+
+    // Balance check (can be useful information if balance < allowance)
+    const balance = await erc20.balanceOf(user.address)
+    console.log("balance of (integer): ", balance.toString())
+    console.log("balance of (decimals): ", formatUnits(balance, decimals))
 
     // Set allowance for exchangeProxyAddress
     const tx = await erc20.connect(user).approve(exchangeProxyAddress, allowance)
