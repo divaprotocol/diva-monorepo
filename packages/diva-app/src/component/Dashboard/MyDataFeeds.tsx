@@ -163,9 +163,9 @@ const SubmitCell = (props: any) => {
   const enabled =
     (expiryTime.getTime() <= now.getTime() &&
       props.row.Status.toLowerCase() === 'open' &&
-      expiryTime.getTime() + (24 * 60 - 5) * 60 * 1000 > 0) ||
+      expiryTime.getTime() + (24 * 60 - 5) * 60 * 1000 > now.getTime()) ||
     (props.row.Status === 'Challenged' &&
-      expiryTime.getTime() + (48 * 60 - 5) * 60 * 1000 > 0)
+      expiryTime.getTime() + (48 * 60 - 5) * 60 * 1000 > now.getTime())
 
   return (
     <Container>
