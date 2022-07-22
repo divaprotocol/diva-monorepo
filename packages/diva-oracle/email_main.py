@@ -11,6 +11,7 @@ from web3 import Web3
 import time
 import config.diva as diva
 from lib.sendEmail import sendEmail
+from lib.sendEmail import message_craft_pool_expiry
 from lib.recorder import *
 from lib.df_utils import extend_DataFrame
 from lib.query import query
@@ -27,14 +28,15 @@ def run(network, w3, contract):
     print('\033[1m' + "Network: {}".format(network) + '\033[0m')
     max_time_away = dt.timedelta(minutes=config.max_time_away)
 
-    resp = run_query(pool_expiry(), network)
+    resp = run_query(pool_expiry(48), network)
     # print(resp)
     df = pd.json_normalize(resp, ['data', 'pools'])
-    print(df)
+    # print(df)
     numberPools = 0
 
     if not df.empty:
-        sendEmail(False, df)
+        message_craft_pool_expiry(df, 8)
+        message_craft_pool_expiry(df, 24, 8)
 
 
 network = config.network

@@ -7,6 +7,10 @@ from datetime import datetime as dt
 ON = True
 
 
+def hour_conversion(hours):
+    return hours*60*60
+
+
 def message_craft_new_pool(df):
     message = "Subject: Diva - New Pools"
     message += "\n"
@@ -20,31 +24,34 @@ def message_craft_new_pool(df):
     return message
 
 
-def message_craft_pool_expiry(df):
+def message_craft_pool_expiry(df, notification_ceiling, notification_floor=0):
     message = "Subject: Diva - Pool Expiry"
     message += "\n"
     message += "\n"
     message += "Pool Expirty notification \n"
     for key, i in df.iterrows():
-        print(i)
-        print("now")
-        print(dt.now())
-        message += "New Pool {}, Expires in {} hours, set to expire at {}".format(
-            i['id'], int((int(i['expiryTime']) - dt.now().timestamp())/(60*60)), dt.fromtimestamp(int(i['expiryTime'])))
-        message += "\n"
-    return message
+        if (dt.now().timestamp() + hour_conversion(notification_floor)) < int(i['expiryTime']) < (dt.now().timestamp() + hour_conversion(notification_ceiling)):
+            print("made it")
+            print(i)
+            print("now")
+            print(dt.now())
+            message += "New Pool {}, Expires in {} hours, set to expire at {}".format(
+                i['id'], int((int(i['expiryTime']) - dt.now().timestamp())/(60*60)), dt.fromtimestamp(int(i['expiryTime'])))
+            message += "\n"
+    sendEmail(False, message)
+    return
 
 
-def sendEmail(ON, df):
+def sendEmail(ON, message):
     smtp_server = "smtp.gmail.com"
     port = 587  # For starttls
     sender_email = config.sender_email
     password = config.pass_code
     receiver_email = "diva.protocol.bot@gmail.com"
-    #receiver_email = "wladimir.weinbender@googlemail.com"
+    # receiver_email = "wladimir.weinbender@googlemail.com"
     # Wlad's email googlemail
     # wladimir.weinbender@googlemail.com
-    message = message_craft_pool_expiry(df)
+    message = message
     message1 = """
     Subject: Diva message
     This message is sent from Python.
@@ -70,3 +77,6 @@ def sendEmail(ON, df):
             print(e)
         finally:
             server.quit()
+    else:
+        print("email notifications set to False; message not sent")
+        # print(message)

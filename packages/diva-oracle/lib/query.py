@@ -2,6 +2,10 @@ from datetime import datetime as dt
 import config.config as config
 
 
+def hour_conversion(hours):
+    return hours*60*60
+
+
 def query(lastId):
     return """
             { 
@@ -36,8 +40,11 @@ def email_query():
                 }
             """ % (config.dataprovider, (int(dt.now().timestamp()) - 30000))
 
+# Notification period in hours
 
-def pool_expiry():
+
+def pool_expiry(Notification_period_ceiling, Notification_period_floor=0):
+    print(hour_conversion(Notification_period_ceiling))
     return """
             { 
                 pools (where: {dataProvider: "%s", expiryTime_gte: "%s", expiryTime_lte: "%s" }) {
@@ -52,4 +59,4 @@ def pool_expiry():
                     createdAt
                   }
                 }
-            """ % (config.dataprovider, (int(dt.now().timestamp())), (int(dt.now().timestamp()) + 300000))
+            """ % (config.dataprovider, (int(dt.now().timestamp()) + hour_conversion(Notification_period_floor)), (int(dt.now().timestamp()) + hour_conversion(Notification_period_ceiling)))
