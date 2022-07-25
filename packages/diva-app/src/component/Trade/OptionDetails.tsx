@@ -70,29 +70,16 @@ export default function OptionDetails({
   const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
   const maxYield = useAppSelector((state) => state.stats.maxYield)
   useEffect(() => {
-    // Calculate gradient. Scaled up to 18 decimals as it's compared with gradientLinear below
-    const gradient = BigNumber.from(pool.collateralBalanceLongInitial)
-      .mul(parseUnits('1', pool.collateralToken.decimals))
-      .mul(parseUnits('1', 18 - pool.collateralToken.decimals))
-      .div(
-        BigNumber.from(pool.collateralBalanceLongInitial).add(
-          BigNumber.from(pool.collateralBalanceShortInitial)
-        )
-      )
-
-    // Hypothetical gradient for a linear payoff to be compared with actual gradient to determine the payoff type
-    let gradientLinear // 18 decimals
-    if (pool.cap !== pool.floor) {
-      gradientLinear = BigNumber.from(pool.inflection)
-        .sub(BigNumber.from(pool.floor))
-        .mul(parseUnits('1'))
-        .div(BigNumber.from(pool.cap).sub(BigNumber.from(pool.floor)))
-    }
-
-    if (pool.cap === pool.floor && pool.floor === pool.inflection) {
+    if (pool.cap === pool.floor) {
       setBinary(true)
       setLinear(false)
-    } else if (gradient.eq(gradientLinear)) {
+    } else if (
+      BigNumber.from(pool.inflection).eq(
+        BigNumber.from(pool.floor)
+          .add(BigNumber.from(pool.cap))
+          .div(BigNumber.from('2'))
+      )
+    ) {
       setBinary(false)
       setLinear(true)
     }

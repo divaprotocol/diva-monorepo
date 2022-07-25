@@ -80,10 +80,6 @@ export default function Underlying() {
   const currentPrice = useAppSelector(
     selectUnderlyingPrice(pool?.referenceAsset)
   )
-
-  const currentPrice = useAppSelector(
-    selectUnderlyingPrice(pool?.referenceAsset)
-  )
   useEffect(() => {
     if (pool?.referenceAsset != null)
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
@@ -151,7 +147,6 @@ export default function Underlying() {
                     data={data}
                     refAsset={pool.referenceAsset}
                     payOut={pool.collateralToken.symbol}
-                    currentPrice={currentPrice}
                     w={650}
                     h={336}
                     isLong={OptionParams.IsLong}
