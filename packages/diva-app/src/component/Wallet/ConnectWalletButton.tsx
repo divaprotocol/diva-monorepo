@@ -21,7 +21,9 @@ export function ConnectWalletButton() {
         type="submit"
         value="Submit"
         sx={{ marginLeft: '10px' }}
-        onClick={() => (modal(), isConnected ? disconnect() : connect())}
+        onClick={() => (
+          modal(), isConnected && userAddress ? disconnect() : connect()
+        )}
       >
         {isConnected && userAddress
           ? getShortenedAddress(userAddress)
