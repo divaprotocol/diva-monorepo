@@ -130,33 +130,35 @@ const SubmitButton = (props: any) => {
                     false
                   )
                   .then((tx) => {
-                    tx.wait().then(() => {
-                      diva
-                        .redeemPositionToken(props.row.address.id, bal)
-                        .then((tx: any) => {
-                          tx.wait().then(() => {
+                    tx.wait()
+                      .then(() => {
+                        diva
+                          .redeemPositionToken(props.row.address.id, bal)
+                          .then((tx: any) => {
+                            tx.wait().then(() => {
+                              /**
+                               * dispatch action to refetch the pool after action
+                               */
+                              setDisabledButton(true)
+                              dispatch(
+                                fetchPool({
+                                  graphUrl:
+                                    config[chainId as number].divaSubgraph,
+                                  poolId: props.id.split('/')[0],
+                                })
+                              )
+                              setLoadingValue(false)
+                            })
+                          })
+                          .catch((err) => {
                             setLoadingValue(false)
-                            setDisabledButton(true)
+                            console.error(err)
                           })
-                        })
-                        .then((tx) => {
-                          /**
-                           * dispatch action to refetch the pool after action
-                           */
-                          tx.wait().then(() => {
-                            dispatch(
-                              fetchPool({
-                                graphUrl:
-                                  config[chainId as number].divaSubgraph,
-                                poolId: props.id.split('/')[0],
-                              })
-                            )
-                          })
-                        })
-                        .catch((err) => {
-                          console.error(err)
-                        })
-                    })
+                      })
+                      .catch((err) => {
+                        console.error(err)
+                        setLoadingValue(false)
+                      })
                   })
                   .catch((err) => {
                     console.error(err)
