@@ -194,7 +194,7 @@ export default function OpenOrders(props: {
         dispatch(setResponseBuy([]))
       }
     }
-  }, [responseBuy, responseSell])
+  }, [responseBuy.length, responseSell.length])
 
   async function cancelOrder(order, chainId) {
     const orderHash = order.orderHash
@@ -264,7 +264,7 @@ export default function OpenOrders(props: {
                         <Typography variant="subtitle1">
                           {order.nbrOptions === 0
                             ? '-'
-                            : order.nbrOptions.toFixed(2)}
+                            : order.nbrOptions.toFixed(4)}
                         </Typography>
                       </Box>
                     </TableCell>

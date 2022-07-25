@@ -239,19 +239,22 @@ export const Tasks = (props: any) => {
   const [points, setPoints] = useState(0)
   const [multiplier, setMultiplier] = useState('1.0')
   let score = 0
-  const testnetUser = useQuery<TestUser>('testnetUser', async () => {
-    const response = request(
-      config[chainId].divaSubgraph,
-      queryTestUser(userAddress)
-    ).then((user) => {
-      if (user.testnetUser != null) {
-        return user.testnetUser
-      } else {
-        return {}
-      }
-    })
-    return response
-  })
+  const testnetUser = useQuery<TestUser>(
+    `testnetUser-${userAddress}`,
+    async () => {
+      const response = request(
+        config[chainId].divaSubgraph,
+        queryTestUser(userAddress)
+      ).then((user) => {
+        if (user.testnetUser != null) {
+          return user.testnetUser
+        } else {
+          return {}
+        }
+      })
+      return response
+    }
+  )
 
   useEffect(() => {
     if (pools != null && testnetUser.data != null && userAddress != null) {
@@ -393,7 +396,7 @@ export const Tasks = (props: any) => {
     if (points === 3000) {
       setMultiplier('1.5')
     }
-  }, [calcRows, multiplier, points === 3000])
+  }, [userAddress, calcRows, multiplier, points === 3000])
   return (
     <Box>
       <Box

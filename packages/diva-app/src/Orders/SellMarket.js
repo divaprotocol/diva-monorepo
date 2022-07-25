@@ -1,6 +1,5 @@
 import { IZeroExContract } from '@0x/contract-wrappers'
-import { parseUnits } from 'ethers/lib/utils'
-import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
+import { BigNumber } from 'ethers'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 
@@ -39,7 +38,7 @@ export const sellMarketOrder = async (orderData) => {
 
   let fillOrders = []
   orders.forEach((order) => {
-    if (nbrOptionsToSell.gt(0)) {
+    if (nbrOptionsToSell.gt(10)) {
       fillOrders.push(order)
 
       // Note: As opposed to BuyMarket.js, the position token amount to sell entered by the user (nbrOptionsToSell) represents the TAKER token amount in
@@ -53,7 +52,15 @@ export const sellMarketOrder = async (orderData) => {
       } else {
         takerAssetFillAmount = order.remainingFillableTakerAmount
       }
-      takerAssetFillAmounts.push(takerAssetFillAmount)
+      // Add the takerAssetFillAmount to the takerAssetFillAmounts array.
+      // Slightly reduce the amount to account for issues experienced when trying to fill an amount equal to or close to remainingFillableTakerAmount.
+      // The offset should not exceed minRemainingFillableTakerAmount in OpenOrders.tsx (currently set to 100).
+      // Note that because of this logic, orders will have a non-zero remainingFillableTakerAmount but as this will be <=100, they will
+      // be filtered out on data load. An alternative logic could be to fill the missing amount in a second order but this option has not been implemented
+      // as the additional gas costs incurred from filling another order might not be worth it.
+      takerAssetFillAmounts.push(
+        BigNumber.from(takerAssetFillAmount).sub(BigNumber.from(10)).toString()
+      )
 
       // Update the remaining amount to be filled.
       // Note that nbrOptionsToSell = 0 if equal to order.remainingFillableTakerAmount. Hence, it won't enter the if statement at the beginning of the forEach part.

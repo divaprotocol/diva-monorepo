@@ -21,7 +21,7 @@ import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
-import { FormLabel, Stack, Tooltip } from '@mui/material'
+import { Container, FormLabel, Stack, Tooltip } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { selectUserAddress } from '../../../Redux/appSlice'
 import { BigNumber } from 'ethers'
@@ -36,6 +36,8 @@ import {
   calcPayoffPerToken,
   calcBreakEven,
 } from '../../../Util/calcPayoffPerToken'
+import CheckIcon from '@mui/icons-material/Check'
+import { LoadingButton } from '@mui/lab'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigNumber.from(0)
@@ -83,6 +85,8 @@ export default function BuyMarket(props: {
     setExistingBuyLimitOrdersAmountUser,
   ] = React.useState(ZERO)
   const [isApproved, setIsApproved] = React.useState(false)
+  const [approveLoading, setApproveLoading] = React.useState(false)
+  const [fillLoading, setFillLoading] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
@@ -110,7 +114,8 @@ export default function BuyMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
-      // Approved amount is 0 ...
+      // Remaining allowance - youPay <= 0
+      setApproveLoading(true)
 
       if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for collateral token assuming 1% fee (expressed as an integer with collateral token decimals (<= 18)).
@@ -119,7 +124,7 @@ export default function BuyMarket(props: {
         // TODO: Exclude orders that have a fee higher than 1% from the orderbook so that users will not get screwed.
         const amountToApprove = allowance
           .add(youPay) // youPay is already including fee, hence no feeMultiplier needed in that case
-          .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
+          .add(BigNumber.from(100)) // Adding a buffer of 100 to make sure that there will be always sufficient approval
 
         // Set allowance. Returns 'undefined' if rejected by user.
         const approveResponse = await props.approve(
@@ -138,16 +143,19 @@ export default function BuyMarket(props: {
           setRemainingAllowance(remainingAllowance)
           setAllowance(collateralAllowance)
           setIsApproved(true)
+          setApproveLoading(false)
           alert(
             `Allowance for ${toExponentialOrNumber(
               Number(formatUnits(collateralAllowance, decimals))
             )} ${option.collateralToken.symbol} tokens successfully set.`
           )
+        } else {
+          setApproveLoading(false)
         }
       }
     } else {
-      // Approved amount is > 0 ...
-
+      // Remaining allowance - youPay > 0
+      setFillLoading(true)
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
 
@@ -178,7 +186,7 @@ export default function BuyMarket(props: {
               const amountToApprove = additionalAllowance
                 .add(allowance)
                 .add(BigNumber.from(100)) // Buffer to ensure that there is always sufficient approval
-
+              setApproveLoading(true)
               // Set allowance. Returns 'undefined' if rejected by user.
               const approveResponse = await props.approve(
                 amountToApprove,
@@ -188,6 +196,7 @@ export default function BuyMarket(props: {
               )
 
               if (approveResponse !== 'undefined') {
+                setApproveLoading(false)
                 const newAllowance = BigNumber.from(approveResponse)
                 const remainingAllowance = newAllowance.sub(
                   existingBuyLimitOrdersAmountUser
@@ -204,6 +213,7 @@ export default function BuyMarket(props: {
                 )
               }
             } else {
+              setApproveLoading(false)
               console.log('Additional approval rejected by user.')
             }
           }
@@ -222,6 +232,7 @@ export default function BuyMarket(props: {
           }
           buyMarketOrder(orderData).then(async (orderFillStatus: any) => {
             let orderFilled = false
+            setFillLoading(true)
             if (!(orderFillStatus === undefined)) {
               if (!('logs' in orderFillStatus)) {
                 alert('Order could not be filled.')
@@ -233,16 +244,18 @@ export default function BuyMarket(props: {
                   } else {
                     if (eventData.event === 'LimitOrderFilled') {
                       //wait for 4 secs for 0x to update orders then handle order book display
-                      await new Promise((resolve) => setTimeout(resolve, 4000))
+                      // await new Promise((resolve) => setTimeout(resolve, 4000))
                       await props.handleDisplayOrder()
                       //reset input & you pay fields
                       Array.from(document.querySelectorAll('input')).forEach(
                         (input) => (input.value = '')
                       )
                       setNumberOfOptions(ZERO)
+                      setFillLoading(false)
                       setYouPay(ZERO)
                       orderFilled = true
                     } else {
+                      setFillLoading(false)
                       alert('Order could not be filled.')
                     }
                   }
@@ -250,6 +263,7 @@ export default function BuyMarket(props: {
               }
             } else {
               alert('Order could not be filled.')
+              setFillLoading(false)
               await props.handleDisplayOrder()
               //reset input & you pay fields
               Array.from(document.querySelectorAll('input')).forEach(
@@ -259,11 +273,13 @@ export default function BuyMarket(props: {
               setYouPay(ZERO)
             }
             if (orderFilled) {
+              setFillLoading(false)
               alert('Order successfully filled.')
             }
           })
         }
       } else {
+        setFillLoading(false)
         alert(`No ${option.collateralToken.symbol} tokens available to buy.`)
       }
     }
@@ -460,6 +476,12 @@ export default function BuyMarket(props: {
   }, [numberOfOptions])
 
   useEffect(() => {
+    if (remainingAllowance.sub(youPay).gt(0)) {
+      setIsApproved(true)
+    }
+    if (remainingAllowance.sub(youPay).lte(0)) {
+      setIsApproved(false)
+    }
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
@@ -559,7 +581,7 @@ export default function BuyMarket(props: {
             sx={{
               color: 'Gray',
               fontSize: 11,
-              paddingTop: 2.5,
+              paddingTop: 2,
               paddingRight: 1.5,
             }}
           >
@@ -585,7 +607,9 @@ export default function BuyMarket(props: {
           <RightSideLabel>
             <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
-                {option.collateralToken.symbol + ' '}
+                {option.collateralToken.symbol +
+                  '/' +
+                  params.tokenType.toUpperCase()}
               </FormLabel>
               <FormLabel>
                 {toExponentialOrNumber(
@@ -637,19 +661,36 @@ export default function BuyMarket(props: {
           </RightSideLabel>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="30%" marginTop="15%" marginBottom={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            startIcon={<AddIcon />}
-            type="submit"
-            value="Submit"
-            disabled={orderBtnDisabled}
-          >
-            {isApproved ? 'Fill Order' : 'Approve'}
-          </Button>
-        </Box>
+        <Container sx={{ marginBottom: 2 }}>
+          <Stack direction={'row'} spacing={1}>
+            <LoadingButton
+              variant="contained"
+              sx={{ width: '50%', height: '45px' }}
+              loading={approveLoading}
+              color="primary"
+              size="large"
+              startIcon={<CheckIcon />}
+              type="submit"
+              value="Submit"
+              disabled={isApproved || orderBtnDisabled}
+            >
+              {'Approve'}
+            </LoadingButton>
+            <LoadingButton
+              variant="contained"
+              sx={{ width: '50%', height: '45px' }}
+              loading={fillLoading}
+              color="primary"
+              size="large"
+              startIcon={<AddIcon />}
+              type="submit"
+              value="Submit"
+              disabled={!isApproved || orderBtnDisabled}
+            >
+              {'Fill'}
+            </LoadingButton>
+          </Stack>
+        </Container>
       </form>
     </div>
   )

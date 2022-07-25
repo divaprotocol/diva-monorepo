@@ -11,6 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
 import React, { useEffect, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
@@ -133,7 +134,7 @@ export const DueInCell = (props: any) => {
 }
 const SubmitCell = (props: any) => {
   const { provider } = useConnectionContext()
-
+  const userAddress = useAppSelector(selectUserAddress)
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
 
@@ -148,6 +149,7 @@ const SubmitCell = (props: any) => {
 
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
+  const [loadingValue, setLoadingValue] = useState(false)
   const handleOpen = () => {
     setOpen(true)
   }
@@ -156,19 +158,30 @@ const SubmitCell = (props: any) => {
     setOpen(false)
   }
   const expiryTime = new Date(props.row.Expiry)
+  const statusTimestamp = props.row.StatusTimestamp * 1000
   const now = new Date()
+  const relevantTime =
+    statusTimestamp < expiryTime.getTime()
+      ? expiryTime.getTime()
+      : statusTimestamp
   const enabled =
-    (expiryTime.getTime() <= now.getTime() &&
+    (relevantTime <= now.getTime() &&
       props.row.Status.toLowerCase() === 'open' &&
-      expiryTime.getTime() + (24 * 60 - 5) * 60 * 1000 > 0) ||
+      relevantTime + (24 * 60 - 5) * 60 * 1000 > now.getTime()) ||
     (props.row.Status === 'Challenged' &&
-      expiryTime.getTime() + (48 * 60 - 5) * 60 * 1000 > 0)
+      relevantTime + (48 * 60 - 5) * 60 * 1000 > now.getTime())
 
   return (
     <Container>
-      <Button variant="contained" onClick={handleOpen} disabled={!enabled}>
+      <LoadingButton
+        variant="contained"
+        onClick={handleOpen}
+        // disabled={!enabled || disabledButton}
+        disabled={!enabled}
+        loading={loadingValue}
+      >
         Submit value
-      </Button>
+      </LoadingButton>
       <Dialog open={open} onClose={handleClose}>
         <DialogContent>
           <DialogContentText>
@@ -178,15 +191,17 @@ const SubmitCell = (props: any) => {
 
         <DialogActions>
           <TextField
-            defaultValue={textFieldValue}
+            defaultValue=""
             onChange={(e) => {
               setTextFieldValue(e.target.value)
             }}
           />
-          <Button
+          <LoadingButton
             color="primary"
             type="submit"
+            loading={loadingValue}
             onClick={() => {
+              setLoadingValue(textFieldValue ? true : false)
               if (diva != null) {
                 diva
                   .setFinalReferenceValue(
@@ -201,23 +216,25 @@ const SubmitCell = (props: any) => {
                     tx.wait().then(() => {
                       setTimeout(() => {
                         dispatch(
-                          fetchPool({
-                            graphUrl: config[chainId as number].divaSubgraph,
-                            poolId: props.id.split('/')[0],
+                          fetchPools({
+                            page: 0,
+                            dataProvider: userAddress,
                           })
                         )
+                        setLoadingValue(false)
                       }, 10000)
                     })
                   })
                   .catch((err) => {
                     console.error(err)
+                    setLoadingValue(false)
                   })
               }
               handleClose()
             }}
           >
             Submit value
-          </Button>
+          </LoadingButton>
         </DialogActions>
       </Dialog>
     </Container>
@@ -302,7 +319,9 @@ const columns: GridColDef[] = [
 export function MyDataFeeds() {
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
-  const dispatch = useAppDispatch()
+  const dispatch = useDispatch()
+  const pools = useAppSelector((state) => selectPools(state))
+  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
 
   useEffect(() => {
     if (userAddress != null) {
@@ -314,9 +333,6 @@ export function MyDataFeeds() {
       )
     }
   }, [dispatch, page, userAddress])
-
-  const pools = useAppSelector((state) => selectPools(state))
-  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,

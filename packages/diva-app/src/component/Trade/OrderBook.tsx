@@ -6,6 +6,7 @@ import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
+import { BigNumber } from 'ethers'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
@@ -15,7 +16,7 @@ import { useAppSelector } from '../../Redux/hooks'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Pool } from '../../lib/queries'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { selectChainId } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 const PageDiv = styled.div`
@@ -23,71 +24,69 @@ const PageDiv = styled.div`
 `
 
 /**
- * Prepare all data to be displayed in the orderbook (price, quantity and expires in)
+ * Prepare the data to be displayed in the orderbook (price, quantity and expires in)
  */
 function mapOrderData(
   records: [],
   option: Pool,
   orderType: number // 0 = BUY, 1 = SELL
 ) {
-  // Get orderbook (before filtering out 0 quantities)
-  const orderbookTemp: any = records.map((record: any) => {
+  // Get orderbook (comes already filtered and clean-up; see OpenOrders.tsx)
+  const orderbook: any = records.map((record: any) => {
     const order = record.order
     const metaData = record.metaData
     const orders: any = {}
 
     // Buy Limit (orderType = 0)
     if (orderType === 0) {
-      const takerAmount = formatUnits(order.takerAmount)
-      const makerAmount = formatUnits(
-        order.makerAmount.toString(),
-        option.collateralToken.decimals
-      )
-      const remainingTakerAmount = formatUnits(
-        metaData.remainingFillableTakerAmount
-      )
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'buy'
       orders.id = 'buy' + records.indexOf(record as never)
-      const bidAmount = Number(makerAmount) / Number(takerAmount) // ok to have it that way as this is just for displaying information in the frontend and not for transactions
-      orders.bid = bidAmount
-      if (Number(remainingTakerAmount) < Number(takerAmount)) {
-        const nbrOptions = Number(remainingTakerAmount)
-        orders.nbrOptions = nbrOptions
-      } else {
-        orders.nbrOptions = Number(takerAmount)
-      }
+
+      // Calculate Bid amount
+      const bidAmount = BigNumber.from(order.makerAmount)
+        .mul(parseUnits('1'))
+        .div(BigNumber.from(order.takerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
+      orders.bid = formatUnits(bidAmount, option.collateralToken.decimals)
+
+      // Display remainingFillableTakerAmount as the quantity in the orderbook
+      orders.nbrOptions = formatUnits(
+        BigNumber.from(metaData.remainingFillableTakerAmount)
+      )
     }
+
     // Sell Limit (orderType = 1)
     if (orderType === 1) {
-      const takerAmount = formatUnits(
-        order.takerAmount,
-        option.collateralToken.decimals
-      )
-      const remainingTakerAmount = formatUnits(
-        metaData.remainingFillableTakerAmount,
-        option.collateralToken.decimals
-      )
-      const makerAmount = formatUnits(order.makerAmount)
       orders.expiry = getExpiryMinutesFromNow(order.expiry)
       orders.orderType = 'sell'
       orders.id = 'sell' + records.indexOf(record as never)
-      const askAmount = Number(takerAmount) / Number(makerAmount)
-      orders.ask = askAmount
-      if (remainingTakerAmount == makerAmount) {
-        orders.nbrOptions = Number(makerAmount)
+
+      // Calculate Ask amount
+      const askAmount = BigNumber.from(order.takerAmount)
+        .mul(parseUnits('1'))
+        .div(BigNumber.from(order.makerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
+      orders.ask = formatUnits(askAmount, option.collateralToken.decimals)
+
+      if (
+        BigNumber.from(metaData.remainingFillableTakerAmount).lt(
+          BigNumber.from(order.takerAmount)
+        )
+      ) {
+        const remainingFillableMakerAmount = BigNumber.from(
+          metaData.remainingFillableTakerAmount
+        )
+          .mul(BigNumber.from(order.makerAmount))
+          .div(BigNumber.from(order.takerAmount))
+        orders.nbrOptions = formatUnits(remainingFillableMakerAmount)
       } else {
-        const quantity = Number(remainingTakerAmount) / askAmount // TODO
-        orders.nbrOptions = quantity
+        orders.nbrOptions = formatUnits(BigNumber.from(order.makerAmount))
       }
     }
-
     return orders
-  })
-
-  // Filter out orders with quantity = 0 (may happen if maker has revoked the approval)
-  const orderbook = orderbookTemp.filter((object) => {
-    return object.nbrOptions !== 0
   })
 
   return orderbook
@@ -165,6 +164,18 @@ export default function OrderBook(props: {
       }
     }
 
+    // Keep this for debugging
+    // const buyOrdersByMakerAddress = responseBuy.filter((v) =>
+    //   v.order.maker.includes('0xfb34097980eb94bdec8ee4a1eafab92d29d177d9')
+    // )
+    // console.log('buyOrdersByMakerAddress', buyOrdersByMakerAddress)
+
+    // Keep for debugging
+    // const sellOrdersByMakerAddress = responseSell.filter((v) =>
+    //   v.order.maker.includes('0xfb34097980eb94bdec8ee4a1eafab92d29d177d9')
+    // )
+    // console.log('sellOrdersByMakerAddress', sellOrdersByMakerAddress)
+
     const orderBookBuy = mapOrderData(responseBuy, option, OrderType.BUY)
     orders.push(orderBookBuy)
 
@@ -212,7 +223,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.buyQuantity != ''
-                            ? row.buyQuantity?.toFixed(4)
+                            ? Number(row.buyQuantity)?.toFixed(4)
                             : '-'}
                         </Typography>
                         <label> </label>
@@ -231,7 +242,7 @@ export default function OrderBook(props: {
                     <TableCell align="center">
                       <Box>
                         <Typography variant="subtitle1" color="#ff5c8d">
-                          {row.ask != '' ? row.ask?.toFixed(4) : '-'}
+                          {row.ask != '' ? Number(row.ask)?.toFixed(4) : '-'}
                         </Typography>
                         <Typography variant="caption" color="#8e8e8e" noWrap>
                           {row.sellExpiry}
@@ -242,7 +253,7 @@ export default function OrderBook(props: {
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
                           {row.sellQuantity != ''
-                            ? row.sellQuantity?.toFixed(4)
+                            ? Number(row.sellQuantity)?.toFixed(4)
                             : '-'}
                         </Typography>
                       </Box>

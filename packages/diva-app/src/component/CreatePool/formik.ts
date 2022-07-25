@@ -22,6 +22,7 @@ export type Values = {
   tokenSupply: number
   capacity: string
   dataProvider: string
+  payoutProfile: string
 }
 
 export const initialValues: Values = {
@@ -45,6 +46,7 @@ export const initialValues: Values = {
   tokenSupply: 10,
   capacity: 'Unlimited',
   dataProvider: '',
+  payoutProfile: 'Binary',
 }
 
 type Errors = {
@@ -137,7 +139,7 @@ export const useCreatePoolFormik = () => {
         errors.collateralBalance = 'Collateral can not be 0'
       }
 
-      if (values.expiryTime == null) {
+      if (values.expiryTime == null || isNaN(values.expiryTime.getTime())) {
         errors.expiryTime = 'You must set an expiry time'
       }
       if (

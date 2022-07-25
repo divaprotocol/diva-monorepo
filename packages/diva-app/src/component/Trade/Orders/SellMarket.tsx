@@ -21,7 +21,7 @@ import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
-import { FormLabel, Stack, Tooltip } from '@mui/material'
+import { Container, FormLabel, Stack, Tooltip } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { selectUserAddress } from '../../../Redux/appSlice'
 import { BigNumber } from 'ethers'
@@ -36,6 +36,8 @@ import {
   calcPayoffPerToken,
   calcBreakEven,
 } from '../../../Util/calcPayoffPerToken'
+import CheckIcon from '@mui/icons-material/Check'
+import { LoadingButton } from '@mui/lab'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigNumber.from(0)
@@ -73,6 +75,7 @@ export default function SellMarket(props: {
   const collateralTokenUnit = parseUnits('1', decimals)
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
+  const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
   const [youReceive, setYouReceive] = React.useState(ZERO)
   const [existingBuyLimitOrders, setExistingBuyLimitOrders] = React.useState([])
@@ -81,6 +84,8 @@ export default function SellMarket(props: {
     setExistingSellLimitOrdersAmountUser,
   ] = React.useState(ZERO)
   const [isApproved, setIsApproved] = React.useState(false)
+  const [approveLoading, setApproveLoading] = React.useState(false)
+  const [fillLoading, setFillLoading] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
   const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
@@ -96,17 +101,25 @@ export default function SellMarket(props: {
     if (value !== '') {
       const nbrOptions = parseUnits(value)
       setNumberOfOptions(nbrOptions)
+
+      // Set trading fee
+      const feeAmount = nbrOptions
+        .mul(parseUnits(tradingFee.toString()))
+        .div(positionTokenUnit)
+      setFeeAmount(feeAmount)
     } else {
       setYouReceive(ZERO)
       setNumberOfOptions(ZERO)
       setOrderBtnDisabled(true)
+      setFeeAmount(ZERO)
     }
   }
 
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
-      // Approved amount is 0 ...
+      // Remaining allowance - nbrOptions <= 0
+      setApproveLoading(true)
 
       if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for position token assuming 1% fee (expressed as an integer with 18 decimals).
@@ -117,7 +130,7 @@ export default function SellMarket(props: {
           .add(numberOfOptions)
           .mul(parseUnits(feeMultiplier))
           .div(positionTokenUnit)
-          .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
+          .add(BigNumber.from(100)) // Adding a buffer of 100 to make sure that there will be always sufficient approval
 
         // Set allowance. Returns 'undefined' if rejected by user.
         const approveResponse = await props.approve(
@@ -136,16 +149,19 @@ export default function SellMarket(props: {
           setRemainingAllowance(remainingAllowance)
           setAllowance(optionAllowance)
           setIsApproved(true)
+          setApproveLoading(false)
           alert(
             `Allowance for ${toExponentialOrNumber(
               Number(formatUnits(optionAllowance))
             )} ${params.tokenType.toUpperCase()} tokens successfully set (includes allowance for 1% fee payment).`
           )
+        } else {
+          setApproveLoading(false)
         }
       }
     } else {
-      // Approved amount is > 0 ...
-
+      // Remaining allowance - nbrOptions > 0
+      setFillLoading(true)
       if (optionBalance.gt(0)) {
         // User owns position tokens ...
 
@@ -156,125 +172,137 @@ export default function SellMarket(props: {
         const numberOfOptionsInclFees = numberOfOptions
           .mul(parseUnits(feeMultiplier))
           .div(positionTokenUnit)
-
-        // TODO: Show the additional fee amount somewhere in the order widget
-        const feeAmount = numberOfOptionsInclFees.sub(numberOfOptions)
-
-        if (numberOfOptionsInclFees.gt(remainingAllowance)) {
-          // Entered position token amount exceeds remaining allowance ...
-
-          // Get total amount of position tokens that the user wants to sell (incl. the user's Sell Limit orders and fees)
-          const totalSellAmount = numberOfOptionsInclFees.add(
-            existingSellLimitOrdersAmountUser
+        if (optionBalance.lt(numberOfOptionsInclFees)) {
+          alert(
+            `Insufficient ${params.tokenType.toUpperCase()} token balance. Try to reduce the entered amount to account for fees.`
           )
-
-          // TODO: Consider refactoring the if clauses a bit
-          if (totalSellAmount.gt(optionBalance)) {
-            // User has not enough position tokens to sell ...
-
-            alert('Insufficient position token balance')
-          } else {
-            // Calculate additional allowance required to executed the Sell Market order
-            const additionalAllowance =
-              numberOfOptionsInclFees.sub(remainingAllowance)
-            if (
-              confirm(
-                'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
-                  toExponentialOrNumber(
-                    Number(formatUnits(additionalAllowance))
-                  ) +
-                  ' ' +
-                  params.tokenType.toUpperCase() +
-                  ' tokens (includes allowance for 1% fee payment). Click FILL ORDER after the allowance has been updated.'
-              )
-            ) {
-              const amountToApprove = additionalAllowance
-                .add(allowance)
-                .add(BigNumber.from(100)) // Buffer to make sure there is always sufficient approval
-
-              // Set allowance. Returns 'undefined' if rejected by user.
-              const approveResponse = await props.approve(
-                amountToApprove,
-                takerTokenContract,
-                exchangeProxy,
-                userAddress
-              )
-
-              if (approveResponse !== 'undefined') {
-                const newAllowance = BigNumber.from(approveResponse)
-                const remainingAllowance = newAllowance.sub(
-                  existingSellLimitOrdersAmountUser
-                )
-
-                setRemainingAllowance(remainingAllowance)
-                setAllowance(newAllowance)
-                alert(
-                  `Additional ${toExponentialOrNumber(
-                    Number(formatUnits(additionalAllowance))
-                  )} ${params.tokenType.toUpperCase()} tokens approved. Please proceed with the order.`
-                )
-              }
-            } else {
-              console.log('Additional approval rejected by user.')
-            }
-          }
         } else {
-          const orderData = {
-            taker: userAddress,
-            provider: web3,
-            isBuy: false,
-            nbrOptions: numberOfOptions, // Number of position tokens the user wants to sell
-            collateralDecimals: decimals,
-            makerToken: makerToken,
-            takerToken: takerToken,
-            avgExpectedRate: avgExpectedRate,
-            existingLimitOrders: existingBuyLimitOrders,
-            chainId: props.chainId,
-          }
-          sellMarketOrder(orderData).then(async (orderFillStatus: any) => {
-            let orderFilled = false
-            if (!(orderFillStatus == undefined)) {
-              if (!('logs' in orderFillStatus)) {
-                alert('Order could not be filled.')
-                return
-              } else {
-                orderFillStatus.logs.forEach(async (eventData: any) => {
-                  if (!('event' in eventData)) {
-                    return
-                  } else {
-                    if (eventData.event === 'LimitOrderFilled') {
-                      //wait for 4 secs for 0x to update orders then handle order book display
-                      await new Promise((resolve) => setTimeout(resolve, 4000))
-                      await props.handleDisplayOrder()
-                      //reset input & you pay fields
-                      Array.from(document.querySelectorAll('input')).forEach(
-                        (input) => (input.value = '')
-                      )
-                      setNumberOfOptions(ZERO)
-                      setYouReceive(ZERO)
-                      orderFilled = true
-                    } else {
-                      alert('Order could not be filled.')
-                    }
-                  }
-                })
-              }
+          if (numberOfOptionsInclFees.gt(remainingAllowance)) {
+            // Entered position token amount exceeds remaining allowance ...
+
+            // Get total amount of position tokens that the user wants to sell (incl. the user's Sell Limit orders and fees)
+            const totalSellAmount = numberOfOptionsInclFees.add(
+              existingSellLimitOrdersAmountUser
+            )
+
+            // TODO: Consider refactoring the if clauses a bit
+            if (totalSellAmount.gt(optionBalance)) {
+              // User has not enough position tokens to sell ...
+
+              alert('Insufficient position token balance')
             } else {
-              alert('Order could not be filled.')
-              await props.handleDisplayOrder()
-              //reset input & you pay fields
-              Array.from(document.querySelectorAll('input')).forEach(
-                (input) => (input.value = '')
-              )
-              setNumberOfOptions(ZERO)
-              setYouReceive(ZERO)
+              // Calculate additional allowance required to executed the Sell Market order
+              const additionalAllowance =
+                numberOfOptionsInclFees.sub(remainingAllowance)
+              if (
+                confirm(
+                  'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
+                    toExponentialOrNumber(
+                      Number(formatUnits(additionalAllowance))
+                    ) +
+                    ' ' +
+                    params.tokenType.toUpperCase() +
+                    ' tokens (includes allowance for 1% fee payment). Click FILL ORDER after the allowance has been updated.'
+                )
+              ) {
+                const amountToApprove = additionalAllowance
+                  .add(allowance)
+                  .add(BigNumber.from(100)) // Buffer to make sure there is always sufficient approval
+                setApproveLoading(true)
+                // Set allowance. Returns 'undefined' if rejected by user.
+                const approveResponse = await props.approve(
+                  amountToApprove,
+                  takerTokenContract,
+                  exchangeProxy,
+                  userAddress
+                )
+
+                if (approveResponse !== 'undefined') {
+                  setApproveLoading(false)
+                  const newAllowance = BigNumber.from(approveResponse)
+                  const remainingAllowance = newAllowance.sub(
+                    existingSellLimitOrdersAmountUser
+                  )
+
+                  setRemainingAllowance(remainingAllowance)
+                  setAllowance(newAllowance)
+                  alert(
+                    `Additional ${toExponentialOrNumber(
+                      Number(formatUnits(additionalAllowance))
+                    )} ${params.tokenType.toUpperCase()} tokens approved. Please proceed with the order.`
+                  )
+                }
+              } else {
+                setApproveLoading(false)
+                console.log('Additional approval rejected by user.')
+              }
             }
-            if (orderFilled) {
-              alert('Order successfully filled.')
+          } else {
+            const orderData = {
+              taker: userAddress,
+              provider: web3,
+              isBuy: false,
+              nbrOptions: numberOfOptions, // Number of position tokens the user wants to sell
+              collateralDecimals: decimals,
+              makerToken: makerToken,
+              takerToken: takerToken,
+              avgExpectedRate: avgExpectedRate,
+              existingLimitOrders: existingBuyLimitOrders,
+              chainId: props.chainId,
             }
-          })
+            sellMarketOrder(orderData).then(async (orderFillStatus: any) => {
+              let orderFilled = false
+              setFillLoading(true)
+              if (!(orderFillStatus == undefined)) {
+                if (!('logs' in orderFillStatus)) {
+                  alert('Order could not be filled.')
+                  return
+                } else {
+                  orderFillStatus.logs.forEach(async (eventData: any) => {
+                    if (!('event' in eventData)) {
+                      return
+                    } else {
+                      if (eventData.event === 'LimitOrderFilled') {
+                        //wait for 4 secs for 0x to update orders then handle order book display
+                        // await new Promise((resolve) =>
+                        //   setTimeout(resolve, 4000)
+                        // )
+                        await props.handleDisplayOrder()
+                        //reset input & you pay fields
+                        Array.from(document.querySelectorAll('input')).forEach(
+                          (input) => (input.value = '')
+                        )
+                        setNumberOfOptions(ZERO)
+                        setFillLoading(false)
+                        setYouReceive(ZERO)
+                        orderFilled = true
+                      } else {
+                        setFillLoading(false)
+                        alert('Order could not be filled.')
+                      }
+                    }
+                  })
+                }
+              } else {
+                alert('Order could not be filled.')
+                setFillLoading(false)
+                await props.handleDisplayOrder()
+                //reset input & you pay fields
+                Array.from(document.querySelectorAll('input')).forEach(
+                  (input) => (input.value = '')
+                )
+                setNumberOfOptions(ZERO)
+                setYouReceive(ZERO)
+              }
+              if (orderFilled) {
+                setFillLoading(false)
+                alert('Order successfully filled.')
+              }
+            })
+          }
         }
       } else {
+        setFillLoading(false)
         alert(
           'No ' + params.tokenType.toUpperCase() + ' tokens available to sell.'
         )
@@ -471,6 +499,12 @@ export default function SellMarket(props: {
   }, [numberOfOptions])
 
   useEffect(() => {
+    if (remainingAllowance.sub(numberOfOptions).gt(0)) {
+      setIsApproved(true)
+    }
+    if (remainingAllowance.sub(numberOfOptions).lte(0)) {
+      setIsApproved(false)
+    }
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
@@ -576,16 +610,42 @@ export default function SellMarket(props: {
             sx={{
               color: 'Gray',
               fontSize: 11,
-              paddingTop: 2.5,
+              paddingTop: 2,
               paddingRight: 1.5,
             }}
           >
             {params.tokenType.toUpperCase() + ' '}
           </FormLabel>
-          <FormInput
-            type="text"
-            onChange={(event) => handleNumberOfOptions(event.target.value)}
-          />
+          <Stack alignItems="flex-end">
+            <FormInput
+              width={'78.3px'}
+              type="text"
+              onChange={(event) => handleNumberOfOptions(event.target.value)}
+            />
+            <FormLabel
+              sx={{
+                color: 'Gray',
+                fontSize: 11,
+                alignItems: 'flex-end',
+                marginTop: '2px',
+                paddingRight: 1.4,
+              }}
+            >
+              {toExponentialOrNumber(
+                Number(formatUnits(numberOfOptions.add(feeAmount)))
+              )}
+            </FormLabel>
+            <FormLabel
+              sx={{
+                color: 'Gray',
+                fontSize: 11,
+                alignItems: 'flex-end',
+                paddingRight: 1.4,
+              }}
+            >
+              (incl. 1% fee)
+            </FormLabel>
+          </Stack>
         </FormDiv>
         <FormDiv>
           <LabelStyleDiv>
@@ -602,7 +662,9 @@ export default function SellMarket(props: {
           <RightSideLabel>
             <Stack direction={'row'} justifyContent="flex-end" spacing={1}>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
-                {option.collateralToken.symbol + ' '}
+                {option.collateralToken.symbol +
+                  '/' +
+                  params.tokenType.toUpperCase()}
               </FormLabel>
               <FormLabel>
                 {toExponentialOrNumber(
@@ -645,19 +707,36 @@ export default function SellMarket(props: {
           </RightSideLabel>
         </FormDiv>
         <CreateButtonWrapper />
-        <Box marginLeft="30%" marginTop="15%" marginBottom={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            startIcon={<AddIcon />}
-            type="submit"
-            value="Submit"
-            disabled={orderBtnDisabled}
-          >
-            {isApproved ? 'Fill Order' : 'Approve'}
-          </Button>
-        </Box>
+        <Container sx={{ marginBottom: 2 }}>
+          <Stack direction={'row'} spacing={1}>
+            <LoadingButton
+              variant="contained"
+              sx={{ width: '50%', height: '45px' }}
+              loading={approveLoading}
+              color="primary"
+              size="large"
+              startIcon={<CheckIcon />}
+              type="submit"
+              value="Submit"
+              disabled={isApproved || orderBtnDisabled}
+            >
+              {'Approve'}
+            </LoadingButton>
+            <LoadingButton
+              variant="contained"
+              sx={{ width: '50%', height: '45px' }}
+              loading={fillLoading}
+              color="primary"
+              size="large"
+              startIcon={<AddIcon />}
+              type="submit"
+              value="Submit"
+              disabled={!isApproved || orderBtnDisabled}
+            >
+              {'Fill'}
+            </LoadingButton>
+          </Stack>
+        </Container>
       </form>
     </div>
   )
