@@ -1,7 +1,5 @@
 export function generatePayoffChartData(data, currentPrice) {
-  console.log('currentPrice', currentPrice)
   const optionData = data
-  console.log('optionData.Floor', optionData.Floor)
   const CollateralBalanceLong = data.CollateralBalanceLong // temporarily hard-coded
   const CollateralBalanceShort = data.CollateralBalanceShort // temporarily hard-coded
   const TokenSupply = data.TokenSupply // temporarily hard-coded
@@ -24,7 +22,6 @@ export function generatePayoffChartData(data, currentPrice) {
       return optionData.Cap * 1.15
     }
   }
-  console.log('maxXValue', maxXValue())
   let chartData = []
   if (optionData.IsLong === true) {
     chartData = [
