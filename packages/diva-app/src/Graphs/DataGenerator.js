@@ -5,15 +5,24 @@ export function generatePayoffChartData(data, currentPrice) {
   const CollateralBalanceLong = data.CollateralBalanceLong // temporarily hard-coded
   const CollateralBalanceShort = data.CollateralBalanceShort // temporarily hard-coded
   const TokenSupply = data.TokenSupply // temporarily hard-coded
+
   const minXValue = () => {
-    return optionData.Floor < currentPrice
-      ? optionData.Floor - optionData.Cap * 0.15
-      : currentPrice - optionData.Cap * 0.15
+    if (!isNaN(currentPrice)) {
+      return optionData.Floor < currentPrice
+        ? optionData.Floor - optionData.Cap * 0.15
+        : currentPrice - optionData.Cap * 0.15
+    } else {
+      return optionData.Floor - optionData.Cap * 0.15
+    }
   }
   const maxXValue = () => {
-    return optionData.Cap <= currentPrice
-      ? currentPrice * 1.15
-      : optionData.Cap * 1.15
+    if (!isNaN(currentPrice)) {
+      return optionData.Cap <= currentPrice
+        ? currentPrice * 1.15
+        : optionData.Cap * 1.15
+    } else {
+      return optionData.Cap * 1.15
+    }
   }
   console.log('maxXValue', maxXValue())
   let chartData = []
