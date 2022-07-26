@@ -568,7 +568,7 @@ export default function BuyMarket(props: {
         )
       )
     }
-  }, [option, avgExpectedRate, usdPrice])
+  }, [option, avgExpectedRate, usdPrice, userAddress])
 
   return (
     <div>

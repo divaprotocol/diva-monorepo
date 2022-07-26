@@ -378,7 +378,7 @@ export default function SellLimit(props: {
         })
       })
     }
-  }, [responseSell])
+  }, [responseSell, userAddress])
 
   useEffect(() => {
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
@@ -481,7 +481,7 @@ export default function SellLimit(props: {
     } else {
       setIsApproved(true)
     }
-  }, [remainingAllowance, numberOfOptions])
+  }, [remainingAllowance, numberOfOptions, userAddress])
 
   const createBtnDisabled =
     !numberOfOptions.gt(0) ||

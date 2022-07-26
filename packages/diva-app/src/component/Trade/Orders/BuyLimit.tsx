@@ -359,7 +359,7 @@ export default function BuyLimit(props: {
         })
       })
     }
-  }, [responseBuy])
+  }, [responseBuy, userAddress])
 
   useEffect(() => {
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
@@ -462,7 +462,7 @@ export default function BuyLimit(props: {
     } else {
       setIsApproved(true)
     }
-  }, [remainingAllowance, youPay])
+  }, [remainingAllowance, youPay, userAddress])
 
   const createBtnDisabled =
     !isApproved || youPay.lte(0) || collateralBalance.sub(youPay).lt(0)

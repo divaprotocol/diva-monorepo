@@ -591,7 +591,7 @@ export default function SellMarket(props: {
         )
       )
     }
-  }, [option, avgExpectedRate, usdPrice])
+  }, [option, avgExpectedRate, usdPrice, userAddress])
 
   return (
     <div>
