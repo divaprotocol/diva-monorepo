@@ -114,8 +114,6 @@ export default function Underlying() {
     history.push(`/${params.poolId}/${isLong ? 'long' : 'short'}/` + newValue)
     setValue(newValue)
   }
-
-  console.log('break even===', breakEven)
   return (
     <Container sx={{ paddingTop: '1em', paddingBottom: '3em' }}>
       <TabContext value={value}>

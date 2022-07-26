@@ -22,7 +22,6 @@ export default function DIVATradeChart(props) {
       x: parseFloat(x),
       y: parseFloat(y),
     }))
-
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
     const reffeenceAsset = refAsset.slice(0, 8)
     // Set the dimensions and margins of the graph

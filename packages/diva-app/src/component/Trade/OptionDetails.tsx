@@ -53,6 +53,7 @@ const FlexDataDiv = styled.div`
   display: flex;
   flex-direction: row;
 `
+
 export default function OptionDetails({
   pool,
 }: {
@@ -69,6 +70,7 @@ export default function OptionDetails({
   const [linear, setLinear] = useState(false)
   const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
   const maxYield = useAppSelector((state) => state.stats.maxYield)
+  const [fontColor, setFontColor] = useState('#ffff')
   useEffect(() => {
     if (pool.cap === pool.floor) {
       setBinary(true)
@@ -84,6 +86,7 @@ export default function OptionDetails({
       setLinear(true)
     }
   }, [pool])
+
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
       (dataName: { id: string }) => dataName?.id == pool?.dataProvider
@@ -96,6 +99,13 @@ export default function OptionDetails({
       setCheckIcon(false)
     }
   }, [dataSource.dataProviders, pool.dataProvider])
+
+  useEffect(() => {
+    if (maxYield != 'n/a') {
+      setFontColor('#3393E0')
+    }
+  }, [maxYield])
+
   return (
     <PageDiv>
       <FlexDiv>
@@ -203,7 +213,7 @@ export default function OptionDetails({
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Max yield</FlexBoxHeader>
-          <FlexBoxData>{maxYield}</FlexBoxData>
+          <FlexBoxData style={{ color: fontColor }}>{maxYield}</FlexBoxData>
         </FlexBox>
       </FlexDiv>
     </PageDiv>
