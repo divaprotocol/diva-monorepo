@@ -161,7 +161,10 @@ export default function BuyLimit(props: {
       setApproveLoading(true)
       if (numberOfOptions.gt(0)) {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals (<= 18)).
-        const amountToApprove = allowance.add(youPay).add(BigNumber.from(100))
+        const amountToApprove = allowance
+          .add(youPay)
+          .sub(remainingAllowance)
+          .add(BigNumber.from(100))
 
         // Set allowance. Returns 'undefined' if rejected by user.
         const approveResponse = await props.approve(
@@ -195,60 +198,6 @@ export default function BuyLimit(props: {
       setFillLoading(true)
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
-
-        const totalBuyAmount = youPay.add(existingBuyLimitOrdersAmountUser)
-
-        // TODO: Consider refactoring the if clauses a bit
-        if (totalBuyAmount.gt(collateralBalance)) {
-          alert('Not sufficient balance')
-        } else {
-          // Integer with collateral token decimals
-          const additionalAllowance = youPay.sub(remainingAllowance)
-          if (
-            confirm(
-              'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
-                toExponentialOrNumber(
-                  Number(formatUnits(additionalAllowance, decimals))
-                ) +
-                ' ' +
-                option.collateralToken.symbol +
-                ' tokens. Click CREATE ORDER after the allowance has been updated.'
-            )
-          ) {
-            const amountToApprove = additionalAllowance
-              .add(allowance)
-              .add(BigNumber.from(100))
-            setApproveLoading(true)
-            // Set allowance. Returns 'undefined' if rejected by user.
-            const approveResponse = await props.approve(
-              amountToApprove,
-              makerTokenContract,
-              exchangeProxy,
-              userAddress
-            )
-
-            if (approveResponse !== 'undefined') {
-              setApproveLoading(false)
-              const newAllowance = BigNumber.from(approveResponse)
-              const remainingAllowance = newAllowance.sub(
-                existingBuyLimitOrdersAmountUser
-              )
-
-              setRemainingAllowance(remainingAllowance)
-              setAllowance(newAllowance)
-              alert(
-                `Additional ${toExponentialOrNumber(
-                  Number(formatUnits(additionalAllowance, decimals))
-                )} ${
-                  option.collateralToken.symbol
-                } tokens approved. Please proceed with the order.`
-              )
-            }
-          } else {
-            setApproveLoading(false)
-            console.log('Additional approval rejected by user.')
-          }
-        }
 
         const orderData = {
           maker: userAddress,

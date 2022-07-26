@@ -174,6 +174,7 @@ export default function SellLimit(props: {
         // Calculate required allowance amount for position token (expressed as an integer with 18 decimals).
         const amountToApprove = allowance
           .add(numberOfOptions)
+          .sub(remainingAllowance)
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
         // Set allowance. Returns 'undefined' if rejected by user.
@@ -208,66 +209,6 @@ export default function SellLimit(props: {
       setFillLoading(true)
       if (optionBalance.gt(0)) {
         // User owns position tokens ...
-
-        // Get total amount of position tokens that the user wants to sell (incl. the user's existing Sell Limit orders)
-        const totalSellAmount = numberOfOptions.add(
-          existingSellLimitOrdersAmountUser
-        )
-
-        if (numberOfOptions.gt(remainingAllowance)) {
-          // Entered position token amount exceeds remaining allowance ...
-
-          if (totalSellAmount.gt(optionBalance)) {
-            // User has not enough position tokens to sell ...
-
-            alert('Insufficient position token balance')
-          } else {
-            // Calculate additional allowance required to executed the Sell Limit order
-            const additionalAllowance = numberOfOptions.sub(remainingAllowance)
-            if (
-              confirm(
-                'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
-                  toExponentialOrNumber(
-                    Number(formatUnits(additionalAllowance))
-                  ) +
-                  ' ' +
-                  params.tokenType.toUpperCase() +
-                  ' tokens. Click CREATE ORDER after the allowance has been updated.'
-              )
-            ) {
-              const amountToApprove = additionalAllowance
-                .add(allowance)
-                .add(BigNumber.from(100))
-              setApproveLoading(true)
-              // Set allowance. Returns 'undefined' if rejected by user.
-              const approveResponse = await props.approve(
-                amountToApprove,
-                makerTokenContract,
-                exchangeProxy,
-                userAddress
-              )
-
-              if (approveResponse !== 'undefined') {
-                setApproveLoading(false)
-                const newAllowance = BigNumber.from(approveResponse)
-                const remainingAllowance = newAllowance.sub(
-                  existingSellLimitOrdersAmountUser
-                )
-
-                setRemainingAllowance(remainingAllowance)
-                setAllowance(newAllowance)
-                alert(
-                  `Additional ${toExponentialOrNumber(
-                    Number(formatUnits(additionalAllowance))
-                  )} ${params.tokenType.toUpperCase()} tokens approved. Please proceed with the order.`
-                )
-              }
-            } else {
-              setApproveLoading(false)
-              console.log('Additional approval rejected by user.')
-            }
-          }
-        }
 
         const orderData = {
           maker: userAddress,
