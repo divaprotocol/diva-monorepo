@@ -196,91 +196,89 @@ export default function BuyLimit(props: {
       if (collateralBalance.gt(0)) {
         // User owns collateral tokens ...
 
-        if (youPay.gt(remainingAllowance)) {
-          const totalBuyAmount = youPay.add(existingBuyLimitOrdersAmountUser)
+        const totalBuyAmount = youPay.add(existingBuyLimitOrdersAmountUser)
 
-          // TODO: Consider refactoring the if clauses a bit
-          if (totalBuyAmount.gt(collateralBalance)) {
-            alert('Not sufficient balance')
-          } else {
-            // Integer with collateral token decimals
-            const additionalAllowance = youPay.sub(remainingAllowance)
-            if (
-              confirm(
-                'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
-                  toExponentialOrNumber(
-                    Number(formatUnits(additionalAllowance, decimals))
-                  ) +
-                  ' ' +
-                  option.collateralToken.symbol +
-                  ' tokens. Click CREATE ORDER after the allowance has been updated.'
-              )
-            ) {
-              const amountToApprove = additionalAllowance
-                .add(allowance)
-                .add(BigNumber.from(100))
-              setApproveLoading(true)
-              // Set allowance. Returns 'undefined' if rejected by user.
-              const approveResponse = await props.approve(
-                amountToApprove,
-                makerTokenContract,
-                exchangeProxy,
-                userAddress
-              )
-
-              if (approveResponse !== 'undefined') {
-                setApproveLoading(false)
-                const newAllowance = BigNumber.from(approveResponse)
-                const remainingAllowance = newAllowance.sub(
-                  existingBuyLimitOrdersAmountUser
-                )
-
-                setRemainingAllowance(remainingAllowance)
-                setAllowance(newAllowance)
-                alert(
-                  `Additional ${toExponentialOrNumber(
-                    Number(formatUnits(additionalAllowance, decimals))
-                  )} ${
-                    option.collateralToken.symbol
-                  } tokens approved. Please proceed with the order.`
-                )
-              }
-            } else {
-              setApproveLoading(false)
-              console.log('Additional approval rejected by user.')
-            }
-          }
+        // TODO: Consider refactoring the if clauses a bit
+        if (totalBuyAmount.gt(collateralBalance)) {
+          alert('Not sufficient balance')
         } else {
-          const orderData = {
-            maker: userAddress,
-            provider: web3,
-            isBuy: true,
-            nbrOptions: numberOfOptions,
-            collateralDecimals: decimals,
-            makerToken: makerToken,
-            takerToken: takerToken,
-            limitPrice: pricePerOption,
-            orderExpiry: expiry,
-            chainId: props.chainId,
-            exchangeProxy: exchangeProxy,
+          // Integer with collateral token decimals
+          const additionalAllowance = youPay.sub(remainingAllowance)
+          if (
+            confirm(
+              'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
+                toExponentialOrNumber(
+                  Number(formatUnits(additionalAllowance, decimals))
+                ) +
+                ' ' +
+                option.collateralToken.symbol +
+                ' tokens. Click CREATE ORDER after the allowance has been updated.'
+            )
+          ) {
+            const amountToApprove = additionalAllowance
+              .add(allowance)
+              .add(BigNumber.from(100))
+            setApproveLoading(true)
+            // Set allowance. Returns 'undefined' if rejected by user.
+            const approveResponse = await props.approve(
+              amountToApprove,
+              makerTokenContract,
+              exchangeProxy,
+              userAddress
+            )
+
+            if (approveResponse !== 'undefined') {
+              setApproveLoading(false)
+              const newAllowance = BigNumber.from(approveResponse)
+              const remainingAllowance = newAllowance.sub(
+                existingBuyLimitOrdersAmountUser
+              )
+
+              setRemainingAllowance(remainingAllowance)
+              setAllowance(newAllowance)
+              alert(
+                `Additional ${toExponentialOrNumber(
+                  Number(formatUnits(additionalAllowance, decimals))
+                )} ${
+                  option.collateralToken.symbol
+                } tokens approved. Please proceed with the order.`
+              )
+            }
+          } else {
+            setApproveLoading(false)
+            console.log('Additional approval rejected by user.')
           }
-          setFillLoading(true)
-          buylimitOrder(orderData)
-            .then(async (response) => {
-              if (response.status === 200) {
-                //need to invalidate cache order response since orderbook is updated
-                dispatch(setResponseBuy([]))
-                // await new Promise((resolve) => setTimeout(resolve, 2000))
-                await props.handleDisplayOrder()
-                setFillLoading(false)
-                handleFormReset()
-              }
-            })
-            .catch(function (error) {
-              setFillLoading(false)
-              console.error('Error' + error)
-            })
         }
+
+        const orderData = {
+          maker: userAddress,
+          provider: web3,
+          isBuy: true,
+          nbrOptions: numberOfOptions,
+          collateralDecimals: decimals,
+          makerToken: makerToken,
+          takerToken: takerToken,
+          limitPrice: pricePerOption,
+          orderExpiry: expiry,
+          chainId: props.chainId,
+          exchangeProxy: exchangeProxy,
+        }
+        setFillLoading(true)
+        buylimitOrder(orderData)
+          .then(async (response) => {
+            if (response.status === 200) {
+              //need to invalidate cache order response since orderbook is updated
+              dispatch(setResponseBuy([]))
+              // await new Promise((resolve) => setTimeout(resolve, 2000))
+              await props.handleDisplayOrder()
+              setFillLoading(false)
+              handleFormReset()
+            }
+          })
+          .catch(function (error) {
+            setFillLoading(false)
+            console.error('Error' + error)
+          })
       } else {
         setFillLoading(false)
         alert(`No ${option.collateralToken.symbol} tokens available to buy.`)
@@ -459,15 +457,17 @@ export default function BuyLimit(props: {
   ])
 
   useEffect(() => {
-    if (remainingAllowance.sub(youPay).lte(0)) {
+    if (allowance.sub(youPay).lte(0)) {
       setIsApproved(false)
     } else {
       setIsApproved(true)
     }
   }, [remainingAllowance, youPay])
 
-  const createBtnDisabled = !isApproved || youPay.lte(0)
-  const approveBtnDisabled = isApproved || youPay.lte(0)
+  const createBtnDisabled =
+    !isApproved || youPay.lte(0) || collateralBalance.sub(youPay).lt(0)
+  const approveBtnDisabled =
+    isApproved || youPay.lte(0) || collateralBalance.sub(youPay).lt(0)
 
   return (
     <div>

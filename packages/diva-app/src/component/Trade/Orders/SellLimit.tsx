@@ -209,96 +209,91 @@ export default function SellLimit(props: {
       if (optionBalance.gt(0)) {
         // User owns position tokens ...
 
-        // TODO: Consider refactoring the if clauses a bit
-        if (numberOfOptions.gt(remainingAllowance)) {
-          // Entered position token amount exceeds remaining allowance ...
+        // Get total amount of position tokens that the user wants to sell (incl. the user's existing Sell Limit orders)
+        const totalSellAmount = numberOfOptions.add(
+          existingSellLimitOrdersAmountUser
+        )
 
-          // Get total amount of position tokens that the user wants to sell (incl. the user's existing Sell Limit orders)
-          const totalSellAmount = numberOfOptions.add(
-            existingSellLimitOrdersAmountUser
-          )
+        if (totalSellAmount.gt(optionBalance)) {
+          // User has not enough position tokens to sell ...
 
-          if (totalSellAmount.gt(optionBalance)) {
-            // User has not enough position tokens to sell ...
-
-            alert('Insufficient position token balance')
-          } else {
-            // Calculate additional allowance required to executed the Sell Limit order
-            const additionalAllowance = numberOfOptions.sub(remainingAllowance)
-            if (
-              confirm(
-                'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
-                  toExponentialOrNumber(
-                    Number(formatUnits(additionalAllowance))
-                  ) +
-                  ' ' +
-                  params.tokenType.toUpperCase() +
-                  ' tokens. Click CREATE ORDER after the allowance has been updated.'
-              )
-            ) {
-              const amountToApprove = additionalAllowance
-                .add(allowance)
-                .add(BigNumber.from(100))
-              setApproveLoading(true)
-              // Set allowance. Returns 'undefined' if rejected by user.
-              const approveResponse = await props.approve(
-                amountToApprove,
-                makerTokenContract,
-                exchangeProxy,
-                userAddress
-              )
-
-              if (approveResponse !== 'undefined') {
-                setApproveLoading(false)
-                const newAllowance = BigNumber.from(approveResponse)
-                const remainingAllowance = newAllowance.sub(
-                  existingSellLimitOrdersAmountUser
-                )
-
-                setRemainingAllowance(remainingAllowance)
-                setAllowance(newAllowance)
-                alert(
-                  `Additional ${toExponentialOrNumber(
-                    Number(formatUnits(additionalAllowance))
-                  )} ${params.tokenType.toUpperCase()} tokens approved. Please proceed with the order.`
-                )
-              }
-            } else {
-              setApproveLoading(false)
-              console.log('Additional approval rejected by user.')
-            }
-          }
+          alert('Insufficient position token balance')
         } else {
-          const orderData = {
-            maker: userAddress,
-            provider: web3,
-            isBuy: false,
-            nbrOptions: numberOfOptions,
-            collateralDecimals: decimals,
-            makerToken: makerToken,
-            takerToken: takerToken,
-            limitPrice: pricePerOption,
-            orderExpiry: expiry,
-            chainId: props.chainId,
-            exchangeProxy: exchangeProxy,
+          // Calculate additional allowance required to executed the Sell Limit order
+          const additionalAllowance = numberOfOptions.sub(remainingAllowance)
+          if (
+            confirm(
+              'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
+                toExponentialOrNumber(
+                  Number(formatUnits(additionalAllowance))
+                ) +
+                ' ' +
+                params.tokenType.toUpperCase() +
+                ' tokens. Click CREATE ORDER after the allowance has been updated.'
+            )
+          ) {
+            const amountToApprove = additionalAllowance
+              .add(allowance)
+              .add(BigNumber.from(100))
+            setApproveLoading(true)
+            // Set allowance. Returns 'undefined' if rejected by user.
+            const approveResponse = await props.approve(
+              amountToApprove,
+              makerTokenContract,
+              exchangeProxy,
+              userAddress
+            )
+
+            if (approveResponse !== 'undefined') {
+              setApproveLoading(false)
+              const newAllowance = BigNumber.from(approveResponse)
+              const remainingAllowance = newAllowance.sub(
+                existingSellLimitOrdersAmountUser
+              )
+
+              setRemainingAllowance(remainingAllowance)
+              setAllowance(newAllowance)
+              alert(
+                `Additional ${toExponentialOrNumber(
+                  Number(formatUnits(additionalAllowance))
+                )} ${params.tokenType.toUpperCase()} tokens approved. Please proceed with the order.`
+              )
+            }
+          } else {
+            setApproveLoading(false)
+            console.log('Additional approval rejected by user.')
           }
-          setFillLoading(true)
-          sellLimitOrder(orderData)
-            .then(async (response) => {
-              if (response?.status === 200) {
-                //need to invalidate cache order response since orderbook is updated
-                dispatch(setResponseSell([]))
-                // await new Promise((resolve) => setTimeout(resolve, 2000))
-                await props.handleDisplayOrder()
-                setFillLoading(false)
-                handleFormReset()
-              }
-            })
-            .catch(function (error) {
-              setFillLoading(false)
-              console.error(error)
-            })
         }
+
+        const orderData = {
+          maker: userAddress,
+          provider: web3,
+          isBuy: false,
+          nbrOptions: numberOfOptions,
+          collateralDecimals: decimals,
+          makerToken: makerToken,
+          takerToken: takerToken,
+          limitPrice: pricePerOption,
+          orderExpiry: expiry,
+          chainId: props.chainId,
+          exchangeProxy: exchangeProxy,
+        }
+        setFillLoading(true)
+        sellLimitOrder(orderData)
+          .then(async (response) => {
+            if (response?.status === 200) {
+              //need to invalidate cache order response since orderbook is updated
+              dispatch(setResponseSell([]))
+              // await new Promise((resolve) => setTimeout(resolve, 2000))
+              await props.handleDisplayOrder()
+              setFillLoading(false)
+              handleFormReset()
+            }
+          })
+          .catch(function (error) {
+            setFillLoading(false)
+            console.error(error)
+          })
       } else {
         setFillLoading(false)
         alert(
@@ -489,9 +484,15 @@ export default function SellLimit(props: {
   }, [remainingAllowance, numberOfOptions])
 
   const createBtnDisabled =
-    !numberOfOptions.gt(0) || !pricePerOption.gt(0) || !isApproved
+    !numberOfOptions.gt(0) ||
+    !pricePerOption.gt(0) ||
+    !isApproved ||
+    optionBalance.sub(numberOfOptions).lt(0)
 
-  const approveBtnDisabled = !numberOfOptions.gt(0) || isApproved
+  const approveBtnDisabled =
+    !numberOfOptions.gt(0) ||
+    isApproved ||
+    optionBalance.sub(numberOfOptions).lt(0)
 
   return (
     <div>
