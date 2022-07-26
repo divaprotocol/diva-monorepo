@@ -1,8 +1,7 @@
 import config
 import eth_abi
 from Crypto.Hash import keccak
-from web3 import Web3
-import tellor
+
 
 PRIVATE_KEY = config.PRIVATE_KEY
 PUBLIC_KEY = config.PUBLIC_KEY
@@ -36,10 +35,3 @@ def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract)
     print(txn_hash.hex())
     transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
     print("Price submitted for pool id {} ".format(pool_id), "({})".format(network))
-
-print(1)
-
-poolId = 48423
-w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL["ropsten"]))
-tellor_contract = w3.eth.contract(address=tellor.TellorPlayground_contract_address["ropsten"], abi=tellor.TellorPlayground_abi)
-submitTellorValue(poolId, 93, 1, "ropsten", w3, tellor_contract)

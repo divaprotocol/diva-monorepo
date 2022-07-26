@@ -1,7 +1,4 @@
 import config
-import eth_abi
-from Crypto.Hash import keccak
-from web3 import Web3
 import tellor
 
 PRIVATE_KEY = config.PRIVATE_KEY
@@ -28,7 +25,3 @@ def setFinRefVal(pool_id, network, w3, my_contract):
     transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
     print("Price submitted for pool id {} ".format(pool_id), "({})".format(network))
 
-poolId = 48423
-w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL["ropsten"]))
-DIVAOracleTellor_contract = w3.eth.contract(address=tellor.DIVAOracleTellor_contract_address["ropsten"], abi=tellor.DIVAOracleTellor_abi)
-setFinRefVal(poolId, "ropsten", w3, DIVAOracleTellor_contract)
