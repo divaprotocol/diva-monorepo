@@ -1,38 +1,37 @@
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useRef, useEffect } from 'react'
 import * as d3 from 'd3'
 
 export default function DIVATradeChart(props) {
-  const ref = React.useRef()
-  useLayoutEffect(() => {
-    let {
-      data,
-      w, //Width
-      h, //Height
-      refAsset, //ReferenceAsset
-      payOut,
-      isLong,
-      breakEven,
-      currentPrice,
-      floor,
-      cap,
-      mouseHover,
-      showBreakEven,
-    } = props
-    data = data.map(({ x, y }) => ({
-      x: parseFloat(x),
-      y: parseFloat(y),
-    }))
+  let {
+    data,
+    w, //Width
+    h, //Height
+    refAsset, //ReferenceAsset
+    payOut,
+    isLong,
+    breakEven,
+    currentPrice,
+    floor,
+    cap,
+    mouseHover,
+    showBreakEven,
+  } = props
+  const ref = useRef()
 
-    const optionTypeText = isLong ? 'LONG' : 'SHORT'
-    const referenceAsset = refAsset.slice(0, 8)
-    // Set the dimensions and margins of the graph
-    var margin = { top: 15, right: 2, bottom: 40, left: 20 },
-      width = w - margin.left - margin.right,
-      height = h - margin.top - margin.bottom
+  data = data.map(({ x, y }) => ({
+    x: parseFloat(x),
+    y: parseFloat(y),
+  }))
+  // Set the dimensions and margins of the graph
+  var margin = { top: 15, right: 2, bottom: 40, left: 20 },
+    width = w - margin.left - margin.right,
+    height = h - margin.top - margin.bottom
+
+  useEffect(() => {
     // Append the svg object to the reference element of the page
     // Appends a 'group' element to 'svg'
     // Moves the 'group' element to the top left margin
-    var svg = d3
+    const svg = d3
       .select(ref.current)
       .append('svg')
       .attr('width', width + margin.left + margin.right)
@@ -40,6 +39,17 @@ export default function DIVATradeChart(props) {
       .style('overflow', 'visible')
       .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+  }, [])
+
+  useEffect(() => {
+    draw()
+  }, [props.data, props.currentPrice, props.breakEven])
+
+  const draw = () => {
+    const svg = d3.select(ref.current)
+
+    const optionTypeText = isLong ? 'LONG' : 'SHORT'
+    const referenceAsset = refAsset.slice(0, 8)
 
     //Text Label on the Top left corner i.e Payout per Long token (in WAGMI18)
     const labelWidth = 30
@@ -487,7 +497,11 @@ export default function DIVATradeChart(props) {
     if (mouseHover) {
       mouseHoverEffect()
     }
-  }, [props.w])
+  }
 
-  return <div id="DivaTradeChart" ref={ref}></div>
+  return (
+    <div id="DivaTradeChart">
+      <svg ref={ref}></svg>
+    </div>
+  )
 }
