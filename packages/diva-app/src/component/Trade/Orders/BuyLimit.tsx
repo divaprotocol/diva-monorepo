@@ -466,8 +466,7 @@ export default function BuyLimit(props: {
 
   const createBtnDisabled =
     !isApproved || youPay.lte(0) || collateralBalance.sub(youPay).lt(0)
-  const approveBtnDisabled =
-    isApproved || youPay.lte(0) || collateralBalance.sub(youPay).lt(0)
+  const approveBtnDisabled = isApproved || youPay.lte(0) // No collateralBalance.sub(youPay).lt(0) condition as a user should be able to approve any amount they want
 
   return (
     <div>

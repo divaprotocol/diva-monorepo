@@ -572,8 +572,7 @@ export default function BuyMarket(props: {
 
   const fillBtnDisabled =
     isApproved || orderBtnDisabled || collateralBalance.sub(youPay).lt(0)
-  const approveBtnDisabled =
-    !isApproved || orderBtnDisabled || collateralBalance.sub(youPay).lt(0)
+  const approveBtnDisabled = !isApproved || orderBtnDisabled // No collateralBalance.sub(youPay).lt(0) condition as a user should be able to approve any amount they want
 
   return (
     <div>

@@ -213,8 +213,6 @@ export default function SellLimit(props: {
         const totalSellAmount = numberOfOptions.add(
           existingSellLimitOrdersAmountUser
         )
-        console.log('optionBalance', optionBalance.toString())
-        console.log('totalSellAmount', totalSellAmount.toString())
 
         if (numberOfOptions.gt(remainingAllowance)) {
           // Entered position token amount exceeds remaining allowance ...
@@ -495,10 +493,7 @@ export default function SellLimit(props: {
     !isApproved ||
     optionBalance.sub(numberOfOptions).lt(0)
 
-  const approveBtnDisabled =
-    !numberOfOptions.gt(0) ||
-    isApproved ||
-    optionBalance.sub(numberOfOptions).lt(0)
+  const approveBtnDisabled = !numberOfOptions.gt(0) || isApproved // No optionBalance.sub(numberOfOptions).lt(0) condition as a user should be able to approve any amount they want
 
   return (
     <div>
