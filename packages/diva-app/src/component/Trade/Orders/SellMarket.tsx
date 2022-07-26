@@ -593,6 +593,11 @@ export default function SellMarket(props: {
     }
   }, [option, avgExpectedRate, usdPrice, userAddress])
 
+  const fillBtnDisabled =
+    isApproved || orderBtnDisabled || optionBalance.sub(numberOfOptions).lt(0)
+  const approveBtnDisabled =
+    !isApproved || orderBtnDisabled || optionBalance.sub(numberOfOptions).lt(0)
+
   return (
     <div>
       <form onSubmit={handleOrderSubmit}>
@@ -718,7 +723,7 @@ export default function SellMarket(props: {
               startIcon={<CheckIcon />}
               type="submit"
               value="Submit"
-              disabled={isApproved || orderBtnDisabled}
+              disabled={fillBtnDisabled}
             >
               {'Approve'}
             </LoadingButton>
@@ -731,7 +736,7 @@ export default function SellMarket(props: {
               startIcon={<AddIcon />}
               type="submit"
               value="Submit"
-              disabled={!isApproved || orderBtnDisabled}
+              disabled={approveBtnDisabled}
             >
               {'Fill'}
             </LoadingButton>
