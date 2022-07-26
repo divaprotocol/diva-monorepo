@@ -144,7 +144,8 @@ export const useCreatePoolFormik = () => {
       }
       if (
         values.expiryTime != null &&
-        values.expiryTime.getTime() - Date.now() < threshold
+        values.expiryTime.getTime() - Date.now() < threshold &&
+        values.step === 1
       ) {
         errors.expiryTime = `Expiry time cannot be earlier than ${
           threshold / 1000 / 60
