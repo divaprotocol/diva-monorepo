@@ -457,7 +457,7 @@ export default function BuyLimit(props: {
   ])
 
   useEffect(() => {
-    if (allowance.sub(youPay).lte(0)) {
+    if (remainingAllowance.sub(youPay).lte(0)) {
       setIsApproved(false)
     } else {
       setIsApproved(true)
