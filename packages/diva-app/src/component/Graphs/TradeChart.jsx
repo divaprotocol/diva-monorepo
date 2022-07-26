@@ -24,7 +24,7 @@ export default function DIVATradeChart(props) {
     }))
 
     const optionTypeText = isLong ? 'LONG' : 'SHORT'
-    const reffeenceAsset = refAsset.slice(0, 8)
+    const referenceAsset = refAsset.slice(0, 8)
     // Set the dimensions and margins of the graph
     var margin = { top: 15, right: 2, bottom: 40, left: 20 },
       width = w - margin.left - margin.right,
@@ -342,7 +342,7 @@ export default function DIVATradeChart(props) {
         .attr('x', 18)
         .attr('y', 40)
         .attr('font-size', '14')
-        .text(reffeenceAsset + '...' + ' at Expiry:')
+        .text(referenceAsset + '...' + ' at Expiry:')
 
       tooltipPerLine
         .append('text')
