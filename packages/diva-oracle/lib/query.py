@@ -23,7 +23,7 @@ def query(lastId):
             """ % (lastId, (int(dt.now().timestamp()) - 86400), (int(dt.now().timestamp()) - 300), config.dataprovider)
 
 
-def email_query():
+def new_pool_query():
     return """
             { 
                 pools (where: {dataProvider: "%s", createdAt_gte: "%s" }) {

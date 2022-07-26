@@ -15,8 +15,9 @@ from lib.submitPool import submitPool
 
 message = "Subject: Pending Pool Transactions \n"
 
+
 def run(network, w3, contract):
-    #sendEmail()
+    # sendEmail()
     print("#########################################")
     print('\033[1m' + "Network: {}".format(network) + '\033[0m')
     max_time_away = dt.timedelta(minutes=config.max_time_away)
@@ -36,22 +37,6 @@ def run(network, w3, contract):
 networks = config.networks
 waiting_sec = config.waiting_next_iteration
 
-pendingPools = {
-    "ropsten": [],
-    "mumbai": [],
-    "rinkeby": []
-}
-pendingPools_nonces = {
-    "ropsten": [],
-    "mumbai": [],
-    "rinkeby": []
-}
-pendingPools_len = {
-    "ropsten": [0],
-    "mumbai": [0],
-    "rinkeby": [0]
-}
-
 
 w3_instances = []
 contract_instances = []
@@ -63,8 +48,10 @@ nonces = {
 
 for network in networks:
     w3_instances.append(Web3(Web3.HTTPProvider(config.PROVIDER_URL[network])))
-    contract_instances.append(w3_instances[-1].eth.contract(address=diva.contract_address[network], abi=diva.abi))
-    nonces[network] = w3_instances[-1].eth.get_transaction_count(config.PUBLIC_KEY)
+    contract_instances.append(
+        w3_instances[-1].eth.contract(address=diva.contract_address[network], abi=diva.abi))
+    nonces[network] = w3_instances[-1].eth.get_transaction_count(
+        config.PUBLIC_KEY)
 iter = 0
 
 
@@ -81,10 +68,8 @@ if __name__ == "__main__":
         for j in jobs:
             j.join()
 
-
         print("#########################################")
         print("Waiting {} sec before next iteration...".format(waiting_sec))
         # Wait before next iteration
         time.sleep(waiting_sec)
         iter += 1
-
