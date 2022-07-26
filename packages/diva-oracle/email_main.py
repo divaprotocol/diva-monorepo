@@ -15,7 +15,7 @@ from lib.sendEmail import message_craft_pool_expiry
 from lib.recorder import *
 from lib.df_utils import extend_DataFrame
 from lib.query import query
-from lib.query import email_query
+from lib.query import new_pool_query
 from lib.query import pool_expiry
 from lib.submitPool import submitPool
 

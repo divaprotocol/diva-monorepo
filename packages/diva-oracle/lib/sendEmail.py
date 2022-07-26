@@ -25,17 +25,19 @@ def message_craft_new_pool(df):
 
 
 def message_craft_pool_expiry(df, notification_ceiling, notification_floor=0):
-    message = "Subject: Diva - Pool Expiry"
+    message = "Subject: Diva - Pool Expiry notice"
     message += "\n"
     message += "\n"
-    message += "Pool Expirty notification \n"
+    message += "Pool Expiry notification \n"
+    message += "Pools Expire between {} and {} hours until expiration \n".format(
+        notification_floor, notification_ceiling)
     for key, i in df.iterrows():
         if (dt.now().timestamp() + hour_conversion(notification_floor)) < int(i['expiryTime']) < (dt.now().timestamp() + hour_conversion(notification_ceiling)):
             print("made it")
             print(i)
             print("now")
             print(dt.now())
-            message += "New Pool {}, Expires in {} hours, set to expire at {}".format(
+            message += "Pool {}, Expires in {} hours, set to expire at {}".format(
                 i['id'], int((int(i['expiryTime']) - dt.now().timestamp())/(60*60)), dt.fromtimestamp(int(i['expiryTime'])))
             message += "\n"
     sendEmail(False, message)
