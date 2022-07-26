@@ -1,0 +1,45 @@
+import config
+import eth_abi
+from Crypto.Hash import keccak
+from web3 import Web3
+import tellor
+
+PRIVATE_KEY = config.PRIVATE_KEY
+PUBLIC_KEY = config.PUBLIC_KEY
+
+
+def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract):
+    print("Sending price to Tellor Playground ...")
+    gas_price = w3.eth.gas_price
+
+
+    queryDataArgs = eth_abi.encode_abi(["int"], [int(pool_id)])
+    queryData = eth_abi.encode_abi(["string", "bytes"],["DIVAProtocolPolygon", queryDataArgs])
+    queryId = keccak.new(digest_bits=256)
+    queryId.update(queryData)
+    print(queryId.hexdigest())
+
+    oracleValue = eth_abi.encode_abi(["int", "int"], [int(w3.toWei(finalRefVal, 'ether')), int(w3.toWei(collToUSD, 'ether'))])
+
+    submit_txn = my_contract.functions.submitValue('0x' + queryId.hexdigest(), '0x' + oracleValue.hex(), 0, '0x' + queryData.hex()).buildTransaction(
+        {
+            "gasPrice": gas_price,
+            "chainId": config.chain_id[network],
+            "from": PUBLIC_KEY,
+            "nonce": w3.eth.get_transaction_count(PUBLIC_KEY)
+        }
+    )
+    print("Nonce:", w3.eth.get_transaction_count(PUBLIC_KEY))
+    print("For pool:", pool_id)
+    signed_txn = w3.eth.account.sign_transaction(submit_txn, private_key=PRIVATE_KEY)
+    txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+    print(txn_hash.hex())
+    transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
+    print("Price submitted for pool id {} ".format(pool_id), "({})".format(network))
+
+print(1)
+
+poolId = 48423
+w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL["ropsten"]))
+tellor_contract = w3.eth.contract(address=tellor.TellorPlayground_contract_address["ropsten"], abi=tellor.TellorPlayground_abi)
+submitTellorValue(poolId, 93, 1, "ropsten", w3, tellor_contract)
