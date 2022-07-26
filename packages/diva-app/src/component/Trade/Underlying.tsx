@@ -169,15 +169,17 @@ export default function Underlying() {
               </Stack>
             </LeftDiv>
             <RightDiv>
-              <Paper>
-                <CreateOrder
-                  option={pool}
-                  tokenAddress={tokenAddress}
-                  exchangeProxy={exchangeProxy}
-                  chainId={chainId}
-                  provider={provider}
-                />
-              </Paper>
+              <Stack spacing={2}>
+                <Paper>
+                  <CreateOrder
+                    option={pool}
+                    tokenAddress={tokenAddress}
+                    exchangeProxy={exchangeProxy}
+                    chainId={chainId}
+                    provider={provider}
+                  />
+                </Paper>
+              </Stack>
             </RightDiv>
           </Stack>
         </TabPanel>
