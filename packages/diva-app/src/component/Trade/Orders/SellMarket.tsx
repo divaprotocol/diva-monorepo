@@ -111,6 +111,7 @@ export default function SellMarket(props: {
       // Disable fill order button if nbrOptions incl. fee exceeds user's wallet balance
       if (optionBalance.sub(nbrOptions).sub(feeAmount).lt(0)) {
         setOrderBtnDisabled(true)
+        
         console.log('Insufficient wallet balance')
       } else {
         setOrderBtnDisabled(false)
