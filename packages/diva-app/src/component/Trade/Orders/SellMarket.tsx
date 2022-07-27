@@ -189,29 +189,23 @@ export default function SellMarket(props: {
         existingLimitOrders: existingBuyLimitOrders,
         chainId: props.chainId,
       }
-      console.log('orderData', orderData)
       sellMarketOrder(orderData).then(async (orderFillStatus: any) => {
         if (!(orderFillStatus == undefined)) {
-          orderFillStatus.logs.forEach(async (eventData: any) => {
-            // On fill order success ...
+          // On fill order success ...
 
-            if (eventData.event === 'LimitOrderFilled') {
-              // QUESTION Do we need this if statement at all?
-              // Wait for 4 secs for 0x to update orders, then handle order book display
-              await new Promise((resolve) => setTimeout(resolve, 4000))
+          // Wait for 4 secs for 0x to update orders, then handle order book display
+          await new Promise((resolve) => setTimeout(resolve, 4000))
 
-              // Reset inputs and state variables
-              await props.handleDisplayOrder()
-              Array.from(document.querySelectorAll('input')).forEach(
-                (input) => (input.value = '')
-              )
-              setNumberOfOptions(ZERO)
-              setFillLoading(false)
-              setYouReceive(ZERO)
-              setFeeAmount(ZERO)
-              alert('Order successfully filled.')
-            }
-          })
+          // Reset inputs and state variables
+          await props.handleDisplayOrder()
+          Array.from(document.querySelectorAll('input')).forEach(
+            (input) => (input.value = '')
+          )
+          setNumberOfOptions(ZERO)
+          setFillLoading(false)
+          setYouReceive(ZERO)
+          setFeeAmount(ZERO)
+          alert('Order successfully filled.')
         } else {
           // Rejected by user or tx failure (i.e., orderFillStatus == undefined as no tx receipt was returned)
           // Do not reset values.

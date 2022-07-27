@@ -13,7 +13,7 @@
  
     // INPUT: 0x exchange proxy address, token to approve, amount to approve
     const exchangeProxyAddress = "0xdef1c0ded9bec7f1a1670819833240f027b25eff" // same for several chains including Mainnet and Ropsten     
-    const tokenToApprove = "0x03582cb41f2fd982e1b531d633b6de049d56f2a0"
+    const tokenToApprove = "0x134e62bd2ee247d4186a1fdbaa9e076cb26c1355"
     let allowance = 0 // conversion into BigNumber with the respective number of decimals is done below 
 
     // Get signers
