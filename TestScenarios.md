@@ -75,6 +75,7 @@ Check list for testing the trade page:
    * [ ] Number incl. fees should update automatically on user input. 
    * [ ] User can partially fill an order in the orderbook and the orderbook gets updated automatically.
    * [ ] User can fill multiple order in the orderbook and the orderbook gets updated automatically.
+   * [ ] Fill success message is only shown once if multiple orders are filled.
    * [ ] After successful order fill, Number, Number incl. fees and You Receive are updated
    * [ ] After successful order fill, Wallet Balance is automatically reduced by Number incl. fees.
    * [ ] If there are no Bids / Buy Limit orders in the orderbook, the FILL button should stay disabled on Number input and show a "No Bids in orderbook" notification to the user. The notification should disappear if the user removes the input.
