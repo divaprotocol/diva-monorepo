@@ -469,9 +469,12 @@ export default function BuyLimit(props: {
               <LabelStyle>You Pay </LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {toExponentialOrNumber(
-                  Number(formatUnits(remainingAllowance, decimals))
-                )}
+                {Number(formatUnits(remainingAllowance, decimals)) <
+                0.00000000001
+                  ? 0
+                  : toExponentialOrNumber(
+                      Number(formatUnits(remainingAllowance, decimals))
+                    )}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>
