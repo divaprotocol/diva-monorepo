@@ -1,5 +1,92 @@
 # Trade page
 
+Check list for testing the trade page:
+
+## BUY LIMIT
+* Setting allowance:
+   * [ ] APPROVE button is enabled if i) Number AND Price have been entered by the user and ii) the resulting You Pay amount exceeds the user's remaining allowance. 
+   * [ ] APPROVE button is disabled if one of the two input fields (Number or Price) are empty.
+   * [ ] APPROVE button is disabled if You Pay amount is less than or equal to the user's remaining allowance.
+   * [ ] You Pay amount is automatically updated on user input.
+   * [ ] User can approve a You Pay amount that exceeds their wallet balance.
+   * [ ] After successful approval, the inputs for Number and Price remain inside the input fields and are NOT cleared.
+   * [ ] After successful approval, APPROVE button is disabled.
+   * [ ] On user rejection in Metamask pop-up, APPROVE button is enabled (and stops spinning) and user inputs are NOT cleared.
+   * [ ] After user rejection, the approve transaction should be repeatable without requiring a page reload.
+* Placing orders:
+   * [ ] CREATE button is enabled if i) both Number AND Price have been entered by the user
+   and ii) the You Pay amount DOES NOT exceed the user's wallet balance. 
+   * [ ] CREATE button is disabled if one of the two input fields (Number or Price) are empty.
+   * [ ] CREATE button is disabled if You Pay amount exceeds the user's wallet balance.
+   * [ ] User can place multiple orders witin their allowance and they automatically show up in the orderbook.
+   * [ ] After successful order creation, the input fields are cleared and the CREATE button is disabled.
+   * [ ] After successful order creation, the remaining allowance is automatically reduced by the You Pay amount.
+   * [ ] On user rejection in Metamask pop-up, CREATE button is enabled (and stops spinning) and user inputs are NOT cleared.
+   * [ ] After user rejection, the creation of the order should be repeatable without requiring a page reload.
+
+## SELL MARKET
+* Setting allowance:
+   * [ ] APPROVE button is enabled if i) Number has been entered and ii) Number **incl. fees** exceeds the user's remaining allowance.
+   * [ ] APPROVE button is disabled if the Number field is empty.
+   * [ ] APPROVE button is disabled if Number **incl. fees** amount is less than or equal to the user's remaining allowance.
+   * [ ] You Receive is automatically updated on user input.
+   * [ ] User can approve a Number **incl. fees** that exceeds their wallet balance.
+   * [ ] After successful approval, the input for Number remains inside the input field and is NOT cleared.
+   * [ ] After successful approval, APPROVE button is disabled.
+   * [ ] On user rejection in Metamask pop-up, APPROVE button is enabled (and stops spinning) and Number input is NOT cleared.
+   * [ ] After user rejection, the approve transaction should be repeatable without requiring a page reload.
+* Filling orders:
+   * [ ] FILL button is enabled if i) Number has been entered by the user and ii) Number **incl. fees** DOES NOT exceed the user's wallet balance.
+   * [ ] FILL button is disabled if Number field is empty.
+   * [ ] FILL button is disabled if Number **incl. fees** exceeds the user's wallet balance and a "Insufficient balance" notification is shown to the user. The notification should disappear if the user reduces/removes the input.
+   * [ ] Number incl. fees should update automatically on user input. 
+   * [ ] User can partially fill an order in the orderbook and the orderbook gets updated automatically.
+   * [ ] User can fill multiple order in the orderbook and the orderbook gets updated automatically.
+   * [ ] After successful order fill, Number, Number incl. fees and You Receive are updated
+   * [ ] After successful order fill, Wallet Balance is automatically reduced by Number incl. fees.
+   * [ ] If there are no Bids / Buy Limit orders in the orderbook, the FILL button should stay disabled on Number input and show a "No Bids in orderbook" notification to the user. The notification should disappear if the user removes the input.
+   * [ ] On user rejection in Metamask pop-up, FILL button is enabled (and stops spinning) and user input is NOT cleared. [FIX]
+   * [ ] After user rejection, the fill order transaction should be repeatable without requiring a page reload. [FIX]
+* Expected price:
+   * [ ] If no user input is provided, the Expected Price shows the best price available in the order book
+   * [ ] If a user input is provided, the Expected Price is calculated correctly and updated automatically
+
+## Orderbook
+* [ ] Orders disappear automatically after they expire
+
+
+* [ ] Fill one limit order starting with zero approval
+* [ ] Fill multiple limit orders starting with zero approval
+* [ ] Fill one limit order that requires additional approval
+* [ ] Fill multiple limit orders that requires additional approval
+* [ ] Fill single order fully
+* [ ] Fill multiple orders fully
+* [ ] Fill all orders in orderbook at once
+* [ ] Fill single order partially
+* [ ] Fill multiple orders fully
+* [ ] Expected price is calculated correctly (excluding fees)
+* [ ] You pay includes fees
+* [ ] Taker amount approved is including fees
+* [ ] Stats are calculated correctly
+* [ ] Small amounts are handled correctly (e.g., 1e-18)
+* [ ] Wallet balance is correctly displayed
+* [ ] Remaining allowance is correctly calculated
+* [ ] Fill/create an order where remaining allowance is exceeded
+* [ ] Fill/create an order where remaining allowance is not exceeded
+
+* [ ] CREATE button is disabled if you pay amount (incl. fee) exceeds user's wallet balance
+* [ ] APPROVE button is independent of user's wallet balance and enabled whenever you pay amount (incl. fee) exceeds remaining allowance
+* [ ]  
+
+## Tips & Comments
+* Use the `approve.js` script in `packages/diva-scripts` to set the allowance. Set `tokenToApprove` to the collateral/position token address, set the `allowance` amount and run `yarn hardhat run scripts/approve.js --network ropsten` inside `packages/diva-scripts`. Make sure you have an `.env` file in order to execute transactions.
+* If you create a Sell Limit order say and reduce the allowance afterwards, thereby reducing the fillable quantity, all additional approval giving afterwards will go towards making the existing order fully fillable. That is, if say you have placed a Sell Limit order with quantity = 1 and afterwards you reduce the allowance to quantity = 0.8, then, if you want to do a SELL MARKET for 0.1, for which you need additional allowance, this additional allowance will increase the fillable quantity of the existing Sell Limit order rather than enabling you to execute the SELL MARKET order of 0.1. This is expected behavior and not a bug.
+
+
+## General
+* [ ] User's are not allowed to enter characters into the input field (PENDING implementation)
+* [ ] Buttons keep showing loading wheel until both the transaction and 0x data refresh have been completed.
+
 ## SELL LIMIT
 
 ### Test 1: Remaining allowance

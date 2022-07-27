@@ -136,9 +136,8 @@ export default function SellMarket(props: {
         // TODO: Exclude orders that have a fee higher than 1% from the orderbook so that users will not get screwed.
         const amountToApprove = allowance
           .add(numberOfOptions)
+          .add(feeAmount)
           .sub(remainingAllowance)
-          .mul(parseUnits(feeMultiplier))
-          .div(positionTokenUnit)
           .add(BigNumber.from(100)) // Adding a buffer of 100 to make sure that there will be always sufficient approval
 
         // Set allowance. Returns 'undefined' if rejected by user.
