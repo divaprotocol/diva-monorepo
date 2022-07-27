@@ -45,8 +45,8 @@ Check list for testing the trade page:
    * [ ] After successful order fill, Number, Number incl. fees and You Receive are updated
    * [ ] After successful order fill, Wallet Balance is automatically reduced by Number incl. fees.
    * [ ] If there are no Bids / Buy Limit orders in the orderbook, the FILL button should stay disabled on Number input and show a "No Bids in orderbook" notification to the user. The notification should disappear if the user removes the input.
-   * [ ] On user rejection in Metamask pop-up, FILL button is enabled (and stops spinning) and user input is NOT cleared. [FIX]
-   * [ ] After user rejection, the fill order transaction should be repeatable without requiring a page reload. [FIX]
+   * [ ] On user rejection in Metamask pop-up, FILL button is enabled (and stops spinning) and user input is NOT cleared.
+   * [ ] After user rejection, the fill order transaction should be repeatable without requiring a page reload.
 * Expected price:
    * [ ] If no user input is provided, the Expected Price shows the best price available in the order book
    * [ ] If a user input is provided, the Expected Price is calculated correctly and updated automatically

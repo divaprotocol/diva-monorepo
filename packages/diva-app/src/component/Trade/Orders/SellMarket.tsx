@@ -183,6 +183,7 @@ export default function SellMarket(props: {
         existingLimitOrders: existingBuyLimitOrders,
         chainId: props.chainId,
       }
+      console.log('orderData', orderData)
       sellMarketOrder(orderData).then(async (orderFillStatus: any) => {
         if (!(orderFillStatus == undefined)) {
           orderFillStatus.logs.forEach(async (eventData: any) => {
@@ -207,18 +208,9 @@ export default function SellMarket(props: {
           })
         } else {
           // Rejected by user or tx failure (i.e., orderFillStatus == undefined as no tx receipt was returned)
-          setOrderBtnDisabled(true)
+          // Do not reset values.
           setFillLoading(false)
           alert('Order could not be filled.')
-
-          // Reset inputs and state variables
-          await props.handleDisplayOrder()
-          Array.from(document.querySelectorAll('input')).forEach(
-            (input) => (input.value = '')
-          )
-          setNumberOfOptions(ZERO)
-          setFeeAmount(ZERO)
-          setYouReceive(ZERO)
         }
       })
     }

@@ -201,17 +201,9 @@ export default function BuyMarket(props: {
           })
         } else {
           // Rejected by user or tx failure (i.e., orderFillStatus == undefined as no tx receipt was returned)
-          setOrderBtnDisabled(true)
+          // Do not reset values.
           setFillLoading(false)
           alert('Order could not be filled.')
-
-          // Reset inputs and state variables
-          await props.handleDisplayOrder()
-          Array.from(document.querySelectorAll('input')).forEach(
-            (input) => (input.value = '')
-          )
-          setNumberOfOptions(ZERO)
-          setYouPay(ZERO)
         }
       })
     }
