@@ -17,7 +17,7 @@ Check list for testing the trade page:
    * [ ] CREATE button is enabled if i) both Number AND Price have been entered by the user
    and ii) the You Pay amount DOES NOT exceed the user's wallet balance. 
    * [ ] CREATE button is disabled if one of the two input fields (Number or Price) are empty.
-   * [ ] CREATE button is disabled if You Pay amount exceeds the user's wallet balance. An "Insufficient balance" notification is shown to the user if within the remaining allowance (otherwise approve process is activated). The notification should disappear if the user reduces/removes the input.
+   * [ ] CREATE button is disabled if You Pay amount exceeds the user's wallet balance. An "Insufficient balance" notification is shown to the user if You Pay amount is within the remaining allowance (otherwise approve process is activated). The notification should disappear if the user reduces/removes the input. **Notification part is pending implementation.**
    * [ ] User can place multiple orders witin their allowance and they automatically show up in the orderbook.
    * [ ] After successful order creation, the input fields are cleared and the CREATE button is disabled.
    * [ ] After successful order creation, the remaining allowance is automatically reduced by the You Pay amount.
@@ -38,7 +38,7 @@ Check list for testing the trade page:
 * Filling orders:
    * [ ] FILL button is enabled if i) Number has been entered by the user and ii) Number **incl. fees** DOES NOT exceed the user's wallet balance.
    * [ ] FILL button is disabled if Number field is empty.
-   * [ ] FILL button is disabled if Number **incl. fees** exceeds the user's wallet balance. An "Insufficient balance" notification is shown to the user if within the remaining allowance (otherwise approve process is activated). The notification should disappear if the user reduces/removes the input.
+   * [ ] FILL button is disabled if Number **incl. fees** exceeds the user's wallet balance. An "Insufficient balance" notification is shown to the user if Number **incl. fees** is within the remaining allowance (otherwise approve process is activated). The notification should disappear if the user reduces/removes the input. **Notification part is pending implementation.**
    * [ ] Number incl. fees should update automatically on user input. 
    * [ ] User can partially fill an order in the orderbook and the orderbook gets updated automatically.
    * [ ] User can fill multiple order in the orderbook and the orderbook gets updated automatically.

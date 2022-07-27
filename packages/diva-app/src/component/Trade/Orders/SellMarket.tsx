@@ -111,8 +111,13 @@ export default function SellMarket(props: {
       // Disable fill order button if nbrOptions incl. fee exceeds user's wallet balance
       if (optionBalance.sub(nbrOptions).sub(feeAmount).lt(0)) {
         setOrderBtnDisabled(true)
-        
-        console.log('Insufficient wallet balance')
+
+        // TODO Below is currently not working as isApproved is updated after this part. To be revisited in a separate PR.
+        // if (isApproved) {
+        //   // Display message only when balance is exceeded in the presence of sufficient approval.
+        //   // Otherwise the normal approval logic will take place where a user can approve a higher amount.
+        //   console.log('Insufficient wallet balance')
+        // }
       } else {
         setOrderBtnDisabled(false)
       }

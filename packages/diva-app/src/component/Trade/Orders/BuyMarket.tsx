@@ -108,8 +108,13 @@ export default function BuyMarket(props: {
       // Disable fill order button if youPay amount (incl. fees) exceeds user's wallet balance
       if (collateralBalance.sub(youPay).lt(0)) {
         setOrderBtnDisabled(true)
-        // TODO Add if isApproved condition here
-        console.log('Insufficient wallet balance')
+
+        // TODO Below is currently not working as isApproved is updated after this part. To be revisited in a separate PR.
+        // if (isApproved) {
+        //   // Display message only when balance is exceeded in the presence of sufficient approval.
+        //   // Otherwise the normal approval logic will take place where a user can approve a higher amount.
+        //   console.log('Insufficient wallet balance')
+        // }
       } else {
         setOrderBtnDisabled(false)
       }
