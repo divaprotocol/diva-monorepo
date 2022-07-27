@@ -107,10 +107,14 @@ export default function SellMarket(props: {
         .mul(parseUnits(tradingFee.toString()))
         .div(positionTokenUnit)
       setFeeAmount(feeAmount)
+
       // Disable fill order button if nbrOptions incl. fee exceeds user's wallet balance
-      optionBalance.sub(nbrOptions).sub(feeAmount).lt(0)
-        ? setOrderBtnDisabled(true)
-        : setOrderBtnDisabled(false)
+      if (optionBalance.sub(nbrOptions).sub(feeAmount).lt(0)) {
+        setOrderBtnDisabled(true)
+        console.log('Insufficient wallet balance')
+      } else {
+        setOrderBtnDisabled(false)
+      }
     } else {
       setYouReceive(ZERO)
       setNumberOfOptions(ZERO)
@@ -149,7 +153,7 @@ export default function SellMarket(props: {
           const optionAllowance = BigNumber.from(approveResponse)
           const remainingAllowance = optionAllowance.sub(
             existingSellLimitOrdersAmountUser
-          ) // QUESTION: Do we have to deduct fees here?
+          )
 
           setRemainingAllowance(remainingAllowance)
           setAllowance(optionAllowance)
@@ -186,6 +190,7 @@ export default function SellMarket(props: {
             // On fill order success ...
 
             if (eventData.event === 'LimitOrderFilled') {
+              // QUESTION Do we need this if statement at all?
               // Wait for 4 secs for 0x to update orders, then handle order book display
               await new Promise((resolve) => setTimeout(resolve, 4000))
 
@@ -198,7 +203,6 @@ export default function SellMarket(props: {
               setFillLoading(false)
               setYouReceive(ZERO)
               setFeeAmount(ZERO)
-              setFillLoading(false)
               alert('Order successfully filled.')
             }
           })
@@ -505,7 +509,7 @@ export default function SellMarket(props: {
     !isApproved ||
     orderBtnDisabled ||
     optionBalance.sub(numberOfOptions).sub(feeAmount).lt(0)
-  const approveBtnDisabled = !numberOfOptions.gt(0) || isApproved // No optionBalance.sub(numberOfOptions).sub(feeAmount).lt(0) condition as a user should be able to approve any amount they want
+  const approveBtnDisabled = isApproved || !numberOfOptions.gt(0) // No optionBalance.sub(numberOfOptions).sub(feeAmount).lt(0) condition as a user should be able to approve any amount they want
 
   return (
     <div>

@@ -429,12 +429,11 @@ export default function SellLimit(props: {
   }, [remainingAllowance, numberOfOptions, userAddress])
 
   const createBtnDisabled =
+    !isApproved ||
     !numberOfOptions.gt(0) ||
     !pricePerOption.gt(0) ||
-    !isApproved ||
     optionBalance.sub(numberOfOptions).lt(0)
-
-  const approveBtnDisabled = !numberOfOptions.gt(0) || isApproved // No optionBalance.sub(numberOfOptions).lt(0) condition as a user should be able to approve any amount they want
+  const approveBtnDisabled = isApproved || !numberOfOptions.gt(0) // No optionBalance.sub(numberOfOptions).lt(0) condition as a user should be able to approve any amount they want
 
   return (
     <div>
