@@ -207,44 +207,34 @@ export default function SellLimit(props: {
     } else {
       // Remaining allowance - nbrOptions > 0
       setFillLoading(true)
-      if (optionBalance.gt(0)) {
-        // User owns position tokens ...
-
-        const orderData = {
-          maker: userAddress,
-          provider: web3,
-          isBuy: false,
-          nbrOptions: numberOfOptions,
-          collateralDecimals: decimals,
-          makerToken: makerToken,
-          takerToken: takerToken,
-          limitPrice: pricePerOption,
-          orderExpiry: expiry,
-          chainId: props.chainId,
-          exchangeProxy: exchangeProxy,
-        }
-        setFillLoading(true)
-        sellLimitOrder(orderData)
-          .then(async (response) => {
-            if (response?.status === 200) {
-              //need to invalidate cache order response since orderbook is updated
-              dispatch(setResponseSell([]))
-              // await new Promise((resolve) => setTimeout(resolve, 2000))
-              await props.handleDisplayOrder()
-              setFillLoading(false)
-              handleFormReset()
-            }
-          })
-          .catch(function (error) {
-            setFillLoading(false)
-            console.error(error)
-          })
-      } else {
-        setFillLoading(false)
-        alert(
-          'No ' + params.tokenType.toUpperCase() + ' tokens available to sell.'
-        )
+      const orderData = {
+        maker: userAddress,
+        provider: web3,
+        isBuy: false,
+        nbrOptions: numberOfOptions,
+        collateralDecimals: decimals,
+        makerToken: makerToken,
+        takerToken: takerToken,
+        limitPrice: pricePerOption,
+        orderExpiry: expiry,
+        chainId: props.chainId,
+        exchangeProxy: exchangeProxy,
       }
+      sellLimitOrder(orderData)
+        .then(async (response) => {
+          if (response.status === 200) {
+            //need to invalidate cache order response since orderbook is updated
+            dispatch(setResponseSell([]))
+            // await new Promise((resolve) => setTimeout(resolve, 2000))
+            await props.handleDisplayOrder()
+            setFillLoading(false)
+            handleFormReset()
+          }
+        })
+        .catch(function (error) {
+          setFillLoading(false)
+          console.error(error)
+        })
     }
   }
 

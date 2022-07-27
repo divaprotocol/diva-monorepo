@@ -196,42 +196,34 @@ export default function BuyLimit(props: {
     } else {
       // Remaining allowance - youPay > 0
       setFillLoading(true)
-      if (collateralBalance.gt(0)) {
-        // User owns collateral tokens ...
-
-        const orderData = {
-          maker: userAddress,
-          provider: web3,
-          isBuy: true,
-          nbrOptions: numberOfOptions,
-          collateralDecimals: decimals,
-          makerToken: makerToken,
-          takerToken: takerToken,
-          limitPrice: pricePerOption,
-          orderExpiry: expiry,
-          chainId: props.chainId,
-          exchangeProxy: exchangeProxy,
-        }
-        setFillLoading(true)
-        buylimitOrder(orderData)
-          .then(async (response) => {
-            if (response.status === 200) {
-              //need to invalidate cache order response since orderbook is updated
-              dispatch(setResponseBuy([]))
-              // await new Promise((resolve) => setTimeout(resolve, 2000))
-              await props.handleDisplayOrder()
-              setFillLoading(false)
-              handleFormReset()
-            }
-          })
-          .catch(function (error) {
-            setFillLoading(false)
-            console.error('Error' + error)
-          })
-      } else {
-        setFillLoading(false)
-        alert(`No ${option.collateralToken.symbol} tokens available to buy.`)
+      const orderData = {
+        maker: userAddress,
+        provider: web3,
+        isBuy: true,
+        nbrOptions: numberOfOptions,
+        collateralDecimals: decimals,
+        makerToken: makerToken,
+        takerToken: takerToken,
+        limitPrice: pricePerOption,
+        orderExpiry: expiry,
+        chainId: props.chainId,
+        exchangeProxy: exchangeProxy,
       }
+      buylimitOrder(orderData)
+        .then(async (response) => {
+          if (response.status === 200) {
+            //need to invalidate cache order response since orderbook is updated
+            dispatch(setResponseBuy([]))
+            // await new Promise((resolve) => setTimeout(resolve, 2000))
+            await props.handleDisplayOrder()
+            setFillLoading(false)
+            handleFormReset()
+          }
+        })
+        .catch(function (error) {
+          setFillLoading(false)
+          console.error(error)
+        })
     }
   }
 

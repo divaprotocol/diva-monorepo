@@ -24,6 +24,8 @@ Check list for testing the trade page:
    * [ ] After successful order creation, the remaining allowance is automatically reduced by the You Pay amount.
    * [ ] On user rejection in Metamask pop-up, CREATE button is enabled (and stops spinning) and user inputs are NOT cleared.
    * [ ] After user rejection, the creation of the order should be repeatable without requiring a page reload.
+* Break-even:
+   * [ ] Updates Break-even on Price input
 
 ## SELL LIMIT
 * Setting allowance:
@@ -47,6 +49,8 @@ Check list for testing the trade page:
    * [ ] After successful order creation, the remaining allowance is automatically reduced by the Number amount.
    * [ ] On user rejection in Metamask pop-up, CREATE button is enabled (and stops spinning) and user inputs are NOT cleared. [FIX]
    * [ ] After user rejection, the creation of the order should be repeatable without requiring a page reload. [TEST]
+* Break-even:
+   * [ ] Updates Break-even on Price input
 
 
 ## SELL MARKET
@@ -77,6 +81,8 @@ Check list for testing the trade page:
 * Expected price:
    * [ ] If no user input is provided, the Expected Price shows the best price available in the order book
    * [ ] If a user input is provided, the Expected Price is calculated correctly and updated automatically
+* Break-even:
+   * [ ] Updates Break-even on Expected Price change
 
 ## Orderbook
 * [ ] Orders disappear automatically after they expire
