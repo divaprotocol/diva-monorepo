@@ -5,7 +5,7 @@ Check list for testing the trade page:
 ## BUY LIMIT
 * Setting allowance:
    * [ ] APPROVE button is enabled if i) Number AND Price have been entered by the user and ii) the resulting You Pay amount exceeds the user's remaining allowance. 
-   * [ ] APPROVE button is disabled if one of the two input fields (Number or Price) are empty.
+   * [ ] APPROVE button is disabled if one of the two input fields (Number or Price) are removed/empty.
    * [ ] APPROVE button is disabled if You Pay amount is less than or equal to the user's remaining allowance.
    * [ ] You Pay amount is automatically updated on user input.
    * [ ] User can approve a You Pay amount that exceeds their wallet balance.
@@ -16,20 +16,46 @@ Check list for testing the trade page:
 * Placing orders:
    * [ ] CREATE button is enabled if i) both Number AND Price have been entered by the user
    and ii) the You Pay amount DOES NOT exceed the user's wallet balance. 
-   * [ ] CREATE button is disabled if one of the two input fields (Number or Price) are empty.
-   * [ ] CREATE button is disabled if You Pay amount exceeds the user's wallet balance. An "Insufficient balance" notification is shown to the user if You Pay amount is within the remaining allowance (otherwise approve process is activated). The notification should disappear if the user reduces/removes the input. **Notification part is pending implementation.**
+   * [ ] CREATE button is disabled if one of the two input fields (Number or Price) are removed/empty.
+   * [ ] CREATE button is disabled if You Pay amount exceeds the user's wallet balance.
+   * [ ] An "Insufficient balance" notification is shown to the user if the You Pay amount i) exceeds the user's wallet balance and ii) is within the remaining allowance. Otherwise the approve process will be triggered and no notification is needed. The notification should disappear if the user reduces/removes the input. **Notification part is pending implementation.**
    * [ ] User can place multiple orders witin their allowance and they automatically show up in the orderbook.
    * [ ] After successful order creation, the input fields are cleared and the CREATE button is disabled.
    * [ ] After successful order creation, the remaining allowance is automatically reduced by the You Pay amount.
    * [ ] On user rejection in Metamask pop-up, CREATE button is enabled (and stops spinning) and user inputs are NOT cleared.
    * [ ] After user rejection, the creation of the order should be repeatable without requiring a page reload.
 
+## SELL LIMIT
+* Setting allowance:
+   * [ ] APPROVE button is enabled if Number has been entered by the user and that amount exceeds the user's remaining allowance. Note that as opposed to BUY LIMIT, there is no need to enter the Price for the approve process.
+   * [ ] APPROVE button is disabled if the Number is removed/empty.
+   * [ ] APPROVE button is disabled if the Number is less than or equal to the user's remaining allowance.
+   * [ ] User can approve a Number amount that exceeds their wallet balance.
+   * [ ] After successful approval, the Number input remains inside the input field and is NOT cleared.
+   * [ ] After successful approval, APPROVE button is disabled.
+   * [ ] On user rejection in Metamask pop-up, APPROVE button is enabled (and stops spinning) and user inputs are NOT cleared.
+   * [ ] After user rejection, the approve transaction should be repeatable without requiring a page reload.
+* Placing orders:
+   * [ ] You Receive amount is automatically updated after both Number and Price have been entered.
+   * [ ] CREATE button is enabled if i) both Number AND Price have been entered by the user
+   and ii) the Number amount DOES NOT exceed the user's wallet balance.
+   * [ ] CREATE button is disabled if one of the two input fields (Number or Price) are removed/empty.
+   * [ ] CREATE button is disabled if Number amount exceeds the user's wallet balance.
+   * [ ] An "Insufficient balance" notification is shown to the user if the Number amount i) exceeds the user's wallet balance and ii) is within the remaining allowance. Otherwise the approve process will be triggered and no notification is needed. The notification should disappear if the user reduces/removes the input. **Notification part is pending implementation.**
+   * [ ] User can place multiple orders witin their allowance and they automatically show up in the orderbook.
+   * [ ] After successful order creation, the input fields are cleared and the CREATE button is disabled.
+   * [ ] After successful order creation, the remaining allowance is automatically reduced by the Number amount.
+   * [ ] On user rejection in Metamask pop-up, CREATE button is enabled (and stops spinning) and user inputs are NOT cleared. [FIX]
+   * [ ] After user rejection, the creation of the order should be repeatable without requiring a page reload. [TEST]
+
+
 ## SELL MARKET
 * Setting allowance:
    * [ ] APPROVE button is enabled if i) Number has been entered and ii) Number **incl. fees** exceeds the user's remaining allowance.
-   * [ ] APPROVE button is disabled if the Number field is empty.
+   * [ ] APPROVE button is disabled if the Number field is removed/empty.
    * [ ] APPROVE button is disabled if Number **incl. fees** amount is less than or equal to the user's remaining allowance.
    * [ ] You Receive is automatically updated on user input.
+   * [ ] APPROVE button stays disabled if there are no Bids / Buy Limit orders in the orderbook, irrespective of a user's inputs. 
    * [ ] User can approve a Number **incl. fees** that exceeds their wallet balance.
    * [ ] After successful approval, the input for Number remains inside the input field and is NOT cleared.
    * [ ] After successful approval, APPROVE button is disabled.
@@ -37,8 +63,9 @@ Check list for testing the trade page:
    * [ ] After user rejection, the approve transaction should be repeatable without requiring a page reload.
 * Filling orders:
    * [ ] FILL button is enabled if i) Number has been entered by the user and ii) Number **incl. fees** DOES NOT exceed the user's wallet balance.
-   * [ ] FILL button is disabled if Number field is empty.
-   * [ ] FILL button is disabled if Number **incl. fees** exceeds the user's wallet balance. An "Insufficient balance" notification is shown to the user if Number **incl. fees** is within the remaining allowance (otherwise approve process is activated). The notification should disappear if the user reduces/removes the input. **Notification part is pending implementation.**
+   * [ ] FILL button is disabled if Number field is removed/empty.
+   * [ ] FILL button is disabled if Number **incl. fees** exceeds the user's wallet balance.
+   * [ ] An "Insufficient balance" notification is shown to the user if the Number **incl. fees** amount i) exceeds the user's wallet balance and ii) is within the remaining allowance. Otherwise the approve process will be triggered and no notification is needed. The notification should disappear if the user reduces/removes the input. **Notification part is pending implementation.**
    * [ ] Number incl. fees should update automatically on user input. 
    * [ ] User can partially fill an order in the orderbook and the orderbook gets updated automatically.
    * [ ] User can fill multiple order in the orderbook and the orderbook gets updated automatically.
