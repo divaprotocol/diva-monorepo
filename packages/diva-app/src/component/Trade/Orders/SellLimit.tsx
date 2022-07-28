@@ -225,7 +225,10 @@ export default function SellLimit(props: {
           if (response.status === 200) {
             //need to invalidate cache order response since orderbook is updated
             dispatch(setResponseSell([]))
-            // await new Promise((resolve) => setTimeout(resolve, 2000))
+
+            // Wait for 2 secs for 0x to update orders, then handle order book display
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+
             await props.handleDisplayOrder()
             setFillLoading(false)
             handleFormReset()
