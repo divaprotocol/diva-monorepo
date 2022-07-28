@@ -23,6 +23,14 @@ export function ReviewAndSubmit({
   const chainId = provider?.network?.chainId
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
+  const [mobile, setMobile] = useState(false)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setMobile(true)
+    } else {
+      setMobile(false)
+    }
+  }, [])
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
       (dataName: { id: string }) => dataName?.id == values.dataProvider
@@ -50,7 +58,10 @@ export function ReviewAndSubmit({
     matchingDataFeedProviders.some((v) => formik.values.dataProvider === v.id)
 
   return (
-    <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+    <Stack
+      direction={mobile ? 'column' : 'row'}
+      sx={{ justifyContent: 'space-between' }}
+    >
       <Container sx={{ minWidth: '60%' }}>
         <Typography
           pb={theme.spacing(1)}

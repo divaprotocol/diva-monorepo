@@ -76,10 +76,7 @@ export function DefinePoolAttributes({
     } else {
       setMobile(false)
     }
-    console.log(window.innerWidth)
-    console.log(mobile)
-  }, [window.innerWidth])
-  console.log(window.innerWidth)
+  }, [])
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
@@ -204,7 +201,7 @@ export function DefinePoolAttributes({
   }, [payoutProfile])
 
   return (
-    <Stack direction={'row'}>
+    <Stack direction={mobile ? 'column' : 'row'}>
       <Container sx={{ minWidth: '60%' }}>
         <Typography
           style={{ color: 'white' }}
@@ -220,7 +217,7 @@ export function DefinePoolAttributes({
         >
           <Container>
             <h3>Event</h3>
-            <Stack spacing={2} direction="row">
+            <Stack spacing={2} direction={mobile ? 'column' : 'row'}>
               <FormControl
                 fullWidth
                 error={formik.errors.referenceAsset != null}
@@ -319,7 +316,7 @@ export function DefinePoolAttributes({
             <Box>
               <h3>Collateral</h3>
 
-              <Stack pb={3} spacing={2} direction="row">
+              <Stack pb={3} spacing={2} direction={mobile ? 'column' : 'row'}>
                 <FormControl
                   fullWidth
                   error={formik.errors.collateralToken != null}
@@ -439,7 +436,12 @@ export function DefinePoolAttributes({
                 />
               </RadioGroup>
             </FormControl>
-            <Stack pr={-5} pb={3} spacing={2} direction="row">
+            <Stack
+              pr={-5}
+              pb={3}
+              spacing={2}
+              direction={mobile ? 'column' : 'row'}
+            >
               {value === 'Binary' && (
                 <Box pt={2} width="100%">
                   <Tooltip
@@ -471,7 +473,7 @@ export function DefinePoolAttributes({
                         }
                       }}
                       value={inflection}
-                      sx={{ width: '48%' }}
+                      sx={{ width: mobile ? '100%' : '48%' }}
                     />
                   </Tooltip>
                   <DefineAdvanced formik={formik} />
@@ -481,7 +483,7 @@ export function DefinePoolAttributes({
                 <Box pt={2} width="100%">
                   <Stack
                     // sx={{ justifyContent: 'space-between' }}
-                    direction="row"
+                    direction={mobile ? 'column' : 'row'}
                     spacing={2}
                   >
                     <Tooltip
@@ -557,7 +559,7 @@ export function DefinePoolAttributes({
                     <Stack sx={{ justifyContent: 'space-between' }} spacing={3}>
                       <Stack
                         sx={{ justifyContent: 'space-between' }}
-                        direction="row"
+                        direction={mobile ? 'column' : 'row'}
                         spacing={2}
                       >
                         <Tooltip
@@ -597,7 +599,7 @@ export function DefinePoolAttributes({
                       </Stack>
                       <Stack
                         sx={{ justifyContent: 'space-between' }}
-                        direction="row"
+                        direction={mobile ? 'column' : 'row'}
                         spacing={2}
                       >
                         <Tooltip
