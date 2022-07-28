@@ -363,6 +363,31 @@ export function MyDataFeeds() {
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
 
+  const { provider } = useConnectionContext()
+  const chainId = provider?.network?.chainId
+  const [submissionPeriod, setSubmissionPeriod] = useState(0)
+  const [challengePeriod, setChallengePeriod] = useState(0)
+  const [reviewPeriod, setReviewPeriod] = useState(0)
+  const [fallbackPeriod, setFallbackPeriod] = useState(0)
+
+  const diva =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider.getSigner()
+        )
+      : null
+
+  useEffect(() => {
+    diva.getGovernanceParameters().then((governanceParameters) => {
+      setSubmissionPeriod(governanceParameters.submissionPeriod.toNumber())
+      setChallengePeriod(governanceParameters.challengePeriod.toNumber())
+      setReviewPeriod(governanceParameters.reviewPeriod.toNumber())
+      setFallbackPeriod(governanceParameters.fallbackPeriod.toNumber())
+    })
+  }, [diva])
+
   useEffect(() => {
     if (userAddress != null) {
       dispatch(
@@ -373,6 +398,7 @@ export function MyDataFeeds() {
       )
     }
   }, [dispatch, page, userAddress])
+
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,

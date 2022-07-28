@@ -512,6 +512,11 @@ export function MyPositions() {
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
+  const [submissionPeriod, setSubmissionPeriod] = useState(0)
+  const [challengePeriod, setChallengePeriod] = useState(0)
+  const [reviewPeriod, setReviewPeriod] = useState(0)
+  const [fallbackPeriod, setFallbackPeriod] = useState(0)
+
   useEffect(() => {
     dispatch(
       fetchPositionTokens({
@@ -520,13 +525,35 @@ export function MyPositions() {
     )
   }, [dispatch, page, userAddress])
 
+  const diva =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider.getSigner()
+        )
+      : null
+
+  useEffect(() => {
+    diva.getGovernanceParameters().then((governanceParameters) => {
+      setSubmissionPeriod(governanceParameters.submissionPeriod.toNumber())
+      setChallengePeriod(governanceParameters.challengePeriod.toNumber())
+      setReviewPeriod(governanceParameters.reviewPeriod.toNumber())
+      setFallbackPeriod(governanceParameters.fallbackPeriod.toNumber())
+    })
+  }, [diva])
+
   const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
       val.expiryTime,
       val.statusTimestamp,
       val.statusFinalReferenceValue,
       val.finalReferenceValue,
-      val.inflection
+      val.inflection,
+      submissionPeriod,
+      challengePeriod,
+      reviewPeriod,
+      fallbackPeriod
     )
 
     const shared = {

@@ -7,7 +7,7 @@ import {
   userTimeZone,
 } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { BigNumber } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { useEffect, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
@@ -17,11 +17,14 @@ import {
   selectRequestStatus,
 } from '../../Redux/appSlice'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
+import { config } from '../../constants'
+import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { Box, Tooltip } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { getAppStatus } from '../../Util/getAppStatus'
 import { divaGovernanceAddress } from '../../constants'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useHistory, useLocation, useParams } from 'react-router-dom'
 
 export const ExpiresInCell = (props: any) => {
@@ -196,6 +199,31 @@ export default function Markets() {
   const [createdBy, setCreatedBy] = useState(params.creatorAddress)
   const history = useHistory()
 
+  const { provider } = useConnectionContext()
+  const chainId = provider?.network?.chainId
+  const [submissionPeriod, setSubmissionPeriod] = useState(0)
+  const [challengePeriod, setChallengePeriod] = useState(0)
+  const [reviewPeriod, setReviewPeriod] = useState(0)
+  const [fallbackPeriod, setFallbackPeriod] = useState(0)
+
+  const diva =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider.getSigner()
+        )
+      : null
+
+  useEffect(() => {
+    diva.getGovernanceParameters().then((governanceParameters) => {
+      setSubmissionPeriod(governanceParameters.submissionPeriod.toNumber())
+      setChallengePeriod(governanceParameters.challengePeriod.toNumber())
+      setReviewPeriod(governanceParameters.reviewPeriod.toNumber())
+      setFallbackPeriod(governanceParameters.fallbackPeriod.toNumber())
+    })
+  }, [diva])
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       dispatch(fetchPools({ page, createdBy }))
@@ -218,7 +246,11 @@ export default function Markets() {
       val.statusTimestamp,
       val.statusFinalReferenceValue,
       val.finalReferenceValue,
-      val.inflection
+      val.inflection,
+      submissionPeriod,
+      challengePeriod,
+      reviewPeriod,
+      fallbackPeriod
     )
     const shared = {
       Icon: val.referenceAsset,
