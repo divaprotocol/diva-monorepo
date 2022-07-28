@@ -1,4 +1,4 @@
-# Oracle Layour
+# Oracle Layout
 The Oracle directory here can run different types of Oracles based on need. There are 3 main oracles seen in the root here
 1. Email Oracle: email_main.py
 2. Price Oracle: price_main.py
