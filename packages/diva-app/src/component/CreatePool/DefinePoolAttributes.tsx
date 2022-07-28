@@ -50,7 +50,7 @@ export function DefinePoolAttributes({
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
   const [value, setValue] = useState('Binary')
-
+  const [mobile, setMobile] = useState(false)
   const handleChange = (event) => {
     setValue(event.target.value)
     formik.setFieldValue('payoutProfile', event.target.value)
@@ -70,6 +70,16 @@ export function DefinePoolAttributes({
     payoutProfile,
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setMobile(true)
+    } else {
+      setMobile(false)
+    }
+    console.log(window.innerWidth)
+    console.log(mobile)
+  }, [window.innerWidth])
+  console.log(window.innerWidth)
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
