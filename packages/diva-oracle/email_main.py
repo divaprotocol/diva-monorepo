@@ -42,8 +42,9 @@ def run(network, w3, contract):
         # 2. Pool expire notification ; message_craft_pool_expiry
         # Turning False to True will send email, check your configs
         # Email runs on gmail API access, see configs for more details
+        # Set receiver email in sendEmail -> May modify to set here
         message_craft_pool_expiry(df, 8, 0, False)
-        message_craft_pool_expiry(df, 24, 8, False)
+        message_craft_pool_expiry(df, 24, 8, True)
 
 
 network = config.network
