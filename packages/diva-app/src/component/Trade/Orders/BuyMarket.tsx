@@ -398,12 +398,6 @@ export default function BuyMarket(props: {
   }, [numberOfOptions])
 
   useEffect(() => {
-    if (remainingAllowance.sub(youPay).gt(0)) {
-      setIsApproved(true)
-    }
-    if (remainingAllowance.sub(youPay).lte(0)) {
-      setIsApproved(false)
-    }
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
@@ -491,6 +485,15 @@ export default function BuyMarket(props: {
       )
     }
   }, [option, avgExpectedRate, usdPrice, userAddress])
+
+  useEffect(() => {
+    if (remainingAllowance.sub(youPay).gt(0)) {
+      setIsApproved(true)
+    }
+    if (remainingAllowance.sub(youPay).lte(0)) {
+      setIsApproved(false)
+    }
+  }, [remainingAllowance, youPay, userAddress])
 
   const fillBtnDisabled =
     !isApproved || orderBtnDisabled || collateralBalance.sub(youPay).lt(0)

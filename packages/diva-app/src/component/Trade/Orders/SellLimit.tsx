@@ -411,6 +411,7 @@ export default function SellLimit(props: {
     pricePerOption,
     usdPrice,
     existingSellLimitOrdersAmountUser,
+    userAddress,
   ])
 
   useEffect(() => {

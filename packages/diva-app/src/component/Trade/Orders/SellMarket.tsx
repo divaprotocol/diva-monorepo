@@ -402,12 +402,6 @@ export default function SellMarket(props: {
   }, [numberOfOptions])
 
   useEffect(() => {
-    if (remainingAllowance.sub(numberOfOptions).sub(feeAmount).gt(0)) {
-      setIsApproved(true)
-    }
-    if (remainingAllowance.sub(numberOfOptions).sub(feeAmount).lte(0)) {
-      setIsApproved(false)
-    }
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
@@ -495,6 +489,15 @@ export default function SellMarket(props: {
       )
     }
   }, [option, avgExpectedRate, usdPrice, userAddress])
+
+  useEffect(() => {
+    if (remainingAllowance.sub(numberOfOptions).sub(feeAmount).gt(0)) {
+      setIsApproved(true)
+    }
+    if (remainingAllowance.sub(numberOfOptions).sub(feeAmount).lte(0)) {
+      setIsApproved(false)
+    }
+  }, [remainingAllowance, numberOfOptions, userAddress])
 
   const fillBtnDisabled =
     !isApproved ||

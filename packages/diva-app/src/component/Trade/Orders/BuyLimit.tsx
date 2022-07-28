@@ -398,6 +398,7 @@ export default function BuyLimit(props: {
     pricePerOption,
     usdPrice,
     existingBuyLimitOrdersAmountUser,
+    userAddress,
   ])
 
   useEffect(() => {

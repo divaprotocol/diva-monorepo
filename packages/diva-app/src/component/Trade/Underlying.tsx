@@ -215,7 +215,7 @@ export default function Underlying() {
                     w={380}
                     h={220}
                     isLong={OptionParams.IsLong}
-                    breakEven={breakEven}
+                    breakEven={0}
                     floor={OptionParams.Floor}
                     cap={OptionParams.Cap}
                     mouseHover={true}
