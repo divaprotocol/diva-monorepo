@@ -26,15 +26,16 @@ export const buyMarketOrder = async (orderData) => {
 
   // Initialize input arrays for batchFillLimitOrders function
   let takerAssetFillAmounts = []
-  const signatures = []
+  let signatures = []
 
   // Function to executed the 0x batchFillLimitOrders function
   const fillOrderResponse = async (takerAssetFillAmounts, fillOrders) => {
-    fillOrders.map(function (order) {
-      signatures.push(order.signature)
-      delete order.signature
-      return order
-    })
+    // Separate signatures and order data.
+    // Used destructuing instead of signatures.push(order.signature) in combinatino with delete.signature
+    // as signatures would end up undefined on user rejection of transaction and
+    // as a result batchFillLimitOrders would throw an error.
+    signatures = fillOrders.map(({ signature, ...rest }) => signature)
+    fillOrders = fillOrders.map(({ signature, ...rest }) => rest)
 
     // Keep for debugging
     // const res = await exchange
