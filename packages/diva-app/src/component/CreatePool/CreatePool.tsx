@@ -169,7 +169,7 @@ export function CreatePool() {
                     formik.setFieldValue('step', formik.values.step - 1, true)
                   }}
                 >
-                  'Go Back'
+                  Go Back
                 </Button>
               </Stack>
             ) : formik.values.step === 4 ? (
@@ -177,7 +177,7 @@ export function CreatePool() {
                 variant="text"
                 sx={{
                   mt: theme.spacing(8),
-                  ml: theme.spacing(115),
+                  ml: theme.spacing(mobile ? 35 : 115),
                 }}
                 onClick={() => {
                   history.push('/dashboard/mypositions')
