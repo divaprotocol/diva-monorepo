@@ -84,6 +84,7 @@ Check list for testing the order widget on the trade page:
 * Expected price:
    * [ ] If no user input is provided, the Expected Price shows the best price available in the order book.
    * [ ] If a user input is provided, the Expected Price is calculated correctly and updated automatically.
+   * [ ] Expected price is set to zero if a user clears all Bids / Buy Limit orders. **TODO**
 * Max Yield & Break-even:
    * [ ] Updates Break-even on Expected Price change.
    * [ ] Break-even shows 'n/a' if price is greater than 1.
@@ -118,6 +119,7 @@ Check list for testing the order widget on the trade page:
 * Expected price:
    * [ ] If no user input is provided, the Expected Price shows the best price available in the order book.
    * [ ] If a user input is provided, the Expected Price is calculated correctly and updated automatically.
+   * [ ] Expected price is set to zero if a user clears all Asks / Sell Limit orders. **TODO**
 * Max Yield & Break-even:
    * [ ] Updates Break-even on Expected Price change.
    * [ ] Break-even shows 'n/a' if price is greater than 1.
