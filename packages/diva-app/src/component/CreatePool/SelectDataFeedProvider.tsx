@@ -69,7 +69,7 @@ export function SelectDataFeedProvider({
 
   if (isWhitelistedDataFeed) {
     helperText = (
-      <Stack direction={mobile ? 'column' : 'row'} alignContent="center">
+      <Stack direction="row" alignContent="center">
         <CheckCircle
           fontSize="small"
           color="success"
@@ -84,7 +84,7 @@ export function SelectDataFeedProvider({
     !isWhitelistedDataFeed
   ) {
     helperText = (
-      <Stack direction={mobile ? 'column' : 'row'} alignItems="center">
+      <Stack direction={'row'} alignItems="center">
         <Report
           color="warning"
           fontSize="small"
