@@ -123,18 +123,29 @@ Check list for testing the order widget on the trade page:
    * [ ] Break-even shows 'n/a' if price is greater than 1.
 
 ## General
-* [ ] User's are not allowed to enter characters into the input field (PENDING implementation)
+* [ ] User's are not allowed to enter characters into the input field (PENDING implementation).
 * [ ] Buttons keep showing loading wheel until both the transaction and 0x data refresh have been completed.
-* [ ] Small amounts are handled correctly (e.g., 1e-18)
+* [ ] Small amounts are handled correctly (e.g., 1e-18).
+* [ ] Repeat all tests with a token that has less than 18 decimals.
 
 ## Tips & Comments
 * Use the `approve.js` script in `packages/diva-scripts` to set the allowance. Set `tokenToApprove` to the collateral/position token address, set the `allowance` amount and run `yarn hardhat run scripts/approve.js --network ropsten` inside `packages/diva-scripts`. Make sure you have an `.env` file in order to execute transactions.
 * If you create a Sell Limit order say and reduce the allowance afterwards, thereby reducing the fillable quantity, all additional approval giving afterwards will go towards making the existing order fully fillable. That is, if say you have placed a Sell Limit order with quantity = 1 and afterwards you reduce the allowance to quantity = 0.8, then, if you want to do a SELL MARKET for 0.1, for which you need additional allowance, this additional allowance will increase the fillable quantity of the existing Sell Limit order rather than enabling you to execute the SELL MARKET order of 0.1. This is expected behavior and not a bug.
-* Adding liquidity requires approving the collateral token. After liquidity has been added, the allowance will drop to zero. Currently, this may impact the fillable of a user's outstanding Buy Limit orders. **TODO: Incorporate a user's outstanding Buy Limit orders when setting the allowance in Add Liquidity.** 
+* Adding liquidity or creating a pool will reduce the user's collateral token balance. This may render existing orders unfillable. Notify the user during one of the two operations that existing Buy Limit orders may become invalid due to a lack of collateral token balance. **TODO** 
 * Run the test cases both with a full and with an empty orderbook. For instance, it happened that APPROVE button enabling/disabling in SELL MARKET worked as expected when the orderbook was full, but didn't (APPROVE button was enabled although entered amount didn't exceed the remaining allowance) when it was empty.
 
 # Orderbook
 
-Check list for testing the order widget on the trade page:
+Check list for testing the orderbook on the trade page:
 
-* [ ] Orders disappear automatically after they expire
+* [ ] Orders disappear automatically after they expire.
+* [ ] Confirm that invalid Bid / Buy Limit orders are not included in the orderbook by creating multiple orders and reducing the user's __allowance__ such that only one remains fillable (use `approve.js` in `packages/diva-scripts` for that).
+* [ ] Confirm that invalid Bid / Buy Limit orders are not included in the orderbook by creating multiple orders and reducing the __balance__ such that only one remains fillable (transfer tokens to another account).
+* [ ] Confirm that invalid Ask / Sell Limit orders are not included in the orderbook by creating multiple orders and reducing the user's __allowance__ such that only one remains fillable (use `approve.js` in `packages/diva-scripts` for that).
+* [ ] Confirm that invalid Ask / Sell Limit orders are not included in the orderbook by creating multiple orders and reducing the __balance__ such that only one remains fillable (transfer tokens to another account).
+
+# Your Open Orders
+
+Check list for testing the Your Open Orders tab on the trade page:
+
+* [ ] Confirm that Quantity is reduced if allowance or balance is reduced but orders do not disappear
