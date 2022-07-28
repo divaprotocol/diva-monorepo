@@ -25,9 +25,11 @@ waiting_sec = 500
 def run(network, w3, contract):
     # sendEmail()
     print("#########################################")
+    print("RUNNING EMAIL ORACLE")
     print('\033[1m' + "Network: {}".format(network) + '\033[0m')
     max_time_away = dt.timedelta(minutes=config.max_time_away)
 
+    # CHECK CORRECT QUERY FOR EMAIL ORACLE SETTINGS
     resp = run_query(pool_expiry(48), network)
     # print(resp)
     df = pd.json_normalize(resp, ['data', 'pools'])
@@ -35,8 +37,13 @@ def run(network, w3, contract):
     numberPools = 0
 
     if not df.empty:
-        message_craft_pool_expiry(df, 8)
-        message_craft_pool_expiry(df, 24, 8)
+        # 2 OPTIONS
+        # 1. New Pool created notification
+        # 2. Pool expire notification ; message_craft_pool_expiry
+        # Turning False to True will send email, check your configs
+        # Email runs on gmail API access, see configs for more details
+        message_craft_pool_expiry(df, 8, 0, False)
+        message_craft_pool_expiry(df, 24, 8, False)
 
 
 network = config.network
