@@ -21,10 +21,11 @@ def message_craft_new_pool(df):
         message += "New Pool {}, created at {}, set to expire at {}".format(
             i['id'], dt.fromtimestamp(int(i['createdAt'])), dt.fromtimestamp(int(i['expiryTime'])))
         message += "\n"
+    sendEmail(False, message)
     return message
 
 
-def message_craft_pool_expiry(df, notification_ceiling, notification_floor=0):
+def message_craft_pool_expiry(df, notification_ceiling, notification_floor=0, Sendemail=False):
     message = "Subject: Diva - Pool Expiry notice"
     message += "\n"
     message += "\n"
@@ -40,7 +41,7 @@ def message_craft_pool_expiry(df, notification_ceiling, notification_floor=0):
             message += "Pool {}, Expires in {} hours, set to expire at {}".format(
                 i['id'], int((int(i['expiryTime']) - dt.now().timestamp())/(60*60)), dt.fromtimestamp(int(i['expiryTime'])))
             message += "\n"
-    sendEmail(False, message)
+    sendEmail(Sendemail, message)
     return
 
 
@@ -50,14 +51,8 @@ def sendEmail(ON, message):
     sender_email = config.sender_email
     password = config.pass_code
     receiver_email = "diva.protocol.bot@gmail.com"
-    # receiver_email = "wladimir.weinbender@googlemail.com"
-    # Wlad's email googlemail
-    # wladimir.weinbender@googlemail.com
     message = message
-    message1 = """
-    Subject: Diva message
-    This message is sent from Python.
-     """
+    print("message body")
     print(message)
     if ON == True:
         # Create a secure SSL contexßt
@@ -74,6 +69,7 @@ def sendEmail(ON, message):
             # TODO: Send email here
             server.sendmail(sender_email, receiver_email, message)
             print("Email sent")
+            print("email sent to {}".format(receiver_email))
         except Exception as e:
             # Print any error messages to stdout
             print(e)
