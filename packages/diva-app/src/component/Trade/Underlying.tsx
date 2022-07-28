@@ -211,15 +211,15 @@ export default function Underlying() {
                     data={data}
                     refAsset={pool.referenceAsset}
                     payOut={pool.collateralToken.symbol}
-                    currentPrice={currentPrice}
+                    // currentPrice={currentPrice}
                     w={380}
                     h={220}
                     isLong={OptionParams.IsLong}
-                    breakEven={breakEven}
+                    breakEven={0}
                     floor={OptionParams.Floor}
                     cap={OptionParams.Cap}
                     mouseHover={true}
-                    showBreakEven={true}
+                    showBreakEven={false}
                   />
                 </Paper>
                 <Typography
