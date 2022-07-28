@@ -151,6 +151,7 @@ const SubmitCell = (props: any) => {
   const [submissionPeriod, setSubmissionPeriod] = useState(0)
   const [challengePeriod, setChallengePeriod] = useState(0)
   const [reviewPeriod, setReviewPeriod] = useState(0)
+  const [fallbackPeriod, setFallbackPeriod] = useState(0)
   const handleOpen = () => {
     setOpen(true)
   }
@@ -178,6 +179,7 @@ const SubmitCell = (props: any) => {
       setSubmissionPeriod(governanceParameters.submissionPeriod.toNumber())
       setChallengePeriod(governanceParameters.challengePeriod.toNumber())
       setReviewPeriod(governanceParameters.reviewPeriod.toNumber())
+      setFallbackPeriod(governanceParameters.fallbackPeriod.toNumber())
     })
   }, [diva])
 
