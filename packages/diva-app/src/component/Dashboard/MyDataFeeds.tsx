@@ -40,7 +40,7 @@ export const DueInCell = (props: any) => {
   const statusTimestamp = parseInt(props.row.StatusTimestamp)
   const expiryTime = new Date(props.row.Expiry)
   const now = new Date()
-  if (expiryTime.getTime() <= now.getTime() && props.row.Status === 'Expired') {
+  if (props.row.Status === 'Expired') {
     const minUntilExp = getExpiryMinutesFromNow(
       expTimestamp + 24 * 3600 - 5 * 60
     )
@@ -168,11 +168,7 @@ const SubmitCell = (props: any) => {
       : statusTimestamp
 
   const enabled =
-    (relevantTime <= now.getTime() &&
-      props.row.Status === 'Expired' &&
-      relevantTime + submissionPeriod * 1000 > now.getTime()) ||
-    (props.row.Status === 'Challenged' &&
-      relevantTime + challengePeriod * 1000 > now.getTime())
+    props.row.Status === 'Expired' || props.row.Status === 'Challenged'
 
   useEffect(() => {
     diva.getGovernanceParameters().then((governanceParameters) => {
