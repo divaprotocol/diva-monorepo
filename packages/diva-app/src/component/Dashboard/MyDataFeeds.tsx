@@ -33,16 +33,14 @@ import { useDispatch } from 'react-redux'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ExpiresInCell } from '../Markets/Markets'
+import { getAppStatus } from '../../Util/getAppStatus'
 
 export const DueInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
   const statusTimestamp = parseInt(props.row.StatusTimestamp)
   const expiryTime = new Date(props.row.Expiry)
   const now = new Date()
-  if (
-    expiryTime.getTime() <= now.getTime() &&
-    props.row.Status.toLowerCase() === 'open'
-  ) {
+  if (expiryTime.getTime() <= now.getTime() && props.row.Status === 'Expired') {
     const minUntilExp = getExpiryMinutesFromNow(
       expTimestamp + 24 * 3600 - 5 * 60
     )
@@ -150,6 +148,9 @@ const SubmitCell = (props: any) => {
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
   const [loadingValue, setLoadingValue] = useState(false)
+  const [submissionPeriod, setSubmissionPeriod] = useState(0)
+  const [challengePeriod, setChallengePeriod] = useState(0)
+  const [reviewPeriod, setReviewPeriod] = useState(0)
   const handleOpen = () => {
     setOpen(true)
   }
@@ -164,12 +165,21 @@ const SubmitCell = (props: any) => {
     statusTimestamp < expiryTime.getTime()
       ? expiryTime.getTime()
       : statusTimestamp
+
   const enabled =
     (relevantTime <= now.getTime() &&
-      props.row.Status.toLowerCase() === 'open' &&
-      relevantTime + (24 * 60 - 5) * 60 * 1000 > now.getTime()) ||
+      props.row.Status === 'Expired' &&
+      relevantTime + submissionPeriod * 1000 > now.getTime()) ||
     (props.row.Status === 'Challenged' &&
-      relevantTime + (48 * 60 - 5) * 60 * 1000 > now.getTime())
+      relevantTime + challengePeriod * 1000 > now.getTime())
+
+  useEffect(() => {
+    diva.getGovernanceParameters().then((governanceParameters) => {
+      setSubmissionPeriod(governanceParameters.submissionPeriod.toNumber())
+      setChallengePeriod(governanceParameters.challengePeriod.toNumber())
+      setReviewPeriod(governanceParameters.reviewPeriod.toNumber())
+    })
+  }, [diva])
 
   return (
     <Container>
@@ -347,6 +357,14 @@ export function MyDataFeeds() {
       Challenges: val.challenges,
     }
 
+    const { status } = getAppStatus(
+      val.expiryTime,
+      val.statusTimestamp,
+      val.statusFinalReferenceValue,
+      val.finalReferenceValue,
+      val.inflection
+    )
+
     const payOff = {
       CollateralBalanceLong: Number(
         formatUnits(
@@ -366,7 +384,6 @@ export function MyDataFeeds() {
       TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
 
-    const Status = val.statusFinalReferenceValue
     return [
       ...acc,
       {
@@ -387,7 +404,7 @@ export function MyDataFeeds() {
           ).toFixed(4) +
           ' ' +
           val.collateralToken.symbol,
-        Status,
+        Status: status,
         StatusTimestamp: val.statusTimestamp,
         finalValue:
           val.statusFinalReferenceValue === 'Open'
