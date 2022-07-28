@@ -42,9 +42,9 @@ export const DueInCell = (props: any) => {
   const now = new Date()
   if (props.row.Status === 'Expired') {
     const minUntilExp = getExpiryMinutesFromNow(
-      expTimestamp + 24 * 3600 - 5 * 60
+      expTimestamp + props.row.SubmissionPeriod
     )
-    if (minUntilExp < 24 * 60 - 5 && minUntilExp > 0) {
+    if (minUntilExp < props.row.SubmissionPeriod && minUntilExp > 0) {
       return minUntilExp === 1 ? (
         <Tooltip placement="top-end" title={props.row.Expiry}>
           <div
@@ -79,9 +79,9 @@ export const DueInCell = (props: any) => {
   }
   if (props.row.Status === 'Challenged') {
     const minUntilExp = getExpiryMinutesFromNow(
-      statusTimestamp + 48 * 3600 - 5 * 60
+      statusTimestamp + props.row.ReviewPeriod
     )
-    if (minUntilExp < 48 * 60 - 5 && minUntilExp > 0) {
+    if (minUntilExp < props.row.ReviewPeriod && minUntilExp > 0) {
       return minUntilExp === 1 ? (
         <Tooltip placement="top-end" title={props.row.Expiry}>
           <div
@@ -159,16 +159,24 @@ const SubmitCell = (props: any) => {
   const handleClose = () => {
     setOpen(false)
   }
+
   const expiryTime = new Date(props.row.Expiry)
   const statusTimestamp = props.row.StatusTimestamp * 1000
   const now = new Date()
-  const relevantTime =
+
+  // Set relevant start time for submissionPeriodEnd calculations. Before expiry, the expiryTime is the relevant start time.
+  // After expiry, when status == Challenged, the statusTimestamp (i.e. time of challenge) is the relevant start time.
+  const relevantStartTime =
     statusTimestamp < expiryTime.getTime()
       ? expiryTime.getTime()
       : statusTimestamp
 
+  // Flag for enabling the SUBMIT VALUE button
   const enabled =
-    props.row.Status === 'Expired' || props.row.Status === 'Challenged'
+    (props.row.Status === 'Expired' &&
+      now.getTime() < relevantStartTime + submissionPeriod * 1000) ||
+    (props.row.Status === 'Challenged' &&
+      now.getTime() < relevantStartTime + challengePeriod * 1000)
 
   useEffect(() => {
     diva.getGovernanceParameters().then((governanceParameters) => {
@@ -293,6 +301,30 @@ const columns: GridColDef[] = [
     ),
   },
   {
+    field: 'SubmissionPeriod',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+  },
+  {
+    field: 'ChallengePeriod',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+  },
+  {
+    field: 'ReviewPeriod',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+  },
+  {
+    field: 'FallbackPeriod',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+  },
+  {
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
@@ -360,7 +392,11 @@ export function MyDataFeeds() {
       val.statusTimestamp,
       val.statusFinalReferenceValue,
       val.finalReferenceValue,
-      val.inflection
+      val.inflection,
+      submissionPeriod,
+      challengePeriod,
+      reviewPeriod,
+      fallbackPeriod
     )
 
     const payOff = {

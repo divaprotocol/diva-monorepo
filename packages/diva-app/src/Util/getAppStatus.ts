@@ -8,23 +8,32 @@ export function getAppStatus(
   statusTimestamp: string,
   statusFinalReferenceValue: string,
   finalReferenceValue: string,
-  inflection: string
+  inflection: string,
+  submissionPeriod: number, // in seconds
+  challengePeriod: number, // in seconds
+  reviewPeriod: number, // in seconds
+  fallbackPeriod: number // in seconds
 ): { finalValue: number | string; status: string } {
+  // Convert strings to Date objects
   const dtExpiryTime = new Date(parseInt(expiryTime) * 1000)
   const dtStatusTimestamp = new Date(parseInt(statusTimestamp) * 1000)
+
+  // Get current time
   const now = new Date().getTime()
-  const submissionPeriodEnd = new Date(parseInt(expiryTime) * 1000).setMinutes(
-    dtExpiryTime.getMinutes() + 24 * 60 + 5
+
+  // Get end dates for settlement periods
+  const submissionPeriodEnd = dtExpiryTime.setMinutes(
+    dtExpiryTime.getMinutes() + submissionPeriod / 60
+  ) // Ok to use dtExpiryTime only and not max(dtExpiryTime, dtStatusTimestamp) as submissionPeriodEnd is only used when statusFinalReferenceValue === 'Open' below in the code.
+  const fallbackPeriodEnd = dtExpiryTime.setMinutes(
+    dtExpiryTime.getMinutes() + (submissionPeriod + fallbackPeriod) / 60
   )
-  const fallbackPeriodEnd = new Date(parseInt(expiryTime) * 1000).setMinutes(
-    dtExpiryTime.getMinutes() + 6 * 24 * 60 + 5
-  ) // 5 min delay built in to have a high confidence that block.timestamp during call will be > fallback period end
-  const challengePeriodEnd = new Date(
-    parseInt(statusTimestamp) * 1000
-  ).setMinutes(dtStatusTimestamp.getMinutes() + 1 * 24 * 60 + 5) // statusTimestamp is equal to time of submission when it's used below in the code. 5 min delay built in to have a high confidence that block.timestamp during call will be > challenge period end
-  const reviewPeriodEnd = new Date(parseInt(statusTimestamp) * 1000).setMinutes(
-    dtStatusTimestamp.getMinutes() + 2 * 24 * 60 + 5
-  ) // statusTimestamp is equal to time of first challenge following a submission when it's used down below in the code. 5 min delay built in to have a high confidence that block.timestamp during call will be > review period end
+  const challengePeriodEnd = dtStatusTimestamp.setMinutes(
+    dtStatusTimestamp.getMinutes() + challengePeriod / 60
+  ) // statusTimestamp is equal to time of submission when it's used below in the code.
+  const reviewPeriodEnd = dtStatusTimestamp.setMinutes(
+    dtStatusTimestamp.getMinutes() + reviewPeriod / 60
+  ) // statusTimestamp is equal to time of first challenge following a submission when it's used down below in the code.
 
   let finalValue = '-'
   let status = statusFinalReferenceValue
@@ -40,6 +49,7 @@ export function getAppStatus(
         status = 'Fallback'
       } else if (now > fallbackPeriodEnd) {
         finalValue = parseFloat(formatEther(inflection)).toFixed(4)
+        console.log('finalValue', finalValue)
         status = 'Confirmed*'
       }
     } else if (
