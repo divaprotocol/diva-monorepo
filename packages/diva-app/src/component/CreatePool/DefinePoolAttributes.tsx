@@ -50,7 +50,7 @@ export function DefinePoolAttributes({
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
   const [value, setValue] = useState('Binary')
-
+  const [mobile, setMobile] = useState(false)
   const handleChange = (event) => {
     setValue(event.target.value)
     formik.setFieldValue('payoutProfile', event.target.value)
@@ -70,6 +70,13 @@ export function DefinePoolAttributes({
     payoutProfile,
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setMobile(true)
+    } else {
+      setMobile(false)
+    }
+  }, [])
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
@@ -194,7 +201,7 @@ export function DefinePoolAttributes({
   }, [payoutProfile])
 
   return (
-    <Stack direction={'row'}>
+    <Stack direction={mobile ? 'column' : 'row'}>
       <Container sx={{ minWidth: '60%' }}>
         <Typography
           style={{ color: 'white' }}
@@ -210,7 +217,7 @@ export function DefinePoolAttributes({
         >
           <Container>
             <h3>Event</h3>
-            <Stack spacing={2} direction="row">
+            <Stack spacing={2} direction={mobile ? 'column' : 'row'}>
               <FormControl
                 fullWidth
                 error={formik.errors.referenceAsset != null}
@@ -309,7 +316,7 @@ export function DefinePoolAttributes({
             <Box>
               <h3>Collateral</h3>
 
-              <Stack pb={3} spacing={2} direction="row">
+              <Stack pb={3} spacing={2} direction={mobile ? 'column' : 'row'}>
                 <FormControl
                   fullWidth
                   error={formik.errors.collateralToken != null}
@@ -429,7 +436,12 @@ export function DefinePoolAttributes({
                 />
               </RadioGroup>
             </FormControl>
-            <Stack pr={-5} pb={3} spacing={2} direction="row">
+            <Stack
+              pr={-5}
+              pb={3}
+              spacing={2}
+              direction={mobile ? 'column' : 'row'}
+            >
               {value === 'Binary' && (
                 <Box pt={2} width="100%">
                   <Tooltip
@@ -461,7 +473,7 @@ export function DefinePoolAttributes({
                         }
                       }}
                       value={inflection}
-                      sx={{ width: '48%' }}
+                      sx={{ width: mobile ? '100%' : '48%' }}
                     />
                   </Tooltip>
                   <DefineAdvanced formik={formik} />
@@ -471,7 +483,7 @@ export function DefinePoolAttributes({
                 <Box pt={2} width="100%">
                   <Stack
                     // sx={{ justifyContent: 'space-between' }}
-                    direction="row"
+                    direction={mobile ? 'column' : 'row'}
                     spacing={2}
                   >
                     <Tooltip
@@ -547,7 +559,7 @@ export function DefinePoolAttributes({
                     <Stack sx={{ justifyContent: 'space-between' }} spacing={3}>
                       <Stack
                         sx={{ justifyContent: 'space-between' }}
-                        direction="row"
+                        direction={mobile ? 'column' : 'row'}
                         spacing={2}
                       >
                         <Tooltip
@@ -587,7 +599,7 @@ export function DefinePoolAttributes({
                       </Stack>
                       <Stack
                         sx={{ justifyContent: 'space-between' }}
-                        direction="row"
+                        direction={mobile ? 'column' : 'row'}
                         spacing={2}
                       >
                         <Tooltip
