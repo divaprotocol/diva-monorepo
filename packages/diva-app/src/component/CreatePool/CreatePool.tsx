@@ -137,13 +137,18 @@ export function CreatePool() {
           )}
 
           <Stack
-            sx={{ pr: theme.spacing(12), paddingTop: theme.spacing(3) }}
-            direction="row"
+            sx={{
+              pr: theme.spacing(mobile ? 6 : 12),
+              paddingTop: theme.spacing(3),
+            }}
+            direction={
+              mobile && formik.values.step === 3 ? 'column-reverse' : 'row'
+            }
             spacing={3}
             justifyContent="space-between"
             alignItems="center"
           >
-            {formik.values.step !== 4 && formik.values.step !== 3 && (
+            {formik.values.step !== 4 && (
               <Button
                 sx={{ width: theme.spacing(16) }}
                 onClick={() => {
@@ -154,25 +159,30 @@ export function CreatePool() {
               </Button>
             )}
             {formik.values.step === 3 ? (
-              <Stack>
-                <ApproveActionButtons
-                  collateralTokenAddress={formik.values.collateralToken.id}
-                  onTransactionSuccess={handlePoolSuccess}
-                  pool={formik.values}
-                  decimal={decimal}
-                  textFieldValue={formik.values.collateralBalance}
-                  transactionType={'create'}
-                />
-                <Button
-                  sx={{ width: theme.spacing(16) }}
-                  onClick={() => {
-                    formik.setFieldValue('step', formik.values.step - 1, true)
-                  }}
-                >
-                  Go Back
-                </Button>
-              </Stack>
-            ) : formik.values.step === 4 ? (
+              // <Stack
+              //   justifyContent="space-between"
+              //   alignItems="center"
+              //   direction={'row-reverse'}
+              //   sx={{ pr: theme.spacing(12) }}
+              // >
+              <ApproveActionButtons
+                collateralTokenAddress={formik.values.collateralToken.id}
+                onTransactionSuccess={handlePoolSuccess}
+                pool={formik.values}
+                decimal={decimal}
+                textFieldValue={formik.values.collateralBalance}
+                transactionType={'create'}
+              />
+            ) : //   <Button
+            //     sx={{ width: theme.spacing(16) }}
+            //     onClick={() => {
+            //       formik.setFieldValue('step', formik.values.step - 1, true)
+            //     }}
+            //   >
+            //     Go Back
+            //   </Button>
+            // </Stack>
+            formik.values.step === 4 ? (
               <Button
                 variant="text"
                 sx={{

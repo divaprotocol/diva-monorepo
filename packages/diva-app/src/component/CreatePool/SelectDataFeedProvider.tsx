@@ -105,7 +105,7 @@ export function SelectDataFeedProvider({
         <Box
           style={{
             border: '1px solid #383838',
-            minWidth: theme.spacing(60),
+            minWidth: theme.spacing(mobile ? 0 : 60),
           }}
         >
           <Container>
@@ -157,15 +157,15 @@ export function SelectDataFeedProvider({
         </Box>
       </Container>
       <Stack
-        pr={mobile ? theme.spacing(3) : theme.spacing(12)}
-        pl={mobile ? theme.spacing(3) : theme.spacing(0)}
+        pr={mobile ? theme.spacing(2) : theme.spacing(12)}
+        pl={mobile ? theme.spacing(2) : theme.spacing(0)}
       >
         <Typography pb={1} variant="subtitle1">
           Info
         </Typography>
         <Card
           style={{
-            minWidth: theme.spacing(mobile ? 60 : 0),
+            minWidth: theme.spacing(mobile ? 0 : 60),
             border: '1px solid #1B3448',
             // border-radius: '5px',
             background:
@@ -192,7 +192,7 @@ export function SelectDataFeedProvider({
                   EtherscanLinkType.ADDRESS
                 )}
               >
-                {formik.values.dataProvider}
+                {getShortenedAddress(formik.values.dataProvider)}
               </Link>
             </Typography>
             <Typography pt={theme.spacing(2)} variant="subtitle1">

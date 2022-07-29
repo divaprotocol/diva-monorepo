@@ -11,6 +11,7 @@ import { PayoffProfile } from './PayoffProfile'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { useEffect, useState } from 'react'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 export function ReviewAndSubmit({
   formik,
@@ -36,7 +37,9 @@ export function ReviewAndSubmit({
       (dataName: { id: string }) => dataName?.id == values.dataProvider
     )
     if (dataName?.name != null) {
-      setDataSourceName(dataName.name + ' (' + values.dataProvider + ')')
+      setDataSourceName(
+        dataName.name + ' (' + getShortenedAddress(values.dataProvider) + ')'
+      )
     } else {
       setDataSourceName(values.dataProvider)
     }
