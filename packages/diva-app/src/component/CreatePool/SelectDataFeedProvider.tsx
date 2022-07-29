@@ -105,6 +105,7 @@ export function SelectDataFeedProvider({
         <Box
           style={{
             border: '1px solid #383838',
+            minWidth: theme.spacing(60),
           }}
         >
           <Container>
@@ -164,7 +165,7 @@ export function SelectDataFeedProvider({
         </Typography>
         <Card
           style={{
-            minWidth: theme.spacing(60),
+            minWidth: theme.spacing(mobile ? 60 : 0),
             border: '1px solid #1B3448',
             // border-radius: '5px',
             background:
