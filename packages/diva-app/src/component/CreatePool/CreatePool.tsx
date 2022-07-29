@@ -159,12 +159,6 @@ export function CreatePool() {
               </Button>
             )}
             {formik.values.step === 3 ? (
-              // <Stack
-              //   justifyContent="space-between"
-              //   alignItems="center"
-              //   direction={'row-reverse'}
-              //   sx={{ pr: theme.spacing(12) }}
-              // >
               <ApproveActionButtons
                 collateralTokenAddress={formik.values.collateralToken.id}
                 onTransactionSuccess={handlePoolSuccess}
@@ -173,16 +167,7 @@ export function CreatePool() {
                 textFieldValue={formik.values.collateralBalance}
                 transactionType={'create'}
               />
-            ) : //   <Button
-            //     sx={{ width: theme.spacing(16) }}
-            //     onClick={() => {
-            //       formik.setFieldValue('step', formik.values.step - 1, true)
-            //     }}
-            //   >
-            //     Go Back
-            //   </Button>
-            // </Stack>
-            formik.values.step === 4 ? (
+            ) : formik.values.step === 4 ? (
               <Button
                 variant="text"
                 sx={{
