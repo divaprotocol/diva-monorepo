@@ -26,6 +26,7 @@ import { getAppStatus } from '../../Util/getAppStatus'
 import { divaGovernanceAddress } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useHistory, useLocation, useParams } from 'react-router-dom'
+import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 
 export const ExpiresInCell = (props: any) => {
   //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
@@ -198,31 +199,8 @@ export default function Markets() {
   const params = useParams() as { creatorAddress: string; status: string }
   const [createdBy, setCreatedBy] = useState(params.creatorAddress)
   const history = useHistory()
-
-  const { provider } = useConnectionContext()
-  const chainId = provider?.network?.chainId
-  const [submissionPeriod, setSubmissionPeriod] = useState(0)
-  const [challengePeriod, setChallengePeriod] = useState(0)
-  const [reviewPeriod, setReviewPeriod] = useState(0)
-  const [fallbackPeriod, setFallbackPeriod] = useState(0)
-
-  const diva =
-    chainId != null
-      ? new ethers.Contract(
-          config[chainId!].divaAddress,
-          DIVA_ABI,
-          provider.getSigner()
-        )
-      : null
-
-  useEffect(() => {
-    diva.getGovernanceParameters().then((governanceParameters) => {
-      setSubmissionPeriod(governanceParameters.submissionPeriod.toNumber())
-      setChallengePeriod(governanceParameters.challengePeriod.toNumber())
-      setReviewPeriod(governanceParameters.reviewPeriod.toNumber())
-      setFallbackPeriod(governanceParameters.fallbackPeriod.toNumber())
-    })
-  }, [diva])
+  const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
+    useGovernanceParameters()
 
   useEffect(() => {
     const timeout = setTimeout(() => {
