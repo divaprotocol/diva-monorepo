@@ -49,7 +49,6 @@ export function getAppStatus(
         status = 'Fallback'
       } else if (now > fallbackPeriodEnd) {
         finalValue = parseFloat(formatEther(inflection)).toFixed(4)
-        console.log('finalValue', finalValue)
         status = 'Confirmed*'
       }
     } else if (

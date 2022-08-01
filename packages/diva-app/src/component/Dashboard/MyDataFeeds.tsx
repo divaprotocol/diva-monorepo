@@ -1,6 +1,5 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
-  Button,
   Container,
   Dialog,
   DialogActions,
@@ -12,7 +11,7 @@ import {
   Typography,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
@@ -23,14 +22,13 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
 import {
-  fetchPool,
   fetchPools,
   selectPools,
   selectRequestStatus,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
-import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
+import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { ExpiresInCell } from '../Markets/Markets'
@@ -39,8 +37,7 @@ import { getAppStatus } from '../../Util/getAppStatus'
 export const DueInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
   const statusTimestamp = parseInt(props.row.StatusTimestamp)
-  const expiryTime = new Date(props.row.Expiry)
-  const now = new Date()
+
   if (props.row.Status === 'Expired') {
     const minUntilExp = getExpiryMinutesFromNow(
       expTimestamp + props.row.SubmissionPeriod
@@ -149,10 +146,9 @@ const SubmitCell = (props: any) => {
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
   const [loadingValue, setLoadingValue] = useState(false)
-  const [submissionPeriod, setSubmissionPeriod] = useState(0)
-  const [challengePeriod, setChallengePeriod] = useState(0)
-  const [reviewPeriod, setReviewPeriod] = useState(0)
-  const [fallbackPeriod, setFallbackPeriod] = useState(0)
+
+  const { submissionPeriod, challengePeriod } = useGovernanceParameters()
+
   const handleOpen = () => {
     setOpen(true)
   }
@@ -178,15 +174,6 @@ const SubmitCell = (props: any) => {
       now.getTime() < relevantStartTime + submissionPeriod * 1000) ||
     (props.row.Status === 'Challenged' &&
       now.getTime() < relevantStartTime + challengePeriod * 1000)
-
-  useEffect(() => {
-    diva.getGovernanceParameters().then((governanceParameters) => {
-      setSubmissionPeriod(governanceParameters.submissionPeriod.toNumber())
-      setChallengePeriod(governanceParameters.challengePeriod.toNumber())
-      setReviewPeriod(governanceParameters.reviewPeriod.toNumber())
-      setFallbackPeriod(governanceParameters.fallbackPeriod.toNumber())
-    })
-  }, [diva])
 
   return (
     <Container>
@@ -301,30 +288,30 @@ const columns: GridColDef[] = [
       </Tooltip>
     ),
   },
-  {
-    field: 'SubmissionPeriod',
-    align: 'right',
-    headerAlign: 'right',
-    type: 'number',
-  },
-  {
-    field: 'ChallengePeriod',
-    align: 'right',
-    headerAlign: 'right',
-    type: 'number',
-  },
-  {
-    field: 'ReviewPeriod',
-    align: 'right',
-    headerAlign: 'right',
-    type: 'number',
-  },
-  {
-    field: 'FallbackPeriod',
-    align: 'right',
-    headerAlign: 'right',
-    type: 'number',
-  },
+  // {
+  //   field: 'SubmissionPeriod',
+  //   align: 'right',
+  //   headerAlign: 'right',
+  //   type: 'number',
+  // },
+  // {
+  //   field: 'ChallengePeriod',
+  //   align: 'right',
+  //   headerAlign: 'right',
+  //   type: 'number',
+  // },
+  // {
+  //   field: 'ReviewPeriod',
+  //   align: 'right',
+  //   headerAlign: 'right',
+  //   type: 'number',
+  // },
+  // {
+  //   field: 'FallbackPeriod',
+  //   align: 'right',
+  //   headerAlign: 'right',
+  //   type: 'number',
+  // },
   {
     field: 'Status',
     align: 'right',
@@ -423,6 +410,19 @@ export function MyDataFeeds() {
       TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
 
+    const finalReferenceValue = () => {
+      switch (status) {
+        case 'Open':
+          return '-'
+        case 'Confirmed*':
+          if (val.finalReferenceValue === '0') {
+            return parseFloat(formatEther(val.inflection)).toFixed(4)
+          } else {
+            return parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
+          }
+      }
+    }
+
     return [
       ...acc,
       {
@@ -445,10 +445,7 @@ export function MyDataFeeds() {
           val.collateralToken.symbol,
         Status: status,
         StatusTimestamp: val.statusTimestamp,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
+        finalValue: finalReferenceValue(),
       },
     ]
   }, [] as GridRowModel[])
