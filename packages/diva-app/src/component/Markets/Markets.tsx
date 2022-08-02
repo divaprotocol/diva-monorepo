@@ -22,7 +22,7 @@ import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { Box, Tooltip } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
-import { getAppStatus } from '../../Util/getAppStatus'
+import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import { divaGovernanceAddress } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useHistory, useLocation, useParams } from 'react-router-dom'
@@ -182,6 +182,13 @@ const columns: GridColDef[] = [
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
+    renderCell: (cell: any) => {
+      return (
+        <Tooltip placement="top-end" title={statusDescription[cell.value]}>
+          <span className="table-cell-trucate">{cell.value}</span>
+        </Tooltip>
+      )
+    },
   },
   {
     field: 'TVL',

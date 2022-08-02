@@ -288,30 +288,6 @@ const columns: GridColDef[] = [
       </Tooltip>
     ),
   },
-  // {
-  //   field: 'SubmissionPeriod',
-  //   align: 'right',
-  //   headerAlign: 'right',
-  //   type: 'number',
-  // },
-  // {
-  //   field: 'ChallengePeriod',
-  //   align: 'right',
-  //   headerAlign: 'right',
-  //   type: 'number',
-  // },
-  // {
-  //   field: 'ReviewPeriod',
-  //   align: 'right',
-  //   headerAlign: 'right',
-  //   type: 'number',
-  // },
-  // {
-  //   field: 'FallbackPeriod',
-  //   align: 'right',
-  //   headerAlign: 'right',
-  //   type: 'number',
-  // },
   {
     field: 'Status',
     align: 'right',
@@ -379,7 +355,7 @@ export function MyDataFeeds() {
       Challenges: val.challenges,
     }
 
-    const { status } = getAppStatus(
+    const { status, finalValue } = getAppStatus(
       val.expiryTime,
       val.statusTimestamp,
       val.statusFinalReferenceValue,
@@ -410,19 +386,6 @@ export function MyDataFeeds() {
       TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
 
-    const finalReferenceValue = () => {
-      switch (status) {
-        case 'Open':
-          return '-'
-        case 'Confirmed*':
-          if (val.finalReferenceValue === '0') {
-            return parseFloat(formatEther(val.inflection)).toFixed(4)
-          } else {
-            return parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
-          }
-      }
-    }
-
     return [
       ...acc,
       {
@@ -445,7 +408,7 @@ export function MyDataFeeds() {
           val.collateralToken.symbol,
         Status: status,
         StatusTimestamp: val.statusTimestamp,
-        finalValue: finalReferenceValue(),
+        finalValue: finalValue,
       },
     ]
   }, [] as GridRowModel[])
