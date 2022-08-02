@@ -9,6 +9,7 @@ import {
   Link,
   Typography,
   useTheme,
+  Grid,
 } from '@mui/material'
 import DateRangeIcon from '@mui/icons-material/DateRange'
 import CampaignIcon from '@mui/icons-material/Campaign'
@@ -431,7 +432,7 @@ export const Tasks = (props: any) => {
             }}
           >
             <DataGrid
-              sx={{ border: 0 }}
+              sx={{ width: '100%', border: 0 }}
               hideFooter={true}
               autoHeight={true}
               disableColumnMenu={true}
@@ -449,7 +450,7 @@ export const Tasks = (props: any) => {
         >
           <Box
             sx={{ mb: theme.spacing(-17), border: 1, borderColor: '#2A2A2D' }}
-            width={theme.spacing(mobile ? 35 : 65)}
+            width={mobile ? '100%' : theme.spacing(65)}
             height={theme.spacing(30)}
             style={{
               background: '#171718',
@@ -480,7 +481,7 @@ export const Tasks = (props: any) => {
             style={{
               background: 'linear-gradient(to bottom, #050539, #0D0D11)',
             }}
-            width={theme.spacing(mobile ? 35 : 65)}
+            width={mobile ? '100%' : theme.spacing(65)}
             height={theme.spacing(30)}
           >
             <Container sx={{ mr: theme.spacing(15), pt: theme.spacing(5) }}>
@@ -532,7 +533,10 @@ export const Tasks = (props: any) => {
           </Box>
           {mobile && (
             <DataGrid
-              sx={{ border: 0 }}
+              sx={{
+                width: mobile ? '100%' : theme.spacing(99),
+                border: 0,
+              }}
               hideFooter={true}
               autoHeight={true}
               disableColumnMenu={true}
@@ -547,7 +551,7 @@ export const Tasks = (props: any) => {
               background: '#171718',
             }}
             sx={{ border: 1, borderColor: '#2A2A2D' }}
-            width={theme.spacing(mobile ? 35 : 65)}
+            width={mobile ? '100%' : theme.spacing(65)}
             height={theme.spacing(mobile ? 40 : 30)}
           >
             <Container sx={{ pt: theme.spacing(5) }}>
