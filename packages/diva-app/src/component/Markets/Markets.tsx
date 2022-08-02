@@ -15,6 +15,7 @@ import {
   fetchPools,
   selectPools,
   selectRequestStatus,
+  selectUserAddress,
 } from '../../Redux/appSlice'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { Box, Tooltip } from '@mui/material'
@@ -23,6 +24,9 @@ import { ShowChartOutlined } from '@mui/icons-material'
 import { getAppStatus } from '../../Util/getAppStatus'
 import { divaGovernanceAddress } from '../../constants'
 import { useHistory, useLocation, useParams } from 'react-router-dom'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 
 export const ExpiresInCell = (props: any) => {
   //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
@@ -188,13 +192,42 @@ const columns: GridColDef[] = [
 ]
 
 export default function Markets() {
+  const history = useHistory()
+  const currentAddress = history.location.pathname.split('/')
   const [page, setPage] = useState(0)
   const pools = useAppSelector(selectPools)
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const dispatch = useAppDispatch()
   const params = useParams() as { creatorAddress: string; status: string }
   const [createdBy, setCreatedBy] = useState(params.creatorAddress)
-  const history = useHistory()
+  const [creatorButtonLabel, setCreatorButtonLabel] = useState(
+    getShortenedAddress(currentAddress[2])
+  )
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
+  const [search, setSearch] = useState(null)
+  const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
+
+  const handleCreatorInput = (e) => {
+    setCreatedBy(e.target.value)
+    setCreatorButtonLabel(
+      e.target.value === '' ? 'Creator' : getShortenedAddress(e.target.value)
+    )
+  }
+
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'UnderLying' : e.target.value
+    )
+  }
+  const handleExpiredPools = () => {
+    if (expiredPoolClicked) {
+      setExpiredPoolClicked(false)
+    } else {
+      setExpiredPoolClicked(true)
+    }
+  }
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -336,6 +369,17 @@ export default function Markets() {
     ]
   }, [] as GridRowModel[])
 
+  const filteredRows =
+    search != null && search.length > 0
+      ? expiredPoolClicked
+        ? rows.filter((v) => {
+            v.Status.includes('Open')
+          })
+        : rows.filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      : rows
+
   return (
     <>
       <Box
@@ -350,7 +394,42 @@ export default function Markets() {
         />
         <h2> Markets</h2>
       </Box>
-
+      <Box
+        paddingX={6}
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <DropDownFilter
+          id="Creator Filter"
+          DropDownButtonLabel={
+            history.location.pathname === `/markets/`
+              ? 'Creator'
+              : creatorButtonLabel
+          }
+          InputValue={createdBy}
+          onInputChange={handleCreatorInput}
+          MenuItemLabel="Diva Governance"
+          onMenuItemClick={() => {
+            setCreatedBy(divaGovernanceAddress)
+            setCreatorButtonLabel(getShortenedAddress(divaGovernanceAddress))
+          }}
+        />
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+        <ButtonFilter
+          id="Hide expired pools"
+          ButtonColor="#ffffff"
+          ButtonLabel="Hide Expired Pools"
+          onClick={handleExpiredPools}
+        />
+      </Box>
       <Box
         paddingX={6}
         sx={{
@@ -361,9 +440,7 @@ export default function Markets() {
       >
         <PoolsTable
           columns={columns}
-          onCreatorChanged={setCreatedBy}
-          creatorAddress={createdBy}
-          rows={rows}
+          rows={rows && filteredRows}
           rowCount={8000}
           page={page}
           loading={poolsRequestStatus === 'pending'}

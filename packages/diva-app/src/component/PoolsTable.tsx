@@ -137,119 +137,6 @@ export default function PoolsTable({
         }}
       >
         <Toolbar>
-          <Typography color="#A4A4A4" sx={{ marginRight: '10px' }}>
-            Filters:
-          </Typography>
-          <Box marginRight="35px">
-            <Button
-              id="creator-filter-button"
-              aria-controls={CreatorMenuOpen ? 'creator-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={CreatorMenuOpen ? 'true' : undefined}
-              endIcon={<ArrowDropDownIcon />}
-              sx={{
-                color: '#ffffff',
-                fontSize: '16px',
-                textTransform: 'capitalize',
-              }}
-              onClick={(e) => {
-                setCreatorMenuValue(e.currentTarget)
-              }}
-            >
-              {history.location.pathname === `/markets/`
-                ? 'Creator'
-                : creatorButtonLabel}
-            </Button>
-            <Menu
-              id="creator-filter-menu"
-              anchorEl={creatorMenuValue}
-              open={CreatorMenuOpen}
-              onClose={() => setCreatorMenuValue(null)}
-            >
-              <MenuItem sx={{ width: '300px', height: '50px' }}>
-                <Input
-                  value={creatorAddress}
-                  placeholder="Enter the address"
-                  aria-label="Filter creator"
-                  sx={{ width: '300px', height: '50px' }}
-                  onChange={handleCreatorInput}
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <Search />
-                    </InputAdornment>
-                  }
-                />
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  onCreatorChanged(divaGovernanceAddress)
-                  setCreatorButtonLabel(
-                    getShortenedAddress(divaGovernanceAddress)
-                  )
-                  setCreatorMenuValue(null)
-                }}
-              >
-                Diva Governance
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  onCreatorChanged(userAddress)
-                  setCreatorButtonLabel(getShortenedAddress(userAddress))
-                  setCreatorMenuValue(null)
-                }}
-              >
-                Your Pools
-              </MenuItem>
-            </Menu>
-          </Box>
-          <Box marginRight="30px">
-            <Button
-              id="underlying-filter-button"
-              aria-controls={UnderlyingMenuOpen ? 'creator-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={UnderlyingMenuOpen ? 'true' : undefined}
-              endIcon={<ArrowDropDownIcon />}
-              sx={{
-                color: '#ffffff',
-                fontSize: '16px',
-                textTransform: 'capitalize',
-              }}
-              onClick={(e) => {
-                setUnderlyingValue(e.currentTarget)
-              }}
-            >
-              {underlyingLabel}
-            </Button>
-            <Menu
-              id="underlying-Menu"
-              anchorEl={underlyingValue}
-              open={UnderlyingMenuOpen}
-              onClose={() => setUnderlyingValue(null)}
-            >
-              <MenuItem sx={{ width: '300px', height: '50px' }}>
-                <Input
-                  value={search}
-                  placeholder="Filter underlying"
-                  aria-label="Filter underlying"
-                  sx={{ width: '300px', height: '50px' }}
-                  onChange={handleUnderlyingInput}
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <Search />
-                    </InputAdornment>
-                  }
-                />
-              </MenuItem>
-            </Menu>
-          </Box>
-          <Box>
-            <FormControlLabel
-              value="start"
-              control={<Switch color="primary" onChange={handleExpiryPools} />}
-              label="Hide Expired Pools"
-              labelPlacement="start"
-            />
-          </Box>
           {isViewToggle && (
             <Box
               sx={{
@@ -275,7 +162,7 @@ export default function PoolsTable({
       {selectedPoolsView === 'Table' ? (
         <DataGrid
           className={classes.root}
-          rows={expiredClicked ? openRows : filteredRows}
+          rows={rows}
           pagination
           columns={columns}
           loading={loading}
@@ -311,7 +198,7 @@ export default function PoolsTable({
             rowSpacing={'42px'}
             justifyContent="center"
           >
-            {filteredRows.map((row) => (
+            {rows.map((row) => (
               <Grid item key={row.Id}>
                 <PoolCard row={row} />
               </Grid>

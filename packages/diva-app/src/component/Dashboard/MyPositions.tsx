@@ -46,6 +46,7 @@ import { getAppStatus } from '../../Util/getAppStatus'
 import request from 'graphql-request'
 import { Pool, queryUser } from '../../lib/queries'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
+import PoolsTableFilter from '../PoolsTableFilter/DropDownFilter'
 
 type Response = {
   [token: string]: BigNumber
@@ -744,14 +745,7 @@ export function MyPositions() {
   })
 
   return (
-    <Stack
-      direction="row"
-      sx={{
-        height: '100%',
-      }}
-      spacing={6}
-      paddingRight={6}
-    >
+    <>
       {!userAddress ? (
         <Typography
           sx={{
@@ -776,6 +770,6 @@ export function MyPositions() {
           />
         </>
       )}
-    </Stack>
+    </>
   )
 }
