@@ -1,6 +1,10 @@
 import ethereumLogoUrl from './Images/ethereum-logo.png'
 import polygonMaticLogo from './Images/polygon-matic-logo.svg'
 import arbitrumLogoUrl from './Images/arbitrum_logo.svg'
+import divaLogo from './Images/logo.svg'
+import divaSidebarLogo from './Images/diva-sidebar-logo.svg'
+import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
+import TaskIcon from '@mui/icons-material/Task'
 
 export enum SupportedChainId {
   ROPSTEN = 3,
@@ -175,3 +179,31 @@ export const divaGovernanceAddress =
 export const tradingFee = 0.01 // 1%
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
+
+export const ICONS_URL = {
+  diva: divaLogo,
+  divaSidebarLogo: divaSidebarLogo,
+}
+
+export const APP_BAR_ITEMS = [
+  {
+    label: 'Markets',
+    to: '/',
+    icon: ShowChartOutlined,
+  },
+  {
+    label: 'My Dashboard',
+    to: '/dashboard/mypositions',
+    icon: Person,
+  },
+  {
+    label: 'Create Pool',
+    to: '/Create',
+    icon: Add,
+  },
+  {
+    label: 'Testnet Tasks',
+    to: '/tasks',
+    icon: TaskIcon,
+  },
+]
