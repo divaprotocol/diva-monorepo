@@ -60,8 +60,6 @@ type Props = {
   loading?: boolean
   rows: GridRowModel[]
   onPageChange?: (page: number, details: any) => void
-  creatorAddress?: string
-  onCreatorChanged?: (createdBy: string) => void
   page: number
   rowCount?: number
   isViewToggle?: boolean
@@ -71,8 +69,6 @@ export default function PoolsTable({
   columns,
   disableRowClick,
   rows,
-  onCreatorChanged,
-  creatorAddress,
   loading,
   page,
   rowCount,
@@ -80,53 +76,12 @@ export default function PoolsTable({
   isViewToggle,
 }: Props) {
   const history = useHistory()
-  const currentAddress = history.location.pathname.split('/')
-  const [search, setSearch] = useState('')
   const [selectedPoolsView, setSelectedPoolsView] = useState<'Grid' | 'Table'>(
     'Table'
   )
-  const [creatorButtonLabel, setCreatorButtonLabel] = useState(
-    getShortenedAddress(currentAddress[2])
-  )
-  const [underlyingLabel, setUnderlyingLabel] = useState('Underlying')
-  const [creatorMenuValue, setCreatorMenuValue] = useState(null)
-  const [underlyingValue, setUnderlyingValue] = useState(null)
-  const [expiredClicked, setExpiredClicked] = useState(false)
   const classes = useStyles()
   const theme = useTheme()
-  const userAddress = useAppSelector(selectUserAddress)
-  const CreatorMenuOpen = Boolean(creatorMenuValue)
-  const UnderlyingMenuOpen = Boolean(underlyingValue)
-  const handleCreatorInput = (e) => {
-    onCreatorChanged(e.target.value)
-    setCreatorButtonLabel(
-      e.target.value === '' ? 'Creator' : getShortenedAddress(e.target.value)
-    )
-  }
-  const filteredRows =
-    search != null && search.length > 0
-      ? rows.filter((v) =>
-          v.Underlying.toLowerCase().includes(search.toLowerCase())
-        )
-      : rows
-
   const dispatch = useDispatch()
-
-  const openRows = expiredClicked
-    ? filteredRows.filter((v) => v.Status.includes('Open'))
-    : filteredRows
-  const handleExpiryPools = () => {
-    if (expiredClicked) {
-      setExpiredClicked(false)
-    } else {
-      setExpiredClicked(true)
-    }
-  }
-
-  const handleUnderlyingInput = (e) => {
-    setSearch(e.target.value)
-    setUnderlyingLabel(e.target.value === '' ? 'Underlying' : e.target.value)
-  }
   return (
     <Stack height="100%" width="100%" spacing={5}>
       <AppBar
@@ -136,7 +91,7 @@ export default function PoolsTable({
           boxShadow: 'none',
         }}
       >
-        <Toolbar>
+        {/* <Toolbar>
           {isViewToggle && (
             <Box
               sx={{
@@ -157,7 +112,7 @@ export default function PoolsTable({
               </Button>
             </Box>
           )}
-        </Toolbar>
+        </Toolbar> */}
       </AppBar>
       {selectedPoolsView === 'Table' ? (
         <DataGrid

@@ -1,5 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
+  Box,
   Button,
   Container,
   Dialog,
@@ -47,6 +48,8 @@ import request from 'graphql-request'
 import { Pool, queryUser } from '../../lib/queries'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
 import PoolsTableFilter from '../PoolsTableFilter/DropDownFilter'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 
 type Response = {
   [token: string]: BigNumber
@@ -528,6 +531,11 @@ export function MyPositions() {
   const { provider, chainId } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
+  const [search, setSearch] = useState(null)
+  const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
+  const [confirmedPoolClicked, setConfirmedPoolClicked] = useState(false)
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
@@ -538,6 +546,26 @@ export function MyPositions() {
       })
     )
   }, [dispatch, page, userAddress])
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'Underlying' : e.target.value
+    )
+  }
+  const handleExpiredPools = () => {
+    if (expiredPoolClicked) {
+      setExpiredPoolClicked(false)
+    } else {
+      setExpiredPoolClicked(true)
+    }
+  }
+  const handleConfirmedPools = () => {
+    if (confirmedPoolClicked) {
+      setConfirmedPoolClicked(false)
+    } else {
+      setConfirmedPoolClicked(true)
+    }
+  }
 
   const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
@@ -737,7 +765,29 @@ export function MyPositions() {
           }))
       : []
 
-  const sortedRows = filteredRows.sort((a, b) => {
+  const filteredRowsByOptions =
+    search != null && search.length > 0
+      ? expiredPoolClicked
+        ? filteredRows
+            .filter((v) =>
+              v.Underlying.toLowerCase().includes(search.toLowerCase())
+            )
+            .filter((v) => v.Status.includes('Open'))
+        : confirmedPoolClicked
+        ? filteredRows
+            .filter((v) =>
+              v.Underlying.toLowerCase().includes(search.toLowerCase())
+            )
+            .filter((v) => v.Status.includes('Confirmed'))
+        : filteredRows.filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      : expiredPoolClicked
+      ? filteredRows.filter((v) => v.Status.includes('Open'))
+      : confirmedPoolClicked
+      ? filteredRows.filter((v) => v.Status.includes('Confirmed'))
+      : filteredRows
+  const sortedRows = filteredRowsByOptions.sort((a, b) => {
     const aId = parseFloat(a.Id.substring(1))
     const bId = parseFloat(b.Id.substring(1))
 
@@ -746,6 +796,32 @@ export function MyPositions() {
 
   return (
     <>
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+        <ButtonFilter
+          id="Hide expired pools"
+          ButtonColor="#ffffff"
+          ButtonLabel="Hide Expired Pools"
+          onClick={handleExpiredPools}
+        />
+        <ButtonFilter
+          id="Confirmed Pools"
+          ButtonColor="#ffffff"
+          ButtonLabel="Confirmed Pools"
+          onClick={handleConfirmedPools}
+        />
+      </Box>
       {!userAddress ? (
         <Typography
           sx={{
@@ -762,7 +838,7 @@ export function MyPositions() {
         <>
           <PoolsTable
             page={page}
-            rows={sortedRows}
+            rows={filteredRowsByOptions && sortedRows}
             loading={balances.isLoading}
             rowCount={3000}
             columns={columns}

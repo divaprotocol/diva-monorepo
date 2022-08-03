@@ -19,9 +19,9 @@ const ButtonFilter = ({ id, ButtonLabel, ButtonColor, onClick }: prop) => {
           borderColor: '#ffffff',
           fontSize: '16px',
           textTransform: 'capitalize',
-          ':focus': {
-            borderColor: 'primary',
-            color: 'primary',
+          ':active': {
+            borderColor: '#3393E0',
+            color: '#3393E0',
           },
         }}
         onClick={onClick}

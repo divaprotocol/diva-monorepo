@@ -218,7 +218,7 @@ export default function Markets() {
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
     setUnderlyingButtonLabel(
-      e.target.value === '' ? 'UnderLying' : e.target.value
+      e.target.value === '' ? 'Underlying' : e.target.value
     )
   }
   const handleExpiredPools = () => {
@@ -372,12 +372,16 @@ export default function Markets() {
   const filteredRows =
     search != null && search.length > 0
       ? expiredPoolClicked
-        ? rows.filter((v) => {
-            v.Status.includes('Open')
-          })
+        ? rows
+            .filter((v) => v.Status.includes('Open'))
+            .filter((v) =>
+              v.Underlying.toLowerCase().includes(search.toLowerCase())
+            )
         : rows.filter((v) =>
             v.Underlying.toLowerCase().includes(search.toLowerCase())
           )
+      : expiredPoolClicked
+      ? rows.filter((v) => v.Status.includes('Open'))
       : rows
 
   return (
@@ -440,7 +444,7 @@ export default function Markets() {
       >
         <PoolsTable
           columns={columns}
-          rows={rows && filteredRows}
+          rows={filteredRows}
           rowCount={8000}
           page={page}
           loading={poolsRequestStatus === 'pending'}
