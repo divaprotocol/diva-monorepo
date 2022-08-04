@@ -1,51 +1,64 @@
-import React, { useLayoutEffect, useState } from 'react'
+import { useRef, useEffect } from 'react'
 import * as d3 from 'd3'
 
 export default function DIVATradeChart(props) {
-  const ref = React.useRef()
-  useLayoutEffect(() => {
-    let {
-      data,
-      w, //Width
-      h, //Height
-      refAsset, //ReferenceAsset
-      payOut,
-      isLong,
-      breakEven,
-      currentPrice,
-      floor,
-      cap,
-      mouseHover,
-      showBreakEven,
-    } = props
-    data = data.map(({ x, y }) => ({
-      x: parseFloat(x),
-      y: parseFloat(y),
-    }))
-    const optionTypeText = isLong ? 'LONG' : 'SHORT'
-    const reffeenceAsset = refAsset.slice(0, 8)
-    // Set the dimensions and margins of the graph
-    var margin = { top: 15, right: 2, bottom: 40, left: 20 },
-      width = w - margin.left - margin.right,
-      height = h - margin.top - margin.bottom
-    // Append the svg object to the reference element of the page
-    // Appends a 'group' element to 'svg'
-    // Moves the 'group' element to the top left margin
-    var svg = d3
-      .select(ref.current)
-      .append('svg')
+  const ref = useRef()
+  let {
+    data,
+    w, //Width
+    h, //Height
+    refAsset, //ReferenceAsset
+    payOut,
+    isLong,
+    breakEven,
+    currentPrice,
+    floor,
+    cap,
+    mouseHover,
+    showBreakEven,
+  } = props
+
+  data = data.map(({ x, y }) => ({
+    x: parseFloat(x),
+    y: parseFloat(y),
+  }))
+
+  const optionTypeText = isLong ? 'LONG' : 'SHORT'
+  const reffeenceAsset = refAsset.slice(0, 8)
+
+  // Set the dimensions and margins of the graph
+  const margin = { top: 15, right: 2, bottom: 40, left: 20 },
+    width = w - margin.left - margin.right,
+    height = h - margin.top - margin.bottom
+  const labelWidth = 30
+  const labelHeight = 10
+  const blueColorCode = '#3B8DCA'
+  const redColorCode = '#F77F99'
+  const legendHeight = height + 30
+  console.log('width', width)
+  console.log('widthXXX', width + margin.left + margin.right)
+  console.log('W', w)
+
+  useEffect(() => {
+    intitalChart()
+  }, [])
+  const intitalChart = () => {
+    const svg = d3.select(ref.current)
+    svg
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
       .style('overflow', 'visible')
-      .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
 
     //Text Label on the Top left corner i.e Payout per Long token (in WAGMI18)
-    const labelWidth = 30
-    const labelHeight = 10
-    const blueColorCode = '#3B8DCA'
-    const redColorCode = '#F77F99'
-    const legendHeight = height + 30
+  }
+  // Append the svg object to the reference element of the page
+  // Appends a 'group' element to 'svg'
+  // Moves the 'group' element to the top left margin
+  const draw = () => {
+    const svg = d3.select(ref.current)
+    svg.selectAll('*').remove()
+    svg.selectAll('rect').data(data)
     svg
       .append('text')
       .attr('width', labelWidth)
@@ -57,7 +70,158 @@ export default function DIVATradeChart(props) {
       .style('fill', '#A4A4A4')
       .text(' Payout per ' + optionTypeText + ' token (' + 'in ' + payOut + ')')
 
-    // legends
+    // Add X axis
+    const domainMin = d3.min(data, function (d) {
+      return d.x
+    })
+    const domainMax = d3.max(data, function (d) {
+      return d.x
+    })
+    const x = d3
+      .scaleLinear()
+      .domain([domainMin, domainMax])
+      .range([0, width - margin.right])
+    // Remove X- axis labels
+    svg
+      .append('rect')
+      .attr('transform', 'translate(0,' + height + ')')
+      .style('stroke', '#B8B8B8')
+      .style('stroke-width', '0.75px')
+    // Add Y axis
+    const y = d3
+      .scaleLinear()
+      .domain([
+        0,
+        d3.max(data, function (d) {
+          return d.y
+        }),
+      ])
+      .range([height, 60])
+    svg
+      .append('g')
+      .attr('class', 'yAxisG')
+      .attr('transform', `translate(0)`)
+      .call(
+        d3
+          .axisRight(y)
+          .tickSize(width)
+          .tickValues([
+            0,
+            data[2].y,
+            d3.max(data, function (d) {
+              return d.y
+            }),
+          ])
+          .ticks(3)
+      )
+      .call((g) => g.select('.domain').remove())
+      .call((g) =>
+        g
+          .selectAll('.tick:not(:first-of-type) line')
+          .attr('stroke-opacity', 0.5)
+          .style('stroke', '#3393E0')
+      )
+      .call((g) => g.selectAll('.tick text').attr('x', 4).attr('dy', -4))
+
+    // // Add the line
+
+    const valueline = d3
+      .line()
+      .x(function (d) {
+        return x(d.x)
+      })
+      .y(function (d) {
+        return y(d.y)
+      })
+    svg
+      .append('path')
+      .data([data]) // or data([data])
+      .attr('d', valueline)
+      .style('fill', 'none')
+      .style('stroke', function () {
+        return mouseHover ? 'grey' : blueColorCode
+      })
+      .style('stroke-width', '4px')
+      .attr('class', function () {
+        return mouseHover ? 'line' : null
+      })
+
+    // Format x axis
+
+    // //for Y axis
+    // //or breakEven point
+    svg
+      .selectAll('dot')
+      .data(data)
+      .enter()
+      .append('circle')
+      .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
+      .filter(function (d) {
+        return (d.x = breakEven ? breakEven : null)
+      })
+      .attr('cx', function (d) {
+        return x(d.x)
+      })
+      .attr('cy', function () {
+        return y(0)
+      })
+      .attr('r', 5)
+      .style('fill', '#9747FF')
+    // // for current price point
+    svg
+      .selectAll('dot')
+      .data(data)
+      .enter()
+      .append('circle')
+      .filter(function (d) {
+        return (d.x = currentPrice ? currentPrice : null)
+      })
+      .attr('cx', function (d) {
+        return x(d.x)
+      })
+      .attr('cy', function () {
+        return y(0)
+      })
+      .attr('r', 5)
+      .style('fill', '#3393E0')
+
+    // //for floor point
+    svg
+      .selectAll('dot')
+      .data(data)
+      .enter()
+      .append('circle')
+      .filter(function (d) {
+        return (d.x = floor)
+      })
+      .attr('cx', function (d) {
+        return x(d.x)
+      })
+      .attr('cy', function () {
+        return y(0)
+      })
+      .attr('r', 5)
+      .style('fill', '#F7931A')
+
+    // //for cap point
+    svg
+      .selectAll('dot')
+      .data(data)
+      .enter()
+      .append('circle')
+      .filter(function (d) {
+        return cap == floor ? null : (d.x = cap)
+      })
+      .attr('cx', function (d) {
+        return x(d.x)
+      })
+      .attr('cy', function () {
+        return y(0)
+      })
+      .attr('r', 5)
+      .style('fill', '#83BD67')
+
+    // // legends
     svg
       .append('circle')
       .attr('cx', width * 0.0083)
@@ -114,6 +278,8 @@ export default function DIVATradeChart(props) {
       .text('Cap' + ' ' + '(' + cap + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
+
+    //current price legend
     svg
       .append('text')
       .attr('x', width * 0.45)
@@ -122,6 +288,7 @@ export default function DIVATradeChart(props) {
       .text('Current price' + ' ' + '(' + currentPrice + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
+
     svg
       .append('text')
       .attr('x', width * 0.77)
@@ -130,161 +297,6 @@ export default function DIVATradeChart(props) {
       .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(2) + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
-
-    // Add X axis
-    const x = d3
-      .scaleLinear()
-      .domain([
-        d3.min(data, function (d) {
-          return d.x
-        }),
-        // <= currentPrice ? d.x : currentPrice || d.x
-        d3.max(data, function (d) {
-          return d.x
-        }),
-      ])
-      .range([0, width])
-    // Remove X- axis labels
-    svg
-      .append('g')
-      .attr('class', 'xAxisG')
-      .attr('transform', 'translate(0,' + height + ')')
-    // Add Y axis
-    const y = d3
-      .scaleLinear()
-      .domain([
-        0,
-        d3.max(data, function (d) {
-          return d.y
-        }),
-      ])
-      .range([height, 60])
-    svg
-      .append('g')
-      .attr('class', 'yAxisG')
-      .attr('transform', `translate(0)`)
-      .call(
-        d3
-          .axisRight(y)
-          .tickSize(width)
-          .tickValues([
-            0,
-            data[2].y,
-            d3.max(data, function (d) {
-              return d.y
-            }),
-          ])
-          .ticks(3)
-      )
-      .call((g) => g.select('.domain').remove())
-      .call((g) =>
-        g
-          .selectAll('.tick:not(:first-of-type) line')
-          .attr('stroke-opacity', 0.5)
-          .style('stroke', '#3393E0')
-      )
-      .call((g) => g.selectAll('.tick text').attr('x', 4).attr('dy', -4))
-
-    // Add the line
-    const valueline = d3
-      .line()
-      .x(function (d) {
-        return x(d.x)
-      })
-      .y(function (d) {
-        return y(d.y)
-      })
-    svg
-      .append('path')
-      .data([data]) // or data([data])
-      .attr('d', valueline)
-      .style('fill', 'none')
-      .style('stroke', function () {
-        return mouseHover ? 'grey' : blueColorCode
-      })
-      .style('stroke-width', '4px')
-      .attr('class', function () {
-        return mouseHover ? 'line' : null
-      })
-
-    // Format x axis
-    d3.select('.xAxisG path')
-      .style('stroke', '#B8B8B8')
-      .style('stroke-width', '0.75px')
-    //for Y axis
-    //or breakEven point
-    svg
-      .append('g')
-      .selectAll('dot')
-      .data(data)
-      .enter()
-      .append('circle')
-      .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
-      .filter(function (d) {
-        return (d.x = breakEven ? breakEven : null)
-      })
-      .attr('cx', function (d) {
-        return x(d.x)
-      })
-      .attr('cy', function () {
-        return y(0)
-      })
-      .attr('r', 5)
-      .style('fill', '#9747FF')
-    // for current price point
-    svg
-      .append('g')
-      .selectAll('dot')
-      .data(data)
-      .enter()
-      .append('circle')
-      .filter(function (d) {
-        return (d.x = currentPrice ? currentPrice : null)
-      })
-      .attr('cx', function (d) {
-        return x(d.x)
-      })
-      .attr('cy', function () {
-        return y(0)
-      })
-      .attr('r', 5)
-      .style('fill', '#3393E0')
-    //for floor point
-    svg
-      .append('g')
-      .selectAll('dot')
-      .data(data)
-      .enter()
-      .append('circle')
-      .filter(function (d) {
-        return (d.x = floor)
-      })
-      .attr('cx', function (d) {
-        return x(d.x)
-      })
-      .attr('cy', function () {
-        return y(0)
-      })
-      .attr('r', 5)
-      .style('fill', '#F7931A')
-    //for cap point
-    svg
-      .append('g')
-      .selectAll('dot')
-      .data(data)
-      .enter()
-      .append('circle')
-      .filter(function (d) {
-        return cap == floor ? null : (d.x = cap)
-      })
-      .attr('cx', function (d) {
-        return x(d.x)
-      })
-      .attr('cy', function () {
-        return y(0)
-      })
-      .attr('r', 5)
-      .style('fill', '#83BD67')
 
     // Add mouseover effects
     const mouseHoverEffect = () => {
@@ -399,7 +411,7 @@ export default function DIVATradeChart(props) {
           target = null,
           pos = null
 
-        // eslint-disable-next-line
+        //eslint-disable-next-line
       while (true) {
           target = Math.floor((beginning + end) / 2)
           pos = l[i].getPointAtLength(target)
@@ -486,7 +498,10 @@ export default function DIVATradeChart(props) {
     if (mouseHover) {
       mouseHoverEffect()
     }
-  }, [props.w])
+  }
+  useEffect(() => {
+    draw()
+  }, [props.currentPrice, props.breakEven])
 
-  return <div id="DivaTradeChart" ref={ref}></div>
+  return <svg ref={ref}></svg>
 }
