@@ -3,6 +3,7 @@ import polygonMaticLogo from './Images/polygon-matic-logo.svg'
 import arbitrumLogoUrl from './Images/arbitrum_logo.svg'
 import divaLogo from './Images/logo.svg'
 import divaSidebarLogo from './Images/diva-sidebar-logo.svg'
+import divaTextLogo from './Images/diva_logo_text.svg'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
 import TaskIcon from '@mui/icons-material/Task'
 
@@ -183,6 +184,7 @@ export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 export const ICONS_URL = {
   diva: divaLogo,
   divaSidebarLogo: divaSidebarLogo,
+  divaTextLogo: divaTextLogo,
 }
 
 export const APP_BAR_ITEMS = [
