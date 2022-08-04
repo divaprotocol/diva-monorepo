@@ -104,6 +104,20 @@ export default function BuyMarket(props: {
     if (value !== '') {
       const nbrOptions = parseUnits(value)
       setNumberOfOptions(nbrOptions)
+
+      // Disable fill order button if youPay amount (incl. fees) exceeds user's wallet balance
+      if (collateralBalance.sub(youPay).lt(0)) {
+        setOrderBtnDisabled(true)
+
+        // TODO Below is currently not working as isApproved is updated after this part. To be revisited in a separate PR.
+        // if (isApproved) {
+        //   // Display message only when balance is exceeded in the presence of sufficient approval.
+        //   // Otherwise the normal approval logic will take place where a user can approve a higher amount.
+        //   console.log('Insufficient wallet balance')
+        // }
+      } else {
+        setOrderBtnDisabled(false)
+      }
     } else {
       setYouPay(ZERO)
       setNumberOfOptions(ZERO)
@@ -114,7 +128,7 @@ export default function BuyMarket(props: {
   const handleOrderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!isApproved) {
-      // Remaining allowance - youPay <= 0
+      // Remaining allowance - youPay (incl. fee) <= 0
       setApproveLoading(true)
 
       if (numberOfOptions.gt(0)) {
@@ -124,6 +138,7 @@ export default function BuyMarket(props: {
         // TODO: Exclude orders that have a fee higher than 1% from the orderbook so that users will not get screwed.
         const amountToApprove = allowance
           .add(youPay) // youPay is already including fee, hence no feeMultiplier needed in that case
+          .sub(remainingAllowance)
           .add(BigNumber.from(100)) // Adding a buffer of 100 to make sure that there will be always sufficient approval
 
         // Set allowance. Returns 'undefined' if rejected by user.
@@ -154,134 +169,44 @@ export default function BuyMarket(props: {
         }
       }
     } else {
-      // Remaining allowance - youPay > 0
+      // Remaining allowance - youPay (incl. fee) > 0
+
       setFillLoading(true)
-      if (collateralBalance.gt(0)) {
-        // User owns collateral tokens ...
-
-        // youPay is the amount of collateral token that the user would need to pay (incl. fee) for the nbrOfOptions entered.
-        // It is calculated further down in the code based on the nbrOfOptions to buy entered by the user.
-        if (youPay.gt(remainingAllowance)) {
-          // Collateral token amount to pay exceeds remaining allowance ...
-
-          // TODO: Consider refactoring the if clauses a bit
-          if (youPay.gt(collateralBalance)) {
-            // User not enough collateral tokens to pay for the purchase ...
-
-            alert('Insufficient collateral token balance')
-          } else {
-            // Integer with collateral token decimals
-            const additionalAllowance = youPay.sub(remainingAllowance)
-            if (
-              confirm(
-                'The entered amount exceeds your current remaining allowance. Click OK to increase your allowance by ' +
-                  toExponentialOrNumber(
-                    Number(formatUnits(additionalAllowance, decimals))
-                  ) +
-                  ' ' +
-                  option.collateralToken.symbol +
-                  ' tokens. Click FILL ORDER after the allowance has been updated.'
-              )
-            ) {
-              const amountToApprove = additionalAllowance
-                .add(allowance)
-                .add(BigNumber.from(100)) // Buffer to ensure that there is always sufficient approval
-              setApproveLoading(true)
-              // Set allowance. Returns 'undefined' if rejected by user.
-              const approveResponse = await props.approve(
-                amountToApprove,
-                takerTokenContract,
-                exchangeProxy,
-                userAddress
-              )
-
-              if (approveResponse !== 'undefined') {
-                setApproveLoading(false)
-                const newAllowance = BigNumber.from(approveResponse)
-                const remainingAllowance = newAllowance.sub(
-                  existingBuyLimitOrdersAmountUser
-                )
-
-                setRemainingAllowance(remainingAllowance)
-                setAllowance(newAllowance)
-                alert(
-                  `Additional ${toExponentialOrNumber(
-                    Number(formatUnits(additionalAllowance, decimals))
-                  )} ${
-                    option.collateralToken.symbol
-                  } tokens approved. Please proceed with the order.`
-                )
-              }
-            } else {
-              setApproveLoading(false)
-              console.log('Additional approval rejected by user.')
-            }
-          }
-        } else {
-          const orderData = {
-            taker: userAddress,
-            provider: web3,
-            isBuy: true,
-            nbrOptions: numberOfOptions,
-            collateralDecimals: decimals,
-            makerToken: makerToken,
-            takerToken: takerToken,
-            avgExpectedRate: avgExpectedRate,
-            existingLimitOrders: existingSellLimitOrders,
-            chainId: props.chainId,
-          }
-          buyMarketOrder(orderData).then(async (orderFillStatus: any) => {
-            let orderFilled = false
-            setFillLoading(true)
-            if (!(orderFillStatus === undefined)) {
-              if (!('logs' in orderFillStatus)) {
-                alert('Order could not be filled.')
-                return
-              } else {
-                orderFillStatus.logs.forEach(async (eventData: any) => {
-                  if (!('event' in eventData)) {
-                    return
-                  } else {
-                    if (eventData.event === 'LimitOrderFilled') {
-                      //wait for 4 secs for 0x to update orders then handle order book display
-                      // await new Promise((resolve) => setTimeout(resolve, 4000))
-                      await props.handleDisplayOrder()
-                      //reset input & you pay fields
-                      Array.from(document.querySelectorAll('input')).forEach(
-                        (input) => (input.value = '')
-                      )
-                      setNumberOfOptions(ZERO)
-                      setFillLoading(false)
-                      setYouPay(ZERO)
-                      orderFilled = true
-                    } else {
-                      setFillLoading(false)
-                      alert('Order could not be filled.')
-                    }
-                  }
-                })
-              }
-            } else {
-              alert('Order could not be filled.')
-              setFillLoading(false)
-              await props.handleDisplayOrder()
-              //reset input & you pay fields
-              Array.from(document.querySelectorAll('input')).forEach(
-                (input) => (input.value = '')
-              )
-              setNumberOfOptions(ZERO)
-              setYouPay(ZERO)
-            }
-            if (orderFilled) {
-              setFillLoading(false)
-              alert('Order successfully filled.')
-            }
-          })
-        }
-      } else {
-        setFillLoading(false)
-        alert(`No ${option.collateralToken.symbol} tokens available to buy.`)
+      const orderData = {
+        taker: userAddress,
+        provider: web3,
+        isBuy: true,
+        nbrOptions: numberOfOptions,
+        collateralDecimals: decimals,
+        makerToken: makerToken,
+        takerToken: takerToken,
+        avgExpectedRate: avgExpectedRate,
+        existingLimitOrders: existingSellLimitOrders,
+        chainId: props.chainId,
       }
+      buyMarketOrder(orderData).then(async (orderFillStatus: any) => {
+        if (!(orderFillStatus === undefined)) {
+          // On fill order success ...
+
+          // Wait for 4 secs for 0x to update orders, then handle order book display
+          await new Promise((resolve) => setTimeout(resolve, 4000))
+
+          // Reset inputs and state variables
+          await props.handleDisplayOrder()
+          Array.from(document.querySelectorAll('input')).forEach(
+            (input) => (input.value = '')
+          )
+          setNumberOfOptions(ZERO)
+          setFillLoading(false)
+          setYouPay(ZERO)
+          alert('Order successfully filled.')
+        } else {
+          // Rejected by user or tx failure (i.e., orderFillStatus == undefined as no tx receipt was returned)
+          // Do not reset values.
+          setFillLoading(false)
+          alert('Order could not be filled.')
+        }
+      })
     }
   }
 
@@ -377,7 +302,6 @@ export default function BuyMarket(props: {
         // Use values returned from getCollateralInWallet to initialize variables
         setCollateralBalance(val.balance)
         setAllowance(val.allowance)
-        val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
         // Get Sell Limit orders which the user is going to fill during the Buy Market operation
         if (responseSell.length > 0) {
@@ -388,10 +312,9 @@ export default function BuyMarket(props: {
 
         // Get the user's (taker) existing Buy Limit orders which block some of the user's allowance
         getTotalBuyLimitOrderAmountUser(userAddress).then((amount) => {
-          const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance
+          const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance but should go back to zero if 0x orders are refreshed and reflect the actually fillable amount
           setExistingBuyLimitOrdersAmountUser(amount)
           setRemainingAllowance(remainingAmount)
-          remainingAmount.lte(0) ? setIsApproved(false) : setIsApproved(true)
         })
       })
     }
@@ -402,7 +325,6 @@ export default function BuyMarket(props: {
     if (numberOfOptions.gt(0) && existingSellLimitOrders.length > 0) {
       // If user has entered an input into the Number field and there are existing Sell Limit orders to fill in the orderbook...
 
-      setOrderBtnDisabled(false)
       // User input (numberOfOptions) corresponds to the maker token in Sell Limit.
       let makerAmountToFill = numberOfOptions // 18 decimals
 
@@ -476,12 +398,6 @@ export default function BuyMarket(props: {
   }, [numberOfOptions])
 
   useEffect(() => {
-    if (remainingAllowance.sub(youPay).gt(0)) {
-      setIsApproved(true)
-    }
-    if (remainingAllowance.sub(youPay).lte(0)) {
-      setIsApproved(false)
-    }
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
@@ -568,7 +484,20 @@ export default function BuyMarket(props: {
         )
       )
     }
-  }, [option, avgExpectedRate, usdPrice])
+  }, [option, avgExpectedRate, usdPrice, userAddress])
+
+  useEffect(() => {
+    if (remainingAllowance.sub(youPay).gt(0)) {
+      setIsApproved(true)
+    }
+    if (remainingAllowance.sub(youPay).lte(0)) {
+      setIsApproved(false)
+    }
+  }, [remainingAllowance, youPay, userAddress])
+
+  const fillBtnDisabled =
+    !isApproved || orderBtnDisabled || collateralBalance.sub(youPay).lt(0)
+  const approveBtnDisabled = isApproved || youPay.lte(0) // No collateralBalance.sub(youPay).lt(0) condition as a user should be able to approve any amount they want
 
   return (
     <div>
@@ -625,9 +554,12 @@ export default function BuyMarket(props: {
               <LabelStyle>You Pay (incl. 1% fee) </LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {toExponentialOrNumber(
-                  Number(formatUnits(remainingAllowance, decimals))
-                )}
+                {Number(formatUnits(remainingAllowance, decimals)) <
+                0.00000000001
+                  ? 0
+                  : toExponentialOrNumber(
+                      Number(formatUnits(remainingAllowance, decimals))
+                    )}
               </FormLabel>
             </Stack>
           </LabelStyleDiv>
@@ -672,7 +604,7 @@ export default function BuyMarket(props: {
               startIcon={<CheckIcon />}
               type="submit"
               value="Submit"
-              disabled={isApproved || orderBtnDisabled}
+              disabled={approveBtnDisabled}
             >
               {'Approve'}
             </LoadingButton>
@@ -685,7 +617,7 @@ export default function BuyMarket(props: {
               startIcon={<AddIcon />}
               type="submit"
               value="Submit"
-              disabled={!isApproved || orderBtnDisabled}
+              disabled={fillBtnDisabled}
             >
               {'Fill'}
             </LoadingButton>

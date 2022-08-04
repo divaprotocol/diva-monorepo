@@ -31,7 +31,14 @@ export function CreatePool() {
   const theme = useTheme()
   const { provider } = useConnectionContext()
   const history = useHistory()
-
+  const [mobile, setMobile] = useState(false)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setMobile(true)
+    } else {
+      setMobile(false)
+    }
+  }, [])
   const [isSnackbarOpen, setIsSnackbarOpen] = useState<boolean>(false)
 
   let step = null
@@ -96,7 +103,10 @@ export function CreatePool() {
       <Container maxWidth="xl">
         <Box pt={5} pb={10}>
           <Stepper
-            sx={{ pl: theme.spacing(35), maxWidth: 'md' }}
+            sx={{
+              pl: mobile ? theme.spacing(2) : theme.spacing(35),
+              maxWidth: 'md',
+            }}
             activeStep={formik.values.step - 1}
             alternativeLabel
           >
@@ -127,8 +137,13 @@ export function CreatePool() {
           )}
 
           <Stack
-            sx={{ pr: theme.spacing(12), paddingTop: theme.spacing(3) }}
-            direction="row"
+            sx={{
+              pr: theme.spacing(mobile ? 6 : 12),
+              paddingTop: theme.spacing(3),
+            }}
+            direction={
+              mobile && formik.values.step === 3 ? 'column-reverse' : 'row'
+            }
             spacing={3}
             justifyContent="space-between"
             alignItems="center"
@@ -157,7 +172,7 @@ export function CreatePool() {
                 variant="text"
                 sx={{
                   mt: theme.spacing(8),
-                  ml: theme.spacing(115),
+                  ml: theme.spacing(mobile ? 35 : 115),
                 }}
                 onClick={() => {
                   history.push('/dashboard/mypositions')
@@ -172,6 +187,7 @@ export function CreatePool() {
                 onClick={() => {
                   formik.handleSubmit()
                 }}
+                sx={{ width: theme.spacing(16) }}
                 loading={
                   formik.status != null &&
                   !formik.status.startsWith('Error:') &&
