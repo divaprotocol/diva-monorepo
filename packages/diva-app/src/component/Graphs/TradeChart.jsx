@@ -285,7 +285,7 @@ export default function DIVATradeChart(props) {
       .attr('x', width * 0.45)
       .attr('y', legendHeight)
       .attr('opacity', currentPrice ? 1 : 0)
-      .text('Current price' + ' ' + '(' + currentPrice + ')')
+      .text('Current Value' + ' ' + '(' + currentPrice + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 
