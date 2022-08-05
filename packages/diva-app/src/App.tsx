@@ -19,14 +19,22 @@ import { config, divaGovernanceAddress } from './constants'
 import { WrongChain } from './component/Wallet/WrongChain'
 import { Tasks } from './component/Tasks/Tasks'
 import Dashboard from './component/Dashboard/Dashboard'
+import { useCustomMediaQuery } from './hooks/useCustomMediaQuery'
 
 export const App = () => {
   const chainId = useAppSelector((state) => state.appSlice.chainId)
+  const { isMobile } = useCustomMediaQuery()
+
   return (
     <Router>
       <Stack height="100%" direction="row" justifyContent="space-between">
-        <MenuItems />
-        <Divider orientation="vertical" />
+        {!isMobile && (
+          <>
+            <MenuItems />
+            <Divider orientation="vertical" />
+          </>
+        )}
+
         <Container
           disableGutters
           sx={{ alignItems: 'left', height: '100%', overflow: 'auto' }}
