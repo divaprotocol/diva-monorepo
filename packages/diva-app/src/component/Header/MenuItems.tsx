@@ -8,7 +8,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight'
 export default function MenuItems() {
   const location = useLocation()
 
-  const [navOpen, setNavOpen] = useState(true)
+  const [navOpen, setNavOpen] = useState(false)
 
   return (
     <Stack
@@ -48,12 +48,16 @@ export default function MenuItems() {
           borderTop: '1px solid #4F4F4F',
         }}
       >
-        {APP_BAR_ITEMS.map(({ label, to, icon }) => {
+        {APP_BAR_ITEMS.map(({ label, to, icon, isRoot }) => {
           const Icon = icon
-          const isActive = matchPath(location.pathname, {
-            path: to,
-            exact: true,
-          })
+          const isActive =
+            isRoot && location.pathname.startsWith('/markets/')
+              ? true
+              : matchPath(location.pathname, {
+                  path: to,
+                  exact: true,
+                })
+
           return (
             <Link
               to={to}
@@ -110,7 +114,16 @@ export default function MenuItems() {
           color: '#121212',
         }}
       >
-        <ArrowRightIcon />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            transform: `${navOpen ? 'rotate(180deg)' : 'rotate(0deg)'}`,
+          }}
+        >
+          <ArrowRightIcon />
+        </Box>
       </Button>
     </Stack>
   )

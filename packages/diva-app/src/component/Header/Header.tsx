@@ -44,12 +44,16 @@ const MobileMenuList = ({ onClose }) => {
           gridGap: '37px',
         }}
       >
-        {APP_BAR_ITEMS.map(({ label, to, icon }) => {
+        {APP_BAR_ITEMS.map(({ label, to, icon, isRoot }) => {
           const Icon = icon
-          const isActive = matchPath(location.pathname, {
-            path: to,
-            exact: true,
-          })
+          const isActive =
+            isRoot && location.pathname.startsWith('/markets/')
+              ? true
+              : matchPath(location.pathname, {
+                  path: to,
+                  exact: true,
+                })
+
           return (
             <Link
               to={to}

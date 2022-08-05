@@ -192,6 +192,7 @@ export const APP_BAR_ITEMS = [
     label: 'Markets',
     to: '/',
     icon: ShowChartOutlined,
+    isRoot: true,
   },
   {
     label: 'My Dashboard',
@@ -199,7 +200,7 @@ export const APP_BAR_ITEMS = [
     icon: Person,
   },
   {
-    label: 'Create Pool',
+    label: 'Create',
     to: '/Create',
     icon: Add,
   },
