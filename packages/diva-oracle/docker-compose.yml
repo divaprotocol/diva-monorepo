@@ -1,7 +1,7 @@
 services:
   oracle:
     image: python:3.8
-    container_name: Diva-email-oracle
+    container_name: Diva-tellor-oracle
     build: .
     volumes:
       - .:/app
