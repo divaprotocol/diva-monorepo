@@ -4,7 +4,7 @@ import { formatEther } from 'ethers/lib/utils'
 // in the smart contract. Function returns both, the status of the final reference value as well as the
 // (expected) final reference value itself.
 export function getAppStatus(
-  expiryTime: string,
+  expiryTime: string, // in milliseconds
   statusTimestamp: string,
   statusFinalReferenceValue: string,
   finalReferenceValue: string,
@@ -22,18 +22,15 @@ export function getAppStatus(
   const now = new Date().getTime()
 
   // Get end dates for settlement periods
-  const submissionPeriodEnd = dtExpiryTime.setMinutes(
-    dtExpiryTime.getMinutes() + submissionPeriod / 60
-  ) // Ok to use dtExpiryTime only and not max(dtExpiryTime, dtStatusTimestamp) as submissionPeriodEnd is only used when statusFinalReferenceValue === 'Open' below in the code.
-  const fallbackPeriodEnd = dtExpiryTime.setMinutes(
-    dtExpiryTime.getMinutes() + (submissionPeriod + fallbackPeriod) / 60
-  )
-  const challengePeriodEnd = dtStatusTimestamp.setMinutes(
-    dtStatusTimestamp.getMinutes() + challengePeriod / 60
-  ) // statusTimestamp is equal to time of submission when it's used below in the code.
-  const reviewPeriodEnd = dtStatusTimestamp.setMinutes(
-    dtStatusTimestamp.getMinutes() + reviewPeriod / 60
-  ) // statusTimestamp is equal to time of first challenge following a submission when it's used down below in the code.
+  const submissionPeriodEnd = dtExpiryTime.getTime() + submissionPeriod * 1000
+  // Ok to use dtExpiryTime only and not max(dtExpiryTime, dtStatusTimestamp) as submissionPeriodEnd is only used when statusFinalReferenceValue === 'Open' below in the code.
+
+  const fallbackPeriodEnd =
+    dtExpiryTime.getTime() + (submissionPeriod + fallbackPeriod) * 1000
+
+  const challengePeriodEnd =
+    dtStatusTimestamp.getTime() + challengePeriod * 1000 // statusTimestamp is equal to time of submission when it's used below in the code.
+  const reviewPeriodEnd = dtStatusTimestamp.getTime() + reviewPeriod * 1000 // statusTimestamp is equal to time of first challenge following a submission when it's used down below in the code.
 
   let finalValue = '-'
   let status = statusFinalReferenceValue

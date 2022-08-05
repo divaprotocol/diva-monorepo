@@ -30,7 +30,9 @@ export const useGovernanceParameters = () => {
         setSubmissionPeriod(governanceParameters.submissionPeriod.toNumber())
         setChallengePeriod(governanceParameters.challengePeriod.toNumber())
         setReviewPeriod(governanceParameters.reviewPeriod.toNumber())
-        setFallbackPeriod(governanceParameters.fallbackPeriod.toNumber())
+        setFallbackPeriod(
+          governanceParameters.fallbackSubmissionPeriod.toNumber()
+        )
       })
     }
   }, [diva])
