@@ -35,10 +35,6 @@ export default function DIVATradeChart(props) {
   const blueColorCode = '#3B8DCA'
   const redColorCode = '#F77F99'
   const legendHeight = height + 30
-  console.log('width', width)
-  console.log('widthXXX', width + margin.left + margin.right)
-  console.log('W', w)
-
   useEffect(() => {
     intitalChart()
   }, [])
@@ -255,7 +251,7 @@ export default function DIVATradeChart(props) {
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
       })
-      .text('Floor' + ' ' + '(' + floor + ')')
+      .text('Floor' + ' ' + '(' + parseFloat(floor).toFixed(0) + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
     svg
@@ -265,7 +261,7 @@ export default function DIVATradeChart(props) {
       .attr('opacity', function () {
         return cap == floor ? 1 : 0
       })
-      .text('Inflection' + ' ' + '(' + cap + ')') //Binary payoff
+      .text('Inflection' + ' ' + '(' + parseFloat(cap).toFixed(0) + ')') //Binary payoff
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
     svg
@@ -275,7 +271,7 @@ export default function DIVATradeChart(props) {
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
       })
-      .text('Cap' + ' ' + '(' + cap + ')')
+      .text('Cap' + ' ' + '(' + parseFloat(cap).toFixed(0) + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 
@@ -285,7 +281,9 @@ export default function DIVATradeChart(props) {
       .attr('x', width * 0.45)
       .attr('y', legendHeight)
       .attr('opacity', currentPrice ? 1 : 0)
-      .text('Current Value' + ' ' + '(' + currentPrice + ')')
+      .text(
+        'Current Value' + ' ' + '(' + parseFloat(currentPrice).toFixed(0) + ')'
+      )
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 
@@ -294,7 +292,7 @@ export default function DIVATradeChart(props) {
       .attr('x', width * 0.77)
       .attr('y', legendHeight)
       .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
-      .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(2) + ')')
+      .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(0) + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 
