@@ -71,7 +71,7 @@ export default function OptionDetails({
   const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
   const maxYield = useAppSelector((state) => state.stats.maxYield)
   const [fontColor, setFontColor] = useState('#ffff')
-  const [isIntrinsicValue, setIsIntrinsicValue] = useState(true)
+  const [isIntrinsicValue, setIsIntrinsicValue] = useState(false)
   useEffect(() => {
     if (pool.cap === pool.floor) {
       setBinary(true)
@@ -107,8 +107,8 @@ export default function OptionDetails({
     }
   }, [maxYield])
   useEffect(() => {
-    if (intrinsicValue == 'n/a') {
-      setIsIntrinsicValue(false)
+    if (intrinsicValue != 'n/a') {
+      setIsIntrinsicValue(true)
     }
   }, [intrinsicValue])
 
