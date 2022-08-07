@@ -65,7 +65,7 @@ const DropDownFilter = ({
           <MenuItem sx={{ width: '300px', height: '50px' }}>
             <Input
               value={InputValue}
-              placeholder="Enter the address"
+              placeholder={DropDownButtonLabel}
               aria-label="Filter creator"
               sx={{ width: '300px', height: '50px' }}
               onChange={onInputChange}

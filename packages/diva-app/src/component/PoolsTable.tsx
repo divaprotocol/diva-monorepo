@@ -24,8 +24,6 @@ import { LineSeries, XYPlot } from 'react-vis'
 import { Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
 import { makeStyles } from '@mui/styles'
-import ViewModuleIcon from '@mui/icons-material/ViewModule'
-import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
 import PoolCard from './PoolCard'
 import styled from 'styled-components'
 import { setResponseBuy, setResponseSell } from '../Redux/TradeOption'
@@ -62,7 +60,7 @@ type Props = {
   onPageChange?: (page: number, details: any) => void
   page: number
   rowCount?: number
-  isViewToggle?: boolean
+  selectedPoolsView?: string
 }
 
 export default function PoolsTable({
@@ -73,47 +71,13 @@ export default function PoolsTable({
   page,
   rowCount,
   onPageChange,
-  isViewToggle,
+  selectedPoolsView,
 }: Props) {
   const history = useHistory()
-  const [selectedPoolsView, setSelectedPoolsView] = useState<'Grid' | 'Table'>(
-    'Table'
-  )
   const classes = useStyles()
-  const theme = useTheme()
   const dispatch = useDispatch()
   return (
-    <Stack height="100%" width="100%" spacing={5}>
-      <AppBar
-        position="static"
-        sx={{
-          background: theme.palette.background.default,
-          boxShadow: 'none',
-        }}
-      >
-        {/* <Toolbar>
-          {isViewToggle && (
-            <Box
-              sx={{
-                marginLeft: 'auto',
-              }}
-            >
-              <Button
-                onClick={() => setSelectedPoolsView('Table')}
-                color={selectedPoolsView === 'Table' ? 'primary' : 'inherit'}
-              >
-                <ViewHeadlineIcon />
-              </Button>
-              <Button
-                onClick={() => setSelectedPoolsView('Grid')}
-                color={selectedPoolsView === 'Grid' ? 'primary' : 'inherit'}
-              >
-                <ViewModuleIcon />
-              </Button>
-            </Box>
-          )}
-        </Toolbar> */}
-      </AppBar>
+    <Stack height="100%" width="100%">
       {selectedPoolsView === 'Table' ? (
         <DataGrid
           className={classes.root}

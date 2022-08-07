@@ -21,9 +21,11 @@ import Typography from '@mui/material/Typography'
 import styled from 'styled-components'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { Stack } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import PoolsTable from '../PoolsTable'
 import { getDateTime } from '../../Util/Dates'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import ToggleFilter from '../PoolsTableFilter/ToggleFilter'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -104,11 +106,28 @@ export function TradeHistoryTab() {
   const chainId = useAppSelector((state) => state.appSlice.chainId)
   const pools = useAppSelector((state) => selectPools(state))
   const { collateralTokens } = useWhitelist()
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
+  const [search, setSearch] = useState('')
+  const [orderType, setOrderType] = useState<string>('')
   const [history, setHistory] = useState<any[]>([])
   const [page, setPage] = useState(0)
   const orders: any[] = []
   const dispatch = useAppDispatch()
 
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'Underlying' : e.target.value
+    )
+  }
+  const handleBuySellToggle = () => {
+    orderType === ''
+      ? setOrderType('Buy')
+      : orderType === 'Buy'
+      ? setOrderType('Sell')
+      : setOrderType('Buy')
+  }
   useEffect(() => {
     dispatch(fetchPositionTokens({ page }))
   }, [dispatch, page])
@@ -293,16 +312,54 @@ export function TradeHistoryTab() {
           ]
         }, [])
       : []
-
+  console.log('rows', rows)
+  const filteredRows =
+    search != null && search.length > 0
+      ? orderType
+        ? rows
+            .filter((v) => v.type.includes(orderType.toUpperCase()))
+            .filter((v) =>
+              v.Underlying.toLowerCase().includes(search.toLowerCase())
+            )
+        : rows.filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      : orderType
+      ? rows
+          .filter((v) => v.type.includes(orderType.toUpperCase()))
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      : rows
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         height: '100%',
       }}
-      spacing={6}
-      paddingRight={6}
+      spacing={4}
     >
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+        <ToggleFilter
+          id="Buy or Sell"
+          Value={orderType}
+          FirstToggleButtonLabel="Buy"
+          SecondToggleButtonLabel="Sell"
+          onToggle={handleBuySellToggle}
+        />
+      </Box>
       {!userAddress ? (
         <Typography
           sx={{
@@ -320,10 +377,11 @@ export function TradeHistoryTab() {
           <PoolsTable
             disableRowClick
             page={page}
-            rows={rows}
+            rows={filteredRows}
             columns={columns}
             loading={orderFills.isLoading || orderFillsMaker.isLoading}
             onPageChange={(page) => setPage(page)}
+            selectedPoolsView="Table"
           />
         </>
       )}

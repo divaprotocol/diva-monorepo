@@ -795,7 +795,13 @@ export function MyPositions() {
   })
 
   return (
-    <>
+    <Stack
+      direction="column"
+      sx={{
+        height: '100%',
+      }}
+      spacing={4}
+    >
       <Box
         paddingY={2}
         sx={{
@@ -811,13 +817,11 @@ export function MyPositions() {
         />
         <ButtonFilter
           id="Hide expired pools"
-          ButtonColor="#ffffff"
           ButtonLabel="Hide Expired Pools"
           onClick={handleExpiredPools}
         />
         <ButtonFilter
           id="Confirmed Pools"
-          ButtonColor="#ffffff"
           ButtonLabel="Confirmed Pools"
           onClick={handleConfirmedPools}
         />
@@ -843,9 +847,10 @@ export function MyPositions() {
             rowCount={3000}
             columns={columns}
             onPageChange={(page) => setPage(page)}
+            selectedPoolsView="Table"
           />
         </>
       )}
-    </>
+    </Stack>
   )
 }

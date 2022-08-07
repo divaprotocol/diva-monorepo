@@ -18,7 +18,17 @@ import {
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
-import { Box, Tooltip } from '@mui/material'
+import {
+  AppBar,
+  Box,
+  Button,
+  Stack,
+  Tooltip,
+  Toolbar,
+  useTheme,
+} from '@mui/material'
+import ViewModuleIcon from '@mui/icons-material/ViewModule'
+import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { getAppStatus } from '../../Util/getAppStatus'
@@ -193,6 +203,7 @@ const columns: GridColDef[] = [
 
 export default function Markets() {
   const history = useHistory()
+  const theme = useTheme()
   const currentAddress = history.location.pathname.split('/')
   const [page, setPage] = useState(0)
   const pools = useAppSelector(selectPools)
@@ -207,6 +218,9 @@ export default function Markets() {
     useState('Underlying')
   const [search, setSearch] = useState(null)
   const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
+  const [selectedPoolsView, setSelectedPoolsView] = useState<'Grid' | 'Table'>(
+    'Table'
+  )
 
   const handleCreatorInput = (e) => {
     setCreatedBy(e.target.value)
@@ -398,60 +412,98 @@ export default function Markets() {
         />
         <h2> Markets</h2>
       </Box>
-      <Box
-        paddingX={6}
-        paddingY={2}
+      <Stack
+        direction="column"
         sx={{
-          display: 'flex',
-          flexDirection: 'row',
+          height: '100%',
         }}
+        spacing={4}
       >
-        <DropDownFilter
-          id="Creator Filter"
-          DropDownButtonLabel={
-            history.location.pathname === `/markets/`
-              ? 'Creator'
-              : creatorButtonLabel
-          }
-          InputValue={createdBy}
-          onInputChange={handleCreatorInput}
-          MenuItemLabel="Diva Governance"
-          onMenuItemClick={() => {
-            setCreatedBy(divaGovernanceAddress)
-            setCreatorButtonLabel(getShortenedAddress(divaGovernanceAddress))
+        <AppBar
+          position="static"
+          sx={{
+            background: theme.palette.background.default,
+            justifyContent: 'space-between',
+            boxShadow: 'none',
           }}
-        />
-        <DropDownFilter
-          id="Underlying Filter"
-          DropDownButtonLabel={underlyingButtonLabel}
-          InputValue={search}
-          onInputChange={handleUnderLyingInput}
-        />
-        <ButtonFilter
-          id="Hide expired pools"
-          ButtonColor="#ffffff"
-          ButtonLabel="Hide Expired Pools"
-          onClick={handleExpiredPools}
-        />
-      </Box>
-      <Box
-        paddingX={6}
-        sx={{
-          height: 'calc(100% - 6em)',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <PoolsTable
-          columns={columns}
-          rows={filteredRows}
-          rowCount={8000}
-          page={page}
-          loading={poolsRequestStatus === 'pending'}
-          onPageChange={(page) => setPage(page)}
-          isViewToggle={true}
-        />
-      </Box>
+        >
+          <Toolbar>
+            <Box
+              paddingX={3}
+              paddingY={2}
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+              }}
+            >
+              <DropDownFilter
+                id="Creator Filter"
+                DropDownButtonLabel={
+                  history.location.pathname === `/markets/`
+                    ? 'Creator'
+                    : creatorButtonLabel
+                }
+                InputValue={createdBy}
+                onInputChange={handleCreatorInput}
+                MenuItemLabel="Diva Governance"
+                onMenuItemClick={() => {
+                  setCreatedBy(divaGovernanceAddress)
+                  setCreatorButtonLabel(
+                    getShortenedAddress(divaGovernanceAddress)
+                  )
+                }}
+              />
+              <DropDownFilter
+                id="Underlying Filter"
+                DropDownButtonLabel={underlyingButtonLabel}
+                InputValue={search}
+                onInputChange={handleUnderLyingInput}
+              />
+              <ButtonFilter
+                id="Hide expired pools"
+                ButtonLabel="Hide Expired Pools"
+                onClick={handleExpiredPools}
+              />
+            </Box>
+            <Box
+              sx={{
+                marginLeft: 'auto',
+              }}
+            >
+              <Button
+                onClick={() => setSelectedPoolsView('Table')}
+                color={selectedPoolsView === 'Table' ? 'primary' : 'inherit'}
+              >
+                <ViewHeadlineIcon />
+              </Button>
+              <Button
+                onClick={() => setSelectedPoolsView('Grid')}
+                color={selectedPoolsView === 'Grid' ? 'primary' : 'inherit'}
+              >
+                <ViewModuleIcon />
+              </Button>
+            </Box>
+          </Toolbar>
+        </AppBar>
+        <Box
+          paddingX={6}
+          sx={{
+            height: 'calc(100% - 6em)',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <PoolsTable
+            columns={columns}
+            rows={filteredRows}
+            rowCount={8000}
+            page={page}
+            loading={poolsRequestStatus === 'pending'}
+            onPageChange={(page) => setPage(page)}
+            selectedPoolsView={selectedPoolsView}
+          />
+        </Box>
+      </Stack>
     </>
   )
 }

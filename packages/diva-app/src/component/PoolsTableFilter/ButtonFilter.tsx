@@ -1,30 +1,29 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Box, Button } from '@mui/material'
 
 type prop = {
   id: string
   ButtonLabel: string
-  ButtonColor: string
   onClick: () => void
 }
 
-const ButtonFilter = ({ id, ButtonLabel, ButtonColor, onClick }: prop) => {
+const ButtonFilter = ({ id, ButtonLabel, onClick }: prop) => {
+  const [color, setColor] = useState('#ffffff')
   return (
     <Box marginRight="35px">
       <Button
         variant="outlined"
         id={id}
         sx={{
-          color: '#ffffff',
-          borderColor: '#ffffff',
+          color: color,
+          borderColor: color,
           fontSize: '16px',
           textTransform: 'capitalize',
-          ':active': {
-            borderColor: '#3393E0',
-            color: '#3393E0',
-          },
         }}
-        onClick={onClick}
+        onClick={() => {
+          onClick()
+          color === '#ffffff' ? setColor('primary') : setColor('#ffffff')
+        }}
       >
         {ButtonLabel}
       </Button>
