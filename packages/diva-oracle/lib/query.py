@@ -6,6 +6,7 @@ def hour_conversion(hours):
     return hours*60*60
 
 
+# Is lastID pool ID? This is to mitigate the long list of pools
 def query(lastId):
     return """
             { 
@@ -22,6 +23,21 @@ def query(lastId):
                 }
             """ % (lastId, (int(dt.now().timestamp()) - 86400), (int(dt.now().timestamp()) - 300), config.dataprovider)
 
+def tellor_query(lastId):
+    return """
+            { 
+                pools (first: 1000, where: {id_gt: %s, expiryTime_gte: "%s", expiryTime_lte: "%s", statusFinalReferenceValue: "Open", dataProvider: "%s"}) {
+                    id
+                    dataProvider
+                    referenceAsset
+                    floor
+                    inflection
+                    cap
+                    statusFinalReferenceValue
+                    expiryTime
+                  }
+                }
+            """ % (lastId, (int(dt.now().timestamp()) - 86400), (int(dt.now().timestamp()) - 300), config.dataprovider)
 
 def new_pool_query():
     return """

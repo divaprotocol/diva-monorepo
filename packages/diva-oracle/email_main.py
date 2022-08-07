@@ -30,7 +30,7 @@ def run(network, w3, contract):
     max_time_away = dt.timedelta(minutes=config.max_time_away)
 
     # CHECK CORRECT QUERY FOR EMAIL ORACLE SETTINGS
-    resp = run_query(pool_expiry(48), network)
+    resp = run_graph_query(pool_expiry(48), network)
     # print(resp)
     df = pd.json_normalize(resp, ['data', 'pools'])
     # print(df)

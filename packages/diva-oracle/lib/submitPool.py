@@ -3,18 +3,27 @@ import config.diva as diva
 from lib.SendPrice import sendPrice
 from lib.QueryGraph import *
 from lib.Prices import getKrakenPrice
-from lib.query import query
+from lib.query import query, tellor_query
 from lib.recorder import *
+from tellor_settings.tellor_submission import submitTellorValue
+import tellor_settings.tellor_abi as tellor
+from tellor_settings.tellor_setFinalReferenceValue import setFinRefVal
+import time
 
-
-
-def submitPool(df, network, max_time_away, w3, contract):
+def submitPools(df, network, max_time_away, w3, contract, oracle=""):
+    # This while loop extends the dataframe if the graph is at max capacity
+    if oracle == "TELLOR":
+        DIVAOracleTellor_contract = w3.eth.contract(address=tellor.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
+    numberPools = 0
     while True:
             lastId = df.id.iloc[-1]
             if numberPools == df.shape[0]:
                 break
             numberPools = df.shape[0]
-            resp = run_query(query(lastId), network)
+            if oracle == "TELLOR":
+                resp = run_graph_query(tellor_query(lastId), network)
+            else:
+                resp = run_graph_query(query(lastId), network)
             df = extend_DataFrame(df, resp)
 
     df = transform_expiryTimes(df)
@@ -42,7 +51,15 @@ def submitPool(df, network, max_time_away, w3, contract):
             print(message)
 
             try:
-                sendPrice(pool_id=pool_id, value=price, network=network, w3=w3, my_contract=contract, nonce=nonces[network])
+                # tellor oracle has 2 steps submitting value to contract and setting final reference value
+                if oracle == "TELLOR":
+                    print("submitting tellor value")
+                    submitTellorValue(pool_id=pool_id, finalRefVal=price, collToUSD=1, network=network, w3=w3, my_contract=contract)
+                    time.sleep(15) # After submitting the value there is a delay before you can trigger the function. For testing delay is 10 sec
+                    print("sending final reference value")
+                    setFinRefVal(pool_id, network, w3, DIVAOracleTellor_contract)
+                else:
+                    sendPrice(pool_id=pool_id, value=price, network=network, w3=w3, my_contract=contract, nonce=nonces[network])
                 update_records(message)
             except:
                 print("Transaction is still pending...")
@@ -57,6 +74,8 @@ def submitPool(df, network, max_time_away, w3, contract):
             update_pending_records(message)
 
 
+
+    return
 pendingPools = {
     "ropsten": [],
     "mumbai": [],
