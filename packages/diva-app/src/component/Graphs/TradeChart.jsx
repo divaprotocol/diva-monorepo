@@ -251,7 +251,7 @@ export default function DIVATradeChart(props) {
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
       })
-      .text('Floor' + ' ' + '(' + parseFloat(floor).toFixed(0) + ')')
+      .text('Floor' + ' ' + '(' + parseFloat(floor).toFixed(2) + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
     svg
@@ -261,7 +261,7 @@ export default function DIVATradeChart(props) {
       .attr('opacity', function () {
         return cap == floor ? 1 : 0
       })
-      .text('Inflection' + ' ' + '(' + parseFloat(cap).toFixed(0) + ')') //Binary payoff
+      .text('Inflection' + ' ' + '(' + parseFloat(cap).toFixed(2) + ')') //Binary payoff
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
     svg
@@ -271,7 +271,7 @@ export default function DIVATradeChart(props) {
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
       })
-      .text('Cap' + ' ' + '(' + parseFloat(cap).toFixed(0) + ')')
+      .text('Cap' + ' ' + '(' + parseFloat(cap).toFixed(2) + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 
@@ -282,7 +282,7 @@ export default function DIVATradeChart(props) {
       .attr('y', legendHeight)
       .attr('opacity', currentPrice ? 1 : 0)
       .text(
-        'Current Value' + ' ' + '(' + parseFloat(currentPrice).toFixed(0) + ')'
+        'Current Value' + ' ' + '(' + parseFloat(currentPrice).toFixed(2) + ')'
       )
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
@@ -292,7 +292,7 @@ export default function DIVATradeChart(props) {
       .attr('x', width * 0.77)
       .attr('y', legendHeight)
       .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
-      .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(0) + ')')
+      .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(2) + ')')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 

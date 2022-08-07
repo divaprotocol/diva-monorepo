@@ -70,8 +70,7 @@ export default function OptionDetails({
   const [linear, setLinear] = useState(false)
   const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
   const maxYield = useAppSelector((state) => state.stats.maxYield)
-  const [fontColor, setFontColor] = useState('#ffff')
-  const [isIntrinsicValue, setIsIntrinsicValue] = useState(false)
+  const [isMaxYield, setMaxYield] = useState(false)
   useEffect(() => {
     if (pool.cap === pool.floor) {
       setBinary(true)
@@ -103,14 +102,11 @@ export default function OptionDetails({
 
   useEffect(() => {
     if (maxYield != 'n/a') {
-      setFontColor('#3393E0')
+      setMaxYield(true)
+    } else {
+      setMaxYield(false)
     }
   }, [maxYield])
-  useEffect(() => {
-    if (intrinsicValue != 'n/a') {
-      setIsIntrinsicValue(true)
-    }
-  }, [intrinsicValue])
 
   return (
     <PageDiv>
@@ -211,19 +207,21 @@ export default function OptionDetails({
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Intrinsic Value</FlexBoxHeader>
-          {isIntrinsicValue ? (
-            <FlexBoxData>
-              {parseFloat(intrinsicValue).toFixed(2) +
+          <FlexBoxData>
+            {intrinsicValue != 'n/a'
+              ? parseFloat(intrinsicValue).toFixed(2) +
                 ' ' +
-                pool.collateralToken.symbol}
-            </FlexBoxData>
-          ) : (
-            <FlexBoxData>n/a</FlexBoxData>
-          )}
+                pool.collateralToken.symbol
+              : 'n/a'}
+          </FlexBoxData>
         </FlexBox>
         <FlexBox>
           <FlexBoxHeader>Max yield</FlexBoxHeader>
-          <FlexBoxData style={{ color: fontColor }}>{maxYield}</FlexBoxData>
+          {isMaxYield ? (
+            <FlexBoxData style={{ color: '#3393E0' }}>{maxYield}</FlexBoxData>
+          ) : (
+            <FlexBoxData>n/a</FlexBoxData>
+          )}
         </FlexBox>
       </FlexDiv>
     </PageDiv>
