@@ -23,6 +23,9 @@ def query(lastId):
                 }
             """ % (lastId, (int(dt.now().timestamp()) - 86400), (int(dt.now().timestamp()) - 300), config.dataprovider)
 
+# collateral token is need to query and get price from Kraken
+
+
 def tellor_query(lastId):
     return """
             { 
@@ -35,9 +38,20 @@ def tellor_query(lastId):
                     cap
                     statusFinalReferenceValue
                     expiryTime
+                    collateralToken {
+                        symbol
+                    }
                   }
                 }
             """ % (lastId, (int(dt.now().timestamp()) - 86400), (int(dt.now().timestamp()) - 300), config.dataprovider)
+
+
+'''  collateralToken {
+                        symbol
+                        name
+                        id
+                    }'''
+
 
 def new_pool_query():
     return """
