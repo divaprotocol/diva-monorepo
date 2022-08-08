@@ -11,7 +11,7 @@ from lib.sendEmail import sendEmail
 from lib.recorder import *
 from lib.df_utils import extend_DataFrame
 from lib.query import query
-from lib.submitPool import submitPools
+from lib.submitPool import submitPool
 
 message = "Subject: Pending Pool Transactions \n"
 
@@ -19,23 +19,19 @@ message = "Subject: Pending Pool Transactions \n"
 def run(network, w3, contract):
     # sendEmail()
     print("#########################################")
+    print("RUNNING PRICE ORACLE")
     print('\033[1m' + "Network: {}".format(network) + '\033[0m')
     max_time_away = dt.timedelta(minutes=config.max_time_away)
 
-    resp = run_graph_query(query(0), network)
+    resp = run_query(query(0), network)
     df = pd.json_normalize(resp, ['data', 'pools'])
     numberPools = 0
 
     if not df.empty:
-        submitPools(df, network, max_time_away, w3, contract)
+        submitPool(df, network, max_time_away, w3, contract)
 
     else:
         print("No pools that require price now.")
-
-
-# Parallel execution
-networks = config.networks
-waiting_sec = config.waiting_next_iteration
 
 
 w3_instances = []
@@ -46,28 +42,16 @@ nonces = {
     "rinkeby": 0
 }
 
-for network in networks:
-    w3_instances.append(Web3(Web3.HTTPProvider(config.PROVIDER_URL[network])))
-    contract_instances.append(
-        w3_instances[-1].eth.contract(address=diva.contract_address[network], abi=diva.abi))
-    nonces[network] = w3_instances[-1].eth.get_transaction_count(
-        config.PUBLIC_KEY)
-iter = 0
+
+network = config.network
+w3 = (Web3(Web3.HTTPProvider(config.PROVIDER_URL[network])))
+contract = w3.eth.contract(
+    address=diva.contract_address[network], abi=diva.abi)
 
 
 if __name__ == "__main__":
     while True:
-        jobs = []
-        for (network, w3, contract) in zip(networks, w3_instances, contract_instances):
-            thread = threading.Thread(target=run(network, w3, contract))
-            jobs.append(thread)
-
-        for j in jobs:
-            j.start()
-
-        for j in jobs:
-            j.join()
-
+        run(network, w3, contract)
         print("#########################################")
         print("Waiting {} sec before next iteration...".format(waiting_sec))
         # Wait before next iteration

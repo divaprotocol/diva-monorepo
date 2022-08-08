@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 # function to use requests.post to make an API call to the subgraph url
-def run_query(query, network):
+def run_graph_query(query, network):
 
     # endpoint where you are making the request
     request = requests.post('https://api.thegraph.com/subgraphs/name/divaprotocol/diva-{}'''.format(network),
