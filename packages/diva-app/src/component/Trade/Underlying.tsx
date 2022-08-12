@@ -115,7 +115,9 @@ export default function Underlying() {
     setValue(newValue)
   }
   return (
-    <Container sx={{ paddingTop: '1em', paddingBottom: '3em' }}>
+    <Container
+      sx={{ paddingTop: '1em', paddingBottom: '3em', minHeight: '130%' }}
+    >
       <TabContext value={value}>
         <TabList
           onChange={handleChange}
