@@ -26,6 +26,7 @@ import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import styled from 'styled-components'
 import { ExpiresInCell } from './Markets/Markets'
+import { useCustomMediaQuery } from '../hooks/useCustomMediaQuery'
 
 interface Props {
   row: GridRowModel
@@ -34,11 +35,12 @@ interface Props {
 interface StyledButtonProps extends ButtonProps {
   backgroundColor?: string
   borderColor?: string
+  isMobile?: boolean
 }
 
 const BuyAndSellButton = styled(Button)<StyledButtonProps>(
-  ({ theme, backgroundColor, borderColor }) => ({
-    width: '160px',
+  ({ theme, backgroundColor, borderColor, isMobile }) => ({
+    width: `${isMobile ? '100px' : '160px'}`,
     height: '60px',
     background: backgroundColor,
     border: `1px solid ${borderColor}`,
@@ -61,6 +63,7 @@ const PoolCard = ({ row }: Props) => {
   const theme = useTheme()
   const history = useHistory()
   const dataSource = useWhitelist()
+  const { isMobile } = useCustomMediaQuery()
 
   const IsLong = row.id.split('/')[1] === 'long'
   const decimals = pool.collateralToken.decimals
@@ -117,7 +120,7 @@ const PoolCard = ({ row }: Props) => {
   return (
     <Box
       sx={{
-        width: '400px',
+        width: `${isMobile ? '318px' : '400px'}`,
         height: '660px',
         border: '1px solid #383838',
         background: theme.palette.background.default,
@@ -139,6 +142,8 @@ const PoolCard = ({ row }: Props) => {
         <Box
           sx={{
             display: 'flex',
+            alignItems: 'center',
+            maxWidth: '50%',
           }}
         >
           <Box
@@ -151,7 +156,7 @@ const PoolCard = ({ row }: Props) => {
           </Box>
           <Tooltip title={row.Icon}>
             <Typography
-              variant="h2"
+              variant={isMobile ? 'h3' : 'h2'}
               color={'#fff'}
               sx={{
                 maxWidth: '200px',
@@ -303,6 +308,7 @@ const PoolCard = ({ row }: Props) => {
           backgroundColor="linear-gradient(180deg, rgba(18, 18, 18, 0) -60%, rgba(51, 147, 224, 0.3) 100%)"
           borderColor="#3393E0"
           onClick={handleBuyAndSellClick}
+          isMobile={isMobile}
         >
           <Stack>
             <div>BUY</div>
@@ -313,6 +319,7 @@ const PoolCard = ({ row }: Props) => {
           backgroundColor="linear-gradient(180deg, rgba(18, 18, 18, 0) -33.33%, rgba(211, 47, 47, 0.6) 100%)"
           borderColor="#D32F2F"
           onClick={handleBuyAndSellClick}
+          isMobile={isMobile}
         >
           <Stack>
             <div>SELL</div>
