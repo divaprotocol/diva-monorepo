@@ -10,9 +10,14 @@ import tellor_settings.tellor_abi as tellor
 from tellor_settings.tellor_setFinalReferenceValue import setFinRefVal
 import time
 
+from colorama import init
+from termcolor import colored
+
 
 def submitPools(df, network, max_time_away, w3, contract, oracle=""):
     # This while loop extends the dataframe if the graph is at max capacity
+    if df.empty:
+        return("dataframe empy")
     if oracle == "TELLOR":
         DIVAOracleTellor_contract = w3.eth.contract(
             address=tellor.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
@@ -23,10 +28,10 @@ def submitPools(df, network, max_time_away, w3, contract, oracle=""):
             break
         numberPools = df.shape[0]
         if oracle == "TELLOR":
-            resp = run_graph_query(tellor_query(lastId), network)
+            resp = run_graph_query(tellor_query(lastId, tellor.DIVAOracleTellor_contract_address), network)
         else:
             resp = run_graph_query(query(lastId), network)
-        df = extend_DataFrame(df, resp)
+            df = extend_DataFrame(df, resp)
 
     df = transform_expiryTimes(df)
     df = df.sort_values(by=['expiryTime'], ignore_index=True)
@@ -36,7 +41,7 @@ def submitPools(df, network, max_time_away, w3, contract, oracle=""):
 
     for i in range(df.shape[0]):
         pair = df['referenceAsset'].iloc[i]
-        print(pair)
+        opair = pair
         pair = pair.replace("/", "")
         date_dt = df['expiryTime_datetime'].iloc[i]
         pool_id = df['id'].iloc[i]
@@ -54,14 +59,14 @@ def submitPools(df, network, max_time_away, w3, contract, oracle=""):
             # AUTOMATICALLY SETS TO 1 FOR TEST SEE PRICES.PY
             coll_asset_to_usd = getKrakenCollateralConversion(
                 df['collateralToken.symbol'].iloc[i], ts_date=ts_date, ts_date_max_away=ts_date_max_away)
-            print(coll_asset_to_usd)
+            #print(coll_asset_to_usd)
 
         if (price, date) != (-1, -1):
             # submit pool price
             print("-----------------------------------------")
-            message = "Pool id {} : Price for pair {}  date: {} : Price {}  ".format(
-                pool_id, pair, date, price)
-            print(message)
+            message = "Price Submission of Pool id {} -> of pair {} -> Expiry date: {}  Price {}  ".format(
+                pool_id, opair, date, price)
+            print(colored(message, "red"))
 
             try:
                 # tellor oracle has 2 steps submitting value to contract and setting final reference value
