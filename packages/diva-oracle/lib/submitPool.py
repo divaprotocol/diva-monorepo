@@ -28,7 +28,8 @@ def submitPools(df, network, max_time_away, w3, contract, oracle=""):
             break
         numberPools = df.shape[0]
         if oracle == "TELLOR":
-            resp = run_graph_query(tellor_query(lastId, tellor.DIVAOracleTellor_contract_address), network)
+            resp = run_graph_query(tellor_query(lastId, tellor.DIVAOracleTellor_contract_address[network]), network)
+            df = extend_DataFrame(df, resp)
         else:
             resp = run_graph_query(query(lastId), network)
             df = extend_DataFrame(df, resp)
@@ -38,7 +39,7 @@ def submitPools(df, network, max_time_away, w3, contract, oracle=""):
 
     for j in pendingPools[network]:
         df = df[df["id"] != j]
-
+        
     for i in range(df.shape[0]):
         pair = df['referenceAsset'].iloc[i]
         opair = pair
@@ -50,13 +51,13 @@ def submitPools(df, network, max_time_away, w3, contract, oracle=""):
         # convert times to timestamp
         ts_date = datetime.timestamp(date_dt)
         ts_date_max_away = datetime.timestamp(date_max_away)
-
         price, date = getKrakenPrice(
             pair=pair, ts_date=ts_date, ts_date_max_away=ts_date_max_away)
         # This function will get collToUSD format:
         if oracle == "TELLOR":
             # What to do if collateral asset does not exist on Kraken?
             # AUTOMATICALLY SETS TO 1 FOR TEST SEE PRICES.PY
+            # This is for testing purposes
             coll_asset_to_usd = getKrakenCollateralConversion(
                 df['collateralToken.symbol'].iloc[i], ts_date=ts_date, ts_date_max_away=ts_date_max_away)
             #print(coll_asset_to_usd)
@@ -82,8 +83,9 @@ def submitPools(df, network, max_time_away, w3, contract, oracle=""):
                 else:
                     sendPrice(pool_id=pool_id, value=price, network=network,
                               w3=w3, my_contract=contract, nonce=nonces[network])
-                update_records(message)
+                    update_records(message)
             except:
+                # How do we know transactions is still pending?
                 print("Transaction is still pending...")
                 pendingPools[network].append(pool_id)
                 pendingPools_nonces[network].append(nonces[network])

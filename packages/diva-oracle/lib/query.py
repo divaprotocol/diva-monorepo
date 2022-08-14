@@ -26,7 +26,7 @@ def query(lastId):
                     expiryTime
                   }
                 }
-            """ % (lastId, (int(dt.now().timestamp()) - expiry_floor_time_away), (int(dt.now().timestamp()) + expiry_cieling_time_away),  config.dataprovider)
+            """ % (lastId, (int(dt.now().timestamp()) - expiry_cieling_time_away), (int(dt.now().timestamp()) - expiry_floor_time_away),  config.dataprovider)
 
 # collateral token is need to query and get price from Kraken
 
@@ -53,7 +53,7 @@ def tellor_query(lastId, provider):
                     }
                   }
                 }
-            """ % (lastId, (int(dt.now().timestamp()) - expiry_floor_time_away), (int(dt.now().timestamp()) + expiry_cieling_time_away),  provider)
+            """ % (lastId, (int(dt.now().timestamp()) - expiry_cieling_time_away), (int(dt.now().timestamp()) - expiry_floor_time_away),  provider)
 
 
 '''  collateralToken {

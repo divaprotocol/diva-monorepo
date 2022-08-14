@@ -23,7 +23,7 @@ from lib.submitPool import submitPools
 from colorama import init
 from termcolor import colored
 
-waiting_sec = 30
+waiting_sec = 15
 network = "ropsten"
 w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
 tellor_contract = w3.eth.contract(

@@ -21,7 +21,7 @@ def run(network, w3, contract):
     print("#########################################")
     print("RUNNING PRICE ORACLE")
     print('\033[1m' + "Network: {}".format(network) + '\033[0m')
-    max_time_away = dt.timedelta(minutes=config.max_time_away)
+    max_time_away = dt.timedelta(minutes=60)
 
     resp = run_graph_query(query(0), network)
     print(resp)
