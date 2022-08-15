@@ -32,7 +32,7 @@ def query(lastId):
 
 
 def tellor_query(lastId, provider):
-    expiry_floor_time_away = 3000
+    expiry_floor_time_away = 300
     eft = seconds_to_hours(expiry_floor_time_away)
     expiry_cieling_time_away = 86400
     ect = seconds_to_hours(expiry_cieling_time_away)
