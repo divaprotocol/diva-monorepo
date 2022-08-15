@@ -116,7 +116,7 @@ export default function Underlying() {
   }
   return (
     <Container
-      sx={{ paddingTop: '1em', paddingBottom: '3em', minHeight: '130%' }}
+      sx={{ paddingTop: '1em', paddingBottom: '3em', minHeight: '140%' }}
     >
       <TabContext value={value}>
         <TabList
