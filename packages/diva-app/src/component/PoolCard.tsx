@@ -40,7 +40,7 @@ interface StyledButtonProps extends ButtonProps {
 
 const BuyAndSellButton = styled(Button)<StyledButtonProps>(
   ({ theme, backgroundColor, borderColor, isMobile }) => ({
-    width: `${isMobile ? '100px' : '160px'}`,
+    width: `${isMobile ? '120px' : '160px'}`,
     height: '60px',
     background: backgroundColor,
     border: `1px solid ${borderColor}`,
@@ -299,10 +299,11 @@ const PoolCard = ({ row }: Props) => {
       <Stack
         direction="row"
         sx={{
-          justifyContent: 'center',
+          justifyContent: 'space-between',
           marginTop: '16px',
+          alignItems: 'space-between',
+          padding: '0 20px',
         }}
-        spacing={'40px'}
       >
         <BuyAndSellButton
           backgroundColor="linear-gradient(180deg, rgba(18, 18, 18, 0) -60%, rgba(51, 147, 224, 0.3) 100%)"
