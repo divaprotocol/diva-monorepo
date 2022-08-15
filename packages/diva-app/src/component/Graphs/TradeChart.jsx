@@ -410,7 +410,7 @@ export default function DIVATradeChart(props) {
           pos = null
 
         //eslint-disable-next-line
-      while (true) {
+        while (true) {
           target = Math.floor((beginning + end) / 2)
           pos = l[i].getPointAtLength(target)
           if ((target === end || target === beginning) && pos.x !== m) {
@@ -430,36 +430,70 @@ export default function DIVATradeChart(props) {
           d += ' ' + mouse[0] + ',' + 60
           return d
         })
-        d3.select('.mouse-line').style('stroke', function (d, i) {
-          var pos = yPos(d, i, mouse[0], lines)
-          return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
-            ? blueColorCode
-            : redColorCode
-        })
 
-        d3.select('.mouse-per-line circle').style('fill', function (d, i) {
-          var pos = yPos(d, i, mouse[0], lines)
-          return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
-            ? blueColorCode
-            : redColorCode
-        })
-
-        d3.select('.tooltip-per-line .tooltip-payout').style(
-          'fill',
-          function (d, i) {
+        if (isLong) {
+          d3.select('.mouse-line').style('stroke', function (d, i) {
             var pos = yPos(d, i, mouse[0], lines)
             return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
               ? blueColorCode
               : redColorCode
-          }
-        )
+          })
 
-        d3.select('.line').style('stroke', function (d, i) {
-          var pos = yPos(d, i, mouse[0], lines)
-          return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
-            ? blueColorCode
-            : redColorCode
-        })
+          d3.select('.mouse-per-line circle').style('fill', function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
+              ? blueColorCode
+              : redColorCode
+          })
+
+          d3.select('.tooltip-per-line .tooltip-payout').style(
+            'fill',
+            function (d, i) {
+              var pos = yPos(d, i, mouse[0], lines)
+              return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
+                ? blueColorCode
+                : redColorCode
+            }
+          )
+
+          d3.select('.line').style('stroke', function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
+              ? blueColorCode
+              : redColorCode
+          })
+        } else {
+          d3.select('.mouse-line').style('stroke', function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) <= breakEven || breakEven == 'n/a'
+              ? blueColorCode
+              : redColorCode
+          })
+
+          d3.select('.mouse-per-line circle').style('fill', function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) <= breakEven || breakEven == 'n/a'
+              ? blueColorCode
+              : redColorCode
+          })
+
+          d3.select('.tooltip-per-line .tooltip-payout').style(
+            'fill',
+            function (d, i) {
+              var pos = yPos(d, i, mouse[0], lines)
+              return x.invert(pos.x) <= breakEven || breakEven == 'n/a'
+                ? blueColorCode
+                : redColorCode
+            }
+          )
+
+          d3.select('.line').style('stroke', function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) <= breakEven || breakEven == 'n/a'
+              ? blueColorCode
+              : redColorCode
+          })
+        }
 
         d3.selectAll('.mouse-per-line').attr('transform', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
