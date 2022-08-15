@@ -76,6 +76,8 @@ def submitPools(df, network, max_time_away, w3, contract, oracle=""):
                     submitTellorValue(pool_id=pool_id, finalRefVal=price,
                                       collToUSD=coll_asset_to_usd, network=network, w3=w3, my_contract=contract)
                     # After submitting the value there is a delay before you can trigger the function. For testing delay is 10 sec
+                    # TODO Pull a delay from contract
+                    # minDisputePeriod -> Pulling this from the blockchain? 
                     time.sleep(15)
                     print("sending final reference value")
                     setFinRefVal(pool_id, network, w3,
@@ -100,6 +102,25 @@ def submitPools(df, network, max_time_away, w3, contract, oracle=""):
 
     return
 
+
+def tellor_submit_pools(df, network, max_time_away, w3, contract):
+    if df.empty:
+        return("dataframe empy")
+    DIVAOracleTellor_contract = w3.eth.contract(
+            address=tellor.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
+    while True:
+        lastId = df.id.iloc[-1]
+        if numberPools == df.shape[0]:
+            break
+        numberPools = df.shape[0]
+        resp = run_graph_query(tellor_query(lastId, tellor.DIVAOracleTellor_contract_address[network]), network)
+        df = extend_DataFrame(df, resp)
+
+    df = transform_expiryTimes(df)
+    df = df.sort_values(by=['expiryTime'], ignore_index=True)
+
+    for j in pendingPools[network]:
+        df = df[df["id"] != j]
 
 pendingPools = {
     "ropsten": [],

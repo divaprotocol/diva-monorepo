@@ -23,7 +23,7 @@ from lib.submitPool import submitPools
 from colorama import init
 from termcolor import colored
 
-waiting_sec = 15
+waiting_sec = 45
 network = "ropsten"
 w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
 tellor_contract = w3.eth.contract(
@@ -46,9 +46,11 @@ collateralToUSDRate = 1  # TODO: Pull actual rate
 if __name__ == "__main__":
     print(colored("TELLOR-DIVA ORACLE", 'green'))
     print(colored("RUNNING DATA_PROVIDER: {}\n".format(tellor.DIVAOracleTellor_contract_address[network]), 'green') )
+    # DO time time check here 
     while True:
         resp = run_graph_query(tellor_query(0, tellor.DIVAOracleTellor_contract_address[network]), network)
         print(resp)
+
         df = pd.json_normalize(resp, ['data', 'pools'])
         if df.empty:
             print("dataframe empy")
