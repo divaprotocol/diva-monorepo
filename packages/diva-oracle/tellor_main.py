@@ -30,12 +30,12 @@ tellor_contract = w3.eth.contract(
     address=tellor.TellorPlayground_contract_address[network], abi=tellor.TellorPlayground_abi)
 max_time_away = dt.timedelta(minutes=config.max_time_away)
 
-# The submit pool function  has additional logic for the tellow oracle
-#submitPools(df, network, max_time_away, w3, tellor_contract, oracle="TELLOR")
+# The submit pool function has additional logic for the Tellor oracle
+# submitPools(df, network, max_time_away, w3, tellor_contract, oracle="TELLOR")
 # Still need to do below
 collateralToUSDRate = 1  # TODO: Pull actual rate
 
-# TODO: Instead of 15 sec, pull the value from the DIVATellorOracle contract (see slack channel)
+# TODO: Instead of hard-coding 15 sec, pull the value from the DIVATellorOracle contract via getMinPeriodUndisputed (see slack channel)
 # time.sleep(15) # After submitting the value there is a delay before you can trigger the function. For testing delay is 10 sec
 
 #DIVAOracleTellor_contract = w3.eth.contract(address=tellor.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
