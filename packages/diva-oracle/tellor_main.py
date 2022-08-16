@@ -3,6 +3,7 @@ from web3 import Web3
 import tellor_settings.tellor_abi as tellor
 from tellor_settings.tellor_submission import submitTellorValue
 from tellor_settings.tellor_setFinalReferenceValue import setFinRefVal
+import tellor_settings.tellor_contracts as tellor_contracts
 import time
 import datetime as dt
 from lib.Prices import getKrakenPrice
@@ -27,7 +28,7 @@ waiting_sec = 45
 network = "ropsten"
 w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
 tellor_contract = w3.eth.contract(
-    address=tellor.TellorPlayground_contract_address[network], abi=tellor.TellorPlayground_abi)
+    address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.TellorPlayground_abi)
 max_time_away = dt.timedelta(minutes=config.max_time_away)
 
 # The submit pool function has additional logic for the Tellor oracle
@@ -45,10 +46,10 @@ collateralToUSDRate = 1  # TODO: Pull actual rate
 # This will save on gas costs
 if __name__ == "__main__":
     print(colored("TELLOR-DIVA ORACLE", 'green'))
-    print(colored("RUNNING DATA_PROVIDER: {}\n".format(tellor.DIVAOracleTellor_contract_address[network]), 'green') )
+    print(colored("RUNNING DATA_PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]), 'green') )
     # DO time time check here 
     while True:
-        resp = run_graph_query(tellor_query(0, tellor.DIVAOracleTellor_contract_address[network]), network)
+        resp = run_graph_query(tellor_query(0, tellor_contracts.DIVAOracleTellor_contract_address[network]), network)
         print(resp)
 
         df = pd.json_normalize(resp, ['data', 'pools'])
