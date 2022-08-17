@@ -1,52 +1,60 @@
-import React, { useLayoutEffect, useState } from 'react'
+import { useRef, useEffect } from 'react'
 import * as d3 from 'd3'
 
 export default function DIVATradeChart(props) {
-  const ref = React.useRef()
-  useLayoutEffect(() => {
-    let {
-      data,
-      w, //Width
-      h, //Height
-      refAsset, //ReferenceAsset
-      payOut,
-      isLong,
-      breakEven,
-      currentPrice,
-      floor,
-      cap,
-      mouseHover,
-      showBreakEven,
-    } = props
-    data = data.map(({ x, y }) => ({
-      x: parseFloat(x),
-      y: parseFloat(y),
-    }))
+  const ref = useRef()
+  let {
+    data,
+    w, //Width
+    h, //Height
+    refAsset, //ReferenceAsset
+    payOut,
+    isLong,
+    breakEven,
+    currentPrice,
+    floor,
+    cap,
+    mouseHover,
+    showBreakEven,
+  } = props
 
-    const optionTypeText = isLong ? 'LONG' : 'SHORT'
-    const reffeenceAsset = refAsset.slice(0, 8)
-    // Set the dimensions and margins of the graph
-    var margin = { top: 15, right: 2, bottom: 40, left: 20 },
-      width = w - margin.left - margin.right,
-      height = h - margin.top - margin.bottom
-    // Append the svg object to the reference element of the page
-    // Appends a 'group' element to 'svg'
-    // Moves the 'group' element to the top left margin
-    var svg = d3
-      .select(ref.current)
-      .append('svg')
+  data = data.map(({ x, y }) => ({
+    x: parseFloat(x),
+    y: parseFloat(y),
+  }))
+
+  const optionTypeText = isLong ? 'LONG' : 'SHORT'
+  const reffeenceAsset = refAsset.slice(0, 8)
+
+  // Set the dimensions and margins of the graph
+  const margin = { top: 15, right: 2, bottom: 40, left: 20 },
+    width = w - margin.left - margin.right,
+    height = h - margin.top - margin.bottom
+  const labelWidth = 30
+  const labelHeight = 10
+  const blueColorCode = '#3B8DCA'
+  const redColorCode = '#F77F99'
+  const legendHeight = height + 30
+  useEffect(() => {
+    intitalChart()
+  }, [])
+  const intitalChart = () => {
+    const svg = d3.select(ref.current)
+    svg
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
       .style('overflow', 'visible')
-      .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
 
     //Text Label on the Top left corner i.e Payout per Long token (in WAGMI18)
-    const labelWidth = 30
-    const labelHeight = 10
-    const blueColorCode = '#3B8DCA'
-    const redColorCode = '#F77F99'
-    const legendHeight = height + 30
+  }
+  // Append the svg object to the reference element of the page
+  // Appends a 'group' element to 'svg'
+  // Moves the 'group' element to the top left margin
+  const draw = () => {
+    const svg = d3.select(ref.current)
+    svg.selectAll('*').remove()
+    svg.selectAll('rect').data(data)
     svg
       .append('text')
       .attr('width', labelWidth)
@@ -58,98 +66,23 @@ export default function DIVATradeChart(props) {
       .style('fill', '#A4A4A4')
       .text(' Payout per ' + optionTypeText + ' token (' + 'in ' + payOut + ')')
 
-    // legends
-    svg
-      .append('circle')
-      .attr('cx', width * 0.0083)
-      .attr('cy', legendHeight)
-      .attr('r', 6)
-      .style('fill', '#F7931A')
-    svg
-      .append('circle')
-      .attr('cx', width * 0.3)
-      .attr('cy', legendHeight)
-      .attr('r', function () {
-        return cap == floor ? 0 : 6
-      })
-      .style('fill', '#83BD67')
-    svg
-      .append('circle')
-      .attr('cx', width * 0.58)
-      .attr('cy', legendHeight)
-      .attr('r', currentPrice ? 6 : 0)
-      .style('fill', '#3393E0')
-    svg
-      .append('circle')
-      .attr('cx', width * 0.8)
-      .attr('cy', legendHeight)
-      .attr('r', showBreakEven && breakEven != 'n/a' ? 6 : 0)
-      .style('fill', '#9747FF')
-    svg
-      .append('text')
-      .attr('x', width * 0.033)
-      .attr('y', legendHeight)
-      .attr('opacity', function () {
-        return cap == floor ? 0 : 1
-      })
-      .text('Floor' + ' ' + '(' + floor + ')')
-      .style('font-size', '12px')
-      .attr('alignment-baseline', 'middle')
-    svg
-      .append('text')
-      .attr('x', width * 0.033)
-      .attr('y', legendHeight)
-      .attr('opacity', function () {
-        return cap == floor ? 1 : 0
-      })
-      .text('Inflection' + ' ' + '(' + cap + ')') //Binary payoff
-      .style('font-size', '12px')
-      .attr('alignment-baseline', 'middle')
-    svg
-      .append('text')
-      .attr('x', width * 0.32)
-      .attr('y', legendHeight)
-      .attr('opacity', function () {
-        return cap == floor ? 0 : 1
-      })
-      .text('Cap' + ' ' + '(' + cap + ')')
-      .style('font-size', '12px')
-      .attr('alignment-baseline', 'middle')
-    svg
-      .append('text')
-      .attr('x', width * 0.6)
-      .attr('y', legendHeight)
-      .attr('opacity', currentPrice ? 1 : 0)
-      .text('Current price' + ' ' + '(' + currentPrice + ')')
-      .style('font-size', '12px')
-      .attr('alignment-baseline', 'middle')
-    svg
-      .append('text')
-      .attr('x', width * 0.83)
-      .attr('y', legendHeight)
-      .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
-      .text('Break Even' + ' ' + '(' + breakEven + ')')
-      .style('font-size', '12px')
-      .attr('alignment-baseline', 'middle')
-
     // Add X axis
+    const domainMin = d3.min(data, function (d) {
+      return d.x
+    })
+    const domainMax = d3.max(data, function (d) {
+      return d.x
+    })
     const x = d3
       .scaleLinear()
-      .domain([
-        d3.min(data, function (d) {
-          return d.x
-        }),
-        // <= currentPrice ? d.x : currentPrice || d.x
-        d3.max(data, function (d) {
-          return d.x
-        }),
-      ])
-      .range([0, width])
+      .domain([domainMin, domainMax])
+      .range([0, width - margin.right])
     // Remove X- axis labels
     svg
-      .append('g')
-      .attr('class', 'xAxisG')
+      .append('rect')
       .attr('transform', 'translate(0,' + height + ')')
+      .style('stroke', '#B8B8B8')
+      .style('stroke-width', '0.75px')
     // Add Y axis
     const y = d3
       .scaleLinear()
@@ -186,7 +119,8 @@ export default function DIVATradeChart(props) {
       )
       .call((g) => g.selectAll('.tick text').attr('x', 4).attr('dy', -4))
 
-    // Add the line
+    // // Add the line
+
     const valueline = d3
       .line()
       .x(function (d) {
@@ -209,13 +143,10 @@ export default function DIVATradeChart(props) {
       })
 
     // Format x axis
-    d3.select('.xAxisG path')
-      .style('stroke', '#B8B8B8')
-      .style('stroke-width', '0.75px')
-    //for Y axis
-    //or breakEven point
+
+    // //for Y axis
+    // //or breakEven point
     svg
-      .append('g')
       .selectAll('dot')
       .data(data)
       .enter()
@@ -232,9 +163,8 @@ export default function DIVATradeChart(props) {
       })
       .attr('r', 5)
       .style('fill', '#9747FF')
-    // for current price point
+    // // for current price point
     svg
-      .append('g')
       .selectAll('dot')
       .data(data)
       .enter()
@@ -250,9 +180,9 @@ export default function DIVATradeChart(props) {
       })
       .attr('r', 5)
       .style('fill', '#3393E0')
-    //for floor point
+
+    // //for floor point
     svg
-      .append('g')
       .selectAll('dot')
       .data(data)
       .enter()
@@ -268,9 +198,9 @@ export default function DIVATradeChart(props) {
       })
       .attr('r', 5)
       .style('fill', '#F7931A')
-    //for cap point
+
+    // //for cap point
     svg
-      .append('g')
       .selectAll('dot')
       .data(data)
       .enter()
@@ -286,6 +216,85 @@ export default function DIVATradeChart(props) {
       })
       .attr('r', 5)
       .style('fill', '#83BD67')
+
+    // // legends
+    svg
+      .append('circle')
+      .attr('cx', width * 0.0083)
+      .attr('cy', legendHeight)
+      .attr('r', 6)
+      .style('fill', '#F7931A')
+    svg
+      .append('circle')
+      .attr('cx', width * 0.25)
+      .attr('cy', legendHeight)
+      .attr('r', function () {
+        return cap == floor ? 0 : 6
+      })
+      .style('fill', '#83BD67')
+    svg
+      .append('circle')
+      .attr('cx', width * 0.42)
+      .attr('cy', legendHeight)
+      .attr('r', currentPrice ? 6 : 0)
+      .style('fill', '#3393E0')
+    svg
+      .append('circle')
+      .attr('cx', width * 0.75)
+      .attr('cy', legendHeight)
+      .attr('r', showBreakEven && breakEven != 'n/a' ? 6 : 0)
+      .style('fill', '#9747FF')
+    svg
+      .append('text')
+      .attr('x', width * 0.033)
+      .attr('y', legendHeight)
+      .attr('opacity', function () {
+        return cap == floor ? 0 : 1
+      })
+      .text('Floor' + ' ' + '(' + parseFloat(floor).toFixed(2) + ')')
+      .style('font-size', '12px')
+      .attr('alignment-baseline', 'middle')
+    svg
+      .append('text')
+      .attr('x', width * 0.033)
+      .attr('y', legendHeight)
+      .attr('opacity', function () {
+        return cap == floor ? 1 : 0
+      })
+      .text('Inflection' + ' ' + '(' + parseFloat(cap).toFixed(2) + ')') //Binary payoff
+      .style('font-size', '12px')
+      .attr('alignment-baseline', 'middle')
+    svg
+      .append('text')
+      .attr('x', width * 0.27)
+      .attr('y', legendHeight)
+      .attr('opacity', function () {
+        return cap == floor ? 0 : 1
+      })
+      .text('Cap' + ' ' + '(' + parseFloat(cap).toFixed(2) + ')')
+      .style('font-size', '12px')
+      .attr('alignment-baseline', 'middle')
+
+    //current price legend
+    svg
+      .append('text')
+      .attr('x', width * 0.45)
+      .attr('y', legendHeight)
+      .attr('opacity', currentPrice ? 1 : 0)
+      .text(
+        'Current Value' + ' ' + '(' + parseFloat(currentPrice).toFixed(2) + ')'
+      )
+      .style('font-size', '12px')
+      .attr('alignment-baseline', 'middle')
+
+    svg
+      .append('text')
+      .attr('x', width * 0.77)
+      .attr('y', legendHeight)
+      .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
+      .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(2) + ')')
+      .style('font-size', '12px')
+      .attr('alignment-baseline', 'middle')
 
     // Add mouseover effects
     const mouseHoverEffect = () => {
@@ -400,8 +409,8 @@ export default function DIVATradeChart(props) {
           target = null,
           pos = null
 
-        // eslint-disable-next-line
-      while (true) {
+        //eslint-disable-next-line
+        while (true) {
           target = Math.floor((beginning + end) / 2)
           pos = l[i].getPointAtLength(target)
           if ((target === end || target === beginning) && pos.x !== m) {
@@ -421,36 +430,70 @@ export default function DIVATradeChart(props) {
           d += ' ' + mouse[0] + ',' + 60
           return d
         })
-        d3.select('.mouse-line').style('stroke', function (d, i) {
-          var pos = yPos(d, i, mouse[0], lines)
-          return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
-            ? blueColorCode
-            : redColorCode
-        })
 
-        d3.select('.mouse-per-line circle').style('fill', function (d, i) {
-          var pos = yPos(d, i, mouse[0], lines)
-          return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
-            ? blueColorCode
-            : redColorCode
-        })
-
-        d3.select('.tooltip-per-line .tooltip-payout').style(
-          'fill',
-          function (d, i) {
+        if (isLong) {
+          d3.select('.mouse-line').style('stroke', function (d, i) {
             var pos = yPos(d, i, mouse[0], lines)
             return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
               ? blueColorCode
               : redColorCode
-          }
-        )
+          })
 
-        d3.select('.line').style('stroke', function (d, i) {
-          var pos = yPos(d, i, mouse[0], lines)
-          return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
-            ? blueColorCode
-            : redColorCode
-        })
+          d3.select('.mouse-per-line circle').style('fill', function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
+              ? blueColorCode
+              : redColorCode
+          })
+
+          d3.select('.tooltip-per-line .tooltip-payout').style(
+            'fill',
+            function (d, i) {
+              var pos = yPos(d, i, mouse[0], lines)
+              return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
+                ? blueColorCode
+                : redColorCode
+            }
+          )
+
+          d3.select('.line').style('stroke', function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) >= breakEven || breakEven == 'n/a'
+              ? blueColorCode
+              : redColorCode
+          })
+        } else {
+          d3.select('.mouse-line').style('stroke', function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) <= breakEven || breakEven == 'n/a'
+              ? blueColorCode
+              : redColorCode
+          })
+
+          d3.select('.mouse-per-line circle').style('fill', function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) <= breakEven || breakEven == 'n/a'
+              ? blueColorCode
+              : redColorCode
+          })
+
+          d3.select('.tooltip-per-line .tooltip-payout').style(
+            'fill',
+            function (d, i) {
+              var pos = yPos(d, i, mouse[0], lines)
+              return x.invert(pos.x) <= breakEven || breakEven == 'n/a'
+                ? blueColorCode
+                : redColorCode
+            }
+          )
+
+          d3.select('.line').style('stroke', function (d, i) {
+            var pos = yPos(d, i, mouse[0], lines)
+            return x.invert(pos.x) <= breakEven || breakEven == 'n/a'
+              ? blueColorCode
+              : redColorCode
+          })
+        }
 
         d3.selectAll('.mouse-per-line').attr('transform', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
@@ -487,7 +530,10 @@ export default function DIVATradeChart(props) {
     if (mouseHover) {
       mouseHoverEffect()
     }
-  }, [props.w])
+  }
+  useEffect(() => {
+    draw()
+  }, [props.currentPrice, props.breakEven])
 
-  return <div id="DivaTradeChart" ref={ref}></div>
+  return <svg ref={ref}></svg>
 }
