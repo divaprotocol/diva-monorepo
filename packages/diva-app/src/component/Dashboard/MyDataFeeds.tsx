@@ -42,6 +42,7 @@ export const DueInCell = (props: any) => {
     const minUntilExp = getExpiryMinutesFromNow(
       expTimestamp + props.row.SubmissionPeriod
     )
+
     if (minUntilExp < props.row.SubmissionPeriod && minUntilExp > 0) {
       return minUntilExp === 1 ? (
         <Tooltip placement="top-end" title={props.row.Expiry}>
@@ -409,6 +410,7 @@ export function MyDataFeeds() {
         Status: status,
         StatusTimestamp: val.statusTimestamp,
         finalValue: finalValue,
+        SubmissionPeriod: submissionPeriod,
       },
     ]
   }, [] as GridRowModel[])
