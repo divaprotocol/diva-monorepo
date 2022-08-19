@@ -17,6 +17,11 @@ For naming sake, a rename of the oracle can be done under `container_name` in
 docker-compose.yml
 ```
 
+Note the updates have the docker run in detached mode! This will run unless prompted to kill
+```
+docker-compose down
+```
+
 ## Adding config file
 Add a `config.py` file to the `config` folder following the `config.example.py` example.
 
@@ -74,3 +79,5 @@ poetry add pandas
 
 ## Helpful links
 * Python poetry docs: https://python-poetry.org/docs/
+
+### Tellor Oracle details

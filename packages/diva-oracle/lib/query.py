@@ -12,7 +12,7 @@ def seconds_to_hours(seconds):
 def query(lastId):
     expiry_floor_time_away = 300
     expiry_cieling_time_away = 86400
-    print("pools expiring between {} hours and  {} hours from now:{}".format(expiry_floor_time_away/(60*60), expiry_cieling_time_away/(60*60), dt.now()))
+    #print("pools expiring between {} hours and  {} hours from now:{}".format(expiry_floor_time_away/(60*60), expiry_cieling_time_away/(60*60), dt.now()))
     return """
             { 
                 pools (first: 1000, where: {id_gt: %s, expiryTime_gte: "%s", expiryTime_lte: "%s", statusFinalReferenceValue: "Open", dataProvider: "%s"}) {
@@ -34,9 +34,9 @@ def query(lastId):
 def tellor_query(lastId, provider):
     expiry_floor_time_away = 300
     eft = seconds_to_hours(expiry_floor_time_away)
-    expiry_cieling_time_away = 86400
-    ect = seconds_to_hours(expiry_cieling_time_away)
-    print("pools expiring between {} hours and  {} hours from now: {}".format(round(eft, 2), ect, dt.now()))
+    expiry_ceiling_time_away = 86400
+    ect = seconds_to_hours(expiry_ceiling_time_away)
+    #print("pools expiring between {} hours and  {} hours from now: {}".format(round(eft, 2), ect, dt.now()))
     return """
             { 
                 pools (first: 1000, where: {id_gt: %s, expiryTime_gte: "%s", expiryTime_lte: "%s",  statusFinalReferenceValue: "Open", dataProvider: "%s"}) {
@@ -53,7 +53,7 @@ def tellor_query(lastId, provider):
                     }
                   }
                 }
-            """ % (lastId, (int(dt.now().timestamp()) - expiry_cieling_time_away), (int(dt.now().timestamp()) - expiry_floor_time_away),  provider)
+            """ % (lastId, (int(dt.now().timestamp()) - expiry_ceiling_time_away), (int(dt.now().timestamp()) - expiry_floor_time_away),  provider)
 
 
 '''  collateralToken {

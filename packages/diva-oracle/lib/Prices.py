@@ -42,6 +42,7 @@ def getKrakenPrice(pair, ts_date, ts_date_max_away):
 def getKrakenCollateralConversion(dfitem, ts_date, ts_date_max_away):
     pair = dfitem+"USD"
     price = getKrakenPrice(pair, ts_date, ts_date_max_away)
+    # This is for auto price to one in testing of dUSD
     if price[0] == -1:
         return 1
     return price[0]

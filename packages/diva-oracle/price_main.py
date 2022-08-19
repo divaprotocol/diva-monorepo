@@ -12,6 +12,8 @@ from lib.recorder import *
 from lib.df_utils import extend_DataFrame
 from lib.query import query
 from lib.submitPool import submitPools
+from colorama import init
+from termcolor import colored
 
 message = "Subject: Pending Pool Transactions \n"
 
@@ -19,12 +21,11 @@ waiting_sec = 30
 def run(network, w3, contract):
     # sendEmail()
     print("#########################################")
-    print("RUNNING PRICE ORACLE")
-    print('\033[1m' + "Network: {}".format(network) + '\033[0m')
+    print(colored("RUNNING PRICE ORACLE FOR DATA PROVIDER: {} ".format(config.dataprovider), "green"))
+    print(colored('\033[1m' + "Network: {}".format(network) + '\033[0m', "green"))
     max_time_away = dt.timedelta(minutes=60)
 
     resp = run_graph_query(query(0), network)
-    print(resp)
     df = pd.json_normalize(resp, ['data', 'pools'])
     numberPools = 0
 

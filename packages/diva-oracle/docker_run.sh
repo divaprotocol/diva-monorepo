@@ -5,4 +5,7 @@
 #docker rmi $(docker images --filter "dangling=true" -q --no-trunc) -f
 
 docker-compose build
-docker-compose up
+# -d is for detached mode, this will persist the docker image upon closing shell
+docker-compose up -d
+# follow logs in detached mode
+docker logs -f Diva-tellor-oracle
