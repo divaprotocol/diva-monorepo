@@ -80,6 +80,7 @@ export const DueInCell = (props: any) => {
     const minUntilExp = getExpiryMinutesFromNow(
       statusTimestamp + props.row.ReviewPeriod
     )
+
     if (minUntilExp < props.row.ReviewPeriod && minUntilExp > 0) {
       return minUntilExp === 1 ? (
         <Tooltip placement="top-end" title={props.row.Expiry}>
@@ -148,8 +149,6 @@ const SubmitCell = (props: any) => {
   const [textFieldValue, setTextFieldValue] = useState('')
   const [loadingValue, setLoadingValue] = useState(false)
 
-  const { submissionPeriod, challengePeriod } = useGovernanceParameters()
-
   const handleOpen = () => {
     setOpen(true)
   }
@@ -172,9 +171,9 @@ const SubmitCell = (props: any) => {
   // Flag for enabling the SUBMIT VALUE button
   const enabled =
     (props.row.Status === 'Expired' &&
-      now.getTime() < relevantStartTime + submissionPeriod * 1000) ||
+      now.getTime() < relevantStartTime + props.row.SubmissionPeriod * 1000) ||
     (props.row.Status === 'Challenged' &&
-      now.getTime() < relevantStartTime + challengePeriod * 1000)
+      now.getTime() < relevantStartTime + props.row.ChallengePeriod * 1000)
 
   return (
     <Container>
@@ -411,6 +410,8 @@ export function MyDataFeeds() {
         StatusTimestamp: val.statusTimestamp,
         finalValue: finalValue,
         SubmissionPeriod: submissionPeriod,
+        ReviewPeriod: reviewPeriod,
+        ChallengePeriod: challengePeriod,
       },
     ]
   }, [] as GridRowModel[])
