@@ -15,22 +15,18 @@ import Tab from '@mui/material/Tab'
 import React, { useState, useEffect } from 'react'
 import { Liquidity } from '../Liquidity/Liquidity'
 import OrdersPanel from './OrdersPanel'
-import Typography from '@mui/material/Typography'
 import { useAppSelector } from '../../Redux/hooks'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
 import { useDispatch } from 'react-redux'
 import {
-  selectBreakEven,
   fetchPool,
   fetchUnderlyingPrice,
-  selectIntrinsicValue,
   selectIsBuy,
-  selectMaxPayout,
-  selectMaxYield,
   selectPool,
   selectChainId,
-  selectPrice,
+  selectUnderlyingPrice,
 } from '../../Redux/appSlice'
 import { formatUnits, parseEther, formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
@@ -46,7 +42,6 @@ const LeftDiv = styled.div`
 const RightDiv = styled.div`
   width: 35%;
 `
-
 export default function Underlying() {
   const history = useHistory()
   const params: { poolId: string; tokenType: string } = useParams()
@@ -63,19 +58,15 @@ export default function Underlying() {
       ? 'liquidity'
       : 'trade'
   const [value, setValue] = useState(currentTab)
-
-  const maxPayout = useAppSelector((state) => state.stats.maxPayout)
-  const intrinsicValue = useAppSelector((state) => state.stats.intrinsicValue)
-  const maxYield = useAppSelector((state) => state.stats.maxYield)
   const breakEven = useAppSelector((state) => state.stats.breakEven)
-  const isBuy = useAppSelector((state) => selectIsBuy(state))
-  const breakEvenOptionPrice = 0
   const chainId = useAppSelector(selectChainId)
+  const { provider } = useConnectionContext()
   const chainContractAddress =
     contractAddress.getContractAddressesForChainOrThrow(chainId)
   const exchangeProxy = chainContractAddress.exchangeProxy
   const theme = useTheme()
   const dispatch = useDispatch()
+
   useEffect(() => {
     dispatch(
       fetchPool({
@@ -83,44 +74,17 @@ export default function Underlying() {
         poolId: params.poolId,
       })
     )
-  }, [chainId, params.poolId, dispatch])
+  }, [chainId, dispatch, params.poolId])
 
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
-
+  const currentPrice = useAppSelector(
+    selectUnderlyingPrice(pool?.referenceAsset)
+  )
   useEffect(() => {
     if (pool?.referenceAsset != null)
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
   }, [pool, dispatch])
 
-  // const intrinsicValue = useAppSelector((state) =>
-  //   selectIntrinsicValue(state, params.poolId)
-  // )
-  // const intValDisplay =
-  //   intrinsicValue != 'n/a' && intrinsicValue != null
-  //     ? isLong
-  //       ? formatEther(intrinsicValue?.payoffPerLongToken)
-  //       : formatEther(intrinsicValue?.payoffPerShortToken)
-  //     : 'n/a'
-
-  // not open final value
-  // open if less
-  // const confirmed =
-  //   pool.statusFinalReferenceValue === 'Open'
-  //     ? Date.now() - Number(pool.expiryTime) * 1000 >
-  //       6 * 24 * 60 * 60 * 1000 + 5 * 60 * 1000
-  //     : false
-  // const usdPrice = useAppSelector((state) =>
-  //   selectPrice(state, pool?.referenceAsset)
-  // )
-  // const priceValue = usdPrice == null ? '-' : parseEther(usdPrice).toString()
-  // const inflectionValue = confirmed ? pool.inflection : priceValue
-  // const finalValue =
-  //   pool.statusFinalReferenceValue !== 'Open' && pool != null
-  //     ? pool?.finalReferenceValue
-  //     : inflectionValue
-  // const intrinsicValue = useAppSelector((state) =>
-  //   selectIntrinsicValue(state, params?.poolId, finalValue)
-  // )
   if (pool == null) {
     return <LoadingBox />
   }
@@ -144,15 +108,16 @@ export default function Underlying() {
     TokenSupply: Number(formatEther(pool.supplyInitial)),
     IsLong: isLong,
   }
-  const data = generatePayoffChartData(OptionParams)
+  const data = generatePayoffChartData(OptionParams, currentPrice)
   const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
   const handleChange = (event: any, newValue: string) => {
     history.push(`/${params.poolId}/${isLong ? 'long' : 'short'}/` + newValue)
     setValue(newValue)
   }
-
   return (
-    <Container sx={{ paddingTop: '1em', paddingBottom: '3em' }}>
+    <Container
+      sx={{ paddingTop: '1em', paddingBottom: '3em', minHeight: '140%' }}
+    >
       <TabContext value={value}>
         <TabList
           onChange={handleChange}
@@ -178,6 +143,22 @@ export default function Underlying() {
                   <OptionDetails pool={pool} isLong={isLong} />
                 </Paper>
                 <Paper>
+                  <TradeChart
+                    data={data}
+                    refAsset={pool.referenceAsset}
+                    currentPrice={currentPrice}
+                    payOut={pool.collateralToken.symbol}
+                    w={650}
+                    h={336}
+                    isLong={OptionParams.IsLong}
+                    breakEven={breakEven}
+                    floor={OptionParams.Floor}
+                    cap={OptionParams.Cap}
+                    mouseHover={true}
+                    showBreakEven={true}
+                  />
+                </Paper>
+                <Paper>
                   <LeftCompFlexContainer>
                     <OrdersPanel
                       option={pool}
@@ -196,84 +177,9 @@ export default function Underlying() {
                     tokenAddress={tokenAddress}
                     exchangeProxy={exchangeProxy}
                     chainId={chainId}
+                    provider={provider}
                   />
                 </Paper>
-                <Paper>
-                  <TradeChart
-                    data={data}
-                    refAsset={pool.referenceAsset}
-                    payOut={pool.collateralToken.symbol}
-                    w={380}
-                    h={220}
-                    isLong={OptionParams.IsLong}
-                    breakEven={breakEvenOptionPrice}
-                  />
-                </Paper>
-                <Typography
-                  sx={{
-                    paddingLeft: theme.spacing(3),
-                    mt: theme.spacing(1),
-                  }}
-                >
-                  Buyers statistics:
-                </Typography>
-                <Divider />
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography
-                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    Max yield
-                  </Typography>
-                  {isBuy ? (
-                    <Typography
-                      sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                    >
-                      {maxYield}
-                    </Typography>
-                  ) : (
-                    <Typography
-                      sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                    >
-                      {maxYield}
-                    </Typography>
-                  )}
-                </Stack>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography
-                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    Break-even
-                  </Typography>
-                  <Typography
-                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    {Number(breakEven).toFixed(2)}
-                  </Typography>
-                </Stack>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography
-                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    Intrinsic value per token
-                  </Typography>
-                  <Typography
-                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    {parseFloat(intrinsicValue).toFixed(2)}
-                  </Typography>
-                </Stack>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography
-                    sx={{ ml: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    Max payout per token
-                  </Typography>
-                  <Typography
-                    sx={{ mr: theme.spacing(3), mt: theme.spacing(1) }}
-                  >
-                    {maxPayout}
-                  </Typography>
-                </Stack>
               </Stack>
             </RightDiv>
           </Stack>

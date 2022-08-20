@@ -14,6 +14,8 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Container,
+  Card,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 
@@ -22,10 +24,16 @@ import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
-import { CheckCircle, Report } from '@mui/icons-material'
+import {
+  CheckCircle,
+  Circle,
+  FormatListBulleted,
+  Report,
+} from '@mui/icons-material'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { getDateTime, userTimeZone } from '../../Util/Dates'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -41,10 +49,11 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-  const [value, setValue] = useState('binary')
-
+  const [value, setValue] = useState('Binary')
+  const [mobile, setMobile] = useState(false)
   const handleChange = (event) => {
     setValue(event.target.value)
+    formik.setFieldValue('payoutProfile', event.target.value)
   }
   const { referenceAssets, collateralTokens } = useWhitelist()
   const {
@@ -58,8 +67,16 @@ export function DefinePoolAttributes({
     cap,
     floor,
     gradient,
+    payoutProfile,
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setMobile(true)
+    } else {
+      setMobile(false)
+    }
+  }, [])
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
@@ -149,391 +166,638 @@ export function DefinePoolAttributes({
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
   useEffect(() => {
-    switch (value) {
-      case 'binary':
-        formik.setValues((_values) => ({
-          ..._values,
-          cap: formik.values.inflection,
-          floor: formik.values.inflection,
-          gradient: 1,
-        }))
+    switch (payoutProfile) {
+      case 'Binary':
+        formik.setFieldValue('cap', formik.values.inflection)
+        formik.setFieldValue('floor', formik.values.inflection)
+        formik.setFieldValue('gradient', 1)
         break
-      case 'linear':
-        formik.setValues((_values) => ({
-          ..._values,
-          inflection: (formik.values.cap + formik.values.floor) / 2,
-          gradient: 0.5,
-        }))
+      case 'Linear':
+        formik.setFieldValue('gradient', 0.5)
+        formik.setFieldValue(
+          'cap',
+          formik.values.inflection + formik.values.inflection / 2
+        )
+        formik.setFieldValue(
+          'floor',
+          formik.values.inflection - formik.values.inflection / 2
+        )
+        break
+      case 'Custom':
+        formik.setFieldValue(
+          'cap',
+          formik.values.inflection + formik.values.inflection / 2
+        )
+        formik.setFieldValue(
+          'floor',
+          formik.values.inflection - formik.values.inflection / 2
+        )
+        formik.setFieldValue(
+          'inflection',
+          (formik.values.cap + formik.values.floor) / 2
+        )
         break
     }
-  }, [value, formik.values.cap, formik.values.floor, formik.values.inflection])
+  }, [payoutProfile])
+
   return (
-    <Box>
-      <Typography pb={theme.spacing(2)} variant="subtitle1">
-        Define all the parameters for your contingent pool below.
-      </Typography>
-      <h3>Event</h3>
-      <Stack spacing={2} direction="row">
-        <FormControl fullWidth error={formik.errors.referenceAsset != null}>
-          <Autocomplete
-            id="referenceAsset"
-            renderInput={(params) => (
-              <>
-                <TextField
-                  {...params}
-                  label="Reference Asset"
-                  name="referenceAsset"
+    <Stack direction={mobile ? 'column' : 'row'}>
+      <Container sx={{ minWidth: '60%' }}>
+        <Typography
+          style={{ color: 'white' }}
+          pb={theme.spacing(2)}
+          variant="subtitle1"
+        >
+          Pool Configuration
+        </Typography>
+        <Box
+          sx={{ pb: theme.spacing(5) }}
+          border={1}
+          borderColor="secondary.dark"
+        >
+          <Container>
+            <h3>Event</h3>
+            <Stack spacing={2} direction={mobile ? 'column' : 'row'}>
+              <FormControl
+                fullWidth
+                error={formik.errors.referenceAsset != null}
+              >
+                <Autocomplete
                   id="referenceAsset"
-                  onBlur={formik.handleBlur}
-                  error={formik.errors.referenceAsset != null}
-                />
-                <Typography
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
-                  pt={2}
-                  pb={4}
-                >
-                  {formik.errors.referenceAsset != null ? (
-                    <FormHelperText>
-                      {formik.errors.referenceAsset}
-                    </FormHelperText>
-                  ) : isCustomReferenceAsset ? (
+                  renderInput={(params) => (
                     <>
-                      <CheckCircle
-                        fontSize="small"
-                        color="success"
-                        sx={{ marginRight: theme.spacing(0.5) }}
+                      <TextField
+                        {...params}
+                        label="Reference Asset"
+                        name="referenceAsset"
+                        id="referenceAsset"
+                        onBlur={formik.handleBlur}
+                        error={formik.errors.referenceAsset != null}
                       />
-                      <span>This reference asset is whitelisted</span>
-                    </>
-                  ) : (
-                    <>
-                      <Report
-                        color="warning"
-                        fontSize="small"
-                        sx={{ marginRight: theme.spacing(0.5) }}
-                      />
-                      <span>
-                        This reference asset is custom and not on our whitelist
-                      </span>
+                      <Typography
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                        }}
+                        pt={2}
+                        pb={4}
+                      >
+                        {formik.errors.referenceAsset != null ? (
+                          <FormHelperText>
+                            {formik.errors.referenceAsset}
+                          </FormHelperText>
+                        ) : isCustomReferenceAsset ? (
+                          <>
+                            <CheckCircle
+                              fontSize="small"
+                              color="success"
+                              sx={{ marginRight: theme.spacing(0.5) }}
+                            />
+                            <span>This reference asset is whitelisted</span>
+                          </>
+                        ) : (
+                          <>
+                            <Report
+                              color="warning"
+                              fontSize="small"
+                              sx={{ marginRight: theme.spacing(0.5) }}
+                            />
+                            <span>
+                              This reference asset is custom and not on our
+                              whitelist
+                            </span>
+                          </>
+                        )}
+                      </Typography>
                     </>
                   )}
-                </Typography>
-              </>
-            )}
-            onInputChange={(event) => {
-              if (event != null && event.target != null) {
-                formik.setFieldValue(
-                  'referenceAsset',
-                  (event.target as any).value || ''
-                )
-              }
-            }}
-            onChange={(event, option) => {
-              formik.setFieldValue('referenceAsset', option)
-            }}
-            value={referenceAsset}
-            options={referenceAssets}
-          />
-        </FormControl>
-        <FormControl fullWidth>
-          <DateTimePicker
-            InputProps={{
-              name: 'expiryTime',
-              id: 'expiryTime',
-              onBlur: formik.handleBlur,
-              error: formik.errors.expiryTime != null,
-            }}
-            label="Expiry Time"
-            onChange={(event) => {
-              formik.setFieldValue('expiryTime', event)
-            }}
-            minDate={today}
-            value={expiryTime}
-            components={{
-              OpenPickerIcon: ClockIcon,
-            }}
-            renderInput={(params) => <TextField {...params} />}
-          />
-          {formik.errors.expiryTime != null && (
-            <FormHelperText sx={{ color: 'red' }}>
-              {formik.errors.expiryTime}
-            </FormHelperText>
-          )}
-        </FormControl>
-      </Stack>
-      <Box>
-        <h3>Collateral</h3>
-
-        <Stack pb={3} spacing={2} direction="row">
-          <FormControl fullWidth error={formik.errors.collateralToken != null}>
-            <Autocomplete
-              options={possibleOptions}
-              value={collateralToken}
-              onChange={(_, newValue) => {
-                formik.setFieldValue('collateralToken', newValue)
-              }}
-              getOptionLabel={(option: WhitelistCollateralToken) =>
-                option?.symbol || ''
-              }
-              onInputChange={(event) => {
-                if (event != null && event.target != null) {
-                  setReferenceAssetSearch((event.target as any).value || '')
-                }
-              }}
-              renderInput={(params) => (
-                <TextField
-                  error={formik.errors.collateralToken != null}
-                  onBlur={formik.handleBlur}
-                  {...params}
-                  label="Collateral Asset"
-                />
-              )}
-            />
-            {formik.errors.collateralToken != null && (
-              <FormHelperText>{formik.errors.collateralToken}</FormHelperText>
-            )}
-            {collateralWalletBalance != null && collateralToken != null && (
-              <FormHelperText>
-                Your balance: {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
-                {collateralToken?.symbol}{' '}
-                <MaxCollateral
-                  role="button"
-                  onClick={() => {
-                    if (collateralWalletBalance != null) {
+                  onInputChange={(event) => {
+                    if (event != null && event.target != null) {
                       formik.setFieldValue(
-                        'collateralBalance',
-                        collateralWalletBalance
+                        'referenceAsset',
+                        (event.target as any).value || ''
                       )
                     }
                   }}
-                >
-                  (Max)
-                </MaxCollateral>
-              </FormHelperText>
-            )}
-          </FormControl>
-          <FormControl
-            fullWidth
-            error={formik.errors.collateralBalance != null}
-          >
-            <TextField
-              id="collateralBalance"
-              name="collateralBalance"
-              label="Collateral Amount"
-              inputProps={{ min: 0 }}
-              onBlur={formik.handleBlur}
-              error={formik.errors.collateralBalance != null}
-              value={formik.values.collateralBalance}
-              type="number"
-              onChange={(event) => {
-                const collateralBalance = event.target.value
-
-                formik.setValues((values) => ({
-                  ...values,
-                  collateralBalance,
-                  tokenSupply: parseFloat(collateralBalance),
-                }))
-              }}
-            />
-            {formik.errors.collateralBalance != null && (
-              <FormHelperText>{formik.errors.collateralBalance}</FormHelperText>
-            )}
-          </FormControl>
-        </Stack>
-      </Box>
-
-      <h3>Payoff Type</h3>
-      <FormControl>
-        <RadioGroup
-          row
-          aria-labelledby="demo-row-radio-buttons-group-label"
-          name="row-radio-buttons-group"
-          value={value}
-          onChange={handleChange}
-        >
-          <FormControlLabel value="binary" control={<Radio />} label="Binary" />
-          <FormControlLabel value="linear" control={<Radio />} label="Linear" />
-          <FormControlLabel value="custom" control={<Radio />} label="Custom" />
-        </RadioGroup>
-      </FormControl>
-      <Stack pb={3} spacing={2} direction="row">
-        {value === 'binary' && (
-          <Box pt={2} width="50%">
-            <Stack spacing={3}>
-              <Tooltip
-                placement="top-end"
-                title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
-              >
-                <TextField
-                  id="inflection"
-                  error={formik.errors.inflection != null}
-                  name="inflection"
-                  onBlur={formik.handleBlur}
-                  label="Inflection"
-                  inputProps={{
-                    min: floor,
-                    max: cap,
+                  onChange={(event, option) => {
+                    formik.setFieldValue('referenceAsset', option)
                   }}
-                  type="number"
-                  onChange={formik.handleChange}
-                  value={inflection}
-                  sx={{ width: '100%' }}
+                  value={referenceAsset}
+                  options={referenceAssets}
                 />
-              </Tooltip>
-              <DefineAdvanced formik={formik} />
+              </FormControl>
+              <FormControl fullWidth>
+                <DateTimePicker
+                  InputProps={{
+                    name: 'expiryTime',
+                    id: 'expiryTime',
+                    onBlur: formik.handleBlur,
+                    error: formik.errors.expiryTime != null,
+                  }}
+                  label="Expiry Time"
+                  onChange={(event) => {
+                    formik.setFieldValue('expiryTime', event)
+                  }}
+                  minDate={today}
+                  value={expiryTime}
+                  components={{
+                    OpenPickerIcon: ClockIcon,
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+                {formik.errors.expiryTime != null && (
+                  <FormHelperText sx={{ color: 'red' }}>
+                    {formik.errors.expiryTime}
+                  </FormHelperText>
+                )}
+              </FormControl>
             </Stack>
-          </Box>
-        )}
-        {value === 'linear' && (
-          <Box pt={2} width="50%">
-            <Stack spacing={3}>
-              <Tooltip
-                placement="top-end"
-                title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
-              >
-                <TextField
-                  inputProps={{ min: 0, max: inflection }}
-                  name="floor"
-                  error={formik.errors.floor != null}
-                  id="floor"
-                  onBlur={formik.handleBlur}
-                  label="Floor"
-                  value={floor}
-                  type="number"
-                  onChange={formik.handleChange}
-                />
-              </Tooltip>
-              <Tooltip
-                placement="top-end"
-                title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
-              >
-                <TextField
-                  error={formik.errors.cap != null}
-                  inputProps={{ min: inflection }}
-                  onBlur={formik.handleBlur}
-                  name="cap"
-                  id="cap"
-                  label="Cap"
-                  value={cap}
-                  type="number"
-                  onChange={formik.handleChange}
-                />
-              </Tooltip>
-              <DefineAdvanced formik={formik} />
-            </Stack>
-          </Box>
-        )}
-        {value === 'custom' && (
-          <Box pt={2} width="50%">
-            <FormControl fullWidth error={hasPaymentProfileError}>
-              {hasPaymentProfileError && (
-                <FormHelperText
-                  sx={{ marginLeft: 0, paddingBottom: theme.spacing(3) }}
-                >
-                  Invalid input. Please ensure that the following is true:{' '}
-                  <br />
-                  <code>
-                    Floor {'<='} Inflection {'<='} Cap
-                  </code>
-                </FormHelperText>
-              )}
-              <Stack spacing={3}>
-                <Tooltip
-                  placement="top-end"
-                  title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
-                >
-                  <TextField
-                    inputProps={{ min: 0, max: inflection }}
-                    name="floor"
-                    error={formik.errors.floor != null}
-                    id="floor"
-                    onBlur={formik.handleBlur}
-                    label="Floor"
-                    value={floor}
-                    type="number"
-                    onChange={formik.handleChange}
-                  />
-                </Tooltip>
-                <Tooltip
-                  placement="top-end"
-                  title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
-                >
-                  <TextField
-                    id="inflection"
-                    error={formik.errors.inflection != null}
-                    name="inflection"
-                    onBlur={formik.handleBlur}
-                    label="Inflection"
-                    inputProps={{
-                      min: floor,
-                      max: cap,
-                    }}
-                    type="number"
-                    onChange={formik.handleChange}
-                    value={inflection}
-                    sx={{ width: '100%' }}
-                  />
-                </Tooltip>
-                <Tooltip
-                  placement="top-end"
-                  title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
-                >
-                  <TextField
-                    error={formik.errors.cap != null}
-                    inputProps={{ min: inflection }}
-                    onBlur={formik.handleBlur}
-                    name="cap"
-                    id="cap"
-                    label="Cap"
-                    value={cap}
-                    type="number"
-                    onChange={formik.handleChange}
-                  />
-                </Tooltip>
-                <Tooltip
-                  placement="top-end"
-                  title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
-                >
-                  <TextField
-                    name="gradient"
-                    id="gradient"
-                    label="Gradient"
-                    onBlur={formik.handleBlur}
-                    error={formik.errors.gradient != null}
-                    inputProps={{ min: 0 }}
-                    onChange={formik.handleChange}
-                    value={gradient}
-                    type="number"
-                  />
-                </Tooltip>
-                <DefineAdvanced formik={formik} />
-              </Stack>
-            </FormControl>
-          </Box>
-        )}
+            <Box>
+              <h3>Collateral</h3>
 
-        {floor != null &&
-          cap != null &&
-          inflection != null &&
-          tokenSupply != null &&
-          tokenSupply > 0 && (
-            <Box width="50%">
-              <PayoffProfile
-                floor={floor}
-                cap={cap}
-                inflection={inflection}
-                hasError={hasPaymentProfileError}
-                collateralBalanceLong={collateralBalanceLong}
-                collateralBalanceShort={collateralBalanceShort}
-                tokenSupply={tokenSupply}
-              />
+              <Stack pb={3} spacing={2} direction={mobile ? 'column' : 'row'}>
+                <FormControl
+                  fullWidth
+                  error={formik.errors.collateralToken != null}
+                >
+                  <Autocomplete
+                    options={possibleOptions}
+                    value={collateralToken}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('collateralToken', newValue)
+                    }}
+                    getOptionLabel={(option: WhitelistCollateralToken) =>
+                      option?.symbol || ''
+                    }
+                    onInputChange={(event) => {
+                      if (event != null && event.target != null) {
+                        setReferenceAssetSearch(
+                          (event.target as any).value || ''
+                        )
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        error={formik.errors.collateralToken != null}
+                        onBlur={formik.handleBlur}
+                        {...params}
+                        label="Collateral Asset"
+                      />
+                    )}
+                  />
+                  {formik.errors.collateralToken != null && (
+                    <FormHelperText>
+                      {formik.errors.collateralToken}
+                    </FormHelperText>
+                  )}
+                  {collateralWalletBalance != null && collateralToken != null && (
+                    <FormHelperText>
+                      Your balance:{' '}
+                      {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
+                      {collateralToken?.symbol}{' '}
+                      <MaxCollateral
+                        role="button"
+                        onClick={() => {
+                          if (collateralWalletBalance != null) {
+                            formik.setFieldValue(
+                              'collateralBalance',
+                              collateralWalletBalance
+                            )
+                          }
+                        }}
+                      >
+                        (Max)
+                      </MaxCollateral>
+                    </FormHelperText>
+                  )}
+                </FormControl>
+                <FormControl
+                  fullWidth
+                  error={formik.errors.collateralBalance != null}
+                >
+                  <TextField
+                    id="collateralBalance"
+                    name="collateralBalance"
+                    label="Collateral Amount"
+                    inputProps={{ step: 1, min: 0 }}
+                    onBlur={formik.handleBlur}
+                    error={formik.errors.collateralBalance != null}
+                    value={formik.values.collateralBalance}
+                    type="number"
+                    onChange={(event) => {
+                      const collateralBalance = event.target.value
+
+                      formik.setValues((values) => ({
+                        ...values,
+                        collateralBalance,
+                        tokenSupply: parseFloat(collateralBalance),
+                      }))
+                    }}
+                  />
+                  {formik.errors.collateralBalance != null && (
+                    <FormHelperText>
+                      {formik.errors.collateralBalance}
+                    </FormHelperText>
+                  )}
+                  {!isNaN(formik.values.tokenSupply) && (
+                    <FormHelperText>
+                      You receive {formik.values.tokenSupply} LONG and{' '}
+                      {formik.values.tokenSupply} SHORT tokens
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              </Stack>
             </Box>
-          )}
-      </Stack>
-    </Box>
+
+            <h3>Payoff Type</h3>
+            <FormControl>
+              <RadioGroup
+                row
+                aria-labelledby="demo-row-radio-buttons-group-label"
+                name="row-radio-buttons-group"
+                value={value}
+                onChange={handleChange}
+              >
+                <FormControlLabel
+                  value="Binary"
+                  control={<Radio />}
+                  label="Binary"
+                />
+                <FormControlLabel
+                  value="Linear"
+                  control={<Radio />}
+                  label="Linear"
+                />
+                <FormControlLabel
+                  value="Custom"
+                  control={<Radio />}
+                  label="Custom"
+                />
+              </RadioGroup>
+            </FormControl>
+            <Stack
+              pr={-5}
+              pb={3}
+              spacing={2}
+              direction={mobile ? 'column' : 'row'}
+            >
+              {value === 'Binary' && (
+                <Box pt={2} width="100%">
+                  <Tooltip
+                    placement="top-end"
+                    title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+                  >
+                    <TextField
+                      id="inflection"
+                      error={formik.errors.inflection != null}
+                      name="inflection"
+                      onBlur={formik.handleBlur}
+                      label="Inflection"
+                      inputProps={{
+                        step: 1,
+                        min: floor,
+                        max: cap,
+                      }}
+                      type="number"
+                      onChange={(event) => {
+                        if (payoutProfile === 'Binary') {
+                          formik.handleChange(event)
+                          formik.setValues((values) => ({
+                            ...values,
+                            cap: parseFloat(event.target.value),
+                            floor: parseFloat(event.target.value),
+                            inflection: parseFloat(event.target.value),
+                            gradient: 1,
+                          }))
+                        }
+                      }}
+                      value={inflection}
+                      sx={{ width: mobile ? '100%' : '48%' }}
+                    />
+                  </Tooltip>
+                  <DefineAdvanced formik={formik} />
+                </Box>
+              )}
+              {value === 'Linear' && (
+                <Box pt={2} width="100%">
+                  <Stack
+                    // sx={{ justifyContent: 'space-between' }}
+                    direction={mobile ? 'column' : 'row'}
+                    spacing={2}
+                  >
+                    <Tooltip
+                      placement="top-end"
+                      title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+                    >
+                      <TextField
+                        inputProps={{ step: 1, min: 0, max: inflection }}
+                        name="floor"
+                        error={formik.errors.floor != null}
+                        id="floor"
+                        onBlur={formik.handleBlur}
+                        label="Floor"
+                        value={floor}
+                        type="number"
+                        onChange={(event) => {
+                          if (payoutProfile === 'Linear') {
+                            formik.handleChange(event)
+                            formik.setValues((values) => ({
+                              ...values,
+                              floor: parseFloat(event.target.value),
+                              inflection:
+                                (parseFloat(event.target.value) + cap) / 2,
+                            }))
+                          }
+                        }}
+                        sx={{ width: '100%' }}
+                      />
+                    </Tooltip>
+                    <Tooltip
+                      placement="top-end"
+                      title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
+                    >
+                      <TextField
+                        error={formik.errors.cap != null}
+                        inputProps={{ step: 1, min: inflection }}
+                        onBlur={formik.handleBlur}
+                        name="cap"
+                        id="cap"
+                        label="Cap"
+                        value={cap}
+                        type="number"
+                        onChange={(event) => {
+                          formik.handleChange(event)
+                          formik.setValues((values) => ({
+                            ...values,
+                            cap: parseFloat(event.target.value),
+                            inflection:
+                              (parseFloat(event.target.value) + floor) / 2,
+                          }))
+                        }}
+                        sx={{ width: '100%' }}
+                      />
+                    </Tooltip>
+                  </Stack>
+                  <DefineAdvanced formik={formik} />
+                </Box>
+              )}
+              {value === 'Custom' && (
+                <Box pt={2} width="100%">
+                  <FormControl fullWidth error={hasPaymentProfileError}>
+                    {hasPaymentProfileError && (
+                      <FormHelperText
+                        sx={{ marginLeft: 0, paddingBottom: theme.spacing(3) }}
+                      >
+                        Invalid input. Please ensure that the following is true:{' '}
+                        <br />
+                        <code>
+                          Floor {'<='} Inflection {'<='} Cap
+                        </code>
+                      </FormHelperText>
+                    )}
+                    <Stack sx={{ justifyContent: 'space-between' }} spacing={3}>
+                      <Stack
+                        sx={{ justifyContent: 'space-between' }}
+                        direction={mobile ? 'column' : 'row'}
+                        spacing={2}
+                      >
+                        <Tooltip
+                          placement="top-end"
+                          title="Value of the reference asset at or below which the long token pays out 0 and the short token 1 (max payout)."
+                        >
+                          <TextField
+                            inputProps={{ step: 1, min: 0, max: inflection }}
+                            name="floor"
+                            error={formik.errors.floor != null}
+                            id="floor"
+                            onBlur={formik.handleBlur}
+                            label="Floor"
+                            value={floor}
+                            type="number"
+                            onChange={formik.handleChange}
+                            sx={{ width: '100%' }}
+                          />
+                        </Tooltip>
+                        <Tooltip
+                          placement="top-end"
+                          title="Value of the reference asset at or above which the long token pays out 1 (max payout) and the short token 0."
+                        >
+                          <TextField
+                            error={formik.errors.cap != null}
+                            inputProps={{ step: 1, min: inflection }}
+                            onBlur={formik.handleBlur}
+                            name="cap"
+                            id="cap"
+                            label="Cap"
+                            value={cap}
+                            type="number"
+                            onChange={formik.handleChange}
+                            sx={{ width: '100%' }}
+                          />
+                        </Tooltip>
+                      </Stack>
+                      <Stack
+                        sx={{ justifyContent: 'space-between' }}
+                        direction={mobile ? 'column' : 'row'}
+                        spacing={2}
+                      >
+                        <Tooltip
+                          placement="top-end"
+                          title="Value of the reference asset at which the long token pays out Gradient and the short token 1 - Gradient (see advanced settings)."
+                        >
+                          <TextField
+                            id="inflection"
+                            error={formik.errors.inflection != null}
+                            name="inflection"
+                            onBlur={formik.handleBlur}
+                            label="Inflection"
+                            inputProps={{
+                              step: 1,
+                              min: floor,
+                              max: cap,
+                            }}
+                            type="number"
+                            onChange={formik.handleChange}
+                            value={inflection}
+                            sx={{ width: '100%' }}
+                          />
+                        </Tooltip>
+                        <Tooltip
+                          placement="top-end"
+                          title="Payout of long token at inflection. Short token payout at inflection is 1-Gradient."
+                        >
+                          <TextField
+                            name="gradient"
+                            id="gradient"
+                            label="Gradient"
+                            onBlur={formik.handleBlur}
+                            error={formik.errors.gradient != null}
+                            inputProps={{ step: 0.01, min: 0 }}
+                            onChange={formik.handleChange}
+                            value={gradient}
+                            type="number"
+                            sx={{ width: '100%' }}
+                          />
+                        </Tooltip>
+                      </Stack>
+                    </Stack>
+                    <DefineAdvanced formik={formik} />
+                  </FormControl>
+                </Box>
+              )}
+            </Stack>
+          </Container>
+        </Box>
+      </Container>
+      <Container>
+        <Stack>
+          <Typography
+            style={{ color: 'white' }}
+            pb={theme.spacing(2)}
+            variant="subtitle1"
+          >
+            Payoff Profile
+          </Typography>
+          {floor != null &&
+            cap != null &&
+            inflection != null &&
+            tokenSupply != null &&
+            tokenSupply > 0 && (
+              <Box sx={{ maxWidth: '85%' }}>
+                <PayoffProfile
+                  floor={floor}
+                  cap={cap}
+                  inflection={inflection}
+                  hasError={hasPaymentProfileError}
+                  collateralBalanceLong={collateralBalanceLong}
+                  collateralBalanceShort={collateralBalanceShort}
+                  tokenSupply={tokenSupply}
+                />
+              </Box>
+            )}
+          <Card
+            style={{
+              maxWidth: theme.spacing(60),
+              border: '1px solid #1B3448',
+              background:
+                'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
+            }}
+          >
+            <Container>
+              <Typography
+                pb={theme.spacing(1)}
+                pt={theme.spacing(1)}
+                variant="subtitle1"
+              >
+                Payoff Scenarios
+              </Typography>
+              <Typography
+                fontSize={'0.85rem'}
+                sx={{ mt: theme.spacing(2) }}
+                style={{ color: 'white' }}
+              >
+                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
+                {referenceAsset} is{' '}
+                <strong>
+                  {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
+                  {floor}{' '}
+                </strong>{' '}
+                on{' '}
+                {expiryTime != null && !isNaN(expiryTime.getTime())
+                  ? expiryTime.toLocaleString().slice(0, 11) +
+                    ' ' +
+                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
+                    ' ' +
+                    userTimeZone()
+                  : ''}
+                , the payout will be{' '}
+                <strong>
+                  0.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
+                  per LONG
+                </strong>{' '}
+                and
+                <strong>
+                  {' '}
+                  1.00 {collateralToken != null
+                    ? collateralToken.symbol
+                    : ''}{' '}
+                  per SHORT
+                </strong>{' '}
+                token
+              </Typography>
+              <Typography
+                fontSize={'0.85rem'}
+                sx={{ mt: theme.spacing(2) }}
+                style={{ color: 'white' }}
+              >
+                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
+                {referenceAsset} is{' '}
+                <strong>
+                  {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
+                  {cap}{' '}
+                </strong>{' '}
+                on{' '}
+                {expiryTime != null && !isNaN(expiryTime.getTime())
+                  ? expiryTime.toLocaleString().slice(0, 11) +
+                    ' ' +
+                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
+                    ' ' +
+                    userTimeZone()
+                  : ''}
+                , the payout will be{' '}
+                <strong>
+                  1.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
+                  per LONG
+                </strong>{' '}
+                and
+                <strong>
+                  {' '}
+                  0.00 {collateralToken != null
+                    ? collateralToken.symbol
+                    : ''}{' '}
+                  per SHORT
+                </strong>{' '}
+                token
+              </Typography>
+              <Typography
+                fontSize={'0.85rem'}
+                sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                style={{ color: 'white' }}
+              >
+                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} />
+                If {referenceAsset} is{' '}
+                <strong>
+                  {' '}
+                  at
+                  {' ' + inflection}{' '}
+                </strong>{' '}
+                on{' '}
+                {expiryTime != null && !isNaN(expiryTime.getTime())
+                  ? expiryTime.toLocaleString().slice(0, 11) +
+                    ' ' +
+                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
+                    ' ' +
+                    userTimeZone()
+                  : ''}
+                , the payout will be{' '}
+                <strong>
+                  {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
+                  {collateralToken != null ? collateralToken.symbol : ''} per
+                  LONG
+                </strong>{' '}
+                and{' '}
+                <strong>
+                  {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
+                  {collateralToken != null ? collateralToken.symbol : ''} per
+                  SHORT
+                </strong>{' '}
+                token
+              </Typography>
+            </Container>
+          </Card>
+        </Stack>
+      </Container>
+    </Stack>
   )
 }

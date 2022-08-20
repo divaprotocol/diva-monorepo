@@ -1,4 +1,5 @@
 import { Box, Button, Stack, InputAdornment, Input } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { formatUnits } from 'ethers/lib/utils'
 import React, { useState, useEffect } from 'react'
@@ -26,6 +27,7 @@ export function MyOrders() {
   const makerAccount = useAppSelector(selectUserAddress)
   const [dataOrders, setDataOrders] = useState([])
   const [page, setPage] = useState(0)
+  const [loadingValue, setLoadingValue] = useState(false)
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const [search, setSearch] = useState('')
@@ -39,8 +41,8 @@ export function MyOrders() {
     },
   })
   useEffect(() => {
-    dispatch(fetchPositionTokens())
-  }, [dispatch])
+    dispatch(fetchPositionTokens({ page }))
+  }, [dispatch, page])
   const classes = useStyles()
   const trimPools = pools.map((pool) => {
     return {
@@ -182,6 +184,7 @@ export function MyOrders() {
 
   async function cancelOrder(event, orderHash, chainId) {
     event.stopPropagation()
+    setLoadingValue(true)
     //get the order details in current form from 0x before cancelling it.
     const cancelOrder = await getOrderDetails(orderHash, chainId)
     cancelLimitOrder(cancelOrder, chainId).then(function (
@@ -190,11 +193,14 @@ export function MyOrders() {
       const log = cancelOrderResponse?.logs?.[0]
       if (log != null && log.event == 'OrderCancelled') {
         alert('Order successfully canceled')
+        /* setLoadingValue(false) */
         //update myOrders table
         componentDidMount()
       } else {
+        /* setLoadingValue(false) */
         alert('order could not be canceled')
       }
+      setLoadingValue(false)
     })
   }
 
@@ -253,7 +259,7 @@ export function MyOrders() {
       headerAlign: 'right',
       headerName: 'Quantity',
       type: 'number',
-      renderCell: (cell) => cell.value.toFixed(2),
+      renderCell: (cell) => cell.value.toFixed(4),
     },
     {
       field: 'price',
@@ -289,14 +295,15 @@ export function MyOrders() {
       headerName: 'Cancel',
       minWidth: 170,
       renderCell: (cell) => (
-        <Button
+        <LoadingButton
           variant="outlined"
           startIcon={<DeleteIcon />}
           size="small"
+          loading={loadingValue}
           onClick={(event) => cancelOrder(event, cell.value, chainId)}
         >
           Cancel
-        </Button>
+        </LoadingButton>
       ),
     },
   ]

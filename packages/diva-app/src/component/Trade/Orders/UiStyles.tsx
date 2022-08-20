@@ -37,8 +37,10 @@ export const FormDiv = styled.div`
   margin-right: 20px;
 `
 
-export const FormInput = styled.input`
-  width: 30%;
+export const FormInput = styled.input<{
+  width?: string
+}>`
+  width: ${(props) => props.width || '30%'};
   height: 25px;
   background-color: #f8f8f8;
   border: none;

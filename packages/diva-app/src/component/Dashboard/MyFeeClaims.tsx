@@ -8,6 +8,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
 import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import { request } from 'graphql-request'
@@ -26,11 +27,15 @@ import {
   fetchFeeRecipients,
   selectFeeRecipients,
   selectRequestStatus,
+  selectUserAddress,
 } from '../../Redux/appSlice'
+import { useDispatch } from 'react-redux'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 
 const TransferFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+  const dispatch = useDispatch()
   const [decimal, setDecimal] = useState(18)
   const chainId = provider?.network?.chainId
   const token = new ethers.Contract(
@@ -53,6 +58,7 @@ const TransferFeesCell = (props: any) => {
   const [open, setOpen] = useState(false)
   const [addressValue, setAddressValue] = useState('')
   const [amountValue, setAmountValue] = useState('')
+  const [loadingValue, setLoadingValue] = useState(false)
   const handleOpen = () => {
     setAmountValue((parseFloat(props.row.Amount) / 10 ** decimal).toString())
     setOpen(true)
@@ -64,9 +70,13 @@ const TransferFeesCell = (props: any) => {
 
   return (
     <Container>
-      <Button variant="contained" onClick={handleOpen}>
+      <LoadingButton
+        variant="contained"
+        onClick={handleOpen}
+        loading={loadingValue}
+      >
         Transfer Fees
-      </Button>
+      </LoadingButton>
       <Dialog open={open} onClose={handleClose}>
         <DialogActions>
           <Stack>
@@ -84,12 +94,14 @@ const TransferFeesCell = (props: any) => {
                 setAmountValue(e.target.value)
               }}
             />
-            <Button
+            <LoadingButton
               sx={{ mt: '1em', alignSelf: 'right' }}
               color="primary"
               type="submit"
               variant="contained"
+              loading={loadingValue}
               onClick={() => {
+                addressValue && amountValue && setLoadingValue(true)
                 if (diva != null) {
                   diva
                     .transferFeeClaim(
@@ -97,15 +109,28 @@ const TransferFeesCell = (props: any) => {
                       props.row.Address,
                       parseUnits(amountValue, decimal)
                     )
+                    .then((tx) => {
+                      tx.wait().then(() => {
+                        setTimeout(() => {
+                          dispatch(
+                            fetchFeeRecipients({
+                              address: userAddress,
+                            })
+                          )
+                          setLoadingValue(false)
+                        }, 10000)
+                      })
+                    })
                     .catch((err) => {
                       console.error(err)
+                      setLoadingValue(false)
                     })
                 }
                 handleClose()
               }}
             >
               Transfer Fees
-            </Button>
+            </LoadingButton>
           </Stack>
         </DialogActions>
       </Dialog>
@@ -115,8 +140,10 @@ const TransferFeesCell = (props: any) => {
 
 const ClaimFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
-
+  const userAddress = useAppSelector(selectUserAddress)
+  const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
+  const [loadingValue, setLoadingValue] = useState(false)
 
   const diva =
     chainId != null
@@ -128,27 +155,44 @@ const ClaimFeesCell = (props: any) => {
       : null
 
   return (
-    <Button
+    <LoadingButton
       color="primary"
       type="submit"
       variant="contained"
+      loading={loadingValue}
       onClick={() => {
+        setLoadingValue(true)
         if (diva != null) {
-          diva.claimFees(props.row.Address).catch((err) => {
-            console.error(err)
-          })
+          diva
+            .claimFees(props.row.Address)
+            .then((tx) => {
+              tx.wait().then(() => {
+                setTimeout(() => {
+                  dispatch(
+                    fetchFeeRecipients({
+                      address: userAddress,
+                    })
+                  )
+                  setLoadingValue(false)
+                }, 10000)
+              })
+            })
+
+            .catch((err) => {
+              console.error(err)
+              setLoadingValue(false)
+            })
         }
       }}
     >
       Claim Fees
-    </Button>
+    </LoadingButton>
   )
 }
 
 const AmountCell = (props: any) => {
   const context = useConnectionContext()
   const [decimal, setDecimal] = useState<number>()
-
   const token = new ethers.Contract(
     props.row.Address,
     ERC20,
@@ -231,7 +275,6 @@ export function MyFeeClaims() {
   }, [dispatch, page, userAddress])
 
   let feeCount = 0
-  console.log({ feeRecipients })
   const rows: GridRowModel[] = feeRecipients
     .map((v) => v.collateralTokens)
     .flat()
@@ -248,7 +291,6 @@ export function MyFeeClaims() {
       ]
     }, [] as GridRowModel[])
 
-  const filtered = rows.filter((v) => v.Amount != 0)
   return (
     <Stack
       direction="row"
@@ -275,7 +317,7 @@ export function MyFeeClaims() {
           <PoolsTable
             disableRowClick
             page={page}
-            rows={filtered}
+            rows={rows}
             loading={poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}

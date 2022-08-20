@@ -64,7 +64,6 @@ function handleLiquidityEvent(
   let parameters = contract.getPoolParameters(poolId);
   let shortTokenContract = PositionTokenABI.bind(parameters.shortToken);
   let longTokenContract = PositionTokenABI.bind(parameters.longToken);
-
   let entity = Pool.load(poolId.toString());
   
   //set user to position token mapping
@@ -79,6 +78,7 @@ function handleLiquidityEvent(
     userShortPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.shortToken.toHexString());
     userShortPositionTokenEntity.user = msgSender.toHexString();
     userShortPositionTokenEntity.positionToken = parameters.shortToken.toHexString();
+    userShortPositionTokenEntity.receivedAt = blockTimestamp; // doesn't enter this if clause on remove assuming user is only using the app
     userShortPositionTokenEntity.save();
   }
   let userLongPositionTokenEntity = UserPositionToken.load(
@@ -87,6 +87,7 @@ function handleLiquidityEvent(
     userLongPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.longToken.toHexString());
     userLongPositionTokenEntity.user = msgSender.toHexString();
     userLongPositionTokenEntity.positionToken = parameters.longToken.toHexString();
+    userLongPositionTokenEntity.receivedAt = blockTimestamp;
     userLongPositionTokenEntity.save();
   }
 
@@ -446,6 +447,7 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       userPositionTokenEntity = new UserPositionToken(event.params.maker.toHexString() + "-" + event.params.takerToken.toHexString());
       userPositionTokenEntity.user = event.params.maker.toHexString();
       userPositionTokenEntity.positionToken = event.params.takerToken.toHexString();
+      userPositionTokenEntity.receivedAt = event.block.timestamp;
       userPositionTokenEntity.save();
     }
 
@@ -472,6 +474,7 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       userPositionTokenEntity = new UserPositionToken(event.params.taker.toHexString() + "-" + event.params.makerToken.toHexString());
       userPositionTokenEntity.user = event.params.taker.toHexString();
       userPositionTokenEntity.positionToken = event.params.makerToken.toHexString();
+      userPositionTokenEntity.receivedAt = event.block.timestamp;
       userPositionTokenEntity.save();
     }
 

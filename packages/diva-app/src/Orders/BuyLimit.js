@@ -1,66 +1,55 @@
 import { MetamaskSubprovider } from '@0x/subproviders'
-import { parseEther, parseUnits } from 'ethers/lib/utils'
+import { parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
-import { isFloat, decimalPlaces } from '../component/Trade/Orders/OrderHelper'
-import { divaGovernanceAddress } from '../constants'
+import { divaGovernanceAddress, tradingFee } from '../constants'
+import { getFutureExpiryInSeconds } from '../Util/utils'
 
 export const buylimitOrder = async (orderData) => {
-  const getFutureExpiryInSeconds = () => {
-    return Math.floor(Date.now() / 1000 + orderData.orderExpiry * 60).toString()
-  }
-
   const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
-  const nbrOptionsDecimals = isFloat(orderData.nbrOptions)
-    ? decimalPlaces(orderData.nbrOptions)
-    : 0
-  const limitPriceDecimals = isFloat(orderData.limitPrice)
-    ? decimalPlaces(orderData.limitPrice)
-    : 0
-  const totalDecimalPlaces = nbrOptionsDecimals + limitPriceDecimals
+  const positionTokenUnit = parseUnits('1')
 
-  /**Floating point multiplication some times give erronious results
-   * for example. 1.1 * 1.5 = 1.65 however the javascript multiplication give
-   * 1.6500000000000001 as a result. The 1 digit at the end cause lot of issues
-   * to resolve this problem we need to calculate the total number of digit by
-   * addition of individual floating point number
-   */
-  const amount = Number(orderData.nbrOptions * orderData.limitPrice).toFixed(
-    totalDecimalPlaces
-  )
+  const nbrOptionsToBuy = orderData.nbrOptions
 
-  const makerAmount = parseUnits(
-    amount.toString(),
-    orderData.collateralDecimals
-  )
-  const takerAmount = parseEther(orderData.nbrOptions.toString())
-  const takerFeeAmount = takerAmount
-    .mul(parseUnits('0.01')) // 1% fee paid in taker token (i.e. position token in buy limit)
-    .div(parseUnits('1'))
+  // Derive the collateralTokenAmount (makerAmount in Buy Limit) from the user's nbrOptionsToBuy input.
+  const collateralTokenAmount = nbrOptionsToBuy
+    .mul(orderData.limitPrice) // limitPrice is expressed as an integer with collateral token decimals
+    .div(positionTokenUnit) // correction factor in integer multiplication
+
+  // Calculate trading fee amount (expressed as an integer with position token decimals).
+  // NOTE: The fee is paid in position token which is the taker token in Buy Limit. In the context of DIVA,
+  // this has the implication that for deep-out-of the money position tokens, the trading fee may end up being zero for the feeRecipient.
+  const positionTokenFeeAmount = nbrOptionsToBuy
+    .mul(parseUnits(tradingFee.toString())) // TODO: Revisit fee logic for trade mining program at a later stage
+    .div(positionTokenUnit)
+
+  // Get 0x API url to post order
   const networkUrl = config[orderData.chainId].order
+
+  // Construct order object
   const order = new utils.LimitOrder({
     makerToken: orderData.makerToken,
     takerToken: orderData.takerToken,
-    makerAmount: makerAmount.toString(),
-    takerAmount: takerAmount.toString(),
-    maker: orderData.makerAccount,
+    makerAmount: collateralTokenAmount.toString(),
+    takerAmount: nbrOptionsToBuy.toString(),
+    maker: orderData.maker,
     sender: NULL_ADDRESS,
     feeRecipient: divaGovernanceAddress,
-    takerTokenFeeAmount: takerFeeAmount.toString(),
-    expiry: getFutureExpiryInSeconds(),
+    takerTokenFeeAmount: positionTokenFeeAmount.toString(),
+    expiry: getFutureExpiryInSeconds(orderData.orderExpiry),
     salt: Date.now().toString(),
     chainId: orderData.chainId,
     verifyingContract: orderData.exchangeProxy,
   })
 
+  // TODO: Export this part into a separate function
   try {
     const signature = await order.getSignatureWithProviderAsync(
       metamaskProvider,
       utils.SignatureType.EIP712 // Optional
     )
-
     const signedOrder = { ...order, signature }
     const resp = await fetch(networkUrl, {
       method: 'POST',

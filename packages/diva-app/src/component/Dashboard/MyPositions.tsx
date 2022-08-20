@@ -11,6 +11,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
@@ -40,8 +41,9 @@ import {
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { ExpiresInCell } from '../Markets/Markets'
-import { getAppStatus } from '../../Util/getAppStatus'
+import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import request from 'graphql-request'
 import { Pool, queryUser } from '../../lib/queries'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
@@ -94,6 +96,8 @@ const AddToMetamask = (props: any) => {
 const SubmitButton = (props: any) => {
   const [open, setOpen] = React.useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
+  const [loadingValue, setLoadingValue] = useState(false)
+  const [disabledButton, setDisabledButton] = useState(false)
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
 
@@ -110,6 +114,7 @@ const SubmitButton = (props: any) => {
   const token =
     provider && new ethers.Contract(props.row.address.id, ERC20, provider)
   const handleRedeem = (e) => {
+    setLoadingValue(true)
     e.stopPropagation()
     if (props.row.Status === 'Confirmed*') {
       diva
@@ -126,34 +131,44 @@ const SubmitButton = (props: any) => {
                     false
                   )
                   .then((tx) => {
-                    tx.wait().then(() => {
-                      diva
-                        .redeemPositionToken(props.row.address.id, bal)
-                        .then((tx) => {
-                          /**
-                           * dispatch action to refetch the pool after action
-                           */
-                          tx.wait().then(() => {
-                            dispatch(
-                              fetchPool({
-                                graphUrl:
-                                  config[chainId as number].divaSubgraph,
-                                poolId: props.id.split('/')[0],
-                              })
-                            )
+                    tx.wait()
+                      .then(() => {
+                        diva
+                          .redeemPositionToken(props.row.address.id, bal)
+                          .then((tx: any) => {
+                            tx.wait().then(() => {
+                              /**
+                               * dispatch action to refetch the pool after action
+                               */
+                              setDisabledButton(true)
+                              dispatch(
+                                fetchPool({
+                                  graphUrl:
+                                    config[chainId as number].divaSubgraph,
+                                  poolId: props.id.split('/')[0],
+                                })
+                              )
+                              setLoadingValue(false)
+                            })
                           })
-                        })
-                        .catch((err) => {
-                          console.error(err)
-                        })
-                    })
+                          .catch((err) => {
+                            setLoadingValue(false)
+                            console.error(err)
+                          })
+                      })
+                      .catch((err) => {
+                        console.error(err)
+                        setLoadingValue(false)
+                      })
                   })
                   .catch((err) => {
                     console.error(err)
+                    setLoadingValue(false)
                   })
               })
               .catch((err) => {
                 console.error(err)
+                setLoadingValue(false)
               })
           } else {
             token
@@ -161,28 +176,47 @@ const SubmitButton = (props: any) => {
               .then((bal: BigNumber) => {
                 diva
                   .redeemPositionToken(props.row.address.id, bal)
+                  .then((tx: any) => {
+                    tx.wait().then(() => {
+                      setLoadingValue(false)
+                      setDisabledButton(true)
+                    })
+                  })
                   .catch((err) => {
                     console.error(err)
+                    setLoadingValue(false)
                   })
               })
               .catch((err) => {
                 console.error(err)
+                setLoadingValue(false)
               })
           }
         })
         .catch((err) => {
           console.error(err)
+          setLoadingValue(false)
         })
     } else {
       token
         ?.balanceOf(userAddress)
         .then((bal: BigNumber) => {
-          diva.redeemPositionToken(props.row.address.id, bal).catch((err) => {
-            console.error(err)
-          })
+          diva
+            .redeemPositionToken(props.row.address.id, bal)
+            .then((tx: any) => {
+              tx.wait().then(() => {
+                setLoadingValue(false)
+                setDisabledButton(true)
+              })
+            })
+            .catch((err) => {
+              console.error(err)
+              setLoadingValue(false)
+            })
         })
         .catch((err) => {
           console.error(err)
+          setLoadingValue(false)
         })
     }
   }
@@ -217,33 +251,38 @@ const SubmitButton = (props: any) => {
   }
 
   const handleClose = () => {
-    setOpen(false)
+    if (loadingValue === false) {
+      setOpen(false)
+    }
   }
 
   if (buttonName === 'Redeem') {
     return (
       <Container>
-        <Button
+        <LoadingButton
           variant="contained"
           color={buttonName === 'Redeem' ? 'success' : 'primary'}
+          disabled={disabledButton}
+          loading={loadingValue}
           onClick={handleRedeem}
         >
           {buttonName}
-        </Button>
+        </LoadingButton>
       </Container>
     )
   } else if (buttonName === 'Challenge') {
     return (
       <Container>
-        <Button
+        <LoadingButton
           variant="contained"
+          loading={loadingValue}
           onClick={(e) => {
             e.stopPropagation()
             handleOpen()
           }}
         >
           Challenge
-        </Button>
+        </LoadingButton>
         <Dialog open={open} onClose={handleClose}>
           <DialogContent>
             <DialogContentText>
@@ -254,15 +293,17 @@ const SubmitButton = (props: any) => {
           <DialogActions>
             <TextField
               autoFocus={true}
-              defaultValue={textFieldValue}
+              defaultValue=""
               onChange={(e) => {
                 setTextFieldValue(e.target.value)
               }}
             />
-            <Button
+            <LoadingButton
               color="primary"
               type="submit"
+              loading={loadingValue}
               onClick={(e) => {
+                setLoadingValue(textFieldValue ? true : false)
                 if (diva != null) {
                   diva
                     .challengeFinalReferenceValue(
@@ -282,17 +323,19 @@ const SubmitButton = (props: any) => {
                             })
                           )
                         }, 10000)
+                        setLoadingValue(false)
                       })
                     })
                     .catch((err) => {
                       console.error(err)
+                      setLoadingValue(false)
                     })
                 }
                 handleClose()
               }}
             >
               Challenge
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </Dialog>
       </Container>
@@ -426,26 +469,8 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     renderCell: (cell: any) => {
-      const description = (status: string) => {
-        switch (status) {
-          case 'Open':
-            return `Pool has not expired yet.`
-          case 'Expired':
-            return `Pool expired and the final value input from the data provider is pending.`
-          case 'Submitted':
-            return `A final value has been submitted by the data provider.`
-          case 'Challenged':
-            return `The final value submitted by the data provider has been challenged by position token holders.`
-          case 'Fallback':
-            return `The data provider failed to submit a final value within the 24h submission period. The fallback data provider has 5 days to step in and submit a value. This is only to be expected for whitelisted data providers. For non-whitelisted data providers, the fallback data provider may not submit a value in which case it will default to inflection.`
-          case 'Confirmed*':
-            return `The final value will be confirmed inside the smart contract at first user redemption.`
-          case 'Confirmed':
-            return `The final value has been confirmed and position token holders can start redeeming their LONG & SHORT position tokens.`
-        }
-      }
       return (
-        <Tooltip placement="top-end" title={description(cell.value)}>
+        <Tooltip placement="top-end" title={statusDescription[cell.value]}>
           <span className="table-cell-trucate">{cell.value}</span>
         </Tooltip>
       )
@@ -482,15 +507,22 @@ const columns: GridColDef[] = [
 ]
 
 export function MyPositions() {
-  const { provider, address: userAddress, chainId } = useConnectionContext()
+  const { provider, chainId } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
+  const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
+    useGovernanceParameters()
 
   useEffect(() => {
-    dispatch(fetchPositionTokens())
-  }, [dispatch])
+    dispatch(
+      fetchPositionTokens({
+        page,
+      })
+    )
+  }, [dispatch, page, userAddress])
 
   const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
@@ -498,7 +530,11 @@ export function MyPositions() {
       val.statusTimestamp,
       val.statusFinalReferenceValue,
       val.finalReferenceValue,
-      val.inflection
+      val.inflection,
+      submissionPeriod,
+      challengePeriod,
+      reviewPeriod,
+      fallbackPeriod
     )
 
     const shared = {
@@ -606,6 +642,8 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
+  const tokenAddresses = positionTokens.map((v) => v.id)
+
   /**
    * TODO: Move into redux
    */
@@ -616,7 +654,6 @@ export function MyPositions() {
       return Promise.resolve({})
     }
 
-    const tokenAddresses = positionTokens.map((v) => v.id)
     const tokenAddressesChunks = tokenAddresses.reduce(
       (resultArray, item, index) => {
         const batchIndex = Math.floor(index / 400)
@@ -650,6 +687,18 @@ export function MyPositions() {
     return response
   })
 
+  /**
+   * After navigating from success page we need to refetch balances in order
+   * to capture the newly added pool. We only want to do this once to not overfetch
+   */
+  useEffect(() => {
+    setTimeout(() => {
+      if (userAddress != null && balances != null) {
+        balances.refetch()
+      }
+    }, 1000)
+  }, [userAddress])
+
   const tokenBalances = balances.data
 
   const filteredRows =
@@ -667,7 +716,9 @@ export function MyPositions() {
           .map((v) => ({
             ...v,
             Balance:
-              parseInt(formatUnits(tokenBalances[v.address.id])) < 0.01
+              tokenBalances[v.address.id] == null
+                ? 'n/a'
+                : tokenBalances[v.address.id].lt(parseUnits('1', 16))
                 ? '<0.01'
                 : parseFloat(formatUnits(tokenBalances[v.address.id])).toFixed(
                     4
@@ -709,6 +760,7 @@ export function MyPositions() {
             page={page}
             rows={sortedRows}
             loading={balances.isLoading}
+            rowCount={3000}
             columns={columns}
             onPageChange={(page) => setPage(page)}
           />

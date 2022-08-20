@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { BigNumber } from 'ethers'
+import { BigNumber, providers } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
 import {
   FeeRecipient,
@@ -17,6 +17,7 @@ import request from 'graphql-request'
 import { RootState } from './Store'
 import { get0xOpenOrders } from '../DataService/OpenOrders'
 import { config, divaGovernanceAddress } from '../constants'
+import { useConnectionContext } from '../hooks/useConnectionContext'
 
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
@@ -45,6 +46,7 @@ type AppState = {
 type AppStateByChain = {
   chainId?: number
   userAddress?: string
+  provider?: providers.Web3Provider
   [chainId: number]: AppState
 }
 
@@ -72,6 +74,7 @@ export const fetchOrders = createAsyncThunk(
   async ({ pool, isLong }: { pool: Pool; isLong: boolean }, store) => {
     const tokenAddress = pool[isLong ? 'longToken' : 'shortToken'].id
     const state = store.getState() as RootState
+    const { provider } = state.appSlice
 
     if (state.appSlice.chainId == null) {
       console.warn('fetchOrders was called even though chainId is undefined')
@@ -85,12 +88,16 @@ export const fetchOrders = createAsyncThunk(
     const sellOrders: any = await get0xOpenOrders(
       tokenAddress,
       pool.collateralToken.id,
-      Number(config[state.appSlice.chainId])
+      Number(config[state.appSlice.chainId]),
+      provider,
+      config[state.appSlice.chainId].exchangeProxy
     )
     const buyOrders: any = await get0xOpenOrders(
       pool.collateralToken.id,
       tokenAddress,
-      Number(config[state.appSlice.chainId])
+      Number(config[state.appSlice.chainId]),
+      provider,
+      config[state.appSlice.chainId].exchangeProxy
     )
 
     return {
@@ -115,6 +122,7 @@ export const fetchPool = createAsyncThunk(
       graphUrl,
       queryPool(parseInt(poolId))
     )
+
     return res.pool
   }
 )
@@ -201,13 +209,21 @@ export const fetchPools = createAsyncThunk(
 
 export const fetchPositionTokens = createAsyncThunk(
   'app/positionTokens',
-  async (args, store) => {
+  async (
+    {
+      page,
+      pageSize = 300,
+    }: {
+      page: number
+      pageSize?: number
+    },
+    store
+  ) => {
     const state = store.getState() as RootState
     const { chainId, userAddress } = state.appSlice
-
     const res = await request<{ user: User }>(
       config[chainId as number].divaSubgraph,
-      queryUser(userAddress)
+      queryUser(userAddress, pageSize, Math.max(page, 0) * pageSize)
     )
 
     return res.user.positionTokens.map((token) => token.positionToken)
@@ -259,11 +275,12 @@ export const appSlice = createSlice({
     })
 
     builder.addCase(fetchPool.fulfilled, (state, action) => {
-      addPools(state, [action.payload])
+      addPools(state, [action.payload], state.chainId)
     })
 
     builder.addCase(fetchPools.pending, (state, action) => {
       const poolState = state[state.chainId]
+      poolState.pools = []
       poolState.statusByName[
         action.type.substring(0, action.type.length - ('pending'.length + 1))
       ] = 'pending'

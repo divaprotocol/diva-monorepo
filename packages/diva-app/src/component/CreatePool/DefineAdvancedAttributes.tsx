@@ -23,7 +23,14 @@ export function DefineAdvanced({
   const [expanded, setExpanded] = useState(false)
   const [unlimited, setUnlimited] = useState(true)
   const { tokenSupply, capacity } = formik.values
-
+  const [mobile, setMobile] = useState(false)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setMobile(true)
+    } else {
+      setMobile(false)
+    }
+  }, [])
   useEffect(() => {
     if (unlimited) {
       formik.setValues((_values) => ({
@@ -43,6 +50,7 @@ export function DefineAdvanced({
       expanded={expanded}
       onChange={() => setExpanded(!expanded)}
       sx={{
+        maxWidth: mobile ? '100%' : '48%',
         background: 'none',
         padding: 0,
         borderTop: 'none',
@@ -57,27 +65,11 @@ export function DefineAdvanced({
           paddingLeft: 0,
         }}
       >
-        <Typography variant="subtitle2">Advanced Settings</Typography>
+        <Typography color="primary" variant="subtitle2">
+          Advanced Settings
+        </Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ padding: 0 }}>
-        <Box pb={3}>
-          <FormControl fullWidth error={formik.errors.tokenSupply != null}>
-            <TextField
-              name="Position Token Supply"
-              id="tokenSupply"
-              onBlur={formik.handleBlur}
-              error={formik.errors.tokenSupply != null}
-              label="Position Token Supply"
-              value={tokenSupply}
-              disabled
-              type="number"
-              inputProps={{ readOnly: true }}
-            />
-            {formik.errors.tokenSupply != null && (
-              <FormHelperText>{formik.errors.tokenSupply}</FormHelperText>
-            )}
-          </FormControl>
-        </Box>
         <Box pb={3}>
           <FormControl fullWidth error={formik.errors.capacity != null}>
             <Tooltip

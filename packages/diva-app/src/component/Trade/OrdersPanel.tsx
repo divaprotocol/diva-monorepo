@@ -48,7 +48,11 @@ export default function OrdersPanel(props: {
   const renderOrderTables = () => {
     if (orderType === 0) {
       return (
-        <OrderBook option={props.option} tokenAddress={props.tokenAddress} />
+        <OrderBook
+          option={props.option}
+          tokenAddress={props.tokenAddress}
+          exchangeProxy={props.exchangeProxy}
+        />
       )
     }
     if (orderType === 1) {

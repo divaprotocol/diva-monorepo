@@ -99,6 +99,7 @@ type UserPositionToken @entity {
   id: ID! # Set to `${user.id}-${positionToken.id}`
   user: User!
   positionToken: PositionToken!
+  receivedAt: BigInt! # timestamp when user received position token via create pool, add liquidity or trading 
 }
 
 type NativeOrderFill @entity {

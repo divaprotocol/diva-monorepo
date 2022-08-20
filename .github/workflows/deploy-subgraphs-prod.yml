@@ -3,7 +3,7 @@ on:
     branches:
       - main
     paths:
-      - packages/*-subgraph/**
+      - packages/*-subgraph/**/*
 
 name: Deploy production subgraph
 jobs:
@@ -22,6 +22,7 @@ jobs:
           path: |
             **/node_modules
             node_modules
+            **/abis
           key: ${{ hashFiles('**/yarn.lock', '**/package.json', 'yarn.lock') }}
 
       - name: Install dependencies

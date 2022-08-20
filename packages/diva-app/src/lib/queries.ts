@@ -67,12 +67,15 @@ export type User = {
   positionTokens: { positionToken: PositionToken }[]
 }
 
-export const queryUser = (id: string) => gql`
+export const queryUser = (id: string, pageSize: number, skip: number) => gql`
 {
   user(id: "${id}" ){
     id
-    positionTokens {
-      positionToken {
+    positionTokens(first: ${pageSize}, skip: ${skip},
+      orderDirection: desc,
+      orderBy: receivedAt,) {
+        receivedAt,
+        positionToken {
         id
         name
         symbol
@@ -205,7 +208,7 @@ export const queryFeeRecipients = (address: string) => gql`
   {
     feeRecipients(where: { id: "${address}" }) {
       id
-      collateralTokens {
+      collateralTokens(where: {amount_gt: 0}) {
         amount
         collateralToken {
           id
