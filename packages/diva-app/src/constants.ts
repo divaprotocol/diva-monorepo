@@ -63,7 +63,7 @@ export const config: { [key: number]: SingleConfig } = {
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
     allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
@@ -72,15 +72,17 @@ export const config: { [key: number]: SingleConfig } = {
     explorer: 'https://ropsten.etherscan.io/',
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ropsten Ether', symbol: 'ropETH', decimals: 18 },
-    isSupported: true,
+    isSupported: false,
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
     balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
-    divaSubgraph: 'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
-    whitelistSubgraph: 'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
+    divaSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
+    whitelistSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
     allOrders: 'https://goerli.api.0x.org/orderbook/v1/orders/',
     order: 'https://goerli.api.0x.org/orderbook/v1/order/',
     orderbook: 'https://goerli.api.0x.org/orderbook/v1',

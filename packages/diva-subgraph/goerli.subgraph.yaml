@@ -4,9 +4,9 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: DivaDiamond
-    network: ropsten
+    network: goerli
     source:
-      address: "0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211"
+      address: "0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85"
       abi: DivaDiamond
       startBlock: 7087046
     mapping:
@@ -49,7 +49,7 @@ dataSources:
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: ExchangeProxy
-    network: ropsten
+    network: goerli
     source:
       address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
       abi: IZeroEx
