@@ -34,6 +34,15 @@ module.exports = {
       },
       gasPrice: 8000000000
     },
+    goerli: {
+      url: process.env.ALCHEMY_URL_GOERLI,
+      // accounts: [`0x${PRIVATE_KEY}`], // example with private key; type: array; note that this only unlocks 1 single account
+      // gas: 4100000,
+      accounts: {
+        mnemonic: MNEMONIC, // unlocks multiple accounts
+      },
+      gasPrice: 8000000000
+    },
     rinkeby: {
       url: process.env.ALCHEMY_URL_RINKEBY,
       accounts: {
