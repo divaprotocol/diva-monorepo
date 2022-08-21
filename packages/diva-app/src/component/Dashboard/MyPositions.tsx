@@ -807,12 +807,12 @@ export function MyPositions() {
         />
         <ButtonFilter
           id="Hide expired pools"
-          ButtonLabel="Hide Expired Pools"
+          ButtonLabel="Hide Expired"
           onClick={handleExpiredPools}
         />
         <ButtonFilter
           id="Confirmed Pools"
-          ButtonLabel="Confirmed Pools"
+          ButtonLabel="Confirmed"
           onClick={handleConfirmedPools}
         />
       </Box>

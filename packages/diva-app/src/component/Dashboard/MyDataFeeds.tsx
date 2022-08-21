@@ -336,7 +336,6 @@ export function MyDataFeeds() {
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
 
-
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
     setUnderlyingButtonLabel(
@@ -478,7 +477,7 @@ export function MyDataFeeds() {
         />
         <ButtonFilter
           id="Hide expired pools"
-          ButtonLabel="Hide Expired Pools"
+          ButtonLabel="Hide Expired"
           onClick={handleExpiredPools}
         />
       </Box>

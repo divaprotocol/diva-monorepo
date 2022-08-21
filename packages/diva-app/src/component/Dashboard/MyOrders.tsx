@@ -51,12 +51,8 @@ export function MyOrders() {
       e.target.value === '' ? 'Underlying' : e.target.value
     )
   }
-  const handleBuySellToggle = () => {
-    orderType === ''
-      ? setOrderType('Buy')
-      : orderType === 'Buy'
-      ? setOrderType('Sell')
-      : setOrderType('Buy')
+  const handleBuySellToggle = (e) => {
+    setOrderType(e.target.value)
   }
   useEffect(() => {
     dispatch(fetchPositionTokens({ page }))

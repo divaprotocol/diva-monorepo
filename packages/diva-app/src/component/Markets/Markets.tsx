@@ -31,7 +31,6 @@ import ViewModuleIcon from '@mui/icons-material/ViewModule'
 import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import { Box, Tooltip } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
@@ -254,7 +253,6 @@ export default function Markets() {
       setExpiredPoolClicked(true)
     }
   }
-  const history = useHistory()
   const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
     useGovernanceParameters()
 
@@ -480,7 +478,7 @@ export default function Markets() {
               />
               <ButtonFilter
                 id="Hide expired pools"
-                ButtonLabel="Hide Expired Pools"
+                ButtonLabel="Hide Expired"
                 onClick={handleExpiredPools}
               />
             </Box>
