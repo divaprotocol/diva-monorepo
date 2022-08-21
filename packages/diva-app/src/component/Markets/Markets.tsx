@@ -7,7 +7,7 @@ import {
   userTimeZone,
 } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { BigNumber } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { useEffect, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
@@ -29,14 +29,19 @@ import {
 } from '@mui/material'
 import ViewModuleIcon from '@mui/icons-material/ViewModule'
 import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
+import { config } from '../../constants'
+import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import { Box, Tooltip } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
-import { getAppStatus } from '../../Util/getAppStatus'
+import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import { divaGovernanceAddress } from '../../constants'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useHistory, useLocation, useParams } from 'react-router-dom'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
+import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 
 export const ExpiresInCell = (props: any) => {
   //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
@@ -192,6 +197,13 @@ const columns: GridColDef[] = [
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
+    renderCell: (cell: any) => {
+      return (
+        <Tooltip placement="top-end" title={statusDescription[cell.value]}>
+          <span className="table-cell-trucate">{cell.value}</span>
+        </Tooltip>
+      )
+    },
   },
   {
     field: 'TVL',
@@ -242,6 +254,9 @@ export default function Markets() {
       setExpiredPoolClicked(true)
     }
   }
+  const history = useHistory()
+  const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
+    useGovernanceParameters()
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -265,7 +280,11 @@ export default function Markets() {
       val.statusTimestamp,
       val.statusFinalReferenceValue,
       val.finalReferenceValue,
-      val.inflection
+      val.inflection,
+      submissionPeriod,
+      challengePeriod,
+      reviewPeriod,
+      fallbackPeriod
     )
     const shared = {
       Icon: val.referenceAsset,

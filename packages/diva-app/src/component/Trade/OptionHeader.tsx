@@ -94,10 +94,6 @@ export default function OptionHeader(optionData: {
       <Container>
         <CoinIconPair assetName={headerTitle} />
         <OptionTitle>{headerTitle}</OptionTitle>
-
-        {underlyingAssetPrice && (
-          <AssetPriceUsd>{underlyingAssetPrice}</AssetPriceUsd>
-        )}
       </Container>
       <Container>
         <Link
