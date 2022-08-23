@@ -7,7 +7,7 @@ TellorPlayground_contract_address = {
 DIVAOracleTellor_contract_address = {
     "ropsten": '0x638c4aB660A9af1E6D79491462A0904b3dA78bB2', # 10 sec delay (only for testing)
     "rinkeby": '0x7f4262f9511702a4e69F1AA41adDD653Fbc50cf9',
-    "goerli": '0x2f4218C9262216B7B73A76334e5A98F3eF71A61c',
+    "goerli": '0x625aBcb0C7371d6691796E972089d75eD356523b', # 10 sec delay (only for testing)
 }
 
 divaDiamond = {
