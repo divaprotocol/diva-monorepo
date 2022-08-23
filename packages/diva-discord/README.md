@@ -4,14 +4,19 @@
 
 make sure that applicatikon.commands+bot is ticked by url invite create
 
+create bot 
+https://discord.com/developers/applications
+
 invite link:
 https://discord.com/api/oauth2/authorize?client_id=960213520836862073&permissions=1644905889015&scope=bot%20applications.commands
 
 start bot in powershell via:
 - cd packages/diva-discord
-- yarn hardhat run index.js --network ropsten
+#yarn hardhat run index.js --network ropsten
+yarn hardhat run index.js --network goerli
 
 extract list of users
+- cd packages/diva-discord
 - node readData.js
 
 test cases (each should be tested as / command and as message):
