@@ -797,6 +797,8 @@ export function MyPositions() {
         sx={{
           display: 'flex',
           flexDirection: 'row',
+          maxWidth: '400px',
+          justifyContent: 'space-between',
         }}
       >
         <DropDownFilter

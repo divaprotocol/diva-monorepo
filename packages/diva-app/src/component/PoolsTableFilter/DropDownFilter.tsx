@@ -47,7 +47,7 @@ const DropDownFilter = ({
           sx={{
             color: '#ffffff',
             borderColor: '#828282',
-            fontSize: '16px',
+            fontSize: '13px',
             textTransform: 'capitalize',
           }}
           onClick={(e) => {

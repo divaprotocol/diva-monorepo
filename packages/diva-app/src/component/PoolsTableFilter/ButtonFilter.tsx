@@ -7,17 +7,17 @@ type prop = {
   onClick: () => void
 }
 
-const ButtonFilter = ({ id, ButtonLabel, onClick }: prop) => {
+const ButtonFilter = ({ id, ButtonLabel, onClick, ...props }: prop) => {
   const [color, setColor] = useState('#ffffff')
   return (
-    <Box marginRight="35px">
+    <Box {...props}>
       <Button
         variant="outlined"
         id={id}
         sx={{
           color: color,
           borderColor: color,
-          fontSize: '16px',
+          fontSize: '13px',
           textTransform: 'capitalize',
         }}
         onClick={() => {

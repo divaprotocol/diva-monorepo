@@ -23,6 +23,7 @@ import { makeStyles } from '@mui/styles'
 import { ExpiresInCell } from '../Markets/Markets'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ToggleFilter from '../PoolsTableFilter/ToggleFilter'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 
 export function MyOrders() {
   const chainId = useAppSelector(selectChainId)
@@ -35,7 +36,8 @@ export function MyOrders() {
   const [underlyingButtonLabel, setUnderlyingButtonLabel] =
     useState('Underlying')
   const [search, setSearch] = useState('')
-  const [orderType, setOrderType] = useState<string>('')
+  const [buyClicked, setBuyClicked] = useState(false)
+  const [sellClicked, setSellClicked] = useState(false)
   const history = useHistory()
   const dispatch = useAppDispatch()
   const useStyles = makeStyles({
@@ -51,8 +53,19 @@ export function MyOrders() {
       e.target.value === '' ? 'Underlying' : e.target.value
     )
   }
-  const handleBuySellToggle = (e) => {
-    setOrderType(e.target.value)
+  const filterBuyOrders = () => {
+    if (buyClicked) {
+      setBuyClicked(false)
+    } else {
+      setBuyClicked(true)
+    }
+  }
+  const filterSellOrders = () => {
+    if (sellClicked) {
+      setSellClicked(false)
+    } else {
+      setSellClicked(true)
+    }
   }
   useEffect(() => {
     dispatch(fetchPositionTokens({ page }))
@@ -318,21 +331,25 @@ export function MyOrders() {
   console.log(dataOrders)
   const filteredRows =
     search != null && search.length > 0
-      ? orderType
+      ? buyClicked
         ? dataOrders
-            .filter((v) => v.type.includes(orderType.toUpperCase()))
+            .filter((v) => v.type.includes('BUY'))
+            .filter((v) =>
+              v.underlying.toLowerCase().includes(search.toLowerCase())
+            )
+        : sellClicked
+        ? dataOrders
+            .filter((v) => v.type.includes('SELL'))
             .filter((v) =>
               v.underlying.toLowerCase().includes(search.toLowerCase())
             )
         : dataOrders.filter((v) =>
             v.underlying.toLowerCase().includes(search.toLowerCase())
           )
-      : orderType
-      ? dataOrders
-          .filter((v) => v.type.includes(orderType.toUpperCase()))
-          .filter((v) =>
-            v.underlying.toLowerCase().includes(search.toLowerCase())
-          )
+      : buyClicked
+      ? dataOrders.filter((v) => v.type.includes('BUY'))
+      : sellClicked
+      ? dataOrders.filter((v) => v.type.includes('SELL'))
       : dataOrders
   return (
     <Stack
@@ -355,13 +372,8 @@ export function MyOrders() {
           InputValue={search}
           onInputChange={handleUnderLyingInput}
         />
-        <ToggleFilter
-          id="Buy or Sell"
-          Value={orderType}
-          FirstToggleButtonLabel="Buy"
-          SecondToggleButtonLabel="Sell"
-          onToggle={handleBuySellToggle}
-        />
+        <ButtonFilter id="Buy" ButtonLabel="Buy" onClick={filterBuyOrders} />
+        <ButtonFilter id="Sell" ButtonLabel="Sell" onClick={filterSellOrders} />
       </Box>
       <DataGrid
         className={classes.root}

@@ -26,6 +26,7 @@ import PoolsTable from '../PoolsTable'
 import { getDateTime } from '../../Util/Dates'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ToggleFilter from '../PoolsTableFilter/ToggleFilter'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -112,6 +113,8 @@ export function TradeHistoryTab() {
   const [orderType, setOrderType] = useState<string>('')
   const [history, setHistory] = useState<any[]>([])
   const [page, setPage] = useState(0)
+  const [buyClicked, setBuyClicked] = useState(false)
+  const [sellClicked, setSellClicked] = useState(false)
   const orders: any[] = []
   const dispatch = useAppDispatch()
 
@@ -121,8 +124,19 @@ export function TradeHistoryTab() {
       e.target.value === '' ? 'Underlying' : e.target.value
     )
   }
-  const handleBuySellToggle = (e) => {
-    setOrderType(e.target.value)
+  const filterBuyOrders = () => {
+    if (buyClicked) {
+      setBuyClicked(false)
+    } else {
+      setBuyClicked(true)
+    }
+  }
+  const filterSellOrders = () => {
+    if (sellClicked) {
+      setSellClicked(false)
+    } else {
+      setSellClicked(true)
+    }
   }
   useEffect(() => {
     dispatch(fetchPositionTokens({ page }))
@@ -311,21 +325,25 @@ export function TradeHistoryTab() {
   console.log('rows', rows)
   const filteredRows =
     search != null && search.length > 0
-      ? orderType
+      ? buyClicked
         ? rows
-            .filter((v) => v.type.includes(orderType.toUpperCase()))
+            .filter((v) => v.type.includes('BUY'))
+            .filter((v) =>
+              v.Underlying.toLowerCase().includes(search.toLowerCase())
+            )
+        : sellClicked
+        ? rows
+            .filter((v) => v.type.includes('SELL'))
             .filter((v) =>
               v.Underlying.toLowerCase().includes(search.toLowerCase())
             )
         : rows.filter((v) =>
             v.Underlying.toLowerCase().includes(search.toLowerCase())
           )
-      : orderType
-      ? rows
-          .filter((v) => v.type.includes(orderType.toUpperCase()))
-          .filter((v) =>
-            v.Underlying.toLowerCase().includes(search.toLowerCase())
-          )
+      : buyClicked
+      ? rows.filter((v) => v.type.includes('BUY'))
+      : sellClicked
+      ? rows.filter((v) => v.type.includes('SELL'))
       : rows
   return (
     <Stack
@@ -348,13 +366,8 @@ export function TradeHistoryTab() {
           InputValue={search}
           onInputChange={handleUnderLyingInput}
         />
-        <ToggleFilter
-          id="Buy or Sell"
-          Value={orderType}
-          FirstToggleButtonLabel="Buy"
-          SecondToggleButtonLabel="Sell"
-          onToggle={handleBuySellToggle}
-        />
+        <ButtonFilter id="Buy" ButtonLabel="Buy" onClick={filterBuyOrders} />
+        <ButtonFilter id="Sell" ButtonLabel="Sell" onClick={filterSellOrders} />
       </Box>
       {!userAddress ? (
         <Typography

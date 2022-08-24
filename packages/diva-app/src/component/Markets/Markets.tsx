@@ -452,6 +452,7 @@ export default function Markets() {
                 display: 'flex',
                 flexDirection: 'row',
               }}
+              justifyContent="space-between"
             >
               <DropDownFilter
                 id="Creator Filter"
