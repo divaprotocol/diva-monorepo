@@ -2,6 +2,7 @@ TellorPlayground_contract_address = {
     "ropsten": '0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A',
     "rinkeby": '0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A',
     "goerli": '0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A',
+    "goerli": '0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A',
 }
 
 DIVAOracleTellor_contract_address = {
