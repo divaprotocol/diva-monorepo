@@ -8,7 +8,7 @@ type prop = {
 }
 
 const ButtonFilter = ({ id, ButtonLabel, onClick, ...props }: prop) => {
-  const [color, setColor] = useState('#ffffff')
+  const [color, setColor] = useState('#ffffffb3')
   return (
     <Box {...props}>
       <Button
@@ -22,7 +22,7 @@ const ButtonFilter = ({ id, ButtonLabel, onClick, ...props }: prop) => {
         }}
         onClick={() => {
           onClick()
-          color === '#ffffff' ? setColor('primary') : setColor('#ffffff')
+          color === '#ffffffb3' ? setColor('primary') : setColor('#ffffffb3')
         }}
       >
         {ButtonLabel}

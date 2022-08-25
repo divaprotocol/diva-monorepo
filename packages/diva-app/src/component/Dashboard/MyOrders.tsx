@@ -331,7 +331,9 @@ export function MyOrders() {
   console.log(dataOrders)
   const filteredRows =
     search != null && search.length > 0
-      ? buyClicked
+      ? buyClicked && sellClicked
+        ? dataOrders
+        : buyClicked
         ? dataOrders
             .filter((v) => v.type.includes('BUY'))
             .filter((v) =>
@@ -346,6 +348,8 @@ export function MyOrders() {
         : dataOrders.filter((v) =>
             v.underlying.toLowerCase().includes(search.toLowerCase())
           )
+      : buyClicked && sellClicked
+      ? dataOrders
       : buyClicked
       ? dataOrders.filter((v) => v.type.includes('BUY'))
       : sellClicked
