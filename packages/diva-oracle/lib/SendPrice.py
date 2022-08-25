@@ -7,15 +7,18 @@ PUBLIC_KEY = config.PUBLIC_KEY
 def sendPrice(pool_id, value, network, w3, my_contract, nonce):
     print("Sending price to smart contract ...")
     gas_price = w3.eth.gas_price
-    setFinRef_txn = my_contract.functions.setFinalReferenceValue(int(pool_id), int(w3.toWei(value, 'ether')),
-                                                                 False).buildTransaction(
-        {
-            "gasPrice": gas_price,
-            "chainId": config.chain_id[network],
-            "from": PUBLIC_KEY,
-            "nonce": nonce
-        }
-    )
+    try: 
+        setFinRef_txn = my_contract.functions.setFinalReferenceValue(int(pool_id), int(w3.toWei(value, 'ether')),
+                                                                    False).buildTransaction(
+            {
+                "gasPrice": gas_price,
+                "chainId": config.chain_id[network],
+                "from": PUBLIC_KEY,
+                "nonce": nonce
+            }
+        )
+    except:
+        print("unable to send to contract function: Check ether in sender")
     print("Nonce:", nonce)
     print("For pool:", pool_id)
     signed_txn = w3.eth.account.sign_transaction(

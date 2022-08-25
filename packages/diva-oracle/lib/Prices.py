@@ -6,7 +6,6 @@ import json
 
 
 def getKrakenPrice(pair, ts_date, ts_date_max_away):
-    print(ts_date_max_away)
     url = 'https://api.kraken.com/0/public/Trades?pair={}'.format(
         pair) + '&since={}'.format(ts_date_max_away)
     resp = requests.get(url)

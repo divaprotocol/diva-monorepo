@@ -81,6 +81,7 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
         return
     DIVAOracleTellor_contract = w3.eth.contract(
             address=tellor_contracts.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
+    numberPools = 0
     while True:
         lastId = df.id.iloc[-1]
         if numberPools == df.shape[0]:
@@ -92,8 +93,9 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
     df = transform_expiryTimes(df)
     df = df.sort_values(by=['expiryTime'], ignore_index=True)
 
-    for j in pendingPools[network]:
-        df = df[df["id"] != j]
+    # taking this out for now, keeps in a pending pools but doesn't resubmit on error
+    #for j in pendingPools[network]:
+     #   df = df[df["id"] != j]
 
     for i in range(df.shape[0]):
         pair = df['referenceAsset'].iloc[i]
@@ -154,17 +156,20 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
 pendingPools = {
     "ropsten": [],
     "mumbai": [],
-    "rinkeby": []
+    "rinkeby": [],
+    "goerli": []
 }
 pendingPools_nonces = {
     "ropsten": [],
     "mumbai": [],
-    "rinkeby": []
+    "rinkeby": [],
+    "goerli": []
 }
 pendingPools_len = {
     "ropsten": [0],
     "mumbai": [0],
-    "rinkeby": [0]
+    "rinkeby": [0],
+    "goerli": [0]
 }
 
 w3_instances = []
@@ -172,5 +177,6 @@ contract_instances = []
 nonces = {
     "ropsten": 0,
     "mumbai": 0,
-    "rinkeby": 0
+    "rinkeby": 0,
+    "goerli": 0
 }

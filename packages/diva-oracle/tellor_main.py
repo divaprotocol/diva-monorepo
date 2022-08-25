@@ -26,6 +26,7 @@ from termcolor import colored
 
 waiting_sec = 60
 network = config.network
+print(network)
 w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
 tellor_contract = w3.eth.contract(
     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.TellorPlayground_abi)
