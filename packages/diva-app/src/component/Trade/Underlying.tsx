@@ -17,8 +17,7 @@ import { Liquidity } from '../Liquidity/Liquidity'
 import OrdersPanel from './OrdersPanel'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const contractAddress = require('@0x/contract-addresses')
+import { getContractAddressesForChainOrThrow } from '@0x/contract-addresses'
 import { useDispatch } from 'react-redux'
 import {
   fetchPool,
@@ -61,8 +60,7 @@ export default function Underlying() {
   const breakEven = useAppSelector((state) => state.stats.breakEven)
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
-  const chainContractAddress =
-    contractAddress.getContractAddressesForChainOrThrow(chainId)
+  const chainContractAddress = getContractAddressesForChainOrThrow(chainId)
   const exchangeProxy = chainContractAddress.exchangeProxy
   const theme = useTheme()
   const dispatch = useDispatch()
