@@ -7,6 +7,7 @@ import {
   LineSeries,
   LineSeriesPoint,
   DiscreteColorLegend,
+  HorizontalGridLines,
 } from 'react-vis'
 
 export function PayoffProfile(props: {
@@ -115,16 +116,31 @@ export function PayoffProfile(props: {
             fontWeight: theme.typography.fontWeightLight,
             stroke: theme.palette.text.disabled,
             padding: theme.spacing(2),
+            overflow: 'visible',
           }}
           animation
         >
-          <XAxis
-            tickValues={[floor, strike, cap]}
-            style={{ stroke: theme.palette.text.disabled }}
-          />
-          <YAxis style={{ stroke: theme.palette.text.disabled }} />
           <LineSeries style={lineSeriesStyle} data={short} />
           <LineSeries style={lineSeriesStyle} data={long} />
+          <HorizontalGridLines
+            width={width}
+            left={0}
+            style={{
+              stroke: '#3393E0',
+            }}
+          />
+          <YAxis
+            hideLine
+            tickSize={0}
+            tickTotal={6}
+            style={{
+              text: {
+                stroke: 'none',
+                fill: '#949494',
+                transform: 'translate(-20px, -10px)',
+              },
+            }}
+          />
         </XYPlot>
       </Box>
       <Box
