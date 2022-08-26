@@ -86,14 +86,14 @@ async function watchQueue() {
                         timestampLastClaim: new Date(),
                         nbrClaims:1})
                     replyText = `You successfully registered for DIVA testnet :tada: \n`
-                        +`You will shortly receive 10000 dUSD tokens on Ropsten\n`
-                        +`https://ropsten.etherscan.io/tx/${tx.hash}`
+                        +`You will shortly receive 10000 dUSD tokens on Goerli\n`
+                        +`https://goerli.etherscan.io/tx/${tx.hash}`
                 } else {
                     //update timestampLastClaim and counter
                     dbRegisteredUsers.set(userId, new Date(), 'timestampLastClaim')
                     dbRegisteredUsers.set(userId, dbRegisteredUsers.get(userId, "nbrclaims") + 1, 'nbrClaims')
-                    replyText = `You will shortly receive 10000 dUSD tokens on ropsten.\n  `
-                        +`https://ropsten.etherscan.io/tx/${tx.hash}.`
+                    replyText = `You will shortly receive 10000 dUSD tokens on Goerli.\n  `
+                        +`https://goerli.etherscan.io/tx/${tx.hash}.`
                 }
                 
                 console.log(replyText);

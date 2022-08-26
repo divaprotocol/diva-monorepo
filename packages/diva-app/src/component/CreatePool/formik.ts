@@ -38,7 +38,7 @@ export const initialValues: Values = {
   inflection: 200,
   gradient: 0.5,
   collateralToken: {
-    id: '0x134e62bd2ee247d4186a1fdbaa9e076cb26c1355',
+    id: '0xFA158C9B780A4213f3201Ae74Cca013712c8538d', // Ropsten: '0x134e62bd2ee247d4186a1fdbaa9e076cb26c1355',
     name: 'DIVA USD',
     decimals: 18,
     symbol: 'dUSD',

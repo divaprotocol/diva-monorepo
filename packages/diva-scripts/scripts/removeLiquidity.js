@@ -1,6 +1,6 @@
 /**
  * Script to remove liquidity from an existing pool that has not yet expired
- * To execute the script, run `yarn hardhat run scripts/removeLiquidity.js --network ropsten` (you can replace ropsten with any other network that is listed in constants.js)
+ * To execute the script, run `yarn hardhat run scripts/removeLiquidity.js --network goerli` (you can replace goerli with any other network that is listed in constants.js)
  * 
  * Note that as opposed to `addLiquidity` where you specify the amount of collateral tokens to be added, in `removeLiquidity`, you pass in the 
  * number of long tokens to be removed. The required number of short tokens to withdraw collateral is calculated inside the smart contract function
@@ -19,7 +19,7 @@ const { addresses } = require('../constants/constants')
 async function main() {
 
     // INPUT (network)
-    const network = "ropsten" // has to be one of the networks included in constants.js
+    const network = "goerli" // has to be one of the networks included in constants.js
     
     // INPUT (removeLiquidity arguments)
     const poolId = 3 // id of an existing pool

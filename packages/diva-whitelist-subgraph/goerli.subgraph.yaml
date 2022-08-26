@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: DIVAWhitelist
-    network: rinkeby
+    network: goerli
     source:
-      address: "0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e"
+      address: "0x017aA6E15e406b85b8b1dF322e39444D819C8F43"
       abi: DIVAWhitelist
-      startBlock: 10728213
+      startBlock: 7087195
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
