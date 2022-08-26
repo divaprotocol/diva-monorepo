@@ -23,6 +23,10 @@ export type Values = {
   capacity: string
   dataProvider: string
   payoutProfile: string
+  offerDuration?: number
+  offerDirection?: string
+  minTakerContribution?: string
+  takerAddress?: string
 }
 
 export const initialValues: Values = {
@@ -47,6 +51,10 @@ export const initialValues: Values = {
   capacity: 'Unlimited',
   dataProvider: '',
   payoutProfile: 'Binary',
+  offerDirection: 'Long',
+  offerDuration: 24 * 60 * 60 * 1000,
+  minTakerContribution: 'Fill or Kill',
+  takerAddress: 'Everyone',
 }
 
 type Errors = {

@@ -18,7 +18,7 @@ type Props = {
   pool?: any
   decimal: number
   textFieldValue: string
-  transactionType: 'create' | 'liquidity'
+  transactionType: string
   onTransactionSuccess: () => void
   alert?: boolean
 }
@@ -48,6 +48,9 @@ export const ApproveActionButtons = ({
     ERC20,
     provider?.getSigner()
   )
+  // const CREATE_POOL_TYPE = {
+  //   OfferCreateContingentPool: CREATE_POOL_OFFER_STRUCT,
+  // }
   const diva =
     chainId != null
       ? new ethers.Contract(
@@ -56,7 +59,13 @@ export const ApproveActionButtons = ({
           provider.getSigner()
         )
       : null
-
+  const divaDomain = {
+    name: 'DIVA Protocol',
+    version: '1',
+    chainId,
+    // verifyingContract: diva.address,
+    verifyingContract: '',
+  }
   const [mobile, setMobile] = useState(false)
   useEffect(() => {
     if (window.innerWidth < 768) {
@@ -66,7 +75,7 @@ export const ApproveActionButtons = ({
     }
   }, [])
   useEffect(() => {
-    if (transactionType === 'create') {
+    if (transactionType === 'createoffer') {
       setBtnName('Create')
     } else {
       setBtnName('Add')
@@ -174,7 +183,7 @@ export const ApproveActionButtons = ({
             onClick={() => {
               setActionLoading(true)
               switch (transactionType) {
-                case 'create':
+                case 'createpool':
                   diva!
                     .createContingentPool({
                       inflection: parseEther(pool.inflection.toString()),
@@ -255,6 +264,17 @@ export const ApproveActionButtons = ({
                       setActionLoading(false)
                       console.error(err)
                     })
+                  break
+                case 'createoffer':
+                  setApproveLoading(false)
+                  // account.signTypedDataAsync(
+                  //     divaDomain,CREATE_POOL_TYPE,
+                  // )
+                  onTransactionSuccess()
+                  break
+                case 'filloffer':
+                  setApproveLoading(false)
+                  onTransactionSuccess()
                   break
               }
             }}

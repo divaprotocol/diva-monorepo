@@ -15,8 +15,10 @@ import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 export function ReviewAndSubmit({
   formik,
+  offer,
 }: {
   formik: ReturnType<typeof useCreatePoolFormik>
+  offer?: boolean
 }) {
   const { values } = formik
   const theme = useTheme()
@@ -59,7 +61,7 @@ export function ReviewAndSubmit({
   const isWhitelistedDataFeed =
     matchingDataFeedProviders.length > 0 &&
     matchingDataFeedProviders.some((v) => formik.values.dataProvider === v.id)
-
+  console.log(offer, 'offer')
   return (
     <Stack
       direction={mobile ? 'column' : 'row'}
@@ -148,7 +150,7 @@ export function ReviewAndSubmit({
                   <Typography fontSize={'0.85rem'}>{values.cap}</Typography>
                 </Stack>
               )}
-              {!isNaN(values.inflection) && (
+              {!isNaN(values.inflection) && offer === false && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -161,7 +163,7 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {!isNaN(values.gradient) && (
+              {!isNaN(values.gradient) && offer === false && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -179,7 +181,7 @@ export function ReviewAndSubmit({
                 sx={{ fontWeight: 'bold' }}
                 color="primary"
               >
-                Collateral
+                {offer ? 'Offer terms' : 'Collateral'}
               </Typography>
               <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                 <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
@@ -197,14 +199,75 @@ export function ReviewAndSubmit({
                   {values.collateralBalance}
                 </Typography>
               </Stack>
-              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  LONG / SHORT Token Supply
-                </Typography>
-                <Typography fontSize={'0.85rem'}>
-                  {values.tokenSupply}
-                </Typography>
-              </Stack>
+              {!offer && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    LONG / SHORT Token Supply
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.tokenSupply}
+                  </Typography>
+                </Stack>
+              )}
+              {offer && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Your Contribution
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.offerDirection === 'Long'
+                      ? values.collateralBalanceLong
+                      : values.collateralBalanceShort}
+                  </Typography>
+                </Stack>
+              )}
+              {offer && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Taker Contribution
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.offerDirection === 'Long'
+                      ? values.collateralBalanceShort
+                      : values.collateralBalanceLong}
+                  </Typography>
+                </Stack>
+              )}
+              {offer && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Your Direction
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.offerDirection}
+                  </Typography>
+                </Stack>
+              )}
+              {offer && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Offer expiry
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.offerDuration === 24 * 60 * 60 * 1000 && '1 Day'}
+                  </Typography>
+                </Stack>
+              )}
               <Typography
                 variant="subtitle1"
                 sx={{ fontWeight: 'bold' }}
@@ -212,12 +275,45 @@ export function ReviewAndSubmit({
               >
                 Advanced
               </Typography>
-              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Max Pool Capacity
-                </Typography>
-                <Typography fontSize={'0.85rem'}>{values.capacity}</Typography>
-              </Stack>
+              {!offer && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Max Pool Capacity
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.capacity}
+                  </Typography>
+                </Stack>
+              )}
+              {offer && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Taker Address
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.takerAddress}
+                  </Typography>
+                </Stack>
+              )}
+              {offer && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Min Taker Contribution
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.minTakerContribution}
+                  </Typography>
+                </Stack>
+              )}
               {/*<Stack direction="row" sx={{ justifyContent: 'space-between' }}>*/}
               {/*  <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>*/}
               {/*    Pool Description*/}
