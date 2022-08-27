@@ -1,0 +1,114 @@
+type Challenge @entity {
+  id: ID!
+  challengedBy: Bytes!
+  proposedFinalReferenceValue: BigInt!
+  pool: Pool!
+}
+
+type Pool @entity {
+  id: ID! # original -> poolId
+  referenceAsset: String!
+  floor: BigInt!
+  inflection: BigInt!
+  cap: BigInt!
+  supplyShort: BigInt!
+  supplyLong: BigInt!
+  expiryTime: BigInt!
+  collateralToken: CollateralToken!
+  gradient: BigInt!
+  collateralAmount: BigInt!
+
+  shortToken: PositionToken!
+  longToken: PositionToken!
+  finalReferenceValue: BigInt!
+  statusFinalReferenceValue: String!
+  payoutLong: BigInt!
+  payoutShort: BigInt!
+  statusTimestamp: BigInt!
+  dataProvider: Bytes!
+  protocolFee: BigInt!
+  settlementFee: BigInt!
+
+  createdBy: Bytes!
+  createdAt: BigInt!
+  capacity: BigInt!
+  challenges: [Challenge!] @derivedFrom(field: "pool")
+}
+
+type CollateralToken @entity {
+  id: ID! # original -> collateral token address
+  name: String!
+  decimals: Int!
+  symbol: String!
+  feeRecipients: [FeeRecipientCollateralToken!]
+    @derivedFrom(field: "collateralToken")
+}
+
+type FeeRecipient @entity {
+  id: ID! # feeRecipient address
+  collateralTokens: [FeeRecipientCollateralToken!]
+    @derivedFrom(field: "feeRecipient")
+}
+
+type FeeRecipientCollateralToken @entity {
+  id: ID! # Set to `${feeRecipient.id}-${collateralToken.id}`
+  feeRecipient: FeeRecipient!
+  collateralToken: CollateralToken!
+  amount: BigInt!
+}
+
+type PositionToken @entity {
+  id: ID! # Address
+  name: String!
+  symbol: String!
+  decimals: Int!
+  pool: Pool!
+  owner: Bytes!
+  users: [UserPositionToken!]
+    @derivedFrom(field: "positionToken")
+}
+
+type TestnetUser @entity {
+  id: ID! # UserAddress
+  binaryPoolCreated: Boolean!
+  linearPoolCreated: Boolean!
+  convexPoolCreated: Boolean!
+  concavePoolCreated: Boolean!
+  liquidityAdded: Boolean!
+  liquidityRemoved: Boolean!
+  buyLimitOrderCreatedAndFilled: Boolean!
+  sellLimitOrderCreatedAndFilled: Boolean!
+  buyLimitOrderFilled: Boolean!
+  sellLimitOrderFilled: Boolean!
+  finalValueReported: Boolean!
+  reportedValueChallenged: Boolean!
+  positionTokenRedeemed: Boolean!
+  feeClaimed: Boolean!
+  feeClaimTransferred: Boolean!
+}
+
+type User @entity {
+  id: ID! # UserAddress
+  positionTokens: [UserPositionToken!]
+    @derivedFrom(field: "user")
+}
+
+type UserPositionToken @entity {
+  id: ID! # Set to `${user.id}-${positionToken.id}`
+  user: User!
+  positionToken: PositionToken!
+  receivedAt: BigInt! # timestamp when user received position token via create pool, add liquidity or trading 
+}
+
+type NativeOrderFill @entity {
+    # tx hash - order hash - log index
+    id: ID!
+    orderHash: Bytes!
+    maker: Bytes!
+    taker: Bytes!
+    makerToken: Bytes!
+    takerToken: Bytes!
+    makerTokenFilledAmount: BigInt!
+    takerTokenFilledAmount: BigInt!
+    timestamp: BigInt!
+}
