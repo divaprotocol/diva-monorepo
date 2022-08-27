@@ -1,0 +1,73 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: DivaDiamond
+    network: goerli
+    source:
+      address: "0x27D1BD739BD152CDaE38d4444E9aee3498166f01"
+      abi: DivaDiamond
+      startBlock: 7483129
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Challenge
+        - CollateralToken
+        - FeeRecipient
+        - FeeRecipientCollateralToken
+        - PositionToken
+        - TestnetUser
+        - UserPositionTokens
+      abis:
+        - name: DivaDiamond
+          file: ./abi/IDIVANew.json
+        - name: Erc20Token
+          file: ./abi/IERC20.json
+        - name: PositionTokenABI
+          file: ./abi/IPositionToken.json
+      eventHandlers:
+        - event: LiquidityAdded(indexed uint256,indexed address,indexed address,uint256)
+          handler: handleLiquidityAdded
+        - event: LiquidityRemoved(indexed uint256,indexed address,uint256)
+          handler: handleLiquidityRemoved
+        - event: PoolIssued(indexed uint256,indexed address,indexed address,uint256)
+          handler: handlePoolIssued
+        - event: StatusChanged(indexed uint8,indexed address,indexed uint256,uint256)
+          handler: handleStatusChanged
+        - event: FeeClaimAllocated(indexed uint256,indexed address,uint256)
+          handler: handleFeeClaimAllocated
+        - event: FeeClaimed(indexed address,indexed address,uint256)
+          handler: handleFeeClaimed
+        - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
+          handler: handleFeeClaimTransferred
+        - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
+          handler: handlePositionTokenRedeemed
+        - event: OfferFilled(indexed bytes32,indexed address,indexed address)
+          handler: handleOfferFilled
+        - event: OfferCancelled(indexed bytes32,indexed address)
+          handler: handleOfferCancelled
+      file: ./src/mapping_new.ts
+  - kind: ethereum/contract
+    name: ExchangeProxy
+    network: goerli
+    source:
+      address: "0xf91bb752490473b8342a3e964e855b9f9a2a668e"
+      abi: IZeroEx
+      startBlock: 7087046
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - NativeOrderFill
+      abis:
+        - name: IZeroEx
+          file: ./abi/IZeroEx.json
+      eventHandlers:
+        - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
+          handler: handleLimitOrderFilledEvent
+      file: ./src/mapping.ts
