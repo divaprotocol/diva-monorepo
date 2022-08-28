@@ -16,7 +16,7 @@ type Pool @entity {
   expiryTime: BigInt!
   collateralToken: CollateralToken!
   gradient: BigInt!
-  collateralAmount: BigInt!
+  collateralBalance: BigInt!
 
   shortToken: PositionToken!
   longToken: PositionToken!
