@@ -59,17 +59,19 @@ function handleChallengeEvent(
  */
 
 /**
- *
- * handleLiquidityEvent
- *
- * handles both events: Added and Removed and updates the correlating pool with
- * the current state of the it
+ * @notice Function to handle PoolIssued, LiquidityAdded and LiquidityRemoved events. 
+ * @param poolId The pool Id affected
+ * @param longRecipient The recipient address of the long position token in PoolIssued and LiquidityAdded events. msgSender in LiquidityRemoved event.
+ * @param shortRecipient The recipient address of the short position token in PoolIssued and LiquidityAdded events. msgSender in LiquidityRemoved event.
+ * @param divaAddress DIVA contract address
+ * @param msgSender Address that triggered the underlying transaction
+ * @param blockTimestamp Timestamp of the block that the transaction was part of
  */
 function handleLiquidityEvent(
   poolId: BigInt,
   longRecipient: Address,
   shortRecipient: Address,
-  address: Address,
+  divaAddress: Address,
   msgSender: Address,
   blockTimestamp: BigInt
 ): void {
@@ -79,7 +81,7 @@ function handleLiquidityEvent(
   // ***************************************
 
   // Connect to DIVA contract
-  let contract = DivaDiamond.bind(address);
+  let contract = DivaDiamond.bind(divaAddress);
 
   // Get parameters for the provided `poolId`
   let parameters = contract.getPoolParameters(poolId);
@@ -96,7 +98,8 @@ function handleLiquidityEvent(
   // Check whether a User entity for `shortRecipient` already exists
   let shortRecipientEntity = User.load(shortRecipient.toHexString());
 
-  // If not, add it
+  // If not, add it. Could be the case during PoolIssued, LiquidityAdded or LiquidityRemoved events.
+  // QUESTION StatusChanged events as well?
   if (!shortRecipientEntity) {
     shortRecipientEntity = new User(shortRecipient.toHexString());
     shortRecipientEntity.save();
@@ -106,7 +109,7 @@ function handleLiquidityEvent(
   let userShortPositionTokenEntity = UserPositionToken.load(
     shortRecipient.toHexString() + "-" + parameters.shortToken.toHexString())
   
-  // If not, add it
+  // If not, add it. Could be created during removal of liquidity, but not a problem as this is anyways just a rough shortlist.
   if (!userShortPositionTokenEntity) {
     userShortPositionTokenEntity = new UserPositionToken(shortRecipient.toHexString() + "-" + parameters.shortToken.toHexString());
     userShortPositionTokenEntity.user = shortRecipient.toHexString();
@@ -126,7 +129,7 @@ function handleLiquidityEvent(
   let userLongPositionTokenEntity = UserPositionToken.load(
     longRecipient.toHexString() + "-" + parameters.longToken.toHexString())
 
-  // If not, add it
+  // If not, add it. Could be created during removal of liquidity which is not a big problem as this is anyways just a rough shortlist.
   if (!userLongPositionTokenEntity) {
     userLongPositionTokenEntity = new UserPositionToken(longRecipient.toHexString() + "-" + parameters.longToken.toHexString());
     userLongPositionTokenEntity.user = longRecipient.toHexString();
@@ -147,7 +150,7 @@ function handleLiquidityEvent(
     parameters.collateralToken.toHexString()
   );
 
-  // If not, add it
+  // If not, add it. Only the case on PoolIssued event.
   if (!collateralTokenEntity) {
     collateralTokenEntity = new CollateralToken(
       parameters.collateralToken.toHexString()
@@ -166,10 +169,10 @@ function handleLiquidityEvent(
   // *** Add long position token to PositionToken entity ***
   // *******************************************************
 
-  // Check whether the long position token already exists in PositionToken entity
+  // Check whether the long position token already exists in PositionToken entity.
   let longTokenEntity = PositionToken.load(parameters.longToken.toHexString());
 
-  // If not, add it
+  // If not, add it. Only the case on PoolIssued event.
   if (!longTokenEntity) {
     longTokenEntity = new PositionToken(parameters.longToken.toHexString());
 
@@ -194,7 +197,7 @@ function handleLiquidityEvent(
     parameters.shortToken.toHexString()
   );
 
-  // If not, add it
+  // If not, add it. Only the case on PoolIssued event.
   if (!shortTokenEntity) {
     shortTokenEntity = new PositionToken(parameters.shortToken.toHexString());
 
@@ -211,18 +214,24 @@ function handleLiquidityEvent(
   }
   
   // ******************************************
-  // *** Update Pool entity and testnetUser ***
+  // *** Update Pool entity and TestnetUser ***
   // ******************************************
 
   // Check whether a Pool entity already exists for the provided `poolId`
   let poolEntity = Pool.load(poolId.toString());
 
-  // If not, add it. The if clause is entered on create contingent pool only. This is leveraged to update the task completion status
-  // for create contingent pool related tasks 
+  // If not, add it. The if clause is entered on `createContingentPool` or `fillOfferCreateContingentPool` only.
+  // It is not entered on add or remove liquidity. As a result, the task completion status for create contingent pool
+  // related tasks is updated inside this if clause.
   if (!poolEntity) {
     poolEntity = new Pool(poolId.toString());
-    poolEntity.createdBy = msgSender;
+    poolEntity.createdBy = msgSender; // TODO Consider renaming to triggeredBy
     poolEntity.createdAt = blockTimestamp;
+
+
+    // ******************************************************************
+    // *** Update TestnetUser entity for create contingent pool tasks ***
+    // ******************************************************************
 
     // Add testnet user. Here msgSender, i.e. the user that triggered the transaction is the relevant user.
     // This addition is done once when the pool entity is established-
@@ -257,33 +266,35 @@ function handleLiquidityEvent(
   }
 
 
-  // **************************************************
+  // **************************
   // *** Update pool entity ***
-  // **************************************************
+  // **************************
 
-  poolEntity.floor = parameters.floor;
-  poolEntity.inflection = parameters.inflection;
-  poolEntity.cap = parameters.cap;
-  poolEntity.gradient = parameters.gradient;
-  poolEntity.collateralBalance = parameters.collateralBalance;
-  poolEntity.finalReferenceValue = parameters.finalReferenceValue;
-  poolEntity.capacity = parameters.capacity;
-  poolEntity.statusTimestamp = parameters.statusTimestamp;
-  poolEntity.shortToken = parameters.shortToken.toHexString();
-  poolEntity.payoutShort = parameters.payoutShort;
-  poolEntity.longToken = parameters.longToken.toHexString();
-  poolEntity.payoutLong = parameters.payoutLong;
-  poolEntity.collateralToken = collateralTokenEntity.id;
-  poolEntity.expiryTime = parameters.expiryTime;
-  poolEntity.dataProvider = parameters.dataProvider;
-  poolEntity.protocolFee = parameters.protocolFee;
-  poolEntity.settlementFee = parameters.settlementFee;
-  poolEntity.referenceAsset = parameters.referenceAsset;
-  poolEntity.supplyShort = shortTokenContract.totalSupply();
-  poolEntity.supplyLong = longTokenContract.totalSupply();
+  poolEntity.floor = parameters.floor; // Updated at create only
+  poolEntity.inflection = parameters.inflection; // Updated at create only
+  poolEntity.cap = parameters.cap; // Updated at create only
+  poolEntity.gradient = parameters.gradient; // Updated at create only
+  poolEntity.collateralBalance = parameters.collateralBalance; // Updated during create/add/remove using the updated value inside DIVA protocol
+  poolEntity.finalReferenceValue = parameters.finalReferenceValue; // Set at StatusChanged event
+  poolEntity.capacity = parameters.capacity; // Updated at create only
+  poolEntity.statusTimestamp = parameters.statusTimestamp; // Updated at PoolIssued and StatusChanged events
+  poolEntity.shortToken = parameters.shortToken.toHexString(); // Updated at create only
+  poolEntity.payoutShort = parameters.payoutShort; // Updated on StatusChanged event (only when status changes to Confirmed)
+  poolEntity.longToken = parameters.longToken.toHexString(); // Updated at create only
+  poolEntity.payoutLong = parameters.payoutLong; // Updated on StatusChanged event (only when status changes to Confirmed)
+  poolEntity.collateralToken = collateralTokenEntity.id; // Updated at create only
+  poolEntity.expiryTime = parameters.expiryTime; // Updated at create only
+  poolEntity.dataProvider = parameters.dataProvider; // Updated at create only
+  poolEntity.protocolFee = parameters.protocolFee; // Updated at create only
+  poolEntity.settlementFee = parameters.settlementFee; // Updated at create only
+  poolEntity.referenceAsset = parameters.referenceAsset; // Updated at create only
+  poolEntity.supplyShort = shortTokenContract.totalSupply(); // Updated during create/add/remove
+  poolEntity.supplyLong = longTokenContract.totalSupply(); // Updated during create/add/remove
+  // QUESTION Add longRecipient and shortRecipient? May be different during create and add liquidity
 
-  let status = parameters.statusFinalReferenceValue;
+  let status = parameters.statusFinalReferenceValue; // Updated at PoolIssued and StatusChanged events
 
+  // Translate status from number to string
   if (status === 0) {
     poolEntity.statusFinalReferenceValue = "Open";
   } else if (status === 1) {
@@ -358,18 +369,25 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   log.info("handleLiquidityRemoved", []);
   handleLiquidityEvent(
     event.params.poolId,
-    // TODO what to put here as no longRecipient is emitted here
-    // TODO what to put here as no shortRecipient is emitted here
+    event.transaction.from, // COMMENT Place holder for longRecipient
+    event.transaction.from, // COMMENT Place holder for shortRecipient
     event.address,
     event.transaction.from,
     event.block.timestamp
   );
+
+
+  // ************************************************************
+  // *** Update TestnetUser entity for remove liquidity task ***
+  // ************************************************************
 
   let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.liquidityRemoved = true;
+
+  // Save result in entity
   testnetUser.save();
 
 }
@@ -390,6 +408,8 @@ export function handleStatusChanged(event: StatusChanged): void {
   log.info("handleStatusChanged fired", []);
   handleLiquidityEvent(
     event.params.poolId,
+    event.transaction.from, // COMMENT Place holder for longRecipient
+    event.transaction.from, // COMMENT Place holder for shortRecipient
     event.address,
     event.transaction.from,
     event.block.timestamp
@@ -402,6 +422,10 @@ export function handleStatusChanged(event: StatusChanged): void {
       event.transaction.hash.toHex() + "-" + event.logIndex.toString()
     );
 
+    // *******************************************************************
+    // *** Update TestnetUser entity for challenge reported value task ***
+    // *******************************************************************
+
     let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
     if (!testnetUser) {
       testnetUser = new TestnetUser(event.transaction.from.toHexString());
@@ -412,6 +436,11 @@ export function handleStatusChanged(event: StatusChanged): void {
   } else if (event.params.statusFinalReferenceValue === 1) {
     // log.info("event.address: ", [event.address.toHexString()])
     // log.info("event.transaction.from: ", [event.transaction.from.toHexString()])
+
+    // *************************************************************
+    // *** Update TestnetUser entity for report final value task ***
+    // *************************************************************
+
     let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
     if (!testnetUser) {
       testnetUser = new TestnetUser(event.transaction.from.toHexString());
