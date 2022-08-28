@@ -7,31 +7,29 @@ type Challenge @entity {
 
 type Pool @entity {
   id: ID! # original -> poolId
-  referenceAsset: String!
   floor: BigInt!
   inflection: BigInt!
   cap: BigInt!
-  supplyShort: BigInt!
-  supplyLong: BigInt!
-  expiryTime: BigInt!
-  collateralToken: CollateralToken!
   gradient: BigInt!
   collateralBalance: BigInt!
-
-  shortToken: PositionToken!
-  longToken: PositionToken!
   finalReferenceValue: BigInt!
-  statusFinalReferenceValue: String!
-  payoutLong: BigInt!
-  payoutShort: BigInt!
+  capacity: BigInt!
   statusTimestamp: BigInt!
+  shortToken: PositionToken!
+  payoutShort: BigInt!
+  longToken: PositionToken!
+  payoutLong: BigInt!
+  collateralToken: CollateralToken!
+  expiryTime: BigInt!
   dataProvider: Bytes!
   protocolFee: BigInt!
   settlementFee: BigInt!
-
+  statusFinalReferenceValue: String!
+  referenceAsset: String!
+  supplyShort: BigInt!
+  supplyLong: BigInt!
   createdBy: Bytes!
   createdAt: BigInt!
-  capacity: BigInt!
   challenges: [Challenge!] @derivedFrom(field: "pool")
 }
 

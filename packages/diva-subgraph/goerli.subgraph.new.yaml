@@ -1,6 +1,6 @@
 specVersion: 0.0.2
 schema:
-  file: ./schema.graphql
+  file: ./schema_new.graphql
 dataSources:
   - kind: ethereum/contract
     name: DivaDiamond
@@ -70,4 +70,4 @@ dataSources:
       eventHandlers:
         - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
           handler: handleLimitOrderFilledEvent
-      file: ./src/mapping.ts
+      file: ./src/mapping_new.ts
