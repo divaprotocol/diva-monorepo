@@ -99,7 +99,7 @@ function handleLiquidityEvent(
   let shortRecipientEntity = User.load(shortRecipient.toHexString());
 
   // If not, add it. Could be the case during PoolIssued, LiquidityAdded or LiquidityRemoved events.
-  // QUESTION StatusChanged events as well?
+  // QUESTION StatusChanged events as well? I think so because msg.sender could be anyone (msg.sender is used as dummy for shortRecipient and longRecipient in StatusChanged event handling)
   if (!shortRecipientEntity) {
     shortRecipientEntity = new User(shortRecipient.toHexString());
     shortRecipientEntity.save();
@@ -248,7 +248,7 @@ function handleLiquidityEvent(
         testnetUser.binaryPoolCreated = true
     } else {
       // Calculate the hypothetical gradient if it was a linear curve
-      gradientLinear = (parameters.inflection.minus(parameters.floor)).times(unit).div(
+      const gradientLinear = (parameters.inflection.minus(parameters.floor)).times(unit).div(
         parameters.cap.minus(parameters.floor));
       
       // Compare hypothetical gradientLinear with actual gradient set by user
@@ -290,7 +290,7 @@ function handleLiquidityEvent(
   poolEntity.referenceAsset = parameters.referenceAsset; // Updated at create only
   poolEntity.supplyShort = shortTokenContract.totalSupply(); // Updated during create/add/remove
   poolEntity.supplyLong = longTokenContract.totalSupply(); // Updated during create/add/remove
-  // QUESTION Add longRecipient and shortRecipient? May be different during create and add liquidity
+  // QUESTION Add longRecipient and shortRecipient? -> maybe in dedicated PoolIssued and LiquidityAdded entities rather than in "cumulative" Pool entity
 
   let status = parameters.statusFinalReferenceValue; // Updated at PoolIssued and StatusChanged events
 
