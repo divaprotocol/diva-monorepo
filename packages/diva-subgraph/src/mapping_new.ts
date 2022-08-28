@@ -48,6 +48,17 @@ function handleChallengeEvent(
 }
 
 /**
+ * Context:
+ * 
+ * UserPositionToken entity: Frontend application may want to display a user's existing positions.
+ * As looping through all position tokens that have ever been created in DIVA Protocol is not an efficient solution, 
+ * a shortlist of position tokens that a user may own is maintained. This is achieved by logging any interaction where 
+ * the user received position tokens in a UserPositionToken mapping. Interactions including creating a new pool,
+ * adding liquidity to a new pool, purchasing position tokens.
+ * Note that the user to position token mapping is not created if the user purchased the position token other than via 0x protocol.
+ */
+
+/**
  *
  * handleLiquidityEvent
  *
@@ -62,75 +73,81 @@ function handleLiquidityEvent(
   msgSender: Address,
   blockTimestamp: BigInt
 ): void {
+
+  // ***************************************
+  // *** Initialize relevant connections ***
+  // ***************************************
+
+  // Connect to DIVA contract
   let contract = DivaDiamond.bind(address);
+
+  // Get parameters for the provided `poolId`
   let parameters = contract.getPoolParameters(poolId);
+
+  // Connect to short and long position token contracts
   let shortTokenContract = PositionTokenABI.bind(parameters.shortToken);
   let longTokenContract = PositionTokenABI.bind(parameters.longToken);
-  let entity = Pool.load(poolId.toString());
-  
-  //set user to position token mapping
-  let userEntity = User.load(msgSender.toHexString());
-  if (!userEntity) {
-    userEntity = new User(msgSender.toHexString());
-    userEntity.save();
+
+
+  // ****************************************************
+  // *** Map short position token to `shortRecipient` ***
+  // ****************************************************
+
+  // Check whether a User entity for `shortRecipient` already exists
+  let shortRecipientEntity = User.load(shortRecipient.toHexString());
+
+  // If not, add it
+  if (!shortRecipientEntity) {
+    shortRecipientEntity = new User(shortRecipient.toHexString());
+    shortRecipientEntity.save();
   }
+
+  // Check whether the short position token is already mapped to the user `shortRecipient`
   let userShortPositionTokenEntity = UserPositionToken.load(
-    msgSender.toHexString() + "-" + parameters.shortToken.toHexString())
+    shortRecipient.toHexString() + "-" + parameters.shortToken.toHexString())
+  
+  // If not, add it
   if (!userShortPositionTokenEntity) {
-    userShortPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.shortToken.toHexString());
-    userShortPositionTokenEntity.user = msgSender.toHexString();
+    userShortPositionTokenEntity = new UserPositionToken(shortRecipient.toHexString() + "-" + parameters.shortToken.toHexString());
+    userShortPositionTokenEntity.user = shortRecipient.toHexString();
     userShortPositionTokenEntity.positionToken = parameters.shortToken.toHexString();
-    userShortPositionTokenEntity.receivedAt = blockTimestamp; // doesn't enter this if clause on remove assuming user is only using the app
+    userShortPositionTokenEntity.receivedAt = blockTimestamp;
+
+    // Save results in entity
     userShortPositionTokenEntity.save();
   }
+
+
+  // **************************************************
+  // *** Map long position token to `longRecipient` ***
+  // **************************************************
+
+  // Check whether the long position token is already mapped to the user `longRecipient`
   let userLongPositionTokenEntity = UserPositionToken.load(
-    msgSender.toHexString() + "-" + parameters.longToken.toHexString())
+    longRecipient.toHexString() + "-" + parameters.longToken.toHexString())
+
+  // If not, add it
   if (!userLongPositionTokenEntity) {
-    userLongPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.longToken.toHexString());
-    userLongPositionTokenEntity.user = msgSender.toHexString();
+    userLongPositionTokenEntity = new UserPositionToken(longRecipient.toHexString() + "-" + parameters.longToken.toHexString());
+    userLongPositionTokenEntity.user = longRecipient.toHexString();
     userLongPositionTokenEntity.positionToken = parameters.longToken.toHexString();
     userLongPositionTokenEntity.receivedAt = blockTimestamp;
+    
+    // Save results in entity
     userLongPositionTokenEntity.save();
   }
 
 
-  //pool entity
-  if (!entity) {
-    entity = new Pool(poolId.toString());
-    entity.createdBy = msgSender;
-    entity.createdAt = blockTimestamp;
+  // ******************************************************
+  // *** Add collateral token to CollateralToken entity ***
+  // ******************************************************
 
-    let testnetUser = TestnetUser.load(msgSender.toHexString());
-    if (!testnetUser) {
-      testnetUser = new TestnetUser(msgSender.toHexString());
-    }
-
-    const unit = BigInt.fromString("1000000000000000000") // 1e18
-
-    let gradient = parameters.gradient;
-
-    let gradientLinear = new BigInt(1); // CHECK with Sascha
-    if (parameters.cap != parameters.floor) {
-      gradientLinear = (parameters.inflection.minus(parameters.floor)).times(unit).div(
-        parameters.cap.minus(parameters.floor));
-    }
-
-    if (parameters.floor.equals(parameters.inflection) &&
-      parameters.inflection.equals(parameters.cap)) {
-        testnetUser.binaryPoolCreated = true
-    } else if (gradient.equals(gradientLinear)) {
-      testnetUser.linearPoolCreated = true
-    } else if (gradient.gt(gradientLinear)) {
-      testnetUser.concavePoolCreated = true
-    } else if (gradient.lt(gradientLinear)) {
-      testnetUser.convexPoolCreated = true
-    }
-    testnetUser.save();
-  }
-
+  // Check whether the collateral token already exists in CollateralToken entity
   let collateralTokenEntity = CollateralToken.load(
     parameters.collateralToken.toHexString()
   );
+
+  // If not, add it
   if (!collateralTokenEntity) {
     collateralTokenEntity = new CollateralToken(
       parameters.collateralToken.toHexString()
@@ -141,10 +158,18 @@ function handleLiquidityEvent(
     collateralTokenEntity.symbol = tokenContract.symbol();
     collateralTokenEntity.decimals = tokenContract.decimals();
 
+    // Save results in entity
     collateralTokenEntity.save();
   }
 
+  // *******************************************************
+  // *** Add long position token to PositionToken entity ***
+  // *******************************************************
+
+  // Check whether the long position token already exists in PositionToken entity
   let longTokenEntity = PositionToken.load(parameters.longToken.toHexString());
+
+  // If not, add it
   if (!longTokenEntity) {
     longTokenEntity = new PositionToken(parameters.longToken.toHexString());
 
@@ -156,12 +181,20 @@ function handleLiquidityEvent(
     longTokenEntity.pool = longTokenContract.poolId().toString();
     longTokenEntity.owner = longTokenContract.owner();
 
+    // Save results in entity
     longTokenEntity.save();
   }
 
+  // ********************************************************
+  // *** Add short position token to PositionToken entity ***
+  // ********************************************************
+
+  // Check whether the short position token already exists in PositionToken entity
   let shortTokenEntity = PositionToken.load(
     parameters.shortToken.toHexString()
   );
+
+  // If not, add it
   if (!shortTokenEntity) {
     shortTokenEntity = new PositionToken(parameters.shortToken.toHexString());
 
@@ -173,43 +206,96 @@ function handleLiquidityEvent(
     shortTokenEntity.pool = shortTokenContract.poolId().toString();
     shortTokenEntity.owner = shortTokenContract.owner();
 
+    // Save results in entity
     shortTokenEntity.save();
   }
+  
+  // ******************************************
+  // *** Update Pool entity and testnetUser ***
+  // ******************************************
 
-  entity.referenceAsset = parameters.referenceAsset;
-  entity.floor = parameters.floor;
-  entity.inflection = parameters.inflection;
-  entity.cap = parameters.cap;
-  entity.supplyShort = shortTokenContract.totalSupply();
-  entity.supplyLong = longTokenContract.totalSupply();
-  entity.expiryTime = parameters.expiryTime;
-  entity.collateralToken = collateralTokenEntity.id;
-  entity.gradient = parameters.gradient;
-  entity.collateralAmount = parameters.collateralAmount;
-  entity.shortToken = parameters.shortToken.toHexString();
-  entity.longToken = parameters.longToken.toHexString();
-  entity.finalReferenceValue = parameters.finalReferenceValue;
-  entity.payoutLong = parameters.payoutLong;
-  entity.payoutShort = parameters.payoutShort;
-  entity.statusTimestamp = parameters.statusTimestamp;
-  entity.dataProvider = parameters.dataProvider;
-  entity.protocolFee = parameters.protocolFee;
-  entity.settlementFee = parameters.settlementFee;
-  entity.capacity = parameters.capacity;
+  // Check whether a Pool entity already exists for the provided `poolId`
+  let poolEntity = Pool.load(poolId.toString());
+
+  // If not, add it. The if clause is entered on create contingent pool only. This is leveraged to update the task completion status
+  // for create contingent pool related tasks 
+  if (!poolEntity) {
+    poolEntity = new Pool(poolId.toString());
+    poolEntity.createdBy = msgSender;
+    poolEntity.createdAt = blockTimestamp;
+
+    // Add testnet user. Here msgSender, i.e. the user that triggered the transaction is the relevant user.
+    // This addition is done once when the pool entity is established-
+    let testnetUser = TestnetUser.load(msgSender.toHexString());
+    if (!testnetUser) {
+      testnetUser = new TestnetUser(msgSender.toHexString());
+    }
+
+    // Check what payoff profile type the user has created (binary, linear, convex or concave)
+    // and flag the corresponding task as completed
+    const unit = BigInt.fromString("1000000000000000000") // 1e18
+    let gradient = parameters.gradient;
+    if (parameters.floor.equals(parameters.cap)) {
+        testnetUser.binaryPoolCreated = true
+    } else {
+      // Calculate the hypothetical gradient if it was a linear curve
+      gradientLinear = (parameters.inflection.minus(parameters.floor)).times(unit).div(
+        parameters.cap.minus(parameters.floor));
+      
+      // Compare hypothetical gradientLinear with actual gradient set by user
+      if (gradient.equals(gradientLinear)) {
+        testnetUser.linearPoolCreated = true
+      } else if (gradient.gt(gradientLinear)) {
+        testnetUser.concavePoolCreated = true
+      } else if (gradient.lt(gradientLinear)) {
+        testnetUser.convexPoolCreated = true
+      }
+    }
+
+    // Save results in entity
+    testnetUser.save();
+  }
+
+
+  // **************************************************
+  // *** Update pool entity ***
+  // **************************************************
+
+  poolEntity.floor = parameters.floor;
+  poolEntity.inflection = parameters.inflection;
+  poolEntity.cap = parameters.cap;
+  poolEntity.gradient = parameters.gradient;
+  poolEntity.collateralBalance = parameters.collateralBalance;
+  poolEntity.finalReferenceValue = parameters.finalReferenceValue;
+  poolEntity.capacity = parameters.capacity;
+  poolEntity.statusTimestamp = parameters.statusTimestamp;
+  poolEntity.shortToken = parameters.shortToken.toHexString();
+  poolEntity.payoutShort = parameters.payoutShort;
+  poolEntity.longToken = parameters.longToken.toHexString();
+  poolEntity.payoutLong = parameters.payoutLong;
+  poolEntity.collateralToken = collateralTokenEntity.id;
+  poolEntity.expiryTime = parameters.expiryTime;
+  poolEntity.dataProvider = parameters.dataProvider;
+  poolEntity.protocolFee = parameters.protocolFee;
+  poolEntity.settlementFee = parameters.settlementFee;
+  poolEntity.referenceAsset = parameters.referenceAsset;
+  poolEntity.supplyShort = shortTokenContract.totalSupply();
+  poolEntity.supplyLong = longTokenContract.totalSupply();
 
   let status = parameters.statusFinalReferenceValue;
 
   if (status === 0) {
-    entity.statusFinalReferenceValue = "Open";
+    poolEntity.statusFinalReferenceValue = "Open";
   } else if (status === 1) {
-    entity.statusFinalReferenceValue = "Submitted";
+    poolEntity.statusFinalReferenceValue = "Submitted";
   } else if (status === 2) {
-    entity.statusFinalReferenceValue = "Challenged";
+    poolEntity.statusFinalReferenceValue = "Challenged";
   } else if (status === 3) {
-    entity.statusFinalReferenceValue = "Confirmed";
+    poolEntity.statusFinalReferenceValue = "Confirmed";
   }
 
-  entity.save();
+  // Save results in entity
+  poolEntity.save();
 }
 
 function handleFeeClaimEvent(
