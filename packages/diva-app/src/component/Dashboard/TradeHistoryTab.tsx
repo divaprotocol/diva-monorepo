@@ -27,6 +27,7 @@ import { getDateTime } from '../../Util/Dates'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ToggleFilter from '../PoolsTableFilter/ToggleFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
+import { BorderLeft } from '@mui/icons-material'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -325,7 +326,9 @@ export function TradeHistoryTab() {
   console.log('rows', rows)
   const filteredRows =
     search != null && search.length > 0
-      ? buyClicked
+      ? buyClicked && sellClicked
+        ? rows
+        : buyClicked
         ? rows
             .filter((v) => v.type.includes('BUY'))
             .filter((v) =>
@@ -340,6 +343,8 @@ export function TradeHistoryTab() {
         : rows.filter((v) =>
             v.Underlying.toLowerCase().includes(search.toLowerCase())
           )
+      : buyClicked && sellClicked
+      ? rows
       : buyClicked
       ? rows.filter((v) => v.type.includes('BUY'))
       : sellClicked
@@ -366,8 +371,26 @@ export function TradeHistoryTab() {
           InputValue={search}
           onInputChange={handleUnderLyingInput}
         />
-        <ButtonFilter id="Buy" ButtonLabel="Buy" onClick={filterBuyOrders} />
-        <ButtonFilter id="Sell" ButtonLabel="Sell" onClick={filterSellOrders} />
+        <ButtonFilter
+          id="Buy"
+          sx={{
+            borderRight: 0,
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+          }}
+          ButtonLabel="Buy"
+          onClick={filterBuyOrders}
+        />
+        <ButtonFilter
+          id="Sell"
+          sx={{
+            borderLeft: 0,
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+          }}
+          ButtonLabel="Sell"
+          onClick={filterSellOrders}
+        />
       </Box>
       {!userAddress ? (
         <Typography

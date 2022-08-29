@@ -1,25 +1,29 @@
 import React, { useState } from 'react'
-import { Box, Button } from '@mui/material'
+import { Box, Button, SxProps } from '@mui/material'
 
 type prop = {
   id: string
   ButtonLabel: string
+  sx?: SxProps
   onClick: () => void
 }
 
-const ButtonFilter = ({ id, ButtonLabel, onClick, ...props }: prop) => {
+const ButtonFilter = ({ id, ButtonLabel, onClick, sx = [] }: prop) => {
   const [color, setColor] = useState('#ffffffb3')
   return (
-    <Box {...props}>
+    <Box>
       <Button
         variant="outlined"
         id={id}
-        sx={{
-          color: color,
-          borderColor: color,
-          fontSize: '13px',
-          textTransform: 'capitalize',
-        }}
+        sx={[
+          {
+            color: color,
+            borderColor: color,
+            fontSize: '13px',
+            textTransform: 'capitalize',
+          },
+          ...(Array.isArray(sx) ? sx : [sx]),
+        ]}
         onClick={() => {
           onClick()
           color === '#ffffffb3' ? setColor('primary') : setColor('#ffffffb3')

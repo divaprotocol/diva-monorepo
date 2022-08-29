@@ -376,8 +376,26 @@ export function MyOrders() {
           InputValue={search}
           onInputChange={handleUnderLyingInput}
         />
-        <ButtonFilter id="Buy" ButtonLabel="Buy" onClick={filterBuyOrders} />
-        <ButtonFilter id="Sell" ButtonLabel="Sell" onClick={filterSellOrders} />
+        <ButtonFilter
+          id="Buy"
+          sx={{
+            borderRight: 0,
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+          }}
+          ButtonLabel="Buy"
+          onClick={filterBuyOrders}
+        />
+        <ButtonFilter
+          id="Sell"
+          sx={{
+            borderLeft: 0,
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+          }}
+          ButtonLabel="Sell"
+          onClick={filterSellOrders}
+        />
       </Box>
       <DataGrid
         className={classes.root}

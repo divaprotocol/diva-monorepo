@@ -45,7 +45,7 @@ const DropDownFilter = ({
           aria-expanded={DropDownMenuOpen ? 'true' : undefined}
           endIcon={<ArrowDropDownIcon />}
           sx={{
-            color: '#ffffff',
+            color: '#ffffffb3',
             borderColor: '#828282',
             fontSize: '13px',
             textTransform: 'capitalize',
@@ -79,57 +79,6 @@ const DropDownFilter = ({
           <MenuItem onClick={onMenuItemClick}>{MenuItemLabel}</MenuItem>
         </Menu>
       </Box>
-      {/* 
-        <Box marginRight="30px">
-          <Button
-            variant="outlined"
-            id="underlying-filter-button"
-            aria-controls={UnderlyingMenuOpen ? 'creator-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={UnderlyingMenuOpen ? 'true' : undefined}
-            endIcon={<ArrowDropDownIcon />}
-            sx={{
-              color: '#ffffff',
-              fontSize: '16px',
-              textTransform: 'capitalize',
-            }}
-            onClick={(e) => {
-              setUnderlyingValue(e.currentTarget)
-            }}
-          >
-            {underlyingButtonLabel}
-          </Button>
-          <Menu
-            id="underlying-Menu"
-            anchorEl={underlyingValue}
-            open={UnderlyingMenuOpen}
-            onClose={() => setUnderlyingValue(null)}
-          >
-            <MenuItem sx={{ width: '300px', height: '50px' }}>
-              <Input
-                value={underLyingInput}
-                placeholder="Filter underlying"
-                aria-label="Filter underlying"
-                sx={{ width: '300px', height: '50px' }}
-                onChange={onUnderlyingChange}
-                startAdornment={
-                  <InputAdornment position="start">
-                    <Search />
-                  </InputAdornment>
-                }
-              />
-            </MenuItem>
-          </Menu>
-        </Box> */}
-      {/* 
-        <Box>
-          <FormControlLabel
-            value="start"
-            control={<Switch color="primary" onChange={handleExpiryPools} />}
-            label="Hide Expired Pools"
-            labelPlacement="start"
-          />
-        </Box> */}
     </>
   )
 }
