@@ -1,0 +1,7 @@
+{
+    "TOKEN"         : "Secret token of the bot from https://discord.com/developers/applications/957597435964850216/oauth2/general",
+    "PREFIX"        : "/",
+    "PRIVATE_KEY"   : "Private key of the collateral sender address",
+    "DUSD_CONTRACT" : "The address of the collateral token to be send to users"
+    
+}

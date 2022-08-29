@@ -12,7 +12,7 @@ export enum EtherscanLinkType {
 }
 
 export function getEtherscanLink(
-  chainId = 3,
+  chainId = 5,
   address: string,
   type: EtherscanLinkType
 ): string {

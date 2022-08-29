@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: DivaDiamond
-    network: rinkeby
+    network: goerli
     source:
-      address: "0x3481C73363b52a26068b1C7006CEF98670FEE514"
+      address: "0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85"
       abi: DivaDiamond
-      startBlock: 10749776
+      startBlock: 7087046
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -21,6 +21,7 @@ dataSources:
         - FeeRecipientCollateralToken
         - PositionToken
         - TestnetUser
+        - UserPositionTokens
       abis:
         - name: DivaDiamond
           file: ../diva-contracts/abis/diamond.json
@@ -45,4 +46,24 @@ dataSources:
           handler: handleFeeClaimTransferred
         - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: ExchangeProxy
+    network: goerli
+    source:
+      address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
+      abi: IZeroEx
+      startBlock: 7087046
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - NativeOrderFill
+      abis:
+        - name: IZeroEx
+          file: ./abi/IZeroEx.json
+      eventHandlers:
+        - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
+          handler: handleLimitOrderFilledEvent
       file: ./src/mapping.ts
