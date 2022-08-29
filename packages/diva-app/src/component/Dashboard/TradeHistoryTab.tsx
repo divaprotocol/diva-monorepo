@@ -381,7 +381,7 @@ export function TradeHistoryTab() {
           ButtonLabel="Buy"
           onClick={filterBuyOrders}
         />
-        <Divider orientation="vertical" color="#ffffffb3" />
+        <Divider orientation="vertical" />
         <ButtonFilter
           id="Sell"
           sx={{
