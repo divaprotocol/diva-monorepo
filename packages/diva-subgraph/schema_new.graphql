@@ -1,3 +1,6 @@
+# Challenge entity captures all the challenges
+# submitted by position token holders for a given
+# contingent pool
 type Challenge @entity {
   id: ID!
   challengedBy: Bytes!
@@ -5,6 +8,11 @@ type Challenge @entity {
   pool: Pool!
 }
 
+# Pool entity captures the latest state of a 
+# contingent pool. Parameters are set/updated when
+# a contingent pool is created, liquidity is added/removed
+# and during the settlement process (e.g., when final 
+# reference value is set)
 type Pool @entity {
   id: ID! # original -> poolId
   floor: BigInt!
@@ -33,6 +41,10 @@ type Pool @entity {
   challenges: [Challenge!] @derivedFrom(field: "pool")
 }
 
+# CollateralToken entity captures the collateral tokens
+# that are being used as collateral assets when creating
+# contingent pools. The collateral token is also the asset
+# in which fees are denominated.
 type CollateralToken @entity {
   id: ID! # original -> collateral token address
   name: String!
