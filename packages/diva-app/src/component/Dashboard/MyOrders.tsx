@@ -1,4 +1,11 @@
-import { Box, Button, Stack, InputAdornment, Input } from '@mui/material'
+import {
+  Box,
+  Button,
+  Stack,
+  InputAdornment,
+  Input,
+  Divider,
+} from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { formatUnits } from 'ethers/lib/utils'
@@ -386,6 +393,7 @@ export function MyOrders() {
           ButtonLabel="Buy"
           onClick={filterBuyOrders}
         />
+        <Divider orientation="vertical" color="#ffffffb3" />
         <ButtonFilter
           id="Sell"
           sx={{

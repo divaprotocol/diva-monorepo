@@ -36,7 +36,7 @@ const DropDownFilter = ({
   const DropDownMenuOpen = Boolean(dropDownMenuValue)
   return (
     <>
-      <Box marginRight="35px">
+      <Box marginRight="30px">
         <Button
           variant="outlined"
           id={id}

@@ -798,7 +798,6 @@ export function MyPositions() {
           display: 'flex',
           flexDirection: 'row',
           maxWidth: '400px',
-          justifyContent: 'space-between',
         }}
       >
         <DropDownFilter
@@ -809,6 +808,7 @@ export function MyPositions() {
         />
         <ButtonFilter
           id="Hide expired pools"
+          sx={{ marginRight: '30px' }}
           ButtonLabel="Hide Expired"
           onClick={handleExpiredPools}
         />

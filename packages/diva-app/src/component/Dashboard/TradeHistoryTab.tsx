@@ -21,7 +21,7 @@ import Typography from '@mui/material/Typography'
 import styled from 'styled-components'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { Box, Stack } from '@mui/material'
+import { Box, Divider, Stack } from '@mui/material'
 import PoolsTable from '../PoolsTable'
 import { getDateTime } from '../../Util/Dates'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
@@ -381,6 +381,7 @@ export function TradeHistoryTab() {
           ButtonLabel="Buy"
           onClick={filterBuyOrders}
         />
+        <Divider orientation="vertical" color="#ffffffb3" />
         <ButtonFilter
           id="Sell"
           sx={{
