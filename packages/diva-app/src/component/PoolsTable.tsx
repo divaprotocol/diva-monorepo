@@ -102,10 +102,10 @@ export default function PoolsTable({
 
   // set the default view to grid in mobile
   useEffect(() => {
-    if (isMobile) {
+    if (isMobile && isViewToggle) {
       setSelectedPoolsView('Grid')
     }
-  }, [isMobile])
+  }, [isMobile, isViewToggle])
 
   const handleCreatorInput = (e) => {
     onCreatorChanged(e.target.value)

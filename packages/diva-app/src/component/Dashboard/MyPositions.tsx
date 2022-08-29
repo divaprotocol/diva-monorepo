@@ -6,6 +6,9 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
+  Divider,
+  Grid,
+  Pagination,
   Stack,
   TextField,
   Tooltip,
@@ -47,6 +50,9 @@ import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import request from 'graphql-request'
 import { Pool, queryUser } from '../../lib/queries'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
+import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
+import { Box } from '@mui/system'
+import { calcPayoffPerToken } from '../../Util/calcPayoffPerToken'
 
 type Response = {
   [token: string]: BigNumber
@@ -100,6 +106,7 @@ const SubmitButton = (props: any) => {
   const [disabledButton, setDisabledButton] = useState(false)
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
+  const { isMobile } = useCustomMediaQuery()
 
   const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
@@ -258,27 +265,47 @@ const SubmitButton = (props: any) => {
 
   if (buttonName === 'Redeem') {
     return (
-      <Container>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          width: isMobile ? 'auto' : '100%',
+        }}
+      >
         <LoadingButton
           variant="contained"
           color={buttonName === 'Redeem' ? 'success' : 'primary'}
           disabled={disabledButton}
           loading={loadingValue}
           onClick={handleRedeem}
+          sx={{
+            fontSize: isMobile ? '10px' : 'auto',
+            padding: isMobile ? '5px 11px' : 'auto',
+          }}
         >
           {buttonName}
         </LoadingButton>
-      </Container>
+      </Box>
     )
   } else if (buttonName === 'Challenge') {
     return (
-      <Container>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          width: isMobile ? 'auto' : '100%',
+        }}
+      >
         <LoadingButton
           variant="contained"
           loading={loadingValue}
           onClick={(e) => {
             e.stopPropagation()
             handleOpen()
+          }}
+          sx={{
+            fontSize: isMobile ? '10px' : 'auto',
+            padding: isMobile ? '5px 11px' : 'auto',
           }}
         >
           Challenge
@@ -302,6 +329,10 @@ const SubmitButton = (props: any) => {
               color="primary"
               type="submit"
               loading={loadingValue}
+              sx={{
+                fontSize: isMobile ? '10px' : 'auto',
+                padding: isMobile ? '5px 11px' : 'auto',
+              }}
               onClick={(e) => {
                 setLoadingValue(textFieldValue ? true : false)
                 if (diva != null) {
@@ -338,7 +369,7 @@ const SubmitButton = (props: any) => {
             </LoadingButton>
           </DialogActions>
         </Dialog>
-      </Container>
+      </Box>
     )
   } else {
     return <></>
@@ -506,6 +537,129 @@ const columns: GridColDef[] = [
   },
 ]
 
+const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
+  if (!row) return
+
+  const { Icon, Id, Floor, TVL, finalValue, Cap, Balance, Status } = row
+
+  const DATA_ARRAY = [
+    {
+      label: 'Floor',
+      value: Floor,
+    },
+    {
+      label: 'TVL',
+      value: TVL,
+    },
+    {
+      label: 'Final Value',
+      value: finalValue,
+    },
+    {
+      label: 'Cap',
+      value: Cap,
+    },
+    {
+      label: 'Balance',
+      value: Balance,
+    },
+    {
+      label: 'Payoff',
+      value: 0,
+    },
+  ]
+
+  return (
+    <>
+      <Divider light />
+      <Stack
+        sx={{
+          fontSize: '10px',
+          width: '100%',
+          margin: '12px 0',
+        }}
+        spacing={1.6}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gridGap: '8px',
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontWeight: 500,
+              }}
+            >
+              {Icon}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '9.2px',
+              }}
+            >
+              #{Id}
+            </Typography>
+            <AddToMetamask row={row} />
+          </Box>
+          <Box>
+            <Button
+              size="small"
+              sx={{
+                borderRadius: '40px',
+                fontSize: '10px',
+                background:
+                  Status === 'Expired'
+                    ? 'rgba(237, 108, 2, 0.4)'
+                    : 'rgba(51, 147, 224, 0.4)',
+              }}
+              variant="contained"
+            >
+              {Status}
+            </Button>
+          </Box>
+        </Box>
+        <Grid sx={{}} container rowGap={1.6} justifyContent="space-between">
+          {DATA_ARRAY.map(({ label, value }) => (
+            <Grid item spacing={1.6} key={label} xs={4}>
+              <Stack direction="row" spacing={2}>
+                <Box
+                  sx={{
+                    color: '#828282',
+                    minWidth: '50px',
+                  }}
+                >
+                  {label}
+                </Box>
+                <Box>
+                  {label === 'Payoff' ? (
+                    <Payoff row={row} />
+                  ) : (
+                    value.toString().slice(0, -2)
+                  )}
+                </Box>
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
+        <Stack alignItems="flex-end">
+          <SubmitButton row={row} buttonName="yolo" {...row} />
+        </Stack>
+      </Stack>
+      <Divider light />
+    </>
+  )
+}
+
 export function MyPositions() {
   const { provider, chainId } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
@@ -515,6 +669,7 @@ export function MyPositions() {
   const dispatch = useDispatch()
   const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
     useGovernanceParameters()
+  const { isMobile } = useCustomMediaQuery()
 
   useEffect(() => {
     dispatch(
@@ -740,7 +895,7 @@ export function MyPositions() {
         height: '100%',
       }}
       spacing={6}
-      paddingRight={6}
+      paddingRight={isMobile ? 0 : 6}
     >
       {!userAddress ? (
         <Typography
@@ -756,14 +911,38 @@ export function MyPositions() {
         </Typography>
       ) : (
         <>
-          <PoolsTable
-            page={page}
-            rows={sortedRows}
-            loading={balances.isLoading}
-            rowCount={3000}
-            columns={columns}
-            onPageChange={(page) => setPage(page)}
-          />
+          {isMobile ? (
+            <Stack
+              width={'100%'}
+              sx={{
+                marginTop: '16px',
+              }}
+              spacing={2}
+            >
+              <Box>
+                {sortedRows.map((row) => (
+                  <MyPositionsTokenCard row={row} key={row.Id} />
+                ))}
+              </Box>
+              <Pagination
+                count={10}
+                sx={{
+                  marginBottom: 3,
+                }}
+                onChange={(e, page) => setPage(page - 1)}
+                page={page + 1}
+              />
+            </Stack>
+          ) : (
+            <PoolsTable
+              page={page}
+              rows={sortedRows}
+              loading={balances.isLoading}
+              rowCount={3000}
+              columns={columns}
+              onPageChange={(page) => setPage(page)}
+            />
+          )}
         </>
       )}
     </Stack>
