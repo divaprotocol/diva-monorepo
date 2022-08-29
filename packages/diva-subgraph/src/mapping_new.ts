@@ -125,6 +125,16 @@ function handleLiquidityEvent(
   // *** Map long position token to `longRecipient` ***
   // **************************************************
 
+  // Check whether a User entity for `shortRecipient` already exists
+  let longRecipientEntity = User.load(longRecipient.toHexString());
+
+  // If not, add it. Could be the case during PoolIssued, LiquidityAdded or LiquidityRemoved events.
+  // QUESTION StatusChanged events as well? I think so because msg.sender could be anyone (msg.sender is used as dummy for shortRecipient and longRecipient in StatusChanged event handling)
+  if (!longRecipientEntity) {
+    longRecipientEntity = new User(longRecipient.toHexString());
+    longRecipientEntity.save();
+  }
+
   // Check whether the long position token is already mapped to the user `longRecipient`
   let userLongPositionTokenEntity = UserPositionToken.load(
     longRecipient.toHexString() + "-" + parameters.longToken.toHexString())
