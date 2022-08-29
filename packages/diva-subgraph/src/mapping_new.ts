@@ -235,7 +235,7 @@ function handleLiquidityEvent(
   // related tasks is updated inside this if clause.
   if (!poolEntity) {
     poolEntity = new Pool(poolId.toString());
-    poolEntity.createdBy = msgSender; // TODO Consider renaming to triggeredBy
+    poolEntity.createdBy = msgSender;
     poolEntity.createdAt = blockTimestamp;
 
 
