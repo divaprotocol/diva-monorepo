@@ -9,6 +9,7 @@ import {
   Link,
   Typography,
   useTheme,
+  Grid,
 } from '@mui/material'
 import DateRangeIcon from '@mui/icons-material/DateRange'
 import CampaignIcon from '@mui/icons-material/Campaign'
@@ -24,7 +25,7 @@ const columns: GridColDef[] = [
   {
     field: 'Task',
     align: 'left',
-    minWidth: 550,
+    minWidth: 350,
     renderHeader: (header) => <WhiteText>{'Task'}</WhiteText>,
     renderCell: (cell) => {
       let link = ''
@@ -238,6 +239,14 @@ export const Tasks = (props: any) => {
   const [calcRows, setCalcRows] = useState(rows)
   const [points, setPoints] = useState(0)
   const [multiplier, setMultiplier] = useState('1.0')
+  const [mobile, setMobile] = useState(false)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setMobile(true)
+    } else {
+      setMobile(false)
+    }
+  }, [])
   let score = 0
   const testnetUser = useQuery<TestUser>(
     `testnetUser-${userAddress}`,
@@ -410,25 +419,30 @@ export const Tasks = (props: any) => {
         <h2> Testnet Tasks</h2>
       </Box>
       <Stack
-        sx={{ justifyContent: 'space-between' }}
-        direction={'row'}
+        sx={{ pb: theme.spacing(5), justifyContent: 'space-between' }}
+        direction={mobile ? 'column' : 'row'}
         height="80%"
         width="90%"
       >
-        <Container
-          sx={{ width: theme.spacing(99), marginLeft: theme.spacing(5) }}
-        >
-          <DataGrid
-            sx={{ border: 0 }}
-            hideFooter={true}
-            autoHeight={true}
-            disableColumnMenu={true}
-            disableSelectionOnClick={true}
-            className={classes.root}
-            rows={calcRows}
-            columns={columns}
-          />
-        </Container>
+        {!mobile && (
+          <Container
+            sx={{
+              width: theme.spacing(mobile ? 40 : 99),
+              marginLeft: theme.spacing(mobile ? 0 : 5),
+            }}
+          >
+            <DataGrid
+              sx={{ width: '100%', border: 0 }}
+              hideFooter={true}
+              autoHeight={true}
+              disableColumnMenu={true}
+              disableSelectionOnClick={true}
+              className={classes.root}
+              rows={calcRows}
+              columns={columns}
+            />
+          </Container>
+        )}
 
         <Stack
           spacing={theme.spacing(6)}
@@ -436,7 +450,7 @@ export const Tasks = (props: any) => {
         >
           <Box
             sx={{ mb: theme.spacing(-17), border: 1, borderColor: '#2A2A2D' }}
-            width={theme.spacing(65)}
+            width={mobile ? '100%' : theme.spacing(65)}
             height={theme.spacing(30)}
             style={{
               background: '#171718',
@@ -467,10 +481,10 @@ export const Tasks = (props: any) => {
             style={{
               background: 'linear-gradient(to bottom, #050539, #0D0D11)',
             }}
-            width={theme.spacing(65)}
+            width={mobile ? '100%' : theme.spacing(65)}
             height={theme.spacing(30)}
           >
-            <Container sx={{ pt: theme.spacing(5) }}>
+            <Container sx={{ mr: theme.spacing(15), pt: theme.spacing(5) }}>
               <Container>
                 <Typography
                   fontSize={'1.2em'}
@@ -480,7 +494,10 @@ export const Tasks = (props: any) => {
                   Your rewards
                 </Typography>
               </Container>
-              <Stack direction={'row'} sx={{ justifyContent: 'space-between' }}>
+              <Stack
+                direction={'row'}
+                sx={{ justifyContent: mobile ? 'center' : 'space-between' }}
+              >
                 <Container>
                   <Typography>Current points</Typography>
                   {userAddress != null ? (
@@ -514,13 +531,28 @@ export const Tasks = (props: any) => {
               </Stack>
             </Container>
           </Box>
+          {mobile && (
+            <DataGrid
+              sx={{
+                width: mobile ? '100%' : theme.spacing(99),
+                border: 0,
+              }}
+              hideFooter={true}
+              autoHeight={true}
+              disableColumnMenu={true}
+              disableSelectionOnClick={true}
+              className={classes.root}
+              rows={calcRows}
+              columns={columns}
+            />
+          )}
           <Box
             style={{
               background: '#171718',
             }}
             sx={{ border: 1, borderColor: '#2A2A2D' }}
-            width={theme.spacing(65)}
-            height={theme.spacing(30)}
+            width={mobile ? '100%' : theme.spacing(65)}
+            height={theme.spacing(mobile ? 40 : 30)}
           >
             <Container sx={{ pt: theme.spacing(5) }}>
               <Stack
