@@ -61,7 +61,7 @@ export function ReviewAndSubmit({
   const isWhitelistedDataFeed =
     matchingDataFeedProviders.length > 0 &&
     matchingDataFeedProviders.some((v) => formik.values.dataProvider === v.id)
-  console.log(offer, 'offer')
+  console.log(values, 'values')
   return (
     <Stack
       direction={mobile ? 'column' : 'row'}
@@ -264,7 +264,9 @@ export function ReviewAndSubmit({
                     Offer expiry
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.offerDuration === 24 * 60 * 60 * 1000 && '1 Day'}
+                    {values.offerDuration ===
+                      Math.floor(24 * 60 * 60 + Date.now() / 1000).toString() &&
+                      '1 Day'}
                   </Typography>
                 </Stack>
               )}

@@ -74,7 +74,10 @@ export function DefineOfferAttributes({
   }
   const handleOfferDurationChange = (event) => {
     setOfferDuration(event.target.value)
-    formik.setFieldValue('offerDuration', event.target.value)
+    formik.setFieldValue(
+      'offerDuration',
+      Math.floor(event.target.value + Date.now() / 1000).toString()
+    )
   }
   const handleMinTakerContributionsChange = (event) => {
     formik.setFieldValue('minTakerContribution', event.target.value)

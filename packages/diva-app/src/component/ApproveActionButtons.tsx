@@ -1,8 +1,8 @@
 import { CircularProgress, Container, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import { ethers } from 'ethers'
-import { config } from '../constants'
-import { parseEther, parseUnits } from 'ethers/lib/utils'
+import { config, CREATE_POOL_TYPE } from '../constants'
+import { parseEther, parseUnits, splitSignature } from 'ethers/lib/utils'
 import { fetchPool, selectUserAddress } from '../Redux/appSlice'
 import React, { useEffect, useState } from 'react'
 import { useConnectionContext } from '../hooks/useConnectionContext'
@@ -12,6 +12,8 @@ import { useAppSelector } from '../Redux/hooks'
 import AddIcon from '@mui/icons-material/Add'
 import CheckIcon from '@mui/icons-material/Check'
 import { useDispatch } from 'react-redux'
+import { useCreatePoolFormik } from './CreatePool/formik'
+import DIVA712ABI from '../abi/DIVA712ABI.json'
 
 type Props = {
   collateralTokenAddress: string
@@ -21,6 +23,7 @@ type Props = {
   transactionType: string
   onTransactionSuccess: () => void
   alert?: boolean
+  formik?: ReturnType<typeof useCreatePoolFormik>
 }
 
 export const ApproveActionButtons = ({
@@ -31,40 +34,80 @@ export const ApproveActionButtons = ({
   transactionType,
   onTransactionSuccess,
   alert,
+  formik,
 }: Props) => {
+  const { values } = formik
   const [approveLoading, setApproveLoading] = React.useState(false)
   const [actionLoading, setActionLoading] = React.useState(false)
   const [approveEnabled, setApproveEnabled] = React.useState(false)
   const [actionEnabled, setActionEnabled] = React.useState(false)
   const [isPoolCreated, setIsPoolCreated] = React.useState(false)
+  const [jsonToExport, setJsonToExport] = useState<any>()
   const [btnName, setBtnName] = React.useState('Add')
   const { provider } = useConnectionContext()
   const account = useAppSelector(selectUserAddress)
   const chainId = provider?.network?.chainId
   const theme = useTheme()
   const dispatch = useDispatch()
-  const token = new ethers.Contract(
-    collateralTokenAddress,
-    ERC20,
-    provider?.getSigner()
-  )
+  const signer = provider?.getSigner()
+  const token = new ethers.Contract(collateralTokenAddress, ERC20, signer)
   // const CREATE_POOL_TYPE = {
   //   OfferCreateContingentPool: CREATE_POOL_OFFER_STRUCT,
   // }
+
   const diva =
     chainId != null
-      ? new ethers.Contract(
-          config[chainId!].divaAddress,
-          DIVA_ABI,
-          provider.getSigner()
-        )
+      ? new ethers.Contract(config[chainId!].divaAddress, DIVA_ABI, signer)
       : null
+
+  const eip712Diva = new ethers.Contract(
+    '0xfD7107cAC6decc8b972EaFe938F628E00716708C', //Goerli
+    DIVA712ABI,
+    signer
+  )
+  const offerCreationStats = {
+    maker: account,
+    taker:
+      values.takerAddress === 'Everyone'
+        ? '0x0000000000000000000000000000000000000000'
+        : values.takerAddress,
+    makerCollateralAmount: parseUnits(
+      values.collateralBalance,
+      values.collateralToken.decimals
+    ).toString(),
+    takerCollateralAmount: parseUnits(
+      values.collateralBalance,
+      values.collateralToken.decimals
+    ).toString(),
+    makerDirection: true,
+    offerExpiry: values.offerDuration,
+    minimumTakerFillAmount: parseUnits(
+      values.minTakerContribution === 'Fill or Kill'
+        ? values.collateralBalance
+        : values.minTakerContribution,
+      values.collateralToken.decimals
+    ).toString(),
+    referenceAsset: values.referenceAsset,
+    expiryTime: Math.floor(
+      new Date(values.expiryTime).getTime() / 1000
+    ).toString(),
+    floor: parseEther(String(values.floor)).toString(),
+    inflection: parseEther('60000').toString(),
+    cap: parseEther('80000').toString(),
+    gradient: parseEther('0.7').toString(),
+    collateralToken: values.collateralToken.id,
+    dataProvider: values.dataProvider,
+    capacity:
+      values.capacity === 'Unlimited'
+        ? '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+        : values.capacity,
+    salt: Date.now().toString(),
+  }
   const divaDomain = {
     name: 'DIVA Protocol',
     version: '1',
     chainId,
-    // verifyingContract: diva.address,
-    verifyingContract: '',
+    verifyingContract: '0xfD7107cAC6decc8b972EaFe938F628E00716708C',
   }
   const [mobile, setMobile] = useState(false)
   useEffect(() => {
@@ -77,6 +120,9 @@ export const ApproveActionButtons = ({
   useEffect(() => {
     if (transactionType === 'createoffer') {
       setBtnName('Create')
+    }
+    if (transactionType === 'filloffer') {
+      setBtnName('Fill')
     } else {
       setBtnName('Add')
     }
@@ -267,14 +313,52 @@ export const ApproveActionButtons = ({
                   break
                 case 'createoffer':
                   setApproveLoading(false)
-                  // account.signTypedDataAsync(
-                  //     divaDomain,CREATE_POOL_TYPE,
-                  // )
-                  onTransactionSuccess()
+                  console.log(signer)
+                  signer
+                    ._signTypedData(
+                      divaDomain,
+                      CREATE_POOL_TYPE,
+                      offerCreationStats
+                    )
+                    .then((signedTypedData) => {
+                      const { r, s, v } = splitSignature(signedTypedData)
+                      const signature = {
+                        signatureType: 2,
+                        v: v,
+                        r: r,
+                        s: s,
+                      }
+                      const json = {
+                        ...offerCreationStats,
+                        signature,
+                      }
+
+                      formik.setFieldValue('jsonToExport', json)
+                      console.log('json', json)
+                      onTransactionSuccess()
+                    })
+                    .catch((err: any) => {
+                      console.log(err)
+                    })
                   break
                 case 'filloffer':
-                  setApproveLoading(false)
-                  onTransactionSuccess()
+                  // setApproveLoading(false)
+                  console.log(
+                    values.jsonToExport,
+                    values.signature,
+                    '100000000'
+                  )
+                  eip712Diva
+                    .fillOfferCreateContingentPool(
+                      values.jsonToExport,
+                      values.signature,
+                      '10000'
+                    )
+                    .catch((err: any) => {
+                      console.log(err)
+                    })
+                  // .then(onTransactionSuccess())
+
                   break
               }
             }}

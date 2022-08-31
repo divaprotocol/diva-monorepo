@@ -104,10 +104,6 @@ export function CreatePool() {
   // actions after pool is successfully created
   const handlePoolSuccess = () => {
     formik.setFieldValue('step', formik.values.step + 1, true)
-    console.log(configPicked)
-    if (configPicked === 'filloffer') {
-      formik.setFieldValue('step', formik.values.step + 1, true)
-    }
   }
   const arrowSvg = (
     <svg
@@ -236,6 +232,7 @@ export function CreatePool() {
                 decimal={decimal}
                 textFieldValue={formik.values.collateralBalance}
                 transactionType={configPicked}
+                formik={formik}
               />
             ) : formik.values.step === 4 ? (
               configPicked === 'createpool' && (

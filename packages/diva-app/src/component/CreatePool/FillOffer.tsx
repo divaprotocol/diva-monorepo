@@ -2,7 +2,13 @@ import { useCreatePoolFormik } from './formik'
 import { Stack, TextField } from '@mui/material'
 import React, { useEffect } from 'react'
 import { FileUpload, FileUploadProps } from './FileUpload'
-import { formatUnits } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
+import { useErcBalance } from '../../hooks/useErcBalance'
 // const fileUploadProp: FileUploadProps = {
 //   accept: 'application/json',
 //   onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,62 +31,69 @@ export function FillOffer({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const [uploadedJson, setUploadedJson] = React.useState<any>('{}')
+  const walletBalance = useErcBalance(JSON.parse(uploadedJson).collateralToken)
   useEffect(() => {
     if (uploadedJson !== '{}' && uploadedJson != undefined) {
       const configJson = JSON.parse(uploadedJson)
-      // formik.setValues((_values) => ({
-      //   ..._values,
-      //   referenceAsset: uploadedJson.referenceAsset,
-      //   expiryTime: uploadedJson.expiryTime,
-      //   floor: uploadedJson.floor,
-      //   cap: uploadedJson.cap,
-      //   inflection: uploadedJson.inflection,
-      //   gradient: uploadedJson.gradient,
-      //   collateralToken: uploadedJson.collateralToken,
-      //   collateralWalletBalance: uploadedJson.collateralWalletBalance,
-      //   collateralBalance: uploadedJson.collateralBalance,
-      //   collateralBalanceLong: parseFloat(uploadedJson.collateralBalanceLong),
-      //   collateralBalanceShort: parseFloat(uploadedJson.collateralBalanceLong),
-      //   tokenSupply: parseFloat(uploadedJson.collateralBalance),
-      //   capacity: uploadedJson.capacity,
-      //   dataProvider: uploadedJson.dataProvider,
-      //   payoutProfile: uploadedJson.payoutProfile,
-      //   offerDirection: uploadedJson.offerDirection,
-      //   offerDuration: uploadedJson.offerDuration,
-      //   minTakerContribution: uploadedJson.minTakerContribution,
-      //   takerAddress: uploadedJson.takerAddress,
-      // }))
+
+      formik.setFieldValue(
+        'offerDirection',
+        configJson.makerDirection ? 'Long' : 'Short'
+      )
       formik.setFieldValue('referenceAsset', configJson.referenceAsset)
-      formik.setFieldValue('expiryTime', new Date(configJson.expiryTime))
-      formik.setFieldValue('floor', configJson.floor)
-      formik.setFieldValue('cap', configJson.cap)
-      formik.setFieldValue('inflection', configJson.inflection)
-      formik.setFieldValue('gradient', configJson.gradient)
-      formik.setFieldValue('collateralToken', configJson.collateralToken)
-      formik.setFieldValue(
-        'collateralWalletBalance',
-        configJson.collateralWalletBalance
-      )
-      formik.setFieldValue('collateralBalance', configJson.collateralBalance)
-      formik.setFieldValue(
-        'collateralBalanceShort',
-        configJson.collateralBalanceShort
-      )
+      formik.setFieldValue('expiryTime', new Date(configJson.expiryTime * 1000))
+      formik.setFieldValue('floor', formatEther(configJson.floor))
+      formik.setFieldValue('cap', formatEther(configJson.cap))
+      formik.setFieldValue('inflection', formatEther(configJson.inflection))
       formik.setFieldValue(
         'collateralBalanceLong',
-        configJson.collateralBalanceLong
+        formatEther(configJson.takerCollateralAmount)
       )
-      formik.setFieldValue('tokenSupply', configJson.tokenSupply)
+      formik.setFieldValue(
+        'collateralBalanceShort',
+        formatEther(configJson.makerCollateralAmount)
+      )
+      console.log(parseFloat(configJson.makerCollateralAmount), 'maker')
+      formik.setFieldValue(
+        'gradient',
+        parseFloat(formatEther(configJson.gradient))
+      )
+      formik.setFieldValue('collateralWalletBalance', walletBalance)
+      formik.setFieldValue('collateralToken.id', configJson.collateralToken)
       formik.setFieldValue('capacity', configJson.capacity)
       formik.setFieldValue('dataProvider', configJson.dataProvider)
-      formik.setFieldValue('payoutProfile', configJson.payoutProfile)
-      formik.setFieldValue('offerDirection', configJson.offerDirection)
-      formik.setFieldValue('offerDuration', configJson.offerDuration)
+      formik.setFieldValue('offerDuration', configJson.offerExpiry)
       formik.setFieldValue(
         'minTakerContribution',
-        configJson.minTakerContribution
+        formatEther(configJson.minimumTakerFillAmount)
       )
-      formik.setFieldValue('takerAddress', configJson.takerAddress)
+      formik.setFieldValue(
+        'takerAddress',
+        configJson.taker === '0x0000000000000000000000000000000000000000'
+          ? 'Everyone'
+          : configJson.taker
+      )
+      formik.setFieldValue('jsonToExport', {
+        maker: configJson.maker,
+        taker: configJson.taker,
+        makerCollateralAmount: configJson.makerCollateralAmount,
+        takerCollateralAmount: configJson.takerCollateralAmount,
+        makerDirection: configJson.makerDirection,
+        offerExpiry: configJson.offerExpiry,
+        minimumTakerFillAmount: configJson.minimumTakerFillAmount,
+        referenceAsset: configJson.referenceAsset,
+        expiryTime: configJson.expiryTime,
+        floor: configJson.floor,
+        inflection: configJson.inflection,
+        cap: configJson.cap,
+        gradient: configJson.gradient,
+        collateralToken: configJson.collateralToken,
+        dataProvider: configJson.dataProvider,
+        capacity: configJson.capacity,
+        salt: configJson.salt,
+      })
+      formik.setFieldValue('signature', configJson.signature)
+      // formik.setFieldValue('step', 3, false)
     }
     console.log('formik values', formik.values)
     console.log(uploadedJson, 'uploadedJson')

@@ -10,7 +10,7 @@ import {
   useTheme,
 } from '@mui/material'
 import { Box } from '@mui/material'
-import { config } from '../../constants'
+import { config, CREATE_POOL_TYPE } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { useCreatePoolFormik } from './formik'
@@ -157,6 +157,7 @@ export function Success({
   const { values } = formik
   const [longToken, setLongToken] = useState()
   const [shortToken, setShortToken] = useState()
+  const [jsonToExport, setJsonToExport] = useState<any>()
   const [poolId, setPoolId] = useState<number>()
   const theme = useTheme()
   const { provider } = useConnectionContext()
@@ -177,61 +178,17 @@ export function Success({
     /**
      * Remove etherscan usage and capture transaction receipt instead
      */
-    etherscanProvider.getHistory(userAddress).then((txs) => {
-      provider.getTransactionReceipt(txs[txs.length - 1].hash).then((txRc) => {
-        const id = BigNumber.from(txRc.logs[4].topics[1]).toNumber()
-        diva.getPoolParameters(id).then((pool) => {
-          setShortToken(pool.shortToken)
-          setLongToken(pool.longToken)
-          setPoolId(id)
-        })
-      })
-    })
+    // etherscanProvider.getHistory(userAddress).then((txs) => {
+    //   provider.getTransactionReceipt(txs[txs.length - 1].hash).then((txRc) => {
+    //     const id = BigNumber.from(txRc.logs[4].topics[1]).toNumber()
+    //     diva.getPoolParameters(id).then((pool) => {
+    //       setShortToken(pool.shortToken)
+    //       setLongToken(pool.longToken)
+    //       setPoolId(id)
+    //     })
+    //   })
+    // })
   }, [diva])
-  // const offerCreationStats = {
-  //   maker: userAddress,
-  //   taker:
-  //     values.takerAddress === 'Everyone'
-  //       ? '0x0000000000000000000000000000000000000000'
-  //       : values.takerAddress,
-  //   makerCollateralAmount: parseUnits(
-  //     values.collateralBalance,
-  //     values.collateralToken.decimals
-  //   ).toString(),
-  //   takerCollateralAmount: parseUnits(
-  //     values.collateralBalance,
-  //     values.collateralToken.decimals
-  //   ).toString(),
-  //   makerDirection: true,
-  //   offerExpiry: values.offerDuration / 1000,
-  //   minimumTakerFillAmount: parseUnits(
-  //     values.minTakerContribution === 'Fill or Kill'
-  //       ? values.collateralBalance
-  //       : values.minTakerContribution,
-  //     values.collateralToken.decimals
-  //   ).toString(),
-  //   referenceAsset: values.referenceAsset,
-  //   expiryTime: values.expiryTime,
-  //   floor: parseEther(String(values.floor)).toString(),
-  //   inflection: parseEther('60000').toString(),
-  //   cap: parseEther('80000').toString(),
-  //   gradient: parseEther('0.7').toString(),
-  //   collateralToken: collateralTokenAddress,
-  //   dataProvider: DATA_PROVIDER,
-  //   capacity: parseUnits('200', collateralTokenDecimals).toString(),
-  //   salt: Date.now().toString(),
-  // }
-  // const { r, s, v } = splitSignature(userAddress.getSigner())
-  // const signature = {
-  //   signatureType: 2,
-  //   v: v,
-  //   r: r,
-  //   s: s,
-  // }
-  // const jsonToExport = {
-  //   ...offerCreationStats,
-  //   signature,
-  // }
 
   return (
     <Container>
@@ -350,7 +307,7 @@ export function Success({
           {transactionType === 'createoffer' && (
             <TextField
               multiline
-              value={JSON.stringify(values, null, 2)}
+              value={JSON.stringify(values.jsonToExport, null, 2)}
               style={{ background: '#121212', width: '120%', height: '100%' }}
             />
           )}
@@ -376,7 +333,7 @@ export function Success({
                 onClick={() => {
                   const link = document.createElement('a')
                   link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
-                    JSON.stringify(values, null, 2)
+                    JSON.stringify(values.jsonToExport, null, 2)
                   )}`
                   link.download = 'offer.json'
                   link.click()

@@ -7,6 +7,29 @@ import divaTextLogo from './Images/diva_logo_text.svg'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
 import TaskIcon from '@mui/icons-material/Task'
 
+const CREATE_POOL_OFFER_STRUCT = [
+  { type: 'address', name: 'maker' },
+  { type: 'address', name: 'taker' },
+  { type: 'uint256', name: 'makerCollateralAmount' },
+  { type: 'uint256', name: 'takerCollateralAmount' },
+  { type: 'bool', name: 'makerDirection' },
+  { type: 'uint256', name: 'offerExpiry' },
+  { type: 'uint256', name: 'minimumTakerFillAmount' },
+  { type: 'string', name: 'referenceAsset' },
+  { type: 'uint96', name: 'expiryTime' },
+  { type: 'uint256', name: 'floor' },
+  { type: 'uint256', name: 'inflection' },
+  { type: 'uint256', name: 'cap' },
+  { type: 'uint256', name: 'gradient' },
+  { type: 'address', name: 'collateralToken' },
+  { type: 'address', name: 'dataProvider' },
+  { type: 'uint256', name: 'capacity' },
+  { type: 'uint256', name: 'salt' },
+]
+export const CREATE_POOL_TYPE = {
+  OfferCreateContingentPool: CREATE_POOL_OFFER_STRUCT,
+}
+
 export enum SupportedChainId {
   ROPSTEN = 3,
   MAINNET = 1,

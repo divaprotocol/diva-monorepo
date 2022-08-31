@@ -23,10 +23,12 @@ export type Values = {
   capacity: string
   dataProvider: string
   payoutProfile: string
-  offerDuration?: number
+  offerDuration?: string
   offerDirection?: string
   minTakerContribution?: string
   takerAddress?: string
+  jsonToExport?: string
+  signature?: string
 }
 
 export const initialValues: Values = {
@@ -52,9 +54,11 @@ export const initialValues: Values = {
   dataProvider: '',
   payoutProfile: 'Binary',
   offerDirection: 'Long',
-  offerDuration: 24 * 60 * 60 * 1000,
+  offerDuration: Math.floor(24 * 60 * 60 + Date.now() / 1000).toString(),
   minTakerContribution: 'Fill or Kill',
   takerAddress: 'Everyone',
+  jsonToExport: '{}',
+  signature: '',
 }
 
 type Errors = {
