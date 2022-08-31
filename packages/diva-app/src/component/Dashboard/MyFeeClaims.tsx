@@ -1,9 +1,10 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
-  Button,
-  Container,
+  Box,
+  CircularProgress,
   Dialog,
   DialogActions,
+  Divider,
   Stack,
   TextField,
   Typography,
@@ -31,11 +32,14 @@ import {
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
+import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 
 const TransferFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
   const dispatch = useDispatch()
+  const { isMobile } = useCustomMediaQuery()
+
   const [decimal, setDecimal] = useState(18)
   const chainId = provider?.network?.chainId
   const token = new ethers.Contract(
@@ -69,11 +73,21 @@ const TransferFeesCell = (props: any) => {
   }
 
   return (
-    <Container>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        width: isMobile ? 'auto' : '100%',
+      }}
+    >
       <LoadingButton
         variant="contained"
         onClick={handleOpen}
         loading={loadingValue}
+        sx={{
+          fontSize: isMobile ? '10px' : 'auto',
+          padding: isMobile ? '5px 11px' : 'auto',
+        }}
       >
         Transfer Fees
       </LoadingButton>
@@ -134,7 +148,7 @@ const TransferFeesCell = (props: any) => {
           </Stack>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Box>
   )
 }
 
@@ -142,6 +156,8 @@ const ClaimFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
   const dispatch = useDispatch()
+  const { isMobile } = useCustomMediaQuery()
+
   const chainId = provider?.network?.chainId
   const [loadingValue, setLoadingValue] = useState(false)
 
@@ -160,6 +176,10 @@ const ClaimFeesCell = (props: any) => {
       type="submit"
       variant="contained"
       loading={loadingValue}
+      sx={{
+        fontSize: isMobile ? '10px' : 'auto',
+        padding: isMobile ? '5px 11px' : 'auto',
+      }}
       onClick={() => {
         setLoadingValue(true)
         if (diva != null) {
@@ -253,11 +273,71 @@ const columns: GridColDef[] = [
   },
 ]
 
+const MyFeeClaimsTokenCard = ({ row }: { row: GridRowModel }) => {
+  const { Underlying } = row
+
+  return (
+    <>
+      <Divider light />
+      <Stack
+        sx={{
+          fontSize: '10px',
+          width: '100%',
+          margin: '12px 0',
+        }}
+        spacing={1.6}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '12px',
+              fontWeight: 500,
+              color: '#FFFFFF',
+            }}
+          >
+            {Underlying}
+          </Typography>
+          <Stack spacing={1.6} direction="row">
+            <Typography
+              sx={{
+                fontSize: '10px',
+                color: '#828282',
+              }}
+            >
+              Amount
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '9.2px',
+              }}
+            >
+              <AmountCell row={row} />
+            </Typography>
+          </Stack>
+        </Box>
+
+        <Stack direction="row" justifyContent="flex-end" spacing={2}>
+          <ClaimFeesCell row={row} {...row} />
+          <TransferFeesCell row={row} {...row} />
+        </Stack>
+      </Stack>
+      <Divider light />
+    </>
+  )
+}
+
 export function MyFeeClaims() {
   const { address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
 
   const dispatch = useAppDispatch()
+  const { isMobile } = useCustomMediaQuery()
 
   const feeRecipients = useAppSelector(selectFeeRecipients)
   const poolsRequestStatus = useAppSelector(
@@ -298,7 +378,7 @@ export function MyFeeClaims() {
         height: '100%',
       }}
       spacing={6}
-      paddingRight={6}
+      paddingRight={isMobile ? 0 : 6}
     >
       {!userAddress ? (
         <Typography
@@ -314,14 +394,42 @@ export function MyFeeClaims() {
         </Typography>
       ) : (
         <>
-          <PoolsTable
-            disableRowClick
-            page={page}
-            rows={rows}
-            loading={poolsRequestStatus === 'pending'}
-            columns={columns}
-            onPageChange={(page) => setPage(page)}
-          />
+          {isMobile ? (
+            <Stack
+              width={'100%'}
+              sx={{
+                marginTop: '16px',
+                marginBottom: '16px',
+              }}
+              spacing={2}
+            >
+              {poolsRequestStatus !== 'pending' ? (
+                <>
+                  <Box>
+                    {rows.map((row) => (
+                      <MyFeeClaimsTokenCard row={row} key={row.Id} />
+                    ))}
+                  </Box>
+                </>
+              ) : (
+                <CircularProgress
+                  sx={{
+                    margin: '0 auto',
+                    marginTop: 10,
+                  }}
+                />
+              )}
+            </Stack>
+          ) : (
+            <PoolsTable
+              disableRowClick
+              page={page}
+              rows={rows}
+              loading={poolsRequestStatus === 'pending'}
+              columns={columns}
+              onPageChange={(page) => setPage(page)}
+            />
+          )}
         </>
       )}
     </Stack>
