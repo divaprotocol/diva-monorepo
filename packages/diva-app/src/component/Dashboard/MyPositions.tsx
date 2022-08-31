@@ -1,7 +1,7 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
   Button,
-  Container,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -916,22 +916,35 @@ export function MyPositions() {
               width={'100%'}
               sx={{
                 marginTop: '16px',
+                marginBottom: '16px',
               }}
               spacing={2}
             >
-              <Box>
-                {sortedRows.map((row) => (
-                  <MyPositionsTokenCard row={row} key={row.Id} />
-                ))}
-              </Box>
-              <Pagination
-                count={10}
-                sx={{
-                  marginBottom: 3,
-                }}
-                onChange={(e, page) => setPage(page - 1)}
-                page={page + 1}
-              />
+              {!balances.isLoading ? (
+                <>
+                  <Box>
+                    {sortedRows.map((row) => (
+                      <MyPositionsTokenCard row={row} key={row.Id} />
+                    ))}
+                  </Box>
+                  <Pagination
+                    sx={{
+                      minHeight: '70px',
+                      fontSize: '14px',
+                    }}
+                    count={10}
+                    onChange={(e, page) => setPage(page - 1)}
+                    page={page + 1}
+                  />
+                </>
+              ) : (
+                <CircularProgress
+                  sx={{
+                    margin: '0 auto',
+                    marginTop: 10,
+                  }}
+                />
+              )}
             </Stack>
           ) : (
             <PoolsTable

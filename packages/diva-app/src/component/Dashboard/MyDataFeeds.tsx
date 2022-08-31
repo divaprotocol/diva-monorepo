@@ -1,10 +1,15 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
-  Container,
+  Box,
+  Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
+  Divider,
+  Grid,
+  Pagination,
   Stack,
   TextField,
   Tooltip,
@@ -33,10 +38,12 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { ExpiresInCell } from '../Markets/Markets'
 import { getAppStatus } from '../../Util/getAppStatus'
+import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 
 export const DueInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
   const statusTimestamp = parseInt(props.row.StatusTimestamp)
+  const { isMobile } = useCustomMediaQuery()
 
   if (props.row.Status === 'Expired') {
     const minUntilExp = getExpiryMinutesFromNow(
@@ -51,7 +58,7 @@ export const DueInCell = (props: any) => {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              height: '150vh',
+              height: isMobile ? 'auto' : '150vh',
             }}
           >
             {'<1m'}
@@ -64,7 +71,7 @@ export const DueInCell = (props: any) => {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              height: '150vh',
+              height: isMobile ? 'auto' : '150vh',
             }}
           >
             {(minUntilExp - (minUntilExp % 60)) / 60 +
@@ -89,7 +96,7 @@ export const DueInCell = (props: any) => {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              height: '150vh',
+              height: isMobile ? 'auto' : '150vh',
             }}
           >
             {'<1m'}
@@ -102,7 +109,7 @@ export const DueInCell = (props: any) => {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              height: '150vh',
+              height: isMobile ? 'auto' : '150vh',
             }}
           >
             {(minUntilExp - (minUntilExp % 60)) / 60 +
@@ -122,7 +129,7 @@ export const DueInCell = (props: any) => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          height: '150vh',
+          height: isMobile ? 'auto' : '150vh',
         }}
       >
         {'-'}
@@ -135,6 +142,7 @@ const SubmitCell = (props: any) => {
   const userAddress = useAppSelector(selectUserAddress)
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
+  const { isMobile } = useCustomMediaQuery()
 
   const diva =
     chainId != null
@@ -176,13 +184,23 @@ const SubmitCell = (props: any) => {
       now.getTime() < relevantStartTime + props.row.ChallengePeriod * 1000)
 
   return (
-    <Container>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        width: isMobile ? 'auto' : '100%',
+      }}
+    >
       <LoadingButton
         variant="contained"
         onClick={handleOpen}
         // disabled={!enabled || disabledButton}
         disabled={!enabled}
         loading={loadingValue}
+        sx={{
+          fontSize: isMobile ? '10px' : 'auto',
+          padding: isMobile ? '5px 11px' : 'auto',
+        }}
       >
         Submit value
       </LoadingButton>
@@ -204,6 +222,10 @@ const SubmitCell = (props: any) => {
             color="primary"
             type="submit"
             loading={loadingValue}
+            sx={{
+              fontSize: isMobile ? '10px' : 'auto',
+              padding: isMobile ? '5px 11px' : 'auto',
+            }}
             onClick={() => {
               setLoadingValue(textFieldValue ? true : false)
               if (diva != null) {
@@ -241,7 +263,7 @@ const SubmitCell = (props: any) => {
           </LoadingButton>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Box>
   )
 }
 
@@ -320,12 +342,131 @@ const columns: GridColDef[] = [
   },
 ]
 
+const MyDataFeedsTokenCard = ({ row }: { row: GridRowModel }) => {
+  if (!row) return
+
+  const { Icon, Id, Floor, finalValue, Cap, Status, Inflection } = row
+
+  const DATA_ARRAY = [
+    {
+      label: 'Floor',
+      value: Floor,
+    },
+    {
+      label: 'Inflection',
+      value: Inflection,
+    },
+    {
+      label: 'Cap',
+      value: Cap,
+    },
+    {
+      label: 'Final Value',
+      value: finalValue,
+    },
+    {
+      label: 'Due In',
+      value: 0,
+    },
+  ]
+
+  return (
+    <>
+      <Divider light />
+      <Stack
+        sx={{
+          fontSize: '10px',
+          width: '100%',
+          margin: '12px 0',
+        }}
+        spacing={1.6}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gridGap: '8px',
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontWeight: 500,
+              }}
+            >
+              {Icon}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '9.2px',
+              }}
+            >
+              #{Id}
+            </Typography>
+          </Box>
+          <Box>
+            <Button
+              size="small"
+              sx={{
+                borderRadius: '40px',
+                fontSize: '10px',
+                background:
+                  Status === 'Expired'
+                    ? 'rgba(237, 108, 2, 0.4)'
+                    : 'rgba(51, 147, 224, 0.4)',
+              }}
+              variant="contained"
+            >
+              {Status}
+            </Button>
+          </Box>
+        </Box>
+        <Grid container rowGap={1.6} justifyContent="space-between">
+          {DATA_ARRAY.map(({ label, value }) => (
+            <Grid item spacing={1.6} key={label} xs={4}>
+              <Stack direction="row" spacing={2}>
+                <Box
+                  sx={{
+                    color: '#828282',
+                    minWidth: '50px',
+                  }}
+                >
+                  {label}
+                </Box>
+                <Box>
+                  {label === 'Due In' ? (
+                    <DueInCell row={row} />
+                  ) : (
+                    value.toString().slice(0, -2)
+                  )}
+                </Box>
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
+        <Stack alignItems="flex-end">
+          <SubmitCell row={row} {...row} />
+        </Stack>
+      </Stack>
+      <Divider light />
+    </>
+  )
+}
+
 export function MyDataFeeds() {
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
   const dispatch = useDispatch()
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+  const { isMobile } = useCustomMediaQuery()
 
   const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
     useGovernanceParameters()
@@ -423,7 +564,7 @@ export function MyDataFeeds() {
         height: '100%',
       }}
       spacing={6}
-      paddingRight={6}
+      paddingRight={isMobile ? 0 : 6}
     >
       {!userAddress ? (
         <Typography
@@ -439,15 +580,52 @@ export function MyDataFeeds() {
         </Typography>
       ) : (
         <>
-          <PoolsTable
-            disableRowClick={true}
-            page={page}
-            rowCount={9999}
-            loading={poolsRequestStatus === 'pending'}
-            rows={rows}
-            columns={columns}
-            onPageChange={(page) => setPage(page)}
-          />
+          {isMobile ? (
+            <Stack
+              width={'100%'}
+              sx={{
+                marginTop: '16px',
+                marginBottom: '16px',
+              }}
+              spacing={2}
+            >
+              {poolsRequestStatus !== 'pending' ? (
+                <>
+                  <Box>
+                    {rows.map((row) => (
+                      <MyDataFeedsTokenCard row={row} key={row.Id} />
+                    ))}
+                  </Box>
+                  <Pagination
+                    sx={{
+                      minHeight: '70px',
+                      fontSize: '14px',
+                    }}
+                    count={10}
+                    onChange={(e, page) => setPage(page - 1)}
+                    page={page + 1}
+                  />
+                </>
+              ) : (
+                <CircularProgress
+                  sx={{
+                    margin: '0 auto',
+                    marginTop: 10,
+                  }}
+                />
+              )}
+            </Stack>
+          ) : (
+            <PoolsTable
+              disableRowClick={true}
+              page={page}
+              rowCount={9999}
+              loading={poolsRequestStatus === 'pending'}
+              rows={rows}
+              columns={columns}
+              onPageChange={(page) => setPage(page)}
+            />
+          )}
         </>
       )}
     </Stack>
