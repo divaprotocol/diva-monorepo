@@ -30,6 +30,11 @@ const addresses = {
       divaAddress: "0x625aBcb0C7371d6691796E972089d75eD356523b", 
       TestERC20Plasma: "0xfe4F5145f6e09952a5ba9e956ED0C25e3Fa4c7F1",
       WAGMI18: "0x91F13B8da062f9a042dbD37D2e61FBfAcEB267aC"
+    },
+    goerli: {
+      divaAddress: "0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85", 
+      dUSD: "0xFA158C9B780A4213f3201Ae74Cca013712c8538d",
+      WAGMI: "0x9A07D3F69411155f2790E5ed138b750C3Ecd28aD"
     }
   }
 

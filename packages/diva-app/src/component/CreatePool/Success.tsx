@@ -149,9 +149,9 @@ export function Success({
   const theme = useTheme()
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
-  const etherscanProvider = new ethers.providers.EtherscanProvider(3)
 
   const chainId = provider?.network?.chainId
+  const etherscanProvider = new ethers.providers.EtherscanProvider(chainId)
 
   const diva =
     chainId != null

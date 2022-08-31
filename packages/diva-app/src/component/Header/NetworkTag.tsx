@@ -29,6 +29,6 @@ export function NetworkTag() {
       </>
     )
   } else {
-    return <Chip label={'Preview (Ropsten)'} sx={{ marginLeft: 'auto' }} />
+    return <Chip label={'Preview (Goerli)'} sx={{ marginLeft: 'auto' }} />
   }
 }

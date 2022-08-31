@@ -64,6 +64,7 @@ export const initialState: AppStateByChain = {
   1: defaultAppState,
   3: defaultAppState,
   4: defaultAppState,
+  5: defaultAppState,
   42: defaultAppState,
   137: defaultAppState,
   80001: defaultAppState,
@@ -193,7 +194,7 @@ export const fetchPools = createAsyncThunk(
       /**
        * Handle error and fail gracefully
        */
-      console.error(err)
+      console.error(err, 'error is fetching pools')
       return {
         pools: [],
         chainId,

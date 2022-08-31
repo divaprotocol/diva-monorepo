@@ -1,7 +1,7 @@
 /**
  * Script to redeem position tokens from a pool that has already expired 
- * Run: `yarn hardhat run scripts/redeemPositionToken.js --network ropsten` 
- * Replace ropsten with any other network that is listed in constants.js
+ * Run: `yarn hardhat run scripts/redeemPositionToken.js --network goerli` 
+ * Replace goerli with any other network that is listed in constants.js
  * 
  * Note that as opposed to `addLiquidity` where you specify the amount of collateral tokens to be added, in `removeLiquidity`, you pass in the 
  * number of position tokens to remove (e.g., 200 means that 200 position and 200 short tokens will be removed). The collateral to return is 
@@ -19,7 +19,7 @@ const { addresses } = require('../constants/constants')
 async function main() {
 
   // INPUT: network (check constants.js for available values), id of an existing pool
-  const network = "ropsten"
+  const network = "goerli"
   
   // INPUT id of an existing pool and number of position tokens to redeem
   const poolId = 4 // id of an existing pool

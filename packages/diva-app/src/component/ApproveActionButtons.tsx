@@ -4,7 +4,7 @@ import { ethers } from 'ethers'
 import { config } from '../constants'
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { fetchPool, selectUserAddress } from '../Redux/appSlice'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useConnectionContext } from '../hooks/useConnectionContext'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
@@ -56,6 +56,15 @@ export const ApproveActionButtons = ({
           provider.getSigner()
         )
       : null
+
+  const [mobile, setMobile] = useState(false)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setMobile(true)
+    } else {
+      setMobile(false)
+    }
+  }, [])
   useEffect(() => {
     if (transactionType === 'create') {
       setBtnName('Create')
@@ -86,12 +95,12 @@ export const ApproveActionButtons = ({
         height: '100px',
         width: '100%',
         display: 'flex',
-        justifyContent: 'flex-end',
+        justifyContent: mobile ? 'center' : 'flex-end',
       }}
     >
-      <Stack direction="row" spacing={theme.spacing(3)}>
+      <Stack direction="row" spacing={theme.spacing(mobile ? 1 : 3)}>
         {approveLoading ? (
-          <Container sx={{ minWidth: theme.spacing(20) }}>
+          <Container sx={{ minWidth: theme.spacing(mobile ? 10 : 20) }}>
             <CircularProgress />
           </Container>
         ) : (
@@ -133,9 +142,9 @@ export const ApproveActionButtons = ({
                   })
               }}
               style={{
-                maxWidth: theme.spacing(26),
+                maxWidth: theme.spacing(mobile ? 16 : 26),
                 maxHeight: theme.spacing(5),
-                minWidth: theme.spacing(26),
+                minWidth: theme.spacing(mobile ? 16 : 26),
                 minHeight: theme.spacing(5),
               }}
             >
@@ -145,7 +154,7 @@ export const ApproveActionButtons = ({
           </Container>
         )}
         {actionLoading ? (
-          <Container sx={{ minWidth: theme.spacing(20) }}>
+          <Container sx={{ minWidth: theme.spacing(mobile ? 10 : 20) }}>
             <CircularProgress />
           </Container>
         ) : (
@@ -250,9 +259,9 @@ export const ApproveActionButtons = ({
               }
             }}
             style={{
-              maxWidth: theme.spacing(26),
+              maxWidth: theme.spacing(mobile ? 16 : 26),
               maxHeight: theme.spacing(5),
-              minWidth: theme.spacing(26),
+              minWidth: theme.spacing(mobile ? 16 : 26),
               minHeight: theme.spacing(5),
             }}
           >

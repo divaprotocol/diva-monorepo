@@ -23,7 +23,14 @@ export function DefineAdvanced({
   const [expanded, setExpanded] = useState(false)
   const [unlimited, setUnlimited] = useState(true)
   const { tokenSupply, capacity } = formik.values
-
+  const [mobile, setMobile] = useState(false)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setMobile(true)
+    } else {
+      setMobile(false)
+    }
+  }, [])
   useEffect(() => {
     if (unlimited) {
       formik.setValues((_values) => ({
@@ -43,7 +50,7 @@ export function DefineAdvanced({
       expanded={expanded}
       onChange={() => setExpanded(!expanded)}
       sx={{
-        maxWidth: '48%',
+        maxWidth: mobile ? '100%' : '48%',
         background: 'none',
         padding: 0,
         borderTop: 'none',

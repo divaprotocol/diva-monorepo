@@ -1,7 +1,7 @@
 /**
  * Script to get the pool parameters for an existing poolId
- * Run: `yarn hardhat run scripts/getPoolParameters.js --network ropsten`
- * Replace ropsten with any other network that is listed in constants.js
+ * Run: `yarn hardhat run scripts/getPoolParameters.js --network goerli`
+ * Replace goerli with any other network that is listed in constants.js
  */
 
 const { ethers } = require("hardhat");
@@ -10,7 +10,7 @@ const { addresses } = require("../constants/constants");
 
 async function main() {
   // INPUT: network (check constants.js for available values), id of an existing pool
-  const network = "ropsten";
+  const network = "goerli";
 
   // INPUT: id of existing pool
   const poolId = 100;

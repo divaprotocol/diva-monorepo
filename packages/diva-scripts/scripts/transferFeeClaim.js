@@ -1,7 +1,7 @@
 /**
  * Script to transfer fee claims
- * Run: `yarn hardhat run scripts/transferFeeClaim.js --network ropsten`
- * Replace ropsten with any other network that is listed in constants.js
+ * Run: `yarn hardhat run scripts/transferFeeClaim.js --network goerli`
+ * Replace goerli with any other network that is listed in constants.js
  */
 
 const { ethers } = require('hardhat');
@@ -12,10 +12,10 @@ const { addresses } = require('../constants/constants')
 async function main() {
 
     // INPUT: network
-    const network = "ropsten"     
+    const network = "goerli"     
     
     // INPUT: collateral token
-    const collateralTokenSymbol = "WAGMI18"
+    const collateralTokenSymbol = "dUSD"
 
     // Lookup collateral token address
     const collateralToken = addresses[network][collateralTokenSymbol];

@@ -35,6 +35,7 @@ import { selectUserAddress } from '../Redux/appSlice'
 import { useAppSelector } from '../Redux/hooks'
 import { divaGovernanceAddress } from '../constants'
 import { useWhitelist } from '../hooks/useWhitelist'
+import { useCustomMediaQuery } from '../hooks/useCustomMediaQuery'
 
 const useStyles = makeStyles({
   root: {
@@ -95,8 +96,17 @@ export default function PoolsTable({
   const classes = useStyles()
   const theme = useTheme()
   const userAddress = useAppSelector(selectUserAddress)
+  const { isMobile } = useCustomMediaQuery()
   const CreatorMenuOpen = Boolean(creatorMenuValue)
   const UnderlyingMenuOpen = Boolean(underlyingValue)
+
+  // set the default view to grid in mobile
+  useEffect(() => {
+    if (isMobile) {
+      setSelectedPoolsView('Grid')
+    }
+  }, [isMobile])
+
   const handleCreatorInput = (e) => {
     onCreatorChanged(e.target.value)
     setCreatorButtonLabel(
@@ -127,6 +137,7 @@ export default function PoolsTable({
     setSearch(e.target.value)
     setUnderlyingLabel(e.target.value === '' ? 'Underlying' : e.target.value)
   }
+
   return (
     <Stack height="100%" width="100%" spacing={5}>
       <AppBar

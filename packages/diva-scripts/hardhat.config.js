@@ -69,6 +69,12 @@ module.exports = {
         mnemonic: MNEMONIC, 
       }
     },
+    goerli: {
+      url: process.env.ALCHEMY_URL_GOERLI,
+      accounts: {
+        mnemonic: MNEMONIC, 
+      }
+    },
   },
   settings: {
     optimizer: {
