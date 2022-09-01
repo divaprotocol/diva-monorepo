@@ -1,4 +1,15 @@
-import { Box, Button, Stack, InputAdornment, Input } from '@mui/material'
+import {
+  Box,
+  Button,
+  Stack,
+  InputAdornment,
+  Input,
+  Pagination,
+  CircularProgress,
+  Divider,
+  Grid,
+  Typography,
+} from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { formatUnits } from 'ethers/lib/utils'
@@ -17,10 +28,146 @@ import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Search } from '@mui/icons-material'
 import { CoinIconPair } from '../CoinIcon'
 import { useHistory } from 'react-router-dom'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { DataGrid, GridColDef, GridRowModel } from '@mui/x-data-grid'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { makeStyles } from '@mui/styles'
 import { ExpiresInCell } from '../Markets/Markets'
+import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
+
+const MyOrdersPoolCard = ({
+  row,
+  cancelOrder,
+}: {
+  row: GridRowModel
+  cancelOrder: (event: any, orderHash: any, chainId: any) => Promise<void>
+}) => {
+  const { icon, Id, type, quantity, price, payReceive, position, orderHash } =
+    row
+
+  const history = useHistory()
+  const chainId = useAppSelector(selectChainId)
+
+  const DATA_ARRAY = [
+    {
+      label: 'Type',
+      value: type,
+    },
+    {
+      label: 'Quantity',
+      value: quantity,
+    },
+    {
+      label: 'Price',
+      value: price,
+    },
+    {
+      label: 'Pay/Receive',
+      value: payReceive,
+    },
+  ]
+
+  return (
+    <>
+      <Divider light />
+      <Stack
+        sx={{
+          fontSize: '10px',
+          width: '100%',
+          margin: '12px 0',
+        }}
+        spacing={1.6}
+        onClick={() => {
+          history.push(`../../${Id}/${position}`)
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gridGap: '8px',
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontWeight: 500,
+              }}
+            >
+              {icon}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '9.2px',
+              }}
+            >
+              #{Id}
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1.6} alignItems="center">
+            <Typography
+              sx={{
+                fontSize: '10px',
+                fontWeight: 500,
+                color: '#828282',
+              }}
+            >
+              Order Expires In
+            </Typography>
+            <ExpiresInCell row={row} {...row} />
+          </Stack>
+        </Box>
+        <Grid container rowGap={1.6} justifyContent="space-between">
+          {DATA_ARRAY.map(({ label, value }) => (
+            <Grid item key={label} xs={6}>
+              <Stack direction="row" spacing={10}>
+                <Box
+                  sx={{
+                    color: '#828282',
+                    minWidth: '60px',
+                  }}
+                >
+                  {label}
+                </Box>
+                {label === 'Type' ? (
+                  <>
+                    {value === 'BUY' ? (
+                      <GreenText>{value}</GreenText>
+                    ) : (
+                      <RedText>{value}</RedText>
+                    )}
+                  </>
+                ) : (
+                  <Box>{value}</Box>
+                )}
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
+        <Stack alignItems="flex-end">
+          <LoadingButton
+            variant="outlined"
+            startIcon={<DeleteIcon />}
+            size="small"
+            onClick={(event) => cancelOrder(event, orderHash, chainId)}
+            sx={{
+              fontSize: '10px',
+            }}
+          >
+            Cancel
+          </LoadingButton>
+        </Stack>
+      </Stack>
+      <Divider light />
+    </>
+  )
+}
 
 export function MyOrders() {
   const chainId = useAppSelector(selectChainId)
@@ -33,6 +180,7 @@ export function MyOrders() {
   const [search, setSearch] = useState('')
   const history = useHistory()
   const dispatch = useAppDispatch()
+  const { isMobile } = useCustomMediaQuery()
   const useStyles = makeStyles({
     root: {
       '&.MuiDataGrid-root .MuiDataGrid-cell:focus': {
@@ -314,50 +462,91 @@ export function MyOrders() {
         height: '100%',
       }}
       spacing={6}
-      paddingRight={6}
+      paddingRight={isMobile ? 0 : 6}
     >
       <>
-        <Stack height="100%" width="100%">
-          <Box
+        {isMobile ? (
+          <Stack
+            width={'100%'}
             sx={{
-              display: 'flex',
-              alignItems: 'end',
-              flexDirection: 'column',
-              paddingBottom: '1em',
+              marginTop: '16px',
+              marginBottom: '16px',
             }}
+            spacing={2}
           >
-            <Input
-              value={search}
-              placeholder="Filter underlying"
-              aria-label="Filter underlying"
-              onChange={(e) => setSearch(e.target.value)}
-              startAdornment={
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              }
-            />
-          </Box>
-          <DataGrid
-            className={classes.root}
-            rows={filteredRows}
-            pagination
-            columns={columns}
-            loading={poolsRequestStatus !== 'fulfilled'}
-            onPageChange={(page) => setPage(page)}
-            page={page}
-            onRowClick={(row) => {
-              history.push(`../../${row.row.Id}/${row.row.position}`)
-            }}
-            componentsProps={{
-              row: {
-                style: {
-                  cursor: 'pointer',
+            {poolsRequestStatus === 'fulfilled' ? (
+              <>
+                <Box>
+                  {filteredRows.map((row) => (
+                    <MyOrdersPoolCard
+                      row={row}
+                      key={row.Id}
+                      cancelOrder={cancelOrder}
+                    />
+                  ))}
+                </Box>
+                <Pagination
+                  sx={{
+                    minHeight: '70px',
+                    fontSize: '14px',
+                  }}
+                  count={10}
+                  onChange={(e, page) => setPage(page - 1)}
+                  page={page + 1}
+                />
+              </>
+            ) : (
+              <CircularProgress
+                sx={{
+                  margin: '0 auto',
+                  marginTop: 10,
+                }}
+              />
+            )}
+          </Stack>
+        ) : (
+          <Stack height="100%" width="100%">
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'end',
+                flexDirection: 'column',
+                paddingBottom: '1em',
+              }}
+            >
+              <Input
+                value={search}
+                placeholder="Filter underlying"
+                aria-label="Filter underlying"
+                onChange={(e) => setSearch(e.target.value)}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <Search />
+                  </InputAdornment>
+                }
+              />
+            </Box>
+            <DataGrid
+              className={classes.root}
+              rows={filteredRows}
+              pagination
+              columns={columns}
+              loading={poolsRequestStatus !== 'fulfilled'}
+              onPageChange={(page) => setPage(page)}
+              page={page}
+              onRowClick={(row) => {
+                history.push(`../../${row.row.Id}/${row.row.position}`)
+              }}
+              componentsProps={{
+                row: {
+                  style: {
+                    cursor: 'pointer',
+                  },
                 },
-              },
-            }}
-          />
-        </Stack>
+              }}
+            />
+          </Stack>
+        )}
       </>
     </Stack>
   )
