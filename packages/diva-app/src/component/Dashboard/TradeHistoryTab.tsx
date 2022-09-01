@@ -21,9 +21,18 @@ import Typography from '@mui/material/Typography'
 import styled from 'styled-components'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { Stack } from '@mui/material'
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  Grid,
+  Pagination,
+  Stack,
+} from '@mui/material'
 import PoolsTable from '../PoolsTable'
 import { getDateTime } from '../../Util/Dates'
+import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -99,6 +108,124 @@ const columns: GridColDef[] = [
     minWidth: 200,
   },
 ]
+
+const TradeHistoryTabTokenCars = ({ row }: { row: GridRowModel }) => {
+  const { Underlying, symbol, type, quantity, price, payReceive, timestamp } =
+    row
+
+  const DATA_ARRAY = [
+    {
+      label: 'Type',
+      value: type,
+    },
+    {
+      label: 'Quantity',
+      value: quantity,
+    },
+    {
+      label: 'Price',
+      value: price,
+    },
+    {
+      label: 'Pay/Receive',
+      value: payReceive,
+    },
+  ]
+
+  return (
+    <>
+      <Divider light />
+      <Stack
+        sx={{
+          fontSize: '10px',
+          width: '100%',
+          margin: '12px 0',
+        }}
+        spacing={1.6}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gridGap: '8px',
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontWeight: 500,
+              }}
+            >
+              {Underlying}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '9.2px',
+              }}
+            >
+              #{symbol}
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1.6} alignItems="center">
+            <Typography
+              sx={{
+                fontSize: '10px',
+                fontWeight: 500,
+                color: '#828282',
+              }}
+            >
+              Timestamp
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '10px',
+              }}
+            >
+              {timestamp}
+            </Typography>
+          </Stack>
+        </Box>
+        <Grid container rowGap={1.6} justifyContent="space-between">
+          {DATA_ARRAY.map(({ label, value }) => (
+            <Grid item key={label} xs={6}>
+              <Stack direction="row" spacing={10}>
+                <Box
+                  sx={{
+                    color: '#828282',
+                    minWidth: '60px',
+                  }}
+                >
+                  {label}
+                </Box>
+                {label === 'Type' ? (
+                  <>
+                    {value === 'BUY' ? (
+                      <GreenText>{value}</GreenText>
+                    ) : (
+                      <RedText>{value}</RedText>
+                    )}
+                  </>
+                ) : (
+                  <Box>{value}</Box>
+                )}
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
+        <Stack alignItems="flex-end"></Stack>
+      </Stack>
+      <Divider light />
+    </>
+  )
+}
+
 export function TradeHistoryTab() {
   const userAddress = useAppSelector(selectUserAddress)
   const chainId = useAppSelector((state) => state.appSlice.chainId)
@@ -108,6 +235,7 @@ export function TradeHistoryTab() {
   const [page, setPage] = useState(0)
   const orders: any[] = []
   const dispatch = useAppDispatch()
+  const { isMobile } = useCustomMediaQuery()
 
   useEffect(() => {
     dispatch(fetchPositionTokens({ page }))
@@ -301,7 +429,7 @@ export function TradeHistoryTab() {
         height: '100%',
       }}
       spacing={6}
-      paddingRight={6}
+      paddingRight={isMobile ? 0 : 6}
     >
       {!userAddress ? (
         <Typography
@@ -317,14 +445,51 @@ export function TradeHistoryTab() {
         </Typography>
       ) : (
         <>
-          <PoolsTable
-            disableRowClick
-            page={page}
-            rows={rows}
-            columns={columns}
-            loading={orderFills.isLoading || orderFillsMaker.isLoading}
-            onPageChange={(page) => setPage(page)}
-          />
+          {isMobile ? (
+            <Stack
+              width={'100%'}
+              sx={{
+                marginTop: '16px',
+                marginBottom: '16px',
+              }}
+              spacing={2}
+            >
+              {!orderFills.isLoading || !orderFillsMaker.isLoading ? (
+                <>
+                  <Box>
+                    {rows.map((row) => (
+                      <TradeHistoryTabTokenCars row={row} key={row.Id} />
+                    ))}
+                  </Box>
+                  <Pagination
+                    sx={{
+                      minHeight: '70px',
+                      fontSize: '14px',
+                    }}
+                    count={10}
+                    onChange={(e, page) => setPage(page - 1)}
+                    page={page + 1}
+                  />
+                </>
+              ) : (
+                <CircularProgress
+                  sx={{
+                    margin: '0 auto',
+                    marginTop: 10,
+                  }}
+                />
+              )}
+            </Stack>
+          ) : (
+            <PoolsTable
+              disableRowClick
+              page={page}
+              rows={rows}
+              columns={columns}
+              loading={orderFills.isLoading || orderFillsMaker.isLoading}
+              onPageChange={(page) => setPage(page)}
+            />
+          )}
         </>
       )}
     </Stack>

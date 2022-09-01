@@ -628,7 +628,7 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
             </Button>
           </Box>
         </Box>
-        <Grid sx={{}} container rowGap={1.6} justifyContent="space-between">
+        <Grid container rowGap={1.6} justifyContent="space-between">
           {DATA_ARRAY.map(({ label, value }) => (
             <Grid item spacing={1.6} key={label} xs={4}>
               <Stack direction="row" spacing={2}>
