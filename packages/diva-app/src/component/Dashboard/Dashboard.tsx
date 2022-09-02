@@ -65,7 +65,8 @@ const Dashboard = (props: any) => {
 
   const [value, setValue] = useState(indexToTabName[page])
 
-  const handleChange = (event: any, newValue: string) => {
+  const handleChange = (event: any, newValue: number | null) => {
+    if (newValue === value || typeof newValue !== 'number') return
     history.push(`/dashboard/${tabNameToIndex[newValue]}`)
     setValue(newValue)
   }

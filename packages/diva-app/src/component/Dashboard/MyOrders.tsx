@@ -37,9 +37,11 @@ import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 const MyOrdersPoolCard = ({
   row,
   cancelOrder,
+  loadingValue,
 }: {
   row: GridRowModel
   cancelOrder: (event: any, orderHash: any, chainId: any) => Promise<void>
+  loadingValue: boolean
 }) => {
   const { icon, Id, type, quantity, price, payReceive, position, orderHash } =
     row
@@ -159,6 +161,7 @@ const MyOrdersPoolCard = ({
             sx={{
               fontSize: '10px',
             }}
+            loading={loadingValue}
           >
             Cancel
           </LoadingButton>
@@ -482,6 +485,7 @@ export function MyOrders() {
                       row={row}
                       key={row.Id}
                       cancelOrder={cancelOrder}
+                      loadingValue={loadingValue}
                     />
                   ))}
                 </Box>
