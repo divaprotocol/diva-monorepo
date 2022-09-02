@@ -77,15 +77,15 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.GOERLI]: {
     divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
     balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
-    exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
+    exchangeProxy: '0xf91bb752490473b8342a3e964e855b9f9a2a668e',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
-    allOrders: 'https://goerli.api.0x.org/orderbook/v1/orders/',
-    order: 'https://goerli.api.0x.org/orderbook/v1/order/',
-    orderbook: 'https://goerli.api.0x.org/orderbook/v1',
+    allOrders: 'http://18.206.87.23/orderbook/v1/orders/',
+    order: 'http://18.206.87.23/orderbook/v1/order/',
+    orderbook: 'http://18.206.87.23/orderbook/v1',
     explorer: 'https://goerli.etherscan.io/',
     name: 'Görli',
     logoUrl: ethereumLogoUrl,
