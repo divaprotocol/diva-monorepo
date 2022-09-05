@@ -9,7 +9,7 @@ import {
 import { LoadingButton } from '@mui/lab'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { formatUnits } from 'ethers/lib/utils'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { getOrderDetails, getUserOrders } from '../../DataService/OpenOrders'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import {
@@ -335,33 +335,41 @@ export function MyOrders() {
       ),
     },
   ]
-  console.log(dataOrders)
-  const filteredRows =
-    search != null && search.length > 0
-      ? buyClicked && sellClicked
-        ? dataOrders
-        : buyClicked
-        ? dataOrders
-            .filter((v) => v.type.includes('BUY'))
-            .filter((v) =>
-              v.underlying.toLowerCase().includes(search.toLowerCase())
-            )
-        : sellClicked
-        ? dataOrders
-            .filter((v) => v.type.includes('SELL'))
-            .filter((v) =>
-              v.underlying.toLowerCase().includes(search.toLowerCase())
-            )
-        : dataOrders.filter((v) =>
+
+  const filteredRows = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (buyClicked && sellClicked) {
+        return dataOrders
+      } else if (buyClicked) {
+        return dataOrders
+          .filter((v) => v.type.includes('BUY'))
+          .filter((v) =>
             v.underlying.toLowerCase().includes(search.toLowerCase())
           )
-      : buyClicked && sellClicked
-      ? dataOrders
-      : buyClicked
-      ? dataOrders.filter((v) => v.type.includes('BUY'))
-      : sellClicked
-      ? dataOrders.filter((v) => v.type.includes('SELL'))
-      : dataOrders
+      } else if (sellClicked) {
+        return dataOrders
+          .filter((v) => v.type.includes('SELL'))
+          .filter((v) =>
+            v.underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      } else {
+        return dataOrders.filter((v) =>
+          v.underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else {
+      if (buyClicked && sellClicked) {
+        return dataOrders
+      } else if (buyClicked) {
+        return dataOrders.filter((v) => v.type.includes('BUY'))
+      } else if (sellClicked) {
+        return dataOrders.filter((v) => v.type.includes('SELL'))
+      } else {
+        return dataOrders
+      }
+    }
+  }, [search, buyClicked, sellClicked, dataOrders])
+
   return (
     <Stack
       direction="column"
