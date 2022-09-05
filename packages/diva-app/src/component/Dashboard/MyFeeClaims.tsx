@@ -1,5 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
+  Box,
   Button,
   Container,
   Dialog,
@@ -31,6 +32,7 @@ import {
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 
 const TransferFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
@@ -263,6 +265,13 @@ export function MyFeeClaims() {
   const poolsRequestStatus = useAppSelector(
     selectRequestStatus('app/feeRecipients')
   )
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] = useState('Assets')
+  const [search, setSearch] = useState(null)
+
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(e.target.value === '' ? 'Assets' : e.target.value)
+  }
 
   useEffect(() => {
     if (userAddress != null) {
@@ -291,15 +300,35 @@ export function MyFeeClaims() {
       ]
     }, [] as GridRowModel[])
 
+  const filteredRows =
+    search != null && search.length > 0
+      ? rows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      : rows
+
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         height: '100%',
       }}
-      spacing={6}
-      paddingRight={6}
+      spacing={4}
     >
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+      </Box>
       {!userAddress ? (
         <Typography
           sx={{
@@ -317,10 +346,11 @@ export function MyFeeClaims() {
           <PoolsTable
             disableRowClick
             page={page}
-            rows={rows}
+            rows={filteredRows}
             loading={poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}
+            selectedPoolsView="Table"
           />
         </>
       )}

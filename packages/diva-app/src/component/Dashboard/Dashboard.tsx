@@ -1,5 +1,5 @@
 import { Person } from '@mui/icons-material'
-import { Box, Tab, Tabs } from '@mui/material'
+import { Box, Divider, Tab, Tabs } from '@mui/material'
 import { useState } from 'react'
 import { MyDataFeeds } from './MyDataFeeds'
 import { MyFeeClaims } from './MyFeeClaims'
@@ -58,6 +58,7 @@ const Dashboard = (props: any) => {
           <Tab label="FEE CLAIMS" />
           <Tab label="TRADE HISTORY" />
         </Tabs>
+        <Divider orientation="horizontal" />
         {value === 0 && <MyPositions />}
         {value === 1 && <MyOrders />}
         {value === 2 && <MyDataFeeds />}

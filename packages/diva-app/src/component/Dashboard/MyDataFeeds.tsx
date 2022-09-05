@@ -1,5 +1,7 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
+  Box,
+  Button,
   Container,
   Dialog,
   DialogActions,
@@ -11,7 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
@@ -32,6 +34,8 @@ import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { ExpiresInCell } from '../Markets/Markets'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import { getAppStatus } from '../../Util/getAppStatus'
 
 export const DueInCell = (props: any) => {
@@ -323,9 +327,28 @@ const columns: GridColDef[] = [
 export function MyDataFeeds() {
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
+  const [search, setSearch] = useState(null)
+  const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
+
   const dispatch = useDispatch()
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'Underlying' : e.target.value
+    )
+  }
+  const handleExpiredPools = () => {
+    if (expiredPoolClicked) {
+      setExpiredPoolClicked(false)
+    } else {
+      setExpiredPoolClicked(true)
+    }
+  }
 
   const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
     useGovernanceParameters()
@@ -416,40 +439,87 @@ export function MyDataFeeds() {
     ]
   }, [] as GridRowModel[])
 
+  const filteredRows = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (expiredPoolClicked) {
+        return rows
+          .filter((v) => v.Status.includes('Open'))
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      } else {
+        return rows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else {
+      if (expiredPoolClicked) {
+        return rows.filter((v) => v.Status.includes('Open'))
+      } else {
+        return rows
+      }
+    }
+  }, [rows, search, expiredPoolClicked])
+
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         height: '100%',
       }}
-      spacing={6}
-      paddingRight={6}
+      spacing={4}
     >
-      {!userAddress ? (
-        <Typography
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
-            width: '100%',
-          }}
-        >
-          Please connect your wallet
-        </Typography>
-      ) : (
-        <>
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+        <ButtonFilter
+          id="Hide expired pools"
+          ButtonLabel="Hide Expired"
+          onClick={handleExpiredPools}
+        />
+      </Box>
+      <Stack
+        direction="row"
+        sx={{
+          height: '100%',
+        }}
+        spacing={6}
+      >
+        {!userAddress ? (
+          <Typography
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+              width: '100%',
+            }}
+          >
+            Please connect your wallet
+          </Typography>
+        ) : (
           <PoolsTable
             disableRowClick={true}
             page={page}
             rowCount={9999}
             loading={poolsRequestStatus === 'pending'}
-            rows={rows}
+            rows={filteredRows}
             columns={columns}
             onPageChange={(page) => setPage(page)}
+            selectedPoolsView="Table"
           />
-        </>
-      )}
+        )}
+      </Stack>
     </Stack>
   )
 }
