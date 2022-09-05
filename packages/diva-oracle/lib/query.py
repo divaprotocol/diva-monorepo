@@ -50,6 +50,7 @@ def tellor_query(lastId, provider):
                     expiryTime
                     collateralToken {
                         symbol
+                        id
                     }
                   }
                 }
@@ -68,7 +69,7 @@ def new_pool_query():
             { 
                 pools (where: {dataProvider: "%s", createdAt_gte: "%s" }) {
                     id
-                    dataProvider
+                    dsf
                     referenceAsset
                     floor
                     inflection

@@ -24,6 +24,12 @@ chain_id = {
     "goerli": 5
 }
 
+# symbol : Id
+WHITELIST_TOKEN_POOLS = {
+    "dUSD" : "0xfa158c9b780a4213f3201ae74cca013712c8538d",
+    "WBTC" : "0xA61E26649743f8c86b09860c9fddf45153fA7A55"
+}
+
 # PARAMETERS
 
 # Max seconds to wait for a transaction to be confirmed

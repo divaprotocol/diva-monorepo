@@ -20,14 +20,17 @@ def submitPools(df, network, max_time_away, w3, contract):
     if df.empty:
         return("dataframe empy")
     numberPools = 0
-    while True:
-        lastId = df.id.iloc[-1]
-        if numberPools == df.shape[0]:
-            break
-        numberPools = df.shape[0]
-        resp = run_graph_query(query(lastId), network)
-        df = extend_DataFrame(df, resp)
-
+    try:
+        while True:
+            lastId = df.id.iloc[-1]
+            if numberPools == df.shape[0]:
+                break
+            numberPools = df.shape[0]
+            resp = run_graph_query(query(lastId), network)
+            df = extend_DataFrame(df, resp)
+    except:
+        print("could not query graph")
+    print(df)
     df = transform_expiryTimes(df)
     df = df.sort_values(by=['expiryTime'], ignore_index=True)
 
@@ -82,13 +85,16 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
     DIVAOracleTellor_contract = w3.eth.contract(
             address=tellor_contracts.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
     numberPools = 0
-    while True:
-        lastId = df.id.iloc[-1]
-        if numberPools == df.shape[0]:
-            break
-        numberPools = df.shape[0]
-        resp = run_graph_query(tellor_query(lastId, tellor_contracts.DIVAOracleTellor_contract_address[network]), network)
-        df = extend_DataFrame(df, resp)
+    try:
+        while True:
+            lastId = df.id.iloc[-1]
+            if numberPools == df.shape[0]:
+                break
+            numberPools = df.shape[0]
+            resp = run_graph_query(tellor_query(lastId, tellor_contracts.DIVAOracleTellor_contract_address[network]), network)
+            df = extend_DataFrame(df, resp)
+    except:
+        print("Could not query graph")
 
     df = transform_expiryTimes(df)
     df = df.sort_values(by=['expiryTime'], ignore_index=True)
@@ -116,7 +122,7 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
             # AUTOMATICALLY SETS TO 1 FOR TEST SEE PRICES.PY
             # This is for testing purposes, fix before prod
         coll_asset_to_usd = getKrakenCollateralConversion(
-            df['collateralToken.symbol'].iloc[i], ts_date=ts_date, ts_date_max_away=ts_date_max_away)
+            df['collateralToken.symbol'].iloc[i], df['collateralToken.id'], ts_date=ts_date, ts_date_max_away=ts_date_max_away)
         if (price, date) != (-1, -1):
             # submit pool price
             print("-----------------------------------------")

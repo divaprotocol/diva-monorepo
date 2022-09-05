@@ -3,6 +3,7 @@ import string
 import requests
 import pandas as pd
 import json
+from config.config import WHITELIST_TOKEN_POOLS
 
 
 def getKrakenPrice(pair, ts_date, ts_date_max_away):
@@ -23,7 +24,7 @@ def getKrakenPrice(pair, ts_date, ts_date_max_away):
                       'buy/sell', 'market/limit', 'misc']
         df['datetime'] = df['time'].apply(lambda x: datetime.fromtimestamp(x))
 
-        df_reduced = df.loc[df['time'] <= ts_date]
+        df_reduced = df.loc[df['time'] <= ts_date-60]
         if not df_reduced.empty:
             price_kraken = float(df_reduced.iloc[-1, 0])
             price_kraken_rounded = round(price_kraken, 2)
@@ -38,15 +39,25 @@ def getKrakenPrice(pair, ts_date, ts_date_max_away):
         return -1, -1
 
 
-def getKrakenCollateralConversion(dfitem, ts_date, ts_date_max_away):
+def getKrakenCollateralConversion(dfitem, dfcontract, ts_date, ts_date_max_away):
     pair = dfitem+"USD"
+    check_whitelist_token(dfitem, dfcontract)
     price = getKrakenPrice(pair, ts_date, ts_date_max_away)
     # This is for auto price to one in testing of dUSD
     if price[0] == -1:
         return 1
     return price[0]
 
-
+def check_whitelist_token(dfitem, dfcontract):
+    try:
+        if dfitem in WHITELIST_TOKEN_POOLS:
+            print("Valid whitelisted Token {}, {}", dfitem, dfcontract )
+            print(WHITELIST_TOKEN_POOLS.get(dfitem))
+        else:
+            print("INVALID WHITELIST TOKEN")
+    except:
+        print("UNABLE TO VERIFY WHITELIST")
+    return
 # Example Call
 # asset = 'ETH'
 # currency = 'USD'
