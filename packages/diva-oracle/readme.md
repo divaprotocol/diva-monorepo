@@ -43,6 +43,8 @@ docker-compose up
 * If you face an error saying "The command 'docker-compose' could not be found in the WSL 2 distro. We recommend to activate the WSL integration in Docker Desktop settings." while using WSL on Windows, then
 open the Docker Desktop App in Windows, go to Settings -> Resources and ensure that your Linux distribution (e.g., Ubuntu) is enabled. See also [here](https://stackoverflow.com/questions/63497928/ubuntu-wsl-with-docker-could-not-be-found).
 * If you are running into a "Permission denied" error, prepend `sudo` to the commands, i.e. `sudo docker-compose up --build` and `sudo docker-compose up`
+* FileNotFoundError: Make sure you are inside `packages/diva-oracle` folder. Another reason might be that docker is not running. To check that, type `docker ps` in the command line. If this throws 
+"Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?", then docker is not running. The command to start Docker depends on your operating system. If you are running on Windows and you have Docker Desktop already installed, simply open the application and try again. For other operating systems, please refer to this [resource](https://docs.docker.com/config/daemon/). 
 
 # Running _without_ Docker
 
