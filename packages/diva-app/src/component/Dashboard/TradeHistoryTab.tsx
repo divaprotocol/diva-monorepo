@@ -15,7 +15,7 @@ import {
 } from '../../Redux/appSlice'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import { useWhitelist } from '../../hooks/useWhitelist'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { formatEther, formatUnits } from 'ethers/lib/utils'
 import Typography from '@mui/material/Typography'
 import styled from 'styled-components'
@@ -323,33 +323,39 @@ export function TradeHistoryTab() {
           ]
         }, [])
       : []
-  console.log('rows', rows)
-  const filteredRows =
-    search != null && search.length > 0
-      ? buyClicked && sellClicked
-        ? rows
-        : buyClicked
-        ? rows
-            .filter((v) => v.type.includes('BUY'))
-            .filter((v) =>
-              v.Underlying.toLowerCase().includes(search.toLowerCase())
-            )
-        : sellClicked
-        ? rows
-            .filter((v) => v.type.includes('SELL'))
-            .filter((v) =>
-              v.Underlying.toLowerCase().includes(search.toLowerCase())
-            )
-        : rows.filter((v) =>
+
+  const filteredRows = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (buyClicked && sellClicked) {
+        return rows
+      } else if (buyClicked) {
+        return rows
+          .filter((v) => v.type.includes('BUY'))
+          .filter((v) =>
             v.Underlying.toLowerCase().includes(search.toLowerCase())
           )
-      : buyClicked && sellClicked
-      ? rows
-      : buyClicked
-      ? rows.filter((v) => v.type.includes('BUY'))
-      : sellClicked
-      ? rows.filter((v) => v.type.includes('SELL'))
-      : rows
+      } else if (sellClicked) {
+        return rows
+          .filter((v) => v.type.includes('SELL'))
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      } else {
+        return rows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else if (buyClicked && sellClicked) {
+      return rows
+    } else if (buyClicked) {
+      return rows.filter((v) => v.type.includes('BUY'))
+    } else if (sellClicked) {
+      return rows.filter((v) => v.type.includes('SELL'))
+    } else {
+      return rows
+    }
+  }, [search, buyClicked, sellClicked, rows])
+
   return (
     <Stack
       direction="column"

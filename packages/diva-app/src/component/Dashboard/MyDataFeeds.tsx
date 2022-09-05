@@ -13,7 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
@@ -439,20 +439,27 @@ export function MyDataFeeds() {
     ]
   }, [] as GridRowModel[])
 
-  const filteredRows =
-    search != null && search.length > 0
-      ? expiredPoolClicked
-        ? rows
-            .filter((v) => v.Status.includes('Open'))
-            .filter((v) =>
-              v.Underlying.toLowerCase().includes(search.toLowerCase())
-            )
-        : rows.filter((v) =>
+  const filteredRows = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (expiredPoolClicked) {
+        return rows
+          .filter((v) => v.Status.includes('Open'))
+          .filter((v) =>
             v.Underlying.toLowerCase().includes(search.toLowerCase())
           )
-      : expiredPoolClicked
-      ? rows.filter((v) => v.Status.includes('Open'))
-      : rows
+      } else {
+        return rows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else {
+      if (expiredPoolClicked) {
+        return rows.filter((v) => v.Status.includes('Open'))
+      } else {
+        return rows
+      }
+    }
+  }, [rows, search, expiredPoolClicked])
 
   return (
     <Stack

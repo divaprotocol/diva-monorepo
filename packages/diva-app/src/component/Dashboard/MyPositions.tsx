@@ -29,7 +29,7 @@ import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import styled from 'styled-components'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import {
@@ -755,28 +755,35 @@ export function MyPositions() {
           }))
       : []
 
-  const filteredRowsByOptions =
-    search != null && search.length > 0
-      ? expiredPoolClicked
-        ? filteredRows
-            .filter((v) =>
-              v.Underlying.toLowerCase().includes(search.toLowerCase())
-            )
-            .filter((v) => v.Status.includes('Open'))
-        : confirmedPoolClicked
-        ? filteredRows
-            .filter((v) =>
-              v.Underlying.toLowerCase().includes(search.toLowerCase())
-            )
-            .filter((v) => v.Status.includes('Confirmed'))
-        : filteredRows.filter((v) =>
+  // covert the above function to a memoized one
+  const filteredRowsByOptions = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (expiredPoolClicked) {
+        return filteredRows
+          .filter((v) =>
             v.Underlying.toLowerCase().includes(search.toLowerCase())
           )
-      : expiredPoolClicked
-      ? filteredRows.filter((v) => v.Status.includes('Open'))
-      : confirmedPoolClicked
-      ? filteredRows.filter((v) => v.Status.includes('Confirmed'))
-      : filteredRows
+          .filter((v) => v.Status.includes('Open'))
+      } else if (confirmedPoolClicked) {
+        return filteredRows
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+          .filter((v) => v.Status.includes('Confirmed'))
+      } else {
+        return filteredRows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else if (expiredPoolClicked) {
+      return filteredRows.filter((v) => v.Status.includes('Open'))
+    } else if (confirmedPoolClicked) {
+      return filteredRows.filter((v) => v.Status.includes('Confirmed'))
+    } else {
+      return filteredRows
+    }
+  }, [filteredRows, search, expiredPoolClicked, confirmedPoolClicked])
+
   const sortedRows = filteredRowsByOptions.sort((a, b) => {
     const aId = parseFloat(a.Id.substring(1))
     const bId = parseFloat(b.Id.substring(1))
