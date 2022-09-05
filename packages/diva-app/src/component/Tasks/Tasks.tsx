@@ -423,7 +423,7 @@ export const Tasks = (props: any) => {
         })
       )
     }
-  }, [testnetUser.isSuccess, userAddress])
+  }, [ropstenProgress, testnetUser.isSuccess, userAddress])
 
   useEffect(() => {
     calcRows.map((row) => {
@@ -435,7 +435,7 @@ export const Tasks = (props: any) => {
     if (points === 3000) {
       setMultiplier('1.5')
     }
-  }, [userAddress, calcRows, multiplier, points === 3000])
+  }, [ropstenProgress, userAddress, calcRows, multiplier, points === 3000])
   return (
     <Box>
       <Box
