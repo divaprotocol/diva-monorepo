@@ -277,7 +277,6 @@ export const Tasks = (props: any) => {
       ropstenData.map((data) => {
         if (data.id === userAddress) {
           setRopstenProgress(data)
-          console.log(data)
         }
       })
       setCalcRows(
