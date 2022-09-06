@@ -1,5 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
+  Box,
   Button,
   Container,
   Dialog,
@@ -28,7 +29,7 @@ import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import styled from 'styled-components'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import {
@@ -47,6 +48,9 @@ import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import request from 'graphql-request'
 import { Pool, queryUser } from '../../lib/queries'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
+import PoolsTableFilter from '../PoolsTableFilter/DropDownFilter'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 
 type Response = {
   [token: string]: BigNumber
@@ -510,6 +514,11 @@ export function MyPositions() {
   const { provider, chainId } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
+  const [search, setSearch] = useState(null)
+  const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
+  const [confirmedPoolClicked, setConfirmedPoolClicked] = useState(false)
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
@@ -523,6 +532,26 @@ export function MyPositions() {
       })
     )
   }, [dispatch, page, userAddress])
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'Underlying' : e.target.value
+    )
+  }
+  const handleExpiredPools = () => {
+    if (expiredPoolClicked) {
+      setExpiredPoolClicked(false)
+    } else {
+      setExpiredPoolClicked(true)
+    }
+  }
+  const handleConfirmedPools = () => {
+    if (confirmedPoolClicked) {
+      setConfirmedPoolClicked(false)
+    } else {
+      setConfirmedPoolClicked(true)
+    }
+  }
 
   const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
@@ -726,7 +755,36 @@ export function MyPositions() {
           }))
       : []
 
-  const sortedRows = filteredRows.sort((a, b) => {
+  // covert the above function to a memoized one
+  const filteredRowsByOptions = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (expiredPoolClicked) {
+        return filteredRows
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+          .filter((v) => v.Status.includes('Open'))
+      } else if (confirmedPoolClicked) {
+        return filteredRows
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+          .filter((v) => v.Status.includes('Confirmed'))
+      } else {
+        return filteredRows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else if (expiredPoolClicked) {
+      return filteredRows.filter((v) => v.Status.includes('Open'))
+    } else if (confirmedPoolClicked) {
+      return filteredRows.filter((v) => v.Status.includes('Confirmed'))
+    } else {
+      return filteredRows
+    }
+  }, [filteredRows, search, expiredPoolClicked, confirmedPoolClicked])
+
+  const sortedRows = filteredRowsByOptions.sort((a, b) => {
     const aId = parseFloat(a.Id.substring(1))
     const bId = parseFloat(b.Id.substring(1))
 
@@ -735,13 +793,38 @@ export function MyPositions() {
 
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         height: '100%',
       }}
-      spacing={6}
-      paddingRight={6}
+      spacing={4}
     >
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          maxWidth: '400px',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+        <ButtonFilter
+          id="Hide expired pools"
+          sx={{ marginRight: '30px' }}
+          ButtonLabel="Hide Expired"
+          onClick={handleExpiredPools}
+        />
+        <ButtonFilter
+          id="Confirmed Pools"
+          ButtonLabel="Confirmed"
+          onClick={handleConfirmedPools}
+        />
+      </Box>
       {!userAddress ? (
         <Typography
           sx={{
@@ -758,11 +841,12 @@ export function MyPositions() {
         <>
           <PoolsTable
             page={page}
-            rows={sortedRows}
+            rows={filteredRowsByOptions && sortedRows}
             loading={balances.isLoading}
             rowCount={3000}
             columns={columns}
             onPageChange={(page) => setPage(page)}
+            selectedPoolsView="Table"
           />
         </>
       )}

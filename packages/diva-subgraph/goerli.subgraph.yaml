@@ -51,7 +51,7 @@ dataSources:
     name: ExchangeProxy
     network: goerli
     source:
-      address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
+      address: "0xf91bb752490473b8342a3e964e855b9f9a2a668e"
       abi: IZeroEx
       startBlock: 7087046
     mapping:
