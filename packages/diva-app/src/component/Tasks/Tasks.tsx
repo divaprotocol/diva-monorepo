@@ -20,6 +20,7 @@ import { useQuery } from 'react-query'
 import { OrderFill, queryTestUser, TestUser } from '../../lib/queries'
 import request from 'graphql-request'
 import TaskIcon from '@mui/icons-material/Task'
+import ropstenData from './ropsten-points.json'
 
 const columns: GridColDef[] = [
   {
@@ -240,6 +241,7 @@ export const Tasks = (props: any) => {
   const [points, setPoints] = useState(0)
   const [multiplier, setMultiplier] = useState('1.0')
   const [mobile, setMobile] = useState(false)
+  const [ropstenProgress, setRopstenProgress] = useState<any>({})
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
@@ -266,7 +268,17 @@ export const Tasks = (props: any) => {
   )
 
   useEffect(() => {
-    if (pools != null && testnetUser.data != null && userAddress != null) {
+    if (
+      pools != null &&
+      testnetUser.data != null &&
+      userAddress != null &&
+      ropstenData != null
+    ) {
+      ropstenData.map((data) => {
+        if (data.id === userAddress) {
+          setRopstenProgress(data)
+        }
+      })
       setCalcRows(
         rows.map((v) => {
           switch (v.id) {
@@ -274,7 +286,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.binaryPoolCreated == true
+                  testnetUser.data?.binaryPoolCreated == true ||
+                  ropstenProgress.binaryPoolCreated == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -282,7 +295,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.linearPoolCreated == true
+                  testnetUser.data?.linearPoolCreated == true ||
+                  ropstenProgress.linearPoolCreated == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -290,7 +304,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.convexPoolCreated == true
+                  testnetUser.data?.convexPoolCreated == true ||
+                  ropstenProgress.convexPoolCreated == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -298,7 +313,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.concavePoolCreated == true
+                  testnetUser.data?.concavePoolCreated == true ||
+                  ropstenProgress.concavePoolCreated == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -306,7 +322,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.liquidityAdded == true
+                  testnetUser.data?.liquidityAdded == true ||
+                  ropstenProgress.liquidityAdded == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -315,7 +332,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.liquidityRemoved == true
+                  testnetUser.data?.liquidityRemoved == true ||
+                  ropstenProgress.liquidityRemoved == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -323,7 +341,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.buyLimitOrderCreatedAndFilled == true
+                  testnetUser.data?.buyLimitOrderCreatedAndFilled == true ||
+                  ropstenProgress.buyLimitOrderCreatedAndFilled == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -331,7 +350,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.sellLimitOrderCreatedAndFilled == true
+                  testnetUser.data?.sellLimitOrderCreatedAndFilled == true ||
+                  ropstenProgress.sellLimitOrderCreatedAndFilled == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -339,7 +359,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.buyLimitOrderFilled == true
+                  testnetUser.data?.buyLimitOrderFilled == true ||
+                  ropstenProgress.buyLimitOrderFilled == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -347,7 +368,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.sellLimitOrderFilled == true
+                  testnetUser.data?.sellLimitOrderFilled == true ||
+                  ropstenProgress.sellLimitOrderFilled == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -355,7 +377,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.finalValueReported == true
+                  testnetUser.data?.finalValueReported == true ||
+                  ropstenProgress.finalValueReported == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -363,7 +386,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.reportedValueChallenged == true
+                  testnetUser.data?.reportedValueChallenged == true ||
+                  ropstenProgress.reportedValueChallenged == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -371,7 +395,8 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.positionTokenRedeemed == true
+                  testnetUser.data?.positionTokenRedeemed == true ||
+                  ropstenProgress.positionTokenRedeemed == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -379,13 +404,17 @@ export const Tasks = (props: any) => {
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.feesClaimed == true ? 'Completed' : 'Open',
+                  testnetUser.data?.feesClaimed == true ||
+                  ropstenProgress.feesClaimed == 'True'
+                    ? 'Completed'
+                    : 'Open',
               }
             case 15:
               return {
                 ...v,
                 Status:
-                  testnetUser.data?.feeClaimsTransferred == true
+                  testnetUser.data?.feeClaimsTransferred == true ||
+                  ropstenProgress.feeClaimsTransferred == 'True'
                     ? 'Completed'
                     : 'Open',
               }
@@ -393,7 +422,7 @@ export const Tasks = (props: any) => {
         })
       )
     }
-  }, [testnetUser.isSuccess, userAddress])
+  }, [ropstenProgress, testnetUser.isSuccess, userAddress])
 
   useEffect(() => {
     calcRows.map((row) => {
@@ -405,7 +434,7 @@ export const Tasks = (props: any) => {
     if (points === 3000) {
       setMultiplier('1.5')
     }
-  }, [userAddress, calcRows, multiplier, points === 3000])
+  }, [ropstenProgress, userAddress, calcRows, multiplier, points === 3000])
   return (
     <Box>
       <Box
