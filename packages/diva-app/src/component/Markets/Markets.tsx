@@ -15,17 +15,31 @@ import {
   fetchPools,
   selectPools,
   selectRequestStatus,
+  selectUserAddress,
 } from '../../Redux/appSlice'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
+import {
+  AppBar,
+  Box,
+  Button,
+  Stack,
+  Tooltip,
+  Toolbar,
+  useTheme,
+} from '@mui/material'
+import ViewModuleIcon from '@mui/icons-material/ViewModule'
+import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
 import { config } from '../../constants'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import { Box, Tooltip } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import { divaGovernanceAddress } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useHistory, useLocation, useParams } from 'react-router-dom'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 
 export const ExpiresInCell = (props: any) => {
@@ -199,13 +213,46 @@ const columns: GridColDef[] = [
 ]
 
 export default function Markets() {
+  const history = useHistory()
+  const theme = useTheme()
+  const currentAddress = history.location.pathname.split('/')
   const [page, setPage] = useState(0)
   const pools = useAppSelector(selectPools)
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const dispatch = useAppDispatch()
   const params = useParams() as { creatorAddress: string; status: string }
   const [createdBy, setCreatedBy] = useState(params.creatorAddress)
-  const history = useHistory()
+  const [creatorButtonLabel, setCreatorButtonLabel] = useState(
+    getShortenedAddress(currentAddress[2])
+  )
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
+  const [search, setSearch] = useState(null)
+  const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
+  const [selectedPoolsView, setSelectedPoolsView] = useState<'Grid' | 'Table'>(
+    'Table'
+  )
+
+  const handleCreatorInput = (e) => {
+    setCreatedBy(e.target.value)
+    setCreatorButtonLabel(
+      e.target.value === '' ? 'Creator' : getShortenedAddress(e.target.value)
+    )
+  }
+
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'Underlying' : e.target.value
+    )
+  }
+  const handleExpiredPools = () => {
+    if (expiredPoolClicked) {
+      setExpiredPoolClicked(false)
+    } else {
+      setExpiredPoolClicked(true)
+    }
+  }
   const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
     useGovernanceParameters()
 
@@ -353,6 +400,21 @@ export default function Markets() {
     ]
   }, [] as GridRowModel[])
 
+  const filteredRows =
+    search != null && search.length > 0
+      ? expiredPoolClicked
+        ? rows
+            .filter((v) => v.Status.includes('Open'))
+            .filter((v) =>
+              v.Underlying.toLowerCase().includes(search.toLowerCase())
+            )
+        : rows.filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      : expiredPoolClicked
+      ? rows.filter((v) => v.Status.includes('Open'))
+      : rows
+
   return (
     <>
       <Box
@@ -367,27 +429,99 @@ export default function Markets() {
         />
         <h2> Markets</h2>
       </Box>
-
-      <Box
-        paddingX={6}
+      <Stack
+        direction="column"
         sx={{
-          height: 'calc(100% - 6em)',
-          display: 'flex',
-          flexDirection: 'column',
+          height: '100%',
         }}
+        spacing={4}
       >
-        <PoolsTable
-          columns={columns}
-          onCreatorChanged={setCreatedBy}
-          creatorAddress={createdBy}
-          rows={rows}
-          rowCount={8000}
-          page={page}
-          loading={poolsRequestStatus === 'pending'}
-          onPageChange={(page) => setPage(page)}
-          isViewToggle={true}
-        />
-      </Box>
+        <AppBar
+          position="static"
+          sx={{
+            background: theme.palette.background.default,
+            justifyContent: 'space-between',
+            boxShadow: 'none',
+          }}
+        >
+          <Toolbar>
+            <Box
+              paddingX={3}
+              paddingY={2}
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+              }}
+              justifyContent="space-between"
+            >
+              <DropDownFilter
+                id="Creator Filter"
+                DropDownButtonLabel={
+                  history.location.pathname === `/markets/`
+                    ? 'Creator'
+                    : creatorButtonLabel
+                }
+                InputValue={createdBy}
+                onInputChange={handleCreatorInput}
+                MenuItemLabel="Diva Governance"
+                onMenuItemClick={() => {
+                  setCreatedBy(divaGovernanceAddress)
+                  setCreatorButtonLabel(
+                    getShortenedAddress(divaGovernanceAddress)
+                  )
+                }}
+              />
+              <DropDownFilter
+                id="Underlying Filter"
+                DropDownButtonLabel={underlyingButtonLabel}
+                InputValue={search}
+                onInputChange={handleUnderLyingInput}
+              />
+              <ButtonFilter
+                id="Hide expired pools"
+                ButtonLabel="Hide Expired"
+                onClick={handleExpiredPools}
+              />
+            </Box>
+            <Box
+              sx={{
+                marginLeft: 'auto',
+              }}
+            >
+              <Button
+                onClick={() => setSelectedPoolsView('Table')}
+                color={selectedPoolsView === 'Table' ? 'primary' : 'inherit'}
+              >
+                <ViewHeadlineIcon />
+              </Button>
+              <Button
+                onClick={() => setSelectedPoolsView('Grid')}
+                color={selectedPoolsView === 'Grid' ? 'primary' : 'inherit'}
+              >
+                <ViewModuleIcon />
+              </Button>
+            </Box>
+          </Toolbar>
+        </AppBar>
+        <Box
+          paddingX={6}
+          sx={{
+            height: 'calc(100% - 6em)',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <PoolsTable
+            columns={columns}
+            rows={filteredRows}
+            rowCount={8000}
+            page={page}
+            loading={poolsRequestStatus === 'pending'}
+            onPageChange={(page) => setPage(page)}
+            selectedPoolsView={selectedPoolsView}
+          />
+        </Box>
+      </Stack>
     </>
   )
 }

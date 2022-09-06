@@ -15,24 +15,21 @@ import {
 } from '../../Redux/appSlice'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import { useWhitelist } from '../../hooks/useWhitelist'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { formatEther, formatUnits } from 'ethers/lib/utils'
 import Typography from '@mui/material/Typography'
 import styled from 'styled-components'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Divider,
-  Grid,
-  Pagination,
-  Stack,
-} from '@mui/material'
+import { Button, CircularProgress, Grid, Pagination } from '@mui/material'
 import PoolsTable from '../PoolsTable'
 import { getDateTime } from '../../Util/Dates'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
+import { Box, Divider, Stack } from '@mui/material'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import ToggleFilter from '../PoolsTableFilter/ToggleFilter'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
+import { BorderLeft } from '@mui/icons-material'
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -231,12 +228,38 @@ export function TradeHistoryTab() {
   const chainId = useAppSelector((state) => state.appSlice.chainId)
   const pools = useAppSelector((state) => selectPools(state))
   const { collateralTokens } = useWhitelist()
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
+  const [search, setSearch] = useState('')
+  const [orderType, setOrderType] = useState<string>('')
   const [history, setHistory] = useState<any[]>([])
   const [page, setPage] = useState(0)
+  const [buyClicked, setBuyClicked] = useState(false)
+  const [sellClicked, setSellClicked] = useState(false)
   const orders: any[] = []
   const dispatch = useAppDispatch()
   const { isMobile } = useCustomMediaQuery()
 
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'Underlying' : e.target.value
+    )
+  }
+  const filterBuyOrders = () => {
+    if (buyClicked) {
+      setBuyClicked(false)
+    } else {
+      setBuyClicked(true)
+    }
+  }
+  const filterSellOrders = () => {
+    if (sellClicked) {
+      setSellClicked(false)
+    } else {
+      setSellClicked(true)
+    }
+  }
   useEffect(() => {
     dispatch(fetchPositionTokens({ page }))
   }, [dispatch, page])
@@ -422,15 +445,82 @@ export function TradeHistoryTab() {
         }, [])
       : []
 
+  const filteredRows = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (buyClicked && sellClicked) {
+        return rows
+      } else if (buyClicked) {
+        return rows
+          .filter((v) => v.type.includes('BUY'))
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      } else if (sellClicked) {
+        return rows
+          .filter((v) => v.type.includes('SELL'))
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      } else {
+        return rows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else if (buyClicked && sellClicked) {
+      return rows
+    } else if (buyClicked) {
+      return rows.filter((v) => v.type.includes('BUY'))
+    } else if (sellClicked) {
+      return rows.filter((v) => v.type.includes('SELL'))
+    } else {
+      return rows
+    }
+  }, [search, buyClicked, sellClicked, rows])
+
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         height: '100%',
       }}
-      spacing={6}
       paddingRight={isMobile ? 0 : 6}
+      spacing={4}
     >
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+        <ButtonFilter
+          id="Buy"
+          sx={{
+            borderRight: 0,
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+          }}
+          ButtonLabel="Buy"
+          onClick={filterBuyOrders}
+        />
+        <Divider orientation="vertical" />
+        <ButtonFilter
+          id="Sell"
+          sx={{
+            borderLeft: 0,
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+          }}
+          ButtonLabel="Sell"
+          onClick={filterSellOrders}
+        />
+      </Box>
       {!userAddress ? (
         <Typography
           sx={{
@@ -457,7 +547,7 @@ export function TradeHistoryTab() {
               {!orderFills.isLoading || !orderFillsMaker.isLoading ? (
                 <>
                   <Box>
-                    {rows.map((row) => (
+                    {filteredRows.map((row) => (
                       <TradeHistoryTabTokenCars row={row} key={row.Id} />
                     ))}
                   </Box>
@@ -484,10 +574,11 @@ export function TradeHistoryTab() {
             <PoolsTable
               disableRowClick
               page={page}
-              rows={rows}
+              rows={filteredRows}
               columns={columns}
               loading={orderFills.isLoading || orderFillsMaker.isLoading}
               onPageChange={(page) => setPage(page)}
+              selectedPoolsView="Table"
             />
           )}
         </>

@@ -6,14 +6,14 @@ import {
   Input,
   Pagination,
   CircularProgress,
-  Divider,
   Grid,
   Typography,
+  Divider,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { formatUnits } from 'ethers/lib/utils'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { getOrderDetails, getUserOrders } from '../../DataService/OpenOrders'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import {
@@ -33,6 +33,9 @@ import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { makeStyles } from '@mui/styles'
 import { ExpiresInCell } from '../Markets/Markets'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import ToggleFilter from '../PoolsTableFilter/ToggleFilter'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 
 const MyOrdersPoolCard = ({
   row,
@@ -180,7 +183,11 @@ export function MyOrders() {
   const [loadingValue, setLoadingValue] = useState(false)
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
   const [search, setSearch] = useState('')
+  const [buyClicked, setBuyClicked] = useState(false)
+  const [sellClicked, setSellClicked] = useState(false)
   const history = useHistory()
   const dispatch = useAppDispatch()
   const { isMobile } = useCustomMediaQuery()
@@ -191,6 +198,26 @@ export function MyOrders() {
       },
     },
   })
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'Underlying' : e.target.value
+    )
+  }
+  const filterBuyOrders = () => {
+    if (buyClicked) {
+      setBuyClicked(false)
+    } else {
+      setBuyClicked(true)
+    }
+  }
+  const filterSellOrders = () => {
+    if (sellClicked) {
+      setSellClicked(false)
+    } else {
+      setSellClicked(true)
+    }
+  }
   useEffect(() => {
     dispatch(fetchPositionTokens({ page }))
   }, [dispatch, page])
@@ -365,12 +392,6 @@ export function MyOrders() {
     componentDidMount()
   }, [])
 
-  const filteredRows =
-    search != null && search.length > 0
-      ? dataOrders.filter((v) =>
-          v.underlying.toLowerCase().includes(search.toLowerCase())
-        )
-      : dataOrders
   const columns: GridColDef[] = [
     {
       field: 'symbol',
@@ -458,15 +479,85 @@ export function MyOrders() {
       ),
     },
   ]
+
+  const filteredRows = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (buyClicked && sellClicked) {
+        return dataOrders
+      } else if (buyClicked) {
+        return dataOrders
+          .filter((v) => v.type.includes('BUY'))
+          .filter((v) =>
+            v.underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      } else if (sellClicked) {
+        return dataOrders
+          .filter((v) => v.type.includes('SELL'))
+          .filter((v) =>
+            v.underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      } else {
+        return dataOrders.filter((v) =>
+          v.underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else {
+      if (buyClicked && sellClicked) {
+        return dataOrders
+      } else if (buyClicked) {
+        return dataOrders.filter((v) => v.type.includes('BUY'))
+      } else if (sellClicked) {
+        return dataOrders.filter((v) => v.type.includes('SELL'))
+      } else {
+        return dataOrders
+      }
+    }
+  }, [search, buyClicked, sellClicked, dataOrders])
+
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         height: '100%',
       }}
       spacing={6}
       paddingRight={isMobile ? 0 : 6}
     >
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+        <ButtonFilter
+          id="Buy"
+          sx={{
+            borderRight: 0,
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+          }}
+          ButtonLabel="Buy"
+          onClick={filterBuyOrders}
+        />
+        <Divider orientation="vertical" />
+        <ButtonFilter
+          id="Sell"
+          sx={{
+            borderLeft: 0,
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+          }}
+          ButtonLabel="Sell"
+          onClick={filterSellOrders}
+        />
+      </Box>
       <>
         {isMobile ? (
           <Stack
@@ -537,6 +628,7 @@ export function MyOrders() {
               columns={columns}
               loading={poolsRequestStatus !== 'fulfilled'}
               onPageChange={(page) => setPage(page)}
+              selectedPoolsView="Table"
               page={page}
               onRowClick={(row) => {
                 history.push(`../../${row.row.Id}/${row.row.position}`)
