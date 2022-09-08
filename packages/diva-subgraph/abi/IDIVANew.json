@@ -282,7 +282,11 @@
     "type": "function"
   },
   { "inputs": [], "name": "InvalidSignature", "type": "error" },
-  { "inputs": [], "name": "OfferFilledCancelledOrExpired", "type": "error" },
+  {
+    "inputs": [],
+    "name": "OfferInvalidCancelledFilledOrExpired",
+    "type": "error"
+  },
   { "inputs": [], "name": "PoolCapacityExceeded", "type": "error" },
   { "inputs": [], "name": "PoolExpired", "type": "error" },
   {
@@ -292,6 +296,7 @@
   },
   { "inputs": [], "name": "TakerFillAmountSmallerMinimum", "type": "error" },
   { "inputs": [], "name": "UnauthorizedTaker", "type": "error" },
+  { "inputs": [], "name": "ZeroLongAndShortRecipients", "type": "error" },
   {
     "anonymous": false,
     "inputs": [
@@ -312,6 +317,12 @@
         "internalType": "address",
         "name": "taker",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "takerFilledAmount",
+        "type": "uint256"
       }
     ],
     "name": "OfferFilled",
