@@ -61,7 +61,6 @@ export function ReviewAndSubmit({
   const isWhitelistedDataFeed =
     matchingDataFeedProviders.length > 0 &&
     matchingDataFeedProviders.some((v) => formik.values.dataProvider === v.id)
-  console.log(values, 'values')
   return (
     <Stack
       direction={mobile ? 'column' : 'row'}

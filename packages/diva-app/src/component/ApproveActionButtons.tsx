@@ -2,7 +2,12 @@ import { CircularProgress, Container, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import { ethers } from 'ethers'
 import { config, CREATE_POOL_TYPE } from '../constants'
-import { parseEther, parseUnits, splitSignature } from 'ethers/lib/utils'
+import {
+  formatEther,
+  parseEther,
+  parseUnits,
+  splitSignature,
+} from 'ethers/lib/utils'
 import { fetchPool, selectUserAddress } from '../Redux/appSlice'
 import React, { useEffect, useState } from 'react'
 import { useConnectionContext } from '../hooks/useConnectionContext'
@@ -61,7 +66,7 @@ export const ApproveActionButtons = ({
       : null
 
   const eip712Diva = new ethers.Contract(
-    '0xfD7107cAC6decc8b972EaFe938F628E00716708C', //Goerli
+    '0xb02bbd63545654d55125F98F85F4E691f1a3E207', //Goerli
     DIVA712ABI,
     signer
   )
@@ -107,7 +112,7 @@ export const ApproveActionButtons = ({
     name: 'DIVA Protocol',
     version: '1',
     chainId,
-    verifyingContract: '0xfD7107cAC6decc8b972EaFe938F628E00716708C',
+    verifyingContract: '0xb02bbd63545654d55125F98F85F4E691f1a3E207',
   }
   const [mobile, setMobile] = useState(false)
   useEffect(() => {
@@ -132,6 +137,7 @@ export const ApproveActionButtons = ({
         setActionEnabled(false)
       } else {
         token.allowance(account, config[chainId]?.divaAddress).then((res) => {
+          console.log('allowance', formatEther(res))
           if (res.lt(parseUnits(textFieldValue, decimal))) {
             setApproveEnabled(true)
             setActionEnabled(false)
@@ -323,7 +329,6 @@ export const ApproveActionButtons = ({
                     .then((signedTypedData) => {
                       const { r, s, v } = splitSignature(signedTypedData)
                       const signature = {
-                        signatureType: 2,
                         v: v,
                         r: r,
                         s: s,
@@ -343,16 +348,20 @@ export const ApproveActionButtons = ({
                   break
                 case 'filloffer':
                   // setApproveLoading(false)
-                  console.log(
-                    values.jsonToExport,
-                    values.signature,
-                    '100000000'
-                  )
+                  console.log('json', values.jsonToExport)
+                  eip712Diva
+                    .getOfferRelevantStateCreateContingentPool(
+                      offerCreationStats,
+                      values.signature
+                    )
+                    .then((res: any) => {
+                      console.log('res', res)
+                    })
                   eip712Diva
                     .fillOfferCreateContingentPool(
                       values.jsonToExport,
                       values.signature,
-                      '10000'
+                      '10000000000000000000'
                     )
                     .catch((err: any) => {
                       console.log(err)

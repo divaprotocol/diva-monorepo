@@ -27,7 +27,7 @@ export type Values = {
   offerDirection?: string
   minTakerContribution?: string
   takerAddress?: string
-  jsonToExport?: string
+  jsonToExport?: any
   signature?: string
 }
 

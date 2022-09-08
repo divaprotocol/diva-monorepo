@@ -9,6 +9,9 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { useErcBalance } from '../../hooks/useErcBalance'
+import { useAppSelector } from '../../Redux/hooks'
+import { selectUserAddress } from '../../Redux/appSlice'
+import { BigNumber } from 'ethers'
 // const fileUploadProp: FileUploadProps = {
 //   accept: 'application/json',
 //   onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,6 +34,7 @@ export function FillOffer({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const [uploadedJson, setUploadedJson] = React.useState<any>('{}')
+  const userAddress = useAppSelector(selectUserAddress)
   const walletBalance = useErcBalance(JSON.parse(uploadedJson).collateralToken)
   useEffect(() => {
     if (uploadedJson !== '{}' && uploadedJson != undefined) {
@@ -59,6 +63,21 @@ export function FillOffer({
         parseFloat(formatEther(configJson.gradient))
       )
       formik.setFieldValue('collateralWalletBalance', walletBalance)
+      if (configJson.maker === userAddress) {
+        formik.setFieldValue(
+          'collateralBalance',
+          formatEther(
+            BigNumber.from(configJson.makerCollateralAmount).add(
+              BigNumber.from(configJson.takerCollateralAmount)
+            )
+          )
+        )
+      } else {
+        formik.setFieldValue(
+          'collateralBalance',
+          formatEther(configJson.takerCollateralAmount)
+        )
+      }
       formik.setFieldValue('collateralToken.id', configJson.collateralToken)
       formik.setFieldValue('capacity', configJson.capacity)
       formik.setFieldValue('dataProvider', configJson.dataProvider)
