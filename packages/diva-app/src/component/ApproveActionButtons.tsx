@@ -35,7 +35,7 @@ export const ApproveActionButtons = ({
   collateralTokenAddress,
   pool,
   decimal,
-  textFieldValue,
+  textFieldValue, // TODO: need to set textFieldValue(approve amount) as makerCollateralAmount + takerCollateralAmount if offerMaker == offerTaker
   transactionType,
   onTransactionSuccess,
   alert,
@@ -66,7 +66,7 @@ export const ApproveActionButtons = ({
       : null
 
   const eip712Diva = new ethers.Contract(
-    '0xb02bbd63545654d55125F98F85F4E691f1a3E207', //Goerli
+    config[chainId!].divaAddress,
     DIVA712ABI,
     signer
   )
@@ -112,7 +112,7 @@ export const ApproveActionButtons = ({
     name: 'DIVA Protocol',
     version: '1',
     chainId,
-    verifyingContract: '0xb02bbd63545654d55125F98F85F4E691f1a3E207',
+    verifyingContract: config[chainId!].divaAddress,
   }
   const [mobile, setMobile] = useState(false)
   useEffect(() => {
@@ -403,7 +403,7 @@ export const ApproveActionButtons = ({
                     .fillOfferCreateContingentPool(
                       values.jsonToExport,
                       values.signature,
-                      '10000000000000000000'
+                      '10000000000000000000' // TODO: Need to set takerFillAmount as bigger than minimumTakerFillAmount
                     )
                     .catch((err: any) => {
                       console.log(err)

@@ -98,7 +98,7 @@ export const config: { [key: number]: SingleConfig } = {
     isSupported: false,
   },
   [SupportedChainId.GOERLI]: {
-    divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
+    divaAddress: '0x27D1BD739BD152CDaE38d4444E9aee3498166f01', // 27.08.2022
     balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
