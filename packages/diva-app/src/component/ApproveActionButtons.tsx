@@ -136,31 +136,15 @@ export const ApproveActionButtons = ({
         setApproveEnabled(false)
         setActionEnabled(false)
       } else {
-        if (transactionType === 'filloffer') {
-          token
-            .allowance(account, '0xb02bbd63545654d55125F98F85F4E691f1a3E207')
-            .then((res) => {
-              console.log('allowance', formatEther(res))
-              if (res.lt(parseUnits(textFieldValue, decimal))) {
-                setApproveEnabled(true)
-                setActionEnabled(false)
-              } else {
-                setActionEnabled(true)
-                setApproveEnabled(false)
-              }
-            })
-        } else {
-          token.allowance(account, config[chainId]?.divaAddress).then((res) => {
-            console.log('allowance', formatEther(res))
-            if (res.lt(parseUnits(textFieldValue, decimal))) {
-              setApproveEnabled(true)
-              setActionEnabled(false)
-            } else {
-              setActionEnabled(true)
-              setApproveEnabled(false)
-            }
-          })
-        }
+        token.allowance(account, config[chainId]?.divaAddress).then((res) => {
+          if (res.lt(parseUnits(textFieldValue, decimal))) {
+            setApproveEnabled(true)
+            setActionEnabled(false)
+          } else {
+            setActionEnabled(true)
+            setApproveEnabled(false)
+          }
+        })
       }
     }
   }, [textFieldValue, chainId, pool, approveLoading, actionLoading])
@@ -195,54 +179,27 @@ export const ApproveActionButtons = ({
                 alert === true
               }
               onClick={() => {
-                switch (transactionType) {
-                  case 'createpool' || 'liquidity':
-                    setApproveLoading(true)
+                setApproveLoading(true)
 
-                    token
-                      .approve(
-                        config[chainId!].divaAddress,
-                        parseUnits(textFieldValue, decimal)
-                      )
-                      .then((tx: any) => {
-                        return tx.wait()
-                      })
-                      .then(() => {
-                        setApproveLoading(false)
-                        return token.allowance(
-                          account,
-                          config[chainId!].divaAddress
-                        )
-                      })
-                      .catch((err: any) => {
-                        setApproveLoading(false)
-                        console.error(err)
-                      })
-                    break
-                  case 'filloffer':
-                    setApproveLoading(true)
-
-                    token
-                      .approve(
-                        '0xb02bbd63545654d55125F98F85F4E691f1a3E207',
-                        parseUnits(textFieldValue, decimal)
-                      )
-                      .then((tx: any) => {
-                        return tx.wait()
-                      })
-                      .then(() => {
-                        setApproveLoading(false)
-                        return token.allowance(
-                          account,
-                          config[chainId!].divaAddress
-                        )
-                      })
-                      .catch((err: any) => {
-                        setApproveLoading(false)
-                        console.error(err)
-                      })
-                    break
-                }
+                token
+                  .approve(
+                    config[chainId!].divaAddress,
+                    parseUnits(textFieldValue, decimal)
+                  )
+                  .then((tx: any) => {
+                    return tx.wait()
+                  })
+                  .then(() => {
+                    setApproveLoading(false)
+                    return token.allowance(
+                      account,
+                      config[chainId!].divaAddress
+                    )
+                  })
+                  .catch((err: any) => {
+                    setApproveLoading(false)
+                    console.error(err)
+                  })
               }}
               style={{
                 maxWidth: theme.spacing(mobile ? 16 : 26),
