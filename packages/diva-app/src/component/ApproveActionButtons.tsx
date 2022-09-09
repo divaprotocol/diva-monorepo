@@ -1,6 +1,12 @@
-import { CircularProgress, Container, Stack, useTheme } from '@mui/material'
+import {
+  Alert,
+  CircularProgress,
+  Container,
+  Stack,
+  useTheme,
+} from '@mui/material'
 import Button from '@mui/material/Button'
-import { ethers } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import { config, CREATE_POOL_TYPE } from '../constants'
 import {
   formatEther,
@@ -30,7 +36,118 @@ type Props = {
   alert?: boolean
   formik?: ReturnType<typeof useCreatePoolFormik>
 }
+async function _checkConditions(
+  diva: ethers.Contract,
+  divaDomain: {
+    name: string
+    version: string
+    chainId: number
+    verifyingContract: string
+  },
+  offerCreateContingentPool: any,
+  type: Record<string, { type: string; name: string }[]>,
+  signature: any,
+  userAddress: string,
+  takerFillAmount: BigNumber
+): Promise<{ message: string; success: boolean }> {
+  // Get current time (proxy for block timestamp)
+  const now = Math.floor(Date.now() / 1000)
 
+  // Get information about the state of the create contingent pool offer
+  const relevantStateParams =
+    await diva.getOfferRelevantStateCreateContingentPool(
+      offerCreateContingentPool,
+      signature
+    )
+
+  // Confirm that the offer is fillable
+  if (relevantStateParams.offerInfo.status != 4) {
+    console.log(
+      'Offer is not fillable (invalid, expired, cancelled or already filled)'
+    )
+
+    // Helper logs to help identify the reason why an offer is not fillable
+    let msg
+    if (BigNumber.from(offerCreateContingentPool.takerCollateralAmount).eq(0)) {
+      msg = 'Invalid offer because takerCollateralAmount is zero'
+    }
+
+    if (Number(offerCreateContingentPool.offerExpiry) <= now) {
+      msg = 'Offer expiry is in the past'
+    }
+
+    if (
+      relevantStateParams.offerInfo.takerFilledAmount ===
+      ethers.constants.MaxUint256
+    ) {
+      msg = 'Offer was cancelled'
+    }
+
+    if (
+      BigNumber.from(relevantStateParams.offerInfo.takerFilledAmount).gt(
+        offerCreateContingentPool.takerCollateralAmount
+      )
+    ) {
+      msg = 'Offer is already filled'
+    }
+    return { message: msg, success: false }
+  }
+
+  // Confirm that the contingent pool parameters are valid
+  if (!relevantStateParams.isValidInputParamsCreateContingentPool) {
+    return {
+      message: 'Invalid create contingent pool parameters',
+      success: false,
+    }
+  }
+
+  // Check actual fillable amount. The checks above provide more information on why
+  // actualTakerFillableAmount is smaller than takerCollateralAmount - takerFilledAmount.
+  if (relevantStateParams.actualTakerFillableAmount.lt(takerFillAmount)) {
+    return {
+      message: 'Actually fillable amount is smaller than takerFillAmount',
+      success: false,
+    }
+  }
+
+  // Confirm that signature matches the offer
+  const recoveredAddress = ethers.utils.verifyTypedData(
+    divaDomain,
+    type,
+    offerCreateContingentPool,
+    signature
+  )
+  if (recoveredAddress != offerCreateContingentPool.maker) {
+    return {
+      message: 'Invalid signature',
+      success: false,
+    }
+  }
+
+  // Check that taker is allowed to fill the offer (relevant if taker specified in the offer is not the zero address)
+  if (
+    offerCreateContingentPool.taker != ethers.constants.AddressZero &&
+    userAddress != offerCreateContingentPool.taker
+  ) {
+    return {
+      message: 'Offer is reserved for a different address',
+      success: false,
+    }
+  }
+
+  // Confirm that takerFillAmount >= minimumTakerFillAmount **on first fill**. Minimum is not relevant on second fill (i.e. when takerFilledAmount > 0)
+  if (
+    relevantStateParams.offerInfo.takerFilledAmount == 0 &&
+    takerFillAmount.lt(offerCreateContingentPool.minimumTakerFillAmount)
+  ) {
+    return {
+      message: 'TakerFillAmount is smaller than minimumTakerFillAmount',
+      success: false,
+    }
+  }
+
+  return { message: 'All good', success: true }
+}
 export const ApproveActionButtons = ({
   collateralTokenAddress,
   pool,
@@ -47,7 +164,7 @@ export const ApproveActionButtons = ({
   const [approveEnabled, setApproveEnabled] = React.useState(false)
   const [actionEnabled, setActionEnabled] = React.useState(false)
   const [isPoolCreated, setIsPoolCreated] = React.useState(false)
-  const [jsonToExport, setJsonToExport] = useState<any>()
+  const [errorMessage, setErrorMessage] = useState<string>('All good')
   const [btnName, setBtnName] = React.useState('Add')
   const { provider } = useConnectionContext()
   const account = useAppSelector(selectUserAddress)
@@ -174,13 +291,94 @@ export const ApproveActionButtons = ({
         justifyContent: mobile ? 'center' : 'flex-end',
       }}
     >
-      <Stack direction="row" spacing={theme.spacing(mobile ? 1 : 3)}>
-        {approveLoading ? (
-          <Container sx={{ minWidth: theme.spacing(mobile ? 10 : 20) }}>
-            <CircularProgress />
-          </Container>
-        ) : (
-          <Container>
+      <Stack>
+        <Stack direction="row" spacing={theme.spacing(mobile ? 1 : 3)}>
+          {approveLoading ? (
+            <Container sx={{ minWidth: theme.spacing(mobile ? 10 : 20) }}>
+              <CircularProgress />
+            </Container>
+          ) : (
+            <Container>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                type="submit"
+                value="Submit"
+                disabled={
+                  approveEnabled === false ||
+                  account == null ||
+                  textFieldValue === '' ||
+                  isPoolCreated === true ||
+                  alert === true
+                }
+                onClick={() => {
+                  switch (transactionType) {
+                    case 'createpool' || 'liquidity':
+                      setApproveLoading(true)
+
+                      token
+                        .approve(
+                          config[chainId!].divaAddress,
+                          parseUnits(textFieldValue, decimal)
+                        )
+                        .then((tx: any) => {
+                          return tx.wait()
+                        })
+                        .then(() => {
+                          setApproveLoading(false)
+                          return token.allowance(
+                            account,
+                            config[chainId!].divaAddress
+                          )
+                        })
+                        .catch((err: any) => {
+                          setApproveLoading(false)
+                          console.error(err)
+                        })
+                      break
+                    case 'filloffer':
+                      setApproveLoading(true)
+
+                      token
+                        .approve(
+                          '0xb02bbd63545654d55125F98F85F4E691f1a3E207',
+                          parseUnits(textFieldValue, decimal)
+                        )
+                        .then((tx: any) => {
+                          return tx.wait()
+                        })
+                        .then(() => {
+                          setApproveLoading(false)
+                          return token.allowance(
+                            account,
+                            '0xb02bbd63545654d55125F98F85F4E691f1a3E207'
+                          )
+                        })
+                        .catch((err: any) => {
+                          setApproveLoading(false)
+                          console.error(err)
+                        })
+                      break
+                  }
+                }}
+                style={{
+                  maxWidth: theme.spacing(mobile ? 16 : 26),
+                  maxHeight: theme.spacing(5),
+                  minWidth: theme.spacing(mobile ? 16 : 26),
+                  minHeight: theme.spacing(5),
+                }}
+              >
+                <CheckIcon />
+                Approve
+              </Button>
+            </Container>
+          )}
+          {actionLoading ? (
+            <Container sx={{ minWidth: theme.spacing(mobile ? 10 : 20) }}>
+              <CircularProgress />
+            </Container>
+          ) : (
             <Button
               variant="contained"
               color="primary"
@@ -188,59 +386,162 @@ export const ApproveActionButtons = ({
               type="submit"
               value="Submit"
               disabled={
-                approveEnabled === false ||
+                actionEnabled === false ||
                 account == null ||
                 textFieldValue === '' ||
                 isPoolCreated === true ||
                 alert === true
               }
               onClick={() => {
+                setActionLoading(true)
                 switch (transactionType) {
-                  case 'createpool' || 'liquidity':
-                    setApproveLoading(true)
-
-                    token
-                      .approve(
-                        config[chainId!].divaAddress,
-                        parseUnits(textFieldValue, decimal)
-                      )
-                      .then((tx: any) => {
-                        return tx.wait()
+                  case 'createpool':
+                    diva!
+                      .createContingentPool({
+                        inflection: parseEther(pool.inflection.toString()),
+                        cap: parseEther(pool.cap.toString()),
+                        floor: parseEther(pool.floor.toString()),
+                        collateralBalanceShort: parseUnits(
+                          pool.collateralBalanceShort.toString(),
+                          decimal
+                        ),
+                        collateralBalanceLong: parseUnits(
+                          pool.collateralBalanceLong.toString(),
+                          decimal
+                        ),
+                        expiryTime: Math.trunc(
+                          pool.expiryTime.getTime() / 1000
+                        ),
+                        supplyPositionToken: parseEther(
+                          pool.tokenSupply.toString()
+                        ),
+                        referenceAsset: pool.referenceAsset.toString(),
+                        collateralToken: pool.collateralToken.id.toString(),
+                        dataProvider: pool.dataProvider.toString(),
+                        capacity:
+                          pool.capacity === 'Unlimited'
+                            ? ethers.constants.MaxUint256
+                            : parseUnits(pool.capacity.toString(), decimal),
                       })
-                      .then(() => {
-                        setApproveLoading(false)
-                        return token.allowance(
-                          account,
-                          config[chainId!].divaAddress
-                        )
+                      .then((tx) => {
+                        /**
+                         * dispatch action to refetch the pool after action
+                         */
+                        tx.wait()
+                          .then(() => {
+                            setTimeout(() => {
+                              setActionLoading(false)
+                              setIsPoolCreated(true)
+                              onTransactionSuccess()
+                            }, 15000)
+                          })
+                          .catch((err: any) => {
+                            setActionLoading(false)
+                            console.error(err)
+                          })
                       })
                       .catch((err: any) => {
-                        setApproveLoading(false)
+                        setActionLoading(false)
                         console.error(err)
                       })
                     break
-                  case 'filloffer':
-                    setApproveLoading(true)
-
-                    token
-                      .approve(
-                        '0xb02bbd63545654d55125F98F85F4E691f1a3E207',
+                  case 'liquidity':
+                    diva!
+                      .addLiquidity(
+                        window.location.pathname.split('/')[1],
                         parseUnits(textFieldValue, decimal)
                       )
-                      .then((tx: any) => {
-                        return tx.wait()
-                      })
-                      .then(() => {
-                        setApproveLoading(false)
-                        return token.allowance(
-                          account,
-                          config[chainId!].divaAddress
-                        )
+                      .then((tx) => {
+                        /**
+                         * dispatch action to refetch the pool after action
+                         */
+                        tx.wait()
+                          .then(() => {
+                            setActionLoading(false)
+                            setTimeout(() => {
+                              onTransactionSuccess()
+                              dispatch(
+                                fetchPool({
+                                  graphUrl:
+                                    config[chainId as number].divaSubgraph,
+                                  poolId:
+                                    window.location.pathname.split('/')[1],
+                                })
+                              )
+                            }, 5000)
+                          })
+                          .catch((err: any) => {
+                            setActionLoading(false)
+                            console.error(err)
+                          })
                       })
                       .catch((err: any) => {
-                        setApproveLoading(false)
+                        setActionLoading(false)
                         console.error(err)
                       })
+                    break
+                  case 'createoffer':
+                    setApproveLoading(false)
+                    console.log(signer)
+                    signer
+                      ._signTypedData(
+                        divaDomain,
+                        CREATE_POOL_TYPE,
+                        offerCreationStats
+                      )
+                      .then((signedTypedData) => {
+                        const { r, s, v } = splitSignature(signedTypedData)
+                        const signature = {
+                          v: v,
+                          r: r,
+                          s: s,
+                        }
+                        const json = {
+                          ...offerCreationStats,
+                          signature,
+                        }
+
+                        formik.setFieldValue('jsonToExport', json)
+                        console.log('json', json)
+                        onTransactionSuccess()
+                      })
+                      .catch((err: any) => {
+                        console.log(err)
+                      })
+                    break
+                  case 'filloffer':
+                    // setApproveLoading(false)
+                    console.log('json', values.collateralBalance)
+                    _checkConditions(
+                      eip712Diva,
+                      divaDomain,
+                      offerCreationStats,
+                      CREATE_POOL_TYPE,
+                      values.signature,
+                      account,
+                      parseEther(values.collateralBalance)
+                    ).then((res) => {
+                      if (res.success) {
+                        eip712Diva
+                          .fillOfferCreateContingentPool(
+                            values.jsonToExport,
+                            values.signature,
+                            parseEther(values.collateralBalance)
+                          )
+                          .then(onTransactionSuccess())
+                          .catch((err: any) => {
+                            setActionLoading(false)
+                            console.log(err)
+                          })
+                      } else {
+                        setActionLoading(false)
+                        setErrorMessage(res.message)
+                        console.warn(res.message)
+                      }
+                    })
+
+                    // .then(onTransactionSuccess())
+
                     break
                 }
               }}
@@ -251,178 +552,15 @@ export const ApproveActionButtons = ({
                 minHeight: theme.spacing(5),
               }}
             >
-              <CheckIcon />
-              Approve
+              <AddIcon />
+              {btnName}
             </Button>
+          )}
+        </Stack>
+        {errorMessage !== 'All good' && (
+          <Container sx={{ ml: theme.spacing(34) }}>
+            <Alert severity="error">{errorMessage}</Alert>
           </Container>
-        )}
-        {actionLoading ? (
-          <Container sx={{ minWidth: theme.spacing(mobile ? 10 : 20) }}>
-            <CircularProgress />
-          </Container>
-        ) : (
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            type="submit"
-            value="Submit"
-            disabled={
-              actionEnabled === false ||
-              account == null ||
-              textFieldValue === '' ||
-              isPoolCreated === true ||
-              alert === true
-            }
-            onClick={() => {
-              setActionLoading(true)
-              switch (transactionType) {
-                case 'createpool':
-                  diva!
-                    .createContingentPool({
-                      inflection: parseEther(pool.inflection.toString()),
-                      cap: parseEther(pool.cap.toString()),
-                      floor: parseEther(pool.floor.toString()),
-                      collateralBalanceShort: parseUnits(
-                        pool.collateralBalanceShort.toString(),
-                        decimal
-                      ),
-                      collateralBalanceLong: parseUnits(
-                        pool.collateralBalanceLong.toString(),
-                        decimal
-                      ),
-                      expiryTime: Math.trunc(pool.expiryTime.getTime() / 1000),
-                      supplyPositionToken: parseEther(
-                        pool.tokenSupply.toString()
-                      ),
-                      referenceAsset: pool.referenceAsset.toString(),
-                      collateralToken: pool.collateralToken.id.toString(),
-                      dataProvider: pool.dataProvider.toString(),
-                      capacity:
-                        pool.capacity === 'Unlimited'
-                          ? ethers.constants.MaxUint256
-                          : parseUnits(pool.capacity.toString(), decimal),
-                    })
-                    .then((tx) => {
-                      /**
-                       * dispatch action to refetch the pool after action
-                       */
-                      tx.wait()
-                        .then(() => {
-                          setTimeout(() => {
-                            setActionLoading(false)
-                            setIsPoolCreated(true)
-                            onTransactionSuccess()
-                          }, 15000)
-                        })
-                        .catch((err: any) => {
-                          setActionLoading(false)
-                          console.error(err)
-                        })
-                    })
-                    .catch((err: any) => {
-                      setActionLoading(false)
-                      console.error(err)
-                    })
-                  break
-                case 'liquidity':
-                  diva!
-                    .addLiquidity(
-                      window.location.pathname.split('/')[1],
-                      parseUnits(textFieldValue, decimal)
-                    )
-                    .then((tx) => {
-                      /**
-                       * dispatch action to refetch the pool after action
-                       */
-                      tx.wait()
-                        .then(() => {
-                          setActionLoading(false)
-                          setTimeout(() => {
-                            onTransactionSuccess()
-                            dispatch(
-                              fetchPool({
-                                graphUrl:
-                                  config[chainId as number].divaSubgraph,
-                                poolId: window.location.pathname.split('/')[1],
-                              })
-                            )
-                          }, 5000)
-                        })
-                        .catch((err: any) => {
-                          setActionLoading(false)
-                          console.error(err)
-                        })
-                    })
-                    .catch((err: any) => {
-                      setActionLoading(false)
-                      console.error(err)
-                    })
-                  break
-                case 'createoffer':
-                  setApproveLoading(false)
-                  console.log(signer)
-                  signer
-                    ._signTypedData(
-                      divaDomain,
-                      CREATE_POOL_TYPE,
-                      offerCreationStats
-                    )
-                    .then((signedTypedData) => {
-                      const { r, s, v } = splitSignature(signedTypedData)
-                      const signature = {
-                        v: v,
-                        r: r,
-                        s: s,
-                      }
-                      const json = {
-                        ...offerCreationStats,
-                        signature,
-                      }
-
-                      formik.setFieldValue('jsonToExport', json)
-                      console.log('json', json)
-                      onTransactionSuccess()
-                    })
-                    .catch((err: any) => {
-                      console.log(err)
-                    })
-                  break
-                case 'filloffer':
-                  // setApproveLoading(false)
-                  console.log('json', values.jsonToExport)
-                  eip712Diva
-                    .getOfferRelevantStateCreateContingentPool(
-                      offerCreationStats,
-                      values.signature
-                    )
-                    .then((res: any) => {
-                      console.log('res', res)
-                    })
-                  eip712Diva
-                    .fillOfferCreateContingentPool(
-                      values.jsonToExport,
-                      values.signature,
-                      '10000000000000000000'
-                    )
-                    .catch((err: any) => {
-                      console.log(err)
-                    })
-                  // .then(onTransactionSuccess())
-
-                  break
-              }
-            }}
-            style={{
-              maxWidth: theme.spacing(mobile ? 16 : 26),
-              maxHeight: theme.spacing(5),
-              minWidth: theme.spacing(mobile ? 16 : 26),
-              minHeight: theme.spacing(5),
-            }}
-          >
-            <AddIcon />
-            {btnName}
-          </Button>
         )}
       </Stack>
     </div>
