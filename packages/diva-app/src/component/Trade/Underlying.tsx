@@ -58,6 +58,7 @@ export default function Underlying() {
       ? 'liquidity'
       : 'trade'
   const [value, setValue] = useState(currentTab)
+  const [chartWidth, setChartWidth] = useState(650)
   const breakEven = useAppSelector((state) => state.stats.breakEven)
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
@@ -66,6 +67,13 @@ export default function Underlying() {
   const exchangeProxy = chainContractAddress.exchangeProxy
   const theme = useTheme()
   const dispatch = useDispatch()
+
+  useEffect(() => {
+    window.addEventListener('resize', () => {
+      setChartWidth(window.innerWidth * 0.4768)
+    })
+  }, [window.innerWidth])
+  console.log('window.innerWidth ', window.innerWidth)
 
   useEffect(() => {
     dispatch(
@@ -148,7 +156,7 @@ export default function Underlying() {
                     refAsset={pool.referenceAsset}
                     currentPrice={currentPrice}
                     payOut={pool.collateralToken.symbol}
-                    w={650}
+                    w={chartWidth}
                     h={336}
                     isLong={OptionParams.IsLong}
                     breakEven={breakEven}

@@ -7,11 +7,11 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { useCreatePoolFormik } from './formik'
 import { Circle } from '@mui/icons-material'
-import { PayoffProfile } from './PayoffProfile'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { useEffect, useState } from 'react'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { PayoffProfile } from './PayoffProfile'
 
 export function ReviewAndSubmit({
   formik,
@@ -260,6 +260,7 @@ export function ReviewAndSubmit({
                   collateralBalanceLong={values.collateralBalanceLong}
                   collateralBalanceShort={values.collateralBalanceShort}
                   tokenSupply={values.tokenSupply}
+                  collateralToken={values.collateralToken.symbol}
                 />
               </Box>
             )}
