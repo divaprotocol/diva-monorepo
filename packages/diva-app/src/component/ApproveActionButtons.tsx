@@ -117,7 +117,10 @@ async function _checkConditions(
     offerCreateContingentPool,
     signature
   )
-  if (recoveredAddress != offerCreateContingentPool.maker) {
+  if (
+    recoveredAddress.toLowerCase() !=
+    offerCreateContingentPool.maker.toLowerCase()
+  ) {
     return {
       message: 'Invalid signature',
       success: false,
@@ -187,8 +190,9 @@ export const ApproveActionButtons = ({
     DIVA712ABI,
     signer
   )
+
   const offerCreationStats = {
-    maker: account,
+    maker: ethers.utils.getAddress(account),
     taker:
       values.takerAddress === 'Everyone'
         ? '0x0000000000000000000000000000000000000000'
@@ -211,7 +215,7 @@ export const ApproveActionButtons = ({
     ).toString(),
     referenceAsset: values.referenceAsset,
     expiryTime: Math.floor(
-      new Date(values.expiryTime).getTime() / 1000
+      new Date(values.expiryTime).getTime() / 1000 + 10000
     ).toString(),
     floor: parseEther(String(values.floor)).toString(),
     inflection: parseEther('60000').toString(),
@@ -225,6 +229,7 @@ export const ApproveActionButtons = ({
         : values.capacity,
     salt: Date.now().toString(),
   }
+
   const divaDomain = {
     name: 'DIVA Protocol',
     version: '1',
@@ -482,7 +487,6 @@ export const ApproveActionButtons = ({
                     break
                   case 'createoffer':
                     setApproveLoading(false)
-                    console.log(signer)
                     signer
                       ._signTypedData(
                         divaDomain,
@@ -515,7 +519,7 @@ export const ApproveActionButtons = ({
                     _checkConditions(
                       eip712Diva,
                       divaDomain,
-                      offerCreationStats,
+                      values.jsonToExport, // offerCreationStats,
                       CREATE_POOL_TYPE,
                       values.signature,
                       account,
