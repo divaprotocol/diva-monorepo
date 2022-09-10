@@ -257,6 +257,7 @@ function handleLiquidityEvent(
     if (parameters.floor.equals(parameters.cap)) {
         testnetUser.binaryPoolCreated = true
     } else {
+      // TODO decimals of gradient have been changed -> Adjust
       // Calculate the hypothetical gradient if it was a linear curve
       const gradientLinear = (parameters.inflection.minus(parameters.floor)).times(unit).div(
         parameters.cap.minus(parameters.floor));
