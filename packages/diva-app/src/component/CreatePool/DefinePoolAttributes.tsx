@@ -313,102 +313,6 @@ export function DefinePoolAttributes({
                 )}
               </FormControl>
             </Stack>
-            <Box>
-              <h3>Collateral</h3>
-
-              <Stack pb={3} spacing={2} direction={mobile ? 'column' : 'row'}>
-                <FormControl
-                  fullWidth
-                  error={formik.errors.collateralToken != null}
-                >
-                  <Autocomplete
-                    options={possibleOptions}
-                    value={collateralToken}
-                    onChange={(_, newValue) => {
-                      formik.setFieldValue('collateralToken', newValue)
-                    }}
-                    getOptionLabel={(option: WhitelistCollateralToken) =>
-                      option?.symbol || ''
-                    }
-                    onInputChange={(event) => {
-                      if (event != null && event.target != null) {
-                        setReferenceAssetSearch(
-                          (event.target as any).value || ''
-                        )
-                      }
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        error={formik.errors.collateralToken != null}
-                        onBlur={formik.handleBlur}
-                        {...params}
-                        label="Collateral Asset"
-                      />
-                    )}
-                  />
-                  {formik.errors.collateralToken != null && (
-                    <FormHelperText>
-                      {formik.errors.collateralToken}
-                    </FormHelperText>
-                  )}
-                  {collateralWalletBalance != null && collateralToken != null && (
-                    <FormHelperText>
-                      Your balance:{' '}
-                      {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
-                      {collateralToken?.symbol}{' '}
-                      <MaxCollateral
-                        role="button"
-                        onClick={() => {
-                          if (collateralWalletBalance != null) {
-                            formik.setFieldValue(
-                              'collateralBalance',
-                              collateralWalletBalance
-                            )
-                          }
-                        }}
-                      >
-                        (Max)
-                      </MaxCollateral>
-                    </FormHelperText>
-                  )}
-                </FormControl>
-                <FormControl
-                  fullWidth
-                  error={formik.errors.collateralBalance != null}
-                >
-                  <TextField
-                    id="collateralBalance"
-                    name="collateralBalance"
-                    label="Collateral Amount"
-                    inputProps={{ step: 1, min: 0 }}
-                    onBlur={formik.handleBlur}
-                    error={formik.errors.collateralBalance != null}
-                    value={formik.values.collateralBalance}
-                    type="number"
-                    onChange={(event) => {
-                      const collateralBalance = event.target.value
-
-                      formik.setValues((values) => ({
-                        ...values,
-                        collateralBalance,
-                        tokenSupply: parseFloat(collateralBalance),
-                      }))
-                    }}
-                  />
-                  {formik.errors.collateralBalance != null && (
-                    <FormHelperText>
-                      {formik.errors.collateralBalance}
-                    </FormHelperText>
-                  )}
-                  {!isNaN(formik.values.tokenSupply) && (
-                    <FormHelperText>
-                      You receive {formik.values.tokenSupply} LONG and{' '}
-                      {formik.values.tokenSupply} SHORT tokens
-                    </FormHelperText>
-                  )}
-                </FormControl>
-              </Stack>
-            </Box>
 
             <h3>Payoff Type</h3>
             <FormControl>
@@ -647,6 +551,102 @@ export function DefinePoolAttributes({
                 </Box>
               )}
             </Stack>
+            <Box>
+              <h3>Collateral</h3>
+
+              <Stack pb={3} spacing={2} direction={mobile ? 'column' : 'row'}>
+                <FormControl
+                  fullWidth
+                  error={formik.errors.collateralToken != null}
+                >
+                  <Autocomplete
+                    options={possibleOptions}
+                    value={collateralToken}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('collateralToken', newValue)
+                    }}
+                    getOptionLabel={(option: WhitelistCollateralToken) =>
+                      option?.symbol || ''
+                    }
+                    onInputChange={(event) => {
+                      if (event != null && event.target != null) {
+                        setReferenceAssetSearch(
+                          (event.target as any).value || ''
+                        )
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        error={formik.errors.collateralToken != null}
+                        onBlur={formik.handleBlur}
+                        {...params}
+                        label="Collateral Asset"
+                      />
+                    )}
+                  />
+                  {formik.errors.collateralToken != null && (
+                    <FormHelperText>
+                      {formik.errors.collateralToken}
+                    </FormHelperText>
+                  )}
+                  {collateralWalletBalance != null && collateralToken != null && (
+                    <FormHelperText>
+                      Your balance:{' '}
+                      {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
+                      {collateralToken?.symbol}{' '}
+                      <MaxCollateral
+                        role="button"
+                        onClick={() => {
+                          if (collateralWalletBalance != null) {
+                            formik.setFieldValue(
+                              'collateralBalance',
+                              collateralWalletBalance
+                            )
+                          }
+                        }}
+                      >
+                        (Max)
+                      </MaxCollateral>
+                    </FormHelperText>
+                  )}
+                </FormControl>
+                <FormControl
+                  fullWidth
+                  error={formik.errors.collateralBalance != null}
+                >
+                  <TextField
+                    id="collateralBalance"
+                    name="collateralBalance"
+                    label="Collateral Amount"
+                    inputProps={{ step: 1, min: 0 }}
+                    onBlur={formik.handleBlur}
+                    error={formik.errors.collateralBalance != null}
+                    value={formik.values.collateralBalance}
+                    type="number"
+                    onChange={(event) => {
+                      const collateralBalance = event.target.value
+
+                      formik.setValues((values) => ({
+                        ...values,
+                        collateralBalance,
+                        tokenSupply: parseFloat(collateralBalance),
+                      }))
+                    }}
+                  />
+                  {formik.errors.collateralBalance != null && (
+                    <FormHelperText>
+                      {formik.errors.collateralBalance}
+                    </FormHelperText>
+                  )}
+                  {!isNaN(formik.values.tokenSupply) && (
+                    <FormHelperText>
+                      You receive {formik.values.tokenSupply} LONG and{' '}
+                      {formik.values.tokenSupply} SHORT tokens
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              </Stack>
+            </Box>
           </Container>
         </Box>
       </Container>

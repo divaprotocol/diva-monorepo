@@ -532,7 +532,11 @@ export const ApproveActionButtons = ({
                             values.signature,
                             parseEther(values.collateralBalance)
                           )
-                          .then(onTransactionSuccess())
+                          .then((tx) => {
+                            tx.wait().then(() => {
+                              onTransactionSuccess()
+                            })
+                          })
                           .catch((err: any) => {
                             setActionLoading(false)
                             console.log(err)

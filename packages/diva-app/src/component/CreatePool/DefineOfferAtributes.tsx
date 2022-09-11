@@ -762,6 +762,7 @@ export function DefineOfferAttributes({
                     label="Taker Share"
                     inputProps={{ step: 1, min: 0 }}
                     onBlur={formik.handleBlur}
+                    disabled={true}
                     error={
                       direction === 'Long'
                         ? formik.errors.collateralBalanceShort != null
