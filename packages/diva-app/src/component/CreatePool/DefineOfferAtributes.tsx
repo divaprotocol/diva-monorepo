@@ -22,6 +22,7 @@ import {
   Accordion,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { BigNumber, ethers } from 'ethers'
 
 import { PayoffProfile } from './PayoffProfile'
 import { useCreatePoolFormik } from './formik'
@@ -51,7 +52,7 @@ export function DefineOfferAttributes({
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
   const [value, setValue] = useState('Binary')
   const [direction, setDirection] = useState('Long')
-  const [offerDuration, setOfferDuration] = useState(24 * 60 * 60 * 1000)
+  const [offerDuration, setOfferDuration] = useState(24 * 60 * 60) // 1 Day
   const [expanded, setExpanded] = useState(false)
   const [everyone, setEveryone] = useState(true)
   const [fillOrKill, setFillOrKill] = useState(true)
@@ -756,7 +757,7 @@ export function DefineOfferAttributes({
                   {!isNaN(
                     direction === 'Long'
                       ? formik.values.collateralBalanceShort
-                      : formik.values.collateralBalanceLong
+                      : formik.values.collateralBalanceLong // QUESTION Why do we need this part here?
                   ) && (
                     <FormHelperText>
                       Taker receives{' '}
@@ -811,11 +812,11 @@ export function DefineOfferAttributes({
                 value={offerDuration}
                 onChange={handleOfferDurationChange}
               >
-                <MenuItem value={60 * 60 * 1000}>1 Hour</MenuItem>
-                <MenuItem value={4 * 60 * 60 * 1000}>4 Hours</MenuItem>
-                <MenuItem value={12 * 60 * 60 * 1000}>12 Hours</MenuItem>
-                <MenuItem value={24 * 60 * 60 * 1000}>1 Day</MenuItem>
-                <MenuItem value={7 * 24 * 60 * 60 * 1000}>7 Days</MenuItem>
+                <MenuItem value={60 * 60}>1 Hour</MenuItem>
+                <MenuItem value={4 * 60 * 60}>4 Hours</MenuItem>
+                <MenuItem value={12 * 60 * 60}>12 Hours</MenuItem>
+                <MenuItem value={24 * 60 * 60}>1 Day</MenuItem>
+                <MenuItem value={7 * 24 * 60 * 60}>7 Days</MenuItem>
               </Select>
             </FormControl>
             {/*</Container>*/}
@@ -858,6 +859,7 @@ export function DefineOfferAttributes({
                             onBlur={formik.handleBlur}
                             id="takerAddress"
                             label="Taker Address"
+                            value={ethers.constants.AddressZero}
                             onChange={formik.handleChange}
                             type="string"
                           />
@@ -918,7 +920,7 @@ export function DefineOfferAttributes({
                       >
                         <Tooltip
                           placement="top-end"
-                          title="Maximum collateral that the pool can accept."
+                          title="Minimum collateral amount the taker has to contribute on first fill"
                         >
                           <TextField
                             name="minTakerContribution"
@@ -926,7 +928,11 @@ export function DefineOfferAttributes({
                             disabled={fillOrKill}
                             onBlur={formik.handleBlur}
                             id="minTakerContribution"
-                            label="Mininmum Token Contribution"
+                            label="Minimum Taker Contribution"
+                            value={
+                              parseFloat(formik.values.collateralBalance) -
+                              formik.values.yourShare
+                            }
                             helperText={
                               formik.errors.minTakerContribution != null
                                 ? formik.errors.minTakerContribution
@@ -944,7 +950,7 @@ export function DefineOfferAttributes({
                             onChange={() => {
                               formik.setFieldValue(
                                 'minTakerContribution',
-                                'Fill or Kill'
+                                'Fill Or Kill'
                               )
                               setFillOrKill(!fillOrKill)
                             }}

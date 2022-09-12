@@ -260,9 +260,10 @@ export function ReviewAndSubmit({
                     fontSize={'0.85rem'}
                     sx={{ ml: theme.spacing(2) }}
                   >
-                    Offer expiry
+                    Offer Expiry
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
+                    {/** TODO Add all the other values 1 Hour, 4 Hours, etc that are available in the dropdown in Create offer */}
                     {values.offerDuration ===
                       Math.floor(24 * 60 * 60 + Date.now() / 1000).toString() &&
                       '1 Day'}

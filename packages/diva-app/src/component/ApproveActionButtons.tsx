@@ -199,7 +199,7 @@ export const ApproveActionButtons = ({
       values.takerShare.toString(),
       values.collateralToken.decimals
     ).toString(),
-    makerDirection: true, // TODO true if Your Direction = Long in GUI; false otherwise
+    makerDirection: values.offerDirection === 'Long' ? true : false,
     offerExpiry: values.offerDuration,
     minimumTakerFillAmount: parseUnits(
       values.minTakerContribution === 'Fill or Kill'
