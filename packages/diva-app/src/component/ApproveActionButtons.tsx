@@ -219,8 +219,11 @@ export const ApproveActionButtons = ({
     dataProvider: values.dataProvider,
     capacity:
       values.capacity === 'Unlimited'
-        ? '115792089237316195423570985008687907853269984665640564039457584007913129639935'
-        : parseUnits(values.capacity, values.collateralToken.decimals),
+        ? ethers.constants.MaxUint256
+        : parseUnits(
+            String(values.capacity),
+            values.collateralToken.decimals
+          ).toString(),
     salt: Date.now().toString(),
   }
 

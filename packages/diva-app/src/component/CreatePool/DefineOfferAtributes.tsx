@@ -22,7 +22,7 @@ import {
   Accordion,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
-import { BigNumber, ethers } from 'ethers'
+import { ethers } from 'ethers'
 
 import { PayoffProfile } from './PayoffProfile'
 import { useCreatePoolFormik } from './formik'
@@ -907,7 +907,10 @@ export function DefineOfferAttributes({
                         control={
                           <Checkbox
                             defaultChecked={unlimited}
-                            onChange={() => setUnlimited(!unlimited)}
+                            onChange={() => {
+                              formik.setFieldValue('capacity', 'Unlimited')
+                              setUnlimited(!unlimited)
+                            }}
                           />
                         }
                         label="Unlimited"
@@ -933,6 +936,7 @@ export function DefineOfferAttributes({
                               parseFloat(formik.values.collateralBalance) -
                               formik.values.yourShare
                             }
+                            /** QUESTION formik.values.takerShare didn't work for some reason */
                             helperText={
                               formik.errors.minTakerContribution != null
                                 ? formik.errors.minTakerContribution
