@@ -58,6 +58,7 @@ const PoolCard = ({ row }: Props) => {
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
   const [usdPrice, setUsdPrice] = useState('')
+  const [chartWidth, setChartWidth] = useState(380)
 
   const pool = useAppSelector((state) => selectPool(state, row.Id.substring(1)))
   const theme = useTheme()
@@ -116,6 +117,13 @@ const PoolCard = ({ row }: Props) => {
   const currentPrice = useAppSelector(
     selectUnderlyingPrice(pool?.referenceAsset)
   )
+  useEffect(() => {
+    if (isMobile) {
+      setChartWidth(304)
+    } else {
+      setChartWidth(380)
+    }
+  }, [isMobile])
 
   return (
     <Box
@@ -207,7 +215,7 @@ const PoolCard = ({ row }: Props) => {
         data={row.PayoffProfile}
         refAsset={pool.referenceAsset}
         payOut={pool.collateralToken.symbol}
-        w={380}
+        w={chartWidth}
         h={220}
         isLong={IsLong}
         currentPrice={currentPrice}
