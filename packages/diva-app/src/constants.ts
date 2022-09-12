@@ -42,6 +42,7 @@ export enum SupportedChainId {
 type SingleConfig = {
   readonly name: string
   readonly divaAddress: string
+  readonly divaAddressNew: string
   readonly balanceCheckAddress: string
   readonly exchangeProxy: string
   readonly whitelistAddress: string
@@ -66,6 +67,7 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.MAINNET]: {
     name: 'Ethereum',
     divaAddress: '',
+    divaAddressNew: '',
     balanceCheckAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
@@ -82,6 +84,7 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.ROPSTEN]: {
     name: 'Ropsten',
     divaAddress: '0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211',
+    divaAddressNew: '',
     balanceCheckAddress: '0xD713aeC2156709A6AF392bb84018ACc6b44f1885',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
@@ -99,6 +102,7 @@ export const config: { [key: number]: SingleConfig } = {
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
+    divaAddressNew: '0xb02bbd63545654d55125F98F85F4E691f1a3E207',
     balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
@@ -118,6 +122,7 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.POLYGON]: {
     name: 'Polygon',
     divaAddress: '',
+    divaAddressNew: '',
     balanceCheckAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
@@ -134,6 +139,7 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.POLYGON_MUMBAI]: {
     name: 'Mumbai',
     divaAddress: '',
+    divaAddressNew: '',
     balanceCheckAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
@@ -154,6 +160,7 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.ARBITRUM_ONE]: {
     name: 'Arbitrum',
     divaAddress: '',
+    divaAddressNew: '',
     balanceCheckAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',

@@ -50,9 +50,6 @@ async function _checkConditions(
   userAddress: string,
   takerFillAmount: BigNumber
 ): Promise<{ message: string; success: boolean }> {
-  // Get current time (proxy for block timestamp)
-  const now = Math.floor(Date.now() / 1000)
-
   // Get information about the state of the create contingent pool offer
   const relevantStateParams =
     await diva.getOfferRelevantStateCreateContingentPool(
@@ -61,36 +58,33 @@ async function _checkConditions(
     )
 
   // Confirm that the offer is fillable
-  if (relevantStateParams.offerInfo.status != 4) {
-    console.log(
-      'Offer is not fillable (invalid, expired, cancelled or already filled)'
-    )
-
-    // Helper logs to help identify the reason why an offer is not fillable
-    let msg
-    if (BigNumber.from(offerCreateContingentPool.takerCollateralAmount).eq(0)) {
-      msg = 'Invalid offer because takerCollateralAmount is zero'
+  // 0: INVALID, 1: CANCELLED, 2: FILLED, 3: EXPIRED, 4: FILLABLE
+  if (relevantStateParams.offerInfo.status === 0) {
+    return {
+      message: 'Offer is invalid because takerCollateralAmount is zero',
+      success: false,
     }
+  }
 
-    if (Number(offerCreateContingentPool.offerExpiry) <= now) {
-      msg = 'Offer expiry is in the past'
+  if (relevantStateParams.offerInfo.status === 1) {
+    return {
+      message: 'Offer was cancelled',
+      success: false,
     }
+  }
 
-    if (
-      relevantStateParams.offerInfo.takerFilledAmount ===
-      ethers.constants.MaxUint256
-    ) {
-      msg = 'Offer was cancelled'
+  if (relevantStateParams.offerInfo.status === 2) {
+    return {
+      message: 'Offer is already filled',
+      success: false,
     }
+  }
 
-    if (
-      BigNumber.from(relevantStateParams.offerInfo.takerFilledAmount).gt(
-        offerCreateContingentPool.takerCollateralAmount
-      )
-    ) {
-      msg = 'Offer is already filled'
+  if (relevantStateParams.offerInfo.status === 3) {
+    return {
+      message: 'Offer is already expired',
+      success: false,
     }
-    return { message: msg, success: false }
   }
 
   // Confirm that the contingent pool parameters are valid
@@ -185,8 +179,8 @@ export const ApproveActionButtons = ({
       ? new ethers.Contract(config[chainId!].divaAddress, DIVA_ABI, signer)
       : null
 
-  const eip712Diva = new ethers.Contract(
-    '0xb02bbd63545654d55125F98F85F4E691f1a3E207', //Goerli
+  const divaNew = new ethers.Contract(
+    config[chainId!].divaAddressNew, //Goerli
     DIVA712ABI,
     signer
   )
@@ -196,26 +190,26 @@ export const ApproveActionButtons = ({
     taker:
       values.takerAddress === 'Everyone'
         ? '0x0000000000000000000000000000000000000000'
-        : values.takerAddress,
+        : ethers.utils.getAddress(values.takerAddress),
     makerCollateralAmount: parseUnits(
-      values.collateralBalance,
+      values.yourShare.toString(),
       values.collateralToken.decimals
     ).toString(),
     takerCollateralAmount: parseUnits(
-      values.collateralBalance,
+      values.takerShare.toString(),
       values.collateralToken.decimals
     ).toString(),
-    makerDirection: true,
+    makerDirection: true, // TODO true if Your Direction = Long in GUI; false otherwise
     offerExpiry: values.offerDuration,
     minimumTakerFillAmount: parseUnits(
       values.minTakerContribution === 'Fill or Kill'
-        ? values.collateralBalance
+        ? values.takerShare.toString()
         : values.minTakerContribution,
       values.collateralToken.decimals
     ).toString(),
     referenceAsset: values.referenceAsset,
     expiryTime: Math.floor(
-      new Date(values.expiryTime).getTime() / 1000 + 10000
+      new Date(values.expiryTime).getTime() / 1000
     ).toString(),
     floor: parseEther(String(values.floor)).toString(),
     inflection: parseEther(String(values.inflection)).toString(),
@@ -226,7 +220,7 @@ export const ApproveActionButtons = ({
     capacity:
       values.capacity === 'Unlimited'
         ? '115792089237316195423570985008687907853269984665640564039457584007913129639935'
-        : values.capacity,
+        : parseUnits(values.capacity, values.collateralToken.decimals),
     salt: Date.now().toString(),
   }
 
@@ -234,7 +228,7 @@ export const ApproveActionButtons = ({
     name: 'DIVA Protocol',
     version: '1',
     chainId,
-    verifyingContract: '0xb02bbd63545654d55125F98F85F4E691f1a3E207',
+    verifyingContract: config[chainId!].divaAddressNew,
   }
   const [mobile, setMobile] = useState(false)
   useEffect(() => {
@@ -260,7 +254,7 @@ export const ApproveActionButtons = ({
       } else {
         if (transactionType === 'filloffer') {
           token
-            .allowance(account, '0xb02bbd63545654d55125F98F85F4E691f1a3E207')
+            .allowance(account, config[chainId!].divaAddressNew)
             .then((res) => {
               console.log('allowance', formatEther(res))
               if (res.lt(parseUnits(textFieldValue, decimal))) {
@@ -347,7 +341,7 @@ export const ApproveActionButtons = ({
 
                       token
                         .approve(
-                          '0xb02bbd63545654d55125F98F85F4E691f1a3E207',
+                          config[chainId!].divaAddressNew,
                           parseUnits(textFieldValue, decimal)
                         )
                         .then((tx: any) => {
@@ -357,7 +351,7 @@ export const ApproveActionButtons = ({
                           setApproveLoading(false)
                           return token.allowance(
                             account,
-                            '0xb02bbd63545654d55125F98F85F4E691f1a3E207'
+                            config[chainId!].divaAddressNew
                           )
                         })
                         .catch((err: any) => {
@@ -517,7 +511,7 @@ export const ApproveActionButtons = ({
                     // setApproveLoading(false)
                     console.log('json', values.collateralBalance)
                     _checkConditions(
-                      eip712Diva,
+                      divaNew,
                       divaDomain,
                       values.jsonToExport, // offerCreationStats,
                       CREATE_POOL_TYPE,
@@ -526,7 +520,7 @@ export const ApproveActionButtons = ({
                       parseEther(values.collateralBalance)
                     ).then((res) => {
                       if (res.success) {
-                        eip712Diva
+                        divaNew
                           .fillOfferCreateContingentPool(
                             values.jsonToExport,
                             values.signature,

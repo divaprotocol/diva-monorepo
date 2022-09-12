@@ -170,24 +170,6 @@ export function DefineOfferAttributes({
       v.symbol.includes(referenceAssetSearch.trim())
     ) || []
 
-  const setCollateralBalance = (num: number) => {
-    let long = 0
-    let short = 0
-
-    if (num > 0) {
-      const half = num / 2
-      long = short = half
-    }
-    formik.setValues(
-      {
-        ...formik.values,
-        collateralBalanceLong: long,
-        collateralBalanceShort: short,
-      },
-      true
-    )
-  }
-
   const hasPaymentProfileError =
     formik.errors.floor != null ||
     formik.errors.cap != null ||
@@ -679,12 +661,6 @@ export function DefineOfferAttributes({
                       {formik.errors.collateralBalance}
                     </FormHelperText>
                   )}
-                  {!isNaN(formik.values.tokenSupply) && (
-                    <FormHelperText>
-                      You receive {formik.values.tokenSupply} LONG and{' '}
-                      {formik.values.tokenSupply} SHORT tokens
-                    </FormHelperText>
-                  )}
                 </FormControl>
               </Stack>
             </Box>
@@ -767,13 +743,13 @@ export function DefineOfferAttributes({
                     value={
                       parseFloat(formik.values.collateralBalance) -
                       formik.values.yourShare
-                    }
+                    } // TODO Update with BigNumber
                     type="number"
                     onChange={(event) => {
                       const collateralBalance = event.target.value
                       formik.setValues((values) => ({
                         ...values,
-                        takerShare: parseFloat(collateralBalance),
+                        takerShare: parseFloat(collateralBalance), // TODO Update with BigNumber
                       }))
                     }}
                   />
@@ -783,15 +759,11 @@ export function DefineOfferAttributes({
                       : formik.values.collateralBalanceLong
                   ) && (
                     <FormHelperText>
-                      Share taker receives{' '}
+                      Taker receives{' '}
                       {direction === 'Long' ? (
-                        <strong>
-                          {formik.values.collateralBalanceShort} Short Tokens
-                        </strong>
+                        <strong>{formik.values.takerShare} SHORT Tokens</strong>
                       ) : (
-                        <strong>
-                          {formik.values.collateralBalanceLong} Long Tokens
-                        </strong>
+                        <strong>{formik.values.takerShare} LONG Tokens</strong>
                       )}
                     </FormHelperText>
                   )}
