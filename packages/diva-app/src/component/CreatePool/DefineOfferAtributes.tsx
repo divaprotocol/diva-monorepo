@@ -56,6 +56,7 @@ export function DefineOfferAttributes({
   const [everyone, setEveryone] = useState(true)
   const [fillOrKill, setFillOrKill] = useState(true)
   const [mobile, setMobile] = useState(false)
+  const [unlimited, setUnlimited] = useState(true)
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
@@ -193,6 +194,19 @@ export function DefineOfferAttributes({
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
+  useEffect(() => {
+    if (unlimited) {
+      formik.setValues((_values) => ({
+        ..._values,
+        capacity: 'Unlimited',
+      }))
+    } else {
+      formik.setValues((_values) => ({
+        ..._values,
+        capacity: formik.values.collateralBalance,
+      }))
+    }
+  }, [unlimited, formik.values.collateralBalance])
   useEffect(() => {
     switch (payoutProfile) {
       case 'Binary':
@@ -407,7 +421,6 @@ export function DefineOfferAttributes({
                       sx={{ width: mobile ? '100%' : '48%' }}
                     />
                   </Tooltip>
-                  <DefineAdvanced formik={formik} />
                 </Box>
               )}
               {value === 'Linear' && (
@@ -470,7 +483,6 @@ export function DefineOfferAttributes({
                       />
                     </Tooltip>
                   </Stack>
-                  <DefineAdvanced formik={formik} />
                 </Box>
               )}
               {value === 'Custom' && (
@@ -694,30 +706,18 @@ export function DefineOfferAttributes({
                     label="Your Share"
                     inputProps={{ step: 1, min: 0 }}
                     onBlur={formik.handleBlur}
-                    error={
-                      direction === 'Long'
-                        ? formik.errors.collateralBalanceLong != null
-                        : formik.errors.collateralBalanceShort != null
-                    }
-                    value={
-                      direction === 'Long'
-                        ? formik.values.collateralBalanceLong
-                        : formik.values.collateralBalanceShort
-                    }
+                    error={formik.errors.yourShare != null}
+                    value={formik.values.yourShare}
                     type="number"
                     onChange={(event) => {
                       const collateralBalance = event.target.value
-                      if (direction === 'Long') {
-                        formik.setValues((values) => ({
-                          ...values,
-                          collateralBalanceLong: parseFloat(collateralBalance),
-                        }))
-                      } else {
-                        formik.setValues((values) => ({
-                          ...values,
-                          collateralBalanceShort: parseFloat(collateralBalance),
-                        }))
-                      }
+                      formik.setValues((values) => ({
+                        ...values,
+                        yourShare: parseFloat(collateralBalance),
+                        takerShare:
+                          parseFloat(values.collateralBalance) -
+                          parseFloat(collateralBalance),
+                      }))
                     }}
                   />
                   {direction === 'Long'
@@ -763,38 +763,20 @@ export function DefineOfferAttributes({
                     inputProps={{ step: 1, min: 0 }}
                     onBlur={formik.handleBlur}
                     disabled={true}
-                    error={
-                      direction === 'Long'
-                        ? formik.errors.collateralBalanceShort != null
-                        : formik.errors.collateralBalanceLong != null
-                    }
+                    error={formik.errors.takerShare != null}
                     value={
-                      direction === 'Long'
-                        ? formik.values.collateralBalanceShort
-                        : formik.values.collateralBalanceLong
+                      parseFloat(formik.values.collateralBalance) -
+                      formik.values.yourShare
                     }
                     type="number"
                     onChange={(event) => {
                       const collateralBalance = event.target.value
-
-                      if (direction === 'Long') {
-                        formik.setValues((values) => ({
-                          ...values,
-                          collateralBalanceShort: parseFloat(collateralBalance),
-                        }))
-                      } else {
-                        formik.setValues((values) => ({
-                          ...values,
-                          collateralBalanceLong: parseFloat(collateralBalance),
-                        }))
-                      }
+                      formik.setValues((values) => ({
+                        ...values,
+                        takerShare: parseFloat(collateralBalance),
+                      }))
                     }}
                   />
-                  {formik.errors.collateralBalanceShort != null && (
-                    <FormHelperText>
-                      {formik.errors.collateralBalanceShort}
-                    </FormHelperText>
-                  )}
                   {!isNaN(
                     direction === 'Long'
                       ? formik.values.collateralBalanceShort
@@ -857,7 +839,11 @@ export function DefineOfferAttributes({
                 value={offerDuration}
                 onChange={handleOfferDurationChange}
               >
+                <MenuItem value={60 * 60 * 1000}>1 Hour</MenuItem>
+                <MenuItem value={4 * 60 * 60 * 1000}>4 Hours</MenuItem>
+                <MenuItem value={12 * 60 * 60 * 1000}>12 Hours</MenuItem>
                 <MenuItem value={24 * 60 * 60 * 1000}>1 Day</MenuItem>
+                <MenuItem value={7 * 24 * 60 * 60 * 1000}>7 Days</MenuItem>
               </Select>
             </FormControl>
             {/*</Container>*/}
@@ -916,6 +902,41 @@ export function DefineOfferAttributes({
                           />
                         }
                         label="Everyone"
+                      />
+                      <FormControl
+                        fullWidth
+                        error={formik.errors.capacity != null}
+                      >
+                        <Tooltip
+                          placement="top-end"
+                          title="Maximum collateral that the pool can accept."
+                        >
+                          <TextField
+                            name="capacity"
+                            error={formik.errors.capacity != null}
+                            disabled={unlimited}
+                            onBlur={formik.handleBlur}
+                            id="capacity"
+                            label="Maximum Pool Capacity"
+                            value={capacity}
+                            helperText={
+                              formik.errors.capacity != null
+                                ? formik.errors.capacity
+                                : ''
+                            }
+                            type="number"
+                            onChange={formik.handleChange}
+                          />
+                        </Tooltip>
+                      </FormControl>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            defaultChecked={unlimited}
+                            onChange={() => setUnlimited(!unlimited)}
+                          />
+                        }
+                        label="Unlimited"
                       />
                     </Container>
                     <Container>

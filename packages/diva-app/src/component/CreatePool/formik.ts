@@ -29,6 +29,8 @@ export type Values = {
   takerAddress?: string
   jsonToExport?: any
   signature?: string
+  yourShare?: number
+  takerShare?: number
 }
 
 export const initialValues: Values = {
@@ -59,6 +61,8 @@ export const initialValues: Values = {
   takerAddress: 'Everyone',
   jsonToExport: '{}',
   signature: '',
+  yourShare: 0,
+  takerShare: 0,
 }
 
 type Errors = {
@@ -150,7 +154,9 @@ export const useCreatePoolFormik = () => {
       } else if (values.collateralBalance == '0') {
         errors.collateralBalance = 'Collateral can not be 0'
       }
-
+      if (values.takerShare < 0 || isNaN(values.takerShare)) {
+        errors.takerShare = 'Taker share can not be negative or missing'
+      }
       if (values.expiryTime == null || isNaN(values.expiryTime.getTime())) {
         errors.expiryTime = 'You must set an expiry time'
       }

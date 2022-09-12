@@ -218,9 +218,9 @@ export const ApproveActionButtons = ({
       new Date(values.expiryTime).getTime() / 1000 + 10000
     ).toString(),
     floor: parseEther(String(values.floor)).toString(),
-    inflection: parseEther('60000').toString(),
-    cap: parseEther('80000').toString(),
-    gradient: parseEther('0.7').toString(),
+    inflection: parseEther(String(values.inflection)).toString(),
+    cap: parseEther(String(values.cap)).toString(),
+    gradient: parseEther(String(values.gradient)).toString(),
     collateralToken: values.collateralToken.id,
     dataProvider: values.dataProvider,
     capacity:

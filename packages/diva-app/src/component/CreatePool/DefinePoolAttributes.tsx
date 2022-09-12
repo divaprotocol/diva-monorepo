@@ -380,7 +380,6 @@ export function DefinePoolAttributes({
                       sx={{ width: mobile ? '100%' : '48%' }}
                     />
                   </Tooltip>
-                  <DefineAdvanced formik={formik} />
                 </Box>
               )}
               {value === 'Linear' && (
@@ -546,7 +545,6 @@ export function DefinePoolAttributes({
                         </Tooltip>
                       </Stack>
                     </Stack>
-                    <DefineAdvanced formik={formik} />
                   </FormControl>
                 </Box>
               )}
@@ -647,6 +645,7 @@ export function DefinePoolAttributes({
                 </FormControl>
               </Stack>
             </Box>
+            <DefineAdvanced formik={formik} />
           </Container>
         </Box>
       </Container>
