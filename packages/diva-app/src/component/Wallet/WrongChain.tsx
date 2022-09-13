@@ -8,7 +8,7 @@ export const WrongChain = (props: any) => {
   const handleOpen = async () => {
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x3' }],
+      params: [{ chainId: '0x5' }],
     })
   }
   return (
@@ -24,7 +24,7 @@ export const WrongChain = (props: any) => {
         }}
       >
         Unsupported network, please <Button onClick={handleOpen}>Switch</Button>{' '}
-        to Ropsten network in your Metamask wallet.
+        to Goerli network in your Metamask wallet.
       </Typography>
     </Box>
   )

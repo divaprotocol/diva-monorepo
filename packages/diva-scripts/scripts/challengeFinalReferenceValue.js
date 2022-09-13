@@ -1,8 +1,8 @@
 /**
  * Script to challenge the value submitted by the data feed provider. Only works if 
  * challenge was enabled by the data feed provider at value submission and if within the challenge period (24h after submission)
- * Run: `yarn hardhat run scripts/challengeFinalReferenceValue.js --network ropsten`
- * Replace ropsten with any other network that is listed in constants.js
+ * Run: `yarn hardhat run scripts/challengeFinalReferenceValue.js --network goerli`
+ * Replace goerli with any other network that is listed in constants.js
  */
 
 const { ethers } = require('hardhat');
@@ -13,7 +13,7 @@ const { addresses, status } = require('../constants/constants')
 async function main() {
 
   // INPUT: network
-  const network = "ropsten" // has to be one of the networks included in constants.js
+  const network = "goerli" // has to be one of the networks included in constants.js
   
   // INPUT: arguments into `setFinalReferenceValue` function
   const poolId = 5 // id of an existing pool

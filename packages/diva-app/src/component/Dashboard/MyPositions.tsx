@@ -1,5 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
+  Box,
   Button,
   Container,
   Dialog,
@@ -28,7 +29,7 @@ import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import styled from 'styled-components'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import {
@@ -41,11 +42,15 @@ import {
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { ExpiresInCell } from '../Markets/Markets'
-import { getAppStatus } from '../../Util/getAppStatus'
+import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import request from 'graphql-request'
 import { Pool, queryUser } from '../../lib/queries'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
+import PoolsTableFilter from '../PoolsTableFilter/DropDownFilter'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 
 type Response = {
   [token: string]: BigNumber
@@ -468,26 +473,8 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     renderCell: (cell: any) => {
-      const description = (status: string) => {
-        switch (status) {
-          case 'Open':
-            return `Pool has not expired yet.`
-          case 'Expired':
-            return `Pool expired and the final value input from the data provider is pending.`
-          case 'Submitted':
-            return `A final value has been submitted by the data provider.`
-          case 'Challenged':
-            return `The final value submitted by the data provider has been challenged by position token holders.`
-          case 'Fallback':
-            return `The data provider failed to submit a final value within the 24h submission period. The fallback data provider has 5 days to step in and submit a value. This is only to be expected for whitelisted data providers. For non-whitelisted data providers, the fallback data provider may not submit a value in which case it will default to inflection.`
-          case 'Confirmed*':
-            return `The final value will be confirmed inside the smart contract at first user redemption.`
-          case 'Confirmed':
-            return `The final value has been confirmed and position token holders can start redeeming their LONG & SHORT position tokens.`
-        }
-      }
       return (
-        <Tooltip placement="top-end" title={description(cell.value)}>
+        <Tooltip placement="top-end" title={statusDescription[cell.value]}>
           <span className="table-cell-trucate">{cell.value}</span>
         </Tooltip>
       )
@@ -527,9 +514,17 @@ export function MyPositions() {
   const { provider, chainId } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
+  const [search, setSearch] = useState(null)
+  const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
+  const [confirmedPoolClicked, setConfirmedPoolClicked] = useState(false)
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
+  const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
+    useGovernanceParameters()
+
   useEffect(() => {
     dispatch(
       fetchPositionTokens({
@@ -537,6 +532,26 @@ export function MyPositions() {
       })
     )
   }, [dispatch, page, userAddress])
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'Underlying' : e.target.value
+    )
+  }
+  const handleExpiredPools = () => {
+    if (expiredPoolClicked) {
+      setExpiredPoolClicked(false)
+    } else {
+      setExpiredPoolClicked(true)
+    }
+  }
+  const handleConfirmedPools = () => {
+    if (confirmedPoolClicked) {
+      setConfirmedPoolClicked(false)
+    } else {
+      setConfirmedPoolClicked(true)
+    }
+  }
 
   const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
     const { finalValue, status } = getAppStatus(
@@ -544,7 +559,11 @@ export function MyPositions() {
       val.statusTimestamp,
       val.statusFinalReferenceValue,
       val.finalReferenceValue,
-      val.inflection
+      val.inflection,
+      submissionPeriod,
+      challengePeriod,
+      reviewPeriod,
+      fallbackPeriod
     )
 
     const shared = {
@@ -736,7 +755,36 @@ export function MyPositions() {
           }))
       : []
 
-  const sortedRows = filteredRows.sort((a, b) => {
+  // covert the above function to a memoized one
+  const filteredRowsByOptions = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (expiredPoolClicked) {
+        return filteredRows
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+          .filter((v) => v.Status.includes('Open'))
+      } else if (confirmedPoolClicked) {
+        return filteredRows
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+          .filter((v) => v.Status.includes('Confirmed'))
+      } else {
+        return filteredRows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else if (expiredPoolClicked) {
+      return filteredRows.filter((v) => v.Status.includes('Open'))
+    } else if (confirmedPoolClicked) {
+      return filteredRows.filter((v) => v.Status.includes('Confirmed'))
+    } else {
+      return filteredRows
+    }
+  }, [filteredRows, search, expiredPoolClicked, confirmedPoolClicked])
+
+  const sortedRows = filteredRowsByOptions.sort((a, b) => {
     const aId = parseFloat(a.Id.substring(1))
     const bId = parseFloat(b.Id.substring(1))
 
@@ -745,13 +793,38 @@ export function MyPositions() {
 
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         height: '100%',
       }}
-      spacing={6}
-      paddingRight={6}
+      spacing={4}
     >
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          maxWidth: '400px',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+        <ButtonFilter
+          id="Hide expired pools"
+          sx={{ marginRight: '30px' }}
+          ButtonLabel="Hide Expired"
+          onClick={handleExpiredPools}
+        />
+        <ButtonFilter
+          id="Confirmed Pools"
+          ButtonLabel="Confirmed"
+          onClick={handleConfirmedPools}
+        />
+      </Box>
       {!userAddress ? (
         <Typography
           sx={{
@@ -768,11 +841,12 @@ export function MyPositions() {
         <>
           <PoolsTable
             page={page}
-            rows={sortedRows}
+            rows={filteredRowsByOptions && sortedRows}
             loading={balances.isLoading}
             rowCount={3000}
             columns={columns}
             onPageChange={(page) => setPage(page)}
+            selectedPoolsView="Table"
           />
         </>
       )}

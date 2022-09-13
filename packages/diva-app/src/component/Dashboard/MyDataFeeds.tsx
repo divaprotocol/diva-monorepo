@@ -1,5 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
+  Box,
   Button,
   Container,
   Dialog,
@@ -12,7 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
@@ -23,30 +24,30 @@ import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
 import {
-  fetchPool,
   fetchPools,
   selectPools,
   selectRequestStatus,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
-import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
+import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { ExpiresInCell } from '../Markets/Markets'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import { getAppStatus } from '../../Util/getAppStatus'
 
 export const DueInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
   const statusTimestamp = parseInt(props.row.StatusTimestamp)
-  const expiryTime = new Date(props.row.Expiry)
-  const now = new Date()
-  if (
-    expiryTime.getTime() <= now.getTime() &&
-    props.row.Status.toLowerCase() === 'open'
-  ) {
+
+  if (props.row.Status === 'Expired') {
     const minUntilExp = getExpiryMinutesFromNow(
-      expTimestamp + 24 * 3600 - 5 * 60
+      expTimestamp + props.row.SubmissionPeriod
     )
-    if (minUntilExp < 24 * 60 - 5 && minUntilExp > 0) {
+
+    if (minUntilExp < props.row.SubmissionPeriod && minUntilExp > 0) {
       return minUntilExp === 1 ? (
         <Tooltip placement="top-end" title={props.row.Expiry}>
           <div
@@ -81,9 +82,10 @@ export const DueInCell = (props: any) => {
   }
   if (props.row.Status === 'Challenged') {
     const minUntilExp = getExpiryMinutesFromNow(
-      statusTimestamp + 48 * 3600 - 5 * 60
+      statusTimestamp + props.row.ReviewPeriod
     )
-    if (minUntilExp < 48 * 60 - 5 && minUntilExp > 0) {
+
+    if (minUntilExp < props.row.ReviewPeriod && minUntilExp > 0) {
       return minUntilExp === 1 ? (
         <Tooltip placement="top-end" title={props.row.Expiry}>
           <div
@@ -150,6 +152,7 @@ const SubmitCell = (props: any) => {
   const [open, setOpen] = useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
   const [loadingValue, setLoadingValue] = useState(false)
+
   const handleOpen = () => {
     setOpen(true)
   }
@@ -157,19 +160,24 @@ const SubmitCell = (props: any) => {
   const handleClose = () => {
     setOpen(false)
   }
+
   const expiryTime = new Date(props.row.Expiry)
   const statusTimestamp = props.row.StatusTimestamp * 1000
   const now = new Date()
-  const relevantTime =
+
+  // Set relevant start time for submissionPeriodEnd calculations. Before expiry, the expiryTime is the relevant start time.
+  // After expiry, when status == Challenged, the statusTimestamp (i.e. time of challenge) is the relevant start time.
+  const relevantStartTime =
     statusTimestamp < expiryTime.getTime()
       ? expiryTime.getTime()
       : statusTimestamp
+
+  // Flag for enabling the SUBMIT VALUE button
   const enabled =
-    (relevantTime <= now.getTime() &&
-      props.row.Status.toLowerCase() === 'open' &&
-      relevantTime + (24 * 60 - 5) * 60 * 1000 > now.getTime()) ||
+    (props.row.Status === 'Expired' &&
+      now.getTime() < relevantStartTime + props.row.SubmissionPeriod * 1000) ||
     (props.row.Status === 'Challenged' &&
-      relevantTime + (48 * 60 - 5) * 60 * 1000 > now.getTime())
+      now.getTime() < relevantStartTime + props.row.ChallengePeriod * 1000)
 
   return (
     <Container>
@@ -319,9 +327,31 @@ const columns: GridColDef[] = [
 export function MyDataFeeds() {
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
+  const [search, setSearch] = useState(null)
+  const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
+
   const dispatch = useDispatch()
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'Underlying' : e.target.value
+    )
+  }
+  const handleExpiredPools = () => {
+    if (expiredPoolClicked) {
+      setExpiredPoolClicked(false)
+    } else {
+      setExpiredPoolClicked(true)
+    }
+  }
+
+  const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
+    useGovernanceParameters()
 
   useEffect(() => {
     if (userAddress != null) {
@@ -333,6 +363,7 @@ export function MyDataFeeds() {
       )
     }
   }, [dispatch, page, userAddress])
+
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,
@@ -346,6 +377,18 @@ export function MyDataFeeds() {
       MaxYield: 'TBD',
       Challenges: val.challenges,
     }
+
+    const { status, finalValue } = getAppStatus(
+      val.expiryTime,
+      val.statusTimestamp,
+      val.statusFinalReferenceValue,
+      val.finalReferenceValue,
+      val.inflection,
+      submissionPeriod,
+      challengePeriod,
+      reviewPeriod,
+      fallbackPeriod
+    )
 
     const payOff = {
       CollateralBalanceLong: Number(
@@ -366,7 +409,6 @@ export function MyDataFeeds() {
       TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
 
-    const Status = val.statusFinalReferenceValue
     return [
       ...acc,
       {
@@ -387,50 +429,97 @@ export function MyDataFeeds() {
           ).toFixed(4) +
           ' ' +
           val.collateralToken.symbol,
-        Status,
+        Status: status,
         StatusTimestamp: val.statusTimestamp,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : parseFloat(formatEther(val.finalReferenceValue)).toFixed(4),
+        finalValue: finalValue,
+        SubmissionPeriod: submissionPeriod,
+        ReviewPeriod: reviewPeriod,
+        ChallengePeriod: challengePeriod,
       },
     ]
   }, [] as GridRowModel[])
 
+  const filteredRows = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (expiredPoolClicked) {
+        return rows
+          .filter((v) => v.Status.includes('Open'))
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      } else {
+        return rows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else {
+      if (expiredPoolClicked) {
+        return rows.filter((v) => v.Status.includes('Open'))
+      } else {
+        return rows
+      }
+    }
+  }, [rows, search, expiredPoolClicked])
+
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         height: '100%',
       }}
-      spacing={6}
-      paddingRight={6}
+      spacing={4}
     >
-      {!userAddress ? (
-        <Typography
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%',
-            width: '100%',
-          }}
-        >
-          Please connect your wallet
-        </Typography>
-      ) : (
-        <>
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+        <ButtonFilter
+          id="Hide expired pools"
+          ButtonLabel="Hide Expired"
+          onClick={handleExpiredPools}
+        />
+      </Box>
+      <Stack
+        direction="row"
+        sx={{
+          height: '100%',
+        }}
+        spacing={6}
+      >
+        {!userAddress ? (
+          <Typography
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+              width: '100%',
+            }}
+          >
+            Please connect your wallet
+          </Typography>
+        ) : (
           <PoolsTable
             disableRowClick={true}
             page={page}
             rowCount={9999}
             loading={poolsRequestStatus === 'pending'}
-            rows={rows}
+            rows={filteredRows}
             columns={columns}
             onPageChange={(page) => setPage(page)}
+            selectedPoolsView="Table"
           />
-        </>
-      )}
+        )}
+      </Stack>
     </Stack>
   )
 }

@@ -1,7 +1,7 @@
 /**
  * Script to set the allowance for the 0x exchange contract
- * Run: `yarn hardhat run scripts/0xAllowance.js --network ropsten`
- * Replace ropsten with any other network that is listed in constants.js
+ * Run: `yarn hardhat run scripts/0xAllowance.js --network goerli`
+ * Replace goerli with any other network that is listed in constants.js
  */
 
  const { ethers } = require('hardhat');
