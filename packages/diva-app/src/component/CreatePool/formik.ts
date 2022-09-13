@@ -3,6 +3,7 @@ import { useFormik } from 'formik'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useDiva } from '../../hooks/useDiva'
 import { WhitelistCollateralToken } from '../../lib/queries'
+import { ethers } from 'ethers'
 
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
@@ -56,13 +57,15 @@ export const initialValues: Values = {
   dataProvider: '',
   payoutProfile: 'Binary',
   offerDirection: 'Long',
-  offerDuration: Math.floor(24 * 60 * 60 + Date.now() / 1000).toString(),
+  offerDuration: Math.floor(
+    24 * 60 * 60 + defaultDate.getTime() / 1000
+  ).toString(),
   minTakerContribution: 'Fill or Kill',
   takerAddress: 'Everyone',
   jsonToExport: '{}',
   signature: '',
   yourShare: 0,
-  takerShare: 0,
+  takerShare: 10,
 }
 
 type Errors = {
@@ -154,8 +157,8 @@ export const useCreatePoolFormik = () => {
       } else if (values.collateralBalance == '0') {
         errors.collateralBalance = 'Collateral can not be 0'
       }
-      if (values.takerShare < 0 || isNaN(values.takerShare)) {
-        errors.takerShare = 'Taker share can not be negative or missing'
+      if (values.takerShare <= 0 || isNaN(values.takerShare)) {
+        errors.takerShare = 'Taker share can not be zero, negative or missing'
       }
       if (values.expiryTime == null || isNaN(values.expiryTime.getTime())) {
         errors.expiryTime = 'You must set an expiry time'
@@ -168,7 +171,16 @@ export const useCreatePoolFormik = () => {
           threshold / 1000 / 60
         } minutes from now`
       }
+      if (values.takerAddress == null) {
+        errors.takerAddress = 'Taker address must not be empty'
+      }
 
+      if (
+        values.takerAddress.length !== ethers.constants.AddressZero.length &&
+        values.takerAddress !== 'Everyone'
+      ) {
+        errors.takerAddress = 'Taker address must be valid'
+      }
       // floor can't be higher or equal to inflection
       if (values.floor > values.inflection) {
         errors.floor = 'Must be lower than inflection'

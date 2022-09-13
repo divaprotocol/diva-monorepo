@@ -219,7 +219,7 @@ export const ApproveActionButtons = ({
     dataProvider: values.dataProvider,
     capacity:
       values.capacity === 'Unlimited'
-        ? ethers.constants.MaxUint256
+        ? ethers.constants.MaxUint256.toString()
         : parseUnits(
             String(values.capacity),
             values.collateralToken.decimals
@@ -422,7 +422,7 @@ export const ApproveActionButtons = ({
                         dataProvider: pool.dataProvider.toString(),
                         capacity:
                           pool.capacity === 'Unlimited'
-                            ? ethers.constants.MaxUint256
+                            ? ethers.constants.MaxUint256.toString()
                             : parseUnits(pool.capacity.toString(), decimal),
                       })
                       .then((tx) => {

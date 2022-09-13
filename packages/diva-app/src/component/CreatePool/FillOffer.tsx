@@ -57,7 +57,6 @@ export function FillOffer({
         'collateralBalanceShort',
         formatEther(configJson.makerCollateralAmount)
       )
-      console.log(parseFloat(configJson.makerCollateralAmount), 'maker')
       formik.setFieldValue(
         'gradient',
         parseFloat(formatEther(configJson.gradient))

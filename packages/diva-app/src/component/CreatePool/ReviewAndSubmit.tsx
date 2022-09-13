@@ -1,4 +1,15 @@
-import { Card, Container, Stack, Typography, useTheme } from '@mui/material'
+import {
+  Card,
+  Container,
+  FormControl,
+  FormHelperText,
+  InputAdornment,
+  LinearProgress,
+  Stack,
+  TextField,
+  Typography,
+  useTheme,
+} from '@mui/material'
 import { Box } from '@mui/material'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
@@ -10,15 +21,21 @@ import { Circle } from '@mui/icons-material'
 import { PayoffProfile } from './PayoffProfile'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { useEffect, useState } from 'react'
-import { getDateTime, userTimeZone } from '../../Util/Dates'
+import {
+  getDateTime,
+  getExpiryMinutesFromNow,
+  userTimeZone,
+} from '../../Util/Dates'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { ethers } from 'ethers'
+import ERC20 from '@diva/contracts/abis/erc20.json'
 
 export function ReviewAndSubmit({
   formik,
-  offer,
+  transaction,
 }: {
   formik: ReturnType<typeof useCreatePoolFormik>
-  offer?: boolean
+  transaction?: string
 }) {
   const { values } = formik
   const theme = useTheme()
@@ -27,6 +44,18 @@ export function ReviewAndSubmit({
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
   const [mobile, setMobile] = useState(false)
+  const [tokenSymbol, setTokenSymbol] = useState('')
+
+  useEffect(() => {
+    const tokenContract = new ethers.Contract(
+      formik.values.collateralToken.id,
+      ERC20,
+      provider.getSigner()
+    )
+    tokenContract.symbol().then((symbol) => {
+      setTokenSymbol(symbol)
+    })
+  }, [])
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
@@ -149,7 +178,7 @@ export function ReviewAndSubmit({
                   <Typography fontSize={'0.85rem'}>{values.cap}</Typography>
                 </Stack>
               )}
-              {!isNaN(values.inflection) && offer === false && (
+              {!isNaN(values.inflection) && transaction === 'createpool' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -162,7 +191,7 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {!isNaN(values.gradient) && offer === false && (
+              {!isNaN(values.gradient) && transaction === 'createpool' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -180,7 +209,7 @@ export function ReviewAndSubmit({
                 sx={{ fontWeight: 'bold' }}
                 color="primary"
               >
-                {offer ? 'Offer terms' : 'Collateral'}
+                {transaction === 'createoffer' ? 'Offer terms' : 'Collateral'}
               </Typography>
               <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                 <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
@@ -198,7 +227,7 @@ export function ReviewAndSubmit({
                   {values.collateralBalance}
                 </Typography>
               </Stack>
-              {!offer && (
+              {transaction === 'createpool' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -211,7 +240,8 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {offer && (
+              {(transaction === 'createoffer' ||
+                transaction === 'filloffer') && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -226,7 +256,8 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {offer && (
+              {(transaction === 'createoffer' ||
+                transaction === 'filloffer') && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -241,7 +272,8 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {offer && (
+              {(transaction === 'createoffer' ||
+                transaction === 'filloffer') && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -254,7 +286,8 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {offer && (
+              {(transaction === 'createoffer' ||
+                transaction === 'filloffer') && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -263,10 +296,28 @@ export function ReviewAndSubmit({
                     Offer Expiry
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {/** TODO Add all the other values 1 Hour, 4 Hours, etc that are available in the dropdown in Create offer */}
-                    {values.offerDuration ===
-                      Math.floor(24 * 60 * 60 + Date.now() / 1000).toString() &&
-                      '1 Day'}
+                    {/*{values.expiryTime.toLocaleString().slice(0, 11) +
+                    ' ' +
+                    getDateTime(Number(values.expiryTime) / 1000).slice(
+                      11,
+                      19
+                    ) +
+                    ' ' +
+                    userTimeZone()}*/}
+                    {new Date(parseFloat(values.offerDuration) * 1000)
+                      .toLocaleString()
+                      .slice(0, 11) +
+                      ' ' +
+                      getDateTime(
+                        Number(
+                          new Date(parseFloat(values.offerDuration) * 1000)
+                        ) / 1000
+                      ).slice(11, 19) +
+                      ' ' +
+                      userTimeZone()}
+                    {/*{values.offerDuration ===*/}
+                    {/*  Math.floor(24 * 60 * 60 + Date.now() / 1000).toString() &&*/}
+                    {/*  '1 Day'}*/}
                   </Typography>
                 </Stack>
               )}
@@ -277,7 +328,7 @@ export function ReviewAndSubmit({
               >
                 Advanced
               </Typography>
-              {!offer && (
+              {transaction === 'createpool' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -290,7 +341,8 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {offer && (
+              {(transaction === 'createoffer' ||
+                transaction === 'filloffer') && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -303,7 +355,8 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {offer && (
+              {(transaction === 'createoffer' ||
+                transaction === 'filloffer') && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -341,6 +394,104 @@ export function ReviewAndSubmit({
       </Container>
       <Container>
         <Stack>
+          {transaction === 'filloffer' && (
+            <Card
+              style={{
+                border: '1px solid #1B3448',
+                background:
+                  'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
+              }}
+            >
+              <Container sx={{ pt: theme.spacing(2) }}>
+                <FormControl
+                  fullWidth
+                  error={
+                    formik.values.offerDirection === 'Long'
+                      ? formik.errors.collateralBalanceShort != null
+                      : formik.errors.collateralBalanceLong != null
+                  }
+                >
+                  <TextField
+                    id="takerShare"
+                    name="takerShare"
+                    label="Your Contribution"
+                    onBlur={formik.handleBlur}
+                    error={formik.errors.takerShare != null}
+                    value={parseFloat(formik.values.collateralBalance)}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {tokenSymbol}
+                        </InputAdornment>
+                      ),
+                    }}
+                    type="number"
+                    onChange={(event) => {
+                      const collateralBalance = event.target.value
+                      formik.setValues((values) => ({
+                        ...values,
+                        takerShare: parseFloat(collateralBalance),
+                      }))
+                    }}
+                  />
+                  {!isNaN(
+                    formik.values.offerDirection === 'Long'
+                      ? formik.values.collateralBalanceShort
+                      : formik.values.collateralBalanceLong
+                  ) && (
+                    <FormHelperText>
+                      You receive{' '}
+                      {formik.values.offerDirection === 'Long' ? (
+                        <strong>{formik.values.takerShare} SHORT Tokens</strong>
+                      ) : (
+                        <strong>{formik.values.takerShare} LONG Tokens</strong>
+                      )}
+                    </FormHelperText>
+                  )}
+                </FormControl>
+                <Container sx={{ ml: theme.spacing(40) }}>
+                  <FormHelperText>
+                    Expires in:{' '}
+                    {Math.floor(
+                      getExpiryMinutesFromNow(formik.values.offerDuration) / 60
+                    )}
+                    h{' '}
+                    {getExpiryMinutesFromNow(formik.values.offerDuration) % 60}m
+                  </FormHelperText>
+                </Container>
+
+                <LinearProgress
+                  variant="determinate"
+                  sx={{ height: '15px', borderRadius: 1 }}
+                  value={
+                    ((formik.values.takerShare -
+                      Number(formik.values.minTakerContribution)) /
+                      (Number(formik.values.collateralBalance) -
+                        Number(formik.values.minTakerContribution))) *
+                    100
+                  }
+                />
+                <Stack
+                  height="100%"
+                  direction="row"
+                  justifyContent="space-between"
+                >
+                  <Typography fontSize={'0.85rem'}>
+                    {formik.values.minTakerContribution + ' ' + tokenSymbol}
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {formik.values.collateralBalance + ' ' + tokenSymbol}
+                  </Typography>
+                </Stack>
+                <FormHelperText>
+                  Remaining fill amount{' '}
+                  {Number(formik.values.collateralBalance) -
+                    formik.values.takerShare}{' '}
+                  {tokenSymbol}
+                </FormHelperText>
+              </Container>
+            </Card>
+          )}
           <Typography color="white" pb={theme.spacing(2)} variant="subtitle1">
             Payoff Profile
           </Typography>

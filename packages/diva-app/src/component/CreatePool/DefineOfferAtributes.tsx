@@ -74,11 +74,14 @@ export function DefineOfferAttributes({
     setDirection(event.target.value)
     formik.setFieldValue('offerDirection', event.target.value)
   }
+
   const handleOfferDurationChange = (event) => {
     setOfferDuration(event.target.value)
     formik.setFieldValue(
       'offerDuration',
-      Math.floor(event.target.value + Date.now() / 1000).toString()
+      Math.floor(
+        event.target.value + formik.values.expiryTime.getTime() / 1000
+      ).toString()
     )
   }
   const handleMinTakerContributionsChange = (event) => {
@@ -714,13 +717,9 @@ export function DefineOfferAttributes({
                     <FormHelperText>
                       You receive{' '}
                       {direction === 'Long' ? (
-                        <strong>
-                          {formik.values.collateralBalanceLong} Long Tokens
-                        </strong>
+                        <strong>{formik.values.yourShare} Long Tokens</strong>
                       ) : (
-                        <strong>
-                          {formik.values.collateralBalanceShort} Short Tokens
-                        </strong>
+                        <strong>{formik.values.yourShare} Short Tokens</strong>
                       )}
                     </FormHelperText>
                   )}
@@ -856,12 +855,16 @@ export function DefineOfferAttributes({
                           <TextField
                             name="takerAddress"
                             disabled={everyone}
-                            onBlur={formik.handleBlur}
                             id="takerAddress"
                             label="Taker Address"
-                            value={ethers.constants.AddressZero}
-                            onChange={formik.handleChange}
-                            type="string"
+                            value={formik.values.takerAddress}
+                            onChange={(event) => {
+                              formik.setFieldValue(
+                                'takerAddress',
+                                event.target.value
+                              )
+                            }}
+                            type="text"
                           />
                         </Tooltip>
                       </FormControl>
@@ -899,7 +902,12 @@ export function DefineOfferAttributes({
                                 : ''
                             }
                             type="number"
-                            onChange={formik.handleChange}
+                            onChange={(event) => {
+                              formik.setFieldValue(
+                                'capacity',
+                                event.target.value
+                              )
+                            }}
                           />
                         </Tooltip>
                       </FormControl>

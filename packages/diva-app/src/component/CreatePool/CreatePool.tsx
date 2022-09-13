@@ -68,19 +68,7 @@ export function CreatePool() {
       step = <SelectDataFeedProvider formik={formik} />
       break
     case 3:
-      {
-        configPicked === 'createpool' &&
-          (step = <ReviewAndSubmit formik={formik} offer={false} />)
-      }
-      {
-        configPicked === 'createoffer' &&
-          (step = <ReviewAndSubmit formik={formik} offer />)
-      }
-      {
-        configPicked === 'filloffer' &&
-          (step = <ReviewAndSubmit formik={formik} offer />)
-      }
-
+      step = <ReviewAndSubmit formik={formik} transaction={configPicked} />
       break
     case 4:
       step = <Success formik={formik} transactionType={configPicked} />
