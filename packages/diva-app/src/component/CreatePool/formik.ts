@@ -145,7 +145,7 @@ export const useCreatePoolFormik = () => {
         errors.collateralToken = 'You must choose a collateral asset'
       }
       if (values.collateralBalance == '') {
-        errors.collateralBalance = 'Collateral can not be empty'
+        errors.collateralBalance = 'Collateral cannot be empty'
       }
 
       if (!isConnected) {
@@ -155,10 +155,10 @@ export const useCreatePoolFormik = () => {
         errors.collateralWalletBalance =
           'Collateral cannot be higher than your balance'
       } else if (values.collateralBalance == '0') {
-        errors.collateralBalance = 'Collateral can not be 0'
+        errors.collateralBalance = 'Collateral cannot be 0'
       }
       if (values.takerShare <= 0 || isNaN(values.takerShare)) {
-        errors.takerShare = 'Taker share can not be zero, negative or missing'
+        errors.takerShare = 'Taker share cannot be zero, negative or missing'
       }
       if (values.expiryTime == null || isNaN(values.expiryTime.getTime())) {
         errors.expiryTime = 'You must set an expiry time'

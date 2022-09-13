@@ -717,9 +717,9 @@ export function DefineOfferAttributes({
                     <FormHelperText>
                       You receive{' '}
                       {direction === 'Long' ? (
-                        <strong>{formik.values.yourShare} Long Tokens</strong>
+                        <strong>{formik.values.yourShare} LONG Tokens</strong>
                       ) : (
-                        <strong>{formik.values.yourShare} Short Tokens</strong>
+                        <strong>{formik.values.yourShare} SHORT Tokens</strong>
                       )}
                     </FormHelperText>
                   )}
