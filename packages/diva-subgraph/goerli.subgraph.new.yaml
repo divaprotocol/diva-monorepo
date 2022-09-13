@@ -6,7 +6,7 @@ dataSources:
     name: DivaDiamond
     network: goerli
     source:
-      address: "0xb02bbd63545654d55125F98F85F4E691f1a3E207"
+      address: "0x36a10DDa1d71fE161e8856dA1db271e75190c727"
       abi: DivaDiamond
       startBlock: 7483129
     mapping:
@@ -46,7 +46,7 @@ dataSources:
           handler: handleFeeClaimTransferred
         - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
-        - event: OfferFilled(indexed bytes32,indexed address,indexed address)
+        - event: OfferFilled(indexed bytes32,indexed address,indexed address,uint256)
           handler: handleOfferFilled
         - event: OfferCancelled(indexed bytes32,indexed address)
           handler: handleOfferCancelled
