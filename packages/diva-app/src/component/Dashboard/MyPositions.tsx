@@ -8,8 +8,12 @@ import {
   DialogContent,
   DialogContentText,
   Divider,
+  Drawer,
   Grid,
+  Input,
+  InputAdornment,
   Pagination,
+  Radio,
   Stack,
   TextField,
   Tooltip,
@@ -56,6 +60,10 @@ import { calcPayoffPerToken } from '../../Util/calcPayoffPerToken'
 import PoolsTableFilter from '../PoolsTableFilter/DropDownFilter'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import CloseIcon from '@mui/icons-material/Close'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import { Search } from '@mui/icons-material'
 
 type Response = {
   [token: string]: BigNumber
@@ -107,6 +115,7 @@ const SubmitButton = (props: any) => {
   const [textFieldValue, setTextFieldValue] = useState('')
   const [loadingValue, setLoadingValue] = useState(false)
   const [disabledButton, setDisabledButton] = useState(false)
+
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
   const { isMobile } = useCustomMediaQuery()
@@ -672,6 +681,8 @@ export function MyPositions() {
   const [search, setSearch] = useState(null)
   const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
   const [confirmedPoolClicked, setConfirmedPoolClicked] = useState(false)
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
+
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
@@ -954,32 +965,34 @@ export function MyPositions() {
       paddingRight={isMobile ? 0 : 6}
       spacing={4}
     >
-      <Box
-        paddingY={2}
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          maxWidth: '400px',
-        }}
-      >
-        <DropDownFilter
-          id="Underlying Filter"
-          DropDownButtonLabel={underlyingButtonLabel}
-          InputValue={search}
-          onInputChange={handleUnderLyingInput}
-        />
-        <ButtonFilter
-          id="Hide expired pools"
-          sx={{ marginRight: '30px' }}
-          ButtonLabel="Hide Expired"
-          onClick={handleExpiredPools}
-        />
-        <ButtonFilter
-          id="Confirmed Pools"
-          ButtonLabel="Confirmed"
-          onClick={handleConfirmedPools}
-        />
-      </Box>
+      {!isMobile && (
+        <Box
+          paddingY={2}
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            maxWidth: '400px',
+          }}
+        >
+          <DropDownFilter
+            id="Underlying Filter"
+            DropDownButtonLabel={underlyingButtonLabel}
+            InputValue={search}
+            onInputChange={handleUnderLyingInput}
+          />
+          <ButtonFilter
+            id="Hide expired pools"
+            sx={{ marginRight: '30px' }}
+            ButtonLabel="Hide Expired"
+            onClick={handleExpiredPools}
+          />
+          <ButtonFilter
+            id="Confirmed Pools"
+            ButtonLabel="Confirmed"
+            onClick={handleConfirmedPools}
+          />
+        </Box>
+      )}
       {!userAddress ? (
         <Typography
           sx={{
@@ -1005,6 +1018,23 @@ export function MyPositions() {
             >
               {!balances.isLoading ? (
                 <>
+                  <Button
+                    onClick={() => {
+                      setIsFilterDrawerOpen(!isFilterDrawerOpen)
+                    }}
+                    startIcon={<FilterListIcon fontSize="small" />}
+                    variant="outlined"
+                    sx={{
+                      width: '84px',
+                      height: '30px',
+                      fontSize: '13px',
+                      padding: '4px 10px',
+                      textTransform: 'none',
+                    }}
+                    color={isFilterDrawerOpen ? 'primary' : 'secondary'}
+                  >
+                    Filters
+                  </Button>
                   <Box>
                     {sortedRows.map((row) => (
                       <MyPositionsTokenCard row={row} key={row.Id} />
@@ -1028,6 +1058,10 @@ export function MyPositions() {
                   }}
                 />
               )}
+              <FilterDrawerModal
+                isFilterDrawerOpen={isFilterDrawerOpen}
+                setIsFilterDrawerOpen={setIsFilterDrawerOpen}
+              />
             </Stack>
           ) : (
             <PoolsTable
@@ -1043,5 +1077,197 @@ export function MyPositions() {
         </>
       )}
     </Stack>
+  )
+}
+
+const FilterDrawerModal = ({
+  isFilterDrawerOpen,
+  setIsFilterDrawerOpen,
+  children,
+}) => {
+  const [search, setSearch] = useState('')
+  const [selectedFilterFromRadio, setSelectedFilterFromRadio] = useState('')
+
+  return (
+    <Drawer
+      anchor={'bottom'}
+      open={isFilterDrawerOpen}
+      onClose={() => setIsFilterDrawerOpen(false)}
+      sx={{}}
+    >
+      <Box
+        sx={{
+          height: '100vh',
+          backgroundColor: '#000000',
+          padding: '30px',
+          position: 'relative',
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent="center"
+          alignItems="center"
+          sx={{
+            position: 'relative',
+          }}
+        >
+          <Box
+            sx={{
+              fontSize: '20px',
+              fontWeight: '500',
+              letterSpacing: '0.15px',
+            }}
+          >
+            Filters
+          </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              right: '5px',
+              width: '14px',
+              top: '2px',
+            }}
+            onClick={() => setIsFilterDrawerOpen(false)}
+          >
+            <CloseIcon fontSize="small" />
+          </Box>
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{
+            marginTop: '38px',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Underlying
+          </Typography>
+          <ArrowDropUpIcon />
+        </Stack>
+        <Box>
+          <TextField
+            value={search}
+            aria-label="Filter creator"
+            sx={{ width: '100%', height: '50px', marginTop: '16px' }}
+            onChange={(event) => setSearch(event.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search color="secondary" />
+                </InputAdornment>
+              ),
+            }}
+            placeholder="Enter Underlying"
+            color="secondary"
+          />
+        </Box>
+        {/* below components will come as children */}
+        <Stack
+          spacing={0.6}
+          sx={{
+            marginTop: '16px',
+            fontSize: '14px',
+            marginBottom: '32px',
+          }}
+        >
+          <Stack
+            direction="row"
+            justifyContent={'space-between'}
+            alignItems={'center'}
+          >
+            <Box>BTC/USD</Box>
+            <Radio
+              checked={selectedFilterFromRadio === 'BTC/USD'}
+              size="small"
+              value="BTC/USD"
+              onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+            />
+          </Stack>
+          <Stack
+            direction="row"
+            justifyContent={'space-between'}
+            alignItems={'center'}
+          >
+            <Box>ETH/USD</Box>
+            <Radio
+              checked={selectedFilterFromRadio === 'ETH/USD'}
+              size="small"
+              value="ETH/USD"
+              onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+            />
+          </Stack>
+          <Stack
+            direction="row"
+            justifyContent={'space-between'}
+            alignItems={'center'}
+          >
+            <Box>GHST/USD</Box>
+            <Radio
+              checked={selectedFilterFromRadio === 'GHST/USD'}
+              size="small"
+              value="GHST/USD"
+              onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+            />
+          </Stack>
+          <Stack
+            direction="row"
+            justifyContent={'space-between'}
+            alignItems={'center'}
+          >
+            <Box>USDT/USD</Box>
+            <Radio
+              checked={selectedFilterFromRadio === 'USDT/USD'}
+              size="small"
+              value="USDT/USD"
+              onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+            />
+          </Stack>
+        </Stack>
+        <Divider />
+
+        {/* place this components below */}
+        <Box
+          sx={{
+            position: 'absolute',
+            width: '84%',
+            bottom: '50px',
+          }}
+        >
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            sx={{
+              justifySelf: 'flex-end',
+            }}
+          >
+            <Button
+              variant="outlined"
+              color="secondary"
+              sx={{
+                width: '124px',
+                height: '42px',
+              }}
+            >
+              CLEAR ALL
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                width: '124px',
+                height: '42px',
+              }}
+            >
+              APPLY
+            </Button>
+          </Stack>
+        </Box>
+      </Box>
+    </Drawer>
   )
 }
