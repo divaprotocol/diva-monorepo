@@ -37,7 +37,7 @@ export default function DIVATradeChart(props) {
   const legendHeight = height + 30
   useEffect(() => {
     intitalChart()
-  }, [])
+  }, [props.w])
   const intitalChart = () => {
     const svg = d3.select(ref.current)
     svg
@@ -73,10 +73,7 @@ export default function DIVATradeChart(props) {
     const domainMax = d3.max(data, function (d) {
       return d.x
     })
-    const x = d3
-      .scaleLinear()
-      .domain([domainMin, domainMax])
-      .range([0, width - margin.right])
+    const x = d3.scaleLinear().domain([domainMin, domainMax]).range([0, width])
     // Remove X- axis labels
     svg
       .append('rect')
@@ -226,7 +223,7 @@ export default function DIVATradeChart(props) {
       .style('fill', '#F7931A')
     svg
       .append('circle')
-      .attr('cx', width * 0.25)
+      .attr('cx', width * 0.3)
       .attr('cy', legendHeight)
       .attr('r', function () {
         return cap == floor ? 0 : 6
@@ -234,13 +231,13 @@ export default function DIVATradeChart(props) {
       .style('fill', '#83BD67')
     svg
       .append('circle')
-      .attr('cx', width * 0.42)
+      .attr('cx', width * 0.6)
       .attr('cy', legendHeight)
       .attr('r', currentPrice ? 6 : 0)
       .style('fill', '#3393E0')
     svg
       .append('circle')
-      .attr('cx', width * 0.75)
+      .attr('cx', width * 0.8)
       .attr('cy', legendHeight)
       .attr('r', showBreakEven && breakEven != 'n/a' ? 6 : 0)
       .style('fill', '#9747FF')
@@ -252,7 +249,7 @@ export default function DIVATradeChart(props) {
         return cap == floor ? 0 : 1
       })
       .text('Floor' + ' ' + '(' + parseFloat(floor).toFixed(2) + ')')
-      .style('font-size', '12px')
+      .style('font-size', showBreakEven ? '12px' : '10px')
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
@@ -262,38 +259,38 @@ export default function DIVATradeChart(props) {
         return cap == floor ? 1 : 0
       })
       .text('Inflection' + ' ' + '(' + parseFloat(cap).toFixed(2) + ')') //Binary payoff
-      .style('font-size', '12px')
+      .style('font-size', showBreakEven ? '12px' : '10px')
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
-      .attr('x', width * 0.27)
+      .attr('x', width * 0.33)
       .attr('y', legendHeight)
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
       })
       .text('Cap' + ' ' + '(' + parseFloat(cap).toFixed(2) + ')')
-      .style('font-size', '12px')
+      .style('font-size', showBreakEven ? '12px' : '10px')
       .attr('alignment-baseline', 'middle')
 
     //current price legend
     svg
       .append('text')
-      .attr('x', width * 0.45)
+      .attr('x', width * 0.63)
       .attr('y', legendHeight)
       .attr('opacity', currentPrice ? 1 : 0)
       .text(
         'Current Value' + ' ' + '(' + parseFloat(currentPrice).toFixed(2) + ')'
       )
-      .style('font-size', '12px')
+      .style('font-size', showBreakEven ? '12px' : '10px')
       .attr('alignment-baseline', 'middle')
 
     svg
       .append('text')
-      .attr('x', width * 0.77)
+      .attr('x', width * 0.83)
       .attr('y', legendHeight)
       .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
       .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(2) + ')')
-      .style('font-size', '12px')
+      .style('font-size', showBreakEven ? '12px' : '10px')
       .attr('alignment-baseline', 'middle')
 
     // Add mouseover effects
@@ -533,7 +530,7 @@ export default function DIVATradeChart(props) {
   }
   useEffect(() => {
     draw()
-  }, [props.currentPrice, props.breakEven])
+  }, [props.currentPrice, props.breakEven, props.w])
 
   return <svg ref={ref}></svg>
 }

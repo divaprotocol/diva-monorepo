@@ -58,7 +58,6 @@ const PoolCard = ({ row }: Props) => {
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
   const [usdPrice, setUsdPrice] = useState('')
-
   const pool = useAppSelector((state) => selectPool(state, row.Id.substring(1)))
   const theme = useTheme()
   const history = useHistory()
@@ -207,7 +206,7 @@ const PoolCard = ({ row }: Props) => {
         data={row.PayoffProfile}
         refAsset={pool.referenceAsset}
         payOut={pool.collateralToken.symbol}
-        w={380}
+        w={isMobile ? 304 : 380}
         h={220}
         isLong={IsLong}
         currentPrice={currentPrice}
