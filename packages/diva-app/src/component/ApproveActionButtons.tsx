@@ -187,10 +187,7 @@ export const ApproveActionButtons = ({
 
   const offerCreationStats = {
     maker: ethers.utils.getAddress(account),
-    taker:
-      values.takerAddress === 'Everyone'
-        ? '0x0000000000000000000000000000000000000000'
-        : ethers.utils.getAddress(values.takerAddress),
+    taker: ethers.utils.getAddress(values.takerAddress),
     makerCollateralAmount: parseUnits(
       values.yourShare.toString(),
       values.collateralToken.decimals
@@ -199,7 +196,7 @@ export const ApproveActionButtons = ({
       values.takerShare.toString(),
       values.collateralToken.decimals
     ).toString(),
-    makerDirection: values.offerDirection === 'Long' ? true : false,
+    makerDirection: values.offerDirection === 'Long',
     offerExpiry: values.offerDuration,
     minimumTakerFillAmount: parseUnits(
       values.minTakerContribution === 'Fill or Kill'
@@ -530,7 +527,15 @@ export const ApproveActionButtons = ({
                             parseEther(values.collateralBalance)
                           )
                           .then((tx) => {
-                            tx.wait().then(() => {
+                            tx.wait().then((receipt) => {
+                              const typedOfferHash = receipt.events.find(
+                                (x: any) => x.event === 'OfferFilled'
+                              ).args.typedOfferHash
+                              divaNew
+                                .getPoolIdByTypedOfferHash(typedOfferHash)
+                                .then((poolId: any) => {
+                                  formik.setFieldValue('poolId', poolId)
+                                })
                               onTransactionSuccess()
                             })
                           })

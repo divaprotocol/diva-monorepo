@@ -178,16 +178,26 @@ export function Success({
     /**
      * Remove etherscan usage and capture transaction receipt instead
      */
-    etherscanProvider.getHistory(userAddress).then((txs) => {
-      provider.getTransactionReceipt(txs[txs.length - 1].hash).then((txRc) => {
-        const id = BigNumber.from(txRc.logs[4].topics[1]).toNumber()
-        diva.getPoolParameters(id).then((pool) => {
-          setShortToken(pool.shortToken)
-          setLongToken(pool.longToken)
-          setPoolId(id)
-        })
+    if (transactionType !== 'filloffer') {
+      etherscanProvider.getHistory(userAddress).then((txs) => {
+        provider
+          .getTransactionReceipt(txs[txs.length - 1].hash)
+          .then((txRc) => {
+            const id = BigNumber.from(txRc.logs[4].topics[1]).toNumber()
+            diva.getPoolParameters(id).then((pool) => {
+              setShortToken(pool.shortToken)
+              setLongToken(pool.longToken)
+              setPoolId(id)
+            })
+          })
       })
-    })
+    } else {
+      diva.getPoolParameters(formik.values.poolId).then((pool) => {
+        setShortToken(pool.shortToken)
+        setLongToken(pool.longToken)
+        setPoolId(Number(formik.values.poolId))
+      })
+    }
   }, [diva])
 
   return (

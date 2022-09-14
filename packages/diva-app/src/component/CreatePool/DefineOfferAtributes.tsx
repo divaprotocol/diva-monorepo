@@ -873,7 +873,10 @@ export function DefineOfferAttributes({
                           <Checkbox
                             defaultChecked={everyone}
                             onChange={() => {
-                              formik.setFieldValue('takerAddress', 'Everyone')
+                              formik.setFieldValue(
+                                'takerAddress',
+                                ethers.constants.AddressZero
+                              )
                               setEveryone(!everyone)
                             }}
                           />
@@ -902,12 +905,7 @@ export function DefineOfferAttributes({
                                 : ''
                             }
                             type="number"
-                            onChange={(event) => {
-                              formik.setFieldValue(
-                                'capacity',
-                                event.target.value
-                              )
-                            }}
+                            onChange={formik.handleChange}
                           />
                         </Tooltip>
                       </FormControl>
@@ -940,11 +938,7 @@ export function DefineOfferAttributes({
                             onBlur={formik.handleBlur}
                             id="minTakerContribution"
                             label="Minimum Taker Contribution"
-                            value={
-                              parseFloat(formik.values.collateralBalance) -
-                              formik.values.yourShare
-                            }
-                            /** QUESTION formik.values.takerShare didn't work for some reason */
+                            value={formik.values.minTakerContribution}
                             helperText={
                               formik.errors.minTakerContribution != null
                                 ? formik.errors.minTakerContribution

@@ -85,12 +85,7 @@ export function FillOffer({
         'minTakerContribution',
         formatEther(configJson.minimumTakerFillAmount)
       )
-      formik.setFieldValue(
-        'takerAddress',
-        configJson.taker === '0x0000000000000000000000000000000000000000'
-          ? 'Everyone'
-          : configJson.taker
-      )
+      formik.setFieldValue('takerAddress', configJson.taker)
       formik.setFieldValue('jsonToExport', {
         maker: configJson.maker,
         taker: configJson.taker,

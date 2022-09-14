@@ -32,6 +32,7 @@ export type Values = {
   signature?: string
   yourShare?: number
   takerShare?: number
+  poolId?: string
 }
 
 export const initialValues: Values = {
@@ -61,11 +62,12 @@ export const initialValues: Values = {
     24 * 60 * 60 + defaultDate.getTime() / 1000
   ).toString(),
   minTakerContribution: 'Fill or Kill',
-  takerAddress: 'Everyone',
+  takerAddress: ethers.constants.AddressZero,
   jsonToExport: '{}',
   signature: '',
   yourShare: 0,
   takerShare: 10,
+  poolId: '',
 }
 
 type Errors = {
@@ -147,6 +149,18 @@ export const useCreatePoolFormik = () => {
       if (values.collateralBalance == '') {
         errors.collateralBalance = 'Collateral cannot be empty'
       }
+      if (
+        values.minTakerContribution !== 'Fill or Kill' &&
+        parseFloat(values.minTakerContribution) >
+          parseFloat(values.collateralBalance)
+      ) {
+        errors.minTakerContribution =
+          'Minimum taker contribution must be less than collateral amount'
+      }
+      if (Number(values.minTakerContribution) < 0) {
+        errors.minTakerContribution =
+          'Minimum taker contribution must be greater than 0'
+      }
 
       if (!isConnected) {
         errors.collateralWalletBalance =
@@ -205,9 +219,9 @@ export const useCreatePoolFormik = () => {
         errors.capacity = 'Capacity cannot be negative'
       } else if (
         parseFloat(values.capacity) !== 0 &&
-        collateralBalance > parseFloat(values.capacity)
+        parseFloat(values.collateralBalance) > parseFloat(values.capacity)
       ) {
-        errors.capacity = `Capacity must be larger than ${collateralBalance}. For unlimited capacity, set to 0`
+        errors.capacity = `Capacity must be larger than ${values.collateralBalance}. For unlimited capacity, set to 0`
       }
 
       // validate data provider

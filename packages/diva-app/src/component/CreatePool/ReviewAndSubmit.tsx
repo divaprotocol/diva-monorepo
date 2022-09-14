@@ -395,62 +395,77 @@ export function ReviewAndSubmit({
       <Container>
         <Stack>
           {transaction === 'filloffer' && (
-            <Card
-              style={{
-                border: '1px solid #1B3448',
-                background:
-                  'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
-              }}
-            >
-              <Container sx={{ pt: theme.spacing(2) }}>
-                <FormControl
-                  fullWidth
-                  error={
-                    formik.values.offerDirection === 'Long'
-                      ? formik.errors.collateralBalanceShort != null
-                      : formik.errors.collateralBalanceLong != null
-                  }
-                >
-                  <TextField
-                    id="takerShare"
-                    name="takerShare"
-                    label="Your Contribution"
-                    onBlur={formik.handleBlur}
-                    error={formik.errors.takerShare != null}
-                    value={parseFloat(formik.values.collateralBalance)}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          {tokenSymbol}
-                        </InputAdornment>
-                      ),
-                    }}
-                    type="number"
-                    onChange={(event) => {
-                      const collateralBalance = event.target.value
-                      formik.setValues((values) => ({
-                        ...values,
-                        takerShare: parseFloat(collateralBalance),
-                      }))
-                    }}
-                  />
-                  {!isNaN(
-                    formik.values.offerDirection === 'Long'
-                      ? formik.values.collateralBalanceShort
-                      : formik.values.collateralBalanceLong
-                  ) && (
-                    <FormHelperText>
-                      You receive{' '}
-                      {formik.values.offerDirection === 'Long' ? (
-                        <strong>{formik.values.takerShare} SHORT Tokens</strong>
-                      ) : (
-                        <strong>{formik.values.takerShare} LONG Tokens</strong>
-                      )}
-                    </FormHelperText>
-                  )}
-                </FormControl>
-                <Container sx={{ ml: theme.spacing(40) }}>
-                  <FormHelperText>
+            <>
+              <Typography
+                color="white"
+                pb={theme.spacing(2)}
+                variant="subtitle1"
+              >
+                Fill Offer
+              </Typography>
+              <Card
+                style={{
+                  border: '1px solid #1B3448',
+                  background:
+                    'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
+                  marginBottom: theme.spacing(2),
+                }}
+              >
+                <Container sx={{ pt: theme.spacing(2) }}>
+                  <FormControl
+                    fullWidth
+                    error={
+                      formik.values.offerDirection === 'Long'
+                        ? formik.errors.collateralBalanceShort != null
+                        : formik.errors.collateralBalanceLong != null
+                    }
+                  >
+                    <TextField
+                      id="takerShare"
+                      name="takerShare"
+                      label="Your Contribution"
+                      onBlur={formik.handleBlur}
+                      error={formik.errors.takerShare != null}
+                      value={parseFloat(formik.values.collateralBalance)}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            {tokenSymbol}
+                          </InputAdornment>
+                        ),
+                      }}
+                      type="number"
+                      onChange={(event) => {
+                        const collateralBalance = event.target.value
+                        formik.setValues((values) => ({
+                          ...values,
+                          takerShare: parseFloat(collateralBalance),
+                        }))
+                      }}
+                    />
+                    {!isNaN(
+                      formik.values.offerDirection === 'Long'
+                        ? formik.values.collateralBalanceShort
+                        : formik.values.collateralBalanceLong
+                    ) && (
+                      <FormHelperText>
+                        You receive{' '}
+                        {formik.values.offerDirection === 'Long' ? (
+                          <strong>
+                            {formik.values.takerShare} SHORT Tokens
+                          </strong>
+                        ) : (
+                          <strong>
+                            {formik.values.takerShare} LONG Tokens
+                          </strong>
+                        )}
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+
+                  <FormHelperText
+                    sx={{ display: 'flex', justifyContent: 'flex-end' }}
+                  >
                     Expires in:{' '}
                     {Math.floor(
                       getExpiryMinutesFromNow(formik.values.offerDuration) / 60
@@ -458,39 +473,51 @@ export function ReviewAndSubmit({
                     h{' '}
                     {getExpiryMinutesFromNow(formik.values.offerDuration) % 60}m
                   </FormHelperText>
-                </Container>
 
-                <LinearProgress
-                  variant="determinate"
-                  sx={{ height: '15px', borderRadius: 1 }}
-                  value={
-                    ((formik.values.takerShare -
-                      Number(formik.values.minTakerContribution)) /
-                      (Number(formik.values.collateralBalance) -
-                        Number(formik.values.minTakerContribution))) *
-                    100
-                  }
-                />
-                <Stack
-                  height="100%"
-                  direction="row"
-                  justifyContent="space-between"
-                >
-                  <Typography fontSize={'0.85rem'}>
-                    {formik.values.minTakerContribution + ' ' + tokenSymbol}
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {formik.values.collateralBalance + ' ' + tokenSymbol}
-                  </Typography>
-                </Stack>
-                <FormHelperText>
-                  Remaining fill amount{' '}
-                  {Number(formik.values.collateralBalance) -
-                    formik.values.takerShare}{' '}
-                  {tokenSymbol}
-                </FormHelperText>
-              </Container>
-            </Card>
+                  <LinearProgress
+                    variant="determinate"
+                    sx={{
+                      mt: theme.spacing(1),
+                      mb: theme.spacing(1),
+                      height: '15px',
+                      borderRadius: 1,
+                    }}
+                    value={
+                      ((formik.values.takerShare -
+                        Number(formik.values.minTakerContribution)) /
+                        (Number(formik.values.collateralBalance) -
+                          Number(formik.values.minTakerContribution))) *
+                      100
+                    }
+                  />
+                  <Stack
+                    height="100%"
+                    direction="row"
+                    justifyContent="space-between"
+                    sx={{
+                      mb: theme.spacing(1),
+                    }}
+                  >
+                    <Typography fontSize={'0.85rem'}>
+                      {formik.values.minTakerContribution + ' ' + tokenSymbol}
+                    </Typography>
+                    <Typography fontSize={'0.85rem'}>
+                      {formik.values.collateralBalance + ' ' + tokenSymbol}
+                    </Typography>
+                  </Stack>
+                  <FormHelperText
+                    sx={{
+                      mb: theme.spacing(1),
+                    }}
+                  >
+                    Remaining fill amount{' '}
+                    {Number(formik.values.collateralBalance) -
+                      formik.values.takerShare}{' '}
+                    {tokenSymbol}
+                  </FormHelperText>
+                </Container>
+              </Card>
+            </>
           )}
           <Typography color="white" pb={theme.spacing(2)} variant="subtitle1">
             Payoff Profile
