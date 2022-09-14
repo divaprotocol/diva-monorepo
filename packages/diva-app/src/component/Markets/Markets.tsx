@@ -41,6 +41,7 @@ import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
+import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 
 export const ExpiresInCell = (props: any) => {
   //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
@@ -215,6 +216,7 @@ const columns: GridColDef[] = [
 export default function Markets() {
   const history = useHistory()
   const theme = useTheme()
+  const { isMobile } = useCustomMediaQuery()
   const currentAddress = history.location.pathname.split('/')
   const [page, setPage] = useState(0)
   const pools = useAppSelector(selectPools)
@@ -399,6 +401,13 @@ export default function Markets() {
       },
     ]
   }, [] as GridRowModel[])
+
+  // set card view on mobile devices
+  useEffect(() => {
+    if (isMobile) {
+      setSelectedPoolsView('Grid')
+    }
+  }, [isMobile])
 
   const filteredRows =
     search != null && search.length > 0
