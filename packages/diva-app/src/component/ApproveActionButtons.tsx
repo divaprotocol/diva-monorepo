@@ -199,7 +199,7 @@ export const ApproveActionButtons = ({
     makerDirection: values.offerDirection === 'Long',
     offerExpiry: values.offerDuration,
     minimumTakerFillAmount: parseUnits(
-      values.minTakerContribution === 'Fill or Kill'
+      values.minTakerContribution === 'Fill Or Kill'
         ? values.takerShare.toString()
         : values.minTakerContribution,
       values.collateralToken.decimals

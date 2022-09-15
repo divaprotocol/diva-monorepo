@@ -61,7 +61,7 @@ export const initialValues: Values = {
   offerDuration: Math.floor(
     24 * 60 * 60 + defaultDate.getTime() / 1000
   ).toString(),
-  minTakerContribution: 'Fill or Kill',
+  minTakerContribution: 'Fill Or Kill',
   takerAddress: ethers.constants.AddressZero,
   jsonToExport: '{}',
   signature: '',
@@ -150,7 +150,7 @@ export const useCreatePoolFormik = () => {
         errors.collateralBalance = 'Collateral cannot be empty'
       }
       if (
-        values.minTakerContribution !== 'Fill or Kill' &&
+        values.minTakerContribution !== 'Fill Or Kill' &&
         parseFloat(values.minTakerContribution) >
           parseFloat(values.collateralBalance)
       ) {
