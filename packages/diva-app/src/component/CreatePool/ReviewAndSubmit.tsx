@@ -29,6 +29,8 @@ import {
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { ethers } from 'ethers'
 import ERC20 from '@diva/contracts/abis/erc20.json'
+import DIVA712ABI from '../../abi/DIVA712ABI.json'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 
 export function ReviewAndSubmit({
   formik,
@@ -45,7 +47,44 @@ export function ReviewAndSubmit({
   const [dataSourceName, setDataSourceName] = useState('')
   const [mobile, setMobile] = useState(false)
   const [tokenSymbol, setTokenSymbol] = useState('')
-
+  const [actualFillableAmount, setActualFillableAmount] = useState(
+    formik.values.takerShare
+  )
+  const [takerFilledAmount, setTakerFilledAmount] = useState(0)
+  const [decimal, setDecimal] = useState(18)
+  const divaNew = new ethers.Contract(
+    config[chainId!].divaAddressNew, //Goerli
+    DIVA712ABI,
+    provider.getSigner()
+  )
+  console.log('formik.values', formik.values)
+  const token = new ethers.Contract(
+    formik.values.collateralToken.id,
+    ERC20,
+    provider.getSigner()
+  )
+  token.decimals().then((decimals: number) => {
+    setDecimal(decimals)
+  })
+  useEffect(() => {
+    if (transaction === 'filloffer') {
+      console.log('aaaaa')
+      divaNew
+        .getOfferRelevantStateCreateContingentPool(
+          formik.values.jsonToExport,
+          formik.values.signature
+        )
+        .then((params: any) => {
+          console.log(params)
+          setActualFillableAmount(
+            Number(formatUnits(params.actualTakerFillableAmount, decimal))
+          )
+          setTakerFilledAmount(
+            Number(formatUnits(params.offerInfo.takerFilledAmount, decimal))
+          )
+        })
+    }
+  }, [])
   useEffect(() => {
     const tokenContract = new ethers.Contract(
       formik.values.collateralToken.id,
@@ -405,6 +444,7 @@ export function ReviewAndSubmit({
               </Typography>
               <Card
                 style={{
+                  maxWidth: theme.spacing(60),
                   border: '1px solid #1B3448',
                   background:
                     'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
@@ -426,7 +466,11 @@ export function ReviewAndSubmit({
                       label="Your Contribution"
                       onBlur={formik.handleBlur}
                       error={formik.errors.takerShare != null}
-                      value={parseFloat(formik.values.collateralBalance)}
+                      value={
+                        formik.values.takerShare === 0
+                          ? ''
+                          : formik.values.takerShare
+                      }
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -437,10 +481,11 @@ export function ReviewAndSubmit({
                       type="number"
                       onChange={(event) => {
                         const collateralBalance = event.target.value
-                        formik.setValues((values) => ({
-                          ...values,
-                          takerShare: parseFloat(collateralBalance),
-                        }))
+                        if (collateralBalance !== '') {
+                          formik.setFieldValue('takerShare', collateralBalance)
+                        } else {
+                          formik.setFieldValue('takerShare', 0)
+                        }
                       }}
                     />
                     {!isNaN(
@@ -483,10 +528,8 @@ export function ReviewAndSubmit({
                       borderRadius: 1,
                     }}
                     value={
-                      ((formik.values.takerShare -
-                        Number(formik.values.minTakerContribution)) /
-                        (Number(formik.values.collateralBalance) -
-                          Number(formik.values.minTakerContribution))) *
+                      ((formik.values.takerShare - takerFilledAmount) /
+                        actualFillableAmount) *
                       100
                     }
                   />
@@ -499,10 +542,12 @@ export function ReviewAndSubmit({
                     }}
                   >
                     <Typography fontSize={'0.85rem'}>
-                      {formik.values.minTakerContribution + ' ' + tokenSymbol}
+                      {takerFilledAmount + ' ' + tokenSymbol}
                     </Typography>
                     <Typography fontSize={'0.85rem'}>
-                      {formik.values.collateralBalance + ' ' + tokenSymbol}
+                      {Number(actualFillableAmount + takerFilledAmount) +
+                        ' ' +
+                        tokenSymbol}
                     </Typography>
                   </Stack>
                   <FormHelperText

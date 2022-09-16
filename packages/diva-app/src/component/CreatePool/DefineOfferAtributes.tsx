@@ -956,7 +956,7 @@ export function DefineOfferAttributes({
                             onChange={() => {
                               formik.setFieldValue(
                                 'minTakerContribution',
-                                'Fill Or Kill'
+                                formik.values.takerShare.toString()
                               )
                               setFillOrKill(!fillOrKill)
                             }}
