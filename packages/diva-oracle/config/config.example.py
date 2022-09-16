@@ -30,6 +30,9 @@ WHITELIST_TOKEN_POOLS = {
     "WBTC" : "0xA61E26649743f8c86b09860c9fddf45153fA7A55"
 }
 
+# This true value will only submit pools in the whitelist token pools
+# Any collateral assets outside of the whitelist will not be processed.
+BLOCK_ON_WHITELIST = True
 # PARAMETERS
 
 # Max seconds to wait for a transaction to be confirmed

@@ -109,6 +109,8 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
         pair = pair.replace("/", "")
         date_dt = df['expiryTime_datetime'].iloc[i]
         pool_id = df['id'].iloc[i]
+        if pool_id in blocked_pools_by_whitelist:
+            return
 
         date_max_away = date_dt - max_time_away
         # convert times to timestamp
@@ -123,6 +125,11 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
             # This is for testing purposes, fix before prod
         coll_asset_to_usd = getKrakenCollateralConversion(
             df['collateralToken.symbol'].iloc[i], df['collateralToken.id'], ts_date=ts_date, ts_date_max_away=ts_date_max_away)
+        if coll_asset_to_usd == "NotWhiteListed":
+            print("collateral asset not whitelisted, blocking submission, add to blocked list")
+            blocked_pools_by_whitelist.append(pool_id)
+            return
+        print("coll asset value from kraken", coll_asset_to_usd)
         if (price, date) != (-1, -1):
             # submit pool price
             print("-----------------------------------------")
@@ -186,3 +193,5 @@ nonces = {
     "rinkeby": 0,
     "goerli": 0
 }
+
+blocked_pools_by_whitelist = []

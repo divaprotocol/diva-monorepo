@@ -4,13 +4,14 @@ import requests
 import pandas as pd
 import json
 from config.config import WHITELIST_TOKEN_POOLS
+from config.config import BLOCK_ON_WHITELIST
 
 
 def getKrakenPrice(pair, ts_date, ts_date_max_away):
     url = 'https://api.kraken.com/0/public/Trades?pair={}'.format(
         pair) + '&since={}'.format(ts_date_max_away)
     resp = requests.get(url)
-
+    #print("LOG: ", resp)
     data = json.loads(resp.content.decode('utf-8'))
     keys = list(data)
     if data[keys[0]] == []:
@@ -41,7 +42,9 @@ def getKrakenPrice(pair, ts_date, ts_date_max_away):
 
 def getKrakenCollateralConversion(dfitem, dfcontract, ts_date, ts_date_max_away):
     pair = dfitem+"USD"
-    check_whitelist_token(dfitem, dfcontract)
+    white_list_status = check_whitelist_token(dfitem, dfcontract)
+    if white_list_status == "NotWhiteListed" and BLOCK_ON_WHITELIST:
+        return white_list_status
     price = getKrakenPrice(pair, ts_date, ts_date_max_away)
     # This is for auto price to one in testing of dUSD
     if price[0] == -1:
@@ -50,33 +53,15 @@ def getKrakenCollateralConversion(dfitem, dfcontract, ts_date, ts_date_max_away)
 
 def check_whitelist_token(dfitem, dfcontract):
     try:
+        #print(dfitem)
+        #print(WHITELIST_TOKEN_POOLS)
         if dfitem in WHITELIST_TOKEN_POOLS:
-            print("Valid whitelisted Token {}, {}", dfitem, dfcontract )
+            print("Valid whitelisted Token {}, {}".format(dfitem, dfcontract ))
             print(WHITELIST_TOKEN_POOLS.get(dfitem))
+            return("whitelisted")
         else:
-            print("INVALID WHITELIST TOKEN")
+            return("NotWhiteListed")
     except:
         print("UNABLE TO VERIFY WHITELIST")
     return
-# Example Call
-# asset = 'ETH'
-# currency = 'USD'
-#
-# pair = asset + currency
-#
-# date = "20.03.2022 10:25:00"
-# max_time_away = dt.timedelta(minutes=15)
-#
-# # Convert string to datetime:
-# date_dt = datetime.strptime(date, '%d.%m.%Y %H:%M:%S')
-#
-# date_max_away = date_dt - max_time_away
-#
-# # convert to timestamp
-# ts_date = datetime.timestamp(date_dt)
-# ts_date_max_away = datetime.timestamp(date_max_away)
-#
-#
-# price, date = getKrakenPrice(pair, ts_date, ts_date_max_away)
-#
-# print('Kraken Price: ', price, ' at datetime: ', date)
+

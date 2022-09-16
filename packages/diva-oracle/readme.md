@@ -4,6 +4,10 @@ The Oracle directory contains three differnet types of oracles which can be run 
 2. Price Oracle (`price_main.py`): Centralized oracle bot sourcing prices from Kraken
 3. Tellor Oracle (`tellor_main.py`): Tellor client using prices from Kraken
 
+## Adding config file
+Add a `config.py` file to the `config` folder following the `config.example.py` example.
+The oracles will not work without a properly configured config file
+
 # Running _with_ Docker
 
 ## Setting an Oracle to run
@@ -21,9 +25,6 @@ Note the updates have the docker run in detached mode! This will run unless prom
 ```
 docker-compose down
 ```
-
-## Adding config file
-Add a `config.py` file to the `config` folder following the `config.example.py` example.
 
 ## Starting Docker
 Upon a working script and configuration, docker can be used to run the oracle. 
