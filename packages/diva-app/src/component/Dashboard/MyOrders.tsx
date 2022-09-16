@@ -9,6 +9,7 @@ import {
   Grid,
   Typography,
   Divider,
+  Radio,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -27,7 +28,7 @@ import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
 import { Search } from '@mui/icons-material'
 import { CoinIconPair } from '../CoinIcon'
-import { useHistory } from 'react-router-dom'
+import { Switch, useHistory } from 'react-router-dom'
 import { DataGrid, GridColDef, GridRowModel } from '@mui/x-data-grid'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { makeStyles } from '@mui/styles'
@@ -36,6 +37,8 @@ import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ToggleFilter from '../PoolsTableFilter/ToggleFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import { FilterDrawerModal } from './FilterDrawerMobile'
 
 const MyOrdersPoolCard = ({
   row,
@@ -188,6 +191,10 @@ export function MyOrders() {
   const [search, setSearch] = useState('')
   const [buyClicked, setBuyClicked] = useState(false)
   const [sellClicked, setSellClicked] = useState(false)
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
+  const [selectedFilterFromRadio, setSelectedFilterFromRadio] = useState('')
+  const [buyAndSellFilter, setBuyAndSellFilter] = useState('')
+
   const history = useHistory()
   const dispatch = useAppDispatch()
   const { isMobile } = useCustomMediaQuery()
@@ -514,6 +521,103 @@ export function MyOrders() {
     }
   }, [search, buyClicked, sellClicked, dataOrders])
 
+  const MobileFilterOptions = () => (
+    <>
+      <Stack
+        spacing={0.6}
+        sx={{
+          marginTop: '16px',
+          fontSize: '14px',
+          marginBottom: '32px',
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>BTC/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'BTC/USD'}
+            size="small"
+            value="BTC/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>ETH/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'ETH/USD'}
+            size="small"
+            value="ETH/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>GHST/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'GHST/USD'}
+            size="small"
+            value="GHST/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>USDT/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'USDT/USD'}
+            size="small"
+            value="USDT/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+      </Stack>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: '20px',
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Buy</Box>
+          <Radio
+            checked={buyClicked}
+            size="small"
+            onClick={() => setBuyClicked(!buyClicked)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Sell</Box>
+          <Radio
+            checked={sellClicked}
+            size="small"
+            onClick={() => setSellClicked(!sellClicked)}
+          />
+        </Stack>
+      </Stack>
+    </>
+  )
+
   return (
     <Stack
       direction="column"
@@ -523,41 +627,43 @@ export function MyOrders() {
       spacing={6}
       paddingRight={isMobile ? 0 : 6}
     >
-      <Box
-        paddingY={2}
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-        }}
-      >
-        <DropDownFilter
-          id="Underlying Filter"
-          DropDownButtonLabel={underlyingButtonLabel}
-          InputValue={search}
-          onInputChange={handleUnderLyingInput}
-        />
-        <ButtonFilter
-          id="Buy"
+      {!isMobile && (
+        <Box
+          paddingY={2}
           sx={{
-            borderRight: 0,
-            borderTopRightRadius: 0,
-            borderBottomRightRadius: 0,
+            display: 'flex',
+            flexDirection: 'row',
           }}
-          ButtonLabel="Buy"
-          onClick={filterBuyOrders}
-        />
-        <Divider orientation="vertical" />
-        <ButtonFilter
-          id="Sell"
-          sx={{
-            borderLeft: 0,
-            borderTopLeftRadius: 0,
-            borderBottomLeftRadius: 0,
-          }}
-          ButtonLabel="Sell"
-          onClick={filterSellOrders}
-        />
-      </Box>
+        >
+          <DropDownFilter
+            id="Underlying Filter"
+            DropDownButtonLabel={underlyingButtonLabel}
+            InputValue={search}
+            onInputChange={handleUnderLyingInput}
+          />
+          <ButtonFilter
+            id="Buy"
+            sx={{
+              borderRight: 0,
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+            }}
+            ButtonLabel="Buy"
+            onClick={filterBuyOrders}
+          />
+          <Divider orientation="vertical" />
+          <ButtonFilter
+            id="Sell"
+            sx={{
+              borderLeft: 0,
+              borderTopLeftRadius: 0,
+              borderBottomLeftRadius: 0,
+            }}
+            ButtonLabel="Sell"
+            onClick={filterSellOrders}
+          />
+        </Box>
+      )}
       <>
         {isMobile ? (
           <Stack
@@ -570,6 +676,23 @@ export function MyOrders() {
           >
             {poolsRequestStatus === 'fulfilled' ? (
               <>
+                <Button
+                  onClick={() => {
+                    setIsFilterDrawerOpen(!isFilterDrawerOpen)
+                  }}
+                  startIcon={<FilterListIcon fontSize="small" />}
+                  variant="outlined"
+                  sx={{
+                    width: '84px',
+                    height: '30px',
+                    fontSize: '13px',
+                    padding: '4px 10px',
+                    textTransform: 'none',
+                  }}
+                  color={isFilterDrawerOpen ? 'primary' : 'secondary'}
+                >
+                  Filters
+                </Button>
                 <Box>
                   {filteredRows.map((row) => (
                     <MyOrdersPoolCard
@@ -598,6 +721,26 @@ export function MyOrders() {
                 }}
               />
             )}
+            <FilterDrawerModal
+              isFilterDrawerOpen={isFilterDrawerOpen}
+              setIsFilterDrawerOpen={setIsFilterDrawerOpen}
+              children={<MobileFilterOptions />}
+              search={search}
+              setSearch={setSearch}
+              onApplyFilter={() => {
+                if (selectedFilterFromRadio) {
+                  setSearch(selectedFilterFromRadio)
+                }
+                setIsFilterDrawerOpen(false)
+              }}
+              onClearFilter={() => {
+                setSearch('')
+                setSelectedFilterFromRadio('')
+                setIsFilterDrawerOpen(false)
+                setBuyClicked(false)
+                setSellClicked(false)
+              }}
+            />
           </Stack>
         ) : (
           <Stack height="100%" width="100%">
