@@ -3,13 +3,13 @@ import {
   Box,
   CircularProgress,
   Button,
-  Container,
   Dialog,
   DialogActions,
   Divider,
   Stack,
   TextField,
   Typography,
+  Radio,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import { useEffect, useState } from 'react'
@@ -36,6 +36,8 @@ import { useDispatch } from 'react-redux'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import { FilterDrawerModal } from './FilterDrawerMobile'
 
 const TransferFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
@@ -338,6 +340,8 @@ const MyFeeClaimsTokenCard = ({ row }: { row: GridRowModel }) => {
 export function MyFeeClaims() {
   const { address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
+  const [selectedFilterFromRadio, setSelectedFilterFromRadio] = useState('')
 
   const dispatch = useAppDispatch()
   const { isMobile } = useCustomMediaQuery()
@@ -388,6 +392,73 @@ export function MyFeeClaims() {
         )
       : rows
 
+  const MobileFilterOptions = () => (
+    <>
+      <Stack
+        spacing={0.6}
+        sx={{
+          marginTop: '16px',
+          fontSize: '14px',
+          marginBottom: '32px',
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>dUSD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'dUSD'}
+            size="small"
+            value="dUSD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'USD'}
+            size="small"
+            value="USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>DAI</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'DAI'}
+            size="small"
+            value="DAI"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>WAGMI16</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'WAGMI16'}
+            size="small"
+            value="WAGMI16"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+      </Stack>
+      <Divider />
+    </>
+  )
+
   return (
     <Stack
       direction="column"
@@ -397,20 +468,22 @@ export function MyFeeClaims() {
       paddingRight={isMobile ? 0 : 6}
       spacing={4}
     >
-      <Box
-        paddingY={2}
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-        }}
-      >
-        <DropDownFilter
-          id="Underlying Filter"
-          DropDownButtonLabel={underlyingButtonLabel}
-          InputValue={search}
-          onInputChange={handleUnderLyingInput}
-        />
-      </Box>
+      {!isMobile && (
+        <Box
+          paddingY={2}
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+          }}
+        >
+          <DropDownFilter
+            id="Underlying Filter"
+            DropDownButtonLabel={underlyingButtonLabel}
+            InputValue={search}
+            onInputChange={handleUnderLyingInput}
+          />
+        </Box>
+      )}
       {!userAddress ? (
         <Typography
           sx={{
@@ -436,8 +509,25 @@ export function MyFeeClaims() {
             >
               {poolsRequestStatus !== 'pending' ? (
                 <>
+                  <Button
+                    onClick={() => {
+                      setIsFilterDrawerOpen(!isFilterDrawerOpen)
+                    }}
+                    startIcon={<FilterListIcon fontSize="small" />}
+                    variant="outlined"
+                    sx={{
+                      width: '84px',
+                      height: '30px',
+                      fontSize: '13px',
+                      padding: '4px 10px',
+                      textTransform: 'none',
+                    }}
+                    color={isFilterDrawerOpen ? 'primary' : 'secondary'}
+                  >
+                    Filters
+                  </Button>
                   <Box>
-                    {rows.map((row) => (
+                    {filteredRows.map((row) => (
                       <MyFeeClaimsTokenCard row={row} key={row.Id} />
                     ))}
                   </Box>
@@ -450,6 +540,24 @@ export function MyFeeClaims() {
                   }}
                 />
               )}
+              <FilterDrawerModal
+                isFilterDrawerOpen={isFilterDrawerOpen}
+                setIsFilterDrawerOpen={setIsFilterDrawerOpen}
+                children={<MobileFilterOptions />}
+                search={search}
+                setSearch={setSearch}
+                onApplyFilter={() => {
+                  if (selectedFilterFromRadio) {
+                    setSearch(selectedFilterFromRadio)
+                  }
+                  setIsFilterDrawerOpen(false)
+                }}
+                onClearFilter={() => {
+                  setSearch('')
+                  setSelectedFilterFromRadio('')
+                  setIsFilterDrawerOpen(false)
+                }}
+              />
             </Stack>
           ) : (
             <PoolsTable

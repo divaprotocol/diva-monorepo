@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -11,7 +10,9 @@ import {
   Divider,
   Grid,
   Pagination,
+  Radio,
   Stack,
+  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -42,6 +43,8 @@ import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import { getAppStatus } from '../../Util/getAppStatus'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
+import { FilterDrawerModal } from './FilterDrawerMobile'
+import FilterListIcon from '@mui/icons-material/FilterList'
 
 export const DueInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
@@ -470,6 +473,8 @@ export function MyDataFeeds() {
     useState('Underlying')
   const [search, setSearch] = useState(null)
   const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
+  const [selectedFilterFromRadio, setSelectedFilterFromRadio] = useState('')
 
   const dispatch = useDispatch()
   const pools = useAppSelector((state) => selectPools(state))
@@ -601,6 +606,90 @@ export function MyDataFeeds() {
     }
   }, [rows, search, expiredPoolClicked])
 
+  const MobileFilterOptions = () => (
+    <>
+      <Stack
+        spacing={0.6}
+        sx={{
+          marginTop: '16px',
+          fontSize: '14px',
+          marginBottom: '32px',
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>BTC/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'BTC/USD'}
+            size="small"
+            value="BTC/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>ETH/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'ETH/USD'}
+            size="small"
+            value="ETH/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>GHST/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'GHST/USD'}
+            size="small"
+            value="GHST/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>USDT/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'USDT/USD'}
+            size="small"
+            value="USDT/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+      </Stack>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: '20px',
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Hide Expired Pools</Box>
+          <Switch
+            checked={expiredPoolClicked}
+            onChange={() => setExpiredPoolClicked(!expiredPoolClicked)}
+          />
+        </Stack>
+      </Stack>
+    </>
+  )
+
   return (
     <Stack
       direction="column"
@@ -610,25 +699,28 @@ export function MyDataFeeds() {
       spacing={6}
       paddingRight={isMobile ? 0 : 6}
     >
-      <Box
-        paddingY={2}
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-        }}
-      >
-        <DropDownFilter
-          id="Underlying Filter"
-          DropDownButtonLabel={underlyingButtonLabel}
-          InputValue={search}
-          onInputChange={handleUnderLyingInput}
-        />
-        <ButtonFilter
-          id="Hide expired pools"
-          ButtonLabel="Hide Expired"
-          onClick={handleExpiredPools}
-        />
-      </Box>
+      {!isMobile && (
+        <Box
+          paddingY={2}
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+          }}
+        >
+          <DropDownFilter
+            id="Underlying Filter"
+            DropDownButtonLabel={underlyingButtonLabel}
+            InputValue={search}
+            onInputChange={handleUnderLyingInput}
+          />
+          <ButtonFilter
+            id="Hide expired pools"
+            ButtonLabel="Hide Expired"
+            onClick={handleExpiredPools}
+          />
+        </Box>
+      )}
+
       {!userAddress ? (
         <Typography
           sx={{
@@ -654,6 +746,23 @@ export function MyDataFeeds() {
             >
               {poolsRequestStatus !== 'pending' ? (
                 <>
+                  <Button
+                    onClick={() => {
+                      setIsFilterDrawerOpen(!isFilterDrawerOpen)
+                    }}
+                    startIcon={<FilterListIcon fontSize="small" />}
+                    variant="outlined"
+                    sx={{
+                      width: '84px',
+                      height: '30px',
+                      fontSize: '13px',
+                      padding: '4px 10px',
+                      textTransform: 'none',
+                    }}
+                    color={isFilterDrawerOpen ? 'primary' : 'secondary'}
+                  >
+                    Filters
+                  </Button>
                   <Box>
                     {filteredRows.map((row) => (
                       <MyDataFeedsTokenCard row={row} key={row.Id} />
@@ -677,6 +786,24 @@ export function MyDataFeeds() {
                   }}
                 />
               )}
+              <FilterDrawerModal
+                isFilterDrawerOpen={isFilterDrawerOpen}
+                setIsFilterDrawerOpen={setIsFilterDrawerOpen}
+                children={<MobileFilterOptions />}
+                search={search}
+                setSearch={setSearch}
+                onApplyFilter={() => {
+                  if (selectedFilterFromRadio) {
+                    setSearch(selectedFilterFromRadio)
+                  }
+                  setIsFilterDrawerOpen(false)
+                }}
+                onClearFilter={() => {
+                  setSearch('')
+                  setSelectedFilterFromRadio('')
+                  setIsFilterDrawerOpen(false)
+                }}
+              />
             </Stack>
           ) : (
             <PoolsTable
