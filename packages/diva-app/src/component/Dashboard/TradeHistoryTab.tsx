@@ -21,7 +21,14 @@ import Typography from '@mui/material/Typography'
 import styled from 'styled-components'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { Button, CircularProgress, Grid, Pagination } from '@mui/material'
+import {
+  Button,
+  CircularProgress,
+  Grid,
+  Pagination,
+  Radio,
+  Switch,
+} from '@mui/material'
 import PoolsTable from '../PoolsTable'
 import { getDateTime } from '../../Util/Dates'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
@@ -30,6 +37,9 @@ import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ToggleFilter from '../PoolsTableFilter/ToggleFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import { BorderLeft } from '@mui/icons-material'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import { FilterDrawerModal } from './FilterDrawerMobile'
+
 const PageDiv = styled.div`
   width: 100%;
 `
@@ -236,6 +246,9 @@ export function TradeHistoryTab() {
   const [page, setPage] = useState(0)
   const [buyClicked, setBuyClicked] = useState(false)
   const [sellClicked, setSellClicked] = useState(false)
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
+  const [selectedFilterFromRadio, setSelectedFilterFromRadio] = useState('')
+
   const orders: any[] = []
   const dispatch = useAppDispatch()
   const { isMobile } = useCustomMediaQuery()
@@ -477,6 +490,103 @@ export function TradeHistoryTab() {
     }
   }, [search, buyClicked, sellClicked, rows])
 
+  const MobileFilterOptions = () => (
+    <>
+      <Stack
+        spacing={0.6}
+        sx={{
+          marginTop: '16px',
+          fontSize: '14px',
+          marginBottom: '32px',
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>BTC/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'BTC/USD'}
+            size="small"
+            value="BTC/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>ETH/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'ETH/USD'}
+            size="small"
+            value="ETH/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>GHST/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'GHST/USD'}
+            size="small"
+            value="GHST/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>USDT/USD</Box>
+          <Radio
+            checked={selectedFilterFromRadio === 'USDT/USD'}
+            size="small"
+            value="USDT/USD"
+            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
+          />
+        </Stack>
+      </Stack>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: '20px',
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Buy</Box>
+          <Radio
+            checked={buyClicked}
+            size="small"
+            onClick={() => setBuyClicked(!buyClicked)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Sell</Box>
+          <Radio
+            checked={sellClicked}
+            size="small"
+            onClick={() => setSellClicked(!sellClicked)}
+          />
+        </Stack>
+      </Stack>
+    </>
+  )
+
   return (
     <Stack
       direction="column"
@@ -486,41 +596,43 @@ export function TradeHistoryTab() {
       paddingRight={isMobile ? 0 : 6}
       spacing={4}
     >
-      <Box
-        paddingY={2}
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-        }}
-      >
-        <DropDownFilter
-          id="Underlying Filter"
-          DropDownButtonLabel={underlyingButtonLabel}
-          InputValue={search}
-          onInputChange={handleUnderLyingInput}
-        />
-        <ButtonFilter
-          id="Buy"
+      {!isMobile && (
+        <Box
+          paddingY={2}
           sx={{
-            borderRight: 0,
-            borderTopRightRadius: 0,
-            borderBottomRightRadius: 0,
+            display: 'flex',
+            flexDirection: 'row',
           }}
-          ButtonLabel="Buy"
-          onClick={filterBuyOrders}
-        />
-        <Divider orientation="vertical" />
-        <ButtonFilter
-          id="Sell"
-          sx={{
-            borderLeft: 0,
-            borderTopLeftRadius: 0,
-            borderBottomLeftRadius: 0,
-          }}
-          ButtonLabel="Sell"
-          onClick={filterSellOrders}
-        />
-      </Box>
+        >
+          <DropDownFilter
+            id="Underlying Filter"
+            DropDownButtonLabel={underlyingButtonLabel}
+            InputValue={search}
+            onInputChange={handleUnderLyingInput}
+          />
+          <ButtonFilter
+            id="Buy"
+            sx={{
+              borderRight: 0,
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+            }}
+            ButtonLabel="Buy"
+            onClick={filterBuyOrders}
+          />
+          <Divider orientation="vertical" />
+          <ButtonFilter
+            id="Sell"
+            sx={{
+              borderLeft: 0,
+              borderTopLeftRadius: 0,
+              borderBottomLeftRadius: 0,
+            }}
+            ButtonLabel="Sell"
+            onClick={filterSellOrders}
+          />
+        </Box>
+      )}
       {!userAddress ? (
         <Typography
           sx={{
@@ -546,6 +658,23 @@ export function TradeHistoryTab() {
             >
               {!orderFills.isLoading || !orderFillsMaker.isLoading ? (
                 <>
+                  <Button
+                    onClick={() => {
+                      setIsFilterDrawerOpen(!isFilterDrawerOpen)
+                    }}
+                    startIcon={<FilterListIcon fontSize="small" />}
+                    variant="outlined"
+                    sx={{
+                      width: '84px',
+                      height: '30px',
+                      fontSize: '13px',
+                      padding: '4px 10px',
+                      textTransform: 'none',
+                    }}
+                    color={isFilterDrawerOpen ? 'primary' : 'secondary'}
+                  >
+                    Filters
+                  </Button>
                   <Box>
                     {filteredRows.map((row) => (
                       <TradeHistoryTabTokenCars row={row} key={row.Id} />
@@ -569,6 +698,26 @@ export function TradeHistoryTab() {
                   }}
                 />
               )}
+              <FilterDrawerModal
+                isFilterDrawerOpen={isFilterDrawerOpen}
+                setIsFilterDrawerOpen={setIsFilterDrawerOpen}
+                children={<MobileFilterOptions />}
+                search={search}
+                setSearch={setSearch}
+                onApplyFilter={() => {
+                  if (selectedFilterFromRadio) {
+                    setSearch(selectedFilterFromRadio)
+                  }
+                  setIsFilterDrawerOpen(false)
+                }}
+                onClearFilter={() => {
+                  setSearch('')
+                  setSelectedFilterFromRadio('')
+                  setIsFilterDrawerOpen(false)
+                  setBuyClicked(false)
+                  setSellClicked(false)
+                }}
+              />
             </Stack>
           ) : (
             <PoolsTable
