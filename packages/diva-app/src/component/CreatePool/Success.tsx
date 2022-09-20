@@ -31,6 +31,7 @@ import {
   splitSignature,
 } from 'ethers/lib/utils'
 import { ContentCopy, Download } from '@mui/icons-material'
+import DIVA712ABI from '../../abi/DIVA712ABI.json'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -174,6 +175,12 @@ export function Success({
           provider.getSigner()
         )
       : null
+
+  const divaNew = new ethers.Contract(
+    config[chainId!].divaAddressNew, //Goerli
+    DIVA712ABI,
+    provider.getSigner()
+  )
   useEffect(() => {
     /**
      * Remove etherscan usage and capture transaction receipt instead
@@ -192,7 +199,7 @@ export function Success({
           })
       })
     } else {
-      diva.getPoolParameters(formik.values.poolId).then((pool) => {
+      divaNew.getPoolParameters(formik.values.poolId).then((pool) => {
         setShortToken(pool.shortToken)
         setLongToken(pool.longToken)
         setPoolId(Number(formik.values.poolId))

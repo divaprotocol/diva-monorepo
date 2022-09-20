@@ -442,7 +442,6 @@ export function DefinePoolAttributes({
                       />
                     </Tooltip>
                   </Stack>
-                  <DefineAdvanced formik={formik} />
                 </Box>
               )}
               {value === 'Custom' && (

@@ -517,14 +517,14 @@ export const ApproveActionButtons = ({
                       CREATE_POOL_TYPE,
                       values.signature,
                       account,
-                      parseEther(values.collateralBalance)
+                      parseEther(values.takerShare.toString())
                     ).then((res) => {
                       if (res.success) {
                         divaNew
                           .fillOfferCreateContingentPool(
                             values.jsonToExport,
                             values.signature,
-                            parseEther(values.collateralBalance)
+                            parseEther(values.takerShare.toString())
                           )
                           .then((tx) => {
                             tx.wait().then((receipt) => {

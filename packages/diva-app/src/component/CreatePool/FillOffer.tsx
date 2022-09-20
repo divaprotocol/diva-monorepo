@@ -42,7 +42,7 @@ export function FillOffer({
 
       formik.setFieldValue(
         'offerDirection',
-        configJson.makerDirection ? 'Long' : 'Short'
+        configJson.makerDirection ? 'Short' : 'Long'
       )
       formik.setFieldValue('referenceAsset', configJson.referenceAsset)
       formik.setFieldValue('expiryTime', new Date(configJson.expiryTime * 1000))
@@ -62,7 +62,7 @@ export function FillOffer({
         parseFloat(formatEther(configJson.gradient))
       )
       formik.setFieldValue('collateralWalletBalance', walletBalance)
-      if (configJson.maker === userAddress) {
+      if (configJson.maker.toLowerCase() === userAddress.toLowerCase()) {
         formik.setFieldValue(
           'collateralBalance',
           formatEther(

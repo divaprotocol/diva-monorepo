@@ -263,7 +263,8 @@ export function ReviewAndSubmit({
                   Collateral Balance
                 </Typography>
                 <Typography fontSize={'0.85rem'}>
-                  {values.collateralBalance}
+                  {(Number(values.collateralBalance) / actualFillableAmount) *
+                    values.takerShare}
                 </Typography>
               </Stack>
               {transaction === 'createpool' && (
@@ -279,8 +280,7 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {(transaction === 'createoffer' ||
-                transaction === 'filloffer') && (
+              {transaction === 'createoffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -289,14 +289,24 @@ export function ReviewAndSubmit({
                     Your Contribution
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.offerDirection === 'Long'
-                      ? values.collateralBalanceLong
-                      : values.collateralBalanceShort}
+                    {values.yourShare}
                   </Typography>
                 </Stack>
               )}
-              {(transaction === 'createoffer' ||
-                transaction === 'filloffer') && (
+              {transaction === 'filloffer' && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Your Contribution
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.takerShare}
+                  </Typography>
+                </Stack>
+              )}
+              {transaction === 'createoffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -305,9 +315,22 @@ export function ReviewAndSubmit({
                     Taker Contribution
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.offerDirection === 'Long'
-                      ? values.collateralBalanceShort
-                      : values.collateralBalanceLong}
+                    {values.takerShare}
+                  </Typography>
+                </Stack>
+              )}
+              {transaction === 'filloffer' && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Maker Contribution
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {(Number(values.collateralBalance) / actualFillableAmount) *
+                      values.takerShare -
+                      values.takerShare}
                   </Typography>
                 </Stack>
               )}
@@ -527,11 +550,7 @@ export function ReviewAndSubmit({
                       height: '15px',
                       borderRadius: 1,
                     }}
-                    value={
-                      ((formik.values.takerShare - takerFilledAmount) /
-                        actualFillableAmount) *
-                      100
-                    }
+                    value={(takerFilledAmount / actualFillableAmount) * 100}
                   />
                   <Stack
                     height="100%"

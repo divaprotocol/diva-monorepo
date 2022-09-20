@@ -571,7 +571,6 @@ export function DefineOfferAttributes({
                         </Tooltip>
                       </Stack>
                     </Stack>
-                    <DefineAdvanced formik={formik} />
                   </FormControl>
                 </Box>
               )}
