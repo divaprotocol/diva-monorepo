@@ -263,8 +263,10 @@ export function ReviewAndSubmit({
                   Collateral Balance
                 </Typography>
                 <Typography fontSize={'0.85rem'}>
-                  {(Number(values.collateralBalance) / actualFillableAmount) *
-                    values.takerShare}
+                  {(
+                    (Number(values.collateralBalance) / actualFillableAmount) *
+                    values.takerShare
+                  ).toFixed(2)}
                 </Typography>
               </Stack>
               {transaction === 'createpool' && (
@@ -289,7 +291,7 @@ export function ReviewAndSubmit({
                     Your Contribution
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.yourShare}
+                    {values.yourShare.toFixed(2)}
                   </Typography>
                 </Stack>
               )}
@@ -302,7 +304,7 @@ export function ReviewAndSubmit({
                     Your Contribution
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.takerShare}
+                    {values.takerShare.toFixed(2)}
                   </Typography>
                 </Stack>
               )}
@@ -315,7 +317,7 @@ export function ReviewAndSubmit({
                     Taker Contribution
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.takerShare}
+                    {values.takerShare.toFixed(2)}
                   </Typography>
                 </Stack>
               )}
@@ -328,9 +330,12 @@ export function ReviewAndSubmit({
                     Maker Contribution
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {(Number(values.collateralBalance) / actualFillableAmount) *
-                      values.takerShare -
-                      values.takerShare}
+                    {(
+                      (Number(values.collateralBalance) /
+                        actualFillableAmount) *
+                        values.takerShare -
+                      values.takerShare
+                    ).toFixed(2)}
                   </Typography>
                 </Stack>
               )}
@@ -413,7 +418,7 @@ export function ReviewAndSubmit({
                     Taker Address
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.takerAddress}
+                    {getShortenedAddress(values.takerAddress)}
                   </Typography>
                 </Stack>
               )}
@@ -505,7 +510,10 @@ export function ReviewAndSubmit({
                       onChange={(event) => {
                         const collateralBalance = event.target.value
                         if (collateralBalance !== '') {
-                          formik.setFieldValue('takerShare', collateralBalance)
+                          formik.setFieldValue(
+                            'takerShare',
+                            Number(collateralBalance)
+                          )
                         } else {
                           formik.setFieldValue('takerShare', 0)
                         }

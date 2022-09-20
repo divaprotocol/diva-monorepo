@@ -657,6 +657,13 @@ export function DefineOfferAttributes({
                         collateralBalance,
                         tokenSupply: parseFloat(collateralBalance),
                       }))
+                      if (fillOrKill) {
+                        formik.setFieldValue(
+                          'minTakerContribution',
+                          parseFloat(collateralBalance) -
+                            formik.values.yourShare
+                        )
+                      }
                     }}
                   />
                   {formik.errors.collateralBalance != null && (
@@ -697,6 +704,13 @@ export function DefineOfferAttributes({
                           parseFloat(values.collateralBalance) -
                           parseFloat(collateralBalance),
                       }))
+                      if (fillOrKill) {
+                        formik.setFieldValue(
+                          'minTakerContribution',
+                          Number(formik.values.collateralBalance) -
+                            parseFloat(collateralBalance)
+                        )
+                      }
                     }}
                   />
                   {direction === 'Long'
