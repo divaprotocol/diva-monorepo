@@ -1,5 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
+  Box,
   Button,
   Container,
   Dialog,
@@ -8,25 +9,35 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
+import { LoadingButton } from '@mui/lab'
+import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import { request } from 'graphql-request'
 import { parseUnits } from 'ethers/lib/utils'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
-
 import { config } from '../../constants'
-import { SideMenu } from './SideMenu'
 import PoolsTable from '../PoolsTable'
 import {
   FeeRecipientCollateralToken,
-  queryMyFeeClaims,
+  queryFeeRecipients,
 } from '../../lib/queries'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import {
+  fetchFeeRecipients,
+  selectFeeRecipients,
+  selectRequestStatus,
+  selectUserAddress,
+} from '../../Redux/appSlice'
+import { useDispatch } from 'react-redux'
+import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 
 const TransferFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+  const dispatch = useDispatch()
   const [decimal, setDecimal] = useState(18)
   const chainId = provider?.network?.chainId
   const token = new ethers.Contract(
@@ -49,6 +60,7 @@ const TransferFeesCell = (props: any) => {
   const [open, setOpen] = useState(false)
   const [addressValue, setAddressValue] = useState('')
   const [amountValue, setAmountValue] = useState('')
+  const [loadingValue, setLoadingValue] = useState(false)
   const handleOpen = () => {
     setAmountValue((parseFloat(props.row.Amount) / 10 ** decimal).toString())
     setOpen(true)
@@ -60,9 +72,13 @@ const TransferFeesCell = (props: any) => {
 
   return (
     <Container>
-      <Button variant="contained" onClick={handleOpen}>
+      <LoadingButton
+        variant="contained"
+        onClick={handleOpen}
+        loading={loadingValue}
+      >
         Transfer Fees
-      </Button>
+      </LoadingButton>
       <Dialog open={open} onClose={handleClose}>
         <DialogActions>
           <Stack>
@@ -80,12 +96,14 @@ const TransferFeesCell = (props: any) => {
                 setAmountValue(e.target.value)
               }}
             />
-            <Button
+            <LoadingButton
               sx={{ mt: '1em', alignSelf: 'right' }}
               color="primary"
               type="submit"
               variant="contained"
+              loading={loadingValue}
               onClick={() => {
+                addressValue && amountValue && setLoadingValue(true)
                 if (diva != null) {
                   diva
                     .transferFeeClaim(
@@ -93,15 +111,28 @@ const TransferFeesCell = (props: any) => {
                       props.row.Address,
                       parseUnits(amountValue, decimal)
                     )
+                    .then((tx) => {
+                      tx.wait().then(() => {
+                        setTimeout(() => {
+                          dispatch(
+                            fetchFeeRecipients({
+                              address: userAddress,
+                            })
+                          )
+                          setLoadingValue(false)
+                        }, 10000)
+                      })
+                    })
                     .catch((err) => {
                       console.error(err)
+                      setLoadingValue(false)
                     })
                 }
                 handleClose()
               }}
             >
               Transfer Fees
-            </Button>
+            </LoadingButton>
           </Stack>
         </DialogActions>
       </Dialog>
@@ -111,8 +142,10 @@ const TransferFeesCell = (props: any) => {
 
 const ClaimFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
-
+  const userAddress = useAppSelector(selectUserAddress)
+  const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
+  const [loadingValue, setLoadingValue] = useState(false)
 
   const diva =
     chainId != null
@@ -124,27 +157,44 @@ const ClaimFeesCell = (props: any) => {
       : null
 
   return (
-    <Button
+    <LoadingButton
       color="primary"
       type="submit"
       variant="contained"
+      loading={loadingValue}
       onClick={() => {
+        setLoadingValue(true)
         if (diva != null) {
-          diva.claimFees(props.row.Address).catch((err) => {
-            console.error(err)
-          })
+          diva
+            .claimFees(props.row.Address)
+            .then((tx) => {
+              tx.wait().then(() => {
+                setTimeout(() => {
+                  dispatch(
+                    fetchFeeRecipients({
+                      address: userAddress,
+                    })
+                  )
+                  setLoadingValue(false)
+                }, 10000)
+              })
+            })
+
+            .catch((err) => {
+              console.error(err)
+              setLoadingValue(false)
+            })
         }
       }}
     >
       Claim Fees
-    </Button>
+    </LoadingButton>
   )
 }
 
 const AmountCell = (props: any) => {
   const context = useConnectionContext()
   const [decimal, setDecimal] = useState<number>()
-
   const token = new ethers.Contract(
     props.row.Address,
     ERC20,
@@ -172,7 +222,7 @@ const AmountCell = (props: any) => {
 
 const columns: GridColDef[] = [
   {
-    field: 'TokenSymbol',
+    field: 'Underlying',
     align: 'left',
     headerAlign: 'left',
     minWidth: 200,
@@ -206,49 +256,79 @@ const columns: GridColDef[] = [
 ]
 
 export function MyFeeClaims() {
-  const { chainId, address: userAddress } = useConnectionContext()
+  const { address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
-  const query = useQuery<{ fees: FeeRecipientCollateralToken[] }>(
-    `pools-fees-${userAddress}`,
-    async () => {
-      if (chainId != null) {
-        const result = await request(
-          config[chainId as number].divaSubgraph,
-          queryMyFeeClaims(userAddress)
-        )
-        return { fees: result.feeRecipients[0].collateralTokens }
-      }
-    }
+
+  const dispatch = useAppDispatch()
+
+  const feeRecipients = useAppSelector(selectFeeRecipients)
+  const poolsRequestStatus = useAppSelector(
+    selectRequestStatus('app/feeRecipients')
   )
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] = useState('Assets')
+  const [search, setSearch] = useState(null)
 
-  const feeRecipients =
-    query?.data?.fees || ([] as FeeRecipientCollateralToken[])
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(e.target.value === '' ? 'Assets' : e.target.value)
+  }
+
+  useEffect(() => {
+    if (userAddress != null) {
+      dispatch(
+        fetchFeeRecipients({
+          address: userAddress,
+        })
+      )
+    }
+  }, [dispatch, page, userAddress])
+
   let feeCount = 0
-  const rows: GridRowModel[] = feeRecipients.reduce((acc, val) => {
-    feeCount = feeCount + 1
-    return [
-      ...acc,
-      {
-        id: feeCount,
-        TokenSymbol: `${val.collateralToken.symbol}`,
-        Amount: `${val.amount}`,
-        Address: `${val.collateralToken.id}`,
-      },
-    ]
-  }, [] as GridRowModel[])
+  const rows: GridRowModel[] = feeRecipients
+    .map((v) => v.collateralTokens)
+    .flat()
+    .reduce((acc, val) => {
+      feeCount = feeCount + 1
+      return [
+        ...acc,
+        {
+          id: feeCount,
+          Underlying: `${val.collateralToken.symbol}`,
+          Amount: `${val.amount}`,
+          Address: `${val.collateralToken.id}`,
+        },
+      ]
+    }, [] as GridRowModel[])
 
-  const filtered = rows.filter((v) => v.Amount != 0)
+  const filteredRows =
+    search != null && search.length > 0
+      ? rows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      : rows
+
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         height: '100%',
-        maxHeight: 'calc(100% - 6em)',
       }}
-      spacing={6}
-      paddingTop={2}
-      paddingRight={6}
+      spacing={4}
     >
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+      </Box>
       {!userAddress ? (
         <Typography
           sx={{
@@ -263,12 +343,14 @@ export function MyFeeClaims() {
         </Typography>
       ) : (
         <>
-          <SideMenu />
           <PoolsTable
+            disableRowClick
             page={page}
-            rows={filtered}
+            rows={filteredRows}
+            loading={poolsRequestStatus === 'pending'}
             columns={columns}
             onPageChange={(page) => setPage(page)}
+            selectedPoolsView="Table"
           />
         </>
       )}

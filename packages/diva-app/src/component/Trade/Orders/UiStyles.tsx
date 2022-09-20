@@ -37,8 +37,10 @@ export const FormDiv = styled.div`
   margin-right: 20px;
 `
 
-export const FormInput = styled.input`
-  width: 30%;
+export const FormInput = styled.input<{
+  width?: string
+}>`
+  width: ${(props) => props.width || '30%'};
   height: 25px;
   background-color: #f8f8f8;
   border: none;
@@ -118,4 +120,18 @@ export const GrayText = styled.div`
   aligned: left;
   font-size: 16px;
   color: dimgray;
+`
+export const WhiteText = styled.div`
+  aligned: left;
+  font-size: 16px;
+  color: white;
+  justify-items: center;
+`
+
+export const GreenText = styled.div`
+  color: #66ffa6;
+`
+
+export const RedText = styled.div`
+  color: #ff5c8d;
 `

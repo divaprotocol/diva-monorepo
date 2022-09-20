@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAppSelector } from '../../Redux/hooks'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
@@ -40,13 +41,13 @@ function mapOrderData(
     if (account === orderMaker) {
       const makerToken = order.makerToken
       const tokenAddress = optionTokenAddress.toLowerCase()
-      const orderType = makerToken === tokenAddress ? 'Sell' : 'Buy'
+      const orderType = makerToken === tokenAddress ? 'SELL' : 'BUY'
       let nbrOptions = 0
       let pricePerOption = 0
       let payReceive = 0
 
       if (makerToken === tokenAddress) {
-        //Sell order
+        //Sell order: maker token is position token, taker token is collateral token
         const takerAmount = formatUnits(
           order.takerAmount,
           option.collateralToken.decimals
@@ -64,7 +65,7 @@ function mapOrderData(
           nbrOptions = Number(remainingTakerAmount) / askAmount
         }
         payReceive = Number(remainingTakerAmount)
-        pricePerOption = payReceive / nbrOptions
+        pricePerOption = askAmount
       } else {
         //Buy order
         const takerAmount = formatUnits(order.takerAmount)
@@ -113,6 +114,7 @@ export default function OpenOrders(props: {
   const dispatch = useDispatch()
   const [orders, setOrders] = useState([])
   const chainId = useAppSelector(selectChainId)
+  const { provider } = useConnectionContext()
   const address = useAppSelector(selectUserAddress)
 
   const componentDidMount = async () => {
@@ -121,10 +123,13 @@ export default function OpenOrders(props: {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
         option.collateralToken.id,
-        chainId
+        chainId,
+        provider,
+        props.exchangeProxy
       )
       if (rSell.length > 0) {
         responseSell = rSell
+        dispatch(setResponseSell(responseSell))
       }
     }
 
@@ -132,10 +137,13 @@ export default function OpenOrders(props: {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
         optionTokenAddress,
-        chainId
+        chainId,
+        provider,
+        props.exchangeProxy
       )
       if (rBuy.length > 0) {
         responseBuy = rBuy
+        dispatch(setResponseBuy(responseBuy))
       }
     }
     const orderBookBuy = mapOrderData(
@@ -186,7 +194,7 @@ export default function OpenOrders(props: {
         dispatch(setResponseBuy([]))
       }
     }
-  }, [responseBuy, responseSell])
+  }, [responseBuy.length, responseSell.length])
 
   async function cancelOrder(order, chainId) {
     const orderHash = order.orderHash
@@ -197,18 +205,23 @@ export default function OpenOrders(props: {
     ) {
       const log = cancelOrderResponse?.logs?.[0]
       if (log != null && log.event == 'OrderCancelled') {
-        alert('Order successfully canceled')
+        alert('Order successfully cancelled')
+        //need to invalidate orders since orderbook is updated
+        dispatch(setResponseSell([]))
+        dispatch(setResponseBuy([]))
+        responseBuy = []
+        responseSell = []
         //update orderbook & create orders widget
         componentDidMount()
       } else {
-        alert('order could not be canceled')
+        alert('order could not be cancelled')
       }
     })
   }
 
   return (
     <PageDiv>
-      <TableContainer component={Paper} sx={{ maxHeight: 340 }}>
+      <TableContainer component={Paper} sx={{ maxHeight: 550 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -232,32 +245,42 @@ export default function OpenOrders(props: {
                       align="left"
                     >
                       <Box>
-                        <Typography variant="subtitle1">
-                          {order.orderType}
-                        </Typography>
-                        <Typography variant="caption" noWrap>
-                          {order.expiry}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box paddingBottom="20px">
-                        <Typography variant="subtitle1">
-                          {order.nbrOptions}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box paddingBottom="20px">
-                        <Typography variant="subtitle1">
-                          {order.pricePerOption.toFixed(2)}
+                        {order.orderType === 'BUY' ? (
+                          <Typography variant="subtitle1" color="#66ffa6">
+                            {order.orderType}
+                          </Typography>
+                        ) : (
+                          <Typography variant="subtitle1" color="#ff5c8d">
+                            {order.orderType}
+                          </Typography>
+                        )}
+                        <Typography variant="caption" color="#8e8e8e" noWrap>
+                          {order.expiryMins}
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell align="center">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
-                          {order.payReceive.toFixed(2)}
+                          {order.nbrOptions === 0
+                            ? '-'
+                            : order.nbrOptions.toFixed(4)}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Box paddingBottom="20px">
+                        <Typography variant="subtitle1">
+                          {order.pricePerOption.toFixed(4)}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Box paddingBottom="20px">
+                        <Typography variant="subtitle1">
+                          {order.nbrOptions === 0
+                            ? '-'
+                            : order.payReceive.toFixed(4)}
                         </Typography>
                       </Box>
                     </TableCell>

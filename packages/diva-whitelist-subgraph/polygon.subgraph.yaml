@@ -6,9 +6,9 @@ dataSources:
     name: DIVAWhitelist
     network: matic
     source:
-      address: "0x47d3EF37b7750498061D26bE4351369d2749DfeD"
+      address: "0x3bcBFBd63f0387fF1b72a4C580fA7758C04B718d"
       abi: DIVAWhitelist
-      startBlock: 25966694
+      startBlock: 28685890
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5

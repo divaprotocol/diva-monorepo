@@ -1,6 +1,8 @@
 import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
+import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 
+// Returned values are expressed as integers with collateral token decimals
 export function calcPayoffPerToken(
   floor,
   inflection,
@@ -18,7 +20,9 @@ export function calcPayoffPerToken(
     collateralBalanceLongInitial.mul(SCALING)
   const collateralBalanceShortInitialScaled =
     collateralBalanceShortInitial.mul(SCALING)
-  let payoffLong = BigENumber.from(0)
+
+  let payoffLong
+
   if (finalReferenceValue.eq(inflection)) {
     payoffLong = collateralBalanceLongInitialScaled
   } else if (finalReferenceValue.lt(inflection)) {
@@ -66,4 +70,65 @@ export function calcPayoffPerToken(
     .div(SCALING)
 
   return { payoffPerLongToken, payoffPerShortToken }
+}
+
+export function calcBreakEven(
+  price,
+  floor,
+  inflection,
+  cap,
+  collateralBalanceLongInitial,
+  collateralBalanceShortInitial,
+  isLong
+) {
+  const UNIT = parseEther('1')
+
+  // Convert inputs into Big Numbers
+  floor = BigENumber.from(floor)
+  inflection = BigENumber.from(inflection)
+  cap = BigENumber.from(cap)
+  collateralBalanceLongInitial = BigENumber.from(collateralBalanceLongInitial)
+  collateralBalanceShortInitial = BigENumber.from(collateralBalanceShortInitial)
+
+  // Calculate gradient
+  const gradient = collateralBalanceLongInitial
+    .mul(UNIT)
+    .div(collateralBalanceLongInitial.add(collateralBalanceShortInitial))
+
+  let breakEven
+
+  if (price.gt(UNIT) || price.lt(BigENumber.from(0))) {
+    breakEven = 'n/a'
+  } else {
+    if (isLong) {
+      if (price.eq(gradient)) {
+        breakEven = inflection
+      } else if (price.lt(gradient)) {
+        breakEven = price.mul(inflection.sub(floor)).div(gradient).add(floor)
+      } else {
+        breakEven = price
+          .sub(gradient)
+          .mul(cap.sub(inflection))
+          .div(UNIT.sub(gradient))
+          .add(inflection)
+      }
+    } else {
+      if (price.eq(UNIT.sub(gradient))) {
+        breakEven = inflection
+      } else if (price.gt(UNIT.sub(gradient))) {
+        breakEven = UNIT.sub(price)
+          .mul(inflection.sub(floor))
+          .div(gradient)
+          .add(floor)
+      } else {
+        breakEven = UNIT.sub(price)
+          .sub(gradient)
+          .mul(cap.sub(inflection))
+          .div(UNIT.sub(gradient))
+          .add(inflection)
+      }
+    }
+  }
+
+  return breakEven
 }

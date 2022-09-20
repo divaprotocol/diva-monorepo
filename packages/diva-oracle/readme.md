@@ -40,6 +40,7 @@ Once the image is built, run below command to spin up or down along with develop
 docker-compose up
 ```
 
+
 ## Trouble shooting
 * If you face an error saying "The command 'docker-compose' could not be found in the WSL 2 distro. We recommend to activate the WSL integration in Docker Desktop settings." while using WSL on Windows, then
 open the Docker Desktop App in Windows, go to Settings -> Resources and ensure that your Linux distribution (e.g., Ubuntu) is enabled. See also [here](https://stackoverflow.com/questions/63497928/ubuntu-wsl-with-docker-could-not-be-found).
@@ -50,37 +51,46 @@ open the Docker Desktop App in Windows, go to Settings -> Resources and ensure t
 # Running _without_ Docker
 
 ## Poetry installation and local development
-1. Install poetry: 
+1. Install poetry:
 
-* OSX / linux / bashonwindows installation instructions:
+- OSX / linux / bashonwindows installation instructions:
+
 ```
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
 ```
-* Windows powershell installation instructions:
+
+- Windows powershell installation instructions:
+
 ```
 (Invoke-WebRequest -Uri https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -UseBasicParsing).Content | python -
 ```
 
-2. Install dependencies: 
+2. Install dependencies:
+
 ```
 poetry install
 ```
 
 3. Run code in your_script.py:
+
 ```
 poetry run python your_script.py
 ```
 
-4. Adding packages: 
+4. Adding packages:
+
 ```
 poetry add pandas
 ```
 
 ## Trouble shooting
-* If `poetry` is not recognized a valid command in your terminal (e.g., when running `poetry --version`), try to add the following path variable in windows `%USERPROFILE%\.poetry\bin`
-* If it's still not working, try to run visual studio / the console in administrator mode
+
+- If `poetry` is not recognized a valid command in your terminal (e.g., when running `poetry --version`), try to add the following path variable in windows `%USERPROFILE%\.poetry\bin`
+- If it's still not working, try to run visual studio / the console in administrator mode
+- For windows user, prefer to run it in Powershell outside of a windows folder (i.e. not in `/mnt/wsl`)
 
 ## Helpful links
-* Python poetry docs: https://python-poetry.org/docs/
+
+- Python poetry docs: https://python-poetry.org/docs/
 
 ### Tellor Oracle details

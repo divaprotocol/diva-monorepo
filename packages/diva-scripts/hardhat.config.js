@@ -33,7 +33,7 @@ module.exports = {
         mnemonic: MNEMONIC, // unlocks multiple accounts
       },
       gasLimit: 3000000,
-      gasPrice: 15000000000
+      gasPrice: 40000000000
     },
     rinkeby: {
       url: process.env.ALCHEMY_URL_RINKEBY,
@@ -65,6 +65,12 @@ module.exports = {
     },
     arbitrum_rinkeby: {
       url: process.env.ALCHEMY_URL_ARBITRUM_RINKEBY,
+      accounts: {
+        mnemonic: MNEMONIC, 
+      }
+    },
+    goerli: {
+      url: process.env.ALCHEMY_URL_GOERLI,
       accounts: {
         mnemonic: MNEMONIC, 
       }

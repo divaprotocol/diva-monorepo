@@ -21,12 +21,12 @@ export type CollateralTokenEntity = {
   feeRecipients: FeeRecipientCollateralToken[]
 }
 
-type PositionToken = {
+export type PositionToken = {
   id: string
   name: string
   symbol: string
   decimals: number
-  pool: Pool
+  pool?: Pool
   owner: string
 }
 
@@ -62,9 +62,96 @@ export type Pool = {
   createdAt: string
 }
 
-export const queryPools = (id: string) => gql`
+export type User = {
+  id: string
+  positionTokens: { positionToken: PositionToken }[]
+}
+
+export const queryUser = (id: string, pageSize: number, skip: number) => gql`
+{
+  user(id: "${id}" ){
+    id
+    positionTokens(first: ${pageSize}, skip: ${skip},
+      orderDirection: desc,
+      orderBy: receivedAt,) {
+        receivedAt,
+        positionToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+        pool {
+          id
+          referenceAsset
+          floor
+          inflection
+          cap
+          supplyInitial
+          supplyShort
+          supplyLong
+          expiryTime
+          collateralToken {
+            id
+            name
+            decimals
+            symbol
+          }
+          collateralBalanceShortInitial
+          collateralBalanceLongInitial
+          collateralBalance
+          shortToken {
+            id
+            name
+            symbol
+            decimals
+            owner
+          }
+          longToken {
+            id
+            name
+            symbol
+            decimals
+            owner
+          }
+          finalReferenceValue
+          statusFinalReferenceValue
+          redemptionAmountLongToken
+          redemptionAmountShortToken
+          statusTimestamp
+          dataProvider
+          redemptionFee
+          settlementFee
+          createdBy
+          createdAt
+          capacity
+          expiryTime
+          challenges {
+            challengedBy
+            proposedFinalReferenceValue
+          }
+        }
+      }
+    }
+  }
+}
+`
+
+export const queryPools = (
+  skip: number,
+  pageSize: number,
+  createdBy = '',
+  dataProvider = ''
+) => gql`
   {
-    pools( where: { id_gt: "${id}" } ) {
+    pools(first: ${pageSize}, skip: ${skip},
+      orderDirection: desc,
+      orderBy: createdAt,
+      where: { 
+        createdBy_contains: "${createdBy}"
+        statusFinalReferenceValue_not: "Confirmed"
+        dataProvider_contains: "${dataProvider}"
+      }) {
       id
       referenceAsset
       floor
@@ -117,121 +204,11 @@ export const queryPools = (id: string) => gql`
   }
 `
 
-export const queryMarkets = (id: string) => gql`
-  {
-    pools( where: { statusFinalReferenceValue_not:"Confirmed" id_gt: "${id}" } ) {
-      id
-      referenceAsset
-      floor
-      inflection
-      cap
-      supplyInitial
-      supplyShort
-      supplyLong
-      expiryTime
-      collateralToken {
-        id
-        name
-        decimals
-        symbol
-      }
-      collateralBalanceShortInitial
-      collateralBalanceLongInitial
-      collateralBalance
-      shortToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      longToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      finalReferenceValue
-      statusFinalReferenceValue
-      redemptionAmountLongToken
-      redemptionAmountShortToken
-      statusTimestamp
-      dataProvider
-      redemptionFee
-      settlementFee
-      createdBy
-      createdAt
-      capacity
-      expiryTime
-      challenges {
-        challengedBy
-        proposedFinalReferenceValue
-      }
-    }
-  }
-`
-
-export const queryDatafeed = (address: string, id: string) => gql`
-  {
-    pools(where: { dataProvider: "${address}" id_gt: "${id}" } ) {
-      id
-      referenceAsset
-      floor
-      inflection
-      cap
-      supplyInitial
-      supplyShort
-      supplyLong
-      expiryTime
-      collateralToken {
-        id
-        name
-        decimals
-        symbol
-      }
-      collateralBalanceShortInitial
-      collateralBalanceLongInitial
-      collateralBalance
-      shortToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      longToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      finalReferenceValue
-      statusFinalReferenceValue
-      redemptionAmountLongToken
-      redemptionAmountShortToken
-      statusTimestamp
-      dataProvider
-      redemptionFee
-      settlementFee
-      createdBy
-      createdAt
-      capacity
-      expiryTime
-      challenges {
-        challengedBy
-        proposedFinalReferenceValue
-      }
-    }
-  }
-`
-
-export const queryMyFeeClaims = (address: string) => gql`
+export const queryFeeRecipients = (address: string) => gql`
   {
     feeRecipients(where: { id: "${address}" }) {
       id
-      collateralTokens {
+      collateralTokens(where: {amount_gt: 0}) {
         amount
         collateralToken {
           id
@@ -305,10 +282,11 @@ export type DataFeed = {
   id: string
   referenceAsset: string
   referenceAssetUnified: string
+  active: boolean
 }
 
 export type DataProvider = {
-  dataFeeds: { id: string; referenceAssetUnified: string }[]
+  dataFeeds: { id: string; referenceAssetUnified: string; active: boolean }[]
   id: string
   name: string
 }
@@ -325,7 +303,94 @@ export type WhitelistQueryResponse = {
   dataFeeds: DataFeed[]
   collateralTokens: WhitelistCollateralToken[]
 }
+export type TestUser = {
+  id: BigNumber
+  binaryPoolCreated: boolean
+  linearPoolCreated: boolean
+  convexPoolCreated: boolean
+  concavePoolCreated: boolean
+  liquidityAdded: boolean
+  liquidityRemoved: boolean
+  buyLimitOrderCreatedAndFilled: boolean
+  sellLimitOrderCreatedAndFilled: boolean
+  buyLimitOrderFilled: boolean
+  sellLimitOrderFilled: boolean
+  finalValueReported: boolean
+  reportedValueChallenged: boolean
+  positionTokenRedeemed: boolean
+  feesClaimed: boolean
+  feeClaimsTransferred: boolean
+}
 
+export type OrderFill = {
+  id: string
+  orderHash: string
+  maker: string
+  taker: string
+  makerToken: string
+  takerToken: string
+  makerTokenFilledAmount: string
+  takerTokenFilledAmount: string
+  timestamp: number
+}
+
+export const queryOrderFillsMaker = (address: string) => gql`
+  {
+    nativeOrderFills(
+      where: { maker: "${address}" }
+    ) {
+      id
+      orderHash
+      maker
+      taker
+      makerToken
+      takerToken
+      makerTokenFilledAmount
+      takerTokenFilledAmount
+      timestamp
+    }
+  }
+`
+
+export const queryOrderFillsTaker = (address: string) => gql`
+  {
+    nativeOrderFills(
+      where: { taker: "${address}" }
+    ) {
+      id
+      orderHash
+      maker
+      taker
+      makerToken
+      takerToken
+      makerTokenFilledAmount
+      takerTokenFilledAmount
+      timestamp
+    }
+  }
+`
+export const queryTestUser = (address: string) => gql`
+  {
+  testnetUser(id: "${address}") {
+    id
+    binaryPoolCreated
+    linearPoolCreated
+    convexPoolCreated
+    concavePoolCreated
+    liquidityAdded
+    liquidityRemoved
+    buyLimitOrderCreatedAndFilled
+    sellLimitOrderCreatedAndFilled
+    buyLimitOrderFilled
+    sellLimitOrderFilled
+    finalValueReported
+    reportedValueChallenged
+    positionTokenRedeemed
+    feesClaimed
+    feeClaimsTransferred
+  }
+}
+`
 export const queryWhitelist = gql`
   {
     dataProviders {
@@ -334,6 +399,7 @@ export const queryWhitelist = gql`
       dataFeeds {
         id
         referenceAssetUnified
+        active
       }
     }
     dataFeeds {

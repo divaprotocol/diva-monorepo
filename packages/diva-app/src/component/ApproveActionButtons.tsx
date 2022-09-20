@@ -2,9 +2,9 @@ import { CircularProgress, Container, Stack, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import { ethers } from 'ethers'
 import { config } from '../constants'
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
+import { parseEther, parseUnits } from 'ethers/lib/utils'
 import { fetchPool, selectUserAddress } from '../Redux/appSlice'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useConnectionContext } from '../hooks/useConnectionContext'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
@@ -20,6 +20,7 @@ type Props = {
   textFieldValue: string
   transactionType: 'create' | 'liquidity'
   onTransactionSuccess: () => void
+  alert?: boolean
 }
 
 export const ApproveActionButtons = ({
@@ -29,11 +30,13 @@ export const ApproveActionButtons = ({
   textFieldValue,
   transactionType,
   onTransactionSuccess,
+  alert,
 }: Props) => {
   const [approveLoading, setApproveLoading] = React.useState(false)
   const [actionLoading, setActionLoading] = React.useState(false)
   const [approveEnabled, setApproveEnabled] = React.useState(false)
   const [actionEnabled, setActionEnabled] = React.useState(false)
+  const [isPoolCreated, setIsPoolCreated] = React.useState(false)
   const [btnName, setBtnName] = React.useState('Add')
   const { provider } = useConnectionContext()
   const account = useAppSelector(selectUserAddress)
@@ -45,11 +48,23 @@ export const ApproveActionButtons = ({
     ERC20,
     provider?.getSigner()
   )
-  const diva = new ethers.Contract(
-    config[provider?.network?.chainId].divaAddress,
-    DIVA_ABI,
-    provider?.getSigner()
-  )
+  const diva =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider.getSigner()
+        )
+      : null
+
+  const [mobile, setMobile] = useState(false)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setMobile(true)
+    } else {
+      setMobile(false)
+    }
+  }, [])
   useEffect(() => {
     if (transactionType === 'create') {
       setBtnName('Create')
@@ -57,18 +72,22 @@ export const ApproveActionButtons = ({
       setBtnName('Add')
     }
     if (textFieldValue !== '' && chainId) {
-      token.allowance(account, config[chainId]?.divaAddress).then((res) => {
-        if (res.lt(parseUnits(textFieldValue, decimal))) {
-          setApproveEnabled(true)
-          setActionEnabled(false)
-        } else {
-          setActionEnabled(true)
-          setApproveEnabled(false)
-        }
-      })
+      if (parseFloat(textFieldValue) === 0) {
+        setApproveEnabled(false)
+        setActionEnabled(false)
+      } else {
+        token.allowance(account, config[chainId]?.divaAddress).then((res) => {
+          if (res.lt(parseUnits(textFieldValue, decimal))) {
+            setApproveEnabled(true)
+            setActionEnabled(false)
+          } else {
+            setActionEnabled(true)
+            setApproveEnabled(false)
+          }
+        })
+      }
     }
   }, [textFieldValue, chainId, pool, approveLoading, actionLoading])
-
   return (
     <div
       style={{
@@ -76,12 +95,12 @@ export const ApproveActionButtons = ({
         height: '100px',
         width: '100%',
         display: 'flex',
-        justifyContent: 'space-evenly',
+        justifyContent: mobile ? 'center' : 'flex-end',
       }}
     >
-      <Stack direction="row" spacing={theme.spacing(2)}>
+      <Stack direction="row" spacing={theme.spacing(mobile ? 1 : 3)}>
         {approveLoading ? (
-          <Container sx={{ minWidth: theme.spacing(20) }}>
+          <Container sx={{ minWidth: theme.spacing(mobile ? 10 : 20) }}>
             <CircularProgress />
           </Container>
         ) : (
@@ -92,7 +111,13 @@ export const ApproveActionButtons = ({
               size="large"
               type="submit"
               value="Submit"
-              disabled={approveEnabled === false}
+              disabled={
+                approveEnabled === false ||
+                account == null ||
+                textFieldValue === '' ||
+                isPoolCreated === true ||
+                alert === true
+              }
               onClick={() => {
                 setApproveLoading(true)
 
@@ -117,9 +142,9 @@ export const ApproveActionButtons = ({
                   })
               }}
               style={{
-                maxWidth: theme.spacing(28),
+                maxWidth: theme.spacing(mobile ? 16 : 26),
                 maxHeight: theme.spacing(5),
-                minWidth: theme.spacing(28),
+                minWidth: theme.spacing(mobile ? 16 : 26),
                 minHeight: theme.spacing(5),
               }}
             >
@@ -129,7 +154,7 @@ export const ApproveActionButtons = ({
           </Container>
         )}
         {actionLoading ? (
-          <Container sx={{ minWidth: theme.spacing(20) }}>
+          <Container sx={{ minWidth: theme.spacing(mobile ? 10 : 20) }}>
             <CircularProgress />
           </Container>
         ) : (
@@ -139,7 +164,13 @@ export const ApproveActionButtons = ({
             size="large"
             type="submit"
             value="Submit"
-            disabled={actionEnabled === false}
+            disabled={
+              actionEnabled === false ||
+              account == null ||
+              textFieldValue === '' ||
+              isPoolCreated === true ||
+              alert === true
+            }
             onClick={() => {
               setActionLoading(true)
               switch (transactionType) {
@@ -164,7 +195,10 @@ export const ApproveActionButtons = ({
                       referenceAsset: pool.referenceAsset.toString(),
                       collateralToken: pool.collateralToken.id.toString(),
                       dataProvider: pool.dataProvider.toString(),
-                      capacity: parseEther('0'),
+                      capacity:
+                        pool.capacity === 'Unlimited'
+                          ? ethers.constants.MaxUint256
+                          : parseUnits(pool.capacity.toString(), decimal),
                     })
                     .then((tx) => {
                       /**
@@ -172,17 +206,11 @@ export const ApproveActionButtons = ({
                        */
                       tx.wait()
                         .then(() => {
-                          setActionLoading(false)
                           setTimeout(() => {
+                            setActionLoading(false)
+                            setIsPoolCreated(true)
                             onTransactionSuccess()
-                            dispatch(
-                              fetchPool({
-                                graphUrl:
-                                  config[chainId as number].divaSubgraph,
-                                poolId: window.location.pathname.split('/')[1],
-                              })
-                            )
-                          }, 5000)
+                          }, 15000)
                         })
                         .catch((err: any) => {
                           setActionLoading(false)
@@ -231,9 +259,9 @@ export const ApproveActionButtons = ({
               }
             }}
             style={{
-              maxWidth: theme.spacing(28),
+              maxWidth: theme.spacing(mobile ? 16 : 26),
               maxHeight: theme.spacing(5),
-              minWidth: theme.spacing(28),
+              minWidth: theme.spacing(mobile ? 16 : 26),
               minHeight: theme.spacing(5),
             }}
           >

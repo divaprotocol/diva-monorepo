@@ -1,7 +1,7 @@
 /**
  * Script to add liquidity to an existing pool that has not yet expired
- * Run: `yarn hardhat run scripts/addLiquidity.js --network ropsten`
- * Replace ropsten with any other network that is listed in constants.js
+ * Run: `yarn hardhat run scripts/addLiquidity.js --network goerli`
+ * Replace goerli with any other network that is listed in constants.js
  */
 
 const { ethers } = require('hardhat');
@@ -14,7 +14,7 @@ async function main() {
     let additionalAmount
 
     // INPUT: network, collateral token symbol (check constants.js for available values)
-    const network = "ropsten" 
+    const network = "goerli" 
     
     // INPUT: arguments for `addLiquidity` function
     const poolId = 3 // id of an existing pool

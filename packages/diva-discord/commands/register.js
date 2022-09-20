@@ -1,49 +1,74 @@
-const ERC20_ABI = require('@diva/contracts/abis/erc20.json')
-const { parseEther, parseUnits, formatUnits } = require('@ethersproject/units')
+const Discord = require('discord.js')
 
 module.exports = {
     name: 'register',
-    async execute(interaction, dbRegisteredUsers, DUSD_CONTRACT, senderAccount) {
-        console.log(`Function register called by ${interaction.user?.tag}`)
-        //check is user is already registered
-        if (dbRegisteredUsers.get(interaction.user?.id) != null) {
-            interaction.reply({
-                content:  `Your discord account is already registered with address \n `
-                +`**${dbRegisteredUsers.get(interaction.user?.id, "address")}** \n `
-                +`To change the your ethereum address use\n**/changeaddress ADDRESS**`,
-                ephemeral: true,
-            })
-            return
+    async execute(interaction, dbRegisteredUsers ) {
+        try {
+
+            let userId =""
+            let userName = ""
+            let address = ""
+            let replyText = ""
+            let addToSendQueue = false
+
+            //users can register by / command or via message. Depending on the way the parameters have to be read 
+            // and the reply needs to be send different.
+            if (interaction instanceof Discord.Message)  { 
+                userId = interaction.author.id
+                userName = interaction.author.tag
+                address = interaction.content.slice(1).split(" ")[1]
+            } else {
+                userId = interaction.user?.id
+                userName = interaction.user?.tag
+                address = interaction.options.getString('address')
+            }
+
+            console.log(`Function register called by ${userName}`)
+            //check is user is already registered
+            if (dbRegisteredUsers.get(userId) != null) {
+                replyText = `Your discord account is already registered with address \n `
+                    +`**${dbRegisteredUsers.get(userId, "address")}** \n `
+            } else if (!ethers.utils.isAddress(address)) {
+                replyText = `The entered address ${address} is not a valid Ethereum wallet. Please check your input` 
+            } else {
+                addToSendQueue = true
+                if (interaction instanceof Discord.Interaction) {
+                    await interaction.deferReply({ephemeral: true})
+                }
+            }
+
+            console.log(replyText);
+            if (replyText != "") {
+                (interaction instanceof Discord.Message) ?
+                    await interaction.reply(replyText) :
+                    await interaction.reply({
+                        content:  replyText,
+                        ephemeral: true,
+                        })
+            }
+            return addToSendQueue
         }
-
-        //get user input for 'address'
-        const address = interaction.options.getString('address')
-
-        //check if wallet is valid
-        if (!ethers.utils.isAddress(address))  {
-            interaction.reply({
-                content:  `The entered address is not a valid Ethereum wallet. Please check your input`,
-                ephemeral: true,
-            })
-            return
+        catch(e){
+            console.error(e)
+            return false
         }
-
-        //add user to database
-        dbRegisteredUsers.set(interaction.user?.id, {address: address, 
-                                                    timestampLastClaim: new Date(),
-                                                    nbrClaims:1})
-        
-        console.log(`Loading contract ${DUSD_CONTRACT}`)
-        const erc20Contract = await ethers.getContractAt(ERC20_ABI, DUSD_CONTRACT)
-        console.log(`sending ${parseEther("1000")} dUSD from ${senderAccount} to ${address}`)
-        const tx = await erc20Contract.connect(senderAccount).transfer(address, parseEther("1000"))
-        //const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
-
-        interaction.reply({
-            content:  `You successfully registered for DIVA testnet :tada: \n`
-            +`You will shortly receive dUSD tokens on ropsten \n`
-            +`https://ropsten.etherscan.io/tx/${tx.hash}.`,
-            ephemeral: true,
-        })
     }
 }
+    //const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+    /*
+    // Ether amount to send
+    let amountInEther = ethers.utils.parseEther('1')
+    // Create a transaction object
+    let txEth = {
+        nonce: nonceCounter,
+        to: address,
+        // Convert currency unit from ether to wei
+        value: amountInEther,
+        gasPrice: ethers.utils.parseUnits('40',9),
+    }
+
+    console.log(`sending ${amountInEther} ETH from ${senderAccount} to ${address}`)
+    // Send a transaction
+    const txObj = await senderAccount.sendTransaction(txEth)
+    nonceCounter = nonceCounter + 1
+    */

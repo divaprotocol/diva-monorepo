@@ -66,4 +66,51 @@ type PositionToken @entity {
   decimals: Int!
   pool: Pool!
   owner: Bytes!
+  users: [UserPositionToken!]
+    @derivedFrom(field: "positionToken")
+}
+
+type TestnetUser @entity {
+  id: ID! # UserAddress
+  binaryPoolCreated: Boolean!
+  linearPoolCreated: Boolean!
+  convexPoolCreated: Boolean!
+  concavePoolCreated: Boolean!
+  liquidityAdded: Boolean!
+  liquidityRemoved: Boolean!
+  buyLimitOrderCreatedAndFilled: Boolean!
+  sellLimitOrderCreatedAndFilled: Boolean!
+  buyLimitOrderFilled: Boolean!
+  sellLimitOrderFilled: Boolean!
+  finalValueReported: Boolean!
+  reportedValueChallenged: Boolean!
+  positionTokenRedeemed: Boolean!
+  feesClaimed: Boolean!
+  feeClaimsTransferred: Boolean!
+}
+
+type User @entity {
+  id: ID! # UserAddress
+  positionTokens: [UserPositionToken!]
+    @derivedFrom(field: "user")
+}
+
+type UserPositionToken @entity {
+  id: ID! # Set to `${user.id}-${positionToken.id}`
+  user: User!
+  positionToken: PositionToken!
+  receivedAt: BigInt! # timestamp when user received position token via create pool, add liquidity or trading 
+}
+
+type NativeOrderFill @entity {
+    # tx hash - order hash - log index
+    id: ID!
+    orderHash: Bytes!
+    maker: Bytes!
+    taker: Bytes!
+    makerToken: Bytes!
+    takerToken: Bytes!
+    makerTokenFilledAmount: BigInt!
+    takerTokenFilledAmount: BigInt!
+    timestamp: BigInt!
 }

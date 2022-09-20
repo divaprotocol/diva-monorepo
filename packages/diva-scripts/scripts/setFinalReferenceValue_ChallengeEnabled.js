@@ -1,7 +1,7 @@
 /**
  * Script to set the final reference price for an already expired pool. Challenge is enabled by data provider at the time of submission.
- * Run `yarn hardhat run scripts/setFinalReferenceValue_ChallengeEnabled.js --network ropsten`
- * Replace ropsten with any other network that is listed in constants.js
+ * Run `yarn hardhat run scripts/setFinalReferenceValue_ChallengeEnabled.js --network goerli`
+ * Replace goerli with any other network that is listed in constants.js
  *
  * Note that `setFinalReferenceValue` only works for an expired pool and only within the initial 24h submission window.
  */
@@ -14,7 +14,7 @@ const { addresses, status } = require('../constants/constants')
 async function main() {
 
   // INPUT: network
-  const network = "ropsten" // has to be one of the networks included in constants.js
+  const network = "goerli" // has to be one of the networks included in constants.js
   
   // INPUT: arguments for the `setFinalReferenceValue` function
   const poolId = 5 // id of an existing pool

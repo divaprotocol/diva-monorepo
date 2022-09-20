@@ -1,7 +1,7 @@
 /**
  * Script to create a contingent pool
- * Run: `yarn hardhat run scripts/createContingentPool.js --network ropsten`
- * Replace ropsten with any other network that is listed in constants.js
+ * Run: `yarn hardhat run scripts/createContingentPool.js --network goerli`
+ * Replace goerli with any other network that is listed in constants.js
  */
 
 const { ethers } = require('hardhat');
@@ -15,8 +15,8 @@ const { getExpiryInSeconds, AddressZero } = require('./utils.js')
 async function main() {
 
   // INPUT: network, collateral token symbol (check constants.js for available values)
-  const network = "ropsten" 
-  const collateralTokenSymbol = "WAGMI6"
+  const network = "goerli" 
+  const collateralTokenSymbol = "dUSD"
 
   // Get signers
   const [acc1, acc2, acc3] = await ethers.getSigners();
@@ -31,16 +31,16 @@ async function main() {
   console.log("Collateral token decimals: " + decimals);
   
   // INPUTS: arguments for `createContingentPool` function
-  const referenceAsset = "UMA/USD" // "BTC/USD" 
-  const expiryTime = getExpiryInSeconds(0) // epoch unix timestamp in seconds
-  const floor = parseEther("20000") 
-  const inflection = parseEther("20000")
-  const cap = parseEther("45000") 
-  const collateralBalanceShort = parseUnits("50", decimals) 
-  const collateralBalanceLong = parseUnits("50", decimals)  
-  const supplyPositionToken = parseEther("100")
+  const referenceAsset = "AAVE/USD" // "BTC/USD" 
+  const expiryTime = getExpiryInSeconds(10000) // epoch unix timestamp in seconds
+  const floor = parseEther("100") 
+  const inflection = parseEther("150")
+  const cap = parseEther("400") 
+  const collateralBalanceShort = parseUnits("500", decimals) 
+  const collateralBalanceLong = parseUnits("500", decimals)  
+  const supplyPositionToken = parseEther("1000")
   const collateralToken = erc20CollateralTokenAddress 
-  const dataProvider = "0x9AdEFeb576dcF52F5220709c1B267d89d5208D78" // Tellor: "0xED6D661645a11C45F4B82274db677867a7D32675"
+  const dataProvider = "0x245B8ABbC1B70B370d1b81398dE0a7920B25E7ca" // Tellor: "0xED6D661645a11C45F4B82274db677867a7D32675"
   const capacity = parseUnits("0", decimals)
 
   // Input checks

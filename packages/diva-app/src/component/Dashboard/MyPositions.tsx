@@ -1,5 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
+  Box,
   Button,
   Container,
   Dialog,
@@ -11,29 +12,45 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
-import { SideMenu } from './SideMenu'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import styled from 'styled-components'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import {
   fetchPool,
+  fetchPositionTokens,
+  selectIntrinsicValue,
   selectPools,
-  selectRequestStatus,
+  selectPositionTokens,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
+import { ExpiresInCell } from '../Markets/Markets'
+import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
+import request from 'graphql-request'
+import { Pool, queryUser } from '../../lib/queries'
+import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
+import PoolsTableFilter from '../PoolsTableFilter/DropDownFilter'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 
 type Response = {
   [token: string]: BigNumber
@@ -44,10 +61,7 @@ const MetaMaskImage = styled.img`
   height: 20px;
   cursor: pointer;
 `
-const ethereum = window?.ethereum
-
 const AddToMetamask = (props: any) => {
-  const { provider } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
     e.stopPropagation()
     const tokenSymbol =
@@ -86,6 +100,8 @@ const AddToMetamask = (props: any) => {
 const SubmitButton = (props: any) => {
   const [open, setOpen] = React.useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
+  const [loadingValue, setLoadingValue] = useState(false)
+  const [disabledButton, setDisabledButton] = useState(false)
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
 
@@ -102,6 +118,7 @@ const SubmitButton = (props: any) => {
   const token =
     provider && new ethers.Contract(props.row.address.id, ERC20, provider)
   const handleRedeem = (e) => {
+    setLoadingValue(true)
     e.stopPropagation()
     if (props.row.Status === 'Confirmed*') {
       diva
@@ -118,34 +135,44 @@ const SubmitButton = (props: any) => {
                     false
                   )
                   .then((tx) => {
-                    tx.wait().then(() => {
-                      diva
-                        .redeemPositionToken(props.row.address.id, bal)
-                        .then((tx) => {
-                          /**
-                           * dispatch action to refetch the pool after action
-                           */
-                          tx.wait().then(() => {
-                            dispatch(
-                              fetchPool({
-                                graphUrl:
-                                  config[chainId as number].divaSubgraph,
-                                poolId: props.id.split('/')[0],
-                              })
-                            )
+                    tx.wait()
+                      .then(() => {
+                        diva
+                          .redeemPositionToken(props.row.address.id, bal)
+                          .then((tx: any) => {
+                            tx.wait().then(() => {
+                              /**
+                               * dispatch action to refetch the pool after action
+                               */
+                              setDisabledButton(true)
+                              dispatch(
+                                fetchPool({
+                                  graphUrl:
+                                    config[chainId as number].divaSubgraph,
+                                  poolId: props.id.split('/')[0],
+                                })
+                              )
+                              setLoadingValue(false)
+                            })
                           })
-                        })
-                        .catch((err) => {
-                          console.error(err)
-                        })
-                    })
+                          .catch((err) => {
+                            setLoadingValue(false)
+                            console.error(err)
+                          })
+                      })
+                      .catch((err) => {
+                        console.error(err)
+                        setLoadingValue(false)
+                      })
                   })
                   .catch((err) => {
                     console.error(err)
+                    setLoadingValue(false)
                   })
               })
               .catch((err) => {
                 console.error(err)
+                setLoadingValue(false)
               })
           } else {
             token
@@ -153,28 +180,47 @@ const SubmitButton = (props: any) => {
               .then((bal: BigNumber) => {
                 diva
                   .redeemPositionToken(props.row.address.id, bal)
+                  .then((tx: any) => {
+                    tx.wait().then(() => {
+                      setLoadingValue(false)
+                      setDisabledButton(true)
+                    })
+                  })
                   .catch((err) => {
                     console.error(err)
+                    setLoadingValue(false)
                   })
               })
               .catch((err) => {
                 console.error(err)
+                setLoadingValue(false)
               })
           }
         })
         .catch((err) => {
           console.error(err)
+          setLoadingValue(false)
         })
     } else {
       token
         ?.balanceOf(userAddress)
         .then((bal: BigNumber) => {
-          diva.redeemPositionToken(props.row.address.id, bal).catch((err) => {
-            console.error(err)
-          })
+          diva
+            .redeemPositionToken(props.row.address.id, bal)
+            .then((tx: any) => {
+              tx.wait().then(() => {
+                setLoadingValue(false)
+                setDisabledButton(true)
+              })
+            })
+            .catch((err) => {
+              console.error(err)
+              setLoadingValue(false)
+            })
         })
         .catch((err) => {
           console.error(err)
+          setLoadingValue(false)
         })
     }
   }
@@ -209,33 +255,38 @@ const SubmitButton = (props: any) => {
   }
 
   const handleClose = () => {
-    setOpen(false)
+    if (loadingValue === false) {
+      setOpen(false)
+    }
   }
 
   if (buttonName === 'Redeem') {
     return (
       <Container>
-        <Button
+        <LoadingButton
           variant="contained"
           color={buttonName === 'Redeem' ? 'success' : 'primary'}
+          disabled={disabledButton}
+          loading={loadingValue}
           onClick={handleRedeem}
         >
           {buttonName}
-        </Button>
+        </LoadingButton>
       </Container>
     )
   } else if (buttonName === 'Challenge') {
     return (
       <Container>
-        <Button
+        <LoadingButton
           variant="contained"
+          loading={loadingValue}
           onClick={(e) => {
             e.stopPropagation()
             handleOpen()
           }}
         >
           Challenge
-        </Button>
+        </LoadingButton>
         <Dialog open={open} onClose={handleClose}>
           <DialogContent>
             <DialogContentText>
@@ -245,15 +296,18 @@ const SubmitButton = (props: any) => {
 
           <DialogActions>
             <TextField
-              defaultValue={textFieldValue}
+              autoFocus={true}
+              defaultValue=""
               onChange={(e) => {
                 setTextFieldValue(e.target.value)
               }}
             />
-            <Button
+            <LoadingButton
               color="primary"
               type="submit"
+              loading={loadingValue}
               onClick={(e) => {
+                setLoadingValue(textFieldValue ? true : false)
                 if (diva != null) {
                   diva
                     .challengeFinalReferenceValue(
@@ -273,23 +327,73 @@ const SubmitButton = (props: any) => {
                             })
                           )
                         }, 10000)
+                        setLoadingValue(false)
                       })
                     })
                     .catch((err) => {
                       console.error(err)
+                      setLoadingValue(false)
                     })
                 }
                 handleClose()
               }}
             >
               Challenge
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </Dialog>
       </Container>
     )
   } else {
     return <></>
+  }
+}
+
+const Payoff = (props: any) => {
+  const intrinsicValue = useAppSelector((state) =>
+    selectIntrinsicValue(
+      state,
+      props.row.Payoff.id,
+      props.row.finalValue != '-'
+        ? parseEther(props.row.finalValue).toString()
+        : '-'
+    )
+  )
+  if (
+    intrinsicValue != null &&
+    props.row.finalValue != '-' &&
+    intrinsicValue.payoffPerShortToken != null &&
+    intrinsicValue.payoffPerLongToken != null
+  ) {
+    if (props.row.Id.toLowerCase().startsWith('s')) {
+      return (
+        <div>
+          {(
+            parseFloat(
+              formatUnits(
+                intrinsicValue.payoffPerShortToken,
+                props.row.Payoff.collateralToken.decimals
+              )
+            ) * props.row.Balance
+          ).toFixed(4)}
+        </div>
+      )
+    } else {
+      return (
+        <div>
+          {(
+            parseFloat(
+              formatUnits(
+                intrinsicValue.payoffPerLongToken,
+                props.row.Payoff.collateralToken.decimals
+              )
+            ) * props.row.Balance
+          ).toFixed(4)}
+        </div>
+      )
+    }
+  } else {
+    return <>-</>
   }
 }
 
@@ -306,6 +410,7 @@ const columns: GridColDef[] = [
     disableReorder: true,
     disableColumnMenu: true,
     headerName: '',
+    width: 70,
     renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
   },
   {
@@ -322,20 +427,35 @@ const columns: GridColDef[] = [
     renderCell: (cell) => <PayoffCell data={cell.value} />,
   },
   { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
   { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
+  {
+    field: 'Inflection',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+    hide: true,
+  },
+  {
+    field: 'Gradient',
+    align: 'right',
+    headerAlign: 'right',
+    type: 'number',
+    hide: true,
+  },
   {
     field: 'Expiry',
     minWidth: 170,
     align: 'right',
     headerAlign: 'right',
     type: 'dateTime',
+    headerName: 'Expires in',
+    renderCell: (props) => <ExpiresInCell {...props} />,
   },
   {
     field: 'TVL',
     align: 'right',
     headerAlign: 'right',
-    minWidth: 200,
+    minWidth: 150,
   },
   {
     field: 'finalValue',
@@ -352,11 +472,24 @@ const columns: GridColDef[] = [
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
+    renderCell: (cell: any) => {
+      return (
+        <Tooltip placement="top-end" title={statusDescription[cell.value]}>
+          <span className="table-cell-trucate">{cell.value}</span>
+        </Tooltip>
+      )
+    },
   },
   {
     field: 'Balance',
     align: 'right',
     headerAlign: 'right',
+  },
+  {
+    field: 'Payoff',
+    align: 'right',
+    headerAlign: 'right',
+    renderCell: (props) => <Payoff {...props} />,
   },
   {
     field: 'submitValue',
@@ -372,59 +505,67 @@ const columns: GridColDef[] = [
     align: 'left',
     headerAlign: 'right',
     headerName: '',
-    minWidth: 100,
+    minWidth: 20,
     renderCell: (props) => <AddToMetamask {...props} />,
   },
 ]
 
 export function MyPositions() {
-  const { provider, address: userAddress } = useConnectionContext()
+  const { provider, chainId } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
-  const pools = useAppSelector((state) => selectPools(state))
-  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
+  const [search, setSearch] = useState(null)
+  const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
+  const [confirmedPoolClicked, setConfirmedPoolClicked] = useState(false)
+  const tokenPools = useAppSelector(selectPools)
+  const positionTokens = useAppSelector(selectPositionTokens)
+  const dispatch = useDispatch()
+  const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
+    useGovernanceParameters()
 
-  const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const expiryTime = new Date(parseInt(val.expiryTime) * 1000)
-    const now = new Date()
-    const fallbackPeriod = new Date(parseInt(val.expiryTime) * 1000).setMinutes(
-      expiryTime.getMinutes() + 24 * 60 + 5
+  useEffect(() => {
+    dispatch(
+      fetchPositionTokens({
+        page,
+      })
     )
-    const unchallengedPeriod = new Date(
-      parseInt(val.expiryTime) * 1000
-    ).setMinutes(expiryTime.getMinutes() + 5 * 24 * 60 + 5)
-    const challengedPeriod = new Date(
-      parseInt(val.expiryTime) * 1000
-    ).setMinutes(expiryTime.getMinutes() + 2 * 24 * 60 + 5)
-    let finalValue = '-'
-    let status = val.statusFinalReferenceValue
-    if (Date.now() > fallbackPeriod) {
-      status = 'Fallback'
-    }
-    if (now.getTime() < expiryTime.getTime()) {
-      finalValue = '-'
-    } else if (val.statusFinalReferenceValue === 'Open') {
-      if (now.getTime() > unchallengedPeriod) {
-        finalValue = parseFloat(formatEther(val.inflection)).toFixed(4)
-        status = 'Confirmed*'
-      } else if (
-        now.getTime() > expiryTime.getTime() &&
-        now.getTime() < unchallengedPeriod
-      ) {
-        status = 'Expired'
-        finalValue = '-'
-      } else {
-        finalValue = '-'
-      }
-    } else if (
-      val.statusFinalReferenceValue === 'Challenged' &&
-      Date.now() > challengedPeriod
-    ) {
-      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
-      status = 'Confirmed*'
+  }, [dispatch, page, userAddress])
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'Underlying' : e.target.value
+    )
+  }
+  const handleExpiredPools = () => {
+    if (expiredPoolClicked) {
+      setExpiredPoolClicked(false)
     } else {
-      finalValue = parseFloat(formatEther(val.finalReferenceValue)).toFixed(4)
-      status = val.statusFinalReferenceValue
+      setExpiredPoolClicked(true)
     }
+  }
+  const handleConfirmedPools = () => {
+    if (confirmedPoolClicked) {
+      setConfirmedPoolClicked(false)
+    } else {
+      setConfirmedPoolClicked(true)
+    }
+  }
+
+  const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
+    const { finalValue, status } = getAppStatus(
+      val.expiryTime,
+      val.statusTimestamp,
+      val.statusFinalReferenceValue,
+      val.finalReferenceValue,
+      val.inflection,
+      submissionPeriod,
+      challengePeriod,
+      reviewPeriod,
+      fallbackPeriod
+    )
+
     const shared = {
       Id: val.id,
       Icon: val.referenceAsset,
@@ -437,19 +578,27 @@ export function MyPositions() {
       Buy: 'TBD',
       MaxYield: 'TBD',
       StatusTimestamp: val.statusTimestamp,
+      Payoff: val,
     }
 
     const payOff = {
-      Floor: parseInt(val.floor) / 1e18,
-      Inflection: parseInt(val.inflection) / 1e18,
-      Cap: parseInt(val.cap) / 1e18,
+      CollateralBalanceLong: Number(
+        formatUnits(
+          val.collateralBalanceLongInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      CollateralBalanceShort: Number(
+        formatUnits(
+          val.collateralBalanceShortInitial,
+          val.collateralToken.decimals
+        )
+      ),
+      Floor: Number(formatEther(val.floor)),
+      Inflection: Number(formatEther(val.inflection)),
+      Cap: Number(formatEther(val.cap)),
+      TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
-
-    const Status =
-      expiryTime.getTime() <= now.getTime() &&
-      val.statusFinalReferenceValue.toLowerCase() === 'open'
-        ? 'Expired'
-        : val.statusFinalReferenceValue
 
     return [
       ...acc,
@@ -458,13 +607,25 @@ export function MyPositions() {
         id: `${val.id}/long`,
         Id: 'L' + val.id,
         address: val.longToken,
+        Gradient: Number(
+          formatUnits(
+            BigNumber.from(val.collateralBalanceLongInitial)
+              .mul(parseUnits('1', val.collateralToken.decimals))
+              .div(
+                BigNumber.from(val.collateralBalanceLongInitial).add(
+                  BigNumber.from(val.collateralBalanceShortInitial)
+                )
+              ),
+            val.collateralToken.decimals
+          )
+        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
               BigNumber.from(val.collateralBalance),
               val.collateralToken.decimals
             )
-          ).toFixed(4) +
+          ).toFixed(2) +
           ' ' +
           val.collateralToken.symbol,
         PayoffProfile: generatePayoffChartData({
@@ -479,13 +640,25 @@ export function MyPositions() {
         id: `${val.id}/short`,
         Id: 'S' + val.id,
         address: val.shortToken,
+        Gradient: Number(
+          formatUnits(
+            BigNumber.from(val.collateralBalanceShortInitial)
+              .mul(parseUnits('1', val.collateralToken.decimals))
+              .div(
+                BigNumber.from(val.collateralBalanceLongInitial).add(
+                  BigNumber.from(val.collateralBalanceShortInitial)
+                )
+              ),
+            val.collateralToken.decimals
+          )
+        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
               BigNumber.from(val.collateralBalance),
               val.collateralToken.decimals
             )
-          ).toFixed(4) +
+          ).toFixed(2) +
           ' ' +
           val.collateralToken.symbol,
         PayoffProfile: generatePayoffChartData({
@@ -498,23 +671,43 @@ export function MyPositions() {
     ]
   }, [] as GridRowModel[])
 
-  const tokenAddresses = rows.map((v) => v.address.id)
+  const tokenAddresses = positionTokens.map((v) => v.id)
 
   /**
    * TODO: Move into redux
    */
   const balances = useQuery<Response>(`balance-${userAddress}`, async () => {
-    const response: Response = {}
+    let response: Response = {}
     if (!userAddress) {
       console.warn('wallet not connected')
       return Promise.resolve({})
     }
+
+    const tokenAddressesChunks = tokenAddresses.reduce(
+      (resultArray, item, index) => {
+        const batchIndex = Math.floor(index / 400)
+        if (!resultArray[batchIndex]) {
+          resultArray[batchIndex] = []
+        }
+        resultArray[batchIndex].push(item)
+        return resultArray
+      },
+      []
+    )
+    const contract = new ethers.Contract(
+      config[chainId].balanceCheckAddress,
+      BalanceCheckerABI,
+      provider
+    )
     await Promise.all(
-      tokenAddresses.map(async (tokenAddress) => {
-        const contract = new ethers.Contract(tokenAddress, ERC20, provider)
+      tokenAddressesChunks.map(async (batch) => {
         try {
-          const res: BigNumber = await contract.balanceOf(userAddress)
-          response[tokenAddress] = res
+          const userAddressArray = Array(batch.length).fill(userAddress)
+          const res = await contract.balances(userAddressArray, batch)
+          response = batch.reduce(
+            (obj, key, index) => ({ ...obj, [key]: res[index] }),
+            {}
+          )
         } catch (error) {
           console.error(error)
         }
@@ -523,11 +716,27 @@ export function MyPositions() {
     return response
   })
 
+  /**
+   * After navigating from success page we need to refetch balances in order
+   * to capture the newly added pool. We only want to do this once to not overfetch
+   */
+  useEffect(() => {
+    setTimeout(() => {
+      if (userAddress != null && balances != null) {
+        balances.refetch()
+      }
+    }, 1000)
+  }, [userAddress])
+
   const tokenBalances = balances.data
 
   const filteredRows =
     tokenBalances != null
       ? rows
+          .filter(
+            (value, index, self) =>
+              index === self.findIndex((t) => t.id === value.id)
+          )
           .filter(
             (v) =>
               tokenBalances[v.address.id] != null &&
@@ -536,7 +745,9 @@ export function MyPositions() {
           .map((v) => ({
             ...v,
             Balance:
-              parseInt(formatUnits(tokenBalances[v.address.id])) < 0.01
+              tokenBalances[v.address.id] == null
+                ? 'n/a'
+                : tokenBalances[v.address.id].lt(parseUnits('1', 16))
                 ? '<0.01'
                 : parseFloat(formatUnits(tokenBalances[v.address.id])).toFixed(
                     4
@@ -544,17 +755,76 @@ export function MyPositions() {
           }))
       : []
 
+  // covert the above function to a memoized one
+  const filteredRowsByOptions = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (expiredPoolClicked) {
+        return filteredRows
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+          .filter((v) => v.Status.includes('Open'))
+      } else if (confirmedPoolClicked) {
+        return filteredRows
+          .filter((v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          )
+          .filter((v) => v.Status.includes('Confirmed'))
+      } else {
+        return filteredRows.filter((v) =>
+          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else if (expiredPoolClicked) {
+      return filteredRows.filter((v) => v.Status.includes('Open'))
+    } else if (confirmedPoolClicked) {
+      return filteredRows.filter((v) => v.Status.includes('Confirmed'))
+    } else {
+      return filteredRows
+    }
+  }, [filteredRows, search, expiredPoolClicked, confirmedPoolClicked])
+
+  const sortedRows = filteredRowsByOptions.sort((a, b) => {
+    const aId = parseFloat(a.Id.substring(1))
+    const bId = parseFloat(b.Id.substring(1))
+
+    return bId - aId
+  })
+
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         height: '100%',
-        maxHeight: 'calc(100% - 6em)',
       }}
-      spacing={6}
-      paddingTop={2}
-      paddingRight={6}
+      spacing={4}
     >
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          maxWidth: '400px',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+        <ButtonFilter
+          id="Hide expired pools"
+          sx={{ marginRight: '30px' }}
+          ButtonLabel="Hide Expired"
+          onClick={handleExpiredPools}
+        />
+        <ButtonFilter
+          id="Confirmed Pools"
+          ButtonLabel="Confirmed"
+          onClick={handleConfirmedPools}
+        />
+      </Box>
       {!userAddress ? (
         <Typography
           sx={{
@@ -569,13 +839,14 @@ export function MyPositions() {
         </Typography>
       ) : (
         <>
-          <SideMenu />
           <PoolsTable
             page={page}
-            rows={filteredRows}
-            loading={balances.isLoading || poolsRequestStatus === 'pending'}
+            rows={filteredRowsByOptions && sortedRows}
+            loading={balances.isLoading}
+            rowCount={3000}
             columns={columns}
             onPageChange={(page) => setPage(page)}
+            selectedPoolsView="Table"
           />
         </>
       )}

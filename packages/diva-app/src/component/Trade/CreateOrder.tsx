@@ -17,6 +17,9 @@ import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
 import { fetchOrders, setIsBuy } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
+import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
+import { setBreakEven } from '../../Redux/Stats'
+import { useAppSelector } from '../../Redux/hooks'
 const PageDiv = styled.div`
   justify-content: center
   height: 500px;
@@ -34,7 +37,7 @@ const useStyles = makeStyles(() => ({
     flexGrow: 1,
   },
   tab: {
-    width: 100,
+    width: 96,
     minWidth: 50,
   },
 }))
@@ -71,6 +74,7 @@ export default function CreateOrder(props: {
   tokenAddress: string
   exchangeProxy: string
   chainId: number
+  provider: any
 }) {
   //const op = useSelector((state) => state.tradeOption.option)
   const option = props.option
@@ -80,10 +84,12 @@ export default function CreateOrder(props: {
   const tabsClass = useTabsBorder()
   const [orderType, setOrderTypeValue] = React.useState(0)
   const [priceType, setPriceTypeValue] = React.useState(0)
-
+  const [usdPrice, setUsdPrice] = React.useState('')
+  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   useEffect(() => {
     getExistingOrders()
-  })
+  }, [orderType, priceType])
 
   const handleOrderTypeChange = (event: any, newValue: number) => {
     dispatch(setIsBuy(newValue === 0))
@@ -94,16 +100,46 @@ export default function CreateOrder(props: {
     setPriceTypeValue(newValue)
   }
 
+  const approve = async (amount, tokenContract, spender, owner) => {
+    try {
+      const approveResponse = await tokenContract.methods
+        .approve(spender, amount)
+        .send({ from: owner })
+      if ('events' in approveResponse) {
+        // Check allowance amount in events to avoid another contract call
+        return approveResponse.events.Approval.returnValues.value
+      } else {
+        // In case the approve call does not or delay emit events, read the allowance again
+        await new Promise((resolve) => setTimeout(resolve, 4000))
+
+        // Set allowance for collateral token (<= 18 decimals)
+        const allowance = await tokenContract.methods
+          .allowance(owner, spender)
+          .call()
+        return allowance
+      }
+    } catch (error) {
+      // If rejected by user in Metamask pop-up
+      console.error('error ' + JSON.stringify(error))
+      return 'undefined'
+    }
+  }
+
   const getExistingOrders = async () => {
-    const responseSell: any = await get0xOpenOrders(
+    //updates orders components
+    responseSell = await get0xOpenOrders(
       props.tokenAddress,
       option.collateralToken.id,
-      props.chainId
+      props.chainId,
+      props.provider,
+      props.exchangeProxy
     )
-    const responseBuy: any = await get0xOpenOrders(
+    responseBuy = await get0xOpenOrders(
       option.collateralToken.id,
       props.tokenAddress,
-      props.chainId
+      props.chainId,
+      props.provider,
+      props.exchangeProxy
     )
     if (responseSell.length > 0) {
       dispatch(setResponseSell(responseSell))
@@ -112,6 +148,17 @@ export default function CreateOrder(props: {
       dispatch(setResponseBuy(responseBuy))
     }
   }
+
+  useEffect(() => {
+    getUnderlyingPrice(option.referenceAsset).then((data) => {
+      if (data != null || data != undefined) {
+        setUsdPrice(data)
+      } else {
+        //handle undefined object return
+        console.warn('Please handle me i am undefined')
+      }
+    })
+  }, [option.referenceAsset])
 
   const renderOrderInfo = () => {
     if (orderType === 0 && priceType === 0) {
@@ -123,6 +170,9 @@ export default function CreateOrder(props: {
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
+          usdPrice={usdPrice}
+          provider={props.provider}
+          approve={approve}
         />
       )
     }
@@ -135,6 +185,9 @@ export default function CreateOrder(props: {
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
+          usdPrice={usdPrice}
+          provider={props.provider}
+          approve={approve}
         />
       )
     }
@@ -147,6 +200,9 @@ export default function CreateOrder(props: {
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
+          usdPrice={usdPrice}
+          provider={props.provider}
+          approve={approve}
         />
       )
     }
@@ -159,6 +215,9 @@ export default function CreateOrder(props: {
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
           chainId={props.chainId}
+          usdPrice={usdPrice}
+          provider={props.provider}
+          approve={approve}
         />
       )
     }

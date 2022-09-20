@@ -67,4 +67,20 @@ interface ISettlement {
     // Duplication of event declaration for event handling in tests and
     // subgraph. Refer to LibDiamond for event description.
     event FeeClaimAllocated(uint256 indexed poolId, address indexed recipient, uint256 amount);
+
+    /**
+     * @notice Emitted when position tokens are redeemed.
+     * @param poolId The Id of the pool that the position token belongs to.
+     * @param positionToken Address of the position token to redeem.
+     * @param amountPositionToken Position token amount returned by user.
+     * @param collateralAmountReturned Collateral amount returned to user.
+     * @param returnedTo Address that is returned collateral.
+     */
+    event PositionTokenRedeemed(
+        uint256 indexed poolId,
+        address indexed positionToken,
+        uint256 amountPositionToken,
+        uint256 collateralAmountReturned,
+        address indexed returnedTo
+    );
 }

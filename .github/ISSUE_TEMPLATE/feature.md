@@ -1,9 +1,9 @@
 ---
 name: Feature
 about: Ticket to describe work related to creating, improving or changing a feature.
-title: '[Untitled Feature Change]'
+title: "[Untitled Feature Change]"
 labels: feature, triage
-assignees: ''
+assignees: ""
 ---
 
 ## Context

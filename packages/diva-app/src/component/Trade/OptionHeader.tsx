@@ -94,10 +94,6 @@ export default function OptionHeader(optionData: {
       <Container>
         <CoinIconPair assetName={headerTitle} />
         <OptionTitle>{headerTitle}</OptionTitle>
-
-        {underlyingAssetPrice && (
-          <AssetPriceUsd>{underlyingAssetPrice}</AssetPriceUsd>
-        )}
       </Container>
       <Container>
         <Link
@@ -107,7 +103,7 @@ export default function OptionHeader(optionData: {
           target="_blank"
           href={getEtherscanLink(
             chainId,
-            shortenTokenAddress,
+            optionData.TokenAddress,
             EtherscanLinkType.ADDRESS
           )}
         >

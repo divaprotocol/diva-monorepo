@@ -10,9 +10,12 @@ export function createDivaTheme(prefersDarkMode: boolean) {
     palette: {
       primary: {
         main: '#3393E0',
+        light: '#79C7E3',
+        dark: '#12939A',
       },
       secondary: {
         main: '#929292',
+        dark: '#4A4A4A',
       },
       mode: 'dark',
       // mode: prefersDarkMode ? 'dark' : 'light',

@@ -1,55 +1,40 @@
 import Header from './component/Header/Header'
 import Underlying from './component/Trade/Underlying'
 
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from 'react-router-dom'
 import { CreatePool } from './component/CreatePool/CreatePool'
 import Markets from './component/Markets/Markets'
-import { MyDataFeeds } from './component/Dashboard/MyDataFeeds'
-import { MyPositions } from './component/Dashboard/MyPositions'
-import { MyFeeClaims } from './component/Dashboard/MyFeeClaims'
-import { useEffect } from 'react'
-import { useDispatch } from 'react-redux'
-import { fetchPools } from './Redux/appSlice'
 import MenuItems from './component/Header/MenuItems'
 import { useAppSelector } from './Redux/hooks'
 import { LoadingBox } from './component/LoadingBox'
 import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
+import { config, divaGovernanceAddress } from './constants'
+import { WrongChain } from './component/Wallet/WrongChain'
+import { Tasks } from './component/Tasks/Tasks'
+import Dashboard from './component/Dashboard/Dashboard'
+import { useCustomMediaQuery } from './hooks/useCustomMediaQuery'
 
 export const App = () => {
-  const dispatch = useDispatch()
   const chainId = useAppSelector((state) => state.appSlice.chainId)
-
-  /**
-   * Pooling fetchPools
-   */
-  useEffect(() => {
-    const pollPools = () => {
-      if (chainId != null) {
-        dispatch(fetchPools())
-      } else {
-        console.warn('chain id undefined')
-      }
-    }
-
-    /**
-     * pool pools every minute
-     */
-    const interval = setInterval(pollPools, 1000 * 30)
-
-    pollPools()
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [chainId, dispatch])
+  const { isMobile } = useCustomMediaQuery()
 
   return (
     <Router>
       <Stack height="100%" direction="row" justifyContent="space-between">
-        <MenuItems />
-        <Divider orientation="vertical" />
+        {!isMobile && (
+          <>
+            <MenuItems />
+            <Divider orientation="vertical" />
+          </>
+        )}
+
         <Container
           disableGutters
           sx={{ alignItems: 'left', height: '100%', overflow: 'auto' }}
@@ -58,19 +43,18 @@ export const App = () => {
           <Header />
           {chainId == null ? (
             <LoadingBox />
-          ) : (
+          ) : config[chainId]?.isSupported ? (
             <Switch>
-              <Route exact path="/">
+              <Route exact path="/tasks">
+                <Tasks />
+              </Route>
+              <Route
+                exact
+                path="/dashboard/:page?"
+                render={(props) => <Dashboard {...props} />}
+              />
+              <Route path="/markets/:creatorAddress?">
                 <Markets />
-              </Route>
-              <Route exact path="/dashboard/mydatafeeds">
-                <MyDataFeeds />
-              </Route>
-              <Route exact path="/dashboard/mypositions">
-                <MyPositions />
-              </Route>
-              <Route exact path="/dashboard/myfeeclaims">
-                <MyFeeClaims />
               </Route>
               <Route path="/:poolId/:tokenType">
                 <Underlying />
@@ -78,7 +62,12 @@ export const App = () => {
               <Route path="/create">
                 <CreatePool />
               </Route>
+              <Route path="/">
+                <Redirect from="/" to={`/markets/${divaGovernanceAddress}`} />
+              </Route>
             </Switch>
+          ) : (
+            <WrongChain />
           )}
         </Container>
       </Stack>

@@ -1,9 +1,9 @@
 ---
 name: Bug report
 about: A bug that occurs in a specific browser or platform
-title: '[Untitled Bug]'
+title: "[Untitled Bug]"
 labels: bugs, triage
-assignees: ''
+assignees: ""
 ---
 
 ## Context
