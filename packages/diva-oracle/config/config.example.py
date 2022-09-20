@@ -2,9 +2,11 @@ PRIVATE_KEY = ''
 PUBLIC_KEY = ''
 dataprovider = PUBLIC_KEY
 
-
-email = ""
-emailpassword = ""
+# This is for gmail
+# This requires 2FA along with
+# https://stackoverflow.com/questions/46445269/gmail-blocks-login-attempt-from-python-with-app-specific-password
+sender_email = ""
+pass_code = ""
 
 PROVIDER_URL = {
     "ropsten": 'https://ropsten.infura.io/v3/<YOUR_API_KEY>',
@@ -22,6 +24,15 @@ chain_id = {
     "goerli": 5
 }
 
+# symbol : Id
+WHITELIST_TOKEN_POOLS = {
+    "dUSD" : "0xfa158c9b780a4213f3201ae74cca013712c8538d",
+    "WBTC" : "0xA61E26649743f8c86b09860c9fddf45153fA7A55"
+}
+
+# This true value will only submit pools in the whitelist token pools
+# Any collateral assets outside of the whitelist will not be processed.
+BLOCK_ON_WHITELIST = True
 # PARAMETERS
 
 # Max seconds to wait for a transaction to be confirmed
@@ -35,6 +46,6 @@ max_reporting_frame = 24
 
 # Networks
 networks = ["ropsten"]  # write ["ropsten","mumbai"] for multiple networks
-
+network = "ropsten"
 # Waiting time (in seconds) before next iteration
 waiting_next_iteration = 120
