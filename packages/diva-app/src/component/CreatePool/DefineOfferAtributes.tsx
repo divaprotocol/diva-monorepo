@@ -882,6 +882,7 @@ export function DefineOfferAttributes({
                         </Tooltip>
                       </FormControl>
                       <FormControlLabel
+                        sx={{ pb: theme.spacing(2) }}
                         control={
                           <Checkbox
                             defaultChecked={everyone}
