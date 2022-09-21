@@ -15,8 +15,8 @@ import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
 import { RootState } from './Store'
-import { get0xOpenOrders } from '../DataService/OpenOrders'
-import { config, divaGovernanceAddress } from '../constants'
+import { get0xOpenOrders, getOrderbookPrices } from '../DataService/OpenOrders'
+import { config, divaGovernanceAddress, NULL_ADDRESS } from '../constants'
 import { useConnectionContext } from '../hooks/useConnectionContext'
 
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
@@ -161,6 +161,7 @@ export const fetchPools = createAsyncThunk(
   ): Promise<{
     pools: Pool[]
     chainId?: number
+    prices?: any[]
   }> => {
     const state = store.getState() as RootState
     const { chainId } = state.appSlice
@@ -170,13 +171,14 @@ export const fetchPools = createAsyncThunk(
     }
 
     if (config[chainId] == null) {
-      console.error(`constants for chainId: "${chainId}" are not configured`)
+      console.error(`constants for chainId: '${chainId}' are not configured`)
       return { pools: [] }
     }
 
     const graphUrl = config[chainId].divaSubgraph
 
     let res: Pool[]
+    let prices: any[]
 
     try {
       const result = await request(
@@ -198,12 +200,47 @@ export const fetchPools = createAsyncThunk(
       return {
         pools: [],
         chainId,
+        prices: [],
+      }
+    }
+
+    const maker = ''
+    const taker = NULL_ADDRESS
+    const feeRecipient = ''
+    const makerAmount = 10
+    // const takerAmount = 10
+    // const takerTokenFeeAmount = 1
+    const threshold = 5
+
+    try {
+      const orderbookPrice = await getOrderbookPrices({
+        chainId,
+        perPage: pageSize,
+        graphUrl,
+        createdBy,
+        // maker,
+        taker,
+        // feeRecipient,
+        makerAmount,
+        // takerAmount,
+        // takerTokenFeeAmount,
+        threshold
+      })
+
+      console.log('orderbookPrice: ', orderbookPrice)
+    } catch (err) {
+      console.error(err, 'error is fetching pools bid and asks')
+      return {
+        pools: res,
+        chainId,
+        prices: []
       }
     }
 
     return {
       pools: res,
       chainId,
+      prices: prices
     }
   }
 )

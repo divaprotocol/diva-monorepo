@@ -299,6 +299,62 @@ export const get0xOpenOrders = async (
   return filteredOrders
 }
 
+interface OrderbookPriceRequest {
+  chainId: number
+  perPage: number
+  graphUrl: string
+  createdBy: string
+  maker?: string
+  taker?: string
+  feeRecipient?: string
+  makerAmount?: number
+  takerAmount?: number
+  takerTokenFeeAmount?: number
+  threshold?: number
+}
+
+export const getOrderbookPrices = async (req: OrderbookPriceRequest) => {
+  let urlPrefix =
+    config[req.chainId].orderbook +
+    '/prices' +
+    `?graphUrl=${req.graphUrl}` +
+    `&createdBy=${req.createdBy}`
+
+  if (req.maker !== undefined) {
+    urlPrefix += `&maker=${req.maker}`
+  }
+  if (req.taker !== undefined) {
+    urlPrefix += `&taker=${req.taker}`
+  }
+  if (req.feeRecipient !== undefined) {
+    urlPrefix += `&feeRecipient=${req.feeRecipient}`
+  }
+  if (req.makerAmount !== undefined) {
+    urlPrefix += `&makerAmount=${req.makerAmount}`
+  }
+  if (req.takerAmount !== undefined) {
+    urlPrefix += `&takerAmount=${req.takerAmount}`
+  }
+  if (req.takerTokenFeeAmount !== undefined) {
+    urlPrefix += `&takerTokenFeeAmount=${req.takerTokenFeeAmount}`
+  }
+  if (req.threshold !== undefined) {
+    urlPrefix += `&threshold=${req.threshold}`
+  }
+  const url = urlPrefix + `&page=1&perPage=${req.perPage}`
+  const prices = await axios
+    .get(url)
+    .then(async function (response) {
+      return response.data
+    })
+    .catch((err) => {
+      console.error(err)
+      return []
+    })
+
+  return prices
+}
+
 export const getOrderDetails = (orderHash: string, chainId) => {
   const res = axios
     .get(config[chainId].order + orderHash)
