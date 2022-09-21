@@ -58,7 +58,7 @@ export default function Underlying() {
       ? 'liquidity'
       : 'trade'
   const [value, setValue] = useState(currentTab)
-  const [chartWidth, setChartWidth] = useState(650)
+  const [chartWidth, setChartWidth] = useState(450)
   const breakEven = useAppSelector((state) => state.stats.breakEven)
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
@@ -70,10 +70,9 @@ export default function Underlying() {
 
   useEffect(() => {
     window.addEventListener('resize', () => {
-      setChartWidth(window.innerWidth * 0.4768)
+      setChartWidth(window.innerWidth * 0.4231)
     })
-  }, [window.innerWidth])
-  console.log('window.innerWidth ', window.innerWidth)
+  }, [])
 
   useEffect(() => {
     dispatch(
@@ -137,7 +136,10 @@ export default function Underlying() {
           <Tab value="liquidity" label="Liquidity" />
         </TabList>
         <TabPanel value="trade">
-          <Stack direction="row" spacing={2}>
+          <Stack
+            direction={{ sm: 'column', md: 'column', lg: 'row', xl: 'row' }}
+            spacing={2}
+          >
             <LeftDiv>
               <Stack spacing={2}>
                 <Paper>
@@ -150,22 +152,24 @@ export default function Underlying() {
                   />
                   <OptionDetails pool={pool} isLong={isLong} />
                 </Paper>
-                <Paper>
-                  <TradeChart
-                    data={data}
-                    refAsset={pool.referenceAsset}
-                    currentPrice={currentPrice}
-                    payOut={pool.collateralToken.symbol}
-                    w={chartWidth}
-                    h={336}
-                    isLong={OptionParams.IsLong}
-                    breakEven={breakEven}
-                    floor={OptionParams.Floor}
-                    cap={OptionParams.Cap}
-                    mouseHover={true}
-                    showBreakEven={true}
-                  />
-                </Paper>
+                <Stack>
+                  <Paper>
+                    <TradeChart
+                      data={data}
+                      refAsset={pool.referenceAsset}
+                      currentPrice={currentPrice}
+                      payOut={pool.collateralToken.symbol}
+                      w={chartWidth}
+                      h={336}
+                      isLong={OptionParams.IsLong}
+                      breakEven={breakEven}
+                      floor={OptionParams.Floor}
+                      cap={OptionParams.Cap}
+                      mouseHover={true}
+                      showBreakEven={true}
+                    />
+                  </Paper>
+                </Stack>
                 <Paper>
                   <LeftCompFlexContainer>
                     <OrdersPanel
