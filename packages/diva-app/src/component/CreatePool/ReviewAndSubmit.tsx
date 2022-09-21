@@ -558,7 +558,11 @@ export function ReviewAndSubmit({
                       height: '15px',
                       borderRadius: 1,
                     }}
-                    value={(takerFilledAmount / actualFillableAmount) * 100}
+                    value={
+                      (takerFilledAmount /
+                        (actualFillableAmount + takerFilledAmount)) *
+                      100
+                    }
                   />
                   <Stack
                     height="100%"
