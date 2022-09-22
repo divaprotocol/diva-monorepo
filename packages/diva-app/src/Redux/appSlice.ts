@@ -204,43 +204,37 @@ export const fetchPools = createAsyncThunk(
       }
     }
 
-    const maker = ''
     const taker = NULL_ADDRESS
-    const feeRecipient = ''
-    const makerAmount = 10
-    // const takerAmount = 10
-    // const takerTokenFeeAmount = 1
-    const threshold = 5
+    const feeRecipient = '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E'
+    const takerTokenFee = 1000 // 1000 = 1%
+    const threshold = 100
 
     try {
-      const orderbookPrice = await getOrderbookPrices({
+      const prices = await getOrderbookPrices({
         chainId,
         perPage: pageSize,
         graphUrl,
         createdBy,
-        // maker,
         taker,
-        // feeRecipient,
-        makerAmount,
-        // takerAmount,
-        // takerTokenFeeAmount,
-        threshold
+        feeRecipient,
+        takerTokenFee,
+        threshold,
       })
 
-      console.log('orderbookPrice: ', orderbookPrice)
+      console.log('orderbookPrice: ', prices)
     } catch (err) {
       console.error(err, 'error is fetching pools bid and asks')
       return {
         pools: res,
         chainId,
-        prices: []
+        prices: [],
       }
     }
 
     return {
       pools: res,
       chainId,
-      prices: prices
+      prices: prices,
     }
   }
 )

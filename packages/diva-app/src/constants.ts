@@ -76,7 +76,7 @@ export const config: { [key: number]: SingleConfig } = {
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
-    balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
+    balanceCheckAddress: '0x6F9b7892a6272880905E90DC5AcD1F56dF222FbE',
     exchangeProxy: '0xf91bb752490473b8342a3e964e855b9f9a2a668e',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
     divaSubgraph:
