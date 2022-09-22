@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { BigNumber, providers } from 'ethers'
+import { BigNumber, providers, ethers } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
 import {
   FeeRecipient,
@@ -204,10 +204,24 @@ export const fetchPools = createAsyncThunk(
       }
     }
 
+    const tokenPair = []
+    res.map((poolPair: Pool) => {
+      tokenPair.push({
+        baseToken: ethers.utils.getAddress(poolPair.longToken.id),
+        quoteToken: ethers.utils.getAddress(poolPair.collateralToken.id),
+        id: poolPair.longToken.name,
+      })
+      tokenPair.push({
+        baseToken: ethers.utils.getAddress(poolPair.shortToken.id),
+        quoteToken: ethers.utils.getAddress(poolPair.collateralToken.id),
+        id: poolPair.shortToken.name,
+      })
+    })
+
     const taker = NULL_ADDRESS
     const feeRecipient = '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E'
     const takerTokenFee = 1000 // 1000 = 1%
-    const threshold = 100
+    const threshold = 1
 
     try {
       const prices = await getOrderbookPrices({
@@ -219,6 +233,7 @@ export const fetchPools = createAsyncThunk(
         feeRecipient,
         takerTokenFee,
         threshold,
+        tokenPair,
       })
 
       console.log('orderbookPrice: ', prices)

@@ -299,6 +299,15 @@ export const get0xOpenOrders = async (
   return filteredOrders
 }
 
+interface OrderBaseInterface {
+  baseToken: string
+  quoteToken: string
+}
+
+interface TokenPairType extends OrderBaseInterface {
+  id: string
+}
+
 interface OrderbookPriceRequest {
   chainId: number
   perPage: number
@@ -308,70 +317,7 @@ interface OrderbookPriceRequest {
   feeRecipient?: string
   takerTokenFee?: number
   threshold?: number
-}
-
-const getAddress = (address: string): string => {
-  return ethers.utils.getAddress(address)
-}
-
-const fetchTokenDecimals = async (
-  chainId: number,
-  provider: any,
-  tokens: string[]
-): Promise<string[]> => {
-  try {
-    const contract = new ethers.Contract(
-      config[chainId].balanceCheckAddress,
-      BalanceCheckerABI,
-      provider
-    )
-
-    const res = await contract.decimals(tokens)
-    const decimals: string[] = []
-
-    res.map((item: BigNumber) => {
-      decimals.push(item.toString())
-    })
-
-    return decimals
-  } catch (err) {
-    console.log('err: ', err)
-    return []
-  }
-}
-
-const checkBigNumber = (amount: string, decimal: string): number => {
-  const result = BigNumber.from(
-    BigNumber.from(amount).div(parseUnits('1', BigNumber.from(decimal)))
-  )
-
-  return Number(result)
-}
-
-interface OrderBaseInterface {
-  baseToken: string
-  quoteToken: string
-}
-
-interface OrderResponseType {
-  order?: {
-    maker: string
-    taker: string
-    makerToken: string
-    takerToken: string
-    makerAmount: string
-    takerAmount: string
-    takerTokenFeeAmount: string
-    feeRecipient: string
-  }
-  metaData?: {
-    remainingFillableTakerAmount: string
-  }
-}
-
-interface PriceResponseType extends OrderBaseInterface {
-  bid: OrderResponseType[]
-  ask: OrderResponseType[]
+  tokenPair: TokenPairType[]
 }
 
 interface OrderOutputType {
@@ -390,80 +336,26 @@ interface OrderOutputType {
   }
 }
 
-interface PriceOutputType extends OrderBaseInterface {
-  bid: OrderOutputType[]
-  ask: OrderOutputType[]
+interface PriceResponseType extends OrderBaseInterface {
+  bid: OrderOutputType
+  ask: OrderOutputType
 }
 
-const checkBidOrAsk = (
-  items: OrderResponseType[],
-  tokens: string[],
-  decimals: string[]
-): OrderOutputType[] => {
-  return items.length === 0
-    ? []
-    : items.map((item: OrderResponseType) => {
-        const makerToken = getAddress(item.order.makerToken)
-        const takerToken = getAddress(item.order.takerToken)
-        const makerTokenDecimal = decimals[tokens.indexOf(makerToken)]
-        const takerTokenDecimal = decimals[tokens.indexOf(takerToken)]
-
-        const bidOutput: OrderOutputType = {
-          order: {
-            maker: getAddress(item.order.maker),
-            taker: getAddress(item.order.taker),
-            makerToken: makerToken,
-            takerToken: takerToken,
-            makerAmount: checkBigNumber(
-              item.order.makerAmount,
-              makerTokenDecimal
-            ),
-            takerAmount: checkBigNumber(
-              item.order.takerAmount,
-              takerTokenDecimal
-            ),
-            takerTokenFeeAmount: checkBigNumber(
-              item.order.takerTokenFeeAmount,
-              takerTokenDecimal
-            ),
-            feeRecipient: getAddress(item.order.feeRecipient),
-          },
-          metaData: {
-            remainingFillableTakerAmount: checkBigNumber(
-              item.metaData.remainingFillableTakerAmount,
-              takerTokenDecimal
-            ),
-          },
-        }
-
-        return bidOutput
-      })
+interface PriceOutputType extends PriceResponseType {
+  id: string
 }
 
-const checkFormat = async (
-  chainId: number,
-  pools: PriceResponseType[],
-  tokens: string[]
-): Promise<PriceOutputType[]> => {
-  const provider = new ethers.providers.Web3Provider(window.ethereum)
-  const signer = provider.getSigner()
-  const decimals = await fetchTokenDecimals(chainId, signer, tokens)
+const getPoolID = (
+  poolResponse: PriceResponseType,
+  tokenPair: TokenPairType[]
+): string => {
+  const pool = tokenPair.filter(
+    (pair: TokenPairType) =>
+      poolResponse.baseToken === pair.baseToken &&
+      poolResponse.quoteToken === pair.quoteToken
+  )[0]
 
-  const outputPools: PriceOutputType[] = pools.map((pool: any) => {
-    const baseToken: string = getAddress(pool.baseToken)
-    const quoteToken: string = getAddress(pool.quoteToken)
-    const bid: OrderOutputType[] = checkBidOrAsk(pool.bid, tokens, decimals)
-    const ask: OrderOutputType[] = checkBidOrAsk(pool.ask, tokens, decimals)
-
-    return {
-      baseToken,
-      quoteToken,
-      bid,
-      ask,
-    }
-  })
-
-  return outputPools
+  return pool.id
 }
 
 export const getOrderbookPrices = async (req: OrderbookPriceRequest) => {
@@ -491,35 +383,16 @@ export const getOrderbookPrices = async (req: OrderbookPriceRequest) => {
     .then(async function (response) {
       const priceResponse: any = response.data
 
-      const tokens: string[] = []
+      const output: PriceOutputType[] = []
       priceResponse.records.map((pool: PriceResponseType) => {
-        pool.bid.map((item: OrderResponseType) => {
-          const makerToken = getAddress(item.order.makerToken)
-          const takerToken = getAddress(item.order.takerToken)
-          if (tokens.indexOf(makerToken) === -1) {
-            tokens.push(makerToken)
-          }
-          if (tokens.indexOf(takerToken) === -1) {
-            tokens.push(takerToken)
-          }
-        })
-        pool.ask.map((item: OrderResponseType) => {
-          const makerToken = getAddress(item.order.makerToken)
-          const takerToken = getAddress(item.order.takerToken)
-          if (tokens.indexOf(makerToken) === -1) {
-            tokens.push(makerToken)
-          }
-          if (tokens.indexOf(takerToken) === -1) {
-            tokens.push(takerToken)
-          }
+        output.push({
+          id: getPoolID(pool, req.tokenPair),
+          baseToken: pool.baseToken,
+          quoteToken: pool.quoteToken,
+          bid: pool.bid,
+          ask: pool.ask,
         })
       })
-
-      const output: PriceOutputType[] = await checkFormat(
-        req.chainId,
-        priceResponse.records,
-        tokens
-      )
 
       return output
     })
