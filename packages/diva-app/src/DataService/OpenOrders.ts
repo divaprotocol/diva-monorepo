@@ -6,9 +6,10 @@ import {
   tradingFee,
 } from '../constants'
 import { BigNumber, ethers } from 'ethers'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { getExpiryMinutesFromNow } from '../Util/Dates'
 import BalanceCheckerABI from '../abi/BalanceCheckerABI.json'
 import ERC20ABI from '../abi/ERC20ABI.json'
-import { parseUnits } from 'ethers/lib/utils'
 
 /**
  * Filter for orders that can actually be filled, i.e. where makers
@@ -306,6 +307,7 @@ interface OrderBaseInterface {
 
 interface TokenPairType extends OrderBaseInterface {
   id: string
+  decimals: number
 }
 
 interface OrderbookPriceRequest {
@@ -330,6 +332,7 @@ interface OrderOutputType {
     takerAmount: number
     takerTokenFeeAmount: number
     feeRecipient: string
+    expiry: string
   }
   metaData?: {
     remainingFillableTakerAmount: number
@@ -343,19 +346,110 @@ interface PriceResponseType extends OrderBaseInterface {
 
 interface PriceOutputType extends PriceResponseType {
   id: string
+  type: string
+  decimals: number
+}
+
+interface OrderOutputType {
+  expiry: string
+  orderType: string
+  id: string
+  bid?: string
+  ask?: string
+  quantity: string
 }
 
 const getPoolID = (
   poolResponse: PriceResponseType,
   tokenPair: TokenPairType[]
-): string => {
+): TokenPairType => {
   const pool = tokenPair.filter(
     (pair: TokenPairType) =>
       poolResponse.baseToken === pair.baseToken &&
       poolResponse.quoteToken === pair.quoteToken
   )[0]
 
-  return pool.id
+  return pool
+}
+
+const getOrder = (price: PriceOutputType): OrderOutputType => {
+  if (price.type === 'Buy') {
+    let expiry = 0
+    if (price.bid.order !== undefined) {
+      expiry = getExpiryMinutesFromNow(price.bid.order.expiry)
+    }
+    const orderType = 'buy'
+    const id = price.id
+
+    // Calculate Bid amount
+    let bidAmount = BigNumber.from(0)
+    let bid = ''
+    let nbrOptions = ''
+    if (price.bid.order !== undefined) {
+      bidAmount = BigNumber.from(price.bid.order.makerAmount)
+        .mul(parseUnits('1'))
+        .div(BigNumber.from(price.bid.order.takerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
+      bid = formatUnits(bidAmount, price.decimals)
+
+      // Display remainingFillableTakerAmount as the quantity in the orderbook
+      nbrOptions = formatUnits(
+        BigNumber.from(price.bid.metaData.remainingFillableTakerAmount)
+      )
+    }
+
+    return {
+      expiry: expiry + ' mins',
+      orderType,
+      id,
+      bid,
+      quantity: nbrOptions,
+    }
+  } else {
+    let expiry = 0
+    if (price.ask.order !== undefined) {
+      expiry = getExpiryMinutesFromNow(price.ask.order.expiry)
+    }
+    const orderType = 'sell'
+    const id = price.id
+
+    let askAmount = BigNumber.from(0)
+    let ask = ''
+    let nbrOptions = ''
+    if (price.ask.order !== undefined) {
+      // Calculate Ask amount
+      askAmount = BigNumber.from(price.ask.order.takerAmount)
+        .mul(parseUnits('1'))
+        .div(BigNumber.from(price.ask.order.makerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
+      ask = formatUnits(askAmount, price.decimals)
+
+      if (
+        BigNumber.from(price.ask.metaData.remainingFillableTakerAmount).lt(
+          BigNumber.from(price.ask.order.takerAmount)
+        )
+      ) {
+        const remainingFillableMakerAmount = BigNumber.from(
+          price.ask.metaData.remainingFillableTakerAmount
+        )
+          .mul(BigNumber.from(price.ask.order.makerAmount))
+          .div(BigNumber.from(price.ask.order.takerAmount))
+        nbrOptions = formatUnits(remainingFillableMakerAmount)
+      } else {
+        nbrOptions = formatUnits(BigNumber.from(price.ask.order.makerAmount))
+      }
+    }
+
+    return {
+      expiry: expiry + ' mins',
+      orderType,
+      id,
+      ask,
+      quantity: nbrOptions,
+    }
+  }
 }
 
 export const getOrderbookPrices = async (req: OrderbookPriceRequest) => {
@@ -383,15 +477,22 @@ export const getOrderbookPrices = async (req: OrderbookPriceRequest) => {
     .then(async function (response) {
       const priceResponse: any = response.data
 
-      const output: PriceOutputType[] = []
+      const output: OrderOutputType[] = []
       priceResponse.records.map((pool: PriceResponseType) => {
-        output.push({
-          id: getPoolID(pool, req.tokenPair),
+        const token = getPoolID(pool, req.tokenPair)
+        const type = token.id[0] === 'S' ? 'Sell' : 'Buy'
+        const decimals = token.decimals
+        const price: PriceOutputType = {
+          id: token.id,
+          type: type,
           baseToken: pool.baseToken,
           quoteToken: pool.quoteToken,
           bid: pool.bid,
           ask: pool.ask,
-        })
+          decimals: decimals,
+        }
+
+        output.push(getOrder(price))
       })
 
       return output

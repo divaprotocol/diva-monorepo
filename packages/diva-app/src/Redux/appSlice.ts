@@ -210,18 +210,20 @@ export const fetchPools = createAsyncThunk(
         baseToken: ethers.utils.getAddress(poolPair.longToken.id),
         quoteToken: ethers.utils.getAddress(poolPair.collateralToken.id),
         id: poolPair.longToken.name,
+        decimals: poolPair.collateralToken.decimals,
       })
       tokenPair.push({
         baseToken: ethers.utils.getAddress(poolPair.shortToken.id),
         quoteToken: ethers.utils.getAddress(poolPair.collateralToken.id),
         id: poolPair.shortToken.name,
+        decimals: poolPair.collateralToken.decimals,
       })
     })
 
     const taker = NULL_ADDRESS
     const feeRecipient = '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E'
     const takerTokenFee = 1000 // 1000 = 1%
-    const threshold = 1
+    const threshold = 100
 
     try {
       const prices = await getOrderbookPrices({
