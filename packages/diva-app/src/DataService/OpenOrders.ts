@@ -317,7 +317,7 @@ interface OrderbookPriceRequest {
   createdBy: string
   taker?: string
   feeRecipient?: string
-  takerTokenFee?: number
+  takerTokenFee?: number // 1 = 0.01%
   threshold?: number
   tokenPair: TokenPairType[]
 }
