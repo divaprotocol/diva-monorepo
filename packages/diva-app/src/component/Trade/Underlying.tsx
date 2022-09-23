@@ -1,5 +1,15 @@
 import styled from 'styled-components'
-import { Container, Divider, Paper, Stack, useTheme } from '@mui/material'
+import {
+  Box,
+  Card,
+  Container,
+  Divider,
+  Paper,
+  Stack,
+  Tabs,
+  Typography,
+  useTheme,
+} from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
@@ -13,7 +23,7 @@ import OptionHeader from './OptionHeader'
 import { config } from '../../constants'
 import Tab from '@mui/material/Tab'
 import React, { useState, useEffect } from 'react'
-import { Liquidity } from '../Liquidity/Liquidity'
+import { BigNumber } from 'ethers'
 import OrdersPanel from './OrdersPanel'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -30,6 +40,12 @@ import {
 } from '../../Redux/appSlice'
 import { formatUnits, parseEther, formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
+import { AddLiquidity } from '../Liquidity/AddLiquidity'
+import { RemoveLiquidity } from '../Liquidity/RemoveLiquidity'
+import { ReactComponent as Bullish } from '../../Images/bullish-svgrepo-com.svg'
+import { ReactComponent as Bearish } from '../../Images/bearish-svgrepo-com.svg'
+import { ReactComponent as Star } from '../../Images/star-svgrepo-com.svg'
+import { borderRight } from '@mui/system'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -47,16 +63,13 @@ export default function Underlying() {
   const params: { poolId: string; tokenType: string } = useParams()
   const isLong = params.tokenType === 'long'
   const currentTab =
-    history.location.pathname ===
-    `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity`
-      ? 'liquidity'
-      : history.location.pathname ===
-        `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity/add`
-      ? 'liquidity'
-      : history.location.pathname ===
-        `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity/remove`
-      ? 'liquidity'
-      : 'trade'
+    history.location.pathname === `/${params.poolId}/add`
+      ? 'add'
+      : history.location.pathname === `/${params.poolId}/remove`
+      ? 'remove'
+      : history.location.pathname === `/${params.poolId}/short`
+      ? 'short'
+      : 'long'
   const [value, setValue] = useState(currentTab)
   const breakEven = useAppSelector((state) => state.stats.breakEven)
   const chainId = useAppSelector(selectChainId)
@@ -74,7 +87,7 @@ export default function Underlying() {
         poolId: params.poolId,
       })
     )
-  }, [chainId, dispatch, params.poolId])
+  }, [value, chainId, dispatch, params.poolId])
 
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
   const currentPrice = useAppSelector(
@@ -109,9 +122,10 @@ export default function Underlying() {
     IsLong: isLong,
   }
   const data = generatePayoffChartData(OptionParams, currentPrice)
-  const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
+  const tokenAddress = value === 'long' ? pool.longToken.id : pool.shortToken.id
+
   const handleChange = (event: any, newValue: string) => {
-    history.push(`/${params.poolId}/${isLong ? 'long' : 'short'}/` + newValue)
+    history.push(`/${params.poolId}/${newValue}`)
     setValue(newValue)
   }
   return (
@@ -119,74 +133,386 @@ export default function Underlying() {
       sx={{ paddingTop: '1em', paddingBottom: '3em', minHeight: '140%' }}
     >
       <TabContext value={value}>
-        <TabList
-          onChange={handleChange}
-          variant="standard"
-          centered
-          sx={{ mb: theme.spacing(4) }}
-        >
-          <Tab value="trade" label="Trade" />
-          <Tab value="liquidity" label="Liquidity" />
-        </TabList>
-        <TabPanel value="trade">
+        <Box sx={{ maxWidth: '70%' }}>
+          <OptionHeader
+            ReferenceAsset={pool.referenceAsset}
+            TokenAddress={tokenAddress}
+            isLong={isLong}
+            poolId={pool.id}
+            tokenDecimals={pool.collateralToken.decimals}
+          />
+          <OptionDetails pool={pool} isLong={isLong} />
+        </Box>
+        <Stack direction="row" mt="40px">
+          <Box mr="20px">
+            {/* <Typography
+              sx={{
+                mt: '-13px',
+                zIndex: 1,
+                background: theme.palette.background.default,
+                color: '#929292',
+              }}
+            >
+              Trade
+            </Typography> */}
+            <Divider
+              orientation="horizontal"
+              textAlign="left"
+              color="#929292"
+              sx={{
+                '&::before, &::after': {
+                  borderColor: '#929292',
+                },
+              }}
+            >
+              Trade
+            </Divider>
+            <TabList
+              onChange={handleChange}
+              variant="standard"
+              sx={{
+                mt: '-10px',
+                borderRight: 1,
+                borderColor: '#929292',
+              }}
+            >
+              <Tab value="long" label="Long" sx={{ color: '#929292' }} />
+              <Tab value="short" label="Short" sx={{ color: '#929292' }} />
+            </TabList>
+          </Box>
+          <Box>
+            {/* 
+            <Typography
+              sx={{
+                mb: '-12px',
+                zIndex: 1,
+                background: theme.palette.background.default,
+                color: '#929292',
+              }}
+            >
+              Liquidity
+            </Typography> */}
+            <Divider
+              orientation="horizontal"
+              textAlign="left"
+              color="#929292"
+              sx={{
+                '&::before, &::after': {
+                  borderColor: '#929292',
+                },
+              }}
+            >
+              Liquidity
+            </Divider>
+
+            <TabList
+              onChange={handleChange}
+              variant="standard"
+              sx={{
+                mt: '-10px',
+                borderRight: 1,
+                borderColor: '#929292',
+                color: '#929292',
+              }}
+            >
+              <Tab value="add" label="Add" sx={{ color: '#929292' }} />
+              <Tab value="remove" label="Remove" sx={{ color: '#929292' }} />
+            </TabList>
+          </Box>
+        </Stack>
+        <Divider orientation="horizontal" />
+        <TabPanel value="long">
           <Stack direction="row" spacing={2}>
             <LeftDiv>
               <Stack spacing={2}>
-                <Paper>
-                  <OptionHeader
-                    ReferenceAsset={pool.referenceAsset}
-                    TokenAddress={tokenAddress}
-                    isLong={isLong}
-                    poolId={pool.id}
-                    tokenDecimals={pool.collateralToken.decimals}
+                <TradeChart
+                  data={data}
+                  refAsset={pool.referenceAsset}
+                  currentPrice={currentPrice}
+                  payOut={pool.collateralToken.symbol}
+                  w={650}
+                  h={336}
+                  isLong={OptionParams.IsLong}
+                  breakEven={breakEven}
+                  floor={OptionParams.Floor}
+                  cap={OptionParams.Cap}
+                  mouseHover={true}
+                  showBreakEven={true}
+                />
+                <LeftCompFlexContainer>
+                  <OrdersPanel
+                    option={pool}
+                    tokenAddress={tokenAddress}
+                    exchangeProxy={exchangeProxy}
                   />
-                  <OptionDetails pool={pool} isLong={isLong} />
-                </Paper>
-                <Paper>
-                  <TradeChart
-                    data={data}
-                    refAsset={pool.referenceAsset}
-                    currentPrice={currentPrice}
-                    payOut={pool.collateralToken.symbol}
-                    w={650}
-                    h={336}
-                    isLong={OptionParams.IsLong}
-                    breakEven={breakEven}
-                    floor={OptionParams.Floor}
-                    cap={OptionParams.Cap}
-                    mouseHover={true}
-                    showBreakEven={true}
-                  />
-                </Paper>
-                <Paper>
-                  <LeftCompFlexContainer>
-                    <OrdersPanel
-                      option={pool}
-                      tokenAddress={tokenAddress}
-                      exchangeProxy={exchangeProxy}
-                    />
-                  </LeftCompFlexContainer>
-                </Paper>
+                </LeftCompFlexContainer>
               </Stack>
             </LeftDiv>
             <RightDiv>
               <Stack spacing={2}>
-                <Paper>
-                  <CreateOrder
-                    option={pool}
-                    tokenAddress={tokenAddress}
-                    exchangeProxy={exchangeProxy}
-                    chainId={chainId}
-                    provider={provider}
-                  />
-                </Paper>
+                <CreateOrder
+                  option={pool}
+                  tokenAddress={tokenAddress}
+                  exchangeProxy={exchangeProxy}
+                  chainId={chainId}
+                  provider={provider}
+                />
               </Stack>
             </RightDiv>
           </Stack>
         </TabPanel>
-        <TabPanel value="liquidity">
-          <Liquidity pool={pool} />
+        <TabPanel value="short">
+          <Stack direction="row" spacing={2}>
+            <LeftDiv>
+              <Stack spacing={2}>
+                <TradeChart
+                  data={data}
+                  refAsset={pool.referenceAsset}
+                  currentPrice={currentPrice}
+                  payOut={pool.collateralToken.symbol}
+                  w={650}
+                  h={336}
+                  isLong={OptionParams.IsLong}
+                  breakEven={breakEven}
+                  floor={OptionParams.Floor}
+                  cap={OptionParams.Cap}
+                  mouseHover={true}
+                  showBreakEven={true}
+                />
+                <LeftCompFlexContainer>
+                  <OrdersPanel
+                    option={pool}
+                    tokenAddress={tokenAddress}
+                    exchangeProxy={exchangeProxy}
+                  />
+                </LeftCompFlexContainer>
+              </Stack>
+            </LeftDiv>
+            <RightDiv>
+              <Stack spacing={2}>
+                <CreateOrder
+                  option={pool}
+                  tokenAddress={tokenAddress}
+                  exchangeProxy={exchangeProxy}
+                  chainId={chainId}
+                  provider={provider}
+                />
+              </Stack>
+            </RightDiv>
+          </Stack>
         </TabPanel>
+        <TabPanel value="add">
+          <AddLiquidity pool={pool!} />
+        </TabPanel>
+        <TabPanel value="remove">
+          <RemoveLiquidity pool={pool!} />
+        </TabPanel>
+        {currentTab == 'add' && pool && (
+          <Container sx={{ mt: theme.spacing(4), mb: theme.spacing(4) }}>
+            {pool &&
+            formatUnits(pool.capacity, pool.collateralToken.decimals) !== // TODO: drop this first == 0.0 part when migrating to new contracts
+              '0.0' &&
+            pool.capacity.toString() !==
+              '115792089237316195423570985008687907853269984665640564039457584007913129639935' ? (
+              <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(4) }}>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Pool Capacity</Typography>
+                  <Typography>
+                    {pool &&
+                      (formatUnits(
+                        pool.capacity,
+                        pool.collateralToken.decimals
+                      ) === '0.0'
+                        ? 'Unlimited'
+                        : parseFloat(
+                            formatUnits(
+                              pool.capacity,
+                              pool.collateralToken.decimals
+                            )
+                          ).toFixed(2))}{' '}
+                    {pool.collateralToken.symbol}{' '}
+                  </Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Currently Utilized</Typography>
+                  <Typography>
+                    {pool &&
+                      parseFloat(
+                        formatUnits(
+                          BigNumber.from(pool.collateralBalance),
+                          pool.collateralToken.decimals
+                        )
+                      ).toFixed(2)}{' '}
+                    {pool.collateralToken.symbol!}{' '}
+                  </Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Currently Utilized in %</Typography>
+                  <Typography>
+                    {pool &&
+                      (
+                        (100 *
+                          parseFloat(
+                            formatUnits(
+                              BigNumber.from(pool.collateralBalance),
+                              pool.collateralToken.decimals
+                            )
+                          )) /
+                        parseFloat(
+                          formatUnits(
+                            BigNumber.from(pool.capacity),
+                            pool.collateralToken.decimals
+                          )
+                        )
+                      ).toFixed(2)}
+                    {'%'}
+                  </Typography>
+                </Stack>
+              </Container>
+            ) : (
+              <Container>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Pool Capacity</Typography>
+                  <Typography>Unlimited</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography>Current Pool Size</Typography>
+                  <Typography>
+                    {pool &&
+                      parseFloat(
+                        formatUnits(
+                          BigNumber.from(pool.collateralBalance),
+                          pool.collateralToken.decimals
+                        )
+                      ).toFixed(4)}{' '}
+                    {pool.collateralToken.symbol!}{' '}
+                  </Typography>
+                </Stack>
+              </Container>
+            )}
+          </Container>
+        )}
+        {currentTab == 'remove' ? (
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            sx={{
+              minWidth: theme.spacing(82),
+            }}
+          >
+            <Card
+              sx={{
+                mt: theme.spacing(2),
+                borderRadius: '16px',
+                width: '450px',
+              }}
+            >
+              <Container
+                sx={{
+                  mt: theme.spacing(2),
+                  mb: theme.spacing(2),
+                }}
+              >
+                <Stack direction="row">
+                  <Star
+                    style={{
+                      marginTop: theme.spacing(-1),
+                      paddingRight: theme.spacing(1),
+                      height: theme.spacing(4),
+                      width: theme.spacing(4),
+                    }}
+                  />
+                  <Typography fontSize={'0.85rem'} style={{ color: 'gray' }}>
+                    {' '}
+                    By removing liquidity you are giving back long and short
+                    position tokens proportional to the pool balance and receive
+                    collateral in return
+                  </Typography>
+                </Stack>
+              </Container>
+            </Card>
+          </Box>
+        ) : (
+          value === 'add' && (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              sx={{
+                minWidth: theme.spacing(82),
+                mb: theme.spacing(4),
+              }}
+            >
+              <Card
+                sx={{
+                  width: '450px',
+                  borderRadius: '16px',
+                }}
+              >
+                <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(2) }}>
+                  <Stack direction="column">
+                    <Stack direction="row">
+                      <Star
+                        style={{
+                          marginTop: theme.spacing(-1),
+                          paddingRight: theme.spacing(1.8),
+                          height: theme.spacing(4),
+                          width: theme.spacing(4),
+                        }}
+                      />
+                      <Typography
+                        fontSize={'0.85rem'}
+                        style={{ color: 'gray' }}
+                      >
+                        {'    '}
+                        By adding liquidity you receive long and short position
+                        tokens in return which represent a claim against the
+                        collateral you deposited
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row">
+                      <Bullish
+                        style={{
+                          paddingTop: theme.spacing(2),
+                          paddingRight: theme.spacing(1),
+                          height: theme.spacing(2.5),
+                          width: theme.spacing(2.5),
+                        }}
+                      />
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ mt: theme.spacing(2) }}
+                        style={{ color: 'gray' }}
+                      >
+                        {' '}
+                        Bullish? Keep the long tokens and sell the short tokens
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row">
+                      <Bearish
+                        style={{
+                          paddingTop: theme.spacing(2),
+                          paddingRight: theme.spacing(1),
+                          height: theme.spacing(2.5),
+                          width: theme.spacing(2.5),
+                        }}
+                      />
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ mt: theme.spacing(2) }}
+                        style={{ color: 'gray' }}
+                      >
+                        {' '}
+                        Bearish? Keep the short tokens and sell the long tokens
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </Container>
+              </Card>
+            </Box>
+          )
+        )}
       </TabContext>
     </Container>
   )
