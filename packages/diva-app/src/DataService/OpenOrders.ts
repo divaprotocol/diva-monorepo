@@ -356,7 +356,8 @@ interface OrderOutputType {
   id: string
   bid?: string
   ask?: string
-  quantity: string
+  bidQuantity: string
+  askQuantity: string
 }
 
 const getPoolID = (
@@ -386,7 +387,8 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
     let bid = ''
     let askAmount = BigNumber.from(0)
     let ask = ''
-    let nbrOptions = ''
+    let bidQuantity = ''
+    let askQuantity = ''
     if (price.bid.order !== undefined) {
       bidAmount = BigNumber.from(price.bid.order.makerAmount)
         .mul(parseUnits('1'))
@@ -396,7 +398,7 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
       bid = formatUnits(bidAmount, price.decimals)
 
       // Display remainingFillableTakerAmount as the quantity in the orderbook
-      nbrOptions = formatUnits(
+      bidQuantity = formatUnits(
         BigNumber.from(price.bid.metaData.remainingFillableTakerAmount)
       )
     }
@@ -408,6 +410,12 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
 
       // Value to display in the orderbook
       ask = formatUnits(askAmount, price.decimals)
+
+      // Display remainingFillableTakerAmount as the quantity in the orderbook
+      askQuantity = formatUnits(
+        BigNumber.from(price.ask.metaData.remainingFillableTakerAmount)
+      )
+      askQuantity = (Number(askQuantity) / Number(ask)).toString()
     }
 
     return {
@@ -415,8 +423,9 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
       orderType,
       id,
       bid,
+      bidQuantity: bidQuantity,
       ask,
-      quantity: nbrOptions,
+      askQuantity: askQuantity,
     }
   } else {
     let expiry = 0
@@ -430,14 +439,15 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
     let bid = ''
     let askAmount = BigNumber.from(0)
     let ask = ''
-    let nbrOptions = ''
+    let askQuantity = ''
+    let bidQuantity = ''
     if (price.ask.order !== undefined) {
-      bidAmount = BigNumber.from(price.ask.order.makerAmount)
+      askAmount = BigNumber.from(price.ask.order.makerAmount)
         .mul(parseUnits('1'))
         .div(BigNumber.from(price.ask.order.takerAmount)) // result is in collateral token decimals
 
       // Value to display in the orderbook
-      bid = formatUnits(bidAmount, price.decimals)
+      ask = formatUnits(askAmount, price.decimals)
 
       if (
         BigNumber.from(price.ask.metaData.remainingFillableTakerAmount).lt(
@@ -449,19 +459,27 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
         )
           .mul(BigNumber.from(price.ask.order.makerAmount))
           .div(BigNumber.from(price.ask.order.takerAmount))
-        nbrOptions = formatUnits(remainingFillableMakerAmount)
+        askQuantity = formatUnits(remainingFillableMakerAmount.div(askAmount))
       } else {
-        nbrOptions = formatUnits(BigNumber.from(price.ask.order.makerAmount))
+        askQuantity = formatUnits(
+          BigNumber.from(price.ask.order.makerAmount).div(askAmount)
+        )
       }
+      askQuantity = (Number(askQuantity) / Number(ask)).toString()
     }
     if (price.bid.order !== undefined) {
       // Calculate Ask amount
-      askAmount = BigNumber.from(price.bid.order.takerAmount)
+      bidAmount = BigNumber.from(price.bid.order.takerAmount)
         .mul(parseUnits('1'))
         .div(BigNumber.from(price.bid.order.makerAmount)) // result is in collateral token decimals
 
       // Value to display in the orderbook
-      ask = formatUnits(askAmount, price.decimals)
+      bid = formatUnits(bidAmount, price.decimals)
+
+      // Display remainingFillableTakerAmount as the quantity in the orderbook
+      bidQuantity = formatUnits(
+        BigNumber.from(price.bid.metaData.remainingFillableTakerAmount)
+      )
     }
 
     return {
@@ -469,8 +487,9 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
       orderType,
       id,
       bid,
+      bidQuantity: bidQuantity,
       ask,
-      quantity: nbrOptions,
+      askQuantity: askQuantity,
     }
   }
 }
