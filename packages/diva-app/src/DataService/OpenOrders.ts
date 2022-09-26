@@ -384,6 +384,8 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
     // Calculate Bid amount
     let bidAmount = BigNumber.from(0)
     let bid = ''
+    let askAmount = BigNumber.from(0)
+    let ask = ''
     let nbrOptions = ''
     if (price.bid.order !== undefined) {
       bidAmount = BigNumber.from(price.bid.order.makerAmount)
@@ -399,11 +401,21 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
       )
     }
 
+    if (price.ask.order !== undefined) {
+      askAmount = BigNumber.from(price.ask.order.takerAmount)
+        .mul(parseUnits('1'))
+        .div(BigNumber.from(price.ask.order.makerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
+      ask = formatUnits(askAmount, price.decimals)
+    }
+
     return {
       expiry: expiry + ' mins',
       orderType,
       id,
       bid,
+      ask,
       quantity: nbrOptions,
     }
   } else {
@@ -414,17 +426,18 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
     const orderType = 'sell'
     const id = price.id
 
+    let bidAmount = BigNumber.from(0)
+    let bid = ''
     let askAmount = BigNumber.from(0)
     let ask = ''
     let nbrOptions = ''
     if (price.ask.order !== undefined) {
-      // Calculate Ask amount
-      askAmount = BigNumber.from(price.ask.order.takerAmount)
+      bidAmount = BigNumber.from(price.ask.order.makerAmount)
         .mul(parseUnits('1'))
-        .div(BigNumber.from(price.ask.order.makerAmount)) // result is in collateral token decimals
+        .div(BigNumber.from(price.ask.order.takerAmount)) // result is in collateral token decimals
 
       // Value to display in the orderbook
-      ask = formatUnits(askAmount, price.decimals)
+      bid = formatUnits(bidAmount, price.decimals)
 
       if (
         BigNumber.from(price.ask.metaData.remainingFillableTakerAmount).lt(
@@ -441,11 +454,21 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
         nbrOptions = formatUnits(BigNumber.from(price.ask.order.makerAmount))
       }
     }
+    if (price.bid.order !== undefined) {
+      // Calculate Ask amount
+      askAmount = BigNumber.from(price.bid.order.takerAmount)
+        .mul(parseUnits('1'))
+        .div(BigNumber.from(price.bid.order.makerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
+      ask = formatUnits(askAmount, price.decimals)
+    }
 
     return {
       expiry: expiry + ' mins',
       orderType,
       id,
+      bid,
       ask,
       quantity: nbrOptions,
     }
