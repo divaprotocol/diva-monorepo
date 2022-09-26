@@ -26,11 +26,11 @@ export default function DIVATradeChart(props) {
 
   const optionTypeText = isLong ? 'LONG' : 'SHORT'
   const reffeenceAsset = refAsset.slice(0, 8)
-  const [width1, setWidth] = useState(w)
+  const [chartWidth, setChartWidth] = useState(w)
 
   const getSvgContainerSize = () => {
     const newWidth = svgContainer.current.clientWidth
-    setWidth(newWidth)
+    setChartWidth(newWidth)
   }
 
   useEffect(() => {
@@ -41,16 +41,19 @@ export default function DIVATradeChart(props) {
 
   // Set the dimensions and margins of the graph
   const margin = { top: 15, right: 20, bottom: 40, left: 20 },
-    width = width1 - margin.left - margin.right,
+    width = chartWidth - margin.left - margin.right,
     height = h - margin.top - margin.bottom
+
   const labelWidth = 30
   const labelHeight = 10
   const blueColorCode = '#3B8DCA'
   const redColorCode = '#F77F99'
   const legendHeight = height + 30
+
   useEffect(() => {
     intitalChart()
   }, [props.w])
+
   const intitalChart = () => {
     const svg = d3.select(ref.current)
     svg
@@ -540,7 +543,7 @@ export default function DIVATradeChart(props) {
   }
   useEffect(() => {
     draw()
-  }, [props.currentPrice, props.breakEven, width1, props.w])
+  }, [props.currentPrice, props.breakEven, chartWidth, props.w])
 
   return (
     <div ref={svgContainer} className="line-chart">
