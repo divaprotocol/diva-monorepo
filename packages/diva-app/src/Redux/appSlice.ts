@@ -161,7 +161,7 @@ export const fetchPools = createAsyncThunk(
   ): Promise<{
     pools: Pool[]
     chainId?: number
-    prices?: any[]
+    // prices?: any[]
   }> => {
     const state = store.getState() as RootState
     const { chainId } = state.appSlice
@@ -177,8 +177,7 @@ export const fetchPools = createAsyncThunk(
 
     const graphUrl = config[chainId].divaSubgraph
 
-    let res: Pool[]
-    let prices: any[]
+    let pools: Pool[]
 
     try {
       const result = await request(
@@ -191,7 +190,7 @@ export const fetchPools = createAsyncThunk(
         )
       )
 
-      res = result.pools
+      pools = result.pools
     } catch (err) {
       /**
        * Handle error and fail gracefully
@@ -200,12 +199,11 @@ export const fetchPools = createAsyncThunk(
       return {
         pools: [],
         chainId,
-        prices: [],
       }
     }
 
     const tokenPair = []
-    res.map((poolPair: Pool) => {
+    pools.map((poolPair: Pool) => {
       tokenPair.push({
         baseToken: ethers.utils.getAddress(poolPair.longToken.id),
         quoteToken: ethers.utils.getAddress(poolPair.collateralToken.id),
@@ -238,20 +236,33 @@ export const fetchPools = createAsyncThunk(
         tokenPair,
       })
 
-      console.log('orderbookPrice: ', prices)
+      pools = pools.map((pool: Pool) => {
+        return (pool = {
+          ...pool,
+          prices: {
+            long: prices.filter((price: any) => price.id === 'L' + pool.id)[0],
+            short: prices.filter((price: any) => price.id === 'S' + pool.id)[0],
+          },
+        })
+      })
     } catch (err) {
       console.error(err, 'error is fetching pools bid and asks')
+
       return {
-        pools: res,
+        pools: pools.map((pool: Pool) => {
+          return (pool = {
+            ...pool,
+            prices: {},
+          })
+        }),
         chainId,
-        prices: [],
       }
     }
 
+    console.log('pools: ', pools)
     return {
-      pools: res,
+      pools,
       chainId,
-      prices: prices,
     }
   }
 )

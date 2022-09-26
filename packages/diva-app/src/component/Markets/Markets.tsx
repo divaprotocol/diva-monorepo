@@ -362,6 +362,20 @@ export default function Markets() {
           val.statusFinalReferenceValue === 'Open'
             ? '-'
             : formatUnits(val.finalReferenceValue),
+        Sell:
+          val.prices?.long !== undefined &&
+          Number(val.prices.long.bid).toFixed(2) !== '0.00'
+            ? Number(val.prices.long.bid).toFixed(2)
+            : '-',
+        Buy:
+          val.prices?.long !== undefined &&
+          Number(val.prices.long.ask).toFixed(2) !== '0.00'
+            ? Number(val.prices.long.ask).toFixed(2)
+            : '-',
+        MaxYield:
+          val.prices?.long !== undefined && val.prices.long.ask !== ''
+            ? Number(1 / Number(val.prices.long.ask)).toFixed(2)
+            : '-',
       },
       {
         ...shared,
@@ -398,6 +412,20 @@ export default function Markets() {
           val.statusFinalReferenceValue === 'Open'
             ? '-'
             : formatUnits(val.finalReferenceValue),
+        Sell:
+          val.prices?.short !== undefined &&
+          Number(val.prices.short.bid).toFixed(2) !== '0.00'
+            ? Number(val.prices.short.bid).toFixed(2)
+            : '-',
+        Buy:
+          val.prices?.short !== undefined &&
+          Number(val.prices.short.ask).toFixed(2) !== '0.00'
+            ? Number(val.prices.short.ask).toFixed(2)
+            : '-',
+        MaxYield:
+          val.prices?.short !== undefined && val.prices.short.ask !== ''
+            ? Number(1 / Number(val.prices.short.ask)).toFixed(2)
+            : '-',
       },
     ]
   }, [] as GridRowModel[])
