@@ -313,6 +313,7 @@ export const ApproveActionButtons = ({
                   alert === true
                 }
                 onClick={() => {
+                  console.log('textFieldValue', formik.values.yourShare)
                   switch (transactionType) {
                     case 'createpool' || 'liquidity':
                       setApproveLoading(true)
@@ -330,6 +331,29 @@ export const ApproveActionButtons = ({
                           return token.allowance(
                             account,
                             config[chainId!].divaAddress
+                          )
+                        })
+                        .catch((err: any) => {
+                          setApproveLoading(false)
+                          console.error(err)
+                        })
+                      break
+                    case 'createoffer':
+                      setApproveLoading(true)
+
+                      token
+                        .approve(
+                          config[chainId!].divaAddressNew,
+                          parseUnits(String(formik.values.yourShare), decimal)
+                        )
+                        .then((tx: any) => {
+                          return tx.wait()
+                        })
+                        .then(() => {
+                          setApproveLoading(false)
+                          return token.allowance(
+                            account,
+                            config[chainId!].divaAddressNew
                           )
                         })
                         .catch((err: any) => {

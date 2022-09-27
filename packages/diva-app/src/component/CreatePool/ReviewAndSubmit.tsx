@@ -36,7 +36,7 @@ export function ReviewAndSubmit({
   formik,
   transaction,
 }: {
-  formik: ReturnType<typeof useCreatePoolFormik>
+  formik: any
   transaction?: string
 }) {
   const { values } = formik
@@ -181,22 +181,29 @@ export function ReviewAndSubmit({
                     userTimeZone()}
                 </Typography>
               </Stack>
-              <Typography
-                variant="subtitle1"
-                sx={{ fontWeight: 'bold' }}
-                color="primary"
-              >
-                Payoff
-              </Typography>
-              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Payoff Profile
+              {transaction == 'createpool' && (
+                <Typography
+                  variant="subtitle1"
+                  sx={{ fontWeight: 'bold' }}
+                  color="primary"
+                >
+                  Payoff
                 </Typography>
-                <Typography fontSize={'0.85rem'}>
-                  {values.payoutProfile}
-                </Typography>
-              </Stack>
-              {!isNaN(values.floor) && (
+              )}
+              {transaction == 'createpool' && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Payoff Profile
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.payoutProfile}
+                  </Typography>
+                </Stack>
+              )}
+              {!isNaN(values.floor) && transaction == 'createpool' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -207,7 +214,7 @@ export function ReviewAndSubmit({
                   <Typography fontSize={'0.85rem'}>{values.floor}</Typography>
                 </Stack>
               )}
-              {!isNaN(values.cap) && (
+              {!isNaN(values.cap) && transaction == 'createpool' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -218,7 +225,7 @@ export function ReviewAndSubmit({
                   <Typography fontSize={'0.85rem'}>{values.cap}</Typography>
                 </Stack>
               )}
-              {!isNaN(values.inflection) && (
+              {!isNaN(values.inflection) && transaction == 'createpool' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -231,7 +238,7 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {!isNaN(values.gradient) && (
+              {!isNaN(values.gradient) && transaction == 'createpool' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -397,6 +404,20 @@ export function ReviewAndSubmit({
                 Advanced
               </Typography>
               {transaction === 'createpool' && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Max Pool Capacity
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.capacity}
+                  </Typography>
+                </Stack>
+              )}
+              {(transaction === 'createoffer' ||
+                transaction === 'filloffer') && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -588,9 +609,7 @@ export function ReviewAndSubmit({
                     }}
                   >
                     Remaining fill amount{' '}
-                    {Number(formik.values.collateralBalance) -
-                      formik.values.takerShare}{' '}
-                    {tokenSymbol}
+                    {actualFillableAmount - takerFilledAmount} {tokenSymbol}
                   </FormHelperText>
                 </Container>
               </Card>
