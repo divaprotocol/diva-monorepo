@@ -85,7 +85,7 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
     allOrders: 'https://eip712api.xyz/orderbook/v1/orders/',
     order: 'https://eip712api.xyz/orderbook/v1/order/',
-    orderbook: 'http://127.0.0.1:8081/orderbook/v1',
+    orderbook: 'https://eip712api.xyz/orderbook/v1',
     explorer: 'https://goerli.etherscan.io/',
     name: 'Görli',
     logoUrl: ethereumLogoUrl,

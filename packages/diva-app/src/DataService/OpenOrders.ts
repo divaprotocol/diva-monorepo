@@ -382,8 +382,8 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
   }
 
   let bidExpiry = 0
-  let bid = '-'
-  let bidnbrOptions = '-'
+  let bid = ''
+  let bidnbrOptions = ''
   if (price.bid.order !== undefined) {
     const order = price.bid
     bidExpiry = getExpiryMinutesFromNow(order.order.expiry)
@@ -402,8 +402,8 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
   }
 
   let askExpiry = 0
-  let ask = '-'
-  let asknbrOptions = '-'
+  let ask = ''
+  let asknbrOptions = ''
   if (price.ask.order !== undefined) {
     const order = price.ask
     askExpiry = getExpiryMinutesFromNow(order.order.expiry)
