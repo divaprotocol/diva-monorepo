@@ -396,7 +396,9 @@ export const RemoveLiquidity = ({ pool }: Props) => {
         </Card>
       </Box>
       <Box>
-        <Container sx={{ mt: theme.spacing(4), mb: theme.spacing(2) }}>
+        <Container
+          sx={{ width: '490px', mt: theme.spacing(4), mb: theme.spacing(2) }}
+        >
           <Stack direction="row" justifyContent="space-between">
             <Typography>Current Pool Size</Typography>
             <Typography>

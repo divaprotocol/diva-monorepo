@@ -312,7 +312,7 @@ export default function Underlying() {
           </Stack>
         </TabPanel>
         <TabPanel value="add">
-          <Stack direction="row" spacing={4}>
+          <Stack direction="row" spacing={6}>
             <Box>
               <AddLiquidity pool={pool!} />
             </Box>
@@ -334,7 +334,7 @@ export default function Underlying() {
                         <Container
                           sx={{ mt: theme.spacing(2), mb: theme.spacing(4) }}
                         >
-                          <Stack direction="row" justifyContent="space-between">
+                          <Stack direction="row" justifyContent="space-around">
                             <Typography>Pool Capacity</Typography>
                             <Typography>
                               {pool &&
@@ -390,11 +390,19 @@ export default function Underlying() {
                         </Container>
                       ) : (
                         <Container>
-                          <Stack direction="row" justifyContent="space-between">
+                          <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            sx={{ width: '450px' }}
+                          >
                             <Typography>Pool Capacity</Typography>
                             <Typography>Unlimited</Typography>
                           </Stack>
-                          <Stack direction="row" justifyContent="space-between">
+                          <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            sx={{ width: '450px' }}
+                          >
                             <Typography>Current Pool Size</Typography>
                             <Typography>
                               {pool &&
@@ -415,80 +423,80 @@ export default function Underlying() {
                 <Box
                   display="flex"
                   alignItems="center"
-                  justifyContent="center"
+                  justifyContent="flex-start"
                   sx={{
                     minWidth: theme.spacing(82),
                     mb: theme.spacing(4),
+                    pl: '50px',
                   }}
                 >
                   <Card
                     sx={{
-                      width: '450px',
+                      width: '420px',
                       borderRadius: '16px',
+                      mt: theme.spacing(2),
+                      mb: theme.spacing(2),
+                      p: theme.spacing(2),
                     }}
                   >
-                    <Container
-                      sx={{ mt: theme.spacing(2), mb: theme.spacing(2) }}
-                    >
-                      <Stack direction="column">
-                        <Stack direction="row">
-                          <Star
-                            style={{
-                              marginTop: theme.spacing(-1),
-                              paddingRight: theme.spacing(1.8),
-                              height: theme.spacing(4),
-                              width: theme.spacing(4),
-                            }}
-                          />
-                          <Typography
-                            fontSize={'0.85rem'}
-                            style={{ color: 'gray' }}
-                          >
-                            {'    '}
-                            By adding liquidity you receive long and short
-                            position tokens in return which represent a claim
-                            against the collateral you deposited
-                          </Typography>
-                        </Stack>
-                        <Stack direction="row">
-                          <Bullish
-                            style={{
-                              paddingTop: theme.spacing(2),
-                              paddingRight: theme.spacing(1),
-                              height: theme.spacing(2.5),
-                              width: theme.spacing(2.5),
-                            }}
-                          />
-                          <Typography
-                            fontSize={'0.85rem'}
-                            sx={{ mt: theme.spacing(2) }}
-                            style={{ color: 'gray' }}
-                          >
-                            {' '}
-                            Bullish? Keep the long tokens and sell the short
-                            tokens
-                          </Typography>
-                        </Stack>
-                        <Stack direction="row">
-                          <Bearish
-                            style={{
-                              paddingTop: theme.spacing(2),
-                              paddingRight: theme.spacing(1),
-                              height: theme.spacing(2.5),
-                              width: theme.spacing(2.5),
-                            }}
-                          />
-                          <Typography
-                            fontSize={'0.85rem'}
-                            sx={{ mt: theme.spacing(2) }}
-                            style={{ color: 'gray' }}
-                          >
-                            Bearish? Keep the short tokens and sell the long
-                            tokens
-                          </Typography>
-                        </Stack>
+                    <Stack direction="column">
+                      <Stack direction="row">
+                        <Star
+                          style={{
+                            marginTop: theme.spacing(-1),
+                            paddingRight: theme.spacing(1.8),
+                            height: theme.spacing(4),
+                            width: theme.spacing(4),
+                          }}
+                        />
+                        <Typography
+                          fontSize={'0.85rem'}
+                          style={{ color: 'gray' }}
+                        >
+                          {'    '}
+                          By adding liquidity you receive long and short
+                          position tokens in return which represent a claim
+                          against the collateral you deposited
+                        </Typography>
                       </Stack>
-                    </Container>
+                      <Stack direction="row">
+                        <Bullish
+                          style={{
+                            paddingTop: theme.spacing(2),
+                            paddingRight: theme.spacing(1),
+                            height: theme.spacing(2.5),
+                            width: theme.spacing(2.5),
+                          }}
+                        />
+                        <Typography
+                          fontSize={'0.85rem'}
+                          sx={{ mt: theme.spacing(2) }}
+                          style={{ color: 'gray' }}
+                        >
+                          {' '}
+                          Bullish? Keep the long tokens and sell the short
+                          tokens
+                        </Typography>
+                      </Stack>
+                      <Stack direction="row">
+                        <Bearish
+                          style={{
+                            paddingTop: theme.spacing(2),
+                            paddingRight: theme.spacing(1),
+                            height: theme.spacing(2.5),
+                            width: theme.spacing(2.5),
+                          }}
+                        />
+                        <Typography
+                          fontSize={'0.85rem'}
+                          sx={{ mt: theme.spacing(2) }}
+                          style={{ color: 'gray' }}
+                        >
+                          Bearish? Keep the short tokens and sell the long
+                          tokens
+                        </Typography>
+                      </Stack>
+                    </Stack>
                   </Card>
                 </Box>
               </Stack>
