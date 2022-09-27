@@ -351,9 +351,10 @@ interface PriceOutputType extends PriceResponseType {
 }
 
 interface OrderOutputType {
-  expiry: string
   orderType: string
   id: string
+  bidExpiry: string
+  askExpiry: string
   bid?: string
   ask?: string
   bidQuantity: string
@@ -374,123 +375,71 @@ const getPoolID = (
 }
 
 const getOrder = (price: PriceOutputType): OrderOutputType => {
-  if (price.type === 'Buy') {
-    let expiry = 0
-    if (price.bid.order !== undefined) {
-      expiry = getExpiryMinutesFromNow(price.bid.order.expiry)
-    }
-    const orderType = 'buy'
-    const id = price.id
+  const id = price.id
+  let orderType = 'buy'
+  if (price.type !== 'Buy') {
+    orderType = 'sell'
+  }
 
+  let bidExpiry = 0
+  let bid = '-'
+  let bidnbrOptions = '-'
+  if (price.bid.order !== undefined) {
+    const order = price.bid
+    bidExpiry = getExpiryMinutesFromNow(order.order.expiry)
     // Calculate Bid amount
-    let bidAmount = BigNumber.from(0)
-    let bid = ''
-    let askAmount = BigNumber.from(0)
-    let ask = ''
-    let bidQuantity = ''
-    let askQuantity = ''
-    if (price.bid.order !== undefined) {
-      bidAmount = BigNumber.from(price.bid.order.makerAmount)
-        .mul(parseUnits('1'))
-        .div(BigNumber.from(price.bid.order.takerAmount)) // result is in collateral token decimals
+    const bidAmount = BigNumber.from(order.order.makerAmount)
+      .mul(parseUnits('1'))
+      .div(BigNumber.from(order.order.takerAmount)) // result is in collateral token decimals
 
-      // Value to display in the orderbook
-      bid = formatUnits(bidAmount, price.decimals)
+    // Value to display in the orderbook
+    bid = formatUnits(bidAmount, price.decimals)
 
-      // Display remainingFillableTakerAmount as the quantity in the orderbook
-      bidQuantity = formatUnits(
-        BigNumber.from(price.bid.metaData.remainingFillableTakerAmount)
+    // Display remainingFillableTakerAmount as the quantity in the orderbook
+    bidnbrOptions = formatUnits(
+      BigNumber.from(order.metaData.remainingFillableTakerAmount)
+    )
+  }
+
+  let askExpiry = 0
+  let ask = '-'
+  let asknbrOptions = '-'
+  if (price.ask.order !== undefined) {
+    const order = price.ask
+    askExpiry = getExpiryMinutesFromNow(order.order.expiry)
+    // Calculate Ask amount
+    const askAmount = BigNumber.from(order.order.takerAmount)
+      .mul(parseUnits('1'))
+      .div(BigNumber.from(order.order.makerAmount)) // result is in collateral token decimals
+
+    // Value to display in the orderbook
+    ask = formatUnits(askAmount, price.decimals)
+
+    if (
+      BigNumber.from(order.metaData.remainingFillableTakerAmount).lt(
+        BigNumber.from(order.order.takerAmount)
       )
-    }
-
-    if (price.ask.order !== undefined) {
-      askAmount = BigNumber.from(price.ask.order.takerAmount)
-        .mul(parseUnits('1'))
-        .div(BigNumber.from(price.ask.order.makerAmount)) // result is in collateral token decimals
-
-      // Value to display in the orderbook
-      ask = formatUnits(askAmount, price.decimals)
-
-      // Display remainingFillableTakerAmount as the quantity in the orderbook
-      askQuantity = formatUnits(
-        BigNumber.from(price.ask.metaData.remainingFillableTakerAmount)
+    ) {
+      const remainingFillableMakerAmount = BigNumber.from(
+        order.metaData.remainingFillableTakerAmount
       )
-      askQuantity = (Number(askQuantity) / Number(ask)).toString()
+        .mul(BigNumber.from(order.order.makerAmount))
+        .div(BigNumber.from(order.order.takerAmount))
+      asknbrOptions = formatUnits(remainingFillableMakerAmount)
+    } else {
+      asknbrOptions = formatUnits(BigNumber.from(order.order.makerAmount))
     }
+  }
 
-    return {
-      expiry: expiry + ' mins',
-      orderType,
-      id,
-      bid,
-      bidQuantity: bidQuantity,
-      ask,
-      askQuantity: askQuantity,
-    }
-  } else {
-    let expiry = 0
-    if (price.ask.order !== undefined) {
-      expiry = getExpiryMinutesFromNow(price.ask.order.expiry)
-    }
-    const orderType = 'sell'
-    const id = price.id
-
-    let bidAmount = BigNumber.from(0)
-    let bid = ''
-    let askAmount = BigNumber.from(0)
-    let ask = ''
-    let askQuantity = ''
-    let bidQuantity = ''
-    if (price.ask.order !== undefined) {
-      askAmount = BigNumber.from(price.ask.order.makerAmount)
-        .mul(parseUnits('1'))
-        .div(BigNumber.from(price.ask.order.takerAmount)) // result is in collateral token decimals
-
-      // Value to display in the orderbook
-      ask = formatUnits(askAmount, price.decimals)
-
-      if (
-        BigNumber.from(price.ask.metaData.remainingFillableTakerAmount).lt(
-          BigNumber.from(price.ask.order.takerAmount)
-        )
-      ) {
-        const remainingFillableMakerAmount = BigNumber.from(
-          price.ask.metaData.remainingFillableTakerAmount
-        )
-          .mul(BigNumber.from(price.ask.order.makerAmount))
-          .div(BigNumber.from(price.ask.order.takerAmount))
-        askQuantity = formatUnits(remainingFillableMakerAmount.div(askAmount))
-      } else {
-        askQuantity = formatUnits(
-          BigNumber.from(price.ask.order.makerAmount).div(askAmount)
-        )
-      }
-      askQuantity = (Number(askQuantity) / Number(ask)).toString()
-    }
-    if (price.bid.order !== undefined) {
-      // Calculate Ask amount
-      bidAmount = BigNumber.from(price.bid.order.takerAmount)
-        .mul(parseUnits('1'))
-        .div(BigNumber.from(price.bid.order.makerAmount)) // result is in collateral token decimals
-
-      // Value to display in the orderbook
-      bid = formatUnits(bidAmount, price.decimals)
-
-      // Display remainingFillableTakerAmount as the quantity in the orderbook
-      bidQuantity = formatUnits(
-        BigNumber.from(price.bid.metaData.remainingFillableTakerAmount)
-      )
-    }
-
-    return {
-      expiry: expiry + ' mins',
-      orderType,
-      id,
-      bid,
-      bidQuantity: bidQuantity,
-      ask,
-      askQuantity: askQuantity,
-    }
+  return {
+    bidExpiry: bidExpiry + ' mins',
+    askExpiry: askExpiry + ' mins',
+    orderType,
+    id,
+    bid,
+    bidQuantity: bidnbrOptions,
+    ask,
+    askQuantity: asknbrOptions,
   }
 }
 
