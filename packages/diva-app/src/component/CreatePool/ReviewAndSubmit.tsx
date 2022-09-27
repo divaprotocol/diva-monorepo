@@ -58,6 +58,7 @@ export function ReviewAndSubmit({
     provider.getSigner()
   )
   console.log('formik.values', formik.values)
+  console.log('duration', new Date(Number(formik.values.offerDuration) * 1000))
   const token = new ethers.Contract(
     formik.values.collateralToken.id,
     ERC20,
@@ -217,7 +218,7 @@ export function ReviewAndSubmit({
                   <Typography fontSize={'0.85rem'}>{values.cap}</Typography>
                 </Stack>
               )}
-              {!isNaN(values.inflection) && transaction === 'createpool' && (
+              {!isNaN(values.inflection) && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -230,7 +231,7 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {!isNaN(values.gradient) && transaction === 'createpool' && (
+              {!isNaN(values.gradient) && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}

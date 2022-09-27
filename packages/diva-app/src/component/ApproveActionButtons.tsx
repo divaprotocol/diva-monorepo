@@ -184,6 +184,7 @@ export const ApproveActionButtons = ({
     DIVA712ABI,
     signer
   )
+  console.log(typeof values.takerShare.toString())
 
   const offerCreationStats = {
     maker: ethers.utils.getAddress(account),
@@ -199,9 +200,9 @@ export const ApproveActionButtons = ({
     makerDirection: values.offerDirection === 'Long',
     offerExpiry: values.offerDuration,
     minimumTakerFillAmount: parseUnits(
-      values.minTakerContribution === values.takerShare.toString()
+      values.minTakerContribution.toString() === values.takerShare.toString()
         ? values.takerShare.toString()
-        : values.minTakerContribution,
+        : values.minTakerContribution.toString(),
       values.collateralToken.decimals
     ).toString(),
     referenceAsset: values.referenceAsset,

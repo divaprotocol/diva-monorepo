@@ -79,9 +79,7 @@ export function DefineOfferAttributes({
     setOfferDuration(event.target.value)
     formik.setFieldValue(
       'offerDuration',
-      Math.floor(
-        event.target.value + formik.values.expiryTime.getTime() / 1000
-      ).toString()
+      Math.floor(event.target.value + Date.now() / 1000).toString()
     )
   }
   const handleMinTakerContributionsChange = (event) => {
@@ -658,11 +656,15 @@ export function DefineOfferAttributes({
                         tokenSupply: parseFloat(collateralBalance),
                       }))
                       if (fillOrKill) {
-                        formik.setFieldValue(
-                          'minTakerContribution',
-                          parseFloat(collateralBalance) -
-                            formik.values.yourShare
-                        )
+                        if (collateralBalance != '') {
+                          formik.setFieldValue(
+                            'minTakerContribution',
+                            parseFloat(collateralBalance) -
+                              formik.values.yourShare
+                          )
+                        } else {
+                          formik.setFieldValue('minTakerContribution', 0)
+                        }
                       }
                     }}
                   />
