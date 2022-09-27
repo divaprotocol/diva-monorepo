@@ -56,6 +56,7 @@ import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { FilterDrawerModal } from './FilterDrawerMobile'
+import { useHistory } from 'react-router-dom'
 
 type Response = {
   [token: string]: BigNumber
@@ -542,6 +543,8 @@ const columns: GridColDef[] = [
 ]
 
 const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
+  const history = useHistory()
+
   if (!row) return
 
   const { Icon, Id, Floor, TVL, finalValue, Cap, Balance, Status } = row
@@ -583,6 +586,9 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
           margin: '12px 0',
         }}
         spacing={1.6}
+        onClick={() => {
+          history.push(`../../${row.id}`)
+        }}
       >
         <Box
           sx={{
@@ -632,25 +638,38 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
             </Button>
           </Box>
         </Box>
-        <Grid container rowGap={1.6} justifyContent="space-between">
+        <Grid
+          container
+          rowGap={1.6}
+          // columnGap={'2px'}
+          justifyContent="space-between"
+        >
           {DATA_ARRAY.map(({ label, value }) => (
-            <Grid item spacing={1.6} key={label} xs={4}>
-              <Stack direction="row" spacing={2}>
+            <Grid
+              item
+              spacing={1.6}
+              key={label}
+              xs={4}
+              sx={{
+                flexGrow: 1,
+              }}
+            >
+              <Stack
+                direction="row"
+                justifyContent={'space-between'}
+                sx={{
+                  borderRight: '10px solid transparent',
+                  flexGrow: 1,
+                }}
+              >
                 <Box
                   sx={{
                     color: '#828282',
-                    minWidth: '50px',
                   }}
                 >
                   {label}
                 </Box>
-                <Box>
-                  {label === 'Payoff' ? (
-                    <Payoff row={row} />
-                  ) : (
-                    value.toString().slice(0, -2)
-                  )}
-                </Box>
+                <Box>{label === 'Payoff' ? <Payoff row={row} /> : value}</Box>
               </Stack>
             </Grid>
           ))}

@@ -62,15 +62,15 @@ const MyOrdersPoolCard = ({
     },
     {
       label: 'Quantity',
-      value: quantity,
+      value: quantity.toFixed(4),
     },
     {
       label: 'Price',
-      value: price,
+      value: price.toFixed(4),
     },
     {
       label: 'Pay/Receive',
-      value: payReceive,
+      value: payReceive.toFixed(4),
     },
   ]
 
@@ -134,7 +134,14 @@ const MyOrdersPoolCard = ({
         <Grid container rowGap={1.6} justifyContent="space-between">
           {DATA_ARRAY.map(({ label, value }) => (
             <Grid item key={label} xs={6}>
-              <Stack direction="row" spacing={10}>
+              <Stack
+                direction="row"
+                justifyContent={'space-between'}
+                sx={{
+                  borderRight: '10px solid transparent',
+                  flexGrow: 1,
+                }}
+              >
                 <Box
                   sx={{
                     color: '#828282',
