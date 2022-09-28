@@ -259,7 +259,6 @@ export const fetchPools = createAsyncThunk(
       }
     }
 
-    console.log('pools: ', pools)
     return {
       pools,
       chainId,
