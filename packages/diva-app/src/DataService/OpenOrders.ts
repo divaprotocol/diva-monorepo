@@ -314,7 +314,7 @@ interface OrderbookPriceRequest {
   chainId: number
   perPage: number
   graphUrl: string
-  createdBy: string
+  createdBy?: string
   taker?: string
   feeRecipient?: string
   takerTokenFee?: number // 1 = 0.01%

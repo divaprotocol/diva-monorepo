@@ -166,7 +166,6 @@ export const fetchPools = createAsyncThunk(
   ): Promise<{
     pools: Pool[]
     chainId?: number
-    // prices?: any[]
   }> => {
     const state = store.getState() as RootState
     const { chainId } = state.appSlice
