@@ -16,8 +16,13 @@ import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
 import { RootState } from './Store'
 import { get0xOpenOrders, getOrderbookPrices } from '../DataService/OpenOrders'
-import { config, divaGovernanceAddress, NULL_ADDRESS } from '../constants'
-import { useConnectionContext } from '../hooks/useConnectionContext'
+import {
+  config,
+  divaGovernanceAddress,
+  NULL_ADDRESS,
+  DEFAULT_TAKER_TOKEN_FEE,
+  DEFAULT_THRESHOLD,
+} from '../constants'
 
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
@@ -219,9 +224,9 @@ export const fetchPools = createAsyncThunk(
     })
 
     const taker = NULL_ADDRESS
-    const feeRecipient = '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E'
-    const takerTokenFee = 1000 // 1000 = 1%
-    const threshold = 100
+    const feeRecipient = divaGovernanceAddress
+    const takerTokenFee = DEFAULT_TAKER_TOKEN_FEE
+    const threshold = DEFAULT_THRESHOLD
 
     try {
       const prices = await getOrderbookPrices({

@@ -159,6 +159,10 @@ export const divaGovernanceAddress =
 
 export const tradingFee = 0.01 // 1%
 
+export const DEFAULT_TAKER_TOKEN_FEE = 1000 // 1000 = 1%
+
+export const DEFAULT_THRESHOLD = 100
+
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 export const ICONS_URL = {
