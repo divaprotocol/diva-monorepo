@@ -187,7 +187,7 @@ export const fetchPools = createAsyncThunk(
       const result = await request(
         graphUrl,
         queryPools(
-          Math.max(page, 0) * pageSize,
+          (Math.max(page, 0) * pageSize) / 2,
           pageSize,
           createdBy,
           dataProvider
@@ -230,6 +230,7 @@ export const fetchPools = createAsyncThunk(
     try {
       const prices = await getOrderbookPrices({
         chainId,
+        page,
         perPage: pageSize,
         graphUrl,
         createdBy,

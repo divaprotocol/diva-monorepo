@@ -312,6 +312,7 @@ interface TokenPairType extends OrderBaseInterface {
 
 interface OrderbookPriceRequest {
   chainId: number
+  page: number
   perPage: number
   graphUrl: string
   createdBy?: string
@@ -445,11 +446,11 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
 
 export const getOrderbookPrices = async (req: OrderbookPriceRequest) => {
   let urlPrefix =
-    config[req.chainId].orderbook +
-    '/prices' +
-    `?graphUrl=${req.graphUrl}` +
-    `&createdBy=${req.createdBy}`
+    config[req.chainId].orderbook + `/prices?graphUrl=${req.graphUrl}`
 
+  if (req.createdBy !== undefined) {
+    urlPrefix += `&createdBy=${req.createdBy}`
+  }
   if (req.taker !== undefined) {
     urlPrefix += `&taker=${req.taker}`
   }
@@ -462,7 +463,7 @@ export const getOrderbookPrices = async (req: OrderbookPriceRequest) => {
   if (req.threshold !== undefined) {
     urlPrefix += `&threshold=${req.threshold}`
   }
-  const url = urlPrefix + `&page=1&perPage=${req.perPage}`
+  const url = urlPrefix + `&page=${req.page + 1}&perPage=${req.perPage}`
   const prices = await axios
     .get(url)
     .then(async function (response) {
