@@ -34,7 +34,7 @@ type Props = {
   transactionType: string
   onTransactionSuccess: () => void
   alert?: boolean
-  formik?: ReturnType<typeof useCreatePoolFormik>
+  formik?: any
 }
 async function _checkConditions(
   diva: ethers.Contract,
@@ -254,19 +254,53 @@ export const ApproveActionButtons = ({
         setActionEnabled(false)
       } else {
         if (transactionType === 'filloffer') {
-          token
-            .allowance(account, config[chainId!].divaAddressNew)
-            .then((res) => {
-              if (
-                res.lt(parseUnits(String(formik.values.yourShare), decimal))
-              ) {
-                setApproveEnabled(true)
-                setActionEnabled(false)
-              } else {
-                setActionEnabled(true)
-                setApproveEnabled(false)
-              }
-            })
+          if (
+            account.toLowerCase() ===
+            formik.values.jsonToExport.maker.toLowerCase()
+          ) {
+            token
+              .allowance(account, config[chainId!].divaAddressNew)
+              .then((res) => {
+                console.log('allowance', formatEther(res))
+                if (
+                  res.lt(
+                    parseUnits(String(formik.values.yourShare), decimal).add(
+                      parseUnits(
+                        String(
+                          (formik.values.yourShare * formik.values.makerShare) /
+                            (Number(
+                              formik.values.jsonToExport.takerCollateralAmount
+                            ) /
+                              10 ** decimal)
+                        ),
+                        decimal
+                      )
+                    )
+                  )
+                ) {
+                  setApproveEnabled(true)
+                  setActionEnabled(false)
+                } else {
+                  setActionEnabled(true)
+                  setApproveEnabled(false)
+                }
+              })
+          } else {
+            token
+              .allowance(account, config[chainId!].divaAddressNew)
+              .then((res) => {
+                console.log('allowance', formatEther(res))
+                if (
+                  res.lt(parseUnits(String(formik.values.yourShare), decimal))
+                ) {
+                  setApproveEnabled(true)
+                  setActionEnabled(false)
+                } else {
+                  setActionEnabled(true)
+                  setApproveEnabled(false)
+                }
+              })
+          }
         } else {
           if (transactionType === 'createoffer') {
             token
@@ -300,6 +334,7 @@ export const ApproveActionButtons = ({
     }
   }, [
     formik.values.yourShare,
+    formik.values.jsonToExport,
     textFieldValue,
     chainId,
     pool,
@@ -338,7 +373,6 @@ export const ApproveActionButtons = ({
                   alert === true
                 }
                 onClick={() => {
-                  console.log('textFieldValue', formik.values.yourShare)
                   switch (transactionType) {
                     case 'createpool' || 'liquidity':
                       setApproveLoading(true)
@@ -392,7 +426,29 @@ export const ApproveActionButtons = ({
                       token
                         .approve(
                           config[chainId!].divaAddressNew,
-                          parseUnits(String(formik.values.yourShare), decimal)
+                          account.toLowerCase() ===
+                            formik.values.jsonToExport.maker.toLowerCase()
+                            ? parseUnits(
+                                String(formik.values.yourShare),
+                                decimal
+                              ).add(
+                                parseUnits(
+                                  String(
+                                    (formik.values.yourShare *
+                                      formik.values.makerShare) /
+                                      (Number(
+                                        formik.values.jsonToExport
+                                          .takerCollateralAmount
+                                      ) /
+                                        10 ** decimal)
+                                  ),
+                                  decimal
+                                )
+                              )
+                            : parseUnits(
+                                String(formik.values.yourShare),
+                                decimal
+                              )
                         )
                         .then((tx: any) => {
                           return tx.wait()
@@ -565,14 +621,14 @@ export const ApproveActionButtons = ({
                       CREATE_POOL_TYPE,
                       values.signature,
                       account,
-                      parseEther(values.yourShare.toString())
+                      parseUnits(values.yourShare.toString(), decimal)
                     ).then((res) => {
                       if (res.success) {
                         divaNew
                           .fillOfferCreateContingentPool(
                             values.jsonToExport,
                             values.signature,
-                            parseEther(values.yourShare.toString())
+                            parseUnits(values.yourShare.toString(), decimal)
                           )
                           .then((tx) => {
                             tx.wait().then((receipt) => {
