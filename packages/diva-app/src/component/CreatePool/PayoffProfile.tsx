@@ -22,17 +22,19 @@ export function PayoffProfile(props: {
     floor,
     cap,
     inflection: strike,
-    tokenSupply,
     hasError,
     collateralBalanceShort,
     collateralBalanceLong,
   } = props
+  console.log('props', props)
   const padding = cap * 0.1
   const start = Math.max(floor - padding, 0)
-  const totalCollateral = collateralBalanceLong + collateralBalanceShort
+  const end = Number(cap) + padding
+  const gradient =
+    collateralBalanceLong / (collateralBalanceLong + collateralBalanceShort)
 
-  const maxPayoutLong = totalCollateral / tokenSupply
-  const maxPayoutShort = totalCollateral / tokenSupply
+  const maxPayoutLong = 1
+  const maxPayoutShort = 1
   const theme = useTheme()
 
   const short: LineSeriesPoint[] = [
@@ -46,14 +48,14 @@ export function PayoffProfile(props: {
     },
     {
       x: strike,
-      y: collateralBalanceShort / tokenSupply,
+      y: 1 - gradient,
     },
     {
       x: cap,
       y: 0,
     },
     {
-      x: cap + padding,
+      x: end,
       y: 0,
     },
   ]
@@ -69,14 +71,14 @@ export function PayoffProfile(props: {
     },
     {
       x: strike,
-      y: collateralBalanceLong / tokenSupply,
+      y: gradient,
     },
     {
       x: cap,
       y: maxPayoutLong,
     },
     {
-      x: cap + padding,
+      x: end,
       y: maxPayoutLong,
     },
   ]
