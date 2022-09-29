@@ -195,14 +195,39 @@ export function ReviewAndSubmit({
                   {values.collateralToken.symbol}
                 </Typography>
               </Stack>
-              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Collateral Balance
-                </Typography>
-                <Typography fontSize={'0.85rem'}>
-                  {Number(values.collateralBalance).toFixed(2)}
-                </Typography>
-              </Stack>
+              {transaction === 'createpool' && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Collateral Balance
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {Number(values.collateralBalance).toFixed(2)}
+                  </Typography>
+                </Stack>
+              )}
+              {transaction !== 'createpool' && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Collateral Balance
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {(
+                      (formik.values.yourShare * formik.values.makerShare) /
+                        (Number(
+                          formik.values.jsonToExport.takerCollateralAmount
+                        ) /
+                          10 ** decimal) +
+                      formik.values.yourShare
+                    ).toFixed(2)}
+                  </Typography>
+                </Stack>
+              )}
               {transaction === 'createpool' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
