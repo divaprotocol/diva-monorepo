@@ -208,7 +208,20 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {transaction !== 'createpool' && (
+              {transaction === 'createoffer' && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Collateral Balance
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {formik.values.collateralBalance}
+                  </Typography>
+                </Stack>
+              )}
+              {transaction === 'filloffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
