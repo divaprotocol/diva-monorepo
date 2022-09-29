@@ -16,7 +16,6 @@ import { useQuery } from 'react-query'
 import { config } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
-import { useCreatePoolFormik } from './formik'
 import { Circle } from '@mui/icons-material'
 import { PayoffProfile } from './PayoffProfile'
 import { useWhitelist } from '../../hooks/useWhitelist'
@@ -30,7 +29,7 @@ import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { ethers } from 'ethers'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import DIVA712ABI from '../../abi/DIVA712ABI.json'
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 
 export function ReviewAndSubmit({
   formik,
@@ -201,10 +200,7 @@ export function ReviewAndSubmit({
                   Collateral Balance
                 </Typography>
                 <Typography fontSize={'0.85rem'}>
-                  {(
-                    (Number(values.collateralBalance) / actualFillableAmount) *
-                    values.takerShare
-                  ).toFixed(2)}
+                  {Number(values.collateralBalance).toFixed(2)}
                 </Typography>
               </Stack>
               {transaction === 'createpool' && (
@@ -242,7 +238,7 @@ export function ReviewAndSubmit({
                     Your Contribution
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.takerShare.toFixed(2)}
+                    {values.yourShare.toFixed(2)}
                   </Typography>
                 </Stack>
               )}
@@ -269,8 +265,11 @@ export function ReviewAndSubmit({
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
                     {(
-                      (values.yourShare * values.makerShare) /
-                      formik.values.jsonToExport.takerCollateralAmount
+                      (formik.values.yourShare * formik.values.makerShare) /
+                      (Number(
+                        formik.values.jsonToExport.takerCollateralAmount
+                      ) /
+                        10 ** decimal)
                     ).toFixed(2)}
                   </Typography>
                 </Stack>
@@ -478,12 +477,10 @@ export function ReviewAndSubmit({
                         You receive{' '}
                         {formik.values.offerDirection === 'Long' ? (
                           <strong>
-                            {formik.values.takerShare} SHORT Tokens
+                            {formik.values.yourShare} SHORT Tokens
                           </strong>
                         ) : (
-                          <strong>
-                            {formik.values.takerShare} LONG Tokens
-                          </strong>
+                          <strong>{formik.values.yourShare} LONG Tokens</strong>
                         )}
                       </FormHelperText>
                     )}
