@@ -181,76 +181,6 @@ export function ReviewAndSubmit({
                     userTimeZone()}
                 </Typography>
               </Stack>
-              {transaction == 'createpool' && (
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: 'bold' }}
-                  color="primary"
-                >
-                  Payoff
-                </Typography>
-              )}
-              {transaction == 'createpool' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Payoff Profile
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {values.payoutProfile}
-                  </Typography>
-                </Stack>
-              )}
-              {!isNaN(values.floor) && transaction == 'createpool' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Floor
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>{values.floor}</Typography>
-                </Stack>
-              )}
-              {!isNaN(values.cap) && transaction == 'createpool' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Cap
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>{values.cap}</Typography>
-                </Stack>
-              )}
-              {!isNaN(values.inflection) && transaction == 'createpool' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Inflection
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {values.inflection}
-                  </Typography>
-                </Stack>
-              )}
-              {!isNaN(values.gradient) && transaction == 'createpool' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Gradient
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {Number(values.gradient).toFixed(2)}
-                  </Typography>
-                </Stack>
-              )}
               <Typography
                 variant="subtitle1"
                 sx={{ fontWeight: 'bold' }}
@@ -339,10 +269,8 @@ export function ReviewAndSubmit({
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
                     {(
-                      (Number(values.collateralBalance) /
-                        actualFillableAmount) *
-                        values.takerShare -
-                      values.takerShare
+                      (values.yourShare * values.makerShare) /
+                      formik.values.jsonToExport.takerCollateralAmount
                     ).toFixed(2)}
                   </Typography>
                 </Stack>
@@ -517,9 +445,9 @@ export function ReviewAndSubmit({
                       onBlur={formik.handleBlur}
                       error={formik.errors.takerShare != null}
                       value={
-                        formik.values.takerShare === 0
+                        formik.values.yourShare === 0
                           ? ''
-                          : formik.values.takerShare
+                          : formik.values.yourShare
                       }
                       InputProps={{
                         endAdornment: (
@@ -533,11 +461,11 @@ export function ReviewAndSubmit({
                         const collateralBalance = event.target.value
                         if (collateralBalance !== '') {
                           formik.setFieldValue(
-                            'takerShare',
+                            'yourShare',
                             Number(collateralBalance)
                           )
                         } else {
-                          formik.setFieldValue('takerShare', 0)
+                          formik.setFieldValue('yourShare', 0)
                         }
                       }}
                     />
@@ -608,8 +536,7 @@ export function ReviewAndSubmit({
                       mb: theme.spacing(1),
                     }}
                   >
-                    Remaining fill amount{' '}
-                    {actualFillableAmount - takerFilledAmount} {tokenSymbol}
+                    Remaining fill amount {actualFillableAmount} {tokenSymbol}
                   </FormHelperText>
                 </Container>
               </Card>

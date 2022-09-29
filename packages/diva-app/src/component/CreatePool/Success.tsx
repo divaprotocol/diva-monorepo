@@ -205,7 +205,7 @@ export function Success({
         setPoolId(Number(formik.values.poolId))
       })
     }
-  }, [])
+  }, [formik.values.poolId])
 
   return (
     <Container>

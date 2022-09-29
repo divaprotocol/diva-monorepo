@@ -257,8 +257,9 @@ export const ApproveActionButtons = ({
           token
             .allowance(account, config[chainId!].divaAddressNew)
             .then((res) => {
-              console.log('allowance', formatEther(res))
-              if (res.lt(parseUnits(textFieldValue, decimal))) {
+              if (
+                res.lt(parseUnits(String(formik.values.yourShare), decimal))
+              ) {
                 setApproveEnabled(true)
                 setActionEnabled(false)
               } else {
@@ -267,20 +268,44 @@ export const ApproveActionButtons = ({
               }
             })
         } else {
-          token.allowance(account, config[chainId]?.divaAddress).then((res) => {
-            console.log('allowance', formatEther(res))
-            if (res.lt(parseUnits(textFieldValue, decimal))) {
-              setApproveEnabled(true)
-              setActionEnabled(false)
-            } else {
-              setActionEnabled(true)
-              setApproveEnabled(false)
-            }
-          })
+          if (transactionType === 'createoffer') {
+            token
+              .allowance(account, config[chainId]?.divaAddressNew)
+              .then((res) => {
+                if (
+                  res.lt(parseUnits(String(formik.values.yourShare), decimal))
+                ) {
+                  setApproveEnabled(true)
+                  setActionEnabled(false)
+                } else {
+                  setActionEnabled(true)
+                  setApproveEnabled(false)
+                }
+              })
+          } else {
+            token
+              .allowance(account, config[chainId]?.divaAddress)
+              .then((res) => {
+                if (res.lt(parseUnits(textFieldValue, decimal))) {
+                  setApproveEnabled(true)
+                  setActionEnabled(false)
+                } else {
+                  setActionEnabled(true)
+                  setApproveEnabled(false)
+                }
+              })
+          }
         }
       }
     }
-  }, [textFieldValue, chainId, pool, approveLoading, actionLoading])
+  }, [
+    formik.values.yourShare,
+    textFieldValue,
+    chainId,
+    pool,
+    approveLoading,
+    actionLoading,
+  ])
   return (
     <div
       style={{
@@ -367,7 +392,7 @@ export const ApproveActionButtons = ({
                       token
                         .approve(
                           config[chainId!].divaAddressNew,
-                          parseUnits(textFieldValue, decimal)
+                          parseUnits(String(formik.values.yourShare), decimal)
                         )
                         .then((tx: any) => {
                           return tx.wait()
@@ -533,8 +558,6 @@ export const ApproveActionButtons = ({
                       })
                     break
                   case 'filloffer':
-                    // setApproveLoading(false)
-                    console.log('json', values.collateralBalance)
                     _checkConditions(
                       divaNew,
                       divaDomain,
@@ -542,14 +565,14 @@ export const ApproveActionButtons = ({
                       CREATE_POOL_TYPE,
                       values.signature,
                       account,
-                      parseEther(values.takerShare.toString())
+                      parseEther(values.yourShare.toString())
                     ).then((res) => {
                       if (res.success) {
                         divaNew
                           .fillOfferCreateContingentPool(
                             values.jsonToExport,
                             values.signature,
-                            parseEther(values.takerShare.toString())
+                            parseEther(values.yourShare.toString())
                           )
                           .then((tx) => {
                             tx.wait().then((receipt) => {
@@ -574,9 +597,6 @@ export const ApproveActionButtons = ({
                         console.warn(res.message)
                       }
                     })
-
-                    // .then(onTransactionSuccess())
-
                     break
                 }
               }}

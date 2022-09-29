@@ -50,12 +50,12 @@ export function FillOffer({
       formik.setFieldValue('cap', formatEther(configJson.cap))
       formik.setFieldValue('inflection', formatEther(configJson.inflection))
       formik.setFieldValue(
-        'collateralBalanceLong',
-        formatEther(configJson.takerCollateralAmount)
+        'yourShare',
+        Number(formatEther(configJson.takerCollateralAmount))
       )
       formik.setFieldValue(
-        'collateralBalanceShort',
-        formatEther(configJson.makerCollateralAmount)
+        'makerShare',
+        Number(formatEther(configJson.makerCollateralAmount))
       )
       formik.setFieldValue(
         'gradient',
@@ -78,7 +78,13 @@ export function FillOffer({
         )
       }
       formik.setFieldValue('collateralToken.id', configJson.collateralToken)
-      formik.setFieldValue('capacity', configJson.capacity)
+      formik.setFieldValue(
+        'capacity',
+        configJson.capacity ===
+          '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+          ? 'Unlimited'
+          : configJson.capacity
+      )
       formik.setFieldValue('dataProvider', configJson.dataProvider)
       formik.setFieldValue('offerDuration', configJson.offerExpiry)
       formik.setFieldValue(
