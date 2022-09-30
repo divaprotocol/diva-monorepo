@@ -10,6 +10,13 @@ import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getExpiryMinutesFromNow } from '../Util/Dates'
 import BalanceCheckerABI from '../abi/BalanceCheckerABI.json'
 import ERC20ABI from '../abi/ERC20ABI.json'
+import {
+  PoolInfoType,
+  OrderbookPriceRequest,
+  OrderOutputType,
+  PriceResponseType,
+  PriceOutputType,
+} from '../Models/orderbook'
 
 /**
  * Filter for orders that can actually be filled, i.e. where makers
@@ -300,83 +307,33 @@ export const get0xOpenOrders = async (
   return filteredOrders
 }
 
-interface OrderBaseInterface {
-  baseToken: string
-  quoteToken: string
-}
-
-interface TokenPairType extends OrderBaseInterface {
-  id: string
-  decimals: number
-}
-
-interface OrderbookPriceRequest {
-  chainId: number
-  page: number
-  perPage: number
-  graphUrl: string
-  createdBy?: string
-  taker?: string
-  feeRecipient?: string
-  takerTokenFee?: number // 1 = 0.01%
-  threshold?: number
-  tokenPair: TokenPairType[]
-}
-
-interface OrderOutputType {
-  order?: {
-    maker: string
-    taker: string
-    makerToken: string
-    takerToken: string
-    makerAmount: number
-    takerAmount: number
-    takerTokenFeeAmount: number
-    feeRecipient: string
-    expiry: string
-  }
-  metaData?: {
-    remainingFillableTakerAmount: number
-  }
-}
-
-interface PriceResponseType extends OrderBaseInterface {
-  bid: OrderOutputType
-  ask: OrderOutputType
-}
-
-interface PriceOutputType extends PriceResponseType {
-  id: string
-  type: string
-  decimals: number
-}
-
-interface OrderOutputType {
-  orderType: string
-  id: string
-  bidExpiry: string
-  askExpiry: string
-  bid?: string
-  ask?: string
-  bidQuantity: string
-  askQuantity: string
-}
-
-const getPoolID = (
+/**
+ * A function to get pool information from the pool information array using the baseToken and quoteToken of the pool.
+ * @param {PriceResponseType} poolResponse // orderbook price response
+ * @param {PoolInfoType[]} poolInfoArray // pool information array
+ * @returns {PoolInfoType}
+ */
+const getPoolInformation = (
   poolResponse: PriceResponseType,
-  tokenPair: TokenPairType[]
-): TokenPairType => {
-  const pool = tokenPair.filter(
-    (pair: TokenPairType) =>
+  poolInfoArray: PoolInfoType[]
+): PoolInfoType => {
+  // Filter pool information by baseToken and quoteToken of the pool
+  const poolInfo = poolInfoArray.filter(
+    (pair: PoolInfoType) =>
       poolResponse.baseToken === pair.baseToken &&
       poolResponse.quoteToken === pair.quoteToken
   )[0]
 
-  return pool
+  return poolInfo
 }
 
-const getOrder = (price: PriceOutputType): OrderOutputType => {
-  const id = price.id
+/**
+ * A function to get orders by order output type from order price information
+ * @param {PriceOutputType} price // orderbook price information
+ * @returns {OrderOutputType}
+ */
+const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
+  const poolId = price.poolId
   let orderType = 'buy'
   if (price.type !== 'Buy') {
     orderType = 'sell'
@@ -433,58 +390,75 @@ const getOrder = (price: PriceOutputType): OrderOutputType => {
   }
 
   return {
-    bidExpiry: bidExpiry + ' mins',
-    askExpiry: askExpiry + ' mins',
-    orderType,
-    id,
-    bid,
-    bidQuantity: bidnbrOptions,
-    ask,
-    askQuantity: asknbrOptions,
+    bidExpiry: bidExpiry + ' mins', // expiry time of best bid
+    askExpiry: askExpiry + ' mins', // expiry time of best ask
+    orderType, // order type
+    poolId, // pool id
+    bid, // best bid
+    bidQuantity: bidnbrOptions, // best bid quantity
+    ask, // best ask
+    askQuantity: asknbrOptions, // best ask quantity
   }
 }
 
-export const getOrderbookPrices = async (req: OrderbookPriceRequest) => {
+/**
+ * A function to get orderbook price using orderbook price endpoint
+ * @param {OrderbookPriceRequest} req // orderbook price request
+ * @returns {OrderOutputType[]}
+ */
+export const getOrderbookPrices = async (
+  req: OrderbookPriceRequest
+): Promise<OrderOutputType[]> => {
+  // Generate an orderbook price endpoint
   let urlPrefix =
     config[req.chainId].orderbook + `/prices?graphUrl=${req.graphUrl}`
 
+  // Add createdBy by parameter to orderbook price endpoint
   if (req.createdBy !== undefined) {
     urlPrefix += `&createdBy=${req.createdBy}`
   }
+  // Add taker by parameter to orderbook price endpoint
   if (req.taker !== undefined) {
     urlPrefix += `&taker=${req.taker}`
   }
+  // Add feeRecipient by parameter to orderbook price endpoint
   if (req.feeRecipient !== undefined) {
     urlPrefix += `&feeRecipient=${req.feeRecipient}`
   }
+  // Add takerTokenFee by parameter to orderbook price endpoint
   if (req.takerTokenFee !== undefined) {
     urlPrefix += `&takerTokenFee=${req.takerTokenFee}`
   }
+  // Add threshold by parameter to orderbook price endpoint
   if (req.threshold !== undefined) {
     urlPrefix += `&threshold=${req.threshold}`
   }
+  // Add 1 to the current page because the page parameter starts at 0.
   const url = urlPrefix + `&page=${req.page + 1}&perPage=${req.perPage}`
-  const prices = await axios
+
+  // Get orderbook price response from orderbook price endpoint
+  const prices: OrderOutputType[] = await axios
     .get(url)
     .then(async function (response) {
       const priceResponse: any = response.data
 
       const output: OrderOutputType[] = []
-      priceResponse.records.map((pool: PriceResponseType) => {
-        const token = getPoolID(pool, req.tokenPair)
-        const type = token.id[0] === 'S' ? 'Sell' : 'Buy'
-        const decimals = token.decimals
+      // Formatting data format for using market page tables
+      priceResponse.records.map((poolPrice: PriceResponseType) => {
+        const poolInfo = getPoolInformation(poolPrice, req.poolInfo)
+        const type = poolInfo.poolId[0] === 'S' ? 'Sell' : 'Buy'
+        const decimals = poolInfo.collateralTokenDecimals
         const price: PriceOutputType = {
-          id: token.id,
-          type: type,
-          baseToken: pool.baseToken,
-          quoteToken: pool.quoteToken,
-          bid: pool.bid,
-          ask: pool.ask,
-          decimals: decimals,
+          poolId: poolInfo.poolId, // pool id
+          type: type, // pool type
+          baseToken: poolPrice.baseToken, // pool baseToken
+          quoteToken: poolPrice.quoteToken, // pool quoteToken
+          bid: poolPrice.bid, // best bid of pool
+          ask: poolPrice.ask, // best ask of pool
+          decimals: decimals, // collateral token decimals of pool
         }
 
-        output.push(getOrder(price))
+        output.push(getOrderOutput(price))
       })
 
       return output

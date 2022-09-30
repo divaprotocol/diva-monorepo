@@ -17,6 +17,11 @@ import request from 'graphql-request'
 import { RootState } from './Store'
 import { get0xOpenOrders, getOrderbookPrices } from '../DataService/OpenOrders'
 import {
+  OrderbookPriceRequest,
+  OrderOutputType,
+  PoolInfoType,
+} from '../Models/orderbook'
+import {
   config,
   divaGovernanceAddress,
   NULL_ADDRESS,
@@ -187,7 +192,7 @@ export const fetchPools = createAsyncThunk(
       const result = await request(
         graphUrl,
         queryPools(
-          (Math.max(page, 0) * pageSize) / 2,
+          (Math.max(page, 0) * pageSize) / 2, // Because there are 2 rows (long and short) in the table for every pool
           pageSize,
           createdBy,
           dataProvider
@@ -206,19 +211,19 @@ export const fetchPools = createAsyncThunk(
       }
     }
 
-    const tokenPair = []
+    const poolInfo: PoolInfoType[] = []
     pools.map((poolPair: Pool) => {
-      tokenPair.push({
+      poolInfo.push({
         baseToken: ethers.utils.getAddress(poolPair.longToken.id),
         quoteToken: ethers.utils.getAddress(poolPair.collateralToken.id),
-        id: poolPair.longToken.name,
-        decimals: poolPair.collateralToken.decimals,
+        poolId: poolPair.longToken.name,
+        collateralTokenDecimals: poolPair.collateralToken.decimals,
       })
-      tokenPair.push({
+      poolInfo.push({
         baseToken: ethers.utils.getAddress(poolPair.shortToken.id),
         quoteToken: ethers.utils.getAddress(poolPair.collateralToken.id),
-        id: poolPair.shortToken.name,
-        decimals: poolPair.collateralToken.decimals,
+        poolId: poolPair.shortToken.name,
+        collateralTokenDecimals: poolPair.collateralToken.decimals,
       })
     })
 
@@ -226,27 +231,32 @@ export const fetchPools = createAsyncThunk(
     const feeRecipient = divaGovernanceAddress
     const takerTokenFee = DEFAULT_TAKER_TOKEN_FEE
     const threshold = DEFAULT_THRESHOLD
+    const req: OrderbookPriceRequest = {
+      chainId,
+      page,
+      perPage: pageSize,
+      graphUrl,
+      createdBy,
+      taker,
+      feeRecipient,
+      takerTokenFee,
+      threshold,
+      poolInfo,
+    }
 
     try {
-      const prices = await getOrderbookPrices({
-        chainId,
-        page,
-        perPage: pageSize,
-        graphUrl,
-        createdBy,
-        taker,
-        feeRecipient,
-        takerTokenFee,
-        threshold,
-        tokenPair,
-      })
-
+      const prices: OrderOutputType[] = await getOrderbookPrices(req)
+      // Update price parameters to display market page
       pools = pools.map((pool: Pool) => {
         return (pool = {
           ...pool,
           prices: {
-            long: prices.filter((price: any) => price.id === 'L' + pool.id)[0],
-            short: prices.filter((price: any) => price.id === 'S' + pool.id)[0],
+            long: prices.filter(
+              (price: OrderOutputType) => price.poolId === 'L' + pool.id
+            )[0],
+            short: prices.filter(
+              (price: OrderOutputType) => price.poolId === 'S' + pool.id
+            )[0],
           },
         })
       })

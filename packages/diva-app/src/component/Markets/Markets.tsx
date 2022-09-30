@@ -374,7 +374,7 @@ export default function Markets() {
             : '-',
         MaxYield:
           val.prices?.long !== undefined && val.prices.long.ask !== ''
-            ? Number(1 / Number(val.prices.long.ask)).toFixed(2)
+            ? Number(1 / Number(val.prices.long.ask)).toFixed(2) + 'x'
             : '-',
       },
       {
@@ -424,7 +424,7 @@ export default function Markets() {
             : '-',
         MaxYield:
           val.prices?.short !== undefined && val.prices.short.ask !== ''
-            ? Number(1 / Number(val.prices.short.ask)).toFixed(2)
+            ? Number(1 / Number(val.prices.short.ask)).toFixed(2) + 'x'
             : '-',
       },
     ]
