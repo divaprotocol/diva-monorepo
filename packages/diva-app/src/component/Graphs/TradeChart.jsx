@@ -49,6 +49,27 @@ export default function DIVATradeChart(props) {
   const blueColorCode = '#3B8DCA'
   const redColorCode = '#F77F99'
   const legendHeight = height + 30
+  const newLegendHeight = height + 63
+  const legendXPos = {
+    currentCircle: width * 0.0083,
+    currentText: width * 0.033,
+  }
+  const newlegendXPos = {
+    currentCircle: width * 0.0083,
+    currentText: width * 0.033,
+  }
+  const [legendYPos, setLegendYPos] = useState(legendHeight)
+  const [currentLegend, setCurrentLegend] = useState(legendHeight)
+  const [BreakevenLegend, setBreakLegend] = useState(legendHeight)
+
+  console.log(parseFloat(currentPrice).toFixed(0).length)
+
+  useEffect(() => {
+    if (parseFloat(currentPrice).toFixed(0).length >= 5) {
+      setLegendYPos(newLegendHeight)
+      setCurrentLegend()
+    }
+  }, [currentPrice])
 
   useEffect(() => {
     intitalChart()
@@ -242,10 +263,11 @@ export default function DIVATradeChart(props) {
         return cap == floor ? 0 : 6
       })
       .style('fill', '#83BD67')
+    //current Price
     svg
       .append('circle')
       .attr('cx', width * 0.54)
-      .attr('cy', legendHeight)
+      .attr('cy', legendYPos)
       .attr('r', currentPrice ? 6 : 0)
       .style('fill', '#3393E0')
     svg
@@ -289,7 +311,7 @@ export default function DIVATradeChart(props) {
     svg
       .append('text')
       .attr('x', width * 0.57)
-      .attr('y', legendHeight)
+      .attr('y', legendYPos)
       .attr('opacity', currentPrice ? 1 : 0)
       .text(
         'Current Value' + ' ' + '(' + parseFloat(currentPrice).toFixed(2) + ')'
