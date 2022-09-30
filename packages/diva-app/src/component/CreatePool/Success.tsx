@@ -220,7 +220,7 @@ export function Success({
           </Container>
           <h2>Congratulations</h2>
           {transactionType === 'filloffer' && (
-            <Typography>Your offer has been filled successfully</Typography>
+            <Typography>The offer has been filled successfully</Typography>
           )}
           {transactionType === 'filloffer' && <h4>Pool ID: {poolId}</h4>}
           {transactionType === 'createoffer' && (
