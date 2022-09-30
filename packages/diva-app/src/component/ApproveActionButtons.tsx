@@ -184,7 +184,6 @@ export const ApproveActionButtons = ({
     DIVA712ABI,
     signer
   )
-  console.log(typeof values.takerShare.toString())
 
   const offerCreationStats = {
     maker: ethers.utils.getAddress(account),
@@ -261,7 +260,6 @@ export const ApproveActionButtons = ({
             token
               .allowance(account, config[chainId!].divaAddressNew)
               .then((res) => {
-                console.log('allowance', formatEther(res))
                 if (
                   res.lt(
                     parseUnits(String(formik.values.yourShare), decimal).add(
@@ -289,7 +287,6 @@ export const ApproveActionButtons = ({
             token
               .allowance(account, config[chainId!].divaAddressNew)
               .then((res) => {
-                console.log('allowance', formatEther(res))
                 if (
                   res.lt(parseUnits(String(formik.values.yourShare), decimal))
                 ) {
@@ -606,7 +603,6 @@ export const ApproveActionButtons = ({
                         }
 
                         formik.setFieldValue('jsonToExport', json)
-                        console.log('json', json)
                         onTransactionSuccess()
                       })
                       .catch((err: any) => {

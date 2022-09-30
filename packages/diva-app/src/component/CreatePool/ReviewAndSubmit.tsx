@@ -56,8 +56,7 @@ export function ReviewAndSubmit({
     DIVA712ABI,
     provider.getSigner()
   )
-  console.log('formik.values', formik.values)
-  console.log('duration', new Date(Number(formik.values.offerDuration) * 1000))
+
   const token = new ethers.Contract(
     formik.values.collateralToken.id,
     ERC20,
@@ -68,14 +67,12 @@ export function ReviewAndSubmit({
   })
   useEffect(() => {
     if (transaction === 'filloffer') {
-      console.log('aaaaa')
       divaNew
         .getOfferRelevantStateCreateContingentPool(
           formik.values.jsonToExport,
           formik.values.signature
         )
         .then((params: any) => {
-          console.log(params)
           setActualFillableAmount(
             Number(formatUnits(params.actualTakerFillableAmount, decimal))
           )
