@@ -26,7 +26,7 @@ export function PayoffProfile(props: {
     collateralBalanceShort,
     collateralBalanceLong,
   } = props
-  console.log('props', props)
+
   const padding = cap * 0.1
   const start = Math.max(floor - padding, 0)
   const end = Number(cap) + padding

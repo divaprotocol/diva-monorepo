@@ -35,6 +35,9 @@ import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
 import MenuItem from '@mui/material/MenuItem'
+import { useAppSelector } from '../../Redux/hooks'
+import { selectUserAddress } from '../../Redux/appSlice'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -58,6 +61,8 @@ export function DefineOfferAttributes({
   const [fillOrKill, setFillOrKill] = useState(true)
   const [mobile, setMobile] = useState(false)
   const [unlimited, setUnlimited] = useState(true)
+  const account = useAppSelector(selectUserAddress)
+  const { isConnected, disconnect, connect } = useConnectionContext()
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
@@ -102,12 +107,22 @@ export function DefineOfferAttributes({
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
   useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', () => {
+        disconnect()
+        connect()
+        formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
+      })
+    }
+  }, [])
+  useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
     } else {
       setMobile(false)
     }
   }, [])
+
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
@@ -732,9 +747,13 @@ export function DefineOfferAttributes({
                     <FormHelperText>
                       You receive{' '}
                       {direction === 'Long' ? (
-                        <strong>{formik.values.yourShare} LONG Tokens</strong>
+                        <strong>
+                          {formik.values.collateralBalance} LONG Tokens
+                        </strong>
                       ) : (
-                        <strong>{formik.values.yourShare} SHORT Tokens</strong>
+                        <strong>
+                          {formik.values.collateralBalance} SHORT Tokens
+                        </strong>
                       )}
                     </FormHelperText>
                   )}
@@ -776,9 +795,13 @@ export function DefineOfferAttributes({
                     <FormHelperText>
                       Taker receives{' '}
                       {direction === 'Long' ? (
-                        <strong>{formik.values.takerShare} SHORT Tokens</strong>
+                        <strong>
+                          {formik.values.collateralBalance} SHORT Tokens
+                        </strong>
                       ) : (
-                        <strong>{formik.values.takerShare} LONG Tokens</strong>
+                        <strong>
+                          {formik.values.collateralBalance} LONG Tokens
+                        </strong>
                       )}
                     </FormHelperText>
                   )}
@@ -861,7 +884,7 @@ export function DefineOfferAttributes({
               <AccordionDetails sx={{ padding: 0 }}>
                 <Box pb={3}>
                   <Stack direction={mobile ? 'column' : 'row'}>
-                    <Container>
+                    <Container sx={{ margin: -2, padding: 1 }}>
                       <FormControl
                         fullWidth
                         error={formik.errors.takerAddress != null}
@@ -938,7 +961,9 @@ export function DefineOfferAttributes({
                         label="Unlimited"
                       />
                     </Container>
-                    <Container>
+                    <Container
+                      sx={{ margin: -3, padding: 2, pr: 4, ml: -1.5, mr: -8 }}
+                    >
                       <FormControl
                         fullWidth
                         error={formik.errors.minTakerContribution != null}

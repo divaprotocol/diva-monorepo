@@ -217,7 +217,7 @@ export function ReviewAndSubmit({
                     Collateral Balance
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {formik.values.collateralBalance}
+                    {Number(formik.values.collateralBalance).toFixed(2)}
                   </Typography>
                 </Stack>
               )}
@@ -515,10 +515,26 @@ export function ReviewAndSubmit({
                         You receive{' '}
                         {formik.values.offerDirection === 'Long' ? (
                           <strong>
-                            {formik.values.yourShare} SHORT Tokens
+                            {(formik.values.yourShare *
+                              formik.values.makerShare) /
+                              (Number(
+                                formik.values.jsonToExport.takerCollateralAmount
+                              ) /
+                                10 ** decimal) +
+                              formik.values.yourShare}{' '}
+                            SHORT Tokens
                           </strong>
                         ) : (
-                          <strong>{formik.values.yourShare} LONG Tokens</strong>
+                          <strong>
+                            {(formik.values.yourShare *
+                              formik.values.makerShare) /
+                              (Number(
+                                formik.values.jsonToExport.takerCollateralAmount
+                              ) /
+                                10 ** decimal) +
+                              formik.values.yourShare}{' '}
+                            LONG Tokens
+                          </strong>
                         )}
                       </FormHelperText>
                     )}
@@ -571,7 +587,7 @@ export function ReviewAndSubmit({
                       mb: theme.spacing(1),
                     }}
                   >
-                    Remaining fill amount {actualFillableAmount} {tokenSymbol}
+                    Remaining fill amount: {actualFillableAmount} {tokenSymbol}
                   </FormHelperText>
                 </Container>
               </Card>
