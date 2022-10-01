@@ -109,121 +109,113 @@ export default function OptionDetails({
   }, [maxYield])
 
   return (
-    <PageDiv>
-      <FlexDiv>
-        <FlexBox>
-          <FlexBoxHeader>Expires at</FlexBoxHeader>
-          <FlexBoxData>
-            <Tooltip
-              title={
-                getDateTime(pool.expiryTime).slice(11, 19) +
-                ' ' +
-                userTimeZone()
-              }
-              arrow
-            >
-              <FlexDataDiv>
-                {getDateTime(pool.expiryTime).slice(0, 10)}
-                {'  '}
-              </FlexDataDiv>
-            </Tooltip>
-          </FlexBoxData>
-        </FlexBox>
-        {binary ? (
-          <>
-            <FlexBox>
-              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
-              <FlexBoxData>Binary</FlexBoxData>
-            </FlexBox>
-          </>
-        ) : linear ? (
-          <>
-            <FlexBox>
-              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
-              <FlexBoxData>Linear</FlexBoxData>
-            </FlexBox>
-          </>
-        ) : (
-          <>
-            <FlexBox>
-              <FlexBoxHeader>Payoff Type</FlexBoxHeader>
-              <FlexBoxData>Custom</FlexBoxData>
-            </FlexBox>
-          </>
-        )}
-        <FlexBox>
-          <FlexBoxHeader>Data Provider</FlexBoxHeader>
-          <FlexBoxData>
-            <FlexCheckIcon>
-              <Tooltip title={pool.dataProvider} arrow>
-                <FlexDataDiv>{dataSourceName}</FlexDataDiv>
-              </Tooltip>
-              {checkIcon ? (
-                <Tooltip
-                  title="Trusted data provider from the DIVA whitelist."
-                  arrow
-                >
-                  <CheckCircleSharpIcon
-                    sx={{
-                      mt: 0.3,
-                      paddingLeft: 1,
-                    }}
-                    color="success"
-                    fontSize="inherit"
-                  />
-                </Tooltip>
-              ) : (
-                <Tooltip
-                  title="Data provider is NOT part of DIVA's whitelist."
-                  arrow
-                >
-                  <WarningAmberSharpIcon
-                    sx={{
-                      mt: 0.3,
-                      paddingLeft: 1,
-                    }}
-                    color="warning"
-                    fontSize="inherit"
-                  />
-                </Tooltip>
-              )}
-            </FlexCheckIcon>
-          </FlexBoxData>
-        </FlexBox>
-        <FlexBox>
-          <FlexBoxHeader>Collateral</FlexBoxHeader>
-          <Tooltip title={pool.collateralToken.id} arrow placement="bottom">
-            <FlexBoxData>
-              {Number(
-                formatUnits(
-                  pool.collateralBalance,
-                  pool.collateralToken.decimals
-                )
-              ).toFixed(2) +
-                ' ' +
-                pool.collateralToken.symbol}
-            </FlexBoxData>
+    <FlexDiv>
+      <FlexBox>
+        <FlexBoxHeader>Expires at</FlexBoxHeader>
+        <FlexBoxData>
+          <Tooltip
+            title={
+              getDateTime(pool.expiryTime).slice(11, 19) + ' ' + userTimeZone()
+            }
+            arrow
+          >
+            <FlexDataDiv>
+              {getDateTime(pool.expiryTime).slice(0, 10)}
+            </FlexDataDiv>
           </Tooltip>
-        </FlexBox>
-        <FlexBox>
-          <FlexBoxHeader>Intrinsic Value</FlexBoxHeader>
+        </FlexBoxData>
+      </FlexBox>
+      {binary ? (
+        <>
+          <FlexBox>
+            <FlexBoxHeader>Payoff Type</FlexBoxHeader>
+            <FlexBoxData>Binary</FlexBoxData>
+          </FlexBox>
+        </>
+      ) : linear ? (
+        <>
+          <FlexBox>
+            <FlexBoxHeader>Payoff Type</FlexBoxHeader>
+            <FlexBoxData>Linear</FlexBoxData>
+          </FlexBox>
+        </>
+      ) : (
+        <>
+          <FlexBox>
+            <FlexBoxHeader>Payoff Type</FlexBoxHeader>
+            <FlexBoxData>Custom</FlexBoxData>
+          </FlexBox>
+        </>
+      )}
+      <FlexBox>
+        <FlexBoxHeader>Data Provider</FlexBoxHeader>
+        <FlexBoxData>
+          <FlexCheckIcon>
+            <Tooltip title={pool.dataProvider} arrow>
+              <FlexDataDiv>{dataSourceName}</FlexDataDiv>
+            </Tooltip>
+            {checkIcon ? (
+              <Tooltip
+                title="Trusted data provider from the DIVA whitelist."
+                arrow
+              >
+                <CheckCircleSharpIcon
+                  sx={{
+                    mt: 0.3,
+                    paddingLeft: 1,
+                  }}
+                  color="success"
+                  fontSize="inherit"
+                />
+              </Tooltip>
+            ) : (
+              <Tooltip
+                title="Data provider is NOT part of DIVA's whitelist."
+                arrow
+              >
+                <WarningAmberSharpIcon
+                  sx={{
+                    mt: 0.3,
+                    paddingLeft: 1,
+                  }}
+                  color="warning"
+                  fontSize="inherit"
+                />
+              </Tooltip>
+            )}
+          </FlexCheckIcon>
+        </FlexBoxData>
+      </FlexBox>
+      <FlexBox>
+        <FlexBoxHeader>Collateral</FlexBoxHeader>
+        <Tooltip title={pool.collateralToken.id} arrow placement="bottom">
           <FlexBoxData>
-            {intrinsicValue != 'n/a'
-              ? parseFloat(intrinsicValue).toFixed(2) +
-                ' ' +
-                pool.collateralToken.symbol
-              : 'n/a'}
+            {Number(
+              formatUnits(pool.collateralBalance, pool.collateralToken.decimals)
+            ).toFixed(2) +
+              ' ' +
+              pool.collateralToken.symbol}
           </FlexBoxData>
-        </FlexBox>
-        <FlexBox>
-          <FlexBoxHeader>Max yield</FlexBoxHeader>
-          {isMaxYield ? (
-            <FlexBoxData style={{ color: '#3393E0' }}>{maxYield}</FlexBoxData>
-          ) : (
-            <FlexBoxData>n/a</FlexBoxData>
-          )}
-        </FlexBox>
-      </FlexDiv>
-    </PageDiv>
+        </Tooltip>
+      </FlexBox>
+      <FlexBox>
+        <FlexBoxHeader>Intrinsic Value</FlexBoxHeader>
+        <FlexBoxData>
+          {intrinsicValue != 'n/a'
+            ? parseFloat(intrinsicValue).toFixed(2) +
+              ' ' +
+              pool.collateralToken.symbol
+            : 'n/a'}
+        </FlexBoxData>
+      </FlexBox>
+      <FlexBox>
+        <FlexBoxHeader>Max yield</FlexBoxHeader>
+        {isMaxYield ? (
+          <FlexBoxData style={{ color: '#3393E0' }}>{maxYield}</FlexBoxData>
+        ) : (
+          <FlexBoxData>n/a</FlexBoxData>
+        )}
+      </FlexBox>
+    </FlexDiv>
   )
 }

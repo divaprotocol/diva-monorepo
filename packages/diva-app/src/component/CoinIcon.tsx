@@ -7,12 +7,18 @@ import localCoinImages from '../Util/localCoinImages.json'
 const assetLogoPath = '/images/coin-logos/'
 const existsLocally = (file: string) => localCoinImages.includes(file)
 
-const Placeholder = ({ asset }: { asset: string }) => {
+type prop = {
+  asset?: string
+  assetName?: string
+  isLargeIcon?: boolean
+}
+
+const Placeholder = ({ asset }: prop) => {
   return (
     <svg height="100%" overflow="visible" viewBox="4 0 30 30">
       <circle
         cx="20"
-        cy="15"
+        cy="20"
         dx="-0.5em"
         z="2"
         r="16"
@@ -21,7 +27,7 @@ const Placeholder = ({ asset }: { asset: string }) => {
       />
       <text
         x="66%"
-        y="55%"
+        y="70%"
         textAnchor="middle"
         fill="white"
         fontSize="20px"
@@ -33,7 +39,7 @@ const Placeholder = ({ asset }: { asset: string }) => {
   )
 }
 
-const CoinIcon = ({ assetName }: { assetName: string }) => {
+const CoinIcon = ({ assetName }: prop) => {
   let imgSrc = useCoinIcon(assetName)
   const [showPlaceholder, setShowPlaceholder] = useState(false)
   if (showPlaceholder || imgSrc == null) {
@@ -56,14 +62,14 @@ const CoinIcon = ({ assetName }: { assetName: string }) => {
   )
 }
 
-export const CoinIconPair = ({ assetName }: { assetName: string }) => {
+export const CoinIconPair = ({ assetName, isLargeIcon }: prop) => {
   const assets = assetName.split('/')
 
   if (assets.length === 1) {
     return (
       <Box
         sx={{
-          height: 30,
+          height: `${isLargeIcon ? 45 : 30}`,
         }}
       >
         <CoinIcon assetName={assets[0]} />
@@ -74,7 +80,7 @@ export const CoinIconPair = ({ assetName }: { assetName: string }) => {
       <>
         <Box
           sx={{
-            height: 30,
+            height: `${isLargeIcon ? '45px' : '30px'}`,
           }}
         >
           <CoinIcon assetName={assets[0]} />
@@ -82,7 +88,7 @@ export const CoinIconPair = ({ assetName }: { assetName: string }) => {
         <Box
           marginLeft={-1}
           sx={{
-            height: 30,
+            height: `${isLargeIcon ? '45px' : '30px'}`,
           }}
         >
           <CoinIcon assetName={assets[1]} />

@@ -1,6 +1,14 @@
 import styled from 'styled-components'
 import '../../Util/Dates'
-import { IconButton, Link } from '@mui/material'
+import {
+  Box,
+  Container,
+  IconButton,
+  Link,
+  Stack,
+  Typography,
+} from '@mui/material'
+import AddCircleIcon from '@mui/icons-material/AddCircle'
 import {
   getEtherscanLink,
   EtherscanLinkType,
@@ -25,27 +33,6 @@ const AppHeader = styled.header`
   justify-content: space-between;
 `
 
-const Container = styled.div`
-  display: flex;
-  align-items: center;
-`
-
-const OptionTitle = styled.h2`
-  font-size: 1rem;
-  padding: 15px;
-`
-
-const MetaMaskImage = styled.img`
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  margin-right: 10px;
-`
-
-const AssetPriceUsd = styled.div`
-  font-weight: bold;
-  padding-left: 15px;
-`
 export default function OptionHeader(optionData: {
   TokenAddress: string
   ReferenceAsset: string
@@ -57,17 +44,14 @@ export default function OptionHeader(optionData: {
 
   const params: { poolId: string; tokenType: string } = useParams()
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
+  const { TokenAddress, isLong } = optionData
   const headerTitle = optionData.ReferenceAsset
+  const tokenSymbol = isLong ? `L${optionData.poolId}` : `S${optionData.poolId}`
   const underlyingAssetPrice = useAppSelector(
     selectUnderlyingPrice(pool?.referenceAsset)
   )
 
   const handleAddMetaMask = async () => {
-    const { TokenAddress, isLong } = optionData
-    const tokenSymbol = isLong
-      ? `L${optionData.poolId}`
-      : `S${optionData.poolId}`
-
     try {
       await window.ethereum.request({
         method: 'wallet_watchAsset',
@@ -91,45 +75,67 @@ export default function OptionHeader(optionData: {
 
   return (
     <AppHeader>
-      <Container>
-        <CoinIconPair assetName={headerTitle} />
-        <OptionTitle>{headerTitle}</OptionTitle>
-      </Container>
-      <Container>
-        <Link
-          style={{ color: 'gray' }}
-          underline={'none'}
-          rel="noopener noreferrer"
-          target="_blank"
-          href={getEtherscanLink(
-            chainId,
-            optionData.TokenAddress,
-            EtherscanLinkType.ADDRESS
-          )}
-        >
-          {shortenTokenAddress}
-        </Link>
-        <IconButton
-          onClick={() => navigator.clipboard.writeText(optionData.TokenAddress)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="14"
-            viewBox="0 0 24 24"
-            width="14"
+      <Stack direction="column">
+        <Stack direction="row">
+          <CoinIconPair assetName={headerTitle} isLargeIcon />
+          <Typography
+            fontSize="34px"
+            sx={{
+              ml: '20px',
+              transform: 'translateY(-20%)',
+            }}
           >
-            <path d="M0 0h24v24H0z" fill="none" />
-            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
-          </svg>
-        </IconButton>
-        <Tooltip title="Add to Metamask">
-          <MetaMaskImage
-            src="/images/metamask.svg"
-            alt="metamask"
-            onClick={handleAddMetaMask}
-          />
-        </Tooltip>
-      </Container>
+            {headerTitle}
+          </Typography>
+        </Stack>
+        <Stack direction="row" ml="100px" mt="-10px">
+          <Tooltip title="Add to Metamask">
+            <IconButton
+              sx={{
+                w: '14px',
+                h: '14px',
+                mt: '-8px',
+                ml: '-7px',
+                color: '#929292',
+              }}
+              onClick={handleAddMetaMask}
+            >
+              <AddCircleIcon />
+            </IconButton>
+          </Tooltip>
+          <Link
+            style={{ color: 'gray' }}
+            underline={'none'}
+            rel="noopener noreferrer"
+            target="_blank"
+            href={getEtherscanLink(
+              chainId,
+              optionData.TokenAddress,
+              EtherscanLinkType.ADDRESS
+            )}
+          >
+            {shortenTokenAddress}
+          </Link>
+          <Typography fontSize="14px" color="#929292" pl="10px">
+            ({tokenSymbol})
+          </Typography>
+          {/* <IconButton
+            onClick={() =>
+              navigator.clipboard.writeText(optionData.TokenAddress)
+            }
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="14"
+              viewBox="0 0 24 24"
+              width="14"
+            >
+              <path d="M0 0h24v24H0z" fill="none" />
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
+            </svg>
+          </IconButton> */}
+        </Stack>
+      </Stack>
     </AppHeader>
   )
 }
