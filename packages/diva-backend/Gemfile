@@ -1,0 +1,6 @@
+source 'https://rubygems.org'
+gem "sinatra"
+gem "rack-contrib"
+gem "rethinkdb"
+gem "json"
+gem "puma"
