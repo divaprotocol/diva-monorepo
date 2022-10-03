@@ -76,7 +76,7 @@ export const config: { [key: number]: SingleConfig } = {
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
-    balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
+    balanceCheckAddress: '0x6F9b7892a6272880905E90DC5AcD1F56dF222FbE',
     exchangeProxy: '0xf91bb752490473b8342a3e964e855b9f9a2a668e',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
     divaSubgraph:
@@ -158,6 +158,10 @@ export const divaGovernanceAddress =
   '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E' // creator of pools on Main Markets page and trading fee recipient
 
 export const tradingFee = 0.01 // 1%
+
+export const DEFAULT_TAKER_TOKEN_FEE = 1000 // 1000 = 1%
+
+export const DEFAULT_THRESHOLD = 100
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 

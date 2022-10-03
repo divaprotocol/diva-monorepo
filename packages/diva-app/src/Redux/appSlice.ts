@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { BigNumber, providers } from 'ethers'
+import { BigNumber, providers, ethers } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
 import {
   FeeRecipient,
@@ -15,9 +15,19 @@ import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
 import { RootState } from './Store'
-import { get0xOpenOrders } from '../DataService/OpenOrders'
-import { config, divaGovernanceAddress } from '../constants'
-import { useConnectionContext } from '../hooks/useConnectionContext'
+import { get0xOpenOrders, getOrderbookPrices } from '../DataService/OpenOrders'
+import {
+  OrderbookPriceRequest,
+  OrderOutputType,
+  PoolInfoType,
+} from '../Models/orderbook'
+import {
+  config,
+  divaGovernanceAddress,
+  NULL_ADDRESS,
+  DEFAULT_TAKER_TOKEN_FEE,
+  DEFAULT_THRESHOLD,
+} from '../constants'
 
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
@@ -170,26 +180,26 @@ export const fetchPools = createAsyncThunk(
     }
 
     if (config[chainId] == null) {
-      console.error(`constants for chainId: "${chainId}" are not configured`)
+      console.error(`constants for chainId: '${chainId}' are not configured`)
       return { pools: [] }
     }
 
     const graphUrl = config[chainId].divaSubgraph
 
-    let res: Pool[]
+    let pools: Pool[]
 
     try {
       const result = await request(
         graphUrl,
         queryPools(
-          Math.max(page, 0) * pageSize,
+          (Math.max(page, 0) * pageSize) / 2, // Because there are 2 rows (long and short) in the table for every pool
           pageSize,
           createdBy,
           dataProvider
         )
       )
 
-      res = result.pools
+      pools = result.pools
     } catch (err) {
       /**
        * Handle error and fail gracefully
@@ -201,8 +211,71 @@ export const fetchPools = createAsyncThunk(
       }
     }
 
+    const poolInfo: PoolInfoType[] = []
+    pools.map((poolPair: Pool) => {
+      poolInfo.push({
+        baseToken: ethers.utils.getAddress(poolPair.longToken.id),
+        quoteToken: ethers.utils.getAddress(poolPair.collateralToken.id),
+        poolId: poolPair.longToken.name,
+        collateralTokenDecimals: poolPair.collateralToken.decimals,
+      })
+      poolInfo.push({
+        baseToken: ethers.utils.getAddress(poolPair.shortToken.id),
+        quoteToken: ethers.utils.getAddress(poolPair.collateralToken.id),
+        poolId: poolPair.shortToken.name,
+        collateralTokenDecimals: poolPair.collateralToken.decimals,
+      })
+    })
+
+    const taker = NULL_ADDRESS
+    const feeRecipient = divaGovernanceAddress
+    const takerTokenFee = DEFAULT_TAKER_TOKEN_FEE
+    const threshold = DEFAULT_THRESHOLD
+    const req: OrderbookPriceRequest = {
+      chainId,
+      page,
+      perPage: pageSize,
+      graphUrl,
+      createdBy,
+      taker,
+      feeRecipient,
+      takerTokenFee,
+      threshold,
+      poolInfo,
+    }
+
+    try {
+      const prices: OrderOutputType[] = await getOrderbookPrices(req)
+      // Update price parameters to display market page
+      pools = pools.map((pool: Pool) => {
+        return (pool = {
+          ...pool,
+          prices: {
+            long: prices.filter(
+              (price: OrderOutputType) => price.poolId === 'L' + pool.id
+            )[0],
+            short: prices.filter(
+              (price: OrderOutputType) => price.poolId === 'S' + pool.id
+            )[0],
+          },
+        })
+      })
+    } catch (err) {
+      console.error(err, 'error is fetching pools bid and asks')
+
+      return {
+        pools: pools.map((pool: Pool) => {
+          return (pool = {
+            ...pool,
+            prices: {},
+          })
+        }),
+        chainId,
+      }
+    }
+
     return {
-      pools: res,
+      pools,
       chainId,
     }
   }
