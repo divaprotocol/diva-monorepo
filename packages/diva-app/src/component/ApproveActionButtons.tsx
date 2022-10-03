@@ -124,7 +124,7 @@ async function _checkConditions(
   // Check that taker is allowed to fill the offer (relevant if taker specified in the offer is not the zero address)
   if (
     offerCreateContingentPool.taker != ethers.constants.AddressZero &&
-    userAddress != offerCreateContingentPool.taker
+    userAddress.toLowerCase() != offerCreateContingentPool.taker.toLowerCase()
   ) {
     return {
       message: 'Offer is reserved for a different address',
@@ -190,11 +190,11 @@ export const ApproveActionButtons = ({
     taker: ethers.utils.getAddress(values.takerAddress),
     makerCollateralAmount: parseUnits(
       values.yourShare.toString(),
-      values.collateralToken.decimals
+      decimal
     ).toString(),
     takerCollateralAmount: parseUnits(
       values.takerShare.toString(),
-      values.collateralToken.decimals
+      decimal
     ).toString(),
     makerDirection: values.offerDirection === 'Long',
     offerExpiry: values.offerDuration,

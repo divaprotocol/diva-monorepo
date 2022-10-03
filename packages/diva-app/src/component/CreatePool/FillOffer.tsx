@@ -9,25 +9,12 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { useErcBalance } from '../../hooks/useErcBalance'
+import ERC20 from '@diva/contracts/abis/erc20.json'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
-import { BigNumber } from 'ethers'
-// const fileUploadProp: FileUploadProps = {
-//   accept: 'application/json',
-//   onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-//     if (event.target.files !== null && event.target?.files?.length > 0) {
-//       console.log(`Saving ${event.target.value}`)
-//     }
-//   },
-//   onDrop: (event: React.DragEvent<HTMLElement>) => {
-//     console.log(JSON.stringify(event.dataTransfer.files[0]))
-//     const fileReader = new FileReader()
-//     fileReader.readAsText(event.dataTransfer.files[0], 'UTF-8')
-//     fileReader.onload = (e) => {
-//       console.log('e.target.result', e.target.result)
-//     }
-//   },
-// }
+import { BigNumber, ethers } from 'ethers'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
+
 export function FillOffer({
   formik,
 }: {
@@ -36,9 +23,21 @@ export function FillOffer({
   const [uploadedJson, setUploadedJson] = React.useState<any>('{}')
   const userAddress = useAppSelector(selectUserAddress)
   const walletBalance = useErcBalance(JSON.parse(uploadedJson).collateralToken)
+  const { provider } = useConnectionContext()
+  const [decimal, setDecimal] = React.useState(18)
+
   useEffect(() => {
     if (uploadedJson !== '{}' && uploadedJson != undefined) {
       const configJson = JSON.parse(uploadedJson)
+      const token = new ethers.Contract(
+        configJson.collateralToken,
+        ERC20,
+        provider.getSigner()
+      )
+      token.decimals().then((decimals: number) => {
+        setDecimal(decimals)
+        formik.setFieldValue('collateralToken.decimals', decimals)
+      })
 
       formik.setFieldValue(
         'offerDirection',
@@ -51,11 +50,11 @@ export function FillOffer({
       formik.setFieldValue('inflection', formatEther(configJson.inflection))
       formik.setFieldValue(
         'yourShare',
-        Number(formatEther(configJson.takerCollateralAmount))
+        parseFloat(formatUnits(configJson.takerCollateralAmount, decimal))
       )
       formik.setFieldValue(
         'makerShare',
-        Number(formatEther(configJson.makerCollateralAmount))
+        Number(formatUnits(configJson.makerCollateralAmount, decimal))
       )
       formik.setFieldValue(
         'gradient',
@@ -65,16 +64,17 @@ export function FillOffer({
       if (configJson.maker.toLowerCase() === userAddress.toLowerCase()) {
         formik.setFieldValue(
           'collateralBalance',
-          formatEther(
+          formatUnits(
             BigNumber.from(configJson.makerCollateralAmount).add(
               BigNumber.from(configJson.takerCollateralAmount)
-            )
+            ),
+            decimal
           )
         )
       } else {
         formik.setFieldValue(
           'collateralBalance',
-          formatEther(configJson.takerCollateralAmount)
+          formatUnits(configJson.takerCollateralAmount, decimal)
         )
       }
       formik.setFieldValue('collateralToken.id', configJson.collateralToken)
@@ -89,7 +89,7 @@ export function FillOffer({
       formik.setFieldValue('offerDuration', configJson.offerExpiry)
       formik.setFieldValue(
         'minTakerContribution',
-        formatEther(configJson.minimumTakerFillAmount)
+        formatUnits(configJson.minimumTakerFillAmount, decimal)
       )
       formik.setFieldValue('takerAddress', configJson.taker)
       formik.setFieldValue('jsonToExport', {
@@ -114,9 +114,7 @@ export function FillOffer({
       formik.setFieldValue('signature', configJson.signature)
       // formik.setFieldValue('step', 3, false)
     }
-    console.log('formik values', formik.values)
-    console.log(uploadedJson, 'uploadedJson')
-  }, [uploadedJson])
+  }, [formik.values.collateralToken.id, uploadedJson, decimal])
 
   return (
     <Stack>
@@ -138,17 +136,14 @@ export function FillOffer({
               const fileReader = new FileReader()
               fileReader.readAsText(event.target.files[0], 'UTF-8')
               fileReader.onload = (e) => {
-                console.log('e.target.result', e.target.result)
                 setUploadedJson(e.target.result)
               }
             }
           },
           onDrop: (event: React.DragEvent<HTMLElement>) => {
-            console.log(JSON.stringify(event.dataTransfer.files[0]))
             const fileReader = new FileReader()
             fileReader.readAsText(event.dataTransfer.files[0], 'UTF-8')
             fileReader.onload = (e) => {
-              console.log('e.target.result', e.target.result)
               setUploadedJson(e.target.result)
             }
           },

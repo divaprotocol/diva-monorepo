@@ -388,7 +388,9 @@ export function ReviewAndSubmit({
                     Max Pool Capacity
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.capacity}
+                    {values.capacity !== 'Unlimited'
+                      ? formatUnits(values.capacity, decimal)
+                      : 'Unlimited'}
                   </Typography>
                 </Stack>
               )}
@@ -510,7 +512,7 @@ export function ReviewAndSubmit({
                     ) && (
                       <FormHelperText>
                         You receive{' '}
-                        {formik.values.offerDirection === 'Long' ? (
+                        {formik.values.offerDirection !== 'Long' ? (
                           <strong>
                             {(formik.values.yourShare *
                               formik.values.makerShare) /

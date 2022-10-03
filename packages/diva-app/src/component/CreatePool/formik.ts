@@ -58,9 +58,7 @@ export const initialValues: Values = {
   dataProvider: '',
   payoutProfile: 'Binary',
   offerDirection: 'Long',
-  offerDuration: Math.floor(
-    24 * 60 * 60 + defaultDate.getTime() / 1000
-  ).toString(),
+  offerDuration: Math.floor(24 * 60 * 60 + Date.now() / 1000).toString(),
   minTakerContribution: '10',
   takerAddress: ethers.constants.AddressZero,
   jsonToExport: '{}',

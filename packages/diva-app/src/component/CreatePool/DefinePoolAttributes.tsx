@@ -34,6 +34,7 @@ import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -56,6 +57,7 @@ export function DefinePoolAttributes({
     formik.setFieldValue('payoutProfile', event.target.value)
   }
   const { referenceAssets, collateralTokens } = useWhitelist()
+  const { disconnect, connect } = useConnectionContext()
   const {
     referenceAsset,
     expiryTime,
@@ -70,6 +72,15 @@ export function DefinePoolAttributes({
     payoutProfile,
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
+  useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', () => {
+        disconnect()
+        connect()
+        formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
+      })
+    }
+  }, [])
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
