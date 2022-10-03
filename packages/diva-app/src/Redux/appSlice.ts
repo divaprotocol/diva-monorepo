@@ -193,7 +193,7 @@ export const fetchPools = createAsyncThunk(
         graphUrl,
         queryPools(
           (Math.max(page, 0) * pageSize) / 2, // Because there are 2 rows (long and short) in the table for every pool
-          pageSize,
+          pageSize / 2, // Because there are 2 rows (long and short) in the table for every pool
           createdBy,
           dataProvider
         )
