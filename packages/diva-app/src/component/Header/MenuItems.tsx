@@ -48,7 +48,7 @@ export default function MenuItems() {
           borderTop: '1px solid #4F4F4F',
         }}
       >
-        {APP_BAR_ITEMS.map(({ label, to, icon, isRoot }) => {
+        {APP_BAR_ITEMS.map(({ label, to, icon, isRoot }, i) => {
           const Icon = icon
           const isActive =
             isRoot && location.pathname.startsWith('/markets/')
@@ -64,6 +64,7 @@ export default function MenuItems() {
               style={{
                 textDecoration: 'none',
               }}
+              key={i}
             >
               <Box
                 sx={{

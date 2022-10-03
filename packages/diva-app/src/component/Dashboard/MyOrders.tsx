@@ -131,14 +131,18 @@ const MyOrdersPoolCard = ({
             <ExpiresInCell row={row} {...row} />
           </Stack>
         </Box>
-        <Grid container rowGap={1.6} justifyContent="space-between">
-          {DATA_ARRAY.map(({ label, value }) => (
-            <Grid item key={label} xs={6}>
+        <Grid
+          container
+          rowGap={1.6}
+          justifyContent="space-between"
+          columnGap={'3px'}
+        >
+          {DATA_ARRAY.map(({ label, value }, i) => (
+            <Grid item key={i} xs={5}>
               <Stack
                 direction="row"
                 justifyContent={'space-between'}
                 sx={{
-                  borderRight: '10px solid transparent',
                   flexGrow: 1,
                 }}
               >

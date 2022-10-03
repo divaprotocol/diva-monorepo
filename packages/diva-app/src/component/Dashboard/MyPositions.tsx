@@ -622,46 +622,53 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
             <AddToMetamask row={row} />
           </Box>
           <Box>
-            <Button
-              size="small"
-              sx={{
-                borderRadius: '40px',
-                fontSize: '10px',
-                background:
-                  Status === 'Expired'
-                    ? 'rgba(237, 108, 2, 0.4)'
-                    : 'rgba(51, 147, 224, 0.4)',
-              }}
-              variant="contained"
-            >
-              {Status}
-            </Button>
+            {Status === 'Open' ? (
+              <Stack direction="row" spacing={1.6} alignItems="center">
+                <Typography
+                  sx={{
+                    fontSize: '10px',
+                    fontWeight: 500,
+                    color: '#828282',
+                  }}
+                >
+                  Expires in
+                </Typography>
+                <ExpiresInCell row={row} />
+              </Stack>
+            ) : (
+              <Button
+                size="small"
+                sx={{
+                  borderRadius: '40px',
+                  fontSize: '10px',
+                  background:
+                    Status === 'Expired'
+                      ? 'rgba(237, 108, 2, 0.4)'
+                      : 'rgba(51, 147, 224, 0.4)',
+                }}
+                variant="contained"
+              >
+                {Status}
+              </Button>
+            )}
           </Box>
         </Box>
         <Grid
           container
           rowGap={1.6}
-          // columnGap={'2px'}
           justifyContent="space-between"
+          columnGap={'3px'}
         >
-          {DATA_ARRAY.map(({ label, value }) => (
+          {DATA_ARRAY.map(({ label, value }, i) => (
             <Grid
               item
-              spacing={1.6}
-              key={label}
-              xs={4}
+              key={i}
+              xs={3}
               sx={{
                 flexGrow: 1,
               }}
             >
-              <Stack
-                direction="row"
-                justifyContent={'space-between'}
-                sx={{
-                  borderRight: '10px solid transparent',
-                  flexGrow: 1,
-                }}
-              >
+              <Stack direction="row" justifyContent={'space-between'}>
                 <Box
                   sx={{
                     color: '#828282',

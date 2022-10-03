@@ -434,10 +434,19 @@ const MyDataFeedsTokenCard = ({ row }: { row: GridRowModel }) => {
             </Button>
           </Box>
         </Box>
-        <Grid container rowGap={1.6} justifyContent="space-between">
-          {DATA_ARRAY.map(({ label, value }) => (
-            <Grid item spacing={1.6} key={label} xs={4}>
-              <Stack direction="row" spacing={2}>
+        <Grid
+          container
+          rowGap={1.6}
+          justifyContent="space-between"
+          columnGap={'3px'}
+        >
+          {DATA_ARRAY.map(({ label, value }, i) => (
+            <Grid item justifyContent={'space-between'} key={i} xs={3.4}>
+              <Stack
+                direction="row"
+                spacing={2}
+                justifyContent={'space-between'}
+              >
                 <Box
                   sx={{
                     color: '#828282',
@@ -447,11 +456,7 @@ const MyDataFeedsTokenCard = ({ row }: { row: GridRowModel }) => {
                   {label}
                 </Box>
                 <Box>
-                  {label === 'Due In' ? (
-                    <DueInCell row={row} />
-                  ) : (
-                    value.toString().slice(0, -2)
-                  )}
+                  {label === 'Due In' ? <DueInCell row={row} /> : value}
                 </Box>
               </Stack>
             </Grid>
@@ -764,8 +769,8 @@ export function MyDataFeeds() {
                     Filters
                   </Button>
                   <Box>
-                    {filteredRows.map((row) => (
-                      <MyDataFeedsTokenCard row={row} key={row.Id} />
+                    {filteredRows.map((row, i) => (
+                      <MyDataFeedsTokenCard row={row} key={i} />
                     ))}
                   </Box>
                   <Pagination

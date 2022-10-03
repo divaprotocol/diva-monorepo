@@ -199,14 +199,18 @@ const TradeHistoryTabTokenCars = ({ row }: { row: GridRowModel }) => {
             </Typography>
           </Stack>
         </Box>
-        <Grid container rowGap={1.6} justifyContent="space-between">
+        <Grid
+          container
+          rowGap={1.6}
+          justifyContent="space-between"
+          columnGap={'3px'}
+        >
           {DATA_ARRAY.map(({ label, value }) => (
-            <Grid item key={label} xs={6}>
-              <Stack direction="row" spacing={10}>
+            <Grid item key={label} xs={5}>
+              <Stack direction="row" justifyContent={'space-between'}>
                 <Box
                   sx={{
                     color: '#828282',
-                    minWidth: '60px',
                   }}
                 >
                   {label}
@@ -676,8 +680,8 @@ export function TradeHistoryTab() {
                     Filters
                   </Button>
                   <Box>
-                    {filteredRows.map((row) => (
-                      <TradeHistoryTabTokenCars row={row} key={row.Id} />
+                    {filteredRows.map((row, i) => (
+                      <TradeHistoryTabTokenCars row={row} key={i} />
                     ))}
                   </Box>
                   <Pagination
