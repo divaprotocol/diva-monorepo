@@ -164,9 +164,9 @@ const columns: GridColDef[] = [
     field: 'Sell',
     align: 'right',
     headerAlign: 'right',
-    renderHeader: (header) => <GrayText>{'Sell'}</GrayText>,
+    headerName: 'Sell',
     renderCell: (cell) => (
-      <Typography color="dimgray" fontSize={'0.875rem'}>
+      <Typography color="#66ffa6" fontSize={'0.875rem'}>
         {cell.value}
       </Typography>
     ),
@@ -175,9 +175,9 @@ const columns: GridColDef[] = [
     field: 'Buy',
     align: 'right',
     headerAlign: 'right',
-    renderHeader: (header) => <GrayText>{'Buy'}</GrayText>,
+    headerName: 'Buy',
     renderCell: (cell) => (
-      <Typography color="dimgray" fontSize={'0.875rem'}>
+      <Typography color="#ff5c8d" fontSize={'0.875rem'}>
         {cell.value}
       </Typography>
     ),
@@ -186,9 +186,9 @@ const columns: GridColDef[] = [
     field: 'MaxYield',
     align: 'right',
     headerAlign: 'right',
-    renderHeader: (header) => <GrayText>{'MaxYield'}</GrayText>,
+    headerName: 'MaxYield',
     renderCell: (cell) => (
-      <Typography color="dimgray" fontSize={'0.875rem'}>
+      <Typography color="#3393e0" fontSize={'0.875rem'}>
         {cell.value}
       </Typography>
     ),
