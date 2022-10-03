@@ -189,7 +189,7 @@ const columns: GridColDef[] = [
     headerName: 'MaxYield',
     renderCell: (cell) => (
       <Typography color="#3393e0" fontSize={'0.875rem'}>
-        {cell.value}
+        {cell.value.buy}
       </Typography>
     ),
   },
@@ -295,7 +295,10 @@ export default function Markets() {
       Expiry: getDateTime(val.expiryTime),
       Sell: '-',
       Buy: '-',
-      MaxYield: '-',
+      MaxYield: {
+        buy: '-',
+        sell: '-',
+      },
     }
 
     const payOff = {
@@ -372,10 +375,16 @@ export default function Markets() {
           Number(val.prices.long.ask).toFixed(2) !== '0.00'
             ? Number(val.prices.long.ask).toFixed(2)
             : '-',
-        MaxYield:
-          val.prices?.long !== undefined && val.prices.long.ask !== ''
-            ? Number(1 / Number(val.prices.long.ask)).toFixed(2) + 'x'
-            : '-',
+        MaxYield: {
+          buy:
+            val.prices?.long !== undefined && val.prices.long.ask !== ''
+              ? Number(1 / Number(val.prices.long.ask)).toFixed(2) + 'x'
+              : '-',
+          sell:
+            val.prices?.long !== undefined && val.prices.long.bid !== ''
+              ? Number(1 / Number(val.prices.long.bid)).toFixed(2) + 'x'
+              : '-',
+        },
       },
       {
         ...shared,
@@ -422,10 +431,16 @@ export default function Markets() {
           Number(val.prices.short.ask).toFixed(2) !== '0.00'
             ? Number(val.prices.short.ask).toFixed(2)
             : '-',
-        MaxYield:
-          val.prices?.short !== undefined && val.prices.short.ask !== ''
-            ? Number(1 / Number(val.prices.short.ask)).toFixed(2) + 'x'
-            : '-',
+        MaxYield: {
+          buy:
+            val.prices?.short !== undefined && val.prices.short.ask !== ''
+              ? Number(1 / Number(val.prices.short.ask)).toFixed(2) + 'x'
+              : '-',
+          sell:
+            val.prices?.short !== undefined && val.prices.short.bid !== ''
+              ? Number(1 / Number(val.prices.short.bid)).toFixed(2) + 'x'
+              : '-',
+        },
       },
     ]
   }, [] as GridRowModel[])

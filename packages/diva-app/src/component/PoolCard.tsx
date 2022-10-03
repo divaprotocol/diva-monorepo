@@ -312,7 +312,7 @@ const PoolCard = ({ row }: Props) => {
         >
           <Stack>
             <div>BUY</div>
-            <div>-</div>
+            <div>{row.Buy}</div>
           </Stack>
         </BuyAndSellButton>
         <BuyAndSellButton
@@ -323,7 +323,7 @@ const PoolCard = ({ row }: Props) => {
         >
           <Stack>
             <div>SELL</div>
-            <div>-</div>
+            <div>{row.Sell}</div>
           </Stack>
         </BuyAndSellButton>
       </Stack>
@@ -343,7 +343,7 @@ const PoolCard = ({ row }: Props) => {
               color: '#3393E0',
             }}
           >
-            -
+            {row.MaxYield.buy}
           </Typography>
         </Box>
         <Box>
@@ -356,7 +356,7 @@ const PoolCard = ({ row }: Props) => {
               color: '#3393E0',
             }}
           >
-            -
+            {row.MaxYield.sell}
           </Typography>
         </Box>
       </Stack>
