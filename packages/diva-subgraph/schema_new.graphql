@@ -32,6 +32,10 @@ type Pool @entity {
   dataProvider: Bytes!
   protocolFee: BigInt!
   settlementFee: BigInt!
+  submissionPeriod: BigInt!
+  challengePeriod: BigInt!
+  reviewPeriod: BigInt!
+  fallbackSubmissionPeriod: BigInt!
   statusFinalReferenceValue: String!
   referenceAsset: String!
   supplyShort: BigInt!

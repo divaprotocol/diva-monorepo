@@ -6,7 +6,7 @@ dataSources:
     name: DivaDiamond
     network: goerli
     source:
-      address: "0x36a10DDa1d71fE161e8856dA1db271e75190c727"
+      address: "0xf9f2Ef8eBE5d1b62c36B0a23e8ca78B92b8Ea3e3"
       abi: DivaDiamond
       startBlock: 7483129
     mapping:
@@ -29,6 +29,8 @@ dataSources:
           file: ./abi/IERC20.json
         - name: PositionTokenABI
           file: ./abi/IPositionToken.json
+        - name: PermissionedPositionTokenABI
+          file: ./abi/IPermissionedPositionToken.json
       eventHandlers:
         - event: LiquidityAdded(indexed uint256,indexed address,indexed address,uint256)
           handler: handleLiquidityAdded
