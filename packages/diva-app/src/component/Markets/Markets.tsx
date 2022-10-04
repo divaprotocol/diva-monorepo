@@ -164,9 +164,9 @@ const columns: GridColDef[] = [
     field: 'Sell',
     align: 'right',
     headerAlign: 'right',
-    renderHeader: (header) => <GrayText>{'Sell'}</GrayText>,
+    headerName: 'Sell',
     renderCell: (cell) => (
-      <Typography color="dimgray" fontSize={'0.875rem'}>
+      <Typography color="#66ffa6" fontSize={'0.875rem'}>
         {cell.value}
       </Typography>
     ),
@@ -175,9 +175,9 @@ const columns: GridColDef[] = [
     field: 'Buy',
     align: 'right',
     headerAlign: 'right',
-    renderHeader: (header) => <GrayText>{'Buy'}</GrayText>,
+    headerName: 'Buy',
     renderCell: (cell) => (
-      <Typography color="dimgray" fontSize={'0.875rem'}>
+      <Typography color="#ff5c8d" fontSize={'0.875rem'}>
         {cell.value}
       </Typography>
     ),
@@ -186,10 +186,10 @@ const columns: GridColDef[] = [
     field: 'MaxYield',
     align: 'right',
     headerAlign: 'right',
-    renderHeader: (header) => <GrayText>{'MaxYield'}</GrayText>,
+    headerName: 'MaxYield',
     renderCell: (cell) => (
-      <Typography color="dimgray" fontSize={'0.875rem'}>
-        {cell.value}
+      <Typography color="#3393e0" fontSize={'0.875rem'}>
+        {cell.value.buy}
       </Typography>
     ),
   },
@@ -295,7 +295,10 @@ export default function Markets() {
       Expiry: getDateTime(val.expiryTime),
       Sell: '-',
       Buy: '-',
-      MaxYield: '-',
+      MaxYield: {
+        buy: '-',
+        sell: '-',
+      },
     }
 
     const payOff = {
@@ -362,6 +365,26 @@ export default function Markets() {
           val.statusFinalReferenceValue === 'Open'
             ? '-'
             : formatUnits(val.finalReferenceValue),
+        Sell:
+          val.prices?.long !== undefined &&
+          Number(val.prices.long.bid).toFixed(2) !== '0.00'
+            ? Number(val.prices.long.bid).toFixed(2)
+            : '-',
+        Buy:
+          val.prices?.long !== undefined &&
+          Number(val.prices.long.ask).toFixed(2) !== '0.00'
+            ? Number(val.prices.long.ask).toFixed(2)
+            : '-',
+        MaxYield: {
+          buy:
+            val.prices?.long !== undefined && val.prices.long.ask !== ''
+              ? Number(1 / Number(val.prices.long.ask)).toFixed(2) + 'x'
+              : '-',
+          sell:
+            val.prices?.long !== undefined && val.prices.long.bid !== ''
+              ? Number(1 / Number(val.prices.long.bid)).toFixed(2) + 'x'
+              : '-',
+        },
       },
       {
         ...shared,
@@ -398,6 +421,26 @@ export default function Markets() {
           val.statusFinalReferenceValue === 'Open'
             ? '-'
             : formatUnits(val.finalReferenceValue),
+        Sell:
+          val.prices?.short !== undefined &&
+          Number(val.prices.short.bid).toFixed(2) !== '0.00'
+            ? Number(val.prices.short.bid).toFixed(2)
+            : '-',
+        Buy:
+          val.prices?.short !== undefined &&
+          Number(val.prices.short.ask).toFixed(2) !== '0.00'
+            ? Number(val.prices.short.ask).toFixed(2)
+            : '-',
+        MaxYield: {
+          buy:
+            val.prices?.short !== undefined && val.prices.short.ask !== ''
+              ? Number(1 / Number(val.prices.short.ask)).toFixed(2) + 'x'
+              : '-',
+          sell:
+            val.prices?.short !== undefined && val.prices.short.bid !== ''
+              ? Number(1 / Number(val.prices.short.bid)).toFixed(2) + 'x'
+              : '-',
+        },
       },
     ]
   }, [] as GridRowModel[])
