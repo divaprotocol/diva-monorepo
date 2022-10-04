@@ -12,6 +12,7 @@ import {
 } from "../generated/DivaDiamond/DivaDiamond";
 import { Erc20Token } from "../generated/DivaDiamond/Erc20Token";
 import { PositionTokenABI } from "../generated/DivaDiamond/PositionTokenABI";
+import { PermissionedPositionTokenABI } from "../generated/DivaDiamond/PermissionedPositionTokenABI";
 import { LimitOrderFilled } from "../generated/ExchangeProxy/IZeroEx";
 import {
   Pool,
@@ -303,8 +304,12 @@ function handleLiquidityEvent(
   poolEntity.collateralToken = collateralTokenEntity.id; // Updated at create only
   poolEntity.expiryTime = parameters.expiryTime; // Updated at create only
   poolEntity.dataProvider = parameters.dataProvider; // Updated at create only
-  poolEntity.protocolFee = parameters.protocolFee; // Updated at create only
-  poolEntity.settlementFee = parameters.settlementFee; // Updated at create only
+  poolEntity.protocolFee = contract.getFees(poolId).protocolFee; // Updated at create only
+  poolEntity.settlementFee = contract.getFees(poolId).settlementFee; // Updated at create only
+  poolEntity.submissionPeriod = contract.getSettlementPeriods(poolId).submissionPeriod;
+  poolEntity.challengePeriod = contract.getSettlementPeriods(poolId).challengePeriod;
+  poolEntity.reviewPeriod = contract.getSettlementPeriods(poolId).reviewPeriod;
+  poolEntity.fallbackSubmissionPeriod = contract.getSettlementPeriods(poolId).fallbackSubmissionPeriod;
   poolEntity.referenceAsset = parameters.referenceAsset; // Updated at create only
   poolEntity.supplyShort = shortTokenContract.totalSupply(); // Updated during create/add/remove
   poolEntity.supplyLong = longTokenContract.totalSupply(); // Updated during create/add/remove
@@ -584,7 +589,7 @@ export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void 
   } else {
     testnetUser.endTime = event.block.timestamp
   }
-  
+
   testnetUser.save();
 
 }
