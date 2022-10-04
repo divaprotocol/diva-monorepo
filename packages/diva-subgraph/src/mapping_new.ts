@@ -272,6 +272,13 @@ function handleLiquidityEvent(
       }
     }
 
+    if (testnetUser.startTime.equals(new BigInt(0))) {
+      testnetUser.startTime = blockTimestamp
+      testnetUser.endTime = blockTimestamp
+    } else {
+      testnetUser.endTime = blockTimestamp
+    }
+
     // Save results in entity
     testnetUser.save();
   }
@@ -372,6 +379,14 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.liquidityAdded = true;
+
+  if (testnetUser.startTime.equals(new BigInt(0))) {
+    testnetUser.startTime = event.block.timestamp
+    testnetUser.endTime = event.block.timestamp
+  } else {
+    testnetUser.endTime = event.block.timestamp
+  }
+
   testnetUser.save();
 
 }
@@ -397,6 +412,12 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.liquidityRemoved = true;
+
+  if (testnetUser.startTime.equals(new BigInt(0))) {
+    testnetUser.startTime = event.block.timestamp
+    testnetUser.endTime = event.block.timestamp
+  } else {
+    testnetUser.endTime = event.block.timestamp
 
   // Save result in entity
   testnetUser.save();
@@ -442,6 +463,14 @@ export function handleStatusChanged(event: StatusChanged): void {
       testnetUser = new TestnetUser(event.transaction.from.toHexString());
     }
     testnetUser.reportedValueChallenged = true;
+
+    if (testnetUser.startTime.equals(new BigInt(0))) {
+      testnetUser.startTime = event.block.timestamp
+      testnetUser.endTime = event.block.timestamp
+    } else {
+      testnetUser.endTime = event.block.timestamp
+    }
+
     testnetUser.save();
 
   } else if (event.params.statusFinalReferenceValue === 1) {
@@ -457,6 +486,14 @@ export function handleStatusChanged(event: StatusChanged): void {
       testnetUser = new TestnetUser(event.transaction.from.toHexString());
     }
     testnetUser.finalValueReported = true;
+
+    if (testnetUser.startTime.equals(new BigInt(0))) {
+      testnetUser.startTime = event.block.timestamp
+      testnetUser.endTime = event.block.timestamp
+    } else {
+      testnetUser.endTime = event.block.timestamp
+    }
+
     testnetUser.save();
 
   }
@@ -495,6 +532,14 @@ export function handleFeeClaimTransferred(event: FeeClaimTransferred): void {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.feeClaimTransferred = true;
+
+  if (testnetUser.startTime.equals(new BigInt(0))) {
+    testnetUser.startTime = event.block.timestamp
+    testnetUser.endTime = event.block.timestamp
+  } else {
+    testnetUser.endTime = event.block.timestamp
+  }
+
   testnetUser.save();
 
 }
@@ -513,6 +558,14 @@ export function handleFeeClaimed(event: FeeClaimed): void {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.feeClaimed = true;
+
+  if (testnetUser.startTime.equals(new BigInt(0))) {
+    testnetUser.startTime = event.block.timestamp
+    testnetUser.endTime = event.block.timestamp
+  } else {
+    testnetUser.endTime = event.block.timestamp
+  }
+
   testnetUser.save();
 }
 
@@ -524,6 +577,14 @@ export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void 
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.positionTokenRedeemed = true;
+
+  if (testnetUser.startTime.equals(new BigInt(0))) {
+    testnetUser.startTime = event.block.timestamp
+    testnetUser.endTime = event.block.timestamp
+  } else {
+    testnetUser.endTime = event.block.timestamp
+  }
+  
   testnetUser.save();
 
 }
