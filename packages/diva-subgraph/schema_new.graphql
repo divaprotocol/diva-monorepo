@@ -95,6 +95,8 @@ type TestnetUser @entity {
   positionTokenRedeemed: Boolean!
   feeClaimed: Boolean!
   feeClaimTransferred: Boolean!
+  startTime: BigInt!
+  endTime: BigInt!
 }
 
 type User @entity {
