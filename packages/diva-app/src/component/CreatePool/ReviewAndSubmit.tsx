@@ -81,7 +81,7 @@ export function ReviewAndSubmit({
           )
         })
     }
-  }, [])
+  }, [decimal])
   useEffect(() => {
     const tokenContract = new ethers.Contract(
       formik.values.collateralToken.id,
@@ -494,14 +494,20 @@ export function ReviewAndSubmit({
                       }}
                       type="number"
                       onChange={(event) => {
-                        const collateralBalance = event.target.value
-                        if (collateralBalance !== '') {
-                          formik.setFieldValue(
-                            'yourShare',
-                            Number(collateralBalance)
-                          )
-                        } else {
-                          formik.setFieldValue('yourShare', 0)
+                        const value = event.target.value
+                        const arr = value.split('.')
+                        if (arr.length > 1) {
+                          if (arr[1].length <= decimal) {
+                            const collateralBalance = event.target.value
+                            if (collateralBalance !== '') {
+                              formik.setFieldValue(
+                                'yourShare',
+                                Number(collateralBalance)
+                              )
+                            } else {
+                              formik.setFieldValue('yourShare', 0)
+                            }
+                          }
                         }
                       }}
                     />

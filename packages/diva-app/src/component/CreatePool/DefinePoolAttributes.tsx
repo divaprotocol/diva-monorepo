@@ -632,13 +632,18 @@ export function DefinePoolAttributes({
                     value={formik.values.collateralBalance}
                     type="number"
                     onChange={(event) => {
-                      const collateralBalance = event.target.value
-
-                      formik.setValues((values) => ({
-                        ...values,
-                        collateralBalance,
-                        tokenSupply: parseFloat(collateralBalance),
-                      }))
+                      const value = event.target.value
+                      const arr = value.split('.')
+                      if (arr.length > 1) {
+                        if (arr[1].length <= collateralToken.decimals) {
+                          const collateralBalance = event.target.value
+                          formik.setValues((values) => ({
+                            ...values,
+                            collateralBalance,
+                            tokenSupply: parseFloat(collateralBalance),
+                          }))
+                        }
+                      }
                     }}
                   />
                   {formik.errors.collateralBalance != null && (

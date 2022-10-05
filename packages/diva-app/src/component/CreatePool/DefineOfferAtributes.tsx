@@ -663,24 +663,30 @@ export function DefineOfferAttributes({
                     value={formik.values.collateralBalance}
                     type="number"
                     onChange={(event) => {
-                      const collateralBalance = event.target.value
+                      const value = event.target.value
+                      const arr = value.split('.')
+                      if (arr.length > 1) {
+                        if (arr[1].length <= collateralToken.decimals) {
+                          const collateralBalance = event.target.value
 
-                      formik.setValues((values) => ({
-                        ...values,
-                        collateralBalance,
-                        tokenSupply: parseFloat(collateralBalance),
-                        takerShare:
-                          parseFloat(collateralBalance) - values.yourShare,
-                      }))
-                      if (fillOrKill) {
-                        if (collateralBalance != '') {
-                          formik.setFieldValue(
-                            'minTakerContribution',
-                            parseFloat(collateralBalance) -
-                              formik.values.yourShare
-                          )
-                        } else {
-                          formik.setFieldValue('minTakerContribution', 0)
+                          formik.setValues((values) => ({
+                            ...values,
+                            collateralBalance,
+                            tokenSupply: parseFloat(collateralBalance),
+                            takerShare:
+                              parseFloat(collateralBalance) - values.yourShare,
+                          }))
+                          if (fillOrKill) {
+                            if (collateralBalance != '') {
+                              formik.setFieldValue(
+                                'minTakerContribution',
+                                parseFloat(collateralBalance) -
+                                  formik.values.yourShare
+                              )
+                            } else {
+                              formik.setFieldValue('minTakerContribution', 0)
+                            }
+                          }
                         }
                       }
                     }}

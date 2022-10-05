@@ -104,7 +104,22 @@ export function PayoffProfile(props: {
   const lineSeriesStyle: any = { strokeWidth: '3px' }
 
   if (hasError) lineSeriesStyle.stroke = theme.palette.error.main
-
+  const legendItems = [
+    {
+      title: 'Long',
+      color: theme.palette.primary.light,
+    },
+    {
+      title: 'Short',
+      color: theme.palette.primary.dark,
+    },
+  ]
+  if (longDirection) {
+    legendItems.pop()
+  } else {
+    legendItems.reverse()
+    legendItems.pop()
+  }
   return (
     <Box pb={3} ref={ref}>
       <Box ref={ref} pr={1}>
@@ -137,7 +152,7 @@ export function PayoffProfile(props: {
             (longDirection ? (
               <LineSeries style={lineSeriesStyle} data={long} />
             ) : (
-              <LineSeries style={lineSeriesStyle} data={long} />
+              <LineSeries style={lineSeriesStyle} data={short} />
             ))}
         </XYPlot>
       </Box>
@@ -154,19 +169,7 @@ export function PayoffProfile(props: {
           },
         }}
       >
-        <DiscreteColorLegend
-          orientation="horizontal"
-          items={[
-            {
-              title: 'Long',
-              color: theme.palette.primary.light,
-            },
-            {
-              title: 'Short',
-              color: theme.palette.primary.dark,
-            },
-          ]}
-        />
+        <DiscreteColorLegend orientation="horizontal" items={legendItems} />
       </Box>
     </Box>
   )
