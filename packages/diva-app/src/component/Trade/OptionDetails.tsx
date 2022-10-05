@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
-import { Tooltip } from '@mui/material'
+import { Box, Stack, Tooltip, Typography } from '@mui/material'
 import { Pool } from '../../lib/queries'
 import { formatUnits } from 'ethers/lib/utils'
 import { useWhitelist } from '../../hooks/useWhitelist'
@@ -9,50 +9,6 @@ import CheckCircleSharpIcon from '@mui/icons-material/CheckCircleSharp'
 import WarningAmberSharpIcon from '@mui/icons-material/WarningAmberSharp'
 import { BigNumber } from 'ethers'
 import { useAppSelector } from '../../Redux/hooks'
-const PageDiv = styled.div`
-  width: 100%;
-`
-
-const FlexBoxHeader = styled.div`
-  font-size: 0.9rem;
-  font-weight: solid;
-  text-align: left;
-  width: max-content;
-  padding-left: 15px;
-  color: gray;
-`
-
-const FlexBoxData = styled.div`
-  padding: 15px;
-  width: 100%;
-  font-size: 1rem;
-  text-align: left;
-`
-
-const FlexDiv = styled.div`
-  margin-top: 15px;
-  display: -webkit-box;
-  display: -moz-box;
-  display: -ms-flexbox;
-  display: -webkit-flex;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-`
-
-const FlexBox = styled.div`
-  flex: 1;
-  justify-content: flex-start;
-`
-
-const FlexCheckIcon = styled.div`
-  display: flex;
-  flex-direction: row;
-`
-const FlexDataDiv = styled.div`
-  display: flex;
-  flex-direction: row;
-`
 
 export default function OptionDetails({
   pool,
@@ -109,113 +65,138 @@ export default function OptionDetails({
   }, [maxYield])
 
   return (
-    <FlexDiv>
-      <FlexBox>
-        <FlexBoxHeader>Expires at</FlexBoxHeader>
-        <FlexBoxData>
-          <Tooltip
-            title={
-              getDateTime(pool.expiryTime).slice(11, 19) + ' ' + userTimeZone()
-            }
-            arrow
-          >
-            <FlexDataDiv>
-              {getDateTime(pool.expiryTime).slice(0, 10)}
-            </FlexDataDiv>
-          </Tooltip>
-        </FlexBoxData>
-      </FlexBox>
-      {binary ? (
-        <>
-          <FlexBox>
-            <FlexBoxHeader>Payoff Type</FlexBoxHeader>
-            <FlexBoxData>Binary</FlexBoxData>
-          </FlexBox>
-        </>
-      ) : linear ? (
-        <>
-          <FlexBox>
-            <FlexBoxHeader>Payoff Type</FlexBoxHeader>
-            <FlexBoxData>Linear</FlexBoxData>
-          </FlexBox>
-        </>
-      ) : (
-        <>
-          <FlexBox>
-            <FlexBoxHeader>Payoff Type</FlexBoxHeader>
-            <FlexBoxData>Custom</FlexBoxData>
-          </FlexBox>
-        </>
-      )}
-      <FlexBox>
-        <FlexBoxHeader>Data Provider</FlexBoxHeader>
-        <FlexBoxData>
-          <FlexCheckIcon>
-            <Tooltip title={pool.dataProvider} arrow>
-              <FlexDataDiv>{dataSourceName}</FlexDataDiv>
-            </Tooltip>
-            {checkIcon ? (
-              <Tooltip
-                title="Trusted data provider from the DIVA whitelist."
-                arrow
-              >
-                <CheckCircleSharpIcon
-                  sx={{
-                    mt: 0.3,
-                    paddingLeft: 1,
-                  }}
-                  color="success"
-                  fontSize="inherit"
-                />
-              </Tooltip>
-            ) : (
-              <Tooltip
-                title="Data provider is NOT part of DIVA's whitelist."
-                arrow
-              >
-                <WarningAmberSharpIcon
-                  sx={{
-                    mt: 0.3,
-                    paddingLeft: 1,
-                  }}
-                  color="warning"
-                  fontSize="inherit"
-                />
-              </Tooltip>
-            )}
-          </FlexCheckIcon>
-        </FlexBoxData>
-      </FlexBox>
-      <FlexBox>
-        <FlexBoxHeader>Collateral</FlexBoxHeader>
-        <Tooltip title={pool.collateralToken.id} arrow placement="bottom">
-          <FlexBoxData>
-            {Number(
-              formatUnits(pool.collateralBalance, pool.collateralToken.decimals)
-            ).toFixed(2) +
-              ' ' +
-              pool.collateralToken.symbol}
-          </FlexBoxData>
+    <Stack direction="row" mt="15px" spacing={3}>
+      <Stack direction="column">
+        <Typography fontSize="14px" fontWeight="bold" color="gray" pl="15px">
+          Expires at
+        </Typography>
+        <Tooltip
+          title={
+            getDateTime(pool.expiryTime).slice(11, 19) + ' ' + userTimeZone()
+          }
+          arrow
+        >
+          <Typography fontSize="24px" pl="15px">
+            {getDateTime(pool.expiryTime).slice(0, 10)}
+          </Typography>
         </Tooltip>
-      </FlexBox>
-      <FlexBox>
-        <FlexBoxHeader>Intrinsic Value</FlexBoxHeader>
-        <FlexBoxData>
-          {intrinsicValue != 'n/a'
-            ? parseFloat(intrinsicValue).toFixed(2) +
-              ' ' +
-              pool.collateralToken.symbol
-            : 'n/a'}
-        </FlexBoxData>
-      </FlexBox>
-      <FlexBox>
-        <FlexBoxHeader>Max yield</FlexBoxHeader>
+      </Stack>
+      {binary ? (
+        <Stack direction="column">
+          <Typography fontSize="14px" fontWeight="bold" color="gray" pl="15px">
+            Payoff Type
+          </Typography>
+          <Typography fontSize="24px" pl="15px">
+            Binary
+          </Typography>
+        </Stack>
+      ) : linear ? (
+        <Stack direction="column">
+          <Typography fontSize="14px" fontWeight="bold" color="gray" pl="15px">
+            Payoff Type
+          </Typography>
+          <Typography fontSize="24px" pl="15px">
+            Linear
+          </Typography>
+        </Stack>
+      ) : (
+        <Stack direction="column">
+          <Typography fontSize="14px" fontWeight="bold" color="gray" pl="15px">
+            Payoff Type
+          </Typography>
+          <Typography fontSize="24px" pl="15px">
+            Custom
+          </Typography>
+        </Stack>
+      )}
+      <Stack direction="column">
+        <Typography fontSize="14px" fontWeight="bold" color="gray" pl="15px">
+          Data Provider
+        </Typography>
+        <Stack direction="row" alignItems="center">
+          <Tooltip title={pool.dataProvider} arrow>
+            <Typography fontSize="24px" pl="15px">
+              {dataSourceName}
+            </Typography>
+          </Tooltip>
+          {checkIcon ? (
+            <Tooltip
+              title="Trusted data provider from the DIVA whitelist."
+              arrow
+            >
+              <CheckCircleSharpIcon
+                sx={{
+                  paddingLeft: 1,
+                }}
+                color="success"
+                fontSize="inherit"
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip
+              title="Data provider is NOT part of DIVA's whitelist."
+              arrow
+            >
+              <WarningAmberSharpIcon
+                sx={{
+                  paddingLeft: 1,
+                }}
+                color="warning"
+                fontSize="inherit"
+              />
+            </Tooltip>
+          )}
+        </Stack>
+      </Stack>
+      <Stack direction="column">
+        <Typography fontSize="14px" fontWeight="bold" color="gray" pl="15px">
+          Collateral
+        </Typography>
+        <Stack direction="row" alignItems="center">
+          <Tooltip title={pool.collateralToken.id} arrow placement="bottom">
+            <Typography fontSize="24px" pl="15px">
+              {Number(
+                formatUnits(
+                  pool.collateralBalance,
+                  pool.collateralToken.decimals
+                )
+              ).toFixed(2) + ' '}
+            </Typography>
+          </Tooltip>
+          <Typography fontSize="24px" fontWeight="bold" color="gray" pl="10px">
+            {pool.collateralToken.symbol}
+          </Typography>
+        </Stack>
+      </Stack>
+      <Stack direction="column">
+        <Typography fontSize="14px" fontWeight="bold" color="gray" pl="15px">
+          Intrinsic Value
+        </Typography>
+        <Stack direction="row" alignItems="center">
+          <Typography fontSize="24px" pl="15px">
+            {intrinsicValue != 'n/a'
+              ? parseFloat(intrinsicValue).toFixed(2) + ' '
+              : 'n/a'}
+          </Typography>
+          <Typography fontSize="24px" fontWeight="bold" color="gray" pl="10px">
+            {intrinsicValue && pool.collateralToken.symbol}{' '}
+          </Typography>
+        </Stack>
+      </Stack>
+      <Stack direction="column">
+        <Typography fontSize="14px" fontWeight="bold" color="gray" pl="15px">
+          Max yield
+        </Typography>
         {isMaxYield ? (
-          <FlexBoxData style={{ color: '#3393E0' }}>{maxYield}</FlexBoxData>
+          <Typography fontSize="24px" color="primary" pl="10px">
+            {maxYield}
+          </Typography>
         ) : (
-          <FlexBoxData>n/a</FlexBoxData>
+          <Typography fontSize="24px" pl="15px">
+            n/a
+          </Typography>
         )}
-      </FlexBox>
-    </FlexDiv>
+      </Stack>
+    </Stack>
   )
 }

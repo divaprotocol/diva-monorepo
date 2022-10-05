@@ -36,8 +36,12 @@ export const App = () => {
         )}
 
         <Container
-          disableGutters
-          sx={{ alignItems: 'left', height: '100%', overflow: 'auto' }}
+          sx={{
+            alignItems: 'left',
+            width: '100%',
+            height: '100%',
+            overflow: 'auto',
+          }}
           maxWidth={false}
         >
           <Header />

@@ -40,7 +40,7 @@ export default function DIVATradeChart(props) {
   }, [props.w])
 
   // Set the dimensions and margins of the graph
-  const margin = { top: 15, right: 20, bottom: 40, left: 20 },
+  const margin = { top: 15, right: 20, bottom: 40, left: 0 },
     width = chartWidth - margin.left - margin.right,
     height = h - margin.top - margin.bottom
 
