@@ -27,6 +27,14 @@ import {
   NativeOrderFill
 } from "../generated/schema";
 
+
+/**
+ * TODO 
+ * - Add collateralBalanceGross
+ * - Add permissionedERC721Token to Pool entity
+ * - Add 
+ */
+
 /**
  *
  * handleChallengeEvent
@@ -74,7 +82,8 @@ function handleLiquidityEvent(
   shortRecipient: Address,
   divaAddress: Address,
   msgSender: Address,
-  blockTimestamp: BigInt
+  blockTimestamp: BigInt,
+  collateralAmount: BigInt
 ): void {
 
   // ***************************************
@@ -294,6 +303,7 @@ function handleLiquidityEvent(
   poolEntity.cap = parameters.cap; // Updated at create only
   poolEntity.gradient = parameters.gradient; // Updated at create only
   poolEntity.collateralBalance = parameters.collateralBalance; // Updated during create/add/remove using the updated value inside DIVA protocol
+  poolEntity.collateralBalanceGross = poolEntity.collateralBalanceGross.plus(collateralAmount); // Updated during create/add/remove using the updated value inside DIVA protocol  
   poolEntity.finalReferenceValue = parameters.finalReferenceValue; // Set at StatusChanged event
   poolEntity.capacity = parameters.capacity; // Updated at create only
   poolEntity.statusTimestamp = parameters.statusTimestamp; // Updated at PoolIssued and StatusChanged events
@@ -313,6 +323,14 @@ function handleLiquidityEvent(
   poolEntity.referenceAsset = parameters.referenceAsset; // Updated at create only
   poolEntity.supplyShort = shortTokenContract.totalSupply(); // Updated during create/add/remove
   poolEntity.supplyLong = longTokenContract.totalSupply(); // Updated during create/add/remove
+  
+  // TODO: shortTokenContract is an instance of PositionToken and not PermissionedPositionToken
+  try {
+    poolEntity.permissionedERC721Token = shortTokenContract.permissionedERC721Token();
+  } catch {
+    poolEntity.permissionedERC721Token = "0x0000000000000000000000000000000000000000"
+  }
+
   // QUESTION Add longRecipient and shortRecipient? -> maybe in dedicated PoolIssued and LiquidityAdded entities rather than in "cumulative" Pool entity
 
   let status = parameters.statusFinalReferenceValue; // Updated at PoolIssued and StatusChanged events
@@ -376,7 +394,8 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
     event.params.shortRecipient,
     event.address,
     event.transaction.from,
-    event.block.timestamp
+    event.block.timestamp,
+    event.params.collateralAmount
   );
 
   let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
@@ -404,7 +423,8 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
     event.transaction.from, // COMMENT Place holder for shortRecipient
     event.address,
     event.transaction.from,
-    event.block.timestamp
+    event.block.timestamp,
+    new BigInt(0) // Do not add to collateralBalanceGross on remove liquidity
   );
 
 
@@ -438,7 +458,8 @@ export function handlePoolIssued(event: PoolIssued): void {
     event.params.shortRecipient,  // Short position token recipient address
     event.address,                // DIVA contract address
     event.transaction.from,       // Address that triggered the transaction emitting the PoolIssued event
-    event.block.timestamp         // Block timestamp
+    event.block.timestamp,         // Block timestamp
+    event.params.collateralAmount
   );
 }
 
@@ -450,7 +471,8 @@ export function handleStatusChanged(event: StatusChanged): void {
     event.transaction.from, // COMMENT Place holder for shortRecipient
     event.address,
     event.transaction.from,
-    event.block.timestamp
+    event.block.timestamp,
+    new BigInt(0) // Do not add to collateralBalanceGross on redeem
   );
   if (event.params.statusFinalReferenceValue === 2) {
     handleChallengeEvent(

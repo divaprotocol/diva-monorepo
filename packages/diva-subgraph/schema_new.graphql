@@ -20,6 +20,7 @@ type Pool @entity {
   cap: BigInt!
   gradient: BigInt!
   collateralBalance: BigInt!
+  collateralBalanceGross: BigInt!
   finalReferenceValue: BigInt!
   capacity: BigInt!
   statusTimestamp: BigInt!
@@ -40,6 +41,7 @@ type Pool @entity {
   referenceAsset: String!
   supplyShort: BigInt!
   supplyLong: BigInt!
+  permissionedERC721Token: String!
   createdBy: Bytes!
   createdAt: BigInt!
   challenges: [Challenge!] @derivedFrom(field: "pool")
