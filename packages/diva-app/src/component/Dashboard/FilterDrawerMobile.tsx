@@ -11,22 +11,24 @@ import {
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import CloseIcon from '@mui/icons-material/Close'
 
+// props for the FilterDrawerMobile component
+interface FilterDrawerMobileProps {
+  open: boolean
+  onClose: (boolean) => void
+  children: React.ReactNode
+  onApplyFilter: () => void
+  onClearFilter: () => void
+}
+
 export const FilterDrawerModal = ({
-  isFilterDrawerOpen,
-  setIsFilterDrawerOpen,
+  open,
+  onClose,
   children,
-  search,
-  setSearch,
   onApplyFilter,
   onClearFilter,
-}) => {
+}: FilterDrawerMobileProps) => {
   return (
-    <Drawer
-      anchor={'bottom'}
-      open={isFilterDrawerOpen}
-      onClose={() => setIsFilterDrawerOpen(false)}
-      sx={{}}
-    >
+    <Drawer anchor={'bottom'} open={open} onClose={() => onClose(false)}>
       <Box
         sx={{
           height: '100vh',
@@ -59,45 +61,11 @@ export const FilterDrawerModal = ({
               width: '14px',
               top: '2px',
             }}
-            onClick={() => setIsFilterDrawerOpen(false)}
+            onClick={() => onClose(false)}
           >
             <CloseIcon fontSize="small" />
           </Box>
         </Stack>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{
-            marginTop: '38px',
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: '16px',
-            }}
-          >
-            Underlying
-          </Typography>
-          <ArrowDropUpIcon />
-        </Stack>
-        <Box>
-          <TextField
-            value={search}
-            aria-label="Filter creator"
-            sx={{ width: '100%', height: '50px', marginTop: '16px' }}
-            onChange={(event) => setSearch(event.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search color="secondary" />
-                </InputAdornment>
-              ),
-            }}
-            placeholder="Enter Underlying"
-            color="secondary"
-          />
-        </Box>
         {children}
         <Box
           sx={{

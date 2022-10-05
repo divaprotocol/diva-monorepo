@@ -351,7 +351,7 @@ export function MyFeeClaims() {
     selectRequestStatus('app/feeRecipients')
   )
   const [underlyingButtonLabel, setUnderlyingButtonLabel] = useState('Assets')
-  const [search, setSearch] = useState(null)
+  const [search, setSearch] = useState('')
 
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
@@ -541,11 +541,9 @@ export function MyFeeClaims() {
                 />
               )}
               <FilterDrawerModal
-                isFilterDrawerOpen={isFilterDrawerOpen}
-                setIsFilterDrawerOpen={setIsFilterDrawerOpen}
+                open={isFilterDrawerOpen}
+                onClose={setIsFilterDrawerOpen}
                 children={<MobileFilterOptions />}
-                search={search}
-                setSearch={setSearch}
                 onApplyFilter={() => {
                   if (selectedFilterFromRadio) {
                     setSearch(selectedFilterFromRadio)

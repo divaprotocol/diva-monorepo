@@ -1,7 +1,11 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -9,8 +13,8 @@ import {
   DialogContentText,
   Divider,
   Grid,
+  InputAdornment,
   Pagination,
-  Radio,
   Stack,
   Switch,
   TextField,
@@ -57,6 +61,8 @@ import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { FilterDrawerModal } from './FilterDrawerMobile'
 import { useHistory } from 'react-router-dom'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import { Search } from '@mui/icons-material'
 
 type Response = {
   [token: string]: BigNumber
@@ -99,6 +105,167 @@ const AddToMetamask = (props: any) => {
           onClick={handleAddMetaMask}
         />
       </Tooltip>
+    </>
+  )
+}
+
+const MobileFilterOptions = ({
+  setSearch,
+  expiredPoolClicked,
+  setExpiredPoolClicked,
+  confirmedPoolClicked,
+  setConfirmedPoolClicked,
+  rows,
+  checkedState,
+  setCheckedState,
+  searchInput,
+  setSearchInput,
+}) => {
+  // get top 4 most popular underlying tokens in sortedRows
+  const top4UnderlyingTokens = useMemo(() => {
+    const underlyingTokens = rows
+      .map((row) => row.Underlying)
+      .filter((value, index, self) => self.indexOf(value) === index)
+    const underlyingTokensWithCount = underlyingTokens.map((token) => {
+      return {
+        token,
+        count: rows.filter((row) => row.Underlying === token).length,
+      }
+    })
+    const sortedUnderlyingTokens = underlyingTokensWithCount.sort(
+      (a, b) => b.count - a.count
+    )
+    return sortedUnderlyingTokens.slice(0, 4)
+  }, [rows])
+
+  const handleOnChange = (position) => {
+    const updatedCheckedState = checkedState.map((item, index) =>
+      index === position ? !item : item
+    )
+
+    setCheckedState(updatedCheckedState)
+
+    const underlyingTokenString = updatedCheckedState
+      .map((currentState, index) => {
+        if (currentState === true) {
+          return top4UnderlyingTokens[index]
+        }
+      })
+      .filter((item) => item !== undefined)
+      .map((item) => item.token)
+      .join(' ')
+      .toString()
+
+    setSearch(underlyingTokenString)
+  }
+
+  return (
+    <>
+      <Accordion
+        sx={{
+          backgroundColor: '#000000',
+          '&:before': {
+            display: 'none',
+          },
+          marginTop: '28px',
+        }}
+        defaultExpanded
+      >
+        <AccordionSummary
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          sx={{
+            padding: '0px',
+            backgroundColor: '#000000',
+          }}
+          expandIcon={<ArrowDropUpIcon />}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Underlying
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            backgroundColor: '#000000',
+            padding: '0px',
+          }}
+        >
+          <Box>
+            <TextField
+              value={searchInput}
+              aria-label="Filter creator"
+              sx={{ width: '100%', height: '50px', marginTop: '16px' }}
+              onChange={(event) => setSearchInput(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Enter Underlying"
+              color="secondary"
+            />
+          </Box>
+          <Stack
+            spacing={0.6}
+            sx={{
+              marginTop: '16px',
+              fontSize: '14px',
+              marginBottom: '32px',
+            }}
+          >
+            {top4UnderlyingTokens.map((underlying, index) => (
+              <Stack
+                direction="row"
+                justifyContent={'space-between'}
+                alignItems={'center'}
+                key={index}
+              >
+                <Box>{underlying.token}</Box>
+                <Checkbox
+                  checked={checkedState[index]}
+                  id={`custom-checkbox-${index}`}
+                  onChange={() => handleOnChange(index)}
+                />
+              </Stack>
+            ))}
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: '20px',
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Hide Expired Pools</Box>
+          <Switch
+            checked={expiredPoolClicked}
+            onChange={() => setExpiredPoolClicked(!expiredPoolClicked)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Confirmed Pools</Box>
+          <Switch
+            checked={confirmedPoolClicked}
+            onChange={() => setConfirmedPoolClicked(!confirmedPoolClicked)}
+          />
+        </Stack>
+      </Stack>
     </>
   )
 }
@@ -691,17 +858,18 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
 }
 
 export function MyPositions() {
-  const { provider, chainId } = useConnectionContext()
-  const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
   const [underlyingButtonLabel, setUnderlyingButtonLabel] =
     useState('Underlying')
-  const [search, setSearch] = useState(null)
+  const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
   const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
   const [confirmedPoolClicked, setConfirmedPoolClicked] = useState(false)
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
-  const [selectedFilterFromRadio, setSelectedFilterFromRadio] = useState('')
+  const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
 
+  const { provider, chainId } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
@@ -716,6 +884,7 @@ export function MyPositions() {
       })
     )
   }, [dispatch, page, userAddress])
+
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
     setUnderlyingButtonLabel(
@@ -939,7 +1108,6 @@ export function MyPositions() {
           }))
       : []
 
-  // covert the above function to a memoized one
   const filteredRowsByOptions = useMemo(() => {
     if (search != null && search.length > 0) {
       if (expiredPoolClicked) {
@@ -975,100 +1143,19 @@ export function MyPositions() {
     return bId - aId
   })
 
-  const MobileFilterOptions = () => (
-    <>
-      <Stack
-        spacing={0.6}
-        sx={{
-          marginTop: '16px',
-          fontSize: '14px',
-          marginBottom: '32px',
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>BTC/USD</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'BTC/USD'}
-            size="small"
-            value="BTC/USD"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>ETH/USD</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'ETH/USD'}
-            size="small"
-            value="ETH/USD"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>GHST/USD</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'GHST/USD'}
-            size="small"
-            value="GHST/USD"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>USDT/USD</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'USDT/USD'}
-            size="small"
-            value="USDT/USD"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-      </Stack>
-      <Divider />
-      <Stack
-        sx={{
-          paddingTop: '20px',
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>Hide Expired Pools</Box>
-          <Switch
-            checked={expiredPoolClicked}
-            onChange={() => setExpiredPoolClicked(!expiredPoolClicked)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>Confirmed Pools</Box>
-          <Switch
-            checked={confirmedPoolClicked}
-            onChange={() => setConfirmedPoolClicked(!confirmedPoolClicked)}
-          />
-        </Stack>
-      </Stack>
-    </>
-  )
+  useEffect(() => {
+    if (searchInput.length > 0 && searchInput !== null) {
+      setCheckedState(new Array(4).fill(false))
+      setSearch(searchInput)
+    }
+  }, [searchInput])
+
+  useEffect(() => {
+    if (checkedState.includes(true)) {
+      setSearch('')
+      setSearchInput('')
+    }
+  }, [checkedState])
 
   return (
     <Stack
@@ -1173,23 +1260,31 @@ export function MyPositions() {
                 />
               )}
               <FilterDrawerModal
-                isFilterDrawerOpen={isFilterDrawerOpen}
-                setIsFilterDrawerOpen={setIsFilterDrawerOpen}
-                children={<MobileFilterOptions />}
-                search={search}
-                setSearch={setSearch}
+                open={isFilterDrawerOpen}
+                onClose={setIsFilterDrawerOpen}
+                children={
+                  <MobileFilterOptions
+                    setSearch={setSearch}
+                    expiredPoolClicked={expiredPoolClicked}
+                    setExpiredPoolClicked={setExpiredPoolClicked}
+                    confirmedPoolClicked={confirmedPoolClicked}
+                    setConfirmedPoolClicked={setConfirmedPoolClicked}
+                    rows={rows}
+                    checkedState={checkedState}
+                    setCheckedState={setCheckedState}
+                    searchInput={searchInput}
+                    setSearchInput={setSearchInput}
+                  />
+                }
                 onApplyFilter={() => {
-                  if (selectedFilterFromRadio) {
-                    setSearch(selectedFilterFromRadio)
-                  }
                   setIsFilterDrawerOpen(false)
                 }}
                 onClearFilter={() => {
                   setSearch('')
                   setExpiredPoolClicked(false)
                   setConfirmedPoolClicked(false)
-                  setSelectedFilterFromRadio('')
-                  setIsFilterDrawerOpen(false)
+                  setSearchInput('')
+                  setCheckedState(new Array(4).fill(false))
                 }}
               />
             </Stack>

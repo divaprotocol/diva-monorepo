@@ -476,7 +476,7 @@ export function MyDataFeeds() {
   const [page, setPage] = useState(0)
   const [underlyingButtonLabel, setUnderlyingButtonLabel] =
     useState('Underlying')
-  const [search, setSearch] = useState(null)
+  const [search, setSearch] = useState('')
   const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
   const [selectedFilterFromRadio, setSelectedFilterFromRadio] = useState('')
@@ -792,11 +792,9 @@ export function MyDataFeeds() {
                 />
               )}
               <FilterDrawerModal
-                isFilterDrawerOpen={isFilterDrawerOpen}
-                setIsFilterDrawerOpen={setIsFilterDrawerOpen}
+                open={isFilterDrawerOpen}
+                onClose={setIsFilterDrawerOpen}
                 children={<MobileFilterOptions />}
-                search={search}
-                setSearch={setSearch}
                 onApplyFilter={() => {
                   if (selectedFilterFromRadio) {
                     setSearch(selectedFilterFromRadio)

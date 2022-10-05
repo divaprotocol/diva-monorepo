@@ -733,11 +733,9 @@ export function MyOrders() {
               />
             )}
             <FilterDrawerModal
-              isFilterDrawerOpen={isFilterDrawerOpen}
-              setIsFilterDrawerOpen={setIsFilterDrawerOpen}
+              open={isFilterDrawerOpen}
+              onClose={setIsFilterDrawerOpen}
               children={<MobileFilterOptions />}
-              search={search}
-              setSearch={setSearch}
               onApplyFilter={() => {
                 if (selectedFilterFromRadio) {
                   setSearch(selectedFilterFromRadio)
