@@ -415,7 +415,7 @@ export function ReviewAndSubmit({
                     fontSize={'0.85rem'}
                     sx={{ ml: theme.spacing(2) }}
                   >
-                    Min Taker Contribution
+                    Min Taker Contribution (applicable on 1st fill only)
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
                     {values.minTakerContribution}
@@ -601,15 +601,28 @@ export function ReviewAndSubmit({
             values.tokenSupply != null &&
             values.tokenSupply > 0 && (
               <Box sx={{ maxWidth: '85%' }}>
-                <PayoffProfile
-                  floor={values.floor}
-                  cap={values.cap}
-                  inflection={values.inflection}
-                  hasError={false}
-                  collateralBalanceLong={values.collateralBalanceLong}
-                  collateralBalanceShort={values.collateralBalanceShort}
-                  tokenSupply={values.tokenSupply}
-                />
+                {transaction !== 'createpool' ? (
+                  <PayoffProfile
+                    floor={values.floor}
+                    cap={values.cap}
+                    inflection={values.inflection}
+                    hasError={false}
+                    collateralBalanceLong={values.collateralBalanceLong}
+                    collateralBalanceShort={values.collateralBalanceShort}
+                    tokenSupply={values.tokenSupply}
+                    longDirection={values.offerDirection === 'Long'}
+                  />
+                ) : (
+                  <PayoffProfile
+                    floor={values.floor}
+                    cap={values.cap}
+                    inflection={values.inflection}
+                    hasError={false}
+                    collateralBalanceLong={values.collateralBalanceLong}
+                    collateralBalanceShort={values.collateralBalanceShort}
+                    tokenSupply={values.tokenSupply}
+                  />
+                )}
               </Box>
             )}
           <Card

@@ -186,15 +186,15 @@ export const ApproveActionButtons = ({
   )
 
   const offerCreationStats = {
-    maker: ethers.utils.getAddress(account),
+    maker: account != null && ethers.utils.getAddress(account),
     taker: ethers.utils.getAddress(values.takerAddress),
     makerCollateralAmount: parseUnits(
       values.yourShare.toString(),
-      decimal
+      values.collateralToken.decimals
     ).toString(),
     takerCollateralAmount: parseUnits(
       values.takerShare.toString(),
-      decimal
+      values.collateralToken.decimals
     ).toString(),
     makerDirection: values.offerDirection === 'Long',
     offerExpiry: values.offerDuration,

@@ -669,6 +669,8 @@ export function DefineOfferAttributes({
                         ...values,
                         collateralBalance,
                         tokenSupply: parseFloat(collateralBalance),
+                        takerShare:
+                          parseFloat(collateralBalance) - values.yourShare,
                       }))
                       if (fillOrKill) {
                         if (collateralBalance != '') {

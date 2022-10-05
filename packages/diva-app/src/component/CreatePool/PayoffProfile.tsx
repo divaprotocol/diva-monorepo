@@ -17,6 +17,7 @@ export function PayoffProfile(props: {
   collateralBalanceShort: number
   collateralBalanceLong: number
   tokenSupply: number
+  longDirection?: boolean
 }) {
   const {
     floor,
@@ -25,6 +26,7 @@ export function PayoffProfile(props: {
     hasError,
     collateralBalanceShort,
     collateralBalanceLong,
+    longDirection,
   } = props
 
   const padding = cap * 0.1
@@ -125,8 +127,18 @@ export function PayoffProfile(props: {
             style={{ stroke: theme.palette.text.disabled }}
           />
           <YAxis style={{ stroke: theme.palette.text.disabled }} />
-          <LineSeries style={lineSeriesStyle} data={short} />
-          <LineSeries style={lineSeriesStyle} data={long} />
+          {longDirection == undefined && (
+            <LineSeries style={lineSeriesStyle} data={short} />
+          )}
+          {longDirection == undefined && (
+            <LineSeries style={lineSeriesStyle} data={long} />
+          )}
+          {longDirection != undefined &&
+            (longDirection ? (
+              <LineSeries style={lineSeriesStyle} data={long} />
+            ) : (
+              <LineSeries style={lineSeriesStyle} data={long} />
+            ))}
         </XYPlot>
       </Box>
       <Box

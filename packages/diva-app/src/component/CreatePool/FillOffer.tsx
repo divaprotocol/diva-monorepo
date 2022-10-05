@@ -25,7 +25,15 @@ export function FillOffer({
   const walletBalance = useErcBalance(JSON.parse(uploadedJson).collateralToken)
   const { provider } = useConnectionContext()
   const [decimal, setDecimal] = React.useState(18)
-
+  const { isConnected, disconnect, connect } = useConnectionContext()
+  useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', () => {
+        disconnect()
+        connect()
+      })
+    }
+  }, [])
   useEffect(() => {
     if (uploadedJson !== '{}' && uploadedJson != undefined) {
       const configJson = JSON.parse(uploadedJson)
@@ -37,6 +45,34 @@ export function FillOffer({
       token.decimals().then((decimals: number) => {
         setDecimal(decimals)
         formik.setFieldValue('collateralToken.decimals', decimals)
+        formik.setFieldValue(
+          'yourShare',
+          parseFloat(formatUnits(configJson.takerCollateralAmount, decimals))
+        )
+        formik.setFieldValue(
+          'makerShare',
+          Number(formatUnits(configJson.makerCollateralAmount, decimals))
+        )
+        if (configJson.maker.toLowerCase() === userAddress.toLowerCase()) {
+          formik.setFieldValue(
+            'collateralBalance',
+            formatUnits(
+              BigNumber.from(configJson.makerCollateralAmount).add(
+                BigNumber.from(configJson.takerCollateralAmount)
+              ),
+              decimals
+            )
+          )
+        } else {
+          formik.setFieldValue(
+            'collateralBalance',
+            formatUnits(configJson.takerCollateralAmount, decimals)
+          )
+        }
+        formik.setFieldValue(
+          'minTakerContribution',
+          formatUnits(configJson.minimumTakerFillAmount, decimals)
+        )
       })
 
       formik.setFieldValue(
@@ -48,35 +84,13 @@ export function FillOffer({
       formik.setFieldValue('floor', formatEther(configJson.floor))
       formik.setFieldValue('cap', formatEther(configJson.cap))
       formik.setFieldValue('inflection', formatEther(configJson.inflection))
-      formik.setFieldValue(
-        'yourShare',
-        parseFloat(formatUnits(configJson.takerCollateralAmount, decimal))
-      )
-      formik.setFieldValue(
-        'makerShare',
-        Number(formatUnits(configJson.makerCollateralAmount, decimal))
-      )
+
       formik.setFieldValue(
         'gradient',
         parseFloat(formatEther(configJson.gradient))
       )
       formik.setFieldValue('collateralWalletBalance', walletBalance)
-      if (configJson.maker.toLowerCase() === userAddress.toLowerCase()) {
-        formik.setFieldValue(
-          'collateralBalance',
-          formatUnits(
-            BigNumber.from(configJson.makerCollateralAmount).add(
-              BigNumber.from(configJson.takerCollateralAmount)
-            ),
-            decimal
-          )
-        )
-      } else {
-        formik.setFieldValue(
-          'collateralBalance',
-          formatUnits(configJson.takerCollateralAmount, decimal)
-        )
-      }
+
       formik.setFieldValue('collateralToken.id', configJson.collateralToken)
       formik.setFieldValue(
         'capacity',
@@ -87,10 +101,7 @@ export function FillOffer({
       )
       formik.setFieldValue('dataProvider', configJson.dataProvider)
       formik.setFieldValue('offerDuration', configJson.offerExpiry)
-      formik.setFieldValue(
-        'minTakerContribution',
-        formatUnits(configJson.minimumTakerFillAmount, decimal)
-      )
+
       formik.setFieldValue('takerAddress', configJson.taker)
       formik.setFieldValue('jsonToExport', {
         maker: configJson.maker,
