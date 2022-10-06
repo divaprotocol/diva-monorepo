@@ -247,7 +247,7 @@ export function ReviewAndSubmit({
                     LONG / SHORT Token Supply
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.tokenSupply}
+                    {Number(values.tokenSupply).toFixed(2)}
                   </Typography>
                 </Stack>
               )}
@@ -374,7 +374,7 @@ export function ReviewAndSubmit({
                     Max Pool Capacity
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.capacity}
+                    {Number(values.capacity).toFixed(2)}
                   </Typography>
                 </Stack>
               )}
