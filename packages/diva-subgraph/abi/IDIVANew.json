@@ -1588,6 +1588,12 @@
         "internalType": "uint256",
         "name": "collateralAmount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "permissionedERC721Token",
+        "type": "address"
       }
     ],
     "name": "PoolIssued",

@@ -6,7 +6,7 @@ dataSources:
     name: DivaDiamond
     network: goerli
     source:
-      address: "0xf9f2Ef8eBE5d1b62c36B0a23e8ca78B92b8Ea3e3"
+      address: "0xCC5Bced6f8eaecCDbA9792e0E175BF36A0E611EF"
       abi: DivaDiamond
       startBlock: 7483129
     mapping:
@@ -36,7 +36,7 @@ dataSources:
           handler: handleLiquidityAdded
         - event: LiquidityRemoved(indexed uint256,indexed address,uint256)
           handler: handleLiquidityRemoved
-        - event: PoolIssued(indexed uint256,indexed address,indexed address,uint256)
+        - event: PoolIssued(indexed uint256,indexed address,indexed address,uint256,address)
           handler: handlePoolIssued
         - event: StatusChanged(indexed uint8,indexed address,indexed uint256,uint256)
           handler: handleStatusChanged

@@ -12,7 +12,7 @@ import {
 } from "../generated/DivaDiamond/DivaDiamond";
 import { Erc20Token } from "../generated/DivaDiamond/Erc20Token";
 import { PositionTokenABI } from "../generated/DivaDiamond/PositionTokenABI";
-import { PermissionedPositionTokenABI } from "../generated/DivaDiamond/PermissionedPositionTokenABI";
+// import { PermissionedPositionTokenABI } from "../generated/DivaDiamond/PermissionedPositionTokenABI";
 import { LimitOrderFilled } from "../generated/ExchangeProxy/IZeroEx";
 import {
   Pool,
@@ -83,7 +83,8 @@ function handleLiquidityEvent(
   divaAddress: Address,
   msgSender: Address,
   blockTimestamp: BigInt,
-  collateralAmount: BigInt
+  collateralAmount: BigInt,
+  permissionedERC721Token: Address,
 ): void {
 
   // ***************************************
@@ -263,11 +264,15 @@ function handleLiquidityEvent(
     // Check what payoff profile type the user has created (binary, linear, convex or concave)
     // and flag the corresponding task as completed
     const unit = BigInt.fromString("1000000000000000000") // 1e18
-    let gradient = parameters.gradient;
+    
+    // Scale gradient to 18 decimals
+    const decimals = shortTokenContract.decimals();
+    const scaling = BigInt.fromI32(10).pow(18 - <u8>(decimals));
+    let gradient = parameters.gradient.times(scaling);
+
     if (parameters.floor.equals(parameters.cap)) {
         testnetUser.binaryPoolCreated = true
     } else {
-      // TODO decimals of gradient have been changed -> Adjust
       // Calculate the hypothetical gradient if it was a linear curve
       const gradientLinear = (parameters.inflection.minus(parameters.floor)).times(unit).div(
         parameters.cap.minus(parameters.floor));
@@ -324,12 +329,8 @@ function handleLiquidityEvent(
   poolEntity.supplyShort = shortTokenContract.totalSupply(); // Updated during create/add/remove
   poolEntity.supplyLong = longTokenContract.totalSupply(); // Updated during create/add/remove
   
-  // TODO: shortTokenContract is an instance of PositionToken and not PermissionedPositionToken
-  try {
-    poolEntity.permissionedERC721Token = shortTokenContract.permissionedERC721Token();
-  } catch {
-    poolEntity.permissionedERC721Token = "0x0000000000000000000000000000000000000000"
-  }
+  // TODO: Add permissionedERC721Token to PoolIssued event
+  poolEntity.permissionedERC721Token = permissionedERC721Token.toHexString();
 
   // QUESTION Add longRecipient and shortRecipient? -> maybe in dedicated PoolIssued and LiquidityAdded entities rather than in "cumulative" Pool entity
 
@@ -395,7 +396,8 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
     event.address,
     event.transaction.from,
     event.block.timestamp,
-    event.params.collateralAmount
+    event.params.collateralAmount,
+    new Address(0)
   );
 
   let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
@@ -424,7 +426,8 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
     event.address,
     event.transaction.from,
     event.block.timestamp,
-    new BigInt(0) // Do not add to collateralBalanceGross on remove liquidity
+    new BigInt(0), // Do not add to collateralBalanceGross on remove liquidity
+    new Address(0)
   );
 
 
@@ -459,7 +462,8 @@ export function handlePoolIssued(event: PoolIssued): void {
     event.address,                // DIVA contract address
     event.transaction.from,       // Address that triggered the transaction emitting the PoolIssued event
     event.block.timestamp,         // Block timestamp
-    event.params.collateralAmount
+    event.params.collateralAmount,
+    event.params.permissionedERC721Token
   );
 }
 
@@ -472,7 +476,8 @@ export function handleStatusChanged(event: StatusChanged): void {
     event.address,
     event.transaction.from,
     event.block.timestamp,
-    new BigInt(0) // Do not add to collateralBalanceGross on redeem
+    new BigInt(0), // Do not add to collateralBalanceGross on redeem
+    new Address(0)
   );
   if (event.params.statusFinalReferenceValue === 2) {
     handleChallengeEvent(
