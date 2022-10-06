@@ -216,7 +216,6 @@ const MobileFilterOptions = ({
             sx={{
               marginTop: '16px',
               fontSize: '14px',
-              marginBottom: '32px',
             }}
           >
             {top4UnderlyingTokens.map((underlying, index) => (
@@ -1112,19 +1111,25 @@ export function MyPositions() {
     if (search != null && search.length > 0) {
       if (expiredPoolClicked) {
         return filteredRows
-          .filter((v) =>
-            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          .filter(
+            (v) =>
+              search.toLowerCase().includes(v.Underlying.toLowerCase()) ||
+              v.Underlying.toLowerCase().includes(search.toLowerCase())
           )
           .filter((v) => v.Status.includes('Open'))
       } else if (confirmedPoolClicked) {
         return filteredRows
-          .filter((v) =>
-            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          .filter(
+            (v) =>
+              search.toLowerCase().includes(v.Underlying.toLowerCase()) ||
+              v.Underlying.toLowerCase().includes(search.toLowerCase())
           )
           .filter((v) => v.Status.includes('Confirmed'))
       } else {
-        return filteredRows.filter((v) =>
-          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        return filteredRows.filter(
+          (v) =>
+            search.toLowerCase().includes(v.Underlying.toLowerCase()) ||
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
         )
       }
     } else if (expiredPoolClicked) {
@@ -1152,7 +1157,6 @@ export function MyPositions() {
 
   useEffect(() => {
     if (checkedState.includes(true)) {
-      setSearch('')
       setSearchInput('')
     }
   }, [checkedState])
