@@ -239,13 +239,10 @@ export const ApproveActionButtons = ({
     }
   }, [])
   useEffect(() => {
-    if (transactionType === 'createoffer') {
-      setBtnName('Create')
-    }
     if (transactionType === 'filloffer') {
       setBtnName('Fill')
     } else {
-      setBtnName('Add')
+      setBtnName('Create')
     }
     if (textFieldValue !== '' && chainId) {
       if (parseFloat(textFieldValue) === 0) {
