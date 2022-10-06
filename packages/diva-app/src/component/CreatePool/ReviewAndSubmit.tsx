@@ -374,7 +374,9 @@ export function ReviewAndSubmit({
                     Max Pool Capacity
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {Number(values.capacity).toFixed(2)}
+                    {values.capacity !== 'Unlimited'
+                      ? Number(values.capacity).toFixed(2)
+                      : 'Unlimited'}
                   </Typography>
                 </Stack>
               )}
