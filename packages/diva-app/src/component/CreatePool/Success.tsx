@@ -30,6 +30,7 @@ import {
   parseUnits,
   splitSignature,
 } from 'ethers/lib/utils'
+import ERC20 from '@diva/contracts/abis/erc20.json'
 import { ContentCopy, Download } from '@mui/icons-material'
 import DIVA712ABI from '../../abi/DIVA712ABI.json'
 
@@ -46,7 +47,10 @@ const AddToMetamask = ({
   address: string
   symbol: string
 }) => {
+  const { provider } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
+    const token = new ethers.Contract(address, ERC20, provider.getSigner())
+    const decimal = await token.decimals()
     try {
       await window.ethereum.request({
         method: 'wallet_watchAsset',
@@ -55,7 +59,7 @@ const AddToMetamask = ({
           options: {
             address: address,
             symbol: symbol, // A ticker symbol or shorthand, up to 5 chars.
-            decimals: 18,
+            decimals: decimal,
             image:
               'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
           },
