@@ -665,10 +665,9 @@ export function DefineOfferAttributes({
                     onChange={(event) => {
                       const value = event.target.value
                       const arr = value.split('.')
+                      const collateralBalance = event.target.value
                       if (arr.length > 1) {
                         if (arr[1].length <= collateralToken.decimals) {
-                          const collateralBalance = event.target.value
-
                           formik.setValues((values) => ({
                             ...values,
                             collateralBalance,
@@ -686,6 +685,25 @@ export function DefineOfferAttributes({
                             } else {
                               formik.setFieldValue('minTakerContribution', 0)
                             }
+                          }
+                        }
+                      } else {
+                        formik.setValues((values) => ({
+                          ...values,
+                          collateralBalance,
+                          tokenSupply: parseFloat(collateralBalance),
+                          takerShare:
+                            parseFloat(collateralBalance) - values.yourShare,
+                        }))
+                        if (fillOrKill) {
+                          if (collateralBalance != '') {
+                            formik.setFieldValue(
+                              'minTakerContribution',
+                              parseFloat(collateralBalance) -
+                                formik.values.yourShare
+                            )
+                          } else {
+                            formik.setFieldValue('minTakerContribution', 0)
                           }
                         }
                       }

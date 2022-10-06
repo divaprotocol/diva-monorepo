@@ -496,9 +496,9 @@ export function ReviewAndSubmit({
                       onChange={(event) => {
                         const value = event.target.value
                         const arr = value.split('.')
+                        const collateralBalance = event.target.value
                         if (arr.length > 1) {
                           if (arr[1].length <= decimal) {
-                            const collateralBalance = event.target.value
                             if (collateralBalance !== '') {
                               formik.setFieldValue(
                                 'yourShare',
@@ -507,6 +507,15 @@ export function ReviewAndSubmit({
                             } else {
                               formik.setFieldValue('yourShare', 0)
                             }
+                          }
+                        } else {
+                          if (collateralBalance !== '') {
+                            formik.setFieldValue(
+                              'yourShare',
+                              Number(collateralBalance)
+                            )
+                          } else {
+                            formik.setFieldValue('yourShare', 0)
                           }
                         }
                       }}
