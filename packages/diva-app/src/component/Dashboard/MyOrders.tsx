@@ -1,8 +1,15 @@
-import { Box, Button, Stack, InputAdornment, Input } from '@mui/material'
+import {
+  Box,
+  Button,
+  Stack,
+  InputAdornment,
+  Input,
+  Divider,
+} from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { formatUnits } from 'ethers/lib/utils'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { getOrderDetails, getUserOrders } from '../../DataService/OpenOrders'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import {
@@ -21,6 +28,9 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { makeStyles } from '@mui/styles'
 import { ExpiresInCell } from '../Markets/Markets'
+import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import ToggleFilter from '../PoolsTableFilter/ToggleFilter'
+import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 
 export function MyOrders() {
   const chainId = useAppSelector(selectChainId)
@@ -30,7 +40,11 @@ export function MyOrders() {
   const [loadingValue, setLoadingValue] = useState(false)
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] =
+    useState('Underlying')
   const [search, setSearch] = useState('')
+  const [buyClicked, setBuyClicked] = useState(false)
+  const [sellClicked, setSellClicked] = useState(false)
   const history = useHistory()
   const dispatch = useAppDispatch()
   const useStyles = makeStyles({
@@ -40,6 +54,26 @@ export function MyOrders() {
       },
     },
   })
+  const handleUnderLyingInput = (e) => {
+    setSearch(e.target.value)
+    setUnderlyingButtonLabel(
+      e.target.value === '' ? 'Underlying' : e.target.value
+    )
+  }
+  const filterBuyOrders = () => {
+    if (buyClicked) {
+      setBuyClicked(false)
+    } else {
+      setBuyClicked(true)
+    }
+  }
+  const filterSellOrders = () => {
+    if (sellClicked) {
+      setSellClicked(false)
+    } else {
+      setSellClicked(true)
+    }
+  }
   useEffect(() => {
     dispatch(fetchPositionTokens({ page }))
   }, [dispatch, page])
@@ -214,12 +248,6 @@ export function MyOrders() {
     componentDidMount()
   }, [])
 
-  const filteredRows =
-    search != null && search.length > 0
-      ? dataOrders.filter((v) =>
-          v.underlying.toLowerCase().includes(search.toLowerCase())
-        )
-      : dataOrders
   const columns: GridColDef[] = [
     {
       field: 'symbol',
@@ -307,58 +335,104 @@ export function MyOrders() {
       ),
     },
   ]
+
+  const filteredRows = useMemo(() => {
+    if (search != null && search.length > 0) {
+      if (buyClicked && sellClicked) {
+        return dataOrders
+      } else if (buyClicked) {
+        return dataOrders
+          .filter((v) => v.type.includes('BUY'))
+          .filter((v) =>
+            v.underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      } else if (sellClicked) {
+        return dataOrders
+          .filter((v) => v.type.includes('SELL'))
+          .filter((v) =>
+            v.underlying.toLowerCase().includes(search.toLowerCase())
+          )
+      } else {
+        return dataOrders.filter((v) =>
+          v.underlying.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+    } else {
+      if (buyClicked && sellClicked) {
+        return dataOrders
+      } else if (buyClicked) {
+        return dataOrders.filter((v) => v.type.includes('BUY'))
+      } else if (sellClicked) {
+        return dataOrders.filter((v) => v.type.includes('SELL'))
+      } else {
+        return dataOrders
+      }
+    }
+  }, [search, buyClicked, sellClicked, dataOrders])
+
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         height: '100%',
       }}
-      spacing={6}
-      paddingRight={6}
+      spacing={4}
     >
-      <>
-        <Stack height="100%" width="100%">
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'end',
-              flexDirection: 'column',
-              paddingBottom: '1em',
-            }}
-          >
-            <Input
-              value={search}
-              placeholder="Filter underlying"
-              aria-label="Filter underlying"
-              onChange={(e) => setSearch(e.target.value)}
-              startAdornment={
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              }
-            />
-          </Box>
-          <DataGrid
-            className={classes.root}
-            rows={filteredRows}
-            pagination
-            columns={columns}
-            loading={poolsRequestStatus !== 'fulfilled'}
-            onPageChange={(page) => setPage(page)}
-            page={page}
-            onRowClick={(row) => {
-              history.push(`../../${row.row.Id}/${row.row.position}`)
-            }}
-            componentsProps={{
-              row: {
-                style: {
-                  cursor: 'pointer',
-                },
-              },
-            }}
-          />
-        </Stack>
-      </>
+      <Box
+        paddingY={2}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <DropDownFilter
+          id="Underlying Filter"
+          DropDownButtonLabel={underlyingButtonLabel}
+          InputValue={search}
+          onInputChange={handleUnderLyingInput}
+        />
+        <ButtonFilter
+          id="Buy"
+          sx={{
+            borderRight: 0,
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+          }}
+          ButtonLabel="Buy"
+          onClick={filterBuyOrders}
+        />
+        <Divider orientation="vertical" />
+        <ButtonFilter
+          id="Sell"
+          sx={{
+            borderLeft: 0,
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+          }}
+          ButtonLabel="Sell"
+          onClick={filterSellOrders}
+        />
+      </Box>
+      <DataGrid
+        className={classes.root}
+        rows={filteredRows}
+        pagination
+        columns={columns}
+        loading={poolsRequestStatus !== 'fulfilled'}
+        onPageChange={(page) => setPage(page)}
+        selectedPoolsView="Table"
+        page={page}
+        onRowClick={(row) => {
+          history.push(`../../${row.row.Id}/${row.row.position}`)
+        }}
+        componentsProps={{
+          row: {
+            style: {
+              cursor: 'pointer',
+            },
+          },
+        }}
+      />
     </Stack>
   )
 }

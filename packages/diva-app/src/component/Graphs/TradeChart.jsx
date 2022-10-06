@@ -1,13 +1,14 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import * as d3 from 'd3'
 
 export default function DIVATradeChart(props) {
   const ref = useRef()
+  const svgContainer = useRef(null)
   let {
     data,
-    w, //Width
-    h, //Height
-    refAsset, //ReferenceAsset
+    w,
+    h,
+    refAsset,
     payOut,
     isLong,
     breakEven,
@@ -25,19 +26,34 @@ export default function DIVATradeChart(props) {
 
   const optionTypeText = isLong ? 'LONG' : 'SHORT'
   const reffeenceAsset = refAsset.slice(0, 8)
+  const [chartWidth, setChartWidth] = useState(w)
+
+  const getSvgContainerSize = () => {
+    const newWidth = svgContainer.current.clientWidth
+    setChartWidth(newWidth)
+  }
+
+  useEffect(() => {
+    getSvgContainerSize()
+    window.addEventListener('resize', getSvgContainerSize)
+    return () => window.removeEventListener('resize', getSvgContainerSize)
+  }, [props.w])
 
   // Set the dimensions and margins of the graph
-  const margin = { top: 15, right: 2, bottom: 40, left: 20 },
-    width = w - margin.left - margin.right,
+  const margin = { top: 15, right: 20, bottom: 40, left: 20 },
+    width = chartWidth - margin.left - margin.right,
     height = h - margin.top - margin.bottom
+
   const labelWidth = 30
   const labelHeight = 10
   const blueColorCode = '#3B8DCA'
   const redColorCode = '#F77F99'
   const legendHeight = height + 30
+
   useEffect(() => {
     intitalChart()
-  }, [])
+  }, [props.w])
+
   const intitalChart = () => {
     const svg = d3.select(ref.current)
     svg
@@ -45,11 +61,8 @@ export default function DIVATradeChart(props) {
       .attr('height', height + margin.top + margin.bottom)
       .style('overflow', 'visible')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-
-    //Text Label on the Top left corner i.e Payout per Long token (in WAGMI18)
   }
-  // Append the svg object to the reference element of the page
-  // Appends a 'group' element to 'svg'
+
   // Moves the 'group' element to the top left margin
   const draw = () => {
     const svg = d3.select(ref.current)
@@ -73,10 +86,7 @@ export default function DIVATradeChart(props) {
     const domainMax = d3.max(data, function (d) {
       return d.x
     })
-    const x = d3
-      .scaleLinear()
-      .domain([domainMin, domainMax])
-      .range([0, width - margin.right])
+    const x = d3.scaleLinear().domain([domainMin, domainMax]).range([0, width])
     // Remove X- axis labels
     svg
       .append('rect')
@@ -226,7 +236,7 @@ export default function DIVATradeChart(props) {
       .style('fill', '#F7931A')
     svg
       .append('circle')
-      .attr('cx', width * 0.25)
+      .attr('cx', width * 0.3)
       .attr('cy', legendHeight)
       .attr('r', function () {
         return cap == floor ? 0 : 6
@@ -234,13 +244,13 @@ export default function DIVATradeChart(props) {
       .style('fill', '#83BD67')
     svg
       .append('circle')
-      .attr('cx', width * 0.42)
+      .attr('cx', width * 0.54)
       .attr('cy', legendHeight)
       .attr('r', currentPrice ? 6 : 0)
       .style('fill', '#3393E0')
     svg
       .append('circle')
-      .attr('cx', width * 0.75)
+      .attr('cx', width * 0.8)
       .attr('cy', legendHeight)
       .attr('r', showBreakEven && breakEven != 'n/a' ? 6 : 0)
       .style('fill', '#9747FF')
@@ -252,7 +262,7 @@ export default function DIVATradeChart(props) {
         return cap == floor ? 0 : 1
       })
       .text('Floor' + ' ' + '(' + parseFloat(floor).toFixed(2) + ')')
-      .style('font-size', '12px')
+      .style('font-size', showBreakEven ? '12px' : '10px')
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
@@ -262,38 +272,38 @@ export default function DIVATradeChart(props) {
         return cap == floor ? 1 : 0
       })
       .text('Inflection' + ' ' + '(' + parseFloat(cap).toFixed(2) + ')') //Binary payoff
-      .style('font-size', '12px')
+      .style('font-size', showBreakEven ? '12px' : '10px')
       .attr('alignment-baseline', 'middle')
     svg
       .append('text')
-      .attr('x', width * 0.27)
+      .attr('x', width * 0.33)
       .attr('y', legendHeight)
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
       })
       .text('Cap' + ' ' + '(' + parseFloat(cap).toFixed(2) + ')')
-      .style('font-size', '12px')
+      .style('font-size', showBreakEven ? '12px' : '10px')
       .attr('alignment-baseline', 'middle')
 
     //current price legend
     svg
       .append('text')
-      .attr('x', width * 0.45)
+      .attr('x', width * 0.57)
       .attr('y', legendHeight)
       .attr('opacity', currentPrice ? 1 : 0)
       .text(
         'Current Value' + ' ' + '(' + parseFloat(currentPrice).toFixed(2) + ')'
       )
-      .style('font-size', '12px')
+      .style('font-size', showBreakEven ? '12px' : '10px')
       .attr('alignment-baseline', 'middle')
 
     svg
       .append('text')
-      .attr('x', width * 0.77)
+      .attr('x', width * 0.83)
       .attr('y', legendHeight)
       .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
       .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(2) + ')')
-      .style('font-size', '12px')
+      .style('font-size', showBreakEven ? '12px' : '10px')
       .attr('alignment-baseline', 'middle')
 
     // Add mouseover effects
@@ -533,7 +543,11 @@ export default function DIVATradeChart(props) {
   }
   useEffect(() => {
     draw()
-  }, [props.currentPrice, props.breakEven])
+  }, [props.currentPrice, props.breakEven, chartWidth, props.w])
 
-  return <svg ref={ref}></svg>
+  return (
+    <div ref={svgContainer} className="line-chart">
+      <svg ref={ref}></svg>
+    </div>
+  )
 }

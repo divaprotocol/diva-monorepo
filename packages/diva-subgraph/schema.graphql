@@ -87,6 +87,8 @@ type TestnetUser @entity {
   positionTokenRedeemed: Boolean!
   feesClaimed: Boolean!
   feeClaimsTransferred: Boolean!
+  startTime: BigInt!
+  endTime: BigInt!
 }
 
 type User @entity {

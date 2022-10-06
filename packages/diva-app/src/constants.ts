@@ -110,9 +110,9 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
-    allOrders: 'https://goerli.api.0x.org/orderbook/v1/orders/',
-    order: 'https://goerli.api.0x.org/orderbook/v1/order/',
-    orderbook: 'https://goerli.api.0x.org/orderbook/v1',
+    allOrders: 'https://eip712api.xyz/orderbook/v1/orders/',
+    order: 'https://eip712api.xyz/orderbook/v1/order/',
+    orderbook: 'https://eip712api.xyz/orderbook/v1',
     explorer: 'https://goerli.etherscan.io/',
     name: 'Görli',
     logoUrl: ethereumLogoUrl,
@@ -188,6 +188,10 @@ export const divaGovernanceAddress =
   '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E' // creator of pools on Main Markets page and trading fee recipient
 
 export const tradingFee = 0.01 // 1%
+
+export const DEFAULT_TAKER_TOKEN_FEE = 1000 // 1000 = 1%
+
+export const DEFAULT_THRESHOLD = 100
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 
