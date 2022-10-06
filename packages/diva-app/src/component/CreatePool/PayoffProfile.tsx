@@ -114,11 +114,13 @@ export function PayoffProfile(props: {
       color: theme.palette.primary.dark,
     },
   ]
-  if (longDirection) {
-    legendItems.pop()
-  } else {
-    legendItems.reverse()
-    legendItems.pop()
+  if (longDirection != undefined) {
+    if (longDirection) {
+      legendItems.pop()
+    } else {
+      legendItems.reverse()
+      legendItems.pop()
+    }
   }
   return (
     <Box pb={3} ref={ref}>

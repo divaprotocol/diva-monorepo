@@ -13,7 +13,7 @@ export type Values = {
   expiryTime: Date
   floor: number
   cap: number
-  inflection: number
+  inflection: string
   gradient: number
   collateralToken?: WhitelistCollateralToken
   collateralWalletBalance: string
@@ -41,7 +41,7 @@ export const initialValues: Values = {
   expiryTime: defaultDate,
   floor: 100,
   cap: 300,
-  inflection: 200,
+  inflection: '200',
   gradient: 0.5,
   collateralToken: {
     id: '0xFA158C9B780A4213f3201Ae74Cca013712c8538d', // Ropsten: '0x134e62bd2ee247d4186a1fdbaa9e076cb26c1355',
@@ -99,7 +99,7 @@ export const useCreatePoolFormik = () => {
         if (collateralToken != null && dataProvider != null) {
           contract
             ?.createContingentPool({
-              inflection,
+              inflection: Number(inflection),
               cap,
               floor,
               collateralBalanceShort,
@@ -193,7 +193,7 @@ export const useCreatePoolFormik = () => {
         errors.takerAddress = 'Taker address must be valid'
       }
       // floor can't be higher or equal to inflection
-      if (values.floor > values.inflection) {
+      if (values.floor > Number(values.inflection)) {
         errors.floor = 'Must be lower than inflection'
         errors.inflection = 'Must be higher than floor'
       }
@@ -205,7 +205,7 @@ export const useCreatePoolFormik = () => {
       }
 
       // inflection can't be higher or equal to cap
-      if (values.inflection > values.cap) {
+      if (Number(values.inflection) > values.cap) {
         errors.inflection = 'Must be lower than cap'
         errors.cap = 'Must be higher than inflection'
       }
