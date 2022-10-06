@@ -378,8 +378,22 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {(transaction === 'createoffer' ||
-                transaction === 'filloffer') && (
+              {transaction === 'createoffer' && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Max Pool Capacity
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.capacity !== 'Unlimited'
+                      ? Number(values.capacity).toFixed(2)
+                      : 'Unlimited'}
+                  </Typography>
+                </Stack>
+              )}
+              {transaction === 'filloffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -418,7 +432,7 @@ export function ReviewAndSubmit({
                     Min Taker Contribution (applicable on 1st fill only)
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.minTakerContribution}
+                    {Number(values.minTakerContribution).toFixed(2)}
                   </Typography>
                 </Stack>
               )}
