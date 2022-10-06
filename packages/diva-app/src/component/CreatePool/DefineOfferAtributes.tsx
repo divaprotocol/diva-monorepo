@@ -217,25 +217,21 @@ export function DefineOfferAttributes({
         formik.setFieldValue('gradient', 0.5)
         formik.setFieldValue(
           'cap',
-          Number(formik.values.inflection) +
-            Number(formik.values.inflection) / 2
+          formik.values.inflection + formik.values.inflection / 2
         )
         formik.setFieldValue(
           'floor',
-          Number(formik.values.inflection) -
-            Number(formik.values.inflection) / 2
+          formik.values.inflection - formik.values.inflection / 2
         )
         break
       case 'Custom':
         formik.setFieldValue(
           'cap',
-          Number(formik.values.inflection) +
-            Number(formik.values.inflection) / 2
+          formik.values.inflection + formik.values.inflection / 2
         )
         formik.setFieldValue(
           'floor',
-          Number(formik.values.inflection) -
-            Number(formik.values.inflection) / 2
+          formik.values.inflection - formik.values.inflection / 2
         )
         formik.setFieldValue(
           'inflection',
@@ -415,7 +411,7 @@ export function DefineOfferAttributes({
                             ...values,
                             cap: parseFloat(event.target.value),
                             floor: parseFloat(event.target.value),
-                            inflection: event.target.value,
+                            inflection: parseFloat(event.target.value),
                             gradient: 1,
                           }))
                         }
@@ -452,10 +448,8 @@ export function DefineOfferAttributes({
                             formik.setValues((values) => ({
                               ...values,
                               floor: parseFloat(event.target.value),
-                              inflection: (
-                                (parseFloat(event.target.value) + cap) /
-                                2
-                              ).toString(),
+                              inflection:
+                                (parseFloat(event.target.value) + cap) / 2,
                             }))
                           }
                         }}
@@ -480,10 +474,8 @@ export function DefineOfferAttributes({
                           formik.setValues((values) => ({
                             ...values,
                             cap: parseFloat(event.target.value),
-                            inflection: (
-                              (parseFloat(event.target.value) + floor) /
-                              2
-                            ).toString(),
+                            inflection:
+                              (parseFloat(event.target.value) + floor) / 2,
                           }))
                         }}
                         sx={{ width: '100%' }}
@@ -1065,7 +1057,7 @@ export function DefineOfferAttributes({
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
-                  inflection={Number(inflection)}
+                  inflection={inflection}
                   hasError={hasPaymentProfileError}
                   collateralBalanceLong={collateralBalanceLong}
                   collateralBalanceShort={collateralBalanceShort}
@@ -1097,10 +1089,8 @@ export function DefineOfferAttributes({
                 <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
                 {referenceAsset} is{' '}
                 <strong>
-                  {floor < Number(inflection) && Number(inflection) < cap
-                    ? 'at or '
-                    : ''}{' '}
-                  below {floor}{' '}
+                  {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
+                  {floor}{' '}
                 </strong>{' '}
                 on{' '}
                 {expiryTime != null && !isNaN(expiryTime.getTime())
@@ -1133,10 +1123,8 @@ export function DefineOfferAttributes({
                 <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
                 {referenceAsset} is{' '}
                 <strong>
-                  {floor < Number(inflection) && Number(inflection) < cap
-                    ? 'at or '
-                    : ''}{' '}
-                  above {cap}{' '}
+                  {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
+                  {cap}{' '}
                 </strong>{' '}
                 on{' '}
                 {expiryTime != null && !isNaN(expiryTime.getTime())
