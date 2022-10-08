@@ -9,6 +9,7 @@ import {
   Stack,
   useTheme,
   Box,
+  TextField,
 } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import React, { useEffect, useState } from 'react'
@@ -87,46 +88,69 @@ export const AddLiquidity = ({ pool }: Props) => {
     }
   }, [textFieldValue, pool, tokenBalance])
   return (
-    <Stack
-      direction="column"
-      sx={{
-        mt: theme.spacing(2),
-      }}
-    >
-      {loading ? (
-        <>
-          <Box pt={2} pb={3}>
-            <Alert severity="info">{approving}</Alert>
-          </Box>
-        </>
-      ) : (
-        ''
-      )}
-      <Collapse in={openExpiredAlert}>
-        <Alert
-          severity="error"
-          action={
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={() => {
-                setOpenExpiredAlert(false)
-              }}
-            >
-              {'X'}
-            </IconButton>
-          }
-          sx={{ mb: 2 }}
+    <>
+      <Stack
+        direction="column"
+        sx={{
+          mt: theme.spacing(2),
+        }}
+      >
+        {loading ? (
+          <>
+            <Box pt={2} pb={3}>
+              <Alert severity="info">{approving}</Alert>
+            </Box>
+          </>
+        ) : (
+          ''
+        )}
+        <Collapse in={openExpiredAlert}>
+          <Alert
+            severity="error"
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setOpenExpiredAlert(false)
+                }}
+              >
+                {'X'}
+              </IconButton>
+            }
+            sx={{ mb: 2 }}
+          >
+            Pool expired. Addition of liquidity is no longer possible
+          </Alert>
+        </Collapse>
+        <Card
+          sx={{
+            width: '430px',
+            border: '1px solid #383838',
+            background: theme.palette.background.default,
+            borderRadius: '5px',
+            borderBottom: 0,
+            p: theme.spacing(2),
+          }}
         >
-          Pool expired. Addition of liquidity is no longer possible
-        </Alert>
-      </Collapse>
-      <Card sx={{ minWidth: '100px', borderRadius: '16px' }}>
-        <Container sx={{ mt: theme.spacing(2) }}>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography sx={{ mt: theme.spacing(2) }}>Amount</Typography>
-            <Input
+          <TextField
+            id="outlined-number"
+            label="Amount to add"
+            type="number"
+            sx={{ width: '100%' }}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={textFieldValue}
+            onChange={(e) => {
+              const amount = e.target.value
+              if (!amount || amount.match(/^\d{1,}(\.\d{0,18})?$/)) {
+                setTextFieldValue(amount)
+              }
+            }}
+          />
+          {/* <Input
               type="number"
               inputProps={{ style: { textAlign: 'right' } }}
               value={textFieldValue}
@@ -136,13 +160,16 @@ export const AddLiquidity = ({ pool }: Props) => {
                   setTextFieldValue(amount)
                 }
               }}
-            />
-          </Stack>
+            /> */}
           {tokenBalance ? (
             <>
-              <Typography variant="subtitle2" color="text.secondary">
-                Your balance: {parseFloat(tokenBalance!).toFixed(4)}{' '}
-                {pool!.collateralToken.symbol}{' '}
+              <Typography variant="h5" color="text.secondary">
+                Your have
+                <Typography variant="h4" sx={{ display: 'inline' }}>
+                  &nbsp; {parseFloat(tokenBalance!).toFixed(4)}{' '}
+                  {pool!.collateralToken.symbol} &nbsp;
+                </Typography>
+                in your wallet.{' '}
                 <MaxCollateral
                   role="button"
                   onClick={() => {
@@ -200,129 +227,105 @@ export const AddLiquidity = ({ pool }: Props) => {
               Exceeds pool capacity
             </Alert>
           </Collapse>
-          <Container
+        </Card>
+        <Card
+          sx={{
+            width: '430px',
+            border: '1px solid #1B3448',
+            paddingTop: theme.spacing(4),
+            background: 'linear-gradient(to bottom, #1B3448, #051827 70%)',
+          }}
+        >
+          <BlackTextTypography>You Receive</BlackTextTypography>
+          <Divider
+            variant={'fullWidth'}
             sx={{
-              borderRadius: '16px',
-              width: theme.spacing(60),
-              height: theme.spacing(22),
-              backgroundColor: 'lightgray',
-              alignSelf: 'center',
+              background: 'black',
+              mt: theme.spacing(2),
+              mb: theme.spacing(2),
             }}
-          >
+          />
+          <Stack direction="row">
             <Container
               sx={{
-                mt: theme.spacing(2),
-                paddingTop: theme.spacing(4),
-                backgroundColor: 'lightgray',
+                ml: theme.spacing(-2),
               }}
             >
-              <BlackTextTypography>You Receive</BlackTextTypography>
-              <Divider
-                variant={'fullWidth'}
-                sx={{
-                  background: 'black',
-                  mt: theme.spacing(2),
-                  mb: theme.spacing(2),
-                }}
-              />
-              <Stack direction="row">
-                <Container
-                  sx={{
-                    ml: theme.spacing(-2),
-                    minWidth: theme.spacing(18),
-                  }}
-                >
-                  <BlackTextTypography>
-                    {pool &&
-                      textFieldValue !== '' &&
-                      (
-                        (parseFloat(formatEther(pool.supplyInitial)) /
-                          (parseFloat(
-                            formatUnits(
-                              pool.collateralBalanceLongInitial,
-                              decimal
-                            )
-                          ) +
-                            parseFloat(
-                              formatUnits(
-                                pool.collateralBalanceShortInitial,
-                                decimal
-                              )
-                            ))) *
-                        parseFloat(formatEther(parseEther(textFieldValue)))
-                      ).toFixed(4)}
-                  </BlackTextTypography>
-                  <BlackTextTypography>Long Tokens</BlackTextTypography>
-                </Container>
-                <Container
-                  sx={{
-                    ml: theme.spacing(-2),
-                    minWidth: theme.spacing(18),
-                  }}
-                >
-                  <BlackTextTypography>
-                    {pool &&
-                      textFieldValue !== '' &&
-                      (
-                        (parseFloat(formatEther(pool.supplyInitial)) /
-                          (parseFloat(
-                            formatUnits(
-                              pool.collateralBalanceLongInitial,
-                              decimal
-                            )
-                          ) +
-                            parseFloat(
-                              formatUnits(
-                                pool.collateralBalanceShortInitial,
-                                decimal
-                              )
-                            ))) *
-                        parseFloat(formatEther(parseEther(textFieldValue)))
-                      ).toFixed(4)}
-                  </BlackTextTypography>
-                  <BlackTextTypography>Short Tokens</BlackTextTypography>
-                </Container>
-                <Container
-                  sx={{
-                    ml: theme.spacing(-2),
-                    minWidth: theme.spacing(20),
-                  }}
-                >
-                  <BlackTextTypography>
-                    {pool &&
-                      textFieldValue !== '' &&
-                      Number(
-                        (100 * parseFloat(textFieldValue)) /
-                          (parseFloat(textFieldValue) +
-                            parseFloat(
-                              formatUnits(
-                                BigNumber.from(pool.collateralBalance),
-                                decimal
-                              )
-                            ))
-                      ).toFixed(2) + ' %'}
-                  </BlackTextTypography>
-                  <BlackTextTypography>Share of Pool</BlackTextTypography>
-                </Container>
-              </Stack>
+              <BlackTextTypography>
+                {pool &&
+                  textFieldValue !== '' &&
+                  (
+                    (parseFloat(formatEther(pool.supplyInitial)) /
+                      (parseFloat(
+                        formatUnits(pool.collateralBalanceLongInitial, decimal)
+                      ) +
+                        parseFloat(
+                          formatUnits(
+                            pool.collateralBalanceShortInitial,
+                            decimal
+                          )
+                        ))) *
+                    parseFloat(formatEther(parseEther(textFieldValue)))
+                  ).toFixed(4)}
+              </BlackTextTypography>
+              <BlackTextTypography>Long Tokens</BlackTextTypography>
             </Container>
-          </Container>
-          <Container
-            sx={{
-              mt: '2em',
-            }}
-          >
-            <ApproveActionButtons
-              collateralTokenAddress={pool!.collateralToken.id}
-              decimal={pool.collateralToken.decimals}
-              textFieldValue={textFieldValue}
-              transactionType={'liquidity'}
-              onTransactionSuccess={() => setBalanceUpdated(!balanceUpdated)}
-              alert={openExpiredAlert || openAlert}
-            />
-          </Container>
-        </Container>
-      </Card>
-    </Stack>
+            <Container
+              sx={{
+                ml: theme.spacing(-2),
+              }}
+            >
+              <BlackTextTypography>
+                {pool &&
+                  textFieldValue !== '' &&
+                  (
+                    (parseFloat(formatEther(pool.supplyInitial)) /
+                      (parseFloat(
+                        formatUnits(pool.collateralBalanceLongInitial, decimal)
+                      ) +
+                        parseFloat(
+                          formatUnits(
+                            pool.collateralBalanceShortInitial,
+                            decimal
+                          )
+                        ))) *
+                    parseFloat(formatEther(parseEther(textFieldValue)))
+                  ).toFixed(4)}
+              </BlackTextTypography>
+              <BlackTextTypography>Short Tokens</BlackTextTypography>
+            </Container>
+            <Container
+              sx={{
+                ml: theme.spacing(-2),
+              }}
+            >
+              <BlackTextTypography>
+                {pool &&
+                  textFieldValue !== '' &&
+                  Number(
+                    (100 * parseFloat(textFieldValue)) /
+                      (parseFloat(textFieldValue) +
+                        parseFloat(
+                          formatUnits(
+                            BigNumber.from(pool.collateralBalance),
+                            decimal
+                          )
+                        ))
+                  ).toFixed(2) + ' %'}
+              </BlackTextTypography>
+              <BlackTextTypography>Share of Pool</BlackTextTypography>
+            </Container>
+          </Stack>
+          <ApproveActionButtons
+            collateralTokenAddress={pool!.collateralToken.id}
+            decimal={pool.collateralToken.decimals}
+            textFieldValue={textFieldValue}
+            transactionType={'liquidity'}
+            onTransactionSuccess={() => setBalanceUpdated(!balanceUpdated)}
+            alert={openExpiredAlert || openAlert}
+          />
+        </Card>
+      </Stack>
+    </>
   )
 }
