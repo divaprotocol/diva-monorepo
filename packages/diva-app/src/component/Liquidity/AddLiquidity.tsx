@@ -34,10 +34,6 @@ const MaxCollateral = styled.u`
   }
 `
 
-const BlackTextTypography = (props) => (
-  <Typography color="#000">{props.children}</Typography>
-)
-
 type Props = {
   pool?: any
 }
@@ -88,69 +84,68 @@ export const AddLiquidity = ({ pool }: Props) => {
     }
   }, [textFieldValue, pool, tokenBalance])
   return (
-    <>
-      <Stack
-        direction="column"
+    <Stack
+      direction="column"
+      sx={{
+        mt: theme.spacing(2),
+      }}
+    >
+      {loading ? (
+        <>
+          <Box pt={2} pb={3}>
+            <Alert severity="info">{approving}</Alert>
+          </Box>
+        </>
+      ) : (
+        ''
+      )}
+      <Collapse in={openExpiredAlert}>
+        <Alert
+          severity="error"
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setOpenExpiredAlert(false)
+              }}
+            >
+              {'X'}
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          Pool expired. Addition of liquidity is no longer possible
+        </Alert>
+      </Collapse>
+      <Card
         sx={{
-          mt: theme.spacing(2),
+          width: '430px',
+          border: '1px solid #383838',
+          background: theme.palette.background.default,
+          borderRadius: '5px',
+          borderBottom: 0,
+          p: theme.spacing(2),
         }}
       >
-        {loading ? (
-          <>
-            <Box pt={2} pb={3}>
-              <Alert severity="info">{approving}</Alert>
-            </Box>
-          </>
-        ) : (
-          ''
-        )}
-        <Collapse in={openExpiredAlert}>
-          <Alert
-            severity="error"
-            action={
-              <IconButton
-                aria-label="close"
-                color="inherit"
-                size="small"
-                onClick={() => {
-                  setOpenExpiredAlert(false)
-                }}
-              >
-                {'X'}
-              </IconButton>
-            }
-            sx={{ mb: 2 }}
-          >
-            Pool expired. Addition of liquidity is no longer possible
-          </Alert>
-        </Collapse>
-        <Card
-          sx={{
-            width: '430px',
-            border: '1px solid #383838',
-            background: theme.palette.background.default,
-            borderRadius: '5px',
-            borderBottom: 0,
-            p: theme.spacing(2),
+        <TextField
+          id="outlined-number"
+          label="Amount to add"
+          type="number"
+          sx={{ width: '100%' }}
+          InputLabelProps={{
+            shrink: true,
           }}
-        >
-          <TextField
-            id="outlined-number"
-            label="Amount to add"
-            type="number"
-            sx={{ width: '100%' }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            value={textFieldValue}
-            onChange={(e) => {
-              const amount = e.target.value
-              if (!amount || amount.match(/^\d{1,}(\.\d{0,18})?$/)) {
-                setTextFieldValue(amount)
-              }
-            }}
-          />
-          {/* <Input
+          value={textFieldValue}
+          onChange={(e) => {
+            const amount = e.target.value
+            if (!amount || amount.match(/^\d{1,}(\.\d{0,18})?$/)) {
+              setTextFieldValue(amount)
+            }
+          }}
+        />
+        {/* <Input
               type="number"
               inputProps={{ style: { textAlign: 'right' } }}
               value={textFieldValue}
@@ -161,97 +156,94 @@ export const AddLiquidity = ({ pool }: Props) => {
                 }
               }}
             /> */}
-          {tokenBalance ? (
-            <>
-              <Typography variant="h5" color="text.secondary">
-                Your have
-                <Typography variant="h4" sx={{ display: 'inline' }}>
-                  &nbsp; {parseFloat(tokenBalance!).toFixed(4)}{' '}
-                  {pool!.collateralToken.symbol} &nbsp;
-                </Typography>
-                in your wallet.{' '}
-                <MaxCollateral
-                  role="button"
-                  onClick={() => {
-                    if (tokenBalance != null) {
-                      setTextFieldValue(tokenBalance)
-                    }
-                  }}
-                >
-                  (Max)
-                </MaxCollateral>
+        {tokenBalance ? (
+          <>
+            <Typography variant="h5" color="text.secondary">
+              You have
+              <Typography variant="h4" sx={{ display: 'inline' }}>
+                &nbsp; {parseFloat(tokenBalance!).toFixed(4)}{' '}
+                {pool!.collateralToken.symbol} &nbsp;
               </Typography>
-            </>
-          ) : (
-            <Typography variant="subtitle2" color="text.secondary">
-              Please connect your wallet
+              in your wallet.{' '}
+              <MaxCollateral
+                role="button"
+                onClick={() => {
+                  if (tokenBalance != null) {
+                    setTextFieldValue(tokenBalance)
+                  }
+                }}
+              >
+                (Max)
+              </MaxCollateral>
             </Typography>
-          )}
-          <Collapse in={openAlert} sx={{ mt: theme.spacing(2) }}>
-            <Alert
-              severity="error"
-              action={
-                <IconButton
-                  aria-label="close"
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    setOpenAlert(false)
-                  }}
-                >
-                  {'X'}
-                </IconButton>
-              }
-              sx={{ mb: 2 }}
-            >
-              Insufficient wallet balance
-            </Alert>
-          </Collapse>
-          <Collapse in={openCapacityAlert} sx={{ mt: theme.spacing(2) }}>
-            <Alert
-              severity="error"
-              action={
-                <IconButton
-                  aria-label="close"
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    setOpenCapacityAlert(false)
-                  }}
-                >
-                  {'X'}
-                </IconButton>
-              }
-              sx={{ mb: 2 }}
-            >
-              Exceeds pool capacity
-            </Alert>
-          </Collapse>
-        </Card>
-        <Card
-          sx={{
-            width: '430px',
-            border: '1px solid #1B3448',
-            paddingTop: theme.spacing(4),
-            background: 'linear-gradient(to bottom, #1B3448, #051827 70%)',
-          }}
-        >
-          <BlackTextTypography>You Receive</BlackTextTypography>
-          <Divider
-            variant={'fullWidth'}
-            sx={{
-              background: 'black',
-              mt: theme.spacing(2),
-              mb: theme.spacing(2),
-            }}
-          />
-          <Stack direction="row">
-            <Container
-              sx={{
-                ml: theme.spacing(-2),
-              }}
-            >
-              <BlackTextTypography>
+          </>
+        ) : (
+          <Typography variant="subtitle2" color="text.secondary">
+            Please connect your wallet
+          </Typography>
+        )}
+        <Collapse in={openAlert} sx={{ mt: theme.spacing(2) }}>
+          <Alert
+            severity="error"
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setOpenAlert(false)
+                }}
+              >
+                {'X'}
+              </IconButton>
+            }
+            sx={{ mb: 2 }}
+          >
+            Insufficient wallet balance
+          </Alert>
+        </Collapse>
+        <Collapse in={openCapacityAlert} sx={{ mt: theme.spacing(2) }}>
+          <Alert
+            severity="error"
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setOpenCapacityAlert(false)
+                }}
+              >
+                {'X'}
+              </IconButton>
+            }
+            sx={{ mb: 2 }}
+          >
+            Exceeds pool capacity
+          </Alert>
+        </Collapse>
+      </Card>
+      <Card
+        sx={{
+          width: '430px',
+          height: '280px',
+          border: '1px solid #1B3448',
+          mt: theme.spacing(-1),
+          paddingTop: theme.spacing(4),
+          px: theme.spacing(2),
+          background: 'linear-gradient(to bottom, #1B3448, #000000 80%)',
+        }}
+      >
+        <Stack direction="column" spacing={4}>
+          <Typography variant="h3" color="#ffffff">
+            You Receive
+          </Typography>
+          <Stack direction="row" spacing={6}>
+            <Stack direction="column" spacing={2} minWidth="100px">
+              <Typography variant="h4" color="#929292">
+                Long Tokens
+              </Typography>
+              <Typography variant="h2">
                 {pool &&
                   textFieldValue !== '' &&
                   (
@@ -267,15 +259,13 @@ export const AddLiquidity = ({ pool }: Props) => {
                         ))) *
                     parseFloat(formatEther(parseEther(textFieldValue)))
                   ).toFixed(4)}
-              </BlackTextTypography>
-              <BlackTextTypography>Long Tokens</BlackTextTypography>
-            </Container>
-            <Container
-              sx={{
-                ml: theme.spacing(-2),
-              }}
-            >
-              <BlackTextTypography>
+              </Typography>
+            </Stack>
+            <Stack direction="column" spacing={2} minWidth="100px">
+              <Typography variant="h4" color="#929292">
+                Short Tokens
+              </Typography>
+              <Typography variant="h2">
                 {pool &&
                   textFieldValue !== '' &&
                   (
@@ -291,15 +281,13 @@ export const AddLiquidity = ({ pool }: Props) => {
                         ))) *
                     parseFloat(formatEther(parseEther(textFieldValue)))
                   ).toFixed(4)}
-              </BlackTextTypography>
-              <BlackTextTypography>Short Tokens</BlackTextTypography>
-            </Container>
-            <Container
-              sx={{
-                ml: theme.spacing(-2),
-              }}
-            >
-              <BlackTextTypography>
+              </Typography>
+            </Stack>
+            <Stack direction="column" spacing={2} minWidth="100px">
+              <Typography variant="h4" color="#929292">
+                Share of Pool
+              </Typography>
+              <Typography variant="h2">
                 {pool &&
                   textFieldValue !== '' &&
                   Number(
@@ -312,9 +300,8 @@ export const AddLiquidity = ({ pool }: Props) => {
                           )
                         ))
                   ).toFixed(2) + ' %'}
-              </BlackTextTypography>
-              <BlackTextTypography>Share of Pool</BlackTextTypography>
-            </Container>
+              </Typography>
+            </Stack>
           </Stack>
           <ApproveActionButtons
             collateralTokenAddress={pool!.collateralToken.id}
@@ -324,8 +311,8 @@ export const AddLiquidity = ({ pool }: Props) => {
             onTransactionSuccess={() => setBalanceUpdated(!balanceUpdated)}
             alert={openExpiredAlert || openAlert}
           />
-        </Card>
-      </Stack>
-    </>
+        </Stack>
+      </Card>
+    </Stack>
   )
 }
