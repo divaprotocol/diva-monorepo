@@ -63,7 +63,7 @@ import { FilterDrawerModal } from './FilterDrawerMobile'
 import { useHistory } from 'react-router-dom'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { Search } from '@mui/icons-material'
-import { getTopNObjectByProperty } from '../../Util/dashboard'
+import { getTopNObjectByProperty, getColorByStatus } from '../../Util/dashboard'
 
 type Response = {
   [token: string]: BigNumber
@@ -796,10 +796,10 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
                 sx={{
                   borderRadius: '40px',
                   fontSize: '10px',
-                  background:
-                    Status === 'Expired'
-                      ? 'rgba(237, 108, 2, 0.4)'
-                      : 'rgba(51, 147, 224, 0.4)',
+                  background: getColorByStatus(Status).backgroundColor,
+                  color: getColorByStatus(Status).fontColor,
+                  textTransform: 'capitalize',
+                  fontWeight: 400,
                 }}
                 variant="contained"
               >

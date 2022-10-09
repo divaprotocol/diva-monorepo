@@ -15,7 +15,6 @@ import {
   Grid,
   InputAdornment,
   Pagination,
-  Radio,
   Stack,
   Switch,
   TextField,
@@ -52,7 +51,7 @@ import { FilterDrawerModal } from './FilterDrawerMobile'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { Search } from '@mui/icons-material'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
-import { getTopNObjectByProperty } from '../../Util/dashboard'
+import { getColorByStatus, getTopNObjectByProperty } from '../../Util/dashboard'
 
 export const DueInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
@@ -426,20 +425,35 @@ const MyDataFeedsTokenCard = ({ row }: { row: GridRowModel }) => {
             </Typography>
           </Box>
           <Box>
-            <Button
-              size="small"
-              sx={{
-                borderRadius: '40px',
-                fontSize: '10px',
-                background:
-                  Status === 'Expired'
-                    ? 'rgba(237, 108, 2, 0.4)'
-                    : 'rgba(51, 147, 224, 0.4)',
-              }}
-              variant="contained"
-            >
-              {Status}
-            </Button>
+            {Status === 'Open' ? (
+              <Stack direction="row" spacing={1.6} alignItems="center">
+                <Typography
+                  sx={{
+                    fontSize: '10px',
+                    fontWeight: 500,
+                    color: '#828282',
+                  }}
+                >
+                  Expires in
+                </Typography>
+                <ExpiresInCell row={row} />
+              </Stack>
+            ) : (
+              <Button
+                size="small"
+                sx={{
+                  borderRadius: '40px',
+                  fontSize: '10px',
+                  background: getColorByStatus(Status).backgroundColor,
+                  color: getColorByStatus(Status).fontColor,
+                  textTransform: 'capitalize',
+                  fontWeight: 400,
+                }}
+                variant="contained"
+              >
+                {Status}
+              </Button>
+            )}
           </Box>
         </Box>
         <Grid
