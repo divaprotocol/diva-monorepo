@@ -63,6 +63,7 @@ import { FilterDrawerModal } from './FilterDrawerMobile'
 import { useHistory } from 'react-router-dom'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { Search } from '@mui/icons-material'
+import { getTopNObjectByProperty } from '../../Util/dashboard'
 
 type Response = {
   [token: string]: BigNumber
@@ -121,22 +122,10 @@ const MobileFilterOptions = ({
   searchInput,
   setSearchInput,
 }) => {
-  // get top 4 most popular underlying tokens in sortedRows
-  const top4UnderlyingTokens = useMemo(() => {
-    const underlyingTokens = rows
-      .map((row) => row.Underlying)
-      .filter((value, index, self) => self.indexOf(value) === index)
-    const underlyingTokensWithCount = underlyingTokens.map((token) => {
-      return {
-        token,
-        count: rows.filter((row) => row.Underlying === token).length,
-      }
-    })
-    const sortedUnderlyingTokens = underlyingTokensWithCount.sort(
-      (a, b) => b.count - a.count
-    )
-    return sortedUnderlyingTokens.slice(0, 4)
-  }, [rows])
+  const top4UnderlyingTokens = useMemo(
+    () => getTopNObjectByProperty(rows, 'Underlying', 4),
+    [rows]
+  )
 
   const handleOnChange = (position) => {
     const updatedCheckedState = checkedState.map((item, index) =>

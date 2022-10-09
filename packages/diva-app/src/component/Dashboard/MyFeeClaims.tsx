@@ -10,21 +10,20 @@ import {
   TextField,
   Typography,
   Radio,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Checkbox,
+  InputAdornment,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ethers } from 'ethers'
-import { request } from 'graphql-request'
 import { parseUnits } from 'ethers/lib/utils'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
-import {
-  FeeRecipientCollateralToken,
-  queryFeeRecipients,
-} from '../../lib/queries'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import {
   fetchFeeRecipients,
@@ -38,6 +37,9 @@ import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { FilterDrawerModal } from './FilterDrawerMobile'
+import { Search } from '@mui/icons-material'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import { getTopNObjectByProperty } from '../../Util/dashboard'
 
 const TransferFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
@@ -337,11 +339,130 @@ const MyFeeClaimsTokenCard = ({ row }: { row: GridRowModel }) => {
   )
 }
 
+const MobileFilterOptions = ({
+  searchInput,
+  setSearchInput,
+  rows,
+  checkedState,
+  setCheckedState,
+  setSearch,
+}) => {
+  const top4UnderlyingTokens = useMemo(
+    () => getTopNObjectByProperty(rows, 'Underlying', 4),
+    [rows]
+  )
+
+  const handleOnChange = (position) => {
+    const updatedCheckedState = checkedState.map((item, index) =>
+      index === position ? !item : item
+    )
+
+    setCheckedState(updatedCheckedState)
+
+    const underlyingTokenString = updatedCheckedState
+      .map((currentState, index) => {
+        if (currentState === true) {
+          return top4UnderlyingTokens[index]
+        }
+      })
+      .filter((item) => item !== undefined)
+      .map((item) => item.token)
+      .join(' ')
+      .toString()
+
+    setSearch(underlyingTokenString)
+  }
+
+  return (
+    <>
+      <Accordion
+        sx={{
+          backgroundColor: '#000000',
+          '&:before': {
+            display: 'none',
+          },
+          marginTop: '28px',
+        }}
+        defaultExpanded
+      >
+        <AccordionSummary
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          sx={{
+            padding: '0px',
+            backgroundColor: '#000000',
+          }}
+          expandIcon={<ArrowDropUpIcon />}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Underlying
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            backgroundColor: '#000000',
+            padding: '0px',
+          }}
+        >
+          <Box>
+            <TextField
+              value={searchInput}
+              aria-label="Filter creator"
+              sx={{ width: '100%', height: '50px', marginTop: '16px' }}
+              onChange={(event) => setSearchInput(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Enter Underlying"
+              color="secondary"
+            />
+          </Box>
+          <Stack
+            spacing={0.6}
+            sx={{
+              marginTop: '16px',
+              fontSize: '14px',
+            }}
+          >
+            {top4UnderlyingTokens.map((underlying, index) => (
+              <Stack
+                direction="row"
+                justifyContent={'space-between'}
+                alignItems={'center'}
+                key={index}
+              >
+                <Box>{underlying.token}</Box>
+                <Checkbox
+                  checked={checkedState[index]}
+                  id={`custom-checkbox-${index}`}
+                  onChange={() => handleOnChange(index)}
+                />
+              </Stack>
+            ))}
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
+    </>
+  )
+}
+
 export function MyFeeClaims() {
   const { address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
-  const [selectedFilterFromRadio, setSelectedFilterFromRadio] = useState('')
+  const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] = useState('Assets')
 
   const dispatch = useAppDispatch()
   const { isMobile } = useCustomMediaQuery()
@@ -350,8 +471,6 @@ export function MyFeeClaims() {
   const poolsRequestStatus = useAppSelector(
     selectRequestStatus('app/feeRecipients')
   )
-  const [underlyingButtonLabel, setUnderlyingButtonLabel] = useState('Assets')
-  const [search, setSearch] = useState('')
 
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
@@ -392,72 +511,18 @@ export function MyFeeClaims() {
         )
       : rows
 
-  const MobileFilterOptions = () => (
-    <>
-      <Stack
-        spacing={0.6}
-        sx={{
-          marginTop: '16px',
-          fontSize: '14px',
-          marginBottom: '32px',
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>dUSD</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'dUSD'}
-            size="small"
-            value="dUSD"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>USD</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'USD'}
-            size="small"
-            value="USD"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>DAI</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'DAI'}
-            size="small"
-            value="DAI"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>WAGMI16</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'WAGMI16'}
-            size="small"
-            value="WAGMI16"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-      </Stack>
-      <Divider />
-    </>
-  )
+  useEffect(() => {
+    if (searchInput.length > 0 && searchInput !== null) {
+      setCheckedState(new Array(4).fill(false))
+      setSearch(searchInput)
+    }
+  }, [searchInput])
+
+  useEffect(() => {
+    if (checkedState.includes(true)) {
+      setSearchInput('')
+    }
+  }, [checkedState])
 
   return (
     <Stack
@@ -527,8 +592,8 @@ export function MyFeeClaims() {
                     Filters
                   </Button>
                   <Box>
-                    {filteredRows.map((row) => (
-                      <MyFeeClaimsTokenCard row={row} key={row.Id} />
+                    {filteredRows.map((row, index) => (
+                      <MyFeeClaimsTokenCard row={row} key={index} />
                     ))}
                   </Box>
                 </>
@@ -543,17 +608,23 @@ export function MyFeeClaims() {
               <FilterDrawerModal
                 open={isFilterDrawerOpen}
                 onClose={setIsFilterDrawerOpen}
-                children={<MobileFilterOptions />}
+                children={
+                  <MobileFilterOptions
+                    searchInput={searchInput}
+                    setSearchInput={setSearchInput}
+                    rows={rows}
+                    checkedState={checkedState}
+                    setCheckedState={setCheckedState}
+                    setSearch={setSearch}
+                  />
+                }
                 onApplyFilter={() => {
-                  if (selectedFilterFromRadio) {
-                    setSearch(selectedFilterFromRadio)
-                  }
                   setIsFilterDrawerOpen(false)
                 }}
                 onClearFilter={() => {
                   setSearch('')
-                  setSelectedFilterFromRadio('')
-                  setIsFilterDrawerOpen(false)
+                  setSearchInput('')
+                  setCheckedState(new Array(4).fill(false))
                 }}
               />
             </Stack>

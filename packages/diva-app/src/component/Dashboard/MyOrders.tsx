@@ -44,6 +44,7 @@ import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { FilterDrawerModal } from './FilterDrawerMobile'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import { getTopNObjectByProperty } from '../../Util/dashboard'
 
 const MyOrdersPoolCard = ({
   row,
@@ -206,21 +207,10 @@ const MobileFilterOptions = ({
   setCheckedState,
   setSearch,
 }) => {
-  const top4UnderlyingTokens = useMemo(() => {
-    const underlyingTokens = rows
-      .map((row) => row.underlying)
-      .filter((value, index, self) => self.indexOf(value) === index)
-    const underlyingTokensWithCount = underlyingTokens.map((token) => {
-      return {
-        token,
-        count: rows.filter((row) => row.underlying === token).length,
-      }
-    })
-    const sortedUnderlyingTokens = underlyingTokensWithCount.sort(
-      (a, b) => b.count - a.count
-    )
-    return sortedUnderlyingTokens.slice(0, 4)
-  }, [rows])
+  const top4UnderlyingTokens = useMemo(
+    () => getTopNObjectByProperty(rows, 'underlying', 4),
+    [rows]
+  )
 
   const handleOnChange = (position) => {
     const updatedCheckedState = checkedState.map((item, index) =>
@@ -356,13 +346,9 @@ const MobileFilterOptions = ({
 }
 
 export function MyOrders() {
-  const chainId = useAppSelector(selectChainId)
-  const makerAccount = useAppSelector(selectUserAddress)
   const [dataOrders, setDataOrders] = useState([])
   const [page, setPage] = useState(0)
   const [loadingValue, setLoadingValue] = useState(false)
-  const pools = useAppSelector((state) => selectPools(state))
-  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const [underlyingButtonLabel, setUnderlyingButtonLabel] =
     useState('Underlying')
   const [search, setSearch] = useState('')
@@ -370,12 +356,16 @@ export function MyOrders() {
   const [buyClicked, setBuyClicked] = useState(false)
   const [sellClicked, setSellClicked] = useState(false)
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
-  const [buyAndSellFilter, setBuyAndSellFilter] = useState('')
   const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
 
+  const chainId = useAppSelector(selectChainId)
+  const makerAccount = useAppSelector(selectUserAddress)
+  const pools = useAppSelector((state) => selectPools(state))
+  const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const history = useHistory()
   const dispatch = useAppDispatch()
   const { isMobile } = useCustomMediaQuery()
+
   const useStyles = makeStyles({
     root: {
       '&.MuiDataGrid-root .MuiDataGrid-cell:focus': {
@@ -383,6 +373,8 @@ export function MyOrders() {
       },
     },
   })
+  const classes = useStyles()
+
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
     setUnderlyingButtonLabel(
@@ -403,10 +395,11 @@ export function MyOrders() {
       setSellClicked(true)
     }
   }
+
   useEffect(() => {
     dispatch(fetchPositionTokens({ page }))
   }, [dispatch, page])
-  const classes = useStyles()
+
   const trimPools = pools.map((pool) => {
     return {
       id: pool.id,
@@ -672,18 +665,24 @@ export function MyOrders() {
       } else if (buyClicked) {
         return dataOrders
           .filter((v) => v.type.includes('BUY'))
-          .filter((v) =>
-            v.underlying.toLowerCase().includes(search.toLowerCase())
+          .filter(
+            (v) =>
+              v.underlying.toLowerCase().includes(search.toLowerCase()) ||
+              search.toLowerCase().includes(v.underlying.toLowerCase())
           )
       } else if (sellClicked) {
         return dataOrders
           .filter((v) => v.type.includes('SELL'))
-          .filter((v) =>
-            v.underlying.toLowerCase().includes(search.toLowerCase())
+          .filter(
+            (v) =>
+              v.underlying.toLowerCase().includes(search.toLowerCase()) ||
+              search.toLowerCase().includes(v.underlying.toLowerCase())
           )
       } else {
-        return dataOrders.filter((v) =>
-          v.underlying.toLowerCase().includes(search.toLowerCase())
+        return dataOrders.filter(
+          (v) =>
+            v.underlying.toLowerCase().includes(search.toLowerCase()) ||
+            search.toLowerCase().includes(v.underlying.toLowerCase())
         )
       }
     } else {
