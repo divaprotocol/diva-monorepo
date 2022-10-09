@@ -10,6 +10,11 @@ import {
   Typography,
   Divider,
   Radio,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Checkbox,
+  TextField,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -25,20 +30,20 @@ import {
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
-import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
+import { getDateTime } from '../../Util/Dates'
 import { Search } from '@mui/icons-material'
 import { CoinIconPair } from '../CoinIcon'
-import { Switch, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { DataGrid, GridColDef, GridRowModel } from '@mui/x-data-grid'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { makeStyles } from '@mui/styles'
 import { ExpiresInCell } from '../Markets/Markets'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
-import ToggleFilter from '../PoolsTableFilter/ToggleFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { FilterDrawerModal } from './FilterDrawerMobile'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 
 const MyOrdersPoolCard = ({
   row,
@@ -46,7 +51,7 @@ const MyOrdersPoolCard = ({
   loadingValue,
 }: {
   row: GridRowModel
-  cancelOrder: (event: any, orderHash: any, chainId: any) => Promise<void>
+  cancelOrder: (event: any, orderHash: string, chainId: string) => Promise<void>
   loadingValue: boolean
 }) => {
   const { icon, Id, type, quantity, price, payReceive, position, orderHash } =
@@ -189,6 +194,167 @@ const MyOrdersPoolCard = ({
   )
 }
 
+const MobileFilterOptions = ({
+  buyClicked,
+  setBuyClicked,
+  sellClicked,
+  setSellClicked,
+  rows,
+  searchInput,
+  setSearchInput,
+  checkedState,
+  setCheckedState,
+  setSearch,
+}) => {
+  const top4UnderlyingTokens = useMemo(() => {
+    const underlyingTokens = rows
+      .map((row) => row.underlying)
+      .filter((value, index, self) => self.indexOf(value) === index)
+    const underlyingTokensWithCount = underlyingTokens.map((token) => {
+      return {
+        token,
+        count: rows.filter((row) => row.underlying === token).length,
+      }
+    })
+    const sortedUnderlyingTokens = underlyingTokensWithCount.sort(
+      (a, b) => b.count - a.count
+    )
+    return sortedUnderlyingTokens.slice(0, 4)
+  }, [rows])
+
+  const handleOnChange = (position) => {
+    const updatedCheckedState = checkedState.map((item, index) =>
+      index === position ? !item : item
+    )
+
+    setCheckedState(updatedCheckedState)
+
+    const underlyingTokenString = updatedCheckedState
+      .map((currentState, index) => {
+        if (currentState === true) {
+          return top4UnderlyingTokens[index]
+        }
+      })
+      .filter((item) => item !== undefined)
+      .map((item) => item.token)
+      .join(' ')
+      .toString()
+
+    setSearch(underlyingTokenString)
+  }
+
+  return (
+    <>
+      <Accordion
+        sx={{
+          backgroundColor: '#000000',
+          '&:before': {
+            display: 'none',
+          },
+          marginTop: '28px',
+        }}
+        defaultExpanded
+      >
+        <AccordionSummary
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          sx={{
+            padding: '0px',
+            backgroundColor: '#000000',
+          }}
+          expandIcon={<ArrowDropUpIcon />}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Underlying
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            backgroundColor: '#000000',
+            padding: '0px',
+          }}
+        >
+          <Box>
+            <TextField
+              value={searchInput}
+              aria-label="Filter creator"
+              sx={{ width: '100%', height: '50px', marginTop: '16px' }}
+              onChange={(event) => setSearchInput(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Enter Underlying"
+              color="secondary"
+            />
+          </Box>
+          <Stack
+            spacing={0.6}
+            sx={{
+              marginTop: '16px',
+              fontSize: '14px',
+            }}
+          >
+            {top4UnderlyingTokens.map((underlying, index) => (
+              <Stack
+                direction="row"
+                justifyContent={'space-between'}
+                alignItems={'center'}
+                key={index}
+              >
+                <Box>{underlying.token}</Box>
+                <Checkbox
+                  checked={checkedState[index]}
+                  id={`custom-checkbox-${index}`}
+                  onChange={() => handleOnChange(index)}
+                />
+              </Stack>
+            ))}
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: '20px',
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Buy</Box>
+          <Radio
+            checked={buyClicked}
+            size="small"
+            onClick={() => setBuyClicked(!buyClicked)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Sell</Box>
+          <Radio
+            checked={sellClicked}
+            size="small"
+            onClick={() => setSellClicked(!sellClicked)}
+          />
+        </Stack>
+      </Stack>
+    </>
+  )
+}
+
 export function MyOrders() {
   const chainId = useAppSelector(selectChainId)
   const makerAccount = useAppSelector(selectUserAddress)
@@ -200,11 +366,12 @@ export function MyOrders() {
   const [underlyingButtonLabel, setUnderlyingButtonLabel] =
     useState('Underlying')
   const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
   const [buyClicked, setBuyClicked] = useState(false)
   const [sellClicked, setSellClicked] = useState(false)
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
-  const [selectedFilterFromRadio, setSelectedFilterFromRadio] = useState('')
   const [buyAndSellFilter, setBuyAndSellFilter] = useState('')
+  const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
 
   const history = useHistory()
   const dispatch = useAppDispatch()
@@ -532,102 +699,18 @@ export function MyOrders() {
     }
   }, [search, buyClicked, sellClicked, dataOrders])
 
-  const MobileFilterOptions = () => (
-    <>
-      <Stack
-        spacing={0.6}
-        sx={{
-          marginTop: '16px',
-          fontSize: '14px',
-          marginBottom: '32px',
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>BTC/USD</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'BTC/USD'}
-            size="small"
-            value="BTC/USD"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>ETH/USD</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'ETH/USD'}
-            size="small"
-            value="ETH/USD"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>GHST/USD</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'GHST/USD'}
-            size="small"
-            value="GHST/USD"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>USDT/USD</Box>
-          <Radio
-            checked={selectedFilterFromRadio === 'USDT/USD'}
-            size="small"
-            value="USDT/USD"
-            onChange={(e) => setSelectedFilterFromRadio(e.target.value)}
-          />
-        </Stack>
-      </Stack>
-      <Divider />
-      <Stack
-        sx={{
-          paddingTop: '20px',
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>Buy</Box>
-          <Radio
-            checked={buyClicked}
-            size="small"
-            onClick={() => setBuyClicked(!buyClicked)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>Sell</Box>
-          <Radio
-            checked={sellClicked}
-            size="small"
-            onClick={() => setSellClicked(!sellClicked)}
-          />
-        </Stack>
-      </Stack>
-    </>
-  )
+  useEffect(() => {
+    if (searchInput.length > 0 && searchInput !== null) {
+      setCheckedState(new Array(4).fill(false))
+      setSearch(searchInput)
+    }
+  }, [searchInput])
+
+  useEffect(() => {
+    if (checkedState.includes(true)) {
+      setSearchInput('')
+    }
+  }, [checkedState])
 
   return (
     <Stack
@@ -705,10 +788,10 @@ export function MyOrders() {
                   Filters
                 </Button>
                 <Box>
-                  {filteredRows.map((row) => (
+                  {filteredRows.map((row, i) => (
                     <MyOrdersPoolCard
                       row={row}
-                      key={row.Id}
+                      key={i}
                       cancelOrder={cancelOrder}
                       loadingValue={loadingValue}
                     />
@@ -735,19 +818,29 @@ export function MyOrders() {
             <FilterDrawerModal
               open={isFilterDrawerOpen}
               onClose={setIsFilterDrawerOpen}
-              children={<MobileFilterOptions />}
+              children={
+                <MobileFilterOptions
+                  buyClicked={buyClicked}
+                  setBuyClicked={setBuyClicked}
+                  sellClicked={sellClicked}
+                  setSellClicked={setSellClicked}
+                  rows={dataOrders}
+                  checkedState={checkedState}
+                  searchInput={searchInput}
+                  setSearchInput={setSearchInput}
+                  setSearch={setSearch}
+                  setCheckedState={setCheckedState}
+                />
+              }
               onApplyFilter={() => {
-                if (selectedFilterFromRadio) {
-                  setSearch(selectedFilterFromRadio)
-                }
                 setIsFilterDrawerOpen(false)
               }}
               onClearFilter={() => {
                 setSearch('')
-                setSelectedFilterFromRadio('')
-                setIsFilterDrawerOpen(false)
+                setSearchInput('')
                 setBuyClicked(false)
                 setSellClicked(false)
+                setCheckedState(new Array(4).fill(false))
               }}
             />
           </Stack>
