@@ -630,7 +630,7 @@ export const ApproveActionButtons = ({
                                 (x: any) => x.event === 'OfferFilled'
                               ).args.typedOfferHash
                               divaNew
-                                .getPoolIdByTypedOfferHash(typedOfferHash)
+                                .getPoolIdByTypedCreateOfferHash(typedOfferHash)
                                 .then((poolId: any) => {
                                   formik.setFieldValue('poolId', poolId)
                                 })
