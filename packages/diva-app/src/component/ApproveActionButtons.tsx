@@ -221,6 +221,7 @@ export const ApproveActionButtons = ({
             String(values.capacity),
             values.collateralToken.decimals
           ).toString(),
+    permissionedERC721Token: ethers.constants.AddressZero,
     salt: Date.now().toString(),
   }
 
