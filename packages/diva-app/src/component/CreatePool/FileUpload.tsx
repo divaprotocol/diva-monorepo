@@ -1,8 +1,6 @@
 import React from 'react'
 import { Box, Typography } from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import clsx from 'clsx'
-import FileUploadDefaultImage from './FileUploadDefaultImage.png'
 import { makeStyles } from '@mui/styles'
 
 export type FileUploadProps = {
@@ -25,42 +23,9 @@ export type FileUploadProps = {
 }
 
 const useStyle = makeStyles(() => ({
-  // root: {
-  //   background: '#121212',
-  //   cursor: 'pointer',
-  //   textAlign: 'center',
-  //   display: 'flex',
-  //   '&:hover p,&:hover svg,& img': {
-  //     opacity: 1,
-  //   },
-  //   '& p, svg': {
-  //     opacity: 0.4,
-  //   },
-  //   '&:hover img': {
-  //     opacity: 0.3,
-  //   },
-  // },
-  // noMouseEvent: {
-  //   pointerEvents: 'none',
-  // },
-  // iconText: {
-  //   display: 'flex',
-  //   justifyContent: 'center',
-  //   flexDirection: 'column',
-  //   alignItems: 'center',
-  //   position: 'absolute',
-  // },
   hidden: {
     display: 'none',
   },
-  // onDragOver: {
-  //   '& img': {
-  //     opacity: 0.3,
-  //   },
-  //   '& p, svg': {
-  //     opacity: 1,
-  //   },
-  // },
 }))
 
 export const FileUpload: React.FC<FileUploadProps> = ({
@@ -109,31 +74,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     },
   }
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(event)
-  }
-
   return (
     <>
       <input
-        onChange={handleChange}
+        onChange={onChange}
         accept={accept}
         className={classes.hidden}
         id="file-upload"
         type="file"
       />
 
-      <label
-        htmlFor="file-upload"
-        {...dragEvents}
-        // className={clsx(classes.root, isDragOver && classes.onDragOver)}
-      >
-        <Box
-          width={width}
-          height={height}
-          bgcolor={backgroundColor}
-          // className={classes.noMouseEvent}
-        >
+      <label htmlFor="file-upload" {...dragEvents}>
+        <Box width={width} height={height} bgcolor={backgroundColor}>
           {(!imageButton || isDragOver || isMouseOver) && (
             <>
               <Box

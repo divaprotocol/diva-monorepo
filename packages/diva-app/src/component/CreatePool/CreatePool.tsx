@@ -162,8 +162,8 @@ export function CreatePool() {
             {formik.values.step === 1 && (
               <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
                 <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
+                  labelId="create-select-label"
+                  id="create-select-label"
                   value={configPicked}
                   onChange={handleConfigPick}
                 >
