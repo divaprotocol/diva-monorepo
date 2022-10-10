@@ -3,6 +3,7 @@ import { useFormik } from 'formik'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useDiva } from '../../hooks/useDiva'
 import { WhitelistCollateralToken } from '../../lib/queries'
+import { ethers } from 'ethers'
 
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
@@ -23,6 +24,15 @@ export type Values = {
   capacity: string
   dataProvider: string
   payoutProfile: string
+  offerDuration?: string
+  offerDirection?: string
+  minTakerContribution?: string
+  takerAddress?: string
+  jsonToExport?: any
+  signature?: string
+  yourShare?: number
+  takerShare?: number
+  poolId?: string
 }
 
 export const initialValues: Values = {
@@ -47,6 +57,15 @@ export const initialValues: Values = {
   capacity: 'Unlimited',
   dataProvider: '',
   payoutProfile: 'Binary',
+  offerDirection: 'Long',
+  offerDuration: Math.floor(24 * 60 * 60 + Date.now() / 1000).toString(),
+  minTakerContribution: '10',
+  takerAddress: ethers.constants.AddressZero,
+  jsonToExport: '{}',
+  signature: '',
+  yourShare: 0,
+  takerShare: 10,
+  poolId: '',
 }
 
 type Errors = {
@@ -126,7 +145,18 @@ export const useCreatePoolFormik = () => {
         errors.collateralToken = 'You must choose a collateral asset'
       }
       if (values.collateralBalance == '') {
-        errors.collateralBalance = 'Collateral can not be empty'
+        errors.collateralBalance = 'Collateral cannot be empty'
+      }
+      if (
+        parseFloat(values.minTakerContribution) >
+        parseFloat(values.collateralBalance)
+      ) {
+        errors.minTakerContribution =
+          'Minimum taker contribution must be less than collateral amount'
+      }
+      if (Number(values.minTakerContribution) < 0) {
+        errors.minTakerContribution =
+          'Minimum taker contribution must be greater than 0'
       }
 
       if (!isConnected) {
@@ -136,9 +166,11 @@ export const useCreatePoolFormik = () => {
         errors.collateralWalletBalance =
           'Collateral cannot be higher than your balance'
       } else if (values.collateralBalance == '0') {
-        errors.collateralBalance = 'Collateral can not be 0'
+        errors.collateralBalance = 'Collateral cannot be 0'
       }
-
+      if (values.takerShare <= 0 || isNaN(values.takerShare)) {
+        errors.takerShare = 'Taker share cannot be zero, negative or missing'
+      }
       if (values.expiryTime == null || isNaN(values.expiryTime.getTime())) {
         errors.expiryTime = 'You must set an expiry time'
       }
@@ -150,7 +182,16 @@ export const useCreatePoolFormik = () => {
           threshold / 1000 / 60
         } minutes from now`
       }
+      if (values.takerAddress == null) {
+        errors.takerAddress = 'Taker address must not be empty'
+      }
 
+      if (
+        values.takerAddress.length !== ethers.constants.AddressZero.length &&
+        values.takerAddress !== 'Everyone'
+      ) {
+        errors.takerAddress = 'Taker address must be valid'
+      }
       // floor can't be higher or equal to inflection
       if (values.floor > values.inflection) {
         errors.floor = 'Must be lower than inflection'
@@ -175,9 +216,9 @@ export const useCreatePoolFormik = () => {
         errors.capacity = 'Capacity cannot be negative'
       } else if (
         parseFloat(values.capacity) !== 0 &&
-        collateralBalance > parseFloat(values.capacity)
+        parseFloat(values.collateralBalance) > parseFloat(values.capacity)
       ) {
-        errors.capacity = `Capacity must be larger than ${collateralBalance}. For unlimited capacity, set to 0`
+        errors.capacity = `Capacity must be larger than ${values.collateralBalance}. For unlimited capacity, set to 0`
       }
 
       // validate data provider

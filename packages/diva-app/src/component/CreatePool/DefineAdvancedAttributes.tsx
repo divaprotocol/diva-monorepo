@@ -96,7 +96,10 @@ export function DefineAdvanced({
             control={
               <Checkbox
                 defaultChecked={unlimited}
-                onChange={() => setUnlimited(!unlimited)}
+                onChange={() => {
+                  formik.setFieldValue('capacity', 'Unlimited')
+                  setUnlimited(!unlimited)
+                }}
               />
             }
             label="Unlimited"

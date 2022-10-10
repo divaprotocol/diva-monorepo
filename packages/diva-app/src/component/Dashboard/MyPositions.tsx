@@ -75,8 +75,16 @@ const MetaMaskImage = styled.img`
   cursor: pointer;
 `
 const AddToMetamask = (props: any) => {
+  const { provider } = useConnectionContext()
+
   const handleAddMetaMask = async (e) => {
     e.stopPropagation()
+    const token = new ethers.Contract(
+      props.row.address.id,
+      ERC20,
+      provider.getSigner()
+    )
+    const decimal = await token.decimals()
     const tokenSymbol =
       props.row.id.split('/')[1][0].toUpperCase() + props.row.id.split('/')[0]
     try {
@@ -87,7 +95,7 @@ const AddToMetamask = (props: any) => {
           options: {
             address: props.row.address.id,
             symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
-            decimals: 18,
+            decimals: decimal,
             image:
               'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
           },

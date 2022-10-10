@@ -7,6 +7,29 @@ import divaTextLogo from './Images/diva_logo_text.svg'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
 import TaskIcon from '@mui/icons-material/Task'
 
+const CREATE_POOL_OFFER_STRUCT = [
+  { type: 'address', name: 'maker' },
+  { type: 'address', name: 'taker' },
+  { type: 'uint256', name: 'makerCollateralAmount' },
+  { type: 'uint256', name: 'takerCollateralAmount' },
+  { type: 'bool', name: 'makerDirection' },
+  { type: 'uint256', name: 'offerExpiry' },
+  { type: 'uint256', name: 'minimumTakerFillAmount' },
+  { type: 'string', name: 'referenceAsset' },
+  { type: 'uint96', name: 'expiryTime' },
+  { type: 'uint256', name: 'floor' },
+  { type: 'uint256', name: 'inflection' },
+  { type: 'uint256', name: 'cap' },
+  { type: 'uint256', name: 'gradient' },
+  { type: 'address', name: 'collateralToken' },
+  { type: 'address', name: 'dataProvider' },
+  { type: 'uint256', name: 'capacity' },
+  { type: 'uint256', name: 'salt' },
+]
+export const CREATE_POOL_TYPE = {
+  OfferCreateContingentPool: CREATE_POOL_OFFER_STRUCT,
+}
+
 export enum SupportedChainId {
   ROPSTEN = 3,
   MAINNET = 1,
@@ -19,6 +42,7 @@ export enum SupportedChainId {
 type SingleConfig = {
   readonly name: string
   readonly divaAddress: string
+  readonly divaAddressNew: string
   readonly balanceCheckAddress: string
   readonly exchangeProxy: string
   readonly whitelistAddress: string
@@ -43,6 +67,7 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.MAINNET]: {
     name: 'Ethereum',
     divaAddress: '',
+    divaAddressNew: '',
     balanceCheckAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
@@ -59,6 +84,7 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.ROPSTEN]: {
     name: 'Ropsten',
     divaAddress: '0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211',
+    divaAddressNew: '',
     balanceCheckAddress: '0xD713aeC2156709A6AF392bb84018ACc6b44f1885',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
@@ -76,8 +102,9 @@ export const config: { [key: number]: SingleConfig } = {
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
-    balanceCheckAddress: '0x6F9b7892a6272880905E90DC5AcD1F56dF222FbE',
-    exchangeProxy: '0xf91bb752490473b8342a3e964e855b9f9a2a668e',
+    divaAddressNew: '0xb02bbd63545654d55125F98F85F4E691f1a3E207',
+    balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
+    exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
@@ -95,6 +122,7 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.POLYGON]: {
     name: 'Polygon',
     divaAddress: '',
+    divaAddressNew: '',
     balanceCheckAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
@@ -111,6 +139,7 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.POLYGON_MUMBAI]: {
     name: 'Mumbai',
     divaAddress: '',
+    divaAddressNew: '',
     balanceCheckAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
@@ -131,6 +160,7 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.ARBITRUM_ONE]: {
     name: 'Arbitrum',
     divaAddress: '',
+    divaAddressNew: '',
     balanceCheckAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
