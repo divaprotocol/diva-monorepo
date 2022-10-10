@@ -121,7 +121,7 @@ export const AddLiquidity = ({ pool }: Props) => {
       </Collapse>
       <Card
         sx={{
-          width: '430px',
+          width: '470px',
           border: '1px solid #383838',
           background: theme.palette.background.default,
           borderRadius: '5px',
@@ -225,16 +225,16 @@ export const AddLiquidity = ({ pool }: Props) => {
       </Card>
       <Card
         sx={{
-          width: '430px',
+          width: '470px',
           height: '280px',
           border: '1px solid #1B3448',
           mt: theme.spacing(-1),
           paddingTop: theme.spacing(4),
           px: theme.spacing(2),
-          background: 'linear-gradient(to bottom, #1B3448, #000000 80%)',
+          background: 'linear-gradient(to bottom, #1B3448, #000000 110%)',
         }}
       >
-        <Stack direction="column" spacing={4}>
+        <Stack direction="column" spacing={4} pl={theme.spacing(0.8)}>
           <Typography variant="h3" color="#ffffff">
             You Receive
           </Typography>
@@ -243,7 +243,7 @@ export const AddLiquidity = ({ pool }: Props) => {
               <Typography variant="h4" color="#929292">
                 Long Tokens
               </Typography>
-              <Typography variant="h2">
+              <Typography variant="h2" noWrap>
                 {pool &&
                   textFieldValue !== '' &&
                   (
@@ -265,7 +265,7 @@ export const AddLiquidity = ({ pool }: Props) => {
               <Typography variant="h4" color="#929292">
                 Short Tokens
               </Typography>
-              <Typography variant="h2">
+              <Typography variant="h2" noWrap>
                 {pool &&
                   textFieldValue !== '' &&
                   (
@@ -303,15 +303,15 @@ export const AddLiquidity = ({ pool }: Props) => {
               </Typography>
             </Stack>
           </Stack>
-          <ApproveActionButtons
-            collateralTokenAddress={pool!.collateralToken.id}
-            decimal={pool.collateralToken.decimals}
-            textFieldValue={textFieldValue}
-            transactionType={'liquidity'}
-            onTransactionSuccess={() => setBalanceUpdated(!balanceUpdated)}
-            alert={openExpiredAlert || openAlert}
-          />
         </Stack>
+        <ApproveActionButtons
+          collateralTokenAddress={pool!.collateralToken.id}
+          decimal={pool.collateralToken.decimals}
+          textFieldValue={textFieldValue}
+          transactionType={'liquidity'}
+          onTransactionSuccess={() => setBalanceUpdated(!balanceUpdated)}
+          alert={openExpiredAlert || openAlert}
+        />
       </Card>
     </Stack>
   )
