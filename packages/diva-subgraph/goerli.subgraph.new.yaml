@@ -6,7 +6,7 @@ dataSources:
     name: DivaDiamond
     network: goerli
     source:
-      address: "0xCC5Bced6f8eaecCDbA9792e0E175BF36A0E611EF"
+      address: "0x6cDEc9b70431bf650f3A0DDD0e246368a4C4F1E1"
       abi: DivaDiamond
       startBlock: 7483129
     mapping:
