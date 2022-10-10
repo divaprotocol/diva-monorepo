@@ -1,13 +1,16 @@
 import {
   Container,
+  IconButton,
   Link,
   Stack,
+  TextareaAutosize,
+  TextField,
   Tooltip,
   Typography,
   useTheme,
 } from '@mui/material'
 import { Box } from '@mui/material'
-import { config } from '../../constants'
+import { config, CREATE_POOL_TYPE } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { useCreatePoolFormik } from './formik'
@@ -21,7 +24,15 @@ import {
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
-import { formatEther } from 'ethers/lib/utils'
+import {
+  formatEther,
+  parseEther,
+  parseUnits,
+  splitSignature,
+} from 'ethers/lib/utils'
+import ERC20 from '@diva/contracts/abis/erc20.json'
+import { ContentCopy, Download } from '@mui/icons-material'
+import DIVA712ABI from '../../abi/DIVA712ABI.json'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -36,7 +47,10 @@ const AddToMetamask = ({
   address: string
   symbol: string
 }) => {
+  const { provider } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
+    const token = new ethers.Contract(address, ERC20, provider.getSigner())
+    const decimal = await token.decimals()
     try {
       await window.ethereum.request({
         method: 'wallet_watchAsset',
@@ -45,7 +59,7 @@ const AddToMetamask = ({
           options: {
             address: address,
             symbol: symbol, // A ticker symbol or shorthand, up to 5 chars.
-            decimals: 18,
+            decimals: decimal,
             image:
               'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
           },
@@ -140,11 +154,15 @@ const congratsSvg = (
 
 export function Success({
   formik,
+  transactionType,
 }: {
   formik: ReturnType<typeof useCreatePoolFormik>
+  transactionType: string
 }) {
+  const { values } = formik
   const [longToken, setLongToken] = useState()
   const [shortToken, setShortToken] = useState()
+  const [jsonToExport, setJsonToExport] = useState<any>()
   const [poolId, setPoolId] = useState<number>()
   const theme = useTheme()
   const { provider } = useConnectionContext()
@@ -161,67 +179,190 @@ export function Success({
           provider.getSigner()
         )
       : null
+
+  const divaNew = new ethers.Contract(
+    config[chainId!].divaAddressNew, //Goerli
+    DIVA712ABI,
+    provider.getSigner()
+  )
   useEffect(() => {
     /**
      * Remove etherscan usage and capture transaction receipt instead
      */
-    etherscanProvider.getHistory(userAddress).then((txs) => {
-      provider.getTransactionReceipt(txs[txs.length - 1].hash).then((txRc) => {
-        const id = BigNumber.from(txRc.logs[4].topics[1]).toNumber()
-        diva.getPoolParameters(id).then((pool) => {
-          setShortToken(pool.shortToken)
-          setLongToken(pool.longToken)
-          setPoolId(id)
-        })
+    if (transactionType !== 'filloffer') {
+      etherscanProvider.getHistory(userAddress).then((txs) => {
+        provider
+          .getTransactionReceipt(txs[txs.length - 1].hash)
+          .then((txRc) => {
+            const id = BigNumber.from(txRc.logs[4].topics[1]).toNumber()
+            diva.getPoolParameters(id).then((pool) => {
+              setShortToken(pool.shortToken)
+              setLongToken(pool.longToken)
+              setPoolId(id)
+            })
+          })
       })
-    })
-  }, [diva])
+    } else {
+      divaNew.getPoolParameters(formik.values.poolId).then((pool) => {
+        setShortToken(pool.shortToken)
+        setLongToken(pool.longToken)
+        setPoolId(Number(formik.values.poolId))
+      })
+    }
+  }, [formik.values.poolId])
 
   return (
     <Container>
       <Box display="flex" justifyContent="center" alignItems="center">
         <Stack display="flex" justifyContent="center" alignItems="center">
-          <Container sx={{ ml: theme.spacing(15) }}>{congratsSvg}</Container>
+          <Container
+            sx={{
+              ml: theme.spacing(transactionType === 'createoffer' ? 27 : 20),
+            }}
+          >
+            {congratsSvg}
+          </Container>
           <h2>Congratulations</h2>
-          <h4>Your pool has been created successfully</h4>
-          <h4>Pool ID: {poolId}</h4>
-          <Stack direction={'row'} spacing={5}>
+          {transactionType === 'filloffer' && (
+            <Typography>The offer has been filled successfully</Typography>
+          )}
+          {transactionType === 'filloffer' && <h4>Pool ID: {poolId}</h4>}
+          {transactionType === 'createoffer' && (
+            <Typography>Your offer has been created successfully</Typography>
+          )}
+          {transactionType === 'filloffer' && values.offerDirection === 'Long' && (
+            <Stack direction={'row'} spacing={5}>
+              <Typography>
+                Long token: {'L' + poolId + ' - '}
+                <Link
+                  style={{ color: 'gray' }}
+                  underline={'none'}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href={getEtherscanLink(
+                    chainId,
+                    longToken,
+                    EtherscanLinkType.ADDRESS
+                  )}
+                >
+                  {getShortenedAddress(longToken)}
+                </Link>{' '}
+              </Typography>
+              <AddToMetamask address={longToken} symbol={'L-' + poolId} />
+            </Stack>
+          )}
+          {transactionType === 'filloffer' &&
+            values.offerDirection === 'Short' && (
+              <Stack direction={'row'} spacing={5}>
+                <Typography>
+                  Long token: {'S' + poolId + ' - '}
+                  <Link
+                    style={{ color: 'gray' }}
+                    underline={'none'}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href={getEtherscanLink(
+                      chainId,
+                      shortToken,
+                      EtherscanLinkType.ADDRESS
+                    )}
+                  >
+                    {getShortenedAddress(shortToken)}
+                  </Link>{' '}
+                </Typography>
+                <AddToMetamask address={shortToken} symbol={'S-' + poolId} />
+              </Stack>
+            )}
+          {transactionType === 'createoffer' && (
             <Typography>
-              Long token: {'L' + poolId + ' - '}
-              <Link
-                style={{ color: 'gray' }}
-                underline={'none'}
-                rel="noopener noreferrer"
-                target="_blank"
-                href={getEtherscanLink(
-                  chainId,
-                  longToken,
-                  EtherscanLinkType.ADDRESS
-                )}
-              >
-                {getShortenedAddress(longToken)}
-              </Link>{' '}
+              Copy or Download the JSON to share and complete offer creation
+              process
             </Typography>
-            <AddToMetamask address={longToken} symbol={'L-' + poolId} />
-          </Stack>
-          <Stack direction={'row'} spacing={5}>
-            <Typography>
-              Short token: {'S' + poolId + ' - '}
-              <Link
-                style={{ color: 'gray' }}
-                underline={'none'}
-                rel="noopener noreferrer"
-                target="_blank"
-                href={getEtherscanLink(
-                  chainId,
-                  shortToken,
-                  EtherscanLinkType.ADDRESS
-                )}
+          )}
+          {transactionType === 'createpool' && (
+            <h4>Your pool has been created successfully</h4>
+          )}
+          {transactionType === 'createpool' && <h4>Pool ID: {poolId}</h4>}
+          {transactionType === 'createpool' && (
+            <Stack direction={'row'} spacing={5}>
+              <Typography>
+                Long token: {'L' + poolId + ' - '}
+                <Link
+                  style={{ color: 'gray' }}
+                  underline={'none'}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href={getEtherscanLink(
+                    chainId,
+                    longToken,
+                    EtherscanLinkType.ADDRESS
+                  )}
+                >
+                  {getShortenedAddress(longToken)}
+                </Link>{' '}
+              </Typography>
+              <AddToMetamask address={longToken} symbol={'L-' + poolId} />
+            </Stack>
+          )}
+          {transactionType === 'createpool' && (
+            <Stack direction={'row'} spacing={5}>
+              <Typography>
+                Short token: {'S' + poolId + ' - '}
+                <Link
+                  style={{ color: 'gray' }}
+                  underline={'none'}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  href={getEtherscanLink(
+                    chainId,
+                    shortToken,
+                    EtherscanLinkType.ADDRESS
+                  )}
+                >
+                  {getShortenedAddress(shortToken)}
+                </Link>{' '}
+              </Typography>
+              <AddToMetamask address={shortToken} symbol={'S-' + poolId} />
+            </Stack>
+          )}
+          {transactionType === 'createoffer' && (
+            <TextField
+              multiline
+              value={JSON.stringify(values.jsonToExport, null, 2)}
+              style={{ background: '#121212', width: '120%', height: '100%' }}
+            />
+          )}
+          <Stack
+            direction={'row'}
+            spacing={2}
+            mt={theme.spacing(2)}
+            pl={theme.spacing(60)}
+          >
+            {transactionType === 'createoffer' && (
+              <IconButton
+                color="primary"
+                onClick={() =>
+                  navigator.clipboard.writeText(JSON.stringify(values, null, 2))
+                }
               >
-                {getShortenedAddress(shortToken)}
-              </Link>{' '}
-            </Typography>
-            <AddToMetamask address={shortToken} symbol={'S-' + poolId} />
+                <ContentCopy />
+              </IconButton>
+            )}
+            {transactionType === 'createoffer' && (
+              <IconButton
+                color="primary"
+                onClick={() => {
+                  const link = document.createElement('a')
+                  link.href = `data:text/json;chatset=utf-8,${encodeURIComponent(
+                    JSON.stringify(values.jsonToExport, null, 2)
+                  )}`
+                  link.download = 'offer.json'
+                  link.click()
+                }}
+              >
+                <Download />
+              </IconButton>
+            )}
           </Stack>
         </Stack>
       </Box>
