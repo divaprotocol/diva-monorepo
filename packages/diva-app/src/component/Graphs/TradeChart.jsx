@@ -52,44 +52,42 @@ export default function DIVATradeChart(props) {
   const legendHeight = height + 30
   const newLegendHeight = height + 63
   const legendXPos = {
-    capCirlce: width * 0.3,
+    capCircle: width * 0.3,
 
     capText: width * 0.33,
 
-    currentCircle: width * 0.58,
+    currentCircle: width * 0.55,
 
-    currentText: width * 0.61,
+    currentText: width * 0.58,
 
     breakEvenCircle: width * 0.8,
 
     breakEvenText: width * 0.83,
   }
   const newlegendXPos = {
-    capCirlce: width * 0.54,
-
-    capText: width * 0.57,
-
-    currentCircle: width * 0.0083,
-
-    currentText: width * 0.033,
-
     breakEvenCircle: width * 0.0083,
 
     breakEvenText: width * 0.033,
   }
-  const [isLegendResposive, setLegendResposive] = useState(true)
-  const [isBreakLegend, setBreakLegend] = useState(false)
+  const mobileViewLegeds = {
+    floorCircle: width * 0.0083,
 
+    floorText: width * 0.05,
+
+    capCirlce: width * 0.54,
+
+    capText: width * 0.58,
+
+    currentCircle: width * 0.0083,
+
+    currentText: width * 0.05,
+  }
+
+  const [isBreakLegend, setBreakLegend] = useState(false)
   useEffect(() => {
-    if (parseFloat(currentPrice).toFixed(0).length >= 4) {
-      if (!showBreakEven) {
-        setLegendResposive(false)
-      }
-    }
     if (parseFloat(currentPrice).toFixed(0).length >= 4) {
       if (breakEven != 'n/a' && showBreakEven) {
         setBottomMargin(80)
-        setLegendResposive(true)
         setBreakLegend(true)
       } else {
         setBottomMargin(40)
@@ -271,6 +269,7 @@ export default function DIVATradeChart(props) {
       .style('fill', '#83BD67')
 
     // legends
+    //floorcircle
     svg
       .append('circle')
       .attr('cx', width * 0.0083)
@@ -283,7 +282,7 @@ export default function DIVATradeChart(props) {
       .append('circle')
       .attr(
         'cx',
-        isLegendResposive ? legendXPos.capCirlce : newlegendXPos.capCirlce
+        showBreakEven ? legendXPos.capCircle : mobileViewLegeds.capCirlce
       )
       .attr('cy', legendHeight)
       .attr('r', function () {
@@ -295,11 +294,11 @@ export default function DIVATradeChart(props) {
       .append('circle')
       .attr(
         'cx',
-        isLegendResposive
+        showBreakEven
           ? legendXPos.currentCircle
-          : newlegendXPos.currentCircle
+          : mobileViewLegeds.currentCircle
       )
-      .attr('cy', isLegendResposive ? legendHeight : newLegendHeight)
+      .attr('cy', showBreakEven ? legendHeight : newLegendHeight)
       .attr('r', currentPrice ? 6 : 0)
       .style('fill', '#3393E0')
     svg
@@ -317,13 +316,13 @@ export default function DIVATradeChart(props) {
     //legend Text
     svg
       .append('text')
-      .attr('x', width * 0.033)
+      .attr('x', showBreakEven ? width * 0.033 : mobileViewLegeds.floorText)
       .attr('y', legendHeight)
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
       })
       .text('Floor' + ' ' + '(' + parseFloat(floor).toFixed(2) + ')')
-      .style('font-size', showBreakEven ? '12px' : '10px')
+      .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 
     svg
@@ -334,18 +333,18 @@ export default function DIVATradeChart(props) {
         return cap == floor ? 1 : 0
       })
       .text('Inflection' + ' ' + '(' + parseFloat(cap).toFixed(2) + ')') //Binary payoff
-      .style('font-size', showBreakEven ? '12px' : '10px')
+      .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
     //cap text
     svg
       .append('text')
-      .attr('x', isLegendResposive ? legendXPos.capText : newlegendXPos.capText)
+      .attr('x', showBreakEven ? legendXPos.capText : mobileViewLegeds.capText)
       .attr('y', legendHeight)
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
       })
       .text('Cap' + ' ' + '(' + parseFloat(cap).toFixed(2) + ')')
-      .style('font-size', showBreakEven ? '12px' : '10px')
+      .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 
     //current price legend
@@ -353,14 +352,14 @@ export default function DIVATradeChart(props) {
       .append('text')
       .attr(
         'x',
-        isLegendResposive ? legendXPos.currentText : newlegendXPos.currentText
+        showBreakEven ? legendXPos.currentText : mobileViewLegeds.currentText
       )
-      .attr('y', isLegendResposive ? legendHeight : newLegendHeight)
+      .attr('y', showBreakEven ? legendHeight : newLegendHeight)
       .attr('opacity', currentPrice ? 1 : 0)
       .text(
         'Current Value' + ' ' + '(' + parseFloat(currentPrice).toFixed(2) + ')'
       )
-      .style('font-size', showBreakEven ? '12px' : '10px')
+      .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 
     svg
@@ -372,7 +371,7 @@ export default function DIVATradeChart(props) {
       .attr('y', isBreakLegend ? newLegendHeight : legendHeight)
       .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
       .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(2) + ')')
-      .style('font-size', showBreakEven ? '12px' : '10px')
+      .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
 
     // Add mouseover effects
