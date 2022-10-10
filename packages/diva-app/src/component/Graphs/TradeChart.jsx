@@ -41,7 +41,7 @@ export default function DIVATradeChart(props) {
   }, [props.w])
 
   // Set the dimensions and margins of the graph
-  const margin = { top: 15, right: 20, bottom: 40, left: 20 },
+  const margin = { top: 15, right: 20, left: 20 },
     width = chartWidth - margin.left - margin.right,
     height = h - margin.top - bottomMargin
 
@@ -52,33 +52,50 @@ export default function DIVATradeChart(props) {
   const legendHeight = height + 30
   const newLegendHeight = height + 63
   const legendXPos = {
-    currentCircle: width * 0.54,
+    capCirlce: width * 0.3,
 
-    currentText: width * 0.57,
+    capText: width * 0.33,
+
+    currentCircle: width * 0.58,
+
+    currentText: width * 0.61,
 
     breakEvenCircle: width * 0.8,
 
     breakEvenText: width * 0.83,
   }
   const newlegendXPos = {
+    capCirlce: width * 0.54,
+
+    capText: width * 0.57,
+
     currentCircle: width * 0.0083,
 
     currentText: width * 0.033,
 
-    breakEvenCircle: width * 0.3,
+    breakEvenCircle: width * 0.0083,
 
-    breakEvenText: width * 0.33,
+    breakEvenText: width * 0.033,
   }
   const [isLegendResposive, setLegendResposive] = useState(true)
+  const [isBreakLegend, setBreakLegend] = useState(false)
 
   useEffect(() => {
-    if (parseFloat(currentPrice).toFixed(0).length >= 5) {
-      setLegendResposive(false)
-      if (showBreakEven) {
-        setBottomMargin(80)
+    if (parseFloat(currentPrice).toFixed(0).length >= 4) {
+      if (!showBreakEven) {
+        setLegendResposive(false)
       }
     }
-  }, [currentPrice])
+    if (parseFloat(currentPrice).toFixed(0).length >= 4) {
+      if (breakEven != 'n/a' && showBreakEven) {
+        setBottomMargin(80)
+        setLegendResposive(true)
+        setBreakLegend(true)
+      } else {
+        setBottomMargin(40)
+      }
+    }
+  }, [currentPrice, props.breakEven])
 
   useEffect(() => {
     intitalChart()
@@ -181,10 +198,7 @@ export default function DIVATradeChart(props) {
         return mouseHover ? 'line' : null
       })
 
-    // Format x axis
-
-    // //for Y axis
-    // //or breakEven point
+    // breakEven point
     svg
       .selectAll('dot')
       .data(data)
@@ -256,16 +270,21 @@ export default function DIVATradeChart(props) {
       .attr('r', 5)
       .style('fill', '#83BD67')
 
-    // // legends
+    // legends
     svg
       .append('circle')
       .attr('cx', width * 0.0083)
       .attr('cy', legendHeight)
       .attr('r', 6)
       .style('fill', '#F7931A')
+
+    //cap circle
     svg
       .append('circle')
-      .attr('cx', width * 0.3)
+      .attr(
+        'cx',
+        isLegendResposive ? legendXPos.capCirlce : newlegendXPos.capCirlce
+      )
       .attr('cy', legendHeight)
       .attr('r', function () {
         return cap == floor ? 0 : 6
@@ -285,11 +304,17 @@ export default function DIVATradeChart(props) {
       .style('fill', '#3393E0')
     svg
       .append('circle')
-      .attr('cx', width * 0.8)
-      .attr('cy', legendHeight)
+      .attr(
+        'cx',
+        isBreakLegend
+          ? newlegendXPos.breakEvenCircle
+          : legendXPos.breakEvenCircle
+      )
+      .attr('cy', isBreakLegend ? newLegendHeight : legendHeight)
       .attr('r', showBreakEven && breakEven != 'n/a' ? 6 : 0)
       .style('fill', '#9747FF')
 
+    //legend Text
     svg
       .append('text')
       .attr('x', width * 0.033)
@@ -304,16 +329,17 @@ export default function DIVATradeChart(props) {
     svg
       .append('text')
       .attr('x', width * 0.033)
-      .attr('y', isLegendResposive ? legendHeight : newLegendHeight)
+      .attr('y', legendHeight)
       .attr('opacity', function () {
         return cap == floor ? 1 : 0
       })
       .text('Inflection' + ' ' + '(' + parseFloat(cap).toFixed(2) + ')') //Binary payoff
       .style('font-size', showBreakEven ? '12px' : '10px')
       .attr('alignment-baseline', 'middle')
+    //cap text
     svg
       .append('text')
-      .attr('x', width * 0.33)
+      .attr('x', isLegendResposive ? legendXPos.capText : newlegendXPos.capText)
       .attr('y', legendHeight)
       .attr('opacity', function () {
         return cap == floor ? 0 : 1
@@ -339,8 +365,11 @@ export default function DIVATradeChart(props) {
 
     svg
       .append('text')
-      .attr('x', width * 0.83)
-      .attr('y', isLegendResposive ? legendHeight : newLegendHeight)
+      .attr(
+        'x',
+        isBreakLegend ? newlegendXPos.breakEvenText : legendXPos.breakEvenText
+      )
+      .attr('y', isBreakLegend ? newLegendHeight : legendHeight)
       .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
       .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(2) + ')')
       .style('font-size', showBreakEven ? '12px' : '10px')
@@ -583,7 +612,7 @@ export default function DIVATradeChart(props) {
   }
   useEffect(() => {
     draw()
-  }, [props.currentPrice, props.breakEven, chartWidth, props.w])
+  }, [props.currentPrice, props.breakEven, chartWidth, props.w, bottomMargin])
 
   return (
     <div ref={svgContainer} className="line-chart">
