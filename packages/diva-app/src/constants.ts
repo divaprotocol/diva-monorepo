@@ -99,7 +99,7 @@ export const config: { [key: number]: SingleConfig } = {
     explorer: 'https://ropsten.etherscan.io/',
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ropsten Ether', symbol: 'ropETH', decimals: 18 },
-    isSupported: false,
+    isSupported: true,
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
@@ -183,7 +183,7 @@ export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(
 ).filter((id) => typeof id === 'number') as SupportedChainId[]
 
 // current supported chain
-export const CURRENT_SUPPORTED_CHAIN_ID = [SupportedChainId.GOERLI]
+export const CURRENT_SUPPORTED_CHAIN_ID = [SupportedChainId.ROPSTEN]
 
 export const divaGovernanceAddress =
   '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E' // creator of pools on Main Markets page and trading fee recipient
