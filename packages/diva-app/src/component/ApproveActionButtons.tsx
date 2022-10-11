@@ -605,10 +605,10 @@ export const ApproveActionButtons = ({
                             signature
                           )
                           .then((res: any) => {
-                            const typedHash = res.offerInfo.typedOfferHash
+                            const offerHash = res.offerInfo.typedOfferHash
                             const jsonToExport = {
                               ...json,
-                              typedHash,
+                              offerHash,
                             }
                             formik.setFieldValue('jsonToExport', jsonToExport)
                             onTransactionSuccess()
