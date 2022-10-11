@@ -599,9 +599,20 @@ export const ApproveActionButtons = ({
                           ...offerCreationStats,
                           signature,
                         }
-
-                        formik.setFieldValue('jsonToExport', json)
-                        onTransactionSuccess()
+                        divaNew
+                          .getOfferRelevantStateCreateContingentPool(
+                            offerCreationStats,
+                            signature
+                          )
+                          .then((res: any) => {
+                            const offerHash = res.offerInfo.typedOfferHash
+                            const jsonToExport = {
+                              ...json,
+                              offerHash,
+                            }
+                            formik.setFieldValue('jsonToExport', jsonToExport)
+                            onTransactionSuccess()
+                          })
                       })
                       .catch((err: any) => {
                         console.log(err)
