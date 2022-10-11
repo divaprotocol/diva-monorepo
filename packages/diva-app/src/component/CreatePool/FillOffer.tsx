@@ -120,6 +120,7 @@ export function FillOffer({
         collateralToken: configJson.collateralToken,
         dataProvider: configJson.dataProvider,
         capacity: configJson.capacity,
+        permissionedERC721Token: ethers.constants.AddressZero,
         salt: configJson.salt,
       })
       formik.setFieldValue('signature', configJson.signature)

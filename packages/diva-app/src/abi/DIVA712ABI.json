@@ -68,8 +68,8 @@
           },
           { "internalType": "address", "name": "recipient", "type": "address" }
         ],
-        "internalType": "struct IClaim.FeeClaim[]",
-        "name": "_feeClaims",
+        "internalType": "struct IClaim.ArgsBatchClaimFee[]",
+        "name": "_argsBatchClaimFee",
         "type": "tuple[]"
       }
     ],
@@ -82,16 +82,16 @@
     "inputs": [
       {
         "components": [
+          { "internalType": "address", "name": "recipient", "type": "address" },
           {
             "internalType": "address",
             "name": "collateralToken",
             "type": "address"
           },
-          { "internalType": "address", "name": "recipient", "type": "address" },
           { "internalType": "uint256", "name": "amount", "type": "uint256" }
         ],
-        "internalType": "struct IClaim.FeeClaimTransfer[]",
-        "name": "_feeClaimTransfers",
+        "internalType": "struct IClaim.ArgsBatchTransferFeeClaim[]",
+        "name": "_argsBatchTransferFeeClaim",
         "type": "tuple[]"
       }
     ],
@@ -332,6 +332,76 @@
     "inputs": [
       {
         "components": [
+          {
+            "components": [
+              { "internalType": "address", "name": "maker", "type": "address" },
+              { "internalType": "address", "name": "taker", "type": "address" },
+              {
+                "internalType": "uint256",
+                "name": "makerCollateralAmount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "takerCollateralAmount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "makerDirection",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "offerExpiry",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "minimumTakerFillAmount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "poolId",
+                "type": "uint256"
+              },
+              { "internalType": "uint256", "name": "salt", "type": "uint256" }
+            ],
+            "internalType": "struct LibEIP712.OfferAddLiquidity",
+            "name": "offerAddLiquidity",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              { "internalType": "uint8", "name": "v", "type": "uint8" },
+              { "internalType": "bytes32", "name": "r", "type": "bytes32" },
+              { "internalType": "bytes32", "name": "s", "type": "bytes32" }
+            ],
+            "internalType": "struct LibEIP712.Signature",
+            "name": "signature",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "takerFillAmount",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IEIP712Add.ArgsBatchFillOfferAddLiquidity[]",
+        "name": "_argsBatchOfferAddLiquidity",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "batchFillOfferAddLiquidity",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
           { "internalType": "address", "name": "maker", "type": "address" },
           { "internalType": "address", "name": "taker", "type": "address" },
           {
@@ -495,6 +565,11 @@
             "type": "address"
           },
           { "internalType": "uint256", "name": "capacity", "type": "uint256" },
+          {
+            "internalType": "address",
+            "name": "permissionedERC721Token",
+            "type": "address"
+          },
           { "internalType": "uint256", "name": "salt", "type": "uint256" }
         ],
         "internalType": "struct LibEIP712.OfferCreateContingentPool",
@@ -511,6 +586,113 @@
     "inputs": [],
     "name": "InvalidInputParamsCreateContingentPool",
     "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "components": [
+              { "internalType": "address", "name": "maker", "type": "address" },
+              { "internalType": "address", "name": "taker", "type": "address" },
+              {
+                "internalType": "uint256",
+                "name": "makerCollateralAmount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "takerCollateralAmount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "bool",
+                "name": "makerDirection",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "offerExpiry",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "minimumTakerFillAmount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "referenceAsset",
+                "type": "string"
+              },
+              {
+                "internalType": "uint96",
+                "name": "expiryTime",
+                "type": "uint96"
+              },
+              { "internalType": "uint256", "name": "floor", "type": "uint256" },
+              {
+                "internalType": "uint256",
+                "name": "inflection",
+                "type": "uint256"
+              },
+              { "internalType": "uint256", "name": "cap", "type": "uint256" },
+              {
+                "internalType": "uint256",
+                "name": "gradient",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "collateralToken",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "dataProvider",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "capacity",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "permissionedERC721Token",
+                "type": "address"
+              },
+              { "internalType": "uint256", "name": "salt", "type": "uint256" }
+            ],
+            "internalType": "struct LibEIP712.OfferCreateContingentPool",
+            "name": "offerCreateContingentPool",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              { "internalType": "uint8", "name": "v", "type": "uint8" },
+              { "internalType": "bytes32", "name": "r", "type": "bytes32" },
+              { "internalType": "bytes32", "name": "s", "type": "bytes32" }
+            ],
+            "internalType": "struct LibEIP712.Signature",
+            "name": "signature",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "takerFillAmount",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IEIP712Create.ArgsBatchFillOfferCreateContingentPool[]",
+        "name": "_argsBatchFillOfferCreateContingentPool",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "batchFillOfferCreateContingentPool",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [
@@ -564,6 +746,11 @@
             "type": "address"
           },
           { "internalType": "uint256", "name": "capacity", "type": "uint256" },
+          {
+            "internalType": "address",
+            "name": "permissionedERC721Token",
+            "type": "address"
+          },
           { "internalType": "uint256", "name": "salt", "type": "uint256" }
         ],
         "internalType": "struct LibEIP712.OfferCreateContingentPool",
@@ -614,39 +801,13 @@
   },
   {
     "inputs": [],
-    "name": "getGovernanceParameters",
+    "name": "getCurrentFees",
     "outputs": [
       {
         "components": [
           {
             "internalType": "uint256",
-            "name": "submissionPeriod",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "challengePeriod",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "reviewPeriod",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "fallbackSubmissionPeriod",
-            "type": "uint256"
-          },
-          { "internalType": "address", "name": "treasury", "type": "address" },
-          {
-            "internalType": "address",
-            "name": "fallbackDataProvider",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "pauseReturnCollateralUntil",
+            "name": "startPoolId",
             "type": "uint256"
           },
           { "internalType": "uint96", "name": "protocolFee", "type": "uint96" },
@@ -656,9 +817,158 @@
             "type": "uint96"
           }
         ],
-        "internalType": "struct LibDIVAStorage.GovernanceStorage",
+        "internalType": "struct LibDIVAStorage.Fees",
+        "name": "currentFees",
+        "type": "tuple"
+      },
+      { "internalType": "uint8", "name": "maxUpdateIdToFees", "type": "uint8" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCurrentSettlementPeriods",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "startPoolId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint24",
+            "name": "submissionPeriod",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "challengePeriod",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "reviewPeriod",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "fallbackSubmissionPeriod",
+            "type": "uint24"
+          }
+        ],
+        "internalType": "struct LibDIVAStorage.SettlementPeriods",
+        "name": "currentSettlementPeriods",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint8",
+        "name": "maxUpdateIdToSettlementPeriods",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_poolId", "type": "uint256" }
+    ],
+    "name": "getFees",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "startPoolId",
+            "type": "uint256"
+          },
+          { "internalType": "uint96", "name": "protocolFee", "type": "uint96" },
+          {
+            "internalType": "uint96",
+            "name": "settlementFee",
+            "type": "uint96"
+          }
+        ],
+        "internalType": "struct LibDIVAStorage.Fees",
         "name": "",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getGovernanceParameters",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "startPoolId",
+            "type": "uint256"
+          },
+          { "internalType": "uint96", "name": "protocolFee", "type": "uint96" },
+          {
+            "internalType": "uint96",
+            "name": "settlementFee",
+            "type": "uint96"
+          }
+        ],
+        "internalType": "struct LibDIVAStorage.Fees",
+        "name": "currentFees",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "startPoolId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint24",
+            "name": "submissionPeriod",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "challengePeriod",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "reviewPeriod",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "fallbackSubmissionPeriod",
+            "type": "uint24"
+          }
+        ],
+        "internalType": "struct LibDIVAStorage.SettlementPeriods",
+        "name": "currentSettlementPeriods",
+        "type": "tuple"
+      },
+      { "internalType": "address", "name": "treasury", "type": "address" },
+      {
+        "internalType": "address",
+        "name": "fallbackDataProvider",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "pauseReturnCollateralUntil",
+        "type": "uint256"
+      },
+      { "internalType": "uint8", "name": "maxUpdateIdToFees", "type": "uint8" },
+      {
+        "internalType": "uint8",
+        "name": "maxUpdateIdToSettlementPeriods",
+        "type": "uint8"
       }
     ],
     "stateMutability": "view",
@@ -803,6 +1113,11 @@
             "type": "address"
           },
           { "internalType": "uint256", "name": "capacity", "type": "uint256" },
+          {
+            "internalType": "address",
+            "name": "permissionedERC721Token",
+            "type": "address"
+          },
           { "internalType": "uint256", "name": "salt", "type": "uint256" }
         ],
         "internalType": "struct LibEIP712.OfferCreateContingentPool",
@@ -867,7 +1182,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "getPoolIdByTypedOfferHash",
+    "name": "getPoolIdByTypedCreateOfferHash",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
@@ -922,12 +1237,6 @@
             "internalType": "address",
             "name": "dataProvider",
             "type": "address"
-          },
-          { "internalType": "uint96", "name": "protocolFee", "type": "uint96" },
-          {
-            "internalType": "uint96",
-            "name": "settlementFee",
-            "type": "uint96"
           },
           {
             "internalType": "enum LibDIVAStorage.Status",
@@ -999,12 +1308,6 @@
             "name": "dataProvider",
             "type": "address"
           },
-          { "internalType": "uint96", "name": "protocolFee", "type": "uint96" },
-          {
-            "internalType": "uint96",
-            "name": "settlementFee",
-            "type": "uint96"
-          },
           {
             "internalType": "enum LibDIVAStorage.Status",
             "name": "statusFinalReferenceValue",
@@ -1017,6 +1320,48 @@
           }
         ],
         "internalType": "struct LibDIVAStorage.Pool",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_poolId", "type": "uint256" }
+    ],
+    "name": "getSettlementPeriods",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "startPoolId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint24",
+            "name": "submissionPeriod",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "challengePeriod",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "reviewPeriod",
+            "type": "uint24"
+          },
+          {
+            "internalType": "uint24",
+            "name": "fallbackSubmissionPeriod",
+            "type": "uint24"
+          }
+        ],
+        "internalType": "struct LibDIVAStorage.SettlementPeriods",
         "name": "",
         "type": "tuple"
       }
@@ -1048,28 +1393,10 @@
   },
   { "inputs": [], "name": "FeeAboveMaximum", "type": "error" },
   { "inputs": [], "name": "FeeBelowMinimum", "type": "error" },
+  { "inputs": [], "name": "InvalidStartPoolId", "type": "error" },
   { "inputs": [], "name": "OutOfBounds", "type": "error" },
   { "inputs": [], "name": "TooEarlyToPauseAgain", "type": "error" },
   { "inputs": [], "name": "ZeroAddress", "type": "error" },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "period",
-        "type": "uint256"
-      }
-    ],
-    "name": "ChallengePeriodSet",
-    "type": "event"
-  },
   {
     "anonymous": false,
     "inputs": [
@@ -1100,12 +1427,24 @@
       },
       {
         "indexed": false,
+        "internalType": "uint96",
+        "name": "fee",
+        "type": "uint96"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
-        "name": "period",
+        "name": "startPoolId",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum IGovernance.FeeType",
+        "name": "feeType",
+        "type": "uint8"
       }
     ],
-    "name": "FallbackSubmissionPeriodSet",
+    "name": "FeeSet",
     "type": "event"
   },
   {
@@ -1138,69 +1477,24 @@
       },
       {
         "indexed": false,
-        "internalType": "uint96",
-        "name": "fee",
-        "type": "uint96"
-      }
-    ],
-    "name": "ProtocolFeeSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
+        "internalType": "uint24",
+        "name": "period",
+        "type": "uint24"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "period",
+        "name": "startPoolId",
         "type": "uint256"
-      }
-    ],
-    "name": "ReviewPeriodSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
       },
       {
         "indexed": false,
-        "internalType": "uint96",
-        "name": "fee",
-        "type": "uint96"
+        "internalType": "enum IGovernance.SettlementPeriodType",
+        "name": "periodType",
+        "type": "uint8"
       }
     ],
-    "name": "SettlementFeeSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "period",
-        "type": "uint256"
-      }
-    ],
-    "name": "SubmissionPeriodSet",
+    "name": "SettlementPeriodSet",
     "type": "event"
   },
   {
@@ -1225,19 +1519,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_challengePeriod",
-        "type": "uint256"
-      }
-    ],
-    "name": "setChallengePeriod",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "_newFallbackDataProvider",
         "type": "address"
@@ -1250,13 +1531,11 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_fallbackSubmissionPeriod",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "_startPoolId", "type": "uint256" },
+      { "internalType": "uint96", "name": "_protocolFee", "type": "uint96" },
+      { "internalType": "uint96", "name": "_settlementFee", "type": "uint96" }
     ],
-    "name": "setFallbackSubmissionPeriod",
+    "name": "setFees",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1270,40 +1549,25 @@
   },
   {
     "inputs": [
-      { "internalType": "uint96", "name": "_protocolFee", "type": "uint96" }
-    ],
-    "name": "setProtocolFee",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "_reviewPeriod", "type": "uint256" }
-    ],
-    "name": "setReviewPeriod",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint96", "name": "_settlementFee", "type": "uint96" }
-    ],
-    "name": "setSettlementFee",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+      { "internalType": "uint256", "name": "_startPoolId", "type": "uint256" },
       {
-        "internalType": "uint256",
+        "internalType": "uint24",
         "name": "_submissionPeriod",
-        "type": "uint256"
+        "type": "uint24"
+      },
+      {
+        "internalType": "uint24",
+        "name": "_challengePeriod",
+        "type": "uint24"
+      },
+      { "internalType": "uint24", "name": "_reviewPeriod", "type": "uint24" },
+      {
+        "internalType": "uint24",
+        "name": "_fallbackSubmissionPeriod",
+        "type": "uint24"
       }
     ],
-    "name": "setSubmissionPeriod",
+    "name": "setSettlementPeriods",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1439,6 +1703,54 @@
   },
   {
     "inputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "collateralAmountIncr",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "longRecipient",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "shortRecipient",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct ILiquidity.ArgsBatchAddLiquidity[]",
+        "name": "_argsBatchAddLiquidity",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "batchAddLiquidity",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          { "internalType": "uint256", "name": "amount", "type": "uint256" }
+        ],
+        "internalType": "struct ILiquidity.ArgsBatchRemoveLiquidity[]",
+        "name": "_argsBatchRemoveLiquidity",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "batchRemoveLiquidity",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
       { "internalType": "uint256", "name": "_poolId", "type": "uint256" },
       { "internalType": "uint256", "name": "_amount", "type": "uint256" }
     ],
@@ -1501,6 +1813,12 @@
         "internalType": "uint256",
         "name": "collateralAmount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "permissionedERC721Token",
+        "type": "address"
       }
     ],
     "name": "PoolIssued",
@@ -1548,6 +1866,73 @@
           {
             "internalType": "address",
             "name": "shortRecipient",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "permissionedERC721Token",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct LibDIVA.PoolParams[]",
+        "name": "_poolsParams",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "batchCreateContingentPool",
+    "outputs": [
+      { "internalType": "uint256[]", "name": "", "type": "uint256[]" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "referenceAsset",
+            "type": "string"
+          },
+          { "internalType": "uint96", "name": "expiryTime", "type": "uint96" },
+          { "internalType": "uint256", "name": "floor", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "inflection",
+            "type": "uint256"
+          },
+          { "internalType": "uint256", "name": "cap", "type": "uint256" },
+          { "internalType": "uint256", "name": "gradient", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "collateralAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "collateralToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "dataProvider",
+            "type": "address"
+          },
+          { "internalType": "uint256", "name": "capacity", "type": "uint256" },
+          {
+            "internalType": "address",
+            "name": "longRecipient",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "shortRecipient",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "permissionedERC721Token",
             "type": "address"
           }
         ],
@@ -1640,6 +2025,70 @@
     ],
     "name": "StatusChanged",
     "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "proposedFinalReferenceValue",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct ISettlement.ArgsBatchChallengeFinalReferenceValue[]",
+        "name": "_argsBatchChallengeFinalReferenceValue",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "batchChallengeFinalReferenceValue",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "positionToken",
+            "type": "address"
+          },
+          { "internalType": "uint256", "name": "amount", "type": "uint256" }
+        ],
+        "internalType": "struct ISettlement.ArgsBatchRedeemPositionToken[]",
+        "name": "_argsBatchRedeemPositionToken",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "batchRedeemPositionToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "poolId", "type": "uint256" },
+          {
+            "internalType": "uint256",
+            "name": "finalReferenceValue",
+            "type": "uint256"
+          },
+          { "internalType": "bool", "name": "allowChallenge", "type": "bool" }
+        ],
+        "internalType": "struct ISettlement.ArgsBatchSetFinalReferenceValue[]",
+        "name": "_argsBatchSetFinalReferenceValue",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "batchSetFinalReferenceValue",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "inputs": [
