@@ -1,15 +1,6 @@
-import { Search } from '@mui/icons-material'
-import {
-  Drawer,
-  Box,
-  Stack,
-  Typography,
-  TextField,
-  InputAdornment,
-  Button,
-} from '@mui/material'
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import { Drawer, Box, Stack, Button } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
+import useTheme from '@mui/material/styles/useTheme'
 
 // props for the FilterDrawerMobile component
 interface FilterDrawerMobileProps {
@@ -27,13 +18,15 @@ export const FilterDrawerModal = ({
   onApplyFilter,
   onClearFilter,
 }: FilterDrawerMobileProps) => {
+  const theme = useTheme()
+
   return (
     <Drawer anchor={'bottom'} open={open} onClose={() => onClose(false)}>
       <Box
         sx={{
           height: '100vh',
           backgroundColor: '#000000',
-          padding: '30px',
+          padding: theme.spacing(3.5),
           position: 'relative',
         }}
       >

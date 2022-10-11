@@ -64,6 +64,7 @@ import { useHistory } from 'react-router-dom'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { Search } from '@mui/icons-material'
 import { getTopNObjectByProperty, getColorByStatus } from '../../Util/dashboard'
+import useTheme from '@mui/material/styles/useTheme'
 
 type Response = {
   [token: string]: BigNumber
@@ -130,6 +131,8 @@ const MobileFilterOptions = ({
   searchInput,
   setSearchInput,
 }) => {
+  const theme = useTheme()
+
   const top4UnderlyingTokens = useMemo(
     () => getTopNObjectByProperty(rows, 'Underlying', 4),
     [rows]
@@ -164,7 +167,7 @@ const MobileFilterOptions = ({
           '&:before': {
             display: 'none',
           },
-          marginTop: '28px',
+          marginTop: theme.spacing(3.5),
         }}
         defaultExpanded
       >
@@ -195,7 +198,11 @@ const MobileFilterOptions = ({
             <TextField
               value={searchInput}
               aria-label="Filter creator"
-              sx={{ width: '100%', height: '50px', marginTop: '16px' }}
+              sx={{
+                width: '100%',
+                height: '50px',
+                marginTop: theme.spacing(2),
+              }}
               onChange={(event) => setSearchInput(event.target.value)}
               InputProps={{
                 startAdornment: (
@@ -211,7 +218,7 @@ const MobileFilterOptions = ({
           <Stack
             spacing={0.6}
             sx={{
-              marginTop: '16px',
+              marginTop: theme.spacing(2),
               fontSize: '14px',
             }}
           >
@@ -236,7 +243,7 @@ const MobileFilterOptions = ({
       <Divider />
       <Stack
         sx={{
-          paddingTop: '20px',
+          paddingTop: theme.spacing(2.5),
         }}
       >
         <Stack
@@ -707,6 +714,7 @@ const columns: GridColDef[] = [
 
 const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
   const history = useHistory()
+  const theme = useTheme()
 
   if (!row) return
 
@@ -746,7 +754,7 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
         sx={{
           fontSize: '10px',
           width: '100%',
-          margin: '12px 0',
+          margin: `${theme.spacing(1.5)} 0`,
         }}
         spacing={1.6}
         onClick={() => {
@@ -872,6 +880,7 @@ export function MyPositions() {
   const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
     useGovernanceParameters()
   const { isMobile } = useCustomMediaQuery()
+  const theme = useTheme()
 
   useEffect(() => {
     dispatch(
@@ -1184,7 +1193,7 @@ export function MyPositions() {
           />
           <ButtonFilter
             id="Hide expired pools"
-            sx={{ marginRight: '30px' }}
+            sx={{ marginRight: theme.spacing(3.5) }}
             ButtonLabel="Hide Expired"
             onClick={handleExpiredPools}
           />
@@ -1213,8 +1222,8 @@ export function MyPositions() {
             <Stack
               width={'100%'}
               sx={{
-                marginTop: '16px',
-                marginBottom: '16px',
+                marginTop: theme.spacing(2),
+                marginBottom: theme.spacing(2),
               }}
               spacing={2}
             >

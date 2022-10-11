@@ -45,6 +45,7 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import { FilterDrawerModal } from './FilterDrawerMobile'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { getTopNObjectByProperty } from '../../Util/dashboard'
+import useTheme from '@mui/material/styles/useTheme'
 
 const MyOrdersPoolCard = ({
   row,
@@ -207,6 +208,8 @@ const MobileFilterOptions = ({
   setCheckedState,
   setSearch,
 }) => {
+  const theme = useTheme()
+
   const top4UnderlyingTokens = useMemo(
     () => getTopNObjectByProperty(rows, 'underlying', 4),
     [rows]
@@ -241,7 +244,7 @@ const MobileFilterOptions = ({
           '&:before': {
             display: 'none',
           },
-          marginTop: '28px',
+          marginTop: theme.spacing(3.5),
         }}
         defaultExpanded
       >
@@ -288,7 +291,7 @@ const MobileFilterOptions = ({
           <Stack
             spacing={0.6}
             sx={{
-              marginTop: '16px',
+              marginTop: theme.spacing(2),
               fontSize: '14px',
             }}
           >
@@ -313,7 +316,7 @@ const MobileFilterOptions = ({
       <Divider />
       <Stack
         sx={{
-          paddingTop: '20px',
+          paddingTop: theme.spacing(2.5),
         }}
       >
         <Stack
@@ -365,6 +368,7 @@ export function MyOrders() {
   const history = useHistory()
   const dispatch = useAppDispatch()
   const { isMobile } = useCustomMediaQuery()
+  const theme = useTheme()
 
   const useStyles = makeStyles({
     root: {
@@ -762,8 +766,8 @@ export function MyOrders() {
           <Stack
             width={'100%'}
             sx={{
-              marginTop: '16px',
-              marginBottom: '16px',
+              marginTop: theme.spacing(2),
+              marginBottom: theme.spacing(2),
             }}
             spacing={2}
           >
@@ -850,7 +854,7 @@ export function MyOrders() {
                 display: 'flex',
                 alignItems: 'end',
                 flexDirection: 'column',
-                paddingBottom: '1em',
+                paddingBottom: theme.spacing(2),
               }}
             >
               <Input

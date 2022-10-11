@@ -52,6 +52,7 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import { Search } from '@mui/icons-material'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { getColorByStatus, getTopNObjectByProperty } from '../../Util/dashboard'
+import useTheme from '@mui/material/styles/useTheme'
 
 export const DueInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
@@ -503,6 +504,8 @@ const MobileFilterOptions = ({
   expiredPoolClicked,
   setExpiredPoolClicked,
 }) => {
+  const theme = useTheme()
+
   const top4UnderlyingTokens = useMemo(
     () => getTopNObjectByProperty(rows, 'Underlying', 4),
     [rows]
@@ -537,7 +540,7 @@ const MobileFilterOptions = ({
           '&:before': {
             display: 'none',
           },
-          marginTop: '28px',
+          marginTop: theme.spacing(3.5),
         }}
         defaultExpanded
       >
@@ -568,7 +571,11 @@ const MobileFilterOptions = ({
             <TextField
               value={searchInput}
               aria-label="Filter creator"
-              sx={{ width: '100%', height: '50px', marginTop: '16px' }}
+              sx={{
+                width: '100%',
+                height: '50px',
+                marginTop: theme.spacing(2),
+              }}
               onChange={(event) => setSearchInput(event.target.value)}
               InputProps={{
                 startAdornment: (
@@ -584,7 +591,7 @@ const MobileFilterOptions = ({
           <Stack
             spacing={0.6}
             sx={{
-              marginTop: '16px',
+              marginTop: theme.spacing(2),
               fontSize: '14px',
             }}
           >
@@ -609,7 +616,7 @@ const MobileFilterOptions = ({
       <Divider />
       <Stack
         sx={{
-          paddingTop: '20px',
+          paddingTop: theme.spacing(2.5),
         }}
       >
         <Stack
@@ -643,6 +650,7 @@ export function MyDataFeeds() {
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const { isMobile } = useCustomMediaQuery()
+  const theme = useTheme()
 
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
@@ -835,8 +843,8 @@ export function MyDataFeeds() {
             <Stack
               width={'100%'}
               sx={{
-                marginTop: '16px',
-                marginBottom: '16px',
+                marginTop: theme.spacing(2),
+                marginBottom: theme.spacing(2),
               }}
               spacing={2}
             >

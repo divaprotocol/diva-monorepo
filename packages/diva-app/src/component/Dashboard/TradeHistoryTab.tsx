@@ -43,6 +43,7 @@ import { FilterDrawerModal } from './FilterDrawerMobile'
 import { Search } from '@mui/icons-material'
 import { getTopNObjectByProperty } from '../../Util/dashboard'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import useTheme from '@mui/material/styles/useTheme'
 
 const columns: GridColDef[] = [
   {
@@ -240,6 +241,8 @@ const MobileFilterOptions = ({
   sellClicked,
   setSellClicked,
 }) => {
+  const theme = useTheme()
+
   const top4UnderlyingTokens = useMemo(
     () => getTopNObjectByProperty(rows, 'Underlying', 4),
     [rows]
@@ -273,7 +276,7 @@ const MobileFilterOptions = ({
           '&:before': {
             display: 'none',
           },
-          marginTop: '28px',
+          marginTop: theme.spacing(3.5),
         }}
         defaultExpanded
       >
@@ -304,7 +307,11 @@ const MobileFilterOptions = ({
             <TextField
               value={searchInput}
               aria-label="Filter creator"
-              sx={{ width: '100%', height: '50px', marginTop: '16px' }}
+              sx={{
+                width: '100%',
+                height: '50px',
+                marginTop: theme.spacing(2),
+              }}
               onChange={(event) => setSearchInput(event.target.value)}
               InputProps={{
                 startAdornment: (
@@ -320,7 +327,7 @@ const MobileFilterOptions = ({
           <Stack
             spacing={0.6}
             sx={{
-              marginTop: '16px',
+              marginTop: theme.spacing(2),
               fontSize: '14px',
             }}
           >
@@ -345,7 +352,7 @@ const MobileFilterOptions = ({
       <Divider />
       <Stack
         sx={{
-          paddingTop: '20px',
+          paddingTop: theme.spacing(2.5),
         }}
       >
         <Stack
@@ -396,6 +403,7 @@ export function TradeHistoryTab() {
   const orders: any[] = []
   const dispatch = useAppDispatch()
   const { isMobile } = useCustomMediaQuery()
+  const theme = useTheme()
 
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
@@ -717,8 +725,8 @@ export function TradeHistoryTab() {
             <Stack
               width={'100%'}
               sx={{
-                marginTop: '16px',
-                marginBottom: '16px',
+                marginTop: theme.spacing(2),
+                marginBottom: theme.spacing(2),
               }}
               spacing={2}
             >

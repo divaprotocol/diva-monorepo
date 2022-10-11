@@ -12,6 +12,7 @@ import Paper from '@mui/material/Paper'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import { styled } from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles'
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   '& .MuiToggleButtonGroup-grouped': {
@@ -37,6 +38,7 @@ const Dashboard = (props: any) => {
   const { params } = match
   const { page } = params
   const { isMobile } = useCustomMediaQuery()
+  const theme = useTheme()
 
   const tabNameToIndex = {
     0: 'mypositions',
@@ -69,14 +71,14 @@ const Dashboard = (props: any) => {
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          marginTop: `${isMobile ? '24px' : '0'}`,
+          marginTop: `${isMobile ? theme.spacing(3) : '0'}`,
         }}
       >
         <Person
           style={{
             fontSize: `${isMobile ? 24 : 34}`,
-            paddingLeft: 20,
-            paddingRight: 10,
+            paddingLeft: theme.spacing(2.5),
+            paddingRight: theme.spacing(1.5),
           }}
         />
         <Typography
@@ -104,7 +106,7 @@ const Dashboard = (props: any) => {
                 display: 'flex',
                 border: (theme) => `1px solid ${theme.palette.divider}`,
                 flexWrap: 'wrap',
-                marginTop: '13px',
+                marginTop: theme.spacing(1.6),
               }}
             >
               <StyledToggleButtonGroup
