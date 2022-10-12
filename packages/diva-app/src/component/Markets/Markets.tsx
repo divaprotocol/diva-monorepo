@@ -232,8 +232,8 @@ const MobileFilterOptions = ({
   searchInput,
   setSearchInput,
   createdBy,
-  mobileCreatorFilter,
-  setMobileCreatorFilter,
+  setCreatedBy,
+  handleCreatorInput,
 }) => {
   const theme = useTheme()
 
@@ -311,14 +311,14 @@ const MobileFilterOptions = ({
         >
           <Box>
             <TextField
-              value={mobileCreatorFilter}
+              value={createdBy}
               aria-label="Filter creator"
               sx={{
                 width: '100%',
                 height: '50px',
                 marginTop: theme.spacing(2),
               }}
-              onChange={(event) => setMobileCreatorFilter(event.target.value)}
+              onChange={handleCreatorInput}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -344,16 +344,13 @@ const MobileFilterOptions = ({
             >
               <Box>Diva Governance</Box>
               <Checkbox
-                checked={
-                  mobileCreatorFilter === divaGovernanceAddress ||
-                  createdBy !== divaGovernanceAddress
-                }
+                checked={createdBy === divaGovernanceAddress}
                 id={`checkbox-diva-governance`}
                 onChange={() => {
-                  if (mobileCreatorFilter === divaGovernanceAddress) {
-                    setMobileCreatorFilter('')
+                  if (createdBy === divaGovernanceAddress) {
+                    setCreatedBy('')
                   } else {
-                    setMobileCreatorFilter(divaGovernanceAddress)
+                    setCreatedBy(divaGovernanceAddress)
                   }
                 }}
               />
@@ -866,9 +863,9 @@ export default function Markets() {
                   setCheckedState={setCheckedState}
                   searchInput={searchInput}
                   setSearchInput={setSearchInput}
-                  mobileCreatorFilter={mobileCreatorFilter}
-                  setMobileCreatorFilter={setMobileCreatorFilter}
                   createdBy={createdBy}
+                  setCreatedBy={setCreatedBy}
+                  handleCreatorInput={handleCreatorInput}
                 />
               }
               onApplyFilter={() => {

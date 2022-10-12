@@ -1,6 +1,6 @@
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
-import { Box, Grid, Stack } from '@mui/material'
+import { Box, CircularProgress, Grid, Stack } from '@mui/material'
 import { LineSeries, XYPlot } from 'react-vis'
 import { useHistory } from 'react-router-dom'
 import { makeStyles } from '@mui/styles'
@@ -51,6 +51,8 @@ export default function PoolsTable({
   const classes = useStyles()
   const dispatch = useDispatch()
 
+  console.log(rows.length)
+
   return (
     <Stack height="100%" width="100%">
       {selectedPoolsView === 'Table' ? (
@@ -85,20 +87,43 @@ export default function PoolsTable({
           }}
         />
       ) : (
-        <Box className={classes.root}>
-          <Grid
-            container
-            spacing={'76px'}
-            rowSpacing={'42px'}
-            justifyContent="center"
-          >
-            {rows.map((row) => (
-              <Grid item key={row.Id}>
-                <PoolCard row={row} />
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
+        <>
+          {loading ? (
+            <CircularProgress
+              sx={{
+                margin: '0 auto',
+                marginTop: 10,
+              }}
+            />
+          ) : (
+            <Box className={classes.root}>
+              {rows.length === 0 ? (
+                <Box
+                  sx={{
+                    color: 'white',
+                    textAlign: 'center',
+                    marginTop: 10,
+                  }}
+                >
+                  No results found.
+                </Box>
+              ) : (
+                <Grid
+                  container
+                  spacing={'76px'}
+                  rowSpacing={'42px'}
+                  justifyContent="center"
+                >
+                  {rows.map((row) => (
+                    <Grid item key={row.Id}>
+                      <PoolCard row={row} />
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </Box>
+          )}
+        </>
       )}
     </Stack>
   )
