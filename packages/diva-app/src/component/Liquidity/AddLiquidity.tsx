@@ -22,6 +22,10 @@ import {
   parseEther,
   parseUnits,
 } from 'ethers/lib/utils'
+import { ethers } from 'ethers'
+import { config } from '../../constants'
+import ERC20 from '@diva/contracts/abis/erc20.json'
+import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { selectUserAddress } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -48,10 +52,31 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [loading, setLoading] = React.useState(false)
   const [balanceUpdated, setBalanceUpdated] = React.useState(true)
   const [approving, setApproving] = React.useState('')
+  const { provider } = useConnectionContext()
+  const account = useAppSelector(selectUserAddress)
+  const chainId = provider?.network?.chainId
   const tokenBalance = useErcBalance(
     pool ? pool!.collateralToken.id : undefined,
     balanceUpdated
   )
+  const token = new ethers.Contract(
+    pool.collateralToken.id,
+    ERC20,
+    provider?.getSigner()
+  )
+  /* const diva =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider.getSigner()
+        )
+      : null */
+  const RemainingAllownace = token.allowance(
+    account,
+    config[chainId]?.divaAddress
+  )
+  console.log('Reamaining Balnce is:', RemainingAllownace)
   useEffect(() => {
     if (pool) {
       setDecimal(pool.collateralToken.decimals)
