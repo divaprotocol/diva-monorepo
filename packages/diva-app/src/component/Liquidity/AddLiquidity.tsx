@@ -145,17 +145,6 @@ export const AddLiquidity = ({ pool }: Props) => {
             }
           }}
         />
-        {/* <Input
-              type="number"
-              inputProps={{ style: { textAlign: 'right' } }}
-              value={textFieldValue}
-              onChange={(e) => {
-                const amount = e.target.value
-                if (!amount || amount.match(/^\d{1,}(\.\d{0,18})?$/)) {
-                  setTextFieldValue(amount)
-                }
-              }}
-            /> */}
         {tokenBalance ? (
           <>
             <Typography variant="h5" color="text.secondary">
@@ -312,6 +301,9 @@ export const AddLiquidity = ({ pool }: Props) => {
           onTransactionSuccess={() => setBalanceUpdated(!balanceUpdated)}
           alert={openExpiredAlert || openAlert}
         />
+        <Typography variant="h6" color="gray">
+          Remaining Allowance:{' '}
+        </Typography>
       </Card>
     </Stack>
   )

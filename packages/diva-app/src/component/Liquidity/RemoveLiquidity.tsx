@@ -70,6 +70,53 @@ export const RemoveLiquidity = ({ pool }: Props) => {
 
     balanceUpdated
   )
+  const reedemptionFees =
+    pool &&
+    textFieldValue !== '' &&
+    (
+      (parseFloat(formatEther(BigNumber.from(pool!.redemptionFee))) *
+        parseFloat(formatUnits(parseUnits(textFieldValue, decimal), decimal))) /
+      (1.0 -
+        parseFloat(formatEther(BigNumber.from(pool.redemptionFee))) -
+        parseFloat(formatEther(BigNumber.from(pool.settlementFee))))
+    ).toFixed(4)
+  const settlementFees =
+    pool &&
+    textFieldValue !== '' &&
+    (
+      (parseFloat(formatEther(BigNumber.from(pool!.settlementFee))) *
+        parseFloat(formatUnits(parseUnits(textFieldValue, decimal), decimal))) /
+      (1.0 -
+        parseFloat(formatEther(BigNumber.from(pool.redemptionFee))) -
+        parseFloat(formatEther(BigNumber.from(pool.settlementFee))))
+    ).toFixed(4)
+
+  const receivingAmount =
+    pool &&
+    textFieldValue !== '' &&
+    (
+      parseFloat(textFieldValue) -
+      (parseFloat(reedemptionFees) + parseFloat(settlementFees))
+    ).toFixed(4)
+  const returnAmount =
+    textFieldValue == '' ? 0 : Number(parseFloat(textFieldValue).toFixed(4))
+
+  const currentPoolSize =
+    pool &&
+    parseFloat(
+      formatUnits(BigNumber.from(pool.collateralBalance), decimal)
+    ).toFixed(4) + pool.collateralToken.symbol
+
+  const yourPoolShare =
+    pool &&
+    textFieldValue !== '' &&
+    Number(
+      (100 * pool.longToken.id
+        ? parseFloat(tokenBalanceLong)
+        : parseFloat(tokenBalanceShort)) /
+        parseFloat(formatUnits(BigNumber.from(pool.collateralBalance), decimal))
+    ).toFixed(2) + ' %'
+
   useEffect(() => {
     if (pool) {
       setOpenExpiredAlert(pool.statusFinalReferenceValue === 'Confirmed')
@@ -184,6 +231,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       console.error(error)
     }
   }
+
   return (
     <>
       <Stack
@@ -304,62 +352,31 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               height: '280px',
               border: '1px solid #1B3448',
               mt: theme.spacing(-1),
-              paddingTop: theme.spacing(4),
+              py: theme.spacing(4),
               px: theme.spacing(2),
               background: 'linear-gradient(to bottom, #1B3448, #000000 110%)',
             }}
           >
             <Stack direction="column" spacing={4}>
               <Stack direction="row" justifyContent="space-between">
-                <Typography variant="h3">Protocol Fee</Typography>
+                <Typography variant="h3">Reedemption Fee</Typography>
                 <Typography variant="h3">
-                  {pool &&
-                    textFieldValue !== '' &&
-                    (
-                      (parseFloat(
-                        formatEther(BigNumber.from(pool!.redemptionFee))
-                      ) *
-                        parseFloat(
-                          formatUnits(
-                            parseUnits(textFieldValue, decimal),
-                            decimal
-                          )
-                        )) /
-                      (1.0 -
-                        parseFloat(
-                          formatEther(BigNumber.from(pool.redemptionFee))
-                        ) -
-                        parseFloat(
-                          formatEther(BigNumber.from(pool.settlementFee))
-                        ))
-                    ).toFixed(4)}{' '}
-                  {pool!.collateralToken.symbol}{' '}
+                  {reedemptionFees} {pool!.collateralToken.symbol}
                 </Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
                 <Typography variant="h3">Settlement Fee</Typography>
                 <Typography variant="h3">
-                  {pool &&
-                    textFieldValue !== '' &&
-                    (
-                      (parseFloat(
-                        formatEther(BigNumber.from(pool!.settlementFee))
-                      ) *
-                        parseFloat(
-                          formatUnits(
-                            parseUnits(textFieldValue, decimal),
-                            decimal
-                          )
-                        )) /
-                      (1.0 -
-                        parseFloat(
-                          formatEther(BigNumber.from(pool.redemptionFee))
-                        ) -
-                        parseFloat(
-                          formatEther(BigNumber.from(pool.settlementFee))
-                        ))
-                    ).toFixed(4)}{' '}
-                  {pool!.collateralToken.symbol}{' '}
+                  {settlementFees} {pool!.collateralToken.symbol}
+                </Typography>
+              </Stack>
+
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="h3">
+                  You will receive (after fees)
+                </Typography>
+                <Typography variant="h3">
+                  {receivingAmount} {pool!.collateralToken.symbol}
                 </Typography>
               </Stack>
               <div
@@ -435,6 +452,11 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 )}
               </div>
             </Stack>
+            <Box>
+              <Typography variant="h6" color="gray">
+                {returnAmount} Long and short tokens will be returned and burnt.
+              </Typography>
+            </Box>
           </Card>
         </Box>
         <Box>
@@ -451,50 +473,32 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 <Typography variant="h4" color="gray">
                   Current Pool Size
                 </Typography>
-                <Typography variant="h2">
-                  {pool &&
-                    parseFloat(
-                      formatUnits(
-                        BigNumber.from(pool.collateralBalance),
-                        decimal
-                      )
-                    ).toFixed(4)}{' '}
-                  {pool!.collateralToken.symbol}{' '}
-                </Typography>
+                <Typography variant="h2">{currentPoolSize}</Typography>
               </Stack>
               <Stack direction="column" justifyContent="space-between">
                 <Typography variant="h4" color="#929292">
-                  Share of Pool
+                  Your Pool Share
                 </Typography>
-                <Typography variant="h2">
-                  {pool &&
-                    textFieldValue !== '' &&
-                    Number(
-                      (100 * parseFloat(textFieldValue)) /
-                        (parseFloat(textFieldValue) +
-                          parseFloat(
-                            formatUnits(
-                              BigNumber.from(pool.collateralBalance),
-                              decimal
-                            )
-                          ))
-                    ).toFixed(2) + ' %'}
-                </Typography>
+                <Typography variant="h2">{yourPoolShare}</Typography>
               </Stack>
             </Stack>
             <Typography variant="h3">Your Balance</Typography>
             <Stack direction="row" spacing={theme.spacing(4)}>
-              <Stack direction="column" spacing={1}>
+              <Stack direction="column" spacing={1} maxWidth="100px">
                 <Typography variant="h4" color="#929292">
                   Long Token
                 </Typography>
-                <Typography variant="h2">{(+longToken).toFixed(4)}</Typography>
+                <Typography variant="h2" noWrap>
+                  {(+longToken).toFixed(4)}
+                </Typography>
               </Stack>
-              <Stack direction="column" spacing={1}>
+              <Stack direction="column" spacing={1} maxWidth="100px">
                 <Typography variant="h4" color="#929292">
                   Short Token
                 </Typography>
-                <Typography variant="h2">{(+shortToken).toFixed(4)}</Typography>
+                <Typography variant="h2" noWrap>
+                  {(+shortToken).toFixed(4)}
+                </Typography>
               </Stack>
             </Stack>
             <Box
@@ -514,21 +518,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                   p: theme.spacing(3),
                 }}
               >
-                {/* <Container
-                sx={{
-                  mt: theme.spacing(2),
-                  mb: theme.spacing(2),
-                }}
-              > */}
                 <Stack direction="row" spacing={2}>
-                  {/* <Star
-                    style={{
-                      marginTop: theme.spacing(-1),
-                      paddingRight: theme.spacing(1),
-                      height: theme.spacing(4),
-                      width: theme.spacing(4),
-                    }}
-                  /> */}
                   <LightbulbIcon
                     style={{
                       height: theme.spacing(3),
@@ -542,7 +532,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                     collateral in return
                   </Typography>
                 </Stack>
-                {/* </Container> */}
               </Card>
             </Box>
           </Stack>
