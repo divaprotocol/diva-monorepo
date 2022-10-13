@@ -266,7 +266,6 @@ const MobileFilterOptions = ({
   return (
     <Box
       sx={{
-        maxHeight: '88%',
         overflowY: 'scroll',
         msOverflowStyle: 'none',
         scrollbarWidth: 'none',
@@ -306,7 +305,7 @@ const MobileFilterOptions = ({
         <AccordionDetails
           sx={{
             backgroundColor: '#000000',
-            padding: '0px',
+            padding: 0,
           }}
         >
           <Box>
@@ -315,7 +314,7 @@ const MobileFilterOptions = ({
               aria-label="Filter creator"
               sx={{
                 width: '100%',
-                height: '50px',
+                height: theme.spacing(6.25),
                 marginTop: theme.spacing(2),
               }}
               onChange={handleCreatorInput}
@@ -372,7 +371,7 @@ const MobileFilterOptions = ({
           aria-controls="panel1a-content"
           id="panel1a-header"
           sx={{
-            padding: '0px',
+            padding: 0,
             backgroundColor: '#000000',
           }}
           expandIcon={<ArrowDropUpIcon />}
@@ -388,7 +387,7 @@ const MobileFilterOptions = ({
         <AccordionDetails
           sx={{
             backgroundColor: '#000000',
-            padding: '0px',
+            padding: 0,
           }}
         >
           <Box>
@@ -397,7 +396,7 @@ const MobileFilterOptions = ({
               aria-label="Filter creator"
               sx={{
                 width: '100%',
-                height: '50px',
+                height: theme.spacing(6.25),
                 marginTop: theme.spacing(2),
               }}
               onChange={(event) => setSearchInput(event.target.value)}
@@ -731,7 +730,7 @@ export default function Markets() {
   return (
     <>
       <Box
-        paddingRight={isMobile ? 0 : 6}
+        paddingRight={isMobile ? 0 : theme.spacing(2)}
         sx={{
           display: 'flex',
           flexDirection: 'row',
@@ -840,10 +839,11 @@ export default function Markets() {
               startIcon={<FilterListIcon fontSize="small" />}
               variant="outlined"
               sx={{
-                width: '84px',
-                height: '30px',
+                width: theme.spacing(10.5),
+                height: theme.spacing(3.75),
                 fontSize: '13px',
-                padding: '4px 10px',
+                paddingY: theme.spacing(0.5),
+                paddingX: theme.spacing(1.25),
                 textTransform: 'none',
               }}
               color={isFilterDrawerOpen ? 'primary' : 'secondary'}
@@ -869,15 +869,6 @@ export default function Markets() {
                 />
               }
               onApplyFilter={() => {
-                if (
-                  mobileCreatorFilter.length > 0 &&
-                  mobileCreatorFilter !== null
-                ) {
-                  setCreatedBy(mobileCreatorFilter)
-                  setCreatorButtonLabel(
-                    getShortenedAddress(mobileCreatorFilter)
-                  )
-                }
                 setIsFilterDrawerOpen(false)
               }}
               onClearFilter={() => {

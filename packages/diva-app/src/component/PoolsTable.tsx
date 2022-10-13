@@ -7,6 +7,7 @@ import { makeStyles } from '@mui/styles'
 import PoolCard from './PoolCard'
 import { setResponseBuy, setResponseSell } from '../Redux/TradeOption'
 import { useDispatch } from 'react-redux'
+import useTheme from '@mui/material/styles/useTheme'
 
 const useStyles = makeStyles({
   root: {
@@ -50,8 +51,7 @@ export default function PoolsTable({
   const history = useHistory()
   const classes = useStyles()
   const dispatch = useDispatch()
-
-  console.log(rows.length)
+  const theme = useTheme()
 
   return (
     <Stack height="100%" width="100%">
@@ -110,8 +110,8 @@ export default function PoolsTable({
               ) : (
                 <Grid
                   container
-                  spacing={'76px'}
-                  rowSpacing={'42px'}
+                  spacing={theme.spacing(9.5)}
+                  rowSpacing={theme.spacing(5.25)}
                   justifyContent="center"
                 >
                   {rows.map((row) => (
