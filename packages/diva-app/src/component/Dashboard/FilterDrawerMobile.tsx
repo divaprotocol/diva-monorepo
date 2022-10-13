@@ -83,7 +83,7 @@ export const FilterDrawerModal = ({
               }}
               onClick={onClearFilter}
             >
-              CLEAR ALL
+              RESET
             </Button>
             <Button
               variant="contained"

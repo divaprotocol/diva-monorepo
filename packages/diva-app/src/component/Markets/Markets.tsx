@@ -7,15 +7,14 @@ import {
   userTimeZone,
 } from '../../Util/Dates'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { BigNumber, ethers } from 'ethers'
+import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import {
   fetchPools,
   selectPools,
   selectRequestStatus,
-  selectUserAddress,
 } from '../../Redux/appSlice'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import {
@@ -26,22 +25,32 @@ import {
   Tooltip,
   Toolbar,
   useTheme,
+  Checkbox,
+  Divider,
+  Switch,
 } from '@mui/material'
 import ViewModuleIcon from '@mui/icons-material/ViewModule'
 import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
-import { config } from '../../constants'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import { divaGovernanceAddress } from '../../constants'
-import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { useHistory, useLocation, useParams } from 'react-router-dom'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import { FilterDrawerModal } from '../Dashboard/FilterDrawerMobile'
+import Accordion from '@mui/material/Accordion'
+import AccordionSummary from '@mui/material/AccordionSummary'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import AccordionDetails from '@mui/material/AccordionDetails'
+import TextField from '@mui/material/TextField'
+import InputAdornment from '@mui/material/InputAdornment'
+import { Search } from '@mui/icons-material'
+import { getTopNObjectByProperty } from '../../Util/dashboard'
+import { useHistory, useParams } from 'react-router-dom'
 
 export const ExpiresInCell = (props: any) => {
   //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
@@ -213,6 +222,242 @@ const columns: GridColDef[] = [
   },
 ]
 
+const MobileFilterOptions = ({
+  setSearch,
+  expiredPoolClicked,
+  setExpiredPoolClicked,
+  rows,
+  checkedState,
+  setCheckedState,
+  searchInput,
+  setSearchInput,
+  createdBy,
+  setCreatedBy,
+  handleCreatorInput,
+}) => {
+  const theme = useTheme()
+
+  const top4UnderlyingTokens = useMemo(
+    () => getTopNObjectByProperty(rows, 'Underlying', 4),
+    [rows]
+  )
+
+  const handleOnChange = (position) => {
+    const updatedCheckedState = checkedState.map((item, index) =>
+      index === position ? !item : item
+    )
+
+    setCheckedState(updatedCheckedState)
+
+    const underlyingTokenString = updatedCheckedState
+      .map((currentState, index) => {
+        if (currentState === true) {
+          return top4UnderlyingTokens[index]
+        }
+      })
+      .filter((item) => item !== undefined)
+      .map((item) => item.token)
+      .join(' ')
+      .toString()
+
+    setSearch(underlyingTokenString)
+  }
+
+  return (
+    <Box
+      sx={{
+        overflowY: 'scroll',
+        msOverflowStyle: 'none',
+        scrollbarWidth: 'none',
+        '&::-webkit-scrollbar': {
+          display: 'none',
+        },
+      }}
+    >
+      <Accordion
+        sx={{
+          backgroundColor: '#000000',
+          '&:before': {
+            display: 'none',
+          },
+          marginTop: theme.spacing(3.5),
+          marginBottom: theme.spacing(1),
+        }}
+        defaultExpanded
+      >
+        <AccordionSummary
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          sx={{
+            padding: '0px',
+            backgroundColor: '#000000',
+          }}
+          expandIcon={<ArrowDropUpIcon />}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Creator
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            backgroundColor: '#000000',
+            padding: 0,
+          }}
+        >
+          <Box>
+            <TextField
+              value={createdBy}
+              aria-label="Filter creator"
+              sx={{
+                width: '100%',
+                height: theme.spacing(6.25),
+                marginTop: theme.spacing(2),
+              }}
+              onChange={handleCreatorInput}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Enter Creator"
+              color="secondary"
+            />
+          </Box>
+          <Stack
+            spacing={0.6}
+            sx={{
+              marginTop: theme.spacing(2),
+              fontSize: '14px',
+            }}
+          >
+            <Stack
+              direction="row"
+              justifyContent={'space-between'}
+              alignItems={'center'}
+            >
+              <Box>Diva Governance</Box>
+              <Checkbox
+                checked={createdBy === divaGovernanceAddress}
+                id={`checkbox-diva-governance`}
+                onChange={() => {
+                  if (createdBy === divaGovernanceAddress) {
+                    setCreatedBy('')
+                  } else {
+                    setCreatedBy(divaGovernanceAddress)
+                  }
+                }}
+              />
+            </Stack>
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
+      <Accordion
+        sx={{
+          backgroundColor: '#000000',
+          '&:before': {
+            display: 'none',
+          },
+          marginY: theme.spacing(1),
+        }}
+      >
+        <AccordionSummary
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          sx={{
+            padding: 0,
+            backgroundColor: '#000000',
+          }}
+          expandIcon={<ArrowDropUpIcon />}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Underlying
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            backgroundColor: '#000000',
+            padding: 0,
+          }}
+        >
+          <Box>
+            <TextField
+              value={searchInput}
+              aria-label="Filter creator"
+              sx={{
+                width: '100%',
+                height: theme.spacing(6.25),
+                marginTop: theme.spacing(2),
+              }}
+              onChange={(event) => setSearchInput(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Enter Underlying"
+              color="secondary"
+            />
+          </Box>
+          <Stack
+            spacing={0.6}
+            sx={{
+              marginTop: theme.spacing(2),
+              fontSize: '14px',
+            }}
+          >
+            {top4UnderlyingTokens.map((underlying, index) => (
+              <Stack
+                direction="row"
+                justifyContent={'space-between'}
+                alignItems={'center'}
+                key={index}
+              >
+                <Box>{underlying.token}</Box>
+                <Checkbox
+                  checked={checkedState[index]}
+                  id={`custom-checkbox-${index}`}
+                  onChange={() => handleOnChange(index)}
+                />
+              </Stack>
+            ))}
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: theme.spacing(2.5),
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Hide Expired Pools</Box>
+          <Switch
+            checked={expiredPoolClicked}
+            onChange={() => setExpiredPoolClicked(!expiredPoolClicked)}
+          />
+        </Stack>
+      </Stack>
+    </Box>
+  )
+}
+
 export default function Markets() {
   const history = useHistory()
   const theme = useTheme()
@@ -234,6 +479,10 @@ export default function Markets() {
   const [selectedPoolsView, setSelectedPoolsView] = useState<'Grid' | 'Table'>(
     'Table'
   )
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
+  const [searchInput, setSearchInput] = useState<string>('')
+  const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
+  const [mobileCreatorFilter, setMobileCreatorFilter] = useState<string>('')
 
   const handleCreatorInput = (e) => {
     setCreatedBy(e.target.value)
@@ -457,27 +706,44 @@ export default function Markets() {
       ? expiredPoolClicked
         ? rows
             .filter((v) => v.Status.includes('Open'))
-            .filter((v) =>
-              v.Underlying.toLowerCase().includes(search.toLowerCase())
+            .filter(
+              (v) =>
+                v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
+                search.toLowerCase().includes(v.Underlying.toLowerCase())
             )
-        : rows.filter((v) =>
-            v.Underlying.toLowerCase().includes(search.toLowerCase())
+        : rows.filter(
+            (v) =>
+              v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
+              search.toLowerCase().includes(v.Underlying.toLowerCase())
           )
       : expiredPoolClicked
       ? rows.filter((v) => v.Status.includes('Open'))
       : rows
 
+  useEffect(() => {
+    if (searchInput.length > 0 && searchInput !== null) {
+      setCheckedState(new Array(4).fill(false))
+      setSearch(searchInput)
+    }
+  }, [searchInput])
+
   return (
     <>
       <Box
-        paddingX={6}
+        paddingRight={isMobile ? 0 : theme.spacing(2)}
         sx={{
           display: 'flex',
           flexDirection: 'row',
+          alignItems: 'center',
+          fontSize: isMobile ? '14px' : '24px',
         }}
       >
         <ShowChartOutlined
-          style={{ fontSize: 34, padding: 20, paddingRight: 10 }}
+          style={{
+            fontSize: isMobile ? 24 : 34,
+            padding: 20,
+            paddingRight: 10,
+          }}
         />
         <h2> Markets</h2>
       </Box>
@@ -488,73 +754,133 @@ export default function Markets() {
         }}
         spacing={4}
       >
-        <AppBar
-          position="static"
-          sx={{
-            background: theme.palette.background.default,
-            justifyContent: 'space-between',
-            boxShadow: 'none',
-          }}
-        >
-          <Toolbar>
-            <Box
-              paddingX={3}
-              paddingY={2}
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-              }}
-              justifyContent="space-between"
-            >
-              <DropDownFilter
-                id="Creator Filter"
-                DropDownButtonLabel={
-                  history.location.pathname === `/markets/`
-                    ? 'Creator'
-                    : creatorButtonLabel
-                }
-                InputValue={createdBy}
-                onInputChange={handleCreatorInput}
-                MenuItemLabel="Diva Governance"
-                onMenuItemClick={() => {
-                  setCreatedBy(divaGovernanceAddress)
-                  setCreatorButtonLabel(
-                    getShortenedAddress(divaGovernanceAddress)
-                  )
+        {!isMobile && (
+          <AppBar
+            position="static"
+            sx={{
+              background: theme.palette.background.default,
+              justifyContent: 'space-between',
+              boxShadow: 'none',
+            }}
+          >
+            <Toolbar>
+              <Box
+                paddingX={3}
+                paddingY={2}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
                 }}
-              />
-              <DropDownFilter
-                id="Underlying Filter"
-                DropDownButtonLabel={underlyingButtonLabel}
-                InputValue={search}
-                onInputChange={handleUnderLyingInput}
-              />
-              <ButtonFilter
-                id="Hide expired pools"
-                ButtonLabel="Hide Expired"
-                onClick={handleExpiredPools}
-              />
-            </Box>
-            <Box
-              sx={{
-                marginLeft: 'auto',
+                justifyContent="space-between"
+              >
+                <DropDownFilter
+                  id="Creator Filter"
+                  DropDownButtonLabel={
+                    history.location.pathname === `/markets/`
+                      ? 'Creator'
+                      : creatorButtonLabel
+                  }
+                  InputValue={createdBy}
+                  onInputChange={handleCreatorInput}
+                  MenuItemLabel="Diva Governance"
+                  onMenuItemClick={() => {
+                    setCreatedBy(divaGovernanceAddress)
+                    setCreatorButtonLabel(
+                      getShortenedAddress(divaGovernanceAddress)
+                    )
+                  }}
+                />
+                <DropDownFilter
+                  id="Underlying Filter"
+                  DropDownButtonLabel={underlyingButtonLabel}
+                  InputValue={search}
+                  onInputChange={handleUnderLyingInput}
+                />
+                <ButtonFilter
+                  id="Hide expired pools"
+                  ButtonLabel="Hide Expired"
+                  onClick={handleExpiredPools}
+                />
+              </Box>
+              <Box
+                sx={{
+                  marginLeft: 'auto',
+                }}
+              >
+                <Button
+                  onClick={() => setSelectedPoolsView('Table')}
+                  color={selectedPoolsView === 'Table' ? 'primary' : 'inherit'}
+                >
+                  <ViewHeadlineIcon />
+                </Button>
+                <Button
+                  onClick={() => setSelectedPoolsView('Grid')}
+                  color={selectedPoolsView === 'Grid' ? 'primary' : 'inherit'}
+                >
+                  <ViewModuleIcon />
+                </Button>
+              </Box>
+            </Toolbar>
+          </AppBar>
+        )}
+        {isMobile && (
+          <Stack
+            width={'100%'}
+            sx={{
+              marginTop: theme.spacing(1),
+              marginLeft: theme.spacing(2),
+            }}
+            spacing={2}
+          >
+            <Button
+              onClick={() => {
+                setIsFilterDrawerOpen(!isFilterDrawerOpen)
               }}
+              startIcon={<FilterListIcon fontSize="small" />}
+              variant="outlined"
+              sx={{
+                width: theme.spacing(10.5),
+                height: theme.spacing(3.75),
+                fontSize: '13px',
+                paddingY: theme.spacing(0.5),
+                paddingX: theme.spacing(1.25),
+                textTransform: 'none',
+              }}
+              color={isFilterDrawerOpen ? 'primary' : 'secondary'}
             >
-              <Button
-                onClick={() => setSelectedPoolsView('Table')}
-                color={selectedPoolsView === 'Table' ? 'primary' : 'inherit'}
-              >
-                <ViewHeadlineIcon />
-              </Button>
-              <Button
-                onClick={() => setSelectedPoolsView('Grid')}
-                color={selectedPoolsView === 'Grid' ? 'primary' : 'inherit'}
-              >
-                <ViewModuleIcon />
-              </Button>
-            </Box>
-          </Toolbar>
-        </AppBar>
+              Filters
+            </Button>
+            <FilterDrawerModal
+              open={isFilterDrawerOpen}
+              onClose={setIsFilterDrawerOpen}
+              children={
+                <MobileFilterOptions
+                  setSearch={setSearch}
+                  expiredPoolClicked={expiredPoolClicked}
+                  setExpiredPoolClicked={setExpiredPoolClicked}
+                  rows={rows}
+                  checkedState={checkedState}
+                  setCheckedState={setCheckedState}
+                  searchInput={searchInput}
+                  setSearchInput={setSearchInput}
+                  createdBy={createdBy}
+                  setCreatedBy={setCreatedBy}
+                  handleCreatorInput={handleCreatorInput}
+                />
+              }
+              onApplyFilter={() => {
+                setIsFilterDrawerOpen(false)
+              }}
+              onClearFilter={() => {
+                setSearch('')
+                setCreatedBy(divaGovernanceAddress)
+                setExpiredPoolClicked(false)
+                setSearchInput('')
+                setCheckedState(new Array(4).fill(false))
+              }}
+            />
+          </Stack>
+        )}
         <Box
           paddingX={6}
           sx={{
