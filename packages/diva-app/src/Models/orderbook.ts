@@ -59,3 +59,8 @@ export interface OrderOutputType {
   bidQuantity: string // bid quantity
   askQuantity: string // ask quantity
 }
+
+export const ORDER_TYPE = {
+  BUY: 0,
+  SELL: 1,
+}
