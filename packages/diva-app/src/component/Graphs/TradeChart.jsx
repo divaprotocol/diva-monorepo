@@ -304,11 +304,11 @@ export default function DIVATradeChart(props) {
       .append('circle')
       .attr(
         'cx',
-        isLegendResponsive
+        isLegendResponsive && currentPrice
           ? legendXPos.breakEvenCircle
           : newlegendXPos.breakEvenCircle
       )
-      .attr('cy', newLegendHeight)
+      .attr('cy', currentPrice ? newLegendHeight : legendHeight)
       .attr('r', showBreakEven && breakEven != 'n/a' ? 6 : 0)
       .style('fill', '#9747FF')
 
@@ -370,11 +370,11 @@ export default function DIVATradeChart(props) {
       .append('text')
       .attr(
         'x',
-        isLegendResponsive
+        isLegendResponsive && currentPrice
           ? legendXPos.breakEvenText
           : newlegendXPos.breakEvenText
       )
-      .attr('y', newLegendHeight)
+      .attr('y', currentPrice ? newLegendHeight : legendHeight)
       .attr('opacity', showBreakEven && breakEven != 'n/a' ? 1 : 0)
       .text('Break Even' + ' ' + '(' + parseFloat(breakEven).toFixed(2) + ')')
       .style('font-size', '12px')
