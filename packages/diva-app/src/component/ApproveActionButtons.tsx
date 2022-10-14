@@ -568,6 +568,8 @@ export const ApproveActionButtons = ({
                       })
                     break
                   case 'createoffer':
+                    // eslint-disable-next-line no-case-declarations
+                    const now = Date.now().toString()
                     setApproveLoading(false)
                     signer
                       ._signTypedData(divaDomain, CREATE_POOL_TYPE, {
@@ -617,7 +619,7 @@ export const ApproveActionButtons = ({
                                 formik.values.collateralToken.decimals
                               ).toString(),
                         permissionedERC721Token: ethers.constants.AddressZero,
-                        salt: Date.now().toString(),
+                        salt: now,
                       })
                       .then((signedTypedData) => {
                         const { r, s, v } = splitSignature(signedTypedData)
@@ -680,7 +682,7 @@ export const ApproveActionButtons = ({
                                   ).toString(),
                             permissionedERC721Token:
                               ethers.constants.AddressZero,
-                            salt: Date.now().toString(),
+                            salt: now,
                           },
                           signature,
                         }
@@ -739,7 +741,7 @@ export const ApproveActionButtons = ({
                                     ).toString(),
                               permissionedERC721Token:
                                 ethers.constants.AddressZero,
-                              salt: Date.now().toString(),
+                              salt: now,
                             },
                             signature
                           )
