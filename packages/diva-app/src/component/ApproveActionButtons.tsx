@@ -570,57 +570,61 @@ export const ApproveActionButtons = ({
                   case 'createoffer':
                     // eslint-disable-next-line no-case-declarations
                     const now = Date.now().toString()
+                    // eslint-disable-next-line no-case-declarations
+                    const createOfferStats = {
+                      maker:
+                        account != null && ethers.utils.getAddress(account),
+                      taker: ethers.utils.getAddress(
+                        formik.values.takerAddress
+                      ),
+                      makerCollateralAmount: parseUnits(
+                        formik.values.yourShare.toString(),
+                        formik.values.collateralToken.decimals
+                      ).toString(),
+                      takerCollateralAmount: parseUnits(
+                        formik.values.takerShare.toString(),
+                        formik.values.collateralToken.decimals
+                      ).toString(),
+                      makerDirection: formik.values.offerDirection === 'Long',
+                      offerExpiry: formik.values.offerDuration,
+                      minimumTakerFillAmount: parseUnits(
+                        formik.values.minTakerContribution.toString() ===
+                          formik.values.takerShare.toString()
+                          ? formik.values.takerShare.toString()
+                          : formik.values.minTakerContribution.toString(),
+                        formik.values.collateralToken.decimals
+                      ).toString(),
+                      referenceAsset: formik.values.referenceAsset,
+                      expiryTime: Math.floor(
+                        new Date(formik.values.expiryTime).getTime() / 1000
+                      ).toString(),
+                      floor: parseEther(String(formik.values.floor)).toString(),
+                      inflection: parseEther(
+                        String(formik.values.inflection)
+                      ).toString(),
+                      cap: parseEther(String(formik.values.cap)).toString(),
+                      gradient: parseEther(
+                        String(formik.values.gradient)
+                      ).toString(),
+                      collateralToken: formik.values.collateralToken.id,
+                      dataProvider: formik.values.dataProvider,
+                      capacity:
+                        formik.values.capacity === 'Unlimited'
+                          ? ethers.constants.MaxUint256.toString()
+                          : parseUnits(
+                              String(formik.values.capacity),
+                              formik.values.collateralToken.decimals
+                            ).toString(),
+                      permissionedERC721Token: ethers.constants.AddressZero,
+                      salt: now,
+                    }
                     setApproveLoading(false)
                     signer
-                      ._signTypedData(divaDomain, CREATE_POOL_TYPE, {
-                        maker:
-                          account != null && ethers.utils.getAddress(account),
-                        taker: ethers.utils.getAddress(
-                          formik.values.takerAddress
-                        ),
-                        makerCollateralAmount: parseUnits(
-                          formik.values.yourShare.toString(),
-                          formik.values.collateralToken.decimals
-                        ).toString(),
-                        takerCollateralAmount: parseUnits(
-                          formik.values.takerShare.toString(),
-                          formik.values.collateralToken.decimals
-                        ).toString(),
-                        makerDirection: formik.values.offerDirection === 'Long',
-                        offerExpiry: formik.values.offerDuration,
-                        minimumTakerFillAmount: parseUnits(
-                          formik.values.minTakerContribution.toString() ===
-                            formik.values.takerShare.toString()
-                            ? formik.values.takerShare.toString()
-                            : formik.values.minTakerContribution.toString(),
-                          formik.values.collateralToken.decimals
-                        ).toString(),
-                        referenceAsset: formik.values.referenceAsset,
-                        expiryTime: Math.floor(
-                          new Date(formik.values.expiryTime).getTime() / 1000
-                        ).toString(),
-                        floor: parseEther(
-                          String(formik.values.floor)
-                        ).toString(),
-                        inflection: parseEther(
-                          String(formik.values.inflection)
-                        ).toString(),
-                        cap: parseEther(String(formik.values.cap)).toString(),
-                        gradient: parseEther(
-                          String(formik.values.gradient)
-                        ).toString(),
-                        collateralToken: formik.values.collateralToken.id,
-                        dataProvider: formik.values.dataProvider,
-                        capacity:
-                          formik.values.capacity === 'Unlimited'
-                            ? ethers.constants.MaxUint256.toString()
-                            : parseUnits(
-                                String(formik.values.capacity),
-                                formik.values.collateralToken.decimals
-                              ).toString(),
-                        permissionedERC721Token: ethers.constants.AddressZero,
-                        salt: now,
-                      })
+                      ._signTypedData(
+                        divaDomain,
+                        CREATE_POOL_TYPE,
+                        createOfferStats
+                      )
                       .then((signedTypedData) => {
                         const { r, s, v } = splitSignature(signedTypedData)
                         const signature = {
@@ -629,120 +633,12 @@ export const ApproveActionButtons = ({
                           s: s,
                         }
                         const json = {
-                          ...{
-                            maker:
-                              account != null &&
-                              ethers.utils.getAddress(account),
-                            taker: ethers.utils.getAddress(
-                              formik.values.takerAddress
-                            ),
-                            makerCollateralAmount: parseUnits(
-                              formik.values.yourShare.toString(),
-                              formik.values.collateralToken.decimals
-                            ).toString(),
-                            takerCollateralAmount: parseUnits(
-                              formik.values.takerShare.toString(),
-                              formik.values.collateralToken.decimals
-                            ).toString(),
-                            makerDirection:
-                              formik.values.offerDirection === 'Long',
-                            offerExpiry: formik.values.offerDuration,
-                            minimumTakerFillAmount: parseUnits(
-                              formik.values.minTakerContribution.toString() ===
-                                formik.values.takerShare.toString()
-                                ? formik.values.takerShare.toString()
-                                : formik.values.minTakerContribution.toString(),
-                              formik.values.collateralToken.decimals
-                            ).toString(),
-                            referenceAsset: formik.values.referenceAsset,
-                            expiryTime: Math.floor(
-                              new Date(formik.values.expiryTime).getTime() /
-                                1000
-                            ).toString(),
-                            floor: parseEther(
-                              String(formik.values.floor)
-                            ).toString(),
-                            inflection: parseEther(
-                              String(formik.values.inflection)
-                            ).toString(),
-                            cap: parseEther(
-                              String(formik.values.cap)
-                            ).toString(),
-                            gradient: parseEther(
-                              String(formik.values.gradient)
-                            ).toString(),
-                            collateralToken: formik.values.collateralToken.id,
-                            dataProvider: formik.values.dataProvider,
-                            capacity:
-                              formik.values.capacity === 'Unlimited'
-                                ? ethers.constants.MaxUint256.toString()
-                                : parseUnits(
-                                    String(formik.values.capacity),
-                                    formik.values.collateralToken.decimals
-                                  ).toString(),
-                            permissionedERC721Token:
-                              ethers.constants.AddressZero,
-                            salt: now,
-                          },
+                          ...createOfferStats,
                           signature,
                         }
                         divaNew
                           .getOfferRelevantStateCreateContingentPool(
-                            {
-                              maker:
-                                account != null &&
-                                ethers.utils.getAddress(account),
-                              taker: ethers.utils.getAddress(
-                                formik.values.takerAddress
-                              ),
-                              makerCollateralAmount: parseUnits(
-                                formik.values.yourShare.toString(),
-                                formik.values.collateralToken.decimals
-                              ).toString(),
-                              takerCollateralAmount: parseUnits(
-                                formik.values.takerShare.toString(),
-                                formik.values.collateralToken.decimals
-                              ).toString(),
-                              makerDirection:
-                                formik.values.offerDirection === 'Long',
-                              offerExpiry: formik.values.offerDuration,
-                              minimumTakerFillAmount: parseUnits(
-                                formik.values.minTakerContribution.toString() ===
-                                  formik.values.takerShare.toString()
-                                  ? formik.values.takerShare.toString()
-                                  : formik.values.minTakerContribution.toString(),
-                                formik.values.collateralToken.decimals
-                              ).toString(),
-                              referenceAsset: formik.values.referenceAsset,
-                              expiryTime: Math.floor(
-                                new Date(formik.values.expiryTime).getTime() /
-                                  1000
-                              ).toString(),
-                              floor: parseEther(
-                                String(formik.values.floor)
-                              ).toString(),
-                              inflection: parseEther(
-                                String(formik.values.inflection)
-                              ).toString(),
-                              cap: parseEther(
-                                String(formik.values.cap)
-                              ).toString(),
-                              gradient: parseEther(
-                                String(formik.values.gradient)
-                              ).toString(),
-                              collateralToken: formik.values.collateralToken.id,
-                              dataProvider: formik.values.dataProvider,
-                              capacity:
-                                formik.values.capacity === 'Unlimited'
-                                  ? ethers.constants.MaxUint256.toString()
-                                  : parseUnits(
-                                      String(formik.values.capacity),
-                                      formik.values.collateralToken.decimals
-                                    ).toString(),
-                              permissionedERC721Token:
-                                ethers.constants.AddressZero,
-                              salt: now,
-                            },
+                            createOfferStats,
                             signature
                           )
                           .then((res: any) => {
