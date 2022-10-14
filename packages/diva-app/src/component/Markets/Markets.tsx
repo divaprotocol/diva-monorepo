@@ -54,7 +54,6 @@ import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import { Search } from '@mui/icons-material'
 import { getTopNObjectByProperty } from '../../Util/dashboard'
-import { useHistory, useParams } from 'react-router-dom'
 
 export const ExpiresInCell = (props: any) => {
   //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
