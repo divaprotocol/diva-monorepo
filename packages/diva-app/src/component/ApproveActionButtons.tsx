@@ -155,7 +155,6 @@ export const ApproveActionButtons = ({
   alert,
   formik,
 }: Props) => {
-  const { values } = formik
   const [approveLoading, setApproveLoading] = React.useState(false)
   const [actionLoading, setActionLoading] = React.useState(false)
   const [approveEnabled, setApproveEnabled] = React.useState(false)
@@ -170,67 +169,30 @@ export const ApproveActionButtons = ({
   const dispatch = useDispatch()
   const signer = provider?.getSigner()
   const token = new ethers.Contract(collateralTokenAddress, ERC20, signer)
-  // const CREATE_POOL_TYPE = {
-  //   OfferCreateContingentPool: CREATE_POOL_OFFER_STRUCT,
-  // }
 
   const diva =
     chainId != null
-      ? new ethers.Contract(config[chainId!].divaAddress, DIVA_ABI, signer)
+      ? new ethers.Contract(config[chainId]?.divaAddress, DIVA_ABI, signer)
       : null
 
-  const divaNew = new ethers.Contract(
-    config[chainId!].divaAddressNew, //Goerli
-    DIVA712ABI,
-    signer
-  )
+  const divaNew =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId]?.divaAddressNew, //Goerli
+          DIVA712ABI,
+          signer
+        )
+      : null
 
-  const offerCreationStats = {
-    maker: account != null && ethers.utils.getAddress(account),
-    taker: ethers.utils.getAddress(values.takerAddress),
-    makerCollateralAmount: parseUnits(
-      values.yourShare.toString(),
-      values.collateralToken.decimals
-    ).toString(),
-    takerCollateralAmount: parseUnits(
-      values.takerShare.toString(),
-      values.collateralToken.decimals
-    ).toString(),
-    makerDirection: values.offerDirection === 'Long',
-    offerExpiry: values.offerDuration,
-    minimumTakerFillAmount: parseUnits(
-      values.minTakerContribution.toString() === values.takerShare.toString()
-        ? values.takerShare.toString()
-        : values.minTakerContribution.toString(),
-      values.collateralToken.decimals
-    ).toString(),
-    referenceAsset: values.referenceAsset,
-    expiryTime: Math.floor(
-      new Date(values.expiryTime).getTime() / 1000
-    ).toString(),
-    floor: parseEther(String(values.floor)).toString(),
-    inflection: parseEther(String(values.inflection)).toString(),
-    cap: parseEther(String(values.cap)).toString(),
-    gradient: parseEther(String(values.gradient)).toString(),
-    collateralToken: values.collateralToken.id,
-    dataProvider: values.dataProvider,
-    capacity:
-      values.capacity === 'Unlimited'
-        ? ethers.constants.MaxUint256.toString()
-        : parseUnits(
-            String(values.capacity),
-            values.collateralToken.decimals
-          ).toString(),
-    permissionedERC721Token: ethers.constants.AddressZero,
-    salt: Date.now().toString(),
-  }
-
-  const divaDomain = {
-    name: 'DIVA Protocol',
-    version: '1',
-    chainId,
-    verifyingContract: config[chainId!].divaAddressNew,
-  }
+  const divaDomain =
+    chainId != null
+      ? {
+          name: 'DIVA Protocol',
+          version: '1',
+          chainId,
+          verifyingContract: config[chainId!].divaAddressNew,
+        }
+      : null
   const [mobile, setMobile] = useState(false)
   useEffect(() => {
     if (window.innerWidth < 768) {
@@ -242,6 +204,8 @@ export const ApproveActionButtons = ({
   useEffect(() => {
     if (transactionType === 'filloffer') {
       setBtnName('Fill')
+    } else if (transactionType === 'liquidity') {
+      setBtnName('Add')
     } else {
       setBtnName('Create')
     }
@@ -328,8 +292,8 @@ export const ApproveActionButtons = ({
       }
     }
   }, [
-    formik.values.yourShare,
-    formik.values.jsonToExport,
+    formik?.values.yourShare,
+    formik?.values.jsonToExport,
     textFieldValue,
     chainId,
     pool,
@@ -369,7 +333,30 @@ export const ApproveActionButtons = ({
                 }
                 onClick={() => {
                   switch (transactionType) {
-                    case 'createpool' || 'liquidity':
+                    case 'liquidity':
+                      setApproveLoading(true)
+
+                      token
+                        .approve(
+                          config[chainId!].divaAddress,
+                          parseUnits(textFieldValue, decimal)
+                        )
+                        .then((tx: any) => {
+                          return tx.wait()
+                        })
+                        .then(() => {
+                          setApproveLoading(false)
+                          return token.allowance(
+                            account,
+                            config[chainId!].divaAddress
+                          )
+                        })
+                        .catch((err: any) => {
+                          setApproveLoading(false)
+                          console.error(err)
+                        })
+                      break
+                    case 'createpool':
                       setApproveLoading(true)
 
                       token
@@ -583,11 +570,55 @@ export const ApproveActionButtons = ({
                   case 'createoffer':
                     setApproveLoading(false)
                     signer
-                      ._signTypedData(
-                        divaDomain,
-                        CREATE_POOL_TYPE,
-                        offerCreationStats
-                      )
+                      ._signTypedData(divaDomain, CREATE_POOL_TYPE, {
+                        maker:
+                          account != null && ethers.utils.getAddress(account),
+                        taker: ethers.utils.getAddress(
+                          formik.values.takerAddress
+                        ),
+                        makerCollateralAmount: parseUnits(
+                          formik.values.yourShare.toString(),
+                          formik.values.collateralToken.decimals
+                        ).toString(),
+                        takerCollateralAmount: parseUnits(
+                          formik.values.takerShare.toString(),
+                          formik.values.collateralToken.decimals
+                        ).toString(),
+                        makerDirection: formik.values.offerDirection === 'Long',
+                        offerExpiry: formik.values.offerDuration,
+                        minimumTakerFillAmount: parseUnits(
+                          formik.values.minTakerContribution.toString() ===
+                            formik.values.takerShare.toString()
+                            ? formik.values.takerShare.toString()
+                            : formik.values.minTakerContribution.toString(),
+                          formik.values.collateralToken.decimals
+                        ).toString(),
+                        referenceAsset: formik.values.referenceAsset,
+                        expiryTime: Math.floor(
+                          new Date(formik.values.expiryTime).getTime() / 1000
+                        ).toString(),
+                        floor: parseEther(
+                          String(formik.values.floor)
+                        ).toString(),
+                        inflection: parseEther(
+                          String(formik.values.inflection)
+                        ).toString(),
+                        cap: parseEther(String(formik.values.cap)).toString(),
+                        gradient: parseEther(
+                          String(formik.values.gradient)
+                        ).toString(),
+                        collateralToken: formik.values.collateralToken.id,
+                        dataProvider: formik.values.dataProvider,
+                        capacity:
+                          formik.values.capacity === 'Unlimited'
+                            ? ethers.constants.MaxUint256.toString()
+                            : parseUnits(
+                                String(formik.values.capacity),
+                                formik.values.collateralToken.decimals
+                              ).toString(),
+                        permissionedERC721Token: ethers.constants.AddressZero,
+                        salt: Date.now().toString(),
+                      })
                       .then((signedTypedData) => {
                         const { r, s, v } = splitSignature(signedTypedData)
                         const signature = {
@@ -596,12 +627,120 @@ export const ApproveActionButtons = ({
                           s: s,
                         }
                         const json = {
-                          ...offerCreationStats,
+                          ...{
+                            maker:
+                              account != null &&
+                              ethers.utils.getAddress(account),
+                            taker: ethers.utils.getAddress(
+                              formik.values.takerAddress
+                            ),
+                            makerCollateralAmount: parseUnits(
+                              formik.values.yourShare.toString(),
+                              formik.values.collateralToken.decimals
+                            ).toString(),
+                            takerCollateralAmount: parseUnits(
+                              formik.values.takerShare.toString(),
+                              formik.values.collateralToken.decimals
+                            ).toString(),
+                            makerDirection:
+                              formik.values.offerDirection === 'Long',
+                            offerExpiry: formik.values.offerDuration,
+                            minimumTakerFillAmount: parseUnits(
+                              formik.values.minTakerContribution.toString() ===
+                                formik.values.takerShare.toString()
+                                ? formik.values.takerShare.toString()
+                                : formik.values.minTakerContribution.toString(),
+                              formik.values.collateralToken.decimals
+                            ).toString(),
+                            referenceAsset: formik.values.referenceAsset,
+                            expiryTime: Math.floor(
+                              new Date(formik.values.expiryTime).getTime() /
+                                1000
+                            ).toString(),
+                            floor: parseEther(
+                              String(formik.values.floor)
+                            ).toString(),
+                            inflection: parseEther(
+                              String(formik.values.inflection)
+                            ).toString(),
+                            cap: parseEther(
+                              String(formik.values.cap)
+                            ).toString(),
+                            gradient: parseEther(
+                              String(formik.values.gradient)
+                            ).toString(),
+                            collateralToken: formik.values.collateralToken.id,
+                            dataProvider: formik.values.dataProvider,
+                            capacity:
+                              formik.values.capacity === 'Unlimited'
+                                ? ethers.constants.MaxUint256.toString()
+                                : parseUnits(
+                                    String(formik.values.capacity),
+                                    formik.values.collateralToken.decimals
+                                  ).toString(),
+                            permissionedERC721Token:
+                              ethers.constants.AddressZero,
+                            salt: Date.now().toString(),
+                          },
                           signature,
                         }
                         divaNew
                           .getOfferRelevantStateCreateContingentPool(
-                            offerCreationStats,
+                            {
+                              maker:
+                                account != null &&
+                                ethers.utils.getAddress(account),
+                              taker: ethers.utils.getAddress(
+                                formik.values.takerAddress
+                              ),
+                              makerCollateralAmount: parseUnits(
+                                formik.values.yourShare.toString(),
+                                formik.values.collateralToken.decimals
+                              ).toString(),
+                              takerCollateralAmount: parseUnits(
+                                formik.values.takerShare.toString(),
+                                formik.values.collateralToken.decimals
+                              ).toString(),
+                              makerDirection:
+                                formik.values.offerDirection === 'Long',
+                              offerExpiry: formik.values.offerDuration,
+                              minimumTakerFillAmount: parseUnits(
+                                formik.values.minTakerContribution.toString() ===
+                                  formik.values.takerShare.toString()
+                                  ? formik.values.takerShare.toString()
+                                  : formik.values.minTakerContribution.toString(),
+                                formik.values.collateralToken.decimals
+                              ).toString(),
+                              referenceAsset: formik.values.referenceAsset,
+                              expiryTime: Math.floor(
+                                new Date(formik.values.expiryTime).getTime() /
+                                  1000
+                              ).toString(),
+                              floor: parseEther(
+                                String(formik.values.floor)
+                              ).toString(),
+                              inflection: parseEther(
+                                String(formik.values.inflection)
+                              ).toString(),
+                              cap: parseEther(
+                                String(formik.values.cap)
+                              ).toString(),
+                              gradient: parseEther(
+                                String(formik.values.gradient)
+                              ).toString(),
+                              collateralToken: formik.values.collateralToken.id,
+                              dataProvider: formik.values.dataProvider,
+                              capacity:
+                                formik.values.capacity === 'Unlimited'
+                                  ? ethers.constants.MaxUint256.toString()
+                                  : parseUnits(
+                                      String(formik.values.capacity),
+                                      formik.values.collateralToken.decimals
+                                    ).toString(),
+                              permissionedERC721Token:
+                                ethers.constants.AddressZero,
+                              salt: Date.now().toString(),
+                            },
                             signature
                           )
                           .then((res: any) => {
@@ -622,18 +761,21 @@ export const ApproveActionButtons = ({
                     _checkConditions(
                       divaNew,
                       divaDomain,
-                      values.jsonToExport, // offerCreationStats,
+                      formik.values.jsonToExport, // offerCreationStats,
                       CREATE_POOL_TYPE,
-                      values.signature,
+                      formik.values.signature,
                       account,
-                      parseUnits(values.yourShare.toString(), decimal)
+                      parseUnits(formik.values.yourShare.toString(), decimal)
                     ).then((res) => {
                       if (res.success) {
                         divaNew
                           .fillOfferCreateContingentPool(
-                            values.jsonToExport,
-                            values.signature,
-                            parseUnits(values.yourShare.toString(), decimal)
+                            formik.values.jsonToExport,
+                            formik.values.signature,
+                            parseUnits(
+                              formik.values.yourShare.toString(),
+                              decimal
+                            )
                           )
                           .then((tx) => {
                             tx.wait().then((receipt) => {
