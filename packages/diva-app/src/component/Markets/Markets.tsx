@@ -37,7 +37,11 @@ import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { ORDER_TYPE } from '../../Models/orderbook'
 import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
-import { createTable, mapOrderData } from '../../DataService/OpenOrders'
+import {
+  createTable,
+  getResponse,
+  mapOrderData,
+} from '../../DataService/OpenOrders'
 import { useHistory, useParams } from 'react-router-dom'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
@@ -525,36 +529,6 @@ export default function Markets() {
   // - rSell: baseToken is collateralToken and quoteToken is tokenAddress
   // - rBuy: baseToken is tokenAddress and quoteToken is collateralToken
 
-  const getResponse = (firstOrdersBid: any[], secondOrdersBid: any[]) => {
-    let responseSell = []
-    let responseBuy = []
-    // Get responseBuy and responseSell using isBuy parameter
-    if (firstOrdersBid.length !== 0) {
-      const bidOrder = firstOrdersBid[0].order
-      if (bidOrder.isBuy) {
-        responseBuy = firstOrdersBid
-        responseSell = secondOrdersBid
-      } else {
-        responseBuy = secondOrdersBid
-        responseSell = firstOrdersBid
-      }
-    } else if (secondOrdersBid.length !== 0) {
-      const bidOrder = secondOrdersBid[0].order
-      if (bidOrder.isBuy) {
-        responseBuy = firstOrdersBid
-        responseSell = secondOrdersBid
-      } else {
-        responseBuy = secondOrdersBid
-        responseSell = firstOrdersBid
-      }
-    }
-
-    return {
-      responseBuy,
-      responseSell,
-    }
-  }
-
   const getMakerTakerTokens = (orders: any) => {
     const tokens: string[] = []
 
@@ -595,16 +569,20 @@ export default function Markets() {
         // Check pool type
         const poolType =
           tokens.indexOf(tablePool.shortToken.id) !== -1 ? 'S' : 'L'
+        const tokenAddress =
+          poolType === 'S' ? tablePool.shortToken.id : tablePool.longToken.id
 
         const firstRecords = checkOrders.first.bids.records
         const secondRecords = checkOrders.second.bids.records
 
         // Get updated pool's buy and sell data
         const { responseBuy, responseSell } = getResponse(
+          tokenAddress,
           firstRecords,
           secondRecords
         )
 
+        // Get updated orderbook buy data
         const orderBookBuy = mapOrderData(
           responseBuy,
           tablePool.collateralToken.decimals,
@@ -612,6 +590,7 @@ export default function Markets() {
         )
         orderPrices.push(orderBookBuy)
 
+        // Get updated orderbook buy data
         const orderBookSell = mapOrderData(
           responseSell,
           tablePool.collateralToken.decimals,

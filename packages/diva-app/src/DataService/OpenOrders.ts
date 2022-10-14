@@ -612,3 +612,37 @@ export const createTable = (buyOrders: any, sellOrders: any) => {
     return table
   }
 }
+
+export const getResponse = (
+  makerToken: string,
+  firstOrdersBid: any[],
+  secondOrdersBid: any[]
+) => {
+  let responseSell = []
+  let responseBuy = []
+  // Get responseBuy and responseSell using makerToken
+  if (firstOrdersBid.length !== 0) {
+    const bidOrder = firstOrdersBid[0].order
+    if (getAddress(bidOrder.makerToken) === getAddress(makerToken)) {
+      responseBuy = secondOrdersBid
+      responseSell = firstOrdersBid
+    } else {
+      responseBuy = firstOrdersBid
+      responseSell = secondOrdersBid
+    }
+  } else if (secondOrdersBid.length !== 0) {
+    const bidOrder = secondOrdersBid[0].order
+    if (getAddress(bidOrder.makerToken) === getAddress(makerToken)) {
+      responseBuy = firstOrdersBid
+      responseSell = secondOrdersBid
+    } else {
+      responseBuy = secondOrdersBid
+      responseSell = firstOrdersBid
+    }
+  }
+
+  return {
+    responseBuy,
+    responseSell,
+  }
+}

@@ -13,9 +13,11 @@ import Paper from '@mui/material/Paper'
 import { useState, useEffect } from 'react'
 import { useAppSelector } from '../../Redux/hooks'
 import { ORDER_TYPE } from '../../Models/orderbook'
+import { WEBSOCKET_URL } from '../../constants'
 import {
   createTable,
   get0xOpenOrders,
+  getResponse,
   mapOrderData,
 } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
@@ -37,6 +39,9 @@ export default function OrderBook(props: {
   const [orderBook, setOrderBook] = useState([] as any)
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
+  const [websocketClient, setWebsocketClient] = useState(
+    new WebSocket(WEBSOCKET_URL)
+  )
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
@@ -102,6 +107,71 @@ export default function OrderBook(props: {
     componentDidMount()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [responseBuy, responseSell, provider])
+
+  useEffect(() => {
+    if (websocketClient !== undefined) {
+      // Connect to server using websocket
+      websocketClient.onopen = () => {
+        console.log('WebSocket Connected')
+      }
+
+      // Receive data using websocket
+      websocketClient.onmessage = (e) => {
+        const message = JSON.parse(e.data)
+        const orders = message.filter((item) => item.poolId === option.id)
+
+        if (orders.length !== 0) {
+          const updateOrders = []
+          const checkOrders = orders[0]
+
+          const firstRecords = checkOrders.first.bids.records
+          const secondRecords = checkOrders.second.bids.records
+
+          // Get updated pool's buy and sell data
+          const { responseBuy, responseSell } = getResponse(
+            optionTokenAddress,
+            firstRecords,
+            secondRecords
+          )
+
+          // Get updated orderbook buy data
+          const orderBookBuy = mapOrderData(
+            responseBuy,
+            option.collateralToken.decimals,
+            ORDER_TYPE.BUY
+          )
+          updateOrders.push(orderBookBuy)
+
+          // Get updated orderbook buy data
+          const orderBookSell = mapOrderData(
+            responseSell,
+            option.collateralToken.decimals,
+            ORDER_TYPE.SELL
+          )
+          updateOrders.push(orderBookSell)
+
+          //put both buy & sell orders in one array to format table rows
+          const completeOrderBook = createTable(
+            updateOrders[ORDER_TYPE.BUY],
+            updateOrders[ORDER_TYPE.SELL]
+          )
+
+          setOrderBook(completeOrderBook)
+        }
+      }
+
+      return () => {
+        websocketClient.onclose = () => {
+          console.log('WebSocket Disconnected')
+          setWebsocketClient(new WebSocket(WEBSOCKET_URL))
+        }
+      }
+    }
+  }, [
+    websocketClient.onmessage,
+    websocketClient.onopen,
+    websocketClient.onclose,
+  ])
 
   return (
     <PageDiv>
