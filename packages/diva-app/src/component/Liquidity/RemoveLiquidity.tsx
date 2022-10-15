@@ -111,9 +111,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
     pool &&
     textFieldValue !== '' &&
     Number(
-      (100 * pool.longToken.id
-        ? parseFloat(tokenBalanceLong)
-        : parseFloat(tokenBalanceShort)) /
+      (100 * pool.longToken.id ? 0.5 : 10) /
         parseFloat(formatUnits(BigNumber.from(pool.collateralBalance), decimal))
     ).toFixed(2) + ' %'
 
@@ -467,36 +465,42 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 <Typography variant="h4" color="gray">
                   Pool ID
                 </Typography>
-                <Typography variant="h2">{pool.id}</Typography>
+                <Typography variant="h2" color="white">
+                  {pool.id}
+                </Typography>
               </Stack>
               <Stack direction="column" justifyContent="space-between">
                 <Typography variant="h4" color="gray">
-                  Current Pool Size
+                  TVL
                 </Typography>
-                <Typography variant="h2">{currentPoolSize}</Typography>
+                <Typography variant="h2" color="white">
+                  {currentPoolSize}
+                </Typography>
               </Stack>
               <Stack direction="column" justifyContent="space-between">
                 <Typography variant="h4" color="#929292">
                   Your Pool Share
                 </Typography>
-                <Typography variant="h2">{yourPoolShare}</Typography>
+                <Typography variant="h2" color="white">
+                  {yourPoolShare}
+                </Typography>
               </Stack>
             </Stack>
             <Typography variant="h3">Your Balance</Typography>
             <Stack direction="row" spacing={theme.spacing(4)}>
               <Stack direction="column" spacing={1} maxWidth="100px">
                 <Typography variant="h4" color="#929292">
-                  Long Token
+                  LONG Token
                 </Typography>
-                <Typography variant="h2" noWrap>
+                <Typography variant="h2" color="white" noWrap>
                   {(+longToken).toFixed(4)}
                 </Typography>
               </Stack>
               <Stack direction="column" spacing={1} maxWidth="100px">
                 <Typography variant="h4" color="#929292">
-                  Short Token
+                  SHORT Token
                 </Typography>
-                <Typography variant="h2" noWrap>
+                <Typography variant="h2" color="white" noWrap>
                   {(+shortToken).toFixed(4)}
                 </Typography>
               </Stack>

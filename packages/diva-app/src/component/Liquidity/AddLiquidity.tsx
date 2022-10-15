@@ -64,6 +64,7 @@ export const AddLiquidity = ({ pool }: Props) => {
     ERC20,
     provider?.getSigner()
   )
+  console.log('Token:', token)
   /* const diva =
     chainId != null
       ? new ethers.Contract(
@@ -72,11 +73,6 @@ export const AddLiquidity = ({ pool }: Props) => {
           provider.getSigner()
         )
       : null */
-  const RemainingAllownace = token.allowance(
-    account,
-    config[chainId]?.divaAddress
-  )
-  console.log('Reamaining Balnce is:', RemainingAllownace)
   useEffect(() => {
     if (pool) {
       setDecimal(pool.collateralToken.decimals)
@@ -108,6 +104,22 @@ export const AddLiquidity = ({ pool }: Props) => {
       setOpenAlert(false)
     }
   }, [textFieldValue, pool, tokenBalance])
+
+  const [remainingAllowanace, setRemainingAllowance] = useState()
+  useEffect(() => {
+    if (account) {
+      const getRemainingAllownace = async () => {
+        const RemainingAllownace = await token.allowance(
+          account,
+          config[chainId]?.divaAddress
+        )
+        console.log('Allowance', Number(RemainingAllownace.hex))
+        setRemainingAllowance(RemainingAllownace)
+      }
+      getRemainingAllownace()
+    }
+  }, [])
+  console.log('Remaining Allowance', remainingAllowanace)
   return (
     <Stack
       direction="column"
@@ -327,7 +339,7 @@ export const AddLiquidity = ({ pool }: Props) => {
           alert={openExpiredAlert || openAlert}
         />
         <Typography variant="h6" color="gray">
-          Remaining Allowance:{' '}
+          Remaining Allowance: {}
         </Typography>
       </Card>
     </Stack>

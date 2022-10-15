@@ -131,7 +131,12 @@ export default function Underlying() {
   }
   return (
     <TabContext value={value}>
-      <Box sx={{ maxWidth: '70%', paddingTop: '1em', ml: '10px' }}>
+      <Box
+        sx={{
+          /* maxWidth: '70%',*/ paddingTop: '1em',
+          ml: '10px',
+        }}
+      >
         <OptionHeader
           ReferenceAsset={pool.referenceAsset}
           TokenAddress={tokenAddress}
