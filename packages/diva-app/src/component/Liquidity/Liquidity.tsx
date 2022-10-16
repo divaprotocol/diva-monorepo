@@ -214,9 +214,11 @@ export const Liquidity = ({ pool }: Props) => {
                     />
                     <Typography fontSize={'0.85rem'} style={{ color: 'gray' }}>
                       {'    '}
-                      By adding liquidity you receive long and short position
-                      tokens in return which represent a claim against the
-                      collateral you deposited
+                      By adding liquidity you receive LONG and SHORT position
+                      tokens in return which combined represent a claim against
+                      the collateral you deposited but on an isolated basis
+                      expose you to the upside (LONG) or downside (SHORT) of the
+                      underlying metric
                     </Typography>
                   </Stack>
                   <Stack direction="row">

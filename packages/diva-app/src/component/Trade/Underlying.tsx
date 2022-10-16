@@ -412,7 +412,7 @@ export default function Underlying() {
                       </Stack>
                       <Stack direction="column" justifyContent="space-between">
                         <Typography variant="h4" color="gray">
-                          Current Pool Size
+                          TVL
                         </Typography>
                         <Typography variant="h2">
                           {pool &&
@@ -458,9 +458,11 @@ export default function Underlying() {
                       }}
                     />
                     <Typography variant="h3" color="gray">
-                      By adding liquidity you receive long and short position
-                      tokens in return which represent a claim against the
-                      collateral you deposited
+                      By adding liquidity you receive LONG and SHORT position
+                      tokens in return which combined represent a claim against
+                      the collateral you deposited but on an isolated basis
+                      expose you to the upside (LONG) or downside (SHORT) of the
+                      underlying metric
                     </Typography>
                   </Stack>
                   <Stack direction="row" spacing={2}>
@@ -471,7 +473,7 @@ export default function Underlying() {
                       }}
                     />
                     <Typography variant="h3" color="gray">
-                      Bullish? Keep the long tokens and sell the short tokens
+                      Bullish? Keep the LONG tokens and sell the SHORT tokens
                     </Typography>
                   </Stack>
                   <Stack direction="row" spacing={2}>
@@ -482,7 +484,7 @@ export default function Underlying() {
                       }}
                     />
                     <Typography variant="h3" color="gray">
-                      Bearish? Keep the short tokens and sell the long tokens
+                      Bearish? Keep the SHORT tokens and sell the LONG tokens
                     </Typography>
                   </Stack>
                 </Stack>

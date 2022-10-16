@@ -317,7 +317,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                 {pool &&
                   textFieldValue !== '' &&
                   Number(
-                    (100 * parseFloat(textFieldValue)) /
+                    parseFloat(textFieldValue) /
                       (parseFloat(textFieldValue) +
                         parseFloat(
                           formatUnits(
