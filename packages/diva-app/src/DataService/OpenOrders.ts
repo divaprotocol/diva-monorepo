@@ -621,7 +621,8 @@ export const getResponse = (
   let responseSell = []
   let responseBuy = []
   // Get responseBuy and responseSell using makerToken
-  if (firstOrdersBid.length !== 0) { // If the bids for the first order is not empty
+  if (firstOrdersBid.length !== 0) {
+    // If the bids for the first order is not empty
     const bidOrder = firstOrdersBid[0].order
     if (getAddress(bidOrder.makerToken) === getAddress(makerToken)) {
       responseBuy = secondOrdersBid
@@ -630,7 +631,7 @@ export const getResponse = (
       responseBuy = firstOrdersBid
       responseSell = secondOrdersBid
     }
-  // If the bids for the first order is empty and the bids for the second order is not empty
+    // If the bids for the first order is empty and the bids for the second order is not empty
   } else if (secondOrdersBid.length !== 0) {
     const bidOrder = secondOrdersBid[0].order
     if (getAddress(bidOrder.makerToken) === getAddress(makerToken)) {
