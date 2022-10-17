@@ -51,8 +51,7 @@ export const sellLimitOrder = async (orderData) => {
       utils.SignatureType.EIP712 // Optional
     )
     const poolId = orderData.poolId
-    const isBuy = orderData.isBuy
-    const signedOrder = { ...order, signature, poolId, isBuy }
+    const signedOrder = { ...order, signature, poolId }
 
     const resp = await fetch(networkUrl, {
       method: 'POST',

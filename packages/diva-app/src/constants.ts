@@ -227,4 +227,4 @@ export const APP_BAR_ITEMS = [
 ]
 
 // websocket url
-export const WEBSOCKET_URL = 'ws://18.206.87.23:9000'
+export const WEBSOCKET_URL = 'wss://eip712api.xyz/websocket'

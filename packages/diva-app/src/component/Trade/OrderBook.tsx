@@ -124,6 +124,7 @@ export default function OrderBook(props: {
           const updateOrders = []
           const checkOrders = orders[0]
 
+          // Get first and second order's bids
           const firstRecords = checkOrders.first.bids.records
           const secondRecords = checkOrders.second.bids.records
 

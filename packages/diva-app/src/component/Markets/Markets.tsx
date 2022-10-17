@@ -521,9 +521,9 @@ export default function Markets() {
     useGovernanceParameters()
 
   // orders structure
-  // - orders[0] = poolId
-  // - orders[1] = baseToken is makerToken and quoteToken is takerToken
-  // - orders[2] = baseToken is takerToken and quoteToken is makerToken
+  // - orders.poolId = poolId
+  // - orders.first = baseToken is makerToken and quoteToken is takerToken
+  // - orders.second = baseToken is takerToken and quoteToken is makerToken
 
   // rSell and rBuy structure
   // - rSell: baseToken is collateralToken and quoteToken is tokenAddress
@@ -564,14 +564,19 @@ export default function Markets() {
         let updatePool = tablePool
         const orderPrices = []
         const checkOrders = orders[0]
+
+        // Get all maker and taker token ids of order data
         const tokens = getMakerTakerTokens(checkOrders)
 
         // Check pool type
         const poolType =
           tokens.indexOf(tablePool.shortToken.id) !== -1 ? 'S' : 'L'
+
+        // Check the token address of table row
         const tokenAddress =
           poolType === 'S' ? tablePool.shortToken.id : tablePool.longToken.id
 
+        // Get first records and second records
         const firstRecords = checkOrders.first.bids.records
         const secondRecords = checkOrders.second.bids.records
 
