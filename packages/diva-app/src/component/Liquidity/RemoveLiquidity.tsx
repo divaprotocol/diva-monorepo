@@ -74,21 +74,15 @@ export const RemoveLiquidity = ({ pool }: Props) => {
     pool &&
     textFieldValue !== '' &&
     (
-      (parseFloat(formatEther(BigNumber.from(pool!.redemptionFee))) *
-        parseFloat(formatUnits(parseUnits(textFieldValue, decimal), decimal))) /
-      (1.0 -
-        parseFloat(formatEther(BigNumber.from(pool.redemptionFee))) -
-        parseFloat(formatEther(BigNumber.from(pool.settlementFee))))
+      parseFloat(formatEther(BigNumber.from(pool!.redemptionFee))) *
+      parseFloat(formatUnits(parseUnits(textFieldValue, decimal), decimal))
     ).toFixed(4)
   const settlementFees =
     pool &&
     textFieldValue !== '' &&
     (
-      (parseFloat(formatEther(BigNumber.from(pool!.settlementFee))) *
-        parseFloat(formatUnits(parseUnits(textFieldValue, decimal), decimal))) /
-      (1.0 -
-        parseFloat(formatEther(BigNumber.from(pool.redemptionFee))) -
-        parseFloat(formatEther(BigNumber.from(pool.settlementFee))))
+      parseFloat(formatEther(BigNumber.from(pool!.settlementFee))) *
+      parseFloat(formatUnits(parseUnits(textFieldValue, decimal), decimal))
     ).toFixed(4)
 
   const receivingAmount =
@@ -109,9 +103,8 @@ export const RemoveLiquidity = ({ pool }: Props) => {
 
   const yourPoolShare =
     pool &&
-    textFieldValue !== '' &&
     Number(
-      (100 * pool.longToken.id ? 0.5 : 10) /
+      parseFloat(formatUnits(maxCollateral.toString())) /
         parseFloat(formatUnits(BigNumber.from(pool.collateralBalance), decimal))
     ).toFixed(2) + ' %'
 
@@ -130,12 +123,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           )
           .mul(parseUnits('1', 18 - decimal))
           .div(BigNumber.from(pool.supplyInitial))
-          .mul(
-            parseUnits('1', 18)
-              .sub(BigNumber.from(pool.redemptionFee))
-              .sub(BigNumber.from(pool.settlementFee))
-          )
-          .div(parseEther('1'))
         const colShort = shortBalance
           .mul(
             BigNumber.from(pool.collateralBalanceLongInitial).add(
@@ -144,12 +131,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           )
           .mul(parseUnits('1', 18 - decimal))
           .div(BigNumber.from(pool.supplyInitial))
-          .mul(
-            parseUnits('1', 18)
-              .sub(BigNumber.from(pool.redemptionFee))
-              .sub(BigNumber.from(pool.settlementFee))
-          )
-          .div(parseEther('1'))
         {
           colLong.lt(colShort)
             ? setMaxCollateral(colLong)
@@ -163,12 +144,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           setLongToken(
             formatEther(
               parseEther(textFieldValue)
-                .mul(parseEther('1'))
-                .div(
-                  parseEther('1')
-                    .sub(BigNumber.from(pool.redemptionFee))
-                    .sub(BigNumber.from(pool.settlementFee))
-                )
                 .mul(BigNumber.from(pool.supplyInitial))
                 .div(
                   BigNumber.from(pool.collateralBalanceLongInitial)
@@ -180,12 +155,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           setShortToken(
             formatEther(
               parseEther(textFieldValue)
-                .mul(parseEther('1'))
-                .div(
-                  parseEther('1')
-                    .sub(BigNumber.from(pool.redemptionFee))
-                    .sub(BigNumber.from(pool.settlementFee))
-                )
                 .mul(BigNumber.from(pool.supplyInitial))
                 .div(
                   BigNumber.from(pool.collateralBalanceLongInitial)
@@ -305,8 +274,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               <Typography variant="subtitle2" color="text.secondary">
                 You can remove up to{' '}
                 {parseFloat(formatEther(maxCollateral)).toFixed(4)}{' '}
-                {pool!.collateralToken.symbol}
-                {' (after fees) '}
+                {pool!.collateralToken.symbol}{' '}
                 <MaxCollateral
                   role="button"
                   onClick={() => {
@@ -357,7 +325,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           >
             <Stack direction="column" spacing={4}>
               <Stack direction="row" justifyContent="space-between">
-                <Typography variant="h3">Reedemption Fee</Typography>
+                <Typography variant="h3">Protocol Fee</Typography>
                 <Typography variant="h3">
                   {reedemptionFees} {pool!.collateralToken.symbol}
                 </Typography>
@@ -452,7 +420,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
             </Stack>
             <Box>
               <Typography variant="h6" color="gray">
-                {returnAmount} Long and short tokens will be returned and burnt.
+                {returnAmount} LONG and SHORT tokens will be returned and burnt.
               </Typography>
             </Box>
           </Card>
@@ -531,9 +499,9 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                     }}
                   />
                   <Typography variant="h3" color="gray" textAlign="justify">
-                    By removing liquidity you are giving back long and short
-                    position tokens proportional to the pool balance and receive
-                    collateral in return
+                    By removing liquidity you are giving back LONG and SHORT
+                    position tokens in equal proportions to receive collateral
+                    in return
                   </Typography>
                 </Stack>
               </Card>
