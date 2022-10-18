@@ -251,7 +251,10 @@ export const ApproveActionButtons = ({
         setApproveEnabled(false)
         setActionEnabled(false)
       } else {
-        if (transactionType === 'filloffer') {
+        if (
+          transactionType === 'filloffer' &&
+          formik.values.jsonToExport != '{}'
+        ) {
           if (
             account.toLowerCase() ===
             formik.values.jsonToExport.maker.toLowerCase()
