@@ -70,7 +70,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
 
     balanceUpdated
   )
-  const reedemptionFees =
+  const protocolFees =
     pool &&
     textFieldValue !== '' &&
     (
@@ -90,7 +90,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
     textFieldValue !== '' &&
     (
       parseFloat(textFieldValue) -
-      (parseFloat(reedemptionFees) + parseFloat(settlementFees))
+      (parseFloat(protocolFees) + parseFloat(settlementFees))
     ).toFixed(4)
   const returnAmount =
     textFieldValue == '' ? 0 : Number(parseFloat(textFieldValue).toFixed(4))
@@ -104,9 +104,9 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const yourPoolShare =
     pool &&
     Number(
-      parseFloat(formatUnits(maxCollateral.toString())) /
+      parseFloat(formatUnits(BigNumber.from(maxCollateral), decimal)) /
         parseFloat(formatUnits(BigNumber.from(pool.collateralBalance), decimal))
-    ).toFixed(2) + ' %'
+    ).toFixed(6) + ' %'
 
   useEffect(() => {
     if (pool) {
@@ -201,44 +201,45 @@ export const RemoveLiquidity = ({ pool }: Props) => {
 
   return (
     <>
+      {loading ? (
+        <>
+          <Box pt={2} pb={3} maxWidth="470px">
+            <Alert severity="info">Removing...</Alert>
+          </Box>
+        </>
+      ) : (
+        ''
+      )}
+      <Collapse in={openExpiredAlert}>
+        <Alert
+          severity="error"
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setOpenExpiredAlert(false)
+              }}
+            >
+              {'X'}
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          Final value is already confirmed. Please redeem your tokens in My
+          Positions.
+        </Alert>
+      </Collapse>
       <Stack
         direction="row"
-        spacing={2}
+        spacing={theme.spacing(20)}
         sx={{
-          mt: theme.spacing(2),
+          /* mt: theme.spacing(2), */
+          my: theme.spacing(6),
         }}
       >
         <Box>
-          {loading ? (
-            <>
-              <Box pt={2} pb={3}>
-                <Alert severity="info">Removing...</Alert>
-              </Box>
-            </>
-          ) : (
-            ''
-          )}
-          <Collapse in={openExpiredAlert}>
-            <Alert
-              severity="error"
-              action={
-                <IconButton
-                  aria-label="close"
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    setOpenExpiredAlert(false)
-                  }}
-                >
-                  {'X'}
-                </IconButton>
-              }
-              sx={{ mb: 2 }}
-            >
-              Final value is already confirmed. Please redeem your tokens in My
-              Positions.
-            </Alert>
-          </Collapse>
           <Card
             sx={{
               width: '430px',
@@ -327,7 +328,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               <Stack direction="row" justifyContent="space-between">
                 <Typography variant="h3">Protocol Fee</Typography>
                 <Typography variant="h3">
-                  {reedemptionFees} {pool!.collateralToken.symbol}
+                  {protocolFees} {pool!.collateralToken.symbol}
                 </Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
@@ -429,24 +430,24 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           <Stack direction="column" spacing={3} maxWidth={theme.spacing(65)}>
             <Typography variant="h3"> Pool Status</Typography>
             <Stack direction="row" justifyContent="space-between">
-              <Stack direction="column" justifyContent="space-between">
-                <Typography variant="h4" color="gray">
+              <Stack direction="column" spacing={1}>
+                <Typography variant="h4" fontWeight="normal" color="gray">
                   Pool ID
                 </Typography>
                 <Typography variant="h2" color="white">
                   {pool.id}
                 </Typography>
               </Stack>
-              <Stack direction="column" justifyContent="space-between">
-                <Typography variant="h4" color="gray">
+              <Stack direction="column" spacing={1}>
+                <Typography variant="h4" fontWeight="normal" color="gray">
                   TVL
                 </Typography>
                 <Typography variant="h2" color="white">
                   {currentPoolSize}
                 </Typography>
               </Stack>
-              <Stack direction="column" justifyContent="space-between">
-                <Typography variant="h4" color="#929292">
+              <Stack direction="column" spacing={1}>
+                <Typography variant="h4" fontWeight="normal" color="#929292">
                   Your Pool Share
                 </Typography>
                 <Typography variant="h2" color="white">
@@ -457,7 +458,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
             <Typography variant="h3">Your Balance</Typography>
             <Stack direction="row" spacing={theme.spacing(4)}>
               <Stack direction="column" spacing={1} maxWidth="100px">
-                <Typography variant="h4" color="#929292">
+                <Typography variant="h4" fontWeight="normal" color="#929292">
                   LONG Token
                 </Typography>
                 <Typography variant="h2" color="white" noWrap>
@@ -465,7 +466,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 </Typography>
               </Stack>
               <Stack direction="column" spacing={1} maxWidth="100px">
-                <Typography variant="h4" color="#929292">
+                <Typography variant="h4" fontWeight="normal" color="#929292">
                   SHORT Token
                 </Typography>
                 <Typography variant="h2" color="white" noWrap>

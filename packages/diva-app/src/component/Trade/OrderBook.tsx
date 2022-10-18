@@ -19,9 +19,6 @@ import { Pool } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { selectChainId } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-const PageDiv = styled.div`
-  width: 100%;
-`
 
 /**
  * Prepare the data to be displayed in the orderbook (price, quantity and expires in)
@@ -196,81 +193,79 @@ export default function OrderBook(props: {
   }, [responseBuy, responseSell, provider])
 
   return (
-    <PageDiv>
-      <TableContainer component={Paper} sx={{ maxHeight: 550 }}>
-        <Table stickyHeader aria-label="sticky table">
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">Quantity</TableCell>
-              <TableCell align="center">BID</TableCell>
-              <TableCell align="center">ASK</TableCell>
-              <TableCell align="center">Quantity</TableCell>
-            </TableRow>
-          </TableHead>
+    <TableContainer component={Paper} sx={{ maxHeight: 550 }}>
+      <Table stickyHeader aria-label="sticky table">
+        <TableHead>
+          <TableRow>
+            <TableCell align="center">Quantity</TableCell>
+            <TableCell align="center">BID</TableCell>
+            <TableCell align="center">ASK</TableCell>
+            <TableCell align="center">Quantity</TableCell>
+          </TableRow>
+        </TableHead>
 
-          <TableBody>
-            {orderBook.length > 0 ? (
-              orderBook.map((row: any, index: number) => {
-                const labelId = `table-${index}`
-                return (
-                  <TableRow hover tabIndex={-1} key={orderBook.indexOf(row)}>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      align="center"
-                    >
-                      <Box paddingBottom="20px">
-                        <Typography variant="subtitle1">
-                          {row.buyQuantity != ''
-                            ? Number(row.buyQuantity)?.toFixed(4)
-                            : '-'}
-                        </Typography>
-                        <label> </label>
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box>
-                        <Typography variant="subtitle1" color="#66ffa6">
-                          {row.bid != '' ? Number(row.bid)?.toFixed(4) : '-'}
-                        </Typography>
-                        <Typography variant="caption" color="#8e8e8e" noWrap>
-                          {row.buyExpiry}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box>
-                        <Typography variant="subtitle1" color="#ff5c8d">
-                          {row.ask != '' ? Number(row.ask)?.toFixed(4) : '-'}
-                        </Typography>
-                        <Typography variant="caption" color="#8e8e8e" noWrap>
-                          {row.sellExpiry}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box paddingBottom="20px">
-                        <Typography variant="subtitle1">
-                          {row.sellQuantity != ''
-                            ? Number(row.sellQuantity)?.toFixed(4)
-                            : '-'}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                )
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={4} align="center">
-                  None
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </PageDiv>
+        <TableBody>
+          {orderBook.length > 0 ? (
+            orderBook.map((row: any, index: number) => {
+              const labelId = `table-${index}`
+              return (
+                <TableRow hover tabIndex={-1} key={orderBook.indexOf(row)}>
+                  <TableCell
+                    component="th"
+                    id={labelId}
+                    scope="row"
+                    align="center"
+                  >
+                    <Box paddingBottom="20px">
+                      <Typography variant="subtitle1">
+                        {row.buyQuantity != ''
+                          ? Number(row.buyQuantity)?.toFixed(4)
+                          : '-'}
+                      </Typography>
+                      <label> </label>
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box>
+                      <Typography variant="subtitle1" color="#66ffa6">
+                        {row.bid != '' ? Number(row.bid)?.toFixed(4) : '-'}
+                      </Typography>
+                      <Typography variant="caption" color="#8e8e8e" noWrap>
+                        {row.buyExpiry}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box>
+                      <Typography variant="subtitle1" color="#ff5c8d">
+                        {row.ask != '' ? Number(row.ask)?.toFixed(4) : '-'}
+                      </Typography>
+                      <Typography variant="caption" color="#8e8e8e" noWrap>
+                        {row.sellExpiry}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box paddingBottom="20px">
+                      <Typography variant="subtitle1">
+                        {row.sellQuantity != ''
+                          ? Number(row.sellQuantity)?.toFixed(4)
+                          : '-'}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              )
+            })
+          ) : (
+            <TableRow>
+              <TableCell colSpan={4} align="center">
+                None
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
   )
 }

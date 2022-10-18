@@ -2,87 +2,75 @@ import React from 'react'
 import 'styled-components'
 import styled from 'styled-components'
 import { makeStyles } from '@mui/styles'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
+import { Box, Divider, Stack, Tab, Typography, useTheme } from '@mui/material'
+import TabContext from '@mui/lab/TabContext'
+import TabList from '@mui/lab/TabList'
+import TabPanel from '@mui/lab/TabPanel'
 import { Pool } from '../../lib/queries'
 import OrderBook from './OrderBook'
 import OptionOrders from './OptionOrders'
 import { TradeHistory } from './TradeHistory'
-
-const PageDiv = styled.div`
-  width: 200px;
-  height: 10%;
-`
-
-function a11yProps(index: number) {
-  return {
-    id: `tab-${index}`,
-    'aria-controls': `tabpanel-${index}`,
-  }
-}
-
-const useStyles = makeStyles(() => ({
-  root: {
-    flexGrow: 1,
-  },
-}))
-
-const TabsDiv = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  aligh-items: flex-start;
-`
 
 export default function OrdersPanel(props: {
   option: Pool
   tokenAddress: string
   exchangeProxy: string
 }) {
-  const [orderType, setOrderTypeValue] = React.useState(0)
-  const classes = useStyles()
+  const [orderType, setOrderTypeValue] = React.useState('')
+  const theme = useTheme()
 
-  const handleOrderTypeChange = (event: any, newValue: number) => {
+  const handleOrderTypeChange = (event: any, newValue: string) => {
     setOrderTypeValue(newValue)
   }
 
-  const renderOrderTables = () => {
-    if (orderType === 0) {
-      return (
-        <OrderBook
-          option={props.option}
-          tokenAddress={props.tokenAddress}
-          exchangeProxy={props.exchangeProxy}
-        />
-      )
-    }
-    if (orderType === 1) {
-      return (
-        <OptionOrders
-          option={props.option}
-          tokenAddress={props.tokenAddress}
-          exchangeProxy={props.exchangeProxy}
-        />
-      )
-    }
-    if (orderType === 2) {
-      return <TradeHistory pool={props.option} />
-    }
-  }
-
   return (
-    <PageDiv className={classes.root}>
-      <TabsDiv>
-        <Tabs
-          value={orderType}
-          onChange={handleOrderTypeChange}
-          TabIndicatorProps={{ style: { backgroundColor: '#70D9BA' } }}
-        >
-          <Tab label="Order Book" {...a11yProps(0)} />
-          <Tab label="Your open orders" {...a11yProps(1)} />
-          <Tab label="Trade History" {...a11yProps(2)} />
-        </Tabs>
-      </TabsDiv>
-      {renderOrderTables()}
-    </PageDiv>
+    <TabContext value={orderType}>
+      <Stack direction="column" width={theme.spacing(95)}>
+        <Stack direction="row" justifyContent="space-between">
+          <TabList onChange={handleOrderTypeChange}>
+            <Tab label="Buy" value="orderbook" />
+            <Tab label="Sell" value="" />
+            <Tab label="Your open orders" value="openorders" />
+            <Tab label="Trade History" value="tradehistory" />
+          </TabList>
+          <Stack direction="row" spacing={2}>
+            <Box>
+              <Typography variant="h4" color="gray">
+                Best Buy
+              </Typography>
+              <Typography variant="h2" color="white">
+                1.78
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="h4" color="gray">
+                Best Buy
+              </Typography>
+              <Typography variant="h2" color="white">
+                1.78
+              </Typography>
+            </Box>
+          </Stack>
+        </Stack>
+        <Divider orientation="horizontal" />
+        <TabPanel value="orderbook">
+          <OrderBook
+            option={props.option}
+            tokenAddress={props.tokenAddress}
+            exchangeProxy={props.exchangeProxy}
+          />
+        </TabPanel>
+        <TabPanel value="openorders">
+          <OptionOrders
+            option={props.option}
+            tokenAddress={props.tokenAddress}
+            exchangeProxy={props.exchangeProxy}
+          />
+        </TabPanel>
+        <TabPanel value="tradehistory">
+          <TradeHistory pool={props.option} />
+        </TabPanel>
+      </Stack>
+    </TabContext>
   )
 }

@@ -4,9 +4,7 @@ import {
   Card,
   Container,
   Divider,
-  Paper,
   Stack,
-  Tabs,
   Typography,
   useTheme,
 } from '@mui/material'
