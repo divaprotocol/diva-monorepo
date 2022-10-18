@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { BigNumber, providers, ethers } from 'ethers'
+import { BigNumber, providers } from 'ethers'
 import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
 import {
   FeeRecipient,
@@ -15,7 +15,11 @@ import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
 import { RootState } from './Store'
-import { get0xOpenOrders, getOrderbookPrices } from '../DataService/OpenOrders'
+import {
+  getAddress,
+  get0xOpenOrders,
+  getOrderbookPrices,
+} from '../DataService/OpenOrders'
 import {
   OrderbookPriceRequest,
   OrderOutputType,
@@ -214,14 +218,14 @@ export const fetchPools = createAsyncThunk(
     const poolInfo: PoolInfoType[] = []
     pools.map((poolPair: Pool) => {
       poolInfo.push({
-        baseToken: ethers.utils.getAddress(poolPair.longToken.id),
-        quoteToken: ethers.utils.getAddress(poolPair.collateralToken.id),
+        baseToken: getAddress(poolPair.longToken.id),
+        quoteToken: getAddress(poolPair.collateralToken.id),
         poolId: poolPair.longToken.name,
         collateralTokenDecimals: poolPair.collateralToken.decimals,
       })
       poolInfo.push({
-        baseToken: ethers.utils.getAddress(poolPair.shortToken.id),
-        quoteToken: ethers.utils.getAddress(poolPair.collateralToken.id),
+        baseToken: getAddress(poolPair.shortToken.id),
+        quoteToken: getAddress(poolPair.collateralToken.id),
         poolId: poolPair.shortToken.name,
         collateralTokenDecimals: poolPair.collateralToken.decimals,
       })

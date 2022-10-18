@@ -50,7 +50,9 @@ export const buylimitOrder = async (orderData) => {
       metamaskProvider,
       utils.SignatureType.EIP712 // Optional
     )
-    const signedOrder = { ...order, signature }
+    const poolId = orderData.poolId
+    const signedOrder = { ...order, signature, poolId }
+
     const resp = await fetch(networkUrl, {
       method: 'POST',
       body: JSON.stringify(signedOrder),

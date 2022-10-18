@@ -219,6 +219,7 @@ export default function SellLimit(props: {
         orderExpiry: expiry,
         chainId: props.chainId,
         exchangeProxy: exchangeProxy,
+        poolId: option.id,
       }
       sellLimitOrder(orderData)
         .then(async (response) => {

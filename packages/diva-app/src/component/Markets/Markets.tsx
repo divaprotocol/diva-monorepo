@@ -6,6 +6,7 @@ import {
   getExpiryMinutesFromNow,
   userTimeZone,
 } from '../../Util/Dates'
+import { Pool } from '../../lib/queries'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
@@ -31,10 +32,17 @@ import {
 } from '@mui/material'
 import ViewModuleIcon from '@mui/icons-material/ViewModule'
 import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
+import { divaGovernanceAddress, WEBSOCKET_URL } from '../../constants'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
+import { ORDER_TYPE } from '../../Models/orderbook'
 import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
-import { divaGovernanceAddress } from '../../constants'
+import {
+  createTable,
+  getResponse,
+  mapOrderData,
+} from '../../DataService/OpenOrders'
+import { useHistory, useParams } from 'react-router-dom'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
@@ -50,7 +58,6 @@ import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import { Search } from '@mui/icons-material'
 import { getTopNObjectByProperty } from '../../Util/dashboard'
-import { useHistory, useParams } from 'react-router-dom'
 
 export const ExpiresInCell = (props: any) => {
   //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
@@ -465,6 +472,7 @@ export default function Markets() {
   const currentAddress = history.location.pathname.split('/')
   const [page, setPage] = useState(0)
   const pools = useAppSelector(selectPools)
+  const [tablePools, setTablePools] = useState<Pool[]>(pools)
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const dispatch = useAppDispatch()
   const params = useParams() as { creatorAddress: string; status: string }
@@ -479,12 +487,15 @@ export default function Markets() {
   const [selectedPoolsView, setSelectedPoolsView] = useState<'Grid' | 'Table'>(
     'Table'
   )
+  const [websocketClient, setWebsocketClient] = useState(
+    new WebSocket(WEBSOCKET_URL)
+  )
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
   const [searchInput, setSearchInput] = useState<string>('')
   const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
   const [mobileCreatorFilter, setMobileCreatorFilter] = useState<string>('')
 
-  const handleCreatorInput = (e) => {
+  const handleCreatorInput = (e: any) => {
     setCreatedBy(e.target.value)
     setCreatorButtonLabel(
       e.target.value === '' ? 'Creator' : getShortenedAddress(e.target.value)
@@ -497,6 +508,7 @@ export default function Markets() {
       e.target.value === '' ? 'Underlying' : e.target.value
     )
   }
+
   const handleExpiredPools = () => {
     if (expiredPoolClicked) {
       setExpiredPoolClicked(false)
@@ -504,8 +516,171 @@ export default function Markets() {
       setExpiredPoolClicked(true)
     }
   }
+
   const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
     useGovernanceParameters()
+
+  // orders structure
+  // - orders.poolId = poolId
+  // - orders.first = baseToken is makerToken and quoteToken is takerToken
+  // - orders.second = baseToken is takerToken and quoteToken is makerToken
+
+  // rSell and rBuy structure
+  // - rSell: baseToken is collateralToken and quoteToken is tokenAddress
+  // - rBuy: baseToken is tokenAddress and quoteToken is collateralToken
+
+  const getMakerTakerTokens = (orders: any) => {
+    const tokens: string[] = []
+
+    // Get makerToken and takerToken of orders
+    orders.first.bids.records.map((bid: any) => {
+      if (tokens.indexOf(bid.order.makerToken) === -1) {
+        tokens.push(bid.order.makerToken)
+      }
+      if (tokens.indexOf(bid.order.takerToken) === -1) {
+        tokens.push(bid.order.takerToken)
+      }
+    })
+
+    orders.second.bids.records.map((bid: any) => {
+      if (tokens.indexOf(bid.order.makerToken) === -1) {
+        tokens.push(bid.order.makerToken)
+      }
+      if (tokens.indexOf(bid.order.takerToken) === -1) {
+        tokens.push(bid.order.takerToken)
+      }
+    })
+
+    return tokens
+  }
+
+  const getUpdatedRows = (ordersArray: any[]) => {
+    const updatedTablePools = tablePools.map((tablePool) => {
+      const orders = ordersArray.filter((item) => item.poolId === tablePool.id)
+
+      if (orders.length === 0) {
+        return tablePool
+      } else {
+        let updatePool = tablePool
+        const orderPrices = []
+        const checkOrders = orders[0]
+
+        // Get all maker and taker token ids of order data
+        const tokens = getMakerTakerTokens(checkOrders)
+
+        // Check pool type
+        const poolType =
+          tokens.indexOf(tablePool.shortToken.id) !== -1 ? 'S' : 'L'
+
+        // Check the token address of table row
+        const tokenAddress =
+          poolType === 'S' ? tablePool.shortToken.id : tablePool.longToken.id
+
+        // Get first records and second records
+        const firstRecords = checkOrders.first.bids.records
+        const secondRecords = checkOrders.second.bids.records
+
+        // Get updated pool's buy and sell data
+        const { responseBuy, responseSell } = getResponse(
+          tokenAddress,
+          firstRecords,
+          secondRecords
+        )
+
+        // Get updated orderbook buy data
+        const orderBookBuy = mapOrderData(
+          responseBuy,
+          tablePool.collateralToken.decimals,
+          ORDER_TYPE.BUY
+        )
+        orderPrices.push(orderBookBuy)
+
+        // Get updated orderbook buy data
+        const orderBookSell = mapOrderData(
+          responseSell,
+          tablePool.collateralToken.decimals,
+          ORDER_TYPE.SELL
+        )
+        orderPrices.push(orderBookSell)
+
+        // Calculate table row data with updated information
+        const completeOrderBook = createTable(
+          orderPrices[ORDER_TYPE.BUY],
+          orderPrices[ORDER_TYPE.SELL]
+        )
+
+        if (completeOrderBook.length !== 0) {
+          if (poolType === 'L') {
+            // Update the pool's long price information with the updated information
+            updatePool = {
+              ...tablePool,
+              prices: {
+                ...tablePool.prices,
+                long: {
+                  ask: completeOrderBook[0].ask,
+                  askExpiry: completeOrderBook[0].sellExpiry,
+                  askQuantity: completeOrderBook[0].sellQuantity,
+                  bid: completeOrderBook[0].bid,
+                  bidExpiry: completeOrderBook[0].buyExpiry,
+                  bidQuantity: completeOrderBook[0].buyQuantity,
+                  orderType: poolType,
+                  poolId: poolType + tablePool.id,
+                },
+              },
+            }
+          } else {
+            // Update the pool's short price information with the updated information
+            updatePool = {
+              ...tablePool,
+              prices: {
+                ...tablePool.prices,
+                short: {
+                  ask: completeOrderBook[0].ask,
+                  askExpiry: completeOrderBook[0].sellExpiry,
+                  askQuantity: completeOrderBook[0].sellQuantity,
+                  bid: completeOrderBook[0].bid,
+                  bidExpiry: completeOrderBook[0].buyExpiry,
+                  bidQuantity: completeOrderBook[0].buyQuantity,
+                  orderType: poolType,
+                  poolId: poolType + tablePool.id,
+                },
+              },
+            }
+          }
+        }
+
+        return updatePool
+      }
+    })
+
+    setTablePools(updatedTablePools)
+  }
+
+  useEffect(() => {
+    if (websocketClient !== undefined) {
+      // Connect to server using websocket
+      websocketClient.onopen = () => {
+        console.log('WebSocket Connected')
+      }
+
+      // Receive data using websocket
+      websocketClient.onmessage = (e) => {
+        const message = JSON.parse(e.data)
+        getUpdatedRows(message)
+      }
+
+      return () => {
+        websocketClient.onclose = () => {
+          console.log('WebSocket Disconnected')
+          setWebsocketClient(new WebSocket(WEBSOCKET_URL))
+        }
+      }
+    }
+  }, [
+    websocketClient.onmessage,
+    websocketClient.onopen,
+    websocketClient.onclose,
+  ])
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -523,7 +698,7 @@ export default function Markets() {
     return () => clearTimeout(timeout)
   }, [createdBy, history])
 
-  const rows: GridRowModel[] = pools.reduce((acc, val) => {
+  const rows: GridRowModel[] = tablePools.reduce((acc, val) => {
     const { status } = getAppStatus(
       val.expiryTime,
       val.statusTimestamp,
@@ -535,6 +710,7 @@ export default function Markets() {
       reviewPeriod,
       fallbackPeriod
     )
+
     const shared = {
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,
@@ -568,15 +744,7 @@ export default function Markets() {
       Cap: Number(formatEther(val.cap)),
       TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
-    // console.log(
-    //   BigNumber.from(val.collateralBalanceLongInitial)
-    //     .mul(parseUnits('1', val.collateralToken.decimals))
-    //     .div(
-    //       BigNumber.from(val.collateralBalanceLongInitial).add(
-    //         BigNumber.from(val.collateralBalanceShortInitial)
-    //       )
-    //     )
-    // )
+
     return [
       ...acc,
       {

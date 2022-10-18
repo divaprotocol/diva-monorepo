@@ -225,3 +225,6 @@ export const APP_BAR_ITEMS = [
     icon: TaskIcon,
   },
 ]
+
+// websocket url
+export const WEBSOCKET_URL = 'wss://eip712api.xyz/websocket'
