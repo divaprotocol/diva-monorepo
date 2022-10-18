@@ -25,6 +25,7 @@ import CheckIcon from '@mui/icons-material/Check'
 import { useDispatch } from 'react-redux'
 import { useCreatePoolFormik } from './CreatePool/formik'
 import DIVA712ABI from '../abi/DIVA712ABI.json'
+import axios from 'axios'
 
 type Props = {
   collateralTokenAddress: string
@@ -611,7 +612,13 @@ export const ApproveActionButtons = ({
                               offerHash,
                             }
                             formik.setFieldValue('jsonToExport', jsonToExport)
-                            onTransactionSuccess()
+                            axios.post('/offers', jsonToExport).then((res) => {
+                              formik.setFieldValue(
+                                'offerHash',
+                                res.data.offer?.id
+                              )
+                              onTransactionSuccess()
+                            })
                           })
                       })
                       .catch((err: any) => {

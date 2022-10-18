@@ -1,6 +1,7 @@
 import {
   Container,
   IconButton,
+  InputAdornment,
   Link,
   Stack,
   TextareaAutosize,
@@ -24,12 +25,7 @@ import {
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
-import {
-  formatEther,
-  parseEther,
-  parseUnits,
-  splitSignature,
-} from 'ethers/lib/utils'
+import InsertLinkTwoToneIcon from '@mui/icons-material/InsertLinkTwoTone'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import { ContentCopy, Download } from '@mui/icons-material'
 import DIVA712ABI from '../../abi/DIVA712ABI.json'
@@ -329,15 +325,11 @@ export function Success({
             <TextField
               multiline
               value={JSON.stringify(values.jsonToExport, null, 2)}
-              style={{ background: '#121212', width: '120%', height: '100%' }}
+              style={{ background: '#121212', width: '100%', height: '100%' }}
             />
           )}
-          <Stack
-            direction={'row'}
-            spacing={2}
-            mt={theme.spacing(2)}
-            pl={theme.spacing(60)}
-          >
+
+          <Stack direction={'row'} spacing={2} mt={theme.spacing(2)}>
             {transactionType === 'createoffer' && (
               <IconButton
                 color="primary"
@@ -362,6 +354,34 @@ export function Success({
               >
                 <Download />
               </IconButton>
+            )}
+            {transactionType === 'createoffer' && (
+              <TextField
+                value={window.location.origin + '/offer/' + values.offerHash}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <IconButton
+                        color="primary"
+                        onClick={() =>
+                          navigator.clipboard.writeText(
+                            window.location.origin +
+                              '/offer/' +
+                              values.offerHash
+                          )
+                        }
+                      >
+                        <InsertLinkTwoToneIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                style={{
+                  background: '#121212',
+                  width: theme.spacing(100),
+                  height: '100%',
+                }}
+              />
             )}
           </Stack>
         </Stack>

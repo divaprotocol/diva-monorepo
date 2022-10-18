@@ -10,6 +10,7 @@
       "**/@synthetixio/synpress"
     ]
   },
+  "proxy": "https://diva-protocol.herokuapp.com/",
   "scripts": {
     "graph:auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
     "deploy": "turbo run deploy",
