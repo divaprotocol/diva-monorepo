@@ -10,7 +10,6 @@ import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import {
   fetchPositionTokens,
   selectPools,
-  selectRequestStatus,
   selectUserAddress,
 } from '../../Redux/appSlice'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
@@ -18,29 +17,34 @@ import { useWhitelist } from '../../hooks/useWhitelist'
 import { useEffect, useMemo, useState } from 'react'
 import { formatEther, formatUnits } from 'ethers/lib/utils'
 import Typography from '@mui/material/Typography'
-import styled from 'styled-components'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
-import { Box, Divider, Stack } from '@mui/material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Button,
+  Checkbox,
+  CircularProgress,
+  Grid,
+  InputAdornment,
+  Pagination,
+  Radio,
+  TextField,
+} from '@mui/material'
 import PoolsTable from '../PoolsTable'
 import { getDateTime } from '../../Util/Dates'
+import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
+import { Box, Divider, Stack } from '@mui/material'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
-import ToggleFilter from '../PoolsTableFilter/ToggleFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
-import { BorderLeft } from '@mui/icons-material'
-const PageDiv = styled.div`
-  width: 100%;
-`
-type FilledOrder = {
-  id: string
-  underlying: string
-  symbol: string
-  type: string
-  quantity: string
-  paidReceived: string
-  price: number
-  timestamp: number
-}
+import FilterListIcon from '@mui/icons-material/FilterList'
+import { FilterDrawerModal } from './FilterDrawerMobile'
+import { Search } from '@mui/icons-material'
+import { getTopNObjectByProperty } from '../../Util/dashboard'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import useTheme from '@mui/material/styles/useTheme'
+
 const columns: GridColDef[] = [
   {
     field: 'symbol',
@@ -103,6 +107,283 @@ const columns: GridColDef[] = [
     minWidth: 200,
   },
 ]
+
+const TradeHistoryTabTokenCars = ({ row }: { row: GridRowModel }) => {
+  const { Underlying, symbol, type, quantity, price, payReceive, timestamp } =
+    row
+
+  const DATA_ARRAY = [
+    {
+      label: 'Type',
+      value: type,
+    },
+    {
+      label: 'Quantity',
+      value: quantity,
+    },
+    {
+      label: 'Price',
+      value: price,
+    },
+    {
+      label: 'Pay/Receive',
+      value: payReceive,
+    },
+  ]
+
+  return (
+    <>
+      <Divider light />
+      <Stack
+        sx={{
+          fontSize: '10px',
+          width: '100%',
+          margin: '12px 0',
+        }}
+        spacing={1.6}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gridGap: '8px',
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontWeight: 500,
+              }}
+            >
+              {Underlying}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '9.2px',
+              }}
+            >
+              #{symbol}
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1.6} alignItems="center">
+            <Typography
+              sx={{
+                fontSize: '10px',
+                fontWeight: 500,
+                color: '#828282',
+              }}
+            >
+              Timestamp
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '10px',
+              }}
+            >
+              {timestamp}
+            </Typography>
+          </Stack>
+        </Box>
+        <Grid
+          container
+          rowGap={1.6}
+          justifyContent="space-between"
+          columnGap={'3px'}
+        >
+          {DATA_ARRAY.map(({ label, value }, index) => (
+            <Grid item key={index} xs={5}>
+              <Stack direction="row" justifyContent={'space-between'}>
+                <Box
+                  sx={{
+                    color: '#828282',
+                  }}
+                >
+                  {label}
+                </Box>
+                {label === 'Type' ? (
+                  <>
+                    {value === 'BUY' ? (
+                      <GreenText>{value}</GreenText>
+                    ) : (
+                      <RedText>{value}</RedText>
+                    )}
+                  </>
+                ) : (
+                  <Box>{value}</Box>
+                )}
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
+        <Stack alignItems="flex-end"></Stack>
+      </Stack>
+      <Divider light />
+    </>
+  )
+}
+
+const MobileFilterOptions = ({
+  rows,
+  checkedState,
+  setCheckedState,
+  setSearch,
+  searchInput,
+  setSearchInput,
+  buyClicked,
+  setBuyClicked,
+  sellClicked,
+  setSellClicked,
+}) => {
+  const theme = useTheme()
+
+  const top4UnderlyingTokens = useMemo(
+    () => getTopNObjectByProperty(rows, 'Underlying', 4),
+    [rows]
+  )
+
+  const handleOnChange = (position) => {
+    const updatedCheckedState = checkedState.map((item, index) =>
+      index === position ? !item : item
+    )
+
+    setCheckedState(updatedCheckedState)
+
+    const underlyingTokenString = updatedCheckedState
+      .map((currentState, index) => {
+        if (currentState === true) {
+          return top4UnderlyingTokens[index]
+        }
+      })
+      .filter((item) => item !== undefined)
+      .map((item) => item.token)
+      .join(' ')
+      .toString()
+
+    setSearch(underlyingTokenString)
+  }
+  return (
+    <>
+      <Accordion
+        sx={{
+          backgroundColor: '#000000',
+          '&:before': {
+            display: 'none',
+          },
+          marginTop: theme.spacing(3.5),
+        }}
+        defaultExpanded
+      >
+        <AccordionSummary
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          sx={{
+            padding: '0px',
+            backgroundColor: '#000000',
+          }}
+          expandIcon={<ArrowDropUpIcon />}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Underlying
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            backgroundColor: '#000000',
+            padding: '0px',
+          }}
+        >
+          <Box>
+            <TextField
+              value={searchInput}
+              aria-label="Filter creator"
+              sx={{
+                width: '100%',
+                height: '50px',
+                marginTop: theme.spacing(2),
+              }}
+              onChange={(event) => setSearchInput(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Enter Underlying"
+              color="secondary"
+            />
+          </Box>
+          <Stack
+            spacing={0.6}
+            sx={{
+              marginTop: theme.spacing(2),
+              fontSize: '14px',
+            }}
+          >
+            {top4UnderlyingTokens.map((underlying, index) => (
+              <Stack
+                direction="row"
+                justifyContent={'space-between'}
+                alignItems={'center'}
+                key={index}
+              >
+                <Box>{underlying.token}</Box>
+                <Checkbox
+                  checked={checkedState[index]}
+                  id={`custom-checkbox-${index}`}
+                  onChange={() => handleOnChange(index)}
+                />
+              </Stack>
+            ))}
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: theme.spacing(2.5),
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Buy</Box>
+          <Radio
+            checked={buyClicked}
+            size="small"
+            onClick={() => setBuyClicked(!buyClicked)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Sell</Box>
+          <Radio
+            checked={sellClicked}
+            size="small"
+            onClick={() => setSellClicked(!sellClicked)}
+          />
+        </Stack>
+      </Stack>
+    </>
+  )
+}
+
 export function TradeHistoryTab() {
   const userAddress = useAppSelector(selectUserAddress)
   const chainId = useAppSelector((state) => state.appSlice.chainId)
@@ -111,13 +392,18 @@ export function TradeHistoryTab() {
   const [underlyingButtonLabel, setUnderlyingButtonLabel] =
     useState('Underlying')
   const [search, setSearch] = useState('')
-  const [orderType, setOrderType] = useState<string>('')
   const [history, setHistory] = useState<any[]>([])
   const [page, setPage] = useState(0)
   const [buyClicked, setBuyClicked] = useState(false)
   const [sellClicked, setSellClicked] = useState(false)
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
+  const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
+  const [searchInput, setSearchInput] = useState('')
+
   const orders: any[] = []
   const dispatch = useAppDispatch()
+  const { isMobile } = useCustomMediaQuery()
+  const theme = useTheme()
 
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
@@ -331,18 +617,24 @@ export function TradeHistoryTab() {
       } else if (buyClicked) {
         return rows
           .filter((v) => v.type.includes('BUY'))
-          .filter((v) =>
-            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          .filter(
+            (v) =>
+              v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
+              search.toLowerCase().includes(v.Underlying.toLowerCase())
           )
       } else if (sellClicked) {
         return rows
           .filter((v) => v.type.includes('SELL'))
-          .filter((v) =>
-            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          .filter(
+            (v) =>
+              v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
+              search.toLowerCase().includes(v.Underlying.toLowerCase())
           )
       } else {
-        return rows.filter((v) =>
-          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        return rows.filter(
+          (v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
+            search.toLowerCase().includes(v.Underlying.toLowerCase())
         )
       }
     } else if (buyClicked && sellClicked) {
@@ -356,49 +648,65 @@ export function TradeHistoryTab() {
     }
   }, [search, buyClicked, sellClicked, rows])
 
+  useEffect(() => {
+    if (searchInput.length > 0 && searchInput !== null) {
+      setCheckedState(new Array(4).fill(false))
+      setSearch(searchInput)
+    }
+  }, [searchInput])
+
+  useEffect(() => {
+    if (checkedState.includes(true)) {
+      setSearchInput('')
+    }
+  }, [checkedState])
+
   return (
     <Stack
       direction="column"
       sx={{
         height: '100%',
       }}
+      paddingRight={isMobile ? 0 : 6}
       spacing={4}
     >
-      <Box
-        paddingY={2}
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-        }}
-      >
-        <DropDownFilter
-          id="Underlying Filter"
-          DropDownButtonLabel={underlyingButtonLabel}
-          InputValue={search}
-          onInputChange={handleUnderLyingInput}
-        />
-        <ButtonFilter
-          id="Buy"
+      {!isMobile && (
+        <Box
+          paddingY={2}
           sx={{
-            borderRight: 0,
-            borderTopRightRadius: 0,
-            borderBottomRightRadius: 0,
+            display: 'flex',
+            flexDirection: 'row',
           }}
-          ButtonLabel="Buy"
-          onClick={filterBuyOrders}
-        />
-        <Divider orientation="vertical" />
-        <ButtonFilter
-          id="Sell"
-          sx={{
-            borderLeft: 0,
-            borderTopLeftRadius: 0,
-            borderBottomLeftRadius: 0,
-          }}
-          ButtonLabel="Sell"
-          onClick={filterSellOrders}
-        />
-      </Box>
+        >
+          <DropDownFilter
+            id="Underlying Filter"
+            DropDownButtonLabel={underlyingButtonLabel}
+            InputValue={search}
+            onInputChange={handleUnderLyingInput}
+          />
+          <ButtonFilter
+            id="Buy"
+            sx={{
+              borderRight: 0,
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+            }}
+            ButtonLabel="Buy"
+            onClick={filterBuyOrders}
+          />
+          <Divider orientation="vertical" />
+          <ButtonFilter
+            id="Sell"
+            sx={{
+              borderLeft: 0,
+              borderTopLeftRadius: 0,
+              borderBottomLeftRadius: 0,
+            }}
+            ButtonLabel="Sell"
+            onClick={filterSellOrders}
+          />
+        </Box>
+      )}
       {!userAddress ? (
         <Typography
           sx={{
@@ -413,15 +721,97 @@ export function TradeHistoryTab() {
         </Typography>
       ) : (
         <>
-          <PoolsTable
-            disableRowClick
-            page={page}
-            rows={filteredRows}
-            columns={columns}
-            loading={orderFills.isLoading || orderFillsMaker.isLoading}
-            onPageChange={(page) => setPage(page)}
-            selectedPoolsView="Table"
-          />
+          {isMobile ? (
+            <Stack
+              width={'100%'}
+              sx={{
+                marginTop: theme.spacing(2),
+                marginBottom: theme.spacing(2),
+              }}
+              spacing={2}
+            >
+              {!orderFills.isLoading || !orderFillsMaker.isLoading ? (
+                <>
+                  <Button
+                    onClick={() => {
+                      setIsFilterDrawerOpen(!isFilterDrawerOpen)
+                    }}
+                    startIcon={<FilterListIcon fontSize="small" />}
+                    variant="outlined"
+                    sx={{
+                      width: '84px',
+                      height: '30px',
+                      fontSize: '13px',
+                      padding: '4px 10px',
+                      textTransform: 'none',
+                    }}
+                    color={isFilterDrawerOpen ? 'primary' : 'secondary'}
+                  >
+                    Filters
+                  </Button>
+                  <Box>
+                    {filteredRows.map((row, index) => (
+                      <TradeHistoryTabTokenCars row={row} key={index} />
+                    ))}
+                  </Box>
+                  <Pagination
+                    sx={{
+                      minHeight: '70px',
+                      fontSize: '14px',
+                    }}
+                    count={10}
+                    onChange={(e, page) => setPage(page - 1)}
+                    page={page + 1}
+                  />
+                </>
+              ) : (
+                <CircularProgress
+                  sx={{
+                    margin: '0 auto',
+                    marginTop: 10,
+                  }}
+                />
+              )}
+              <FilterDrawerModal
+                open={isFilterDrawerOpen}
+                onClose={setIsFilterDrawerOpen}
+                children={
+                  <MobileFilterOptions
+                    rows={rows}
+                    checkedState={checkedState}
+                    setCheckedState={setCheckedState}
+                    setSearch={setSearch}
+                    searchInput={searchInput}
+                    setSearchInput={setSearchInput}
+                    buyClicked={buyClicked}
+                    setBuyClicked={setBuyClicked}
+                    sellClicked={sellClicked}
+                    setSellClicked={setSellClicked}
+                  />
+                }
+                onApplyFilter={() => {
+                  setIsFilterDrawerOpen(false)
+                }}
+                onClearFilter={() => {
+                  setSearch('')
+                  setBuyClicked(false)
+                  setSellClicked(false)
+                  setSearchInput('')
+                  setCheckedState(new Array(4).fill(false))
+                }}
+              />
+            </Stack>
+          ) : (
+            <PoolsTable
+              disableRowClick
+              page={page}
+              rows={filteredRows}
+              columns={columns}
+              loading={orderFills.isLoading || orderFillsMaker.isLoading}
+              onPageChange={(page) => setPage(page)}
+              selectedPoolsView="Table"
+            />
+          )}
         </>
       )}
     </Stack>

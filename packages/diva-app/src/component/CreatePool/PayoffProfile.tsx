@@ -17,22 +17,26 @@ export function PayoffProfile(props: {
   collateralBalanceShort: number
   collateralBalanceLong: number
   tokenSupply: number
+  longDirection?: boolean
 }) {
   const {
     floor,
     cap,
     inflection: strike,
-    tokenSupply,
     hasError,
     collateralBalanceShort,
     collateralBalanceLong,
+    longDirection,
   } = props
+
   const padding = cap * 0.1
   const start = Math.max(floor - padding, 0)
-  const totalCollateral = collateralBalanceLong + collateralBalanceShort
+  const end = Number(cap) + padding
+  const gradient =
+    collateralBalanceLong / (collateralBalanceLong + collateralBalanceShort)
 
-  const maxPayoutLong = totalCollateral / tokenSupply
-  const maxPayoutShort = totalCollateral / tokenSupply
+  const maxPayoutLong = 1
+  const maxPayoutShort = 1
   const theme = useTheme()
 
   const short: LineSeriesPoint[] = [
@@ -46,14 +50,14 @@ export function PayoffProfile(props: {
     },
     {
       x: strike,
-      y: collateralBalanceShort / tokenSupply,
+      y: 1 - gradient,
     },
     {
       x: cap,
       y: 0,
     },
     {
-      x: cap + padding,
+      x: end,
       y: 0,
     },
   ]
@@ -69,14 +73,14 @@ export function PayoffProfile(props: {
     },
     {
       x: strike,
-      y: collateralBalanceLong / tokenSupply,
+      y: gradient,
     },
     {
       x: cap,
       y: maxPayoutLong,
     },
     {
-      x: cap + padding,
+      x: end,
       y: maxPayoutLong,
     },
   ]
@@ -100,7 +104,24 @@ export function PayoffProfile(props: {
   const lineSeriesStyle: any = { strokeWidth: '3px' }
 
   if (hasError) lineSeriesStyle.stroke = theme.palette.error.main
-
+  const legendItems = [
+    {
+      title: 'Long',
+      color: theme.palette.primary.light,
+    },
+    {
+      title: 'Short',
+      color: theme.palette.primary.dark,
+    },
+  ]
+  if (longDirection != undefined) {
+    if (longDirection) {
+      legendItems.pop()
+    } else {
+      legendItems.reverse()
+      legendItems.pop()
+    }
+  }
   return (
     <Box pb={3} ref={ref}>
       <Box ref={ref} pr={1}>
@@ -123,8 +144,18 @@ export function PayoffProfile(props: {
             style={{ stroke: theme.palette.text.disabled }}
           />
           <YAxis style={{ stroke: theme.palette.text.disabled }} />
-          <LineSeries style={lineSeriesStyle} data={short} />
-          <LineSeries style={lineSeriesStyle} data={long} />
+          {longDirection == undefined && (
+            <LineSeries style={lineSeriesStyle} data={short} />
+          )}
+          {longDirection == undefined && (
+            <LineSeries style={lineSeriesStyle} data={long} />
+          )}
+          {longDirection != undefined &&
+            (longDirection ? (
+              <LineSeries style={lineSeriesStyle} data={long} />
+            ) : (
+              <LineSeries style={lineSeriesStyle} data={short} />
+            ))}
         </XYPlot>
       </Box>
       <Box
@@ -140,19 +171,7 @@ export function PayoffProfile(props: {
           },
         }}
       >
-        <DiscreteColorLegend
-          orientation="horizontal"
-          items={[
-            {
-              title: 'Long',
-              color: theme.palette.primary.light,
-            },
-            {
-              title: 'Short',
-              color: theme.palette.primary.dark,
-            },
-          ]}
-        />
+        <DiscreteColorLegend orientation="horizontal" items={legendItems} />
       </Box>
     </Box>
   )

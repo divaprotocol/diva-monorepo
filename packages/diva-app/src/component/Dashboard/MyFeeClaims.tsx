@@ -1,28 +1,28 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
   Box,
+  CircularProgress,
   Button,
-  Container,
   Dialog,
   DialogActions,
+  Divider,
   Stack,
   TextField,
   Typography,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Checkbox,
+  InputAdornment,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ethers } from 'ethers'
-import { request } from 'graphql-request'
 import { parseUnits } from 'ethers/lib/utils'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
-import {
-  FeeRecipientCollateralToken,
-  queryFeeRecipients,
-} from '../../lib/queries'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import {
   fetchFeeRecipients,
@@ -32,12 +32,21 @@ import {
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
+import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import { FilterDrawerModal } from './FilterDrawerMobile'
+import { Search } from '@mui/icons-material'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import { getTopNObjectByProperty } from '../../Util/dashboard'
+import useTheme from '@mui/material/styles/useTheme'
 
 const TransferFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
   const dispatch = useDispatch()
+  const { isMobile } = useCustomMediaQuery()
+
   const [decimal, setDecimal] = useState(18)
   const chainId = provider?.network?.chainId
   const token = new ethers.Contract(
@@ -71,11 +80,21 @@ const TransferFeesCell = (props: any) => {
   }
 
   return (
-    <Container>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        width: isMobile ? 'auto' : '100%',
+      }}
+    >
       <LoadingButton
         variant="contained"
         onClick={handleOpen}
         loading={loadingValue}
+        sx={{
+          fontSize: isMobile ? '10px' : 'auto',
+          padding: isMobile ? '5px 11px' : 'auto',
+        }}
       >
         Transfer Fees
       </LoadingButton>
@@ -136,7 +155,7 @@ const TransferFeesCell = (props: any) => {
           </Stack>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Box>
   )
 }
 
@@ -144,6 +163,8 @@ const ClaimFeesCell = (props: any) => {
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
   const dispatch = useDispatch()
+  const { isMobile } = useCustomMediaQuery()
+
   const chainId = provider?.network?.chainId
   const [loadingValue, setLoadingValue] = useState(false)
 
@@ -162,6 +183,10 @@ const ClaimFeesCell = (props: any) => {
       type="submit"
       variant="contained"
       loading={loadingValue}
+      sx={{
+        fontSize: isMobile ? '10px' : 'auto',
+        padding: isMobile ? '5px 11px' : 'auto',
+      }}
       onClick={() => {
         setLoadingValue(true)
         if (diva != null) {
@@ -255,18 +280,204 @@ const columns: GridColDef[] = [
   },
 ]
 
+const MyFeeClaimsTokenCard = ({ row }: { row: GridRowModel }) => {
+  const { Underlying } = row
+
+  return (
+    <>
+      <Divider light />
+      <Stack
+        sx={{
+          fontSize: '10px',
+          width: '100%',
+          margin: '12px 0',
+        }}
+        spacing={1.6}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '12px',
+              fontWeight: 500,
+              color: '#FFFFFF',
+            }}
+          >
+            {Underlying}
+          </Typography>
+          <Stack spacing={1.6} direction="row">
+            <Typography
+              sx={{
+                fontSize: '10px',
+                color: '#828282',
+              }}
+            >
+              Amount
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '9.2px',
+              }}
+            >
+              <AmountCell row={row} />
+            </Typography>
+          </Stack>
+        </Box>
+
+        <Stack direction="row" justifyContent="flex-end" spacing={2}>
+          <ClaimFeesCell row={row} {...row} />
+          <TransferFeesCell row={row} {...row} />
+        </Stack>
+      </Stack>
+      <Divider light />
+    </>
+  )
+}
+
+const MobileFilterOptions = ({
+  searchInput,
+  setSearchInput,
+  rows,
+  checkedState,
+  setCheckedState,
+  setSearch,
+}) => {
+  const theme = useTheme()
+
+  const top4UnderlyingTokens = useMemo(
+    () => getTopNObjectByProperty(rows, 'Underlying', 4),
+    [rows]
+  )
+
+  const handleOnChange = (position) => {
+    const updatedCheckedState = checkedState.map((item, index) =>
+      index === position ? !item : item
+    )
+
+    setCheckedState(updatedCheckedState)
+
+    const underlyingTokenString = updatedCheckedState
+      .map((currentState, index) => {
+        if (currentState === true) {
+          return top4UnderlyingTokens[index]
+        }
+      })
+      .filter((item) => item !== undefined)
+      .map((item) => item.token)
+      .join(' ')
+      .toString()
+
+    setSearch(underlyingTokenString)
+  }
+
+  return (
+    <>
+      <Accordion
+        sx={{
+          backgroundColor: '#000000',
+          '&:before': {
+            display: 'none',
+          },
+          marginTop: theme.spacing(3.5),
+        }}
+        defaultExpanded
+      >
+        <AccordionSummary
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          sx={{
+            padding: '0px',
+            backgroundColor: '#000000',
+          }}
+          expandIcon={<ArrowDropUpIcon />}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Underlying
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            backgroundColor: '#000000',
+            padding: '0px',
+          }}
+        >
+          <Box>
+            <TextField
+              value={searchInput}
+              aria-label="Filter creator"
+              sx={{
+                width: '100%',
+                height: '50px',
+                marginTop: theme.spacing(2),
+              }}
+              onChange={(event) => setSearchInput(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Enter Underlying"
+              color="secondary"
+            />
+          </Box>
+          <Stack
+            spacing={0.6}
+            sx={{
+              marginTop: theme.spacing(2),
+              fontSize: '14px',
+            }}
+          >
+            {top4UnderlyingTokens.map((underlying, index) => (
+              <Stack
+                direction="row"
+                justifyContent={'space-between'}
+                alignItems={'center'}
+                key={index}
+              >
+                <Box>{underlying.token}</Box>
+                <Checkbox
+                  checked={checkedState[index]}
+                  id={`custom-checkbox-${index}`}
+                  onChange={() => handleOnChange(index)}
+                />
+              </Stack>
+            ))}
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
+    </>
+  )
+}
+
 export function MyFeeClaims() {
   const { address: userAddress } = useConnectionContext()
   const [page, setPage] = useState(0)
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
+  const [underlyingButtonLabel, setUnderlyingButtonLabel] = useState('Assets')
 
   const dispatch = useAppDispatch()
+  const { isMobile } = useCustomMediaQuery()
+  const theme = useTheme()
 
   const feeRecipients = useAppSelector(selectFeeRecipients)
   const poolsRequestStatus = useAppSelector(
     selectRequestStatus('app/feeRecipients')
   )
-  const [underlyingButtonLabel, setUnderlyingButtonLabel] = useState('Assets')
-  const [search, setSearch] = useState(null)
 
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
@@ -307,28 +518,44 @@ export function MyFeeClaims() {
         )
       : rows
 
+  useEffect(() => {
+    if (searchInput.length > 0 && searchInput !== null) {
+      setCheckedState(new Array(4).fill(false))
+      setSearch(searchInput)
+    }
+  }, [searchInput])
+
+  useEffect(() => {
+    if (checkedState.includes(true)) {
+      setSearchInput('')
+    }
+  }, [checkedState])
+
   return (
     <Stack
       direction="column"
       sx={{
         height: '100%',
       }}
+      paddingRight={isMobile ? 0 : 6}
       spacing={4}
     >
-      <Box
-        paddingY={2}
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-        }}
-      >
-        <DropDownFilter
-          id="Underlying Filter"
-          DropDownButtonLabel={underlyingButtonLabel}
-          InputValue={search}
-          onInputChange={handleUnderLyingInput}
-        />
-      </Box>
+      {!isMobile && (
+        <Box
+          paddingY={2}
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+          }}
+        >
+          <DropDownFilter
+            id="Underlying Filter"
+            DropDownButtonLabel={underlyingButtonLabel}
+            InputValue={search}
+            onInputChange={handleUnderLyingInput}
+          />
+        </Box>
+      )}
       {!userAddress ? (
         <Typography
           sx={{
@@ -343,15 +570,82 @@ export function MyFeeClaims() {
         </Typography>
       ) : (
         <>
-          <PoolsTable
-            disableRowClick
-            page={page}
-            rows={filteredRows}
-            loading={poolsRequestStatus === 'pending'}
-            columns={columns}
-            onPageChange={(page) => setPage(page)}
-            selectedPoolsView="Table"
-          />
+          {isMobile ? (
+            <Stack
+              width={'100%'}
+              sx={{
+                marginTop: theme.spacing(2),
+                marginBottom: theme.spacing(2),
+              }}
+              spacing={2}
+            >
+              {poolsRequestStatus !== 'pending' ? (
+                <>
+                  <Button
+                    onClick={() => {
+                      setIsFilterDrawerOpen(!isFilterDrawerOpen)
+                    }}
+                    startIcon={<FilterListIcon fontSize="small" />}
+                    variant="outlined"
+                    sx={{
+                      width: '84px',
+                      height: '30px',
+                      fontSize: '13px',
+                      padding: '4px 10px',
+                      textTransform: 'none',
+                    }}
+                    color={isFilterDrawerOpen ? 'primary' : 'secondary'}
+                  >
+                    Filters
+                  </Button>
+                  <Box>
+                    {filteredRows.map((row, index) => (
+                      <MyFeeClaimsTokenCard row={row} key={index} />
+                    ))}
+                  </Box>
+                </>
+              ) : (
+                <CircularProgress
+                  sx={{
+                    margin: '0 auto',
+                    marginTop: 10,
+                  }}
+                />
+              )}
+              <FilterDrawerModal
+                open={isFilterDrawerOpen}
+                onClose={setIsFilterDrawerOpen}
+                children={
+                  <MobileFilterOptions
+                    searchInput={searchInput}
+                    setSearchInput={setSearchInput}
+                    rows={rows}
+                    checkedState={checkedState}
+                    setCheckedState={setCheckedState}
+                    setSearch={setSearch}
+                  />
+                }
+                onApplyFilter={() => {
+                  setIsFilterDrawerOpen(false)
+                }}
+                onClearFilter={() => {
+                  setSearch('')
+                  setSearchInput('')
+                  setCheckedState(new Array(4).fill(false))
+                }}
+              />
+            </Stack>
+          ) : (
+            <PoolsTable
+              disableRowClick
+              page={page}
+              rows={filteredRows}
+              loading={poolsRequestStatus === 'pending'}
+              columns={columns}
+              onPageChange={(page) => setPage(page)}
+              selectedPoolsView="Table"
+            />
+          )}
         </>
       )}
     </Stack>

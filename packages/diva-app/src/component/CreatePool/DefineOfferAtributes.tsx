@@ -10,30 +10,33 @@ import {
   Typography,
   useTheme,
   Tooltip,
-  FormLabel,
   RadioGroup,
   FormControlLabel,
   Radio,
   Container,
   Card,
+  Select,
+  AccordionSummary,
+  AccordionDetails,
+  Checkbox,
+  Accordion,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { ethers } from 'ethers'
 
 import { PayoffProfile } from './PayoffProfile'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
-import {
-  CheckCircle,
-  Circle,
-  FormatListBulleted,
-  Report,
-} from '@mui/icons-material'
+import { CheckCircle, Circle, Report } from '@mui/icons-material'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
+import MenuItem from '@mui/material/MenuItem'
+import { useAppSelector } from '../../Redux/hooks'
+import { selectUserAddress } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const MaxCollateral = styled.u`
@@ -43,7 +46,7 @@ const MaxCollateral = styled.u`
   }
 `
 
-export function DefinePoolAttributes({
+export function DefineOfferAttributes({
   formik,
 }: {
   formik: ReturnType<typeof useCreatePoolFormik>
@@ -51,13 +54,43 @@ export function DefinePoolAttributes({
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
   const [value, setValue] = useState('Binary')
+  const [direction, setDirection] = useState('Long')
+  const [offerDuration, setOfferDuration] = useState(24 * 60 * 60) // 1 Day
+  const [expanded, setExpanded] = useState(false)
+  const [everyone, setEveryone] = useState(true)
+  const [fillOrKill, setFillOrKill] = useState(true)
   const [mobile, setMobile] = useState(false)
+  const [unlimited, setUnlimited] = useState(true)
+  const account = useAppSelector(selectUserAddress)
+  const { isConnected, disconnect, connect } = useConnectionContext()
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setMobile(true)
+    } else {
+      setMobile(false)
+    }
+  }, [])
+
   const handleChange = (event) => {
     setValue(event.target.value)
     formik.setFieldValue('payoutProfile', event.target.value)
   }
+  const handleDirectionChange = (event) => {
+    setDirection(event.target.value)
+    formik.setFieldValue('offerDirection', event.target.value)
+  }
+
+  const handleOfferDurationChange = (event) => {
+    setOfferDuration(event.target.value)
+    formik.setFieldValue(
+      'offerDuration',
+      Math.floor(event.target.value + Date.now() / 1000).toString()
+    )
+  }
+  const handleMinTakerContributionsChange = (event) => {
+    formik.setFieldValue('minTakerContribution', event.target.value)
+  }
   const { referenceAssets, collateralTokens } = useWhitelist()
-  const { disconnect, connect } = useConnectionContext()
   const {
     referenceAsset,
     expiryTime,
@@ -66,6 +99,7 @@ export function DefinePoolAttributes({
     collateralBalanceLong,
     tokenSupply,
     inflection,
+    capacity,
     cap,
     floor,
     gradient,
@@ -73,7 +107,7 @@ export function DefinePoolAttributes({
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
   useEffect(() => {
-    if (window.ethereum && formik.values.jsonToExport !== '{}') {
+    if (window.ethereum) {
       window.ethereum.on('accountsChanged', () => {
         disconnect()
         connect()
@@ -88,6 +122,7 @@ export function DefinePoolAttributes({
       setMobile(false)
     }
   }, [])
+
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
   }, [collateralWalletBalance])
@@ -152,30 +187,25 @@ export function DefinePoolAttributes({
       v.symbol.includes(referenceAssetSearch.trim())
     ) || []
 
-  const setCollateralBalance = (num: number) => {
-    let long = 0
-    let short = 0
-
-    if (num > 0) {
-      const half = num / 2
-      long = short = half
-    }
-    formik.setValues(
-      {
-        ...formik.values,
-        collateralBalanceLong: long,
-        collateralBalanceShort: short,
-      },
-      true
-    )
-  }
-
   const hasPaymentProfileError =
     formik.errors.floor != null ||
     formik.errors.cap != null ||
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
+  useEffect(() => {
+    if (unlimited) {
+      formik.setValues((_values) => ({
+        ..._values,
+        capacity: 'Unlimited',
+      }))
+    } else {
+      formik.setValues((_values) => ({
+        ..._values,
+        capacity: formik.values.collateralBalance,
+      }))
+    }
+  }, [unlimited, formik.values.collateralBalance])
   useEffect(() => {
     switch (payoutProfile) {
       case 'Binary':
@@ -219,7 +249,7 @@ export function DefinePoolAttributes({
           pb={theme.spacing(2)}
           variant="subtitle1"
         >
-          Pool Configuration
+          Offer Configuration
         </Typography>
         <Box
           sx={{ pb: theme.spacing(5) }}
@@ -324,7 +354,6 @@ export function DefinePoolAttributes({
                 )}
               </FormControl>
             </Stack>
-
             <h3>Payoff Type</h3>
             <FormControl>
               <RadioGroup
@@ -559,8 +588,10 @@ export function DefinePoolAttributes({
                 </Box>
               )}
             </Stack>
+          </Container>
+          <Container>
             <Box>
-              <h3>Collateral</h3>
+              <h3>Offer Terms</h3>
 
               <Stack pb={3} spacing={2} direction={mobile ? 'column' : 'row'}>
                 <FormControl
@@ -641,14 +672,40 @@ export function DefinePoolAttributes({
                             ...values,
                             collateralBalance,
                             tokenSupply: parseFloat(collateralBalance),
+                            takerShare:
+                              parseFloat(collateralBalance) - values.yourShare,
                           }))
+                          if (fillOrKill) {
+                            if (collateralBalance != '') {
+                              formik.setFieldValue(
+                                'minTakerContribution',
+                                parseFloat(collateralBalance) -
+                                  formik.values.yourShare
+                              )
+                            } else {
+                              formik.setFieldValue('minTakerContribution', 0)
+                            }
+                          }
                         }
                       } else {
                         formik.setValues((values) => ({
                           ...values,
                           collateralBalance,
                           tokenSupply: parseFloat(collateralBalance),
+                          takerShare:
+                            parseFloat(collateralBalance) - values.yourShare,
                         }))
+                        if (fillOrKill) {
+                          if (collateralBalance != '') {
+                            formik.setFieldValue(
+                              'minTakerContribution',
+                              parseFloat(collateralBalance) -
+                                formik.values.yourShare
+                            )
+                          } else {
+                            formik.setFieldValue('minTakerContribution', 0)
+                          }
+                        }
                       }
                     }}
                   />
@@ -657,16 +714,328 @@ export function DefinePoolAttributes({
                       {formik.errors.collateralBalance}
                     </FormHelperText>
                   )}
-                  {!isNaN(formik.values.tokenSupply) && (
+                </FormControl>
+              </Stack>
+            </Box>
+          </Container>
+          <Container>
+            <Box>
+              <Stack pb={3} spacing={2} direction={mobile ? 'column' : 'row'}>
+                <FormControl
+                  fullWidth
+                  error={
+                    direction === 'Long'
+                      ? formik.errors.collateralBalanceLong != null
+                      : formik.errors.collateralBalanceShort != null
+                  }
+                >
+                  <TextField
+                    id="yourShare"
+                    name="yourShare"
+                    label="Your Share"
+                    inputProps={{ step: 1, min: 0 }}
+                    onBlur={formik.handleBlur}
+                    error={formik.errors.yourShare != null}
+                    value={formik.values.yourShare}
+                    type="number"
+                    onChange={(event) => {
+                      const collateralBalance = event.target.value
+                      formik.setValues((values) => ({
+                        ...values,
+                        yourShare: parseFloat(collateralBalance),
+                        takerShare:
+                          parseFloat(values.collateralBalance) -
+                          parseFloat(collateralBalance),
+                      }))
+                      if (fillOrKill) {
+                        formik.setFieldValue(
+                          'minTakerContribution',
+                          Number(formik.values.collateralBalance) -
+                            parseFloat(collateralBalance)
+                        )
+                      }
+                    }}
+                  />
+                  {direction === 'Long'
+                    ? formik.errors.collateralBalanceLong != null
+                    : formik.errors.collateralBalanceShort != null && (
+                        <FormHelperText>
+                          {direction === 'Long'
+                            ? formik.errors.collateralBalanceLong
+                            : formik.errors.collateralBalanceShort}
+                        </FormHelperText>
+                      )}
+                  {!isNaN(
+                    direction === 'Long'
+                      ? formik.values.collateralBalanceLong
+                      : formik.values.collateralBalanceShort
+                  ) && (
                     <FormHelperText>
-                      You receive {formik.values.tokenSupply} LONG and{' '}
-                      {formik.values.tokenSupply} SHORT tokens
+                      You receive{' '}
+                      {direction === 'Long' ? (
+                        <strong>
+                          {formik.values.collateralBalance} LONG Tokens
+                        </strong>
+                      ) : (
+                        <strong>
+                          {formik.values.collateralBalance} SHORT Tokens
+                        </strong>
+                      )}
+                    </FormHelperText>
+                  )}
+                </FormControl>
+                <FormControl
+                  fullWidth
+                  error={
+                    direction === 'Long'
+                      ? formik.errors.collateralBalanceShort != null
+                      : formik.errors.collateralBalanceLong != null
+                  }
+                >
+                  <TextField
+                    id="takerShare"
+                    name="takerShare"
+                    label="Taker Share"
+                    inputProps={{ step: 1, min: 0 }}
+                    onBlur={formik.handleBlur}
+                    disabled={true}
+                    error={formik.errors.takerShare != null}
+                    value={
+                      parseFloat(formik.values.collateralBalance) -
+                      formik.values.yourShare
+                    } // TODO Update with BigNumber
+                    type="number"
+                    onChange={(event) => {
+                      const collateralBalance = event.target.value
+                      formik.setValues((values) => ({
+                        ...values,
+                        takerShare: parseFloat(collateralBalance), // TODO Update with BigNumber
+                      }))
+                    }}
+                  />
+                  {!isNaN(
+                    direction === 'Long'
+                      ? formik.values.collateralBalanceShort
+                      : formik.values.collateralBalanceLong // QUESTION Why do we need this part here?
+                  ) && (
+                    <FormHelperText>
+                      Taker receives{' '}
+                      {direction === 'Long' ? (
+                        <strong>
+                          {formik.values.collateralBalance} SHORT Tokens
+                        </strong>
+                      ) : (
+                        <strong>
+                          {formik.values.collateralBalance} LONG Tokens
+                        </strong>
+                      )}
                     </FormHelperText>
                   )}
                 </FormControl>
               </Stack>
             </Box>
-            <DefineAdvanced formik={formik} />
+          </Container>
+
+          <Stack pb={3} direction={mobile ? 'column' : 'row'}>
+            <Container>
+              <h3>Your Direction</h3>
+              <FormControl>
+                <RadioGroup
+                  row
+                  aria-labelledby="demo-row-radio-buttons-group-label"
+                  name="row-radio-buttons-group"
+                  value={direction}
+                  onChange={handleDirectionChange}
+                >
+                  <FormControlLabel
+                    value="Long"
+                    control={<Radio />}
+                    label="Long"
+                  />
+                  <FormControlLabel
+                    value="Short"
+                    control={<Radio />}
+                    label="Short"
+                  />
+                </RadioGroup>
+              </FormControl>
+            </Container>
+            {/*<Container>*/}
+            <FormControl
+              sx={{
+                pt: theme.spacing(5),
+                pl: theme.spacing(4),
+                pr: theme.spacing(3),
+              }}
+              fullWidth
+            >
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={offerDuration}
+                onChange={handleOfferDurationChange}
+              >
+                <MenuItem value={60 * 60}>1 Hour</MenuItem>
+                <MenuItem value={4 * 60 * 60}>4 Hours</MenuItem>
+                <MenuItem value={12 * 60 * 60}>12 Hours</MenuItem>
+                <MenuItem value={24 * 60 * 60}>1 Day</MenuItem>
+                <MenuItem value={7 * 24 * 60 * 60}>7 Days</MenuItem>
+              </Select>
+            </FormControl>
+            {/*</Container>*/}
+          </Stack>
+          <Container>
+            <Accordion
+              expanded={expanded}
+              onChange={() => setExpanded(!expanded)}
+              sx={{
+                maxWidth: '95%',
+                background: 'none',
+                padding: 0,
+                borderTop: 'none',
+                ':before': {
+                  display: 'none',
+                },
+              }}
+            >
+              <AccordionSummary
+                sx={{
+                  paddingLeft: 0,
+                }}
+              >
+                <Typography color="primary" variant="subtitle2">
+                  Advanced Settings
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ padding: 0 }}>
+                <Box pb={3}>
+                  <Stack direction={mobile ? 'column' : 'row'}>
+                    <Container sx={{ margin: -2, padding: 1 }}>
+                      <FormControl
+                        fullWidth
+                        error={formik.errors.takerAddress != null}
+                      >
+                        <Tooltip placement="top-end" title="Taker Address">
+                          <TextField
+                            name="takerAddress"
+                            disabled={everyone}
+                            id="takerAddress"
+                            label="Taker Address"
+                            value={formik.values.takerAddress}
+                            onChange={(event) => {
+                              formik.setFieldValue(
+                                'takerAddress',
+                                event.target.value
+                              )
+                            }}
+                            type="text"
+                          />
+                        </Tooltip>
+                      </FormControl>
+                      <FormControlLabel
+                        sx={{ pb: theme.spacing(2) }}
+                        control={
+                          <Checkbox
+                            defaultChecked={everyone}
+                            onChange={() => {
+                              formik.setFieldValue(
+                                'takerAddress',
+                                ethers.constants.AddressZero
+                              )
+                              setEveryone(!everyone)
+                            }}
+                          />
+                        }
+                        label="Everyone"
+                      />
+                      <FormControl
+                        fullWidth
+                        error={formik.errors.capacity != null}
+                      >
+                        <Tooltip
+                          placement="top-end"
+                          title="Maximum collateral that the pool can accept."
+                        >
+                          <TextField
+                            name="capacity"
+                            error={formik.errors.capacity != null}
+                            disabled={unlimited}
+                            onBlur={formik.handleBlur}
+                            id="capacity"
+                            label="Maximum Pool Capacity"
+                            value={capacity}
+                            helperText={
+                              formik.errors.capacity != null
+                                ? formik.errors.capacity
+                                : ''
+                            }
+                            type="number"
+                            onChange={formik.handleChange}
+                          />
+                        </Tooltip>
+                      </FormControl>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            defaultChecked={unlimited}
+                            onChange={() => {
+                              formik.setFieldValue('capacity', 'Unlimited')
+                              setUnlimited(!unlimited)
+                            }}
+                          />
+                        }
+                        label="Unlimited"
+                      />
+                    </Container>
+                    <Container
+                      sx={{ margin: -3, padding: 2, pr: 4, ml: -1.5, mr: -8 }}
+                    >
+                      <FormControl
+                        fullWidth
+                        error={formik.errors.minTakerContribution != null}
+                      >
+                        <Tooltip
+                          placement="top-end"
+                          title="Minimum collateral amount the taker has to contribute on first fill"
+                        >
+                          <TextField
+                            name="minTakerContribution"
+                            error={formik.errors.minTakerContribution != null}
+                            disabled={fillOrKill}
+                            onBlur={formik.handleBlur}
+                            id="minTakerContribution"
+                            label="Minimum Taker Contribution"
+                            value={formik.values.minTakerContribution}
+                            helperText={
+                              formik.errors.minTakerContribution != null
+                                ? formik.errors.minTakerContribution
+                                : ''
+                            }
+                            type="string"
+                            onChange={formik.handleChange}
+                          />
+                        </Tooltip>
+                      </FormControl>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            defaultChecked={fillOrKill}
+                            onChange={() => {
+                              formik.setFieldValue(
+                                'minTakerContribution',
+                                formik.values.takerShare.toString()
+                              )
+                              setFillOrKill(!fillOrKill)
+                            }}
+                          />
+                        }
+                        label="Fill Or Kill"
+                      />
+                    </Container>
+                  </Stack>
+                </Box>
+              </AccordionDetails>
+            </Accordion>
           </Container>
         </Box>
       </Container>

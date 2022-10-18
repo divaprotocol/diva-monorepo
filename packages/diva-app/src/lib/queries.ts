@@ -60,6 +60,8 @@ export type Pool = {
 
   createdBy: string
   createdAt: string
+
+  prices?: any
 }
 
 export type User = {

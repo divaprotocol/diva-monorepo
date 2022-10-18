@@ -22,7 +22,7 @@ export function getEtherscanLink(
     case EtherscanLinkType.TRANSACTION:
       return `${prefix}/tx/${address}`
     case EtherscanLinkType.ADDRESS:
-      return `${prefix}/address/${address}`
+      return `${prefix}/token/${address}`
     default:
       return `${prefix}`
   }

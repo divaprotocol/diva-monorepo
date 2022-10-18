@@ -1,38 +1,13 @@
-import React, { useEffect, useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
-import {
-  Box,
-  Button,
-  Container,
-  Grid,
-  Input,
-  Stack,
-  TextField,
-  AppBar,
-  InputAdornment,
-  MenuItem,
-  Switch,
-  Toolbar,
-  Typography,
-  useTheme,
-  Menu,
-  FormControlLabel,
-} from '@mui/material'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import { Box, CircularProgress, Grid, Stack } from '@mui/material'
 import { LineSeries, XYPlot } from 'react-vis'
-import { Search } from '@mui/icons-material'
 import { useHistory } from 'react-router-dom'
 import { makeStyles } from '@mui/styles'
 import PoolCard from './PoolCard'
-import styled from 'styled-components'
 import { setResponseBuy, setResponseSell } from '../Redux/TradeOption'
 import { useDispatch } from 'react-redux'
-import { getShortenedAddress } from '../Util/getShortenedAddress'
-import { selectUserAddress } from '../Redux/appSlice'
-import { useAppSelector } from '../Redux/hooks'
-import { divaGovernanceAddress } from '../constants'
-import { useWhitelist } from '../hooks/useWhitelist'
+import useTheme from '@mui/material/styles/useTheme'
 
 const useStyles = makeStyles({
   root: {
@@ -76,6 +51,8 @@ export default function PoolsTable({
   const history = useHistory()
   const classes = useStyles()
   const dispatch = useDispatch()
+  const theme = useTheme()
+
   return (
     <Stack height="100%" width="100%">
       {selectedPoolsView === 'Table' ? (
@@ -110,20 +87,43 @@ export default function PoolsTable({
           }}
         />
       ) : (
-        <Box className={classes.root}>
-          <Grid
-            container
-            spacing={'76px'}
-            rowSpacing={'42px'}
-            justifyContent="center"
-          >
-            {rows.map((row) => (
-              <Grid item key={row.Id}>
-                <PoolCard row={row} />
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
+        <>
+          {loading ? (
+            <CircularProgress
+              sx={{
+                margin: '0 auto',
+                marginTop: 10,
+              }}
+            />
+          ) : (
+            <Box className={classes.root}>
+              {rows.length === 0 ? (
+                <Box
+                  sx={{
+                    color: 'white',
+                    textAlign: 'center',
+                    marginTop: 10,
+                  }}
+                >
+                  No results found.
+                </Box>
+              ) : (
+                <Grid
+                  container
+                  spacing={theme.spacing(9.5)}
+                  rowSpacing={theme.spacing(5.25)}
+                  justifyContent="center"
+                >
+                  {rows.map((row) => (
+                    <Grid item key={row.Id}>
+                      <PoolCard row={row} />
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </Box>
+          )}
+        </>
       )}
     </Stack>
   )
