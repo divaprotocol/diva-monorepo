@@ -279,6 +279,18 @@ export const ApproveActionButtons = ({
                   setApproveEnabled(false)
                 }
               })
+          } else if (transactionType === 'createpool') {
+            token
+              .allowance(account, config[chainId]?.divaAddressNew)
+              .then((res) => {
+                if (res.lt(parseUnits(textFieldValue, decimal))) {
+                  setApproveEnabled(true)
+                  setActionEnabled(false)
+                } else {
+                  setActionEnabled(true)
+                  setApproveEnabled(false)
+                }
+              })
           } else {
             token
               .allowance(account, config[chainId]?.divaAddress)
@@ -365,7 +377,7 @@ export const ApproveActionButtons = ({
 
                       token
                         .approve(
-                          config[chainId!].divaAddress,
+                          config[chainId!].divaAddressNew,
                           parseUnits(textFieldValue, decimal)
                         )
                         .then((tx: any) => {
@@ -487,32 +499,33 @@ export const ApproveActionButtons = ({
                 setActionLoading(true)
                 switch (transactionType) {
                   case 'createpool':
-                    diva!
+                    divaNew!
                       .createContingentPool({
-                        inflection: parseEther(pool.inflection.toString()),
-                        cap: parseEther(pool.cap.toString()),
-                        floor: parseEther(pool.floor.toString()),
-                        collateralBalanceShort: parseUnits(
-                          pool.collateralBalanceShort.toString(),
-                          decimal
-                        ),
-                        collateralBalanceLong: parseUnits(
-                          pool.collateralBalanceLong.toString(),
-                          decimal
-                        ),
+                        referenceAsset: pool.referenceAsset.toString(),
                         expiryTime: Math.trunc(
                           pool.expiryTime.getTime() / 1000
                         ),
-                        supplyPositionToken: parseEther(
-                          pool.tokenSupply.toString()
+                        floor: parseEther(pool.floor.toString()),
+                        inflection: parseEther(pool.inflection.toString()),
+                        cap: parseEther(pool.cap.toString()),
+                        gradient: parseEther(pool.gradient.toString()),
+                        collateralAmount: parseUnits(
+                          pool.collateralBalance,
+                          decimal
                         ),
-                        referenceAsset: pool.referenceAsset.toString(),
                         collateralToken: pool.collateralToken.id.toString(),
                         dataProvider: pool.dataProvider.toString(),
                         capacity:
                           pool.capacity === 'Unlimited'
                             ? ethers.constants.MaxUint256.toString()
                             : parseUnits(pool.capacity.toString(), decimal),
+                        longRecipient: ethers.utils.getAddress(
+                          pool.longRecipient
+                        ),
+                        shortRecipient: ethers.utils.getAddress(
+                          pool.shortRecipient
+                        ),
+                        permissionedERC721Token: ethers.constants.AddressZero,
                       })
                       .then((tx) => {
                         /**
