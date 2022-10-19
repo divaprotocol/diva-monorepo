@@ -4,7 +4,6 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useDiva } from '../../hooks/useDiva'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { ethers } from 'ethers'
-
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
 export type Values = {
@@ -28,6 +27,9 @@ export type Values = {
   offerDirection?: string
   minTakerContribution?: string
   takerAddress?: string
+  makerAddress?: string
+  longRecipient?: string
+  shortRecipient?: string
   jsonToExport?: any
   signature?: string
   yourShare?: number
@@ -61,6 +63,9 @@ export const initialValues: Values = {
   offerDuration: Math.floor(24 * 60 * 60 + Date.now() / 1000).toString(),
   minTakerContribution: '10',
   takerAddress: ethers.constants.AddressZero,
+  makerAddress: '',
+  longRecipient: '',
+  shortRecipient: '',
   jsonToExport: '{}',
   signature: '',
   yourShare: 0,
