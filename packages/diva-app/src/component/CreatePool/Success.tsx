@@ -3,6 +3,7 @@ import {
   IconButton,
   InputAdornment,
   Link,
+  Popover,
   Stack,
   TextareaAutosize,
   TextField,
@@ -158,15 +159,17 @@ export function Success({
   const { values } = formik
   const [longToken, setLongToken] = useState()
   const [shortToken, setShortToken] = useState()
-  const [jsonToExport, setJsonToExport] = useState<any>()
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
   const [poolId, setPoolId] = useState<number>()
   const theme = useTheme()
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
-
+  const copied = Boolean(anchorEl)
   const chainId = provider?.network?.chainId
   const etherscanProvider = new ethers.providers.EtherscanProvider(chainId)
-
+  const onPopupClose = () => {
+    setAnchorEl(null)
+  }
   const diva =
     chainId != null
       ? new ethers.Contract(
@@ -363,16 +366,29 @@ export function Success({
                     <InputAdornment position="start">
                       <IconButton
                         color="primary"
-                        onClick={() =>
+                        onClick={(event) => {
+                          setAnchorEl(event.currentTarget)
                           navigator.clipboard.writeText(
                             window.location.origin +
                               '/offer/' +
                               values.offerHash
                           )
-                        }
+                        }}
                       >
                         <InsertLinkTwoToneIcon />
                       </IconButton>
+                      <Popover
+                        id={'copied'}
+                        open={copied}
+                        anchorEl={anchorEl}
+                        onClose={onPopupClose}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left',
+                        }}
+                      >
+                        <Typography sx={{ p: 2 }}>Copied</Typography>
+                      </Popover>
                     </InputAdornment>
                   ),
                 }}
