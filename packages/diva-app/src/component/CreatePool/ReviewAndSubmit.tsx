@@ -65,6 +65,8 @@ export function ReviewAndSubmit({
   token.decimals().then((decimals: number) => {
     setDecimal(decimals)
   })
+  console.log('actualFillableAmount', actualFillableAmount)
+  console.log('takerFilledAmount', takerFilledAmount)
   useEffect(() => {
     if (transaction === 'filloffer') {
       divaNew
@@ -81,7 +83,7 @@ export function ReviewAndSubmit({
           )
         })
     }
-  }, [decimal])
+  }, [formik, decimal])
   useEffect(() => {
     const tokenContract = new ethers.Contract(
       formik.values.collateralToken.id,
