@@ -18,8 +18,6 @@ import {
   Card,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
-
-import { PayoffProfile } from './PayoffProfile'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
@@ -35,6 +33,7 @@ import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { PayoffProfile } from '../Graphs/payOffProfille'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
