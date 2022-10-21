@@ -24,7 +24,10 @@ export function Offer() {
   const [decimal, setDecimal] = useState(18)
   const offerHash = window.location.pathname.split('/')[2]
   const jsonResponse = useQuery(`json-${offerHash}`, async () => {
-    const response = axios.get('/offer_create_contingent_pool/' + offerHash)
+    const response = axios.get(
+      'https://eip712api.xyz/orderbook/v1/offer_create_contingent_pool/' +
+        offerHash
+    )
     return response
   })
 

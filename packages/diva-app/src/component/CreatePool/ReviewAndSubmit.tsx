@@ -65,8 +65,6 @@ export function ReviewAndSubmit({
   token.decimals().then((decimals: number) => {
     setDecimal(decimals)
   })
-  console.log('actualFillableAmount', actualFillableAmount)
-  console.log('takerFilledAmount', takerFilledAmount)
   useEffect(() => {
     if (transaction === 'filloffer') {
       divaNew
