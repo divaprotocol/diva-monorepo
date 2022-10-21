@@ -615,13 +615,15 @@ export const ApproveActionButtons = ({
                               offerHash,
                             }
                             formik.setFieldValue('jsonToExport', jsonToExport)
-                            axios.post('/offers', jsonToExport).then((res) => {
-                              formik.setFieldValue(
-                                'offerHash',
-                                res.data.offer?.id
+                            axios
+                              .post(
+                                '/offer_create_contingent_pool',
+                                jsonToExport
                               )
-                              onTransactionSuccess()
-                            })
+                              .then((res) => {
+                                formik.setFieldValue('offerHash', res.data)
+                                onTransactionSuccess()
+                              })
                           })
                       })
                       .catch((err: any) => {
