@@ -1,19 +1,11 @@
 import styled from 'styled-components'
 import '../../Util/Dates'
-import {
-  Box,
-  Container,
-  IconButton,
-  Link,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import {
   getEtherscanLink,
   EtherscanLinkType,
 } from '../../Util/getEtherscanLink'
-import Tooltip from '@mui/material/Tooltip'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
@@ -79,7 +71,7 @@ export default function OptionHeader(optionData: {
         <Stack direction="row">
           <CoinIconPair assetName={headerTitle} isLargeIcon />
           <Typography
-            fontSize="34px"
+            variant="h1"
             sx={{
               ml: '20px',
               transform: 'translateY(-20%)',
@@ -104,7 +96,7 @@ export default function OptionHeader(optionData: {
             </IconButton>
           </Tooltip>
           <Link
-            style={{ color: 'gray' }}
+            sx={{ color: 'gray' }}
             underline={'none'}
             rel="noopener noreferrer"
             target="_blank"
@@ -116,7 +108,7 @@ export default function OptionHeader(optionData: {
           >
             {shortenTokenAddress}
           </Link>
-          <Typography fontSize="14px" color="#929292" pl="10px">
+          <Typography fontSize="14px" color="#929292" pl="10px" mt="1px">
             ({tokenSymbol})
           </Typography>
           {/* <IconButton

@@ -6,6 +6,7 @@ import {
   CircularProgress,
   Collapse,
   Container,
+  Divider,
   IconButton,
   Input,
   Stack,
@@ -234,10 +235,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       <Stack
         direction="row"
         spacing={theme.spacing(20)}
-        sx={{
-          /* mt: theme.spacing(2), */
-          my: theme.spacing(6),
-        }}
+        sx={{ my: theme.spacing(6) }}
       >
         <Box>
           <Card
@@ -272,10 +270,17 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               }}
             />
             {tokenBalanceLong ? (
-              <Typography variant="subtitle2" color="text.secondary">
+              <Typography
+                variant="h5"
+                color="text.secondary"
+                sx={{ ml: theme.spacing(2) }}
+              >
                 You can remove up to{' '}
-                {parseFloat(formatEther(maxCollateral)).toFixed(4)}{' '}
-                {pool!.collateralToken.symbol}{' '}
+                <Typography variant="h4" sx={{ display: 'inline' }}>
+                  &nbsp;
+                  {parseFloat(formatEther(maxCollateral)).toFixed(4)}{' '}
+                  {pool!.collateralToken.symbol}&nbsp;
+                </Typography>
                 <MaxCollateral
                   role="button"
                   onClick={() => {
@@ -428,7 +433,9 @@ export const RemoveLiquidity = ({ pool }: Props) => {
         </Box>
         <Box>
           <Stack direction="column" spacing={3} maxWidth={theme.spacing(65)}>
-            <Typography variant="h3"> Pool Status</Typography>
+            <Typography variant="h3" sx={{ mt: theme.spacing(-2) }}>
+              Pool Status
+            </Typography>
             <Stack direction="row" justifyContent="space-between">
               <Stack direction="column" spacing={1}>
                 <Typography variant="h4" fontWeight="normal" color="gray">
@@ -459,7 +466,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
             <Stack direction="row" spacing={theme.spacing(4)}>
               <Stack direction="column" spacing={1} maxWidth="100px">
                 <Typography variant="h4" fontWeight="normal" color="#929292">
-                  LONG Token
+                  LONG Tokens
                 </Typography>
                 <Typography variant="h2" color="white" noWrap>
                   {(+longToken).toFixed(4)}
@@ -467,7 +474,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               </Stack>
               <Stack direction="column" spacing={1} maxWidth="100px">
                 <Typography variant="h4" fontWeight="normal" color="#929292">
-                  SHORT Token
+                  SHORT Tokens
                 </Typography>
                 <Typography variant="h2" color="white" noWrap>
                   {(+shortToken).toFixed(4)}
