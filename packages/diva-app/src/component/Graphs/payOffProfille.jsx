@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useLayoutEffect } from 'react'
-import { Box, useTheme } from '@mui/material'
+import { useTheme } from '@mui/material'
 import * as d3 from 'd3'
 
 export function PayoffProfile(props) {
@@ -14,7 +14,8 @@ export function PayoffProfile(props) {
     collateralBalanceLong,
     collateralToken,
   } = props
-  const padding = cap * 0.1
+
+  const padding = cap * 0.15
   const start = Math.max(floor - padding, 0)
   const totalCollateral = collateralBalanceLong + collateralBalanceShort
 
@@ -41,7 +42,7 @@ export function PayoffProfile(props) {
       y: 0,
     },
     {
-      x: cap + padding,
+      x: cap * 1.15,
       y: 0,
     },
   ]
@@ -63,12 +64,21 @@ export function PayoffProfile(props) {
       y: maxPayoutLong,
     },
     {
-      x: cap + padding,
+      x: cap * 1.15,
       y: maxPayoutLong,
     },
   ]
   const [width, setWidth] = useState(350)
   const [axisLabel, setAxisLabel] = useState('')
+
+  console.log(
+    'tokenSupply-',
+    tokenSupply,
+    'collateralBalanceLong- ',
+    collateralBalanceLong,
+    'maxPayoutLong- ',
+    maxPayoutLong
+  )
 
   useLayoutEffect(() => {
     const callback = () => {
@@ -95,20 +105,32 @@ export function PayoffProfile(props) {
   }, [])
   const intitalChart = () => {
     const svg = d3.select(ref.current)
-    svg.attr('width', width).attr('height', 300).style('overflow', 'visible')
+    svg.attr('width', width).attr('height', 300)
+    svg
+      .append('defs')
+      .append('clipPath')
+      .attr('id', 'clip')
+      .append('rect')
+      .attr('width', width)
   }
   const draw = () => {
     const svg = d3.select(ref.current)
     svg.selectAll('*').remove()
+    console.log('removed')
     svg.selectAll('rect').data(long)
     const domainMin = d3.min(long, function (d) {
-      return d.x - d.x * 0.2
+      console.log(d.x)
+      return d.x * 0.98
     })
+
     const domainMax = d3.max(long, function (d) {
-      return d.x + d.x * 0.1
+      return d.x
     })
-    console.log('domainMax', domainMin)
-    const x = d3.scaleLinear().domain([domainMin, domainMax]).range([0, width])
+
+    const x = d3
+      .scaleLinear()
+      .domain([start * 0.95, domainMax])
+      .range([0, width * 0.98])
     const y = d3
       .scaleLinear()
       .domain([
@@ -178,7 +200,7 @@ export function PayoffProfile(props) {
   }
   useEffect(() => {
     draw()
-  }, [props, long, short])
+  }, [props, long, short, cap, strike, floor])
 
   return <svg ref={ref}></svg>
 }
