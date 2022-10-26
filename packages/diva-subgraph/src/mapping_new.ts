@@ -421,8 +421,8 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   log.info("handleLiquidityRemoved", []);
   handleLiquidityEvent(
     event.params.poolId,
-    event.transaction.from, // COMMENT Place holder for longRecipient
-    event.transaction.from, // COMMENT Place holder for shortRecipient
+    event.params.longTokenHolder, // COMMENT Place holder for longRecipient
+    event.params.shortTokenHolder, // COMMENT Place holder for shortRecipient
     event.address,
     event.transaction.from,
     event.block.timestamp,
