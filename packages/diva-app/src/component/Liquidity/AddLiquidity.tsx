@@ -67,15 +67,6 @@ export const AddLiquidity = ({ pool }: Props) => {
     ERC20,
     provider?.getSigner()
   )
-  console.log('Token:', token)
-  /* const diva =
-    chainId != null
-      ? new ethers.Contract(
-          config[chainId!].divaAddress,
-          DIVA_ABI,
-          provider.getSigner()
-        )
-      : null */
   useEffect(() => {
     if (pool) {
       setDecimal(pool.collateralToken.decimals)
@@ -112,16 +103,15 @@ export const AddLiquidity = ({ pool }: Props) => {
   useEffect(() => {
     if (account) {
       const getRemainingAllownace = async () => {
-        const RemainingAllownace = await token.allowance(
+        const Allownace = await token.allowance(
           account,
           config[chainId]?.divaAddress
         )
-        setRemainingAllowance(Number(RemainingAllownace))
+        setRemainingAllowance(Number(Allownace))
       }
       getRemainingAllownace()
     }
-  }, [])
-  console.log('Remaining Allowance', Number(remainingAllowanace))
+  }, [account, chainId, token])
   return (
     <>
       {loading ? (
