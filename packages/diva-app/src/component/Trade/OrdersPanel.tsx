@@ -15,8 +15,9 @@ export default function OrdersPanel(props: {
   option: Pool
   tokenAddress: string
   exchangeProxy: string
+  isShowSellOrder?: boolean
 }) {
-  const [orderType, setOrderTypeValue] = React.useState('')
+  const [orderType, setOrderTypeValue] = React.useState('buy')
   const theme = useTheme()
 
   const handleOrderTypeChange = (event: any, newValue: string) => {
@@ -28,8 +29,8 @@ export default function OrdersPanel(props: {
       <Stack direction="column" width={theme.spacing(95)}>
         <Stack direction="row" justifyContent="space-between">
           <TabList onChange={handleOrderTypeChange}>
-            <Tab label="Buy" value="orderbook" />
-            <Tab label="Sell" value="" />
+            <Tab label="Buy" value="buy" />
+            <Tab label="Sell" value="sell" />
             <Tab label="Your open orders" value="openorders" />
             <Tab label="Trade History" value="tradehistory" />
           </TabList>
@@ -53,8 +54,16 @@ export default function OrdersPanel(props: {
           </Stack>
         </Stack>
         <Divider orientation="horizontal" />
-        <TabPanel value="orderbook">
+        <TabPanel value="buy">
           <OrderBook
+            option={props.option}
+            tokenAddress={props.tokenAddress}
+            exchangeProxy={props.exchangeProxy}
+          />
+        </TabPanel>
+        <TabPanel value="sell">
+          <OrderBook
+            isSellOrder
             option={props.option}
             tokenAddress={props.tokenAddress}
             exchangeProxy={props.exchangeProxy}
