@@ -11,7 +11,7 @@ type Pool @entity {
   floor: BigInt!
   inflection: BigInt!
   cap: BigInt!
-  supplyInitial: BigInt!
+  supplyInitial: BigInt! # QUESTION still relevant?
   supplyShort: BigInt!
   supplyLong: BigInt!
   expiryTime: BigInt!

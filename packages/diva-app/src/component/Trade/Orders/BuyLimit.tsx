@@ -311,12 +311,10 @@ export default function BuyLimit(props: {
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
       BigNumber.from(option.cap),
-      BigNumber.from(option.collateralBalanceLongInitial),
-      BigNumber.from(option.collateralBalanceShortInitial),
+      BigNumber.from(option.gradient),
       option.statusFinalReferenceValue === 'Open' && usdPrice != ''
         ? parseUnits(usdPrice)
         : BigNumber.from(option.finalReferenceValue),
-      BigNumber.from(option.supplyInitial),
       decimals
     )
     if (pricePerOption.gt(0)) {
