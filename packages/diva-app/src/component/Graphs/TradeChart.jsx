@@ -27,23 +27,28 @@ export default function DIVATradeChart(props) {
   const optionTypeText = isLong ? 'LONG' : 'SHORT'
   const reffeenceAsset = refAsset.slice(0, 8)
   const [chartWidth, setChartWidth] = useState(w)
+  const [chartHeight, setChartHeight] = useState(h)
   const [isLegendResponsive, setLegendResponsive] = useState(true)
 
   const getSvgContainerSize = () => {
     const newWidth = svgContainer.current.clientWidth
+    const newHeight = svgContainer.current.clientHeight
     setChartWidth(newWidth)
+    if (newHeight >= chartHeight) {
+      setChartHeight(newHeight)
+    }
   }
 
   useEffect(() => {
     getSvgContainerSize()
     window.addEventListener('resize', getSvgContainerSize)
     return () => window.removeEventListener('resize', getSvgContainerSize)
-  }, [props.w])
+  }, [props.w, props.h])
 
   // Set the dimensions and margins of the graph
   const margin = { top: 15, right: 20, bottom: 40, left: 0 },
     width = chartWidth - margin.left - margin.right,
-    height = h - margin.top - margin.bottom
+    height = chartHeight - margin.top - margin.bottom
 
   const labelWidth = 30
   const labelHeight = 10

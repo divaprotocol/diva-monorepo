@@ -51,7 +51,7 @@ const LeftCompFlexContainer = styled.div`
   flex-basis: 100%;
 `
 const LeftDiv = styled.div`
-  width: 60%;
+  width: 50%;
 `
 const RightDiv = styled.div`
   width: 35%;
