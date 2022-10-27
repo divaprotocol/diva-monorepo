@@ -27,12 +27,7 @@ import { config } from '../../constants'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import DIVA_ABI from '@diva/contracts/abis/diamond.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { useQuery } from 'react-query'
 import ERC20 from '@diva/contracts/abis/erc20.json'
@@ -309,7 +304,7 @@ const SubmitButton = (props: any) => {
                 diva
                   .setFinalReferenceValue(
                     props.id.split('/')[0],
-                    parseEther(props.row.Inflection),
+                    parseUnits(props.row.Inflection),
                     false
                   )
                   .then((tx) => {
@@ -514,7 +509,7 @@ const SubmitButton = (props: any) => {
                   diva
                     .challengeFinalReferenceValue(
                       props.id.split('/')[0],
-                      parseEther(textFieldValue)
+                      parseUnits(textFieldValue)
                     )
                     .then((tx) => {
                       /**
@@ -557,7 +552,7 @@ const Payoff = (props: any) => {
       state,
       props.row.Payoff.id,
       props.row.finalValue != '-'
-        ? parseEther(props.row.finalValue).toString()
+        ? parseUnits(props.row.finalValue).toString()
         : '-'
     )
   )
@@ -931,6 +926,7 @@ export function MyPositions() {
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
       Cap: formatUnits(val.cap),
+      Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
       Expiry: getDateTime(val.expiryTime),
       Sell: 'TBD',
       Buy: 'TBD',
@@ -940,22 +936,10 @@ export function MyPositions() {
     }
 
     const payOff = {
-      CollateralBalanceLong: Number(
-        formatUnits(
-          val.collateralBalanceLongInitial,
-          val.collateralToken.decimals
-        )
-      ),
-      CollateralBalanceShort: Number(
-        formatUnits(
-          val.collateralBalanceShortInitial,
-          val.collateralToken.decimals
-        )
-      ),
-      Floor: Number(formatEther(val.floor)),
-      Inflection: Number(formatEther(val.inflection)),
-      Cap: Number(formatEther(val.cap)),
-      TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
+      Gradient: Number(formatUnits(val.gradient, val.collateralToken.decimals)),
+      Floor: Number(formatUnits(val.floor)),
+      Inflection: Number(formatUnits(val.inflection)),
+      Cap: Number(formatUnits(val.cap)),
     }
 
     return [
@@ -965,18 +949,6 @@ export function MyPositions() {
         id: `${val.id}/long`,
         Id: 'L' + val.id,
         address: val.longToken,
-        Gradient: Number(
-          formatUnits(
-            BigNumber.from(val.collateralBalanceLongInitial)
-              .mul(parseUnits('1', val.collateralToken.decimals))
-              .div(
-                BigNumber.from(val.collateralBalanceLongInitial).add(
-                  BigNumber.from(val.collateralBalanceShortInitial)
-                )
-              ),
-            val.collateralToken.decimals
-          )
-        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
@@ -998,18 +970,6 @@ export function MyPositions() {
         id: `${val.id}/short`,
         Id: 'S' + val.id,
         address: val.shortToken,
-        Gradient: Number(
-          formatUnits(
-            BigNumber.from(val.collateralBalanceShortInitial)
-              .mul(parseUnits('1', val.collateralToken.decimals))
-              .div(
-                BigNumber.from(val.collateralBalanceLongInitial).add(
-                  BigNumber.from(val.collateralBalanceShortInitial)
-                )
-              ),
-            val.collateralToken.decimals
-          )
-        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
@@ -1107,7 +1067,8 @@ export function MyPositions() {
                 ? 'n/a'
                 : tokenBalances[v.address.id].lt(parseUnits('1', 16))
                 ? '<0.01'
-                : parseFloat(formatUnits(tokenBalances[v.address.id])).toFixed(
+                : // QUESTION Do we need decimals here?
+                  parseFloat(formatUnits(tokenBalances[v.address.id])).toFixed(
                     4
                   ),
           }))

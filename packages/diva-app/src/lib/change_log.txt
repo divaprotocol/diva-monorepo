@@ -21,3 +21,4 @@ TODO:
 
 QUESTIONS:
 - Remove `convertExponentialToDecimal` in calcPayoffsPerToken.ts?
+- Settlement periods are not longer general but pool specific -> adjust

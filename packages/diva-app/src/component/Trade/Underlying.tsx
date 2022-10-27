@@ -106,22 +106,10 @@ export default function Underlying() {
   }
 
   const OptionParams = {
-    CollateralBalanceLong: Number(
-      formatUnits(
-        pool.collateralBalanceLongInitial,
-        pool.collateralToken.decimals
-      )
-    ),
-    CollateralBalanceShort: Number(
-      formatUnits(
-        pool.collateralBalanceShortInitial,
-        pool.collateralToken.decimals
-      )
-    ),
+    Gradient: Number(formatUnits(pool.gradient, pool.collateralToken.decimals)),
     Floor: Number(formatEther(pool.floor)),
     Inflection: Number(formatEther(pool.inflection)),
     Cap: Number(formatEther(pool.cap)),
-    TokenSupply: Number(formatEther(pool.supplyInitial)),
     IsLong: isLong,
   }
   const data = generatePayoffChartData(OptionParams, currentPrice)
