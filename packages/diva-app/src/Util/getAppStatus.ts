@@ -1,4 +1,4 @@
-import { formatEther } from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 
 // Function to provide users more detailed settlement status information than is provided
 // in the smart contract. Function returns both, the status of the final reference value as well as the
@@ -45,18 +45,18 @@ export function getAppStatus(
       } else if (now > submissionPeriodEnd && now <= fallbackPeriodEnd) {
         status = 'Fallback'
       } else if (now > fallbackPeriodEnd) {
-        finalValue = parseFloat(formatEther(inflection)).toFixed(4)
+        finalValue = parseFloat(formatUnits(inflection)).toFixed(4)
         status = 'Confirmed*'
       }
     } else if (
       (statusFinalReferenceValue === 'Challenged' && now > reviewPeriodEnd) ||
       (statusFinalReferenceValue === 'Submitted' && now > challengePeriodEnd)
     ) {
-      finalValue = parseFloat(formatEther(finalReferenceValue)).toFixed(4)
+      finalValue = parseFloat(formatUnits(finalReferenceValue)).toFixed(4)
       status = 'Confirmed*'
     } else {
       // Submitted or (Challenged && within the challenge period)
-      finalValue = parseFloat(formatEther(finalReferenceValue)).toFixed(4)
+      finalValue = parseFloat(formatUnits(finalReferenceValue)).toFixed(4)
       status = statusFinalReferenceValue
     }
   }

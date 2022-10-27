@@ -12,7 +12,7 @@ export enum EtherscanLinkType {
 }
 
 export function getEtherscanLink(
-  chainId = 5,
+  chainId = 5, // QUESTION Is this the default value?
   address: string,
   type: EtherscanLinkType
 ): string {

@@ -1,8 +1,7 @@
 export function generatePayoffChartData(data, currentPrice) {
+  // TODO Consider renaming "currentPrice" to "currentUnderlyingValue"
   const optionData = data
-  const CollateralBalanceLong = data.CollateralBalanceLong // temporarily hard-coded
-  const CollateralBalanceShort = data.CollateralBalanceShort // temporarily hard-coded
-  const TokenSupply = data.TokenSupply // temporarily hard-coded
+  const Gradient = data.Gradient
 
   const minXValue = () => {
     if (!isNaN(currentPrice)) {
@@ -27,7 +26,7 @@ export function generatePayoffChartData(data, currentPrice) {
     chartData = [
       { x: minXValue(), y: 0 },
       { x: optionData.Floor, y: 0 },
-      { x: optionData.Inflection, y: CollateralBalanceLong / TokenSupply },
+      { x: optionData.Inflection, y: Gradient },
       {
         x: optionData.Cap,
         y: 1,
@@ -47,7 +46,7 @@ export function generatePayoffChartData(data, currentPrice) {
         x: optionData.Floor,
         y: 1,
       },
-      { x: optionData.Inflection, y: CollateralBalanceShort / TokenSupply },
+      { x: optionData.Inflection, y: 1 - Gradient },
       { x: optionData.Cap, y: 0 },
       { x: maxXValue(), y: 0 },
     ]
