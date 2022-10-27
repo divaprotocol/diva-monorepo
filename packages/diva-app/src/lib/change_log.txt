@@ -1,0 +1,9 @@
+lib/queries.ts:
+* collateralBalanceLongInitial and collateralBalanceShortInitial replaced by collateralBalanceGross and gradient
+* redemptionAmountLongToken and redemptionAmountShortToken renamed to payoutLong and payoutShort
+* redemptionFee renamed to protocol fee
+* supplyInitial dropped
+
+
+To check:
+* ...

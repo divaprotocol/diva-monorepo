@@ -1053,7 +1053,7 @@ export function MyPositions() {
       []
     )
     const contract = new ethers.Contract(
-      config[chainId].balanceCheckAddress,
+      config[chainId].balanceCheckerAddress,
       BalanceCheckerABI,
       provider
     )

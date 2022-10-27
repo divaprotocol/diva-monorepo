@@ -51,7 +51,7 @@ async function getFillableOrders(
   // Connect to BalanceChecker contract which implements the `getMinOfBalancesOrAllowances` which allows to
   // obtain the minimum of allowance and balance for an array of maker address with one single call
   const contract = new ethers.Contract(
-    config[chainId].balanceCheckAddress,
+    config[chainId].balanceCheckerAddress,
     BalanceCheckerABI,
     provider
   )

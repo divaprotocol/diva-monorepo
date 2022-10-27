@@ -1,4 +1,4 @@
-import { parseEther, parseUnits } from 'ethers/lib/utils'
+import { parseUnits } from 'ethers/lib/utils'
 import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
 import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
 
@@ -7,73 +7,42 @@ export function calcPayoffPerToken(
   floor,
   inflection,
   cap,
-  collateralBalanceLongInitial,
-  collateralBalanceShortInitial,
+  gradient,
   finalReferenceValue,
-  supplyInitial,
   collateralTokenDecimals
 ) {
   const SCALING = parseUnits('1', 18 - collateralTokenDecimals)
-  const UNIT = parseEther('1')
+  const UNIT = parseUnits('1')
 
-  const collateralBalanceLongInitialScaled =
-    collateralBalanceLongInitial.mul(SCALING)
-  const collateralBalanceShortInitialScaled =
-    collateralBalanceShortInitial.mul(SCALING)
+  const gradientScaled = gradient.mul(SCALING)
 
-  let payoffLong
+  let payoffPerLongToken
 
   if (finalReferenceValue.eq(inflection)) {
-    payoffLong = collateralBalanceLongInitialScaled
+    payoffPerLongToken = gradientScaled
+  } else if (finalReferenceValue.lte(floor)) {
+    payoffPerLongToken = 0
+  } else if (finalReferenceValue.gte(cap)) {
+    payoffPerLongToken = UNIT
   } else if (finalReferenceValue.lt(inflection)) {
-    if ((cap.eq(inflection) && floor.eq(inflection)) || floor.eq(inflection)) {
-      payoffLong = BigENumber.from(0)
-    } else {
-      if (finalReferenceValue.gt(floor)) {
-        payoffLong = collateralBalanceLongInitialScaled
-          .mul(finalReferenceValue.sub(floor))
-          .div(inflection.sub(floor))
-      } else {
-        payoffLong = BigENumber.from(0)
-      }
-    }
-  } else {
-    if ((cap.eq(inflection) && floor.eq(inflection)) || inflection.eq(cap)) {
-      payoffLong = collateralBalanceLongInitialScaled.add(
-        collateralBalanceShortInitialScaled
-      )
-    } else {
-      if (finalReferenceValue.lt(cap)) {
-        payoffLong = collateralBalanceLongInitialScaled.add(
-          collateralBalanceShortInitialScaled
-            .mul(finalReferenceValue.sub(inflection))
-            .div(cap.sub(inflection))
-        )
-      } else {
-        payoffLong = collateralBalanceLongInitialScaled.add(
-          collateralBalanceShortInitialScaled
-        )
-      }
-    }
+    payoffPerLongToken = gradientScaled
+      .mul(finalReferenceValue.sub(floor))
+      .div(inflection.sub(floor))
+  } else if (finalReferenceValue.gt(inflection)) {
+    payoffPerLongToken = gradientScaled.add(
+      UNIT.sub(gradientScaled)
+        .mul(finalReferenceValue.sub(inflection))
+        .div(cap.sub(inflection))
+    )
   }
-  const payoffShort = collateralBalanceLongInitialScaled
-    .add(collateralBalanceShortInitialScaled)
-    .sub(payoffLong)
 
-  const payoffPerLongToken = payoffLong
-    .mul(UNIT)
-    .div(supplyInitial)
-    .div(SCALING)
-  const payoffPerShortToken = payoffShort
-    .mul(UNIT)
-    .div(supplyInitial)
-    .div(SCALING)
+  const payoffPerShortToken = UNIT.sub(payoffPerLongToken)
 
   return { payoffPerLongToken, payoffPerShortToken }
 }
 
 export function calcBreakEven(
-  price,
+  price, // TODO rename to underlyingValue
   floor,
   inflection,
   cap,
@@ -81,7 +50,7 @@ export function calcBreakEven(
   collateralBalanceShortInitial,
   isLong
 ) {
-  const UNIT = parseEther('1')
+  const UNIT = parseUnits('1')
 
   // Convert inputs into Big Numbers
   floor = BigENumber.from(floor)

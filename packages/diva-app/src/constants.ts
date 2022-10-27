@@ -44,7 +44,7 @@ type SingleConfig = {
   readonly name: string
   readonly divaAddress: string
   readonly divaAddressNew: string
-  readonly balanceCheckAddress: string
+  readonly balanceCheckerAddress: string
   readonly exchangeProxy: string
   readonly whitelistAddress: string
   readonly divaSubgraph: string
@@ -70,7 +70,7 @@ export const config: { [key: number]: SingleConfig } = {
     name: 'Ethereum',
     divaAddress: '',
     divaAddressNew: '',
-    balanceCheckAddress: '',
+    balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
     divaSubgraph: '',
@@ -88,7 +88,7 @@ export const config: { [key: number]: SingleConfig } = {
     name: 'Ropsten',
     divaAddress: '0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211',
     divaAddressNew: '',
-    balanceCheckAddress: '0xD713aeC2156709A6AF392bb84018ACc6b44f1885',
+    balanceCheckerAddress: '0xD713aeC2156709A6AF392bb84018ACc6b44f1885',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
@@ -106,12 +106,12 @@ export const config: { [key: number]: SingleConfig } = {
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
-    divaAddressNew: '0x6cDEc9b70431bf650f3A0DDD0e246368a4C4F1E1',
-    balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
+    divaAddressNew: '0x2d941518E0876Fb6042bfCdB403427DC5620b2EC', // 26.10.2022
+    balanceCheckerAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli-new',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
     allOrders: 'https://eip712api.xyz/0x/orderbook/v1/orders/',
@@ -128,7 +128,7 @@ export const config: { [key: number]: SingleConfig } = {
     name: 'Polygon',
     divaAddress: '',
     divaAddressNew: '',
-    balanceCheckAddress: '',
+    balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
     divaSubgraph: '',
@@ -146,7 +146,7 @@ export const config: { [key: number]: SingleConfig } = {
     name: 'Mumbai',
     divaAddress: '',
     divaAddressNew: '',
-    balanceCheckAddress: '',
+    balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
     divaSubgraph: '',
@@ -168,7 +168,7 @@ export const config: { [key: number]: SingleConfig } = {
     name: 'Arbitrum',
     divaAddress: '',
     divaAddressNew: '',
-    balanceCheckAddress: '',
+    balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
     divaSubgraph: '',
@@ -184,7 +184,7 @@ export const config: { [key: number]: SingleConfig } = {
   },
 }
 
-// array of all chains id
+// array of all chain ids
 export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(
   SupportedChainId
 ).filter((id) => typeof id === 'number') as SupportedChainId[]
@@ -192,11 +192,14 @@ export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(
 // current supported chain
 export const CURRENT_SUPPORTED_CHAIN_ID = [SupportedChainId.ROPSTEN]
 
+// TODO Use capital letters
 export const divaGovernanceAddress =
   '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E' // creator of pools on Main Markets page and trading fee recipient
 
+// TODO Use capital letters
 export const tradingFee = 0.01 // 1%
 
+// TODO Think about merging tradingFee and DEFAULT_TAKER_TOKEN_FEE
 export const DEFAULT_TAKER_TOKEN_FEE = 1000 // 1000 = 1%
 
 export const DEFAULT_THRESHOLD = 100
@@ -227,7 +230,7 @@ export const APP_BAR_ITEMS = [
     icon: Add,
   },
   {
-    label: 'Testnet Tasks',
+    label: 'Testnet Tasks', // TODO rename
     to: '/tasks',
     icon: TaskIcon,
   },
