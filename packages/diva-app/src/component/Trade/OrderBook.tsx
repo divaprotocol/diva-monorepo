@@ -6,120 +6,26 @@ import Box from '@mui/material/Box'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
-import { BigNumber } from 'ethers'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { useState, useEffect } from 'react'
 import { useAppSelector } from '../../Redux/hooks'
-import { get0xOpenOrders } from '../../DataService/OpenOrders'
-import { getExpiryMinutesFromNow } from '../../Util/Dates'
+import { ORDER_TYPE } from '../../Models/orderbook'
+import { WEBSOCKET_URL } from '../../constants'
+import {
+  createTable,
+  get0xOpenOrders,
+  getResponse,
+  mapOrderData,
+} from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { selectChainId } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 const PageDiv = styled.div`
   width: 100%;
 `
-
-/**
- * Prepare the data to be displayed in the orderbook (price, quantity and expires in)
- */
-function mapOrderData(
-  records: [],
-  option: Pool,
-  orderType: number // 0 = BUY, 1 = SELL
-) {
-  // Get orderbook (comes already filtered and clean-up; see OpenOrders.tsx)
-  const orderbook: any = records.map((record: any) => {
-    const order = record.order
-    const metaData = record.metaData
-    const orders: any = {}
-
-    // Buy Limit (orderType = 0)
-    if (orderType === 0) {
-      orders.expiry = getExpiryMinutesFromNow(order.expiry)
-      orders.orderType = 'buy'
-      orders.id = 'buy' + records.indexOf(record as never)
-
-      // Calculate Bid amount
-      const bidAmount = BigNumber.from(order.makerAmount)
-        .mul(parseUnits('1'))
-        .div(BigNumber.from(order.takerAmount)) // result is in collateral token decimals
-
-      // Value to display in the orderbook
-      orders.bid = formatUnits(bidAmount, option.collateralToken.decimals)
-
-      // Display remainingFillableTakerAmount as the quantity in the orderbook
-      orders.nbrOptions = formatUnits(
-        BigNumber.from(metaData.remainingFillableTakerAmount)
-      )
-    }
-
-    // Sell Limit (orderType = 1)
-    if (orderType === 1) {
-      orders.expiry = getExpiryMinutesFromNow(order.expiry)
-      orders.orderType = 'sell'
-      orders.id = 'sell' + records.indexOf(record as never)
-
-      // Calculate Ask amount
-      const askAmount = BigNumber.from(order.takerAmount)
-        .mul(parseUnits('1'))
-        .div(BigNumber.from(order.makerAmount)) // result is in collateral token decimals
-
-      // Value to display in the orderbook
-      orders.ask = formatUnits(askAmount, option.collateralToken.decimals)
-
-      if (
-        BigNumber.from(metaData.remainingFillableTakerAmount).lt(
-          BigNumber.from(order.takerAmount)
-        )
-      ) {
-        const remainingFillableMakerAmount = BigNumber.from(
-          metaData.remainingFillableTakerAmount
-        )
-          .mul(BigNumber.from(order.makerAmount))
-          .div(BigNumber.from(order.takerAmount))
-        orders.nbrOptions = formatUnits(remainingFillableMakerAmount)
-      } else {
-        orders.nbrOptions = formatUnits(BigNumber.from(order.makerAmount))
-      }
-    }
-    return orders
-  })
-
-  return orderbook
-}
-
-function createTable(buyOrders: any, sellOrders: any) {
-  // Get orderbook table length
-  const buyOrdersCount = buyOrders !== 'undefined' ? buyOrders.length : 0
-  const sellOrdersCount = sellOrders !== 'undefined' ? sellOrders.length : 0
-  const tableLength =
-    buyOrdersCount >= sellOrdersCount ? buyOrdersCount : sellOrdersCount
-
-  const table: any = []
-  if (tableLength === 0) {
-    return table
-  } else {
-    for (let j = 0; j < tableLength; j++) {
-      const buyOrder = buyOrders[j]
-      const sellOrder = sellOrders[j]
-      const row = {
-        buyExpiry: buyOrder?.expiry == null ? '-' : buyOrder.expiry + ' mins',
-        buyQuantity: buyOrder?.nbrOptions == null ? '' : buyOrder.nbrOptions,
-        bid: buyOrder?.bid == null ? '' : buyOrder.bid,
-        sellExpiry:
-          sellOrder?.expiry == null ? '-' : sellOrder.expiry + ' mins',
-        sellQuantity: sellOrder?.nbrOptions == null ? '' : sellOrder.nbrOptions,
-        ask: sellOrder?.ask == null ? '' : sellOrder.ask,
-      }
-      table.push(row)
-    }
-    return table
-  }
-}
 
 export default function OrderBook(props: {
   option: Pool
@@ -131,12 +37,11 @@ export default function OrderBook(props: {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const [orderBook, setOrderBook] = useState([] as any)
-  const OrderType = {
-    BUY: 0,
-    SELL: 1,
-  }
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
+  const [websocketClient, setWebsocketClient] = useState(
+    new WebSocket(WEBSOCKET_URL)
+  )
   const componentDidMount = async () => {
     const orders = []
     if (responseSell.length === 0) {
@@ -176,16 +81,24 @@ export default function OrderBook(props: {
     // )
     // console.log('sellOrdersByMakerAddress', sellOrdersByMakerAddress)
 
-    const orderBookBuy = mapOrderData(responseBuy, option, OrderType.BUY)
+    const orderBookBuy = mapOrderData(
+      responseBuy,
+      option.collateralToken.decimals,
+      ORDER_TYPE.BUY
+    )
     orders.push(orderBookBuy)
 
-    const orderBookSell = mapOrderData(responseSell, option, OrderType.SELL)
+    const orderBookSell = mapOrderData(
+      responseSell,
+      option.collateralToken.decimals,
+      ORDER_TYPE.SELL
+    )
     orders.push(orderBookSell)
 
     //put both buy & sell orders in one array to format table rows
     const completeOrderBook = createTable(
-      orders[OrderType.BUY],
-      orders[OrderType.SELL]
+      orders[ORDER_TYPE.BUY],
+      orders[ORDER_TYPE.SELL]
     )
     setOrderBook(completeOrderBook)
   }
@@ -194,6 +107,72 @@ export default function OrderBook(props: {
     componentDidMount()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [responseBuy, responseSell, provider])
+
+  useEffect(() => {
+    if (websocketClient !== undefined) {
+      // Connect to server using websocket
+      websocketClient.onopen = () => {
+        console.log('WebSocket Connected')
+      }
+
+      // Receive data using websocket
+      websocketClient.onmessage = (e) => {
+        const message = JSON.parse(e.data)
+        const orders = message.filter((item) => item.poolId === option.id)
+
+        if (orders.length !== 0) {
+          const updateOrders = []
+          const checkOrders = orders[0]
+
+          // Get first and second order's bids
+          const firstRecords = checkOrders.first.bids.records
+          const secondRecords = checkOrders.second.bids.records
+
+          // Get updated pool's buy and sell data
+          const { responseBuy, responseSell } = getResponse(
+            optionTokenAddress,
+            firstRecords,
+            secondRecords
+          )
+
+          // Get updated orderbook buy data
+          const orderBookBuy = mapOrderData(
+            responseBuy,
+            option.collateralToken.decimals,
+            ORDER_TYPE.BUY
+          )
+          updateOrders.push(orderBookBuy)
+
+          // Get updated orderbook buy data
+          const orderBookSell = mapOrderData(
+            responseSell,
+            option.collateralToken.decimals,
+            ORDER_TYPE.SELL
+          )
+          updateOrders.push(orderBookSell)
+
+          //put both buy & sell orders in one array to format table rows
+          const completeOrderBook = createTable(
+            updateOrders[ORDER_TYPE.BUY],
+            updateOrders[ORDER_TYPE.SELL]
+          )
+
+          setOrderBook(completeOrderBook)
+        }
+      }
+
+      return () => {
+        websocketClient.onclose = () => {
+          console.log('WebSocket Disconnected')
+          setWebsocketClient(new WebSocket(WEBSOCKET_URL))
+        }
+      }
+    }
+  }, [
+    websocketClient.onmessage,
+    websocketClient.onopen,
+    websocketClient.onclose,
+  ])
 
   return (
     <PageDiv>

@@ -17,6 +17,7 @@ import {
   PriceResponseType,
   PriceOutputType,
 } from '../Models/orderbook'
+import { Pool } from '../lib/queries'
 
 /**
  * Filter for orders that can actually be filled, i.e. where makers
@@ -403,6 +404,32 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
   }
 }
 
+export const getOrderbookPricesOutput = (
+  priceResponse: any,
+  poolInfoArray: PoolInfoType[]
+) => {
+  const output: OrderOutputType[] = []
+  // Formatting data format for using market page tables
+  priceResponse.records.map((poolPrice: PriceResponseType) => {
+    const poolInfo = getPoolInformation(poolPrice, poolInfoArray)
+    const type = poolInfo.poolId[0] === 'S' ? 'Sell' : 'Buy'
+    const decimals = poolInfo.collateralTokenDecimals
+    const price: PriceOutputType = {
+      poolId: poolInfo.poolId, // pool id
+      type: type, // pool type
+      baseToken: poolPrice.baseToken, // pool baseToken
+      quoteToken: poolPrice.quoteToken, // pool quoteToken
+      bid: poolPrice.bid, // best bid of pool
+      ask: poolPrice.ask, // best ask of pool
+      decimals: decimals, // collateral token decimals of pool
+    }
+
+    output.push(getOrderOutput(price))
+  })
+
+  return output
+}
+
 /**
  * A function to get orderbook price using orderbook price endpoint
  * @param {OrderbookPriceRequest} req // orderbook price request
@@ -444,24 +471,7 @@ export const getOrderbookPrices = async (
     .then(async function (response) {
       const priceResponse: any = response.data
 
-      const output: OrderOutputType[] = []
-      // Formatting data format for using market page tables
-      priceResponse.records.map((poolPrice: PriceResponseType) => {
-        const poolInfo = getPoolInformation(poolPrice, req.poolInfo)
-        const type = poolInfo.poolId[0] === 'S' ? 'Sell' : 'Buy'
-        const decimals = poolInfo.collateralTokenDecimals
-        const price: PriceOutputType = {
-          poolId: poolInfo.poolId, // pool id
-          type: type, // pool type
-          baseToken: poolPrice.baseToken, // pool baseToken
-          quoteToken: poolPrice.quoteToken, // pool quoteToken
-          bid: poolPrice.bid, // best bid of pool
-          ask: poolPrice.ask, // best ask of pool
-          decimals: decimals, // collateral token decimals of pool
-        }
-
-        output.push(getOrderOutput(price))
-      })
+      const output = getOrderbookPricesOutput(priceResponse, req.poolInfo)
 
       return output
     })
@@ -498,5 +508,143 @@ export const getUserOrders = async (trader: string, chainId) => {
         return {}
       })
     return res
+  }
+}
+
+export const getAddress = (address: string) => {
+  return ethers.utils.getAddress(address)
+}
+
+/**
+ * Prepare the data to be displayed in the orderbook (price, quantity and expires in)
+ */
+export const mapOrderData = (
+  records: any[],
+  decimals: number,
+  orderType: number // 0 = BUY, 1 = SELL
+) => {
+  // Get orderbook (comes already filtered and clean-up; see OpenOrders.tsx)
+  const orderbook: any = records.map((record: any) => {
+    const order = record.order
+    const metaData = record.metaData
+    const orders: any = {}
+
+    // Buy Limit (orderType = 0)
+    if (orderType === 0) {
+      orders.expiry = getExpiryMinutesFromNow(order.expiry)
+      orders.orderType = 'buy'
+      orders.id = 'buy' + records.indexOf(record as never)
+
+      // Calculate Bid amount
+      const bidAmount = BigNumber.from(order.makerAmount)
+        .mul(parseUnits('1'))
+        .div(BigNumber.from(order.takerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
+      orders.bid = formatUnits(bidAmount, decimals)
+
+      // Display remainingFillableTakerAmount as the quantity in the orderbook
+      orders.nbrOptions = formatUnits(
+        BigNumber.from(metaData.remainingFillableTakerAmount)
+      )
+    }
+
+    // Sell Limit (orderType = 1)
+    if (orderType === 1) {
+      orders.expiry = getExpiryMinutesFromNow(order.expiry)
+      orders.orderType = 'sell'
+      orders.id = 'sell' + records.indexOf(record as never)
+
+      // Calculate Ask amount
+      const askAmount = BigNumber.from(order.takerAmount)
+        .mul(parseUnits('1'))
+        .div(BigNumber.from(order.makerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
+      orders.ask = formatUnits(askAmount, decimals)
+
+      if (
+        BigNumber.from(metaData.remainingFillableTakerAmount).lt(
+          BigNumber.from(order.takerAmount)
+        )
+      ) {
+        const remainingFillableMakerAmount = BigNumber.from(
+          metaData.remainingFillableTakerAmount
+        )
+          .mul(BigNumber.from(order.makerAmount))
+          .div(BigNumber.from(order.takerAmount))
+        orders.nbrOptions = formatUnits(remainingFillableMakerAmount)
+      } else {
+        orders.nbrOptions = formatUnits(BigNumber.from(order.makerAmount))
+      }
+    }
+    return orders
+  })
+
+  return orderbook
+}
+
+export const createTable = (buyOrders: any, sellOrders: any) => {
+  // Get orderbook table length
+  const buyOrdersCount = buyOrders !== 'undefined' ? buyOrders.length : 0
+  const sellOrdersCount = sellOrders !== 'undefined' ? sellOrders.length : 0
+  const tableLength =
+    buyOrdersCount >= sellOrdersCount ? buyOrdersCount : sellOrdersCount
+
+  const table: any = []
+  if (tableLength === 0) {
+    return table
+  } else {
+    for (let j = 0; j < tableLength; j++) {
+      const buyOrder = buyOrders[j]
+      const sellOrder = sellOrders[j]
+      const row = {
+        buyExpiry: buyOrder?.expiry == null ? '-' : buyOrder.expiry + ' mins',
+        buyQuantity: buyOrder?.nbrOptions == null ? '' : buyOrder.nbrOptions,
+        bid: buyOrder?.bid == null ? '' : buyOrder.bid,
+        sellExpiry:
+          sellOrder?.expiry == null ? '-' : sellOrder.expiry + ' mins',
+        sellQuantity: sellOrder?.nbrOptions == null ? '' : sellOrder.nbrOptions,
+        ask: sellOrder?.ask == null ? '' : sellOrder.ask,
+      }
+      table.push(row)
+    }
+    return table
+  }
+}
+
+export const getResponse = (
+  makerToken: string,
+  firstOrdersBid: any[],
+  secondOrdersBid: any[]
+) => {
+  let responseSell = []
+  let responseBuy = []
+  // Get responseBuy and responseSell using makerToken
+  if (firstOrdersBid.length !== 0) {
+    // If the bids for the first order is not empty
+    const bidOrder = firstOrdersBid[0].order
+    if (getAddress(bidOrder.makerToken) === getAddress(makerToken)) {
+      responseBuy = secondOrdersBid
+      responseSell = firstOrdersBid
+    } else {
+      responseBuy = firstOrdersBid
+      responseSell = secondOrdersBid
+    }
+    // If the bids for the first order is empty and the bids for the second order is not empty
+  } else if (secondOrdersBid.length !== 0) {
+    const bidOrder = secondOrdersBid[0].order
+    if (getAddress(bidOrder.makerToken) === getAddress(makerToken)) {
+      responseBuy = firstOrdersBid
+      responseSell = secondOrdersBid
+    } else {
+      responseBuy = secondOrdersBid
+      responseSell = firstOrdersBid
+    }
+  }
+
+  return {
+    responseBuy,
+    responseSell,
   }
 }

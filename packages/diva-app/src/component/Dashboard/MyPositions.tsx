@@ -1,13 +1,22 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Button,
-  Container,
+  Checkbox,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
+  Divider,
+  Grid,
+  InputAdornment,
+  Pagination,
   Stack,
+  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -45,12 +54,17 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { ExpiresInCell } from '../Markets/Markets'
 import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
-import request from 'graphql-request'
-import { Pool, queryUser } from '../../lib/queries'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
-import PoolsTableFilter from '../PoolsTableFilter/DropDownFilter'
+import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import { FilterDrawerModal } from './FilterDrawerMobile'
+import { useHistory } from 'react-router-dom'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import { Search } from '@mui/icons-material'
+import { getTopNObjectByProperty, getColorByStatus } from '../../Util/dashboard'
+import useTheme from '@mui/material/styles/useTheme'
 
 type Response = {
   [token: string]: BigNumber
@@ -62,8 +76,16 @@ const MetaMaskImage = styled.img`
   cursor: pointer;
 `
 const AddToMetamask = (props: any) => {
+  const { provider } = useConnectionContext()
+
   const handleAddMetaMask = async (e) => {
     e.stopPropagation()
+    const token = new ethers.Contract(
+      props.row.address.id,
+      ERC20,
+      provider.getSigner()
+    )
+    const decimal = await token.decimals()
     const tokenSymbol =
       props.row.id.split('/')[1][0].toUpperCase() + props.row.id.split('/')[0]
     try {
@@ -74,7 +96,7 @@ const AddToMetamask = (props: any) => {
           options: {
             address: props.row.address.id,
             symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
-            decimals: 18,
+            decimals: decimal,
             image:
               'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
           },
@@ -97,13 +119,169 @@ const AddToMetamask = (props: any) => {
   )
 }
 
+const MobileFilterOptions = ({
+  setSearch,
+  expiredPoolClicked,
+  setExpiredPoolClicked,
+  confirmedPoolClicked,
+  setConfirmedPoolClicked,
+  rows,
+  checkedState,
+  setCheckedState,
+  searchInput,
+  setSearchInput,
+}) => {
+  const theme = useTheme()
+
+  const top4UnderlyingTokens = useMemo(
+    () => getTopNObjectByProperty(rows, 'Underlying', 4),
+    [rows]
+  )
+
+  const handleOnChange = (position) => {
+    const updatedCheckedState = checkedState.map((item, index) =>
+      index === position ? !item : item
+    )
+
+    setCheckedState(updatedCheckedState)
+
+    const underlyingTokenString = updatedCheckedState
+      .map((currentState, index) => {
+        if (currentState === true) {
+          return top4UnderlyingTokens[index]
+        }
+      })
+      .filter((item) => item !== undefined)
+      .map((item) => item.token)
+      .join(' ')
+      .toString()
+
+    setSearch(underlyingTokenString)
+  }
+
+  return (
+    <>
+      <Accordion
+        sx={{
+          backgroundColor: '#000000',
+          '&:before': {
+            display: 'none',
+          },
+          marginTop: theme.spacing(3.5),
+        }}
+        defaultExpanded
+      >
+        <AccordionSummary
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          sx={{
+            padding: '0px',
+            backgroundColor: '#000000',
+          }}
+          expandIcon={<ArrowDropUpIcon />}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Underlying
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            backgroundColor: '#000000',
+            padding: '0px',
+          }}
+        >
+          <Box>
+            <TextField
+              value={searchInput}
+              aria-label="Filter creator"
+              sx={{
+                width: '100%',
+                height: '50px',
+                marginTop: theme.spacing(2),
+              }}
+              onChange={(event) => setSearchInput(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Enter Underlying"
+              color="secondary"
+            />
+          </Box>
+          <Stack
+            spacing={0.6}
+            sx={{
+              marginTop: theme.spacing(2),
+              fontSize: '14px',
+            }}
+          >
+            {top4UnderlyingTokens.map((underlying, index) => (
+              <Stack
+                direction="row"
+                justifyContent={'space-between'}
+                alignItems={'center'}
+                key={index}
+              >
+                <Box>{underlying.token}</Box>
+                <Checkbox
+                  checked={checkedState[index]}
+                  id={`custom-checkbox-${index}`}
+                  onChange={() => handleOnChange(index)}
+                />
+              </Stack>
+            ))}
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: theme.spacing(2.5),
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Hide Expired Pools</Box>
+          <Switch
+            checked={expiredPoolClicked}
+            onChange={() => setExpiredPoolClicked(!expiredPoolClicked)}
+          />
+        </Stack>
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Confirmed Pools</Box>
+          <Switch
+            checked={confirmedPoolClicked}
+            onChange={() => setConfirmedPoolClicked(!confirmedPoolClicked)}
+          />
+        </Stack>
+      </Stack>
+    </>
+  )
+}
+
 const SubmitButton = (props: any) => {
   const [open, setOpen] = React.useState(false)
   const [textFieldValue, setTextFieldValue] = useState('')
   const [loadingValue, setLoadingValue] = useState(false)
   const [disabledButton, setDisabledButton] = useState(false)
+
   const { provider } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
+  const { isMobile } = useCustomMediaQuery()
 
   const dispatch = useDispatch()
   const chainId = provider?.network?.chainId
@@ -262,27 +440,47 @@ const SubmitButton = (props: any) => {
 
   if (buttonName === 'Redeem') {
     return (
-      <Container>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          width: isMobile ? 'auto' : '100%',
+        }}
+      >
         <LoadingButton
           variant="contained"
           color={buttonName === 'Redeem' ? 'success' : 'primary'}
           disabled={disabledButton}
           loading={loadingValue}
           onClick={handleRedeem}
+          sx={{
+            fontSize: isMobile ? '10px' : 'auto',
+            padding: isMobile ? '5px 11px' : 'auto',
+          }}
         >
           {buttonName}
         </LoadingButton>
-      </Container>
+      </Box>
     )
   } else if (buttonName === 'Challenge') {
     return (
-      <Container>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          width: isMobile ? 'auto' : '100%',
+        }}
+      >
         <LoadingButton
           variant="contained"
           loading={loadingValue}
           onClick={(e) => {
             e.stopPropagation()
             handleOpen()
+          }}
+          sx={{
+            fontSize: isMobile ? '10px' : 'auto',
+            padding: isMobile ? '5px 11px' : 'auto',
           }}
         >
           Challenge
@@ -306,6 +504,10 @@ const SubmitButton = (props: any) => {
               color="primary"
               type="submit"
               loading={loadingValue}
+              sx={{
+                fontSize: isMobile ? '10px' : 'auto',
+                padding: isMobile ? '5px 11px' : 'auto',
+              }}
               onClick={(e) => {
                 setLoadingValue(textFieldValue ? true : false)
                 if (diva != null) {
@@ -342,7 +544,7 @@ const SubmitButton = (props: any) => {
             </LoadingButton>
           </DialogActions>
         </Dialog>
-      </Container>
+      </Box>
     )
   } else {
     return <></>
@@ -510,20 +712,175 @@ const columns: GridColDef[] = [
   },
 ]
 
+const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
+  const history = useHistory()
+  const theme = useTheme()
+
+  if (!row) return
+
+  const { Icon, Id, Floor, TVL, finalValue, Cap, Balance, Status } = row
+
+  const DATA_ARRAY = [
+    {
+      label: 'Floor',
+      value: Floor,
+    },
+    {
+      label: 'TVL',
+      value: TVL,
+    },
+    {
+      label: 'Final Value',
+      value: finalValue,
+    },
+    {
+      label: 'Cap',
+      value: Cap,
+    },
+    {
+      label: 'Balance',
+      value: Balance,
+    },
+    {
+      label: 'Payoff',
+      value: 0,
+    },
+  ]
+
+  return (
+    <>
+      <Divider light />
+      <Stack
+        sx={{
+          fontSize: '10px',
+          width: '100%',
+          margin: `${theme.spacing(1.5)} 0`,
+        }}
+        spacing={1.6}
+        onClick={() => {
+          history.push(`../../${row.id}`)
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gridGap: '8px',
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '12px',
+                fontWeight: 500,
+              }}
+            >
+              {Icon}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '9.2px',
+              }}
+            >
+              #{Id}
+            </Typography>
+            <AddToMetamask row={row} />
+          </Box>
+          <Box>
+            {Status === 'Open' ? (
+              <Stack direction="row" spacing={1.6} alignItems="center">
+                <Typography
+                  sx={{
+                    fontSize: '10px',
+                    fontWeight: 500,
+                    color: '#828282',
+                  }}
+                >
+                  Expires in
+                </Typography>
+                <ExpiresInCell row={row} />
+              </Stack>
+            ) : (
+              <Button
+                size="small"
+                sx={{
+                  borderRadius: '40px',
+                  fontSize: '10px',
+                  background: getColorByStatus(Status).backgroundColor,
+                  color: getColorByStatus(Status).fontColor,
+                  textTransform: 'capitalize',
+                  fontWeight: 400,
+                }}
+                variant="contained"
+              >
+                {Status}
+              </Button>
+            )}
+          </Box>
+        </Box>
+        <Grid
+          container
+          rowGap={1.6}
+          justifyContent="space-between"
+          columnGap={'3px'}
+        >
+          {DATA_ARRAY.map(({ label, value }, i) => (
+            <Grid
+              item
+              key={i}
+              xs={3}
+              sx={{
+                flexGrow: 1,
+              }}
+            >
+              <Stack direction="row" justifyContent={'space-between'}>
+                <Box
+                  sx={{
+                    color: '#828282',
+                  }}
+                >
+                  {label}
+                </Box>
+                <Box>{label === 'Payoff' ? <Payoff row={row} /> : value}</Box>
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
+        <Stack alignItems="flex-end">
+          <SubmitButton row={row} buttonName="yolo" {...row} />
+        </Stack>
+      </Stack>
+      <Divider light />
+    </>
+  )
+}
+
 export function MyPositions() {
-  const { provider, chainId } = useConnectionContext()
-  const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
   const [underlyingButtonLabel, setUnderlyingButtonLabel] =
     useState('Underlying')
-  const [search, setSearch] = useState(null)
+  const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
   const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
   const [confirmedPoolClicked, setConfirmedPoolClicked] = useState(false)
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
+  const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
+
+  const { provider, chainId } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
   const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
     useGovernanceParameters()
+  const { isMobile } = useCustomMediaQuery()
+  const theme = useTheme()
 
   useEffect(() => {
     dispatch(
@@ -532,6 +889,7 @@ export function MyPositions() {
       })
     )
   }, [dispatch, page, userAddress])
+
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
     setUnderlyingButtonLabel(
@@ -755,24 +1113,29 @@ export function MyPositions() {
           }))
       : []
 
-  // covert the above function to a memoized one
   const filteredRowsByOptions = useMemo(() => {
     if (search != null && search.length > 0) {
       if (expiredPoolClicked) {
         return filteredRows
-          .filter((v) =>
-            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          .filter(
+            (v) =>
+              search.toLowerCase().includes(v.Underlying.toLowerCase()) ||
+              v.Underlying.toLowerCase().includes(search.toLowerCase())
           )
           .filter((v) => v.Status.includes('Open'))
       } else if (confirmedPoolClicked) {
         return filteredRows
-          .filter((v) =>
-            v.Underlying.toLowerCase().includes(search.toLowerCase())
+          .filter(
+            (v) =>
+              search.toLowerCase().includes(v.Underlying.toLowerCase()) ||
+              v.Underlying.toLowerCase().includes(search.toLowerCase())
           )
           .filter((v) => v.Status.includes('Confirmed'))
       } else {
-        return filteredRows.filter((v) =>
-          v.Underlying.toLowerCase().includes(search.toLowerCase())
+        return filteredRows.filter(
+          (v) =>
+            search.toLowerCase().includes(v.Underlying.toLowerCase()) ||
+            v.Underlying.toLowerCase().includes(search.toLowerCase())
         )
       }
     } else if (expiredPoolClicked) {
@@ -791,40 +1154,56 @@ export function MyPositions() {
     return bId - aId
   })
 
+  useEffect(() => {
+    if (searchInput.length > 0 && searchInput !== null) {
+      setCheckedState(new Array(4).fill(false))
+      setSearch(searchInput)
+    }
+  }, [searchInput])
+
+  useEffect(() => {
+    if (checkedState.includes(true)) {
+      setSearchInput('')
+    }
+  }, [checkedState])
+
   return (
     <Stack
       direction="column"
       sx={{
         height: '100%',
       }}
+      paddingRight={isMobile ? 0 : 6}
       spacing={4}
     >
-      <Box
-        paddingY={2}
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          maxWidth: '400px',
-        }}
-      >
-        <DropDownFilter
-          id="Underlying Filter"
-          DropDownButtonLabel={underlyingButtonLabel}
-          InputValue={search}
-          onInputChange={handleUnderLyingInput}
-        />
-        <ButtonFilter
-          id="Hide expired pools"
-          sx={{ marginRight: '30px' }}
-          ButtonLabel="Hide Expired"
-          onClick={handleExpiredPools}
-        />
-        <ButtonFilter
-          id="Confirmed Pools"
-          ButtonLabel="Confirmed"
-          onClick={handleConfirmedPools}
-        />
-      </Box>
+      {!isMobile && (
+        <Box
+          paddingY={2}
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            maxWidth: '400px',
+          }}
+        >
+          <DropDownFilter
+            id="Underlying Filter"
+            DropDownButtonLabel={underlyingButtonLabel}
+            InputValue={search}
+            onInputChange={handleUnderLyingInput}
+          />
+          <ButtonFilter
+            id="Hide expired pools"
+            sx={{ marginRight: theme.spacing(3.5) }}
+            ButtonLabel="Hide Expired"
+            onClick={handleExpiredPools}
+          />
+          <ButtonFilter
+            id="Confirmed Pools"
+            ButtonLabel="Confirmed"
+            onClick={handleConfirmedPools}
+          />
+        </Box>
+      )}
       {!userAddress ? (
         <Typography
           sx={{
@@ -839,15 +1218,97 @@ export function MyPositions() {
         </Typography>
       ) : (
         <>
-          <PoolsTable
-            page={page}
-            rows={filteredRowsByOptions && sortedRows}
-            loading={balances.isLoading}
-            rowCount={3000}
-            columns={columns}
-            onPageChange={(page) => setPage(page)}
-            selectedPoolsView="Table"
-          />
+          {isMobile ? (
+            <Stack
+              width={'100%'}
+              sx={{
+                marginTop: theme.spacing(2),
+                marginBottom: theme.spacing(2),
+              }}
+              spacing={2}
+            >
+              {!balances.isLoading ? (
+                <>
+                  <Button
+                    onClick={() => {
+                      setIsFilterDrawerOpen(!isFilterDrawerOpen)
+                    }}
+                    startIcon={<FilterListIcon fontSize="small" />}
+                    variant="outlined"
+                    sx={{
+                      width: '84px',
+                      height: '30px',
+                      fontSize: '13px',
+                      padding: '4px 10px',
+                      textTransform: 'none',
+                    }}
+                    color={isFilterDrawerOpen ? 'primary' : 'secondary'}
+                  >
+                    Filters
+                  </Button>
+                  <Box>
+                    {sortedRows.map((row) => (
+                      <MyPositionsTokenCard row={row} key={row.Id} />
+                    ))}
+                  </Box>
+                  <Pagination
+                    sx={{
+                      minHeight: '70px',
+                      fontSize: '14px',
+                    }}
+                    count={10}
+                    onChange={(e, page) => setPage(page - 1)}
+                    page={page + 1}
+                  />
+                </>
+              ) : (
+                <CircularProgress
+                  sx={{
+                    margin: '0 auto',
+                    marginTop: 10,
+                  }}
+                />
+              )}
+              <FilterDrawerModal
+                open={isFilterDrawerOpen}
+                onClose={setIsFilterDrawerOpen}
+                children={
+                  <MobileFilterOptions
+                    setSearch={setSearch}
+                    expiredPoolClicked={expiredPoolClicked}
+                    setExpiredPoolClicked={setExpiredPoolClicked}
+                    confirmedPoolClicked={confirmedPoolClicked}
+                    setConfirmedPoolClicked={setConfirmedPoolClicked}
+                    rows={rows}
+                    checkedState={checkedState}
+                    setCheckedState={setCheckedState}
+                    searchInput={searchInput}
+                    setSearchInput={setSearchInput}
+                  />
+                }
+                onApplyFilter={() => {
+                  setIsFilterDrawerOpen(false)
+                }}
+                onClearFilter={() => {
+                  setSearch('')
+                  setExpiredPoolClicked(false)
+                  setConfirmedPoolClicked(false)
+                  setSearchInput('')
+                  setCheckedState(new Array(4).fill(false))
+                }}
+              />
+            </Stack>
+          ) : (
+            <PoolsTable
+              page={page}
+              rows={filteredRowsByOptions && sortedRows}
+              loading={balances.isLoading}
+              rowCount={3000}
+              columns={columns}
+              onPageChange={(page) => setPage(page)}
+              selectedPoolsView="Table"
+            />
+          )}
         </>
       )}
     </Stack>

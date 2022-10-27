@@ -119,11 +119,11 @@ const PoolCard = ({ row }: Props) => {
   return (
     <Box
       sx={{
-        width: `${isMobile ? '318px' : '400px'}`,
-        height: '660px',
+        width: `${isMobile ? theme.spacing(43.75) : theme.spacing(50)}`,
+        height: theme.spacing(82.5),
         border: '1px solid #383838',
         background: theme.palette.background.default,
-        borderRadius: '8px',
+        borderRadius: theme.spacing(1),
         overflow: 'hidden',
       }}
     >
@@ -206,7 +206,7 @@ const PoolCard = ({ row }: Props) => {
         data={row.PayoffProfile}
         refAsset={pool.referenceAsset}
         payOut={pool.collateralToken.symbol}
-        w={isMobile ? 304 : 380}
+        w={isMobile ? 330 : 380}
         h={220}
         isLong={IsLong}
         currentPrice={currentPrice}

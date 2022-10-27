@@ -6,16 +6,16 @@ import {
   getExpiryMinutesFromNow,
   userTimeZone,
 } from '../../Util/Dates'
+import { Pool } from '../../lib/queries'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
-import { BigNumber, ethers } from 'ethers'
+import { BigNumber } from 'ethers'
 import { GrayText } from '../Trade/Orders/UiStyles'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import {
   fetchPools,
   selectPools,
   selectRequestStatus,
-  selectUserAddress,
 } from '../../Redux/appSlice'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import {
@@ -26,22 +26,38 @@ import {
   Tooltip,
   Toolbar,
   useTheme,
+  Checkbox,
+  Divider,
+  Switch,
 } from '@mui/material'
 import ViewModuleIcon from '@mui/icons-material/ViewModule'
 import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
-import { config } from '../../constants'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import { divaGovernanceAddress, WEBSOCKET_URL } from '../../constants'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
+import { ORDER_TYPE } from '../../Models/orderbook'
 import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
-import { divaGovernanceAddress } from '../../constants'
-import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { useHistory, useLocation, useParams } from 'react-router-dom'
+import {
+  createTable,
+  getResponse,
+  mapOrderData,
+} from '../../DataService/OpenOrders'
+import { useHistory, useParams } from 'react-router-dom'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import { FilterDrawerModal } from '../Dashboard/FilterDrawerMobile'
+import Accordion from '@mui/material/Accordion'
+import AccordionSummary from '@mui/material/AccordionSummary'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import AccordionDetails from '@mui/material/AccordionDetails'
+import TextField from '@mui/material/TextField'
+import InputAdornment from '@mui/material/InputAdornment'
+import { Search } from '@mui/icons-material'
+import { getTopNObjectByProperty } from '../../Util/dashboard'
 
 export const ExpiresInCell = (props: any) => {
   //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
@@ -213,6 +229,242 @@ const columns: GridColDef[] = [
   },
 ]
 
+const MobileFilterOptions = ({
+  setSearch,
+  expiredPoolClicked,
+  setExpiredPoolClicked,
+  rows,
+  checkedState,
+  setCheckedState,
+  searchInput,
+  setSearchInput,
+  createdBy,
+  setCreatedBy,
+  handleCreatorInput,
+}) => {
+  const theme = useTheme()
+
+  const top4UnderlyingTokens = useMemo(
+    () => getTopNObjectByProperty(rows, 'Underlying', 4),
+    [rows]
+  )
+
+  const handleOnChange = (position) => {
+    const updatedCheckedState = checkedState.map((item, index) =>
+      index === position ? !item : item
+    )
+
+    setCheckedState(updatedCheckedState)
+
+    const underlyingTokenString = updatedCheckedState
+      .map((currentState, index) => {
+        if (currentState === true) {
+          return top4UnderlyingTokens[index]
+        }
+      })
+      .filter((item) => item !== undefined)
+      .map((item) => item.token)
+      .join(' ')
+      .toString()
+
+    setSearch(underlyingTokenString)
+  }
+
+  return (
+    <Box
+      sx={{
+        overflowY: 'scroll',
+        msOverflowStyle: 'none',
+        scrollbarWidth: 'none',
+        '&::-webkit-scrollbar': {
+          display: 'none',
+        },
+      }}
+    >
+      <Accordion
+        sx={{
+          backgroundColor: '#000000',
+          '&:before': {
+            display: 'none',
+          },
+          marginTop: theme.spacing(3.5),
+          marginBottom: theme.spacing(1),
+        }}
+        defaultExpanded
+      >
+        <AccordionSummary
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          sx={{
+            padding: '0px',
+            backgroundColor: '#000000',
+          }}
+          expandIcon={<ArrowDropUpIcon />}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Creator
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            backgroundColor: '#000000',
+            padding: 0,
+          }}
+        >
+          <Box>
+            <TextField
+              value={createdBy}
+              aria-label="Filter creator"
+              sx={{
+                width: '100%',
+                height: theme.spacing(6.25),
+                marginTop: theme.spacing(2),
+              }}
+              onChange={handleCreatorInput}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Enter Creator"
+              color="secondary"
+            />
+          </Box>
+          <Stack
+            spacing={0.6}
+            sx={{
+              marginTop: theme.spacing(2),
+              fontSize: '14px',
+            }}
+          >
+            <Stack
+              direction="row"
+              justifyContent={'space-between'}
+              alignItems={'center'}
+            >
+              <Box>Diva Governance</Box>
+              <Checkbox
+                checked={createdBy === divaGovernanceAddress}
+                id={`checkbox-diva-governance`}
+                onChange={() => {
+                  if (createdBy === divaGovernanceAddress) {
+                    setCreatedBy('')
+                  } else {
+                    setCreatedBy(divaGovernanceAddress)
+                  }
+                }}
+              />
+            </Stack>
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
+      <Accordion
+        sx={{
+          backgroundColor: '#000000',
+          '&:before': {
+            display: 'none',
+          },
+          marginY: theme.spacing(1),
+        }}
+      >
+        <AccordionSummary
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          sx={{
+            padding: 0,
+            backgroundColor: '#000000',
+          }}
+          expandIcon={<ArrowDropUpIcon />}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Underlying
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            backgroundColor: '#000000',
+            padding: 0,
+          }}
+        >
+          <Box>
+            <TextField
+              value={searchInput}
+              aria-label="Filter creator"
+              sx={{
+                width: '100%',
+                height: theme.spacing(6.25),
+                marginTop: theme.spacing(2),
+              }}
+              onChange={(event) => setSearchInput(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Enter Underlying"
+              color="secondary"
+            />
+          </Box>
+          <Stack
+            spacing={0.6}
+            sx={{
+              marginTop: theme.spacing(2),
+              fontSize: '14px',
+            }}
+          >
+            {top4UnderlyingTokens.map((underlying, index) => (
+              <Stack
+                direction="row"
+                justifyContent={'space-between'}
+                alignItems={'center'}
+                key={index}
+              >
+                <Box>{underlying.token}</Box>
+                <Checkbox
+                  checked={checkedState[index]}
+                  id={`custom-checkbox-${index}`}
+                  onChange={() => handleOnChange(index)}
+                />
+              </Stack>
+            ))}
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: theme.spacing(2.5),
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Hide Expired Pools</Box>
+          <Switch
+            checked={expiredPoolClicked}
+            onChange={() => setExpiredPoolClicked(!expiredPoolClicked)}
+          />
+        </Stack>
+      </Stack>
+    </Box>
+  )
+}
+
 export default function Markets() {
   const history = useHistory()
   const theme = useTheme()
@@ -220,6 +472,7 @@ export default function Markets() {
   const currentAddress = history.location.pathname.split('/')
   const [page, setPage] = useState(0)
   const pools = useAppSelector(selectPools)
+  const [tablePools, setTablePools] = useState<Pool[]>(pools)
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const dispatch = useAppDispatch()
   const params = useParams() as { creatorAddress: string; status: string }
@@ -234,8 +487,15 @@ export default function Markets() {
   const [selectedPoolsView, setSelectedPoolsView] = useState<'Grid' | 'Table'>(
     'Table'
   )
+  const [websocketClient, setWebsocketClient] = useState(
+    new WebSocket(WEBSOCKET_URL)
+  )
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
+  const [searchInput, setSearchInput] = useState<string>('')
+  const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
+  const [mobileCreatorFilter, setMobileCreatorFilter] = useState<string>('')
 
-  const handleCreatorInput = (e) => {
+  const handleCreatorInput = (e: any) => {
     setCreatedBy(e.target.value)
     setCreatorButtonLabel(
       e.target.value === '' ? 'Creator' : getShortenedAddress(e.target.value)
@@ -248,6 +508,7 @@ export default function Markets() {
       e.target.value === '' ? 'Underlying' : e.target.value
     )
   }
+
   const handleExpiredPools = () => {
     if (expiredPoolClicked) {
       setExpiredPoolClicked(false)
@@ -255,8 +516,171 @@ export default function Markets() {
       setExpiredPoolClicked(true)
     }
   }
+
   const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
     useGovernanceParameters()
+
+  // orders structure
+  // - orders.poolId = poolId
+  // - orders.first = baseToken is makerToken and quoteToken is takerToken
+  // - orders.second = baseToken is takerToken and quoteToken is makerToken
+
+  // rSell and rBuy structure
+  // - rSell: baseToken is collateralToken and quoteToken is tokenAddress
+  // - rBuy: baseToken is tokenAddress and quoteToken is collateralToken
+
+  const getMakerTakerTokens = (orders: any) => {
+    const tokens: string[] = []
+
+    // Get makerToken and takerToken of orders
+    orders.first.bids.records.map((bid: any) => {
+      if (tokens.indexOf(bid.order.makerToken) === -1) {
+        tokens.push(bid.order.makerToken)
+      }
+      if (tokens.indexOf(bid.order.takerToken) === -1) {
+        tokens.push(bid.order.takerToken)
+      }
+    })
+
+    orders.second.bids.records.map((bid: any) => {
+      if (tokens.indexOf(bid.order.makerToken) === -1) {
+        tokens.push(bid.order.makerToken)
+      }
+      if (tokens.indexOf(bid.order.takerToken) === -1) {
+        tokens.push(bid.order.takerToken)
+      }
+    })
+
+    return tokens
+  }
+
+  const getUpdatedRows = (ordersArray: any[]) => {
+    const updatedTablePools = tablePools.map((tablePool) => {
+      const orders = ordersArray.filter((item) => item.poolId === tablePool.id)
+
+      if (orders.length === 0) {
+        return tablePool
+      } else {
+        let updatePool = tablePool
+        const orderPrices = []
+        const checkOrders = orders[0]
+
+        // Get all maker and taker token ids of order data
+        const tokens = getMakerTakerTokens(checkOrders)
+
+        // Check pool type
+        const poolType =
+          tokens.indexOf(tablePool.shortToken.id) !== -1 ? 'S' : 'L'
+
+        // Check the token address of table row
+        const tokenAddress =
+          poolType === 'S' ? tablePool.shortToken.id : tablePool.longToken.id
+
+        // Get first records and second records
+        const firstRecords = checkOrders.first.bids.records
+        const secondRecords = checkOrders.second.bids.records
+
+        // Get updated pool's buy and sell data
+        const { responseBuy, responseSell } = getResponse(
+          tokenAddress,
+          firstRecords,
+          secondRecords
+        )
+
+        // Get updated orderbook buy data
+        const orderBookBuy = mapOrderData(
+          responseBuy,
+          tablePool.collateralToken.decimals,
+          ORDER_TYPE.BUY
+        )
+        orderPrices.push(orderBookBuy)
+
+        // Get updated orderbook buy data
+        const orderBookSell = mapOrderData(
+          responseSell,
+          tablePool.collateralToken.decimals,
+          ORDER_TYPE.SELL
+        )
+        orderPrices.push(orderBookSell)
+
+        // Calculate table row data with updated information
+        const completeOrderBook = createTable(
+          orderPrices[ORDER_TYPE.BUY],
+          orderPrices[ORDER_TYPE.SELL]
+        )
+
+        if (completeOrderBook.length !== 0) {
+          if (poolType === 'L') {
+            // Update the pool's long price information with the updated information
+            updatePool = {
+              ...tablePool,
+              prices: {
+                ...tablePool.prices,
+                long: {
+                  ask: completeOrderBook[0].ask,
+                  askExpiry: completeOrderBook[0].sellExpiry,
+                  askQuantity: completeOrderBook[0].sellQuantity,
+                  bid: completeOrderBook[0].bid,
+                  bidExpiry: completeOrderBook[0].buyExpiry,
+                  bidQuantity: completeOrderBook[0].buyQuantity,
+                  orderType: poolType,
+                  poolId: poolType + tablePool.id,
+                },
+              },
+            }
+          } else {
+            // Update the pool's short price information with the updated information
+            updatePool = {
+              ...tablePool,
+              prices: {
+                ...tablePool.prices,
+                short: {
+                  ask: completeOrderBook[0].ask,
+                  askExpiry: completeOrderBook[0].sellExpiry,
+                  askQuantity: completeOrderBook[0].sellQuantity,
+                  bid: completeOrderBook[0].bid,
+                  bidExpiry: completeOrderBook[0].buyExpiry,
+                  bidQuantity: completeOrderBook[0].buyQuantity,
+                  orderType: poolType,
+                  poolId: poolType + tablePool.id,
+                },
+              },
+            }
+          }
+        }
+
+        return updatePool
+      }
+    })
+
+    setTablePools(updatedTablePools)
+  }
+
+  useEffect(() => {
+    if (websocketClient !== undefined) {
+      // Connect to server using websocket
+      websocketClient.onopen = () => {
+        console.log('WebSocket Connected')
+      }
+
+      // Receive data using websocket
+      websocketClient.onmessage = (e) => {
+        const message = JSON.parse(e.data)
+        getUpdatedRows(message)
+      }
+
+      return () => {
+        websocketClient.onclose = () => {
+          console.log('WebSocket Disconnected')
+          setWebsocketClient(new WebSocket(WEBSOCKET_URL))
+        }
+      }
+    }
+  }, [
+    websocketClient.onmessage,
+    websocketClient.onopen,
+    websocketClient.onclose,
+  ])
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -274,7 +698,7 @@ export default function Markets() {
     return () => clearTimeout(timeout)
   }, [createdBy, history])
 
-  const rows: GridRowModel[] = pools.reduce((acc, val) => {
+  const rows: GridRowModel[] = tablePools.reduce((acc, val) => {
     const { status } = getAppStatus(
       val.expiryTime,
       val.statusTimestamp,
@@ -286,6 +710,7 @@ export default function Markets() {
       reviewPeriod,
       fallbackPeriod
     )
+
     const shared = {
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,
@@ -319,15 +744,7 @@ export default function Markets() {
       Cap: Number(formatEther(val.cap)),
       TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
     }
-    // console.log(
-    //   BigNumber.from(val.collateralBalanceLongInitial)
-    //     .mul(parseUnits('1', val.collateralToken.decimals))
-    //     .div(
-    //       BigNumber.from(val.collateralBalanceLongInitial).add(
-    //         BigNumber.from(val.collateralBalanceShortInitial)
-    //       )
-    //     )
-    // )
+
     return [
       ...acc,
       {
@@ -457,27 +874,44 @@ export default function Markets() {
       ? expiredPoolClicked
         ? rows
             .filter((v) => v.Status.includes('Open'))
-            .filter((v) =>
-              v.Underlying.toLowerCase().includes(search.toLowerCase())
+            .filter(
+              (v) =>
+                v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
+                search.toLowerCase().includes(v.Underlying.toLowerCase())
             )
-        : rows.filter((v) =>
-            v.Underlying.toLowerCase().includes(search.toLowerCase())
+        : rows.filter(
+            (v) =>
+              v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
+              search.toLowerCase().includes(v.Underlying.toLowerCase())
           )
       : expiredPoolClicked
       ? rows.filter((v) => v.Status.includes('Open'))
       : rows
 
+  useEffect(() => {
+    if (searchInput.length > 0 && searchInput !== null) {
+      setCheckedState(new Array(4).fill(false))
+      setSearch(searchInput)
+    }
+  }, [searchInput])
+
   return (
     <>
       <Box
-        paddingX={6}
+        paddingRight={isMobile ? 0 : theme.spacing(2)}
         sx={{
           display: 'flex',
           flexDirection: 'row',
+          alignItems: 'center',
+          fontSize: isMobile ? '14px' : '24px',
         }}
       >
         <ShowChartOutlined
-          style={{ fontSize: 34, padding: 20, paddingRight: 10 }}
+          style={{
+            fontSize: isMobile ? 24 : 34,
+            padding: 20,
+            paddingRight: 10,
+          }}
         />
         <h2> Markets</h2>
       </Box>
@@ -488,73 +922,133 @@ export default function Markets() {
         }}
         spacing={4}
       >
-        <AppBar
-          position="static"
-          sx={{
-            background: theme.palette.background.default,
-            justifyContent: 'space-between',
-            boxShadow: 'none',
-          }}
-        >
-          <Toolbar>
-            <Box
-              paddingX={3}
-              paddingY={2}
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-              }}
-              justifyContent="space-between"
-            >
-              <DropDownFilter
-                id="Creator Filter"
-                DropDownButtonLabel={
-                  history.location.pathname === `/markets/`
-                    ? 'Creator'
-                    : creatorButtonLabel
-                }
-                InputValue={createdBy}
-                onInputChange={handleCreatorInput}
-                MenuItemLabel="Diva Governance"
-                onMenuItemClick={() => {
-                  setCreatedBy(divaGovernanceAddress)
-                  setCreatorButtonLabel(
-                    getShortenedAddress(divaGovernanceAddress)
-                  )
+        {!isMobile && (
+          <AppBar
+            position="static"
+            sx={{
+              background: theme.palette.background.default,
+              justifyContent: 'space-between',
+              boxShadow: 'none',
+            }}
+          >
+            <Toolbar>
+              <Box
+                paddingX={3}
+                paddingY={2}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
                 }}
-              />
-              <DropDownFilter
-                id="Underlying Filter"
-                DropDownButtonLabel={underlyingButtonLabel}
-                InputValue={search}
-                onInputChange={handleUnderLyingInput}
-              />
-              <ButtonFilter
-                id="Hide expired pools"
-                ButtonLabel="Hide Expired"
-                onClick={handleExpiredPools}
-              />
-            </Box>
-            <Box
-              sx={{
-                marginLeft: 'auto',
+                justifyContent="space-between"
+              >
+                <DropDownFilter
+                  id="Creator Filter"
+                  DropDownButtonLabel={
+                    history.location.pathname === `/markets/`
+                      ? 'Creator'
+                      : creatorButtonLabel
+                  }
+                  InputValue={createdBy}
+                  onInputChange={handleCreatorInput}
+                  MenuItemLabel="Diva Governance"
+                  onMenuItemClick={() => {
+                    setCreatedBy(divaGovernanceAddress)
+                    setCreatorButtonLabel(
+                      getShortenedAddress(divaGovernanceAddress)
+                    )
+                  }}
+                />
+                <DropDownFilter
+                  id="Underlying Filter"
+                  DropDownButtonLabel={underlyingButtonLabel}
+                  InputValue={search}
+                  onInputChange={handleUnderLyingInput}
+                />
+                <ButtonFilter
+                  id="Hide expired pools"
+                  ButtonLabel="Hide Expired"
+                  onClick={handleExpiredPools}
+                />
+              </Box>
+              <Box
+                sx={{
+                  marginLeft: 'auto',
+                }}
+              >
+                <Button
+                  onClick={() => setSelectedPoolsView('Table')}
+                  color={selectedPoolsView === 'Table' ? 'primary' : 'inherit'}
+                >
+                  <ViewHeadlineIcon />
+                </Button>
+                <Button
+                  onClick={() => setSelectedPoolsView('Grid')}
+                  color={selectedPoolsView === 'Grid' ? 'primary' : 'inherit'}
+                >
+                  <ViewModuleIcon />
+                </Button>
+              </Box>
+            </Toolbar>
+          </AppBar>
+        )}
+        {isMobile && (
+          <Stack
+            width={'100%'}
+            sx={{
+              marginTop: theme.spacing(1),
+              marginLeft: theme.spacing(2),
+            }}
+            spacing={2}
+          >
+            <Button
+              onClick={() => {
+                setIsFilterDrawerOpen(!isFilterDrawerOpen)
               }}
+              startIcon={<FilterListIcon fontSize="small" />}
+              variant="outlined"
+              sx={{
+                width: theme.spacing(10.5),
+                height: theme.spacing(3.75),
+                fontSize: '13px',
+                paddingY: theme.spacing(0.5),
+                paddingX: theme.spacing(1.25),
+                textTransform: 'none',
+              }}
+              color={isFilterDrawerOpen ? 'primary' : 'secondary'}
             >
-              <Button
-                onClick={() => setSelectedPoolsView('Table')}
-                color={selectedPoolsView === 'Table' ? 'primary' : 'inherit'}
-              >
-                <ViewHeadlineIcon />
-              </Button>
-              <Button
-                onClick={() => setSelectedPoolsView('Grid')}
-                color={selectedPoolsView === 'Grid' ? 'primary' : 'inherit'}
-              >
-                <ViewModuleIcon />
-              </Button>
-            </Box>
-          </Toolbar>
-        </AppBar>
+              Filters
+            </Button>
+            <FilterDrawerModal
+              open={isFilterDrawerOpen}
+              onClose={setIsFilterDrawerOpen}
+              children={
+                <MobileFilterOptions
+                  setSearch={setSearch}
+                  expiredPoolClicked={expiredPoolClicked}
+                  setExpiredPoolClicked={setExpiredPoolClicked}
+                  rows={rows}
+                  checkedState={checkedState}
+                  setCheckedState={setCheckedState}
+                  searchInput={searchInput}
+                  setSearchInput={setSearchInput}
+                  createdBy={createdBy}
+                  setCreatedBy={setCreatedBy}
+                  handleCreatorInput={handleCreatorInput}
+                />
+              }
+              onApplyFilter={() => {
+                setIsFilterDrawerOpen(false)
+              }}
+              onClearFilter={() => {
+                setSearch('')
+                setCreatedBy(divaGovernanceAddress)
+                setExpiredPoolClicked(false)
+                setSearchInput('')
+                setCheckedState(new Array(4).fill(false))
+              }}
+            />
+          </Stack>
+        )}
         <Box
           paddingX={6}
           sx={{
