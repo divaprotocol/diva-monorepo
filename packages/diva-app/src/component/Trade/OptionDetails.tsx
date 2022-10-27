@@ -67,7 +67,7 @@ export default function OptionDetails({
   return (
     <Stack direction="row" mt="15px" spacing={3}>
       <Stack direction="column">
-        <Typography fontSize="14px" color="gray" pl="15px">
+        <Typography variant="h4" fontWeight="normal" color="gray" pl="15px">
           Expires at
         </Typography>
         <Tooltip
@@ -76,46 +76,46 @@ export default function OptionDetails({
           }
           arrow
         >
-          <Typography fontSize="24px" pl="15px" color="white">
+          <Typography fontSize="20px" pl="15px" color="white">
             {getDateTime(pool.expiryTime).slice(0, 10)}
           </Typography>
         </Tooltip>
       </Stack>
       {binary ? (
         <Stack direction="column">
-          <Typography fontSize="14px" color="gray" pl="15px">
+          <Typography variant="h4" fontWeight="normal" color="gray" pl="15px">
             Payoff Type
           </Typography>
-          <Typography fontSize="24px" pl="15px" color="white">
+          <Typography fontSize="20px" pl="15px" color="white">
             Binary
           </Typography>
         </Stack>
       ) : linear ? (
         <Stack direction="column">
-          <Typography fontSize="14px" color="gray" pl="15px">
+          <Typography variant="h4" fontWeight="normal" color="gray" pl="15px">
             Payoff Type
           </Typography>
-          <Typography fontSize="24px" pl="15px" color="white">
+          <Typography fontSize="20px" pl="15px" color="white">
             Linear
           </Typography>
         </Stack>
       ) : (
         <Stack direction="column">
-          <Typography fontSize="14px" color="gray" pl="15px">
+          <Typography variant="h4" fontWeight="normal" color="gray" pl="15px">
             Payoff Type
           </Typography>
-          <Typography fontSize="24px" pl="15px" color="white">
+          <Typography fontSize="20px" pl="15px" color="white">
             Custom
           </Typography>
         </Stack>
       )}
       <Stack direction="column">
-        <Typography fontSize="14px" color="gray" pl="15px">
+        <Typography variant="h4" fontWeight="normal" color="gray" pl="15px">
           Data Provider
         </Typography>
         <Stack direction="row" alignItems="center">
           <Tooltip title={pool.dataProvider} arrow>
-            <Typography fontSize="24px" pl="15px" color="white">
+            <Typography fontSize="20px" pl="15px" color="white">
               {dataSourceName}
             </Typography>
           </Tooltip>
@@ -149,12 +149,12 @@ export default function OptionDetails({
         </Stack>
       </Stack>
       <Stack direction="column">
-        <Typography fontSize="14px" color="gray" pl="15px">
+        <Typography variant="h4" fontWeight="normal" color="gray" pl="15px">
           Collateral
         </Typography>
         <Stack direction="row" alignItems="center">
           <Tooltip title={pool.collateralToken.id} arrow placement="bottom">
-            <Typography fontSize="24px" pl="15px" color="white">
+            <Typography fontSize="20px" pl="15px" color="white">
               {Number(
                 formatUnits(
                   pool.collateralBalance,
@@ -163,36 +163,36 @@ export default function OptionDetails({
               ).toFixed(2) + ' '}
             </Typography>
           </Tooltip>
-          <Typography fontSize="24px" color="gray" pl="10px">
+          <Typography fontSize="20px" color="gray" pl="10px">
             {pool.collateralToken.symbol}
           </Typography>
         </Stack>
       </Stack>
       <Stack direction="column">
-        <Typography fontSize="14px" color="gray" pl="15px">
+        <Typography variant="h4" fontWeight="normal" color="gray" pl="15px">
           Intrinsic Value
         </Typography>
         <Stack direction="row" alignItems="center">
-          <Typography fontSize="24px" pl="15px" color="white">
+          <Typography fontSize="20px" pl="15px" color="white">
             {intrinsicValue != 'n/a'
               ? parseFloat(intrinsicValue).toFixed(2) + ' '
               : 'n/a'}
           </Typography>
-          <Typography fontSize="24px" color="gray" pl="10px">
-            {intrinsicValue && pool.collateralToken.symbol}{' '}
+          <Typography fontSize="20px" color="gray" pl="10px">
+            {pool.collateralToken.symbol}
           </Typography>
         </Stack>
       </Stack>
       <Stack direction="column">
-        <Typography fontSize="14px" color="gray" pl="15px">
+        <Typography variant="h4" fontWeight="normal" color="gray" pl="15px">
           Max yield
         </Typography>
         {isMaxYield ? (
-          <Typography fontSize="24px" color="primary" pl="10px">
+          <Typography fontSize="20px" color="primary" pl="10px">
             {maxYield}
           </Typography>
         ) : (
-          <Typography fontSize="24px" pl="15px" color="white">
+          <Typography fontSize="20px" pl="15px" color="white">
             n/a
           </Typography>
         )}

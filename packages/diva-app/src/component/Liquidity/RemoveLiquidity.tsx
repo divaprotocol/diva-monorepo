@@ -105,9 +105,9 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const yourPoolShare =
     pool &&
     Number(
-      parseFloat(formatUnits(BigNumber.from(maxCollateral), decimal)) /
+      parseFloat(formatUnits(maxCollateral.toString())) /
         parseFloat(formatUnits(BigNumber.from(pool.collateralBalance), decimal))
-    ).toFixed(6) + ' %'
+    ).toFixed(4) + ' %'
 
   useEffect(() => {
     if (pool) {
@@ -437,7 +437,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               Pool Status
             </Typography>
             <Stack direction="row" justifyContent="space-between">
-              <Stack direction="column" spacing={1}>
+              <Stack direction="column" justifyContent="space-between">
                 <Typography variant="h4" fontWeight="normal" color="gray">
                   Pool ID
                 </Typography>
@@ -445,7 +445,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                   {pool.id}
                 </Typography>
               </Stack>
-              <Stack direction="column" spacing={1}>
+              <Stack direction="column" justifyContent="space-between">
                 <Typography variant="h4" fontWeight="normal" color="gray">
                   TVL
                 </Typography>
@@ -453,7 +453,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                   {currentPoolSize}
                 </Typography>
               </Stack>
-              <Stack direction="column" spacing={1}>
+              <Stack direction="column" justifyContent="space-between">
                 <Typography variant="h4" fontWeight="normal" color="#929292">
                   Your Pool Share
                 </Typography>
