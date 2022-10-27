@@ -25,6 +25,7 @@ import CheckIcon from '@mui/icons-material/Check'
 import { useDispatch } from 'react-redux'
 import { useCreatePoolFormik } from './CreatePool/formik'
 import DIVA712ABI from '../abi/DIVA712ABI.json'
+import axios from 'axios'
 
 type Props = {
   collateralTokenAddress: string
@@ -214,7 +215,10 @@ export const ApproveActionButtons = ({
         setApproveEnabled(false)
         setActionEnabled(false)
       } else {
-        if (transactionType === 'filloffer') {
+        if (
+          transactionType === 'filloffer' &&
+          formik.values.jsonToExport != '{}'
+        ) {
           if (
             account.toLowerCase() ===
             formik.values.jsonToExport.maker.toLowerCase()
@@ -659,9 +663,20 @@ export const ApproveActionButtons = ({
                             const jsonToExport = {
                               ...json,
                               offerHash,
+                              chainId,
+                              verifyingContract:
+                                config[chainId!].divaAddressNew,
                             }
                             formik.setFieldValue('jsonToExport', jsonToExport)
-                            onTransactionSuccess()
+                            axios
+                              .post(
+                                'https://eip712api.xyz/orderbook/v1/offer_create_contingent_pool',
+                                jsonToExport
+                              )
+                              .then((res) => {
+                                formik.setFieldValue('offerHash', res.data)
+                                onTransactionSuccess()
+                              })
                           })
                       })
                       .catch((err: any) => {

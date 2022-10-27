@@ -35,6 +35,7 @@ export type Values = {
   yourShare?: number
   takerShare?: number
   poolId?: string
+  offerHash?: string
 }
 
 export const initialValues: Values = {
@@ -71,6 +72,7 @@ export const initialValues: Values = {
   yourShare: 0,
   takerShare: 10,
   poolId: '',
+  offerHash: '',
 }
 
 type Errors = {
