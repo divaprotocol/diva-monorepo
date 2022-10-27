@@ -71,7 +71,6 @@ export default function BuyLimit(props: {
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const usdPrice = props.usdPrice
   const decimals = option.collateralToken.decimals
-  const positionTokenUnit = parseUnits('1')
   const collateralTokenUnit = parseUnits('1', decimals)
 
   const classes = useStyles()
@@ -99,10 +98,10 @@ export default function BuyLimit(props: {
 
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
-      const nbrOptions = parseUnits(value)
+      const nbrOptions = parseUnits(value, decimals)
       setNumberOfOptions(nbrOptions)
       if (pricePerOption.gt(0) && nbrOptions.gt(0)) {
-        const youPay = pricePerOption.mul(nbrOptions).div(positionTokenUnit)
+        const youPay = pricePerOption.mul(nbrOptions).div(collateralTokenUnit)
         setYouPay(youPay)
       }
     } else {
@@ -118,7 +117,7 @@ export default function BuyLimit(props: {
       if (numberOfOptions.gt(0) && pricePerOption.gt(0)) {
         const youPay = numberOfOptions
           .mul(pricePerOption)
-          .div(positionTokenUnit)
+          .div(collateralTokenUnit)
         setYouPay(youPay)
       }
     } else {
@@ -342,9 +341,9 @@ export default function BuyLimit(props: {
         option.floor,
         option.inflection,
         option.cap,
-        option.collateralBalanceLongInitial,
-        option.collateralBalanceShortInitial,
-        isLong
+        option.gradient,
+        isLong,
+        decimals
       )
     } else {
       breakEven = 'n/a'
@@ -362,40 +361,20 @@ export default function BuyLimit(props: {
       } else {
         dispatch(setIntrinsicValue(formatUnits(payoffPerLongToken, decimals)))
       }
-      dispatch(
-        setMaxPayout(
-          formatUnits(
-            BigNumber.from(option.collateralBalanceLongInitial)
-              .add(BigNumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - decimals))
-              .mul(parseUnits('1'))
-              .div(BigNumber.from(option.supplyInitial))
-          )
-        )
-      )
+      dispatch(setMaxPayout('1'))
     } else {
       if (option.statusFinalReferenceValue === 'Open' && usdPrice == '') {
         dispatch(setIntrinsicValue('n/a'))
       } else {
         dispatch(setIntrinsicValue(formatUnits(payoffPerShortToken, decimals)))
       }
-      dispatch(
-        setMaxPayout(
-          formatUnits(
-            BigNumber.from(option.collateralBalanceLongInitial)
-              .add(BigNumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - decimals))
-              .mul(parseUnits('1'))
-              .div(BigNumber.from(option.supplyInitial))
-          )
-        )
-      )
+      dispatch(setMaxPayout('1'))
     }
   }, [
     allowance,
     option,
-    pricePerOption,
-    usdPrice,
+    pricePerOption, // TODO Consider renaming to "pricePerPositionToken"
+    usdPrice, // TODO Consider renaming to "underlyingValue"
     existingBuyLimitOrdersAmountUser,
     userAddress,
   ])

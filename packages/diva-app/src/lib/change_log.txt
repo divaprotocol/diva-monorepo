@@ -5,5 +5,19 @@ lib/queries.ts:
 * supplyInitial dropped
 
 
+* calcPayoffsPerToken, calcBreakEven and maxPayout functions updated
+
+
 To check:
 * ...
+
+
+
+TODO:
+- Remove diva-contracts folder 
+  -> Load DIVA ABI from ABI file, i.e. replace `import ERC20_ABI from '@diva/contracts/abis/erc20.json'`
+- 
+
+
+QUESTIONS:
+- Remove `convertExponentialToDecimal` in calcPayoffsPerToken.ts?

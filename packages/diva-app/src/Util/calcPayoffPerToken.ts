@@ -1,8 +1,18 @@
 import { parseUnits } from 'ethers/lib/utils'
-import { BigNumber as BigENumber } from '@ethersproject/bignumber/lib/bignumber'
-import { convertExponentialToDecimal } from '../component/Trade/Orders/OrderHelper'
+import { BigNumber } from '@ethersproject/bignumber/lib/bignumber'
 
 // Returned values are expressed as integers with collateral token decimals
+/**
+ * @dev Function to return the gross payoff per long and short token for a given
+ * payoff profile and a final reference value.
+ * @param floor Floor of the payoff curve expressed as an integer with 18 decimals
+ * @param inflection Inflection of the payoff curve expressed as an integer with 18 decimals
+ * @param cap Cap of the payoff curve expressed as an integer with 18 decimals
+ * @param gradient Gradient of the payoff curve expressed as an integer with collateral token decimals
+ * @param finalReferenceValue Final reference value expressed as an integer with 18 decimals
+ * @param collateralTokenDecimals Collateral token decimals
+ * @returns Payoff per long and short position token expressed as an integer with collateral token decimals
+ */
 export function calcPayoffPerToken(
   floor,
   inflection,
@@ -14,9 +24,12 @@ export function calcPayoffPerToken(
   const SCALING = parseUnits('1', 18 - collateralTokenDecimals)
   const UNIT = parseUnits('1')
 
+  // Scale gradient to 18 decimals for calculation purposes as floor, inflection, etc.
+  // have 18 decimals
   const gradientScaled = gradient.mul(SCALING)
 
   let payoffPerLongToken
+  let payoffPerShortToken
 
   if (finalReferenceValue.eq(inflection)) {
     payoffPerLongToken = gradientScaled
@@ -36,64 +49,83 @@ export function calcPayoffPerToken(
     )
   }
 
-  const payoffPerShortToken = UNIT.sub(payoffPerLongToken)
+  payoffPerShortToken = UNIT.sub(payoffPerLongToken)
+
+  // Convert from 18 decimals to collateral token decimals
+  payoffPerShortToken = payoffPerShortToken.div(SCALING)
+  payoffPerLongToken = payoffPerLongToken.div(SCALING)
 
   return { payoffPerLongToken, payoffPerShortToken }
 }
 
+/**
+ * @dev Function to calculate the value of the underlying metric at which
+ * the cost for purchasing the position token and the payout cancel out.
+ * Calculations are gross of fees.
+ * @param price Position token price expressed as an integer with 18 decimals.
+ * Should be a value between 0 and 1 (inclusive).
+ * @param floor Floor of the payoff curve expressed as an integer with 18 decimals
+ * @param inflection Inflection of the payoff curve expressed as an integer with 18 decimals
+ * @param cap Cap of the payoff curve expressed as an integer with 18 decimals
+ * @param gradient Gradient of the payoff curve expressed as an integer with collateral token decimals
+ * @param isLong True if long position, false if short position
+ * @param collateralTokenDecimals Collateral token decimals
+ * @returns Break-even underlying value
+ */
 export function calcBreakEven(
-  price, // TODO rename to underlyingValue
+  price,
   floor,
   inflection,
   cap,
-  collateralBalanceLongInitial,
-  collateralBalanceShortInitial,
-  isLong
+  gradient,
+  isLong,
+  collateralTokenDecimals
 ) {
+  const SCALING = parseUnits('1', 18 - collateralTokenDecimals)
   const UNIT = parseUnits('1')
 
   // Convert inputs into Big Numbers
-  floor = BigENumber.from(floor)
-  inflection = BigENumber.from(inflection)
-  cap = BigENumber.from(cap)
-  collateralBalanceLongInitial = BigENumber.from(collateralBalanceLongInitial)
-  collateralBalanceShortInitial = BigENumber.from(collateralBalanceShortInitial)
+  floor = BigNumber.from(floor)
+  inflection = BigNumber.from(inflection)
+  cap = BigNumber.from(cap)
 
-  // Calculate gradient
-  const gradient = collateralBalanceLongInitial
-    .mul(UNIT)
-    .div(collateralBalanceLongInitial.add(collateralBalanceShortInitial))
+  // Scale gradient to 18 decimals for calculation purposes as floor, inflection, etc.
+  // have 18 decimals
+  const gradientScaled = gradient.mul(SCALING)
 
   let breakEven
 
-  if (price.gt(UNIT) || price.lt(BigENumber.from(0))) {
+  if (price.gt(UNIT) || price.lt(BigNumber.from(0))) {
     breakEven = 'n/a'
   } else {
     if (isLong) {
-      if (price.eq(gradient)) {
+      if (price.eq(gradientScaled)) {
         breakEven = inflection
-      } else if (price.lt(gradient)) {
-        breakEven = price.mul(inflection.sub(floor)).div(gradient).add(floor)
+      } else if (price.lt(gradientScaled)) {
+        breakEven = price
+          .mul(inflection.sub(floor))
+          .div(gradientScaled)
+          .add(floor)
       } else {
         breakEven = price
-          .sub(gradient)
+          .sub(gradientScaled)
           .mul(cap.sub(inflection))
-          .div(UNIT.sub(gradient))
+          .div(UNIT.sub(gradientScaled))
           .add(inflection)
       }
     } else {
-      if (price.eq(UNIT.sub(gradient))) {
+      if (price.eq(UNIT.sub(gradientScaled))) {
         breakEven = inflection
-      } else if (price.gt(UNIT.sub(gradient))) {
+      } else if (price.gt(UNIT.sub(gradientScaled))) {
         breakEven = UNIT.sub(price)
           .mul(inflection.sub(floor))
-          .div(gradient)
+          .div(gradientScaled)
           .add(floor)
       } else {
         breakEven = UNIT.sub(price)
-          .sub(gradient)
+          .sub(gradientScaled)
           .mul(cap.sub(inflection))
-          .div(UNIT.sub(gradient))
+          .div(UNIT.sub(gradientScaled))
           .add(inflection)
       }
     }
