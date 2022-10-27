@@ -33,7 +33,7 @@ import { DefineOfferAttributes } from './DefineOfferAtributes'
 import { FillOffer } from './FillOffer'
 
 export function CreatePool() {
-  const [decimal, setDecimal] = useState(18)
+  const [decimal, setDecimal] = useState(18) // QUESTION Needs update here?
   const formik = useCreatePoolFormik()
   const theme = useTheme()
   const { provider } = useConnectionContext()
