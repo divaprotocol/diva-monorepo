@@ -650,12 +650,12 @@ export const ApproveActionButtons = ({
                               ...json,
                               offerHash,
                               chainId,
-                              verifyingContract:
-                                config[chainId!].divaAddress,
+                              verifyingContract: config[chainId!].divaAddress,
                             }
                             formik.setFieldValue('jsonToExport', jsonToExport)
                             axios
                               .post(
+                                // TODO Move to constant.ts file
                                 'https://eip712api.xyz/orderbook/v1/offer_create_contingent_pool',
                                 jsonToExport
                               )
