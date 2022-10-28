@@ -8,23 +8,17 @@ import {
 import Button from '@mui/material/Button'
 import { BigNumber, ethers } from 'ethers'
 import { config, CREATE_POOL_TYPE } from '../constants'
-import {
-  formatEther,
-  parseEther,
-  parseUnits,
-  splitSignature,
-} from 'ethers/lib/utils'
+import { parseUnits, splitSignature } from 'ethers/lib/utils'
 import { fetchPool, selectUserAddress } from '../Redux/appSlice'
 import React, { useEffect, useState } from 'react'
 import { useConnectionContext } from '../hooks/useConnectionContext'
-import ERC20 from '@diva/contracts/abis/erc20.json'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import ERC20 from '../abi/ERC20ABI.json'
+import DIVA_ABI from '../abi/DIVAABI.json'
 import { useAppSelector } from '../Redux/hooks'
 import AddIcon from '@mui/icons-material/Add'
 import CheckIcon from '@mui/icons-material/Check'
 import { useDispatch } from 'react-redux'
 import { useCreatePoolFormik } from './CreatePool/formik'
-import DIVA712ABI from '../abi/DIVA712ABI.json'
 import axios from 'axios'
 
 type Props = {
@@ -174,15 +168,6 @@ export const ApproveActionButtons = ({
   const diva =
     chainId != null
       ? new ethers.Contract(config[chainId]?.divaAddress, DIVA_ABI, signer)
-      : null
-
-  const divaNew =
-    chainId != null
-      ? new ethers.Contract(
-          config[chainId]?.divaAddress, //Goerli
-          DIVA712ABI,
-          signer
-        )
       : null
 
   const divaDomain =
@@ -499,16 +484,16 @@ export const ApproveActionButtons = ({
                 setActionLoading(true)
                 switch (transactionType) {
                   case 'createpool':
-                    divaNew!
+                    diva!
                       .createContingentPool({
                         referenceAsset: pool.referenceAsset.toString(),
                         expiryTime: Math.trunc(
                           pool.expiryTime.getTime() / 1000
                         ),
-                        floor: parseEther(pool.floor.toString()),
-                        inflection: parseEther(pool.inflection.toString()),
-                        cap: parseEther(pool.cap.toString()),
-                        gradient: parseEther(pool.gradient.toString()),
+                        floor: parseUnits(pool.floor.toString()),
+                        inflection: parseUnits(pool.inflection.toString()),
+                        cap: parseUnits(pool.cap.toString()),
+                        gradient: parseUnits(pool.gradient.toString(), decimal),
                         collateralAmount: parseUnits(
                           pool.collateralBalance,
                           decimal
@@ -615,13 +600,14 @@ export const ApproveActionButtons = ({
                       expiryTime: Math.floor(
                         new Date(formik.values.expiryTime).getTime() / 1000
                       ).toString(),
-                      floor: parseEther(String(formik.values.floor)).toString(),
-                      inflection: parseEther(
+                      floor: parseUnits(String(formik.values.floor)).toString(),
+                      inflection: parseUnits(
                         String(formik.values.inflection)
                       ).toString(),
-                      cap: parseEther(String(formik.values.cap)).toString(),
-                      gradient: parseEther(
-                        String(formik.values.gradient)
+                      cap: parseUnits(String(formik.values.cap)).toString(),
+                      gradient: parseUnits(
+                        String(formik.values.gradient),
+                        decimal
                       ).toString(),
                       collateralToken: formik.values.collateralToken.id,
                       dataProvider: formik.values.dataProvider,
@@ -653,7 +639,7 @@ export const ApproveActionButtons = ({
                           ...createOfferStats,
                           signature,
                         }
-                        divaNew
+                        diva
                           .getOfferRelevantStateCreateContingentPool(
                             createOfferStats,
                             signature
@@ -686,7 +672,7 @@ export const ApproveActionButtons = ({
                     break
                   case 'filloffer':
                     _checkConditions(
-                      divaNew,
+                      diva,
                       divaDomain,
                       formik.values.jsonToExport, // offerCreationStats,
                       CREATE_POOL_TYPE,
@@ -695,7 +681,7 @@ export const ApproveActionButtons = ({
                       parseUnits(formik.values.yourShare.toString(), decimal)
                     ).then((res) => {
                       if (res.success) {
-                        divaNew
+                        diva
                           .fillOfferCreateContingentPool(
                             formik.values.jsonToExport,
                             formik.values.signature,
@@ -709,7 +695,7 @@ export const ApproveActionButtons = ({
                               const typedOfferHash = receipt.events.find(
                                 (x: any) => x.event === 'OfferFilled'
                               ).args.typedOfferHash
-                              divaNew
+                              diva
                                 .getPoolIdByTypedCreateOfferHash(typedOfferHash)
                                 .then((poolId: any) => {
                                   formik.setFieldValue('poolId', poolId)
