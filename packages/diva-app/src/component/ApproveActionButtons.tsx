@@ -650,8 +650,7 @@ export const ApproveActionButtons = ({
                               ...json,
                               offerHash,
                               chainId,
-                              verifyingContract:
-                                config[chainId!].divaAddress,
+                              verifyingContract: config[chainId!].divaAddress,
                             }
                             formik.setFieldValue('jsonToExport', jsonToExport)
                             axios

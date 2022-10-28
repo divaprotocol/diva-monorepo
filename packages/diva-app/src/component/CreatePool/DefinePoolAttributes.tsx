@@ -62,13 +62,11 @@ export function DefinePoolAttributes({
     referenceAsset,
     expiryTime,
     collateralToken,
-    collateralBalanceShort,
-    collateralBalanceLong,
-    tokenSupply,
+    gradient,
+    collateralBalance,
     inflection,
     cap,
     floor,
-    gradient,
     payoutProfile,
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
@@ -106,40 +104,11 @@ export function DefinePoolAttributes({
       formik.values.gradient <= 1 &&
       formik.values.collateralBalance.toString() != ''
     ) {
-      const collateralBalanceLong = parseUnits(
-        formik.values.collateralBalance,
-        collateralToken.decimals
-      )
-        .mul(
-          parseUnits(
-            formik.values.gradient.toString(),
-            collateralToken.decimals
-          )
-        )
-        .div(parseUnits('1', collateralToken.decimals))
-      const collateralBalanceShort = parseUnits(
-        formik.values.collateralBalance,
-        collateralToken.decimals
-      )
-        .mul(
-          parseUnits('1', collateralToken.decimals).sub(
-            parseUnits(
-              formik.values.gradient.toString(),
-              collateralToken.decimals
-            )
-          )
-        )
-        .div(parseUnits('1', collateralToken.decimals))
-
       formik.setValues((_values) => ({
         ..._values,
-        collateralBalanceLong: parseFloat(
-          formatUnits(collateralBalanceLong, collateralToken.decimals)
+        collateralBalance: parseFloat(
+          formatUnits(collateralBalance.toString(), collateralToken.decimals)
         ),
-        collateralBalanceShort: parseFloat(
-          formatUnits(collateralBalanceShort, collateralToken.decimals)
-        ),
-        tokenSupply: parseFloat(formik.values.collateralBalance),
       }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -151,24 +120,6 @@ export function DefinePoolAttributes({
     collateralTokens?.filter((v) =>
       v.symbol.includes(referenceAssetSearch.trim())
     ) || []
-
-  const setCollateralBalance = (num: number) => {
-    let long = 0
-    let short = 0
-
-    if (num > 0) {
-      const half = num / 2
-      long = short = half
-    }
-    formik.setValues(
-      {
-        ...formik.values,
-        collateralBalanceLong: long,
-        collateralBalanceShort: short,
-      },
-      true
-    )
-  }
 
   const hasPaymentProfileError =
     formik.errors.floor != null ||

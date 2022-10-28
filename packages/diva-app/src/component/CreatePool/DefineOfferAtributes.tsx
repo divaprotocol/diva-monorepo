@@ -95,9 +95,7 @@ export function DefineOfferAttributes({
     referenceAsset,
     expiryTime,
     collateralToken,
-    collateralBalanceShort,
-    collateralBalanceLong,
-    tokenSupply,
+    collateralBalance,
     inflection,
     capacity,
     cap,
@@ -141,40 +139,12 @@ export function DefineOfferAttributes({
       formik.values.gradient <= 1 &&
       formik.values.collateralBalance.toString() != ''
     ) {
-      const collateralBalanceLong = parseUnits(
-        formik.values.collateralBalance,
-        collateralToken.decimals
-      )
-        .mul(
-          parseUnits(
-            formik.values.gradient.toString(),
-            collateralToken.decimals
-          )
-        )
-        .div(parseUnits('1', collateralToken.decimals))
-      const collateralBalanceShort = parseUnits(
-        formik.values.collateralBalance,
-        collateralToken.decimals
-      )
-        .mul(
-          parseUnits('1', collateralToken.decimals).sub(
-            parseUnits(
-              formik.values.gradient.toString(),
-              collateralToken.decimals
-            )
-          )
-        )
-        .div(parseUnits('1', collateralToken.decimals))
-
+      // QUESTION Do we need to refactor here?
       formik.setValues((_values) => ({
         ..._values,
-        collateralBalanceLong: parseFloat(
-          formatUnits(collateralBalanceLong, collateralToken.decimals)
+        collateralBalance: parseFloat(
+          formatUnits(collateralBalance.toString(), collateralToken.decimals)
         ),
-        collateralBalanceShort: parseFloat(
-          formatUnits(collateralBalanceShort, collateralToken.decimals)
-        ),
-        tokenSupply: parseFloat(formik.values.collateralBalance),
       }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -190,7 +160,8 @@ export function DefineOfferAttributes({
   const hasPaymentProfileError =
     formik.errors.floor != null ||
     formik.errors.cap != null ||
-    formik.errors.inflection != null
+    formik.errors.inflection != null ||
+    formik.errors.gradient != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
   useEffect(() => {
@@ -671,7 +642,6 @@ export function DefineOfferAttributes({
                           formik.setValues((values) => ({
                             ...values,
                             collateralBalance,
-                            tokenSupply: parseFloat(collateralBalance),
                             takerShare:
                               parseFloat(collateralBalance) - values.yourShare,
                           }))
@@ -691,7 +661,6 @@ export function DefineOfferAttributes({
                         formik.setValues((values) => ({
                           ...values,
                           collateralBalance,
-                          tokenSupply: parseFloat(collateralBalance),
                           takerShare:
                             parseFloat(collateralBalance) - values.yourShare,
                         }))
@@ -723,11 +692,7 @@ export function DefineOfferAttributes({
               <Stack pb={3} spacing={2} direction={mobile ? 'column' : 'row'}>
                 <FormControl
                   fullWidth
-                  error={
-                    direction === 'Long'
-                      ? formik.errors.collateralBalanceLong != null
-                      : formik.errors.collateralBalanceShort != null
-                  }
+                  error={formik.errors.collateralBalance != null}
                 >
                   <TextField
                     id="yourShare"
@@ -756,20 +721,12 @@ export function DefineOfferAttributes({
                       }
                     }}
                   />
-                  {direction === 'Long'
-                    ? formik.errors.collateralBalanceLong != null
-                    : formik.errors.collateralBalanceShort != null && (
-                        <FormHelperText>
-                          {direction === 'Long'
-                            ? formik.errors.collateralBalanceLong
-                            : formik.errors.collateralBalanceShort}
-                        </FormHelperText>
-                      )}
-                  {!isNaN(
-                    direction === 'Long'
-                      ? formik.values.collateralBalanceLong
-                      : formik.values.collateralBalanceShort
-                  ) && (
+                  {formik.errors.collateralBalance != null && (
+                    <FormHelperText>
+                      {formik.errors.collateralBalance}
+                    </FormHelperText>
+                  )}
+                  {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
                       You receive{' '}
                       {direction === 'Long' ? (
@@ -784,14 +741,7 @@ export function DefineOfferAttributes({
                     </FormHelperText>
                   )}
                 </FormControl>
-                <FormControl
-                  fullWidth
-                  error={
-                    direction === 'Long'
-                      ? formik.errors.collateralBalanceShort != null
-                      : formik.errors.collateralBalanceLong != null
-                  }
-                >
+                <FormControl fullWidth error={formik.errors.collateralBalance}>
                   <TextField
                     id="takerShare"
                     name="takerShare"
@@ -801,8 +751,7 @@ export function DefineOfferAttributes({
                     disabled={true}
                     error={formik.errors.takerShare != null}
                     value={
-                      parseFloat(formik.values.collateralBalance) -
-                      formik.values.yourShare
+                      formik.values.collateralBalance - formik.values.yourShare
                     } // TODO Update with BigNumber
                     type="number"
                     onChange={(event) => {
@@ -813,11 +762,7 @@ export function DefineOfferAttributes({
                       }))
                     }}
                   />
-                  {!isNaN(
-                    direction === 'Long'
-                      ? formik.values.collateralBalanceShort
-                      : formik.values.collateralBalanceLong // QUESTION Why do we need this part here?
-                  ) && (
+                  {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
                       Taker receives{' '}
                       {direction === 'Long' ? (
@@ -1051,8 +996,7 @@ export function DefineOfferAttributes({
           {floor != null &&
             cap != null &&
             inflection != null &&
-            tokenSupply != null &&
-            tokenSupply > 0 && (
+            gradient != null && (
               <Box sx={{ maxWidth: '85%' }}>
                 <PayoffProfile
                   floor={floor}
