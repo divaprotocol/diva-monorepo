@@ -43,7 +43,6 @@ export enum SupportedChainId {
 type SingleConfig = {
   readonly name: string
   readonly divaAddress: string
-  readonly divaAddressNew: string
   readonly balanceCheckerAddress: string
   readonly exchangeProxy: string
   readonly whitelistAddress: string
@@ -68,7 +67,6 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.MAINNET]: {
     name: 'Ethereum',
     divaAddress: '',
-    divaAddressNew: '',
     balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
@@ -84,8 +82,7 @@ export const config: { [key: number]: SingleConfig } = {
   },
   [SupportedChainId.ROPSTEN]: {
     name: 'Ropsten',
-    divaAddress: '0xebBAA31B1Ebd727A1a42e71dC15E304aD8905211',
-    divaAddressNew: '',
+    divaAddress: '',
     balanceCheckerAddress: '0xD713aeC2156709A6AF392bb84018ACc6b44f1885',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
@@ -102,8 +99,7 @@ export const config: { [key: number]: SingleConfig } = {
     isSupported: true,
   },
   [SupportedChainId.GOERLI]: {
-    divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
-    divaAddressNew: '0x2d941518E0876Fb6042bfCdB403427DC5620b2EC', // 26.10.2022
+    divaAddress: '0x2d941518E0876Fb6042bfCdB403427DC5620b2EC', // 26.10.2022
     balanceCheckerAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
@@ -123,7 +119,6 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.POLYGON]: {
     name: 'Polygon',
     divaAddress: '',
-    divaAddressNew: '',
     balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
@@ -140,7 +135,6 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.POLYGON_MUMBAI]: {
     name: 'Mumbai',
     divaAddress: '',
-    divaAddressNew: '',
     balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
@@ -161,7 +155,6 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.ARBITRUM_ONE]: {
     name: 'Arbitrum',
     divaAddress: '',
-    divaAddressNew: '',
     balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',

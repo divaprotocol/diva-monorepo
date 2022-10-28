@@ -16,8 +16,8 @@ To check:
 TODO:
 - Remove diva-contracts folder 
   -> Load DIVA ABI from ABI file, i.e. replace `import ERC20_ABI from '@diva/contracts/abis/erc20.json'`
-- 
-
+- Replace `import ERC20 from '@diva/contracts/abis/erc20.json'`
+- Update governance parameter call for submission periods
 
 QUESTIONS:
 - Remove `convertExponentialToDecimal` in calcPayoffsPerToken.ts?

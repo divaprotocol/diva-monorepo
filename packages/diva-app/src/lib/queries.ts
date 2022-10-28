@@ -59,11 +59,11 @@ export type Pool = {
   supplyShort: string
 
   // QUESTION add the following missing fields?
-  // submissionPeriod: string
-  // challengePeriod: string
-  // reviewPeriod: string
-  // fallbackSubmissionPeriod: string
-  // permissionedERC721Token: string
+  submissionPeriod: string
+  challengePeriod: string
+  reviewPeriod: string
+  fallbackSubmissionPeriod: string
+  permissionedERC721Token: string
 
   createdBy: string
   createdAt: string
@@ -132,6 +132,11 @@ export const queryUser = (id: string, pageSize: number, skip: number) => gql`
           settlementFee
           createdBy
           createdAt
+          submissionPeriod
+          challengePeriod
+          reviewPeriod
+          fallbackSubmissionPeriod
+          permissionedERC721Token
           capacity
           expiryTime
           challenges {
@@ -201,6 +206,11 @@ export const queryPools = (
       settlementFee
       createdBy
       createdAt
+      submissionPeriod
+      challengePeriod
+      reviewPeriod
+      fallbackSubmissionPeriod
+      permissionedERC721Token
       capacity
       expiryTime
       challenges {
@@ -271,6 +281,11 @@ export const queryPool = (poolId: number) => gql`
       settlementFee
       createdBy
       createdAt
+      submissionPeriod
+      challengePeriod
+      reviewPeriod
+      fallbackSubmissionPeriod
+      permissionedERC721Token
       capacity
       expiryTime
       challenges {

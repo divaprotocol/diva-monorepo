@@ -30,7 +30,7 @@ export function DefineAdvanced({
   const userAddress = useAppSelector(selectUserAddress)
   const [expanded, setExpanded] = useState(false)
   const [unlimited, setUnlimited] = useState(true)
-  const { tokenSupply, capacity } = formik.values
+  const { capacity } = formik.values
   const [mobile, setMobile] = useState(false)
   const [editTaker, setEditTaker] = useState(false)
   const [editMaker, setEditMaker] = useState(false)

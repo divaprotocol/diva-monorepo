@@ -1,9 +1,9 @@
 import { ethers, Contract, BigNumber } from 'ethers'
 import { config } from '../constants'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import ERC20 from '@diva/contracts/abis/erc20.json'
+import DIVA_ABI from '../abi/DIVAABI.json'
+import ERC20 from '../abi/ERC20ABI.json'
 import { WhitelistCollateralToken, Pool } from '../lib/queries'
-import { parseEther, parseUnits } from 'ethers/lib/utils'
+import { parseUnits } from 'ethers/lib/utils'
 import { useConnectionContext } from './useConnectionContext'
 import { useAppSelector } from '../Redux/hooks'
 import { selectChainId } from '../Redux/appSlice'
@@ -20,16 +20,18 @@ type DivaContract = Contract & {
       floor: BigNumber,
       inflection: BigNumber,
       cap: BigNumber,
-      collateralBalanceShort: BigNumber,
-      collateralBalanceLong: BigNumber,
-      supplyPositionToken: BigNumber,
+      gradient: BigNumber,
+      collateralBalance: BigNumber,
       collateralToken: string,
       dataProvider: string,
-      capacity: BigNumber
+      capacity: BigNumber,
+      longRecipient: string,
+      shortRecipient: string,
+      permissionedERC721Token: string
     ]
   ) => Promise<any>
-  getPoolParametersById: (id: string) => Promise<Pool>
-  setFinalReferenceValueById: (
+  getPoolParameters: (id: string) => Promise<Pool>
+  setFinalReferenceValue: (
     poolId: string,
     finalReferenceValue: string,
     allowChallenge: boolean
@@ -46,20 +48,22 @@ type DivaApi = {
     referenceValue: number
   }) => Promise<void>
   createContingentPool: (props: {
+    referenceAsset: string
+    expiryTime: number
+    floor: number
     inflection: number
     cap: number
-    floor: number
-    collateralBalanceShort: number
-    collateralBalanceLong: number
-    expiryTime: number
-    supplyPositionToken: number
-    referenceAsset: string
+    gradient: number
+    collateralBalance: number
     collateralToken: WhitelistCollateralToken
     dataProvider: string
     capacity: number
+    longRecipient: string
+    shortRecipient: string
+    permissionedERC721Token: string
   }) => Promise<void>
-  getPoolParametersById: (id: string) => Promise<Pool>
-  setFinalReferenceValueById: (props: {
+  getPoolParameters: (id: string) => Promise<Pool>
+  setFinalReferenceValue: (props: {
     poolId: string
     finalReferenceValue: string
     allowChallenge: boolean
@@ -88,42 +92,35 @@ export function useDiva(): DivaApi | null {
      */
     createContingentPool: async (props) => {
       const {
-        cap,
-        collateralBalanceLong: _collateralBalanceLong,
-        collateralBalanceShort: _collateralBalanceShort,
-        collateralToken,
-        dataProvider,
+        referenceAsset,
         expiryTime,
         floor,
         inflection,
-        referenceAsset,
-        supplyPositionToken,
+        cap,
+        gradient,
+        collateralBalance: _collateralBalance,
+        collateralToken,
+        dataProvider,
         capacity,
+        longRecipient,
+        shortRecipient,
+        permissionedERC721Token,
       } = props
       const erc20 = new ethers.Contract(collateralToken.id, ERC20, signer)
-      const collateralBalanceShort = parseUnits(
-        _collateralBalanceShort.toString(),
-        collateralToken.decimals
-      )
-      const collateralBalanceLong = parseUnits(
-        _collateralBalanceLong.toString(),
+      const collateralBalance = parseUnits(
+        _collateralBalance.toString(),
         collateralToken.decimals
       )
 
       const creatorAddress = await signer.getAddress()
-      const allowedBalance = await erc20.allowance(creatorAddress, divaAddress)
+      const allowance = await erc20.allowance(creatorAddress, divaAddress)
 
       /*** in order to avoid redundant approvals we only need to approve if collateral is
        greater than already approved balance
        */
-      if (
-        allowedBalance.lt(collateralBalanceLong.add(collateralBalanceShort))
-      ) {
+      if (allowance.lt(collateralBalance)) {
         try {
-          const tx = await erc20.approve(
-            divaAddress,
-            collateralBalanceLong.add(collateralBalanceShort)
-          )
+          const tx = await erc20.approve(divaAddress, collateralBalance)
           await tx.wait()
         } catch (e) {
           console.error(e)
@@ -133,30 +130,32 @@ export function useDiva(): DivaApi | null {
       const tx2 = await contract.createContingentPool([
         referenceAsset,
         Math.round(expiryTime / 1000).toString(),
-        parseEther(floor.toString()),
-        parseEther(inflection.toString()),
-        parseEther(cap.toString()),
-        collateralBalanceShort,
-        collateralBalanceLong,
-        parseEther(supplyPositionToken.toString()),
+        parseUnits(floor.toString()),
+        parseUnits(inflection.toString()),
+        parseUnits(cap.toString()),
+        parseUnits(gradient.toString(), collateralToken.decimals),
+        collateralBalance,
         collateralToken.id,
         dataProvider,
-        parseEther(capacity.toString()),
+        parseUnits(capacity.toString(), collateralToken.decimals),
+        longRecipient,
+        shortRecipient,
+        permissionedERC721Token,
       ])
 
       const val = await tx2.wait()
 
       return val
     },
-    getPoolParametersById: (id: string) => {
-      return contract.getPoolParametersById(id).then((val) => {
+    getPoolParameters: (id: string) => {
+      return contract.getPoolParameters(id).then((val) => {
         return val
       })
     },
     challengeFinalReferenceValue: () => {
       return Promise.resolve()
     },
-    setFinalReferenceValueById: () => {
+    setFinalReferenceValue: () => {
       return Promise.resolve()
     },
   }
