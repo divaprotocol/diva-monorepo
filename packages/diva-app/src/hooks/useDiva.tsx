@@ -125,7 +125,7 @@ export function useDiva(): DivaApi | null {
         } catch (e) {
           console.error(e)
         }
-      }
+      } // QUESTION Is this function still relevant? Approve and create are now two separate processes
 
       const tx2 = await contract.createContingentPool([
         referenceAsset,

@@ -52,7 +52,7 @@ export function ReviewAndSubmit({
   const [takerFilledAmount, setTakerFilledAmount] = useState(0)
   const [decimal, setDecimal] = useState(18)
   const divaNew = new ethers.Contract(
-    config[chainId!].divaAddressNew, //Goerli
+    config[chainId!].divaAddress, //Goerli
     DIVA712ABI,
     provider.getSigner()
   )
