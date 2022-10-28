@@ -14,7 +14,7 @@ import {
 import { Box } from '@mui/material'
 import { config, CREATE_POOL_TYPE } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import DIVA_ABI from '../../abi/DIVAABI.json'
 import { useCreatePoolFormik } from './formik'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -27,7 +27,7 @@ import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
 import InsertLinkTwoToneIcon from '@mui/icons-material/InsertLinkTwoTone'
-import ERC20 from '@diva/contracts/abis/erc20.json'
+import ERC20 from '../../abi/ERC20ABI.json'
 import { ContentCopy, Download } from '@mui/icons-material'
 import DIVA712ABI from '../../abi/DIVA712ABI.json'
 
@@ -180,7 +180,7 @@ export function Success({
       : null
 
   const divaNew = new ethers.Contract(
-    config[chainId!].divaAddressNew, //Goerli
+    config[chainId!].divaAddress, //Goerli
     DIVA712ABI,
     provider.getSigner()
   )

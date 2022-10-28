@@ -16,7 +16,7 @@ export type Values = {
   gradient: number
   collateralToken?: WhitelistCollateralToken
   collateralWalletBalance: string
-  collateralBalance: string
+  collateralBalance: number
   capacity: string
   dataProvider: string
   payoutProfile: string
@@ -51,7 +51,7 @@ export const initialValues: Values = {
     symbol: 'dUSD',
   }, // TODO: hard-coded for testnet; will break the app cross chain. Update towards mainnet launch
   collateralWalletBalance: '0',
-  collateralBalance: '10',
+  collateralBalance: 10,
   capacity: 'Unlimited',
   dataProvider: '',
   payoutProfile: 'Binary',
@@ -87,13 +87,13 @@ export const useCreatePoolFormik = () => {
       } else if (values.step === 3) {
         formik.setStatus('Creating Pool')
         const {
+          referenceAsset,
+          expiryTime,
+          floor,
           inflection,
           cap,
-          floor,
-          collateralBalance, // TODO rename to collateralAmount
           gradient,
-          expiryTime,
-          referenceAsset,
+          collateralBalance, // TODO rename to collateralAmount
           collateralToken,
           dataProvider,
           longRecipient,
@@ -116,7 +116,7 @@ export const useCreatePoolFormik = () => {
               capacity: 0,
               longRecipient,
               shortRecipient,
-              permissionedERC721Token
+              permissionedERC721Token,
             })
             .then(() => {
               formik.setStatus('successfully created')
@@ -150,13 +150,10 @@ export const useCreatePoolFormik = () => {
       if (values.collateralToken == null) {
         errors.collateralToken = 'You must choose a collateral asset'
       }
-      if (values.collateralBalance == '') {
+      if (values.collateralBalance == 0) {
         errors.collateralBalance = 'Collateral cannot be empty'
       }
-      if (
-        parseFloat(values.minTakerContribution) >
-        parseFloat(values.collateralBalance)
-      ) {
+      if (parseFloat(values.minTakerContribution) > values.collateralBalance) {
         errors.minTakerContribution =
           'Minimum taker contribution must be less than collateral amount'
       }
@@ -168,10 +165,10 @@ export const useCreatePoolFormik = () => {
       if (!isConnected) {
         errors.collateralWalletBalance =
           'Your wallet must be connected before you can proceed'
-      } else if (walletBalance < parseFloat(collateralBalance)) {
+      } else if (walletBalance < collateralBalance) {
         errors.collateralWalletBalance =
           'Collateral cannot be higher than your balance'
-      } else if (values.collateralBalance == '0') {
+      } else if (values.collateralBalance == 0) {
         errors.collateralBalance = 'Collateral cannot be 0'
       }
       if (values.takerShare <= 0 || isNaN(values.takerShare)) {
@@ -222,7 +219,7 @@ export const useCreatePoolFormik = () => {
         errors.capacity = 'Capacity cannot be negative'
       } else if (
         parseFloat(values.capacity) !== 0 &&
-        parseFloat(values.collateralBalance) > parseFloat(values.capacity)
+        values.collateralBalance > parseFloat(values.capacity)
       ) {
         errors.capacity = `Capacity must be larger than ${values.collateralBalance}. For unlimited capacity, set to 0`
       }

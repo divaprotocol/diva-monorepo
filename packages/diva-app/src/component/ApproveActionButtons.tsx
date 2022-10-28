@@ -179,7 +179,7 @@ export const ApproveActionButtons = ({
   const divaNew =
     chainId != null
       ? new ethers.Contract(
-          config[chainId]?.divaAddressNew, //Goerli
+          config[chainId]?.divaAddress, //Goerli
           DIVA712ABI,
           signer
         )
@@ -191,7 +191,7 @@ export const ApproveActionButtons = ({
           name: 'DIVA Protocol',
           version: '1',
           chainId,
-          verifyingContract: config[chainId!].divaAddressNew,
+          verifyingContract: config[chainId!].divaAddress,
         }
       : null
   const [mobile, setMobile] = useState(false)
@@ -224,7 +224,7 @@ export const ApproveActionButtons = ({
             formik.values.jsonToExport.maker.toLowerCase()
           ) {
             token
-              .allowance(account, config[chainId!].divaAddressNew)
+              .allowance(account, config[chainId!].divaAddress)
               .then((res) => {
                 if (
                   res.lt(
@@ -251,7 +251,7 @@ export const ApproveActionButtons = ({
               })
           } else {
             token
-              .allowance(account, config[chainId!].divaAddressNew)
+              .allowance(account, config[chainId!].divaAddress)
               .then((res) => {
                 if (
                   res.lt(parseUnits(String(formik.values.yourShare), decimal))
@@ -267,7 +267,7 @@ export const ApproveActionButtons = ({
         } else {
           if (transactionType === 'createoffer') {
             token
-              .allowance(account, config[chainId]?.divaAddressNew)
+              .allowance(account, config[chainId]?.divaAddress)
               .then((res) => {
                 if (
                   res.lt(parseUnits(String(formik.values.yourShare), decimal))
@@ -281,7 +281,7 @@ export const ApproveActionButtons = ({
               })
           } else if (transactionType === 'createpool') {
             token
-              .allowance(account, config[chainId]?.divaAddressNew)
+              .allowance(account, config[chainId]?.divaAddress)
               .then((res) => {
                 if (res.lt(parseUnits(textFieldValue, decimal))) {
                   setApproveEnabled(true)
@@ -377,7 +377,7 @@ export const ApproveActionButtons = ({
 
                       token
                         .approve(
-                          config[chainId!].divaAddressNew,
+                          config[chainId!].divaAddress,
                           parseUnits(textFieldValue, decimal)
                         )
                         .then((tx: any) => {
@@ -400,7 +400,7 @@ export const ApproveActionButtons = ({
 
                       token
                         .approve(
-                          config[chainId!].divaAddressNew,
+                          config[chainId!].divaAddress,
                           parseUnits(String(formik.values.yourShare), decimal)
                         )
                         .then((tx: any) => {
@@ -410,7 +410,7 @@ export const ApproveActionButtons = ({
                           setApproveLoading(false)
                           return token.allowance(
                             account,
-                            config[chainId!].divaAddressNew
+                            config[chainId!].divaAddress
                           )
                         })
                         .catch((err: any) => {
@@ -423,7 +423,7 @@ export const ApproveActionButtons = ({
 
                       token
                         .approve(
-                          config[chainId!].divaAddressNew,
+                          config[chainId!].divaAddress,
                           account.toLowerCase() ===
                             formik.values.jsonToExport.maker.toLowerCase()
                             ? parseUnits(
@@ -455,7 +455,7 @@ export const ApproveActionButtons = ({
                           setApproveLoading(false)
                           return token.allowance(
                             account,
-                            config[chainId!].divaAddressNew
+                            config[chainId!].divaAddress
                           )
                         })
                         .catch((err: any) => {
@@ -665,7 +665,7 @@ export const ApproveActionButtons = ({
                               offerHash,
                               chainId,
                               verifyingContract:
-                                config[chainId!].divaAddressNew,
+                                config[chainId!].divaAddress,
                             }
                             formik.setFieldValue('jsonToExport', jsonToExport)
                             axios
