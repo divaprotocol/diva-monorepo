@@ -1058,10 +1058,8 @@ export function DefineOfferAttributes({
                   floor={floor}
                   cap={cap}
                   inflection={inflection}
+                  gradient={gradient}
                   hasError={hasPaymentProfileError}
-                  collateralBalanceLong={collateralBalanceLong}
-                  collateralBalanceShort={collateralBalanceShort}
-                  tokenSupply={tokenSupply}
                 />
               </Box>
             )}

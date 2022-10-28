@@ -7,8 +7,8 @@ import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import ERC20 from '@diva/contracts/abis/erc20.json'
-import { formatEther, formatUnits } from 'ethers/lib/utils'
+import ERC20 from '../../abi/ERC20ABI.json'
+import { formatUnits } from 'ethers/lib/utils'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
 import Container from '@mui/material/Container'
@@ -24,6 +24,7 @@ export function Offer() {
   const [decimal, setDecimal] = useState(18)
   const offerHash = window.location.pathname.split('/')[2]
   const jsonResponse = useQuery(`json-${offerHash}`, async () => {
+    // TODO Move the link part to constants.ts
     const response = axios.get(
       'https://eip712api.xyz/orderbook/v1/offer_create_contingent_pool/' +
         offerHash
@@ -44,6 +45,10 @@ export function Offer() {
         setDecimal(decimals)
         formik.setFieldValue('jsonToExport', jsonResponse.data.data)
         formik.setFieldValue('collateralToken.decimals', decimals)
+        formik.setFieldValue(
+          'gradient',
+          parseFloat(formatUnits(jsonResponse.data.data.gradient, decimals))
+        )
         formik.setFieldValue(
           'yourShare',
           parseFloat(
@@ -92,16 +97,11 @@ export function Offer() {
         'expiryTime',
         new Date(jsonResponse.data.data.expiryTime * 1000)
       )
-      formik.setFieldValue('floor', formatEther(jsonResponse.data.data.floor))
-      formik.setFieldValue('cap', formatEther(jsonResponse.data.data.cap))
+      formik.setFieldValue('floor', formatUnits(jsonResponse.data.data.floor))
+      formik.setFieldValue('cap', formatUnits(jsonResponse.data.data.cap))
       formik.setFieldValue(
         'inflection',
-        formatEther(jsonResponse.data.data.inflection)
-      )
-
-      formik.setFieldValue(
-        'gradient',
-        parseFloat(formatEther(jsonResponse.data.data.gradient))
+        formatUnits(jsonResponse.data.data.inflection)
       )
       formik.setFieldValue('collateralWalletBalance', jsonResponse.data.data)
 

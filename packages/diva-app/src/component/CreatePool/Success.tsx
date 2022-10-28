@@ -29,7 +29,6 @@ import { selectUserAddress } from '../../Redux/appSlice'
 import InsertLinkTwoToneIcon from '@mui/icons-material/InsertLinkTwoTone'
 import ERC20 from '../../abi/ERC20ABI.json'
 import { ContentCopy, Download } from '@mui/icons-material'
-import DIVA712ABI from '../../abi/DIVA712ABI.json'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -179,15 +178,8 @@ export function Success({
         )
       : null
 
-  const divaNew = new ethers.Contract(
-    config[chainId!].divaAddress, //Goerli
-    DIVA712ABI,
-    provider.getSigner()
-  )
   useEffect(() => {
-    /**
-     * Remove etherscan usage and capture transaction receipt instead
-     */
+    // TODO Remove etherscan usage and capture transaction receipt instead
     if (transactionType !== 'filloffer') {
       etherscanProvider.getHistory(userAddress).then((txs) => {
         provider
@@ -202,7 +194,7 @@ export function Success({
           })
       })
     } else {
-      divaNew.getPoolParameters(formik.values.poolId).then((pool) => {
+      diva.getPoolParameters(formik.values.poolId).then((pool) => {
         setShortToken(pool.shortToken)
         setLongToken(pool.longToken)
         setPoolId(Number(formik.values.poolId))
@@ -274,8 +266,7 @@ export function Success({
             )}
           {transactionType === 'createoffer' && (
             <Typography>
-              Copy or Download the JSON to share and complete offer creation
-              process
+              Copy the JSON, download it or share the link with counterparties
             </Typography>
           )}
           {transactionType === 'createpool' && (

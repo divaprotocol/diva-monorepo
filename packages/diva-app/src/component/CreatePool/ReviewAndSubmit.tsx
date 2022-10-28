@@ -27,8 +27,8 @@ import {
 } from '../../Util/Dates'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { ethers } from 'ethers'
-import ERC20 from '@diva/contracts/abis/erc20.json'
-import DIVA712ABI from '../../abi/DIVA712ABI.json'
+import ERC20 from '../../abi/ERC20ABI.json'
+import DIVA_ABI from '../../abi/DIVAABI.json'
 import { formatUnits } from 'ethers/lib/utils'
 
 export function ReviewAndSubmit({
@@ -51,9 +51,11 @@ export function ReviewAndSubmit({
   )
   const [takerFilledAmount, setTakerFilledAmount] = useState(0)
   const [decimal, setDecimal] = useState(18)
-  const divaNew = new ethers.Contract(
+
+  // QUESTION Why not use hook that will also handle null values?
+  const diva = new ethers.Contract(
     config[chainId!].divaAddress, //Goerli
-    DIVA712ABI,
+    DIVA_ABI,
     provider.getSigner()
   )
 
@@ -62,12 +64,14 @@ export function ReviewAndSubmit({
     ERC20,
     provider.getSigner()
   )
+
+  // QUESTION WHy not move this part into a useEffect hook?
   token.decimals().then((decimals: number) => {
     setDecimal(decimals)
   })
   useEffect(() => {
     if (transaction === 'filloffer') {
-      divaNew
+      diva
         .getOfferRelevantStateCreateContingentPool(
           formik.values.jsonToExport,
           formik.values.signature
@@ -198,7 +202,7 @@ export function ReviewAndSubmit({
                     fontSize={'0.85rem'}
                     sx={{ ml: theme.spacing(2) }}
                   >
-                    Collateral Balance
+                    Collateral Amount
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
                     {Number(values.collateralBalance).toFixed(2)}
@@ -211,7 +215,7 @@ export function ReviewAndSubmit({
                     fontSize={'0.85rem'}
                     sx={{ ml: theme.spacing(2) }}
                   >
-                    Collateral Balance
+                    Collateral Amount
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
                     {Number(formik.values.collateralBalance).toFixed(2)}
@@ -224,7 +228,7 @@ export function ReviewAndSubmit({
                     fontSize={'0.85rem'}
                     sx={{ ml: theme.spacing(2) }}
                   >
-                    Collateral Balance
+                    Collateral Amount
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
                     {(
@@ -484,11 +488,7 @@ export function ReviewAndSubmit({
                 <Container sx={{ pt: theme.spacing(2) }}>
                   <FormControl
                     fullWidth
-                    error={
-                      formik.values.offerDirection === 'Long'
-                        ? formik.errors.collateralBalanceShort != null
-                        : formik.errors.collateralBalanceLong != null
-                    }
+                    error={formik.errors.collateralBalance != null}
                   >
                     <TextField
                       id="takerShare"
@@ -536,11 +536,7 @@ export function ReviewAndSubmit({
                         }
                       }}
                     />
-                    {!isNaN(
-                      formik.values.offerDirection === 'Long'
-                        ? formik.values.collateralBalanceShort
-                        : formik.values.collateralBalanceLong
-                    ) && (
+                    {!isNaN(formik.values.collateralBalance) && (
                       <FormHelperText>
                         You receive{' '}
                         {formik.values.offerDirection !== 'Long' ? (
@@ -629,18 +625,15 @@ export function ReviewAndSubmit({
           {values.floor != null &&
             values.cap != null &&
             values.inflection != null &&
-            values.tokenSupply != null &&
-            values.tokenSupply > 0 && (
+            values.gradient != null && (
               <Box sx={{ maxWidth: '85%' }}>
                 {transaction !== 'createpool' ? (
                   <PayoffProfile
                     floor={values.floor}
                     cap={values.cap}
                     inflection={values.inflection}
+                    gradient={values.gradient}
                     hasError={false}
-                    collateralBalanceLong={values.collateralBalanceLong}
-                    collateralBalanceShort={values.collateralBalanceShort}
-                    tokenSupply={values.tokenSupply}
                     longDirection={values.offerDirection === 'Long'}
                   />
                 ) : (
@@ -648,10 +641,8 @@ export function ReviewAndSubmit({
                     floor={values.floor}
                     cap={values.cap}
                     inflection={values.inflection}
+                    gradient={values.gradient}
                     hasError={false}
-                    collateralBalanceLong={values.collateralBalanceLong}
-                    collateralBalanceShort={values.collateralBalanceShort}
-                    tokenSupply={values.tokenSupply}
                   />
                 )}
               </Box>
