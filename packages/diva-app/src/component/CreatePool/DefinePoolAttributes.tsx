@@ -673,7 +673,7 @@ export function DefinePoolAttributes({
         <Stack>
           <Typography
             style={{ color: 'white' }}
-            pb={theme.spacing(2)}
+            // pb={theme.spacing(5)}
             variant="subtitle1"
           >
             Payoff Profile
@@ -683,7 +683,7 @@ export function DefinePoolAttributes({
             inflection != null &&
             tokenSupply != null &&
             tokenSupply > 0 && (
-              <Box sx={{ maxWidth: '85%' }}>
+              <Box sx={{ maxWidth: '85%', padding: '16px' }}>
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
@@ -692,6 +692,7 @@ export function DefinePoolAttributes({
                   collateralBalanceLong={collateralBalanceLong}
                   collateralBalanceShort={collateralBalanceShort}
                   tokenSupply={tokenSupply}
+                  collateralToken={collateralToken.symbol}
                 />
               </Box>
             )}
