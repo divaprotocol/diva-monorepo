@@ -42,7 +42,7 @@ export function PayoffProfile(props) {
       y: 0,
     },
     {
-      x: cap * 1.15,
+      x: cap + padding,
       y: 0,
     },
   ]
@@ -68,17 +68,10 @@ export function PayoffProfile(props) {
       y: maxPayoutLong,
     },
   ]
-  const [width, setWidth] = useState(350)
+  const [chartWidth, setWidth] = useState(400)
   const [axisLabel, setAxisLabel] = useState('')
 
-  console.log(
-    'tokenSupply-',
-    tokenSupply,
-    'collateralBalanceLong- ',
-    collateralBalanceLong,
-    'maxPayoutLong- ',
-    maxPayoutLong
-  )
+  console.log('start', start)
 
   useLayoutEffect(() => {
     const callback = () => {
@@ -92,34 +85,44 @@ export function PayoffProfile(props) {
     }
   }, [ref.current])
 
+  const chartHeight = 300
+
+  const margin = { top: 10, right: 10, bottom: 40, left: 10 },
+    width = chartWidth - margin.left - margin.right,
+    height = chartHeight - margin.top - margin.bottom
+
   useEffect(() => {
-    setAxisLabel(collateralToken)
+    if (collateralToken != undefined) {
+      setAxisLabel(collateralToken)
+    }
   }, [props.collateralToken])
+  console.log('colleart', axisLabel)
 
   const lineSeriesStyle = { strokeWidth: '3px' }
-  const height = 300
 
   if (hasError) lineSeriesStyle.stroke = theme.palette.error.main
+
+  const intitalChart = () => {
+    const svg = d3
+      .select(ref.current)
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom)
+      .style('overflow', 'visible')
+    // svg
+    //   .append('defs')
+    //   .append('clipPath')
+    //   .attr('id', 'clip')
+    //   .append('rect')
+    //   .attr('width', width)
+  }
   useEffect(() => {
     intitalChart()
   }, [])
-  const intitalChart = () => {
-    const svg = d3.select(ref.current)
-    svg.attr('width', width).attr('height', 300)
-    svg
-      .append('defs')
-      .append('clipPath')
-      .attr('id', 'clip')
-      .append('rect')
-      .attr('width', width)
-  }
   const draw = () => {
     const svg = d3.select(ref.current)
     svg.selectAll('*').remove()
-    console.log('removed')
     svg.selectAll('rect').data(long)
     const domainMin = d3.min(long, function (d) {
-      console.log(d.x)
       return d.x * 0.98
     })
 
@@ -129,7 +132,7 @@ export function PayoffProfile(props) {
 
     const x = d3
       .scaleLinear()
-      .domain([start * 0.95, domainMax])
+      .domain([domainMin, domainMax])
       .range([0, width * 0.98])
     const y = d3
       .scaleLinear()
@@ -189,18 +192,56 @@ export function PayoffProfile(props) {
       .style('fill', 'none')
       .style('stroke', theme.palette.primary.dark)
       .style('stroke-width', '3px')
+
     svg
       .append('text')
-      .attr('class', 'y label')
-      .attr('y', 6)
-      .attr('x', 0 - height / 2)
-      .attr('dy', '1em')
-      .style('text-anchor', 'middle')
-      .text('Payout in' + ' ' + axisLabel)
+      .attr('opacity', function () {
+        return axisLabel ? 1 : 0
+      })
+      .attr('text-anchor', 'start')
+      .attr('transform', 'rotate(-90)')
+      .attr('y', -margin.left - 20)
+      .attr('x', -margin.top - 200)
+      .text('payout in' + ' ' + axisLabel)
+
+    svg
+      .append('rect')
+      .attr('x', width - 25)
+      .attr('y', height + 20)
+      .attr('width', 25)
+      .attr('height', 3)
+      .style('fill', theme.palette.primary.light)
+    svg
+      .append('text')
+      .attr('x', width - 25)
+      .attr('y', height + 40)
+      .text('Long')
+      .style('font-size', '15px')
+      .attr('alignment-baseline', 'middle')
+
+    svg
+      .append('rect')
+      .attr('x', 220)
+      .attr('y', height + 20)
+      .attr('width', 25)
+      .attr('height', 3)
+      .style('fill', theme.palette.primary.dark)
+
+    svg
+      .append('text')
+      .attr('x', 220)
+      .attr('y', height + 40)
+      .text('Short')
+      .style('font-size', '15px')
+      .attr('alignment-baseline', 'middle')
   }
   useEffect(() => {
     draw()
-  }, [props, long, short, cap, strike, floor])
+  }, [props, long, short, cap, strike, floor, collateralToken])
 
-  return <svg ref={ref}></svg>
+  return (
+    <div>
+      <svg ref={ref}></svg>
+    </div>
+  )
 }
