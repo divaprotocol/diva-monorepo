@@ -71,8 +71,6 @@ export function PayoffProfile(props) {
   const [chartWidth, setWidth] = useState(400)
   const [axisLabel, setAxisLabel] = useState('')
 
-  console.log('start', start)
-
   useLayoutEffect(() => {
     const callback = () => {
       const rect = ref.current?.getBoundingClientRect()
@@ -85,9 +83,9 @@ export function PayoffProfile(props) {
     }
   }, [ref.current])
 
-  const chartHeight = 300
+  const chartHeight = 302
 
-  const margin = { top: 10, right: 10, bottom: 40, left: 10 },
+  const margin = { top: 10, right: 10, bottom: 30, left: 10 },
     width = chartWidth - margin.left - margin.right,
     height = chartHeight - margin.top - margin.bottom
 
@@ -96,7 +94,6 @@ export function PayoffProfile(props) {
       setAxisLabel(collateralToken)
     }
   }, [props.collateralToken])
-  console.log('colleart', axisLabel)
 
   const lineSeriesStyle = { strokeWidth: '3px' }
 
@@ -108,12 +105,6 @@ export function PayoffProfile(props) {
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
       .style('overflow', 'visible')
-    // svg
-    //   .append('defs')
-    //   .append('clipPath')
-    //   .attr('id', 'clip')
-    //   .append('rect')
-    //   .attr('width', width)
   }
   useEffect(() => {
     intitalChart()
@@ -123,7 +114,7 @@ export function PayoffProfile(props) {
     svg.selectAll('*').remove()
     svg.selectAll('rect').data(long)
     const domainMin = d3.min(long, function (d) {
-      return d.x * 0.98
+      return d.x
     })
 
     const domainMax = d3.max(long, function (d) {
@@ -133,7 +124,16 @@ export function PayoffProfile(props) {
     const x = d3
       .scaleLinear()
       .domain([domainMin, domainMax])
-      .range([0, width * 0.98])
+      .range([width * 0.1, width * 0.98])
+    svg
+      .append('g')
+      .attr('class', 'xAxisG')
+      .attr('transform', 'translate(0,' + height + ')')
+      .call(
+        d3.axisBottom(x).ticks(3).tickSize(0).tickValues([floor, cap, strike])
+      )
+      .call((g) => g.selectAll('.tick text').attr('dy', 10))
+
     const y = d3
       .scaleLinear()
       .domain([
@@ -142,7 +142,7 @@ export function PayoffProfile(props) {
           return d.y
         }),
       ])
-      .range([height, 60])
+      .range([height, 10])
     svg
       .append('g')
       .attr('class', 'yAxisG')
@@ -200,39 +200,40 @@ export function PayoffProfile(props) {
       })
       .attr('text-anchor', 'start')
       .attr('transform', 'rotate(-90)')
-      .attr('y', -margin.left - 20)
-      .attr('x', -margin.top - 200)
-      .text('payout in' + ' ' + axisLabel)
+      .attr('y', -margin.left - 10)
+      .attr('x', -margin.top - 180)
+      .style('font-size', '14px')
+      .text('Payout in' + ' ' + axisLabel)
 
     svg
       .append('rect')
       .attr('x', width - 25)
-      .attr('y', height + 20)
-      .attr('width', 25)
-      .attr('height', 3)
-      .style('fill', theme.palette.primary.light)
-    svg
-      .append('text')
-      .attr('x', width - 25)
-      .attr('y', height + 40)
-      .text('Long')
-      .style('font-size', '15px')
-      .attr('alignment-baseline', 'middle')
-
-    svg
-      .append('rect')
-      .attr('x', 220)
       .attr('y', height + 20)
       .attr('width', 25)
       .attr('height', 3)
       .style('fill', theme.palette.primary.dark)
+    svg
+      .append('text')
+      .attr('x', width - 25)
+      .attr('y', height + 40)
+      .text('Short')
+      .style('font-size', '12px')
+      .attr('alignment-baseline', 'middle')
+
+    svg
+      .append('rect')
+      .attr('x', width - 80)
+      .attr('y', height + 20)
+      .attr('width', 25)
+      .attr('height', 3)
+      .style('fill', theme.palette.primary.light)
 
     svg
       .append('text')
-      .attr('x', 220)
+      .attr('x', width - 80)
       .attr('y', height + 40)
-      .text('Short')
-      .style('font-size', '15px')
+      .text('Long')
+      .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
   }
   useEffect(() => {
