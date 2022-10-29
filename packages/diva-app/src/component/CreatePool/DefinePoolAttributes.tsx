@@ -144,6 +144,8 @@ export function DefinePoolAttributes({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.collateralBalance, formik.values.gradient])
 
+  console.log('collateral', collateralToken)
+
   const theme = useTheme()
 
   const possibleOptions =
@@ -692,7 +694,9 @@ export function DefinePoolAttributes({
                   collateralBalanceLong={collateralBalanceLong}
                   collateralBalanceShort={collateralBalanceShort}
                   tokenSupply={tokenSupply}
-                  collateralToken={collateralToken.symbol}
+                  collateralToken={
+                    collateralToken ? collateralToken.symbol : null
+                  }
                 />
               </Box>
             )}
