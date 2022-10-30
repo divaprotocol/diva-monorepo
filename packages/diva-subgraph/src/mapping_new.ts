@@ -321,10 +321,10 @@ function handleLiquidityEvent(
   poolEntity.dataProvider = parameters.dataProvider; // Updated at create only
   poolEntity.protocolFee = contract.getFees(poolId).protocolFee; // Updated at create only
   poolEntity.settlementFee = contract.getFees(poolId).settlementFee; // Updated at create only
-  poolEntity.submissionPeriod = new BigInt(contract.getSettlementPeriods(poolId).submissionPeriod);
-  poolEntity.challengePeriod = new BigInt(contract.getSettlementPeriods(poolId).challengePeriod);
-  poolEntity.reviewPeriod = new BigInt(contract.getSettlementPeriods(poolId).reviewPeriod);
-  poolEntity.fallbackSubmissionPeriod = new BigInt(contract.getSettlementPeriods(poolId).fallbackSubmissionPeriod);
+  poolEntity.submissionPeriod = BigInt.fromI32(contract.getSettlementPeriods(poolId).submissionPeriod);
+  poolEntity.challengePeriod = BigInt.fromI32(contract.getSettlementPeriods(poolId).challengePeriod);
+  poolEntity.reviewPeriod = BigInt.fromI32(contract.getSettlementPeriods(poolId).reviewPeriod);
+  poolEntity.fallbackSubmissionPeriod = BigInt.fromI32(contract.getSettlementPeriods(poolId).fallbackSubmissionPeriod);
   poolEntity.referenceAsset = parameters.referenceAsset; // Updated at create only
   poolEntity.supplyShort = shortTokenContract.totalSupply(); // Updated during create/add/remove
   poolEntity.supplyLong = longTokenContract.totalSupply(); // Updated during create/add/remove

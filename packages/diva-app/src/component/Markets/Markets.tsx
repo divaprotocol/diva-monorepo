@@ -700,6 +700,7 @@ export default function Markets() {
   }, [createdBy, history])
 
   const rows: GridRowModel[] = tablePools.reduce((acc, val) => {
+    console.log('submissionPeriod', submissionPeriod)
     const { status } = getAppStatus(
       val.expiryTime,
       val.statusTimestamp,
