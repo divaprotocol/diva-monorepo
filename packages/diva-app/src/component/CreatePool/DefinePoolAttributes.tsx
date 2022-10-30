@@ -35,6 +35,7 @@ import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { toExponentialOrNumber } from '../../Util/utils'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -102,12 +103,17 @@ export function DefinePoolAttributes({
       formik.values.gradient.toString() != '' &&
       formik.values.gradient >= 0 &&
       formik.values.gradient <= 1 &&
-      formik.values.collateralBalance.toString() != ''
+      formik.values.collateralBalance.toString() != '' &&
+      !isNaN(formik.values.collateralBalance)
     ) {
+      const collateralBalance = parseUnits(
+        formik.values.collateralBalance.toString(),
+        collateralToken.decimals
+      )
       formik.setValues((_values) => ({
         ..._values,
         collateralBalance: parseFloat(
-          formatUnits(collateralBalance.toString(), collateralToken.decimals)
+          formatUnits(collateralBalance, collateralToken.decimals)
         ),
       }))
     }
@@ -551,7 +557,7 @@ export function DefinePoolAttributes({
                   {collateralWalletBalance != null && collateralToken != null && (
                     <FormHelperText>
                       Your balance:{' '}
-                      {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
+                      {toExponentialOrNumber(Number(collateralWalletBalance))}{' '}
                       {collateralToken?.symbol}{' '}
                       <MaxCollateral
                         role="button"
@@ -584,8 +590,13 @@ export function DefinePoolAttributes({
                     type="number"
                     onChange={(event) => {
                       const value = event.target.value
+                      console.log('value', value)
                       const arr = value.split('.')
                       const collateralBalance = event.target.value
+                      console.log(
+                        'typeof collateralBalance',
+                        typeof collateralBalance
+                      )
                       if (arr.length > 1) {
                         if (arr[1].length <= collateralToken.decimals) {
                           formik.setValues((values) => ({
