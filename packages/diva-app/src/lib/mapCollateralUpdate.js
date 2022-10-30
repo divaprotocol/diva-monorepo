@@ -7,8 +7,7 @@ export const mapCollateralUpdate = (allOptions, change) => {
 
   var updatedOption = Object.assign({}, allOptions[index])
   var collateralTotal = updatedOption.CollateralBalance
-  collateralTotal += data.CollateralBalanceLong
-  collateralTotal += data.CollateralBalanceShort
+  collateralTotal += data.CollateralBalance
   updatedOption.CollateralBalance = collateralTotal
 
   const filter = allOptions.filter((option) => {

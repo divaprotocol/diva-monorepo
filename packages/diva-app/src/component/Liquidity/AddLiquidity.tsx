@@ -235,21 +235,8 @@ export const AddLiquidity = ({ pool }: Props) => {
                   <BlackTextTypography>
                     {pool &&
                       textFieldValue !== '' &&
-                      (
-                        (parseFloat(formatEther(pool.supplyInitial)) /
-                          (parseFloat(
-                            formatUnits(
-                              pool.collateralBalanceLongInitial,
-                              decimal
-                            )
-                          ) +
-                            parseFloat(
-                              formatUnits(
-                                pool.collateralBalanceShortInitial,
-                                decimal
-                              )
-                            ))) *
-                        parseFloat(formatEther(parseEther(textFieldValue)))
+                      parseFloat(
+                        formatEther(parseEther(textFieldValue))
                       ).toFixed(4)}
                   </BlackTextTypography>
                   <BlackTextTypography>Long Tokens</BlackTextTypography>
@@ -263,21 +250,8 @@ export const AddLiquidity = ({ pool }: Props) => {
                   <BlackTextTypography>
                     {pool &&
                       textFieldValue !== '' &&
-                      (
-                        (parseFloat(formatEther(pool.supplyInitial)) /
-                          (parseFloat(
-                            formatUnits(
-                              pool.collateralBalanceLongInitial,
-                              decimal
-                            )
-                          ) +
-                            parseFloat(
-                              formatUnits(
-                                pool.collateralBalanceShortInitial,
-                                decimal
-                              )
-                            ))) *
-                        parseFloat(formatEther(parseEther(textFieldValue)))
+                      parseFloat(
+                        formatEther(parseEther(textFieldValue))
                       ).toFixed(4)}
                   </BlackTextTypography>
                   <BlackTextTypography>Short Tokens</BlackTextTypography>

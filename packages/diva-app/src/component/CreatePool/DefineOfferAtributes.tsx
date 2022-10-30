@@ -173,7 +173,7 @@ export function DefineOfferAttributes({
     } else {
       formik.setValues((_values) => ({
         ..._values,
-        capacity: formik.values.collateralBalance,
+        capacity: formik.values.collateralBalance.toString(),
       }))
     }
   }, [unlimited, formik.values.collateralBalance])
@@ -641,7 +641,7 @@ export function DefineOfferAttributes({
                         if (arr[1].length <= collateralToken.decimals) {
                           formik.setValues((values) => ({
                             ...values,
-                            collateralBalance,
+                            collateralBalance: parseFloat(collateralBalance),
                             takerShare:
                               parseFloat(collateralBalance) - values.yourShare,
                           }))
@@ -660,7 +660,7 @@ export function DefineOfferAttributes({
                       } else {
                         formik.setValues((values) => ({
                           ...values,
-                          collateralBalance,
+                          collateralBalance: parseFloat(collateralBalance),
                           takerShare:
                             parseFloat(collateralBalance) - values.yourShare,
                         }))
@@ -708,9 +708,7 @@ export function DefineOfferAttributes({
                       formik.setValues((values) => ({
                         ...values,
                         yourShare: parseFloat(collateralBalance),
-                        takerShare:
-                          parseFloat(values.collateralBalance) -
-                          parseFloat(collateralBalance),
+                        takerShare: values.collateralBalance, // TODO Fix this
                       }))
                       if (fillOrKill) {
                         formik.setFieldValue(

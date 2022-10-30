@@ -159,7 +159,7 @@ export function Offer() {
               }}
               pool={formik.values}
               decimal={decimal}
-              textFieldValue={formik.values.collateralBalance}
+              textFieldValue={formik.values.collateralBalance.toString()}
               transactionType={'filloffer'}
               formik={formik}
             />
