@@ -333,7 +333,7 @@ export default function BuyLimit(props: {
       dispatch(setMaxYield('n/a'))
     }
 
-    let breakEven: number | string
+    let breakEven: BigNumber | string
 
     if (!pricePerOption.eq(0)) {
       breakEven = calcBreakEven(

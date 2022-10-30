@@ -428,7 +428,7 @@ export default function SellMarket(props: {
       dispatch(setMaxYield('n/a'))
     }
 
-    let breakEven: number | string
+    let breakEven: BigNumber | string
 
     if (!avgExpectedRate.eq(0)) {
       breakEven = calcBreakEven(
