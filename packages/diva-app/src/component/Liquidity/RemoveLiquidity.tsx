@@ -22,10 +22,10 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { useCoinIcon } from '../../hooks/useCoinIcon'
-import ERC20 from '@diva/contracts/abis/erc20.json'
+import ERC20 from '../../abi/ERC20ABI.json'
 import Button from '@mui/material/Button'
 import { config } from '../../constants'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import DIVA_ABI from '../../abi/DIVAABI.json'
 import { fetchPool } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
