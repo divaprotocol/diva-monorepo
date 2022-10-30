@@ -73,14 +73,14 @@ export function calcPayoffPerToken(
  * @returns Break-even underlying value
  */
 export function calcBreakEven(
-  price,
-  floor,
-  inflection,
-  cap,
-  gradient,
-  isLong,
-  collateralTokenDecimals
-) {
+  price: BigNumber,
+  floor: string | BigNumber,
+  inflection: string | BigNumber,
+  cap: string | BigNumber,
+  gradient: string | BigNumber,
+  isLong: boolean,
+  collateralTokenDecimals: number
+): string | BigNumber {
   const SCALING = parseUnits('1', 18 - collateralTokenDecimals)
   const UNIT = parseUnits('1')
 
@@ -88,6 +88,7 @@ export function calcBreakEven(
   floor = BigNumber.from(floor)
   inflection = BigNumber.from(inflection)
   cap = BigNumber.from(cap)
+  gradient = BigNumber.from(gradient)
 
   // Scale gradient to 18 decimals for calculation purposes as floor, inflection, etc.
   // have 18 decimals
