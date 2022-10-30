@@ -14,13 +14,13 @@ import { BigNumber } from '@ethersproject/bignumber/lib/bignumber'
  * @returns Payoff per long and short position token expressed as an integer with collateral token decimals
  */
 export function calcPayoffPerToken(
-  floor,
-  inflection,
-  cap,
-  gradient,
-  finalReferenceValue,
-  collateralTokenDecimals
-) {
+  floor: BigNumber,
+  inflection: BigNumber,
+  cap: BigNumber,
+  gradient: BigNumber,
+  finalReferenceValue: BigNumber,
+  collateralTokenDecimals: number
+): { payoffPerLongToken: BigNumber; payoffPerShortToken: BigNumber } {
   const SCALING = parseUnits('1', 18 - collateralTokenDecimals)
   const UNIT = parseUnits('1')
 
@@ -28,13 +28,13 @@ export function calcPayoffPerToken(
   // have 18 decimals
   const gradientScaled = gradient.mul(SCALING)
 
-  let payoffPerLongToken
-  let payoffPerShortToken
+  let payoffPerLongToken: BigNumber
+  let payoffPerShortToken: BigNumber
 
   if (finalReferenceValue.eq(inflection)) {
     payoffPerLongToken = gradientScaled
   } else if (finalReferenceValue.lte(floor)) {
-    payoffPerLongToken = 0
+    payoffPerLongToken = BigNumber.from(0)
   } else if (finalReferenceValue.gte(cap)) {
     payoffPerLongToken = UNIT
   } else if (finalReferenceValue.lt(inflection)) {
