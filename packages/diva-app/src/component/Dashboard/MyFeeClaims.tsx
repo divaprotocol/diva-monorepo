@@ -191,7 +191,7 @@ const ClaimFeesCell = (props: any) => {
         setLoadingValue(true)
         if (diva != null) {
           diva
-            .claimFees(props.row.Address)
+            .claimFee(props.row.Address, userAddress) // QUESTION Is props.row.Address = collateralTokenAddress?
             .then((tx) => {
               tx.wait().then(() => {
                 setTimeout(() => {
