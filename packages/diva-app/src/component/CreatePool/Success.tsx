@@ -182,11 +182,14 @@ export function Success({
     // TODO Remove etherscan usage and capture transaction receipt instead
     if (transactionType !== 'filloffer') {
       etherscanProvider.getHistory(userAddress).then((txs) => {
+        console.log('txs', txs)
         provider
           .getTransactionReceipt(txs[txs.length - 1].hash)
           .then((txRc) => {
-            const id = BigNumber.from(txRc.logs[4].topics[1]).toNumber()
+            const id = BigNumber.from(txRc.logs[6].topics[1]).toNumber()
+            console.log('id', id)
             diva.getPoolParameters(id).then((pool) => {
+              console.log('pool.shortToken', pool.shortToken)
               setShortToken(pool.shortToken)
               setLongToken(pool.longToken)
               setPoolId(id)
