@@ -22,3 +22,8 @@ TODO:
 QUESTIONS:
 - Remove `convertExponentialToDecimal` in calcPayoffsPerToken.ts?
 - Settlement periods are not longer general but pool specific -> adjust
+
+
+BUGS:
+- In Create Pool, app breaks when Collateral Amount is removed
+- In Create pool, if you reduce collateral Amount from 10 (default) to 9, say, then error message "Minimum taker contribution must be less than collateral amount" pops up which only makes sense for Create Offer process

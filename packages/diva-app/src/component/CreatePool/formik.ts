@@ -150,7 +150,7 @@ export const useCreatePoolFormik = () => {
       if (values.collateralToken == null) {
         errors.collateralToken = 'You must choose a collateral asset'
       }
-      if (values.collateralBalance == 0) {
+      if (values.collateralBalance == 0 || isNaN(values.collateralBalance)) {
         errors.collateralBalance = 'Collateral cannot be empty'
       }
       if (parseFloat(values.minTakerContribution) > values.collateralBalance) {
