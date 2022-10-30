@@ -218,7 +218,7 @@ export function CreatePool() {
                 onTransactionSuccess={handlePoolSuccess}
                 pool={formik.values}
                 decimal={decimal}
-                textFieldValue={formik.values.collateralBalance}
+                textFieldValue={formik.values.collateralBalance.toString()}
                 transactionType={configPicked}
                 formik={formik}
               />

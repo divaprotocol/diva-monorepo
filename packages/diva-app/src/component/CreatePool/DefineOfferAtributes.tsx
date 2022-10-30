@@ -739,7 +739,8 @@ export function DefineOfferAttributes({
                     </FormHelperText>
                   )}
                 </FormControl>
-                <FormControl fullWidth error={formik.errors.collateralBalance}>
+                <FormControl fullWidth>
+                  {/*TODO Removed error={formik.errors.collateralBalance} next to fullWidth due to error -> look into it*/}
                   <TextField
                     id="takerShare"
                     name="takerShare"
