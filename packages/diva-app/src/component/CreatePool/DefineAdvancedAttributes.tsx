@@ -54,7 +54,7 @@ export function DefineAdvanced({
     } else {
       formik.setValues((_values) => ({
         ..._values,
-        capacity: formik.values.collateralBalance,
+        capacity: formik.values.collateralBalance.toString(),
       }))
     }
   }, [unlimited, formik.values.collateralBalance])

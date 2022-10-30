@@ -590,15 +590,13 @@ export function DefinePoolAttributes({
                         if (arr[1].length <= collateralToken.decimals) {
                           formik.setValues((values) => ({
                             ...values,
-                            collateralBalance,
-                            tokenSupply: parseFloat(collateralBalance),
+                            collateralBalance: parseFloat(collateralBalance),
                           }))
                         }
                       } else {
                         formik.setValues((values) => ({
                           ...values,
-                          collateralBalance,
-                          tokenSupply: parseFloat(collateralBalance),
+                          collateralBalance: parseFloat(collateralBalance),
                         }))
                       }
                     }}
@@ -608,10 +606,10 @@ export function DefinePoolAttributes({
                       {formik.errors.collateralBalance}
                     </FormHelperText>
                   )}
-                  {!isNaN(formik.values.tokenSupply) && (
+                  {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
-                      You receive {formik.values.tokenSupply} LONG and{' '}
-                      {formik.values.tokenSupply} SHORT tokens
+                      You receive {formik.values.collateralBalance} LONG and{' '}
+                      {formik.values.collateralBalance} SHORT tokens
                     </FormHelperText>
                   )}
                 </FormControl>
@@ -633,8 +631,7 @@ export function DefinePoolAttributes({
           {floor != null &&
             cap != null &&
             inflection != null &&
-            tokenSupply != null &&
-            tokenSupply > 0 && (
+            gradient != null && (
               <Box sx={{ maxWidth: '85%' }}>
                 <PayoffProfile
                   floor={floor}

@@ -251,7 +251,7 @@ export function ReviewAndSubmit({
                     LONG / SHORT Token Supply
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {Number(values.tokenSupply).toFixed(2)}
+                    {Number(values.collateralBalance).toFixed(2)}
                   </Typography>
                 </Stack>
               )}
