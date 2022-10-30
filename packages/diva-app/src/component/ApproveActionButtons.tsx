@@ -495,7 +495,7 @@ export const ApproveActionButtons = ({
                         cap: parseUnits(pool.cap.toString()),
                         gradient: parseUnits(pool.gradient.toString(), decimal),
                         collateralAmount: parseUnits(
-                          pool.collateralBalance,
+                          pool.collateralBalance.toString(),
                           decimal
                         ),
                         collateralToken: pool.collateralToken.id.toString(),
