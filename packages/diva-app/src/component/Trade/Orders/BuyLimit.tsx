@@ -22,7 +22,7 @@ import { toExponentialOrNumber } from '../../../Util/utils'
 import Web3 from 'web3'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
-import ERC20_ABI from '@diva/contracts/abis/erc20.json'
+import ERC20_ABI from '../../../abi/ERC20ABI.json'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { BigNumber } from 'ethers'

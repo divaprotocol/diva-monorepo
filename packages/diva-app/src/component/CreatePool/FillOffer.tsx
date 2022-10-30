@@ -9,7 +9,7 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { useErcBalance } from '../../hooks/useErcBalance'
-import ERC20 from '@diva/contracts/abis/erc20.json'
+import ERC20 from '../../abi/ERC20ABI.json'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
 import { BigNumber, ethers } from 'ethers'

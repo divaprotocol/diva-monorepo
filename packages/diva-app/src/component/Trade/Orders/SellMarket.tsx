@@ -17,7 +17,7 @@ import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import ERC20_ABI from '@diva/contracts/abis/erc20.json'
+import ERC20_ABI from '../../../abi/ERC20ABI.json'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
