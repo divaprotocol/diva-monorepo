@@ -328,6 +328,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                       DIVA_ABI,
                       provider?.getSigner()
                     )
+                    // TODO removeLiquidity is now allowed even if pool expired
                     diva!
                       .removeLiquidity(
                         window.location.pathname.split('/')[1],
