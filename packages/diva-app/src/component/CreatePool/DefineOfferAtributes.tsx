@@ -1052,7 +1052,7 @@ export function DefineOfferAttributes({
             inflection != null &&
             tokenSupply != null &&
             tokenSupply > 0 && (
-              <Box sx={{ maxWidth: '85%' }}>
+              <Box sx={{ maxWidth: '85%', padding: '16px' }}>
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
@@ -1061,6 +1061,9 @@ export function DefineOfferAttributes({
                   collateralBalanceLong={collateralBalanceLong}
                   collateralBalanceShort={collateralBalanceShort}
                   tokenSupply={tokenSupply}
+                  collateralToken={
+                    collateralToken ? collateralToken.symbol : null
+                  }
                 />
               </Box>
             )}

@@ -675,7 +675,7 @@ export function DefinePoolAttributes({
         <Stack>
           <Typography
             style={{ color: 'white' }}
-            // pb={theme.spacing(5)}
+            pb={theme.spacing(2)}
             variant="subtitle1"
           >
             Payoff Profile

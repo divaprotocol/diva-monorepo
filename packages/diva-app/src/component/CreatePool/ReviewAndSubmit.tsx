@@ -642,6 +642,11 @@ export function ReviewAndSubmit({
                     collateralBalanceShort={values.collateralBalanceShort}
                     tokenSupply={values.tokenSupply}
                     longDirection={values.offerDirection === 'Long'}
+                    collateralToken={
+                      values.collateralToken
+                        ? values.collateralToken.symbol
+                        : null
+                    }
                   />
                 ) : (
                   <PayoffProfile
@@ -652,6 +657,11 @@ export function ReviewAndSubmit({
                     collateralBalanceLong={values.collateralBalanceLong}
                     collateralBalanceShort={values.collateralBalanceShort}
                     tokenSupply={values.tokenSupply}
+                    collateralToken={
+                      values.collateralToken
+                        ? values.collateralToken.symbol
+                        : null
+                    }
                   />
                 )}
               </Box>

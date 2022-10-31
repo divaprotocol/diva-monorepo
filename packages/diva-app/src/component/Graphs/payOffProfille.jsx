@@ -23,6 +23,7 @@ export function PayoffProfile(props) {
   const maxPayoutShort = totalCollateral / tokenSupply
   const theme = useTheme()
   const tickVaule = [0, 0.2, 0.4, 0.6, 0.8, 1]
+  console.log('collateral', collateralToken)
 
   const short = [
     {
