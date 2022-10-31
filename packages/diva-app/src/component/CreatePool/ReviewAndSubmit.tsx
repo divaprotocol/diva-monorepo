@@ -17,7 +17,6 @@ import { config } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { Circle } from '@mui/icons-material'
-import { PayoffProfile } from './PayoffProfile'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { useEffect, useState } from 'react'
 import {
@@ -30,6 +29,7 @@ import { ethers } from 'ethers'
 import ERC20 from '@diva/contracts/abis/erc20.json'
 import DIVA712ABI from '../../abi/DIVA712ABI.json'
 import { formatUnits } from 'ethers/lib/utils'
+import { PayoffProfile } from '../Graphs/payOffProfille'
 
 export function ReviewAndSubmit({
   formik,
