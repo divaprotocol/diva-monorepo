@@ -27,17 +27,18 @@ export const useGovernanceParameters = () => {
   useEffect(() => {
     if (diva) {
       diva.getGovernanceParameters().then((governanceParameters) => {
+        console.log('governanceParameters', governanceParameters)
         setSubmissionPeriod(
-          governanceParameters.currentSettlementPeriods.submissionPeriod.toNumber() // TODO Pull that information from pool query instead doing this as these might not apply to a specific pool
+          governanceParameters.currentSettlementPeriods.submissionPeriod // TODO Pull that information from pool query instead doing this as these might not apply to a specific pool
         )
         setChallengePeriod(
-          governanceParameters.currentSettlementPeriods.challengePeriod.toNumber()
+          governanceParameters.currentSettlementPeriods.challengePeriod
         )
         setReviewPeriod(
-          governanceParameters.currentSettlementPeriods.reviewPeriod.toNumber()
+          governanceParameters.currentSettlementPeriods.reviewPeriod
         )
         setFallbackPeriod(
-          governanceParameters.currentSettlementPeriods.fallbackSubmissionPeriod.toNumber()
+          governanceParameters.currentSettlementPeriods.fallbackSubmissionPeriod
         )
       })
     }
