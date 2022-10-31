@@ -538,7 +538,9 @@ export const ApproveActionButtons = ({
                     diva!
                       .addLiquidity(
                         window.location.pathname.split('/')[1],
-                        parseUnits(textFieldValue, decimal)
+                        parseUnits(textFieldValue, decimal),
+                        account,
+                        account
                       )
                       .then((tx) => {
                         /**
