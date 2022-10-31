@@ -25,5 +25,6 @@ QUESTIONS:
 
 
 BUGS:
-- In Create Pool, app breaks when Collateral Amount is removed
-- In Create pool, if you reduce collateral Amount from 10 (default) to 9, say, then error message "Minimum taker contribution must be less than collateral amount" pops up which only makes sense for Create Offer process
+- SOLVED: In Create Pool, app breaks when Collateral Amount is removed
+- OPEN: In Create pool, if you reduce collateral Amount from 10 (default) to 9, say, then error message "Minimum taker contribution must be less than collateral amount" pops up which only makes sense for Create Offer process
+- OPEN: When you navigate to create page via menu, then shortRecipient and longRecipient are not set. Only on page reload
