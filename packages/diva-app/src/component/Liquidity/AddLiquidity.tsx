@@ -26,6 +26,8 @@ import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useAppSelector } from '../../Redux/hooks'
 import { ApproveActionButtons } from '../ApproveActionButtons'
+import { toExponentialOrNumber } from '../../Util/utils'
+
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -141,7 +143,7 @@ export const AddLiquidity = ({ pool }: Props) => {
           {tokenBalance ? (
             <>
               <Typography variant="subtitle2" color="text.secondary">
-                Your balance: {parseFloat(tokenBalance!).toFixed(4)}{' '}
+                Your balance: {toExponentialOrNumber(Number(tokenBalance!))}{' '}
                 {pool!.collateralToken.symbol}{' '}
                 <MaxCollateral
                   role="button"
