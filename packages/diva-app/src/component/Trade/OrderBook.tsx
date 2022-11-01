@@ -23,14 +23,18 @@ import {
 import { Pool } from '../../lib/queries'
 import { selectChainId } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { Button, useTheme } from '@mui/material'
 
 export default function OrderBook(props: {
   option: Pool
   tokenAddress: string
   exchangeProxy: string
+  isSellOrder?: boolean
 }) {
+  const theme = useTheme()
   const option = props.option
   const optionTokenAddress = props.tokenAddress
+  const isSellOrder = props.isSellOrder
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const [orderBook, setOrderBook] = useState([] as any)
@@ -172,14 +176,31 @@ export default function OrderBook(props: {
   ])
 
   return (
-    <TableContainer component={Paper} sx={{ maxHeight: 550 }}>
+    <TableContainer
+      sx={{
+        maxHeight: 550,
+        width: theme.spacing(95),
+        ml: theme.spacing(-3),
+        border: '1px solid',
+        borderColor: '#4F4F4F',
+        borderRadius: '5px',
+      }}
+    >
       <Table stickyHeader aria-label="sticky table">
         <TableHead>
           <TableRow>
-            <TableCell align="center">Quantity</TableCell>
-            <TableCell align="center">BID</TableCell>
-            <TableCell align="center">ASK</TableCell>
-            <TableCell align="center">Quantity</TableCell>
+            <TableCell align="center" sx={{ color: 'gray' }}>
+              Quantity
+            </TableCell>
+            <TableCell align="center" sx={{ color: 'gray' }}>
+              {isSellOrder ? 'BID' : 'Ask'}
+            </TableCell>
+            <TableCell align="center" sx={{ color: 'gray' }}>
+              Expires in
+            </TableCell>
+            <TableCell align="center" sx={{ color: 'gray' }}>
+              Buy
+            </TableCell>
           </TableRow>
         </TableHead>
 
@@ -189,48 +210,39 @@ export default function OrderBook(props: {
               const labelId = `table-${index}`
               return (
                 <TableRow hover tabIndex={-1} key={orderBook.indexOf(row)}>
-                  <TableCell
-                    component="th"
-                    id={labelId}
-                    scope="row"
-                    align="center"
-                  >
+                  <TableCell align="center">
                     <Box paddingBottom="20px">
                       <Typography variant="subtitle1">
-                        {row.buyQuantity != ''
-                          ? Number(row.buyQuantity)?.toFixed(4)
-                          : '-'}
+                        {isSellOrder
+                          ? Number(row.sellQuantity)?.toFixed(4)
+                          : Number(row.buyQuantity)?.toFixed(4)}
                       </Typography>
-                      <label> </label>
                     </Box>
                   </TableCell>
                   <TableCell align="center">
                     <Box>
                       <Typography variant="subtitle1" color="#66ffa6">
-                        {row.bid != '' ? Number(row.bid)?.toFixed(4) : '-'}
-                      </Typography>
-                      <Typography variant="caption" color="#8e8e8e" noWrap>
-                        {row.buyExpiry}
+                        {isSellOrder
+                          ? Number(row.ask)?.toFixed(4)
+                          : Number(row.bid)?.toFixed(4)}
                       </Typography>
                     </Box>
                   </TableCell>
                   <TableCell align="center">
                     <Box>
-                      <Typography variant="subtitle1" color="#ff5c8d">
-                        {row.ask != '' ? Number(row.ask)?.toFixed(4) : '-'}
-                      </Typography>
                       <Typography variant="caption" color="#8e8e8e" noWrap>
-                        {row.sellExpiry}
+                        {isSellOrder ? row.sellExpiry : row.buyExpiry}
                       </Typography>
                     </Box>
                   </TableCell>
                   <TableCell align="center">
                     <Box paddingBottom="20px">
-                      <Typography variant="subtitle1">
+                      {/* <Typography variant="subtitle1">
                         {row.sellQuantity != ''
                           ? Number(row.sellQuantity)?.toFixed(4)
                           : '-'}
-                      </Typography>
+                      </Typography> */}
+                      <Button variant="outlined">Buy</Button>
                     </Box>
                   </TableCell>
                 </TableRow>
