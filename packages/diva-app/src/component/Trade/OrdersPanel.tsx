@@ -21,29 +21,31 @@ export default function OrdersPanel(props: {
     setOrderTypeValue(newValue)
   }
   return (
-    <TabContext value={orderType}>
-      <TabList onChange={handleOrderTypeChange} variant="standard">
-        <Tab value="orderbook" label="Order Book" />
-        <Tab value="openorders" label="Your open orders" />
-        <Tab value="tradehistory" label="Trade History" />
-      </TabList>
-      <TabPanel value="orderbook">
-        <OrderBook
-          option={props.option}
-          tokenAddress={props.tokenAddress}
-          exchangeProxy={props.exchangeProxy}
-        />
-      </TabPanel>
-      <TabPanel value="openorders">
-        <OptionOrders
-          option={props.option}
-          tokenAddress={props.tokenAddress}
-          exchangeProxy={props.exchangeProxy}
-        />
-      </TabPanel>
-      <TabPanel value="tradehistory">
-        <TradeHistory pool={props.option} />
-      </TabPanel>
-    </TabContext>
+    <Box width="100%">
+      <TabContext value={orderType}>
+        <TabList onChange={handleOrderTypeChange} variant="standard">
+          <Tab value="orderbook" label="Order Book" />
+          <Tab value="openorders" label="Your open orders" />
+          <Tab value="tradehistory" label="Trade History" />
+        </TabList>
+        <TabPanel value="orderbook">
+          <OrderBook
+            option={props.option}
+            tokenAddress={props.tokenAddress}
+            exchangeProxy={props.exchangeProxy}
+          />
+        </TabPanel>
+        <TabPanel value="openorders">
+          <OptionOrders
+            option={props.option}
+            tokenAddress={props.tokenAddress}
+            exchangeProxy={props.exchangeProxy}
+          />
+        </TabPanel>
+        <TabPanel value="tradehistory">
+          <TradeHistory pool={props.option} />
+        </TabPanel>
+      </TabContext>
+    </Box>
   )
 }
