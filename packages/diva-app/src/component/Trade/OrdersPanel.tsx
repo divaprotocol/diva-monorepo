@@ -1,88 +1,49 @@
 import React from 'react'
 import 'styled-components'
-import styled from 'styled-components'
-import { makeStyles } from '@mui/styles'
-import Tabs from '@mui/material/Tabs'
+import TabContext from '@mui/lab/TabContext'
+import TabList from '@mui/lab/TabList'
 import Tab from '@mui/material/Tab'
+import TabPanel from '@mui/lab/TabPanel'
 import { Pool } from '../../lib/queries'
 import OrderBook from './OrderBook'
 import OptionOrders from './OptionOrders'
 import { TradeHistory } from './TradeHistory'
-
-const PageDiv = styled.div`
-  width: 200px;
-  height: 10%;
-`
-
-function a11yProps(index: number) {
-  return {
-    id: `tab-${index}`,
-    'aria-controls': `tabpanel-${index}`,
-  }
-}
-
-const useStyles = makeStyles(() => ({
-  root: {
-    flexGrow: 1,
-  },
-}))
-
-const TabsDiv = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  aligh-items: flex-start;
-`
+import { Box } from '@mui/material'
 
 export default function OrdersPanel(props: {
   option: Pool
   tokenAddress: string
   exchangeProxy: string
 }) {
-  const [orderType, setOrderTypeValue] = React.useState(0)
-  const classes = useStyles()
+  const [orderType, setOrderTypeValue] = React.useState('orderbook')
 
-  const handleOrderTypeChange = (event: any, newValue: number) => {
+  const handleOrderTypeChange = (event: any, newValue: string) => {
     setOrderTypeValue(newValue)
   }
-
-  const renderOrderTables = () => {
-    if (orderType === 0) {
-      return (
+  return (
+    <TabContext value={orderType}>
+      <TabList onChange={handleOrderTypeChange} variant="standard">
+        <Tab value="orderbook" label="Order Book" />
+        <Tab value="openorders" label="Your open orders" />
+        <Tab value="tradehistory" label="Trade History" />
+      </TabList>
+      <TabPanel value="orderbook">
         <OrderBook
           option={props.option}
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
         />
-      )
-    }
-    if (orderType === 1) {
-      return (
+      </TabPanel>
+      <TabPanel value="openorders">
         <OptionOrders
           option={props.option}
           tokenAddress={props.tokenAddress}
           exchangeProxy={props.exchangeProxy}
         />
-      )
-    }
-    if (orderType === 2) {
-      return <TradeHistory pool={props.option} />
-    }
-  }
-
-  return (
-    <PageDiv className={classes.root}>
-      <TabsDiv>
-        <Tabs
-          value={orderType}
-          onChange={handleOrderTypeChange}
-          TabIndicatorProps={{ style: { backgroundColor: '#70D9BA' } }}
-        >
-          <Tab label="Order Book" {...a11yProps(0)} />
-          <Tab label="Your open orders" {...a11yProps(1)} />
-          <Tab label="Trade History" {...a11yProps(2)} />
-        </Tabs>
-      </TabsDiv>
-      {renderOrderTables()}
-    </PageDiv>
+      </TabPanel>
+      <TabPanel value="tradehistory">
+        <TradeHistory pool={props.option} />
+      </TabPanel>
+    </TabContext>
   )
 }

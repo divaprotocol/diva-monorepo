@@ -365,10 +365,17 @@ export const AddLiquidity = ({ pool }: Props) => {
                   '0.0' &&
                 pool.capacity.toString() !==
                   '115792089237316195423570985008687907853269984665640564039457584007913129639935' ? (
-                  <Container>
-                    <Stack direction="row" justifyContent="space-around">
-                      <Typography>Pool Capacity</Typography>
-                      <Typography>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    ml={theme.spacing(3)}
+                    /* sx={{ background: '#000000' }} */
+                  >
+                    <Box>
+                      <Typography variant="h4" fontWeight="normal" color="gray">
+                        Pool Capacity
+                      </Typography>
+                      <Typography fontSize="20px" color="white">
                         {pool &&
                           (formatUnits(
                             pool.capacity,
@@ -383,10 +390,12 @@ export const AddLiquidity = ({ pool }: Props) => {
                               ).toFixed(2))}{' '}
                         {pool.collateralToken.symbol}{' '}
                       </Typography>
-                    </Stack>
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography>Currently Utilized</Typography>
-                      <Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="h4" fontWeight="normal" color="gray">
+                        Currently Utilized
+                      </Typography>
+                      <Typography fontSize="20px" color="white">
                         {pool &&
                           parseFloat(
                             formatUnits(
@@ -396,10 +405,12 @@ export const AddLiquidity = ({ pool }: Props) => {
                           ).toFixed(2)}{' '}
                         {pool.collateralToken.symbol!}{' '}
                       </Typography>
-                    </Stack>
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography>Currently Utilized in %</Typography>
-                      <Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="h4" fontWeight="normal" color="gray">
+                        Currently Utilized in %
+                      </Typography>
+                      <Typography fontSize="20px" color="white">
                         {pool &&
                           (
                             (100 *
@@ -418,8 +429,8 @@ export const AddLiquidity = ({ pool }: Props) => {
                           ).toFixed(2)}
                         {'%'}
                       </Typography>
-                    </Stack>
-                  </Container>
+                    </Box>
+                  </Stack>
                 ) : (
                   <Stack
                     direction="row"
@@ -431,19 +442,23 @@ export const AddLiquidity = ({ pool }: Props) => {
                       <Typography variant="h4" fontWeight="normal" color="gray">
                         Pool ID
                       </Typography>
-                      <Typography variant="h2">{pool.id}</Typography>
+                      <Typography fontSize="20px" color="white">
+                        {pool.id}
+                      </Typography>
                     </Box>
                     <Box>
                       <Typography variant="h4" fontWeight="normal" color="gray">
                         Pool Capacity
                       </Typography>
-                      <Typography variant="h2">Unlimited</Typography>
+                      <Typography fontSize="20px" color="white">
+                        Unlimited
+                      </Typography>
                     </Box>
                     <Box>
                       <Typography variant="h4" fontWeight="normal" color="gray">
                         TVL
                       </Typography>
-                      <Typography variant="h2">
+                      <Typography fontSize="20px" color="white">
                         {pool &&
                           parseFloat(
                             formatUnits(

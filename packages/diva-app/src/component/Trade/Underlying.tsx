@@ -11,6 +11,7 @@ import {
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
+import Tab from '@mui/material/Tab'
 import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
 import { useHistory } from 'react-router-dom'
@@ -19,7 +20,6 @@ import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
 import OptionHeader from './OptionHeader'
 import { config } from '../../constants'
-import Tab from '@mui/material/Tab'
 import React, { useState, useEffect } from 'react'
 import { BigNumber } from 'ethers'
 import OrdersPanel from './OrdersPanel'
@@ -269,43 +269,37 @@ export default function Underlying() {
         </Stack>
       </TabPanel>
       <TabPanel value="short" sx={{ paddingBottom: '3em' }}>
-        <Stack direction="row" spacing={2}>
-          <LeftDiv>
-            <Stack spacing={2}>
-              <TradeChart
-                data={data}
-                refAsset={pool.referenceAsset}
-                currentPrice={currentPrice}
-                payOut={pool.collateralToken.symbol}
-                w={650}
-                h={336}
-                isLong={OptionParams.IsLong}
-                breakEven={breakEven}
-                floor={OptionParams.Floor}
-                cap={OptionParams.Cap}
-                mouseHover={true}
-                showBreakEven={true}
-              />
-              <LeftCompFlexContainer>
-                <OrdersPanel
-                  option={pool}
-                  tokenAddress={tokenAddress}
-                  exchangeProxy={exchangeProxy}
-                />
-              </LeftCompFlexContainer>
-            </Stack>
-          </LeftDiv>
-          <RightDiv>
-            <Stack spacing={2}>
-              <CreateOrder
-                option={pool}
-                tokenAddress={tokenAddress}
-                exchangeProxy={exchangeProxy}
-                chainId={chainId}
-                provider={provider}
-              />
-            </Stack>
-          </RightDiv>
+        <Stack direction="row" justifyContent="space-between">
+          <Stack direction="column" width="60%" spacing={2}>
+            <TradeChart
+              data={data}
+              refAsset={pool.referenceAsset}
+              currentPrice={currentPrice}
+              payOut={pool.collateralToken.symbol}
+              w={650}
+              h={336}
+              isLong={OptionParams.IsLong}
+              breakEven={breakEven}
+              floor={OptionParams.Floor}
+              cap={OptionParams.Cap}
+              mouseHover={true}
+              showBreakEven={true}
+            />
+            <OrdersPanel
+              option={pool}
+              tokenAddress={tokenAddress}
+              exchangeProxy={exchangeProxy}
+            />
+          </Stack>
+          <Box>
+            <CreateOrder
+              option={pool}
+              tokenAddress={tokenAddress}
+              exchangeProxy={exchangeProxy}
+              chainId={chainId}
+              provider={provider}
+            />
+          </Box>
         </Stack>
       </TabPanel>
       <TabPanel value="add">

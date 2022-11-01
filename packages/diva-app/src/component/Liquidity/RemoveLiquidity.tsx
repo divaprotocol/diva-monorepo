@@ -437,49 +437,49 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               Pool Status
             </Typography>
             <Stack direction="row" justifyContent="space-between">
-              <Stack direction="column" justifyContent="space-between">
+              <Box>
                 <Typography variant="h4" fontWeight="normal" color="gray">
                   Pool ID
                 </Typography>
-                <Typography variant="h2" color="white">
+                <Typography fontSize="20px" color="white">
                   {pool.id}
                 </Typography>
-              </Stack>
-              <Stack direction="column" justifyContent="space-between">
+              </Box>
+              <Box>
                 <Typography variant="h4" fontWeight="normal" color="gray">
                   TVL
                 </Typography>
-                <Typography variant="h2" color="white">
+                <Typography fontSize="20px" color="white">
                   {currentPoolSize}
                 </Typography>
-              </Stack>
-              <Stack direction="column" justifyContent="space-between">
+              </Box>
+              <Box>
                 <Typography variant="h4" fontWeight="normal" color="#929292">
                   Your Pool Share
                 </Typography>
-                <Typography variant="h2" color="white">
+                <Typography fontSize="20px" color="white">
                   {yourPoolShare}
                 </Typography>
-              </Stack>
+              </Box>
             </Stack>
             <Typography variant="h3">Your Balance</Typography>
             <Stack direction="row" spacing={theme.spacing(4)}>
-              <Stack direction="column" spacing={1} maxWidth="100px">
+              <Box>
                 <Typography variant="h4" fontWeight="normal" color="#929292">
                   LONG Tokens
                 </Typography>
-                <Typography variant="h2" color="white" noWrap>
+                <Typography fontSize="20px" color="white" noWrap>
                   {(+longToken).toFixed(4)}
                 </Typography>
-              </Stack>
-              <Stack direction="column" spacing={1} maxWidth="100px">
+              </Box>
+              <Box>
                 <Typography variant="h4" fontWeight="normal" color="#929292">
                   SHORT Tokens
                 </Typography>
-                <Typography variant="h2" color="white" noWrap>
+                <Typography fontSize="20px" color="white" noWrap>
                   {(+shortToken).toFixed(4)}
                 </Typography>
-              </Stack>
+              </Box>
             </Stack>
             <Box
               display="flex"

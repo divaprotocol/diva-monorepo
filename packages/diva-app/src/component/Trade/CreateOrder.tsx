@@ -21,7 +21,8 @@ import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
 import { setBreakEven } from '../../Redux/Stats'
 import { useAppSelector } from '../../Redux/hooks'
 const PageDiv = styled.div`
-  justify-content: center
+  width: 450px;
+  justify-content: center;
   height: 500px;
 `
 
