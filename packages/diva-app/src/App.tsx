@@ -20,6 +20,7 @@ import { WrongChain } from './component/Wallet/WrongChain'
 import { Tasks } from './component/Tasks/Tasks'
 import Dashboard from './component/Dashboard/Dashboard'
 import { useCustomMediaQuery } from './hooks/useCustomMediaQuery'
+import { Offer } from './component/CreatePool/Offer'
 
 export const App = () => {
   const chainId = useAppSelector((state) => state.appSlice.chainId)
@@ -60,12 +61,16 @@ export const App = () => {
               <Route path="/markets/:creatorAddress?">
                 <Markets />
               </Route>
+              <Route path="/offer/:hash">
+                <Offer />
+              </Route>
               <Route path="/:poolId/:tokenType">
                 <Underlying />
               </Route>
               <Route path="/create">
                 <CreatePool />
               </Route>
+
               <Route path="/">
                 <Redirect from="/" to={`/markets/${divaGovernanceAddress}`} />
               </Route>
