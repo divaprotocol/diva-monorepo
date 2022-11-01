@@ -4,6 +4,8 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useDiva } from '../../hooks/useDiva'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { ethers } from 'ethers'
+import { useAppSelector } from '../../Redux/hooks'
+import { selectUserAddress } from '../../Redux/appSlice'
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
 export type Values = {
@@ -76,6 +78,9 @@ type Errors = {
 }
 export const useCreatePoolFormik = () => {
   const { provider, isConnected } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+  initialValues.longRecipient = userAddress
+  initialValues.shortRecipient = userAddress
   const contract = useDiva()
   const _formik = useFormik({
     initialValues,

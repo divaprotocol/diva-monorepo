@@ -85,9 +85,10 @@ export function Offer() {
           formatUnits(jsonResponse.data.data.minimumTakerFillAmount, decimals)
         )
       })
+      console.log(typeof jsonResponse.data.data.makerDirection)
       formik.setFieldValue(
         'offerDirection',
-        jsonResponse.data.data.makerDirection ? 'Short' : 'Long'
+        jsonResponse.data.data.makerDirection === 'true' ? 'Short' : 'Long'
       )
       formik.setFieldValue(
         'referenceAsset',
