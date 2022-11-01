@@ -20,6 +20,7 @@ import {
   AccordionDetails,
   Checkbox,
   Accordion,
+  InputLabel,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
@@ -813,6 +814,17 @@ export function DefineOfferAttributes({
               }}
               fullWidth
             >
+              <InputLabel
+                sx={{
+                  pt: theme.spacing(4),
+                  // mb: theme.spacing(5),
+                  // ml: theme.spacing(4),
+                  pl: theme.spacing(6),
+                }}
+                variant="standard"
+              >
+                Offer Expires in
+              </InputLabel>
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
