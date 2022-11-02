@@ -28,6 +28,13 @@ import {
 } from "../generated/schema";
 
 
+// TODO Add in subgraph yml file
+// - event: OfferFilled(indexed bytes32,indexed address,indexed address,uint256)
+// handler: handleOfferFilled
+// - event: OfferCancelled(indexed bytes32,indexed address)
+// handler: handleOfferCancelled
+
+
 /**
  * TODO 
  * - Add collateralBalanceGross
