@@ -67,7 +67,7 @@ export const initialValues: Values = {
   jsonToExport: '{}',
   signature: '',
   yourShare: 1,
-  takerShare: 10,
+  takerShare: 9,
   poolId: '',
   offerHash: '',
   permissionedERC721Token: ethers.constants.AddressZero,
