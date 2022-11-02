@@ -204,14 +204,19 @@ export function Success({
       })
     }
   }, [formik.values.poolId])
-
+  console.log(transactionType)
   return (
     <Container>
       <Box display="flex" justifyContent="center" alignItems="center">
         <Stack display="flex" justifyContent="center" alignItems="center">
           <Container
             sx={{
-              ml: theme.spacing(transactionType === 'createoffer' ? 27 : 20),
+              ml: theme.spacing(
+                transactionType === 'filloffer' ||
+                  transactionType === 'createpool'
+                  ? 12
+                  : 48
+              ),
             }}
           >
             {congratsSvg}
