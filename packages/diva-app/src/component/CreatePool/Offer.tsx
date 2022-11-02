@@ -24,16 +24,23 @@ export function Offer() {
   const [decimal, setDecimal] = useState(18)
   const offerHash = window.location.pathname.split('/')[2]
   const jsonResponse = useQuery(`json-${offerHash}`, async () => {
-    const response = axios.get(
-      config[provider.network.chainId!].offer +
-        'create_contingent_pool/' +
-        offerHash
-    )
-    return response
+    if (provider !== undefined) {
+      const response = axios.get(
+        config[provider.network.chainId!].offer +
+          'create_contingent_pool/' +
+          offerHash
+      )
+      return response
+    }
   })
 
   useEffect(() => {
-    if (jsonResponse.isSuccess) {
+    if (
+      jsonResponse.isSuccess &&
+      provider !== undefined &&
+      jsonResponse.data !== undefined
+    ) {
+      console.log('jsonResponse: ', jsonResponse.data.data)
       const token = new ethers.Contract(
         jsonResponse.data.data.collateralToken,
         ERC20,
@@ -122,7 +129,7 @@ export function Offer() {
 
       formik.setFieldValue('takerAddress', jsonResponse.data.data.taker)
     }
-  }, [jsonResponse.isSuccess])
+  }, [jsonResponse.isSuccess, jsonResponse.data, provider])
   let step = null
   switch (formik.values.step) {
     case 1:
