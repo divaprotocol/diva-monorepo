@@ -499,7 +499,7 @@ export function ReviewAndSubmit({
                       value={
                         formik.values.yourShare === 0
                           ? ''
-                          : formik.values.yourShare
+                          : actualFillableAmount
                       }
                       InputProps={{
                         endAdornment: (

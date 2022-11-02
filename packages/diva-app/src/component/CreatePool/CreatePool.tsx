@@ -223,19 +223,21 @@ export function CreatePool() {
                 formik={formik}
               />
             ) : formik.values.step === 4 ? (
-              <Button
-                variant="text"
-                sx={{
-                  mt: theme.spacing(8),
-                  ml: theme.spacing(mobile ? 35 : 115),
-                }}
-                onClick={() => {
-                  history.push('/dashboard/mypositions')
-                }}
-              >
-                My Positions
-                <ArrowForwardOutlinedIcon sx={{ ml: theme.spacing(1) }} />
-              </Button>
+              configPicked !== 'filloffer' && (
+                <Button
+                  variant="text"
+                  sx={{
+                    mt: theme.spacing(8),
+                    ml: theme.spacing(mobile ? 35 : 115),
+                  }}
+                  onClick={() => {
+                    history.push('/dashboard/mypositions')
+                  }}
+                >
+                  My Positions
+                  <ArrowForwardOutlinedIcon sx={{ ml: theme.spacing(1) }} />
+                </Button>
+              )
             ) : (
               <LoadingButton
                 variant="contained"
