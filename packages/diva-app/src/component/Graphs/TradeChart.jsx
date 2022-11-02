@@ -27,6 +27,7 @@ export default function DIVATradeChart(props) {
   const optionTypeText = isLong ? 'LONG' : 'SHORT'
   const reffeenceAsset = refAsset.slice(0, 8)
   const [chartWidth, setChartWidth] = useState(w)
+  const [chartHeight, setChartHeight] = useState(h)
   const [isLegendResponsive, setLegendResponsive] = useState(true)
 
   const getSvgContainerSize = () => {
@@ -38,12 +39,22 @@ export default function DIVATradeChart(props) {
     getSvgContainerSize()
     window.addEventListener('resize', getSvgContainerSize)
     return () => window.removeEventListener('resize', getSvgContainerSize)
-  }, [props.w])
+  }, [props.w, props.h])
+
+  useEffect(() => {
+    if (chartWidth > 762) {
+      setChartHeight(chartWidth * 0.49)
+    } else {
+      setChartHeight(h)
+    }
+  }, [chartWidth, h])
+  console.log('chartwidth-', chartWidth)
+  console.log('chartheight-', chartHeight)
 
   // Set the dimensions and margins of the graph
   const margin = { top: 15, right: 20, bottom: 40, left: 0 },
     width = chartWidth - margin.left - margin.right,
-    height = h - margin.top - margin.bottom
+    height = chartHeight - margin.top - margin.bottom
 
   const labelWidth = 30
   const labelHeight = 10
@@ -91,9 +102,6 @@ export default function DIVATradeChart(props) {
     }
   }, [chartWidth])
 
-  useEffect(() => {
-    intitalChart()
-  }, [props.w])
   const intitalChart = () => {
     const svg = d3.select(ref.current)
     svg
@@ -103,6 +111,9 @@ export default function DIVATradeChart(props) {
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
   }
 
+  useEffect(() => {
+    intitalChart()
+  }, [chartWidth])
   // Moves the 'group' element to the top left margin
   const draw = () => {
     const svg = d3.select(ref.current)
@@ -617,7 +628,13 @@ export default function DIVATradeChart(props) {
   }
   useEffect(() => {
     draw()
-  }, [props.currentPrice, props.breakEven, width, props.w, isLegendResponsive])
+  }, [
+    props.currentPrice,
+    props.breakEven,
+    props.w,
+    isLegendResponsive,
+    chartWidth,
+  ])
 
   return (
     <div ref={svgContainer} className="line-chart">

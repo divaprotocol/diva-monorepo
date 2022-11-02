@@ -51,7 +51,7 @@ const LeftCompFlexContainer = styled.div`
   flex-basis: 100%;
 `
 const LeftDiv = styled.div`
-  width: 60%;
+  width: 50%;
 `
 const RightDiv = styled.div`
   width: 35%;
@@ -229,23 +229,25 @@ export default function Underlying() {
       </Stack>
       <Divider orientation="horizontal" />
       <TabPanel value="long" sx={{ paddingBottom: '3em' }}>
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row" spacing={25}>
           <LeftDiv>
             <Stack spacing={2}>
-              <TradeChart
-                data={data}
-                refAsset={pool.referenceAsset}
-                currentPrice={currentPrice}
-                payOut={pool.collateralToken.symbol}
-                w={650}
-                h={336}
-                isLong={OptionParams.IsLong}
-                breakEven={breakEven}
-                floor={OptionParams.Floor}
-                cap={OptionParams.Cap}
-                mouseHover={true}
-                showBreakEven={true}
-              />
+              <Box width="100%">
+                <TradeChart
+                  data={data}
+                  refAsset={pool.referenceAsset}
+                  currentPrice={currentPrice}
+                  payOut={pool.collateralToken.symbol}
+                  w={762}
+                  h={377}
+                  isLong={OptionParams.IsLong}
+                  breakEven={breakEven}
+                  floor={OptionParams.Floor}
+                  cap={OptionParams.Cap}
+                  mouseHover={true}
+                  showBreakEven={true}
+                />
+              </Box>
               <LeftCompFlexContainer>
                 <OrdersPanel
                   option={pool}
