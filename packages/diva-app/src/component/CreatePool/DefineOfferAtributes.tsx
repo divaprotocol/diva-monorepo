@@ -59,7 +59,7 @@ export function DefineOfferAttributes({
   const [offerDuration, setOfferDuration] = useState(24 * 60 * 60) // 1 Day
   const [expanded, setExpanded] = useState(false)
   const [everyone, setEveryone] = useState(true)
-  const [fillOrKill, setFillOrKill] = useState(true)
+  const [fillOrKill, setFillOrKill] = useState(false)
   const [mobile, setMobile] = useState(false)
   const [unlimited, setUnlimited] = useState(true)
   const account = useAppSelector(selectUserAddress)
@@ -814,29 +814,19 @@ export function DefineOfferAttributes({
               }}
               fullWidth
             >
-              <InputLabel
-                sx={{
-                  pt: theme.spacing(4),
-                  // mb: theme.spacing(5),
-                  // ml: theme.spacing(4),
-                  pl: theme.spacing(6),
-                }}
-                variant="standard"
-              >
-                Offer Expires in
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
+              <TextField
+                id="select"
+                label="Offer Expires in"
                 value={offerDuration}
                 onChange={handleOfferDurationChange}
+                select
               >
                 <MenuItem value={60 * 60}>1 Hour</MenuItem>
                 <MenuItem value={4 * 60 * 60}>4 Hours</MenuItem>
                 <MenuItem value={12 * 60 * 60}>12 Hours</MenuItem>
                 <MenuItem value={24 * 60 * 60}>1 Day</MenuItem>
                 <MenuItem value={7 * 24 * 60 * 60}>7 Days</MenuItem>
-              </Select>
+              </TextField>
             </FormControl>
             {/*</Container>*/}
           </Stack>
@@ -979,7 +969,10 @@ export function DefineOfferAttributes({
                             onChange={() => {
                               formik.setFieldValue(
                                 'minTakerContribution',
-                                formik.values.takerShare.toString()
+                                (
+                                  formik.values.collateralBalance -
+                                  formik.values.yourShare
+                                ).toString()
                               )
                               setFillOrKill(!fillOrKill)
                             }}

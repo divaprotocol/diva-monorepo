@@ -59,7 +59,7 @@ export const initialValues: Values = {
   payoutProfile: 'Binary',
   offerDirection: 'Long',
   offerDuration: Math.floor(24 * 60 * 60 + Date.now() / 1000).toString(),
-  minTakerContribution: '10',
+  minTakerContribution: '0',
   takerAddress: ethers.constants.AddressZero,
   makerAddress: '',
   longRecipient: '',
