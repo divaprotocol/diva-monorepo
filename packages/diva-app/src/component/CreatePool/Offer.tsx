@@ -25,8 +25,7 @@ export function Offer() {
   const offerHash = window.location.pathname.split('/')[2]
   const jsonResponse = useQuery(`json-${offerHash}`, async () => {
     const response = axios.get(
-      'https://eip712api.xyz/diva/offer/v1/create_contingent_pool/' +
-        offerHash
+      'https://eip712api.xyz/diva/offer/v1/create_contingent_pool/' + offerHash
     )
     return response
   })
