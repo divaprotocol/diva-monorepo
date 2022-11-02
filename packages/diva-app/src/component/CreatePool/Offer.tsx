@@ -24,7 +24,6 @@ export function Offer() {
   const [decimal, setDecimal] = useState(18)
   const offerHash = window.location.pathname.split('/')[2]
   const jsonResponse = useQuery(`json-${offerHash}`, async () => {
-    // TODO Move the link part to constants.ts
     const response = axios.get(
       config[provider.network.chainId!].offer +
         'create_contingent_pool/' +
