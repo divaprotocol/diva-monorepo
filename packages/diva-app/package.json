@@ -81,7 +81,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://eip712api.xyz/orderbook/v1/",
+  "proxy": "https://eip712api.xyz/0x/orderbook/v1/",
   "devDependencies": {
     "@types/coingecko-api": "^1.0.10",
     "@types/react-router-dom": "^5.3.2",
