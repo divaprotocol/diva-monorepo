@@ -48,10 +48,6 @@ dataSources:
           handler: handleFeeClaimTransferred
         - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
-        - event: OfferFilled(indexed bytes32,indexed address,indexed address,uint256)
-          handler: handleOfferFilled
-        - event: OfferCancelled(indexed bytes32,indexed address)
-          handler: handleOfferCancelled
       file: ./src/mapping_new.ts
   - kind: ethereum/contract
     name: ExchangeProxy
