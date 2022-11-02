@@ -24,6 +24,7 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
+import { toExponentialOrNumber } from '../../Util/utils'
 
 import { PayoffProfile } from './PayoffProfile'
 import { useCreatePoolFormik } from './formik'
@@ -603,7 +604,9 @@ export function DefineOfferAttributes({
                   {collateralWalletBalance != null && collateralToken != null && (
                     <FormHelperText>
                       Your balance:{' '}
-                      {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
+                      {toExponentialOrNumber(
+                        parseFloat(collateralWalletBalance)
+                      )}{' '}
                       {collateralToken?.symbol}{' '}
                       <MaxCollateral
                         role="button"
