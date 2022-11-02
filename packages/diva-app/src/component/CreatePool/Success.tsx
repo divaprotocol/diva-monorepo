@@ -1,4 +1,5 @@
 import {
+  Button,
   Container,
   IconButton,
   InputAdornment,
@@ -29,6 +30,8 @@ import { selectUserAddress } from '../../Redux/appSlice'
 import InsertLinkTwoToneIcon from '@mui/icons-material/InsertLinkTwoTone'
 import ERC20 from '../../abi/ERC20ABI.json'
 import { ContentCopy, Download } from '@mui/icons-material'
+import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
+import { useHistory } from 'react-router-dom'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -157,6 +160,7 @@ export function Success({
 }) {
   const { values } = formik
   const [longToken, setLongToken] = useState()
+  const history = useHistory()
   const [shortToken, setShortToken] = useState()
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
   const [poolId, setPoolId] = useState<number>()
@@ -399,6 +403,21 @@ export function Success({
               />
             )}
           </Stack>
+          {transactionType === 'filloffer' && (
+            <Button
+              variant="text"
+              sx={{
+                mt: theme.spacing(8),
+                // ml: theme.spacing(115),
+              }}
+              onClick={() => {
+                history.push('/dashboard/mypositions')
+              }}
+            >
+              My Positions
+              <ArrowForwardOutlinedIcon sx={{ ml: theme.spacing(1) }} />
+            </Button>
+          )}
         </Stack>
       </Box>
     </Container>
