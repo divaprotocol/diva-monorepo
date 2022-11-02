@@ -51,6 +51,7 @@ type SingleConfig = {
   readonly whitelistSubgraph: string
   readonly allOrders: string
   readonly order: string
+  readonly offer: string
   readonly orderbook: string
   readonly explorer: string
   readonly logoUrl: string
@@ -76,6 +77,7 @@ export const config: { [key: number]: SingleConfig } = {
     whitelistSubgraph: '',
     allOrders: '',
     order: '',
+    offer: '',
     orderbook: '',
     explorer: 'https://etherscan.io/',
     logoUrl: ethereumLogoUrl,
@@ -95,6 +97,7 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
     allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
     order: 'https://ropsten.api.0x.org/orderbook/v1/order/',
+    offer: '',
     orderbook: 'https://ropsten.api.0x.org/orderbook/v1',
     explorer: 'https://ropsten.etherscan.io/',
     logoUrl: ethereumLogoUrl,
@@ -111,9 +114,10 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
-    allOrders: 'https://eip712api.xyz/orderbook/v1/orders/',
-    order: 'https://eip712api.xyz/orderbook/v1/order/',
-    orderbook: 'https://eip712api.xyz/orderbook/v1',
+    allOrders: 'https://eip712api.xyz/0x/orderbook/v1/orders/',
+    order: 'https://eip712api.xyz/0x/orderbook/v1/order/',
+    orderbook: 'https://eip712api.xyz/0x/orderbook/v1',
+    offer: 'https://eip712api.xyz/diva/offer/v1/',
     explorer: 'https://goerli.etherscan.io/',
     name: 'Görli',
     logoUrl: ethereumLogoUrl,
@@ -131,6 +135,7 @@ export const config: { [key: number]: SingleConfig } = {
     whitelistSubgraph: '',
     allOrders: '',
     order: '',
+    offer: '',
     orderbook: '',
     explorer: 'https://polygonscan.com/',
     logoUrl: polygonMaticLogo,
@@ -148,6 +153,7 @@ export const config: { [key: number]: SingleConfig } = {
     whitelistSubgraph: '',
     allOrders: '',
     order: '',
+    offer: '',
     orderbook: '',
     explorer: 'https://mumbai.polygonscan.com/',
     logoUrl: polygonMaticLogo,
@@ -169,6 +175,7 @@ export const config: { [key: number]: SingleConfig } = {
     whitelistSubgraph: '',
     allOrders: '',
     order: '',
+    offer: '',
     orderbook: '',
     explorer: 'https://arbiscan.io/',
     logoUrl: arbitrumLogoUrl,
