@@ -207,7 +207,7 @@ export const get0xOpenOrders = async (
   // - takerToken = quoteToken
   const urlPrefix =
     config[chainId].orderbook +
-    '?quoteToken=' +
+    '/pair?quoteToken=' +
     makerToken +
     '&baseToken=' +
     takerToken
@@ -419,8 +419,8 @@ export const getOrderbookPricesOutput = (
       type: type, // pool type
       baseToken: poolPrice.baseToken, // pool baseToken
       quoteToken: poolPrice.quoteToken, // pool quoteToken
-      bid: poolPrice.bid, // best bid of pool
-      ask: poolPrice.ask, // best ask of pool
+      bid: poolPrice.bids.length !== 0 ? poolPrice.bids[0] : {}, // best bid of pool
+      ask: poolPrice.asks.length !== 0 ? poolPrice.asks[0] : {}, // best ask of pool
       decimals: decimals, // collateral token decimals of pool
     }
 
@@ -440,7 +440,7 @@ export const getOrderbookPrices = async (
 ): Promise<OrderOutputType[]> => {
   // Generate an orderbook price endpoint
   let urlPrefix =
-    config[req.chainId].orderbook + `/prices?graphUrl=${req.graphUrl}`
+    config[req.chainId].orderbook + `/pairs?graphUrl=${req.graphUrl}`
 
   // Add createdBy by parameter to orderbook price endpoint
   if (req.createdBy !== undefined) {
@@ -461,6 +461,10 @@ export const getOrderbookPrices = async (
   // Add threshold by parameter to orderbook price endpoint
   if (req.threshold !== undefined) {
     urlPrefix += `&threshold=${req.threshold}`
+  }
+  // Add count by parameter to orderbook price endpoint
+  if (req.count !== undefined) {
+    urlPrefix += `&count=${req.count}`
   }
   // Add 1 to the current page because the page parameter starts at 0.
   const url = urlPrefix + `&page=${req.page + 1}&perPage=${req.perPage}`
