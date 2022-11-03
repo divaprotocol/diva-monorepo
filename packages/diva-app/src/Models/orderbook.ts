@@ -18,6 +18,7 @@ export interface OrderbookPriceRequest {
   feeRecipient?: string // fee recipient address
   takerTokenFee?: number // 1 = 0.001%
   threshold?: number // threshold
+  count?: number // count
   poolInfo: PoolInfoType[]
 }
 
@@ -39,14 +40,16 @@ interface OrderbookPriceResponse {
 }
 
 export interface PriceResponseType extends BaseInterface {
-  bid: OrderbookPriceResponse // best bid
-  ask: OrderbookPriceResponse // best ask
+  bids: OrderbookPriceResponse[] // best bids
+  asks: OrderbookPriceResponse[] // best asks
 }
 
-export interface PriceOutputType extends PriceResponseType {
+export interface PriceOutputType extends BaseInterface {
   poolId: string // pool id
   type: string // pool type such as Long or Short
   decimals: number // collateral token decimals of pool
+  bid: OrderbookPriceResponse // best bid
+  ask: OrderbookPriceResponse // best ask
 }
 
 export interface OrderOutputType {
