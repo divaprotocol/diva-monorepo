@@ -71,7 +71,6 @@ export function ReviewAndSubmit({
   })
   useEffect(() => {
     if (transaction === 'filloffer' && diva !== undefined) {
-      console.log('aaaaaaa')
       diva
         .getOfferRelevantStateCreateContingentPool(
           formik.values.jsonToExport,
