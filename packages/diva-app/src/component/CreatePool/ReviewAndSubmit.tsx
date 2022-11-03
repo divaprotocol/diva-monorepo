@@ -72,14 +72,12 @@ export function ReviewAndSubmit({
   })
   useEffect(() => {
     if (transaction === 'filloffer' && diva !== undefined) {
-      // console.log(formik.values.jsonToExport)
       diva
         .getOfferRelevantStateCreateContingentPool(
           formik.values.jsonToExport,
           formik.values.signature
         )
         .then((params: any) => {
-          console.log(params)
           setActualFillableAmount(
             Number(formatUnits(params.actualTakerFillableAmount, decimal))
           )
