@@ -30,6 +30,7 @@ import { ethers } from 'ethers'
 import ERC20 from '../../abi/ERC20ABI.json'
 import DIVA_ABI from '../../abi/DIVAABI.json'
 import { formatUnits } from 'ethers/lib/utils'
+import { useAppSelector } from '../../Redux/hooks'
 
 export function ReviewAndSubmit({
   formik,
@@ -41,7 +42,7 @@ export function ReviewAndSubmit({
   const { values } = formik
   const theme = useTheme()
   const { provider } = useConnectionContext()
-  const chainId = provider?.network?.chainId
+  const chainId = useAppSelector((state) => state.appSlice.chainId)
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
   const [mobile, setMobile] = useState(false)
@@ -71,12 +72,14 @@ export function ReviewAndSubmit({
   })
   useEffect(() => {
     if (transaction === 'filloffer' && diva !== undefined) {
+      // console.log(formik.values.jsonToExport)
       diva
         .getOfferRelevantStateCreateContingentPool(
           formik.values.jsonToExport,
           formik.values.signature
         )
         .then((params: any) => {
+          console.log(params)
           setActualFillableAmount(
             Number(formatUnits(params.actualTakerFillableAmount, decimal))
           )
@@ -85,10 +88,12 @@ export function ReviewAndSubmit({
           )
         })
     }
-  }, [decimal])
+  }, [decimal, diva])
   useEffect(() => {
-    formik.setFieldValue('yourShare', Number(actualFillableAmount))
-  }, [actualFillableAmount])
+    if (transaction === 'filloffer' && diva !== undefined) {
+      formik.setFieldValue('yourShare', Number(actualFillableAmount))
+    }
+  }, [actualFillableAmount, decimal])
   useEffect(() => {
     const tokenContract = new ethers.Contract(
       formik.values.collateralToken.id,
