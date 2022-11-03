@@ -77,10 +77,6 @@ export function ReviewAndSubmit({
           formik.values.signature
         )
         .then((params: any) => {
-          formik.setFieldValue(
-            'takerShare',
-            Number(formatUnits(params.actualTakerFillableAmount, decimal))
-          )
           setActualFillableAmount(
             Number(formatUnits(params.actualTakerFillableAmount, decimal))
           )
@@ -90,6 +86,9 @@ export function ReviewAndSubmit({
         })
     }
   }, [decimal])
+  useEffect(() => {
+    formik.setFieldValue('yourShare', Number(actualFillableAmount))
+  }, [actualFillableAmount])
   useEffect(() => {
     const tokenContract = new ethers.Contract(
       formik.values.collateralToken.id,
