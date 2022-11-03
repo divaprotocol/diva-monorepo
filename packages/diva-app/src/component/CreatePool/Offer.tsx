@@ -34,7 +34,7 @@ export function Offer() {
   })
 
   useEffect(() => {
-    if (jsonResponse.isSuccess) {
+    if (jsonResponse.isSuccess && userAddress != undefined) {
       const token = new ethers.Contract(
         jsonResponse.data.data.collateralToken,
         ERC20,
@@ -86,7 +86,6 @@ export function Offer() {
           formatUnits(jsonResponse.data.data.minimumTakerFillAmount, decimals)
         )
       })
-      console.log(typeof jsonResponse.data.data.makerDirection)
       formik.setFieldValue(
         'offerDirection',
         jsonResponse.data.data.makerDirection === 'true' ? 'Short' : 'Long'
@@ -123,7 +122,7 @@ export function Offer() {
 
       formik.setFieldValue('takerAddress', jsonResponse.data.data.taker)
     }
-  }, [jsonResponse.isSuccess])
+  }, [jsonResponse.isSuccess, userAddress])
   let step = null
   switch (formik.values.step) {
     case 1:
@@ -150,23 +149,21 @@ export function Offer() {
           ))}
         </Box>
       )}
-      {formik.values.step === 1 &&
-        userAddress != null &&
-        provider?.network?.chainId != null && (
-          <Container sx={{ mr: theme.spacing(9) }}>
-            <ApproveActionButtons
-              collateralTokenAddress={formik.values.collateralToken.id}
-              onTransactionSuccess={() => {
-                formik.setFieldValue('step', formik.values.step + 1, true)
-              }}
-              pool={formik.values}
-              decimal={decimal}
-              textFieldValue={formik.values.collateralBalance.toString()}
-              transactionType={'filloffer'}
-              formik={formik}
-            />
-          </Container>
-        )}
+      {formik.values.step === 1 && userAddress != null && chainId != null && (
+        <Container sx={{ mr: theme.spacing(9) }}>
+          <ApproveActionButtons
+            collateralTokenAddress={formik.values.collateralToken.id}
+            onTransactionSuccess={() => {
+              formik.setFieldValue('step', formik.values.step + 1, true)
+            }}
+            pool={formik.values}
+            decimal={decimal}
+            textFieldValue={formik.values.collateralBalance.toString()}
+            transactionType={'filloffer'}
+            formik={formik}
+          />
+        </Container>
+      )}
     </Container>
   )
 }
