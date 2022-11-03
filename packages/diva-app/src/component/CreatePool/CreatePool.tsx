@@ -223,7 +223,8 @@ export function CreatePool() {
                 formik={formik}
               />
             ) : formik.values.step === 4 ? (
-              configPicked !== 'filloffer' && (
+              configPicked !== 'filloffer' &&
+              configPicked !== 'createoffer' && (
                 <Button
                   variant="text"
                   sx={{

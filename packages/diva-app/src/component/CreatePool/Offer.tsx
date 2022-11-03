@@ -19,17 +19,18 @@ import { Success } from './Success'
 export function Offer() {
   const formik = useCreatePoolFormik()
   const { provider } = useConnectionContext()
+  const chainId = useAppSelector((state) => state.appSlice.chainId)
   const theme = useTheme()
   const userAddress = useAppSelector(selectUserAddress)
   const [decimal, setDecimal] = useState(18)
   const offerHash = window.location.pathname.split('/')[2]
-  const jsonResponse = useQuery(`json-${offerHash}`, async () => {
-    const response = axios.get(
-      config[provider.network.chainId!].offer +
-        'create_contingent_pool/' +
-        offerHash
-    )
-    return response
+  const jsonResponse = useQuery(`json-${offerHash + chainId}`, async () => {
+    if (chainId != undefined) {
+      const response = axios.get(
+        config[chainId].offer + 'create_contingent_pool/' + offerHash
+      )
+      return response
+    }
   })
 
   useEffect(() => {
