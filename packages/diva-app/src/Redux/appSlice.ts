@@ -235,6 +235,7 @@ export const fetchPools = createAsyncThunk(
     const feeRecipient = divaGovernanceAddress
     const takerTokenFee = DEFAULT_TAKER_TOKEN_FEE
     const threshold = DEFAULT_THRESHOLD
+    const count = 1
     const req: OrderbookPriceRequest = {
       chainId,
       page,
@@ -246,6 +247,7 @@ export const fetchPools = createAsyncThunk(
       takerTokenFee,
       threshold,
       poolInfo,
+      count,
     }
 
     try {
