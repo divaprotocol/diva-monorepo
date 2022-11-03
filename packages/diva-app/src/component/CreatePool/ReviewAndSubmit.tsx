@@ -70,7 +70,8 @@ export function ReviewAndSubmit({
     setDecimal(decimals)
   })
   useEffect(() => {
-    if (transaction === 'filloffer') {
+    if (transaction === 'filloffer' && diva !== undefined) {
+      console.log('aaaaaaa')
       diva
         .getOfferRelevantStateCreateContingentPool(
           formik.values.jsonToExport,
@@ -89,7 +90,7 @@ export function ReviewAndSubmit({
           )
         })
     }
-  }, [formik, decimal])
+  }, [decimal])
   useEffect(() => {
     const tokenContract = new ethers.Contract(
       formik.values.collateralToken.id,
