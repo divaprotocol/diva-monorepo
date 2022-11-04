@@ -72,11 +72,12 @@ export function DefinePoolAttributes({
     payoutProfile,
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
+  console.log('collateralWalletBalance', collateralWalletBalance)
   useEffect(() => {
     if (window.ethereum && formik.values.jsonToExport !== '{}') {
       window.ethereum.on('accountsChanged', () => {
         disconnect()
-        connect()
+        connect('metamask')
         formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
       })
     }

@@ -6,6 +6,8 @@ import divaSidebarLogo from './Images/diva-sidebar-logo.svg'
 import divaTextLogo from './Images/diva_logo_text.svg'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
 import TaskIcon from '@mui/icons-material/Task'
+import metamaskLogo from './Images/meta-mask-logo.png'
+import walletConnectLogo from './Images/wallet-connect-logo.png'
 
 const CREATE_POOL_OFFER_STRUCT = [
   { type: 'address', name: 'maker' },
@@ -65,6 +67,25 @@ type SingleConfig = {
 export const projectId = '9f5f0ef1c7544c029b0aa9ca622759c3'
 
 export const config: { [key: number]: SingleConfig } = {
+  [SupportedChainId.GOERLI]: {
+    divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
+    divaAddressNew: '0x6cDEc9b70431bf650f3A0DDD0e246368a4C4F1E1',
+    balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
+    exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
+    whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
+    divaSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
+    whitelistSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
+    allOrders: 'https://eip712api.xyz/orderbook/v1/orders/',
+    order: 'https://eip712api.xyz/orderbook/v1/order/',
+    orderbook: 'https://eip712api.xyz/orderbook/v1',
+    explorer: 'https://goerli.etherscan.io/',
+    name: 'Görli',
+    logoUrl: ethereumLogoUrl,
+    nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
+    isSupported: true,
+  },
   [SupportedChainId.MAINNET]: {
     name: 'Ethereum',
     divaAddress: '',
@@ -99,25 +120,6 @@ export const config: { [key: number]: SingleConfig } = {
     explorer: 'https://ropsten.etherscan.io/',
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ropsten Ether', symbol: 'ropETH', decimals: 18 },
-    isSupported: true,
-  },
-  [SupportedChainId.GOERLI]: {
-    divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
-    divaAddressNew: '0x6cDEc9b70431bf650f3A0DDD0e246368a4C4F1E1',
-    balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
-    exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
-    whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
-    divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
-    whitelistSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
-    allOrders: 'https://eip712api.xyz/orderbook/v1/orders/',
-    order: 'https://eip712api.xyz/orderbook/v1/order/',
-    orderbook: 'https://eip712api.xyz/orderbook/v1',
-    explorer: 'https://goerli.etherscan.io/',
-    name: 'Görli',
-    logoUrl: ethereumLogoUrl,
-    nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
     isSupported: true,
   },
   [SupportedChainId.POLYGON]: {
@@ -183,7 +185,7 @@ export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(
 ).filter((id) => typeof id === 'number') as SupportedChainId[]
 
 // current supported chain
-export const CURRENT_SUPPORTED_CHAIN_ID = [SupportedChainId.ROPSTEN]
+export const CURRENT_SUPPORTED_CHAIN_ID = [SupportedChainId.GOERLI]
 
 export const divaGovernanceAddress =
   '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E' // creator of pools on Main Markets page and trading fee recipient
@@ -228,3 +230,9 @@ export const APP_BAR_ITEMS = [
 
 // websocket url
 export const WEBSOCKET_URL = 'wss://eip712api.xyz/websocket'
+
+// wallet images
+export const WALLET_IMAGES = {
+  metamask: metamaskLogo,
+  walletConnect: walletConnectLogo,
+}

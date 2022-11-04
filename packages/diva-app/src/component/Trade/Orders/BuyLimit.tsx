@@ -42,8 +42,13 @@ import {
 import { setResponseBuy } from '../../../Redux/TradeOption'
 import CheckIcon from '@mui/icons-material/Check'
 import { LoadingButton } from '@mui/lab'
-const web3 = new Web3(Web3.givenProvider)
+import useLocalStorage from 'use-local-storage'
+import WalletConnectProvider from '@walletconnect/web3-provider'
+
 const ZERO = BigNumber.from(0)
+const provider = new WalletConnectProvider({
+  infuraId: '27e484dcd9e3efcfd25a83a78777cdf1',
+})
 
 export default function BuyLimit(props: {
   option: Pool
@@ -60,7 +65,13 @@ export default function BuyLimit(props: {
     owner: string
   ) => any
 }) {
+  const [{ connected }] = useLocalStorage<{
+    connected?: string
+  }>('diva-dapp-connection', {})
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  const web3 = new Web3(
+    connected === 'walletconnect' ? provider : Web3.givenProvider
+  )
 
   const userAddress = useAppSelector(selectUserAddress)
 

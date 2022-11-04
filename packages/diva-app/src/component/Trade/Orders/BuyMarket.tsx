@@ -38,8 +38,12 @@ import {
 } from '../../../Util/calcPayoffPerToken'
 import CheckIcon from '@mui/icons-material/Check'
 import { LoadingButton } from '@mui/lab'
+import useLocalStorage from 'use-local-storage'
+import WalletConnectProvider from '@walletconnect/web3-provider'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const web3 = new Web3(Web3.givenProvider)
+const provider = new WalletConnectProvider({
+  infuraId: '27e484dcd9e3efcfd25a83a78777cdf1',
+})
 const ZERO = BigNumber.from(0)
 const feeMultiplier = (1 + tradingFee).toString()
 
@@ -58,8 +62,14 @@ export default function BuyMarket(props: {
     owner: string
   ) => any
 }) {
+  const [{ connected }] = useLocalStorage<{
+    connected?: string
+  }>('diva-dapp-connection', {})
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  const web3 = new Web3(
+    connected === 'walletconnect' ? provider : Web3.givenProvider
+  )
 
   const userAddress = useAppSelector(selectUserAddress)
 
@@ -91,9 +101,7 @@ export default function BuyMarket(props: {
   const [allowance, setAllowance] = React.useState(ZERO)
   const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
   // eslint-disable-next-line prettier/prettier
-  const [collateralBalance, setCollateralBalance] = React.useState(
-    ZERO
-  )
+  const [collateralBalance, setCollateralBalance] = React.useState(ZERO)
 
   const params: { tokenType: string } = useParams()
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
