@@ -76,7 +76,7 @@ const MetaMaskImage = styled.img`
   cursor: pointer;
 `
 const AddToMetamask = (props: any) => {
-  const { provider } = useConnectionContext()
+  const { provider, sendTransaction } = useConnectionContext()
 
   const handleAddMetaMask = async (e) => {
     e.stopPropagation()
@@ -89,7 +89,7 @@ const AddToMetamask = (props: any) => {
     const tokenSymbol =
       props.row.id.split('/')[1][0].toUpperCase() + props.row.id.split('/')[0]
     try {
-      await window.ethereum.request({
+      await sendTransaction({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC20',

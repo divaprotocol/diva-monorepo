@@ -4,7 +4,7 @@ import ERC20 from '@diva/contracts/abis/erc20.json'
 import { useEffect, useState } from 'react'
 import { formatUnits } from 'ethers/lib/utils'
 import { useConnectionContext } from './useConnectionContext'
-import { selectUserAddress, selectChainId } from '../Redux/appSlice'
+import { selectChainId } from '../Redux/appSlice'
 import { useAppSelector } from '../Redux/hooks'
 
 type Erc20Contract = Contract & {
@@ -18,8 +18,7 @@ type Erc20Contract = Contract & {
  * no balance is returned
  */
 export function useErcBalance(address?: string, updated = true) {
-  const { provider } = useConnectionContext()
-  const userAddress = useAppSelector(selectUserAddress)
+  const { provider, sendTransaction } = useConnectionContext()
   const chainId = useAppSelector(selectChainId)
 
   const [balance, setBalance] = useState<string>()
@@ -28,6 +27,10 @@ export function useErcBalance(address?: string, updated = true) {
     const run = async () => {
       if (provider != null && chainId != null && address != null) {
         const signer = provider.getSigner()
+        await sendTransaction({
+          method: 'eth_requestAccounts',
+          params: [],
+        })
         try {
           const contract = new ethers.Contract(
             address,
@@ -44,7 +47,7 @@ export function useErcBalance(address?: string, updated = true) {
     }
 
     run()
-  }, [address, chainId, userAddress != null, updated])
+  }, [address, chainId, provider, sendTransaction, updated])
 
   return balance
 }

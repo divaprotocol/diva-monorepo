@@ -41,7 +41,7 @@ export const ConnectionContext = createContext<ConnectionContextType>({})
 
 const ethereum = window.ethereum
 
-// Create a connector
+// Create a connector for WalletConnect
 const connector = new WalletConnect({
   bridge: 'https://bridge.walletconnect.org', // Required
   qrcodeModal: QRCodeModal,
@@ -217,16 +217,14 @@ export const ConnectionProvider = ({ children }) => {
     }
   }, [connect, connected, setConnectionState])
 
+  // active the walletconnect provider and set the provider in the state
   useEffect(() => {
     if (connected === 'walletconnect') {
       const activateProvider = async () => {
-        const provider = new EthereumProvider({
-          client: connector as any,
-          chainId: connector.chainId,
-          rpc: {
-            infuraId: '1e5c07a07eb244a6be23cfa590d59ef5',
-          },
+        const provider = new WalletConnectProvider({
+          infuraId: '1e5c07a07eb244a6be23cfa590d59ef5', // Required
         })
+        await provider.enable()
 
         setState((_state) => ({
           ..._state,
@@ -234,9 +232,13 @@ export const ConnectionProvider = ({ children }) => {
         }))
       }
 
-      activateProvider().then(() => {
-        console.log('activated')
-      })
+      activateProvider()
+        .then(() => {
+          console.log('activated')
+        })
+        .catch((e) => {
+          console.warn('Error in initializing the wallets connect provider', e)
+        })
     }
   }, [connected])
 
@@ -252,6 +254,7 @@ export const ConnectionProvider = ({ children }) => {
     return () => clearTimeout(timeout)
   }, [dispatch, state.chainId])
 
+  // actions for wallets
   const sendTransaction = useCallback(
     async ({ method, params }: { method: string; params: any[] }) => {
       if (connected === 'walletconnect') {
@@ -262,7 +265,7 @@ export const ConnectionProvider = ({ children }) => {
       }
       return null
     },
-    [state.provider]
+    [connected]
   )
 
   const value = {
@@ -272,7 +275,6 @@ export const ConnectionProvider = ({ children }) => {
     sendTransaction,
     ...state,
   }
-  console.log(state.provider)
 
   return (
     <ConnectionContext.Provider value={value}>
