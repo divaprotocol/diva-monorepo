@@ -81,7 +81,7 @@ export function ReviewAndSubmit({
           )
         })
     }
-  }, [decimal])
+  }, [formik, decimal])
   useEffect(() => {
     const tokenContract = new ethers.Contract(
       formik.values.collateralToken.id,

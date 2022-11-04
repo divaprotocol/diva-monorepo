@@ -53,6 +53,7 @@ type SingleConfig = {
   readonly whitelistSubgraph: string
   readonly allOrders: string
   readonly order: string
+  readonly offer: string
   readonly orderbook: string
   readonly explorer: string
   readonly logoUrl: string
@@ -97,6 +98,7 @@ export const config: { [key: number]: SingleConfig } = {
     whitelistSubgraph: '',
     allOrders: '',
     order: '',
+    offer: '',
     orderbook: '',
     explorer: 'https://etherscan.io/',
     logoUrl: ethereumLogoUrl,
@@ -116,10 +118,31 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-ropsten',
     allOrders: 'https://ropsten.api.0x.org/orderbook/v1/orders/',
     order: 'https://ropsten.api.0x.org/orderbook/v1/order/',
+    offer: '',
     orderbook: 'https://ropsten.api.0x.org/orderbook/v1',
     explorer: 'https://ropsten.etherscan.io/',
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ropsten Ether', symbol: 'ropETH', decimals: 18 },
+    isSupported: true,
+  },
+  [SupportedChainId.GOERLI]: {
+    divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
+    divaAddressNew: '0x6cDEc9b70431bf650f3A0DDD0e246368a4C4F1E1',
+    balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
+    exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
+    whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
+    divaSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
+    whitelistSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
+    allOrders: 'https://eip712api.xyz/0x/orderbook/v1/orders/',
+    order: 'https://eip712api.xyz/0x/orderbook/v1/order/',
+    orderbook: 'https://eip712api.xyz/0x/orderbook/v1',
+    offer: 'https://eip712api.xyz/diva/offer/v1/',
+    explorer: 'https://goerli.etherscan.io/',
+    name: 'Görli',
+    logoUrl: ethereumLogoUrl,
+    nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
     isSupported: true,
   },
   [SupportedChainId.POLYGON]: {
@@ -133,6 +156,7 @@ export const config: { [key: number]: SingleConfig } = {
     whitelistSubgraph: '',
     allOrders: '',
     order: '',
+    offer: '',
     orderbook: '',
     explorer: 'https://polygonscan.com/',
     logoUrl: polygonMaticLogo,
@@ -150,6 +174,7 @@ export const config: { [key: number]: SingleConfig } = {
     whitelistSubgraph: '',
     allOrders: '',
     order: '',
+    offer: '',
     orderbook: '',
     explorer: 'https://mumbai.polygonscan.com/',
     logoUrl: polygonMaticLogo,
@@ -171,6 +196,7 @@ export const config: { [key: number]: SingleConfig } = {
     whitelistSubgraph: '',
     allOrders: '',
     order: '',
+    offer: '',
     orderbook: '',
     explorer: 'https://arbiscan.io/',
     logoUrl: arbitrumLogoUrl,

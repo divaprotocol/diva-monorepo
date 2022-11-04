@@ -34,7 +34,7 @@
     "@walletconnect/qrcode-modal": "^1.8.0",
     "@walletconnect/web3-provider": "^1.8.0",
     "@walletconnect/ethereum-provider": "2.0.0-beta.26",
-    "axios": "^0.21.4",
+    "axios": "^1.1.3",
     "coingecko-api": "^1.0.10",
     "core-js": "^3.22.1",
     "d3": "^7.0.1",
@@ -62,7 +62,7 @@
     "deploy": "",
     "dev": "react-app-rewired start",
     "start": "CHOKIDAR_USEPOLLING=true react-scripts start",
-    "build": "react-app-rewired build",
+    "build": "react-app-rewired --max_old_space_size=8192 build",
     "test": "start-server-and-test 'yarn dev' http-get://localhost:3000 'synpress run --configFile synpress.json'",
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx && tsc --noEmit",
     "fmt": "prettier . -w"
@@ -85,6 +85,7 @@
       "last 1 safari version"
     ]
   },
+  "proxy": "https://eip712api.xyz/0x/orderbook/v1/",
   "devDependencies": {
     "@types/coingecko-api": "^1.0.10",
     "@types/react-router-dom": "^5.3.2",
