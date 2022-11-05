@@ -175,7 +175,7 @@ export function PayoffProfile(props) {
       .data([long])
       .attr('d', longLine)
       .style('fill', 'none')
-      .style('stroke', theme.palette.primary.light)
+      .style('stroke', '#1976D2')
       .style('stroke-width', '3px')
     const shortLine = d3
       .line()
@@ -190,7 +190,7 @@ export function PayoffProfile(props) {
       .data([short])
       .attr('d', shortLine)
       .style('fill', 'none')
-      .style('stroke', theme.palette.primary.dark)
+      .style('stroke', '#90CAF9')
       .style('stroke-width', '3px')
 
     svg
@@ -211,7 +211,7 @@ export function PayoffProfile(props) {
       .attr('y', height + 20)
       .attr('width', 25)
       .attr('height', 3)
-      .style('fill', theme.palette.primary.dark)
+      .style('fill', '#90CAF9')
     svg
       .append('text')
       .attr('x', width - 25)
@@ -226,7 +226,7 @@ export function PayoffProfile(props) {
       .attr('y', height + 20)
       .attr('width', 25)
       .attr('height', 3)
-      .style('fill', theme.palette.primary.light)
+      .style('fill', '#1976D2')
 
     svg
       .append('text')
