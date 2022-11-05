@@ -47,12 +47,10 @@ export default function DIVATradeChart(props) {
     } else {
       setChartHeight(h)
     }
-  }, [chartWidth, h])
-  console.log('chartwidth-', chartWidth)
-  console.log('chartheight-', chartHeight)
+  }, [chartWidth])
 
   // Set the dimensions and margins of the graph
-  const margin = { top: 15, right: 20, bottom: 40, left: 0 },
+  const margin = { top: 15, right: 20, bottom: 40, left: 20 },
     width = chartWidth - margin.left - margin.right,
     height = chartHeight - margin.top - margin.bottom
 
@@ -100,7 +98,7 @@ export default function DIVATradeChart(props) {
     } else {
       setLegendResponsive(true)
     }
-  }, [chartWidth])
+  }, [chartWidth, chartHeight])
 
   const intitalChart = () => {
     const svg = d3.select(ref.current)
@@ -113,7 +111,7 @@ export default function DIVATradeChart(props) {
 
   useEffect(() => {
     intitalChart()
-  }, [chartWidth])
+  }, [chartHeight, chartWidth])
   // Moves the 'group' element to the top left margin
   const draw = () => {
     const svg = d3.select(ref.current)
@@ -634,6 +632,7 @@ export default function DIVATradeChart(props) {
     props.w,
     isLegendResponsive,
     chartWidth,
+    chartHeight,
   ])
 
   return (
