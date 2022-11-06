@@ -1,12 +1,10 @@
-import React, { FormEvent, useState } from 'react'
+import React, { useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import { Container, FormLabel, MenuItem, Stack, Tooltip } from '@mui/material'
-import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
-import Box from '@mui/material/Box'
 import { sellLimitOrder } from '../../../Orders/SellLimit'
 import { ExpectedRateInfoText, LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
@@ -21,7 +19,7 @@ import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
 import Web3 from 'web3'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import { formatEther, formatUnits, parseUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import ERC20_ABI from '@diva/contracts/abis/erc20.json'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
@@ -42,12 +40,8 @@ import {
 import { setResponseSell } from '../../../Redux/TradeOption'
 import CheckIcon from '@mui/icons-material/Check'
 import { LoadingButton } from '@mui/lab'
-import useLocalStorage from 'use-local-storage'
-import WalletConnectProvider from '@walletconnect/web3-provider'
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
 
-const provider = new WalletConnectProvider({
-  infuraId: '27e484dcd9e3efcfd25a83a78777cdf1',
-})
 const ZERO = BigNumber.from(0)
 
 export default function SellLimit(props: {
@@ -65,13 +59,19 @@ export default function SellLimit(props: {
     owner: string
   ) => any
 }) {
-  const [{ connected }] = useLocalStorage<{
-    connected?: string
-  }>('diva-dapp-connection', {})
+  const [Web3Provider, setWeb3Provider] = useState<Web3>()
+
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const web3 = new Web3(
-    connected === 'walletconnect' ? provider : Web3.givenProvider
-  )
+  const { getWeb3JsProvider } = useConnectionContext()
+  const web3 = new Web3(Web3Provider as any)
+
+  useEffect(() => {
+    const init = async () => {
+      const web3 = await getWeb3JsProvider()
+      setWeb3Provider(web3)
+    }
+    init()
+  }, [getWeb3JsProvider])
 
   const userAddress = useAppSelector(selectUserAddress)
 
@@ -328,7 +328,7 @@ export default function SellLimit(props: {
         })
       })
     }
-  }, [responseSell, userAddress])
+  }, [responseSell, userAddress, Web3Provider])
 
   useEffect(() => {
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(

@@ -7,8 +7,8 @@ import { useDispatch } from 'react-redux'
 import { setChainId, setUserAddress } from '../Redux/appSlice'
 import WalletConnect from '@walletconnect/client'
 import QRCodeModal from '@walletconnect/qrcode-modal'
-import EthereumProvider from '@walletconnect/ethereum-provider'
 import WalletConnectProvider from '@walletconnect/web3-provider'
+import Web3 from 'web3'
 
 type MetamaskProvider = ExternalProvider &
   BaseProvider & {
@@ -22,6 +22,7 @@ type ConnectionContextState = {
   address?: string
   isConnected?: boolean
   provider?: providers.Web3Provider
+  getWeb3JsProvider?: () => Promise<Web3>
 }
 
 type ConnectionContextType = {
@@ -223,6 +224,12 @@ export const ConnectionProvider = ({ children }) => {
       const activateProvider = async () => {
         const provider = new WalletConnectProvider({
           infuraId: '1e5c07a07eb244a6be23cfa590d59ef5', // Required
+          clientMeta: {
+            description: 'Diva Dapp',
+            url: 'https://www.divaprotocol.io/',
+            icons: ['https://www.divaprotocol.io/favicon.ico'],
+            name: 'Diva Dapp',
+          },
         })
         await provider.enable()
 
@@ -240,7 +247,7 @@ export const ConnectionProvider = ({ children }) => {
           console.warn('Error in initializing the wallets connect provider', e)
         })
     }
-  }, [connected])
+  }, [connected, connect, setConnectionState])
 
   /**
    * set default chain if it doesn't load automatically
@@ -268,11 +275,25 @@ export const ConnectionProvider = ({ children }) => {
     [connected]
   )
 
+  const getWeb3JsProvider = useCallback(async () => {
+    if (connected === 'walletconnect') {
+      const provider = new WalletConnectProvider({
+        infuraId: '1e5c07a07eb244a6be23cfa590d59ef5',
+      })
+      await provider.enable()
+
+      return new Web3(provider as any)
+    }
+
+    return new Web3(Web3.givenProvider)
+  }, [connected])
+
   const value = {
     connector,
     connect,
     disconnect,
     sendTransaction,
+    getWeb3JsProvider,
     ...state,
   }
 
