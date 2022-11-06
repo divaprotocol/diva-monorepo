@@ -95,7 +95,7 @@ export function DefineAdvanced({
                     disabled={!editMaker}
                     onBlur={formik.handleBlur}
                     id="longRecipient"
-                    label="Long Recipient"
+                    label="Long Recipient Address"
                     value={formik.values.longRecipient}
                     helperText={
                       formik.errors.longRecipient != null
