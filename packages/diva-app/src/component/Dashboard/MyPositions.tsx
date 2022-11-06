@@ -1065,12 +1065,14 @@ export function MyPositions() {
             Balance:
               tokenBalances[v.address.id] == null
                 ? 'n/a'
-                : tokenBalances[v.address.id].lt(parseUnits('1', 16))
+                : tokenBalances[v.address.id].lt(
+                    parseUnits('1', v.address.decimals - 2)
+                  )
                 ? '<0.01'
                 : // QUESTION Do we need decimals here?
-                  parseFloat(formatUnits(tokenBalances[v.address.id])).toFixed(
-                    4
-                  ),
+                  parseFloat(
+                    formatUnits(tokenBalances[v.address.id], v.address.decimals)
+                  ).toFixed(4),
           }))
       : []
 
