@@ -361,9 +361,14 @@ function handleLiquidityEvent(
 function handleFeeClaimEvent(
   collateralTokenAddress: Address,
   recipient: Address,
-  amount: BigInt,
-  isIncrease: bool
+  divaAddress: Address,
 ): void {
+  // Connect to DIVA contract
+  let contract = DivaDiamond.bind(divaAddress);
+
+  // Get updated claim amount
+  let claim = contract.getClaim(collateralTokenAddress, recipient);
+
   let feeRecipientEntity = FeeRecipient.load(recipient.toHexString());
   let feeRecipientCollateralTokenEntity = FeeRecipientCollateralToken.load(
     recipient.toHexString() + "-" + collateralTokenAddress.toHexString()
@@ -382,13 +387,15 @@ function handleFeeClaimEvent(
       collateralTokenAddress.toHexString();
   }
 
-  if (isIncrease) {
-    feeRecipientCollateralTokenEntity.amount =
-      feeRecipientCollateralTokenEntity.amount.plus(amount);
-  } else {
-    feeRecipientCollateralTokenEntity.amount =
-      feeRecipientCollateralTokenEntity.amount.minus(amount);
-  }
+  feeRecipientCollateralTokenEntity.amount = claim;
+
+  // if (isIncrease) {
+  //   feeRecipientCollateralTokenEntity.amount =
+  //     feeRecipientCollateralTokenEntity.amount.plus(amount);
+  // } else {
+  //   feeRecipientCollateralTokenEntity.amount =
+  //     feeRecipientCollateralTokenEntity.amount.minus(amount);
+  // }
 
   feeRecipientEntity.save();
   feeRecipientCollateralTokenEntity.save();
@@ -546,8 +553,7 @@ export function handleFeeClaimAllocated(event: FeeClaimAllocated): void {
   handleFeeClaimEvent(
     parameters.collateralToken,
     event.params.recipient,
-    event.params.amount,
-    true
+    event.address
   );
 }
 
@@ -557,15 +563,13 @@ export function handleFeeClaimTransferred(event: FeeClaimTransferred): void {
   handleFeeClaimEvent(
     event.params.collateralToken,
     event.params.to,
-    event.params.amount,
-    true
-  ); // true is increase
+    event.address
+  );
   handleFeeClaimEvent(
     event.params.collateralToken,
     event.transaction.from,
-    event.params.amount,
-    false
-  ); // false is decrease
+    event.address
+  );
 
   let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
@@ -589,8 +593,7 @@ export function handleFeeClaimed(event: FeeClaimed): void {
   handleFeeClaimEvent(
     event.params.collateralToken,
     event.transaction.from,
-    event.params.amount,
-    false
+    event.address
   );
 
   let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
