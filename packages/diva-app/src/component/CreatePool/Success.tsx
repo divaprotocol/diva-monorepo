@@ -189,7 +189,6 @@ export function Success({
       setPoolId(Number(formik.values.poolId))
     })
   }, [formik.values.poolId])
-  console.log(transactionType)
   return (
     <Container>
       <Box display="flex" justifyContent="center" alignItems="center">

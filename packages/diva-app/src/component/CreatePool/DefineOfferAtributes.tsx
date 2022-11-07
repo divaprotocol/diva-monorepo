@@ -712,7 +712,9 @@ export function DefineOfferAttributes({
                       formik.setValues((values) => ({
                         ...values,
                         yourShare: parseFloat(collateralBalance),
-                        takerShare: values.collateralBalance, // TODO Fix this
+                        takerShare:
+                          values.collateralBalance -
+                          parseFloat(collateralBalance),
                       }))
                       if (fillOrKill) {
                         formik.setFieldValue(
