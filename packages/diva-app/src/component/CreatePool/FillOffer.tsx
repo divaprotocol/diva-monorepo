@@ -79,10 +79,9 @@ export function FillOffer({
       formik.setFieldValue('floor', formatUnits(configJson.floor))
       formik.setFieldValue('cap', formatUnits(configJson.cap))
       formik.setFieldValue('inflection', formatUnits(configJson.inflection))
-
       formik.setFieldValue(
         'gradient',
-        parseFloat(formatUnits(configJson.gradient)) // TODO add decimals
+        parseFloat(formatUnits(configJson.gradient, decimal))
       )
       formik.setFieldValue('collateralWalletBalance', walletBalance)
 

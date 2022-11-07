@@ -57,7 +57,7 @@ const BuyAndSellButton = styled(Button)<StyledButtonProps>(
 const PoolCard = ({ row }: Props) => {
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
-  const [usdPrice, setUsdPrice] = useState('') // TODO as the underlying doesn't need to be an asset priced in USD
+  const [usdPrice, setUsdPrice] = useState('') // TODO rename as the underlying doesn't need to be an asset priced in USD
   const pool = useAppSelector((state) => selectPool(state, row.Id.substring(1)))
   const theme = useTheme()
   const history = useHistory()

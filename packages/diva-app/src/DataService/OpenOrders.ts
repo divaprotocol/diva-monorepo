@@ -2,8 +2,8 @@ import axios from 'axios'
 import {
   config,
   NULL_ADDRESS,
-  divaGovernanceAddress,
-  tradingFee,
+  DIVA_GOVERNANCE_ADDRESS,
+  TRADING_FEE,
 } from '../constants'
 import { BigNumber, ethers } from 'ethers'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'

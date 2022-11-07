@@ -32,7 +32,7 @@ import {
 } from '@mui/material'
 import ViewModuleIcon from '@mui/icons-material/ViewModule'
 import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
-import { divaGovernanceAddress, WEBSOCKET_URL } from '../../constants'
+import { DIVA_GOVERNANCE_ADDRESS, WEBSOCKET_URL } from '../../constants'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { ORDER_TYPE } from '../../Models/orderbook'
@@ -350,13 +350,13 @@ const MobileFilterOptions = ({
             >
               <Box>Diva Governance</Box>
               <Checkbox
-                checked={createdBy === divaGovernanceAddress}
+                checked={createdBy === DIVA_GOVERNANCE_ADDRESS}
                 id={`checkbox-diva-governance`}
                 onChange={() => {
-                  if (createdBy === divaGovernanceAddress) {
+                  if (createdBy === DIVA_GOVERNANCE_ADDRESS) {
                     setCreatedBy('')
                   } else {
-                    setCreatedBy(divaGovernanceAddress)
+                    setCreatedBy(DIVA_GOVERNANCE_ADDRESS)
                   }
                 }}
               />
@@ -918,9 +918,9 @@ export default function Markets() {
                   onInputChange={handleCreatorInput}
                   MenuItemLabel="Diva Governance"
                   onMenuItemClick={() => {
-                    setCreatedBy(divaGovernanceAddress)
+                    setCreatedBy(DIVA_GOVERNANCE_ADDRESS)
                     setCreatorButtonLabel(
-                      getShortenedAddress(divaGovernanceAddress)
+                      getShortenedAddress(DIVA_GOVERNANCE_ADDRESS)
                     )
                   }}
                 />
@@ -1007,7 +1007,7 @@ export default function Markets() {
               }}
               onClearFilter={() => {
                 setSearch('')
-                setCreatedBy(divaGovernanceAddress)
+                setCreatedBy(DIVA_GOVERNANCE_ADDRESS)
                 setExpiredPoolClicked(false)
                 setSearchInput('')
                 setCheckedState(new Array(4).fill(false))

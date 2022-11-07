@@ -31,7 +31,7 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
-import { tradingFee } from '../../../constants'
+import { TRADING_FEE } from '../../../constants'
 import {
   calcPayoffPerToken,
   calcBreakEven,
@@ -41,7 +41,7 @@ import { LoadingButton } from '@mui/lab'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigNumber.from(0)
-const feeMultiplier = (1 + tradingFee).toString()
+const feeMultiplier = (1 + TRADING_FEE).toString()
 
 export default function SellMarket(props: {
   option: Pool
@@ -103,7 +103,7 @@ export default function SellMarket(props: {
 
       // Set trading fee
       const feeAmount = nbrOptions
-        .mul(parseUnits(tradingFee.toString(), decimals))
+        .mul(parseUnits(TRADING_FEE.toString(), decimals))
         .div(collateralTokenUnit)
       setFeeAmount(feeAmount)
 

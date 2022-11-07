@@ -185,12 +185,12 @@ export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(
 // current supported chain
 export const CURRENT_SUPPORTED_CHAIN_ID = [SupportedChainId.ROPSTEN]
 
-// TODO Use capital letters
-export const divaGovernanceAddress =
-  '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E' // creator of pools on Main Markets page and trading fee recipient
+// DIVA Governance address which is the default creator of pools on Markets page and trading fee recipient
+export const DIVA_GOVERNANCE_ADDRESS =
+  '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E'
 
-// TODO Use capital letters
-export const tradingFee = 0.01 // 1%
+// Trading fee; 0.01 corresponds to 1%
+export const TRADING_FEE = 0.01
 
 // TODO Think about merging tradingFee and DEFAULT_TAKER_TOKEN_FEE
 export const DEFAULT_TAKER_TOKEN_FEE = 1000 // 1000 = 1%
@@ -223,7 +223,7 @@ export const APP_BAR_ITEMS = [
     icon: Add,
   },
   {
-    label: 'Testnet Tasks', // TODO rename
+    label: 'App Training',
     to: '/tasks',
     icon: TaskIcon,
   },
