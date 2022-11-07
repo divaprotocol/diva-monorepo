@@ -350,7 +350,7 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
     bidExpiry = getExpiryMinutesFromNow(order.order.expiry)
     // Calculate Bid amount
     const bidAmount = BigNumber.from(order.order.makerAmount)
-      .mul(parseUnits('1'))
+      .mul(parseUnits('1', price.decimals))
       .div(BigNumber.from(order.order.takerAmount)) // result is in collateral token decimals
 
     // Value to display in the orderbook
@@ -358,7 +358,8 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
 
     // Display remainingFillableTakerAmount as the quantity in the orderbook
     bidnbrOptions = formatUnits(
-      BigNumber.from(order.metaData.remainingFillableTakerAmount)
+      BigNumber.from(order.metaData.remainingFillableTakerAmount),
+      price.decimals
     )
   }
 
@@ -370,7 +371,7 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
     askExpiry = getExpiryMinutesFromNow(order.order.expiry)
     // Calculate Ask amount
     const askAmount = BigNumber.from(order.order.takerAmount)
-      .mul(parseUnits('1'))
+      .mul(parseUnits('1', price.decimals))
       .div(BigNumber.from(order.order.makerAmount)) // result is in collateral token decimals
 
     // Value to display in the orderbook
@@ -386,9 +387,12 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
       )
         .mul(BigNumber.from(order.order.makerAmount))
         .div(BigNumber.from(order.order.takerAmount))
-      asknbrOptions = formatUnits(remainingFillableMakerAmount)
+      asknbrOptions = formatUnits(remainingFillableMakerAmount, price.decimals)
     } else {
-      asknbrOptions = formatUnits(BigNumber.from(order.order.makerAmount))
+      asknbrOptions = formatUnits(
+        BigNumber.from(order.order.makerAmount),
+        price.decimals
+      )
     }
   }
 
@@ -549,7 +553,8 @@ export const mapOrderData = (
 
       // Display remainingFillableTakerAmount as the quantity in the orderbook
       orders.nbrOptions = formatUnits(
-        BigNumber.from(metaData.remainingFillableTakerAmount)
+        BigNumber.from(metaData.remainingFillableTakerAmount),
+        decimals
       )
     }
 
