@@ -74,22 +74,28 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       setOpenExpiredAlert(pool.statusFinalReferenceValue === 'Confirmed')
       setDecimal(pool!.collateralToken.decimals)
       if (tokenBalanceLong && tokenBalanceShort && decimal) {
-        const longBalance = parseEther(tokenBalanceLong)
-        const shortBalance = parseEther(tokenBalanceShort)
+        const longBalance = parseUnits(
+          tokenBalanceLong,
+          pool!.collateralToken.decimals
+        )
+        const shortBalance = parseUnits(
+          tokenBalanceShort,
+          pool!.collateralToken.decimals
+        )
         const colLong = longBalance
           .mul(
             parseUnits('1', 18)
               .sub(BigNumber.from(pool.protocolFee))
               .sub(BigNumber.from(pool.settlementFee))
           )
-          .div(parseUnits('1', decimal))
+          .div(parseUnits('1', 18))
         const colShort = shortBalance
           .mul(
             parseUnits('1', 18)
               .sub(BigNumber.from(pool.protocolFee))
               .sub(BigNumber.from(pool.settlementFee))
           )
-          .div(parseUnits('1', decimal))
+          .div(parseUnits('1', 18))
         {
           colLong.lt(colShort)
             ? setMaxCollateral(colLong)
