@@ -541,7 +541,7 @@ export const mapOrderData = (
 
       // Calculate Bid amount
       const bidAmount = BigNumber.from(order.makerAmount)
-        .mul(parseUnits('1'))
+        .mul(parseUnits('1', decimals))
         .div(BigNumber.from(order.takerAmount)) // result is in collateral token decimals
 
       // Value to display in the orderbook
@@ -561,7 +561,7 @@ export const mapOrderData = (
 
       // Calculate Ask amount
       const askAmount = BigNumber.from(order.takerAmount)
-        .mul(parseUnits('1'))
+        .mul(parseUnits('1', decimals))
         .div(BigNumber.from(order.makerAmount)) // result is in collateral token decimals
 
       // Value to display in the orderbook
@@ -577,9 +577,12 @@ export const mapOrderData = (
         )
           .mul(BigNumber.from(order.makerAmount))
           .div(BigNumber.from(order.takerAmount))
-        orders.nbrOptions = formatUnits(remainingFillableMakerAmount)
+        orders.nbrOptions = formatUnits(remainingFillableMakerAmount, decimals)
       } else {
-        orders.nbrOptions = formatUnits(BigNumber.from(order.makerAmount))
+        orders.nbrOptions = formatUnits(
+          BigNumber.from(order.makerAmount),
+          decimals
+        )
       }
     }
     return orders

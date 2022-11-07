@@ -248,7 +248,6 @@ export const fetchPools = createAsyncThunk(
       threshold,
       count,
       poolInfo,
-      count,
     }
 
     try {

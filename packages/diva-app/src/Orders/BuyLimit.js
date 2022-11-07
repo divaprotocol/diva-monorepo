@@ -9,7 +9,7 @@ import { getFutureExpiryInSeconds } from '../Util/utils'
 export const buylimitOrder = async (orderData) => {
   const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
-  const positionTokenUnit = parseUnits('1')
+  const positionTokenUnit = parseUnits('1', orderData.collateralDecimals)
 
   const nbrOptionsToBuy = orderData.nbrOptions
 
@@ -22,7 +22,7 @@ export const buylimitOrder = async (orderData) => {
   // NOTE: The fee is paid in position token which is the taker token in Buy Limit. In the context of DIVA,
   // this has the implication that for deep-out-of the money position tokens, the trading fee may end up being zero for the feeRecipient.
   const positionTokenFeeAmount = nbrOptionsToBuy
-    .mul(parseUnits(tradingFee.toString())) // TODO: Revisit fee logic for trade mining program at a later stage
+    .mul(parseUnits(tradingFee.toString(), orderData.collateralDecimals)) // TODO: Revisit fee logic for trade mining program at a later stage
     .div(positionTokenUnit)
 
   // Get 0x API url to post order
