@@ -504,10 +504,17 @@ export function TradeHistoryTab() {
                     order.takerTokenFilledAmount,
                     token.decimals
                   ),
-                  quantity: formatEther(order.makerTokenFilledAmount),
+                  quantity: formatUnits(
+                    order.makerTokenFilledAmount,
+                    token.decimals
+                  ),
                   price:
-                    Number(formatUnits(order.takerTokenFilledAmount)) /
-                    Number(formatUnits(order.makerTokenFilledAmount)),
+                    Number(
+                      formatUnits(order.takerTokenFilledAmount, token.decimals)
+                    ) /
+                    Number(
+                      formatUnits(order.makerTokenFilledAmount, token.decimals)
+                    ),
                   timestamp: order.timestamp,
                 })
               } else if (

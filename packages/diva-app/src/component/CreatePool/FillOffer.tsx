@@ -2,12 +2,7 @@ import { useCreatePoolFormik } from './formik'
 import { Stack, TextField } from '@mui/material'
 import React, { useEffect } from 'react'
 import { FileUpload, FileUploadProps } from './FileUpload'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import ERC20 from '../../abi/ERC20ABI.json'
 import { useAppSelector } from '../../Redux/hooks'
@@ -81,13 +76,13 @@ export function FillOffer({
       )
       formik.setFieldValue('referenceAsset', configJson.referenceAsset)
       formik.setFieldValue('expiryTime', new Date(configJson.expiryTime * 1000))
-      formik.setFieldValue('floor', formatEther(configJson.floor))
-      formik.setFieldValue('cap', formatEther(configJson.cap))
-      formik.setFieldValue('inflection', formatEther(configJson.inflection))
+      formik.setFieldValue('floor', formatUnits(configJson.floor))
+      formik.setFieldValue('cap', formatUnits(configJson.cap))
+      formik.setFieldValue('inflection', formatUnits(configJson.inflection))
 
       formik.setFieldValue(
         'gradient',
-        parseFloat(formatEther(configJson.gradient))
+        parseFloat(formatUnits(configJson.gradient)) // TODO add decimals
       )
       formik.setFieldValue('collateralWalletBalance', walletBalance)
 
