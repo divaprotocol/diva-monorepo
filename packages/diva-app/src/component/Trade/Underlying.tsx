@@ -38,7 +38,7 @@ import {
   selectChainId,
   selectUnderlyingPrice,
 } from '../../Redux/appSlice'
-import { formatUnits, parseEther, formatEther } from 'ethers/lib/utils'
+import { formatUnits, formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
 import { AddLiquidity } from '../Liquidity/AddLiquidity'
 import { RemoveLiquidity } from '../Liquidity/RemoveLiquidity'

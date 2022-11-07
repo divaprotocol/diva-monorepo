@@ -101,7 +101,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           setActionEnabled(false)
         } else {
           setLongToken(
-            // TODO fix calcs
             formatEther(
               parseEther(textFieldValue)
                 .mul(parseEther('1'))
@@ -222,14 +221,14 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               <>
                 <Typography variant="subtitle2" color="text.secondary">
                   You can remove up to{' '}
-                  {parseFloat(formatEther(maxCollateral)).toFixed(4)}{' '}
+                  {parseFloat(formatUnits(maxCollateral, decimal)).toFixed(4)}{' '}
                   {pool!.collateralToken.symbol}
                   {' (after fees) '}
                   <MaxCollateral
                     role="button"
                     onClick={() => {
                       if (maxCollateral != 0) {
-                        setTextFieldValue(formatEther(maxCollateral))
+                        setTextFieldValue(formatUnits(maxCollateral, decimal))
                       }
                     }}
                   >
@@ -392,9 +391,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 textFieldValue !== '' &&
                 (
                   (parseFloat(formatEther(BigNumber.from(pool!.protocolFee))) *
-                    parseFloat(
-                      formatUnits(parseUnits(textFieldValue, decimal), decimal)
-                    )) /
+                    parseFloat(textFieldValue)) /
                   (1.0 -
                     parseFloat(formatEther(BigNumber.from(pool.protocolFee))) -
                     parseFloat(formatEther(BigNumber.from(pool.settlementFee))))
@@ -411,9 +408,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                   (parseFloat(
                     formatEther(BigNumber.from(pool!.settlementFee))
                   ) *
-                    parseFloat(
-                      formatUnits(parseUnits(textFieldValue, decimal), decimal)
-                    )) /
+                    parseFloat(textFieldValue)) /
                   (1.0 -
                     parseFloat(formatEther(BigNumber.from(pool.protocolFee))) -
                     parseFloat(formatEther(BigNumber.from(pool.settlementFee))))
