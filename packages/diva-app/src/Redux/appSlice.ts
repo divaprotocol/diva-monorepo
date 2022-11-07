@@ -246,6 +246,7 @@ export const fetchPools = createAsyncThunk(
       feeRecipient,
       takerTokenFee,
       threshold,
+      count,
       poolInfo,
       count,
     }
