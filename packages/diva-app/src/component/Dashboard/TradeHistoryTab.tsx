@@ -564,10 +564,17 @@ export function TradeHistoryTab() {
                     order.makerTokenFilledAmount,
                     token.decimals
                   ),
-                  quantity: formatUnits(order.takerTokenFilledAmount, token.decimals),
+                  quantity: formatUnits(
+                    order.takerTokenFilledAmount,
+                    token.decimals
+                  ),
                   price:
-                    Number(formatUnits(order.makerTokenFilledAmount, token.decimals)) /
-                    Number(formatUnits(order.takerTokenFilledAmount, token.decimals)),
+                    Number(
+                      formatUnits(order.makerTokenFilledAmount, token.decimals)
+                    ) /
+                    Number(
+                      formatUnits(order.takerTokenFilledAmount, token.decimals)
+                    ),
                   timestamp: order.timestamp,
                 })
               } else if (
@@ -584,10 +591,17 @@ export function TradeHistoryTab() {
                     order.makerTokenFilledAmount,
                     token.decimals
                   ),
-                  quantity: formatUnits(order.takerTokenFilledAmount, token.decimals),
+                  quantity: formatUnits(
+                    order.takerTokenFilledAmount,
+                    token.decimals
+                  ),
                   price:
-                    Number(formatUnits(order.makerTokenFilledAmount, token.decimals)) /
-                    Number(formatUnits(order.takerTokenFilledAmount, token.decimals)),
+                    Number(
+                      formatUnits(order.makerTokenFilledAmount, token.decimals)
+                    ) /
+                    Number(
+                      formatUnits(order.takerTokenFilledAmount, token.decimals)
+                    ),
                   timestamp: order.timestamp,
                 })
               }
