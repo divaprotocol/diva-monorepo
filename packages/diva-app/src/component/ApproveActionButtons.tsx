@@ -215,13 +215,13 @@ export const ApproveActionButtons = ({
                   res.lt(
                     parseUnits(String(formik.values.yourShare), decimal).add(
                       parseUnits(
-                        String(
+                        (
                           (formik.values.yourShare * formik.values.makerShare) /
-                            (Number(
-                              formik.values.jsonToExport.takerCollateralAmount
-                            ) /
-                              10 ** decimal)
-                        ),
+                          (Number(
+                            formik.values.jsonToExport.takerCollateralAmount
+                          ) /
+                            10 ** decimal)
+                        ).toFixed(decimal),
                         decimal
                       )
                     )
