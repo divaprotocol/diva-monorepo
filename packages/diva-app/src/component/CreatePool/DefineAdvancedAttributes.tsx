@@ -36,6 +36,11 @@ export function DefineAdvanced({
   const [editMaker, setEditMaker] = useState(false)
 
   useEffect(() => {
+    formik.setFieldValue('shortRecipient', userAddress)
+    formik.setFieldValue('longRecipient', userAddress)
+  }, [userAddress])
+
+  useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
     } else {
