@@ -517,12 +517,16 @@ export const ApproveActionButtons = ({
                          * dispatch action to refetch the pool after action
                          */
                         tx.wait()
-                          .then(() => {
-                            setTimeout(() => {
-                              setActionLoading(false)
-                              setIsPoolCreated(true)
-                              onTransactionSuccess()
-                            }, 15000)
+                          .then((receipt) => {
+                            formik.setFieldValue(
+                              'poolId',
+                              receipt.events.find(
+                                (x: any) => x.event === 'PoolIssued'
+                              ).args.poolId
+                            )
+                            setActionLoading(false)
+                            setIsPoolCreated(true)
+                            onTransactionSuccess()
                           })
                           .catch((err: any) => {
                             setActionLoading(false)
