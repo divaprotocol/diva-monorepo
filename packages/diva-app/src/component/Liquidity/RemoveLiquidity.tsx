@@ -152,9 +152,11 @@ export const RemoveLiquidity = ({ pool }: Props) => {
         DIVA_ABI,
         provider?.getSigner()
       )
+      console.log('longToken', longToken)
+      console.log('decimal', decimal)
       const tx = await diva!.removeLiquidity(
         window.location.pathname.split('/')[1],
-        parseEther(longToken)
+        parseUnits(longToken, decimal)
       )
       await tx?.wait()
       setLoading(false)
@@ -337,7 +339,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                     diva!
                       .removeLiquidity(
                         window.location.pathname.split('/')[1],
-                        parseEther(longToken)
+                        parseUnits(Number(longToken).toFixed(decimal), decimal) // toFixed(decimal) done to avoid fractional component exceeds decimals error
                       )
                       .then((tx) => {
                         /**
