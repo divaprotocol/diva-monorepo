@@ -69,7 +69,6 @@ def new_pool_query():
             { 
                 pools (where: {dataProvider: "%s", createdAt_gte: "%s" }) {
                     id
-                    dsf
                     referenceAsset
                     floor
                     inflection
