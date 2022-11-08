@@ -590,13 +590,8 @@ export function DefinePoolAttributes({
                     type="number"
                     onChange={(event) => {
                       const value = event.target.value
-                      console.log('value', value)
                       const arr = value.split('.')
                       const collateralBalance = event.target.value
-                      console.log(
-                        'typeof collateralBalance',
-                        typeof collateralBalance
-                      )
                       if (arr.length > 1) {
                         if (arr[1].length <= collateralToken.decimals) {
                           formik.setValues((values) => ({

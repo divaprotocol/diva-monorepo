@@ -27,7 +27,6 @@ export const useGovernanceParameters = () => {
   useEffect(() => {
     if (diva) {
       diva.getGovernanceParameters().then((governanceParameters) => {
-        console.log('governanceParameters', governanceParameters)
         setSubmissionPeriod(
           governanceParameters.currentSettlementPeriods.submissionPeriod // TODO Pull that information from pool query instead doing this as these might not apply to a specific pool
         )

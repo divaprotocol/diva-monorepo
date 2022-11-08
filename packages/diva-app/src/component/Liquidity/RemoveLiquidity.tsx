@@ -152,8 +152,6 @@ export const RemoveLiquidity = ({ pool }: Props) => {
         DIVA_ABI,
         provider?.getSigner()
       )
-      console.log('longToken', longToken)
-      console.log('decimal', decimal)
       const tx = await diva!.removeLiquidity(
         window.location.pathname.split('/')[1],
         parseUnits(longToken, decimal)
