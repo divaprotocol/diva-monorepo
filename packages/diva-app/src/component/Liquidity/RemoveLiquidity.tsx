@@ -335,11 +335,10 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                       DIVA_ABI,
                       provider?.getSigner()
                     )
-                    // TODO removeLiquidity is now allowed even if pool expired
                     diva!
                       .removeLiquidity(
                         window.location.pathname.split('/')[1],
-                        parseUnits(Number(longToken).toFixed(decimal), decimal) // toFixed(decimal) done to avoid fractional component exceeds decimals error
+                        parseUnits(Number(longToken).toFixed(decimal), decimal) // toFixed(decimal) used to avoid fractional component exceeds decimals error
                       )
                       .then((tx) => {
                         /**
