@@ -13,27 +13,22 @@ export function PayoffProfile(props: {
   floor: number
   cap: number
   inflection: number
+  gradient: number
   hasError?: boolean
-  collateralBalanceShort: number
-  collateralBalanceLong: number
-  tokenSupply: number
   longDirection?: boolean
 }) {
   const {
     floor,
     cap,
     inflection: strike,
+    gradient,
     hasError,
-    collateralBalanceShort,
-    collateralBalanceLong,
     longDirection,
   } = props
 
   const padding = cap * 0.1
   const start = Math.max(floor - padding, 0)
   const end = Number(cap) + padding
-  const gradient =
-    collateralBalanceLong / (collateralBalanceLong + collateralBalanceShort)
 
   const maxPayoutLong = 1
   const maxPayoutShort = 1

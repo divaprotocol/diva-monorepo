@@ -15,17 +15,14 @@ import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import { BigNumber } from 'ethers'
 import styled from '@emotion/styled'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 import { selectUserAddress } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useAppSelector } from '../../Redux/hooks'
 import { ApproveActionButtons } from '../ApproveActionButtons'
+import { toExponentialOrNumber } from '../../Util/utils'
+
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -62,19 +59,11 @@ export const AddLiquidity = ({ pool }: Props) => {
     }
     if (
       pool! &&
-      formatUnits(parseEther(pool!.capacity), pool.collateralToken.decimals) !==
-        '0.0' &&
+      pool!.capacity.toString() !== '0.0' &&
       textFieldValue !== '' &&
-      parseFloat(formatEther(parseEther(textFieldValue))) +
-        parseFloat(
-          formatUnits(
-            parseEther(pool!.collateralBalance),
-            pool.collateralToken.decimals
-          )
-        ) >
-        parseFloat(
-          formatUnits(parseEther(pool!.capacity), pool.collateralToken.decimals)
-        )
+      parseFloat(textFieldValue) +
+        parseFloat(pool!.collateralBalance.toString()) >
+        parseFloat(pool!.capacity.toString())
     ) {
       setOpenCapacityAlert(true)
     } else {
@@ -141,7 +130,7 @@ export const AddLiquidity = ({ pool }: Props) => {
           {tokenBalance ? (
             <>
               <Typography variant="subtitle2" color="text.secondary">
-                Your balance: {parseFloat(tokenBalance!).toFixed(4)}{' '}
+                Your balance: {toExponentialOrNumber(Number(tokenBalance!))}{' '}
                 {pool!.collateralToken.symbol}{' '}
                 <MaxCollateral
                   role="button"
@@ -235,22 +224,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                   <BlackTextTypography>
                     {pool &&
                       textFieldValue !== '' &&
-                      (
-                        (parseFloat(formatEther(pool.supplyInitial)) /
-                          (parseFloat(
-                            formatUnits(
-                              pool.collateralBalanceLongInitial,
-                              decimal
-                            )
-                          ) +
-                            parseFloat(
-                              formatUnits(
-                                pool.collateralBalanceShortInitial,
-                                decimal
-                              )
-                            ))) *
-                        parseFloat(formatEther(parseEther(textFieldValue)))
-                      ).toFixed(4)}
+                      parseFloat(textFieldValue).toFixed(4)}
                   </BlackTextTypography>
                   <BlackTextTypography>Long Tokens</BlackTextTypography>
                 </Container>
@@ -263,22 +237,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                   <BlackTextTypography>
                     {pool &&
                       textFieldValue !== '' &&
-                      (
-                        (parseFloat(formatEther(pool.supplyInitial)) /
-                          (parseFloat(
-                            formatUnits(
-                              pool.collateralBalanceLongInitial,
-                              decimal
-                            )
-                          ) +
-                            parseFloat(
-                              formatUnits(
-                                pool.collateralBalanceShortInitial,
-                                decimal
-                              )
-                            ))) *
-                        parseFloat(formatEther(parseEther(textFieldValue)))
-                      ).toFixed(4)}
+                      parseFloat(textFieldValue).toFixed(4)}
                   </BlackTextTypography>
                   <BlackTextTypography>Short Tokens</BlackTextTypography>
                 </Container>

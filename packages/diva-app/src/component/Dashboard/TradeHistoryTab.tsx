@@ -15,7 +15,7 @@ import {
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { useEffect, useMemo, useState } from 'react'
-import { formatEther, formatUnits } from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 import Typography from '@mui/material/Typography'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
@@ -504,10 +504,17 @@ export function TradeHistoryTab() {
                     order.takerTokenFilledAmount,
                     token.decimals
                   ),
-                  quantity: formatEther(order.makerTokenFilledAmount),
+                  quantity: formatUnits(
+                    order.makerTokenFilledAmount,
+                    token.decimals
+                  ),
                   price:
-                    Number(formatUnits(order.takerTokenFilledAmount)) /
-                    Number(formatUnits(order.makerTokenFilledAmount)),
+                    Number(
+                      formatUnits(order.takerTokenFilledAmount, token.decimals)
+                    ) /
+                    Number(
+                      formatUnits(order.makerTokenFilledAmount, token.decimals)
+                    ),
                   timestamp: order.timestamp,
                 })
               } else if (
@@ -524,10 +531,17 @@ export function TradeHistoryTab() {
                     order.takerTokenFilledAmount,
                     token.decimals
                   ),
-                  quantity: formatEther(order.makerTokenFilledAmount),
+                  quantity: formatUnits(
+                    order.makerTokenFilledAmount,
+                    token.decimals
+                  ),
                   price:
-                    Number(formatUnits(order.takerTokenFilledAmount)) /
-                    Number(formatUnits(order.makerTokenFilledAmount)),
+                    Number(
+                      formatUnits(order.takerTokenFilledAmount, token.decimals)
+                    ) /
+                    Number(
+                      formatUnits(order.makerTokenFilledAmount, token.decimals)
+                    ),
                   timestamp: order.timestamp,
                 })
               }
@@ -550,10 +564,17 @@ export function TradeHistoryTab() {
                     order.makerTokenFilledAmount,
                     token.decimals
                   ),
-                  quantity: formatEther(order.takerTokenFilledAmount),
+                  quantity: formatUnits(
+                    order.takerTokenFilledAmount,
+                    token.decimals
+                  ),
                   price:
-                    Number(formatUnits(order.makerTokenFilledAmount)) /
-                    Number(formatUnits(order.takerTokenFilledAmount)),
+                    Number(
+                      formatUnits(order.makerTokenFilledAmount, token.decimals)
+                    ) /
+                    Number(
+                      formatUnits(order.takerTokenFilledAmount, token.decimals)
+                    ),
                   timestamp: order.timestamp,
                 })
               } else if (
@@ -570,10 +591,17 @@ export function TradeHistoryTab() {
                     order.makerTokenFilledAmount,
                     token.decimals
                   ),
-                  quantity: formatEther(order.takerTokenFilledAmount),
+                  quantity: formatUnits(
+                    order.takerTokenFilledAmount,
+                    token.decimals
+                  ),
                   price:
-                    Number(formatUnits(order.makerTokenFilledAmount)) /
-                    Number(formatUnits(order.takerTokenFilledAmount)),
+                    Number(
+                      formatUnits(order.makerTokenFilledAmount, token.decimals)
+                    ) /
+                    Number(
+                      formatUnits(order.takerTokenFilledAmount, token.decimals)
+                    ),
                   timestamp: order.timestamp,
                 })
               }

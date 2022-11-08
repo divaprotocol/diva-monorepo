@@ -8,23 +8,17 @@ import {
 import Button from '@mui/material/Button'
 import { BigNumber, ethers } from 'ethers'
 import { config, CREATE_POOL_TYPE } from '../constants'
-import {
-  formatEther,
-  parseEther,
-  parseUnits,
-  splitSignature,
-} from 'ethers/lib/utils'
+import { parseUnits, splitSignature } from 'ethers/lib/utils'
 import { fetchPool, selectUserAddress } from '../Redux/appSlice'
 import React, { useEffect, useState } from 'react'
 import { useConnectionContext } from '../hooks/useConnectionContext'
-import ERC20 from '@diva/contracts/abis/erc20.json'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import ERC20 from '../abi/ERC20ABI.json'
+import DIVA_ABI from '../abi/DIVAABI.json'
 import { useAppSelector } from '../Redux/hooks'
 import AddIcon from '@mui/icons-material/Add'
 import CheckIcon from '@mui/icons-material/Check'
 import { useDispatch } from 'react-redux'
 import { useCreatePoolFormik } from './CreatePool/formik'
-import DIVA712ABI from '../abi/DIVA712ABI.json'
 import axios from 'axios'
 
 type Props = {
@@ -176,22 +170,13 @@ export const ApproveActionButtons = ({
       ? new ethers.Contract(config[chainId]?.divaAddress, DIVA_ABI, signer)
       : null
 
-  const divaNew =
-    chainId != null
-      ? new ethers.Contract(
-          config[chainId]?.divaAddressNew, //Goerli
-          DIVA712ABI,
-          signer
-        )
-      : null
-
   const divaDomain =
     chainId != null
       ? {
           name: 'DIVA Protocol',
           version: '1',
           chainId,
-          verifyingContract: config[chainId!].divaAddressNew,
+          verifyingContract: config[chainId!].divaAddress,
         }
       : null
   const [mobile, setMobile] = useState(false)
@@ -224,19 +209,19 @@ export const ApproveActionButtons = ({
             formik.values.jsonToExport.maker.toLowerCase()
           ) {
             token
-              .allowance(account, config[chainId!].divaAddressNew)
+              .allowance(account, config[chainId!].divaAddress)
               .then((res) => {
                 if (
                   res.lt(
                     parseUnits(String(formik.values.yourShare), decimal).add(
                       parseUnits(
-                        String(
+                        (
                           (formik.values.yourShare * formik.values.makerShare) /
-                            (Number(
-                              formik.values.jsonToExport.takerCollateralAmount
-                            ) /
-                              10 ** decimal)
-                        ),
+                          (Number(
+                            formik.values.jsonToExport.takerCollateralAmount
+                          ) /
+                            10 ** decimal)
+                        ).toFixed(decimal),
                         decimal
                       )
                     )
@@ -251,7 +236,7 @@ export const ApproveActionButtons = ({
               })
           } else {
             token
-              .allowance(account, config[chainId!].divaAddressNew)
+              .allowance(account, config[chainId!].divaAddress)
               .then((res) => {
                 if (
                   res.lt(parseUnits(String(formik.values.yourShare), decimal))
@@ -267,11 +252,23 @@ export const ApproveActionButtons = ({
         } else {
           if (transactionType === 'createoffer') {
             token
-              .allowance(account, config[chainId]?.divaAddressNew)
+              .allowance(account, config[chainId]?.divaAddress)
               .then((res) => {
                 if (
                   res.lt(parseUnits(String(formik.values.yourShare), decimal))
                 ) {
+                  setApproveEnabled(true)
+                  setActionEnabled(false)
+                } else {
+                  setActionEnabled(true)
+                  setApproveEnabled(false)
+                }
+              })
+          } else if (transactionType === 'createpool') {
+            token
+              .allowance(account, config[chainId]?.divaAddress)
+              .then((res) => {
+                if (res.lt(parseUnits(textFieldValue, decimal))) {
                   setApproveEnabled(true)
                   setActionEnabled(false)
                 } else {
@@ -388,7 +385,7 @@ export const ApproveActionButtons = ({
 
                       token
                         .approve(
-                          config[chainId!].divaAddressNew,
+                          config[chainId!].divaAddress,
                           parseUnits(String(formik.values.yourShare), decimal)
                         )
                         .then((tx: any) => {
@@ -398,7 +395,7 @@ export const ApproveActionButtons = ({
                           setApproveLoading(false)
                           return token.allowance(
                             account,
-                            config[chainId!].divaAddressNew
+                            config[chainId!].divaAddress
                           )
                         })
                         .catch((err: any) => {
@@ -411,7 +408,7 @@ export const ApproveActionButtons = ({
 
                       token
                         .approve(
-                          config[chainId!].divaAddressNew,
+                          config[chainId!].divaAddress,
                           account.toLowerCase() ===
                             formik.values.jsonToExport.maker.toLowerCase()
                             ? parseUnits(
@@ -443,7 +440,7 @@ export const ApproveActionButtons = ({
                           setApproveLoading(false)
                           return token.allowance(
                             account,
-                            config[chainId!].divaAddressNew
+                            config[chainId!].divaAddress
                           )
                         })
                         .catch((err: any) => {
@@ -489,42 +486,47 @@ export const ApproveActionButtons = ({
                   case 'createpool':
                     diva!
                       .createContingentPool({
-                        inflection: parseEther(pool.inflection.toString()),
-                        cap: parseEther(pool.cap.toString()),
-                        floor: parseEther(pool.floor.toString()),
-                        collateralBalanceShort: parseUnits(
-                          pool.collateralBalanceShort.toString(),
-                          decimal
-                        ),
-                        collateralBalanceLong: parseUnits(
-                          pool.collateralBalanceLong.toString(),
-                          decimal
-                        ),
+                        referenceAsset: pool.referenceAsset.toString(),
                         expiryTime: Math.trunc(
                           pool.expiryTime.getTime() / 1000
                         ),
-                        supplyPositionToken: parseEther(
-                          pool.tokenSupply.toString()
+                        floor: parseUnits(pool.floor.toString()),
+                        inflection: parseUnits(pool.inflection.toString()),
+                        cap: parseUnits(pool.cap.toString()),
+                        gradient: parseUnits(pool.gradient.toString(), decimal),
+                        collateralAmount: parseUnits(
+                          pool.collateralBalance.toString(),
+                          decimal
                         ),
-                        referenceAsset: pool.referenceAsset.toString(),
                         collateralToken: pool.collateralToken.id.toString(),
                         dataProvider: pool.dataProvider.toString(),
                         capacity:
                           pool.capacity === 'Unlimited'
                             ? ethers.constants.MaxUint256.toString()
                             : parseUnits(pool.capacity.toString(), decimal),
+                        longRecipient: ethers.utils.getAddress(
+                          pool.longRecipient
+                        ),
+                        shortRecipient: ethers.utils.getAddress(
+                          pool.shortRecipient
+                        ),
+                        permissionedERC721Token: ethers.constants.AddressZero,
                       })
                       .then((tx) => {
                         /**
                          * dispatch action to refetch the pool after action
                          */
                         tx.wait()
-                          .then(() => {
-                            setTimeout(() => {
-                              setActionLoading(false)
-                              setIsPoolCreated(true)
-                              onTransactionSuccess()
-                            }, 15000)
+                          .then((receipt) => {
+                            formik.setFieldValue(
+                              'poolId',
+                              receipt.events.find(
+                                (x: any) => x.event === 'PoolIssued'
+                              ).args.poolId
+                            )
+                            setActionLoading(false)
+                            setIsPoolCreated(true)
+                            onTransactionSuccess()
                           })
                           .catch((err: any) => {
                             setActionLoading(false)
@@ -540,7 +542,9 @@ export const ApproveActionButtons = ({
                     diva!
                       .addLiquidity(
                         window.location.pathname.split('/')[1],
-                        parseUnits(textFieldValue, decimal)
+                        parseUnits(textFieldValue, decimal),
+                        account,
+                        account
                       )
                       .then((tx) => {
                         /**
@@ -602,13 +606,14 @@ export const ApproveActionButtons = ({
                       expiryTime: Math.floor(
                         new Date(formik.values.expiryTime).getTime() / 1000
                       ).toString(),
-                      floor: parseEther(String(formik.values.floor)).toString(),
-                      inflection: parseEther(
+                      floor: parseUnits(String(formik.values.floor)).toString(),
+                      inflection: parseUnits(
                         String(formik.values.inflection)
                       ).toString(),
-                      cap: parseEther(String(formik.values.cap)).toString(),
-                      gradient: parseEther(
-                        String(formik.values.gradient)
+                      cap: parseUnits(String(formik.values.cap)).toString(),
+                      gradient: parseUnits(
+                        String(formik.values.gradient),
+                        decimal
                       ).toString(),
                       collateralToken: formik.values.collateralToken.id,
                       dataProvider: formik.values.dataProvider,
@@ -640,7 +645,7 @@ export const ApproveActionButtons = ({
                           ...createOfferStats,
                           signature,
                         }
-                        divaNew
+                        diva
                           .getOfferRelevantStateCreateContingentPool(
                             createOfferStats,
                             signature
@@ -651,8 +656,7 @@ export const ApproveActionButtons = ({
                               ...json,
                               offerHash,
                               chainId,
-                              verifyingContract:
-                                config[chainId!].divaAddressNew,
+                              verifyingContract: config[chainId!].divaAddress,
                             }
                             formik.setFieldValue('jsonToExport', jsonToExport)
                             axios
@@ -673,7 +677,7 @@ export const ApproveActionButtons = ({
                     break
                   case 'filloffer':
                     _checkConditions(
-                      divaNew,
+                      diva,
                       divaDomain,
                       formik.values.jsonToExport, // offerCreationStats,
                       CREATE_POOL_TYPE,
@@ -682,7 +686,7 @@ export const ApproveActionButtons = ({
                       parseUnits(formik.values.yourShare.toString(), decimal)
                     ).then((res) => {
                       if (res.success) {
-                        divaNew
+                        diva
                           .fillOfferCreateContingentPool(
                             formik.values.jsonToExport,
                             formik.values.signature,
@@ -696,7 +700,7 @@ export const ApproveActionButtons = ({
                               const typedOfferHash = receipt.events.find(
                                 (x: any) => x.event === 'OfferFilled'
                               ).args.typedOfferHash
-                              divaNew
+                              diva
                                 .getPoolIdByTypedCreateOfferHash(typedOfferHash)
                                 .then((poolId: any) => {
                                   formik.setFieldValue('poolId', poolId)

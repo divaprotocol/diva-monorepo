@@ -1,3 +1,6 @@
+# Challenge entity captures all the challenges
+# submitted by position token holders for a given
+# contingent pool
 type Challenge @entity {
   id: ID!
   challengedBy: Bytes!
@@ -5,38 +8,49 @@ type Challenge @entity {
   pool: Pool!
 }
 
+# Pool entity captures the latest state of a 
+# contingent pool. Parameters are set/updated when
+# a contingent pool is created, liquidity is added/removed
+# and during the settlement process (e.g., when final 
+# reference value is set)
 type Pool @entity {
   id: ID! # original -> poolId
-  referenceAsset: String!
   floor: BigInt!
   inflection: BigInt!
   cap: BigInt!
-  supplyInitial: BigInt! # QUESTION still relevant?
+  gradient: BigInt!
+  collateralBalance: BigInt!
+  collateralBalanceGross: BigInt!
+  finalReferenceValue: BigInt!
+  capacity: BigInt!
+  statusTimestamp: BigInt!
+  shortToken: PositionToken!
+  payoutShort: BigInt!
+  longToken: PositionToken!
+  payoutLong: BigInt!
+  collateralToken: CollateralToken!
+  expiryTime: BigInt!
+  dataProvider: Bytes!
+  protocolFee: BigInt!
+  settlementFee: BigInt!
+  submissionPeriod: BigInt!
+  challengePeriod: BigInt!
+  reviewPeriod: BigInt!
+  fallbackSubmissionPeriod: BigInt!
+  statusFinalReferenceValue: String!
+  referenceAsset: String!
   supplyShort: BigInt!
   supplyLong: BigInt!
-  expiryTime: BigInt!
-  collateralToken: CollateralToken!
-  collateralBalanceShortInitial: BigInt!
-  collateralBalanceLongInitial: BigInt!
-  collateralBalance: BigInt!
-
-  shortToken: PositionToken!
-  longToken: PositionToken!
-  finalReferenceValue: BigInt!
-  statusFinalReferenceValue: String!
-  redemptionAmountLongToken: BigInt!
-  redemptionAmountShortToken: BigInt!
-  statusTimestamp: BigInt!
-  dataProvider: Bytes!
-  redemptionFee: BigInt!
-  settlementFee: BigInt!
-
+  permissionedERC721Token: String!
   createdBy: Bytes!
   createdAt: BigInt!
-  capacity: BigInt!
   challenges: [Challenge!] @derivedFrom(field: "pool")
 }
 
+# CollateralToken entity captures the collateral tokens
+# that are being used as collateral assets when creating
+# contingent pools. The collateral token is also the asset
+# in which fees are denominated.
 type CollateralToken @entity {
   id: ID! # original -> collateral token address
   name: String!
@@ -85,8 +99,8 @@ type TestnetUser @entity {
   finalValueReported: Boolean!
   reportedValueChallenged: Boolean!
   positionTokenRedeemed: Boolean!
-  feesClaimed: Boolean!
-  feeClaimsTransferred: Boolean!
+  feeClaimed: Boolean!
+  feeClaimTransferred: Boolean!
   startTime: BigInt!
   endTime: BigInt!
 }

@@ -22,10 +22,10 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { useCoinIcon } from '../../hooks/useCoinIcon'
-import ERC20 from '@diva/contracts/abis/erc20.json'
+import ERC20 from '../../abi/ERC20ABI.json'
 import Button from '@mui/material/Button'
 import { config } from '../../constants'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import DIVA_ABI from '../../abi/DIVAABI.json'
 import { fetchPool } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -74,36 +74,28 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       setOpenExpiredAlert(pool.statusFinalReferenceValue === 'Confirmed')
       setDecimal(pool!.collateralToken.decimals)
       if (tokenBalanceLong && tokenBalanceShort && decimal) {
-        const longBalance = parseEther(tokenBalanceLong)
-        const shortBalance = parseEther(tokenBalanceShort)
+        const longBalance = parseUnits(
+          tokenBalanceLong,
+          pool!.collateralToken.decimals
+        )
+        const shortBalance = parseUnits(
+          tokenBalanceShort,
+          pool!.collateralToken.decimals
+        )
         const colLong = longBalance
           .mul(
-            BigNumber.from(pool.collateralBalanceLongInitial).add(
-              BigNumber.from(pool.collateralBalanceShortInitial)
-            )
-          )
-          .mul(parseUnits('1', 18 - decimal))
-          .div(BigNumber.from(pool.supplyInitial))
-          .mul(
             parseUnits('1', 18)
-              .sub(BigNumber.from(pool.redemptionFee))
+              .sub(BigNumber.from(pool.protocolFee))
               .sub(BigNumber.from(pool.settlementFee))
           )
-          .div(parseEther('1'))
+          .div(parseUnits('1', 18))
         const colShort = shortBalance
           .mul(
-            BigNumber.from(pool.collateralBalanceLongInitial).add(
-              BigNumber.from(pool.collateralBalanceShortInitial)
-            )
-          )
-          .mul(parseUnits('1', 18 - decimal))
-          .div(BigNumber.from(pool.supplyInitial))
-          .mul(
             parseUnits('1', 18)
-              .sub(BigNumber.from(pool.redemptionFee))
+              .sub(BigNumber.from(pool.protocolFee))
               .sub(BigNumber.from(pool.settlementFee))
           )
-          .div(parseEther('1'))
+          .div(parseUnits('1', 18))
         {
           colLong.lt(colShort)
             ? setMaxCollateral(colLong)
@@ -120,14 +112,8 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 .mul(parseEther('1'))
                 .div(
                   parseEther('1')
-                    .sub(BigNumber.from(pool.redemptionFee))
+                    .sub(BigNumber.from(pool.protocolFee))
                     .sub(BigNumber.from(pool.settlementFee))
-                )
-                .mul(BigNumber.from(pool.supplyInitial))
-                .div(
-                  BigNumber.from(pool.collateralBalanceLongInitial)
-                    .add(BigNumber.from(pool.collateralBalanceShortInitial))
-                    .mul(parseUnits('1', 18 - decimal))
                 )
             )
           )
@@ -137,14 +123,8 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 .mul(parseEther('1'))
                 .div(
                   parseEther('1')
-                    .sub(BigNumber.from(pool.redemptionFee))
+                    .sub(BigNumber.from(pool.protocolFee))
                     .sub(BigNumber.from(pool.settlementFee))
-                )
-                .mul(BigNumber.from(pool.supplyInitial))
-                .div(
-                  BigNumber.from(pool.collateralBalanceLongInitial)
-                    .add(BigNumber.from(pool.collateralBalanceShortInitial))
-                    .mul(parseUnits('1', 18 - decimal))
                 )
             )
           )
@@ -174,7 +154,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       )
       const tx = await diva!.removeLiquidity(
         window.location.pathname.split('/')[1],
-        parseEther(longToken)
+        parseUnits(longToken, decimal)
       )
       await tx?.wait()
       setLoading(false)
@@ -247,14 +227,14 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               <>
                 <Typography variant="subtitle2" color="text.secondary">
                   You can remove up to{' '}
-                  {parseFloat(formatEther(maxCollateral)).toFixed(4)}{' '}
+                  {parseFloat(formatUnits(maxCollateral, decimal)).toFixed(4)}{' '}
                   {pool!.collateralToken.symbol}
                   {' (after fees) '}
                   <MaxCollateral
                     role="button"
                     onClick={() => {
                       if (maxCollateral != 0) {
-                        setTextFieldValue(formatEther(maxCollateral))
+                        setTextFieldValue(formatUnits(maxCollateral, decimal))
                       }
                     }}
                   >
@@ -356,7 +336,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                     diva!
                       .removeLiquidity(
                         window.location.pathname.split('/')[1],
-                        parseEther(longToken)
+                        parseUnits(Number(longToken).toFixed(decimal), decimal) // toFixed(decimal) used to avoid fractional component exceeds decimals error
                       )
                       .then((tx) => {
                         /**
@@ -415,16 +395,10 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               {pool &&
                 textFieldValue !== '' &&
                 (
-                  (parseFloat(
-                    formatEther(BigNumber.from(pool!.redemptionFee))
-                  ) *
-                    parseFloat(
-                      formatUnits(parseUnits(textFieldValue, decimal), decimal)
-                    )) /
+                  (parseFloat(formatEther(BigNumber.from(pool!.protocolFee))) *
+                    parseFloat(textFieldValue)) /
                   (1.0 -
-                    parseFloat(
-                      formatEther(BigNumber.from(pool.redemptionFee))
-                    ) -
+                    parseFloat(formatEther(BigNumber.from(pool.protocolFee))) -
                     parseFloat(formatEther(BigNumber.from(pool.settlementFee))))
                 ).toFixed(4)}{' '}
               {pool!.collateralToken.symbol}{' '}
@@ -439,13 +413,9 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                   (parseFloat(
                     formatEther(BigNumber.from(pool!.settlementFee))
                   ) *
-                    parseFloat(
-                      formatUnits(parseUnits(textFieldValue, decimal), decimal)
-                    )) /
+                    parseFloat(textFieldValue)) /
                   (1.0 -
-                    parseFloat(
-                      formatEther(BigNumber.from(pool.redemptionFee))
-                    ) -
+                    parseFloat(formatEther(BigNumber.from(pool.protocolFee))) -
                     parseFloat(formatEther(BigNumber.from(pool.settlementFee))))
                 ).toFixed(4)}{' '}
               {pool!.collateralToken.symbol}{' '}

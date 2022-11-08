@@ -62,26 +62,15 @@ export const Liquidity = ({ pool }: Props) => {
         {currentTab == 'add' && pool && (
           <Container sx={{ mt: theme.spacing(4), mb: theme.spacing(4) }}>
             {pool &&
-            formatUnits(pool.capacity, pool.collateralToken.decimals) !== // TODO: drop this first == 0.0 part when migrating to new contracts
-              '0.0' &&
             pool.capacity.toString() !==
               '115792089237316195423570985008687907853269984665640564039457584007913129639935' ? (
               <Container sx={{ mt: theme.spacing(2), mb: theme.spacing(4) }}>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography>Pool Capacity</Typography>
                   <Typography>
-                    {pool &&
-                      (formatUnits(
-                        pool.capacity,
-                        pool.collateralToken.decimals
-                      ) === '0.0'
-                        ? 'Unlimited'
-                        : parseFloat(
-                            formatUnits(
-                              pool.capacity,
-                              pool.collateralToken.decimals
-                            )
-                          ).toFixed(2))}{' '}
+                    {parseFloat(
+                      formatUnits(pool.capacity, pool.collateralToken.decimals)
+                    ).toFixed(2)}{' '}
                     {pool.collateralToken.symbol}{' '}
                   </Typography>
                 </Stack>

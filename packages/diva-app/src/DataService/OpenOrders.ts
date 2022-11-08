@@ -2,8 +2,8 @@ import axios from 'axios'
 import {
   config,
   NULL_ADDRESS,
-  divaGovernanceAddress,
-  tradingFee,
+  DIVA_GOVERNANCE_ADDRESS,
+  TRADING_FEE,
 } from '../constants'
 import { BigNumber, ethers } from 'ethers'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
@@ -51,7 +51,7 @@ async function getFillableOrders(
   // Connect to BalanceChecker contract which implements the `getMinOfBalancesOrAllowances` which allows to
   // obtain the minimum of allowance and balance for an array of maker address with one single call
   const contract = new ethers.Contract(
-    config[chainId].balanceCheckAddress,
+    config[chainId].balanceCheckerAddress,
     BalanceCheckerABI,
     provider
   )
@@ -350,7 +350,7 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
     bidExpiry = getExpiryMinutesFromNow(order.order.expiry)
     // Calculate Bid amount
     const bidAmount = BigNumber.from(order.order.makerAmount)
-      .mul(parseUnits('1'))
+      .mul(parseUnits('1', price.decimals))
       .div(BigNumber.from(order.order.takerAmount)) // result is in collateral token decimals
 
     // Value to display in the orderbook
@@ -358,7 +358,8 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
 
     // Display remainingFillableTakerAmount as the quantity in the orderbook
     bidnbrOptions = formatUnits(
-      BigNumber.from(order.metaData.remainingFillableTakerAmount)
+      BigNumber.from(order.metaData.remainingFillableTakerAmount),
+      price.decimals
     )
   }
 
@@ -370,7 +371,7 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
     askExpiry = getExpiryMinutesFromNow(order.order.expiry)
     // Calculate Ask amount
     const askAmount = BigNumber.from(order.order.takerAmount)
-      .mul(parseUnits('1'))
+      .mul(parseUnits('1', price.decimals))
       .div(BigNumber.from(order.order.makerAmount)) // result is in collateral token decimals
 
     // Value to display in the orderbook
@@ -386,9 +387,12 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
       )
         .mul(BigNumber.from(order.order.makerAmount))
         .div(BigNumber.from(order.order.takerAmount))
-      asknbrOptions = formatUnits(remainingFillableMakerAmount)
+      asknbrOptions = formatUnits(remainingFillableMakerAmount, price.decimals)
     } else {
-      asknbrOptions = formatUnits(BigNumber.from(order.order.makerAmount))
+      asknbrOptions = formatUnits(
+        BigNumber.from(order.order.makerAmount),
+        price.decimals
+      )
     }
   }
 
@@ -541,7 +545,7 @@ export const mapOrderData = (
 
       // Calculate Bid amount
       const bidAmount = BigNumber.from(order.makerAmount)
-        .mul(parseUnits('1'))
+        .mul(parseUnits('1', decimals))
         .div(BigNumber.from(order.takerAmount)) // result is in collateral token decimals
 
       // Value to display in the orderbook
@@ -549,7 +553,8 @@ export const mapOrderData = (
 
       // Display remainingFillableTakerAmount as the quantity in the orderbook
       orders.nbrOptions = formatUnits(
-        BigNumber.from(metaData.remainingFillableTakerAmount)
+        BigNumber.from(metaData.remainingFillableTakerAmount),
+        decimals
       )
     }
 
@@ -561,7 +566,7 @@ export const mapOrderData = (
 
       // Calculate Ask amount
       const askAmount = BigNumber.from(order.takerAmount)
-        .mul(parseUnits('1'))
+        .mul(parseUnits('1', decimals))
         .div(BigNumber.from(order.makerAmount)) // result is in collateral token decimals
 
       // Value to display in the orderbook
@@ -577,9 +582,12 @@ export const mapOrderData = (
         )
           .mul(BigNumber.from(order.makerAmount))
           .div(BigNumber.from(order.takerAmount))
-        orders.nbrOptions = formatUnits(remainingFillableMakerAmount)
+        orders.nbrOptions = formatUnits(remainingFillableMakerAmount, decimals)
       } else {
-        orders.nbrOptions = formatUnits(BigNumber.from(order.makerAmount))
+        orders.nbrOptions = formatUnits(
+          BigNumber.from(order.makerAmount),
+          decimals
+        )
       }
     }
     return orders
