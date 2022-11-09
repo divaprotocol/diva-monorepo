@@ -500,7 +500,7 @@ export default function BuyMarket(props: {
   const approveBtnDisabled = isApproved || youPay.lte(0) // No collateralBalance.sub(youPay).lt(0) condition as a user should be able to approve any amount they want
 
   return (
-    <div>
+    <Box height="100%">
       <form onSubmit={handleOrderSubmit}>
         <FormDiv>
           <LabelStyleDiv>
@@ -624,6 +624,6 @@ export default function BuyMarket(props: {
           </Stack>
         </Container>
       </form>
-    </div>
+    </Box>
   )
 }

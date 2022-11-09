@@ -20,10 +20,12 @@ import { useDispatch } from 'react-redux'
 import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
 import { setBreakEven } from '../../Redux/Stats'
 import { useAppSelector } from '../../Redux/hooks'
+import { Divider } from '@mui/material'
 const PageDiv = styled.div`
-  width: 450px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   justify-content: center;
-  height: 500px;
 `
 
 function a11yProps(index: number) {
@@ -227,30 +229,25 @@ export default function CreateOrder(props: {
   return (
     <PageDiv className={classes.root}>
       <TabsDiv className={classes.root}>
-        <LeftTabDiv>
-          <Tabs
-            className={tabsClass.tabs}
-            value={orderType}
-            onChange={handleOrderTypeChange}
-            TabIndicatorProps={{ style: { backgroundColor: '#70D9BA' } }}
-          >
-            <Tab label="BUY" {...a11yProps(0)} className={classes.tab} />
-            <Tab label="SELL" {...a11yProps(1)} className={dividerClass.tab} />
-          </Tabs>
-        </LeftTabDiv>
-
-        <RightTabDiv>
-          <Tabs
-            className={tabsClass.tabs}
-            value={priceType}
-            onChange={handlePriceTypeChange}
-            TabIndicatorProps={{ style: { backgroundColor: '#70D9BA' } }}
-          >
-            <Tab label="MARKET" {...a11yProps(0)} className={classes.tab} />
-            <Tab label="LIMIT" {...a11yProps(1)} className={classes.tab} />
-          </Tabs>
-        </RightTabDiv>
+        <Tabs
+          value={orderType}
+          onChange={handleOrderTypeChange}
+          TabIndicatorProps={{ style: { backgroundColor: '#70D9BA' } }}
+        >
+          <Tab label="BUY" {...a11yProps(0)} className={classes.tab} />
+          <Tab label="SELL" {...a11yProps(1)} className={classes.tab} />
+        </Tabs>
+        <Divider orientation="vertical" />
+        <Tabs
+          value={priceType}
+          onChange={handlePriceTypeChange}
+          TabIndicatorProps={{ style: { backgroundColor: '#70D9BA' } }}
+        >
+          <Tab label="MARKET" {...a11yProps(0)} className={classes.tab} />
+          <Tab label="LIMIT" {...a11yProps(1)} className={classes.tab} />
+        </Tabs>
       </TabsDiv>
+      <Divider />
       {renderOrderInfo()}
     </PageDiv>
   )
