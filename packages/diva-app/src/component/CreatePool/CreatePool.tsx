@@ -19,7 +19,7 @@ import { useCreatePoolFormik } from './formik'
 import { SelectDataFeedProvider } from './SelectDataFeedProvider'
 import { LoadingButton } from '@mui/lab'
 import { ethers } from 'ethers'
-import ERC20 from '@diva/contracts/abis/erc20.json'
+import ERC20 from '../../abi/ERC20ABI.json'
 import { useEffect, useState } from 'react'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ApproveActionButtons } from '../ApproveActionButtons'
@@ -218,12 +218,13 @@ export function CreatePool() {
                 onTransactionSuccess={handlePoolSuccess}
                 pool={formik.values}
                 decimal={decimal}
-                textFieldValue={formik.values.collateralBalance}
+                textFieldValue={formik.values.collateralBalance.toString()}
                 transactionType={configPicked}
                 formik={formik}
               />
             ) : formik.values.step === 4 ? (
-              configPicked === 'createpool' && (
+              configPicked !== 'filloffer' &&
+              configPicked !== 'createoffer' && (
                 <Button
                   variant="text"
                   sx={{

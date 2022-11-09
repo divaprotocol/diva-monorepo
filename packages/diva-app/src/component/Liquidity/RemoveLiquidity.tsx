@@ -24,10 +24,10 @@ import {
   parseUnits,
 } from 'ethers/lib/utils'
 import { useCoinIcon } from '../../hooks/useCoinIcon'
-import ERC20 from '@diva/contracts/abis/erc20.json'
+import ERC20 from '../../abi/ERC20ABI.json'
 import Button from '@mui/material/Button'
 import { config } from '../../constants'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import DIVA_ABI from '../../abi/DIVAABI.json'
 import { fetchPool } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -114,8 +114,14 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       setOpenExpiredAlert(pool.statusFinalReferenceValue === 'Confirmed')
       setDecimal(pool!.collateralToken.decimals)
       if (tokenBalanceLong && tokenBalanceShort && decimal) {
-        const longBalance = parseEther(tokenBalanceLong)
-        const shortBalance = parseEther(tokenBalanceShort)
+        const longBalance = parseUnits(
+          tokenBalanceLong,
+          pool!.collateralToken.decimals
+        )
+        const shortBalance = parseUnits(
+          tokenBalanceShort,
+          pool!.collateralToken.decimals
+        )
         const colLong = longBalance
           .mul(
             BigNumber.from(pool.collateralBalanceLongInitial).add(
@@ -190,7 +196,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       )
       const tx = await diva!.removeLiquidity(
         window.location.pathname.split('/')[1],
-        parseEther(longToken)
+        parseUnits(longToken, decimal)
       )
       await tx?.wait()
       setLoading(false)

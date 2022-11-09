@@ -16,7 +16,7 @@ export const sellMarketOrder = async (orderData) => {
   // Get existing BUY LIMIT orders to fill, already sorted by best price. Note that makerToken = collateral token and takerToken = position token.
   const orders = orderData.existingLimitOrders
 
-  // User input converted from decimal number into an integer with 18 decimals of type BigNumber
+  // User input
   let nbrOptionsToSell = orderData.nbrOptions
 
   // Initialize input arrays for batchFillLimitOrders function

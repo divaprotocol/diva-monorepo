@@ -7,8 +7,8 @@ import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import ERC20 from '@diva/contracts/abis/erc20.json'
-import { formatEther, formatUnits } from 'ethers/lib/utils'
+import ERC20 from '../../abi/ERC20ABI.json'
+import { formatUnits } from 'ethers/lib/utils'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
 import Container from '@mui/material/Container'
@@ -19,20 +19,22 @@ import { Success } from './Success'
 export function Offer() {
   const formik = useCreatePoolFormik()
   const { provider } = useConnectionContext()
+  const chainId = useAppSelector((state) => state.appSlice.chainId)
   const theme = useTheme()
   const userAddress = useAppSelector(selectUserAddress)
   const [decimal, setDecimal] = useState(18)
   const offerHash = window.location.pathname.split('/')[2]
-  const jsonResponse = useQuery(`json-${offerHash}`, async () => {
-    const response = axios.get(
-      'https://eip712api.xyz/orderbook/v1/offer_create_contingent_pool/' +
-        offerHash
-    )
-    return response
+  const jsonResponse = useQuery(`json-${offerHash + chainId}`, async () => {
+    if (chainId != undefined) {
+      const response = axios.get(
+        config[chainId].offer + 'create_contingent_pool/' + offerHash
+      )
+      return response
+    }
   })
 
   useEffect(() => {
-    if (jsonResponse.isSuccess) {
+    if (jsonResponse.isSuccess && userAddress != undefined) {
       const token = new ethers.Contract(
         jsonResponse.data.data.collateralToken,
         ERC20,
@@ -44,6 +46,10 @@ export function Offer() {
         setDecimal(decimals)
         formik.setFieldValue('jsonToExport', jsonResponse.data.data)
         formik.setFieldValue('collateralToken.decimals', decimals)
+        formik.setFieldValue(
+          'gradient',
+          parseFloat(formatUnits(jsonResponse.data.data.gradient, decimals))
+        )
         formik.setFieldValue(
           'yourShare',
           parseFloat(
@@ -82,7 +88,7 @@ export function Offer() {
       })
       formik.setFieldValue(
         'offerDirection',
-        jsonResponse.data.data.makerDirection ? 'Short' : 'Long'
+        jsonResponse.data.data.makerDirection === 'true' ? 'Short' : 'Long'
       )
       formik.setFieldValue(
         'referenceAsset',
@@ -92,16 +98,11 @@ export function Offer() {
         'expiryTime',
         new Date(jsonResponse.data.data.expiryTime * 1000)
       )
-      formik.setFieldValue('floor', formatEther(jsonResponse.data.data.floor))
-      formik.setFieldValue('cap', formatEther(jsonResponse.data.data.cap))
+      formik.setFieldValue('floor', formatUnits(jsonResponse.data.data.floor))
+      formik.setFieldValue('cap', formatUnits(jsonResponse.data.data.cap))
       formik.setFieldValue(
         'inflection',
-        formatEther(jsonResponse.data.data.inflection)
-      )
-
-      formik.setFieldValue(
-        'gradient',
-        parseFloat(formatEther(jsonResponse.data.data.gradient))
+        formatUnits(jsonResponse.data.data.inflection)
       )
       formik.setFieldValue('collateralWalletBalance', jsonResponse.data.data)
 
@@ -121,7 +122,7 @@ export function Offer() {
 
       formik.setFieldValue('takerAddress', jsonResponse.data.data.taker)
     }
-  }, [jsonResponse.isSuccess])
+  }, [jsonResponse.isSuccess, userAddress])
   let step = null
   switch (formik.values.step) {
     case 1:
@@ -148,23 +149,21 @@ export function Offer() {
           ))}
         </Box>
       )}
-      {formik.values.step === 1 &&
-        userAddress != null &&
-        provider?.network?.chainId != null && (
-          <Container sx={{ mr: theme.spacing(9) }}>
-            <ApproveActionButtons
-              collateralTokenAddress={formik.values.collateralToken.id}
-              onTransactionSuccess={() => {
-                formik.setFieldValue('step', formik.values.step + 1, true)
-              }}
-              pool={formik.values}
-              decimal={decimal}
-              textFieldValue={formik.values.collateralBalance}
-              transactionType={'filloffer'}
-              formik={formik}
-            />
-          </Container>
-        )}
+      {formik.values.step === 1 && userAddress != null && chainId != null && (
+        <Container sx={{ mr: theme.spacing(9) }}>
+          <ApproveActionButtons
+            collateralTokenAddress={formik.values.collateralToken.id}
+            onTransactionSuccess={() => {
+              formik.setFieldValue('step', formik.values.step + 1, true)
+            }}
+            pool={formik.values}
+            decimal={decimal}
+            textFieldValue={formik.values.collateralBalance.toString()}
+            transactionType={'filloffer'}
+            formik={formik}
+          />
+        </Container>
+      )}
     </Container>
   )
 }

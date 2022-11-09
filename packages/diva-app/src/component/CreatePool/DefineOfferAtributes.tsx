@@ -20,9 +20,11 @@ import {
   AccordionDetails,
   Checkbox,
   Accordion,
+  InputLabel,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
+import { toExponentialOrNumber } from '../../Util/utils'
 
 import { PayoffProfile } from './PayoffProfile'
 import { useCreatePoolFormik } from './formik'
@@ -58,7 +60,7 @@ export function DefineOfferAttributes({
   const [offerDuration, setOfferDuration] = useState(24 * 60 * 60) // 1 Day
   const [expanded, setExpanded] = useState(false)
   const [everyone, setEveryone] = useState(true)
-  const [fillOrKill, setFillOrKill] = useState(true)
+  const [fillOrKill, setFillOrKill] = useState(false)
   const [mobile, setMobile] = useState(false)
   const [unlimited, setUnlimited] = useState(true)
   const account = useAppSelector(selectUserAddress)
@@ -95,9 +97,7 @@ export function DefineOfferAttributes({
     referenceAsset,
     expiryTime,
     collateralToken,
-    collateralBalanceShort,
-    collateralBalanceLong,
-    tokenSupply,
+    collateralBalance,
     inflection,
     capacity,
     cap,
@@ -141,40 +141,12 @@ export function DefineOfferAttributes({
       formik.values.gradient <= 1 &&
       formik.values.collateralBalance.toString() != ''
     ) {
-      const collateralBalanceLong = parseUnits(
-        formik.values.collateralBalance,
-        collateralToken.decimals
-      )
-        .mul(
-          parseUnits(
-            formik.values.gradient.toString(),
-            collateralToken.decimals
-          )
-        )
-        .div(parseUnits('1', collateralToken.decimals))
-      const collateralBalanceShort = parseUnits(
-        formik.values.collateralBalance,
-        collateralToken.decimals
-      )
-        .mul(
-          parseUnits('1', collateralToken.decimals).sub(
-            parseUnits(
-              formik.values.gradient.toString(),
-              collateralToken.decimals
-            )
-          )
-        )
-        .div(parseUnits('1', collateralToken.decimals))
-
+      // QUESTION Do we need to refactor here?
       formik.setValues((_values) => ({
         ..._values,
-        collateralBalanceLong: parseFloat(
-          formatUnits(collateralBalanceLong, collateralToken.decimals)
+        collateralBalance: parseFloat(
+          formatUnits(collateralBalance.toString(), collateralToken.decimals)
         ),
-        collateralBalanceShort: parseFloat(
-          formatUnits(collateralBalanceShort, collateralToken.decimals)
-        ),
-        tokenSupply: parseFloat(formik.values.collateralBalance),
       }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -190,7 +162,8 @@ export function DefineOfferAttributes({
   const hasPaymentProfileError =
     formik.errors.floor != null ||
     formik.errors.cap != null ||
-    formik.errors.inflection != null
+    formik.errors.inflection != null ||
+    formik.errors.gradient != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
   useEffect(() => {
@@ -202,7 +175,7 @@ export function DefineOfferAttributes({
     } else {
       formik.setValues((_values) => ({
         ..._values,
-        capacity: formik.values.collateralBalance,
+        capacity: formik.values.collateralBalance.toString(),
       }))
     }
   }, [unlimited, formik.values.collateralBalance])
@@ -631,7 +604,9 @@ export function DefineOfferAttributes({
                   {collateralWalletBalance != null && collateralToken != null && (
                     <FormHelperText>
                       Your balance:{' '}
-                      {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
+                      {toExponentialOrNumber(
+                        parseFloat(collateralWalletBalance)
+                      )}{' '}
                       {collateralToken?.symbol}{' '}
                       <MaxCollateral
                         role="button"
@@ -670,8 +645,7 @@ export function DefineOfferAttributes({
                         if (arr[1].length <= collateralToken.decimals) {
                           formik.setValues((values) => ({
                             ...values,
-                            collateralBalance,
-                            tokenSupply: parseFloat(collateralBalance),
+                            collateralBalance: parseFloat(collateralBalance),
                             takerShare:
                               parseFloat(collateralBalance) - values.yourShare,
                           }))
@@ -690,8 +664,7 @@ export function DefineOfferAttributes({
                       } else {
                         formik.setValues((values) => ({
                           ...values,
-                          collateralBalance,
-                          tokenSupply: parseFloat(collateralBalance),
+                          collateralBalance: parseFloat(collateralBalance),
                           takerShare:
                             parseFloat(collateralBalance) - values.yourShare,
                         }))
@@ -723,11 +696,7 @@ export function DefineOfferAttributes({
               <Stack pb={3} spacing={2} direction={mobile ? 'column' : 'row'}>
                 <FormControl
                   fullWidth
-                  error={
-                    direction === 'Long'
-                      ? formik.errors.collateralBalanceLong != null
-                      : formik.errors.collateralBalanceShort != null
-                  }
+                  error={formik.errors.collateralBalance != null}
                 >
                   <TextField
                     id="yourShare"
@@ -744,7 +713,7 @@ export function DefineOfferAttributes({
                         ...values,
                         yourShare: parseFloat(collateralBalance),
                         takerShare:
-                          parseFloat(values.collateralBalance) -
+                          values.collateralBalance -
                           parseFloat(collateralBalance),
                       }))
                       if (fillOrKill) {
@@ -756,20 +725,12 @@ export function DefineOfferAttributes({
                       }
                     }}
                   />
-                  {direction === 'Long'
-                    ? formik.errors.collateralBalanceLong != null
-                    : formik.errors.collateralBalanceShort != null && (
-                        <FormHelperText>
-                          {direction === 'Long'
-                            ? formik.errors.collateralBalanceLong
-                            : formik.errors.collateralBalanceShort}
-                        </FormHelperText>
-                      )}
-                  {!isNaN(
-                    direction === 'Long'
-                      ? formik.values.collateralBalanceLong
-                      : formik.values.collateralBalanceShort
-                  ) && (
+                  {formik.errors.collateralBalance != null && (
+                    <FormHelperText>
+                      {formik.errors.collateralBalance}
+                    </FormHelperText>
+                  )}
+                  {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
                       You receive{' '}
                       {direction === 'Long' ? (
@@ -784,14 +745,8 @@ export function DefineOfferAttributes({
                     </FormHelperText>
                   )}
                 </FormControl>
-                <FormControl
-                  fullWidth
-                  error={
-                    direction === 'Long'
-                      ? formik.errors.collateralBalanceShort != null
-                      : formik.errors.collateralBalanceLong != null
-                  }
-                >
+                <FormControl fullWidth>
+                  {/*TODO Removed error={formik.errors.collateralBalance} next to fullWidth due to error -> look into it*/}
                   <TextField
                     id="takerShare"
                     name="takerShare"
@@ -801,8 +756,7 @@ export function DefineOfferAttributes({
                     disabled={true}
                     error={formik.errors.takerShare != null}
                     value={
-                      parseFloat(formik.values.collateralBalance) -
-                      formik.values.yourShare
+                      formik.values.collateralBalance - formik.values.yourShare
                     } // TODO Update with BigNumber
                     type="number"
                     onChange={(event) => {
@@ -813,11 +767,7 @@ export function DefineOfferAttributes({
                       }))
                     }}
                   />
-                  {!isNaN(
-                    direction === 'Long'
-                      ? formik.values.collateralBalanceShort
-                      : formik.values.collateralBalanceLong // QUESTION Why do we need this part here?
-                  ) && (
+                  {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
                       Taker receives{' '}
                       {direction === 'Long' ? (
@@ -869,18 +819,19 @@ export function DefineOfferAttributes({
               }}
               fullWidth
             >
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
+              <TextField
+                id="select"
+                label="Offer Expires in"
                 value={offerDuration}
                 onChange={handleOfferDurationChange}
+                select
               >
                 <MenuItem value={60 * 60}>1 Hour</MenuItem>
                 <MenuItem value={4 * 60 * 60}>4 Hours</MenuItem>
                 <MenuItem value={12 * 60 * 60}>12 Hours</MenuItem>
                 <MenuItem value={24 * 60 * 60}>1 Day</MenuItem>
                 <MenuItem value={7 * 24 * 60 * 60}>7 Days</MenuItem>
-              </Select>
+              </TextField>
             </FormControl>
             {/*</Container>*/}
           </Stack>
@@ -1023,7 +974,10 @@ export function DefineOfferAttributes({
                             onChange={() => {
                               formik.setFieldValue(
                                 'minTakerContribution',
-                                formik.values.takerShare.toString()
+                                (
+                                  formik.values.collateralBalance -
+                                  formik.values.yourShare
+                                ).toString()
                               )
                               setFillOrKill(!fillOrKill)
                             }}
@@ -1051,17 +1005,14 @@ export function DefineOfferAttributes({
           {floor != null &&
             cap != null &&
             inflection != null &&
-            tokenSupply != null &&
-            tokenSupply > 0 && (
+            gradient != null && (
               <Box sx={{ maxWidth: '85%' }}>
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
                   inflection={inflection}
+                  gradient={gradient}
                   hasError={hasPaymentProfileError}
-                  collateralBalanceLong={collateralBalanceLong}
-                  collateralBalanceShort={collateralBalanceShort}
-                  tokenSupply={tokenSupply}
                 />
               </Box>
             )}

@@ -15,7 +15,7 @@ import { LoadingBox } from './component/LoadingBox'
 import Container from '@mui/material/Container'
 import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
-import { config, divaGovernanceAddress } from './constants'
+import { config, DIVA_GOVERNANCE_ADDRESS } from './constants'
 import { WrongChain } from './component/Wallet/WrongChain'
 import { Tasks } from './component/Tasks/Tasks'
 import Dashboard from './component/Dashboard/Dashboard'
@@ -72,7 +72,7 @@ export const App = () => {
               </Route>
 
               <Route path="/">
-                <Redirect from="/" to={`/markets/${divaGovernanceAddress}`} />
+                <Redirect from="/" to={`/markets/${DIVA_GOVERNANCE_ADDRESS}`} />
               </Route>
             </Switch>
           ) : (

@@ -74,19 +74,11 @@ export const AddLiquidity = ({ pool }: Props) => {
     }
     if (
       pool! &&
-      formatUnits(parseEther(pool!.capacity), pool.collateralToken.decimals) !==
-        '0.0' &&
+      pool!.capacity.toString() !== '0.0' &&
       textFieldValue !== '' &&
-      parseFloat(formatEther(parseEther(textFieldValue))) +
-        parseFloat(
-          formatUnits(
-            parseEther(pool!.collateralBalance),
-            pool.collateralToken.decimals
-          )
-        ) >
-        parseFloat(
-          formatUnits(parseEther(pool!.capacity), pool.collateralToken.decimals)
-        )
+      parseFloat(textFieldValue) +
+        parseFloat(pool!.collateralBalance.toString()) >
+        parseFloat(pool!.capacity.toString())
     ) {
       setOpenCapacityAlert(true)
     } else {

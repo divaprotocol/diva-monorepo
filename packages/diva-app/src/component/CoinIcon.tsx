@@ -95,5 +95,7 @@ export const CoinIconPair = ({ assetName, isLargeIcon }: prop) => {
         </Box>
       </>
     )
+  } else {
+    return <></>
   }
 }

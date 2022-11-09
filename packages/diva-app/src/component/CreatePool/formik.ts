@@ -4,7 +4,8 @@ import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useDiva } from '../../hooks/useDiva'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { ethers } from 'ethers'
-
+import { useAppSelector } from '../../Redux/hooks'
+import { selectUserAddress } from '../../Redux/appSlice'
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
 export type Values = {
@@ -17,10 +18,7 @@ export type Values = {
   gradient: number
   collateralToken?: WhitelistCollateralToken
   collateralWalletBalance: string
-  collateralBalance: string
-  collateralBalanceShort: number
-  collateralBalanceLong: number
-  tokenSupply: number
+  collateralBalance: number
   capacity: string
   dataProvider: string
   payoutProfile: string
@@ -28,12 +26,16 @@ export type Values = {
   offerDirection?: string
   minTakerContribution?: string
   takerAddress?: string
+  makerAddress?: string
+  longRecipient?: string
+  shortRecipient?: string
   jsonToExport?: any
   signature?: string
   yourShare?: number
   takerShare?: number
   poolId?: string
   offerHash?: string
+  permissionedERC721Token: string
 }
 
 export const initialValues: Values = {
@@ -51,23 +53,24 @@ export const initialValues: Values = {
     symbol: 'dUSD',
   }, // TODO: hard-coded for testnet; will break the app cross chain. Update towards mainnet launch
   collateralWalletBalance: '0',
-  collateralBalance: '10',
-  collateralBalanceShort: 5,
-  collateralBalanceLong: 5,
-  tokenSupply: 10,
+  collateralBalance: 10,
   capacity: 'Unlimited',
   dataProvider: '',
   payoutProfile: 'Binary',
   offerDirection: 'Long',
   offerDuration: Math.floor(24 * 60 * 60 + Date.now() / 1000).toString(),
-  minTakerContribution: '10',
+  minTakerContribution: '0',
   takerAddress: ethers.constants.AddressZero,
+  makerAddress: '',
+  longRecipient: '',
+  shortRecipient: '',
   jsonToExport: '{}',
   signature: '',
-  yourShare: 0,
-  takerShare: 10,
+  yourShare: 1,
+  takerShare: 9,
   poolId: '',
   offerHash: '',
+  permissionedERC721Token: ethers.constants.AddressZero,
 }
 
 type Errors = {
@@ -75,6 +78,9 @@ type Errors = {
 }
 export const useCreatePoolFormik = () => {
   const { provider, isConnected } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+  initialValues.longRecipient = userAddress
+  initialValues.shortRecipient = userAddress
   const contract = useDiva()
   const _formik = useFormik({
     initialValues,
@@ -86,32 +92,36 @@ export const useCreatePoolFormik = () => {
       } else if (values.step === 3) {
         formik.setStatus('Creating Pool')
         const {
+          referenceAsset,
+          expiryTime,
+          floor,
           inflection,
           cap,
-          floor,
-          collateralBalanceLong,
-          collateralBalanceShort,
-          expiryTime,
-          tokenSupply,
-          referenceAsset,
+          gradient,
+          collateralBalance, // TODO rename to collateralAmount
           collateralToken,
           dataProvider,
+          longRecipient,
+          shortRecipient,
+          permissionedERC721Token,
         } = values
 
         if (collateralToken != null && dataProvider != null) {
           contract
             ?.createContingentPool({
+              referenceAsset,
+              expiryTime: expiryTime.getTime(),
+              floor,
               inflection,
               cap,
-              floor,
-              collateralBalanceShort,
-              collateralBalanceLong,
-              expiryTime: expiryTime.getTime(),
-              supplyPositionToken: tokenSupply,
-              referenceAsset,
+              gradient,
+              collateralBalance,
               collateralToken,
               dataProvider,
               capacity: 0,
+              longRecipient,
+              shortRecipient,
+              permissionedERC721Token,
             })
             .then(() => {
               formik.setStatus('successfully created')
@@ -134,8 +144,7 @@ export const useCreatePoolFormik = () => {
 
       const threshold = 300000
 
-      const collateralBalance =
-        values.collateralBalanceLong + values.collateralBalanceShort
+      const collateralBalance = values.collateralBalance
       const walletBalance = parseFloat(values.collateralWalletBalance)
       if (values.referenceAsset == null) {
         errors.referenceAsset = 'You must choose a reference asset'
@@ -146,13 +155,10 @@ export const useCreatePoolFormik = () => {
       if (values.collateralToken == null) {
         errors.collateralToken = 'You must choose a collateral asset'
       }
-      if (values.collateralBalance == '') {
+      if (values.collateralBalance == 0 || isNaN(values.collateralBalance)) {
         errors.collateralBalance = 'Collateral cannot be empty'
       }
-      if (
-        parseFloat(values.minTakerContribution) >
-        parseFloat(values.collateralBalance)
-      ) {
+      if (parseFloat(values.minTakerContribution) > values.collateralBalance) {
         errors.minTakerContribution =
           'Minimum taker contribution must be less than collateral amount'
       }
@@ -167,7 +173,7 @@ export const useCreatePoolFormik = () => {
       } else if (walletBalance < collateralBalance) {
         errors.collateralWalletBalance =
           'Collateral cannot be higher than your balance'
-      } else if (values.collateralBalance == '0') {
+      } else if (values.collateralBalance == 0) {
         errors.collateralBalance = 'Collateral cannot be 0'
       }
       if (values.takerShare <= 0 || isNaN(values.takerShare)) {
@@ -218,7 +224,7 @@ export const useCreatePoolFormik = () => {
         errors.capacity = 'Capacity cannot be negative'
       } else if (
         parseFloat(values.capacity) !== 0 &&
-        parseFloat(values.collateralBalance) > parseFloat(values.capacity)
+        values.collateralBalance > parseFloat(values.capacity)
       ) {
         errors.capacity = `Capacity must be larger than ${values.collateralBalance}. For unlimited capacity, set to 0`
       }
@@ -238,11 +244,6 @@ export const useCreatePoolFormik = () => {
               'You must specify a valid address as the data provider'
           }
         }
-      }
-
-      // short token balance
-      if (values.tokenSupply <= 0) {
-        errors.tokenSupply = 'Must be higher than 0'
       }
 
       return errors
