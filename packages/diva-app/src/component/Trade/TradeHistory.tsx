@@ -19,7 +19,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import styled from 'styled-components'
 import { useEffect, useState } from 'react'
-import { formatEther, formatUnits } from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 import { Stack } from '@mui/material'
 import { GrayText } from './Orders/UiStyles'
 import { getDateTime } from '../../Util/Dates'
@@ -89,10 +89,23 @@ export const TradeHistory = ({ pool }: Props) => {
               order.takerTokenFilledAmount,
               pool.collateralToken.decimals
             ),
-            quantity: formatEther(order.makerTokenFilledAmount),
+            quantity: formatUnits(
+              order.makerTokenFilledAmount,
+              pool.collateralToken.decimals
+            ),
             price:
-              Number(formatUnits(order.takerTokenFilledAmount)) /
-              Number(formatUnits(order.makerTokenFilledAmount)),
+              Number(
+                formatUnits(
+                  order.takerTokenFilledAmount,
+                  pool.collateralToken.decimals
+                )
+              ) /
+              Number(
+                formatUnits(
+                  order.makerTokenFilledAmount,
+                  pool.collateralToken.decimals
+                )
+              ),
             timestamp: order.timestamp,
           })
           ids.push(order.id)
@@ -109,10 +122,23 @@ export const TradeHistory = ({ pool }: Props) => {
               order.makerTokenFilledAmount,
               pool.collateralToken.decimals
             ),
-            quantity: formatEther(order.takerTokenFilledAmount),
+            quantity: formatUnits(
+              order.takerTokenFilledAmount,
+              pool.collateralToken.decimals
+            ),
             price:
-              Number(formatUnits(order.makerTokenFilledAmount)) /
-              Number(formatUnits(order.takerTokenFilledAmount)),
+              Number(
+                formatUnits(
+                  order.makerTokenFilledAmount,
+                  pool.collateralToken.decimals
+                )
+              ) /
+              Number(
+                formatUnits(
+                  order.takerTokenFilledAmount,
+                  pool.collateralToken.decimals
+                )
+              ),
             timestamp: order.timestamp,
           })
           ids.push(order.id)
@@ -132,10 +158,23 @@ export const TradeHistory = ({ pool }: Props) => {
               order.takerTokenFilledAmount,
               pool.collateralToken.decimals
             ),
-            quantity: formatEther(order.makerTokenFilledAmount),
+            quantity: formatUnits(
+              order.makerTokenFilledAmount,
+              pool.collateralToken.decimals
+            ),
             price:
-              Number(formatUnits(order.takerTokenFilledAmount)) /
-              Number(formatUnits(order.makerTokenFilledAmount)),
+              Number(
+                formatUnits(
+                  order.takerTokenFilledAmount,
+                  pool.collateralToken.decimals
+                )
+              ) /
+              Number(
+                formatUnits(
+                  order.makerTokenFilledAmount,
+                  pool.collateralToken.decimals
+                )
+              ),
             timestamp: order.timestamp,
           })
           ids.push(order.id)
@@ -152,10 +191,23 @@ export const TradeHistory = ({ pool }: Props) => {
               order.makerTokenFilledAmount,
               pool.collateralToken.decimals
             ),
-            quantity: formatEther(order.takerTokenFilledAmount),
+            quantity: formatUnits(
+              order.takerTokenFilledAmount,
+              pool.collateralToken.decimals
+            ),
             price:
-              Number(formatUnits(order.makerTokenFilledAmount)) /
-              Number(formatUnits(order.takerTokenFilledAmount)),
+              Number(
+                formatUnits(
+                  order.makerTokenFilledAmount,
+                  pool.collateralToken.decimals
+                )
+              ) /
+              Number(
+                formatUnits(
+                  order.takerTokenFilledAmount,
+                  pool.collateralToken.decimals
+                )
+              ),
             timestamp: order.timestamp,
           })
           ids.push(order.id)

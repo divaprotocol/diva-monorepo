@@ -57,7 +57,7 @@ const BuyAndSellButton = styled(Button)<StyledButtonProps>(
 const PoolCard = ({ row }: Props) => {
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
-  const [usdPrice, setUsdPrice] = useState('')
+  const [usdPrice, setUsdPrice] = useState('') // TODO rename as the underlying doesn't need to be an asset priced in USD
   const pool = useAppSelector((state) => selectPool(state, row.Id.substring(1)))
   const theme = useTheme()
   const history = useHistory()
@@ -94,12 +94,10 @@ const PoolCard = ({ row }: Props) => {
     BigNumber.from(pool.floor),
     BigNumber.from(pool.inflection),
     BigNumber.from(pool.cap),
-    BigNumber.from(pool.collateralBalanceLongInitial),
-    BigNumber.from(pool.collateralBalanceShortInitial),
+    BigNumber.from(pool.gradient),
     pool.statusFinalReferenceValue === 'Open' && usdPrice != ''
       ? parseUnits(usdPrice)
       : BigNumber.from(pool.finalReferenceValue),
-    BigNumber.from(pool.supplyInitial),
     decimals
   )
 

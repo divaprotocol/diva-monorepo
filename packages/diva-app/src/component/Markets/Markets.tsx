@@ -1,6 +1,6 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
-import { formatUnits, formatEther, parseUnits } from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 import {
   getDateTime,
   getExpiryMinutesFromNow,
@@ -32,7 +32,7 @@ import {
 } from '@mui/material'
 import ViewModuleIcon from '@mui/icons-material/ViewModule'
 import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
-import { divaGovernanceAddress, WEBSOCKET_URL } from '../../constants'
+import { DIVA_GOVERNANCE_ADDRESS, WEBSOCKET_URL } from '../../constants'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { ORDER_TYPE } from '../../Models/orderbook'
@@ -350,13 +350,13 @@ const MobileFilterOptions = ({
             >
               <Box>Diva Governance</Box>
               <Checkbox
-                checked={createdBy === divaGovernanceAddress}
+                checked={createdBy === DIVA_GOVERNANCE_ADDRESS}
                 id={`checkbox-diva-governance`}
                 onChange={() => {
-                  if (createdBy === divaGovernanceAddress) {
+                  if (createdBy === DIVA_GOVERNANCE_ADDRESS) {
                     setCreatedBy('')
                   } else {
-                    setCreatedBy(divaGovernanceAddress)
+                    setCreatedBy(DIVA_GOVERNANCE_ADDRESS)
                   }
                 }}
               />
@@ -517,6 +517,7 @@ export default function Markets() {
     }
   }
 
+  // TODO this needs update as those values are now pool specific and can be queried from the subgraph
   const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
     useGovernanceParameters()
 
@@ -717,6 +718,7 @@ export default function Markets() {
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
       Cap: formatUnits(val.cap),
+      Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
       Expiry: getDateTime(val.expiryTime),
       Sell: '-',
       Buy: '-',
@@ -727,22 +729,10 @@ export default function Markets() {
     }
 
     const payOff = {
-      CollateralBalanceLong: Number(
-        formatUnits(
-          val.collateralBalanceLongInitial,
-          val.collateralToken.decimals
-        )
-      ),
-      CollateralBalanceShort: Number(
-        formatUnits(
-          val.collateralBalanceShortInitial,
-          val.collateralToken.decimals
-        )
-      ),
-      Floor: Number(formatEther(val.floor)),
-      Inflection: Number(formatEther(val.inflection)),
-      Cap: Number(formatEther(val.cap)),
-      TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
+      Gradient: Number(formatUnits(val.gradient, val.collateralToken.decimals)),
+      Floor: Number(formatUnits(val.floor)),
+      Inflection: Number(formatUnits(val.inflection)),
+      Cap: Number(formatUnits(val.cap)),
     }
 
     return [
@@ -756,18 +746,6 @@ export default function Markets() {
           ...payOff,
           IsLong: true,
         }),
-        Gradient: Number(
-          formatUnits(
-            BigNumber.from(val.collateralBalanceLongInitial)
-              .mul(parseUnits('1', val.collateralToken.decimals))
-              .div(
-                BigNumber.from(val.collateralBalanceLongInitial).add(
-                  BigNumber.from(val.collateralBalanceShortInitial)
-                )
-              ),
-            val.collateralToken.decimals
-          )
-        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
@@ -812,18 +790,6 @@ export default function Markets() {
           ...payOff,
           IsLong: false,
         }),
-        Gradient: Number(
-          formatUnits(
-            BigNumber.from(val.collateralBalanceShortInitial)
-              .mul(parseUnits('1', val.collateralToken.decimals))
-              .div(
-                BigNumber.from(val.collateralBalanceLongInitial).add(
-                  BigNumber.from(val.collateralBalanceShortInitial)
-                )
-              ),
-            val.collateralToken.decimals
-          )
-        ).toFixed(2),
         TVL:
           parseFloat(
             formatUnits(
@@ -952,9 +918,9 @@ export default function Markets() {
                   onInputChange={handleCreatorInput}
                   MenuItemLabel="Diva Governance"
                   onMenuItemClick={() => {
-                    setCreatedBy(divaGovernanceAddress)
+                    setCreatedBy(DIVA_GOVERNANCE_ADDRESS)
                     setCreatorButtonLabel(
-                      getShortenedAddress(divaGovernanceAddress)
+                      getShortenedAddress(DIVA_GOVERNANCE_ADDRESS)
                     )
                   }}
                 />
@@ -1041,7 +1007,7 @@ export default function Markets() {
               }}
               onClearFilter={() => {
                 setSearch('')
-                setCreatedBy(divaGovernanceAddress)
+                setCreatedBy(DIVA_GOVERNANCE_ADDRESS)
                 setExpiredPoolClicked(false)
                 setSearchInput('')
                 setCheckedState(new Array(4).fill(false))

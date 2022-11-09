@@ -19,8 +19,8 @@ import { LoadingButton } from '@mui/lab'
 import { useEffect, useMemo, useState } from 'react'
 import { ethers } from 'ethers'
 import { parseUnits } from 'ethers/lib/utils'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
-import ERC20 from '@diva/contracts/abis/erc20.json'
+import DIVA_ABI from '../../abi/DIVAABI.json'
+import ERC20 from '../../abi/ERC20ABI.json'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -191,7 +191,7 @@ const ClaimFeesCell = (props: any) => {
         setLoadingValue(true)
         if (diva != null) {
           diva
-            .claimFees(props.row.Address)
+            .claimFee(props.row.Address, userAddress) // QUESTION Is props.row.Address = collateralTokenAddress?
             .then((tx) => {
               tx.wait().then(() => {
                 setTimeout(() => {

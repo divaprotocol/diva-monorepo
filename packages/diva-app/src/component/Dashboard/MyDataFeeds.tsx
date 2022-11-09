@@ -26,9 +26,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import DIVA_ABI from '../../abi/DIVAABI.json'
 import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
-import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
@@ -246,7 +246,7 @@ const SubmitCell = (props: any) => {
                 diva
                   .setFinalReferenceValue(
                     props.id.split('/')[0],
-                    parseEther(textFieldValue),
+                    parseUnits(textFieldValue),
                     true
                   )
                   .then((tx) => {
@@ -331,7 +331,7 @@ const columns: GridColDef[] = [
     renderCell: (props: any) => (
       <Tooltip
         title={props.row.Challenges.map((challenge) => {
-          return '[' + formatEther(challenge.proposedFinalReferenceValue) + '] '
+          return '[' + formatUnits(challenge.proposedFinalReferenceValue) + '] '
         })}
       >
         <span className="table-cell-trucate">{props.row.Status}</span>
@@ -687,6 +687,7 @@ export function MyDataFeeds() {
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
       Cap: formatUnits(val.cap),
+      Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
       Expiry: getDateTime(val.expiryTime),
       Sell: 'TBD',
       Buy: 'TBD',
@@ -707,22 +708,10 @@ export function MyDataFeeds() {
     )
 
     const payOff = {
-      CollateralBalanceLong: Number(
-        formatUnits(
-          val.collateralBalanceLongInitial,
-          val.collateralToken.decimals
-        )
-      ),
-      CollateralBalanceShort: Number(
-        formatUnits(
-          val.collateralBalanceShortInitial,
-          val.collateralToken.decimals
-        )
-      ),
-      Floor: Number(formatEther(val.floor)),
-      Inflection: Number(formatEther(val.inflection)),
-      Cap: Number(formatEther(val.cap)),
-      TokenSupply: Number(formatEther(val.supplyInitial)), // Needs adjustment to formatUnits() when switching to the DIVA Protocol 1.0.0 version
+      Gradient: Number(formatUnits(val.gradient, val.collateralToken.decimals)),
+      Floor: Number(formatUnits(val.floor)),
+      Inflection: Number(formatUnits(val.inflection)),
+      Cap: Number(formatUnits(val.cap)),
     }
 
     return [

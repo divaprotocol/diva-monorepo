@@ -15,7 +15,7 @@ import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-import ERC20_ABI from '@diva/contracts/abis/erc20.json'
+import ERC20_ABI from '../../../abi/ERC20ABI.json'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
@@ -29,7 +29,7 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
-import { tradingFee } from '../../../constants'
+import { TRADING_FEE } from '../../../constants'
 import {
   calcPayoffPerToken,
   calcBreakEven,
@@ -40,7 +40,7 @@ import { useConnectionContext } from '../../../hooks/useConnectionContext'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ZERO = BigNumber.from(0)
-const feeMultiplier = (1 + tradingFee).toString()
+const feeMultiplier = (1 + TRADING_FEE).toString()
 
 export default function BuyMarket(props: {
   option: Pool
@@ -83,7 +83,6 @@ export default function BuyMarket(props: {
     takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
   const usdPrice = props.usdPrice
   const decimals = option.collateralToken.decimals
-  const positionTokenUnit = parseUnits('1')
   const collateralTokenUnit = parseUnits('1', decimals)
 
   const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
@@ -112,7 +111,7 @@ export default function BuyMarket(props: {
 
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
-      const nbrOptions = parseUnits(value)
+      const nbrOptions = parseUnits(value, decimals)
       setNumberOfOptions(nbrOptions)
 
       // Disable fill order button if youPay amount (incl. fees) exceeds user's wallet balance
@@ -246,7 +245,7 @@ export default function BuyMarket(props: {
 
       if (BigNumber.from(remainingFillableTakerAmount).gt(0)) {
         order['expectedRate'] = takerAmount
-          .mul(positionTokenUnit)
+          .mul(collateralTokenUnit)
           .div(makerAmount) // result has collateral token decimals
         order['remainingFillableTakerAmount'] = remainingFillableTakerAmount
         orders.push(order)
@@ -371,7 +370,7 @@ export default function BuyMarket(props: {
           if (makerAmountToFill.lt(makerAmount)) {
             const takerAmountToFill = expectedRate
               .mul(makerAmountToFill)
-              .div(positionTokenUnit)
+              .div(collateralTokenUnit)
             cumulativeTaker = cumulativeTaker.add(takerAmountToFill)
             cumulativeMaker = cumulativeMaker.add(makerAmountToFill)
             makerAmountToFill = ZERO // With that, it will not enter this if block again
@@ -384,7 +383,7 @@ export default function BuyMarket(props: {
       })
       // Calculate average price to pay excluding 1% fee (result is expressed as an integer with collateral token decimals (<= 18))
       cumulativeAvgRate = cumulativeTaker
-        .mul(positionTokenUnit) // scaling for high precision integer math
+        .mul(collateralTokenUnit) // scaling for high precision integer math
         .div(cumulativeMaker)
 
       if (cumulativeAvgRate.gt(0)) {
@@ -412,16 +411,15 @@ export default function BuyMarket(props: {
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
       BigNumber.from(option.cap),
-      BigNumber.from(option.collateralBalanceLongInitial),
-      BigNumber.from(option.collateralBalanceShortInitial),
+      BigNumber.from(option.gradient),
       option.statusFinalReferenceValue === 'Open' && usdPrice != ''
         ? parseUnits(usdPrice)
         : BigNumber.from(option.finalReferenceValue),
-      BigNumber.from(option.supplyInitial),
       decimals
     )
     if (avgExpectedRate.gt(0)) {
       dispatch(
+        // TODO Consider simplifying that formula
         setMaxYield(
           parseFloat(
             formatUnits(
@@ -437,7 +435,7 @@ export default function BuyMarket(props: {
       dispatch(setMaxYield('n/a'))
     }
 
-    let breakEven: number | string
+    let breakEven: BigNumber | string
 
     if (!avgExpectedRate.eq(0)) {
       breakEven = calcBreakEven(
@@ -445,9 +443,9 @@ export default function BuyMarket(props: {
         option.floor,
         option.inflection,
         option.cap,
-        option.collateralBalanceLongInitial,
-        option.collateralBalanceShortInitial,
-        isLong
+        option.gradient,
+        isLong,
+        decimals
       )
     } else {
       breakEven = 'n/a'
@@ -465,34 +463,14 @@ export default function BuyMarket(props: {
       } else {
         dispatch(setIntrinsicValue(formatUnits(payoffPerLongToken, decimals)))
       }
-      dispatch(
-        setMaxPayout(
-          formatUnits(
-            BigNumber.from(option.collateralBalanceLongInitial)
-              .add(BigNumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - decimals))
-              .mul(positionTokenUnit)
-              .div(BigNumber.from(option.supplyInitial))
-          )
-        )
-      )
+      dispatch(setMaxPayout('1'))
     } else {
       if (option.statusFinalReferenceValue === 'Open' && usdPrice == '') {
         dispatch(setIntrinsicValue('n/a'))
       } else {
         dispatch(setIntrinsicValue(formatUnits(payoffPerShortToken, decimals)))
       }
-      dispatch(
-        setMaxPayout(
-          formatUnits(
-            BigNumber.from(option.collateralBalanceLongInitial)
-              .add(BigNumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - decimals))
-              .mul(positionTokenUnit)
-              .div(BigNumber.from(option.supplyInitial))
-          )
-        )
-      )
+      dispatch(setMaxPayout('1'))
     }
   }, [option, avgExpectedRate, usdPrice, userAddress])
 

@@ -35,6 +35,7 @@ import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { toExponentialOrNumber } from '../../Util/utils'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -62,13 +63,11 @@ export function DefinePoolAttributes({
     referenceAsset,
     expiryTime,
     collateralToken,
-    collateralBalanceShort,
-    collateralBalanceLong,
-    tokenSupply,
+    gradient,
+    collateralBalance,
     inflection,
     cap,
     floor,
-    gradient,
     payoutProfile,
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
@@ -105,42 +104,18 @@ export function DefinePoolAttributes({
       formik.values.gradient.toString() != '' &&
       formik.values.gradient >= 0 &&
       formik.values.gradient <= 1 &&
-      formik.values.collateralBalance.toString() != ''
+      formik.values.collateralBalance.toString() != '' &&
+      !isNaN(formik.values.collateralBalance)
     ) {
-      const collateralBalanceLong = parseUnits(
-        formik.values.collateralBalance,
+      const collateralBalance = parseUnits(
+        formik.values.collateralBalance.toString(),
         collateralToken.decimals
       )
-        .mul(
-          parseUnits(
-            formik.values.gradient.toString(),
-            collateralToken.decimals
-          )
-        )
-        .div(parseUnits('1', collateralToken.decimals))
-      const collateralBalanceShort = parseUnits(
-        formik.values.collateralBalance,
-        collateralToken.decimals
-      )
-        .mul(
-          parseUnits('1', collateralToken.decimals).sub(
-            parseUnits(
-              formik.values.gradient.toString(),
-              collateralToken.decimals
-            )
-          )
-        )
-        .div(parseUnits('1', collateralToken.decimals))
-
       formik.setValues((_values) => ({
         ..._values,
-        collateralBalanceLong: parseFloat(
-          formatUnits(collateralBalanceLong, collateralToken.decimals)
+        collateralBalance: parseFloat(
+          formatUnits(collateralBalance, collateralToken.decimals)
         ),
-        collateralBalanceShort: parseFloat(
-          formatUnits(collateralBalanceShort, collateralToken.decimals)
-        ),
-        tokenSupply: parseFloat(formik.values.collateralBalance),
       }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -152,24 +127,6 @@ export function DefinePoolAttributes({
     collateralTokens?.filter((v) =>
       v.symbol.includes(referenceAssetSearch.trim())
     ) || []
-
-  const setCollateralBalance = (num: number) => {
-    let long = 0
-    let short = 0
-
-    if (num > 0) {
-      const half = num / 2
-      long = short = half
-    }
-    formik.setValues(
-      {
-        ...formik.values,
-        collateralBalanceLong: long,
-        collateralBalanceShort: short,
-      },
-      true
-    )
-  }
 
   const hasPaymentProfileError =
     formik.errors.floor != null ||
@@ -601,7 +558,7 @@ export function DefinePoolAttributes({
                   {collateralWalletBalance != null && collateralToken != null && (
                     <FormHelperText>
                       Your balance:{' '}
-                      {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
+                      {toExponentialOrNumber(Number(collateralWalletBalance))}{' '}
                       {collateralToken?.symbol}{' '}
                       <MaxCollateral
                         role="button"
@@ -640,15 +597,13 @@ export function DefinePoolAttributes({
                         if (arr[1].length <= collateralToken.decimals) {
                           formik.setValues((values) => ({
                             ...values,
-                            collateralBalance,
-                            tokenSupply: parseFloat(collateralBalance),
+                            collateralBalance: parseFloat(collateralBalance),
                           }))
                         }
                       } else {
                         formik.setValues((values) => ({
                           ...values,
-                          collateralBalance,
-                          tokenSupply: parseFloat(collateralBalance),
+                          collateralBalance: parseFloat(collateralBalance),
                         }))
                       }
                     }}
@@ -658,10 +613,10 @@ export function DefinePoolAttributes({
                       {formik.errors.collateralBalance}
                     </FormHelperText>
                   )}
-                  {!isNaN(formik.values.tokenSupply) && (
+                  {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
-                      You receive {formik.values.tokenSupply} LONG and{' '}
-                      {formik.values.tokenSupply} SHORT tokens
+                      You receive {formik.values.collateralBalance} LONG and{' '}
+                      {formik.values.collateralBalance} SHORT tokens
                     </FormHelperText>
                   )}
                 </FormControl>
@@ -683,17 +638,14 @@ export function DefinePoolAttributes({
           {floor != null &&
             cap != null &&
             inflection != null &&
-            tokenSupply != null &&
-            tokenSupply > 0 && (
+            gradient != null && (
               <Box sx={{ maxWidth: '85%' }}>
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
                   inflection={inflection}
+                  gradient={gradient}
                   hasError={hasPaymentProfileError}
-                  collateralBalanceLong={collateralBalanceLong}
-                  collateralBalanceShort={collateralBalanceShort}
-                  tokenSupply={tokenSupply}
                 />
               </Box>
             )}

@@ -52,7 +52,10 @@ function mapOrderData(
           order.takerAmount,
           option.collateralToken.decimals
         )
-        const makerAmount = formatUnits(order.makerAmount)
+        const makerAmount = formatUnits(
+          order.makerAmount,
+          option.collateralToken.decimals
+        )
         const remainingTakerAmount = formatUnits(
           metaData.remainingFillableTakerAmount,
           option.collateralToken.decimals
@@ -68,13 +71,17 @@ function mapOrderData(
         pricePerOption = askAmount
       } else {
         //Buy order
-        const takerAmount = formatUnits(order.takerAmount)
+        const takerAmount = formatUnits(
+          order.takerAmount,
+          option.collateralToken.decimals
+        )
         const makerAmount = formatUnits(
           order.makerAmount.toString(),
           option.collateralToken.decimals
         )
         const remainingTakerAmount = formatUnits(
-          metaData.remainingFillableTakerAmount
+          metaData.remainingFillableTakerAmount,
+          option.collateralToken.decimals
         )
         if (remainingTakerAmount < takerAmount) {
           nbrOptions = Number(remainingTakerAmount)

@@ -20,7 +20,7 @@ import { toExponentialOrNumber } from '../../../Util/utils'
 import Web3 from 'web3'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
-import ERC20_ABI from '@diva/contracts/abis/erc20.json'
+import ERC20_ABI from '../../../abi/ERC20ABI.json'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import { BigNumber } from 'ethers'
@@ -82,7 +82,6 @@ export default function SellLimit(props: {
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const usdPrice = props.usdPrice
   const decimals = option.collateralToken.decimals
-  const positionTokenUnit = parseUnits('1')
   const collateralTokenUnit = parseUnits('1', decimals)
 
   const classes = useStyles()
@@ -110,7 +109,7 @@ export default function SellLimit(props: {
 
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
-      const nbrOptions = parseUnits(value)
+      const nbrOptions = parseUnits(value, decimals)
       if (nbrOptions.gt(0)) {
         setNumberOfOptions(nbrOptions)
         if (isApproved === false) {
@@ -119,7 +118,7 @@ export default function SellLimit(props: {
           if (pricePerOption.gt(0)) {
             const youReceive = pricePerOption
               .mul(numberOfOptions)
-              .div(positionTokenUnit)
+              .div(collateralTokenUnit)
             setYouReceive(youReceive)
           }
         }
@@ -138,7 +137,7 @@ export default function SellLimit(props: {
         if (numberOfOptions.gt(0)) {
           const youReceive = pricePerOption
             .mul(numberOfOptions)
-            .div(positionTokenUnit)
+            .div(collateralTokenUnit)
           setYouReceive(youReceive)
         }
       } else {
@@ -208,7 +207,7 @@ export default function SellLimit(props: {
           setApproveLoading(false)
           alert(
             `Allowance for ${toExponentialOrNumber(
-              Number(formatUnits(collateralAllowance))
+              Number(formatUnits(collateralAllowance, decimals))
             )} ${params.tokenType.toUpperCase()} tokens successfully set.`
           )
         } else {
@@ -335,12 +334,10 @@ export default function SellLimit(props: {
       BigNumber.from(option.floor),
       BigNumber.from(option.inflection),
       BigNumber.from(option.cap),
-      BigNumber.from(option.collateralBalanceLongInitial),
-      BigNumber.from(option.collateralBalanceShortInitial),
+      BigNumber.from(option.gradient),
       option.statusFinalReferenceValue === 'Open' && usdPrice != ''
         ? parseUnits(usdPrice)
         : BigNumber.from(option.finalReferenceValue),
-      BigNumber.from(option.supplyInitial),
       decimals
     )
     if (pricePerOption.gt(0)) {
@@ -360,7 +357,7 @@ export default function SellLimit(props: {
       dispatch(setMaxYield('n/a'))
     }
 
-    let breakEven: number | string
+    let breakEven: BigNumber | string
 
     if (!pricePerOption.eq(0)) {
       breakEven = calcBreakEven(
@@ -368,9 +365,9 @@ export default function SellLimit(props: {
         option.floor,
         option.inflection,
         option.cap,
-        option.collateralBalanceLongInitial,
-        option.collateralBalanceShortInitial,
-        isLong
+        option.gradient,
+        isLong,
+        decimals
       )
     } else {
       breakEven = 'n/a'
@@ -388,34 +385,14 @@ export default function SellLimit(props: {
       } else {
         dispatch(setIntrinsicValue(formatUnits(payoffPerLongToken, decimals)))
       }
-      dispatch(
-        setMaxPayout(
-          formatUnits(
-            BigNumber.from(option.collateralBalanceLongInitial)
-              .add(BigNumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - decimals))
-              .mul(parseUnits('1'))
-              .div(BigNumber.from(option.supplyInitial))
-          )
-        )
-      )
+      dispatch(setMaxPayout('1'))
     } else {
       if (option.statusFinalReferenceValue === 'Open' && usdPrice == '') {
         dispatch(setIntrinsicValue('n/a'))
       } else {
         dispatch(setIntrinsicValue(formatUnits(payoffPerShortToken, decimals)))
       }
-      dispatch(
-        setMaxPayout(
-          formatUnits(
-            BigNumber.from(option.collateralBalanceLongInitial)
-              .add(BigNumber.from(option.collateralBalanceShortInitial))
-              .mul(parseUnits('1', 18 - decimals))
-              .mul(parseUnits('1'))
-              .div(BigNumber.from(option.supplyInitial))
-          )
-        )
-      )
+      dispatch(setMaxPayout('1'))
     }
   }, [
     allowance,
@@ -450,10 +427,11 @@ export default function SellLimit(props: {
               <LabelStyle>Number</LabelStyle>
               <FormLabel sx={{ color: 'Gray', fontSize: 11, paddingTop: 0.7 }}>
                 Remaining allowance:{' '}
-                {Number(formatUnits(remainingAllowance)) < 0.00000000001
+                {Number(formatUnits(remainingAllowance, decimals)) <
+                0.00000000001
                   ? 0
                   : toExponentialOrNumber(
-                      Number(formatUnits(remainingAllowance))
+                      Number(formatUnits(remainingAllowance, decimals))
                     )}
               </FormLabel>
             </Stack>
@@ -524,7 +502,9 @@ export default function SellLimit(props: {
                 {params.tokenType.toUpperCase()}
               </FormLabel>
               <FormLabel>
-                {toExponentialOrNumber(Number(formatUnits(optionBalance)))}
+                {toExponentialOrNumber(
+                  Number(formatUnits(optionBalance, decimals))
+                )}
               </FormLabel>
             </Stack>
           </RightSideLabel>

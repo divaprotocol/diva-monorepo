@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { BigNumber, providers } from 'ethers'
-import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import {
   FeeRecipient,
   Pool,
@@ -27,7 +27,7 @@ import {
 } from '../Models/orderbook'
 import {
   config,
-  divaGovernanceAddress,
+  DIVA_GOVERNANCE_ADDRESS,
   NULL_ADDRESS,
   DEFAULT_TAKER_TOKEN_FEE,
   DEFAULT_THRESHOLD,
@@ -232,7 +232,7 @@ export const fetchPools = createAsyncThunk(
     })
 
     const taker = NULL_ADDRESS
-    const feeRecipient = divaGovernanceAddress
+    const feeRecipient = DIVA_GOVERNANCE_ADDRESS
     const takerTokenFee = DEFAULT_TAKER_TOKEN_FEE
     const threshold = DEFAULT_THRESHOLD
     const count = 1
@@ -453,10 +453,8 @@ export const selectPayoff = (
     BigNumber.from(pool.floor),
     BigNumber.from(pool.inflection),
     BigNumber.from(pool.cap),
-    BigNumber.from(pool.collateralBalanceLongInitial),
-    BigNumber.from(pool.collateralBalanceShortInitial),
+    BigNumber.from(pool.gradient),
     BigNumber.from(finalReferenceValue),
-    BigNumber.from(pool.supplyInitial),
     pool.collateralToken.decimals
   )
   if (payoff == null) return undefined
@@ -479,32 +477,6 @@ export const selectIntrinsicValue = (
   }
 }
 
-export const selectMaxPayout = (
-  state: RootState,
-  poolId: string,
-  isLong: boolean
-) => {
-  const pool = selectPool(state, poolId)
-  if (pool == null) return undefined
-  return formatEther(
-    BigNumber.from(
-      isLong
-        ? pool.collateralBalanceLongInitial
-        : pool.collateralBalanceShortInitial
-    )
-      .add(
-        BigNumber.from(
-          isLong
-            ? pool.collateralBalanceShortInitial
-            : pool.collateralBalanceLongInitial
-        )
-      )
-      .mul(parseUnits('1', 18 - pool.collateralToken.decimals))
-      .mul(parseEther('1'))
-      .div(BigNumber.from(pool.supplyInitial))
-  )
-}
-
 export const selectOrder = (
   state: RootState,
   poolId: string,
@@ -523,96 +495,94 @@ export const selectToken = (state: RootState, poolId: string) => {
   return pool?.collateralToken
 }
 
-export const selectMaxYield = (
-  state: RootState,
-  poolId: string,
-  isLong: boolean
-) => {
-  const _B = BigNumber
-  const token = selectToken(state, poolId)
-  const maxPayout = selectMaxPayout(state, poolId, isLong)
-  const avgExpectedRate = selectExpectedRate(state)
-  if (maxPayout == null || avgExpectedRate === undefined) return undefined
-  return {
-    buy: parseFloat(
-      formatEther(
-        parseEther(maxPayout).div(
-          parseUnits(String(avgExpectedRate.buy), token.decimals)
-        )
-      )
-    ).toFixed(2),
-    sell: parseFloat(
-      formatEther(
-        parseEther(maxPayout).div(
-          parseUnits(String(avgExpectedRate.sell), token.decimals)
-        )
-      )
-    ).toFixed(2),
-  }
-}
+// QUESTION Seems not to be used anywhere. Remove?
+// export const selectMaxYield = (state: RootState, poolId: string) => {
+//   const _B = BigNumber
+//   const token = selectToken(state, poolId)
+//   const maxPayout = '1'
+//   const avgExpectedRate = selectExpectedRate(state)
+//   if (avgExpectedRate === undefined) return undefined
+//   return {
+//     buy: parseFloat(
+//       formatUnits(
+//         parseUnits(maxPayout, token.decimals).div(
+//           parseUnits(String(avgExpectedRate.buy), token.decimals)
+//         )
+//       )
+//     ).toFixed(2),
+//     sell: parseFloat(
+//       formatUnits(
+//         parseUnits(maxPayout, token.decimals).div(
+//           parseUnits(String(avgExpectedRate.sell), token.decimals)
+//         )
+//       )
+//     ).toFixed(2),
+//   }
+// }
 
-export const selectBreakEven = (
-  state: RootState,
-  poolId: string,
-  isLong: boolean
-) => {
-  const pool = selectPool(state, poolId)
-  if (pool == null) return undefined
-  const usdPrice = selectPrice(state, pool.referenceAsset)
-  if (usdPrice == null) return undefined
-  const be1 = parseEther(usdPrice)
-    .mul(BigNumber.from(pool.inflection))
-    .sub(BigNumber.from(pool.floor))
-    .mul(BigNumber.from(isLong ? pool.supplyLong : pool.supplyShort))
-    .div(
-      BigNumber.from(
-        isLong
-          ? pool.collateralBalanceLongInitial
-          : pool.collateralBalanceShortInitial
-      )
-    )
-    .add(BigNumber.from(pool.floor))
-  const be2 = parseEther(usdPrice)
-    .mul(BigNumber.from(pool.supplyLong))
-    .sub(
-      BigNumber.from(
-        isLong
-          ? pool.collateralBalanceLongInitial
-          : pool.collateralBalanceShortInitial
-      )
-    )
-    .mul(BigNumber.from(pool.cap).sub(BigNumber.from(pool.inflection)))
-    .div(
-      BigNumber.from(
-        isLong
-          ? pool.collateralBalanceShortInitial
-          : pool.collateralBalanceLongInitial
-      )
-    )
-    .add(BigNumber.from(pool.inflection))
-  if (
-    BigNumber.from(pool.floor).lte(be1) &&
-    be1.lte(BigNumber.from(pool.inflection))
-  ) {
-    return formatEther(be1)
-  } else if (
-    BigNumber.from(pool.inflection).lt(be2) &&
-    be2.lte(BigNumber.from(pool.cap))
-  ) {
-    return formatEther(be2)
-  } else {
-    return 'n/a'
-  }
-}
+// QUESTION Seems not to be used anywhere. Remove?
+// export const selectBreakEven = (
+//   state: RootState,
+//   poolId: string,
+//   isLong: boolean
+// ) => {
+//   const pool = selectPool(state, poolId)
+//   if (pool == null) return undefined
+//   const usdPrice = selectPrice(state, pool.referenceAsset)
+//   if (usdPrice == null) return undefined
+//   const be1 = parseUnits(usdPrice)
+//     .mul(BigNumber.from(pool.inflection))
+//     .sub(BigNumber.from(pool.floor))
+//     .mul(BigNumber.from(isLong ? pool.supplyLong : pool.supplyShort))
+//     .div(
+//       BigNumber.from(
+//         isLong
+//           ? pool.collateralBalanceLongInitial
+//           : pool.collateralBalanceShortInitial
+//       )
+//     )
+//     .add(BigNumber.from(pool.floor))
+//   const be2 = parseUnits(usdPrice)
+//     .mul(BigNumber.from(pool.supplyLong))
+//     .sub(
+//       BigNumber.from(
+//         isLong
+//           ? pool.collateralBalanceLongInitial
+//           : pool.collateralBalanceShortInitial
+//       )
+//     )
+//     .mul(BigNumber.from(pool.cap).sub(BigNumber.from(pool.inflection)))
+//     .div(
+//       BigNumber.from(
+//         isLong
+//           ? pool.collateralBalanceShortInitial
+//           : pool.collateralBalanceLongInitial
+//       )
+//     )
+//     .add(BigNumber.from(pool.inflection))
+//   if (
+//     BigNumber.from(pool.floor).lte(be1) &&
+//     be1.lte(BigNumber.from(pool.inflection))
+//   ) {
+//     return formatUnits(be1)
+//   } else if (
+//     BigNumber.from(pool.inflection).lt(be2) &&
+//     be2.lte(BigNumber.from(pool.cap))
+//   ) {
+//     return formatUnits(be2)
+//   } else {
+//     return 'n/a'
+//   }
+// }
 
 export const selectMainPools = (state: RootState) =>
   selectAppStateByChain(state).pools.filter(
-    (p) => p?.createdBy === divaGovernanceAddress.toLowerCase()
+    (p) => p?.createdBy === DIVA_GOVERNANCE_ADDRESS.toLowerCase()
   )
 
 export const selectOtherPools = (state: RootState) =>
   selectAppStateByChain(state).pools.filter(
-    (p) => p?.createdBy !== divaGovernanceAddress.toLowerCase()
+    (p) => p?.createdBy !== DIVA_GOVERNANCE_ADDRESS.toLowerCase()
   )
 
 export const selectChainId = (state: RootState) => state.appSlice.chainId

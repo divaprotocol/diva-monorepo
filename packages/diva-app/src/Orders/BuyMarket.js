@@ -19,7 +19,6 @@ export const buyMarketOrder = async (orderData) => {
 
   // Define variables for integer math
   const decimals = orderData.collateralDecimals
-  const positionTokenUnit = parseUnits('1')
   const collateralTokenUnit = parseUnits('1', decimals)
 
   let nbrOptionsToBuy = orderData.nbrOptions
@@ -94,8 +93,8 @@ export const buyMarketOrder = async (orderData) => {
           takerAssetFillAmount = order.remainingFillableTakerAmount
           // Update nbrOptionsFilled and overwrite nbrOptionsToBuy with remaining number of position tokens to fill
           nbrOptionsFilled = BigNumber.from(takerAssetFillAmount)
-            .mul(positionTokenUnit)
-            .div(expectedRate) // result has 18 decimals
+            .mul(collateralTokenUnit)
+            .div(expectedRate) // result has collateral token decimals
         }
         takerAssetFillAmounts.push(
           BigNumber.from(takerAssetFillAmount)

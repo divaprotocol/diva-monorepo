@@ -1,4 +1,5 @@
 import {
+  Button,
   Container,
   IconButton,
   InputAdornment,
@@ -14,7 +15,7 @@ import {
 import { Box } from '@mui/material'
 import { config, CREATE_POOL_TYPE } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import DIVA_ABI from '../../abi/DIVAABI.json'
 import { useCreatePoolFormik } from './formik'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -27,9 +28,10 @@ import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
 import InsertLinkTwoToneIcon from '@mui/icons-material/InsertLinkTwoTone'
-import ERC20 from '@diva/contracts/abis/erc20.json'
+import ERC20 from '../../abi/ERC20ABI.json'
 import { ContentCopy, Download } from '@mui/icons-material'
-import DIVA712ABI from '../../abi/DIVA712ABI.json'
+import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
+import { useHistory } from 'react-router-dom'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -158,6 +160,7 @@ export function Success({
 }) {
   const { values } = formik
   const [longToken, setLongToken] = useState()
+  const history = useHistory()
   const [shortToken, setShortToken] = useState()
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
   const [poolId, setPoolId] = useState<number>()
@@ -179,44 +182,25 @@ export function Success({
         )
       : null
 
-  const divaNew = new ethers.Contract(
-    config[chainId!].divaAddressNew, //Goerli
-    DIVA712ABI,
-    provider.getSigner()
-  )
   useEffect(() => {
-    /**
-     * Remove etherscan usage and capture transaction receipt instead
-     */
-    if (transactionType !== 'filloffer') {
-      etherscanProvider.getHistory(userAddress).then((txs) => {
-        provider
-          .getTransactionReceipt(txs[txs.length - 1].hash)
-          .then((txRc) => {
-            const id = BigNumber.from(txRc.logs[4].topics[1]).toNumber()
-            diva.getPoolParameters(id).then((pool) => {
-              setShortToken(pool.shortToken)
-              setLongToken(pool.longToken)
-              setPoolId(id)
-            })
-          })
-      })
-    } else {
-      divaNew.getPoolParameters(formik.values.poolId).then((pool) => {
-        setShortToken(pool.shortToken)
-        setLongToken(pool.longToken)
-        setPoolId(Number(formik.values.poolId))
-      })
-    }
+    diva.getPoolParameters(formik.values.poolId).then((pool) => {
+      setShortToken(pool.shortToken)
+      setLongToken(pool.longToken)
+      setPoolId(Number(formik.values.poolId))
+    })
   }, [formik.values.poolId])
-
   return (
     <Container>
       <Box display="flex" justifyContent="center" alignItems="center">
         <Stack display="flex" justifyContent="center" alignItems="center">
           <Container
             sx={{
-              ml: theme.spacing(transactionType === 'createoffer' ? 27 : 20),
+              ml: theme.spacing(
+                transactionType === 'filloffer' ||
+                  transactionType === 'createpool'
+                  ? 12
+                  : 48
+              ),
             }}
           >
             {congratsSvg}
@@ -274,8 +258,7 @@ export function Success({
             )}
           {transactionType === 'createoffer' && (
             <Typography>
-              Copy or Download the JSON to share and complete offer creation
-              process
+              Copy the JSON, download it or share the link with counterparties
             </Typography>
           )}
           {transactionType === 'createpool' && (
@@ -400,6 +383,21 @@ export function Success({
               />
             )}
           </Stack>
+          {transactionType === 'filloffer' && (
+            <Button
+              variant="text"
+              sx={{
+                mt: theme.spacing(8),
+                // ml: theme.spacing(115),
+              }}
+              onClick={() => {
+                history.push('/dashboard/mypositions')
+              }}
+            >
+              My Positions
+              <ArrowForwardOutlinedIcon sx={{ ml: theme.spacing(1) }} />
+            </Button>
+          )}
         </Stack>
       </Box>
     </Container>
