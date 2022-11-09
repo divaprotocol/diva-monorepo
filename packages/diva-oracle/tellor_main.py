@@ -1,4 +1,3 @@
-import config.config as config
 from web3 import Web3
 import tellor_settings.tellor_abi as tellor
 from tellor_settings.tellor_submission import submitTellorValue
