@@ -73,7 +73,7 @@ def submitPools(df, network, max_time_away, w3, contract):
             nonces[network] += 1
         else:
             pendingPools[network].append(pool_id)
-            message = "Pood id %s : No price available or Pair not available" % pool_id
+            message = "Pood id %s : Price or pair not available" % pool_id
             update_pending_records(message)
 
     return
@@ -115,9 +115,11 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
         date_max_away = date_dt - max_time_away
         # convert times to timestamp
         ts_date = datetime.timestamp(date_dt)
+        print('expiryTime', ts_date)
         ts_date_max_away = datetime.timestamp(date_max_away)
         price, date = getKrakenPrice(
             pair=pair, ts_date=ts_date, ts_date_max_away=ts_date_max_away)
+        print('Price timestamp', date)
         # This function will get collToUSD format:
        
             # TODO

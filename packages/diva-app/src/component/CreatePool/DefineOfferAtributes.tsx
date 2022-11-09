@@ -139,13 +139,18 @@ export function DefineOfferAttributes({
       formik.values.gradient.toString() != '' &&
       formik.values.gradient >= 0 &&
       formik.values.gradient <= 1 &&
-      formik.values.collateralBalance.toString() != ''
+      formik.values.collateralBalance.toString() != '' &&
+      !isNaN(formik.values.collateralBalance)
     ) {
+      const collateralBalance = parseUnits(
+        formik.values.collateralBalance.toString(),
+        collateralToken.decimals
+      )
       // QUESTION Do we need to refactor here?
       formik.setValues((_values) => ({
         ..._values,
         collateralBalance: parseFloat(
-          formatUnits(collateralBalance.toString(), collateralToken.decimals)
+          formatUnits(collateralBalance, collateralToken.decimals)
         ),
       }))
     }
