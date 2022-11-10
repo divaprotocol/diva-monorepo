@@ -31,7 +31,15 @@ import ERC20 from '../../abi/ERC20ABI.json'
 import DIVA_ABI from '../../abi/DIVAABI.json'
 import { formatUnits } from 'ethers/lib/utils'
 import { useAppSelector } from '../../Redux/hooks'
-
+import { toExponentialOrNumber } from '../../Util/utils'
+import styled from '@emotion/styled'
+import { useErcBalance } from '../../hooks/useErcBalance'
+const MaxCollateral = styled.u`
+  cursor: pointer;
+  &:hover {
+    color: ${(props) => (props.theme as any).palette.primary.main};
+  }
+`
 export function ReviewAndSubmit({
   formik,
   transaction,
@@ -52,7 +60,9 @@ export function ReviewAndSubmit({
   )
   const [takerFilledAmount, setTakerFilledAmount] = useState(0)
   const [decimal, setDecimal] = useState(18)
-
+  const collateralWalletBalance = useErcBalance(
+    formik.values.collateralToken.id
+  )
   // QUESTION Why not use hook that will also handle null values?
   const diva = new ethers.Contract(
     config[chainId!].divaAddress, //Goerli
@@ -543,31 +553,39 @@ export function ReviewAndSubmit({
                       }}
                     />
                     {!isNaN(formik.values.collateralBalance) && (
-                      <FormHelperText>
-                        You receive{' '}
-                        {formik.values.offerDirection !== 'Long' ? (
-                          <strong>
-                            {(formik.values.yourShare *
-                              formik.values.makerShare) /
-                              (Number(
-                                formik.values.jsonToExport.takerCollateralAmount
-                              ) /
-                                10 ** decimal) +
-                              formik.values.yourShare}{' '}
-                            SHORT Tokens
-                          </strong>
-                        ) : (
-                          <strong>
-                            {(formik.values.yourShare *
-                              formik.values.makerShare) /
-                              (Number(
-                                formik.values.jsonToExport.takerCollateralAmount
-                              ) /
-                                10 ** decimal) +
-                              formik.values.yourShare}{' '}
-                            LONG Tokens
-                          </strong>
-                        )}
+                      <FormHelperText
+                        sx={{
+                          mr: theme.spacing(-0.25),
+                          display: 'flex',
+                          justifyContent: 'flex-end',
+                        }}
+                      >
+                        Your balance:{' '}
+                        {toExponentialOrNumber(
+                          parseFloat(collateralWalletBalance)
+                        ) +
+                          ' ' +
+                          tokenSymbol}
+                        <MaxCollateral
+                          role="button"
+                          onClick={() => {
+                            if (
+                              actualFillableAmount > collateralWalletBalance
+                            ) {
+                              formik.setFieldValue(
+                                'yourShare',
+                                collateralWalletBalance
+                              )
+                            } else {
+                              formik.setFieldValue(
+                                'yourShare',
+                                actualFillableAmount
+                              )
+                            }
+                          }}
+                        >
+                          (Max)
+                        </MaxCollateral>
                       </FormHelperText>
                     )}
                   </FormControl>
