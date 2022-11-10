@@ -9,7 +9,7 @@ def setFinRefVal(pool_id, network, w3, my_contract):
     print("Triggering setFinalReferenceValue() ...")
     gas_price = w3.eth.gas_price
     try: 
-        submit_txn = my_contract.functions.setFinalReferenceValue(tellor.divaDiamond[network], int(pool_id)).buildTransaction(
+        submit_txn = my_contract.functions.setFinalReferenceValue(int(pool_id)).buildTransaction(
             {
                 "gasPrice": gas_price,
                 "chainId": config.chain_id[network],
@@ -18,7 +18,7 @@ def setFinRefVal(pool_id, network, w3, my_contract):
             }
         )
     except:
-        print("unable to trigger setFinalreferenceValue")
+        print("unable to trigger setFinalReferenceValue")
     print("Nonce:", w3.eth.get_transaction_count(PUBLIC_KEY))
     print("For pool:", pool_id)
     signed_txn = w3.eth.account.sign_transaction(submit_txn, private_key=PRIVATE_KEY)

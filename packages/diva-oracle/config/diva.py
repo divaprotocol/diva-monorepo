@@ -8,7 +8,7 @@ contract_address = {
 }
 
 abi = '''[
-{
+  {
     "inputs": [
       { "internalType": "uint256", "name": "_poolId", "type": "uint256" },
       {
@@ -23,7 +23,7 @@ abi = '''[
     "stateMutability": "nonpayable",
     "type": "function"
   },
-{
+  {
     "inputs": [
       { "internalType": "uint256", "name": "_poolId", "type": "uint256" }
     ],
@@ -31,16 +31,6 @@ abi = '''[
     "outputs": [
       {
         "components": [
-          {
-            "internalType": "string",
-            "name": "referenceAsset",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "expiryTime",
-            "type": "uint256"
-          },
           { "internalType": "uint256", "name": "floor", "type": "uint256" },
           {
             "internalType": "uint256",
@@ -48,57 +38,18 @@ abi = '''[
             "type": "uint256"
           },
           { "internalType": "uint256", "name": "cap", "type": "uint256" },
-          {
-            "internalType": "uint256",
-            "name": "supplyInitial",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "collateralToken",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "collateralBalanceShortInitial",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "collateralBalanceLongInitial",
-            "type": "uint256"
-          },
+          { "internalType": "uint256", "name": "gradient", "type": "uint256" },
           {
             "internalType": "uint256",
             "name": "collateralBalance",
             "type": "uint256"
           },
           {
-            "internalType": "address",
-            "name": "shortToken",
-            "type": "address"
-          },
-          { "internalType": "address", "name": "longToken", "type": "address" },
-          {
             "internalType": "uint256",
             "name": "finalReferenceValue",
             "type": "uint256"
           },
-          {
-            "internalType": "enum LibDiamond.Status",
-            "name": "statusFinalReferenceValue",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "redemptionAmountLongToken",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "redemptionAmountShortToken",
-            "type": "uint256"
-          },
+          { "internalType": "uint256", "name": "capacity", "type": "uint256" },
           {
             "internalType": "uint256",
             "name": "statusTimestamp",
@@ -106,22 +57,35 @@ abi = '''[
           },
           {
             "internalType": "address",
+            "name": "shortToken",
+            "type": "address"
+          },
+          { "internalType": "uint96", "name": "payoutShort", "type": "uint96" },
+          { "internalType": "address", "name": "longToken", "type": "address" },
+          { "internalType": "uint96", "name": "payoutLong", "type": "uint96" },
+          {
+            "internalType": "address",
+            "name": "collateralToken",
+            "type": "address"
+          },
+          { "internalType": "uint96", "name": "expiryTime", "type": "uint96" },
+          {
+            "internalType": "address",
             "name": "dataProvider",
             "type": "address"
           },
           {
-            "internalType": "uint256",
-            "name": "redemptionFee",
-            "type": "uint256"
+            "internalType": "enum LibDIVAStorage.Status",
+            "name": "statusFinalReferenceValue",
+            "type": "uint8"
           },
           {
-            "internalType": "uint256",
-            "name": "settlementFee",
-            "type": "uint256"
-          },
-          { "internalType": "uint256", "name": "capacity", "type": "uint256" }
+            "internalType": "string",
+            "name": "referenceAsset",
+            "type": "string"
+          }
         ],
-        "internalType": "struct LibDiamond.Pool",
+        "internalType": "struct LibDIVAStorage.Pool",
         "name": "",
         "type": "tuple"
       }

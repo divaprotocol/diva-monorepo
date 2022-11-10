@@ -39,7 +39,7 @@ def run(network, w3, contract):
 w3_instances = []
 contract_instances = []
 nonces = {
-    "ropsten": 0,
+    "goerli": 0,
     "mumbai": 0,
     "rinkeby": 0
 }

@@ -34,11 +34,6 @@ DIVAOracleTellor_abi = '''[
 {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "_divaDiamond",
-          "type": "address"
-        },
-        {
           "internalType": "uint256",
           "name": "_poolId",
           "type": "uint256"
