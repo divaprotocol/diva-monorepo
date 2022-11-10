@@ -88,7 +88,7 @@ export function Offer() {
       })
       formik.setFieldValue(
         'offerDirection',
-        jsonResponse.data.data.makerDirection === 'true' ? 'Short' : 'Long'
+        jsonResponse.data.data.makerDirection ? 'Short' : 'Long'
       )
       formik.setFieldValue(
         'referenceAsset',
