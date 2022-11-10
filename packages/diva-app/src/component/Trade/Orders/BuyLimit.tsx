@@ -61,7 +61,7 @@ export default function BuyLimit(props: {
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const [Web3Provider, setWeb3Provider] = useState<Web3>()
-  const { getWeb3JsProvider } = useConnectionContext()
+  const { getWeb3JsProvider, provider } = useConnectionContext()
   const web3 = new Web3(Web3Provider as any)
 
   useEffect(() => {
@@ -207,7 +207,7 @@ export default function BuyLimit(props: {
       setFillLoading(true)
       const orderData = {
         maker: userAddress,
-        provider: web3,
+        provider: provider,
         isBuy: true,
         nbrOptions: numberOfOptions,
         collateralDecimals: decimals,
@@ -265,7 +265,7 @@ export default function BuyLimit(props: {
         makerToken,
         takerToken,
         props.chainId,
-        props.provider,
+        provider,
         props.exchangeProxy
       )
       responseBuy = rBuy

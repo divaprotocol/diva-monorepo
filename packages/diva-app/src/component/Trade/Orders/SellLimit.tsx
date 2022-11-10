@@ -62,7 +62,7 @@ export default function SellLimit(props: {
   const [Web3Provider, setWeb3Provider] = useState<Web3>()
 
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const { getWeb3JsProvider } = useConnectionContext()
+  const { getWeb3JsProvider, provider } = useConnectionContext()
   const web3 = new Web3(Web3Provider as any)
 
   useEffect(() => {
@@ -219,7 +219,7 @@ export default function SellLimit(props: {
       setFillLoading(true)
       const orderData = {
         maker: userAddress,
-        provider: web3,
+        provider: provider,
         isBuy: false,
         nbrOptions: numberOfOptions,
         collateralDecimals: decimals,

@@ -1,13 +1,14 @@
-import { MetamaskSubprovider } from '@0x/subproviders'
-import { parseUnits } from 'ethers/lib/utils'
+import { parseUnits, splitSignature } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
 import { DIVA_GOVERNANCE_ADDRESS, TRADING_FEE } from '../constants'
 import { getFutureExpiryInSeconds } from '../Util/utils'
+import { zeroXTypes, zeroXDomain } from '../lib/zeroX'
 
 export const sellLimitOrder = async (orderData) => {
-  const metamaskProvider = new MetamaskSubprovider(window.ethereum)
+  const { chainId } = orderData
+  const signer = orderData.provider.getSigner()
 
   const collateralTokenUnit = parseUnits('1', orderData.collateralDecimals)
 
@@ -41,14 +42,27 @@ export const sellLimitOrder = async (orderData) => {
     salt: Date.now().toString(),
     chainId: orderData.chainId,
     verifyingContract: orderData.exchangeProxy,
+    pool: '0x0000000000000000000000000000000000000000000000000000000000000000',
+    taker: NULL_ADDRESS,
   })
 
   // TODO: Export this part into a separate function
   try {
-    const signature = await order.getSignatureWithProviderAsync(
-      metamaskProvider,
-      utils.SignatureType.EIP712 // Optional
+    const signedTypedData = await signer._signTypedData(
+      zeroXDomain({
+        chainId: orderData.chainId,
+        verifyingContract: config[chainId].zeroXAddress,
+      }),
+      zeroXTypes,
+      order
     )
+    const { r, s, v } = splitSignature(signedTypedData)
+    const signature = {
+      v: v,
+      r: r,
+      s: s,
+      signatureType: 2,
+    }
     const poolId = orderData.poolId
     const signedOrder = { ...order, signature, poolId }
 

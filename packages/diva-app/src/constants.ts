@@ -62,30 +62,12 @@ type SingleConfig = {
     decimals: number
   }
   readonly isSupported: boolean
+  readonly zeroXAddress: string
 }
 
 export const projectId = '9f5f0ef1c7544c029b0aa9ca622759c3'
 
 export const config: { [key: number]: SingleConfig } = {
-  [SupportedChainId.GOERLI]: {
-    divaAddress: '0x8f138cfC5de71FCde7FdeCd87EAC6Aa6A536Bf85',
-    divaAddressNew: '0x6cDEc9b70431bf650f3A0DDD0e246368a4C4F1E1',
-    balanceCheckAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
-    exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
-    whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
-    divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli',
-    whitelistSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
-    allOrders: 'https://eip712api.xyz/orderbook/v1/orders/',
-    order: 'https://eip712api.xyz/orderbook/v1/order/',
-    orderbook: 'https://eip712api.xyz/orderbook/v1',
-    explorer: 'https://goerli.etherscan.io/',
-    name: 'Görli',
-    logoUrl: ethereumLogoUrl,
-    nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
-    isSupported: true,
-  },
   [SupportedChainId.MAINNET]: {
     name: 'Ethereum',
     divaAddress: '',
@@ -102,6 +84,7 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     isSupported: false,
+    zeroXAddress: '',
   },
   [SupportedChainId.ROPSTEN]: {
     name: 'Ropsten',
@@ -121,6 +104,7 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ropsten Ether', symbol: 'ropETH', decimals: 18 },
     isSupported: true,
+    zeroXAddress: '',
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0x2d941518E0876Fb6042bfCdB403427DC5620b2EC', // 26.10.2022
@@ -140,6 +124,7 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
     isSupported: true,
+    zeroXAddress: '0xf91bb752490473b8342a3e964e855b9f9a2a668e',
   },
   [SupportedChainId.POLYGON]: {
     name: 'Polygon',
@@ -157,6 +142,7 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: polygonMaticLogo,
     nativeCurrency: { name: 'Polygon Matic', symbol: 'MATIC', decimals: 18 },
     isSupported: false,
+    zeroXAddress: '',
   },
   [SupportedChainId.POLYGON_MUMBAI]: {
     name: 'Mumbai',
@@ -178,6 +164,7 @@ export const config: { [key: number]: SingleConfig } = {
       decimals: 18,
     },
     isSupported: false,
+    zeroXAddress: '',
   },
   [SupportedChainId.ARBITRUM_ONE]: {
     name: 'Arbitrum',
@@ -195,6 +182,7 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: arbitrumLogoUrl,
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     isSupported: false,
+    zeroXAddress: 's',
   },
 }
 
