@@ -1,26 +1,15 @@
-from web3 import Web3
 import tellor_settings.tellor_abi as tellor
-from tellor_settings.tellor_submission import submitTellorValue
-from tellor_settings.tellor_setFinalReferenceValue import setFinRefVal
 import tellor_settings.tellor_contracts as tellor_contracts
-import time
 import datetime as dt
-from lib.Prices import getKrakenPrice
 from lib.QueryGraph import *
-from lib.SendPrice import sendPrice
 import config.config as config
-import threading
 from web3 import Web3
 import time
-import config.diva as diva
-from lib.sendEmail import sendEmail
-from lib.recorder import *
-from lib.df_utils import extend_DataFrame
-from lib.query import tellor_query, query
-from lib.submitPool import submitPools, tellor_submit_pools
+from lib.query import tellor_query
+from lib.submitPool import  tellor_submit_pools
+import pandas as pd
 
 
-from colorama import init
 from termcolor import colored
 
 waiting_sec = 60
@@ -46,4 +35,3 @@ if __name__ == "__main__":
         print(colored("Waiting {} sec before next iteration...".format(waiting_sec), 'yellow'))
         # Wait before next iteration
         time.sleep(waiting_sec)
-        
