@@ -1,5 +1,4 @@
 from lib.df_utils import extend_DataFrame
-import config.diva as diva
 from lib.SendPrice import sendPrice
 from lib.QueryGraph import *
 from lib.Prices import getKrakenPrice, getKrakenCollateralConversion
@@ -10,8 +9,6 @@ import tellor_settings.tellor_abi as tellor
 from tellor_settings.tellor_setFinalReferenceValue import setFinRefVal
 import tellor_settings.tellor_contracts as tellor_contracts
 import time
-
-from colorama import init
 from termcolor import colored
 
 
@@ -41,15 +38,13 @@ def submitPools(df, network, max_time_away, w3, contract):
         pair = df['referenceAsset'].iloc[i]
         opair = pair
         pair = pair.replace("/", "")
-        date_dt = df['expiryTime_datetime'].iloc[i]
+        ts_date = df['expiryTime'].iloc[i]
         pool_id = df['id'].iloc[i]
 
-        date_max_away = date_dt - max_time_away
-        # convert times to timestamp
-        ts_date = datetime.timestamp(date_dt)
-        ts_date_max_away = datetime.timestamp(date_max_away)
+        ts_date_max_away = ts_date - max_time_away.seconds
+
         price, date = getKrakenPrice(
-            pair=pair, ts_date=ts_date, ts_date_max_away=ts_date_max_away)
+            pair=pair, ts_date=ts_date)
         # This function will get collToUSD format:
         if (price, date) != (-1, -1):
             # submit pool price
@@ -107,18 +102,15 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
         pair = df['referenceAsset'].iloc[i]
         opair = pair
         pair = pair.replace("/", "")
-        date_dt = df['expiryTime_datetime'].iloc[i]
+        ts_date = df['expiryTime'].iloc[i]
         pool_id = df['id'].iloc[i]
+
+        ts_date_max_away = ts_date - max_time_away.seconds
         if pool_id in blocked_pools_by_whitelist:
             return
 
-        date_max_away = date_dt - max_time_away
-        # convert times to timestamp
-        ts_date = datetime.timestamp(date_dt)
-        print('expiryTime', ts_date)
-        ts_date_max_away = datetime.timestamp(date_max_away)
         price, date = getKrakenPrice(
-            pair=pair, ts_date=ts_date, ts_date_max_away=ts_date_max_away)
+            pair=pair, ts_date=ts_date)
         print('Price timestamp', date)
         # This function will get collToUSD format:
        
@@ -126,7 +118,7 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
             # AUTOMATICALLY SETS TO 1 FOR TEST SEE PRICES.PY
             # This is for testing purposes, fix before prod
         coll_asset_to_usd = getKrakenCollateralConversion(
-            df['collateralToken.symbol'].iloc[i], df['collateralToken.id'], ts_date=ts_date, ts_date_max_away=ts_date_max_away)
+            df['collateralToken.symbol'].iloc[i], df['collateralToken.id'], ts_date=ts_date)
         if coll_asset_to_usd == "NotWhiteListed":
             print("collateral asset not whitelisted, blocking submission, add to blocked list")
             blocked_pools_by_whitelist.append(pool_id)
