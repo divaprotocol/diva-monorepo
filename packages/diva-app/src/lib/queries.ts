@@ -35,8 +35,8 @@ export type Pool = {
   capacity: string
   challenges: Challenge[]
   collateralBalance: string
-  collateralBalanceLongInitial: string
-  collateralBalanceShortInitial: string
+  collateralBalanceGross: string
+  gradient: string
   collateralToken: CollateralTokenEntity
   dataProvider: string
   expiryTime: string
@@ -46,17 +46,24 @@ export type Pool = {
   inflection: string
   longToken: PositionToken
   shortToken: PositionToken
-  redemptionAmountLongToken: string
-  redemptionAmountShortToken: string
-  redemptionFee: string
+  payoutLong: string
+  payoutShort: string
+  protocolFee: string
   referenceAsset: string
   settlementFee: string
   statusFinalReferenceValue: string
   statusTimestamp: string
   intrinsicValue?: string
-  supplyInitial: string
+  // supplyInitial: string
   supplyLong: string
   supplyShort: string
+
+  // QUESTION add the following missing fields?
+  submissionPeriod: string
+  challengePeriod: string
+  reviewPeriod: string
+  fallbackSubmissionPeriod: string
+  permissionedERC721Token: string
 
   createdBy: string
   createdAt: string
@@ -89,7 +96,6 @@ export const queryUser = (id: string, pageSize: number, skip: number) => gql`
           floor
           inflection
           cap
-          supplyInitial
           supplyShort
           supplyLong
           expiryTime
@@ -99,8 +105,8 @@ export const queryUser = (id: string, pageSize: number, skip: number) => gql`
             decimals
             symbol
           }
-          collateralBalanceShortInitial
-          collateralBalanceLongInitial
+          collateralBalanceGross
+          gradient
           collateralBalance
           shortToken {
             id
@@ -118,14 +124,19 @@ export const queryUser = (id: string, pageSize: number, skip: number) => gql`
           }
           finalReferenceValue
           statusFinalReferenceValue
-          redemptionAmountLongToken
-          redemptionAmountShortToken
+          payoutLong
+          payoutShort
           statusTimestamp
           dataProvider
-          redemptionFee
+          protocolFee
           settlementFee
           createdBy
           createdAt
+          submissionPeriod
+          challengePeriod
+          reviewPeriod
+          fallbackSubmissionPeriod
+          permissionedERC721Token
           capacity
           expiryTime
           challenges {
@@ -159,7 +170,6 @@ export const queryPools = (
       floor
       inflection
       cap
-      supplyInitial
       supplyShort
       supplyLong
       expiryTime
@@ -169,8 +179,8 @@ export const queryPools = (
         decimals
         symbol
       }
-      collateralBalanceShortInitial
-      collateralBalanceLongInitial
+      collateralBalanceGross
+      gradient
       collateralBalance
       shortToken {
         id
@@ -188,14 +198,19 @@ export const queryPools = (
       }
       finalReferenceValue
       statusFinalReferenceValue
-      redemptionAmountLongToken
-      redemptionAmountShortToken
+      payoutLong
+      payoutShort
       statusTimestamp
       dataProvider
-      redemptionFee
+      protocolFee
       settlementFee
       createdBy
       createdAt
+      submissionPeriod
+      challengePeriod
+      reviewPeriod
+      fallbackSubmissionPeriod
+      permissionedERC721Token
       capacity
       expiryTime
       challenges {
@@ -230,7 +245,6 @@ export const queryPool = (poolId: number) => gql`
       floor
       inflection
       cap
-      supplyInitial
       supplyShort
       supplyLong
       expiryTime
@@ -240,8 +254,8 @@ export const queryPool = (poolId: number) => gql`
         decimals
         symbol
       }
-      collateralBalanceShortInitial
-      collateralBalanceLongInitial
+      collateralBalanceGross
+      gradient
       collateralBalance
       shortToken {
         id
@@ -259,14 +273,19 @@ export const queryPool = (poolId: number) => gql`
       }
       finalReferenceValue
       statusFinalReferenceValue
-      redemptionAmountLongToken
-      redemptionAmountShortToken
+      payoutLong
+      payoutShort
       statusTimestamp
       dataProvider
-      redemptionFee
+      protocolFee
       settlementFee
       createdBy
       createdAt
+      submissionPeriod
+      challengePeriod
+      reviewPeriod
+      fallbackSubmissionPeriod
+      permissionedERC721Token
       capacity
       expiryTime
       challenges {

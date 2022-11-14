@@ -421,13 +421,14 @@ export function MyOrders() {
     const poolId = pool.id
     const underlying = pool.underlying
     const decimals = pool.collateralToken.decimals
-    const takerAmount = formatUnits(order.takerAmount)
+    const takerAmount = formatUnits(order.takerAmount, decimals)
     const makerAmount = formatUnits(order.makerAmount, decimals)
     let quantity = 0
     let price = 0
     let payReceive = 0
     const remainingTakerAmount = formatUnits(
-      metaData.remainingFillableTakerAmount
+      metaData.remainingFillableTakerAmount,
+      decimals
     )
     if (remainingTakerAmount < takerAmount) {
       quantity = Number(remainingTakerAmount)
@@ -456,7 +457,7 @@ export function MyOrders() {
     const underlying = pool.underlying
     const decimals = pool.collateralToken.decimals
     const takerAmount = formatUnits(order.takerAmount, decimals)
-    const makerAmount = formatUnits(order.makerAmount)
+    const makerAmount = formatUnits(order.makerAmount, decimals)
     let quantity = 0
     let price = 0
     let payReceive = 0

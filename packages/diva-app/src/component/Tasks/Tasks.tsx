@@ -445,7 +445,7 @@ export const Tasks = (props: any) => {
         }}
       >
         <TaskIcon style={{ fontSize: 34, padding: 20, paddingRight: 10 }} />
-        <h2> Testnet Tasks</h2>
+        <h2> App Training</h2>
       </Box>
       <Stack
         sx={{ pb: theme.spacing(5), justifyContent: 'space-between' }}
@@ -472,7 +472,7 @@ export const Tasks = (props: any) => {
             />
           </Container>
         )}
-
+        {/*TODO Updated this part as the testnet is over*/}
         <Stack
           spacing={theme.spacing(6)}
           sx={{ paddingLeft: theme.spacing(2) }}

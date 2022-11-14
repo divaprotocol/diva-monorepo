@@ -2,8 +2,8 @@ import axios from 'axios'
 import {
   config,
   NULL_ADDRESS,
-  divaGovernanceAddress,
-  tradingFee,
+  DIVA_GOVERNANCE_ADDRESS,
+  TRADING_FEE,
 } from '../constants'
 import { BigNumber, ethers } from 'ethers'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
@@ -51,7 +51,7 @@ async function getFillableOrders(
   // Connect to BalanceChecker contract which implements the `getMinOfBalancesOrAllowances` which allows to
   // obtain the minimum of allowance and balance for an array of maker address with one single call
   const contract = new ethers.Contract(
-    config[chainId].balanceCheckAddress,
+    config[chainId].balanceCheckerAddress,
     BalanceCheckerABI,
     provider
   )
@@ -207,7 +207,7 @@ export const get0xOpenOrders = async (
   // - takerToken = quoteToken
   const urlPrefix =
     config[chainId].orderbook +
-    '?quoteToken=' +
+    '/pair?quoteToken=' +
     makerToken +
     '&baseToken=' +
     takerToken
@@ -350,7 +350,7 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
     bidExpiry = getExpiryMinutesFromNow(order.order.expiry)
     // Calculate Bid amount
     const bidAmount = BigNumber.from(order.order.makerAmount)
-      .mul(parseUnits('1'))
+      .mul(parseUnits('1', price.decimals))
       .div(BigNumber.from(order.order.takerAmount)) // result is in collateral token decimals
 
     // Value to display in the orderbook
@@ -358,7 +358,8 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
 
     // Display remainingFillableTakerAmount as the quantity in the orderbook
     bidnbrOptions = formatUnits(
-      BigNumber.from(order.metaData.remainingFillableTakerAmount)
+      BigNumber.from(order.metaData.remainingFillableTakerAmount),
+      price.decimals
     )
   }
 
@@ -370,7 +371,7 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
     askExpiry = getExpiryMinutesFromNow(order.order.expiry)
     // Calculate Ask amount
     const askAmount = BigNumber.from(order.order.takerAmount)
-      .mul(parseUnits('1'))
+      .mul(parseUnits('1', price.decimals))
       .div(BigNumber.from(order.order.makerAmount)) // result is in collateral token decimals
 
     // Value to display in the orderbook
@@ -386,9 +387,12 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
       )
         .mul(BigNumber.from(order.order.makerAmount))
         .div(BigNumber.from(order.order.takerAmount))
-      asknbrOptions = formatUnits(remainingFillableMakerAmount)
+      asknbrOptions = formatUnits(remainingFillableMakerAmount, price.decimals)
     } else {
-      asknbrOptions = formatUnits(BigNumber.from(order.order.makerAmount))
+      asknbrOptions = formatUnits(
+        BigNumber.from(order.order.makerAmount),
+        price.decimals
+      )
     }
   }
 
@@ -419,8 +423,8 @@ export const getOrderbookPricesOutput = (
       type: type, // pool type
       baseToken: poolPrice.baseToken, // pool baseToken
       quoteToken: poolPrice.quoteToken, // pool quoteToken
-      bid: poolPrice.bid, // best bid of pool
-      ask: poolPrice.ask, // best ask of pool
+      bid: poolPrice.bids.length !== 0 ? poolPrice.bids[0] : {}, // best bid of pool
+      ask: poolPrice.asks.length !== 0 ? poolPrice.asks[0] : {}, // best ask of pool
       decimals: decimals, // collateral token decimals of pool
     }
 
@@ -440,7 +444,7 @@ export const getOrderbookPrices = async (
 ): Promise<OrderOutputType[]> => {
   // Generate an orderbook price endpoint
   let urlPrefix =
-    config[req.chainId].orderbook + `/prices?graphUrl=${req.graphUrl}`
+    config[req.chainId].orderbook + `/pairs?graphUrl=${req.graphUrl}`
 
   // Add createdBy by parameter to orderbook price endpoint
   if (req.createdBy !== undefined) {
@@ -461,6 +465,10 @@ export const getOrderbookPrices = async (
   // Add threshold by parameter to orderbook price endpoint
   if (req.threshold !== undefined) {
     urlPrefix += `&threshold=${req.threshold}`
+  }
+  // Add count by parameter to orderbook price endpoint
+  if (req.count !== undefined) {
+    urlPrefix += `&count=${req.count}`
   }
   // Add 1 to the current page because the page parameter starts at 0.
   const url = urlPrefix + `&page=${req.page + 1}&perPage=${req.perPage}`
@@ -537,7 +545,7 @@ export const mapOrderData = (
 
       // Calculate Bid amount
       const bidAmount = BigNumber.from(order.makerAmount)
-        .mul(parseUnits('1'))
+        .mul(parseUnits('1', decimals))
         .div(BigNumber.from(order.takerAmount)) // result is in collateral token decimals
 
       // Value to display in the orderbook
@@ -545,7 +553,8 @@ export const mapOrderData = (
 
       // Display remainingFillableTakerAmount as the quantity in the orderbook
       orders.nbrOptions = formatUnits(
-        BigNumber.from(metaData.remainingFillableTakerAmount)
+        BigNumber.from(metaData.remainingFillableTakerAmount),
+        decimals
       )
     }
 
@@ -557,7 +566,7 @@ export const mapOrderData = (
 
       // Calculate Ask amount
       const askAmount = BigNumber.from(order.takerAmount)
-        .mul(parseUnits('1'))
+        .mul(parseUnits('1', decimals))
         .div(BigNumber.from(order.makerAmount)) // result is in collateral token decimals
 
       // Value to display in the orderbook
@@ -573,9 +582,12 @@ export const mapOrderData = (
         )
           .mul(BigNumber.from(order.makerAmount))
           .div(BigNumber.from(order.takerAmount))
-        orders.nbrOptions = formatUnits(remainingFillableMakerAmount)
+        orders.nbrOptions = formatUnits(remainingFillableMakerAmount, decimals)
       } else {
-        orders.nbrOptions = formatUnits(BigNumber.from(order.makerAmount))
+        orders.nbrOptions = formatUnits(
+          BigNumber.from(order.makerAmount),
+          decimals
+        )
       }
     }
     return orders

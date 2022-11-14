@@ -29,7 +29,3 @@ To work on the app go there and make the changes you want.
 - `yarn build` Builds packages for development
 
 ## Troubleshooting
-
-### Missing abis
-
-If typescript or the subgraphs don't compile because they're missing abis from the @diva/contracts package, go to packages/diva-contract and run `yarn build`.

@@ -3,13 +3,13 @@ import { parseUnits } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
-import { divaGovernanceAddress, tradingFee } from '../constants'
+import { DIVA_GOVERNANCE_ADDRESS, TRADING_FEE } from '../constants'
 import { getFutureExpiryInSeconds } from '../Util/utils'
 
 export const buylimitOrder = async (orderData) => {
   const metamaskProvider = new MetamaskSubprovider(window.ethereum)
 
-  const positionTokenUnit = parseUnits('1')
+  const positionTokenUnit = parseUnits('1', orderData.collateralDecimals)
 
   const nbrOptionsToBuy = orderData.nbrOptions
 
@@ -22,7 +22,7 @@ export const buylimitOrder = async (orderData) => {
   // NOTE: The fee is paid in position token which is the taker token in Buy Limit. In the context of DIVA,
   // this has the implication that for deep-out-of the money position tokens, the trading fee may end up being zero for the feeRecipient.
   const positionTokenFeeAmount = nbrOptionsToBuy
-    .mul(parseUnits(tradingFee.toString())) // TODO: Revisit fee logic for trade mining program at a later stage
+    .mul(parseUnits(TRADING_FEE.toString(), orderData.collateralDecimals)) // TODO: Revisit fee logic for trade mining program at a later stage
     .div(positionTokenUnit)
 
   // Get 0x API url to post order
@@ -36,7 +36,7 @@ export const buylimitOrder = async (orderData) => {
     takerAmount: nbrOptionsToBuy.toString(),
     maker: orderData.maker,
     sender: NULL_ADDRESS,
-    feeRecipient: divaGovernanceAddress,
+    feeRecipient: DIVA_GOVERNANCE_ADDRESS,
     takerTokenFeeAmount: positionTokenFeeAmount.toString(),
     expiry: getFutureExpiryInSeconds(orderData.orderExpiry),
     salt: Date.now().toString(),

@@ -1,0 +1,30 @@
+lib/queries.ts:
+* collateralBalanceLongInitial and collateralBalanceShortInitial replaced by collateralBalanceGross and gradient
+* redemptionAmountLongToken and redemptionAmountShortToken renamed to payoutLong and payoutShort
+* redemptionFee renamed to protocol fee
+* supplyInitial dropped
+
+
+* calcPayoffsPerToken, calcBreakEven and maxPayout functions updated
+
+
+To check:
+* ...
+
+
+
+TODO:
+- Remove diva-contracts folder 
+  -> Load DIVA ABI from ABI file, i.e. replace `import ERC20_ABI from '@diva/contracts/abis/erc20.json'`
+- Replace `import ERC20 from '@diva/contracts/abis/erc20.json'`
+- Update governance parameter call for submission periods
+
+QUESTIONS:
+- Remove `convertExponentialToDecimal` in calcPayoffsPerToken.ts?
+- Settlement periods are not longer general but pool specific -> adjust
+
+
+BUGS:
+- SOLVED: In Create Pool, app breaks when Collateral Amount is removed
+- OPEN: In Create pool, if you reduce collateral Amount from 10 (default) to 9, say, then error message "Minimum taker contribution must be less than collateral amount" pops up which only makes sense for Create Offer process
+- OPEN: When you navigate to create page via menu, then shortRecipient and longRecipient are not set. Only on page reload

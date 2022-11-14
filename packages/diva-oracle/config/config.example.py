@@ -9,14 +9,12 @@ sender_email = ""
 pass_code = ""
 
 PROVIDER_URL = {
-    "ropsten": 'https://ropsten.infura.io/v3/<YOUR_API_KEY>',
     "goerli": 'https://goerli.infura.io/v3/<YOUR_API_KEY>',
     "rinkeby": 'https://rinkeby.infura.io/v3/<YOUR_API_KEY>',
     "mumbai": ''
 }
 
 chain_id = {
-    "ropsten": 3,
     "rinkeby": 4,
     "kovan": 42,
     "mumbai": 80001,
@@ -26,13 +24,16 @@ chain_id = {
 
 # symbol : Id
 WHITELIST_TOKEN_POOLS = {
-    "dUSD" : "0xfa158c9b780a4213f3201ae74cca013712c8538d",
-    "WBTC" : "0xA61E26649743f8c86b09860c9fddf45153fA7A55"
+    "dUSD" : "0xfa158c9b780a4213f3201ae74cca013712c8538d", # 18 decimals
+    "WBTC" : "0xA61E26649743f8c86b09860c9fddf45153fA7A55", # 8 decimals
+    "WAGMI": "0x9A07D3F69411155f2790E5ed138b750C3Ecd28aD", # 6 decimals
+    "WETH": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6" # 18 decimals
 }
 
 # This true value will only submit pools in the whitelist token pools
 # Any collateral assets outside of the whitelist will not be processed.
 BLOCK_ON_WHITELIST = True
+
 # PARAMETERS
 
 # Max seconds to wait for a transaction to be confirmed
@@ -45,7 +46,9 @@ max_time_away = 60
 max_reporting_frame = 24
 
 # Networks
-networks = ["ropsten"]  # write ["ropsten","mumbai"] for multiple networks
-network = "ropsten"
+networks = ["goerli"]  # write ["ropsten","mumbai"] for multiple networks
+
+network = "goeri"
+
 # Waiting time (in seconds) before next iteration
 waiting_next_iteration = 120

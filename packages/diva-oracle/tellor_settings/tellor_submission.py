@@ -1,7 +1,7 @@
 import config.config as config
 import eth_abi
 from Crypto.Hash import keccak
-
+import tellor_settings.tellor_contracts as tellor
 
 PRIVATE_KEY = config.PRIVATE_KEY
 PUBLIC_KEY = config.PUBLIC_KEY
@@ -11,9 +11,9 @@ def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract)
     print("Sending price to Tellor Playground ...")
     gas_price = w3.eth.gas_price
 
-
-    queryDataArgs = eth_abi.encode_abi(["int"], [int(pool_id)])
-    queryData = eth_abi.encode_abi(["string", "bytes"],["DIVAProtocolPolygon", queryDataArgs])
+    # Prepare queryId and queryData for value submission
+    queryDataArgs = eth_abi.encode_abi(["int", "address", "int"], [int(pool_id), tellor.divaDiamond[network], int(config.chain_id[network])])
+    queryData = eth_abi.encode_abi(["string", "bytes"],["DIVAProtocol", queryDataArgs])
     queryId = keccak.new(digest_bits=256)
     queryId.update(queryData)
     print(queryId.hexdigest())

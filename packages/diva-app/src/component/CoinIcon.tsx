@@ -89,5 +89,7 @@ export const CoinIconPair = ({ assetName }: { assetName: string }) => {
         </Box>
       </>
     )
+  } else {
+    return <></>
   }
 }
