@@ -161,12 +161,14 @@ export function ReviewAndSubmit({
           Review
         </Typography>
         <Box border={1} borderColor="secondary.dark">
-          <Container sx={{ pb: theme.spacing(4) }}>
+          <Container sx={{ pb: theme.spacing(4), pt: theme.spacing(3) }}>
             <Stack spacing={theme.spacing(2)}>
-              <Typography pt={theme.spacing(2)} variant="subtitle1">
-                Please review the correctness of the pool's parameters before
-                creating it
-              </Typography>
+              {transaction !== 'filloffer' && (
+                <Typography pt={theme.spacing(2)} variant="subtitle1">
+                  Please review the correctness of the pool's parameters before
+                  creating it
+                </Typography>
+              )}
               <Typography
                 variant="subtitle1"
                 sx={{ fontWeight: 'bold' }}
@@ -204,14 +206,51 @@ export function ReviewAndSubmit({
               >
                 {transaction === 'createoffer' ? 'Offer terms' : 'Collateral'}
               </Typography>
-              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Collateral Token
-                </Typography>
-                <Typography fontSize={'0.85rem'}>
-                  {values.collateralToken.symbol}
-                </Typography>
-              </Stack>
+              {transaction === 'createpool' && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Collateral Token
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {values.collateralToken.symbol}
+                  </Typography>
+                </Stack>
+              )}
+              {transaction === 'filloffer' && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Max yield
+                  </Typography>
+                  <Typography fontSize={'0.85rem'}>
+                    {(
+                      (Number(
+                        formatUnits(
+                          formik.values.jsonToExport.takerCollateralAmount,
+                          decimal
+                        )
+                      ) +
+                        Number(
+                          formatUnits(
+                            formik.values.jsonToExport.makerCollateralAmount,
+                            decimal
+                          )
+                        )) /
+                      Number(
+                        formatUnits(
+                          formik.values.jsonToExport.takerCollateralAmount,
+                          decimal
+                        )
+                      )
+                    ).toFixed(2) + 'x'}
+                  </Typography>
+                </Stack>
+              )}
               {transaction === 'createpool' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
@@ -244,17 +283,23 @@ export function ReviewAndSubmit({
                     fontSize={'0.85rem'}
                     sx={{ ml: theme.spacing(2) }}
                   >
-                    Collateral Amount
+                    Offer Size
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {(
-                      (formik.values.yourShare * formik.values.makerShare) /
-                        (Number(
-                          formik.values.jsonToExport.takerCollateralAmount
-                        ) /
-                          10 ** decimal) +
-                      formik.values.yourShare
-                    ).toFixed(2)}
+                    {Number(
+                      formatUnits(
+                        formik.values.jsonToExport.takerCollateralAmount,
+                        decimal
+                      )
+                      // (formik.values.yourShare * formik.values.makerShare) /
+                      //   (Number(
+                      //     formik.values.jsonToExport.takerCollateralAmount
+                      //   ) /
+                      //     10 ** decimal) +
+                      // formik.values.yourShare
+                    ).toFixed(2) +
+                      ' ' +
+                      tokenSymbol}
                   </Typography>
                 </Stack>
               )}
@@ -284,19 +329,6 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {transaction === 'filloffer' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Your Contribution
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {values.yourShare.toFixed(2)}
-                  </Typography>
-                </Stack>
-              )}
               {transaction === 'createoffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
@@ -310,27 +342,7 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {transaction === 'filloffer' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Maker Contribution
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {(
-                      (formik.values.yourShare * formik.values.makerShare) /
-                      (Number(
-                        formik.values.jsonToExport.takerCollateralAmount
-                      ) /
-                        10 ** decimal)
-                    ).toFixed(2)}
-                  </Typography>
-                </Stack>
-              )}
-              {(transaction === 'createoffer' ||
-                transaction === 'filloffer') && (
+              {transaction === 'createoffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -350,34 +362,30 @@ export function ReviewAndSubmit({
                     fontSize={'0.85rem'}
                     sx={{ ml: theme.spacing(2) }}
                   >
-                    Offer Expiry
+                    Offer Expires in
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {/*{values.expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(values.expiryTime) / 1000).slice(
-                      11,
-                      19
-                    ) +
-                    ' ' +
-                    userTimeZone()}*/}
-                    {new Date(parseFloat(values.offerDuration) * 1000)
-                      .toLocaleString()
-                      .slice(0, 11) +
-                      ' ' +
-                      getDateTime(
-                        Number(
-                          new Date(parseFloat(values.offerDuration) * 1000)
-                        ) / 1000
-                      ).slice(11, 19) +
-                      ' ' +
-                      userTimeZone()}
-                    {/*{values.offerDuration ===*/}
-                    {/*  Math.floor(24 * 60 * 60 + Date.now() / 1000).toString() &&*/}
-                    {/*  '1 Day'}*/}
+                    {Math.floor(
+                      getExpiryMinutesFromNow(formik.values.offerDuration) / 60
+                    )}
+                    h{' '}
+                    {getExpiryMinutesFromNow(formik.values.offerDuration) % 60}m
                   </Typography>
                 </Stack>
               )}
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: 'bold' }}
+                color="primary"
+              >
+                Oracle
+              </Typography>
+              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
+                  Data Provider
+                </Typography>
+                <Typography fontSize={'0.85rem'}>{dataSourceName}</Typography>
+              </Stack>
               <Typography
                 variant="subtitle1"
                 sx={{ fontWeight: 'bold' }}
@@ -454,29 +462,12 @@ export function ReviewAndSubmit({
                     Min Taker Contribution (applicable on 1st fill only)
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {Number(values.minTakerContribution).toFixed(2)}
+                    {Number(values.minTakerContribution).toFixed(2) +
+                      ' ' +
+                      tokenSymbol}
                   </Typography>
                 </Stack>
               )}
-              {/*<Stack direction="row" sx={{ justifyContent: 'space-between' }}>*/}
-              {/*  <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>*/}
-              {/*    Pool Description*/}
-              {/*  </Typography>*/}
-              {/*  <Typography fontSize={'0.85rem'}>TBD</Typography>*/}
-              {/*</Stack>*/}
-              <Typography
-                variant="subtitle1"
-                sx={{ fontWeight: 'bold' }}
-                color="primary"
-              >
-                Oracle
-              </Typography>
-              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Data Provider
-                </Typography>
-                <Typography fontSize={'0.85rem'}>{dataSourceName}</Typography>
-              </Stack>
             </Stack>
           </Container>
         </Box>
@@ -501,7 +492,7 @@ export function ReviewAndSubmit({
                   marginBottom: theme.spacing(2),
                 }}
               >
-                <Container sx={{ pt: theme.spacing(2) }}>
+                <Container sx={{ pt: theme.spacing(4) }}>
                   <FormControl
                     fullWidth
                     error={formik.errors.collateralBalance != null}
@@ -560,12 +551,11 @@ export function ReviewAndSubmit({
                           justifyContent: 'flex-end',
                         }}
                       >
-                        Your balance:{' '}
+                        Balance:{' '}
                         {toExponentialOrNumber(
                           parseFloat(collateralWalletBalance)
-                        ) +
-                          ' ' +
-                          tokenSymbol}
+                        )}
+                        {' ('}
                         <MaxCollateral
                           role="button"
                           onClick={() => {
@@ -584,13 +574,14 @@ export function ReviewAndSubmit({
                             }
                           }}
                         >
-                          (Max)
+                          Max
                         </MaxCollateral>
+                        {')'}
                       </FormHelperText>
                     )}
                   </FormControl>
 
-                  <FormHelperText
+                  {/* <FormHelperText
                     sx={{ display: 'flex', justifyContent: 'flex-end' }}
                   >
                     Expires in:{' '}
@@ -599,7 +590,7 @@ export function ReviewAndSubmit({
                     )}
                     h{' '}
                     {getExpiryMinutesFromNow(formik.values.offerDuration) % 60}m
-                  </FormHelperText>
+                  </FormHelperText> */}
 
                   <LinearProgress
                     variant="determinate"
