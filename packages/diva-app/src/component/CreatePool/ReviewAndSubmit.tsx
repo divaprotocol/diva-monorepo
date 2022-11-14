@@ -615,9 +615,11 @@ export function ReviewAndSubmit({
                     }}
                   >
                     <Typography fontSize={'0.85rem'}>
+                      {'Filled: '}
                       {takerFilledAmount + ' ' + tokenSymbol}
                     </Typography>
                     <Typography fontSize={'0.85rem'}>
+                      {'Offer size: '}
                       {Number(actualFillableAmount + takerFilledAmount) +
                         ' ' +
                         tokenSymbol}
