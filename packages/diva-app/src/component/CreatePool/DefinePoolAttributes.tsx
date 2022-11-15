@@ -644,7 +644,7 @@ export function DefinePoolAttributes({
                   inflection={inflection}
                   gradient={gradient}
                   hasError={hasPaymentProfileError}
-                  collateralToken={collateralToken.name}
+                  collateralToken={collateralToken.symbol}
                 />
               </Box>
             )}

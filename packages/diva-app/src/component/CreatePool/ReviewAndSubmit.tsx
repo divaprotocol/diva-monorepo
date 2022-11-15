@@ -643,7 +643,7 @@ export function ReviewAndSubmit({
                     longDirection={values.offerDirection === 'Long'}
                     collateralToken={
                       values.collateralToken
-                        ? values.collateralToken.name
+                        ? values.collateralToken.symbol
                         : null
                     }
                   />
