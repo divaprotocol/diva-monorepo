@@ -19,7 +19,7 @@ export function PayoffProfile(props) {
   const maxPayoutLong = 1
   const maxPayoutShort = 1
   const theme = useTheme()
-  const tickVaule = [0, 0.2, 0.4, 0.6, 0.8, 1]
+  const tickValues = [0, 0.2, 0.4, 0.6, 0.8, 1]
 
   const short = [
     {
@@ -148,7 +148,7 @@ export function PayoffProfile(props) {
         d3
           .axisRight(y)
           .tickSize(width + 2)
-          .tickValues(tickVaule)
+          .tickValues(tickValues)
           .ticks(6)
       )
       .call((g) => g.select('.domain').remove())

@@ -33,7 +33,7 @@ import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { PayoffProfile } from '../Graphs/payOffProfille'
+import { PayoffProfile } from '../Graphs/payOffProfile'
 import { toExponentialOrNumber } from '../../Util/utils'
 
 const MaxCollateral = styled.u`
@@ -644,7 +644,9 @@ export function DefinePoolAttributes({
                   inflection={inflection}
                   gradient={gradient}
                   hasError={hasPaymentProfileError}
-                  collateralToken={collateralToken.name}
+                  collateralToken={
+                    collateralToken ? collateralToken.symbol : null
+                  }
                 />
               </Box>
             )}

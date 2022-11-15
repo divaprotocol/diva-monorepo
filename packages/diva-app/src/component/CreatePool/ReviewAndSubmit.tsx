@@ -29,7 +29,7 @@ import { ethers } from 'ethers'
 import ERC20 from '../../abi/ERC20ABI.json'
 import DIVA_ABI from '../../abi/DIVAABI.json'
 import { formatUnits } from 'ethers/lib/utils'
-import { PayoffProfile } from '../Graphs/payOffProfille'
+import { PayoffProfile } from '../Graphs/payOffProfile'
 import { useAppSelector } from '../../Redux/hooks'
 
 export function ReviewAndSubmit({
@@ -643,7 +643,7 @@ export function ReviewAndSubmit({
                     longDirection={values.offerDirection === 'Long'}
                     collateralToken={
                       values.collateralToken
-                        ? values.collateralToken.name
+                        ? values.collateralToken.symbol
                         : null
                     }
                   />
@@ -654,6 +654,11 @@ export function ReviewAndSubmit({
                     inflection={values.inflection}
                     gradient={values.gradient}
                     hasError={false}
+                    collateralToken={
+                      values.collateralToken
+                        ? values.collateralToken.symbol
+                        : null
+                    }
                   />
                 )}
               </Box>

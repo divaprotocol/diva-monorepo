@@ -37,7 +37,7 @@ import MenuItem from '@mui/material/MenuItem'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { PayoffProfile } from '../Graphs/payOffProfille'
+import { PayoffProfile } from '../Graphs/payOffProfile'
 import { toExponentialOrNumber } from '../../Util/utils'
 
 const MaxCollateral = styled.u`
@@ -1017,7 +1017,9 @@ export function DefineOfferAttributes({
                   inflection={inflection}
                   gradient={gradient}
                   hasError={hasPaymentProfileError}
-                  collateralToken={collateralToken.name}
+                  collateralToken={
+                    collateralToken ? collateralToken.symbol : null
+                  }
                 />
               </Box>
             )}
