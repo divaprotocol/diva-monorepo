@@ -62,7 +62,6 @@ type SingleConfig = {
     decimals: number
   }
   readonly isSupported: boolean
-  readonly zeroXAddress: string
 }
 
 export const projectId = '9f5f0ef1c7544c029b0aa9ca622759c3'
@@ -84,7 +83,6 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     isSupported: false,
-    zeroXAddress: '',
   },
   [SupportedChainId.ROPSTEN]: {
     name: 'Ropsten',
@@ -104,7 +102,6 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ropsten Ether', symbol: 'ropETH', decimals: 18 },
     isSupported: true,
-    zeroXAddress: '',
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0x2d941518E0876Fb6042bfCdB403427DC5620b2EC', // 26.10.2022
@@ -124,7 +121,6 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
     isSupported: true,
-    zeroXAddress: '0xf91bb752490473b8342a3e964e855b9f9a2a668e',
   },
   [SupportedChainId.POLYGON]: {
     name: 'Polygon',
@@ -142,7 +138,6 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: polygonMaticLogo,
     nativeCurrency: { name: 'Polygon Matic', symbol: 'MATIC', decimals: 18 },
     isSupported: false,
-    zeroXAddress: '',
   },
   [SupportedChainId.POLYGON_MUMBAI]: {
     name: 'Mumbai',
@@ -164,7 +159,6 @@ export const config: { [key: number]: SingleConfig } = {
       decimals: 18,
     },
     isSupported: false,
-    zeroXAddress: '',
   },
   [SupportedChainId.ARBITRUM_ONE]: {
     name: 'Arbitrum',
@@ -182,7 +176,6 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: arbitrumLogoUrl,
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     isSupported: false,
-    zeroXAddress: 's',
   },
 }
 

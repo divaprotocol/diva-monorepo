@@ -5,10 +5,14 @@ import { config } from '../constants'
 import { DIVA_GOVERNANCE_ADDRESS, TRADING_FEE } from '../constants'
 import { getFutureExpiryInSeconds } from '../Util/utils'
 import { zeroXTypes, zeroXDomain } from '../lib/zeroX'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const contractAddress = require('@0x/contract-addresses')
 
 export const sellLimitOrder = async (orderData) => {
   const { chainId } = orderData
   const signer = orderData.provider.getSigner()
+  const ZeroXChainContractAddress =
+    contractAddress.getContractAddressesForChainOrThrow(chainId).exchangeProxy
 
   const collateralTokenUnit = parseUnits('1', orderData.collateralDecimals)
 
@@ -51,7 +55,7 @@ export const sellLimitOrder = async (orderData) => {
     const signedTypedData = await signer._signTypedData(
       zeroXDomain({
         chainId: orderData.chainId,
-        verifyingContract: config[chainId].zeroXAddress,
+        verifyingContract: ZeroXChainContractAddress,
       }),
       zeroXTypes,
       order

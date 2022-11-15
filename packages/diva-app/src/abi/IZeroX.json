@@ -541,5 +541,56 @@
   {
     "stateMutability": "payable",
     "type": "receive"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "contract IERC20TokenV06",
+            "name": "makerToken",
+            "type": "address"
+          },
+          {
+            "internalType": "contract IERC20TokenV06",
+            "name": "takerToken",
+            "type": "address"
+          },
+          {
+            "internalType": "uint128",
+            "name": "makerAmount",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint128",
+            "name": "takerAmount",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint128",
+            "name": "takerTokenFeeAmount",
+            "type": "uint128"
+          },
+          { "internalType": "address", "name": "maker", "type": "address" },
+          { "internalType": "address", "name": "taker", "type": "address" },
+          { "internalType": "address", "name": "sender", "type": "address" },
+          {
+            "internalType": "address",
+            "name": "feeRecipient",
+            "type": "address"
+          },
+          { "internalType": "bytes32", "name": "pool", "type": "bytes32" },
+          { "internalType": "uint64", "name": "expiry", "type": "uint64" },
+          { "internalType": "uint256", "name": "salt", "type": "uint256" }
+        ],
+        "internalType": "struct LibNativeOrder.LimitOrder",
+        "name": "order",
+        "type": "tuple"
+      }
+    ],
+    "name": "cancelLimitOrder",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]
