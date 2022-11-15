@@ -632,7 +632,7 @@ export function ReviewAndSubmit({
             values.cap != null &&
             values.inflection != null &&
             values.gradient != null && (
-              <Box sx={{ maxWidth: '85%' }}>
+              <Box sx={{ maxWidth: '85%', marginLeft: 3, marginBottom: 2 }}>
                 {transaction !== 'createpool' ? (
                   <PayoffProfile
                     floor={values.floor}
@@ -643,7 +643,7 @@ export function ReviewAndSubmit({
                     longDirection={values.offerDirection === 'Long'}
                     collateralToken={
                       values.collateralToken
-                        ? values.collateralToken.symbol
+                        ? values.collateralToken.name
                         : null
                     }
                   />

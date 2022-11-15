@@ -8,19 +8,16 @@ export function PayoffProfile(props) {
     floor,
     cap,
     inflection: strike,
-    tokenSupply,
+    gradient,
     hasError,
-    collateralBalanceShort,
-    collateralBalanceLong,
     collateralToken,
   } = props
 
-  const padding = cap * 0.15
+  const padding = cap * 0.1
   const start = Math.max(floor - padding, 0)
-  const totalCollateral = collateralBalanceLong + collateralBalanceShort
 
-  const maxPayoutLong = totalCollateral / tokenSupply
-  const maxPayoutShort = totalCollateral / tokenSupply
+  const maxPayoutLong = 1
+  const maxPayoutShort = 1
   const theme = useTheme()
   const tickVaule = [0, 0.2, 0.4, 0.6, 0.8, 1]
 
@@ -35,7 +32,7 @@ export function PayoffProfile(props) {
     },
     {
       x: strike,
-      y: collateralBalanceShort / tokenSupply,
+      y: 1 - gradient,
     },
     {
       x: cap,
@@ -57,14 +54,14 @@ export function PayoffProfile(props) {
     },
     {
       x: strike,
-      y: collateralBalanceLong / tokenSupply,
+      y: gradient,
     },
     {
       x: cap,
       y: maxPayoutLong,
     },
     {
-      x: cap * 1.15,
+      x: cap + padding,
       y: maxPayoutLong,
     },
   ]

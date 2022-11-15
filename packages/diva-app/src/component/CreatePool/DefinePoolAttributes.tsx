@@ -637,13 +637,14 @@ export function DefinePoolAttributes({
             cap != null &&
             inflection != null &&
             gradient != null && (
-              <Box sx={{ maxWidth: '85%' }}>
+              <Box sx={{ maxWidth: '85%', marginLeft: 3, marginBottom: 2 }}>
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
                   inflection={inflection}
                   gradient={gradient}
                   hasError={hasPaymentProfileError}
+                  collateralToken={collateralToken.name}
                 />
               </Box>
             )}
