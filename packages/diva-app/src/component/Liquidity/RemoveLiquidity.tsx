@@ -23,9 +23,12 @@ import ERC20 from '../../abi/ERC20ABI.json'
 import Button from '@mui/material/Button'
 import { config } from '../../constants'
 import DIVA_ABI from '../../abi/DIVAABI.json'
+import { toExponentialOrNumber } from '../../Util/utils'
 import { fetchPool } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
+import { selectUserAddress } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { useAppSelector } from '../../Redux/hooks'
 import LightbulbIcon from '@mui/icons-material/Lightbulb'
 
 const MaxCollateral = styled.u`
@@ -54,9 +57,12 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
   const [balanceUpdated, setBalanceUpdated] = React.useState(true)
   const { provider } = useConnectionContext()
+  const account = useAppSelector(selectUserAddress)
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
   const theme = useTheme()
+
+  // TODO Move this part into the useEffect hook so that it updates the user balance on account switch
   const tokenBalanceLong = useErcBalance(
     pool ? pool!.longToken.id : undefined,
     balanceUpdated
@@ -145,7 +151,14 @@ export const RemoveLiquidity = ({ pool }: Props) => {
     } else {
       setOpenAlert(false)
     }
-  }, [tokenBalanceLong, tokenBalanceShort, textFieldValue, chainId, pool])
+  }, [
+    tokenBalanceLong,
+    tokenBalanceShort,
+    textFieldValue,
+    chainId,
+    pool,
+    account,
+  ])
 
   async function removeLiquidityTrade() {
     try {
