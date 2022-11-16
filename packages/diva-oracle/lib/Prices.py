@@ -49,16 +49,16 @@ def getKrakenCollateralConversion(dfitem, dfcontract, ts_date):
     price = getKrakenPrice(pair, ts_date)
     # This is for auto price to one in testing of dUSD
     if price[0] == -1:
-        return 1
-    return price[0]
+        return 1, 1, COLLATERAL_MAPPING[dfitem] + "/USD"
+    return price[0], price[1], COLLATERAL_MAPPING[dfitem] + "/USD"
 
 def check_whitelist_token(dfitem, dfcontract):
     try:
         #print(dfitem)
         #print(WHITELIST_TOKEN_POOLS)
         if dfitem in WHITELIST_TOKEN_POOLS:
-            print("Valid whitelisted Token {}, {}".format(dfitem, dfcontract[0]))
-            print(WHITELIST_TOKEN_POOLS.get(dfitem))
+            #print("Valid whitelisted Token {}, {}".format(dfitem, dfcontract[0]))
+            #print(WHITELIST_TOKEN_POOLS.get(dfitem))
             return "whitelisted"
         else:
             return "NotWhiteListed"
