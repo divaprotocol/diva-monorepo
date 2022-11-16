@@ -6,7 +6,7 @@ import config.config as config
 from web3 import Web3
 import time
 from lib.query import tellor_query
-from lib.submitPool import  tellor_submit_pools
+from lib.submitPool import tellor_submit_pools
 import pandas as pd
 
 

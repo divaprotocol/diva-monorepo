@@ -24,10 +24,17 @@ chain_id = {
 
 # symbol : Id
 WHITELIST_TOKEN_POOLS = {
-    "dUSD" : "0xfa158c9b780a4213f3201ae74cca013712c8538d", # 18 decimals
-    "WBTC" : "0xA61E26649743f8c86b09860c9fddf45153fA7A55", # 8 decimals
-    "WAGMI": "0x9A07D3F69411155f2790E5ed138b750C3Ecd28aD", # 6 decimals
-    "WETH": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6" # 18 decimals
+    "dUSD": "0xfa158c9b780a4213f3201ae74cca013712c8538d",  # 18 decimals
+    "WBTC": "0xA61E26649743f8c86b09860c9fddf45153fA7A55",  # 8 decimals
+    "WAGMI": "0x9A07D3F69411155f2790E5ed138b750C3Ecd28aD",  # 6 decimals
+    "WETH": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"  # 18 decimals
+}
+
+COLLATERAL_MAPPING = {
+    "dUSD": "ETH",
+    "WBTC": "BTC",
+    "WAGMI": "ETH",
+    "WETH": "ETH"
 }
 
 # This true value will only submit pools in the whitelist token pools
