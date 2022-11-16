@@ -229,24 +229,9 @@ export function ReviewAndSubmit({
                   </Typography>
                   <Typography fontSize={'1rem'} color={'#3393E0'}>
                     {(
-                      (Number(
-                        formatUnits(
-                          formik.values.jsonToExport.takerCollateralAmount,
-                          decimal
-                        )
-                      ) +
-                        Number(
-                          formatUnits(
-                            formik.values.jsonToExport.makerCollateralAmount,
-                            decimal
-                          )
-                        )) /
-                      Number(
-                        formatUnits(
-                          formik.values.jsonToExport.takerCollateralAmount,
-                          decimal
-                        )
-                      )
+                      (Number(formik.values.takerShare) +
+                        Number(formik.values.makerShare)) /
+                      Number(formik.values.takerShare)
                     ).toFixed(2) + 'x'}
                   </Typography>
                 </Stack>
@@ -286,12 +271,7 @@ export function ReviewAndSubmit({
                     Offer Size
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {Number(
-                      formatUnits(
-                        formik.values.jsonToExport.takerCollateralAmount,
-                        decimal
-                      )
-                    ).toFixed(2) +
+                    {Number(formik.values.takerShare).toFixed(2) +
                       ' ' +
                       tokenSymbol}
                   </Typography>
