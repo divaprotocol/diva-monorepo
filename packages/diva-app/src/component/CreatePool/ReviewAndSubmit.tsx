@@ -227,7 +227,7 @@ export function ReviewAndSubmit({
                   >
                     Max yield
                   </Typography>
-                  <Typography fontSize={'0.85rem'}>
+                  <Typography fontSize={'1rem'} color={'#3393E0'}>
                     {(
                       (Number(
                         formatUnits(
