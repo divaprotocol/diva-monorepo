@@ -245,7 +245,9 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 You can remove up to
                 <Typography variant="h4" sx={{ display: 'inline' }}>
                   &nbsp;
-                  {parseFloat(formatUnits(maxCollateral, decimal)).toFixed(4)}{' '}
+                  {parseFloat(formatUnits(maxCollateral, decimal)).toFixed(
+                    4
+                  )}{' '}
                   {pool!.collateralToken.symbol}&nbsp;
                 </Typography>
                 {'('}
