@@ -291,12 +291,6 @@ export function ReviewAndSubmit({
                         formik.values.jsonToExport.takerCollateralAmount,
                         decimal
                       )
-                      // (formik.values.yourShare * formik.values.makerShare) /
-                      //   (Number(
-                      //     formik.values.jsonToExport.takerCollateralAmount
-                      //   ) /
-                      //     10 ** decimal) +
-                      // formik.values.yourShare
                     ).toFixed(2) +
                       ' ' +
                       tokenSymbol}
