@@ -22,15 +22,22 @@ max_time_away = dt.timedelta(minutes=config.max_time_away)
 
 
 if __name__ == "__main__":
+    print(colored("*****************************************", 'green'))
     print(colored("RUNNING TELLOR-DIVA ORACLE", 'green'))
-    print(colored("DATA_PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]), 'green') )
+    print(colored("START TIME: %s" % dt.datetime.now().replace(microsecond=0), 'green'))
+    print(colored("DATA PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]), 'green'))
+    with open('log.txt', 'a') as f:
+        f.write("*****************************************\n")
+        f.write("RUNNING TELLOR-DIVA ORACLE\n")
+        f.write("START TIME: %s\n" % dt.datetime.now().replace(microsecond=0))
+        f.write("DATA PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]))
     # DO time time check here 
     while True:
         resp = run_graph_query(tellor_query(0, tellor_contracts.DIVAOracleTellor_contract_address[network]), network)
         df = pd.json_normalize(resp, ['data', 'pools'])
         if df.empty:
             print("No pools to report on at this time")
-        tellor_submit_pools(df, network, max_time_away, w3, tellor_contract)
+        tellor_submit_pools(df, network, w3, tellor_contract)
         print(colored("#########################################", "yellow"))
         print(colored("Waiting {} sec before next iteration...".format(waiting_sec), 'yellow'))
         # Wait before next iteration
