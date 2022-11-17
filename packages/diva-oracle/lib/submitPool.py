@@ -3,7 +3,6 @@ from lib.SendPrice import sendPrice
 from lib.QueryGraph import *
 from lib.Prices import getKrakenPrice, getKrakenCollateralConversion
 from lib.query import query, tellor_query
-from lib.recorder import *
 from tellor_settings.tellor_submission import submitTellorValue
 import tellor_settings.tellor_abi as tellor
 from tellor_settings.tellor_setFinalReferenceValue import setFinRefVal
@@ -11,40 +10,25 @@ import tellor_settings.tellor_contracts as tellor_contracts
 import time
 from termcolor import colored
 import datetime
-from config.config import PUBLIC_KEY
+from lib.recorder import printb, printn, printbAll, update_pending_records, update_records
+
 
 # Function to create output console message
 def printDataToBeSubmitted(pool_id, ts_date, opair, price, date, collAsset, collAddr, proxy, coll_to_usd, coll_date):
-    print("*** Value submission for Pool Id %s ***" % pool_id)
-    print("Pool expiration time: %s (%s)" % (datetime.datetime.fromtimestamp(ts_date),datetime.datetime.fromtimestamp(ts_date).astimezone().tzinfo.__str__()))
-    print("")
-    print(colored("Data to be submitted:", attrs=["bold"]))
-    print(colored("%s: %s" % (opair, price), attrs=["bold"]))
-    print("As of time: %s (%s)" % (datetime.datetime.fromtimestamp(date),datetime.datetime.fromtimestamp(date).astimezone().tzinfo.__str__()))
-    print("Source: Kraken")
-    print("")
-    print("Collateral asset: %s (%s)" % (collAsset, collAddr))
-    print("Proxy rate: %s" % proxy)
-    print(colored("Collateral/USD: %s" % coll_to_usd, attrs=["bold"]))
-    print("As of time: %s (%s)" % (datetime.datetime.fromtimestamp(coll_date), datetime.datetime.fromtimestamp(coll_date).astimezone().tzinfo.__str__()))
-    print("Source: Kraken")
-    print("")
-
-    with open('log.txt', 'a') as f:
-        f.write("*** Value submission for Pool Id %s ***\n" % pool_id)
-        f.write("Pool expiration time: %s (%s)\n" % (datetime.datetime.fromtimestamp(ts_date),datetime.datetime.fromtimestamp(ts_date).astimezone().tzinfo.__str__()))
-        f.write("\n")
-        f.write("Data to be submitted:\n")
-        f.write("%s: %s\n" % (opair, price))
-        f.write("As of time: %s (%s)\n" % (datetime.datetime.fromtimestamp(date),datetime.datetime.fromtimestamp(date).astimezone().tzinfo.__str__()))
-        f.write("Source: Kraken\n")
-        f.write("\n")
-        f.write("Collateral asset: %s (%s)\n" % (collAsset, collAddr))
-        f.write("Proxy rate: %s\n" % proxy)
-        f.write("Collateral/USD: %s\n" % coll_to_usd)
-        f.write("As of time: %s (%s)\n" % (datetime.datetime.fromtimestamp(coll_date), datetime.datetime.fromtimestamp(coll_date).astimezone().tzinfo.__str__()))
-        f.write("Source: Kraken\n")
-        f.write("")
+    printn("*** Value submission for Pool Id %s ***" % pool_id)
+    printn("Pool expiration time: %s (%s)" % (datetime.datetime.fromtimestamp(ts_date),datetime.datetime.fromtimestamp(ts_date).astimezone().tzinfo.__str__()))
+    printn("")
+    printbAll("Data to be submitted:")
+    printbAll("%s: %s" % (opair, price))
+    printn("As of time: %s (%s)" % (datetime.datetime.fromtimestamp(date),datetime.datetime.fromtimestamp(date).astimezone().tzinfo.__str__()))
+    printn("Source: Kraken")
+    printn("")
+    printn("Collateral asset: %s (%s)" % (collAsset, collAddr))
+    printn("Proxy rate: %s" % proxy)
+    printbAll("Collateral/USD: %s" % coll_to_usd)
+    printn("As of time: %s (%s)" % (datetime.datetime.fromtimestamp(coll_date), datetime.datetime.fromtimestamp(coll_date).astimezone().tzinfo.__str__()))
+    printn("Source: Kraken")
+    printn("")
 
 
 def submitPools(df, network, max_time_away, w3, contract):
@@ -122,9 +106,7 @@ def tellor_submit_pools(df, network, w3, contract):
             resp = run_graph_query(tellor_query(lastId, tellor_contracts.DIVAOracleTellor_contract_address[network]), network)
             df = extend_DataFrame(df, resp)
     except:
-        print("Error: Could not query graph.")
-        with open('log.txt', 'a') as f:
-            f.write("Error: Could not query graph.\n")
+        printn("Error: Could not query graph.")
 
     df = transform_expiryTimes(df)
     df = df.sort_values(by=['expiryTime'], ignore_index=True)
@@ -151,20 +133,15 @@ def tellor_submit_pools(df, network, w3, contract):
         coll_asset_to_usd, coll_date, proxy = getKrakenCollateralConversion(
             df['collateralToken.symbol'].iloc[i], df['collateralToken.id'].iloc[i], ts_date=ts_date)
         if coll_asset_to_usd == "NotWhiteListed":
-            print(colored("Failure: ", attrs=["bold"]) + "Error while fetching collateral to USD rate. Blocking submission, add to blocked list")
-            print("Potential reason: Collateral asset missing in mapping.")
-            with open('log.txt', 'a') as f:
-                f.write("Failure: " + "Error while fetching collateral to USD rate. Blocking submission, add to blocked list\n")
-                f.write("Potential reason: Collateral asset missing in mapping.\n")
+            printb("Failure: ", "Error while fetching collateral to USD rate. Blocking submission, add to blocked list")
+            printn("Potential reason: Collateral asset missing in mapping.")
             #print("collateral asset not whitelisted, blocking submission, add to blocked list")
             blocked_pools_by_whitelist.append(pool_id)
             return
         #print("coll asset value from kraken", coll_asset_to_usd)
         if (price, date) != (-1, -1):
             # submit pool price
-            print("-----------------------------------------")
-            with open('log.txt', 'a') as f:
-                f.write("-----------------------------------------\n")
+            printn("-----------------------------------------")
             printDataToBeSubmitted(pool_id, ts_date, opair, price, date, df['collateralToken.symbol'].iloc[i], df['collateralToken.id'].iloc[i], proxy, coll_asset_to_usd, coll_date)
             try:
                 # Tellor oracle has 2 steps submitting value to contract and setting final reference value
@@ -173,16 +150,12 @@ def tellor_submit_pools(df, network, w3, contract):
                 # TODO Pull a delay from contract
                 # minDisputePeriod -> Pulling this from the blockchain -> Look to do this on main
                 time.sleep(15)
-                print("")
-                with open('log.txt', 'a') as f:
-                    f.write("")
+                printn("")
                 setFinRefVal(pool_id, network, w3,
                                 DIVAOracleTellor_contract)
             except:
                 # How do we know transactions is still pending?
-                print("--Tellor submission or setFinalReferenceValue failed--")
-                with open('log.txt', 'a') as f:
-                    f.write("--Tellor submission or setFinalReferenceValue failed--\n")
+                printn("--Tellor submission or setFinalReferenceValue failed--")
                 pendingPools[network].append(pool_id)
                 #pendingPools_nonces[network].append(nonces[network])
                 #print("Nonce of pending pool transaction: {}".format(nonces[network]))
@@ -190,10 +163,7 @@ def tellor_submit_pools(df, network, w3, contract):
             #nonces[network] += 1
         else:
             pendingPools[network].append(pool_id)
-            print(colored("Failure: ", attrs=[
-                "bold"]) + "No price available or pair not available")
-            with open('log.txt', 'a') as f:
-                f.write("Failure: "+ "No price available or pair not available\n")
+            printb("Failure: ", "No price available or pair not available")
             message = "Pood id %s : No price available or Pair not available" % pool_id
             update_pending_records(message)
     return

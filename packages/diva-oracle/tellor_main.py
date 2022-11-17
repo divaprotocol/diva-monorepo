@@ -8,29 +8,25 @@ import time
 from lib.query import tellor_query
 from lib.submitPool import tellor_submit_pools
 import pandas as pd
-
+from lib.recorder import printc
 
 from termcolor import colored
 
 waiting_sec = 60
 network = config.network
-print(network)
+#print(network)
 w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
 tellor_contract = w3.eth.contract(
     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.TellorPlayground_abi)
 max_time_away = dt.timedelta(minutes=config.max_time_away)
+start = dt.datetime.now().replace(microsecond=0)
 
 
 if __name__ == "__main__":
-    print(colored("*****************************************", 'green'))
-    print(colored("RUNNING TELLOR-DIVA ORACLE", 'green'))
-    print(colored("START TIME: %s" % dt.datetime.now().replace(microsecond=0), 'green'))
-    print(colored("DATA PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]), 'green'))
-    with open('log.txt', 'a') as f:
-        f.write("*****************************************\n")
-        f.write("RUNNING TELLOR-DIVA ORACLE\n")
-        f.write("START TIME: %s\n" % dt.datetime.now().replace(microsecond=0))
-        f.write("DATA PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]))
+    printc("*****************************************", 'green')
+    printc("RUNNING TELLOR-DIVA ORACLE", 'green')
+    printc("START TIME: %s" % start, 'green')
+    printc("DATA PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]), 'green')
     # DO time time check here 
     while True:
         resp = run_graph_query(tellor_query(0, tellor_contracts.DIVAOracleTellor_contract_address[network]), network)
