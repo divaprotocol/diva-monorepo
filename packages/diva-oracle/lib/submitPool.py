@@ -10,8 +10,6 @@ from tellor_settings.tellor_setFinalReferenceValue import setFinRefVal
 import tellor_settings.tellor_contracts as tellor_contracts
 import time
 from termcolor import colored
-<<<<<<< Updated upstream
-=======
 import datetime
 from lib.recorder import printb, printn, printbAll, printt, update_pending_records, update_records
 from tellor_settings.tellor_retrieveData import retrieveData
@@ -37,7 +35,7 @@ def printDataToBeSubmitted(pool_id, ts_date, opair, price, date, collAsset, coll
     printn("As of time: %s (%s)" % (datetime.datetime.fromtimestamp(coll_date), datetime.datetime.fromtimestamp(coll_date).astimezone().tzinfo.__str__()))
     printn("Source: Kraken")
     printn("")
->>>>>>> Stashed changes
+
 
 
 def submitPools(df, network, max_time_away, w3, contract):
@@ -162,7 +160,6 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
             print(colored(message, "red"))
 
             try:
-<<<<<<< Updated upstream
                 # tellor oracle has 2 steps submitting value to contract and setting final reference value
                 print("submitting tellor value")
                 submitTellorValue(pool_id=pool_id, finalRefVal=price,
@@ -174,7 +171,7 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
                 setFinRefVal(pool_id, network, w3,
                                 DIVAOracleTellor_contract)
             
-=======
+
                 # We want to submit a value if nobody else has done so, or if others have done but their values differ from my value
                 # by more than a threshold percentage.
                 submit = False
@@ -202,7 +199,6 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
                     printn("")
                     setFinRefVal(pool_id, network, w3,
                                     DIVAOracleTellor_contract)
->>>>>>> Stashed changes
             except:
                 # How do we know transactions is still pending?
                 print("Transaction is still pending...")
