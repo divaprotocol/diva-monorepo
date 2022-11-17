@@ -55,17 +55,16 @@ const WalletInfo = ({
     connected?: string
   }>('diva-dapp-connection', {})
 
-  const handleWalletClick = async () => {
-    if (wallet.name === 'metamask') {
-      connect('metamask')
-    } else {
-      connect('walletconnect')
-    }
+  const handleWalletClick = async (walletName: string) => {
+    await connect(walletName)
     onClose()
   }
 
   return (
-    <WalletInfoContainer theme={theme} onClick={handleWalletClick}>
+    <WalletInfoContainer
+      theme={theme}
+      onClick={() => handleWalletClick(wallet.name)}
+    >
       <>
         <div>
           <img
