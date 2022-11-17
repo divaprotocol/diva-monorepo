@@ -8,9 +8,20 @@ import time
 from lib.query import tellor_query
 from lib.submitPool import  tellor_submit_pools
 import pandas as pd
+<<<<<<< Updated upstream
 
 
+=======
+from lib.recorder import printc, printt
+>>>>>>> Stashed changes
 from termcolor import colored
+from tellor_settings.tellor_retrieveData import retrieveData
+
+# For testing purposes:
+# getVal_contract = w3.eth.contract(
+#     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+# values = retrieveData(243,network, getVal_contract)
+# printt(values)
 
 waiting_sec = 60
 network = config.network

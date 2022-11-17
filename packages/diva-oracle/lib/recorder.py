@@ -1,3 +1,9 @@
+<<<<<<< Updated upstream
+=======
+import datetime as dt
+from termcolor import colored
+from tabulate import tabulate
+>>>>>>> Stashed changes
 
 # This file will write sent transactions to csv file
 
@@ -17,3 +23,32 @@ def update_pending_records(record):
     file.write('\n')
 
     file.close()
+<<<<<<< Updated upstream
+=======
+
+def printbAll(text):
+    print(colored(text, attrs=["bold"]))
+    with open('log.txt', 'a') as f:
+        f.write(text + "\n")
+
+def printb(textb, text):
+    print(colored(textb, attrs=["bold"]) + text)
+    with open('log.txt', 'a') as f:
+        f.write(textb + text + "\n")
+
+def printc(text, col):
+    print(colored(text, col))
+    with open('log.txt', 'a') as f:
+        f.write(text + "\n")
+
+def printn(text):
+    print(text)
+    with open('log.txt', 'a') as f:
+        f.write(text + "\n")
+
+def printt(val):
+    print(tabulate(val, headers=['RefValue', 'CollValue']))
+    with open('log.txt', 'a') as f:
+        for x in val:
+            f.write("%s" % x[0] + "%s \n" % x[1])
+>>>>>>> Stashed changes

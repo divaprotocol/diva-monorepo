@@ -25,5 +25,19 @@ def setFinRefVal(pool_id, network, w3, my_contract):
     txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
     #print("transaction hash for successful transaction")
     #print(txn_hash.hex())
+<<<<<<< Updated upstream
     transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
     print("Final Reference Value submitted for pool id {} ".format(pool_id), "({})".format(network))
+=======
+    try:
+        transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
+    #except TimeExhausted:
+    #    printb("Failure: ", "Timeout error. Transaction is not in chain after %s seconds" % config.timeout)
+    except Exception as err:
+        printb("Failure: ",  err.args[0])
+    printn("")
+    printb("Success: ", "Final Reference Value submitted")
+    printn("https://%s.etherscan.io/tx/%s" % (network, txn_hash.hex()))
+
+    #print("Final Reference Value submitted for pool id {} ".format(pool_id), "({})".format(network))
+>>>>>>> Stashed changes

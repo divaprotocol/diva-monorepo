@@ -10,6 +10,34 @@ from tellor_settings.tellor_setFinalReferenceValue import setFinRefVal
 import tellor_settings.tellor_contracts as tellor_contracts
 import time
 from termcolor import colored
+<<<<<<< Updated upstream
+=======
+import datetime
+from lib.recorder import printb, printn, printbAll, printt, update_pending_records, update_records
+from tellor_settings.tellor_retrieveData import retrieveData
+from config.config import submission_threshold
+from tabulate import tabulate
+
+def extract(lst):
+    return [item[0] for item in lst]
+
+# Function to create output console message
+def printDataToBeSubmitted(pool_id, ts_date, opair, price, date, collAsset, collAddr, proxy, coll_to_usd, coll_date):
+    printn("*** Value submission for Pool Id %s ***" % pool_id)
+    printn("Pool expiration time: %s (%s)" % (datetime.datetime.fromtimestamp(ts_date),datetime.datetime.fromtimestamp(ts_date).astimezone().tzinfo.__str__()))
+    printn("")
+    printbAll("Data to be submitted:")
+    printbAll("%s: %s" % (opair, price))
+    printn("As of time: %s (%s)" % (datetime.datetime.fromtimestamp(date),datetime.datetime.fromtimestamp(date).astimezone().tzinfo.__str__()))
+    printn("Source: Kraken")
+    printn("")
+    printn("Collateral asset: %s (%s)" % (collAsset, collAddr))
+    printn("Proxy rate: %s" % proxy)
+    printbAll("Collateral/USD: %s" % coll_to_usd)
+    printn("As of time: %s (%s)" % (datetime.datetime.fromtimestamp(coll_date), datetime.datetime.fromtimestamp(coll_date).astimezone().tzinfo.__str__()))
+    printn("Source: Kraken")
+    printn("")
+>>>>>>> Stashed changes
 
 
 def submitPools(df, network, max_time_away, w3, contract):
@@ -79,6 +107,8 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
         return
     DIVAOracleTellor_contract = w3.eth.contract(
             address=tellor_contracts.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
+    getVal_contract = w3.eth.contract(
+        address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
     numberPools = 0
     try:
         while True:
@@ -132,6 +162,7 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
             print(colored(message, "red"))
 
             try:
+<<<<<<< Updated upstream
                 # tellor oracle has 2 steps submitting value to contract and setting final reference value
                 print("submitting tellor value")
                 submitTellorValue(pool_id=pool_id, finalRefVal=price,
@@ -143,6 +174,35 @@ def tellor_submit_pools(df, network, max_time_away, w3, contract):
                 setFinRefVal(pool_id, network, w3,
                                 DIVAOracleTellor_contract)
             
+=======
+                # We want to submit a value if nobody else has done so, or if others have done but their values differ from my value
+                # by more than a threshold percentage.
+                submit = False
+                others_values = retrieveData(pool_id, network, getVal_contract)
+                if others_values and submission_threshold != 0:
+                    printn("Already submitted values are: ")
+                    printt(others_values)
+                    values_ref = extract(others_values)
+                    diff = [abs(price / x - 1) * 100 for x in values_ref]
+                    diff_ = [x < submission_threshold for x in diff]
+                    if sum(diff_) == 0:  # If there is at least reported value within the threshold, you don't report.
+                        submit = True
+                    else:
+                        printn("At least one submitted value is close to our value with respect to the threshold. No submission will be done.")
+                elif not others_values:
+                    submit = True
+
+                if submit or (submission_threshold == 0):
+                    # Tellor oracle has 2 steps submitting value to contract and setting final reference value
+                    submitTellorValue(pool_id=pool_id, finalRefVal=price,
+                                        collToUSD=coll_asset_to_usd, network=network, w3=w3, my_contract=contract)
+                    # TODO Pull a delay from contract
+                    # minDisputePeriod -> Pulling this from the blockchain -> Look to do this on main
+                    time.sleep(15)
+                    printn("")
+                    setFinRefVal(pool_id, network, w3,
+                                    DIVAOracleTellor_contract)
+>>>>>>> Stashed changes
             except:
                 # How do we know transactions is still pending?
                 print("Transaction is still pending...")

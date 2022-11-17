@@ -1,0 +1,1117 @@
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 13:25:22
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 240 ***
+Pool expiration time: 2022-11-17 10:26:42 (CET)
+
+Data to be submitted:
+BTC/USD: 16543.7
+As of time: 2022-11-17 10:26:35.561489 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1198.24
+As of time: 2022-11-17 10:26:05.772994 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: 09581b97c3b76f527b7274187e6f9e73b33675ff0d2286f3c9393bed9f7829e6
+Failure: err: max fee per gas less than block base fee: address 0xc948f2F172Fe25977E322c8D82F8f53338f8a051, maxFeePerGas: 109824779328 baseFee: 115795369493 (supplied gas 1126319)
+Nonce: 85 
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 241 ***
+Pool expiration time: 2022-11-17 10:30:49 (CET)
+
+Data to be submitted:
+BTC/USD: 16543.5
+As of time: 2022-11-17 10:30:36.976526 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1195.8
+As of time: 2022-11-17 10:30:26.967941 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: 794881d9af3a906aee0d52b1b89420c67b618dda2b6c0fe5cf4648a23270c095
+Nonce: 85 
+
+Success: Price submitted to Tellor playground
+https://goerli.etherscan.io/tx/0xb1407cc11a617e1f84afb0c7df3dda6e8f800efa9b123208de1153b200a70cdc
+
+Triggering setFinalReferenceValue()...
+DIVAOracleTellor address: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+Triggered by address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+Nonce: 86
+
+Success: Final Reference Value submitted
+https://goerli.etherscan.io/tx/0x4dfcd52097a45f8e1d3427a0294a6e912f656a49c90059b9df1fed67310a719bSending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: 891848cd84fbaf07638753eb896f2d72ea5dd4262252c7c7f87bdacf4869abda
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: 891848cd84fbaf07638753eb896f2d72ea5dd4262252c7c7f87bdacf4869abda
+queryId: 8c52fc17dd4e79c3d7ffaf30a06b8aa201db88f1c412be296f73a94032489ea9
+Get Value Count for Pool id: 269
+queryId: 891848cd84fbaf07638753eb896f2d72ea5dd4262252c7c7f87bdacf4869abda
+Get Value Count for Pool id: 236
+queryId: 8c52fc17dd4e79c3d7ffaf30a06b8aa201db88f1c412be296f73a94032489ea9
+Get Value Count for Pool id: 269
+queryId: 891848cd84fbaf07638753eb896f2d72ea5dd4262252c7c7f87bdacf4869abda
+Get Value Count for Pool id: 269
+queryId: 891848cd84fbaf07638753eb896f2d72ea5dd4262252c7c7f87bdacf4869abda
+Get Value Count for Pool id: 269
+queryId: 891848cd84fbaf07638753eb896f2d72ea5dd4262252c7c7f87bdacf4869abda
+Get Value Count for Pool id: 269
+queryId: 891848cd84fbaf07638753eb896f2d72ea5dd4262252c7c7f87bdacf4869abda
+Get Value Count for Pool id: 269
+queryId: 891848cd84fbaf07638753eb896f2d72ea5dd4262252c7c7f87bdacf4869abda
+Get Value Count for Pool id: 269
+queryId: 891848cd84fbaf07638753eb896f2d72ea5dd4262252c7c7f87bdacf4869abda
+Get Value Count for Pool id: 269
+queryId: 891848cd84fbaf07638753eb896f2d72ea5dd4262252c7c7f87bdacf4869abda
+Get Value Count for Pool id: 236
+queryId: 8c52fc17dd4e79c3d7ffaf30a06b8aa201db88f1c412be296f73a94032489ea9
+Get Value Count for Pool id: 236
+queryId: 8c52fc17dd4e79c3d7ffaf30a06b8aa201db88f1c412be296f73a94032489ea9
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 15:07:36
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 240 ***
+Pool expiration time: 2022-11-17 10:26:42 (CET)
+
+Data to be submitted:
+BTC/USD: 16543.7
+As of time: 2022-11-17 10:26:35.561489 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1198.24
+As of time: 2022-11-17 10:26:05.772994 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 269 ***
+Pool expiration time: 2022-11-17 10:35:00 (CET)
+
+Data to be submitted:
+ETH/USD: 1186.63
+As of time: 2022-11-17 10:34:46.217577 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1186.63
+As of time: 2022-11-17 10:34:46.217577 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: 891848cd84fbaf07638753eb896f2d72ea5dd4262252c7c7f87bdacf4869abda
+Nonce: 87 
+Get Value Count for Pool id: 236
+queryId: 8c52fc17dd4e79c3d7ffaf30a06b8aa201db88f1c412be296f73a94032489ea9
+Get Value Count for Pool id: 236
+queryId: 8c52fc17dd4e79c3d7ffaf30a06b8aa201db88f1c412be296f73a94032489ea9
+Get Value Count for Pool id: 236
+queryId: 8c52fc17dd4e79c3d7ffaf30a06b8aa201db88f1c412be296f73a94032489ea9
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 17:08:56
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 251 ***
+Pool expiration time: 2022-11-17 10:41:36 (CET)
+
+Data to be submitted:
+BTC/USD: 16507.4
+As of time: 2022-11-17 10:41:28.794821 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1188.44
+As of time: 2022-11-17 10:41:28.062339 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 245 ***
+Pool expiration time: 2022-11-17 10:43:19 (CET)
+
+Data to be submitted:
+BTC/USD: 16514.0
+As of time: 2022-11-17 10:43:11.369504 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1189.4
+As of time: 2022-11-17 10:43:17.647854 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: 6a5c0a37c56e41f4284b54a8acf5a8f888f99b7a545b31af510064cdbcb64821
+Nonce: 88 
+
+Success: Price submitted to Tellor playground
+https://goerli.etherscan.io/tx/0x7e403bee9231b07204362869d89dca94ac8b968c779a6b9a41c9b7e6e1fa8fc8
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 252 ***
+Pool expiration time: 2022-11-17 10:49:42 (CET)
+
+Data to be submitted:
+BTC/USD: 16501.6
+As of time: 2022-11-17 10:49:26.393709 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1187.44
+As of time: 2022-11-17 10:49:39.772785 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 249 ***
+Pool expiration time: 2022-11-17 10:51:44 (CET)
+
+Data to be submitted:
+BTC/USD: 16481.2
+As of time: 2022-11-17 10:51:39.819058 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1185.8
+As of time: 2022-11-17 10:51:37.520650 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 17:11:59
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 251 ***
+Pool expiration time: 2022-11-17 10:41:36 (CET)
+
+Data to be submitted:
+BTC/USD: 16507.4
+As of time: 2022-11-17 10:41:28.794821 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1188.44
+As of time: 2022-11-17 10:41:28.062339 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 245 ***
+Pool expiration time: 2022-11-17 10:43:19 (CET)
+
+Data to be submitted:
+BTC/USD: 16514.0
+As of time: 2022-11-17 10:43:11.369504 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1189.4
+As of time: 2022-11-17 10:43:17.647854 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 252 ***
+Pool expiration time: 2022-11-17 10:49:42 (CET)
+
+Data to be submitted:
+BTC/USD: 16501.6
+As of time: 2022-11-17 10:49:26.393709 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1187.44
+As of time: 2022-11-17 10:49:39.772785 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 249 ***
+Pool expiration time: 2022-11-17 10:51:44 (CET)
+
+Data to be submitted:
+BTC/USD: 16481.2
+As of time: 2022-11-17 10:51:39.819058 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1185.8
+As of time: 2022-11-17 10:51:37.520650 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: d6951596bbbee898615fb50c70825e96d26ef1fce61ed764e6a6031fc115df09
+Nonce: 89 
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 261 ***
+Pool expiration time: 2022-11-17 12:14:45 (CET)
+
+Data to be submitted:
+BTC/USD: 16567.0
+As of time: 2022-11-17 12:14:27.019873 (CET)
+Source: Kraken
+
+Collateral asset: WETH (0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6)
+Proxy rate: ETH/USD
+Collateral/USD: 1199.6
+As of time: 2022-11-17 12:14:13.153627 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: 8ab5e154fa5979ec0bb1f0f95e24b444fbd3867bb035a9823cd79acc52d9105c
+Nonce: 89 
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 17:14:33
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 251 ***
+Pool expiration time: 2022-11-17 10:41:36 (CET)
+
+Data to be submitted:
+BTC/USD: 16507.4
+As of time: 2022-11-17 10:41:28.794821 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1188.44
+As of time: 2022-11-17 10:41:28.062339 (CET)
+Source: Kraken
+
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 17:15:02
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 251 ***
+Pool expiration time: 2022-11-17 10:41:36 (CET)
+
+Data to be submitted:
+BTC/USD: 16507.4
+As of time: 2022-11-17 10:41:28.794821 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1188.44
+As of time: 2022-11-17 10:41:28.062339 (CET)
+Source: Kraken
+
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 17:15:30
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 251 ***
+Pool expiration time: 2022-11-17 10:41:36 (CET)
+
+Data to be submitted:
+BTC/USD: 16507.4
+As of time: 2022-11-17 10:41:28.794821 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1188.44
+As of time: 2022-11-17 10:41:28.062339 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 245 ***
+Pool expiration time: 2022-11-17 10:43:19 (CET)
+
+Data to be submitted:
+BTC/USD: 16514.0
+As of time: 2022-11-17 10:43:11.369504 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1189.4
+As of time: 2022-11-17 10:43:17.647854 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 252 ***
+Pool expiration time: 2022-11-17 10:49:42 (CET)
+
+Data to be submitted:
+BTC/USD: 16501.6
+As of time: 2022-11-17 10:49:26.393709 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1187.44
+As of time: 2022-11-17 10:49:39.772785 (CET)
+Source: Kraken
+
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 17:16:24
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 251 ***
+Pool expiration time: 2022-11-17 10:41:36 (CET)
+
+Data to be submitted:
+BTC/USD: 16507.4
+As of time: 2022-11-17 10:41:28.794821 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1188.44
+As of time: 2022-11-17 10:41:28.062339 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 17:17:36
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 251 ***
+Pool expiration time: 2022-11-17 10:41:36 (CET)
+
+Data to be submitted:
+BTC/USD: 16507.4
+As of time: 2022-11-17 10:41:28.794821 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1188.44
+As of time: 2022-11-17 10:41:28.062339 (CET)
+Source: Kraken
+
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 17:18:12
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 251 ***
+Pool expiration time: 2022-11-17 10:41:36 (CET)
+
+Data to be submitted:
+BTC/USD: 16507.4
+As of time: 2022-11-17 10:41:28.794821 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1188.44
+As of time: 2022-11-17 10:41:28.062339 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 17:18:36
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 251 ***
+Pool expiration time: 2022-11-17 10:41:36 (CET)
+
+Data to be submitted:
+BTC/USD: 16507.4
+As of time: 2022-11-17 10:41:28.794821 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1188.44
+As of time: 2022-11-17 10:41:28.062339 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 245 ***
+Pool expiration time: 2022-11-17 10:43:19 (CET)
+
+Data to be submitted:
+BTC/USD: 16514.0
+As of time: 2022-11-17 10:43:11.369504 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1189.4
+As of time: 2022-11-17 10:43:17.647854 (CET)
+Source: Kraken
+
+Already somebody else submitted a value that is close to our value with respect to the threshold. No submission will be done.
+Others have already reported good values.
+-----------------------------------------
+*** Value submission for Pool Id 252 ***
+Pool expiration time: 2022-11-17 10:49:42 (CET)
+
+Data to be submitted:
+BTC/USD: 16501.6
+As of time: 2022-11-17 10:49:26.393709 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1187.44
+As of time: 2022-11-17 10:49:39.772785 (CET)
+Source: Kraken
+
+Already somebody else submitted a value that is close to our value with respect to the threshold. No submission will be done.
+Others have already reported good values.
+-----------------------------------------
+*** Value submission for Pool Id 249 ***
+Pool expiration time: 2022-11-17 10:51:44 (CET)
+
+Data to be submitted:
+BTC/USD: 16481.2
+As of time: 2022-11-17 10:51:39.819058 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1185.8
+As of time: 2022-11-17 10:51:37.520650 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: d6951596bbbee898615fb50c70825e96d26ef1fce61ed764e6a6031fc115df09
+Failure: err: max fee per gas less than block base fee: address 0xc948f2F172Fe25977E322c8D82F8f53338f8a051, maxFeePerGas: 195999764754 baseFee: 199821826158 (supplied gas 13393694)
+Nonce: 89 
+--Tellor submission or setFinalReferenceValue failed--
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 17:25:31
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 251 ***
+Pool expiration time: 2022-11-17 10:41:36 (CET)
+
+Data to be submitted:
+BTC/USD: 16507.4
+As of time: 2022-11-17 10:41:28.794821 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1188.44
+As of time: 2022-11-17 10:41:28.062339 (CET)
+Source: Kraken
+
+Already 1 values submitted by others and at least one is close to our value with respect to the threshold. No submission will be done.
+Others have already reported good values.
+-----------------------------------------
+*** Value submission for Pool Id 245 ***
+Pool expiration time: 2022-11-17 10:43:19 (CET)
+
+Data to be submitted:
+BTC/USD: 16514.0
+As of time: 2022-11-17 10:43:11.369504 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1189.4
+As of time: 2022-11-17 10:43:17.647854 (CET)
+Source: Kraken
+
+Already 1 values submitted by others and at least one is close to our value with respect to the threshold. No submission will be done.
+Others have already reported good values.
+-----------------------------------------
+*** Value submission for Pool Id 252 ***
+Pool expiration time: 2022-11-17 10:49:42 (CET)
+
+Data to be submitted:
+BTC/USD: 16501.6
+As of time: 2022-11-17 10:49:26.393709 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1187.44
+As of time: 2022-11-17 10:49:39.772785 (CET)
+Source: Kraken
+
+Already 1 values submitted by others and at least one is close to our value with respect to the threshold. No submission will be done.
+Others have already reported good values.
+-----------------------------------------
+*** Value submission for Pool Id 249 ***
+Pool expiration time: 2022-11-17 10:51:44 (CET)
+
+Data to be submitted:
+BTC/USD: 16481.2
+As of time: 2022-11-17 10:51:39.819058 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1185.8
+As of time: 2022-11-17 10:51:37.520650 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: d6951596bbbee898615fb50c70825e96d26ef1fce61ed764e6a6031fc115df09
+Nonce: 89 
+
+Success: Price submitted to Tellor playground
+https://goerli.etherscan.io/tx/0x3cb0bd4751a2ce682b295df4355d4f5a5d9e79285f5d5592ef1fdadb1e00d3ad
+
+Triggering setFinalReferenceValue()...
+DIVAOracleTellor address: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+Triggered by address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+Nonce: 90
+
+Success: Final Reference Value submitted
+https://goerli.etherscan.io/tx/0xb76850ca87a59fb06fcb686030bb4788ed20712d5a8a86428f1b583f61603c25
+-----------------------------------------
+*** Value submission for Pool Id 261 ***
+Pool expiration time: 2022-11-17 12:14:45 (CET)
+
+Data to be submitted:
+BTC/USD: 16567.0
+As of time: 2022-11-17 12:14:27.019873 (CET)
+Source: Kraken
+
+Collateral asset: WETH (0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6)
+Proxy rate: ETH/USD
+Collateral/USD: 1199.6
+As of time: 2022-11-17 12:14:13.153627 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: 8ab5e154fa5979ec0bb1f0f95e24b444fbd3867bb035a9823cd79acc52d9105c
+Nonce: 91 
+Failure: Error while submitting to Tellor playground:
+
+Success: Price submitted to Tellor playground
+https://goerli.etherscan.io/tx/0x99fe8dbf24cc2550e4b3a99118007a848758c62886faabe7455f40c83ee37673
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 18:26:05
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 18:59:54
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+[16527.0, 1195.5]16527.01195.516527.01195.5 
+16527.01195.5 
+16527.01195.5 
+16527.01195.5 
+16527.01195.5 
+16527.01195.5 
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 19:38:07
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 19:40:08
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 20:11:26
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: 139a8bf28c432e51499bbcf6637098e1755516e837c90ddad165a4278fa2131b
+Nonce: 100 
+
+Success: Price submitted to Tellor playground
+https://goerli.etherscan.io/tx/0x59825b18c674236e5269e61abc70daec0bc1cbab3c352b4653573f6de2a3fcee
+--Tellor submission or setFinalReferenceValue failed--
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 20:12:30
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16692.71210.94 
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 20:13:49
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16692.71210.94 
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 276 ***
+Pool expiration time: 2022-11-17 19:57:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16696.5
+As of time: 2022-11-17 19:56:48.999169 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.76
+As of time: 2022-11-17 19:56:53.793642 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 20:14:53
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16692.71210.94 
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 276 ***
+Pool expiration time: 2022-11-17 19:57:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16696.5
+As of time: 2022-11-17 19:56:48.999169 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.76
+As of time: 2022-11-17 19:56:53.793642 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: 7cdbbe95f9c7bf64a0cdfcc8bab486a8d6797c30083e860adfc20d6b7766ef4b
+--Tellor submission or setFinalReferenceValue failed--
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 20:23:34
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16692.71210.94 
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 276 ***
+Pool expiration time: 2022-11-17 19:57:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16696.5
+As of time: 2022-11-17 19:56:48.999169 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.76
+As of time: 2022-11-17 19:56:53.793642 (CET)
+Source: Kraken
+
+--Tellor submission or setFinalReferenceValue failed--
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 20:25:09
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16692.71210.94 
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 20:26:06
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16692.71210.94 
+--Tellor submission or setFinalReferenceValue failed--
+-----------------------------------------
+*** Value submission for Pool Id 276 ***
+Pool expiration time: 2022-11-17 19:57:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16696.5
+As of time: 2022-11-17 19:56:48.999169 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.76
+As of time: 2022-11-17 19:56:53.793642 (CET)
+Source: Kraken
+
+Sending price to Tellor playground...
+Network: goerli
+Contract address: 0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A
+Reporter address: 0xc948f2F172Fe25977E322c8D82F8f53338f8a051
+queryId: 7cdbbe95f9c7bf64a0cdfcc8bab486a8d6797c30083e860adfc20d6b7766ef4b
+Nonce: 101 
+Failure: Error while submitting to Tellor playground:
+
+Success: Price submitted to Tellor playground
+https://goerli.etherscan.io/tx/0xdbfeee25fc0898db77cc0d44b2539e6d1ac1d6acca13850ade789596a5b9af1c
+*****************************************
+RUNNING TELLOR-DIVA ORACLE
+START TIME: 2022-11-17 20:26:51
+DATA PROVIDER: 0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB
+
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16692.71210.94 
+At least one submitted value is close to our value with respect to the threshold. No submission will be done.
+-----------------------------------------
+*** Value submission for Pool Id 276 ***
+Pool expiration time: 2022-11-17 19:57:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16696.5
+As of time: 2022-11-17 19:56:48.999169 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.76
+As of time: 2022-11-17 19:56:53.793642 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16696.51210.76 
+At least one submitted value is close to our value with respect to the threshold. No submission will be done.
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16692.71210.94 
+At least one submitted value is close to our value with respect to the threshold. No submission will be done.
+-----------------------------------------
+*** Value submission for Pool Id 276 ***
+Pool expiration time: 2022-11-17 19:57:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16696.5
+As of time: 2022-11-17 19:56:48.999169 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.76
+As of time: 2022-11-17 19:56:53.793642 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16696.51210.76 
+At least one submitted value is close to our value with respect to the threshold. No submission will be done.
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16692.71210.94 
+At least one submitted value is close to our value with respect to the threshold. No submission will be done.
+-----------------------------------------
+*** Value submission for Pool Id 276 ***
+Pool expiration time: 2022-11-17 19:57:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16696.5
+As of time: 2022-11-17 19:56:48.999169 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.76
+As of time: 2022-11-17 19:56:53.793642 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16696.51210.76 
+At least one submitted value is close to our value with respect to the threshold. No submission will be done.
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16692.71210.94 
+At least one submitted value is close to our value with respect to the threshold. No submission will be done.
+-----------------------------------------
+*** Value submission for Pool Id 276 ***
+Pool expiration time: 2022-11-17 19:57:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16696.5
+As of time: 2022-11-17 19:56:48.999169 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.76
+As of time: 2022-11-17 19:56:53.793642 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16696.51210.76 
+At least one submitted value is close to our value with respect to the threshold. No submission will be done.
+-----------------------------------------
+*** Value submission for Pool Id 274 ***
+Pool expiration time: 2022-11-17 19:51:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16692.7
+As of time: 2022-11-17 19:50:57.652117 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.94
+As of time: 2022-11-17 19:50:43.241443 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16692.71210.94 
+At least one submitted value is close to our value with respect to the threshold. No submission will be done.
+-----------------------------------------
+*** Value submission for Pool Id 276 ***
+Pool expiration time: 2022-11-17 19:57:00 (CET)
+
+Data to be submitted:
+BTC/USD: 16696.5
+As of time: 2022-11-17 19:56:48.999169 (CET)
+Source: Kraken
+
+Collateral asset: dUSD (0xfa158c9b780a4213f3201ae74cca013712c8538d)
+Proxy rate: ETH/USD
+Collateral/USD: 1210.76
+As of time: 2022-11-17 19:56:53.793642 (CET)
+Source: Kraken
+
+Already submitted values are: 
+16696.51210.76 
+At least one submitted value is close to our value with respect to the threshold. No submission will be done.

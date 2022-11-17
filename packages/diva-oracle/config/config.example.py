@@ -52,3 +52,7 @@ network = "goeri"
 
 # Waiting time (in seconds) before next iteration
 waiting_next_iteration = 120
+
+# Threshold in percent whether you want to report values when others' values are different by the threshold
+# If submission_threshold = 0, we always submit values.
+submission_threshold = 0.5
