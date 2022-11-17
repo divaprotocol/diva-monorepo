@@ -37,7 +37,7 @@ def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract)
             }
         )
     except ValueError as err:
-        printb("Failure: ", err.args[0]["message"])
+        printb("Failure: ", err.args[0])
 
     #except :
     #    printb("Failure: ", "Error while submit to Tellor playground.")
@@ -53,9 +53,8 @@ def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract)
         transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
     #except TimeExhausted:
     #    printb("Failure: ", "Timeout error. Transaction is not in chain after %s seconds" % config.timeout)
-    except:
-        printb("Failure: ", "Error while submitting to Tellor playground.")
-
+    except ValueError as err:
+        printb("Failure: ", err.args[0])
     #print("Price submitted to Tellor for pool id {} ".format(pool_id), "({})".format(network))
     printn("")
     printb("Success: ", "Price submitted to Tellor playground")

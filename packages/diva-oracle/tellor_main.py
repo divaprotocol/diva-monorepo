@@ -11,6 +11,13 @@ import pandas as pd
 from lib.recorder import printc
 
 from termcolor import colored
+from tellor_settings.tellor_retrieveData import retrieveData
+
+# For testing purposes:
+# getVal_contract = w3.eth.contract(
+#     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+# values = retrieveData(243,network, getVal_contract)
+# printt(values)
 
 waiting_sec = 60
 network = config.network

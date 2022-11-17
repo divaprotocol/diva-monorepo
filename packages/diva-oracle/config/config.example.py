@@ -15,6 +15,7 @@ PROVIDER_URL = {
 }
 
 chain_id = {
+    "ropsten": 3,
     "rinkeby": 4,
     "kovan": 42,
     "mumbai": 80001,
@@ -23,6 +24,7 @@ chain_id = {
 }
 
 # symbol : Id
+
 WHITELIST_TOKEN_POOLS = {
     "dUSD": "0xfa158c9b780a4213f3201ae74cca013712c8538d",  # 18 decimals
     "WBTC": "0xA61E26649743f8c86b09860c9fddf45153fA7A55",  # 8 decimals
@@ -40,7 +42,6 @@ COLLATERAL_MAPPING = {
 # This true value will only submit pools in the whitelist token pools
 # Any collateral assets outside of the whitelist will not be processed.
 BLOCK_ON_WHITELIST = True
-
 # PARAMETERS
 
 # Max seconds to wait for a transaction to be confirmed
@@ -54,8 +55,10 @@ max_reporting_frame = 24
 
 # Networks
 networks = ["goerli"]  # write ["ropsten","mumbai"] for multiple networks
-
-network = "goeri"
-
+network = "goerli"
 # Waiting time (in seconds) before next iteration
 waiting_next_iteration = 120
+
+# Threshold in percent whether you want to report values when others' values are different by the threshold
+# If submission_threshold = 0, we always submit values.
+submission_threshold = 0.5

@@ -1,7 +1,9 @@
 import datetime as dt
 from termcolor import colored
+from tabulate import tabulate
 
 # This file will write sent transactions to csv file
+
 def update_records(record):
     file = open("oracle_records.csv", "a")
     file.write(record)
@@ -18,6 +20,7 @@ def update_pending_records(record):
     file.write('\n')
 
     file.close()
+
 
 def printbAll(text):
     print(colored(text, attrs=["bold"]))
@@ -38,3 +41,10 @@ def printn(text):
     print(text)
     with open('log.txt', 'a') as f:
         f.write(text + "\n")
+
+def printt(val):
+    print(tabulate(val, headers=['RefValue', 'CollValue']))
+    with open('log.txt', 'a') as f:
+        for x in val:
+            f.write("%s" % x[0] + "%s \n" % x[1])
+
