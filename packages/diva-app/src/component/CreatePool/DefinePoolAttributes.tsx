@@ -558,7 +558,7 @@ export function DefinePoolAttributes({
                     <FormHelperText>
                       Your balance:{' '}
                       {toExponentialOrNumber(Number(collateralWalletBalance))}{' '}
-                      {collateralToken?.symbol}{' '}
+                      {collateralToken?.symbol} {'('}
                       <MaxCollateral
                         role="button"
                         onClick={() => {
@@ -570,8 +570,9 @@ export function DefinePoolAttributes({
                           }
                         }}
                       >
-                        (Max)
+                        Max
                       </MaxCollateral>
+                      {')'}
                     </FormHelperText>
                   )}
                 </FormControl>

@@ -612,7 +612,7 @@ export function DefineOfferAttributes({
                       {toExponentialOrNumber(
                         parseFloat(collateralWalletBalance)
                       )}{' '}
-                      {collateralToken?.symbol}{' '}
+                      {collateralToken?.symbol} {'('}
                       <MaxCollateral
                         role="button"
                         onClick={() => {
@@ -624,8 +624,9 @@ export function DefineOfferAttributes({
                           }
                         }}
                       >
-                        (Max)
+                        Max
                       </MaxCollateral>
+                      {')'}
                     </FormHelperText>
                   )}
                 </FormControl>

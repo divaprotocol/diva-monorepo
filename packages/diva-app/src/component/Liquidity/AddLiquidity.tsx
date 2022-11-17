@@ -16,18 +16,12 @@ import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import { BigNumber } from 'ethers'
 import styled from '@emotion/styled'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { formatUnits } from 'ethers/lib/utils'
 import { ethers } from 'ethers'
 import { config } from '../../constants'
-import ERC20 from '@diva/contracts/abis/erc20.json'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import ERC20 from '../../abi/ERC20ABI.json'
+import { toExponentialOrNumber } from '../../Util/utils'
 import { selectUserAddress } from '../../Redux/appSlice'
-import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useAppSelector } from '../../Redux/hooks'
 import { ApproveActionButtons } from '../ApproveActionButtons'
@@ -58,6 +52,8 @@ export const AddLiquidity = ({ pool }: Props) => {
   const { provider } = useConnectionContext()
   const account = useAppSelector(selectUserAddress)
   const chainId = provider?.network?.chainId
+
+  // TODO Move this part into useEffect
   const tokenBalance = useErcBalance(
     pool ? pool!.collateralToken.id : undefined,
     balanceUpdated
@@ -74,11 +70,11 @@ export const AddLiquidity = ({ pool }: Props) => {
     }
     if (
       pool! &&
-      pool!.capacity.toString() !== '0.0' &&
+      pool!.capacity.toString() !== ethers.constants.MaxUint256.toString() &&
       textFieldValue !== '' &&
       parseFloat(textFieldValue) +
-        parseFloat(pool!.collateralBalance.toString()) >
-        parseFloat(pool!.capacity.toString())
+        parseFloat(formatUnits(pool!.collateralBalance, decimal)) >
+        parseFloat(formatUnits(pool!.capacity, decimal))
     ) {
       setOpenCapacityAlert(true)
     } else {
@@ -91,17 +87,17 @@ export const AddLiquidity = ({ pool }: Props) => {
     }
   }, [textFieldValue, pool, tokenBalance])
 
-  const [remainingAllowanace, setRemainingAllowance] = useState<number>()
+  const [remainingAllowance, setRemainingAllowance] = useState<number>()
   useEffect(() => {
     if (account) {
-      const getRemainingAllownace = async () => {
-        const Allownace = await token.allowance(
+      const getRemainingAllowance = async () => {
+        const allowance = await token.allowance(
           account,
           config[chainId]?.divaAddress
         )
-        setRemainingAllowance(Number(Allownace))
+        setRemainingAllowance(Number(formatUnits(allowance, decimal)))
       }
-      getRemainingAllownace()
+      getRemainingAllowance()
     }
   }, [account, chainId, token])
   return (
@@ -178,10 +174,12 @@ export const AddLiquidity = ({ pool }: Props) => {
                 <Typography variant="h5" color="text.secondary">
                   You have
                   <Typography variant="h4" sx={{ display: 'inline' }}>
-                    &nbsp; {parseFloat(tokenBalance!).toFixed(4)}{' '}
-                    {pool!.collateralToken.symbol} &nbsp;
+                    {' '}
+                    {toExponentialOrNumber(parseFloat(tokenBalance!))}{' '}
+                    {pool!.collateralToken.symbol}{' '}
                   </Typography>
-                  in your wallet.{' '}
+                  in your wallet
+                  {' ('}
                   <MaxCollateral
                     role="button"
                     onClick={() => {
@@ -190,8 +188,9 @@ export const AddLiquidity = ({ pool }: Props) => {
                       }
                     }}
                   >
-                    (Max)
+                    Max
                   </MaxCollateral>
+                  {')'}
                 </Typography>
               </>
             ) : (
@@ -263,22 +262,20 @@ export const AddLiquidity = ({ pool }: Props) => {
                   <Typography variant="h2" noWrap>
                     {pool &&
                       textFieldValue !== '' &&
-                      (
-                        (parseFloat(formatEther(pool.supplyInitial)) /
-                          (parseFloat(
-                            formatUnits(
-                              pool.collateralBalanceLongInitial,
-                              decimal
-                            )
-                          ) +
-                            parseFloat(
-                              formatUnits(
-                                pool.collateralBalanceShortInitial,
-                                decimal
-                              )
-                            ))) *
-                        parseFloat(formatEther(parseEther(textFieldValue)))
-                      ).toFixed(4)}
+                      // (parseFloat(formatEther(pool.supplyInitial)) /
+                      //   (parseFloat(
+                      //     formatUnits(
+                      //       pool.collateralBalanceLongInitial,
+                      //       decimal
+                      //     )
+                      //   ) +
+                      //     parseFloat(
+                      //       formatUnits(
+                      //         pool.collateralBalanceShortInitial,
+                      //         decimal
+                      //       )
+                      //     ))) *
+                      parseFloat(textFieldValue).toFixed(4)}
                   </Typography>
                 </Stack>
                 <Stack direction="column" spacing={2} minWidth="100px">
@@ -288,22 +285,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                   <Typography variant="h2" noWrap>
                     {pool &&
                       textFieldValue !== '' &&
-                      (
-                        (parseFloat(formatEther(pool.supplyInitial)) /
-                          (parseFloat(
-                            formatUnits(
-                              pool.collateralBalanceLongInitial,
-                              decimal
-                            )
-                          ) +
-                            parseFloat(
-                              formatUnits(
-                                pool.collateralBalanceShortInitial,
-                                decimal
-                              )
-                            ))) *
-                        parseFloat(formatEther(parseEther(textFieldValue)))
-                      ).toFixed(4)}
+                      parseFloat(textFieldValue).toFixed(4)}
                   </Typography>
                 </Stack>
                 <Stack direction="column" spacing={2} minWidth="100px">
@@ -314,7 +296,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                     {pool &&
                       textFieldValue !== '' &&
                       Number(
-                        parseFloat(textFieldValue) /
+                        (100 * parseFloat(textFieldValue)) /
                           (parseFloat(textFieldValue) +
                             parseFloat(
                               formatUnits(
@@ -336,7 +318,9 @@ export const AddLiquidity = ({ pool }: Props) => {
               alert={openExpiredAlert || openAlert}
             />
             <Typography variant="h6" color="gray">
-              Remaining Allowance: {remainingAllowanace}
+              {/* {console.log('typeof remainingAllowance', remainingAllowance)} */}
+              {/* TODO: use toExponentialOrNumber(remainingAllowance) instead of remainingAllowance, but issue is that remainingAllowance shows undefined */}
+              Remaining Allowance: {remainingAllowance}
             </Typography>
           </Card>
         </Stack>
@@ -356,7 +340,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                 formatUnits(pool.capacity, pool.collateralToken.decimals) !== // TODO: drop this first == 0.0 part when migrating to new contracts
                   '0.0' &&
                 pool.capacity.toString() !==
-                  '115792089237316195423570985008687907853269984665640564039457584007913129639935' ? (
+                  ethers.constants.MaxUint256.toString() ? (
                   <Stack
                     direction="row"
                     justifyContent="space-between"
@@ -509,7 +493,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                     }}
                   />
                   <Typography variant="h3" color="gray">
-                    Bullish? Keep the LONG tokens and sell the SHORT tokens
+                    Bullish? Keep the LONG and sell the SHORT tokens
                   </Typography>
                 </Stack>
                 <Stack direction="row" spacing={2}>
@@ -520,7 +504,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                     }}
                   />
                   <Typography variant="h3" color="gray">
-                    Bearish? Keep the SHORT tokens and sell the LONG tokens
+                    Bearish? Keep the SHORT and sell the LONG tokens
                   </Typography>
                 </Stack>
               </Stack>
