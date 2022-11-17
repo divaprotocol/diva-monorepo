@@ -25,7 +25,7 @@ def getKrakenPrice(pair, ts_date):
                 print("no kraken data")
                 return -1, -1
             df.columns = ['price', 'volume', 'time',
-                          'buy/sell', 'market/limit', 'misc']
+                          'buy/sell', 'market/limit', 'misc', '']
             # df['datetime'] = df['time'].apply(lambda x: datetime.fromtimestamp(x))
 
             df_reduced = df.loc[df['time'] <= ts_date]
