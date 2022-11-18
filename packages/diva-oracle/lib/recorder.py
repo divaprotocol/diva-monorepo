@@ -1,4 +1,3 @@
-import datetime as dt
 from termcolor import colored
 from tabulate import tabulate
 
@@ -43,7 +42,7 @@ def printn(text):
         f.write(text + "\n")
 
 def printt(val):
-    print(tabulate(val, headers=['RefValue', 'CollValue']))
+    print(tabulate(val, headers=['RefValue', 'CollValue', 'Timestmp']))
     with open('log.txt', 'a') as f:
         for x in val:
             f.write("%s" % x[0] + "%s \n" % x[1])

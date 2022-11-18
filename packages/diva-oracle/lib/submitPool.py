@@ -13,7 +13,7 @@ import datetime
 from lib.recorder import printb, printn, printbAll, printt, update_pending_records, update_records
 from tellor_settings.tellor_retrieveData import retrieveData
 from config.config import submission_threshold
-from tabulate import tabulate
+
 
 def extract(lst):
     return [item[0] for item in lst]
@@ -164,8 +164,7 @@ def tellor_submit_pools(df, network, w3, contract):
                     if sum(diff_) == 0:  # If there is at least reported value within the threshold, you don't report.
                         submit = True
                     else:
-                        printn(
-                            "At least one submitted value is close to our value with respect to the threshold. No submission will be done.")
+                        printn("At least one submitted value is within the specified {}% tolerance. No submission will be done.".format(submission_threshold))
                 elif not others_values:
                     submit = True
 

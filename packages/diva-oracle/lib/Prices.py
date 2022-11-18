@@ -2,7 +2,7 @@ import datetime
 import requests
 import pandas as pd
 import json
-from config.config import WHITELIST_TOKEN_POOLS, BLOCK_ON_WHITELIST, max_time_away, COLLATERAL_MAPPING
+from config.config import WHITELIST_TOKEN_POOLS, BLOCK_ON_WHITELIST, max_time_away, COLLATERAL_MAPPING, network
 
 
 def getKrakenPrice(pair, ts_date):
@@ -56,7 +56,7 @@ def check_whitelist_token(dfitem, dfcontract):
     try:
         #print(dfitem)
         #print(WHITELIST_TOKEN_POOLS)
-        if dfitem in WHITELIST_TOKEN_POOLS:
+        if dfitem in WHITELIST_TOKEN_POOLS[network]:
             #print("Valid whitelisted Token {}, {}".format(dfitem, dfcontract[0]))
             #print(WHITELIST_TOKEN_POOLS.get(dfitem))
             return "whitelisted"
