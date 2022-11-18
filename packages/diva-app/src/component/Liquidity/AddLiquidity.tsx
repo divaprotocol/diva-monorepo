@@ -96,7 +96,9 @@ export const AddLiquidity = ({ pool }: Props) => {
           account,
           config[chainId]?.divaAddress
         )
-        setRemainingAllowance(toExponentialOrNumber(Number(allowance)))
+        setRemainingAllowance(
+          toExponentialOrNumber(Number(formatUnits(allowance, decimal)))
+        )
       }
       getRemainingAllowance()
     }
