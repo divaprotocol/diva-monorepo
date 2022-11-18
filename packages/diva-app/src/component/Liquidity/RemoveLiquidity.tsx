@@ -8,6 +8,7 @@ import {
   Container,
   Divider,
   IconButton,
+  InputAdornment,
   Input,
   Stack,
   TextField,
@@ -233,6 +234,13 @@ export const RemoveLiquidity = ({ pool }: Props) => {
               label="Amount to remove"
               type="number"
               sx={{ width: '100%' }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end" sx={{ color: '#929292' }}>
+                    {pool!.collateralToken.symbol}
+                  </InputAdornment>
+                ),
+              }}
               InputLabelProps={{
                 shrink: true,
               }}

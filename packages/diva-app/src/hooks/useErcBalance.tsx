@@ -34,8 +34,8 @@ export function useErcBalance(address?: string, updated = true) {
             ERC20,
             signer
           ) as Erc20Contract
-          const myAddress = await signer.getAddress()
-          const _balance = await contract.balanceOf(myAddress)
+          /* const myAddress = await signer.getAddress() */
+          const _balance = await contract.balanceOf(userAddress)
           setBalance(formatUnits(_balance, await contract.decimals()))
         } catch (err) {
           console.warn(err)
@@ -44,7 +44,7 @@ export function useErcBalance(address?: string, updated = true) {
     }
 
     run()
-  }, [address, chainId, userAddress != null, updated])
+  }, [address, chainId, userAddress, updated])
 
   return balance
 }

@@ -5,6 +5,7 @@ import {
   Container,
   Divider,
   IconButton,
+  InputAdornment,
   Input,
   Stack,
   useTheme,
@@ -87,7 +88,7 @@ export const AddLiquidity = ({ pool }: Props) => {
     }
   }, [textFieldValue, pool, tokenBalance])
 
-  const [remainingAllowance, setRemainingAllowance] = useState<number>()
+  const [remainingAllowance, setRemainingAllowance] = useState('')
   useEffect(() => {
     if (account) {
       const getRemainingAllowance = async () => {
@@ -95,7 +96,7 @@ export const AddLiquidity = ({ pool }: Props) => {
           account,
           config[chainId]?.divaAddress
         )
-        setRemainingAllowance(Number(formatUnits(allowance, decimal)))
+        setRemainingAllowance(toExponentialOrNumber(Number(allowance)))
       }
       getRemainingAllowance()
     }
@@ -158,6 +159,13 @@ export const AddLiquidity = ({ pool }: Props) => {
               label="Amount to add"
               type="number"
               sx={{ width: '100%' }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end" sx={{ color: '#929292' }}>
+                    {pool!.collateralToken.symbol}
+                  </InputAdornment>
+                ),
+              }}
               InputLabelProps={{
                 shrink: true,
               }}
@@ -320,7 +328,8 @@ export const AddLiquidity = ({ pool }: Props) => {
             <Typography variant="h6" color="gray">
               {/* {console.log('typeof remainingAllowance', remainingAllowance)} */}
               {/* TODO: use toExponentialOrNumber(remainingAllowance) instead of remainingAllowance, but issue is that remainingAllowance shows undefined */}
-              Remaining Allowance: {remainingAllowance}
+              Remaining Allowance: {remainingAllowance}{' '}
+              {pool.collateralToken.symbol}
             </Typography>
           </Card>
         </Stack>
