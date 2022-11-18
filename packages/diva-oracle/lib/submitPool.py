@@ -12,7 +12,7 @@ from termcolor import colored
 import datetime
 from lib.recorder import printb, printn, printbAll, printt, update_pending_records, update_records
 from tellor_settings.tellor_retrieveData import retrieveData
-from config.config import submission_threshold
+from config.config import submission_tolerance
 
 
 def extract(lst):
@@ -152,23 +152,23 @@ def tellor_submit_pools(df, network, w3, contract):
             printDataToBeSubmitted(pool_id, ts_date, opair, price, date, df['collateralToken.symbol'].iloc[i], df['collateralToken.id'].iloc[i], proxy, coll_asset_to_usd, coll_date)
             try:
                 # We want to submit a value if nobody else has done so, or if others have done but their values differ from my value
-                # by more than a threshold percentage.
+                # by more than a tolerance percentage.
                 submit = False
                 others_values = retrieveData(pool_id, network, getVal_contract)
-                if others_values and submission_threshold != 0:
+                if others_values and submission_tolerance != 0:
                     printn("Already submitted values are: ")
                     printt(others_values)
                     values_ref = extract(others_values)
                     diff = [abs(price / x - 1) * 100 for x in values_ref]
-                    diff_ = [x < submission_threshold for x in diff]
-                    if sum(diff_) == 0:  # If there is at least reported value within the threshold, you don't report.
+                    diff_ = [x < submission_tolerance for x in diff]
+                    if sum(diff_) == 0:  # If there is at least reported value within the tolerance, you don't report.
                         submit = True
                     else:
-                        printn("At least one submitted value is within the specified {}% tolerance. No submission will be done.".format(submission_threshold))
+                        printn("At least one submitted value is within the specified {}% tolerance. No submission will be done.".format(submission_tolerance))
                 elif not others_values:
                     submit = True
 
-                if submit or (submission_threshold == 0):
+                if submit or (submission_tolerance == 0):
                     # Tellor oracle has 2 steps submitting value to contract and setting final reference value
                     submitTellorValue(pool_id=pool_id, finalRefVal=price,
                                       collToUSD=coll_asset_to_usd, network=network, w3=w3, my_contract=contract)

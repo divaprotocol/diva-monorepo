@@ -67,6 +67,6 @@ network = "goerli"
 # Waiting time (in seconds) before next iteration
 waiting_next_iteration = 60
 
-# Threshold in percent whether you want to report values when others' values are different by the threshold
-# If submission_threshold = 0, we always submit values.
-submission_threshold = 0.5
+# Tolerance in percent whether you want to report values when others' values are different by the tolerance
+# If submission_tolerance = 0, we always submit values.
+submission_tolerance = 0.5
