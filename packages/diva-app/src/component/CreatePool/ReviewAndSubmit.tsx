@@ -99,19 +99,25 @@ export function ReviewAndSubmit({
             Number(formatUnits(params.offerInfo.takerFilledAmount, decimal))
           )
         })
-    }
 
-    setMaxYield(
-      (Number(
-        formatUnits(formik.values.jsonToExport.takerCollateralAmount, decimal)
-      ) +
-        Number(
-          formatUnits(formik.values.jsonToExport.makerCollateralAmount, decimal)
-        )) /
-        Number(
+      setMaxYield(
+        (Number(
           formatUnits(formik.values.jsonToExport.takerCollateralAmount, decimal)
-        )
-    )
+        ) +
+          Number(
+            formatUnits(
+              formik.values.jsonToExport.makerCollateralAmount,
+              decimal
+            )
+          )) /
+          Number(
+            formatUnits(
+              formik.values.jsonToExport.takerCollateralAmount,
+              decimal
+            )
+          )
+      )
+    }
   }, [decimal, diva])
   useEffect(() => {
     if (transaction === 'filloffer' && diva !== undefined) {
