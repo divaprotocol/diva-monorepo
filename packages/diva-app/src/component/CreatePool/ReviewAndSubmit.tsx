@@ -577,10 +577,16 @@ export function ReviewAndSubmit({
                                     'yourShare',
                                     collateralWalletBalance
                                   )
+                                  setMaxPayout(
+                                    Number(collateralWalletBalance) * maxYield
+                                  )
                                 } else {
                                   formik.setFieldValue(
                                     'yourShare',
                                     actualFillableAmount
+                                  )
+                                  setMaxPayout(
+                                    Number(actualFillableAmount) * maxYield
                                   )
                                 }
                               }}
@@ -720,9 +726,15 @@ export function ReviewAndSubmit({
                     style={{ color: 'white' }}
                   >
                     {values.offerDirection === 'Long' ? (
-                      <strong>0.00x</strong>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>
                     ) : (
-                      <strong> {maxYield.toFixed(2) + 'x'}</strong>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {maxYield.toFixed(2) + 'x'}
+                        </span>
+                      </strong>
                     )}{' '}
                     if reported outcome is{' '}
                     <strong>
@@ -739,9 +751,15 @@ export function ReviewAndSubmit({
                     style={{ color: 'white' }}
                   >
                     {values.offerDirection === 'Long' ? (
-                      <strong>{maxYield.toFixed(2) + 'x'}</strong>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {maxYield.toFixed(2) + 'x'}
+                        </span>
+                      </strong>
                     ) : (
-                      <strong>0.00x</strong>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>
                     )}{' '}
                     if reported outcome is{' '}
                     <strong>
@@ -759,12 +777,15 @@ export function ReviewAndSubmit({
                   >
                     {values.offerDirection === 'Long' ? (
                       <strong>
-                        {(values.gradient * maxYield).toFixed(2) + 'x'}
+                        <span style={{ color: '#3393E0' }}>
+                          {(values.gradient * maxYield).toFixed(2) + 'x'}
+                        </span>
                       </strong>
                     ) : (
                       <strong>
-                        {' '}
-                        {((1 - values.gradient) * maxYield).toFixed(2) + 'x'}
+                        <span style={{ color: '#3393E0' }}>
+                          {((1 - values.gradient) * maxYield).toFixed(2) + 'x'}
+                        </span>
                       </strong>
                     )}{' '}
                     if reported outcome is
