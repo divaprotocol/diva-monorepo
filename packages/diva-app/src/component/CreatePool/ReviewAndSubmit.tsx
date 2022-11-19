@@ -290,12 +290,16 @@ export function ReviewAndSubmit({
                     Offer Size
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {Number(
-                      formatUnits(
-                        formik.values.jsonToExport.takerCollateralAmount,
-                        decimal
-                      )
-                    ).toFixed(2) +
+                    {toExponentialOrNumber(
+                      Number(
+                        formatUnits(
+                          formik.values.jsonToExport.takerCollateralAmount,
+                          decimal
+                        )
+                      ),
+                      2,
+                      2
+                    ) +
                       ' ' +
                       tokenSymbol}
                   </Typography>
@@ -460,7 +464,11 @@ export function ReviewAndSubmit({
                     Min Taker Contribution (applicable on 1st fill only)
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {Number(values.minTakerContribution).toFixed(2) +
+                    {toExponentialOrNumber(
+                      Number(values.minTakerContribution),
+                      2,
+                      2
+                    ) +
                       ' ' +
                       tokenSymbol}
                   </Typography>
@@ -559,7 +567,11 @@ export function ReviewAndSubmit({
                               ml: theme.spacing(0),
                             }}
                           >
-                            {`Max payout: ${maxPayout} ${'dUSD'}`}
+                            {`Max payout: ${toExponentialOrNumber(
+                              maxPayout,
+                              2,
+                              2
+                            )} ${'dUSD'}`}
                           </FormHelperText>
                           <FormHelperText
                             sx={{
@@ -673,7 +685,9 @@ export function ReviewAndSubmit({
                       mb: theme.spacing(1),
                     }}
                   >
-                    Remaining fill amount: {actualFillableAmount} {tokenSymbol}
+                    Remaining fill amount:{' '}
+                    {toExponentialOrNumber(actualFillableAmount, 2, 2)}{' '}
+                    {tokenSymbol}
                   </FormHelperText>
                 </Container>
               </Card>
