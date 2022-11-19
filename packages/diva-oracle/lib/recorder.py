@@ -45,5 +45,5 @@ def printt(val):
     print(tabulate(val, headers=['RefValue', 'CollValue', 'Timestmp', 'isDisputed']))
     with open('log.txt', 'a') as f:
         for x in val:
-            f.write("%s" % x[0] + "%s \n" % x[1])
+            f.write("(RefValue, CollValue, Timestmp, isDisputed) =  (%s, %s, %s, %s) \n" % (x[0], x[1], x[2], x[3]))
 
