@@ -42,7 +42,7 @@ def printn(text):
         f.write(text + "\n")
 
 def printt(val):
-    print(tabulate(val, headers=['RefValue', 'CollValue', 'Timestmp']))
+    print(tabulate(val, headers=['RefValue', 'CollValue', 'Timestmp', 'isDisputed']))
     with open('log.txt', 'a') as f:
         for x in val:
             f.write("%s" % x[0] + "%s \n" % x[1])

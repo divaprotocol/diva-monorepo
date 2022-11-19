@@ -36,7 +36,7 @@ def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract)
                 "nonce": w3.eth.get_transaction_count(PUBLIC_KEY)
             }
         )
-    except ValueError as err:
+    except Exception as err:
         printb("Failure: ", err.args[0])
 
     #except :
