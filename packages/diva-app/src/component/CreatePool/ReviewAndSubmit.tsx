@@ -518,40 +518,60 @@ export function ReviewAndSubmit({
                       }}
                     />
                     {!isNaN(formik.values.collateralBalance) && (
-                      <FormHelperText
-                        sx={{
-                          mr: theme.spacing(-0.25),
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                        }}
-                      >
-                        Balance:{' '}
-                        {toExponentialOrNumber(
-                          parseFloat(collateralWalletBalance)
-                        )}
-                        {' ('}
-                        <MaxCollateral
-                          role="button"
-                          onClick={() => {
-                            if (
-                              actualFillableAmount > collateralWalletBalance
-                            ) {
-                              formik.setFieldValue(
-                                'yourShare',
-                                collateralWalletBalance
-                              )
-                            } else {
-                              formik.setFieldValue(
-                                'yourShare',
-                                actualFillableAmount
-                              )
-                            }
+                      <>
+                        <Stack
+                          height="100%"
+                          direction="row"
+                          justifyContent="space-between"
+                          sx={{
+                            mb: theme.spacing(1),
                           }}
                         >
-                          Max
-                        </MaxCollateral>
-                        {')'}
-                      </FormHelperText>
+                          <FormHelperText
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'flex-end',
+                              ml: theme.spacing(0),
+                            }}
+                          >
+                            {`Max payout : ${125} ${'dUSD'}`}
+                          </FormHelperText>
+                          <FormHelperText
+                            sx={{
+                              mr: theme.spacing(-0.25),
+                              display: 'flex',
+                              justifyContent: 'flex-end',
+                            }}
+                          >
+                            Balance:{' '}
+                            {toExponentialOrNumber(
+                              parseFloat(collateralWalletBalance)
+                            )}
+                            {' ('}
+                            <MaxCollateral
+                              role="button"
+                              onClick={() => {
+                                if (
+                                  actualFillableAmount > collateralWalletBalance
+                                ) {
+                                  formik.setFieldValue(
+                                    'yourShare',
+                                    collateralWalletBalance
+                                  )
+                                } else {
+                                  formik.setFieldValue(
+                                    'yourShare',
+                                    actualFillableAmount
+                                  )
+                                }
+                              }}
+                            >
+                              Max
+                            </MaxCollateral>
+                            {')'}
+                          </FormHelperText>
+                        </Stack>
+                      </>
                     )}
                   </FormControl>
 
@@ -588,16 +608,34 @@ export function ReviewAndSubmit({
                       mb: theme.spacing(1),
                     }}
                   >
-                    <Typography fontSize={'0.85rem'}>
-                      {'Filled: '}
-                      {takerFilledAmount + ' ' + tokenSymbol}
-                    </Typography>
-                    <Typography fontSize={'0.85rem'}>
-                      {'Offer size: '}
-                      {Number(actualFillableAmount + takerFilledAmount) +
-                        ' ' +
-                        tokenSymbol}
-                    </Typography>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography
+                        fontSize={'0.75rem'}
+                        sx={{
+                          opacity: 0.5,
+                        }}
+                      >
+                        {'Filled:'}
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {takerFilledAmount + ' ' + tokenSymbol}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography
+                        fontSize={'0.75rem'}
+                        sx={{
+                          opacity: 0.5,
+                        }}
+                      >
+                        {'Offer size: '}
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {Number(actualFillableAmount + takerFilledAmount) +
+                          ' ' +
+                          tokenSymbol}
+                      </Typography>
+                    </Stack>
                   </Stack>
                   <FormHelperText
                     sx={{
@@ -646,99 +684,121 @@ export function ReviewAndSubmit({
           >
             Payoff Scenarios
           </Typography>
-          <Card
-            style={{
-              maxWidth: theme.spacing(60),
-              border: '1px solid #1B3448',
-              background:
-                'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
-            }}
-          >
-            <Container>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {values.referenceAsset} is{' '}
-                <strong>
-                  {values.floor < values.inflection &&
-                  values.inflection < values.cap
-                    ? 'at or '
-                    : ''}{' '}
-                  below {values.floor}
-                </strong>{' '}
-                on{' '}
-                {values.expiryTime.toLocaleString().slice(0, 11) +
-                  ' ' +
-                  getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
-                  ' ' +
-                  userTimeZone()}
-                , the payout will be{' '}
-                <strong>0.00 {values.collateralToken.symbol} per LONG</strong>{' '}
-                and{' '}
-                <strong> 1.00 {values.collateralToken.symbol} per SHORT</strong>{' '}
-                token
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {values.referenceAsset} is{' '}
-                <strong>
-                  {values.floor < values.inflection &&
-                  values.inflection < values.cap
-                    ? 'at or '
-                    : ''}{' '}
-                  above {values.cap}{' '}
-                </strong>{' '}
-                on{' '}
-                {values.expiryTime.toLocaleString().slice(0, 11) +
-                  ' ' +
-                  getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
-                  ' ' +
-                  userTimeZone()}
-                , the payout will be{' '}
-                <strong>1.00 {values.collateralToken.symbol} per LONG</strong>{' '}
-                and{' '}
-                <strong> 0.00 {values.collateralToken.symbol} per SHORT</strong>{' '}
-                token
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {values.referenceAsset} is{' '}
-                <strong>
-                  {' '}
-                  at
-                  {' ' + values.inflection}{' '}
-                </strong>{' '}
-                on{' '}
-                {values.expiryTime.toLocaleString().slice(0, 11) +
-                  ' ' +
-                  getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
-                  ' ' +
-                  userTimeZone()}
-                , the payout will be{' '}
-                <strong>
-                  {values.gradient.toFixed(2)} {values.collateralToken.symbol}{' '}
-                  per LONG
-                </strong>{' '}
-                and{' '}
-                <strong>
-                  {(1 - values.gradient).toFixed(2)}{' '}
-                  {values.collateralToken.symbol} per SHORT
-                </strong>{' '}
-                token
-              </Typography>
-            </Container>
-          </Card>
+          {transaction === 'filloffer' ? (
+            // TODO: Add payoff scenarios for fill offer
+            <Box>
+              <div>first scenario</div>
+            </Box>
+          ) : (
+            <Card
+              style={{
+                maxWidth: theme.spacing(60),
+                border: '1px solid #1B3448',
+                background:
+                  'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
+              }}
+            >
+              <Container>
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
+                  {values.referenceAsset} is{' '}
+                  <strong>
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    below {values.floor}
+                  </strong>{' '}
+                  on{' '}
+                  {values.expiryTime.toLocaleString().slice(0, 11) +
+                    ' ' +
+                    getDateTime(Number(values.expiryTime) / 1000).slice(
+                      11,
+                      19
+                    ) +
+                    ' ' +
+                    userTimeZone()}
+                  , the payout will be{' '}
+                  <strong>0.00 {values.collateralToken.symbol} per LONG</strong>{' '}
+                  and{' '}
+                  <strong>
+                    {' '}
+                    1.00 {values.collateralToken.symbol} per SHORT
+                  </strong>{' '}
+                  token
+                </Typography>
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
+                  {values.referenceAsset} is{' '}
+                  <strong>
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    above {values.cap}{' '}
+                  </strong>{' '}
+                  on{' '}
+                  {values.expiryTime.toLocaleString().slice(0, 11) +
+                    ' ' +
+                    getDateTime(Number(values.expiryTime) / 1000).slice(
+                      11,
+                      19
+                    ) +
+                    ' ' +
+                    userTimeZone()}
+                  , the payout will be{' '}
+                  <strong>1.00 {values.collateralToken.symbol} per LONG</strong>{' '}
+                  and{' '}
+                  <strong>
+                    {' '}
+                    0.00 {values.collateralToken.symbol} per SHORT
+                  </strong>{' '}
+                  token
+                </Typography>
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
+                  {values.referenceAsset} is{' '}
+                  <strong>
+                    {' '}
+                    at
+                    {' ' + values.inflection}{' '}
+                  </strong>{' '}
+                  on{' '}
+                  {values.expiryTime.toLocaleString().slice(0, 11) +
+                    ' ' +
+                    getDateTime(Number(values.expiryTime) / 1000).slice(
+                      11,
+                      19
+                    ) +
+                    ' ' +
+                    userTimeZone()}
+                  , the payout will be{' '}
+                  <strong>
+                    {values.gradient.toFixed(2)} {values.collateralToken.symbol}{' '}
+                    per LONG
+                  </strong>{' '}
+                  and{' '}
+                  <strong>
+                    {(1 - values.gradient).toFixed(2)}{' '}
+                    {values.collateralToken.symbol} per SHORT
+                  </strong>{' '}
+                  token
+                </Typography>
+              </Container>
+            </Card>
+          )}
         </Stack>
       </Container>
     </Stack>
