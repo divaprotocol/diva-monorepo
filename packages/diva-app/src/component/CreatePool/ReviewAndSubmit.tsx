@@ -147,9 +147,7 @@ export function ReviewAndSubmit({
       (dataName: { id: string }) => dataName?.id == values.dataProvider
     )
     if (dataName?.name != null) {
-      setDataSourceName(
-        dataName.name + ' (' + getShortenedAddress(values.dataProvider) + ')'
-      )
+      setDataSourceName(dataName.name + ' (' + values.dataProvider + ')')
     } else {
       setDataSourceName(values.dataProvider)
     }
