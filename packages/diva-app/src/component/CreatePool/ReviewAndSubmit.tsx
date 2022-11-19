@@ -34,6 +34,7 @@ import { useAppSelector } from '../../Redux/hooks'
 import { toExponentialOrNumber } from '../../Util/utils'
 import styled from '@emotion/styled'
 import { useErcBalance } from '../../hooks/useErcBalance'
+import { setMaxPayout } from '../../Redux/Stats'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -54,6 +55,8 @@ export function ReviewAndSubmit({
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
   const [mobile, setMobile] = useState(false)
+  const [maxYield, setMaxYield] = useState(0)
+  const [maxPayout, setMaxPayout] = useState(0)
   const [tokenSymbol, setTokenSymbol] = useState('')
   const [actualFillableAmount, setActualFillableAmount] = useState(
     formik.values.takerShare
@@ -82,6 +85,7 @@ export function ReviewAndSubmit({
   })
   useEffect(() => {
     if (transaction === 'filloffer' && diva !== undefined) {
+      console.log(formik.values)
       diva
         .getOfferRelevantStateCreateContingentPool(
           formik.values.jsonToExport,
@@ -96,10 +100,23 @@ export function ReviewAndSubmit({
           )
         })
     }
+
+    setMaxYield(
+      (Number(
+        formatUnits(formik.values.jsonToExport.takerCollateralAmount, decimal)
+      ) +
+        Number(
+          formatUnits(formik.values.jsonToExport.makerCollateralAmount, decimal)
+        )) /
+        Number(
+          formatUnits(formik.values.jsonToExport.takerCollateralAmount, decimal)
+        )
+    )
   }, [decimal, diva])
   useEffect(() => {
     if (transaction === 'filloffer' && diva !== undefined) {
       formik.setFieldValue('yourShare', Number(actualFillableAmount))
+      setMaxPayout(Number(actualFillableAmount) * maxYield)
     }
   }, [actualFillableAmount, decimal])
   useEffect(() => {
@@ -228,11 +245,7 @@ export function ReviewAndSubmit({
                     Max yield
                   </Typography>
                   <Typography fontSize={'1rem'} color={'#3393E0'}>
-                    {(
-                      (Number(formik.values.takerShare) +
-                        Number(formik.values.makerShare)) /
-                      Number(formik.values.takerShare)
-                    ).toFixed(2) + 'x'}
+                    {maxYield.toFixed(2) + 'x'}
                   </Typography>
                 </Stack>
               )}
@@ -271,7 +284,12 @@ export function ReviewAndSubmit({
                     Offer Size
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {Number(formik.values.takerShare).toFixed(2) +
+                    {Number(
+                      formatUnits(
+                        formik.values.jsonToExport.takerCollateralAmount,
+                        decimal
+                      )
+                    ).toFixed(2) +
                       ' ' +
                       tokenSymbol}
                   </Typography>
@@ -494,6 +512,7 @@ export function ReviewAndSubmit({
                         const value = event.target.value
                         const arr = value.split('.')
                         const collateralBalance = event.target.value
+                        setMaxPayout(Number(value) * maxYield)
                         if (arr.length > 1) {
                           if (arr[1].length <= decimal) {
                             if (collateralBalance !== '') {
@@ -534,7 +553,7 @@ export function ReviewAndSubmit({
                               ml: theme.spacing(0),
                             }}
                           >
-                            {`Max payout : ${125} ${'dUSD'}`}
+                            {`Max payout: ${maxPayout} ${'dUSD'}`}
                           </FormHelperText>
                           <FormHelperText
                             sx={{
@@ -608,7 +627,7 @@ export function ReviewAndSubmit({
                       mb: theme.spacing(1),
                     }}
                   >
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    {/* <Stack direction="row" spacing={1} alignItems="center">
                       <Typography
                         fontSize={'0.75rem'}
                         sx={{
@@ -620,8 +639,8 @@ export function ReviewAndSubmit({
                       <Typography fontSize={'0.85rem'}>
                         {takerFilledAmount + ' ' + tokenSymbol}
                       </Typography>
-                    </Stack>
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    </Stack> */}
+                    {/* <Stack direction="row" spacing={1} alignItems="center">
                       <Typography
                         fontSize={'0.75rem'}
                         sx={{
@@ -635,7 +654,7 @@ export function ReviewAndSubmit({
                           ' ' +
                           tokenSymbol}
                       </Typography>
-                    </Stack>
+                    </Stack> */}
                   </Stack>
                   <FormHelperText
                     sx={{
@@ -685,9 +704,74 @@ export function ReviewAndSubmit({
             Payoff Scenarios
           </Typography>
           {transaction === 'filloffer' ? (
-            // TODO: Add payoff scenarios for fill offer
             <Box>
-              <div>first scenario</div>
+              <Card
+                style={{
+                  maxWidth: theme.spacing(60),
+                  border: '1px solid #1B3448',
+                  background:
+                    'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
+                }}
+              >
+                <Container>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <strong>0.00x</strong>
+                    ) : (
+                      <strong> {maxYield.toFixed(2) + 'x'}</strong>
+                    )}{' '}
+                    if reported outcome is{' '}
+                    <strong>
+                      {values.floor < values.inflection &&
+                      values.inflection < values.cap
+                        ? 'at or '
+                        : ''}{' '}
+                      below {values.floor}
+                    </strong>{' '}
+                  </Typography>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <strong>{maxYield.toFixed(2) + 'x'}</strong>
+                    ) : (
+                      <strong>0.00x</strong>
+                    )}{' '}
+                    if reported outcome is{' '}
+                    <strong>
+                      {values.floor < values.inflection &&
+                      values.inflection < values.cap
+                        ? 'at or '
+                        : ''}{' '}
+                      above {values.cap}{' '}
+                    </strong>
+                  </Typography>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <strong>
+                        {(values.gradient * maxYield).toFixed(2) + 'x'}
+                      </strong>
+                    ) : (
+                      <strong>
+                        {' '}
+                        {((1 - values.gradient) * maxYield).toFixed(2) + 'x'}
+                      </strong>
+                    )}{' '}
+                    if reported outcome is
+                    <strong>{' ' + values.inflection} </strong>
+                  </Typography>
+                </Container>
+              </Card>
             </Box>
           ) : (
             <Card
