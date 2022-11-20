@@ -36,16 +36,25 @@ def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract)
                 "nonce": w3.eth.get_transaction_count(PUBLIC_KEY)
             }
         )
-
-        printn("Nonce: %s " % w3.eth.get_transaction_count(PUBLIC_KEY))
-
-        signed_txn = w3.eth.account.sign_transaction(submit_txn, private_key=PRIVATE_KEY)
-        txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-        transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
-
     except Exception as err:
         printb("Failure: ", err.args[0].__str__())
 
+    #except :
+    #    printb("Failure: ", "Error while submit to Tellor playground.")
+    #    printn("Potential reason: Insufficient Gas")
+
+    printn("Nonce: %s " % w3.eth.get_transaction_count(PUBLIC_KEY))
+
+    #print("For pool:", pool_id)
+    signed_txn = w3.eth.account.sign_transaction(submit_txn, private_key=PRIVATE_KEY)
+    try:
+        txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
+    #except TimeExhausted:
+    #    printb("Failure: ", "Timeout error. Transaction is not in chain after %s seconds" % config.timeout)
+    except Exception as err:
+        printb("Failure: ", err.args[0].__str__())
+    #print("Price submitted to Tellor for pool id {} ".format(pool_id), "({})".format(network))
     printn("")
     printb("Success: ", "Price submitted to Tellor playground")
     printn("https://%s.etherscan.io/tx/%s" % (network, txn_hash.hex()))
