@@ -27,7 +27,7 @@ def printbAll(text):
         f.write(text + "\n")
 
 def printb(textb, text):
-    print(colored(textb, attrs=["bold"]) + text)
+    print(colored(textb, attrs=["bold"]) + str(text))
     with open('log.txt', 'a') as f:
         f.write(textb + text + "\n")
 

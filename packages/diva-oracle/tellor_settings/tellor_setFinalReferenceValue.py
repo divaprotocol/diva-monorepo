@@ -21,23 +21,16 @@ def setFinRefVal(pool_id, network, w3, my_contract):
                 "nonce": w3.eth.get_transaction_count(PUBLIC_KEY)
             }
         )
-    except Exception as err:
-        printb("Failure: ", err.args[0])
 
+        printn("Nonce: %s" % w3.eth.get_transaction_count(PUBLIC_KEY))
 
-    printn("Nonce: %s" % w3.eth.get_transaction_count(PUBLIC_KEY))
-
-    #print("For pool:", pool_id)
-    signed_txn = w3.eth.account.sign_transaction(submit_txn, private_key=PRIVATE_KEY)
-    txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-    #print("transaction hash for successful transaction")
-    #print(txn_hash.hex())
-    try:
+        signed_txn = w3.eth.account.sign_transaction(submit_txn, private_key=PRIVATE_KEY)
+        txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
         transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
-    #except TimeExhausted:
-    #    printb("Failure: ", "Timeout error. Transaction is not in chain after %s seconds" % config.timeout)
+
     except Exception as err:
-        printb("Failure: ", err.args[0])
+        printb("Failure: ", err.args[0].__str__())
+
     printn("")
     printb("Success: ", "Final Reference Value submitted")
     printn("https://%s.etherscan.io/tx/%s" % (network, txn_hash.hex()))
