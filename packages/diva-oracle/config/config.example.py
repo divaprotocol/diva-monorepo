@@ -1,6 +1,7 @@
 PRIVATE_KEY = ''
 PUBLIC_KEY = ''
-dataprovider = PUBLIC_KEY
+dataprovider = ''  # Use '0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB' for Tellor as dataprovider
+
 
 # This is for gmail
 # This requires 2FA along with

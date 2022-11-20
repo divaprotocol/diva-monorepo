@@ -41,5 +41,8 @@ def setFinRefVal(pool_id, network, w3, my_contract):
     printn("")
     printb("Success: ", "Final Reference Value submitted")
     printn("https://%s.etherscan.io/tx/%s" % (network, txn_hash.hex()))
+    printn("Base Fee Per Gas: %s Gwei" % (w3.eth.fee_history(1, transaction_receipt.blockNumber)['baseFeePerGas'][0]/1000000000))
+    printn("Effective Gas Price: %s Gwei" % (transaction_receipt.effectiveGasPrice/1000000000))
+    printn("Gas Used: %s" % transaction_receipt.gasUsed)
 
     #print("Final Reference Value submitted for pool id {} ".format(pool_id), "({})".format(network))
