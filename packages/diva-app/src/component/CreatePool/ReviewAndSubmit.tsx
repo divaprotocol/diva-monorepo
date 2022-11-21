@@ -218,7 +218,7 @@ export function ReviewAndSubmit({
               </Stack>
               <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                 <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Expiry Time
+                  Observation Time
                 </Typography>
                 <Typography fontSize={'0.85rem'}>
                   {values.expiryTime.toLocaleString().slice(0, 11) +

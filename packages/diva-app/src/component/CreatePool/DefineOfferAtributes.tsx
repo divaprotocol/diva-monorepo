@@ -314,7 +314,7 @@ export function DefineOfferAttributes({
                     onBlur: formik.handleBlur,
                     error: formik.errors.expiryTime != null,
                   }}
-                  label="Expiry Time"
+                  label="Observation Time"
                   onChange={(event) => {
                     formik.setFieldValue('expiryTime', event)
                   }}
@@ -1055,56 +1055,56 @@ export function DefineOfferAttributes({
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <strong>
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /SHORT
-                </strong>{' '}
-                token if the reported outcome is{' '}
-                {floor < inflection && inflection < cap
-                  ? 'at or '
-                  : ''} below {floor}{' '}
+                {direction === 'Long'
+                  ? '0.00x your / ' +
+                    (
+                      formik.values.collateralBalance / formik.values.takerShare
+                    ).toFixed(2) +
+                    'x taker multiple '
+                  : (
+                      formik.values.collateralBalance / formik.values.yourShare
+                    ).toFixed(2) +
+                    'x your / ' +
+                    '0.00x taker multiple '}
+                if the reported outcome is{' '}
+                {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
+                {floor}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <strong>
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /SHORT
-                </strong>{' '}
-                token if the reported outcome is{' '}
-                {floor < inflection && inflection < cap
-                  ? 'at or '
-                  : ''} above {cap}{' '}
+                {direction === 'Long'
+                  ? (
+                      formik.values.collateralBalance / formik.values.yourShare
+                    ).toFixed(2) +
+                    'x your / ' +
+                    '0.00x taker multiple '
+                  : '0.00x your / ' +
+                    (
+                      formik.values.collateralBalance / formik.values.takerShare
+                    ).toFixed(2) +
+                    'x taker multiple '}
+                if the reported outcome is{' '}
+                {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
+                {cap}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <strong>
-                  {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''}/LONG
-                </strong>{' '}
-                and{' '}
-                <strong>
-                  {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''}/SHORT
-                </strong>{' '}
-                token if the reported outcome is {inflection}
+                {direction === 'Long'
+                  ? (gradient / formik.values.yourShare).toFixed(2) +
+                    'x your / ' +
+                    ((1 - gradient) / formik.values.yourShare).toFixed(2) +
+                    'x taker multiple '
+                  : ((1 - gradient) / formik.values.yourShare).toFixed(2) +
+                    'x your / ' +
+                    (gradient / formik.values.yourShare).toFixed(2) +
+                    'x taker multiple '}
+                if the reported outcome is {inflection}
               </Typography>
             </Container>
           </Card>
