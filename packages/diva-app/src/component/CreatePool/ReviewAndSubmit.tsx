@@ -38,7 +38,7 @@ import { toExponentialOrNumber } from '../../Util/utils'
 import styled from '@emotion/styled'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import { setMaxPayout } from '../../Redux/Stats'
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+import { ExpandMoreOutlined } from '@mui/icons-material'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -412,7 +412,7 @@ export function ReviewAndSubmit({
                     backgroundColor: '#121212',
                     boxShadow: 'none',
                   }}
-                  expandIcon={<ArrowDropUpIcon color="primary" />}
+                  expandIcon={<ExpandMoreOutlined />}
                 >
                   <Typography
                     variant="subtitle1"
