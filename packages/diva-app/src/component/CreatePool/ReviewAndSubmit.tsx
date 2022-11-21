@@ -402,6 +402,7 @@ export function ReviewAndSubmit({
                   boxShadow: 'none',
                 }}
                 elevation={0}
+                defaultExpanded={transaction === 'filloffer' ? false : true}
               >
                 <AccordionSummary
                   aria-controls="panel1a-content"
@@ -411,7 +412,7 @@ export function ReviewAndSubmit({
                     backgroundColor: '#121212',
                     boxShadow: 'none',
                   }}
-                  expandIcon={<ArrowDropUpIcon color="secondary" />}
+                  expandIcon={<ArrowDropUpIcon color="primary" />}
                 >
                   <Typography
                     variant="subtitle1"
