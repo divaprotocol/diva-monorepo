@@ -1,4 +1,7 @@
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Card,
   Container,
   FormControl,
@@ -35,6 +38,8 @@ import { toExponentialOrNumber } from '../../Util/utils'
 import styled from '@emotion/styled'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import { setMaxPayout } from '../../Redux/Stats'
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
+
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -386,92 +391,143 @@ export function ReviewAndSubmit({
                 </Typography>
                 <Typography fontSize={'0.85rem'}>{dataSourceName}</Typography>
               </Stack>
-              <Typography
-                variant="subtitle1"
-                sx={{ fontWeight: 'bold' }}
-                color="primary"
+              <Accordion
+                sx={{
+                  backgroundColor: '#121212',
+                  '&:before': {
+                    display: 'none',
+                  },
+                  marginTop: theme.spacing(3.5),
+                  marginBottom: theme.spacing(1),
+                  boxShadow: 'none',
+                }}
+                elevation={0}
               >
-                Advanced
-              </Typography>
-              {transaction === 'createpool' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                <AccordionSummary
+                  aria-controls="panel1a-content"
+                  id="panel1a-header"
+                  sx={{
+                    padding: '0px',
+                    backgroundColor: '#121212',
+                    boxShadow: 'none',
+                  }}
+                  expandIcon={<ArrowDropUpIcon color="secondary" />}
+                >
                   <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
+                    variant="subtitle1"
+                    sx={{ fontWeight: 'bold' }}
+                    color="primary"
                   >
-                    Max Pool Capacity
+                    Advanced
                   </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {values.capacity !== 'Unlimited'
-                      ? Number(values.capacity).toFixed(2)
-                      : 'Unlimited'}
-                  </Typography>
-                </Stack>
-              )}
-              {transaction === 'createoffer' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Max Pool Capacity
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {values.capacity !== 'Unlimited'
-                      ? Number(values.capacity).toFixed(2)
-                      : 'Unlimited'}
-                  </Typography>
-                </Stack>
-              )}
-              {transaction === 'filloffer' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Max Pool Capacity
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {values.capacity !== 'Unlimited'
-                      ? formatUnits(values.capacity, decimal)
-                      : 'Unlimited'}
-                  </Typography>
-                </Stack>
-              )}
-              {(transaction === 'createoffer' ||
-                transaction === 'filloffer') && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Taker Address
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {getShortenedAddress(values.takerAddress)}
-                  </Typography>
-                </Stack>
-              )}
-              {(transaction === 'createoffer' ||
-                transaction === 'filloffer') && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Min Taker Contribution (applicable on 1st fill only)
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {toExponentialOrNumber(
-                      Number(values.minTakerContribution),
-                      2,
-                      2
-                    ) +
-                      ' ' +
-                      tokenSymbol}
-                  </Typography>
-                </Stack>
-              )}
+                </AccordionSummary>
+                <AccordionDetails
+                  sx={{
+                    backgroundColor: '#121212',
+                    padding: 0,
+                    boxShadow: 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    rowGap: theme.spacing(2),
+                    opacity: 0.7,
+                  }}
+                >
+                  {transaction === 'createpool' && (
+                    <Stack
+                      direction="row"
+                      sx={{ justifyContent: 'space-between' }}
+                    >
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ ml: theme.spacing(2) }}
+                      >
+                        Max Pool Capacity
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {values.capacity !== 'Unlimited'
+                          ? Number(values.capacity).toFixed(2)
+                          : 'Unlimited'}
+                      </Typography>
+                    </Stack>
+                  )}
+                  {transaction === 'createoffer' && (
+                    <Stack
+                      direction="row"
+                      sx={{ justifyContent: 'space-between' }}
+                    >
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ ml: theme.spacing(2) }}
+                      >
+                        Max Pool Capacity
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {values.capacity !== 'Unlimited'
+                          ? Number(values.capacity).toFixed(2)
+                          : 'Unlimited'}
+                      </Typography>
+                    </Stack>
+                  )}
+                  {transaction === 'filloffer' && (
+                    <Stack
+                      direction="row"
+                      sx={{ justifyContent: 'space-between' }}
+                    >
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ ml: theme.spacing(2) }}
+                      >
+                        Max Pool Capacity
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {values.capacity !== 'Unlimited'
+                          ? formatUnits(values.capacity, decimal)
+                          : 'Unlimited'}
+                      </Typography>
+                    </Stack>
+                  )}
+                  {(transaction === 'createoffer' ||
+                    transaction === 'filloffer') && (
+                    <Stack
+                      direction="row"
+                      sx={{ justifyContent: 'space-between' }}
+                    >
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ ml: theme.spacing(2) }}
+                      >
+                        Taker Address
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {getShortenedAddress(values.takerAddress)}
+                      </Typography>
+                    </Stack>
+                  )}
+                  {(transaction === 'createoffer' ||
+                    transaction === 'filloffer') && (
+                    <Stack
+                      direction="row"
+                      sx={{ justifyContent: 'space-between' }}
+                    >
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ ml: theme.spacing(2) }}
+                      >
+                        Min Taker Contribution (applicable on 1st fill only)
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {toExponentialOrNumber(
+                          Number(values.minTakerContribution),
+                          2,
+                          2
+                        ) +
+                          ' ' +
+                          tokenSymbol}
+                      </Typography>
+                    </Stack>
+                  )}
+                </AccordionDetails>
+              </Accordion>
             </Stack>
           </Container>
         </Box>
