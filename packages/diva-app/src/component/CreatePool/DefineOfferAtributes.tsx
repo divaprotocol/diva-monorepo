@@ -1096,13 +1096,25 @@ export function DefineOfferAttributes({
                 style={{ color: 'white' }}
               >
                 {direction === 'Long'
-                  ? (gradient / formik.values.yourShare).toFixed(2) +
+                  ? (
+                      (gradient * formik.values.collateralBalance) /
+                      formik.values.yourShare
+                    ).toFixed(2) +
                     'x your / ' +
-                    ((1 - gradient) / formik.values.yourShare).toFixed(2) +
+                    (
+                      ((1 - gradient) * formik.values.collateralBalance) /
+                      formik.values.takerShare
+                    ).toFixed(2) +
                     'x taker multiple '
-                  : ((1 - gradient) / formik.values.yourShare).toFixed(2) +
+                  : (
+                      ((1 - gradient) * formik.values.collateralBalance) /
+                      formik.values.yourShare
+                    ).toFixed(2) +
                     'x your / ' +
-                    (gradient / formik.values.yourShare).toFixed(2) +
+                    (
+                      (gradient * formik.values.collateralBalance) /
+                      formik.values.takerShare
+                    ).toFixed(2) +
                     'x taker multiple '}
                 if the reported outcome is {inflection}
               </Typography>
