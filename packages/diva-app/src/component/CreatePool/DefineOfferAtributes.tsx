@@ -1033,6 +1033,14 @@ export function DefineOfferAttributes({
                 />
               </Box>
             )}
+          <Typography
+            pb={theme.spacing(1)}
+            pt={theme.spacing(1)}
+            variant="subtitle1"
+            color="white"
+          >
+            Payoff Scenarios
+          </Typography>
           <Card
             style={{
               maxWidth: theme.spacing(60),
@@ -1042,13 +1050,6 @@ export function DefineOfferAttributes({
             }}
           >
             <Container>
-              <Typography
-                pb={theme.spacing(1)}
-                pt={theme.spacing(1)}
-                variant="subtitle1"
-              >
-                Payoff Scenarios
-              </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
