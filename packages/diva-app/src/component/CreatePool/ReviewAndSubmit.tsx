@@ -762,7 +762,7 @@ export function ReviewAndSubmit({
           >
             Payoff Scenarios
           </Typography>
-          {transaction === 'filloffer' ? (
+          {transaction === 'filloffer' && (
             <Box>
               <Card
                 style={{
@@ -843,7 +843,91 @@ export function ReviewAndSubmit({
                 </Container>
               </Card>
             </Box>
-          ) : (
+          )}
+          {transaction === 'createoffer' && (
+            <Box>
+              <Card
+                style={{
+                  maxWidth: theme.spacing(60),
+                  border: '1px solid #1B3448',
+                  background:
+                    'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
+                }}
+              >
+                <Container>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>
+                    ) : (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {maxYieldMaker.toFixed(2) + 'x'}
+                        </span>
+                      </strong>
+                    )}{' '}
+                    if reported outcome is{' '}
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    below {values.floor}
+                  </Typography>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {maxYieldMaker.toFixed(2) + 'x'}
+                        </span>
+                      </strong>
+                    ) : (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>
+                    )}{' '}
+                    if reported outcome is{' '}
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    above {values.cap}{' '}
+                  </Typography>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(values.gradient * maxYieldMaker).toFixed(2) + 'x'}
+                        </span>
+                      </strong>
+                    ) : (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {((1 - values.gradient) * maxYieldMaker).toFixed(2) +
+                            'x'}
+                        </span>
+                      </strong>
+                    )}{' '}
+                    if reported outcome is
+                    {' ' + values.inflection}
+                  </Typography>
+                </Container>
+              </Card>
+            </Box>
+          )}
+          {transaction === 'createpool' && (
             <Card
               style={{
                 maxWidth: theme.spacing(60),
