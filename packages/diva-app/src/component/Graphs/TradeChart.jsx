@@ -43,7 +43,7 @@ export default function DIVATradeChart(props) {
 
   useEffect(() => {
     if (chartWidth > 762) {
-      setChartHeight(chartWidth * 0.4)
+      setChartHeight(chartWidth * 0.45)
     } else {
       setChartHeight(h)
     }
