@@ -42,7 +42,6 @@ export function Offer() {
       )
 
       formik.setFieldValue('signature', jsonResponse.data.data.signature)
-      console.log('setting json ', jsonResponse.data.data)
       formik.setFieldValue('jsonToExport', jsonResponse.data.data)
       token.decimals().then((decimals: number) => {
         setDecimal(decimals)
