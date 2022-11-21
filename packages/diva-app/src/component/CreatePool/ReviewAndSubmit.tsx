@@ -224,7 +224,7 @@ export function ReviewAndSubmit({
                 sx={{ fontWeight: 'bold' }}
                 color="primary"
               >
-                {transaction === 'createoffer' ? 'Offer terms' : 'Collateral'}
+                {transaction !== 'createpool' ? 'Offer terms' : 'Collateral'}
               </Typography>
               {transaction === 'filloffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
