@@ -1055,102 +1055,56 @@ export function DefineOfferAttributes({
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
                 <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
-                  {floor}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
+                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /LONG
                 </strong>{' '}
                 and
                 <strong>
                   {' '}
-                  1.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
+                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /SHORT
                 </strong>{' '}
-                token
+                token if the reported outcome is{' '}
+                {floor < inflection && inflection < cap
+                  ? 'at or '
+                  : ''} below {floor}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
                 <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
-                  {cap}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
+                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /LONG
                 </strong>{' '}
                 and
                 <strong>
                   {' '}
-                  0.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
+                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /SHORT
                 </strong>{' '}
-                token
+                token if the reported outcome is{' '}
+                {floor < inflection && inflection < cap
+                  ? 'at or '
+                  : ''} above {cap}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} />
-                If {referenceAsset} is{' '}
-                <strong>
-                  {' '}
-                  at
-                  {' ' + inflection}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
                 <strong>
                   {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  LONG
+                  {collateralToken != null ? collateralToken.symbol : ''}/LONG
                 </strong>{' '}
                 and{' '}
                 <strong>
                   {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  SHORT
+                  {collateralToken != null ? collateralToken.symbol : ''}/SHORT
                 </strong>{' '}
-                token
+                token if the reported outcome is {inflection}
               </Typography>
             </Container>
           </Card>

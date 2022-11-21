@@ -942,97 +942,82 @@ export function ReviewAndSubmit({
                   sx={{ mt: theme.spacing(2) }}
                   style={{ color: 'white' }}
                 >
-                  <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                  {values.referenceAsset} is{' '}
                   <strong>
-                    {values.floor < values.inflection &&
-                    values.inflection < values.cap
-                      ? 'at or '
-                      : ''}{' '}
-                    below {values.floor}
+                    0.00{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /LONG
                   </strong>{' '}
-                  on{' '}
-                  {values.expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(values.expiryTime) / 1000).slice(
-                      11,
-                      19
-                    ) +
-                    ' ' +
-                    userTimeZone()}
-                  , the payout will be{' '}
-                  <strong>0.00 {values.collateralToken.symbol} per LONG</strong>{' '}
-                  and{' '}
+                  and
                   <strong>
                     {' '}
-                    1.00 {values.collateralToken.symbol} per SHORT
+                    1.00{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /SHORT
                   </strong>{' '}
-                  token
+                  token if the reported outcome is{' '}
+                  {values.floor < values.inflection &&
+                  values.inflection < values.cap
+                    ? 'at or '
+                    : ''}{' '}
+                  below {values.floor}{' '}
                 </Typography>
                 <Typography
                   fontSize={'0.85rem'}
                   sx={{ mt: theme.spacing(2) }}
                   style={{ color: 'white' }}
                 >
-                  <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                  {values.referenceAsset} is{' '}
                   <strong>
-                    {values.floor < values.inflection &&
-                    values.inflection < values.cap
-                      ? 'at or '
-                      : ''}{' '}
-                    above {values.cap}{' '}
+                    1.00{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /LONG
                   </strong>{' '}
-                  on{' '}
-                  {values.expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(values.expiryTime) / 1000).slice(
-                      11,
-                      19
-                    ) +
-                    ' ' +
-                    userTimeZone()}
-                  , the payout will be{' '}
-                  <strong>1.00 {values.collateralToken.symbol} per LONG</strong>{' '}
-                  and{' '}
+                  and
                   <strong>
                     {' '}
-                    0.00 {values.collateralToken.symbol} per SHORT
+                    0.00{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /SHORT
                   </strong>{' '}
-                  token
+                  token if the reported outcome is{' '}
+                  {values.floor < values.inflection &&
+                  values.inflection < values.cap
+                    ? 'at or '
+                    : ''}{' '}
+                  above {values.cap}{' '}
                 </Typography>
                 <Typography
                   fontSize={'0.85rem'}
                   sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                   style={{ color: 'white' }}
                 >
-                  <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                  {values.referenceAsset} is{' '}
                   <strong>
-                    {' '}
-                    at
-                    {' ' + values.inflection}{' '}
-                  </strong>{' '}
-                  on{' '}
-                  {values.expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(values.expiryTime) / 1000).slice(
-                      11,
-                      19
-                    ) +
-                    ' ' +
-                    userTimeZone()}
-                  , the payout will be{' '}
-                  <strong>
-                    {values.gradient.toFixed(2)} {values.collateralToken.symbol}{' '}
-                    per LONG
+                    {values.gradient.toString() !== ''
+                      ? values.gradient.toFixed(2)
+                      : 0}{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /LONG
                   </strong>{' '}
                   and{' '}
                   <strong>
-                    {(1 - values.gradient).toFixed(2)}{' '}
-                    {values.collateralToken.symbol} per SHORT
+                    {values.gradient.toString() !== ''
+                      ? (1 - values.gradient).toFixed(2)
+                      : 1}{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /SHORT
                   </strong>{' '}
-                  token
+                  token if the reported outcome is {values.inflection}
                 </Typography>
               </Container>
             </Card>
