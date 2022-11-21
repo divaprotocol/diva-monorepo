@@ -189,12 +189,6 @@ export function ReviewAndSubmit({
         <Box border={1} borderColor="secondary.dark">
           <Container sx={{ pb: theme.spacing(4), pt: theme.spacing(3) }}>
             <Stack spacing={theme.spacing(2)}>
-              {transaction !== 'filloffer' && (
-                <Typography pt={theme.spacing(2)} variant="subtitle1">
-                  Please review the correctness of the pool's parameters before
-                  creating it
-                </Typography>
-              )}
               <Typography
                 variant="subtitle1"
                 sx={{ fontWeight: 'bold' }}
@@ -232,19 +226,6 @@ export function ReviewAndSubmit({
               >
                 {transaction === 'createoffer' ? 'Offer terms' : 'Collateral'}
               </Typography>
-              {transaction === 'createpool' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Collateral Token
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {values.collateralToken.symbol}
-                  </Typography>
-                </Stack>
-              )}
               {transaction === 'filloffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
@@ -267,7 +248,9 @@ export function ReviewAndSubmit({
                     Collateral Amount
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {Number(values.collateralBalance).toFixed(2)}
+                    {Number(values.collateralBalance).toFixed(2) +
+                      ' ' +
+                      values.collateralToken.symbol}
                   </Typography>
                 </Stack>
               )}
@@ -280,7 +263,9 @@ export function ReviewAndSubmit({
                     Collateral Amount
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {Number(formik.values.collateralBalance).toFixed(2)}
+                    {Number(formik.values.collateralBalance).toFixed(2) +
+                      ' ' +
+                      tokenSymbol}
                   </Typography>
                 </Stack>
               )}
@@ -308,19 +293,6 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {transaction === 'createpool' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    LONG / SHORT Token Supply
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {Number(values.collateralBalance).toFixed(2)}
-                  </Typography>
-                </Stack>
-              )}
               {transaction === 'createoffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
@@ -330,7 +302,7 @@ export function ReviewAndSubmit({
                     Your Contribution
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.yourShare.toFixed(2)}
+                    {values.yourShare.toFixed(2) + ' ' + tokenSymbol}
                   </Typography>
                 </Stack>
               )}
@@ -343,7 +315,7 @@ export function ReviewAndSubmit({
                     Taker Contribution
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.takerShare.toFixed(2)}
+                    {values.takerShare.toFixed(2) + ' ' + tokenSymbol}
                   </Typography>
                 </Stack>
               )}
@@ -446,7 +418,9 @@ export function ReviewAndSubmit({
                       </Typography>
                       <Typography fontSize={'0.85rem'}>
                         {values.capacity !== 'Unlimited'
-                          ? Number(values.capacity).toFixed(2)
+                          ? Number(values.capacity).toFixed(2) +
+                            ' ' +
+                            tokenSymbol
                           : 'Unlimited'}
                       </Typography>
                     </Stack>
@@ -672,18 +646,6 @@ export function ReviewAndSubmit({
                       </>
                     )}
                   </FormControl>
-
-                  {/* <FormHelperText
-                    sx={{ display: 'flex', justifyContent: 'flex-end' }}
-                  >
-                    Expires in:{' '}
-                    {Math.floor(
-                      getExpiryMinutesFromNow(formik.values.offerDuration) / 60
-                    )}
-                    h{' '}
-                    {getExpiryMinutesFromNow(formik.values.offerDuration) % 60}m
-                  </FormHelperText> */}
-
                   <LinearProgress
                     variant="determinate"
                     sx={{
