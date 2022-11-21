@@ -89,7 +89,11 @@ export function ReviewAndSubmit({
     setDecimal(decimals)
   })
   useEffect(() => {
-    if (transaction === 'filloffer' && diva !== undefined) {
+    if (
+      transaction === 'filloffer' &&
+      diva !== undefined &&
+      formik.values.jsonToExport != '{}'
+    ) {
       console.log(formik.values)
       diva
         .getOfferRelevantStateCreateContingentPool(
@@ -123,7 +127,7 @@ export function ReviewAndSubmit({
           )
       )
     }
-  }, [decimal, diva])
+  }, [decimal, diva, formik.values.jsonToExport])
   useEffect(() => {
     if (transaction === 'filloffer' && diva !== undefined) {
       formik.setFieldValue('yourShare', Number(actualFillableAmount))
@@ -269,30 +273,34 @@ export function ReviewAndSubmit({
                   </Typography>
                 </Stack>
               )}
-              {transaction === 'filloffer' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
+              {transaction === 'filloffer' &&
+                formik.values.jsonToExport != '{}' && (
+                  <Stack
+                    direction="row"
+                    sx={{ justifyContent: 'space-between' }}
                   >
-                    Offer Size
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {toExponentialOrNumber(
-                      Number(
-                        formatUnits(
-                          formik.values.jsonToExport.takerCollateralAmount,
-                          decimal
-                        )
-                      ),
-                      2,
-                      2
-                    ) +
-                      ' ' +
-                      tokenSymbol}
-                  </Typography>
-                </Stack>
-              )}
+                    <Typography
+                      fontSize={'0.85rem'}
+                      sx={{ ml: theme.spacing(2) }}
+                    >
+                      Offer Size
+                    </Typography>
+                    <Typography fontSize={'0.85rem'}>
+                      {toExponentialOrNumber(
+                        Number(
+                          formatUnits(
+                            formik.values.jsonToExport.takerCollateralAmount,
+                            decimal
+                          )
+                        ),
+                        2,
+                        2
+                      ) +
+                        ' ' +
+                        tokenSymbol}
+                    </Typography>
+                  </Stack>
+                )}
               {transaction === 'createoffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
