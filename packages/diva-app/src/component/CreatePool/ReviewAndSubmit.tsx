@@ -61,6 +61,7 @@ export function ReviewAndSubmit({
   const [dataSourceName, setDataSourceName] = useState('')
   const [mobile, setMobile] = useState(false)
   const [maxYield, setMaxYield] = useState(0)
+  const [maxYieldMaker, setMaxYieldMaker] = useState(0)
   const [maxPayout, setMaxPayout] = useState(0)
   const [tokenSymbol, setTokenSymbol] = useState('')
   const [actualFillableAmount, setActualFillableAmount] = useState(
@@ -125,6 +126,13 @@ export function ReviewAndSubmit({
               decimal
             )
           )
+      )
+    }
+
+    if (transaction === 'createoffer' && diva !== undefined) {
+      setMaxYieldMaker(
+        (formik.values.takerShare + formik.values.yourShare) /
+          formik.values.yourShare
       )
     }
   }, [decimal, diva, formik.values.jsonToExport])
@@ -496,7 +504,7 @@ export function ReviewAndSubmit({
                         fontSize={'0.85rem'}
                         sx={{ ml: theme.spacing(2) }}
                       >
-                        Min Taker Contribution (applicable on 1st fill only)
+                        Min Fill Amount (applicable on 1st fill only)
                       </Typography>
                       <Typography fontSize={'0.85rem'}>
                         {toExponentialOrNumber(
@@ -782,13 +790,11 @@ export function ReviewAndSubmit({
                       </strong>
                     )}{' '}
                     if reported outcome is{' '}
-                    <strong>
-                      {values.floor < values.inflection &&
-                      values.inflection < values.cap
-                        ? 'at or '
-                        : ''}{' '}
-                      below {values.floor}
-                    </strong>{' '}
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    below {values.floor}
                   </Typography>
                   <Typography
                     fontSize={'0.85rem'}
@@ -807,13 +813,11 @@ export function ReviewAndSubmit({
                       </strong>
                     )}{' '}
                     if reported outcome is{' '}
-                    <strong>
-                      {values.floor < values.inflection &&
-                      values.inflection < values.cap
-                        ? 'at or '
-                        : ''}{' '}
-                      above {values.cap}{' '}
-                    </strong>
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    above {values.cap}{' '}
                   </Typography>
                   <Typography
                     fontSize={'0.85rem'}
@@ -834,7 +838,7 @@ export function ReviewAndSubmit({
                       </strong>
                     )}{' '}
                     if reported outcome is
-                    <strong>{' ' + values.inflection} </strong>
+                    {' ' + values.inflection}
                   </Typography>
                 </Container>
               </Card>
