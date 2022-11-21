@@ -737,16 +737,22 @@ export function DefineOfferAttributes({
                   )}
                   {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
-                      You receive{' '}
-                      {direction === 'Long' ? (
-                        <strong>
-                          {formik.values.collateralBalance} LONG Tokens
-                        </strong>
-                      ) : (
-                        <strong>
-                          {formik.values.collateralBalance} SHORT Tokens
-                        </strong>
-                      )}
+                      Max payout:{' '}
+                      {formik.values.collateralBalance +
+                        ' ' +
+                        collateralToken?.symbol}
+                      {' ('}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {formik.values.yourShare != 0
+                            ? (
+                                formik.values.collateralBalance /
+                                formik.values.yourShare
+                              ).toFixed(2) + 'x'
+                            : 'n/a'}
+                        </span>
+                      </strong>
+                      {')'}
                     </FormHelperText>
                   )}
                 </FormControl>
@@ -774,16 +780,22 @@ export function DefineOfferAttributes({
                   />
                   {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
-                      Taker receives{' '}
-                      {direction === 'Long' ? (
-                        <strong>
-                          {formik.values.collateralBalance} SHORT Tokens
-                        </strong>
-                      ) : (
-                        <strong>
-                          {formik.values.collateralBalance} LONG Tokens
-                        </strong>
-                      )}
+                      Max payout:{' '}
+                      {formik.values.collateralBalance +
+                        ' ' +
+                        collateralToken?.symbol}
+                      {' ('}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {formik.values.takerShare != 0
+                            ? (
+                                formik.values.collateralBalance /
+                                formik.values.takerShare
+                              ).toFixed(2) + 'x'
+                            : 'n/a'}
+                        </span>
+                      </strong>
+                      {')'}
                     </FormHelperText>
                   )}
                 </FormControl>
