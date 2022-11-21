@@ -57,7 +57,7 @@ def submitPools(df, network, max_time_away, w3, contract):
 
     for j in pendingPools[network]:
         df = df[df["id"] != j]
-        
+
     for i in range(df.shape[0]):
         pair = df['referenceAsset'].iloc[i]
         opair = pair
@@ -77,7 +77,7 @@ def submitPools(df, network, max_time_away, w3, contract):
 
             try:
                 sendPrice(pool_id=pool_id, value=price, network=network,
-                            w3=w3, my_contract=contract, nonce=nonces[network])
+                          w3=w3, my_contract=contract, nonce=nonces[network])
                 update_records(message)
             except:
                 # How do we know transactions is still pending?
@@ -100,7 +100,7 @@ def tellor_submit_pools(df, network, w3, contract):
     if df.empty:
         return
     DIVAOracleTellor_contract = w3.eth.contract(
-            address=tellor_contracts.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
+        address=tellor_contracts.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
     getVal_contract = w3.eth.contract(
         address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
     numberPools = 0
@@ -120,7 +120,7 @@ def tellor_submit_pools(df, network, w3, contract):
 
     # taking this out for now, keeps in a pending pools but doesn't resubmit on error
     #for j in pendingPools[network]:
-     #   df = df[df["id"] != j]
+    #   df = df[df["id"] != j]
 
     for i in range(df.shape[0]):
         pair = df['referenceAsset'].iloc[i]
@@ -167,24 +167,32 @@ def tellor_submit_pools(df, network, w3, contract):
                         printn("At least one submitted value is within the specified {}% tolerance. No submission will be done.".format(submission_tolerance))
                 elif not others_values:
                     submit = True
-
-                if submit or (submission_tolerance == 0):
-                    # Tellor oracle has 2 steps submitting value to contract and setting final reference value
-                    submitTellorValue(pool_id=pool_id, finalRefVal=price,
-                                      collToUSD=coll_asset_to_usd, network=network, w3=w3, my_contract=contract)
-                    # TODO Pull a delay from contract
-                    # minDisputePeriod -> Pulling this from the blockchain -> Look to do this on main
-                    time.sleep(15)
-                    printn("")
-                    setFinRefVal(pool_id, network, w3,
-                                 DIVAOracleTellor_contract)
             except:
-                # How do we know transactions is still pending?
-                printn("--Tellor submission or setFinalReferenceValue failed--")
-                pendingPools[network].append(pool_id)
-                #pendingPools_nonces[network].append(nonces[network])
-                #print("Nonce of pending pool transaction: {}".format(nonces[network]))
-                #print("Pool Id of pending pool: {}".format(pool_id))
+                printn("-- Error while checking for already submitted values --")
+
+            if submit or (submission_tolerance == 0):
+                # Tellor oracle has 2 steps submitting value to contract and setting final reference value
+                sTV = submitTellorValue(pool_id=pool_id, finalRefVal=price,
+                                        collToUSD=coll_asset_to_usd, network=network, w3=w3, my_contract=contract)
+                if sTV == 1:
+                    printn("-- Error in Tellor submission: Continuing with next pool --")
+                    continue
+                # TODO Pull a delay from contract
+                # minDisputePeriod -> Pulling this from the blockchain -> Look to do this on main
+                time.sleep(15)
+                printn("")
+                sFRV = setFinRefVal(pool_id, network, w3,
+                                    DIVAOracleTellor_contract)
+                if sFRV == 1:
+                    printn("-- Error in setFinalReferenceValue: Continuing with next pool --")
+                    continue
+            #except:
+            # How do we know transactions is still pending?
+            # printn("--Tellor submission or setFinalReferenceValue failed--")
+            #pendingPools[network].append(pool_id)
+            #pendingPools_nonces[network].append(nonces[network])
+            #print("Nonce of pending pool transaction: {}".format(nonces[network]))
+            #print("Pool Id of pending pool: {}".format(pool_id))
             #nonces[network] += 1
         else:
             pendingPools[network].append(pool_id)
