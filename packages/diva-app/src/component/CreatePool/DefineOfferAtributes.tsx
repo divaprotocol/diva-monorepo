@@ -1017,7 +1017,7 @@ export function DefineOfferAttributes({
             pb={theme.spacing(2)}
             variant="subtitle1"
           >
-            Payoff Profile
+            Payoff Profiles
           </Typography>
           {floor != null &&
             cap != null &&

@@ -726,9 +726,15 @@ export function ReviewAndSubmit({
               </Card>
             </>
           )}
-          <Typography color="white" pb={theme.spacing(2)} variant="subtitle1">
-            Payoff Profile
-          </Typography>
+          {transaction !== 'createpool' ? (
+            <Typography color="white" pb={theme.spacing(2)} variant="subtitle1">
+              Your Payoff Profile
+            </Typography>
+          ) : (
+            <Typography color="white" pb={theme.spacing(2)} variant="subtitle1">
+              Payoff Profiles
+            </Typography>
+          )}
           {values.floor != null &&
             values.cap != null &&
             values.inflection != null &&
