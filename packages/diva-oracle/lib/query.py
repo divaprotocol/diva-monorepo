@@ -11,7 +11,7 @@ def seconds_to_hours(seconds):
 # Is lastID pool ID? This is to mitigate the long list of pools
 def query(lastId):
     expiry_floor_time_away = 300
-    expiry_cieling_time_away = 86400
+    expiry_cieling_time_away = config.max_reporting_frame * 3600
     #print("pools expiring between {} hours and  {} hours from now:{}".format(expiry_floor_time_away/(60*60), expiry_cieling_time_away/(60*60), dt.now()))
     return """
             { 
@@ -34,7 +34,7 @@ def query(lastId):
 def tellor_query(lastId, provider):
     expiry_floor_time_away = 300
     eft = seconds_to_hours(expiry_floor_time_away)
-    expiry_ceiling_time_away = 86400
+    expiry_ceiling_time_away = config.max_reporting_frame * 3600
     ect = seconds_to_hours(expiry_ceiling_time_away)
     #print("pools expiring between {} hours and  {} hours from now: {}".format(round(eft, 2), ect, dt.now()))
     return """
