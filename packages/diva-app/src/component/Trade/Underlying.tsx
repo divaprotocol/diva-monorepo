@@ -217,50 +217,44 @@ export default function Underlying() {
       </Stack>
       <Divider orientation="horizontal" />
       <TabPanel value="long" sx={{ paddingBottom: '3em' }}>
-        <Stack direction="row" spacing={25}>
-          <LeftDiv>
-            <Stack spacing={2}>
-              <Box width="100%">
-                <TradeChart
-                  data={data}
-                  refAsset={pool.referenceAsset}
-                  currentPrice={currentPrice}
-                  payOut={pool.collateralToken.symbol}
-                  w={762}
-                  h={377}
-                  isLong={OptionParams.IsLong}
-                  breakEven={breakEven}
-                  floor={OptionParams.Floor}
-                  cap={OptionParams.Cap}
-                  mouseHover={true}
-                  showBreakEven={true}
-                />
-              </Box>
-              <LeftCompFlexContainer>
-                <OrdersPanel
-                  option={pool}
-                  tokenAddress={tokenAddress}
-                  exchangeProxy={exchangeProxy}
-                />
-              </LeftCompFlexContainer>
-            </Stack>
-          </LeftDiv>
-          <RightDiv>
-            <Stack spacing={2}>
-              <CreateOrder
+        <Stack direction="row" spacing={15}>
+          <Stack direction="column" width="50%" spacing={2}>
+            <TradeChart
+              data={data}
+              refAsset={pool.referenceAsset}
+              currentPrice={currentPrice}
+              payOut={pool.collateralToken.symbol}
+              w={650}
+              h={336}
+              isLong={OptionParams.IsLong}
+              breakEven={breakEven}
+              floor={OptionParams.Floor}
+              cap={OptionParams.Cap}
+              mouseHover={true}
+              showBreakEven={true}
+            />
+            <LeftCompFlexContainer>
+              <OrdersPanel
                 option={pool}
                 tokenAddress={tokenAddress}
                 exchangeProxy={exchangeProxy}
-                chainId={chainId}
-                provider={provider}
               />
-            </Stack>
-          </RightDiv>
+            </LeftCompFlexContainer>
+          </Stack>
+          <Box>
+            <CreateOrder
+              option={pool}
+              tokenAddress={tokenAddress}
+              exchangeProxy={exchangeProxy}
+              chainId={chainId}
+              provider={provider}
+            />
+          </Box>
         </Stack>
       </TabPanel>
       <TabPanel value="short" sx={{ paddingBottom: '3em' }}>
-        <Stack direction="row" justifyContent="space-between">
-          <Stack direction="column" width="60%" spacing={2}>
+        <Stack direction="row" spacing={15}>
+          <Stack direction="column" width="50%" spacing={2}>
             <TradeChart
               data={data}
               refAsset={pool.referenceAsset}
