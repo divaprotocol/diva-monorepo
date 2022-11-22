@@ -60,7 +60,7 @@ export function ReviewAndSubmit({
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
   const [mobile, setMobile] = useState(false)
-  const [maxYield, setMaxYield] = useState(0)
+  const [maxYieldTaker, setMaxYieldTaker] = useState(0)
   const [maxYieldMaker, setMaxYieldMaker] = useState(0)
   const [maxPayout, setMaxPayout] = useState(0)
   const [tokenSymbol, setTokenSymbol] = useState('')
@@ -110,7 +110,7 @@ export function ReviewAndSubmit({
           )
         })
 
-      setMaxYield(
+      setMaxYieldTaker(
         (Number(
           formatUnits(formik.values.jsonToExport.takerCollateralAmount, decimal)
         ) +
@@ -139,7 +139,7 @@ export function ReviewAndSubmit({
   useEffect(() => {
     if (transaction === 'filloffer' && diva !== undefined) {
       formik.setFieldValue('yourShare', Number(actualFillableAmount))
-      setMaxPayout(Number(actualFillableAmount) * maxYield)
+      setMaxPayout(Number(actualFillableAmount) * maxYieldTaker)
     }
   }, [actualFillableAmount, decimal])
   useEffect(() => {
@@ -247,7 +247,7 @@ export function ReviewAndSubmit({
                     Max yield
                   </Typography>
                   <Typography fontSize={'1rem'} color={'#3393E0'}>
-                    {maxYield.toFixed(2) + 'x'}
+                    {maxYieldTaker.toFixed(2) + 'x'}
                   </Typography>
                 </Stack>
               )}
@@ -571,7 +571,7 @@ export function ReviewAndSubmit({
                         const value = event.target.value
                         const arr = value.split('.')
                         const collateralBalance = event.target.value
-                        setMaxPayout(Number(value) * maxYield)
+                        setMaxPayout(Number(value) * maxYieldTaker)
                         if (arr.length > 1) {
                           if (arr[1].length <= decimal) {
                             if (collateralBalance !== '') {
@@ -641,7 +641,8 @@ export function ReviewAndSubmit({
                                     collateralWalletBalance
                                   )
                                   setMaxPayout(
-                                    Number(collateralWalletBalance) * maxYield
+                                    Number(collateralWalletBalance) *
+                                      maxYieldTaker
                                   )
                                 } else {
                                   formik.setFieldValue(
@@ -649,7 +650,7 @@ export function ReviewAndSubmit({
                                     actualFillableAmount
                                   )
                                   setMaxPayout(
-                                    Number(actualFillableAmount) * maxYield
+                                    Number(actualFillableAmount) * maxYieldTaker
                                   )
                                 }
                               }}
@@ -791,7 +792,7 @@ export function ReviewAndSubmit({
                     ) : (
                       <strong>
                         <span style={{ color: '#3393E0' }}>
-                          {maxYield.toFixed(2) + 'x'}
+                          {maxYieldTaker.toFixed(2) + 'x'}
                         </span>
                       </strong>
                     )}{' '}
@@ -810,7 +811,7 @@ export function ReviewAndSubmit({
                     {values.offerDirection === 'Long' ? (
                       <strong>
                         <span style={{ color: '#3393E0' }}>
-                          {maxYield.toFixed(2) + 'x'}
+                          {maxYieldTaker.toFixed(2) + 'x'}
                         </span>
                       </strong>
                     ) : (
@@ -833,13 +834,14 @@ export function ReviewAndSubmit({
                     {values.offerDirection === 'Long' ? (
                       <strong>
                         <span style={{ color: '#3393E0' }}>
-                          {(values.gradient * maxYield).toFixed(2) + 'x'}
+                          {(values.gradient * maxYieldTaker).toFixed(2) + 'x'}
                         </span>
                       </strong>
                     ) : (
                       <strong>
                         <span style={{ color: '#3393E0' }}>
-                          {((1 - values.gradient) * maxYield).toFixed(2) + 'x'}
+                          {((1 - values.gradient) * maxYieldTaker).toFixed(2) +
+                            'x'}
                         </span>
                       </strong>
                     )}{' '}
