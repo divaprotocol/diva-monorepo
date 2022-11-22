@@ -42,9 +42,9 @@ export function Offer() {
       )
 
       formik.setFieldValue('signature', jsonResponse.data.data.signature)
+      formik.setFieldValue('jsonToExport', jsonResponse.data.data)
       token.decimals().then((decimals: number) => {
         setDecimal(decimals)
-        formik.setFieldValue('jsonToExport', jsonResponse.data.data)
         formik.setFieldValue('collateralToken.decimals', decimals)
         formik.setFieldValue(
           'gradient',

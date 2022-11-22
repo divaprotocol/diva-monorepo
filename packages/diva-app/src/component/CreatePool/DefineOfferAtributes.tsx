@@ -314,7 +314,7 @@ export function DefineOfferAttributes({
                     onBlur: formik.handleBlur,
                     error: formik.errors.expiryTime != null,
                   }}
-                  label="Expiry Time"
+                  label="Observation Time"
                   onChange={(event) => {
                     formik.setFieldValue('expiryTime', event)
                   }}
@@ -737,16 +737,22 @@ export function DefineOfferAttributes({
                   )}
                   {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
-                      You receive{' '}
-                      {direction === 'Long' ? (
-                        <strong>
-                          {formik.values.collateralBalance} LONG Tokens
-                        </strong>
-                      ) : (
-                        <strong>
-                          {formik.values.collateralBalance} SHORT Tokens
-                        </strong>
-                      )}
+                      Max payout:{' '}
+                      {formik.values.collateralBalance +
+                        ' ' +
+                        collateralToken?.symbol}
+                      {' ('}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {formik.values.yourShare != 0
+                            ? (
+                                formik.values.collateralBalance /
+                                formik.values.yourShare
+                              ).toFixed(2) + 'x'
+                            : 'n/a'}
+                        </span>
+                      </strong>
+                      {')'}
                     </FormHelperText>
                   )}
                 </FormControl>
@@ -774,16 +780,22 @@ export function DefineOfferAttributes({
                   />
                   {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
-                      Taker receives{' '}
-                      {direction === 'Long' ? (
-                        <strong>
-                          {formik.values.collateralBalance} SHORT Tokens
-                        </strong>
-                      ) : (
-                        <strong>
-                          {formik.values.collateralBalance} LONG Tokens
-                        </strong>
-                      )}
+                      Max payout:{' '}
+                      {formik.values.collateralBalance +
+                        ' ' +
+                        collateralToken?.symbol}
+                      {' ('}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {formik.values.takerShare != 0
+                            ? (
+                                formik.values.collateralBalance /
+                                formik.values.takerShare
+                              ).toFixed(2) + 'x'
+                            : 'n/a'}
+                        </span>
+                      </strong>
+                      {')'}
                     </FormHelperText>
                   )}
                 </FormControl>
@@ -1005,7 +1017,7 @@ export function DefineOfferAttributes({
             pb={theme.spacing(2)}
             variant="subtitle1"
           >
-            Payoff Profile
+            Payoff Profiles
           </Typography>
           {floor != null &&
             cap != null &&
@@ -1021,6 +1033,14 @@ export function DefineOfferAttributes({
                 />
               </Box>
             )}
+          <Typography
+            pb={theme.spacing(1)}
+            pt={theme.spacing(1)}
+            variant="subtitle1"
+            color="white"
+          >
+            Payoff Scenarios
+          </Typography>
           <Card
             style={{
               maxWidth: theme.spacing(60),
@@ -1031,113 +1051,138 @@ export function DefineOfferAttributes({
           >
             <Container>
               <Typography
-                pb={theme.spacing(1)}
-                pt={theme.spacing(1)}
-                variant="subtitle1"
+                fontSize={'0.85rem'}
+                sx={{ mt: theme.spacing(2) }}
+                style={{ color: 'white' }}
               >
-                Payoff Scenarios
+                {direction === 'Long' ? (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>0.00x</span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          formik.values.collateralBalance /
+                          formik.values.takerShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                ) : (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          formik.values.collateralBalance /
+                          formik.values.yourShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>0.00x</span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                )}
+                if the reported outcome is{' '}
+                {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
+                {floor}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
-                <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
-                  {floor}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  1.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
-                </strong>{' '}
-                token
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
-                <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
-                  {cap}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  0.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
-                </strong>{' '}
-                token
+                {direction === 'Long' ? (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          formik.values.collateralBalance /
+                          formik.values.yourShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>0.00x</span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                ) : (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>0.00x</span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          formik.values.collateralBalance /
+                          formik.values.takerShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                )}
+                if the reported outcome is{' '}
+                {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
+                {cap}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} />
-                If {referenceAsset} is{' '}
-                <strong>
-                  {' '}
-                  at
-                  {' ' + inflection}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  LONG
-                </strong>{' '}
-                and{' '}
-                <strong>
-                  {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  SHORT
-                </strong>{' '}
-                token
+                {direction === 'Long' ? (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          (gradient * formik.values.collateralBalance) /
+                          formik.values.yourShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          ((1 - gradient) * formik.values.collateralBalance) /
+                          formik.values.takerShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                ) : (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          ((1 - gradient) * formik.values.collateralBalance) /
+                          formik.values.yourShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          (gradient * formik.values.collateralBalance) /
+                          formik.values.takerShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                )}
+                if the reported outcome is {inflection}
               </Typography>
             </Container>
           </Card>
