@@ -61,7 +61,7 @@ export default function BuyMarket(props: {
 
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  const { getWeb3JsProvider } = useConnectionContext()
+  const { getWeb3JsProvider, provider } = useConnectionContext()
 
   const web3 = new Web3(Web3Provider as any)
 
@@ -183,7 +183,7 @@ export default function BuyMarket(props: {
       setFillLoading(true)
       const orderData = {
         taker: userAddress,
-        provider: web3,
+        provider: provider,
         isBuy: true,
         nbrOptions: numberOfOptions,
         collateralDecimals: decimals,

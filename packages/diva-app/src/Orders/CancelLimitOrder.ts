@@ -7,12 +7,12 @@ export const cancelLimitOrder = async (orderData, chainId, provider) => {
   const signer = provider.getSigner()
   const exchangeProxyAddress =
     contractAddress.getContractAddressesForChainOrThrow(chainId).exchangeProxy
-  const cancel = new ethers.Contract(exchangeProxyAddress, ZEROX_ABI, signer)
+  const exchange = new ethers.Contract(exchangeProxyAddress, ZEROX_ABI, signer)
 
   delete orderData.order.signature
   const order = orderData.order
   try {
-    const response = await cancel.cancelLimitOrder(order)
+    const response = await exchange.cancelLimitOrder(order)
     //check the status of the transaction
     await provider.waitForTransaction(response.hash)
     return response

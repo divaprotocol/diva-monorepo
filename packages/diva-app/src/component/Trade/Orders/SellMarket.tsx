@@ -61,7 +61,7 @@ export default function SellMarket(props: {
 
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const { getWeb3JsProvider } = useConnectionContext()
+  const { getWeb3JsProvider, provider } = useConnectionContext()
   const web3 = new Web3(Web3Provider as any)
 
   useEffect(() => {
@@ -189,7 +189,7 @@ export default function SellMarket(props: {
       setFillLoading(true)
       const orderData = {
         taker: userAddress,
-        provider: web3,
+        provider: provider,
         isBuy: false,
         nbrOptions: numberOfOptions, // Number of position tokens the user wants to sell
         collateralDecimals: decimals,

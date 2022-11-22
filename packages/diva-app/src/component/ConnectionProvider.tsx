@@ -226,7 +226,38 @@ export const ConnectionProvider = ({ children }) => {
 
       connect('walletconnect')
     }
-  }, [connected, connector])
+  }, [connect, connected, setConnectionState])
+
+  // active the walletconnect provider and set the provider in the state
+  useEffect(() => {
+    if (connected === 'walletconnect') {
+      const activateProvider = async () => {
+        const provider = new WalletConnectProvider({
+          infuraId: '1e5c07a07eb244a6be23cfa590d59ef5', // Required
+          clientMeta: {
+            description: 'Diva Dapp',
+            url: 'https://www.divaprotocol.io/',
+            icons: ['https://www.divaprotocol.io/favicon.ico'],
+            name: 'Diva Dapp',
+          },
+        })
+        await provider.enable()
+
+        setState((_state) => ({
+          ..._state,
+          provider: new providers.Web3Provider(provider),
+        }))
+      }
+
+      activateProvider()
+        .then(() => {
+          console.log('activated')
+        })
+        .catch((e) => {
+          console.warn('Error in initializing the wallets connect provider', e)
+        })
+    }
+  }, [connected, connect, setConnectionState])
 
   /**
    * set default chain if it doesn't load automatically
@@ -275,6 +306,8 @@ export const ConnectionProvider = ({ children }) => {
     getWeb3JsProvider,
     ...state,
   }
+
+  console.log(connector, connected)
 
   return (
     <ConnectionContext.Provider value={value}>
