@@ -726,7 +726,7 @@ export function ReviewAndSubmit({
               </Card>
             </>
           )}
-          {transaction !== 'createpool' ? (
+          {transaction === 'filloffer' ? (
             <Typography color="white" pb={theme.spacing(2)} variant="subtitle1">
               Your Payoff Profile
             </Typography>
@@ -740,7 +740,7 @@ export function ReviewAndSubmit({
             values.inflection != null &&
             values.gradient != null && (
               <Box sx={{ maxWidth: '85%' }}>
-                {transaction !== 'createpool' ? (
+                {transaction === 'filloffer' ? (
                   <PayoffProfile
                     floor={values.floor}
                     cap={values.cap}
@@ -866,41 +866,85 @@ export function ReviewAndSubmit({
                     sx={{ mt: theme.spacing(2) }}
                     style={{ color: 'white' }}
                   >
-                    {values.offerDirection === 'Long' ? (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>0.00x</span>
-                      </strong>
+                    {values.direction === 'Long' ? (
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>0.00x</span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              formik.values.collateralBalance /
+                              formik.values.takerShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
                     ) : (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>
-                          {maxYieldMaker.toFixed(2) + 'x'}
-                        </span>
-                      </strong>
-                    )}{' '}
-                    if reported outcome is{' '}
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              formik.values.collateralBalance /
+                              formik.values.yourShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>0.00x</span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
+                    )}
+                    if the reported outcome is{' '}
                     {values.floor < values.inflection &&
                     values.inflection < values.cap
                       ? 'at or '
                       : ''}{' '}
-                    below {values.floor}
+                    below {values.floor}{' '}
                   </Typography>
                   <Typography
                     fontSize={'0.85rem'}
                     sx={{ mt: theme.spacing(2) }}
                     style={{ color: 'white' }}
                   >
-                    {values.offerDirection === 'Long' ? (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>
-                          {maxYieldMaker.toFixed(2) + 'x'}
-                        </span>
-                      </strong>
+                    {values.direction === 'Long' ? (
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              formik.values.collateralBalance /
+                              formik.values.yourShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>0.00x</span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
                     ) : (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>0.00x</span>
-                      </strong>
-                    )}{' '}
-                    if reported outcome is{' '}
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>0.00x</span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              formik.values.collateralBalance /
+                              formik.values.takerShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
+                    )}
+                    if the reported outcome is{' '}
                     {values.floor < values.inflection &&
                     values.inflection < values.cap
                       ? 'at or '
@@ -912,22 +956,54 @@ export function ReviewAndSubmit({
                     sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                     style={{ color: 'white' }}
                   >
-                    {values.offerDirection === 'Long' ? (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>
-                          {(values.gradient * maxYieldMaker).toFixed(2) + 'x'}
-                        </span>
-                      </strong>
+                    {values.direction === 'Long' ? (
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              (values.gradient *
+                                formik.values.collateralBalance) /
+                              formik.values.yourShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              ((1 - values.gradient) *
+                                formik.values.collateralBalance) /
+                              formik.values.takerShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
                     ) : (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>
-                          {((1 - values.gradient) * maxYieldMaker).toFixed(2) +
-                            'x'}
-                        </span>
-                      </strong>
-                    )}{' '}
-                    if reported outcome is
-                    {' ' + values.inflection}
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              ((1 - values.gradient) *
+                                formik.values.collateralBalance) /
+                              formik.values.yourShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              (values.gradient *
+                                formik.values.collateralBalance) /
+                              formik.values.takerShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
+                    )}
+                    if the reported outcome is {values.inflection}
                   </Typography>
                 </Container>
               </Card>
