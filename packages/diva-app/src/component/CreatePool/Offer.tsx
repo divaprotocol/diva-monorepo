@@ -98,11 +98,17 @@ export function Offer() {
         'expiryTime',
         new Date(jsonResponse.data.data.expiryTime * 1000)
       )
-      formik.setFieldValue('floor', formatUnits(jsonResponse.data.data.floor))
-      formik.setFieldValue('cap', formatUnits(jsonResponse.data.data.cap))
+      formik.setFieldValue(
+        'floor',
+        Number(formatUnits(jsonResponse.data.data.floor))
+      )
+      formik.setFieldValue(
+        'cap',
+        Number(formatUnits(jsonResponse.data.data.cap))
+      )
       formik.setFieldValue(
         'inflection',
-        formatUnits(jsonResponse.data.data.inflection)
+        Number(formatUnits(jsonResponse.data.data.inflection))
       )
       formik.setFieldValue('collateralWalletBalance', jsonResponse.data.data)
 

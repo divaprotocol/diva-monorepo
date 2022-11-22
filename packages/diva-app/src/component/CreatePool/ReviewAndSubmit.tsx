@@ -95,7 +95,6 @@ export function ReviewAndSubmit({
       diva !== undefined &&
       formik.values.jsonToExport != '{}'
     ) {
-      console.log(formik.values)
       diva
         .getOfferRelevantStateCreateContingentPool(
           formik.values.jsonToExport,
