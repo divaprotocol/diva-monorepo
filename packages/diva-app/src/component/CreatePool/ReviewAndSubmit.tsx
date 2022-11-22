@@ -866,7 +866,7 @@ export function ReviewAndSubmit({
                     sx={{ mt: theme.spacing(2) }}
                     style={{ color: 'white' }}
                   >
-                    {values.direction === 'Long' ? (
+                    {values.offerDirection === 'Long' ? (
                       <>
                         <strong>
                           <span style={{ color: '#3393E0' }}>0.00x</span>
@@ -911,7 +911,7 @@ export function ReviewAndSubmit({
                     sx={{ mt: theme.spacing(2) }}
                     style={{ color: 'white' }}
                   >
-                    {values.direction === 'Long' ? (
+                    {values.offerDirection === 'Long' ? (
                       <>
                         <strong>
                           <span style={{ color: '#3393E0' }}>
@@ -956,7 +956,7 @@ export function ReviewAndSubmit({
                     sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                     style={{ color: 'white' }}
                   >
-                    {values.direction === 'Long' ? (
+                    {values.offerDirection === 'Long' ? (
                       <>
                         <strong>
                           <span style={{ color: '#3393E0' }}>
