@@ -1055,17 +1055,23 @@ export function DefineOfferAttributes({
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                {direction === 'Long'
-                  ? '0.00x your / ' +
-                    (
+                {direction === 'Long' ? (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>0.00x</span>
+                    </strong>{' '}
+                    your /{' '}
+                    {(
                       formik.values.collateralBalance / formik.values.takerShare
-                    ).toFixed(2) +
-                    'x taker multiple '
-                  : (
-                      formik.values.collateralBalance / formik.values.yourShare
-                    ).toFixed(2) +
-                    'x your / ' +
-                    '0.00x taker multiple '}
+                    ).toFixed(2) + 'x taker multiple'}
+                  </>
+                ) : (
+                  (
+                    formik.values.collateralBalance / formik.values.yourShare
+                  ).toFixed(2) +
+                  'x your / ' +
+                  '0.00x taker multiple '
+                )}
                 if the reported outcome is{' '}
                 {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
                 {floor}{' '}
