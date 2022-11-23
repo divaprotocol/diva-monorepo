@@ -56,7 +56,7 @@ export async function _checkConditions(
   // 0: INVALID, 1: CANCELLED, 2: FILLED, 3: EXPIRED, 4: FILLABLE
   if (relevantStateParams.offerInfo.status === 0) {
     return {
-      message: 'Offer is invalid because takerCollateralAmount is zero',
+      message: 'Offer is invalid because taker collateral amount is zero',
       success: false,
     }
   }
