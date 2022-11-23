@@ -526,7 +526,7 @@ export function ReviewAndSubmit({
                         Taker Address
                       </Typography>
                       <Typography fontSize={'0.85rem'}>
-                        {getShortenedAddress(values.takerAddress)}
+                        {values.takerAddress}
                       </Typography>
                     </Stack>
                   )}
@@ -587,7 +587,7 @@ export function ReviewAndSubmit({
                     <TextField
                       id="takerShare"
                       name="takerShare"
-                      label="Your Contribution"
+                      label="Amount"
                       onBlur={formik.handleBlur}
                       error={formik.errors.takerShare != null}
                       value={
@@ -758,7 +758,7 @@ export function ReviewAndSubmit({
                       mb: theme.spacing(1),
                     }}
                   >
-                    Remaining fill amount:{' '}
+                    Remaining:{' '}
                     {toExponentialOrNumber(actualFillableAmount, 2, 2)}{' '}
                     {tokenSymbol}
                   </FormHelperText>

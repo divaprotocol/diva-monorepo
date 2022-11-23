@@ -94,7 +94,7 @@ export async function _checkConditions(
   // actualTakerFillableAmount is smaller than takerCollateralAmount - takerFilledAmount.
   if (relevantStateParams.actualTakerFillableAmount.lt(takerFillAmount)) {
     return {
-      message: 'Actually fillable amount is smaller than takerFillAmount',
+      message: 'Entered amount exceeds remaining amount',
       success: false,
     }
   }
@@ -122,7 +122,7 @@ export async function _checkConditions(
     userAddress.toLowerCase() != offerCreateContingentPool.taker.toLowerCase()
   ) {
     return {
-      message: 'Offer is reserved for a different address',
+      message: 'Offer is reserved for a different account',
       success: false,
     }
   }
@@ -133,7 +133,7 @@ export async function _checkConditions(
     takerFillAmount.lt(offerCreateContingentPool.minimumTakerFillAmount)
   ) {
     return {
-      message: 'TakerFillAmount is smaller than minimumTakerFillAmount',
+      message: 'Amount is smaller than the required minimum',
       success: false,
     }
   }
