@@ -199,7 +199,7 @@ export const ApproveActionButtons = ({
         if (!res.success) {
           setErrorMessage(res.message)
         } else {
-          setErrorMessage('')
+          setErrorMessage('All good')
         }
       })
     }
