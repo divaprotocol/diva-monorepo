@@ -181,6 +181,31 @@ export const ApproveActionButtons = ({
       : null
   const [mobile, setMobile] = useState(false)
   useEffect(() => {
+    if (
+      diva != undefined &&
+      divaDomain != undefined &&
+      formik.values != undefined &&
+      account != null
+    ) {
+      _checkConditions(
+        diva,
+        divaDomain,
+        formik.values.jsonToExport, // offerCreationStats,
+        CREATE_POOL_TYPE,
+        formik.values.signature,
+        account,
+        parseUnits(formik.values.yourShare.toString(), decimal)
+      ).then((res) => {
+        if (!res.success) {
+          setErrorMessage(res.message)
+        } else {
+          setErrorMessage('All good')
+        }
+      })
+    }
+  }, [formik.values, account, diva, divaDomain])
+
+  useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
     } else {
@@ -478,7 +503,8 @@ export const ApproveActionButtons = ({
                 account == null ||
                 textFieldValue === '' ||
                 isPoolCreated === true ||
-                alert === true
+                alert === true ||
+                errorMessage !== 'All good'
               }
               onClick={() => {
                 setActionLoading(true)
