@@ -2,6 +2,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
   Card,
   Container,
   FormControl,
@@ -16,13 +17,13 @@ import {
 import { Box } from '@mui/material'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
-import { config } from '../../constants'
+import { config, CREATE_POOL_TYPE } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { Circle } from '@mui/icons-material'
 import { PayoffProfile } from './PayoffProfile'
 import { useWhitelist } from '../../hooks/useWhitelist'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   getDateTime,
   getExpiryMinutesFromNow,
@@ -32,13 +33,14 @@ import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { ethers } from 'ethers'
 import ERC20 from '../../abi/ERC20ABI.json'
 import DIVA_ABI from '../../abi/DIVAABI.json'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useAppSelector } from '../../Redux/hooks'
 import { toExponentialOrNumber } from '../../Util/utils'
 import styled from '@emotion/styled'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import { setMaxPayout } from '../../Redux/Stats'
 import { ExpandMoreOutlined } from '@mui/icons-material'
+import { _checkConditions } from '../ApproveActionButtons'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -55,7 +57,8 @@ export function ReviewAndSubmit({
 }) {
   const { values } = formik
   const theme = useTheme()
-  const { provider } = useConnectionContext()
+  const [errorMessage, setErrorMessage] = useState<string>('')
+  const { provider, address } = useConnectionContext()
   const chainId = useAppSelector((state) => state.appSlice.chainId)
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
@@ -79,11 +82,45 @@ export function ReviewAndSubmit({
     provider.getSigner()
   )
 
+  const divaDomain =
+    chainId != null
+      ? {
+          name: 'DIVA Protocol',
+          version: '1',
+          chainId,
+          verifyingContract: config[chainId!].divaAddress,
+        }
+      : null
+
   const token = new ethers.Contract(
     formik.values.collateralToken.id,
     ERC20,
     provider.getSigner()
   )
+  useEffect(() => {
+    if (
+      diva != undefined &&
+      divaDomain != undefined &&
+      formik.values != undefined &&
+      address != null
+    ) {
+      _checkConditions(
+        diva,
+        divaDomain,
+        formik.values.jsonToExport, // offerCreationStats,
+        CREATE_POOL_TYPE,
+        formik.values.signature,
+        address,
+        parseUnits(formik.values.yourShare.toString(), decimal)
+      ).then((res) => {
+        if (!res.success) {
+          setErrorMessage(res.message)
+        } else {
+          setErrorMessage('')
+        }
+      })
+    }
+  }, [formik.values, address, diva, divaDomain])
 
   // QUESTION WHy not move this part into a useEffect hook?
   token.decimals().then((decimals: number) => {
@@ -594,6 +631,9 @@ export function ReviewAndSubmit({
                         }
                       }}
                     />
+                    {errorMessage !== '' && (
+                      <Alert severity="error">{errorMessage}</Alert>
+                    )}
                     {!isNaN(formik.values.collateralBalance) && (
                       <>
                         <Stack

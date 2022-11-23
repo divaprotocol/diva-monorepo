@@ -31,7 +31,7 @@ type Props = {
   alert?: boolean
   formik?: any
 }
-async function _checkConditions(
+export async function _checkConditions(
   diva: ethers.Contract,
   divaDomain: {
     name: string
@@ -199,12 +199,11 @@ export const ApproveActionButtons = ({
         if (!res.success) {
           setErrorMessage(res.message)
         } else {
-          setErrorMessage('All good')
+          setErrorMessage('')
         }
       })
     }
   }, [formik.values, account, diva, divaDomain])
-
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
@@ -759,7 +758,7 @@ export const ApproveActionButtons = ({
             </Button>
           )}
         </Stack>
-        {errorMessage !== 'All good' && (
+        {errorMessage !== 'All good' && transactionType != 'filloffer' && (
           <Container sx={{ ml: theme.spacing(34) }}>
             <Alert severity="error">{errorMessage}</Alert>
           </Container>
