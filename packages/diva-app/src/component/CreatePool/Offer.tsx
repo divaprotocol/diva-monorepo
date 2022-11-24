@@ -138,38 +138,67 @@ export function Offer() {
       step = <Success formik={formik} transactionType={'filloffer'} />
       break
   }
-  return (
-    <Container maxWidth="xl">
-      <Box pt={8}>
-        {formik.status != null && (
-          <Alert severity="info">{formik.status}</Alert>
-        )}
-        {provider?.network?.chainId != null && step}
-      </Box>
-      {!formik.isValid && (
-        <Box pb={3} pt={2}>
-          {Object.keys(formik.errors).map((key) => (
-            <Box pt={2} key={key}>
-              <Alert severity="error">{(formik.errors as any)[key]}</Alert>
-            </Box>
-          ))}
+  if (jsonResponse.isSuccess) {
+    return (
+      <Container maxWidth="xl">
+        <Box pt={8}>
+          {formik.status != null && (
+            <Alert severity="info">{formik.status}</Alert>
+          )}
+          {provider?.network?.chainId != null && step}
         </Box>
-      )}
-      {formik.values.step === 1 && userAddress != null && chainId != null && (
-        <Container sx={{ mr: theme.spacing(9) }}>
-          <ApproveActionButtons
-            collateralTokenAddress={formik.values.collateralToken.id}
-            onTransactionSuccess={() => {
-              formik.setFieldValue('step', formik.values.step + 1, true)
-            }}
-            pool={formik.values}
-            decimal={decimal}
-            textFieldValue={formik.values.collateralBalance.toString()}
-            transactionType={'filloffer'}
-            formik={formik}
-          />
-        </Container>
-      )}
-    </Container>
-  )
+        {!formik.isValid && (
+          <Box pb={3} pt={2}>
+            {Object.keys(formik.errors).map((key) => (
+              <Box pt={2} key={key}>
+                <Alert severity="error">{(formik.errors as any)[key]}</Alert>
+              </Box>
+            ))}
+          </Box>
+        )}
+        {formik.values.step === 1 && userAddress != null && chainId != null && (
+          <Container sx={{ mr: theme.spacing(9) }}>
+            <ApproveActionButtons
+              collateralTokenAddress={formik.values.collateralToken.id}
+              onTransactionSuccess={() => {
+                formik.setFieldValue('step', formik.values.step + 1, true)
+              }}
+              pool={formik.values}
+              decimal={decimal}
+              textFieldValue={formik.values.collateralBalance.toString()}
+              transactionType={'filloffer'}
+              formik={formik}
+            />
+          </Container>
+        )}
+      </Container>
+    )
+  } else {
+    if (!jsonResponse.isFetched) {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          Loading...
+        </div>
+      )
+    } else {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          This offer is unavailable because it was already filled, expired or
+          considered invalid
+        </div>
+      )
+    }
+  }
 }
