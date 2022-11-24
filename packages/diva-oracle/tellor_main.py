@@ -6,31 +6,40 @@ import config.config as config
 from web3 import Web3
 import time
 from lib.query import tellor_query
-from lib.submitPool import  tellor_submit_pools
+from lib.submitPool import tellor_submit_pools
 import pandas as pd
-
+from lib.recorder import printc
 
 from termcolor import colored
 
-waiting_sec = 60
+# For testing purposes:
+# from tellor_settings.tellor_retrieveData import retrieveData
+# getVal_contract = w3.eth.contract(
+#     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+# values = retrieveData(243,network, getVal_contract)
+# printt(values)
+
+waiting_sec = config.waiting_next_iteration
 network = config.network
-print(network)
 w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
 tellor_contract = w3.eth.contract(
     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.TellorPlayground_abi)
 max_time_away = dt.timedelta(minutes=config.max_time_away)
+start = dt.datetime.now().replace(microsecond=0)
 
 
 if __name__ == "__main__":
-    print(colored("RUNNING TELLOR-DIVA ORACLE", 'green'))
-    print(colored("DATA_PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]), 'green') )
+    printc("*****************************************", 'green')
+    printc("RUNNING TELLOR-DIVA ORACLE", 'green')
+    printc("START TIME: %s" % start, 'green')
+    printc("DATA PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]), 'green')
     # DO time time check here 
     while True:
         resp = run_graph_query(tellor_query(0, tellor_contracts.DIVAOracleTellor_contract_address[network]), network)
         df = pd.json_normalize(resp, ['data', 'pools'])
         if df.empty:
             print("No pools to report on at this time")
-        tellor_submit_pools(df, network, max_time_away, w3, tellor_contract)
+        tellor_submit_pools(df, network, w3, tellor_contract)
         print(colored("#########################################", "yellow"))
         print(colored("Waiting {} sec before next iteration...".format(waiting_sec), 'yellow'))
         # Wait before next iteration

@@ -1,4 +1,8 @@
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
   Card,
   Container,
   FormControl,
@@ -13,13 +17,13 @@ import {
 import { Box } from '@mui/material'
 import request from 'graphql-request'
 import { useQuery } from 'react-query'
-import { config } from '../../constants'
+import { config, CREATE_POOL_TYPE } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { Circle } from '@mui/icons-material'
 import { PayoffProfile } from './PayoffProfile'
 import { useWhitelist } from '../../hooks/useWhitelist'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   getDateTime,
   getExpiryMinutesFromNow,
@@ -29,9 +33,21 @@ import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { ethers } from 'ethers'
 import ERC20 from '../../abi/ERC20ABI.json'
 import DIVA_ABI from '../../abi/DIVAABI.json'
-import { formatUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useAppSelector } from '../../Redux/hooks'
+import { toExponentialOrNumber } from '../../Util/utils'
+import styled from '@emotion/styled'
+import { useErcBalance } from '../../hooks/useErcBalance'
+import { setMaxPayout } from '../../Redux/Stats'
+import { ExpandMoreOutlined } from '@mui/icons-material'
+import { _checkConditions } from '../ApproveActionButtons'
 
+const MaxCollateral = styled.u`
+  cursor: pointer;
+  &:hover {
+    color: ${(props) => (props.theme as any).palette.primary.main};
+  }
+`
 export function ReviewAndSubmit({
   formik,
   transaction,
@@ -41,18 +57,24 @@ export function ReviewAndSubmit({
 }) {
   const { values } = formik
   const theme = useTheme()
-  const { provider } = useConnectionContext()
+  const [errorMessage, setErrorMessage] = useState<string>('')
+  const { provider, address } = useConnectionContext()
   const chainId = useAppSelector((state) => state.appSlice.chainId)
   const dataSource = useWhitelist()
   const [dataSourceName, setDataSourceName] = useState('')
   const [mobile, setMobile] = useState(false)
+  const [maxYieldTaker, setMaxYieldTaker] = useState(0)
+  const [maxYieldMaker, setMaxYieldMaker] = useState(0)
+  const [maxPayout, setMaxPayout] = useState(0)
   const [tokenSymbol, setTokenSymbol] = useState('')
   const [actualFillableAmount, setActualFillableAmount] = useState(
     formik.values.takerShare
   )
   const [takerFilledAmount, setTakerFilledAmount] = useState(0)
   const [decimal, setDecimal] = useState(18)
-
+  const collateralWalletBalance = useErcBalance(
+    formik.values.collateralToken.id
+  )
   // QUESTION Why not use hook that will also handle null values?
   const diva = new ethers.Contract(
     config[chainId!].divaAddress, //Goerli
@@ -60,18 +82,56 @@ export function ReviewAndSubmit({
     provider.getSigner()
   )
 
+  const divaDomain =
+    chainId != null
+      ? {
+          name: 'DIVA Protocol',
+          version: '1',
+          chainId,
+          verifyingContract: config[chainId!].divaAddress,
+        }
+      : null
+
   const token = new ethers.Contract(
     formik.values.collateralToken.id,
     ERC20,
     provider.getSigner()
   )
+  useEffect(() => {
+    if (
+      diva != undefined &&
+      divaDomain != undefined &&
+      formik.values != undefined &&
+      address != null
+    ) {
+      _checkConditions(
+        diva,
+        divaDomain,
+        formik.values.jsonToExport, // offerCreationStats,
+        CREATE_POOL_TYPE,
+        formik.values.signature,
+        address,
+        parseUnits(formik.values.yourShare.toString(), decimal)
+      ).then((res) => {
+        if (!res.success) {
+          setErrorMessage(res.message)
+        } else {
+          setErrorMessage('')
+        }
+      })
+    }
+  }, [formik.values, address, diva, divaDomain])
 
   // QUESTION WHy not move this part into a useEffect hook?
   token.decimals().then((decimals: number) => {
     setDecimal(decimals)
   })
   useEffect(() => {
-    if (transaction === 'filloffer' && diva !== undefined) {
+    if (
+      transaction === 'filloffer' &&
+      diva !== undefined &&
+      formik.values.jsonToExport != '{}'
+    ) {
       diva
         .getOfferRelevantStateCreateContingentPool(
           formik.values.jsonToExport,
@@ -85,11 +145,37 @@ export function ReviewAndSubmit({
             Number(formatUnits(params.offerInfo.takerFilledAmount, decimal))
           )
         })
+
+      setMaxYieldTaker(
+        (Number(
+          formatUnits(formik.values.jsonToExport.takerCollateralAmount, decimal)
+        ) +
+          Number(
+            formatUnits(
+              formik.values.jsonToExport.makerCollateralAmount,
+              decimal
+            )
+          )) /
+          Number(
+            formatUnits(
+              formik.values.jsonToExport.takerCollateralAmount,
+              decimal
+            )
+          )
+      )
     }
-  }, [decimal, diva])
+
+    if (transaction === 'createoffer' && diva !== undefined) {
+      setMaxYieldMaker(
+        (formik.values.takerShare + formik.values.yourShare) /
+          formik.values.yourShare
+      )
+    }
+  }, [decimal, diva, formik.values.jsonToExport])
   useEffect(() => {
     if (transaction === 'filloffer' && diva !== undefined) {
       formik.setFieldValue('yourShare', Number(actualFillableAmount))
+      setMaxPayout(Number(actualFillableAmount) * maxYieldTaker)
     }
   }, [actualFillableAmount, decimal])
   useEffect(() => {
@@ -114,9 +200,7 @@ export function ReviewAndSubmit({
       (dataName: { id: string }) => dataName?.id == values.dataProvider
     )
     if (dataName?.name != null) {
-      setDataSourceName(
-        dataName.name + ' (' + getShortenedAddress(values.dataProvider) + ')'
-      )
+      setDataSourceName(dataName.name + ' (' + values.dataProvider + ')')
     } else {
       setDataSourceName(values.dataProvider)
     }
@@ -151,12 +235,8 @@ export function ReviewAndSubmit({
           Review
         </Typography>
         <Box border={1} borderColor="secondary.dark">
-          <Container sx={{ pb: theme.spacing(4) }}>
+          <Container sx={{ pb: theme.spacing(4), pt: theme.spacing(3) }}>
             <Stack spacing={theme.spacing(2)}>
-              <Typography pt={theme.spacing(2)} variant="subtitle1">
-                Please review the correctness of the pool's parameters before
-                creating it
-              </Typography>
               <Typography
                 variant="subtitle1"
                 sx={{ fontWeight: 'bold' }}
@@ -174,7 +254,7 @@ export function ReviewAndSubmit({
               </Stack>
               <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                 <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Expiry Time
+                  Observation Time
                 </Typography>
                 <Typography fontSize={'0.85rem'}>
                   {values.expiryTime.toLocaleString().slice(0, 11) +
@@ -192,16 +272,21 @@ export function ReviewAndSubmit({
                 sx={{ fontWeight: 'bold' }}
                 color="primary"
               >
-                {transaction === 'createoffer' ? 'Offer terms' : 'Collateral'}
+                {transaction !== 'createpool' ? 'Offer terms' : 'Collateral'}
               </Typography>
-              <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
-                  Collateral Token
-                </Typography>
-                <Typography fontSize={'0.85rem'}>
-                  {values.collateralToken.symbol}
-                </Typography>
-              </Stack>
+              {transaction === 'filloffer' && (
+                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ ml: theme.spacing(2) }}
+                  >
+                    Max yield
+                  </Typography>
+                  <Typography fontSize={'1rem'} color={'#3393E0'}>
+                    {maxYieldTaker.toFixed(2) + 'x'}
+                  </Typography>
+                </Stack>
+              )}
               {transaction === 'createpool' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
@@ -211,7 +296,9 @@ export function ReviewAndSubmit({
                     Collateral Amount
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {Number(values.collateralBalance).toFixed(2)}
+                    {Number(values.collateralBalance).toFixed(2) +
+                      ' ' +
+                      values.collateralToken.symbol}
                   </Typography>
                 </Stack>
               )}
@@ -224,43 +311,40 @@ export function ReviewAndSubmit({
                     Collateral Amount
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {Number(formik.values.collateralBalance).toFixed(2)}
+                    {Number(formik.values.collateralBalance).toFixed(2) +
+                      ' ' +
+                      tokenSymbol}
                   </Typography>
                 </Stack>
               )}
-              {transaction === 'filloffer' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
+              {transaction === 'filloffer' &&
+                formik.values.jsonToExport != '{}' && (
+                  <Stack
+                    direction="row"
+                    sx={{ justifyContent: 'space-between' }}
                   >
-                    Collateral Amount
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {(
-                      (formik.values.yourShare * formik.values.makerShare) /
-                        (Number(
-                          formik.values.jsonToExport.takerCollateralAmount
-                        ) /
-                          10 ** decimal) +
-                      formik.values.yourShare
-                    ).toFixed(2)}
-                  </Typography>
-                </Stack>
-              )}
-              {transaction === 'createpool' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    LONG / SHORT Token Supply
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {Number(values.collateralBalance).toFixed(2)}
-                  </Typography>
-                </Stack>
-              )}
+                    <Typography
+                      fontSize={'0.85rem'}
+                      sx={{ ml: theme.spacing(2) }}
+                    >
+                      Offer Size
+                    </Typography>
+                    <Typography fontSize={'0.85rem'}>
+                      {toExponentialOrNumber(
+                        Number(
+                          formatUnits(
+                            formik.values.jsonToExport.takerCollateralAmount,
+                            decimal
+                          )
+                        ),
+                        2,
+                        2
+                      ) +
+                        ' ' +
+                        tokenSymbol}
+                    </Typography>
+                  </Stack>
+                )}
               {transaction === 'createoffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
@@ -270,20 +354,7 @@ export function ReviewAndSubmit({
                     Your Contribution
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.yourShare.toFixed(2)}
-                  </Typography>
-                </Stack>
-              )}
-              {transaction === 'filloffer' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Your Contribution
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {values.yourShare.toFixed(2)}
+                    {values.yourShare.toFixed(2) + ' ' + tokenSymbol}
                   </Typography>
                 </Stack>
               )}
@@ -296,31 +367,11 @@ export function ReviewAndSubmit({
                     Taker Contribution
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {values.takerShare.toFixed(2)}
+                    {values.takerShare.toFixed(2) + ' ' + tokenSymbol}
                   </Typography>
                 </Stack>
               )}
-              {transaction === 'filloffer' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Maker Contribution
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {(
-                      (formik.values.yourShare * formik.values.makerShare) /
-                      (Number(
-                        formik.values.jsonToExport.takerCollateralAmount
-                      ) /
-                        10 ** decimal)
-                    ).toFixed(2)}
-                  </Typography>
-                </Stack>
-              )}
-              {(transaction === 'createoffer' ||
-                transaction === 'filloffer') && (
+              {transaction === 'createoffer' && (
                 <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
                   <Typography
                     fontSize={'0.85rem'}
@@ -340,120 +391,17 @@ export function ReviewAndSubmit({
                     fontSize={'0.85rem'}
                     sx={{ ml: theme.spacing(2) }}
                   >
-                    Offer Expiry
+                    Offer Expires in
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
-                    {/*{values.expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(values.expiryTime) / 1000).slice(
-                      11,
-                      19
-                    ) +
-                    ' ' +
-                    userTimeZone()}*/}
-                    {new Date(parseFloat(values.offerDuration) * 1000)
-                      .toLocaleString()
-                      .slice(0, 11) +
-                      ' ' +
-                      getDateTime(
-                        Number(
-                          new Date(parseFloat(values.offerDuration) * 1000)
-                        ) / 1000
-                      ).slice(11, 19) +
-                      ' ' +
-                      userTimeZone()}
-                    {/*{values.offerDuration ===*/}
-                    {/*  Math.floor(24 * 60 * 60 + Date.now() / 1000).toString() &&*/}
-                    {/*  '1 Day'}*/}
+                    {Math.floor(
+                      getExpiryMinutesFromNow(formik.values.offerDuration) / 60
+                    )}
+                    h{' '}
+                    {getExpiryMinutesFromNow(formik.values.offerDuration) % 60}m
                   </Typography>
                 </Stack>
               )}
-              <Typography
-                variant="subtitle1"
-                sx={{ fontWeight: 'bold' }}
-                color="primary"
-              >
-                Advanced
-              </Typography>
-              {transaction === 'createpool' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Max Pool Capacity
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {values.capacity !== 'Unlimited'
-                      ? Number(values.capacity).toFixed(2)
-                      : 'Unlimited'}
-                  </Typography>
-                </Stack>
-              )}
-              {transaction === 'createoffer' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Max Pool Capacity
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {values.capacity !== 'Unlimited'
-                      ? Number(values.capacity).toFixed(2)
-                      : 'Unlimited'}
-                  </Typography>
-                </Stack>
-              )}
-              {transaction === 'filloffer' && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Max Pool Capacity
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {values.capacity !== 'Unlimited'
-                      ? formatUnits(values.capacity, decimal)
-                      : 'Unlimited'}
-                  </Typography>
-                </Stack>
-              )}
-              {(transaction === 'createoffer' ||
-                transaction === 'filloffer') && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Taker Address
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {getShortenedAddress(values.takerAddress)}
-                  </Typography>
-                </Stack>
-              )}
-              {(transaction === 'createoffer' ||
-                transaction === 'filloffer') && (
-                <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ ml: theme.spacing(2) }}
-                  >
-                    Min Taker Contribution (applicable on 1st fill only)
-                  </Typography>
-                  <Typography fontSize={'0.85rem'}>
-                    {Number(values.minTakerContribution).toFixed(2)}
-                  </Typography>
-                </Stack>
-              )}
-              {/*<Stack direction="row" sx={{ justifyContent: 'space-between' }}>*/}
-              {/*  <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>*/}
-              {/*    Pool Description*/}
-              {/*  </Typography>*/}
-              {/*  <Typography fontSize={'0.85rem'}>TBD</Typography>*/}
-              {/*</Stack>*/}
               <Typography
                 variant="subtitle1"
                 sx={{ fontWeight: 'bold' }}
@@ -467,6 +415,146 @@ export function ReviewAndSubmit({
                 </Typography>
                 <Typography fontSize={'0.85rem'}>{dataSourceName}</Typography>
               </Stack>
+              <Accordion
+                sx={{
+                  backgroundColor: '#121212',
+                  '&:before': {
+                    display: 'none',
+                  },
+                  marginTop: theme.spacing(3.5),
+                  marginBottom: theme.spacing(1),
+                  boxShadow: 'none',
+                }}
+                elevation={0}
+                defaultExpanded={transaction === 'filloffer' ? false : true}
+              >
+                <AccordionSummary
+                  aria-controls="panel1a-content"
+                  id="panel1a-header"
+                  sx={{
+                    padding: '0px',
+                    backgroundColor: '#121212',
+                    boxShadow: 'none',
+                  }}
+                  expandIcon={<ExpandMoreOutlined />}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 'bold' }}
+                    color="primary"
+                  >
+                    Advanced
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails
+                  sx={{
+                    backgroundColor: '#121212',
+                    padding: 0,
+                    boxShadow: 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    rowGap: theme.spacing(2),
+                    opacity: 0.7,
+                  }}
+                >
+                  {transaction === 'createpool' && (
+                    <Stack
+                      direction="row"
+                      sx={{ justifyContent: 'space-between' }}
+                    >
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ ml: theme.spacing(2) }}
+                      >
+                        Max Pool Capacity
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {values.capacity !== 'Unlimited'
+                          ? Number(values.capacity).toFixed(2) +
+                            ' ' +
+                            tokenSymbol
+                          : 'Unlimited'}
+                      </Typography>
+                    </Stack>
+                  )}
+                  {transaction === 'createoffer' && (
+                    <Stack
+                      direction="row"
+                      sx={{ justifyContent: 'space-between' }}
+                    >
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ ml: theme.spacing(2) }}
+                      >
+                        Max Pool Capacity
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {values.capacity !== 'Unlimited'
+                          ? Number(values.capacity).toFixed(2)
+                          : 'Unlimited'}
+                      </Typography>
+                    </Stack>
+                  )}
+                  {transaction === 'filloffer' && (
+                    <Stack
+                      direction="row"
+                      sx={{ justifyContent: 'space-between' }}
+                    >
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ ml: theme.spacing(2) }}
+                      >
+                        Max Pool Capacity
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {values.capacity !== 'Unlimited'
+                          ? formatUnits(values.capacity, decimal)
+                          : 'Unlimited'}
+                      </Typography>
+                    </Stack>
+                  )}
+                  {(transaction === 'createoffer' ||
+                    transaction === 'filloffer') && (
+                    <Stack
+                      direction="row"
+                      sx={{ justifyContent: 'space-between' }}
+                    >
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ ml: theme.spacing(2) }}
+                      >
+                        Taker Address
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {values.takerAddress}
+                      </Typography>
+                    </Stack>
+                  )}
+                  {(transaction === 'createoffer' ||
+                    transaction === 'filloffer') && (
+                    <Stack
+                      direction="row"
+                      sx={{ justifyContent: 'space-between' }}
+                    >
+                      <Typography
+                        fontSize={'0.85rem'}
+                        sx={{ ml: theme.spacing(2) }}
+                      >
+                        Min Fill Amount (applicable on 1st fill only)
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {toExponentialOrNumber(
+                          Number(values.minTakerContribution),
+                          2,
+                          2
+                        ) +
+                          ' ' +
+                          tokenSymbol}
+                      </Typography>
+                    </Stack>
+                  )}
+                </AccordionDetails>
+              </Accordion>
             </Stack>
           </Container>
         </Box>
@@ -491,7 +579,7 @@ export function ReviewAndSubmit({
                   marginBottom: theme.spacing(2),
                 }}
               >
-                <Container sx={{ pt: theme.spacing(2) }}>
+                <Container sx={{ pt: theme.spacing(4) }}>
                   <FormControl
                     fullWidth
                     error={formik.errors.collateralBalance != null}
@@ -499,7 +587,7 @@ export function ReviewAndSubmit({
                     <TextField
                       id="takerShare"
                       name="takerShare"
-                      label="Your Contribution"
+                      label="Amount"
                       onBlur={formik.handleBlur}
                       error={formik.errors.takerShare != null}
                       value={
@@ -519,6 +607,7 @@ export function ReviewAndSubmit({
                         const value = event.target.value
                         const arr = value.split('.')
                         const collateralBalance = event.target.value
+                        setMaxPayout(Number(value) * maxYieldTaker)
                         if (arr.length > 1) {
                           if (arr[1].length <= decimal) {
                             if (collateralBalance !== '') {
@@ -542,47 +631,77 @@ export function ReviewAndSubmit({
                         }
                       }}
                     />
+                    {errorMessage !== '' && (
+                      <Alert severity="error">{errorMessage}</Alert>
+                    )}
                     {!isNaN(formik.values.collateralBalance) && (
-                      <FormHelperText>
-                        You receive{' '}
-                        {formik.values.offerDirection !== 'Long' ? (
-                          <strong>
-                            {(formik.values.yourShare *
-                              formik.values.makerShare) /
-                              (Number(
-                                formik.values.jsonToExport.takerCollateralAmount
-                              ) /
-                                10 ** decimal) +
-                              formik.values.yourShare}{' '}
-                            SHORT Tokens
-                          </strong>
-                        ) : (
-                          <strong>
-                            {(formik.values.yourShare *
-                              formik.values.makerShare) /
-                              (Number(
-                                formik.values.jsonToExport.takerCollateralAmount
-                              ) /
-                                10 ** decimal) +
-                              formik.values.yourShare}{' '}
-                            LONG Tokens
-                          </strong>
-                        )}
-                      </FormHelperText>
+                      <>
+                        <Stack
+                          height="100%"
+                          direction="row"
+                          justifyContent="space-between"
+                          sx={{
+                            mb: theme.spacing(1),
+                          }}
+                        >
+                          <FormHelperText
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'flex-end',
+                              ml: theme.spacing(0),
+                            }}
+                          >
+                            {`Max payout: ${toExponentialOrNumber(
+                              maxPayout,
+                              2,
+                              2
+                            )} ${'dUSD'}`}
+                          </FormHelperText>
+                          <FormHelperText
+                            sx={{
+                              mr: theme.spacing(-0.25),
+                              display: 'flex',
+                              justifyContent: 'flex-end',
+                            }}
+                          >
+                            Balance:{' '}
+                            {toExponentialOrNumber(
+                              parseFloat(collateralWalletBalance)
+                            )}
+                            {' ('}
+                            <MaxCollateral
+                              role="button"
+                              onClick={() => {
+                                if (
+                                  actualFillableAmount > collateralWalletBalance
+                                ) {
+                                  formik.setFieldValue(
+                                    'yourShare',
+                                    collateralWalletBalance
+                                  )
+                                  setMaxPayout(
+                                    Number(collateralWalletBalance) *
+                                      maxYieldTaker
+                                  )
+                                } else {
+                                  formik.setFieldValue(
+                                    'yourShare',
+                                    actualFillableAmount
+                                  )
+                                  setMaxPayout(
+                                    Number(actualFillableAmount) * maxYieldTaker
+                                  )
+                                }
+                              }}
+                            >
+                              Max
+                            </MaxCollateral>
+                            {')'}
+                          </FormHelperText>
+                        </Stack>
+                      </>
                     )}
                   </FormControl>
-
-                  <FormHelperText
-                    sx={{ display: 'flex', justifyContent: 'flex-end' }}
-                  >
-                    Expires in:{' '}
-                    {Math.floor(
-                      getExpiryMinutesFromNow(formik.values.offerDuration) / 60
-                    )}
-                    h{' '}
-                    {getExpiryMinutesFromNow(formik.values.offerDuration) % 60}m
-                  </FormHelperText>
-
                   <LinearProgress
                     variant="determinate"
                     sx={{
@@ -605,35 +724,63 @@ export function ReviewAndSubmit({
                       mb: theme.spacing(1),
                     }}
                   >
-                    <Typography fontSize={'0.85rem'}>
-                      {takerFilledAmount + ' ' + tokenSymbol}
-                    </Typography>
-                    <Typography fontSize={'0.85rem'}>
-                      {Number(actualFillableAmount + takerFilledAmount) +
-                        ' ' +
-                        tokenSymbol}
-                    </Typography>
+                    {/* <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography
+                        fontSize={'0.75rem'}
+                        sx={{
+                          opacity: 0.5,
+                        }}
+                      >
+                        {'Filled:'}
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {takerFilledAmount + ' ' + tokenSymbol}
+                      </Typography>
+                    </Stack> */}
+                    {/* <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography
+                        fontSize={'0.75rem'}
+                        sx={{
+                          opacity: 0.5,
+                        }}
+                      >
+                        {'Offer size: '}
+                      </Typography>
+                      <Typography fontSize={'0.85rem'}>
+                        {Number(actualFillableAmount + takerFilledAmount) +
+                          ' ' +
+                          tokenSymbol}
+                      </Typography>
+                    </Stack> */}
                   </Stack>
                   <FormHelperText
                     sx={{
                       mb: theme.spacing(1),
                     }}
                   >
-                    Remaining fill amount: {actualFillableAmount} {tokenSymbol}
+                    Remaining:{' '}
+                    {toExponentialOrNumber(actualFillableAmount, 2, 2)}{' '}
+                    {tokenSymbol}
                   </FormHelperText>
                 </Container>
               </Card>
             </>
           )}
-          <Typography color="white" pb={theme.spacing(2)} variant="subtitle1">
-            Payoff Profile
-          </Typography>
+          {transaction === 'filloffer' ? (
+            <Typography color="white" pb={theme.spacing(2)} variant="subtitle1">
+              Your Payoff Profile
+            </Typography>
+          ) : (
+            <Typography color="white" pb={theme.spacing(2)} variant="subtitle1">
+              Payoff Profiles
+            </Typography>
+          )}
           {values.floor != null &&
             values.cap != null &&
             values.inflection != null &&
             values.gradient != null && (
               <Box sx={{ maxWidth: '85%' }}>
-                {transaction !== 'createpool' ? (
+                {transaction === 'filloffer' ? (
                   <PayoffProfile
                     floor={values.floor}
                     cap={values.cap}
@@ -653,106 +800,351 @@ export function ReviewAndSubmit({
                 )}
               </Box>
             )}
-          <Card
-            style={{
-              maxWidth: theme.spacing(60),
-              border: '1px solid #1B3448',
-              background:
-                'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
-            }}
+          <Typography
+            pb={theme.spacing(1)}
+            pt={theme.spacing(1)}
+            variant="subtitle1"
+            color="white"
           >
-            <Container>
-              <Typography
-                pb={theme.spacing(1)}
-                pt={theme.spacing(1)}
-                variant="subtitle1"
+            Payoff Scenarios
+          </Typography>
+          {transaction === 'filloffer' && (
+            <Box>
+              <Card
+                style={{
+                  maxWidth: theme.spacing(60),
+                  border: '1px solid #1B3448',
+                  background:
+                    'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
+                }}
               >
-                Payoff Scenarios
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
+                <Container>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>
+                    ) : (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {maxYieldTaker.toFixed(2) + 'x'}
+                        </span>
+                      </strong>
+                    )}{' '}
+                    if reported outcome is{' '}
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    below {values.floor}
+                  </Typography>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {maxYieldTaker.toFixed(2) + 'x'}
+                        </span>
+                      </strong>
+                    ) : (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>
+                    )}{' '}
+                    if reported outcome is{' '}
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    above {values.cap}{' '}
+                  </Typography>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(values.gradient * maxYieldTaker).toFixed(2) + 'x'}
+                        </span>
+                      </strong>
+                    ) : (
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {((1 - values.gradient) * maxYieldTaker).toFixed(2) +
+                            'x'}
+                        </span>
+                      </strong>
+                    )}{' '}
+                    if reported outcome is
+                    {' ' + values.inflection}
+                  </Typography>
+                </Container>
+              </Card>
+            </Box>
+          )}
+          {transaction === 'createoffer' && (
+            <Box>
+              <Card
+                style={{
+                  maxWidth: theme.spacing(60),
+                  border: '1px solid #1B3448',
+                  background:
+                    'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
+                }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {values.referenceAsset} is{' '}
-                <strong>
+                <Container>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>0.00x</span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              formik.values.collateralBalance /
+                              formik.values.takerShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
+                    ) : (
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              formik.values.collateralBalance /
+                              formik.values.yourShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>0.00x</span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
+                    )}
+                    if the reported outcome is{' '}
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    below {values.floor}{' '}
+                  </Typography>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              formik.values.collateralBalance /
+                              formik.values.yourShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>0.00x</span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
+                    ) : (
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>0.00x</span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              formik.values.collateralBalance /
+                              formik.values.takerShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
+                    )}
+                    if the reported outcome is{' '}
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    above {values.cap}{' '}
+                  </Typography>
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    {values.offerDirection === 'Long' ? (
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              (values.gradient *
+                                formik.values.collateralBalance) /
+                              formik.values.yourShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              ((1 - values.gradient) *
+                                formik.values.collateralBalance) /
+                              formik.values.takerShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
+                    ) : (
+                      <>
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              ((1 - values.gradient) *
+                                formik.values.collateralBalance) /
+                              formik.values.yourShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        your /{' '}
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(
+                              (values.gradient *
+                                formik.values.collateralBalance) /
+                              formik.values.takerShare
+                            ).toFixed(2) + 'x'}
+                          </span>
+                        </strong>{' '}
+                        taker multiple{' '}
+                      </>
+                    )}
+                    if the reported outcome is {values.inflection}
+                  </Typography>
+                </Container>
+              </Card>
+            </Box>
+          )}
+          {transaction === 'createpool' && (
+            <Card
+              style={{
+                maxWidth: theme.spacing(60),
+                border: '1px solid #1B3448',
+                background:
+                  'linear-gradient(180deg, #051827 0%, rgba(5, 24, 39, 0) 100%)',
+              }}
+            >
+              <Container>
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    0.00{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /LONG
+                  </strong>{' '}
+                  and
+                  <strong>
+                    {' '}
+                    1.00{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is{' '}
                   {values.floor < values.inflection &&
                   values.inflection < values.cap
                     ? 'at or '
                     : ''}{' '}
-                  below {values.floor}
-                </strong>{' '}
-                on{' '}
-                {values.expiryTime.toLocaleString().slice(0, 11) +
-                  ' ' +
-                  getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
-                  ' ' +
-                  userTimeZone()}
-                , the payout will be{' '}
-                <strong>0.00 {values.collateralToken.symbol} per LONG</strong>{' '}
-                and{' '}
-                <strong> 1.00 {values.collateralToken.symbol} per SHORT</strong>{' '}
-                token
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {values.referenceAsset} is{' '}
-                <strong>
+                  below {values.floor}{' '}
+                </Typography>
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    1.00{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /LONG
+                  </strong>{' '}
+                  and
+                  <strong>
+                    {' '}
+                    0.00{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is{' '}
                   {values.floor < values.inflection &&
                   values.inflection < values.cap
                     ? 'at or '
                     : ''}{' '}
                   above {values.cap}{' '}
-                </strong>{' '}
-                on{' '}
-                {values.expiryTime.toLocaleString().slice(0, 11) +
-                  ' ' +
-                  getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
-                  ' ' +
-                  userTimeZone()}
-                , the payout will be{' '}
-                <strong>1.00 {values.collateralToken.symbol} per LONG</strong>{' '}
-                and{' '}
-                <strong> 0.00 {values.collateralToken.symbol} per SHORT</strong>{' '}
-                token
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {values.referenceAsset} is{' '}
-                <strong>
-                  {' '}
-                  at
-                  {' ' + values.inflection}{' '}
-                </strong>{' '}
-                on{' '}
-                {values.expiryTime.toLocaleString().slice(0, 11) +
-                  ' ' +
-                  getDateTime(Number(values.expiryTime) / 1000).slice(11, 19) +
-                  ' ' +
-                  userTimeZone()}
-                , the payout will be{' '}
-                <strong>
-                  {values.gradient.toFixed(2)} {values.collateralToken.symbol}{' '}
-                  per LONG
-                </strong>{' '}
-                and{' '}
-                <strong>
-                  {(1 - values.gradient).toFixed(2)}{' '}
-                  {values.collateralToken.symbol} per SHORT
-                </strong>{' '}
-                token
-              </Typography>
-            </Container>
-          </Card>
+                </Typography>
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    {values.gradient.toString() !== ''
+                      ? values.gradient.toFixed(2)
+                      : 0}{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /LONG
+                  </strong>{' '}
+                  and{' '}
+                  <strong>
+                    {values.gradient.toString() !== ''
+                      ? (1 - values.gradient).toFixed(2)
+                      : 1}{' '}
+                    {values.collateralToken != null
+                      ? values.collateralToken.symbol
+                      : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is {values.inflection}
+                </Typography>
+              </Container>
+            </Card>
+          )}
         </Stack>
       </Container>
     </Stack>

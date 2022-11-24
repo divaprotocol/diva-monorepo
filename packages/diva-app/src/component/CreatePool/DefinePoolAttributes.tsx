@@ -264,7 +264,7 @@ export function DefinePoolAttributes({
                     onBlur: formik.handleBlur,
                     error: formik.errors.expiryTime != null,
                   }}
-                  label="Expiry Time"
+                  label="Observation Time"
                   onChange={(event) => {
                     formik.setFieldValue('expiryTime', event)
                   }}
@@ -633,7 +633,7 @@ export function DefinePoolAttributes({
             pb={theme.spacing(2)}
             variant="subtitle1"
           >
-            Payoff Profile
+            Payoff Profiles
           </Typography>
           {floor != null &&
             cap != null &&
@@ -649,6 +649,14 @@ export function DefinePoolAttributes({
                 />
               </Box>
             )}
+          <Typography
+            pb={theme.spacing(1)}
+            pt={theme.spacing(1)}
+            variant="subtitle1"
+            color="white"
+          >
+            Payoff Scenarios
+          </Typography>
           <Card
             style={{
               maxWidth: theme.spacing(60),
@@ -659,113 +667,60 @@ export function DefinePoolAttributes({
           >
             <Container>
               <Typography
-                pb={theme.spacing(1)}
-                pt={theme.spacing(1)}
-                variant="subtitle1"
+                fontSize={'0.85rem'}
+                sx={{ mt: theme.spacing(2) }}
+                style={{ color: 'white' }}
               >
-                Payoff Scenarios
+                <strong>
+                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /LONG
+                </strong>{' '}
+                and
+                <strong>
+                  {' '}
+                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /SHORT
+                </strong>{' '}
+                token if the reported outcome is{' '}
+                {floor < inflection && inflection < cap
+                  ? 'at or '
+                  : ''} below {floor}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
                 <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
-                  {floor}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
+                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /LONG
                 </strong>{' '}
                 and
                 <strong>
                   {' '}
-                  1.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
+                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /SHORT
                 </strong>{' '}
-                token
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
-                <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
-                  {cap}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  0.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
-                </strong>{' '}
-                token
+                token if the reported outcome is{' '}
+                {floor < inflection && inflection < cap
+                  ? 'at or '
+                  : ''} above {cap}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} />
-                If {referenceAsset} is{' '}
-                <strong>
-                  {' '}
-                  at
-                  {' ' + inflection}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
                 <strong>
                   {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  LONG
+                  {collateralToken != null ? collateralToken.symbol : ''}/LONG
                 </strong>{' '}
                 and{' '}
                 <strong>
                   {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  SHORT
+                  {collateralToken != null ? collateralToken.symbol : ''}/SHORT
                 </strong>{' '}
-                token
+                token if the reported outcome is {inflection}
               </Typography>
             </Container>
           </Card>

@@ -2,16 +2,14 @@ import datetime
 import requests
 import pandas as pd
 import json
-from config.config import WHITELIST_TOKEN_POOLS
-from config.config import BLOCK_ON_WHITELIST
-from config.config import max_time_away
+from config.config import WHITELIST_TOKEN_POOLS, BLOCK_ON_WHITELIST, max_time_away, COLLATERAL_MAPPING, network
 
 
 def getKrakenPrice(pair, ts_date):
     max_away = datetime.timedelta(minutes=max_time_away)
     for t in range(1, int(max_away.seconds/60)):
         url = 'https://api.kraken.com/0/public/Trades?pair={}'.format(
-        pair) + '&since={}'.format(ts_date-t*60)
+        pair) + '&since={}'.format(ts_date-t*300)
         resp = requests.get(url)
         #print("LOG: ", resp)
         data = json.loads(resp.content.decode('utf-8'))
@@ -25,7 +23,7 @@ def getKrakenPrice(pair, ts_date):
                 print("no kraken data")
                 return -1, -1
             df.columns = ['price', 'volume', 'time',
-                          'buy/sell', 'market/limit', 'misc']
+                          'buy/sell', 'market/limit', 'misc', '']
             # df['datetime'] = df['time'].apply(lambda x: datetime.fromtimestamp(x))
 
             df_reduced = df.loc[df['time'] <= ts_date]
@@ -44,26 +42,26 @@ def getKrakenPrice(pair, ts_date):
 
 
 def getKrakenCollateralConversion(dfitem, dfcontract, ts_date):
-    pair = dfitem+"USD"
+    pair = COLLATERAL_MAPPING[dfitem] + "USD"
     white_list_status = check_whitelist_token(dfitem, dfcontract)
     if white_list_status == "NotWhiteListed" and BLOCK_ON_WHITELIST:
         return white_list_status
     price = getKrakenPrice(pair, ts_date)
     # This is for auto price to one in testing of dUSD
     if price[0] == -1:
-        return 1
-    return price[0]
+        return 1, 1, COLLATERAL_MAPPING[dfitem] + "/USD"
+    return price[0], price[1], COLLATERAL_MAPPING[dfitem] + "/USD"
 
 def check_whitelist_token(dfitem, dfcontract):
     try:
         #print(dfitem)
         #print(WHITELIST_TOKEN_POOLS)
-        if dfitem in WHITELIST_TOKEN_POOLS:
-            print("Valid whitelisted Token {}, {}".format(dfitem, dfcontract))
-            print(WHITELIST_TOKEN_POOLS.get(dfitem))
-            return("whitelisted")
+        if dfitem in WHITELIST_TOKEN_POOLS[network]:
+            #print("Valid whitelisted Token {}, {}".format(dfitem, dfcontract[0]))
+            #print(WHITELIST_TOKEN_POOLS.get(dfitem))
+            return "whitelisted"
         else:
-            return("NotWhiteListed")
+            return "NotWhiteListed"
     except:
         print("UNABLE TO VERIFY WHITELIST")
     return

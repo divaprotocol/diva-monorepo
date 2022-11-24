@@ -88,8 +88,7 @@ export function FillOffer({
       formik.setFieldValue('collateralToken.id', configJson.collateralToken)
       formik.setFieldValue(
         'capacity',
-        configJson.capacity ===
-          '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+        configJson.capacity === ethers.constants.MaxUint256.toString()
           ? 'Unlimited'
           : configJson.capacity
       )

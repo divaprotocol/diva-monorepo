@@ -14,6 +14,7 @@ from lib.query import query
 from lib.submitPool import submitPools
 from colorama import init
 from termcolor import colored
+import pandas as pd
 
 message = "Subject: Pending Pool Transactions \n"
 
