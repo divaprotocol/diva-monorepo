@@ -158,7 +158,7 @@ export const useCreatePoolFormik = () => {
       if (values.collateralBalance == 0 || isNaN(values.collateralBalance)) {
         errors.collateralBalance = 'Collateral cannot be empty'
       }
-      if (parseFloat(values.minTakerContribution) > values.collateralBalance) {
+      if (parseFloat(values.minTakerContribution) > values.takerShare) {
         errors.minTakerContribution =
           'Minimum taker contribution must be less than collateral amount'
       }

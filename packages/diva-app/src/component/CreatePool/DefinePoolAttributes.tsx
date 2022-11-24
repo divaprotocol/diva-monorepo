@@ -72,6 +72,23 @@ export function DefinePoolAttributes({
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
   useEffect(() => {
+    if (payoutProfile === 'Binary') {
+      formik.setFieldValue('gradient', 1)
+      formik.setFieldValue('cap', formik.values.inflection)
+      formik.setFieldValue('floor', formik.values.inflection)
+    }
+  }, [formik.values])
+  useEffect(() => {
+    if (payoutProfile === 'Linear') {
+      formik.setFieldValue('inflection', (floor + cap) / 2)
+    }
+  }, [formik.values.floor, formik.values.inflection])
+  useEffect(() => {
+    if (payoutProfile === 'Linear') {
+      formik.setFieldValue('inflection', (cap + floor) / 2)
+    }
+  }, [formik.values.cap, formik.values.inflection])
+  useEffect(() => {
     if (window.ethereum && formik.values.jsonToExport !== '{}') {
       window.ethereum.on('accountsChanged', () => {
         disconnect()
@@ -332,18 +349,7 @@ export function DefinePoolAttributes({
                         max: cap,
                       }}
                       type="number"
-                      onChange={(event) => {
-                        if (payoutProfile === 'Binary') {
-                          formik.handleChange(event)
-                          formik.setValues((values) => ({
-                            ...values,
-                            cap: parseFloat(event.target.value),
-                            floor: parseFloat(event.target.value),
-                            inflection: parseFloat(event.target.value),
-                            gradient: 1,
-                          }))
-                        }
-                      }}
+                      onChange={formik.handleChange}
                       value={inflection}
                       sx={{ width: mobile ? '100%' : '48%' }}
                     />
@@ -370,17 +376,7 @@ export function DefinePoolAttributes({
                         label="Floor"
                         value={floor}
                         type="number"
-                        onChange={(event) => {
-                          if (payoutProfile === 'Linear') {
-                            formik.handleChange(event)
-                            formik.setValues((values) => ({
-                              ...values,
-                              floor: parseFloat(event.target.value),
-                              inflection:
-                                (parseFloat(event.target.value) + cap) / 2,
-                            }))
-                          }
-                        }}
+                        onChange={formik.handleChange}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
@@ -397,15 +393,7 @@ export function DefinePoolAttributes({
                         label="Cap"
                         value={cap}
                         type="number"
-                        onChange={(event) => {
-                          formik.handleChange(event)
-                          formik.setValues((values) => ({
-                            ...values,
-                            cap: parseFloat(event.target.value),
-                            inflection:
-                              (parseFloat(event.target.value) + floor) / 2,
-                          }))
-                        }}
+                        onChange={formik.handleChange}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
@@ -588,24 +576,7 @@ export function DefinePoolAttributes({
                     error={formik.errors.collateralBalance != null}
                     value={formik.values.collateralBalance}
                     type="number"
-                    onChange={(event) => {
-                      const value = event.target.value
-                      const arr = value.split('.')
-                      const collateralBalance = event.target.value
-                      if (arr.length > 1) {
-                        if (arr[1].length <= collateralToken.decimals) {
-                          formik.setValues((values) => ({
-                            ...values,
-                            collateralBalance: parseFloat(collateralBalance),
-                          }))
-                        }
-                      } else {
-                        formik.setValues((values) => ({
-                          ...values,
-                          collateralBalance: parseFloat(collateralBalance),
-                        }))
-                      }
-                    }}
+                    onChange={formik.handleChange}
                   />
                   {formik.errors.collateralBalance != null && (
                     <FormHelperText>
