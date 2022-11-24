@@ -71,3 +71,6 @@ waiting_next_iteration = 60
 # Tolerance in percent whether you want to report values when others' values are different by the tolerance
 # If submission_tolerance = 0, we always submit values.
 submission_tolerance = 0.5
+
+# Threshold: If account balance is below threshold, print balance in red. Else print balance in green.
+acc_balance_threshold = 5
