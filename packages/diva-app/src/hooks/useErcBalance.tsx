@@ -27,10 +27,6 @@ export function useErcBalance(address?: string, updated = true) {
     const run = async () => {
       if (provider != null && chainId != null && address != null) {
         const signer = provider.getSigner()
-        await sendTransaction({
-          method: 'eth_requestAccounts',
-          params: [],
-        })
         try {
           const contract = new ethers.Contract(
             address,

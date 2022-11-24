@@ -1,5 +1,5 @@
 import { BaseProvider, ExternalProvider } from '@ethersproject/providers'
-import { createContext, useCallback, useEffect, useState } from 'react'
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { BigNumber, providers } from 'ethers'
 import useLocalStorage from 'use-local-storage'
 import detectEthereumProvider from '@metamask/detect-provider'
@@ -43,12 +43,25 @@ export const ConnectionContext = createContext<ConnectionContextType>({})
 const ethereum = window.ethereum
 
 // Create a connector for WalletConnect
-const connector = new WalletConnect({
-  bridge: 'https://bridge.walletconnect.org', // Required
-  qrcodeModal: QRCodeModal,
-})
 
 export const ConnectionProvider = ({ children }) => {
+  const connector = new WalletConnect({
+    bridge: 'https://bridge.walletconnect.org', // Required
+    qrcodeModal: QRCodeModal,
+  })
+
+  const provider = useMemo(() => {
+    return new WalletConnectProvider({
+      infuraId: '1e5c07a07eb244a6be23cfa590d59ef5', // Required
+      clientMeta: {
+        description: 'Diva Dapp',
+        url: 'https://www.divaprotocol.io/',
+        icons: ['https://www.divaprotocol.io/favicon.ico'],
+        name: 'Diva Dapp',
+      },
+    })
+  }, [])
+
   const [{ connected }, setConnectionState] = useLocalStorage<{
     connected?: string
   }>('diva-dapp-connection', {})
@@ -83,43 +96,35 @@ export const ConnectionProvider = ({ children }) => {
     }
 
     if (walletName === 'walletconnect') {
-      // Check if connection is already established
-      if (!connector.connected) {
-        // create new session
-        await connector.createSession()
-        setConnectionState({ connected: 'walletconnect' })
-      } else {
-        // set existing session
-        setState((_state) => ({
-          ..._state,
-          address: connector.accounts[0],
-          chainId: BigNumber.from(connector.chainId).toNumber(),
-          isConnected: connector.connected,
-        }))
-        setConnectionState({ connected: 'walletconnect' })
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    if (connector.connected && connected === 'walletconnect') {
+      const accounts = await provider.enable()
+      setConnectionState({ connected: 'walletconnect' })
+      const web3Provider = new providers.Web3Provider(provider)
       setState((_state) => ({
         ..._state,
-        address: connector.accounts[0],
-        chainId: BigNumber.from(connector.chainId).toNumber(),
-        isConnected: connector.connected,
+        address: accounts[0],
+        chainId: BigNumber.from(provider.chainId).toNumber(),
+        isConnected: provider.connected,
+        provider: web3Provider,
       }))
     }
   }, [])
 
+  useEffect(() => {
+    if (connected === 'walletconnect') {
+      connect('walletconnect')
+    }
+  }, [connect, connected])
+
   const disconnect = useCallback(() => {
+    setConnectionState({})
     setState((_state) => ({
       ..._state,
       address: undefined,
       isConnected: false,
       chainId: 5,
+      provider: undefined,
     }))
-    setConnectionState({})
+    provider.disconnect()
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -179,85 +184,22 @@ export const ConnectionProvider = ({ children }) => {
 
   useEffect(() => {
     if (connected === 'walletconnect') {
-      connector.on('connect', (error, payload) => {
-        if (error) {
-          throw error
-        }
-        // Get provided accounts and chainId
-        const { accounts, chainId } = payload.params[0]
-
+      provider.on('accountsChanged', (accounts: string[]) => {
         setState((_state) => ({
           ..._state,
           address: accounts[0],
+        }))
+      })
+
+      // Subscribe to chainId change
+      provider.on('chainChanged', (chainId: number) => {
+        setState((_state) => ({
+          ..._state,
           chainId: BigNumber.from(chainId).toNumber(),
-          isConnected: connector.connected,
-        }))
-        setConnectionState({ connected: 'walletconnect' })
-      })
-
-      connector.on('session_update', (error, payload) => {
-        if (error) {
-          throw error
-        }
-        // Get updated accounts and chainId
-        const { accounts, chainId } = payload.params[0]
-
-        setState((_state) => ({
-          ..._state,
-          address: accounts[0],
-          chainId: BigNumber.from(chainId).toNumber(),
-          isConnected: connector.connected,
         }))
       })
-
-      connector.on('disconnect', (error) => {
-        if (error) {
-          throw error
-        }
-
-        setState((_state) => ({
-          ..._state,
-          address: undefined,
-          isConnected: false,
-          chainId: 5,
-        }))
-        setConnectionState({})
-      })
-
-      connect('walletconnect')
     }
-  }, [connect, connected, setConnectionState])
-
-  // active the walletconnect provider and set the provider in the state
-  useEffect(() => {
-    if (connected === 'walletconnect') {
-      const activateProvider = async () => {
-        const provider = new WalletConnectProvider({
-          infuraId: '1e5c07a07eb244a6be23cfa590d59ef5', // Required
-          clientMeta: {
-            description: 'Diva Dapp',
-            url: 'https://www.divaprotocol.io/',
-            icons: ['https://www.divaprotocol.io/favicon.ico'],
-            name: 'Diva Dapp',
-          },
-        })
-        await provider.enable()
-
-        setState((_state) => ({
-          ..._state,
-          provider: new providers.Web3Provider(provider),
-        }))
-      }
-
-      activateProvider()
-        .then(() => {
-          console.log('activated')
-        })
-        .catch((e) => {
-          console.warn('Error in initializing the wallets connect provider', e)
-        })
-    }
-  }, [connected, connect, setConnectionState])
+  }, [provider, connected])
 
   /**
    * set default chain if it doesn't load automatically
@@ -275,7 +217,7 @@ export const ConnectionProvider = ({ children }) => {
   const sendTransaction = useCallback(
     async ({ method, params }: { method: string; params: any[] }) => {
       if (connected === 'walletconnect') {
-        return connector.sendCustomRequest({ method, params })
+        return await provider.request({ method, params })
       }
       if (connected === 'metamask') {
         return ethereum.request({ method, params })
@@ -287,16 +229,11 @@ export const ConnectionProvider = ({ children }) => {
 
   const getWeb3JsProvider = useCallback(async () => {
     if (connected === 'walletconnect') {
-      const provider = new WalletConnectProvider({
-        infuraId: '1e5c07a07eb244a6be23cfa590d59ef5',
-      })
-      await provider.enable()
-
       return new Web3(provider as any)
     }
 
     return new Web3(Web3.givenProvider)
-  }, [connected])
+  }, [connected, provider])
 
   const value = {
     connector,
@@ -306,8 +243,6 @@ export const ConnectionProvider = ({ children }) => {
     getWeb3JsProvider,
     ...state,
   }
-
-  console.log(connector, connected)
 
   return (
     <ConnectionContext.Provider value={value}>

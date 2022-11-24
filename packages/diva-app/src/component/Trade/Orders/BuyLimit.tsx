@@ -70,7 +70,7 @@ export default function BuyLimit(props: {
       setWeb3Provider(web3)
     }
     init()
-  }, [getWeb3JsProvider])
+  }, [getWeb3JsProvider, provider])
 
   const userAddress = useAppSelector(selectUserAddress)
 
