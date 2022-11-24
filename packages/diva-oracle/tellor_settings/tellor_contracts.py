@@ -3,10 +3,14 @@ TellorPlayground_contract_address = {
     "goerli": '0x7B8AC044ebce66aCdF14197E8De38C1Cc802dB4A',
 }
 
+Tellor_contract_address = {
+    "goerli": '0xB3B662644F8d3138df63D2F43068ea621e2981f9',
+}
+
 DIVAOracleTellor_contract_address = {
     "ropsten": '',
     "rinkeby": '',
-    "goerli": '0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB' # 10 sec delay for testing
+    "goerli": '0x63098cC6EDa33B0FbD07472B1a8dD54D4a5C2153' # 10 sec delay for testing
 }
 
 divaDiamond = {
