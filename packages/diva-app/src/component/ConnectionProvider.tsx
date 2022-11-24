@@ -52,7 +52,7 @@ export const ConnectionProvider = ({ children }) => {
 
   const provider = useMemo(() => {
     return new WalletConnectProvider({
-      infuraId: '1e5c07a07eb244a6be23cfa590d59ef5', // Required
+      infuraId: process.env.REACT_APP_INFURA_KEY, // Required
       clientMeta: {
         description: 'Diva Dapp',
         url: 'https://www.divaprotocol.io/',
