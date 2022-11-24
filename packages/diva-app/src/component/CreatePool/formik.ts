@@ -160,7 +160,7 @@ export const useCreatePoolFormik = () => {
       }
       if (parseFloat(values.minTakerContribution) > values.takerShare) {
         errors.minTakerContribution =
-          'Minimum taker contribution must be less than collateral amount'
+          'Minimum taker contribution must be less than or equal to taker share'
       }
       if (Number(values.minTakerContribution) < 0) {
         errors.minTakerContribution =
