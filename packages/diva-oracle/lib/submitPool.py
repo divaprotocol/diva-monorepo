@@ -10,7 +10,7 @@ import tellor_settings.tellor_contracts as tellor_contracts
 import time
 from termcolor import colored
 import datetime
-from lib.recorder import printb, printn, printbAll, printt, update_pending_records, update_records
+from lib.recorder import printb, printn, printbAll, printt, printr, update_pending_records, update_records
 from tellor_settings.tellor_retrieveData import retrieveData
 from config.config import submission_tolerance
 
@@ -20,17 +20,17 @@ def extract(lst):
 
 # Function to create output console message
 def printDataToBeSubmitted(pool_id, ts_date, opair, price, date, collAsset, collAddr, proxy, coll_to_usd, coll_date):
-    printn("*** Value submission for Pool Id %s ***" % pool_id)
+    printr("*** Value submission for Pool Id %s ***" % pool_id, 'cyan')
     printn("Pool expiration time: %s (%s)" % (datetime.datetime.fromtimestamp(ts_date),datetime.datetime.fromtimestamp(ts_date).astimezone().tzinfo.__str__()))
     printn("")
-    printbAll("Data to be submitted:")
-    printbAll("%s: %s" % (opair, price))
+    printbAll("Data to be submitted:", underline=True)
+    printbAll("%s: %s" % (opair, price), 'blue')
     printn("As of time: %s (%s)" % (datetime.datetime.fromtimestamp(date),datetime.datetime.fromtimestamp(date).astimezone().tzinfo.__str__()))
     printn("Source: Kraken")
     printn("")
     printn("Collateral asset: %s (%s)" % (collAsset, collAddr))
     printn("Proxy rate: %s" % proxy)
-    printbAll("Collateral/USD: %s" % coll_to_usd)
+    printbAll("Collateral/USD: %s" % coll_to_usd, 'blue')
     printn("As of time: %s (%s)" % (datetime.datetime.fromtimestamp(coll_date), datetime.datetime.fromtimestamp(coll_date).astimezone().tzinfo.__str__()))
     printn("Source: Kraken")
     printn("")
@@ -156,7 +156,7 @@ def tellor_submit_pools(df, network, w3, contract):
                 submit = False
                 others_values = retrieveData(pool_id, network, getVal_contract)
                 if others_values and submission_tolerance != 0:
-                    printn("Already submitted values are: ")
+                    printbAll("Already submitted values are: ", underline=True)
                     printt(others_values)
                     values_ref = extract(others_values)
                     diff = [abs(price / x - 1) * 100 for x in values_ref]
@@ -168,7 +168,7 @@ def tellor_submit_pools(df, network, w3, contract):
                 elif not others_values:
                     submit = True
             except:
-                printn("-- Error while checking for already submitted values --")
+                printn("-- Error while checking for already submitted values --", 'red')
 
             if submit or (submission_tolerance == 0):
                 # Tellor oracle has 2 steps submitting value to contract and setting final reference value

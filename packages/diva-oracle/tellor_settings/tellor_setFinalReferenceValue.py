@@ -2,10 +2,10 @@ import config.config as config
 import time
 PRIVATE_KEY = config.PRIVATE_KEY
 PUBLIC_KEY = config.PUBLIC_KEY
-from lib.recorder import printb, printn, printbAll
+from lib.recorder import printb, printn, printbAll, printc
 
 def setFinRefVal(pool_id, network, w3, my_contract):
-    printbAll("Triggering setFinalReferenceValue()...")
+    printbAll("Triggering setFinalReferenceValue()...", underline=True)
     printn("DIVAOracleTellor address: %s" % my_contract.address)
     printn("Triggered by address: %s" % PUBLIC_KEY)
 
@@ -28,7 +28,7 @@ def setFinRefVal(pool_id, network, w3, my_contract):
         transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
 
         printn("")
-        printb("Success: ", "Final Reference Value submitted")
+        printb("Success: ", "Final Reference Value submitted", 'green')
         printn("https://%s.etherscan.io/tx/%s" % (network, txn_hash.hex()))
         time.sleep(5)
         try:
@@ -36,12 +36,21 @@ def setFinRefVal(pool_id, network, w3, my_contract):
             gp = transaction_receipt.effectiveGasPrice/1000000000
             gu = transaction_receipt.gasUsed
             printn("Base Fee Per Gas: %s Gwei" % bf)
-            printn("Effective Gas Price: %s Gwei" % gp)
+            printc("Effective Gas Price: ", "%s Gwei" % gp, 'magenta')
             printn("Gas Used: %s" % gu)
         except:
             printn("No Gas Data available at this point.")
+
+        try:
+            rem = float(w3.fromWei(w3.eth.get_balance(PUBLIC_KEY), 'ether'))
+            if rem >= config.acc_balance_threshold:
+                printc("Remaining ETH on reporter account: ", f"{rem} ETH", 'green')
+            else:
+                printc("Remaining ETH on reporter account: ", f"{rem} ETH", 'red')
+        except:
+            printn("Remaining ETH balance not available at this point.")
         return 0
     except Exception as err:
-        printb("Failure: ", err.args[0].__str__())
+        printb("Failure: ", err.args[0].__str__(), 'red')
         return 1
 
