@@ -12,5 +12,5 @@ DIVAOracleTellor_contract_address = {
 divaDiamond = {
     "ropsten": '',
     "rinkeby": '',
-    "goerli": '0x2d941518E0876Fb6042bfCdB403427DC5620b2EC' # 26.10.2022
+    "goerli": '0x659f8bF63Dce2548eB4D9b4BfF6883dddFde4848' # 22.11.2022
 }

@@ -9,7 +9,7 @@
     "graph:auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
     "deploy": "run-s deploy-goerli-new",
     "deploy-goerli": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-goerli goerli.subgraph.yaml",
-    "deploy-goerli-new": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-goerli-new goerli.subgraph.new.yaml",
+    "deploy-goerli-new-2": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-goerli-new-2 goerli.subgraph.new.yaml",
     "deploy-mumbai": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-mumbai mumbai.subgraph.yaml",
     "deploy-polygon": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-polygon polygon.subgraph.yaml",
     "create-local": "graph create --node http://localhost:8020/ divaprotocol/diva-subgraph",
