@@ -10,8 +10,9 @@ def seconds_to_hours(seconds):
 
 # Is lastID pool ID? This is to mitigate the long list of pools
 def query(lastId):
-    expiry_floor_time_away = 300
-    expiry_cieling_time_away = config.max_reporting_frame * 3600
+    expiry_floor_time_away = 300 # TODO Move to config
+    expiry_cieling_time_away = config.max_reporting_frame * 3600 * 7 # drop and use submissionPeriod field in subgraph
+    # currentTime <= expiryTime + submissionPeriod
     #print("pools expiring between {} hours and  {} hours from now:{}".format(expiry_floor_time_away/(60*60), expiry_cieling_time_away/(60*60), dt.now()))
     return """
             { 
@@ -24,6 +25,7 @@ def query(lastId):
                     cap
                     statusFinalReferenceValue
                     expiryTime
+                    submissionPeriod
                   }
                 }
             """ % (lastId, (int(dt.now().timestamp()) - expiry_cieling_time_away), (int(dt.now().timestamp()) - expiry_floor_time_away),  config.dataprovider)
@@ -32,9 +34,10 @@ def query(lastId):
 
 
 def tellor_query(lastId, provider):
-    expiry_floor_time_away = 300
+    expiry_floor_time_away = 300 # TODO Move to config
     eft = seconds_to_hours(expiry_floor_time_away)
-    expiry_ceiling_time_away = config.max_reporting_frame * 3600
+    expiry_ceiling_time_away = config.max_reporting_frame * 3600 * 7 # drop and use submissionPeriod field in subgraph
+    # currentTime <= expiryTime + submissionPeriod
     ect = seconds_to_hours(expiry_ceiling_time_away)
     #print("pools expiring between {} hours and  {} hours from now: {}".format(round(eft, 2), ect, dt.now()))
     return """
@@ -48,6 +51,7 @@ def tellor_query(lastId, provider):
                     cap
                     statusFinalReferenceValue
                     expiryTime
+                    submissionPeriod
                     collateralToken {
                         symbol
                         id
