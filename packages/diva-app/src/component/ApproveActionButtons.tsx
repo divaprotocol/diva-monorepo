@@ -618,7 +618,7 @@ export const ApproveActionButtons = ({
                         formik.values.takerShare.toString(),
                         formik.values.collateralToken.decimals
                       ).toString(),
-                      makerDirection: formik.values.offerDirection === 'Long',
+                      makerIsLong: formik.values.offerDirection === 'Long',
                       offerExpiry: formik.values.offerDuration,
                       minimumTakerFillAmount: parseUnits(
                         formik.values.minTakerContribution.toString() ===
