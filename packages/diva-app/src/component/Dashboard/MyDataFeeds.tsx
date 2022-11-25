@@ -733,7 +733,7 @@ export function MyDataFeeds() {
         Status: status,
         StatusTimestamp: val.statusTimestamp,
         finalValue: finalValue,
-        SubmissionPeriod: val.fallbackSubmissionPeriod,
+        SubmissionPeriod: val.submissionPeriod,
         ReviewPeriod: val.reviewPeriod,
         ChallengePeriod: val.challengePeriod,
       },
