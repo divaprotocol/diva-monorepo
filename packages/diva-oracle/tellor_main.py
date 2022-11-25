@@ -8,7 +8,7 @@ import time
 from lib.query import tellor_query
 from lib.submitPool import tellor_submit_pools
 import pandas as pd
-from lib.recorder import printc
+from lib.recorder import printn
 
 from termcolor import colored
 
@@ -29,10 +29,10 @@ start = dt.datetime.now().replace(microsecond=0)
 
 
 if __name__ == "__main__":
-    printc("*****************************************", 'green')
-    printc("RUNNING TELLOR-DIVA ORACLE", 'green')
-    printc("START TIME: %s" % start, 'green')
-    printc("DATA PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]), 'green')
+    printn("*********************************************************", 'green')
+    printn("RUNNING TELLOR-DIVA ORACLE", 'green')
+    printn("START TIME: %s " % start + f'({dt.datetime.astimezone(start).tzinfo.__str__()})', 'green')
+    printn("DATA PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]), 'green')
     # DO time time check here 
     while True:
         resp = run_graph_query(tellor_query(0, tellor_contracts.DIVAOracleTellor_contract_address[network]), network)
