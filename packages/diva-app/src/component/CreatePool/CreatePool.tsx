@@ -180,7 +180,7 @@ export function CreatePool() {
             )}
             {step}
           </Box>
-          {!formik.isValid && (
+          {!formik.isValid && formik.values.step < 4 && (
             <Box pb={3} pt={2}>
               {Object.keys(formik.errors).map((key) => (
                 <Box pt={2} key={key}>

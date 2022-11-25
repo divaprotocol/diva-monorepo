@@ -1,6 +1,6 @@
 PRIVATE_KEY = ''
 PUBLIC_KEY = ''
-dataprovider = ''  # Use '0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB' for Tellor as dataprovider
+dataprovider = ''  # Use '0x63098cC6EDa33B0FbD07472B1a8dD54D4a5C2153' for Tellor as dataprovider
 
 
 # This is for gmail
