@@ -1,3 +1,4 @@
+// This hook is currently not used but kept for future potential use
 import { ethers } from 'ethers'
 import { useEffect, useMemo, useState } from 'react'
 import { useConnectionContext } from './useConnectionContext'
