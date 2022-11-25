@@ -41,7 +41,6 @@ import {
 import { useDispatch } from 'react-redux'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { ExpiresInCell } from '../Markets/Markets'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
@@ -666,9 +665,6 @@ export function MyDataFeeds() {
     }
   }
 
-  const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
-    useGovernanceParameters()
-
   useEffect(() => {
     if (userAddress != null) {
       dispatch(
@@ -701,10 +697,10 @@ export function MyDataFeeds() {
       val.statusFinalReferenceValue,
       val.finalReferenceValue,
       val.inflection,
-      submissionPeriod,
-      challengePeriod,
-      reviewPeriod,
-      fallbackPeriod
+      parseFloat(val.submissionPeriod),
+      parseFloat(val.challengePeriod),
+      parseFloat(val.reviewPeriod),
+      parseFloat(val.fallbackSubmissionPeriod)
     )
 
     const payOff = {
@@ -737,9 +733,9 @@ export function MyDataFeeds() {
         Status: status,
         StatusTimestamp: val.statusTimestamp,
         finalValue: finalValue,
-        SubmissionPeriod: submissionPeriod,
-        ReviewPeriod: reviewPeriod,
-        ChallengePeriod: challengePeriod,
+        SubmissionPeriod: val.fallbackSubmissionPeriod,
+        ReviewPeriod: val.reviewPeriod,
+        ChallengePeriod: val.challengePeriod,
       },
     ]
   }, [] as GridRowModel[])

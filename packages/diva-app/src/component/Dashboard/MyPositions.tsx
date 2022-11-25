@@ -46,7 +46,6 @@ import {
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { ExpiresInCell } from '../Markets/Markets'
 import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
@@ -872,8 +871,7 @@ export function MyPositions() {
   const tokenPools = useAppSelector(selectPools)
   const positionTokens = useAppSelector(selectPositionTokens)
   const dispatch = useDispatch()
-  const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
-    useGovernanceParameters()
+
   const { isMobile } = useCustomMediaQuery()
   const theme = useTheme()
 
@@ -913,10 +911,10 @@ export function MyPositions() {
       val.statusFinalReferenceValue,
       val.finalReferenceValue,
       val.inflection,
-      submissionPeriod,
-      challengePeriod,
-      reviewPeriod,
-      fallbackPeriod
+      parseFloat(val.submissionPeriod),
+      parseFloat(val.challengePeriod),
+      parseFloat(val.reviewPeriod),
+      parseFloat(val.fallbackSubmissionPeriod)
     )
 
     const shared = {
