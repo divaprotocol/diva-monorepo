@@ -104,8 +104,33 @@ export function DefineOfferAttributes({
     floor,
     gradient,
     payoutProfile,
+    yourShare,
+    takerShare,
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
+  useEffect(() => {
+    if (payoutProfile === 'Binary') {
+      formik.setFieldValue('gradient', 1)
+      formik.setFieldValue('cap', formik.values.inflection)
+      formik.setFieldValue('floor', formik.values.inflection)
+    }
+  }, [formik.values])
+  useEffect(() => {
+    if (payoutProfile === 'Linear') {
+      formik.setFieldValue('inflection', (floor + cap) / 2)
+    }
+  }, [formik.values.floor, formik.values.inflection])
+  useEffect(() => {
+    if (payoutProfile === 'Linear') {
+      formik.setFieldValue('inflection', (cap + floor) / 2)
+    }
+  }, [formik.values.cap, formik.values.inflection])
+  useEffect(() => {
+    formik.setFieldValue('takerShare', collateralBalance - yourShare)
+  }, [collateralBalance])
+  useEffect(() => {
+    formik.setFieldValue('takerShare', collateralBalance - yourShare)
+  }, [yourShare])
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', () => {
@@ -382,18 +407,7 @@ export function DefineOfferAttributes({
                         max: cap,
                       }}
                       type="number"
-                      onChange={(event) => {
-                        if (payoutProfile === 'Binary') {
-                          formik.handleChange(event)
-                          formik.setValues((values) => ({
-                            ...values,
-                            cap: parseFloat(event.target.value),
-                            floor: parseFloat(event.target.value),
-                            inflection: parseFloat(event.target.value),
-                            gradient: 1,
-                          }))
-                        }
-                      }}
+                      onChange={formik.handleChange}
                       value={inflection}
                       sx={{ width: mobile ? '100%' : '48%' }}
                     />
@@ -420,17 +434,7 @@ export function DefineOfferAttributes({
                         label="Floor"
                         value={floor}
                         type="number"
-                        onChange={(event) => {
-                          if (payoutProfile === 'Linear') {
-                            formik.handleChange(event)
-                            formik.setValues((values) => ({
-                              ...values,
-                              floor: parseFloat(event.target.value),
-                              inflection:
-                                (parseFloat(event.target.value) + cap) / 2,
-                            }))
-                          }
-                        }}
+                        onChange={formik.handleChange}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
@@ -447,15 +451,7 @@ export function DefineOfferAttributes({
                         label="Cap"
                         value={cap}
                         type="number"
-                        onChange={(event) => {
-                          formik.handleChange(event)
-                          formik.setValues((values) => ({
-                            ...values,
-                            cap: parseFloat(event.target.value),
-                            inflection:
-                              (parseFloat(event.target.value) + floor) / 2,
-                          }))
-                        }}
+                        onChange={formik.handleChange}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
@@ -642,50 +638,7 @@ export function DefineOfferAttributes({
                     error={formik.errors.collateralBalance != null}
                     value={formik.values.collateralBalance}
                     type="number"
-                    onChange={(event) => {
-                      const value = event.target.value
-                      const arr = value.split('.')
-                      const collateralBalance = event.target.value
-                      if (arr.length > 1) {
-                        if (arr[1].length <= collateralToken.decimals) {
-                          formik.setValues((values) => ({
-                            ...values,
-                            collateralBalance: parseFloat(collateralBalance),
-                            takerShare:
-                              parseFloat(collateralBalance) - values.yourShare,
-                          }))
-                          if (fillOrKill) {
-                            if (collateralBalance != '') {
-                              formik.setFieldValue(
-                                'minTakerContribution',
-                                parseFloat(collateralBalance) -
-                                  formik.values.yourShare
-                              )
-                            } else {
-                              formik.setFieldValue('minTakerContribution', 0)
-                            }
-                          }
-                        }
-                      } else {
-                        formik.setValues((values) => ({
-                          ...values,
-                          collateralBalance: parseFloat(collateralBalance),
-                          takerShare:
-                            parseFloat(collateralBalance) - values.yourShare,
-                        }))
-                        if (fillOrKill) {
-                          if (collateralBalance != '') {
-                            formik.setFieldValue(
-                              'minTakerContribution',
-                              parseFloat(collateralBalance) -
-                                formik.values.yourShare
-                            )
-                          } else {
-                            formik.setFieldValue('minTakerContribution', 0)
-                          }
-                        }
-                      }
-                    }}
+                    onChange={formik.handleChange}
                   />
                   {formik.errors.collateralBalance != null && (
                     <FormHelperText>
@@ -712,23 +665,7 @@ export function DefineOfferAttributes({
                     error={formik.errors.yourShare != null}
                     value={formik.values.yourShare}
                     type="number"
-                    onChange={(event) => {
-                      const collateralBalance = event.target.value
-                      formik.setValues((values) => ({
-                        ...values,
-                        yourShare: parseFloat(collateralBalance),
-                        takerShare:
-                          values.collateralBalance -
-                          parseFloat(collateralBalance),
-                      }))
-                      if (fillOrKill) {
-                        formik.setFieldValue(
-                          'minTakerContribution',
-                          Number(formik.values.collateralBalance) -
-                            parseFloat(collateralBalance)
-                        )
-                      }
-                    }}
+                    onChange={formik.handleChange}
                   />
                   {formik.errors.collateralBalance != null && (
                     <FormHelperText>
@@ -958,10 +895,7 @@ export function DefineOfferAttributes({
                     <Container
                       sx={{ margin: -3, padding: 2, pr: 4, ml: -1.5, mr: -8 }}
                     >
-                      <FormControl
-                        fullWidth
-                        error={formik.errors.minTakerContribution != null}
-                      >
+                      <FormControl fullWidth>
                         <Tooltip
                           placement="top-end"
                           title="Minimum collateral amount the taker has to contribute on first fill"

@@ -21,23 +21,35 @@ def update_pending_records(record):
     file.close()
 
 
-def printbAll(text):
-    print(colored(text, attrs=["bold"]))
+def printbAll(text, color=None, underline=None):
+    if color:
+        if underline:
+            print(colored(text, color, attrs=["bold", "underline"]))
+        else:
+            print(colored(text, color, attrs=["bold"]))
+    else:
+        print(colored(text, attrs=["bold", "underline"]))
     with open('log.txt', 'a') as f:
         f.write(text + "\n")
 
-def printb(textb, text):
-    print(colored(textb, attrs=["bold"]) + str(text))
+def printb(textb, text, color=None):
+    if color:
+        print(colored(textb, color, attrs=["bold"]) + str(text))
+    else:
+        print(colored(textb, attrs=["bold"]) + str(text))
     with open('log.txt', 'a') as f:
         f.write(textb + text + "\n")
 
-def printc(text, col):
-    print(colored(text, col))
+def printc(text1, text2, col):
+    print(text1 + colored(text2, col))
     with open('log.txt', 'a') as f:
-        f.write(text + "\n")
+        f.write(text1 + text2 + "\n")
 
-def printn(text):
-    print(text)
+def printn(text, color=None):
+    if color:
+        print(colored(text, color))
+    else:
+        print(text)
     with open('log.txt', 'a') as f:
         f.write(text + "\n")
 
@@ -46,4 +58,13 @@ def printt(val):
     with open('log.txt', 'a') as f:
         for x in val:
             f.write("(RefValue, CollValue, Timestmp, isDisputed) =  (%s, %s, %s, %s) \n" % (x[0], x[1], x[2], x[3]))
+
+
+def printr(text, color=None):
+    if color:
+        print(colored(text, color, attrs=["bold", "reverse"]))
+    else:
+        print(text)
+    with open('log.txt', 'a') as f:
+        f.write(text + "\n")
 

@@ -3,14 +3,14 @@ import eth_abi
 from Crypto.Hash import keccak
 import tellor_settings.tellor_contracts as tellor
 import time
-from lib.recorder import printb, printn, printbAll
+from lib.recorder import printb, printn, printbAll, printc
 
 PRIVATE_KEY = config.PRIVATE_KEY
 PUBLIC_KEY = config.PUBLIC_KEY
 
 
 def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract):
-    printbAll("Sending price to Tellor playground...")
+    printbAll("Sending price to Tellor playground...", underline=True)
     printn("Network: %s" % network)
     printn("Contract address: %s" % my_contract.address)
     printn("Reporter address: %s" % PUBLIC_KEY)
@@ -43,7 +43,7 @@ def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract)
         transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
 
         printn("")
-        printb("Success: ", "Price submitted to Tellor playground")
+        printb("Success: ", "Price submitted to Tellor playground", 'green')
         printn("https://%s.etherscan.io/tx/%s" % (network, txn_hash.hex()))
         time.sleep(5)
         try:
@@ -51,7 +51,7 @@ def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract)
             gp = transaction_receipt.effectiveGasPrice/1000000000
             gu = transaction_receipt.gasUsed
             printn("Base Fee Per Gas: %s Gwei" % bf)
-            printn("Effective Gas Price: %s Gwei" % gp)
+            printc("Effective Gas Price: ", "%s Gwei" % gp, 'magenta')
             printn("Gas Used: %s" % gu)
         except:
             printn("No Gas Data available at this point.")
@@ -59,7 +59,7 @@ def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract)
         return 0
 
     except Exception as err:
-        printb("Failure: ", err.args[0].__str__())
+        printb("Failure: ", err.args[0].__str__(), 'red')
         return 1
 
 

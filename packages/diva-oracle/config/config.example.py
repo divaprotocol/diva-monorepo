@@ -1,6 +1,6 @@
 PRIVATE_KEY = ''
 PUBLIC_KEY = ''
-dataprovider = ''  # Use '0x9F6Cd21bF0f18cf7bcd1bd9AF75476537d8295fB' for Tellor as dataprovider
+dataprovider = ''  # Use '0x63098cC6EDa33B0FbD07472B1a8dD54D4a5C2153' for Tellor as dataprovider
 
 
 # This is for gmail
@@ -71,3 +71,6 @@ waiting_next_iteration = 60
 # Tolerance in percent whether you want to report values when others' values are different by the tolerance
 # If submission_tolerance = 0, we always submit values.
 submission_tolerance = 0.5
+
+# Threshold: If account balance is below threshold, print balance in red. Else print balance in green.
+acc_balance_threshold = 5

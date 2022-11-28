@@ -72,7 +72,7 @@ export function FillOffer({
 
       formik.setFieldValue(
         'offerDirection',
-        configJson.makerDirection ? 'Short' : 'Long'
+        configJson.makerIsLong ? 'Short' : 'Long'
       )
       formik.setFieldValue('referenceAsset', configJson.referenceAsset)
       formik.setFieldValue('expiryTime', new Date(configJson.expiryTime * 1000))
@@ -101,7 +101,7 @@ export function FillOffer({
         taker: configJson.taker,
         makerCollateralAmount: configJson.makerCollateralAmount,
         takerCollateralAmount: configJson.takerCollateralAmount,
-        makerDirection: configJson.makerDirection,
+        makerIsLong: configJson.makerIsLong,
         offerExpiry: configJson.offerExpiry,
         minimumTakerFillAmount: configJson.minimumTakerFillAmount,
         referenceAsset: configJson.referenceAsset,
