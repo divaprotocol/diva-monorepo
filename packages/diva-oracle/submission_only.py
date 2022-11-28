@@ -13,7 +13,7 @@ tellor_contract = w3.eth.contract(
 max_time_away = dt.timedelta(minutes=config.max_time_away)
 start = dt.datetime.now().replace(microsecond=0)
 
-pool_id = 15
+pool_id = 24
 
 if __name__ == "__main__":
     printn("*********************************************************", 'green')

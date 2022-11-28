@@ -14,7 +14,7 @@ from termcolor import colored
 import datetime
 from lib.recorder import printb, printn, printbAll, printt, printr, update_pending_records, update_records
 from tellor_settings.tellor_retrieveData import retrieveData
-from config.config import submission_tolerance
+from config.config import submission_tolerance, max_reporting_frame, expiry_floor_time_away
 
 
 def extract(lst):
@@ -353,11 +353,11 @@ def tellor_submit_pools_specific_pool(network, w3, contract, poolid, value=None)
     if df['statusFinalReferenceValue'][0] == 'Confirmed':
         printn("Pool %s already settled." % poolid, 'red')
         return
-    elif 24*60*60 <= time_diff:
-        printn("Pool already expired more than 24h ago", 'red')
+    elif max_reporting_frame * 3600 <= time_diff:
+        printn("Pool already expired more than %s h ago" % max_reporting_frame, 'red')
         return
-    elif time_diff <= 300:
-        printn("Pool should be expired for at least 5 min before submitting a value.", 'red')
+    elif time_diff <= expiry_floor_time_away:
+        printn("Pool should be expired for at least %s min before submitting a value." % int(expiry_floor_time_away/60), 'red')
         return
 
     if poolid in blocked_pools_by_whitelist:
