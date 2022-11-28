@@ -101,7 +101,7 @@ export const ConnectionProvider = ({ children }) => {
       const web3Provider = new providers.Web3Provider(provider)
       setState((_state) => ({
         ..._state,
-        address: accounts[0],
+        address: accounts[0].toLowerCase(),
         chainId: BigNumber.from(provider.chainId).toNumber(),
         isConnected: provider.connected,
         provider: web3Provider,
