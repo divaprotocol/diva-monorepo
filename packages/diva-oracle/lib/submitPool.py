@@ -332,7 +332,7 @@ def trigger_setFinRefVal_only(df, network, w3):
     return
 
 
-def tellor_submit_pools_specific_pool(network, w3, contract, poolid, value=None):
+def tellor_submit_pools_specific_pool(network, w3, contract, poolid):
     getVal_contract = w3.eth.contract(
         address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
 
@@ -410,7 +410,24 @@ def tellor_submit_pools_specific_pool(network, w3, contract, poolid, value=None)
                 return
     return
 
+def tellor_triggering_setFinRefVal_specific_pool(network, w3, pool_id):
+    DIVAOracleTellor_contract = w3.eth.contract(
+        address=tellor_contracts.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
+    getVal_contract = w3.eth.contract(
+        address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
 
+    if pool_id in blocked_pools_by_whitelist:
+        return
+
+    others_values = retrieveData(pool_id, network, getVal_contract)
+    if others_values:
+        printr("*** Triggering setFinRefVal() for Pool Id %s ***" % pool_id, 'cyan')
+        sFRV = setFinRefVal(pool_id, network, w3,
+                            DIVAOracleTellor_contract)
+    else:
+        printb('Failure: ',
+               "No values submitted for this pool. First submit values before you trigger the function.", "red")
+    return
 
 
 pendingPools = {
