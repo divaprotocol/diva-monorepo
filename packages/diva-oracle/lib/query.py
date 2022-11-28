@@ -100,3 +100,24 @@ def pool_expiry(Notification_period_ceiling, Notification_period_floor=0):
                   }
                 }
             """ % (config.dataprovider, (int(dt.now().timestamp()) + hour_conversion(Notification_period_floor)), (int(dt.now().timestamp()) + hour_conversion(Notification_period_ceiling)))
+
+
+def queryPool(poolid):
+    return """
+                { 
+                pool (id: %s) {
+                    id
+                    dataProvider
+                    referenceAsset
+                    floor
+                    inflection
+                    cap
+                    statusFinalReferenceValue
+                    expiryTime
+                    collateralToken {
+                        symbol
+                        id
+                    }
+                  }
+                }
+            """  % poolid

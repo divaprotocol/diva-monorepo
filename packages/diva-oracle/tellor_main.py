@@ -6,7 +6,7 @@ import config.config as config
 from web3 import Web3
 import time
 from lib.query import tellor_query
-from lib.submitPool import tellor_submit_pools
+from lib.submitPool import tellor_submit_pools, tellor_submit_pools_only, trigger_setFinRefVal_only
 import pandas as pd
 from lib.recorder import printn
 
@@ -33,14 +33,43 @@ if __name__ == "__main__":
     printn("RUNNING TELLOR-DIVA ORACLE", 'green')
     printn("START TIME: %s " % start + f'({dt.datetime.astimezone(start).tzinfo.__str__()})', 'green')
     printn("DATA PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]), 'green')
-    # DO time time check here 
-    while True:
-        resp = run_graph_query(tellor_query(0, tellor_contracts.DIVAOracleTellor_contract_address[network]), network)
-        df = pd.json_normalize(resp, ['data', 'pools'])
-        if df.empty:
-            print("No pools to report on at this time")
-        tellor_submit_pools(df, network, w3, tellor_contract)
-        print(colored("#########################################", "yellow"))
-        print(colored("Waiting {} sec before next iteration...".format(waiting_sec), 'yellow'))
-        # Wait before next iteration
-        time.sleep(waiting_sec)
+    # DO time time check here
+
+    if config.value_submission and not config.triggering_setFinRefVal:
+        while True:
+            resp = run_graph_query(tellor_query(0, tellor_contracts.DIVAOracleTellor_contract_address[network]), network)
+            df = pd.json_normalize(resp, ['data', 'pools'])
+            if df.empty:
+                print("No pools to report on at this time")
+            tellor_submit_pools_only(df, network, w3, tellor_contract)
+            print(colored("#########################################", "yellow"))
+            print(colored("Waiting {} sec before next iteration...".format(waiting_sec), 'yellow'))
+            # Wait before next iteration
+            time.sleep(waiting_sec)
+    elif config.triggering_setFinRefVal and not config.value_submission:
+        while True:
+            resp = run_graph_query(tellor_query(0, tellor_contracts.DIVAOracleTellor_contract_address[network]),
+                                   network)
+            df = pd.json_normalize(resp, ['data', 'pools'])
+            if df.empty:
+                print("No pools to report on at this time")
+            trigger_setFinRefVal_only(df, network, w3)
+            print(colored("#########################################", "yellow"))
+            print(colored("Waiting {} sec before next iteration...".format(waiting_sec), 'yellow'))
+            # Wait before next iteration
+            time.sleep(waiting_sec)
+    elif not config.value_submission and not config.triggering_setFinRefVal:
+        printn("Change parameters in config file to run oracle.", 'red')
+    else:
+        while True:
+            resp = run_graph_query(tellor_query(0, tellor_contracts.DIVAOracleTellor_contract_address[network]),
+                                   network)
+            df = pd.json_normalize(resp, ['data', 'pools'])
+            if df.empty:
+                print("No pools to report on at this time")
+            tellor_submit_pools(df, network, w3, tellor_contract)
+            print(colored("#########################################", "yellow"))
+            print(colored("Waiting {} sec before next iteration...".format(waiting_sec), 'yellow'))
+            # Wait before next iteration
+            time.sleep(waiting_sec)
+

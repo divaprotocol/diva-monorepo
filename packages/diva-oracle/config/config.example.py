@@ -74,3 +74,9 @@ submission_tolerance = 0.5
 
 # Threshold: If account balance is below threshold, print balance in red. Else print balance in green.
 acc_balance_threshold = 5
+
+# Value submission to pools:
+value_submission = True
+
+# Triggering setFinRefVal():
+triggering_setFinRefVal = True
