@@ -184,6 +184,7 @@ export const ApproveActionButtons = ({
     if (
       diva != undefined &&
       divaDomain != undefined &&
+      formik != undefined &&
       formik.values != undefined &&
       account != null
     ) {
@@ -203,7 +204,7 @@ export const ApproveActionButtons = ({
         }
       })
     }
-  }, [formik.values, account, diva, divaDomain])
+  }, [formik != undefined && formik.values, account, diva, divaDomain])
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
