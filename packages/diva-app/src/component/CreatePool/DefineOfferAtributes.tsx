@@ -88,6 +88,7 @@ export function DefineOfferAttributes({
   }
 
   const handleOfferDurationChange = (event) => {
+    setOfferExpiryToggle('')
     setOfferDuration(event.getTime())
     formik.setFieldValue(
       'offerDuration',
