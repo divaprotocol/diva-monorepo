@@ -99,15 +99,15 @@ export function DefineOfferAttributes({
     setOfferDuration(Number(event.target.value))
     const timeLeft = Number(event.target.value) - Date.now()
     console.log(timeLeft)
-    if (timeLeft < 3600000) {
+    if (timeLeft <= 3600000) {
       setOfferExpiryToggle('1 Hour')
-    } else if (timeLeft > 3600000 && timeLeft < 14400000) {
+    } else if (timeLeft > 3600000 && timeLeft <= 14400000) {
       setOfferExpiryToggle('4 Hrs')
-    } else if (timeLeft > 14400000 && timeLeft < 43200000) {
+    } else if (timeLeft > 14400000 && timeLeft <= 43200000) {
       setOfferExpiryToggle('12 Hrs')
-    } else if (timeLeft > 43200000 && timeLeft < 86400000) {
+    } else if (timeLeft > 43200000 && timeLeft <= 86400000) {
       setOfferExpiryToggle('1 Day')
-    } else if (timeLeft > 86400000 && timeLeft < 604800000) {
+    } else if (timeLeft > 86400000 && timeLeft <= 604800000) {
       setOfferExpiryToggle('7 Days')
     }
     formik.setFieldValue(
