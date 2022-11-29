@@ -102,9 +102,9 @@ export function DefineOfferAttributes({
     if (timeLeft < 3600000) {
       setOfferExpiryToggle('1 Hour')
     } else if (timeLeft > 3600000 && timeLeft < 14400000) {
-      setOfferExpiryToggle('4 Hours')
+      setOfferExpiryToggle('4 Hrs')
     } else if (timeLeft > 14400000 && timeLeft < 43200000) {
-      setOfferExpiryToggle('12 Hours')
+      setOfferExpiryToggle('12 Hrs')
     } else if (timeLeft > 43200000 && timeLeft < 86400000) {
       setOfferExpiryToggle('1 Day')
     } else if (timeLeft > 86400000 && timeLeft < 604800000) {
@@ -799,7 +799,12 @@ export function DefineOfferAttributes({
                 pr: theme.spacing(3),
               }}
             >
-              <FormControl fullWidth>
+              <FormControl
+                sx={{
+                  pb: theme.spacing(2),
+                }}
+                fullWidth
+              >
                 <DateTimePicker
                   InputProps={{
                     name: 'offerDuration',
@@ -837,16 +842,16 @@ export function DefineOfferAttributes({
                   1 Hour
                 </ToggleButton>
                 <ToggleButton
-                  selected={offerExpiryToggle == '4 Hours'}
+                  selected={offerExpiryToggle == '4 Hrs'}
                   value={Date.now() + 4 * 60 * 60 * 1000}
                 >
-                  4 Hours
+                  4 Hrs
                 </ToggleButton>
                 <ToggleButton
-                  selected={offerExpiryToggle == '12 Hours'}
+                  selected={offerExpiryToggle == '12 Hrs'}
                   value={Date.now() + 12 * 60 * 60 * 1000}
                 >
-                  12 Hours
+                  12 Hrs
                 </ToggleButton>
                 <ToggleButton
                   selected={offerExpiryToggle == '1 Day'}
