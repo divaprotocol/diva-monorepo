@@ -11,6 +11,11 @@ import {
   useTheme,
   Box,
   TextField,
+  AccordionSummary,
+  FormControl,
+  Tooltip,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material'
 import Typography from '@mui/material/Typography'
 import React, { useEffect, useState } from 'react'
@@ -29,6 +34,9 @@ import { ApproveActionButtons } from '../ApproveActionButtons'
 import LightbulbIcon from '@mui/icons-material/Lightbulb'
 import { ReactComponent as LongPool } from '../../Images/long-trade-page-icon.svg'
 import { ReactComponent as ShortPool } from '../../Images/short-trade-page-icon.svg'
+import AccordionDetails from '@mui/material/AccordionDetails'
+import { useCreatePoolFormik } from '../CreatePool/formik'
+import Accordion from '@mui/material/Accordion'
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -42,6 +50,7 @@ type Props = {
 
 export const AddLiquidity = ({ pool }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
+  const formik = useCreatePoolFormik()
   const theme = useTheme()
   const [openAlert, setOpenAlert] = React.useState(false)
   const [openExpiredAlert, setOpenExpiredAlert] = React.useState(false)
@@ -53,7 +62,10 @@ export const AddLiquidity = ({ pool }: Props) => {
   const { provider } = useConnectionContext()
   const account = useAppSelector(selectUserAddress)
   const chainId = provider?.network?.chainId
-
+  const [expanded, setExpanded] = useState(false)
+  const [editLongRecipient, setEditLongRecipient] = useState(false)
+  const [editShortRecipient, setEditShortRecipient] = useState(false)
+  console.log(account)
   // TODO Move this part into useEffect
   const tokenBalance = useErcBalance(
     pool ? pool!.collateralToken.id : undefined,
@@ -252,7 +264,7 @@ export const AddLiquidity = ({ pool }: Props) => {
           <Card
             sx={{
               width: '470px',
-              height: '280px',
+              height: '100%',
               border: '1px solid #1B3448',
               mt: theme.spacing(-1),
               py: theme.spacing(4),
@@ -326,6 +338,7 @@ export const AddLiquidity = ({ pool }: Props) => {
               transactionType={'liquidity'}
               onTransactionSuccess={() => setBalanceUpdated(!balanceUpdated)}
               alert={openExpiredAlert || openAlert}
+              formik={formik}
             />
             <Typography variant="h6" color="gray">
               {/* {console.log('typeof remainingAllowance', remainingAllowance)} */}
@@ -333,6 +346,103 @@ export const AddLiquidity = ({ pool }: Props) => {
               Remaining Allowance: {remainingAllowance}{' '}
               {pool.collateralToken.symbol}
             </Typography>
+            <Accordion
+              expanded={expanded}
+              onChange={() => setExpanded(!expanded)}
+              sx={{
+                maxWidth: '95%',
+                background: 'none',
+                padding: 0,
+                borderTop: 'none',
+                ':before': {
+                  display: 'none',
+                },
+              }}
+            >
+              <AccordionSummary
+                sx={{
+                  paddingLeft: 0,
+                }}
+              >
+                <Typography color="primary" variant="subtitle2">
+                  Advanced Settings
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ padding: 0 }}>
+                <Box pb={3}>
+                  <Stack>
+                    <Container sx={{ margin: -2, padding: 1 }}>
+                      <FormControl
+                        fullWidth
+                        error={formik.errors.longRecipient != null}
+                      >
+                        <Tooltip placement="top-end" title="Long Recipient">
+                          <TextField
+                            name="longRecipient"
+                            disabled={!editLongRecipient}
+                            id="longRecipient"
+                            label="Long Recipient"
+                            value={formik.values.longRecipient}
+                            onChange={(event) => {
+                              formik.setFieldValue(
+                                'longRecipient',
+                                event.target.value
+                              )
+                            }}
+                            type="text"
+                          />
+                        </Tooltip>
+                      </FormControl>
+                      <FormControlLabel
+                        sx={{ pb: theme.spacing(2) }}
+                        control={
+                          <Checkbox
+                            defaultChecked={editLongRecipient}
+                            onChange={() => {
+                              setEditLongRecipient(!editLongRecipient)
+                            }}
+                          />
+                        }
+                        label="Edit"
+                      />
+                      <FormControl
+                        fullWidth
+                        error={formik.errors.shortRecipient != null}
+                      >
+                        <Tooltip placement="top-end" title="Short Recipient">
+                          <TextField
+                            name="shortRecipient"
+                            disabled={!editShortRecipient}
+                            id="shortRecipient"
+                            label="Short Recipient"
+                            value={formik.values.shortRecipient}
+                            onChange={(event) => {
+                              formik.setFieldValue(
+                                'shortRecipient',
+                                event.target.value
+                              )
+                            }}
+                            type="text"
+                          />
+                        </Tooltip>
+                      </FormControl>
+                      <FormControlLabel
+                        sx={{ pb: theme.spacing(2) }}
+                        control={
+                          <Checkbox
+                            defaultChecked={editShortRecipient}
+                            onChange={() => {
+                              setEditShortRecipient(!editShortRecipient)
+                            }}
+                          />
+                        }
+                        label="Edit"
+                      />
+                    </Container>
+                  </Stack>
+                </Box>
+              </AccordionDetails>
+            </Accordion>
           </Card>
         </Stack>
         <Stack
