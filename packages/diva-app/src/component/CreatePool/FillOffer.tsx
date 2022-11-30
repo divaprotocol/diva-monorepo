@@ -93,7 +93,7 @@ export function FillOffer({
           : configJson.capacity
       )
       formik.setFieldValue('dataProvider', configJson.dataProvider)
-      formik.setFieldValue('offerDuration', configJson.offerExpiry)
+      formik.setFieldValue('offerExpiry', configJson.offerExpiry)
 
       formik.setFieldValue('takerAddress', configJson.taker)
       formik.setFieldValue('jsonToExport', {

@@ -22,7 +22,7 @@ export type Values = {
   capacity: string
   dataProvider: string
   payoutProfile: string
-  offerDuration?: string
+  offerExpiry?: string
   offerDirection?: string
   minTakerContribution?: string
   takerAddress?: string
@@ -58,7 +58,7 @@ export const initialValues: Values = {
   dataProvider: '',
   payoutProfile: 'Binary',
   offerDirection: 'Long',
-  offerDuration: Math.floor(24 * 60 * 60 + Date.now() / 1000).toString(),
+  offerExpiry: Math.floor(24 * 60 * 60 + Date.now() / 1000).toString(),
   minTakerContribution: '0',
   takerAddress: ethers.constants.AddressZero,
   makerAddress: '',
