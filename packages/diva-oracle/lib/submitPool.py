@@ -353,9 +353,10 @@ def tellor_submit_pools_specific_pool(network, w3, contract, poolid):
     if df['statusFinalReferenceValue'][0] == 'Confirmed':
         printn("Pool %s already settled." % poolid, 'red')
         return
-    elif max_reporting_frame * 3600 <= time_diff:
-        printn("Pool already expired more than %s h ago" % max_reporting_frame, 'red')
-        return
+    #TODO: Remove comment: This was commented out only for testing
+    # elif max_reporting_frame * 3600 <= time_diff:
+    #     printn("Pool already expired more than %s h ago" % max_reporting_frame, 'red')
+    #     return
     elif time_diff <= expiry_floor_time_away:
         printn("Pool should be expired for at least %s min before submitting a value." % int(expiry_floor_time_away/60), 'red')
         return
