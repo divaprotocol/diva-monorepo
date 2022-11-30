@@ -11,6 +11,7 @@ import {
   LinearProgress,
   Stack,
   TextField,
+  Tooltip,
   Typography,
   useTheme,
 } from '@mui/material'
@@ -72,6 +73,7 @@ export function ReviewAndSubmit({
   )
   const [takerFilledAmount, setTakerFilledAmount] = useState(0)
   const [decimal, setDecimal] = useState(18)
+  const [dataProvider, setDataProvider] = useState('')
   const collateralWalletBalance = useErcBalance(
     formik.values.collateralToken.id
   )
@@ -200,7 +202,10 @@ export function ReviewAndSubmit({
       (dataName: { id: string }) => dataName?.id == values.dataProvider
     )
     if (dataName?.name != null) {
-      setDataSourceName(dataName.name + ' (' + values.dataProvider + ')')
+      setDataProvider(values.dataProvider)
+      setDataSourceName(
+        dataName.name + ' (' + getShortenedAddress(values.dataProvider) + ')'
+      )
     } else {
       setDataSourceName(values.dataProvider)
     }
@@ -412,7 +417,9 @@ export function ReviewAndSubmit({
                 <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
                   Data Provider
                 </Typography>
-                <Typography fontSize={'0.85rem'}>{dataSourceName}</Typography>
+                <Tooltip placement="top-end" title={dataProvider}>
+                  <Typography fontSize={'0.85rem'}>{dataSourceName}</Typography>
+                </Tooltip>
               </Stack>
               <Accordion
                 sx={{
@@ -524,9 +531,11 @@ export function ReviewAndSubmit({
                       >
                         Taker Address
                       </Typography>
-                      <Typography fontSize={'0.85rem'}>
-                        {values.takerAddress}
-                      </Typography>
+                      <Tooltip placement="top-end" title={values.takerAddress}>
+                        <Typography fontSize={'0.85rem'}>
+                          {getShortenedAddress(values.takerAddress)}
+                        </Typography>
+                      </Tooltip>
                     </Stack>
                   )}
                   {(transaction === 'createoffer' ||
