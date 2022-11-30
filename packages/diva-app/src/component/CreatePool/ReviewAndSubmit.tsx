@@ -395,10 +395,9 @@ export function ReviewAndSubmit({
                   </Typography>
                   <Typography fontSize={'0.85rem'}>
                     {Math.floor(
-                      getExpiryMinutesFromNow(formik.values.offerDuration) / 60
+                      getExpiryMinutesFromNow(formik.values.offerExpiry) / 60
                     )}
-                    h{' '}
-                    {getExpiryMinutesFromNow(formik.values.offerDuration) % 60}m
+                    h {getExpiryMinutesFromNow(formik.values.offerExpiry) % 60}m
                   </Typography>
                 </Stack>
               )}

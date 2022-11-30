@@ -59,9 +59,7 @@ export function DefineOfferAttributes({
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
   const [value, setValue] = useState('Binary')
   const [direction, setDirection] = useState('Long')
-  const [offerDuration, setOfferDuration] = useState(
-    Date.now() + 24 * 60 * 60000
-  ) // 1 Day
+  const [offerExpiry, setOfferExpiry] = useState(Date.now() + 24 * 60 * 60000) // 1 Day
   const [expanded, setExpanded] = useState(false)
   const [everyone, setEveryone] = useState(true)
   const [offerExpiryToggle, setOfferExpiryToggle] = useState('1 Day')
@@ -87,16 +85,16 @@ export function DefineOfferAttributes({
     formik.setFieldValue('offerDirection', event.target.value)
   }
 
-  const handleOfferDurationChange = (event) => {
+  const handleOfferExpiryChange = (event) => {
     setOfferExpiryToggle('')
-    setOfferDuration(event.getTime())
+    setOfferExpiry(event.getTime())
     formik.setFieldValue(
-      'offerDuration',
+      'offerExpiry',
       Math.floor(event.getTime() / 1000).toString()
     )
   }
-  const handleOfferDurationChangeBtnGrp = (event) => {
-    setOfferDuration(Number(event.target.value))
+  const handleOfferExpiryChangeBtnGrp = (event) => {
+    setOfferExpiry(Number(event.target.value))
     const timeLeft = Number(event.target.value) - Date.now()
     console.log(timeLeft)
     if (timeLeft <= 3600000) {
@@ -111,7 +109,7 @@ export function DefineOfferAttributes({
       setOfferExpiryToggle('7 Days')
     }
     formik.setFieldValue(
-      'offerDuration',
+      'offerExpiry',
       Math.floor(event.target.value / 1000).toString()
     )
   }
@@ -810,20 +808,20 @@ export function DefineOfferAttributes({
                     name: 'offerDuration',
                     id: 'offerDuration',
                     onBlur: formik.handleBlur,
-                    error: formik.errors.offerDuration != null,
+                    error: formik.errors.offerExpiry != null,
                   }}
                   label="Offer Expires in"
-                  onChange={handleOfferDurationChange}
+                  onChange={handleOfferExpiryChange}
                   minDate={today}
-                  value={offerDuration}
+                  value={offerExpiry}
                   components={{
                     OpenPickerIcon: ClockIcon,
                   }}
                   renderInput={(params) => <TextField {...params} />}
                 />
-                {formik.errors.offerDuration != null && (
+                {formik.errors.offerExpiry != null && (
                   <FormHelperText sx={{ color: 'red' }}>
-                    {formik.errors.offerDuration}
+                    {formik.errors.offerExpiry}
                   </FormHelperText>
                 )}
               </FormControl>
@@ -831,9 +829,9 @@ export function DefineOfferAttributes({
                 fullWidth
                 color="primary"
                 size="small"
-                value={offerDuration}
+                value={offerExpiry}
                 exclusive
-                onChange={handleOfferDurationChangeBtnGrp}
+                onChange={handleOfferExpiryChangeBtnGrp}
               >
                 <ToggleButton
                   selected={offerExpiryToggle == '1 Hour'}
