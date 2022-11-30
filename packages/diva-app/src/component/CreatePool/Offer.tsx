@@ -124,7 +124,7 @@ export function Offer() {
           : jsonResponse.data.data.capacity
       )
       formik.setFieldValue('dataProvider', jsonResponse.data.data.dataProvider)
-      formik.setFieldValue('offerDuration', jsonResponse.data.data.offerExpiry)
+      formik.setFieldValue('offerExpiry', jsonResponse.data.data.offerExpiry)
 
       formik.setFieldValue('takerAddress', jsonResponse.data.data.taker)
     }

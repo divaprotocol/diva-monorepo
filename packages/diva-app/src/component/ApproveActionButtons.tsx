@@ -620,7 +620,7 @@ export const ApproveActionButtons = ({
                         formik.values.collateralToken.decimals
                       ).toString(),
                       makerIsLong: formik.values.offerDirection === 'Long',
-                      offerExpiry: formik.values.offerDuration,
+                      offerExpiry: formik.values.offerExpiry,
                       minimumTakerFillAmount: parseUnits(
                         formik.values.minTakerContribution.toString() ===
                           formik.values.takerShare.toString()

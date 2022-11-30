@@ -40,6 +40,8 @@ import MenuItem from '@mui/material/MenuItem'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -57,9 +59,10 @@ export function DefineOfferAttributes({
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
   const [value, setValue] = useState('Binary')
   const [direction, setDirection] = useState('Long')
-  const [offerDuration, setOfferDuration] = useState(24 * 60 * 60) // 1 Day
+  const [offerExpiry, setOfferExpiry] = useState(Date.now() + 24 * 60 * 60000) // 1 Day
   const [expanded, setExpanded] = useState(false)
   const [everyone, setEveryone] = useState(true)
+  const [offerExpiryToggle, setOfferExpiryToggle] = useState('1 Day')
   const [fillOrKill, setFillOrKill] = useState(false)
   const [mobile, setMobile] = useState(false)
   const [unlimited, setUnlimited] = useState(true)
@@ -82,11 +85,32 @@ export function DefineOfferAttributes({
     formik.setFieldValue('offerDirection', event.target.value)
   }
 
-  const handleOfferDurationChange = (event) => {
-    setOfferDuration(event.target.value)
+  const handleOfferExpiryChange = (event) => {
+    setOfferExpiryToggle('')
+    setOfferExpiry(event.getTime())
     formik.setFieldValue(
-      'offerDuration',
-      Math.floor(event.target.value + Date.now() / 1000).toString()
+      'offerExpiry',
+      Math.floor(event.getTime() / 1000).toString()
+    )
+  }
+  const handleOfferExpiryChangeBtnGrp = (event) => {
+    setOfferExpiry(Number(event.target.value))
+    const timeLeft = Number(event.target.value) - Date.now()
+    console.log(timeLeft)
+    if (timeLeft <= 3600000) {
+      setOfferExpiryToggle('1 Hour')
+    } else if (timeLeft > 3600000 && timeLeft <= 14400000) {
+      setOfferExpiryToggle('4 Hrs')
+    } else if (timeLeft > 14400000 && timeLeft <= 43200000) {
+      setOfferExpiryToggle('12 Hrs')
+    } else if (timeLeft > 43200000 && timeLeft <= 86400000) {
+      setOfferExpiryToggle('1 Day')
+    } else if (timeLeft > 86400000 && timeLeft <= 604800000) {
+      setOfferExpiryToggle('7 Days')
+    }
+    formik.setFieldValue(
+      'offerExpiry',
+      Math.floor(event.target.value / 1000).toString()
     )
   }
   const handleMinTakerContributionsChange = (event) => {
@@ -765,29 +789,82 @@ export function DefineOfferAttributes({
               </FormControl>
             </Container>
             {/*<Container>*/}
-            <FormControl
+            <Stack
               sx={{
+                width: '100%',
                 pt: theme.spacing(5),
-                pl: theme.spacing(4),
+                ml: theme.spacing(3),
                 pr: theme.spacing(3),
               }}
-              fullWidth
             >
-              <TextField
-                id="select"
-                label="Offer Expires in"
-                value={offerDuration}
-                onChange={handleOfferDurationChange}
-                select
+              <FormControl
+                sx={{
+                  pb: theme.spacing(2),
+                }}
+                fullWidth
               >
-                <MenuItem value={60 * 60}>1 Hour</MenuItem>
-                <MenuItem value={4 * 60 * 60}>4 Hours</MenuItem>
-                <MenuItem value={12 * 60 * 60}>12 Hours</MenuItem>
-                <MenuItem value={24 * 60 * 60}>1 Day</MenuItem>
-                <MenuItem value={7 * 24 * 60 * 60}>7 Days</MenuItem>
-              </TextField>
-            </FormControl>
-            {/*</Container>*/}
+                <DateTimePicker
+                  InputProps={{
+                    name: 'offerDuration',
+                    id: 'offerDuration',
+                    onBlur: formik.handleBlur,
+                    error: formik.errors.offerExpiry != null,
+                  }}
+                  label="Offer Expires in"
+                  onChange={handleOfferExpiryChange}
+                  minDate={today}
+                  value={offerExpiry}
+                  components={{
+                    OpenPickerIcon: ClockIcon,
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+                {formik.errors.offerExpiry != null && (
+                  <FormHelperText sx={{ color: 'red' }}>
+                    {formik.errors.offerExpiry}
+                  </FormHelperText>
+                )}
+              </FormControl>
+              <ToggleButtonGroup
+                fullWidth
+                color="primary"
+                size="small"
+                value={offerExpiry}
+                exclusive
+                onChange={handleOfferExpiryChangeBtnGrp}
+              >
+                <ToggleButton
+                  selected={offerExpiryToggle == '1 Hour'}
+                  value={Date.now() + 60 * 60 * 1000}
+                >
+                  1 Hour
+                </ToggleButton>
+                <ToggleButton
+                  selected={offerExpiryToggle == '4 Hrs'}
+                  value={Date.now() + 4 * 60 * 60 * 1000}
+                >
+                  4 Hrs
+                </ToggleButton>
+                <ToggleButton
+                  selected={offerExpiryToggle == '12 Hrs'}
+                  value={Date.now() + 12 * 60 * 60 * 1000}
+                >
+                  12 Hrs
+                </ToggleButton>
+                <ToggleButton
+                  selected={offerExpiryToggle == '1 Day'}
+                  value={Date.now() + 24 * 60 * 60 * 1000}
+                >
+                  1 Day
+                </ToggleButton>
+                <ToggleButton
+                  selected={offerExpiryToggle == '7 Days'}
+                  value={Date.now() + 7 * 24 * 60 * 60 * 1000}
+                >
+                  7 Days
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Stack>
           </Stack>
           <Container>
             <Accordion
