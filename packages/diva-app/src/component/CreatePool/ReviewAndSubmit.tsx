@@ -199,7 +199,8 @@ export function ReviewAndSubmit({
   }, [])
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
-      (dataName: { id: string }) => dataName?.id == values.dataProvider
+      (dataName: { id: string }) =>
+        dataName?.id.toLowerCase() == values.dataProvider.toLowerCase()
     )
     if (dataName?.name != null) {
       setDataProvider(values.dataProvider)
