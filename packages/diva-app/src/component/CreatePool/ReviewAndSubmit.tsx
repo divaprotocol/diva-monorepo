@@ -533,7 +533,14 @@ export function ReviewAndSubmit({
                       >
                         Taker Address
                       </Typography>
-                      <Tooltip placement="top-end" title={values.takerAddress}>
+                      <Tooltip
+                        placement="top-end"
+                        title={
+                          values.takerAddress === ethers.constants.AddressZero
+                            ? ''
+                            : values.takerAddress
+                        }
+                      >
                         <Typography fontSize={'0.85rem'}>
                           {values.takerAddress === ethers.constants.AddressZero
                             ? 'Anyone'
