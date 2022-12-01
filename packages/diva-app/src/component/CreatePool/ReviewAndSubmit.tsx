@@ -208,7 +208,8 @@ export function ReviewAndSubmit({
         dataName.name + ' (' + getShortenedAddress(values.dataProvider) + ')'
       )
     } else {
-      setDataSourceName(values.dataProvider)
+      setDataProvider(values.dataProvider)
+      setDataSourceName(getShortenedAddress(values.dataProvider))
     }
   }, [dataSource.dataProviders, values.dataProvider])
 
