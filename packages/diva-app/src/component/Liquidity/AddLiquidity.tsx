@@ -400,8 +400,9 @@ export const AddLiquidity = ({ pool }: Props) => {
                             defaultChecked={editLongRecipient}
                             onChange={() => {
                               setEditLongRecipient(!editLongRecipient)
+                              formik.setFieldValue('longRecipient', account)
                             }}
-                          />
+                          ></Checkbox>
                         }
                         label="Edit"
                       />
@@ -433,6 +434,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                             defaultChecked={editShortRecipient}
                             onChange={() => {
                               setEditShortRecipient(!editShortRecipient)
+                              formik.setFieldValue('shortRecipient', account)
                             }}
                           />
                         }
