@@ -535,7 +535,9 @@ export function ReviewAndSubmit({
                       </Typography>
                       <Tooltip placement="top-end" title={values.takerAddress}>
                         <Typography fontSize={'0.85rem'}>
-                          {getShortenedAddress(values.takerAddress)}
+                          {values.takerAddress === ethers.constants.AddressZero
+                            ? 'Anyone'
+                            : getShortenedAddress(values.takerAddress)}
                         </Typography>
                       </Tooltip>
                     </Stack>
