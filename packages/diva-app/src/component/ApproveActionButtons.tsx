@@ -539,12 +539,13 @@ export const ApproveActionButtons = ({
                       })
                     break
                   case 'liquidity':
+                    console.log(formik.values.longRecipient)
                     diva!
                       .addLiquidity(
                         window.location.pathname.split('/')[1],
                         parseUnits(textFieldValue, decimal),
-                        account,
-                        account
+                        formik.values.longRecipient,
+                        formik.values.shortRecipient
                       )
                       .then((tx) => {
                         /**
