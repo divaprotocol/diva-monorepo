@@ -44,6 +44,7 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 import RemoveOutlinedIcon from '@mui/icons-material/RemoveOutlined'
 import { ReactComponent as LongPool } from '../../Images/long-trade-page-icon.svg'
 import { ReactComponent as ShortPool } from '../../Images/short-trade-page-icon.svg'
+import BuyOrder from './Orders/BuyOrder'
 
 const LeftCompFlexContainer = styled.div`
   display: flex;
@@ -274,6 +275,7 @@ export default function Underlying() {
               tokenAddress={tokenAddress}
               exchangeProxy={exchangeProxy}
             />
+            <BuyOrder option={pool} />
           </Stack>
           <Box>
             <CreateOrder
