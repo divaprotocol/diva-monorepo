@@ -77,6 +77,10 @@ export const AddLiquidity = ({ pool }: Props) => {
     provider?.getSigner()
   )
   useEffect(() => {
+    formik.setFieldValue('longRecipient', account)
+    formik.setFieldValue('shortRecipient', account)
+  }, [account])
+  useEffect(() => {
     if (pool) {
       setDecimal(pool.collateralToken.decimals)
       setOpenExpiredAlert(Date.now() > 1000 * parseInt(pool.expiryTime))
