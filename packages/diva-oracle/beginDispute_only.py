@@ -28,9 +28,11 @@ if __name__ == "__main__":
     x = input("Enter Pool Id: ")
     others_values = retrieveData(x, network, my_contract)
     if others_values:
+        printn("")
         printbAll("Already submitted values are: ", underline=True)
         printt(others_values)
-        idx = input("Index to dispute:")
+        printn("")
+        idx = input("Index to dispute: ")
         beginDispute(x, idx, w3, network, tellor_governance_contract, my_contract)
     else:
         printn("No submitted values for this pool.")
