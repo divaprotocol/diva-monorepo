@@ -11,6 +11,7 @@ import {
   LinearProgress,
   Stack,
   TextField,
+  Tooltip,
   Typography,
   useTheme,
 } from '@mui/material'
@@ -72,6 +73,7 @@ export function ReviewAndSubmit({
   )
   const [takerFilledAmount, setTakerFilledAmount] = useState(0)
   const [decimal, setDecimal] = useState(18)
+  const [dataProvider, setDataProvider] = useState('')
   const collateralWalletBalance = useErcBalance(
     formik.values.collateralToken.id
   )
@@ -197,12 +199,17 @@ export function ReviewAndSubmit({
   }, [])
   useEffect(() => {
     const dataName = dataSource?.dataProviders?.find(
-      (dataName: { id: string }) => dataName?.id == values.dataProvider
+      (dataName: { id: string }) =>
+        dataName?.id.toLowerCase() == values.dataProvider.toLowerCase()
     )
     if (dataName?.name != null) {
-      setDataSourceName(dataName.name + ' (' + values.dataProvider + ')')
+      setDataProvider(values.dataProvider)
+      setDataSourceName(
+        dataName.name + ' (' + getShortenedAddress(values.dataProvider) + ')'
+      )
     } else {
-      setDataSourceName(values.dataProvider)
+      setDataProvider(values.dataProvider)
+      setDataSourceName(getShortenedAddress(values.dataProvider))
     }
   }, [dataSource.dataProviders, values.dataProvider])
 
@@ -412,7 +419,9 @@ export function ReviewAndSubmit({
                 <Typography fontSize={'0.85rem'} sx={{ ml: theme.spacing(2) }}>
                   Data Provider
                 </Typography>
-                <Typography fontSize={'0.85rem'}>{dataSourceName}</Typography>
+                <Tooltip placement="top-end" title={dataProvider}>
+                  <Typography fontSize={'0.85rem'}>{dataSourceName}</Typography>
+                </Tooltip>
               </Stack>
               <Accordion
                 sx={{
@@ -524,9 +533,20 @@ export function ReviewAndSubmit({
                       >
                         Taker Address
                       </Typography>
-                      <Typography fontSize={'0.85rem'}>
-                        {values.takerAddress}
-                      </Typography>
+                      <Tooltip
+                        placement="top-end"
+                        title={
+                          values.takerAddress === ethers.constants.AddressZero
+                            ? ''
+                            : values.takerAddress
+                        }
+                      >
+                        <Typography fontSize={'0.85rem'}>
+                          {values.takerAddress === ethers.constants.AddressZero
+                            ? 'Anyone'
+                            : getShortenedAddress(values.takerAddress)}
+                        </Typography>
+                      </Tooltip>
                     </Stack>
                   )}
                   {(transaction === 'createoffer' ||
