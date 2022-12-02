@@ -9,7 +9,7 @@ def getKrakenPrice(pair, ts_date):
     max_away = datetime.timedelta(minutes=max_time_away)
     for t in range(1, int(max_away.seconds/60)):
         url = 'https://api.kraken.com/0/public/Trades?pair={}'.format(
-        pair) + '&since={}'.format(ts_date-t*300)
+        pair) + '&since={}'.format(ts_date-t*60)
         resp = requests.get(url)
         #print("LOG: ", resp)
         data = json.loads(resp.content.decode('utf-8'))
