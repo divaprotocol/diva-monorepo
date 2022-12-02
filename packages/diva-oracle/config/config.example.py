@@ -62,6 +62,7 @@ max_time_away = 60
 # Reporting needed only for pools that are not older than 24 hours
 max_reporting_frame = 24
 
+# Reporting will be done only for pools that are expired at least 300 sec before
 expiry_floor_time_away = 300
 
 # Network
