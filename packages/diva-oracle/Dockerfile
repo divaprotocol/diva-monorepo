@@ -8,4 +8,4 @@ RUN pip3 install poetry
 RUN poetry install
 
 # u is unbuffered output to see python returns
-CMD ["poetry", "run", "python3", "-u", "tellor_main.py"]
+CMD ["poetry", "run", "python3", "-u", "tellor.py"]

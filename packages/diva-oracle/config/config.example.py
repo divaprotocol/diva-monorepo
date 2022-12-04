@@ -62,6 +62,9 @@ max_time_away = 60
 # Reporting needed only for pools that are not older than 24 hours
 max_reporting_frame = 24
 
+# Reporting will be done only for pools that are expired at least 300 sec before
+expiry_floor_time_away = 300
+
 # Network
 network = "goerli"
 
@@ -74,3 +77,9 @@ submission_tolerance = 0.5
 
 # Threshold: If account balance is below threshold, print balance in red. Else print balance in green.
 acc_balance_threshold = 5
+
+# Value submission to pools:
+value_submission = True
+
+# Triggering setFinRefVal():
+triggering_setFinRefVal = True

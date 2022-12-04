@@ -52,3 +52,6 @@ generated
 tsconfig.tsbuildinfo
 dist
 cdktf.out
+
+# python
+log.txt
