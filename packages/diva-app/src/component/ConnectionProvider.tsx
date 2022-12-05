@@ -5,8 +5,6 @@ import useLocalStorage from 'use-local-storage'
 import detectEthereumProvider from '@metamask/detect-provider'
 import { useDispatch } from 'react-redux'
 import { setChainId, setUserAddress } from '../Redux/appSlice'
-import WalletConnect from '@walletconnect/client'
-import QRCodeModal from '@walletconnect/qrcode-modal'
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import Web3 from 'web3'
 
@@ -28,7 +26,6 @@ type ConnectionContextState = {
 type ConnectionContextType = {
   connect?: (walletName: string) => unknown
   disconnect?: () => unknown
-  connector?: WalletConnect | undefined
   sendTransaction?: ({
     method,
     params,
@@ -42,13 +39,8 @@ export const ConnectionContext = createContext<ConnectionContextType>({})
 
 const ethereum = window.ethereum
 
-// Create a connector for WalletConnect
-
 export const ConnectionProvider = ({ children }) => {
-  const connector = new WalletConnect({
-    bridge: 'https://bridge.walletconnect.org', // Required
-    qrcodeModal: QRCodeModal,
-  })
+  const [refreshProvider, setRefreshProvider] = useState(false)
 
   const provider = useMemo(() => {
     return new WalletConnectProvider({
@@ -60,7 +52,7 @@ export const ConnectionProvider = ({ children }) => {
         name: 'Diva Dapp',
       },
     })
-  }, [])
+  }, [refreshProvider])
 
   const [{ connected }, setConnectionState] = useLocalStorage<{
     connected?: string
@@ -81,33 +73,41 @@ export const ConnectionProvider = ({ children }) => {
     dispatch(setUserAddress(state.address))
   }, [dispatch, state.address])
 
-  const connect = useCallback(async (walletName) => {
-    if (walletName === 'metamask') {
-      const accounts = await ethereum.request({
-        method: 'eth_requestAccounts',
-      })
-      setState((_state) => ({
-        ..._state,
-        address: accounts[0],
-        chainId: BigNumber.from(ethereum.chainId).toNumber(),
-        isConnected: ethereum.isConnected() && accounts.length > 0,
-      }))
-      setConnectionState({ connected: 'metamask' })
-    }
-
-    if (walletName === 'walletconnect') {
-      const accounts = await provider.enable()
-      setConnectionState({ connected: 'walletconnect' })
-      const web3Provider = new providers.Web3Provider(provider)
-      setState((_state) => ({
-        ..._state,
-        address: accounts[0].toLowerCase(),
-        chainId: BigNumber.from(provider.chainId).toNumber(),
-        isConnected: provider.connected,
-        provider: web3Provider,
-      }))
-    }
-  }, [])
+  const connect = useCallback(
+    async (walletName) => {
+      if (walletName === 'metamask') {
+        const accounts = await ethereum.request({
+          method: 'eth_requestAccounts',
+        })
+        setState((_state) => ({
+          ..._state,
+          address: accounts[0],
+          chainId: BigNumber.from(ethereum.chainId).toNumber(),
+          isConnected: ethereum.isConnected() && accounts.length > 0,
+        }))
+        setConnectionState({ connected: 'metamask' })
+      }
+      if (walletName === 'walletconnect' || !provider.connected) {
+        try {
+          const accounts = await provider.enable()
+          setConnectionState({ connected: 'walletconnect' })
+          const web3Provider = new providers.Web3Provider(provider)
+          setState((_state) => ({
+            ..._state,
+            address: accounts[0].toLowerCase(),
+            chainId: BigNumber.from(provider.chainId).toNumber(),
+            isConnected: provider.connected,
+            provider: web3Provider,
+          }))
+        } catch (error) {
+          console.log(error)
+          provider.disconnect()
+          setRefreshProvider((prev) => !prev)
+        }
+      }
+    },
+    [provider, setConnectionState]
+  )
 
   useEffect(() => {
     if (connected === 'walletconnect') {
@@ -236,7 +236,6 @@ export const ConnectionProvider = ({ children }) => {
   }, [connected, provider])
 
   const value = {
-    connector,
     connect,
     disconnect,
     sendTransaction,

@@ -56,8 +56,12 @@ const WalletInfo = ({
   }>('diva-dapp-connection', {})
 
   const handleWalletClick = async (walletName: string) => {
-    await connect(walletName)
-    onClose()
+    try {
+      await connect(walletName)
+      onClose()
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (
