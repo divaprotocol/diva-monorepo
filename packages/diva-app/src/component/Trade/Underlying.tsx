@@ -275,6 +275,7 @@ export default function Underlying() {
               tokenAddress={tokenAddress}
               exchangeProxy={exchangeProxy}
             />
+            <BuyOrder option={pool} />
           </Stack>
           <Box>
             <CreateOrder

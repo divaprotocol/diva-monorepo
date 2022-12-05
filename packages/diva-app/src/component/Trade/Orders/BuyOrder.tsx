@@ -93,7 +93,7 @@ const BuyOrder = (props: {
   ) => any
 }) => {
   const theme = useTheme()
-  const dispatch = useAppDispatch()
+  const [buyAmount, setBuyAmount] = useState('')
   const [collateralBalance, setCollateralBalance] = useState(ZERO)
   const [checked, setChecked] = useState(false)
   const [numberOfOptions, setNumberOfOptions] = useState(ZERO) // User input field
@@ -128,6 +128,7 @@ const BuyOrder = (props: {
   const collateralTokenUnit = parseUnits('1', decimals)
   const usdPrice = props.usdPrice
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
+  const dispatch = useAppDispatch()
   const isLong = window.location.pathname.split('/')[2] === 'long'
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
