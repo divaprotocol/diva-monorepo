@@ -296,3 +296,25 @@ ReportedData_abi = '''[
       "type": "function"
     }
   ]'''
+
+
+tellor_dispute_abi = '''[
+    {
+        "inputs":[
+          {
+            "internalType":"bytes32",
+            "name":"_queryId",
+            "type":"bytes32"
+          },
+          {
+            "internalType":"uint256",
+            "name":"_timestamp",
+            "type":"uint256"
+            }
+        ],
+        "name":"beginDispute",
+        "outputs":[],
+        "stateMutability":"nonpayable",
+        "type":"function"
+    }
+]'''

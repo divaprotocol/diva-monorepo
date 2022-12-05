@@ -1,6 +1,6 @@
 from termcolor import colored
 from tabulate import tabulate
-
+import datetime
 # This file will write sent transactions to csv file
 
 def update_records(record):
@@ -54,10 +54,10 @@ def printn(text, color=None):
         f.write(text + "\n")
 
 def printt(val):
-    print(tabulate(val, headers=['RefValue', 'CollValue', 'Timestmp', 'isDisputed']))
     with open('log.txt', 'a') as f:
         for x in val:
-            f.write("(RefValue, CollValue, Timestmp, isDisputed) =  (%s, %s, %s, %s) \n" % (x[0], x[1], x[2], x[3]))
+            f.write("(Index, RefValue, CollValue, Timestamp, Date, isDisputed) =  (%s, %s, %s, %s, %s, %s) \n" % (x[0], x[1], x[2], x[3], x[4], x[5]))
+    print(tabulate(val, headers=['Index', 'RefValue', 'CollValue', 'Timestamp', f'Date ({datetime.datetime.fromtimestamp(x[3]).astimezone().tzinfo.__str__()})', 'isDisputed']))
 
 
 def printr(text, color=None):

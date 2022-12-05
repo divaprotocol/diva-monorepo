@@ -18,3 +18,7 @@ divaDiamond = {
     "rinkeby": '',
     "goerli": '0x659f8bF63Dce2548eB4D9b4BfF6883dddFde4848' # 22.11.2022
 }
+
+Tellor_governance_contract_address = {
+    "goerli": '0x02803dcFD7Cb32E97320CFe7449BFb45b6C931b8'
+}
