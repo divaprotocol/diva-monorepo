@@ -99,6 +99,7 @@ export default function BuyLimit(props: {
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseUnits(value, decimals)
+      console.log('Number of Otions', nbrOptions)
       setNumberOfOptions(nbrOptions)
       if (pricePerOption.gt(0) && nbrOptions.gt(0)) {
         const youPay = pricePerOption.mul(nbrOptions).div(collateralTokenUnit)
