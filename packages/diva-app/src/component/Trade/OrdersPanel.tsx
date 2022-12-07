@@ -165,22 +165,30 @@ export default function OrdersPanel(props: {
           onChange={handleOrderTypeChange}
           TabIndicatorProps={{ style: { backgroundColor: '#70D9BA' } }}
         >
-          <Tab label="Buy" {...a11yProps(0)} />
-          <Tab label="Sell" {...a11yProps(1)} />
-          <Tab label="Your open orders" {...a11yProps(2)} />
-          <Tab label="Trade History" {...a11yProps(3)} />
+          <Tab label="Buy" {...a11yProps(0)} style={{ maxWidth: 10 }} />
+          <Tab label="Sell" {...a11yProps(1)} style={{ maxWidth: 10 }} />
+          <Tab label="open orders" {...a11yProps(2)} style={{ maxWidth: 10 }} />
+          <Tab
+            label="Trade History"
+            {...a11yProps(3)}
+            style={{ maxWidth: 10 }}
+          />
         </Tabs>
-        <Box sx={{ pr: 2 }}>
+        <Box justifyContent="flex-end" sx={{ pl: 20, pr: 2 }}>
           <Typography variant="h6" color="textSecondary">
             Best buy
           </Typography>
-          <Typography variant="h2">{bestSellPrice.toFixed(2)}</Typography>
+          <Typography variant="h2" color="textPrimary">
+            {bestSellPrice.toFixed(2)}
+          </Typography>
         </Box>
         <Box>
           <Typography variant="h6" color="textSecondary">
             Best sell
           </Typography>
-          <Typography variant="h2">{bestBuyPrice.toFixed(2)}</Typography>
+          <Typography variant="h2" color="textPrimary">
+            {bestBuyPrice.toFixed(2)}
+          </Typography>
         </Box>
       </TabsDiv>
       {renderOrderTables()}
