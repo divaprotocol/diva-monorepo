@@ -8,6 +8,8 @@ interface TradeOptionState {
   responseSell: []
   optionSellOrdersTotal: number
   optionBuyOrdersTotal: number
+  bestBuyPrice: number
+  bestSellPrice: number
 }
 
 const initialState: TradeOptionState = {
@@ -18,6 +20,8 @@ const initialState: TradeOptionState = {
   responseSell: [],
   optionSellOrdersTotal: 0.0,
   optionBuyOrdersTotal: 0.0,
+  bestBuyPrice: 0.0,
+  bestSellPrice: 0.0,
 }
 
 export const tradeOptionSlice = createSlice({
@@ -51,6 +55,12 @@ export const tradeOptionSlice = createSlice({
     setOptionBuyOrdersTotal: (state, action: PayloadAction<number>) => {
       state.optionBuyOrdersTotal = action.payload
     },
+    setBestBuyPrice: (state, action: PayloadAction<number>) => {
+      state.bestBuyPrice = action.payload
+    },
+    setBestSellPrice: (state, action: PayloadAction<number>) => {
+      state.bestSellPrice = action.payload
+    },
   },
 })
 
@@ -62,4 +72,6 @@ export const { setResponseSell } = tradeOptionSlice.actions
 export const { setAllOptionsLiquidity } = tradeOptionSlice.actions
 export const { setOptionSellOrdersTotal } = tradeOptionSlice.actions
 export const { setOptionBuyOrdersTotal } = tradeOptionSlice.actions
+export const { setBestBuyPrice } = tradeOptionSlice.actions
+export const { setBestSellPrice } = tradeOptionSlice.actions
 export default tradeOptionSlice.reducer
