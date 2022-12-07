@@ -3,10 +3,8 @@ import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 import { Container, FormLabel, MenuItem, Stack, Tooltip } from '@mui/material'
-import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
-import Box from '@mui/material/Box'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
 import { ExpectedRateInfoText, LabelStyle } from './UiStyles'
 import { LabelGrayStyle } from './UiStyles'
@@ -42,7 +40,8 @@ import {
 import { setResponseBuy } from '../../../Redux/TradeOption'
 import CheckIcon from '@mui/icons-material/Check'
 import { LoadingButton } from '@mui/lab'
-const web3 = new Web3(Web3.givenProvider)
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
+
 const ZERO = BigNumber.from(0)
 
 export default function BuyLimit(props: {
@@ -61,6 +60,17 @@ export default function BuyLimit(props: {
   ) => any
 }) {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  const [Web3Provider, setWeb3Provider] = useState<Web3>()
+  const { getWeb3JsProvider, provider } = useConnectionContext()
+  const web3 = new Web3(Web3Provider as any)
+
+  useEffect(() => {
+    const init = async () => {
+      const web3 = await getWeb3JsProvider()
+      setWeb3Provider(web3)
+    }
+    init()
+  }, [getWeb3JsProvider, provider])
 
   const userAddress = useAppSelector(selectUserAddress)
 
@@ -197,7 +207,7 @@ export default function BuyLimit(props: {
       setFillLoading(true)
       const orderData = {
         maker: userAddress,
-        provider: web3,
+        provider: provider,
         isBuy: true,
         nbrOptions: numberOfOptions,
         collateralDecimals: decimals,
@@ -255,7 +265,7 @@ export default function BuyLimit(props: {
         makerToken,
         takerToken,
         props.chainId,
-        props.provider,
+        provider,
         props.exchangeProxy
       )
       responseBuy = rBuy
@@ -303,7 +313,7 @@ export default function BuyLimit(props: {
         })
       })
     }
-  }, [responseBuy, userAddress])
+  }, [responseBuy, userAddress, Web3Provider])
 
   useEffect(() => {
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(

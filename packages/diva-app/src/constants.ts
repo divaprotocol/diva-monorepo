@@ -6,6 +6,8 @@ import divaSidebarLogo from './Images/diva-sidebar-logo.svg'
 import divaTextLogo from './Images/diva_logo_text.svg'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
 import TaskIcon from '@mui/icons-material/Task'
+import metamaskLogo from './Images/meta-mask-logo.png'
+import walletConnectLogo from './Images/wallet-connect-logo.png'
 
 const CREATE_POOL_OFFER_STRUCT = [
   { type: 'address', name: 'maker' },
@@ -183,7 +185,7 @@ export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(
 ).filter((id) => typeof id === 'number') as SupportedChainId[]
 
 // current supported chain
-export const CURRENT_SUPPORTED_CHAIN_ID = [SupportedChainId.ROPSTEN]
+export const CURRENT_SUPPORTED_CHAIN_ID = [SupportedChainId.GOERLI]
 
 // DIVA Governance address which is the default creator of pools on Markets page and trading fee recipient
 export const DIVA_GOVERNANCE_ADDRESS =
@@ -231,3 +233,9 @@ export const APP_BAR_ITEMS = [
 
 // websocket url
 export const WEBSOCKET_URL = 'wss://eip712api.xyz/websocket'
+
+// wallet images
+export const WALLET_IMAGES = {
+  metamask: metamaskLogo,
+  walletConnect: walletConnectLogo,
+}

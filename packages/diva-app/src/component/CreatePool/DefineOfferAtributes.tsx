@@ -159,7 +159,7 @@ export function DefineOfferAttributes({
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', () => {
         disconnect()
-        connect()
+        connect('metamask')
         formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
       })
     }

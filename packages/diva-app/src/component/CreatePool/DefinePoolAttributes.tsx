@@ -92,7 +92,7 @@ export function DefinePoolAttributes({
     if (window.ethereum && formik.values.jsonToExport !== '{}') {
       window.ethereum.on('accountsChanged', () => {
         disconnect()
-        connect()
+        connect('metamask')
         formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
       })
     }
