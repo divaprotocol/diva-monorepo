@@ -167,14 +167,10 @@ export default function OrdersPanel(props: {
         >
           <Tab label="Buy" {...a11yProps(0)} style={{ maxWidth: 10 }} />
           <Tab label="Sell" {...a11yProps(1)} style={{ maxWidth: 10 }} />
-          <Tab label="open orders" {...a11yProps(2)} style={{ maxWidth: 10 }} />
-          <Tab
-            label="Trade History"
-            {...a11yProps(3)}
-            style={{ maxWidth: 10 }}
-          />
+          <Tab label="open" {...a11yProps(2)} style={{ maxWidth: 10 }} />
+          <Tab label="History" {...a11yProps(3)} style={{ maxWidth: 10 }} />
         </Tabs>
-        <Box justifyContent="flex-end" sx={{ pl: 20, pr: 2 }}>
+        <Box justifyContent="flex-end" sx={{ pl: 23.5, pr: 2 }}>
           <Typography variant="h6" color="textSecondary">
             Best buy
           </Typography>

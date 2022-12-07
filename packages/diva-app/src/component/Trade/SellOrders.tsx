@@ -187,7 +187,7 @@ export default function SellOrders(props: {
               <TableCell align="center">Quantity</TableCell>
               <TableCell align="center">Price</TableCell>
               <TableCell align="center">Expires in</TableCell>
-              <TableCell align="right">Buy</TableCell>
+              <TableCell align="center">Buy</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
