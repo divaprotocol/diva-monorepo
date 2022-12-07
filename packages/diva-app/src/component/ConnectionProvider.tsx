@@ -87,7 +87,7 @@ export const ConnectionProvider = ({ children }) => {
         }))
         setConnectionState({ connected: 'metamask' })
       }
-      if (walletName === 'walletconnect' || !provider.connected) {
+      if (walletName === 'walletconnect') {
         try {
           const accounts = await provider.enable()
           setConnectionState({ connected: 'walletconnect' })
