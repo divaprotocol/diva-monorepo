@@ -56,6 +56,9 @@ export default function OrdersPanel(props: {
   )
   const dispatch = useDispatch()
   const chainId = useAppSelector(selectChainId)
+  const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
+
   const { provider } = useConnectionContext()
   const handleOrderTypeChange = (event: any, newValue: number) => {
     setOrderTypeValue(newValue)
@@ -120,7 +123,7 @@ export default function OrdersPanel(props: {
         dispatch(setBestSellPrice(0))
       }
     })
-  }, [props.option])
+  }, [props.option, responseSell, responseBuy])
   const renderOrderTables = () => {
     if (orderType === 0) {
       return (
