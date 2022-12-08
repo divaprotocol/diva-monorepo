@@ -23,6 +23,7 @@ import { formatUnits } from 'ethers/lib/utils'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
+import { LoadingButton } from '@mui/lab'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -123,6 +124,7 @@ export default function OpenOrders(props: {
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
   const address = useAppSelector(selectUserAddress)
+  const [cancelLoading, setCancelLoading] = useState(false)
 
   const componentDidMount = async () => {
     const orderBook: any = []
@@ -204,6 +206,7 @@ export default function OpenOrders(props: {
   }, [responseBuy.length, responseSell.length])
 
   async function cancelOrder(order, chainId) {
+    setCancelLoading(true)
     const orderHash = order.orderHash
     //get the order details in current form from 0x before cancelling it.
     const cancelOrder = await getOrderDetails(orderHash, chainId)
@@ -219,8 +222,10 @@ export default function OpenOrders(props: {
         responseSell = []
         //update orderbook & create orders widget
         componentDidMount()
+        setCancelLoading(false)
       } else {
         alert('order could not be cancelled')
+        setCancelLoading(false)
       }
     })
   }
@@ -293,14 +298,15 @@ export default function OpenOrders(props: {
                     <TableCell align="right">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
-                          <Button
+                          <LoadingButton
+                            loading={cancelLoading}
                             variant="outlined"
                             startIcon={<DeleteIcon />}
                             size="small"
                             onClick={() => cancelOrder(orders[index], chainId)}
                           >
                             Cancel
-                          </Button>
+                          </LoadingButton>
                         </Typography>
                       </Box>
                     </TableCell>
