@@ -640,6 +640,8 @@ export function ReviewAndSubmit({
                     inflection={values.inflection}
                     gradient={values.gradient}
                     hasError={false}
+                    referenceAsset={values.referenceAsset}
+                    offerDirection={values.offerDirection}
                     longDirection={values.offerDirection === 'Long'}
                     collateralToken={
                       values.collateralToken
@@ -653,6 +655,7 @@ export function ReviewAndSubmit({
                     cap={values.cap}
                     inflection={values.inflection}
                     gradient={values.gradient}
+                    referenceAsset={values.referenceAsset}
                     hasError={false}
                     collateralToken={
                       values.collateralToken

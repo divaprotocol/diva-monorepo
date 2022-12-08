@@ -10,6 +10,7 @@ export function PayoffProfile(props) {
     inflection: strike,
     gradient,
     hasError,
+    longDirection,
     collateralToken,
     referenceAsset,
   } = props
@@ -21,7 +22,7 @@ export function PayoffProfile(props) {
   const maxPayoutShort = 1
   const theme = useTheme()
   const tickValues = [0, 0.2, 0.4, 0.6, 0.8, 1]
-
+  const refenAsst = referenceAsset?.slice(0, 8)
   const short = [
     {
       x: start,
@@ -72,6 +73,13 @@ export function PayoffProfile(props) {
   }))
   const [chartWidth, setWidth] = useState(400)
   const [axisLabel, setAxisLabel] = useState('')
+  const domainMin = d3.min(longdata, function (d) {
+    return d.x
+  })
+
+  const domainMax = d3.max(longdata, function (d) {
+    return d.x
+  })
 
   useLayoutEffect(() => {
     const callback = () => {
@@ -115,14 +123,6 @@ export function PayoffProfile(props) {
     const svg = d3.select(ref.current)
     svg.selectAll('*').remove()
     svg.selectAll('rect').data(longdata)
-    const domainMin = d3.min(longdata, function (d) {
-      return d.x
-    })
-
-    const domainMax = d3.max(longdata, function (d) {
-      return d.x
-    })
-
     const x = d3
       .scaleLinear()
       .domain([domainMin, domainMax])
@@ -180,6 +180,13 @@ export function PayoffProfile(props) {
       .attr('d', longLine)
       .style('fill', 'none')
       .style('stroke', '#1976D2')
+      .style('opacity', function () {
+        if (longDirection == true || longDirection == undefined) {
+          return 1
+        } else {
+          return 0
+        }
+      })
       .style('stroke-width', '3px')
       .attr('class', 'line')
     const shortLine = d3
@@ -196,6 +203,13 @@ export function PayoffProfile(props) {
       .attr('d', shortLine)
       .style('fill', 'none')
       .style('stroke', '#90CAF9')
+      .style('opacity', function () {
+        if (longDirection == true) {
+          return 0
+        } else {
+          return 1
+        }
+      })
       .style('stroke-width', '3px')
       .attr('class', 'line')
 
@@ -218,6 +232,13 @@ export function PayoffProfile(props) {
       .attr('width', 25)
       .attr('height', 3)
       .style('fill', '#90CAF9')
+      .style('opacity', function () {
+        if (longDirection == true) {
+          return 0
+        } else {
+          return 1
+        }
+      })
     svg
       .append('text')
       .attr('x', width - 25)
@@ -225,6 +246,13 @@ export function PayoffProfile(props) {
       .text('Short')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
+      .style('opacity', function () {
+        if (longDirection == true) {
+          return 0
+        } else {
+          return 1
+        }
+      })
 
     svg
       .append('rect')
@@ -233,6 +261,13 @@ export function PayoffProfile(props) {
       .attr('width', 25)
       .attr('height', 3)
       .style('fill', '#1976D2')
+      .style('opacity', function () {
+        if (longDirection == true || longDirection == undefined) {
+          return 1
+        } else {
+          return 0
+        }
+      })
 
     svg
       .append('text')
@@ -241,6 +276,13 @@ export function PayoffProfile(props) {
       .text('Long')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
+      .style('opacity', function () {
+        if (longDirection == true || longDirection == undefined) {
+          return 1
+        } else {
+          return 0
+        }
+      })
 
     //mouse hover
 
@@ -265,26 +307,36 @@ export function PayoffProfile(props) {
         .attr('class', 'mouse-per-line')
       mousePerLineShort
         .append('circle')
-        .attr('r', 7)
-        .style('stroke', 'white')
+        .attr('r', function () {
+          if (longDirection == true) {
+            return 0
+          } else {
+            return 7
+          }
+        })
+        .style('stroke', 'black')
+        .style('fill', '#90CAF9')
+        .style('stroke-width', '2px')
+
+      mousePerLine
+        .append('circle')
+        .attr('r', function () {
+          if (longDirection == true || longDirection == undefined) {
+            return '7'
+          } else {
+            return '0'
+          }
+        })
+        .style('stroke', 'black')
         .style('fill', '#1976D2')
         .style('stroke-width', '2px')
-        .style('opacity', '0')
+
+      const tooltipBoxWidth = 215
+      const tooltipBoxHeight = 55
       const tooltipPerLine = mouseG
         .data([long])
         .append('g')
         .attr('class', 'tooltip-per-line')
-
-      mousePerLine
-        .append('circle')
-        .attr('r', 7)
-        .style('stroke', 'white')
-        .style('fill', '#1976D2')
-        .style('stroke-width', '2px')
-        .style('opacity', '0')
-
-      const tooltipBoxWidth = 215
-      const tooltipBoxHeight = 55
 
       tooltipPerLine
         .append('rect')
@@ -303,7 +355,7 @@ export function PayoffProfile(props) {
         .attr('x', 18)
         .attr('y', -5)
         .attr('font-size', '14')
-        .text(referenceAsset + '...' + ' at Expiry:')
+        .text(refenAsst + '...' + ' at Expiry:')
 
       tooltipPerLine
         .append('text')
@@ -316,11 +368,24 @@ export function PayoffProfile(props) {
       mousePerLine
         .append('text')
         .attr('transform', 'translate(10,3)')
-        .attr('font-size', '14')
+        .attr('font-size', function () {
+          if (longDirection == true || longDirection == undefined) {
+            return '14'
+          } else {
+            return '0'
+          }
+        })
       mousePerLineShort
         .append('text')
         .attr('transform', 'translate(10,3)')
-        .attr('font-size', '14')
+        .attr('font-size', function () {
+          if (longDirection == true) {
+            return 0
+          } else {
+            return 14
+          }
+        })
+
       tooltipPerLine
         .append('text')
         .attr('class', 'topRow')
@@ -342,9 +407,9 @@ export function PayoffProfile(props) {
       var mouseout = function () {
         d3.select('.mouse-line').style('opacity', '0')
         d3.selectAll('.mouse-per-line circle').style('opacity', '0')
+        d3.selectAll('.mouse-per-line text').style('opacity', '0')
         d3.selectAll('.tooltip-pper-line rect').style('opacity', '0')
         d3.selectAll('.tooltip-per-line text').style('opacity', '0')
-        d3.selectAll('.mouse-per-line text').style('opacity', '0')
       }
       var formatDecimalComma = d3.format(',.2f')
 
@@ -363,7 +428,7 @@ export function PayoffProfile(props) {
           }
           if (pos.x > m) end = target
           else if (pos.x < m) beginning = target
-          else break //position found
+          else break
         }
         return pos
       }
@@ -378,7 +443,6 @@ export function PayoffProfile(props) {
 
         d3.selectAll('.mouse-per-line').attr('transform', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
-          console.log('pos', pos)
           d3.select(this)
             .select('text')
             .text(formatDecimalComma(y.invert(pos.y).toFixed(2)))
@@ -413,7 +477,7 @@ export function PayoffProfile(props) {
   }
   useEffect(() => {
     draw()
-  }, [props, long, cap, strike, floor, collateralToken])
+  }, [props, long, cap, strike, floor, collateralToken, longDirection])
 
   return (
     <div>
