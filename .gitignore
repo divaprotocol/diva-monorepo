@@ -1,5 +1,10 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+*.pyc
+*.xml
+*.iml
+
+
 # dependencies
 node_modules
 .pnp
@@ -47,3 +52,6 @@ generated
 tsconfig.tsbuildinfo
 dist
 cdktf.out
+
+# python
+log.txt

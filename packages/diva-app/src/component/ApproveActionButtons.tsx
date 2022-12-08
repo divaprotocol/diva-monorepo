@@ -31,7 +31,7 @@ type Props = {
   alert?: boolean
   formik?: any
 }
-async function _checkConditions(
+export async function _checkConditions(
   diva: ethers.Contract,
   divaDomain: {
     name: string
@@ -56,7 +56,7 @@ async function _checkConditions(
   // 0: INVALID, 1: CANCELLED, 2: FILLED, 3: EXPIRED, 4: FILLABLE
   if (relevantStateParams.offerInfo.status === 0) {
     return {
-      message: 'Offer is invalid because takerCollateralAmount is zero',
+      message: 'Offer is invalid because taker collateral amount is zero',
       success: false,
     }
   }
@@ -94,7 +94,7 @@ async function _checkConditions(
   // actualTakerFillableAmount is smaller than takerCollateralAmount - takerFilledAmount.
   if (relevantStateParams.actualTakerFillableAmount.lt(takerFillAmount)) {
     return {
-      message: 'Actually fillable amount is smaller than takerFillAmount',
+      message: 'Entered amount exceeds remaining amount',
       success: false,
     }
   }
@@ -122,7 +122,7 @@ async function _checkConditions(
     userAddress.toLowerCase() != offerCreateContingentPool.taker.toLowerCase()
   ) {
     return {
-      message: 'Offer is reserved for a different address',
+      message: 'Offer is reserved for a different account',
       success: false,
     }
   }
@@ -133,7 +133,7 @@ async function _checkConditions(
     takerFillAmount.lt(offerCreateContingentPool.minimumTakerFillAmount)
   ) {
     return {
-      message: 'TakerFillAmount is smaller than minimumTakerFillAmount',
+      message: 'Amount is smaller than the required minimum',
       success: false,
     }
   }
@@ -180,6 +180,31 @@ export const ApproveActionButtons = ({
         }
       : null
   const [mobile, setMobile] = useState(false)
+  useEffect(() => {
+    if (
+      diva != undefined &&
+      divaDomain != undefined &&
+      formik != undefined &&
+      formik.values != undefined &&
+      account != null
+    ) {
+      _checkConditions(
+        diva,
+        divaDomain,
+        formik.values.jsonToExport, // offerCreationStats,
+        CREATE_POOL_TYPE,
+        formik.values.signature,
+        account,
+        parseUnits(formik.values.yourShare.toString(), decimal)
+      ).then((res) => {
+        if (!res.success) {
+          setErrorMessage(res.message)
+        } else {
+          setErrorMessage('All good')
+        }
+      })
+    }
+  }, [formik != undefined && formik.values, account, diva, divaDomain])
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
@@ -478,7 +503,8 @@ export const ApproveActionButtons = ({
                 account == null ||
                 textFieldValue === '' ||
                 isPoolCreated === true ||
-                alert === true
+                alert === true ||
+                errorMessage !== 'All good'
               }
               onClick={() => {
                 setActionLoading(true)
@@ -594,8 +620,8 @@ export const ApproveActionButtons = ({
                         formik.values.takerShare.toString(),
                         formik.values.collateralToken.decimals
                       ).toString(),
-                      makerDirection: formik.values.offerDirection === 'Long',
-                      offerExpiry: formik.values.offerDuration,
+                      makerIsLong: formik.values.offerDirection === 'Long',
+                      offerExpiry: formik.values.offerExpiry,
                       minimumTakerFillAmount: parseUnits(
                         formik.values.minTakerContribution.toString() ===
                           formik.values.takerShare.toString()
@@ -734,7 +760,7 @@ export const ApproveActionButtons = ({
             </Button>
           )}
         </Stack>
-        {errorMessage !== 'All good' && (
+        {errorMessage !== 'All good' && transactionType != 'filloffer' && (
           <Container sx={{ ml: theme.spacing(34) }}>
             <Alert severity="error">{errorMessage}</Alert>
           </Container>

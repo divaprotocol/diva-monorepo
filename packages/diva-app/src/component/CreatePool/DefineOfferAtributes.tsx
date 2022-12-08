@@ -40,6 +40,8 @@ import MenuItem from '@mui/material/MenuItem'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectUserAddress } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -57,9 +59,10 @@ export function DefineOfferAttributes({
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
   const [value, setValue] = useState('Binary')
   const [direction, setDirection] = useState('Long')
-  const [offerDuration, setOfferDuration] = useState(24 * 60 * 60) // 1 Day
+  const [offerExpiry, setOfferExpiry] = useState(Date.now() + 24 * 60 * 60000) // 1 Day
   const [expanded, setExpanded] = useState(false)
   const [everyone, setEveryone] = useState(true)
+  const [offerExpiryToggle, setOfferExpiryToggle] = useState('1 Day')
   const [fillOrKill, setFillOrKill] = useState(false)
   const [mobile, setMobile] = useState(false)
   const [unlimited, setUnlimited] = useState(true)
@@ -82,11 +85,32 @@ export function DefineOfferAttributes({
     formik.setFieldValue('offerDirection', event.target.value)
   }
 
-  const handleOfferDurationChange = (event) => {
-    setOfferDuration(event.target.value)
+  const handleOfferExpiryChange = (event) => {
+    setOfferExpiryToggle('')
+    setOfferExpiry(event.getTime())
     formik.setFieldValue(
-      'offerDuration',
-      Math.floor(event.target.value + Date.now() / 1000).toString()
+      'offerExpiry',
+      Math.floor(event.getTime() / 1000).toString()
+    )
+  }
+  const handleOfferExpiryChangeBtnGrp = (event) => {
+    setOfferExpiry(Number(event.target.value))
+    const timeLeft = Number(event.target.value) - Date.now()
+    console.log(timeLeft)
+    if (timeLeft <= 3600000) {
+      setOfferExpiryToggle('1 Hour')
+    } else if (timeLeft > 3600000 && timeLeft <= 14400000) {
+      setOfferExpiryToggle('4 Hrs')
+    } else if (timeLeft > 14400000 && timeLeft <= 43200000) {
+      setOfferExpiryToggle('12 Hrs')
+    } else if (timeLeft > 43200000 && timeLeft <= 86400000) {
+      setOfferExpiryToggle('1 Day')
+    } else if (timeLeft > 86400000 && timeLeft <= 604800000) {
+      setOfferExpiryToggle('7 Days')
+    }
+    formik.setFieldValue(
+      'offerExpiry',
+      Math.floor(event.target.value / 1000).toString()
     )
   }
   const handleMinTakerContributionsChange = (event) => {
@@ -104,8 +128,33 @@ export function DefineOfferAttributes({
     floor,
     gradient,
     payoutProfile,
+    yourShare,
+    takerShare,
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
+  useEffect(() => {
+    if (payoutProfile === 'Binary') {
+      formik.setFieldValue('gradient', 1)
+      formik.setFieldValue('cap', formik.values.inflection)
+      formik.setFieldValue('floor', formik.values.inflection)
+    }
+  }, [formik.values])
+  useEffect(() => {
+    if (payoutProfile === 'Linear') {
+      formik.setFieldValue('inflection', (floor + cap) / 2)
+    }
+  }, [formik.values.floor, formik.values.inflection])
+  useEffect(() => {
+    if (payoutProfile === 'Linear') {
+      formik.setFieldValue('inflection', (cap + floor) / 2)
+    }
+  }, [formik.values.cap, formik.values.inflection])
+  useEffect(() => {
+    formik.setFieldValue('takerShare', collateralBalance - yourShare)
+  }, [collateralBalance])
+  useEffect(() => {
+    formik.setFieldValue('takerShare', collateralBalance - yourShare)
+  }, [yourShare])
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', () => {
@@ -314,7 +363,7 @@ export function DefineOfferAttributes({
                     onBlur: formik.handleBlur,
                     error: formik.errors.expiryTime != null,
                   }}
-                  label="Expiry Time"
+                  label="Observation Time"
                   onChange={(event) => {
                     formik.setFieldValue('expiryTime', event)
                   }}
@@ -382,18 +431,7 @@ export function DefineOfferAttributes({
                         max: cap,
                       }}
                       type="number"
-                      onChange={(event) => {
-                        if (payoutProfile === 'Binary') {
-                          formik.handleChange(event)
-                          formik.setValues((values) => ({
-                            ...values,
-                            cap: parseFloat(event.target.value),
-                            floor: parseFloat(event.target.value),
-                            inflection: parseFloat(event.target.value),
-                            gradient: 1,
-                          }))
-                        }
-                      }}
+                      onChange={formik.handleChange}
                       value={inflection}
                       sx={{ width: mobile ? '100%' : '48%' }}
                     />
@@ -420,17 +458,7 @@ export function DefineOfferAttributes({
                         label="Floor"
                         value={floor}
                         type="number"
-                        onChange={(event) => {
-                          if (payoutProfile === 'Linear') {
-                            formik.handleChange(event)
-                            formik.setValues((values) => ({
-                              ...values,
-                              floor: parseFloat(event.target.value),
-                              inflection:
-                                (parseFloat(event.target.value) + cap) / 2,
-                            }))
-                          }
-                        }}
+                        onChange={formik.handleChange}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
@@ -447,15 +475,7 @@ export function DefineOfferAttributes({
                         label="Cap"
                         value={cap}
                         type="number"
-                        onChange={(event) => {
-                          formik.handleChange(event)
-                          formik.setValues((values) => ({
-                            ...values,
-                            cap: parseFloat(event.target.value),
-                            inflection:
-                              (parseFloat(event.target.value) + floor) / 2,
-                          }))
-                        }}
+                        onChange={formik.handleChange}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
@@ -643,50 +663,7 @@ export function DefineOfferAttributes({
                     error={formik.errors.collateralBalance != null}
                     value={formik.values.collateralBalance}
                     type="number"
-                    onChange={(event) => {
-                      const value = event.target.value
-                      const arr = value.split('.')
-                      const collateralBalance = event.target.value
-                      if (arr.length > 1) {
-                        if (arr[1].length <= collateralToken.decimals) {
-                          formik.setValues((values) => ({
-                            ...values,
-                            collateralBalance: parseFloat(collateralBalance),
-                            takerShare:
-                              parseFloat(collateralBalance) - values.yourShare,
-                          }))
-                          if (fillOrKill) {
-                            if (collateralBalance != '') {
-                              formik.setFieldValue(
-                                'minTakerContribution',
-                                parseFloat(collateralBalance) -
-                                  formik.values.yourShare
-                              )
-                            } else {
-                              formik.setFieldValue('minTakerContribution', 0)
-                            }
-                          }
-                        }
-                      } else {
-                        formik.setValues((values) => ({
-                          ...values,
-                          collateralBalance: parseFloat(collateralBalance),
-                          takerShare:
-                            parseFloat(collateralBalance) - values.yourShare,
-                        }))
-                        if (fillOrKill) {
-                          if (collateralBalance != '') {
-                            formik.setFieldValue(
-                              'minTakerContribution',
-                              parseFloat(collateralBalance) -
-                                formik.values.yourShare
-                            )
-                          } else {
-                            formik.setFieldValue('minTakerContribution', 0)
-                          }
-                        }
-                      }
-                    }}
+                    onChange={formik.handleChange}
                   />
                   {formik.errors.collateralBalance != null && (
                     <FormHelperText>
@@ -713,23 +690,7 @@ export function DefineOfferAttributes({
                     error={formik.errors.yourShare != null}
                     value={formik.values.yourShare}
                     type="number"
-                    onChange={(event) => {
-                      const collateralBalance = event.target.value
-                      formik.setValues((values) => ({
-                        ...values,
-                        yourShare: parseFloat(collateralBalance),
-                        takerShare:
-                          values.collateralBalance -
-                          parseFloat(collateralBalance),
-                      }))
-                      if (fillOrKill) {
-                        formik.setFieldValue(
-                          'minTakerContribution',
-                          Number(formik.values.collateralBalance) -
-                            parseFloat(collateralBalance)
-                        )
-                      }
-                    }}
+                    onChange={formik.handleChange}
                   />
                   {formik.errors.collateralBalance != null && (
                     <FormHelperText>
@@ -738,16 +699,22 @@ export function DefineOfferAttributes({
                   )}
                   {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
-                      You receive{' '}
-                      {direction === 'Long' ? (
-                        <strong>
-                          {formik.values.collateralBalance} LONG Tokens
-                        </strong>
-                      ) : (
-                        <strong>
-                          {formik.values.collateralBalance} SHORT Tokens
-                        </strong>
-                      )}
+                      Max payout:{' '}
+                      {formik.values.collateralBalance +
+                        ' ' +
+                        collateralToken?.symbol}
+                      {' ('}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {formik.values.yourShare != 0
+                            ? (
+                                formik.values.collateralBalance /
+                                formik.values.yourShare
+                              ).toFixed(2) + 'x'
+                            : 'n/a'}
+                        </span>
+                      </strong>
+                      {')'}
                     </FormHelperText>
                   )}
                 </FormControl>
@@ -775,16 +742,22 @@ export function DefineOfferAttributes({
                   />
                   {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
-                      Taker receives{' '}
-                      {direction === 'Long' ? (
-                        <strong>
-                          {formik.values.collateralBalance} SHORT Tokens
-                        </strong>
-                      ) : (
-                        <strong>
-                          {formik.values.collateralBalance} LONG Tokens
-                        </strong>
-                      )}
+                      Max payout:{' '}
+                      {formik.values.collateralBalance +
+                        ' ' +
+                        collateralToken?.symbol}
+                      {' ('}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {formik.values.takerShare != 0
+                            ? (
+                                formik.values.collateralBalance /
+                                formik.values.takerShare
+                              ).toFixed(2) + 'x'
+                            : 'n/a'}
+                        </span>
+                      </strong>
+                      {')'}
                     </FormHelperText>
                   )}
                 </FormControl>
@@ -817,29 +790,82 @@ export function DefineOfferAttributes({
               </FormControl>
             </Container>
             {/*<Container>*/}
-            <FormControl
+            <Stack
               sx={{
+                width: '100%',
                 pt: theme.spacing(5),
-                pl: theme.spacing(4),
+                ml: theme.spacing(3),
                 pr: theme.spacing(3),
               }}
-              fullWidth
             >
-              <TextField
-                id="select"
-                label="Offer Expires in"
-                value={offerDuration}
-                onChange={handleOfferDurationChange}
-                select
+              <FormControl
+                sx={{
+                  pb: theme.spacing(2),
+                }}
+                fullWidth
               >
-                <MenuItem value={60 * 60}>1 Hour</MenuItem>
-                <MenuItem value={4 * 60 * 60}>4 Hours</MenuItem>
-                <MenuItem value={12 * 60 * 60}>12 Hours</MenuItem>
-                <MenuItem value={24 * 60 * 60}>1 Day</MenuItem>
-                <MenuItem value={7 * 24 * 60 * 60}>7 Days</MenuItem>
-              </TextField>
-            </FormControl>
-            {/*</Container>*/}
+                <DateTimePicker
+                  InputProps={{
+                    name: 'offerDuration',
+                    id: 'offerDuration',
+                    onBlur: formik.handleBlur,
+                    error: formik.errors.offerExpiry != null,
+                  }}
+                  label="Offer Expires in"
+                  onChange={handleOfferExpiryChange}
+                  minDate={today}
+                  value={offerExpiry}
+                  components={{
+                    OpenPickerIcon: ClockIcon,
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+                {formik.errors.offerExpiry != null && (
+                  <FormHelperText sx={{ color: 'red' }}>
+                    {formik.errors.offerExpiry}
+                  </FormHelperText>
+                )}
+              </FormControl>
+              <ToggleButtonGroup
+                fullWidth
+                color="primary"
+                size="small"
+                value={offerExpiry}
+                exclusive
+                onChange={handleOfferExpiryChangeBtnGrp}
+              >
+                <ToggleButton
+                  selected={offerExpiryToggle == '1 Hour'}
+                  value={Date.now() + 60 * 60 * 1000}
+                >
+                  1 Hour
+                </ToggleButton>
+                <ToggleButton
+                  selected={offerExpiryToggle == '4 Hrs'}
+                  value={Date.now() + 4 * 60 * 60 * 1000}
+                >
+                  4 Hrs
+                </ToggleButton>
+                <ToggleButton
+                  selected={offerExpiryToggle == '12 Hrs'}
+                  value={Date.now() + 12 * 60 * 60 * 1000}
+                >
+                  12 Hrs
+                </ToggleButton>
+                <ToggleButton
+                  selected={offerExpiryToggle == '1 Day'}
+                  value={Date.now() + 24 * 60 * 60 * 1000}
+                >
+                  1 Day
+                </ToggleButton>
+                <ToggleButton
+                  selected={offerExpiryToggle == '7 Days'}
+                  value={Date.now() + 7 * 24 * 60 * 60 * 1000}
+                >
+                  7 Days
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Stack>
           </Stack>
           <Container>
             <Accordion
@@ -947,10 +973,7 @@ export function DefineOfferAttributes({
                     <Container
                       sx={{ margin: -3, padding: 2, pr: 4, ml: -1.5, mr: -8 }}
                     >
-                      <FormControl
-                        fullWidth
-                        error={formik.errors.minTakerContribution != null}
-                      >
+                      <FormControl fullWidth>
                         <Tooltip
                           placement="top-end"
                           title="Minimum collateral amount the taker has to contribute on first fill"
@@ -1006,7 +1029,7 @@ export function DefineOfferAttributes({
             pb={theme.spacing(2)}
             variant="subtitle1"
           >
-            Payoff Profile
+            Payoff Profiles
           </Typography>
           {floor != null &&
             cap != null &&
@@ -1022,6 +1045,14 @@ export function DefineOfferAttributes({
                 />
               </Box>
             )}
+          <Typography
+            pb={theme.spacing(1)}
+            pt={theme.spacing(1)}
+            variant="subtitle1"
+            color="white"
+          >
+            Payoff Scenarios
+          </Typography>
           <Card
             style={{
               maxWidth: theme.spacing(60),
@@ -1032,113 +1063,138 @@ export function DefineOfferAttributes({
           >
             <Container>
               <Typography
-                pb={theme.spacing(1)}
-                pt={theme.spacing(1)}
-                variant="subtitle1"
+                fontSize={'0.85rem'}
+                sx={{ mt: theme.spacing(2) }}
+                style={{ color: 'white' }}
               >
-                Payoff Scenarios
+                {direction === 'Long' ? (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>0.00x</span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          formik.values.collateralBalance /
+                          formik.values.takerShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                ) : (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          formik.values.collateralBalance /
+                          formik.values.yourShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>0.00x</span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                )}
+                if the reported outcome is{' '}
+                {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
+                {floor}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
-                <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
-                  {floor}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  1.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
-                </strong>{' '}
-                token
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
-                <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
-                  {cap}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  0.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
-                </strong>{' '}
-                token
+                {direction === 'Long' ? (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          formik.values.collateralBalance /
+                          formik.values.yourShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>0.00x</span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                ) : (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>0.00x</span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          formik.values.collateralBalance /
+                          formik.values.takerShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                )}
+                if the reported outcome is{' '}
+                {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
+                {cap}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} />
-                If {referenceAsset} is{' '}
-                <strong>
-                  {' '}
-                  at
-                  {' ' + inflection}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  LONG
-                </strong>{' '}
-                and{' '}
-                <strong>
-                  {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  SHORT
-                </strong>{' '}
-                token
+                {direction === 'Long' ? (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          (gradient * formik.values.collateralBalance) /
+                          formik.values.yourShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          ((1 - gradient) * formik.values.collateralBalance) /
+                          formik.values.takerShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                ) : (
+                  <>
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          ((1 - gradient) * formik.values.collateralBalance) /
+                          formik.values.yourShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    your /{' '}
+                    <strong>
+                      <span style={{ color: '#3393E0' }}>
+                        {(
+                          (gradient * formik.values.collateralBalance) /
+                          formik.values.takerShare
+                        ).toFixed(2) + 'x'}
+                      </span>
+                    </strong>{' '}
+                    taker multiple{' '}
+                  </>
+                )}
+                if the reported outcome is {inflection}
               </Typography>
             </Container>
           </Card>
