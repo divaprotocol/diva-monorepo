@@ -21,7 +21,7 @@ export function PayoffProfile(props) {
   const maxPayoutLong = 1
   const maxPayoutShort = 1
   const theme = useTheme()
-  const tickValues = [0, 0.2, 0.4, 0.6, 0.8, 1]
+  const tickValues = [0, 1 - gradient, 0.5, gradient, 1]
   const refenAsst = referenceAsset?.slice(0, 8)
   const short = [
     {
@@ -155,7 +155,7 @@ export function PayoffProfile(props) {
           .axisRight(y)
           .tickSize(width + 2)
           .tickValues(tickValues)
-          .ticks(6)
+          .ticks(4)
       )
       .call((g) => g.select('.domain').remove())
       .call((g) =>
