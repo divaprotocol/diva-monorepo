@@ -644,6 +644,7 @@ export function DefinePoolAttributes({
                   inflection={inflection}
                   gradient={gradient}
                   hasError={hasPaymentProfileError}
+                  referenceAsset={referenceAsset}
                   collateralToken={
                     collateralToken ? collateralToken.symbol : null
                   }

@@ -11,6 +11,7 @@ export function PayoffProfile(props) {
     gradient,
     hasError,
     collateralToken,
+    referenceAsset,
   } = props
 
   const padding = cap * 0.1
@@ -65,6 +66,10 @@ export function PayoffProfile(props) {
       y: maxPayoutLong,
     },
   ]
+  const longdata = long.map(({ x, y }) => ({
+    x: parseFloat(x),
+    y: parseFloat(y),
+  }))
   const [chartWidth, setWidth] = useState(400)
   const [axisLabel, setAxisLabel] = useState('')
 
@@ -97,8 +102,8 @@ export function PayoffProfile(props) {
   if (hasError) lineSeriesStyle.stroke = theme.palette.error.main
 
   const intitalChart = () => {
-    const svg = d3
-      .select(ref.current)
+    const svg = d3.select(ref.current)
+    svg
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
       .style('overflow', 'visible')
@@ -109,12 +114,12 @@ export function PayoffProfile(props) {
   const draw = () => {
     const svg = d3.select(ref.current)
     svg.selectAll('*').remove()
-    svg.selectAll('rect').data(long)
-    const domainMin = d3.min(long, function (d) {
+    svg.selectAll('rect').data(longdata)
+    const domainMin = d3.min(longdata, function (d) {
       return d.x
     })
 
-    const domainMax = d3.max(long, function (d) {
+    const domainMax = d3.max(longdata, function (d) {
       return d.x
     })
 
@@ -129,13 +134,14 @@ export function PayoffProfile(props) {
       .call(
         d3.axisBottom(x).ticks(3).tickSize(0).tickValues([floor, cap, strike])
       )
+      .call((g) => g.select('.domain').remove())
       .call((g) => g.selectAll('.tick text').attr('dy', 10))
 
     const y = d3
       .scaleLinear()
       .domain([
         0,
-        d3.max(long, function (d) {
+        d3.max(longdata, function (d) {
           return d.y
         }),
       ])
@@ -159,6 +165,7 @@ export function PayoffProfile(props) {
           .style('stroke', '#3393E0')
       )
       .call((g) => g.selectAll('.tick text').attr('x', 4).attr('dy', -4))
+
     const longLine = d3
       .line()
       .x(function (d) {
@@ -169,11 +176,12 @@ export function PayoffProfile(props) {
       })
     svg
       .append('path')
-      .data([long])
+      .data([longdata])
       .attr('d', longLine)
       .style('fill', 'none')
       .style('stroke', '#1976D2')
       .style('stroke-width', '3px')
+      .attr('class', 'line')
     const shortLine = d3
       .line()
       .x(function (d) {
@@ -189,6 +197,7 @@ export function PayoffProfile(props) {
       .style('fill', 'none')
       .style('stroke', '#90CAF9')
       .style('stroke-width', '3px')
+      .attr('class', 'line')
 
     svg
       .append('text')
@@ -232,10 +241,179 @@ export function PayoffProfile(props) {
       .text('Long')
       .style('font-size', '12px')
       .attr('alignment-baseline', 'middle')
+
+    //mouse hover
+
+    const mouseHoverEffect = () => {
+      const mouseG = svg.append('g').attr('class', 'mouse-over-effects')
+
+      mouseG
+        .append('path')
+        .attr('class', 'mouse-line')
+        .style('stroke', 'grey')
+        .style('stroke-width', '1px')
+        .style('opacity', '0')
+
+      const lines = document.getElementsByClassName('line')
+      const mousePerLine = mouseG
+        .data([long])
+        .append('g')
+        .attr('class', 'mouse-per-line')
+      const mousePerLineShort = mouseG
+        .data([short])
+        .append('g')
+        .attr('class', 'mouse-per-line')
+      mousePerLineShort
+        .append('circle')
+        .attr('r', 7)
+        .style('stroke', 'white')
+        .style('fill', '#1976D2')
+        .style('stroke-width', '2px')
+        .style('opacity', '0')
+      const tooltipPerLine = mouseG
+        .data([long])
+        .append('g')
+        .attr('class', 'tooltip-per-line')
+
+      mousePerLine
+        .append('circle')
+        .attr('r', 7)
+        .style('stroke', 'white')
+        .style('fill', '#1976D2')
+        .style('stroke-width', '2px')
+        .style('opacity', '0')
+
+      const tooltipBoxWidth = 215
+      const tooltipBoxHeight = 55
+
+      tooltipPerLine
+        .append('rect')
+        .attr('class', 'tooltip')
+        .attr('width', tooltipBoxWidth)
+        .attr('height', tooltipBoxHeight)
+        .attr('x', 10)
+        .attr('y', 0)
+        .attr('rx', 4)
+        .attr('ry', 4)
+        .style('fill', 'none')
+        .style('opacity', '0')
+
+      tooltipPerLine
+        .append('text')
+        .attr('x', 18)
+        .attr('y', -5)
+        .attr('font-size', '14')
+        .text(referenceAsset + '...' + ' at Expiry:')
+
+      tooltipPerLine
+        .append('text')
+        .attr('class', 'tooltip-underlying')
+        .attr('text-anchor', 'end')
+        .attr('x', tooltipBoxWidth)
+        .attr('y', -5)
+        .attr('font-size', '14')
+
+      mousePerLine
+        .append('text')
+        .attr('transform', 'translate(10,3)')
+        .attr('font-size', '14')
+      mousePerLineShort
+        .append('text')
+        .attr('transform', 'translate(10,3)')
+        .attr('font-size', '14')
+      tooltipPerLine
+        .append('text')
+        .attr('class', 'topRow')
+        .attr('transform', 'translate(10,3)')
+
+      tooltipPerLine
+        .append('text')
+        .attr('class', 'bottomRow')
+        .attr('transform', 'translate(10,30)')
+
+      var mouseover = function () {
+        d3.select('.mouse-line').style('opacity', '1')
+        d3.selectAll('.mouse-per-line circle').style('opacity', '1')
+        d3.selectAll('.tooltip-pper-line rect').style('opacity', '1')
+        d3.selectAll('.tooltip-per-line text').style('opacity', '1')
+        d3.selectAll('.mouse-per-line text').style('opacity', '1')
+      }
+
+      var mouseout = function () {
+        d3.select('.mouse-line').style('opacity', '0')
+        d3.selectAll('.mouse-per-line circle').style('opacity', '0')
+        d3.selectAll('.tooltip-pper-line rect').style('opacity', '0')
+        d3.selectAll('.tooltip-per-line text').style('opacity', '0')
+        d3.selectAll('.mouse-per-line text').style('opacity', '0')
+      }
+      var formatDecimalComma = d3.format(',.2f')
+
+      const yPos = function (d, i, m, l) {
+        var beginning = 0,
+          end = lines[i].getTotalLength(),
+          target = null,
+          pos = null
+
+        //eslint-disable-next-line
+    while (true) {
+          target = Math.floor((beginning + end) / 2)
+          pos = l[i].getPointAtLength(target)
+          if ((target === end || target === beginning) && pos.x !== m) {
+            break
+          }
+          if (pos.x > m) end = target
+          else if (pos.x < m) beginning = target
+          else break //position found
+        }
+        return pos
+      }
+
+      var mousemove = function (event) {
+        var mouse = d3.pointer(event)
+        d3.select('.mouse-line').attr('d', function () {
+          var d = 'M' + mouse[0] + ',' + height
+          d += ' ' + mouse[0] + ',' + 10
+          return d
+        })
+
+        d3.selectAll('.mouse-per-line').attr('transform', function (d, i) {
+          var pos = yPos(d, i, mouse[0], lines)
+          console.log('pos', pos)
+          d3.select(this)
+            .select('text')
+            .text(formatDecimalComma(y.invert(pos.y).toFixed(2)))
+          return 'translate(' + mouse[0] + ',' + pos.y + ')'
+        })
+
+        d3.selectAll('.tooltip-per-line').attr('transform', function (d, i) {
+          var xValue = x.invert(mouse[0])
+
+          d3.select(this)
+            .select('.tooltip-underlying')
+            .text(formatDecimalComma(xValue.toFixed(2)))
+
+          return (
+            'translate(' + (mouse[0] - tooltipBoxWidth * 0.55) + ',' + 0 + ')'
+          )
+        })
+      }
+
+      mouseG
+        .append('svg:rect')
+        .attr('width', width * 0.98)
+        .attr('height', height)
+        .attr('fill', 'none')
+        .attr('pointer-events', 'all')
+        .on('mouseout', mouseout)
+        .on('mouseover', mouseover)
+        .on('mousemove', mousemove)
+    }
+
+    mouseHoverEffect()
   }
   useEffect(() => {
     draw()
-  }, [props, long, short, cap, strike, floor, collateralToken])
+  }, [props, long, cap, strike, floor, collateralToken])
 
   return (
     <div>
