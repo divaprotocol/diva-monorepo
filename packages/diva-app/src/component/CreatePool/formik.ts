@@ -22,7 +22,7 @@ export type Values = {
   capacity: string
   dataProvider: string
   payoutProfile: string
-  offerDuration?: string
+  offerExpiry?: string
   offerDirection?: string
   minTakerContribution?: string
   takerAddress?: string
@@ -58,7 +58,7 @@ export const initialValues: Values = {
   dataProvider: '',
   payoutProfile: 'Binary',
   offerDirection: 'Long',
-  offerDuration: Math.floor(24 * 60 * 60 + Date.now() / 1000).toString(),
+  offerExpiry: Math.floor(24 * 60 * 60 + Date.now() / 1000).toString(),
   minTakerContribution: '0',
   takerAddress: ethers.constants.AddressZero,
   makerAddress: '',
@@ -158,9 +158,9 @@ export const useCreatePoolFormik = () => {
       if (values.collateralBalance == 0 || isNaN(values.collateralBalance)) {
         errors.collateralBalance = 'Collateral cannot be empty'
       }
-      if (parseFloat(values.minTakerContribution) > values.collateralBalance) {
+      if (parseFloat(values.minTakerContribution) > values.takerShare) {
         errors.minTakerContribution =
-          'Minimum taker contribution must be less than collateral amount'
+          'Minimum taker contribution must be less than or equal to taker share'
       }
       if (Number(values.minTakerContribution) < 0) {
         errors.minTakerContribution =

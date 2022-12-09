@@ -6,13 +6,15 @@ import divaSidebarLogo from './Images/diva-sidebar-logo.svg'
 import divaTextLogo from './Images/diva_logo_text.svg'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
 import TaskIcon from '@mui/icons-material/Task'
+import metamaskLogo from './Images/meta-mask-logo.png'
+import walletConnectLogo from './Images/wallet-connect-logo.png'
 
 const CREATE_POOL_OFFER_STRUCT = [
   { type: 'address', name: 'maker' },
   { type: 'address', name: 'taker' },
   { type: 'uint256', name: 'makerCollateralAmount' },
   { type: 'uint256', name: 'takerCollateralAmount' },
-  { type: 'bool', name: 'makerDirection' },
+  { type: 'bool', name: 'makerIsLong' },
   { type: 'uint256', name: 'offerExpiry' },
   { type: 'uint256', name: 'minimumTakerFillAmount' },
   { type: 'string', name: 'referenceAsset' },
@@ -102,12 +104,12 @@ export const config: { [key: number]: SingleConfig } = {
     isSupported: true,
   },
   [SupportedChainId.GOERLI]: {
-    divaAddress: '0x2d941518E0876Fb6042bfCdB403427DC5620b2EC', // 26.10.2022
+    divaAddress: '0x659f8bF63Dce2548eB4D9b4BfF6883dddFde4848', // 22.11.2022
     balanceCheckerAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli-new',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli-new-2',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
     allOrders: 'https://eip712api.xyz/0x/orderbook/v1/orders/',
@@ -183,7 +185,7 @@ export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(
 ).filter((id) => typeof id === 'number') as SupportedChainId[]
 
 // current supported chain
-export const CURRENT_SUPPORTED_CHAIN_ID = [SupportedChainId.ROPSTEN]
+export const CURRENT_SUPPORTED_CHAIN_ID = [SupportedChainId.GOERLI]
 
 // DIVA Governance address which is the default creator of pools on Markets page and trading fee recipient
 export const DIVA_GOVERNANCE_ADDRESS =
@@ -231,3 +233,9 @@ export const APP_BAR_ITEMS = [
 
 // websocket url
 export const WEBSOCKET_URL = 'wss://eip712api.xyz/websocket'
+
+// wallet images
+export const WALLET_IMAGES = {
+  metamask: metamaskLogo,
+  walletConnect: walletConnectLogo,
+}

@@ -25,7 +25,7 @@ export function FillOffer({
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', () => {
         disconnect()
-        connect()
+        connect('metamask')
       })
     }
   }, [])
@@ -72,7 +72,7 @@ export function FillOffer({
 
       formik.setFieldValue(
         'offerDirection',
-        configJson.makerDirection ? 'Short' : 'Long'
+        configJson.makerIsLong ? 'Short' : 'Long'
       )
       formik.setFieldValue('referenceAsset', configJson.referenceAsset)
       formik.setFieldValue('expiryTime', new Date(configJson.expiryTime * 1000))
@@ -88,13 +88,12 @@ export function FillOffer({
       formik.setFieldValue('collateralToken.id', configJson.collateralToken)
       formik.setFieldValue(
         'capacity',
-        configJson.capacity ===
-          '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+        configJson.capacity === ethers.constants.MaxUint256.toString()
           ? 'Unlimited'
           : configJson.capacity
       )
       formik.setFieldValue('dataProvider', configJson.dataProvider)
-      formik.setFieldValue('offerDuration', configJson.offerExpiry)
+      formik.setFieldValue('offerExpiry', configJson.offerExpiry)
 
       formik.setFieldValue('takerAddress', configJson.taker)
       formik.setFieldValue('jsonToExport', {
@@ -102,7 +101,7 @@ export function FillOffer({
         taker: configJson.taker,
         makerCollateralAmount: configJson.makerCollateralAmount,
         takerCollateralAmount: configJson.takerCollateralAmount,
-        makerDirection: configJson.makerDirection,
+        makerIsLong: configJson.makerIsLong,
         offerExpiry: configJson.offerExpiry,
         minimumTakerFillAmount: configJson.minimumTakerFillAmount,
         referenceAsset: configJson.referenceAsset,

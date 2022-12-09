@@ -46,7 +46,6 @@ import { useHistory, useParams } from 'react-router-dom'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
-import { useGovernanceParameters } from '../../hooks/useGovernanceParameters'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { FilterDrawerModal } from '../Dashboard/FilterDrawerMobile'
@@ -517,10 +516,6 @@ export default function Markets() {
     }
   }
 
-  // TODO this needs update as those values are now pool specific and can be queried from the subgraph
-  const { submissionPeriod, challengePeriod, reviewPeriod, fallbackPeriod } =
-    useGovernanceParameters()
-
   // orders structure
   // - orders.poolId = poolId
   // - orders.first = baseToken is makerToken and quoteToken is takerToken
@@ -706,10 +701,10 @@ export default function Markets() {
       val.statusFinalReferenceValue,
       val.finalReferenceValue,
       val.inflection,
-      submissionPeriod,
-      challengePeriod,
-      reviewPeriod,
-      fallbackPeriod
+      parseFloat(val.submissionPeriod),
+      parseFloat(val.challengePeriod),
+      parseFloat(val.reviewPeriod),
+      parseFloat(val.fallbackSubmissionPeriod)
     )
 
     const shared = {

@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
 import { useEffect } from 'react'
-import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
-import Box from '@mui/material/Box'
 import { sellMarketOrder } from '../../../Orders/SellMarket'
 import { LabelStyle } from './UiStyles'
 import { LabelStyleDiv } from './UiStyles'
@@ -38,8 +36,9 @@ import {
 } from '../../../Util/calcPayoffPerToken'
 import CheckIcon from '@mui/icons-material/Check'
 import { LoadingButton } from '@mui/lab'
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const web3 = new Web3(Web3.givenProvider)
 const ZERO = BigNumber.from(0)
 const feeMultiplier = (1 + TRADING_FEE).toString()
 
@@ -58,8 +57,20 @@ export default function SellMarket(props: {
     owner: string
   ) => any
 }) {
+  const [Web3Provider, setWeb3Provider] = useState<Web3>()
+
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
+  const { getWeb3JsProvider, provider } = useConnectionContext()
+  const web3 = new Web3(Web3Provider as any)
+
+  useEffect(() => {
+    const init = async () => {
+      const web3 = await getWeb3JsProvider()
+      setWeb3Provider(web3)
+    }
+    init()
+  }, [getWeb3JsProvider])
 
   const userAddress = useAppSelector(selectUserAddress)
 
@@ -178,7 +189,7 @@ export default function SellMarket(props: {
       setFillLoading(true)
       const orderData = {
         taker: userAddress,
-        provider: web3,
+        provider: provider,
         isBuy: false,
         nbrOptions: numberOfOptions, // Number of position tokens the user wants to sell
         collateralDecimals: decimals,
@@ -325,7 +336,7 @@ export default function SellMarket(props: {
         })
       })
     }
-  }, [responseBuy, responseSell, userAddress])
+  }, [responseBuy, responseSell, userAddress, Web3Provider])
 
   useEffect(() => {
     // Calculate average price

@@ -71,10 +71,27 @@ export function DefinePoolAttributes({
   } = formik.values
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
   useEffect(() => {
+    if (payoutProfile === 'Binary') {
+      formik.setFieldValue('gradient', 1)
+      formik.setFieldValue('cap', formik.values.inflection)
+      formik.setFieldValue('floor', formik.values.inflection)
+    }
+  }, [formik.values])
+  useEffect(() => {
+    if (payoutProfile === 'Linear') {
+      formik.setFieldValue('inflection', (floor + cap) / 2)
+    }
+  }, [formik.values.floor, formik.values.inflection])
+  useEffect(() => {
+    if (payoutProfile === 'Linear') {
+      formik.setFieldValue('inflection', (cap + floor) / 2)
+    }
+  }, [formik.values.cap, formik.values.inflection])
+  useEffect(() => {
     if (window.ethereum && formik.values.jsonToExport !== '{}') {
       window.ethereum.on('accountsChanged', () => {
         disconnect()
-        connect()
+        connect('metamask')
         formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
       })
     }
@@ -262,7 +279,7 @@ export function DefinePoolAttributes({
                     onBlur: formik.handleBlur,
                     error: formik.errors.expiryTime != null,
                   }}
-                  label="Expiry Time"
+                  label="Observation Time"
                   onChange={(event) => {
                     formik.setFieldValue('expiryTime', event)
                   }}
@@ -331,18 +348,7 @@ export function DefinePoolAttributes({
                         max: cap,
                       }}
                       type="number"
-                      onChange={(event) => {
-                        if (payoutProfile === 'Binary') {
-                          formik.handleChange(event)
-                          formik.setValues((values) => ({
-                            ...values,
-                            cap: parseFloat(event.target.value),
-                            floor: parseFloat(event.target.value),
-                            inflection: parseFloat(event.target.value),
-                            gradient: 1,
-                          }))
-                        }
-                      }}
+                      onChange={formik.handleChange}
                       value={inflection}
                       sx={{ width: mobile ? '100%' : '48%' }}
                     />
@@ -369,17 +375,7 @@ export function DefinePoolAttributes({
                         label="Floor"
                         value={floor}
                         type="number"
-                        onChange={(event) => {
-                          if (payoutProfile === 'Linear') {
-                            formik.handleChange(event)
-                            formik.setValues((values) => ({
-                              ...values,
-                              floor: parseFloat(event.target.value),
-                              inflection:
-                                (parseFloat(event.target.value) + cap) / 2,
-                            }))
-                          }
-                        }}
+                        onChange={formik.handleChange}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
@@ -396,15 +392,7 @@ export function DefinePoolAttributes({
                         label="Cap"
                         value={cap}
                         type="number"
-                        onChange={(event) => {
-                          formik.handleChange(event)
-                          formik.setValues((values) => ({
-                            ...values,
-                            cap: parseFloat(event.target.value),
-                            inflection:
-                              (parseFloat(event.target.value) + floor) / 2,
-                          }))
-                        }}
+                        onChange={formik.handleChange}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
@@ -587,24 +575,7 @@ export function DefinePoolAttributes({
                     error={formik.errors.collateralBalance != null}
                     value={formik.values.collateralBalance}
                     type="number"
-                    onChange={(event) => {
-                      const value = event.target.value
-                      const arr = value.split('.')
-                      const collateralBalance = event.target.value
-                      if (arr.length > 1) {
-                        if (arr[1].length <= collateralToken.decimals) {
-                          formik.setValues((values) => ({
-                            ...values,
-                            collateralBalance: parseFloat(collateralBalance),
-                          }))
-                        }
-                      } else {
-                        formik.setValues((values) => ({
-                          ...values,
-                          collateralBalance: parseFloat(collateralBalance),
-                        }))
-                      }
-                    }}
+                    onChange={formik.handleChange}
                   />
                   {formik.errors.collateralBalance != null && (
                     <FormHelperText>
@@ -631,7 +602,7 @@ export function DefinePoolAttributes({
             pb={theme.spacing(2)}
             variant="subtitle1"
           >
-            Payoff Profile
+            Payoff Profiles
           </Typography>
           {floor != null &&
             cap != null &&
@@ -651,6 +622,14 @@ export function DefinePoolAttributes({
                 />
               </Box>
             )}
+          <Typography
+            pb={theme.spacing(1)}
+            pt={theme.spacing(1)}
+            variant="subtitle1"
+            color="white"
+          >
+            Payoff Scenarios
+          </Typography>
           <Card
             style={{
               maxWidth: theme.spacing(60),
@@ -661,113 +640,60 @@ export function DefinePoolAttributes({
           >
             <Container>
               <Typography
-                pb={theme.spacing(1)}
-                pt={theme.spacing(1)}
-                variant="subtitle1"
+                fontSize={'0.85rem'}
+                sx={{ mt: theme.spacing(2) }}
+                style={{ color: 'white' }}
               >
-                Payoff Scenarios
+                <strong>
+                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /LONG
+                </strong>{' '}
+                and
+                <strong>
+                  {' '}
+                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /SHORT
+                </strong>{' '}
+                token if the reported outcome is{' '}
+                {floor < inflection && inflection < cap
+                  ? 'at or '
+                  : ''} below {floor}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
                 <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
-                  {floor}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
+                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /LONG
                 </strong>{' '}
                 and
                 <strong>
                   {' '}
-                  1.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
+                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                  /SHORT
                 </strong>{' '}
-                token
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
-                <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
-                  {cap}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  0.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
-                </strong>{' '}
-                token
+                token if the reported outcome is{' '}
+                {floor < inflection && inflection < cap
+                  ? 'at or '
+                  : ''} above {cap}{' '}
               </Typography>
               <Typography
                 fontSize={'0.85rem'}
                 sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
                 style={{ color: 'white' }}
               >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} />
-                If {referenceAsset} is{' '}
-                <strong>
-                  {' '}
-                  at
-                  {' ' + inflection}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
                 <strong>
                   {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  LONG
+                  {collateralToken != null ? collateralToken.symbol : ''}/LONG
                 </strong>{' '}
                 and{' '}
                 <strong>
                   {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  SHORT
+                  {collateralToken != null ? collateralToken.symbol : ''}/SHORT
                 </strong>{' '}
-                token
+                token if the reported outcome is {inflection}
               </Typography>
             </Container>
           </Card>

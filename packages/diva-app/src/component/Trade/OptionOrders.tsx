@@ -207,11 +207,10 @@ export default function OpenOrders(props: {
     const orderHash = order.orderHash
     //get the order details in current form from 0x before cancelling it.
     const cancelOrder = await getOrderDetails(orderHash, chainId)
-    cancelLimitOrder(cancelOrder, chainId).then(function (
+    cancelLimitOrder(cancelOrder, chainId, provider).then(function (
       cancelOrderResponse: any
     ) {
-      const log = cancelOrderResponse?.logs?.[0]
-      if (log != null && log.event == 'OrderCancelled') {
+      if (cancelOrderResponse?.hash != null) {
         alert('Order successfully cancelled')
         //need to invalidate orders since orderbook is updated
         dispatch(setResponseSell([]))
