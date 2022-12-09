@@ -18,11 +18,13 @@
     "deploy-polygon-pilot": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-polygon-pilot polygon.subgraph.pilot.yaml",
     "create-local": "graph create --node http://localhost:8020/ divaprotocol/diva-subgraph",
     "remove-local": "graph remove --node http://localhost:8020/ divaprotocol/diva-subgraph",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 divaprotocol/diva-subgraph"
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 divaprotocol/diva-subgraph",
+    "format": "prettier --write ."
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.23.2",
-    "@graphprotocol/graph-ts": "0.23.1"
+    "@graphprotocol/graph-cli": "^0.37.1",
+    "@graphprotocol/graph-ts": "^0.29.0",
+    "prettier": "^2.5.1"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5"
