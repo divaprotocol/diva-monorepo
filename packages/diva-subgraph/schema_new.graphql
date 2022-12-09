@@ -8,10 +8,10 @@ type Challenge @entity {
   pool: Pool!
 }
 
-# Pool entity captures the latest state of a 
+# Pool entity captures the latest state of a
 # contingent pool. Parameters are set/updated when
 # a contingent pool is created, liquidity is added/removed
-# and during the settlement process (e.g., when final 
+# and during the settlement process (e.g., when final
 # reference value is set)
 type Pool @entity {
   id: ID! # original -> poolId
@@ -56,14 +56,12 @@ type CollateralToken @entity {
   name: String!
   decimals: Int!
   symbol: String!
-  feeRecipients: [FeeRecipientCollateralToken!]
-    @derivedFrom(field: "collateralToken")
+  feeRecipients: [FeeRecipientCollateralToken!] @derivedFrom(field: "collateralToken")
 }
 
 type FeeRecipient @entity {
   id: ID! # feeRecipient address
-  collateralTokens: [FeeRecipientCollateralToken!]
-    @derivedFrom(field: "feeRecipient")
+  collateralTokens: [FeeRecipientCollateralToken!] @derivedFrom(field: "feeRecipient")
 }
 
 type FeeRecipientCollateralToken @entity {
@@ -80,8 +78,7 @@ type PositionToken @entity {
   decimals: Int!
   pool: Pool!
   owner: Bytes!
-  users: [UserPositionToken!]
-    @derivedFrom(field: "positionToken")
+  users: [UserPositionToken!] @derivedFrom(field: "positionToken")
 }
 
 type TestnetUser @entity {
@@ -107,26 +104,25 @@ type TestnetUser @entity {
 
 type User @entity {
   id: ID! # UserAddress
-  positionTokens: [UserPositionToken!]
-    @derivedFrom(field: "user")
+  positionTokens: [UserPositionToken!] @derivedFrom(field: "user")
 }
 
 type UserPositionToken @entity {
   id: ID! # Set to `${user.id}-${positionToken.id}`
   user: User!
   positionToken: PositionToken!
-  receivedAt: BigInt! # timestamp when user received position token via create pool, add liquidity or trading 
+  receivedAt: BigInt! # timestamp when user received position token via create pool, add liquidity or trading
 }
 
 type NativeOrderFill @entity {
-    # tx hash - order hash - log index
-    id: ID!
-    orderHash: Bytes!
-    maker: Bytes!
-    taker: Bytes!
-    makerToken: Bytes!
-    takerToken: Bytes!
-    makerTokenFilledAmount: BigInt!
-    takerTokenFilledAmount: BigInt!
-    timestamp: BigInt!
+  # tx hash - order hash - log index
+  id: ID!
+  orderHash: Bytes!
+  maker: Bytes!
+  taker: Bytes!
+  makerToken: Bytes!
+  takerToken: Bytes!
+  makerTokenFilledAmount: BigInt!
+  takerTokenFilledAmount: BigInt!
+  timestamp: BigInt!
 }

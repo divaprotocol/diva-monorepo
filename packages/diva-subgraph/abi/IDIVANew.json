@@ -130,44 +130,32 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "bytes4", "name": "_selector", "type": "bytes4" }
-    ],
+    "inputs": [{ "internalType": "bytes4", "name": "_selector", "type": "bytes4" }],
     "name": "CannotAddFunctionToDiamondThatAlreadyExists",
     "type": "error"
   },
   {
-    "inputs": [
-      { "internalType": "bytes4[]", "name": "_selectors", "type": "bytes4[]" }
-    ],
+    "inputs": [{ "internalType": "bytes4[]", "name": "_selectors", "type": "bytes4[]" }],
     "name": "CannotAddSelectorsToZeroAddress",
     "type": "error"
   },
   {
-    "inputs": [
-      { "internalType": "bytes4", "name": "_selector", "type": "bytes4" }
-    ],
+    "inputs": [{ "internalType": "bytes4", "name": "_selector", "type": "bytes4" }],
     "name": "CannotRemoveFunctionThatDoesNotExist",
     "type": "error"
   },
   {
-    "inputs": [
-      { "internalType": "bytes4", "name": "_selector", "type": "bytes4" }
-    ],
+    "inputs": [{ "internalType": "bytes4", "name": "_selector", "type": "bytes4" }],
     "name": "CannotRemoveImmutableFunction",
     "type": "error"
   },
   {
-    "inputs": [
-      { "internalType": "bytes4", "name": "_selector", "type": "bytes4" }
-    ],
+    "inputs": [{ "internalType": "bytes4", "name": "_selector", "type": "bytes4" }],
     "name": "CannotReplaceFunctionWithTheSameFunctionFromTheSameFacet",
     "type": "error"
   },
   {
-    "inputs": [
-      { "internalType": "bytes4[]", "name": "_selectors", "type": "bytes4[]" }
-    ],
+    "inputs": [{ "internalType": "bytes4[]", "name": "_selectors", "type": "bytes4[]" }],
     "name": "CannotReplaceFunctionsFromFacetWithZeroAddress",
     "type": "error"
   },
@@ -213,9 +201,7 @@
     "type": "error"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_facetAddress", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_facetAddress", "type": "address" }],
     "name": "NoSelectorsProvidedForFacetForCut",
     "type": "error"
   },
@@ -228,9 +214,7 @@
     "type": "error"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_facetAddress", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_facetAddress", "type": "address" }],
     "name": "RemoveFacetAddressMustBeZeroAddress",
     "type": "error"
   },
@@ -329,9 +313,7 @@
       }
     ],
     "name": "facetAddress",
-    "outputs": [
-      { "internalType": "address", "name": "facetAddress_", "type": "address" }
-    ],
+    "outputs": [{ "internalType": "address", "name": "facetAddress_", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -349,9 +331,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_facet", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_facet", "type": "address" }],
     "name": "facetFunctionSelectors",
     "outputs": [
       {
@@ -389,9 +369,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "bytes4", "name": "_interfaceId", "type": "bytes4" }
-    ],
+    "inputs": [{ "internalType": "bytes4", "name": "_interfaceId", "type": "bytes4" }],
     "name": "supportsInterface",
     "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
     "stateMutability": "view",
@@ -1305,9 +1283,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "_poolId", "type": "uint256" }],
     "name": "getFees",
     "outputs": [
       {
@@ -1701,9 +1677,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "_poolId", "type": "uint256" }],
     "name": "getPoolParameters",
     "outputs": [
       {
@@ -1771,9 +1745,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_positionToken", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_positionToken", "type": "address" }],
     "name": "getPoolParametersByAddress",
     "outputs": [
       {
@@ -1841,9 +1813,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "uint256", "name": "_poolId", "type": "uint256" }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "_poolId", "type": "uint256" }],
     "name": "getSettlementPeriods",
     "outputs": [
       {
@@ -1898,9 +1868,7 @@
   {
     "inputs": [],
     "name": "owner",
-    "outputs": [
-      { "internalType": "address", "name": "owner_", "type": "address" }
-    ],
+    "outputs": [{ "internalType": "address", "name": "owner_", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -2086,9 +2054,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_newTreasury", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_newTreasury", "type": "address" }],
     "name": "setTreasuryAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -2283,9 +2249,7 @@
     "type": "event"
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "_newOwner", "type": "address" }
-    ],
+    "inputs": [{ "internalType": "address", "name": "_newOwner", "type": "address" }],
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -2384,9 +2348,7 @@
       }
     ],
     "name": "batchCreateContingentPool",
-    "outputs": [
-      { "internalType": "uint256[]", "name": "", "type": "uint256[]" }
-    ],
+    "outputs": [{ "internalType": "uint256[]", "name": "", "type": "uint256[]" }],
     "stateMutability": "nonpayable",
     "type": "function"
   },
