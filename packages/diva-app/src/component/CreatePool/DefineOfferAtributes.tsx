@@ -387,7 +387,7 @@ export function DefineOfferAttributes({
                 row
                 aria-labelledby="demo-row-radio-buttons-group-label"
                 name="row-radio-buttons-group"
-                value={value}
+                value={formik.values.payoutProfile}
                 onChange={handleChange}
               >
                 <FormControlLabel
@@ -772,7 +772,7 @@ export function DefineOfferAttributes({
                   row
                   aria-labelledby="demo-row-radio-buttons-group-label"
                   name="row-radio-buttons-group"
-                  value={direction}
+                  value={formik.values.offerDirection}
                   onChange={handleDirectionChange}
                 >
                   <FormControlLabel
