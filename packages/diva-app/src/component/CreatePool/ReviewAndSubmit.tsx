@@ -22,7 +22,6 @@ import { config, CREATE_POOL_TYPE } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { Circle } from '@mui/icons-material'
-import { PayoffProfile } from './PayoffProfile'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import React, { useEffect, useState } from 'react'
 import {
@@ -35,6 +34,7 @@ import { ethers } from 'ethers'
 import ERC20 from '../../abi/ERC20ABI.json'
 import DIVA_ABI from '../../abi/DIVAABI.json'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { PayoffProfile } from '../Graphs/payOffProfile'
 import { useAppSelector } from '../../Redux/hooks'
 import { toExponentialOrNumber } from '../../Util/utils'
 import styled from '@emotion/styled'
@@ -227,6 +227,7 @@ export function ReviewAndSubmit({
   const isWhitelistedDataFeed =
     matchingDataFeedProviders.length > 0 &&
     matchingDataFeedProviders.some((v) => formik.values.dataProvider === v.id)
+
   return (
     <Stack
       direction={mobile ? 'column' : 'row'}
@@ -798,15 +799,23 @@ export function ReviewAndSubmit({
             values.cap != null &&
             values.inflection != null &&
             values.gradient != null && (
-              <Box sx={{ maxWidth: '85%' }}>
-                {transaction === 'filloffer' ? (
+              <Box sx={{ maxWidth: '85%', marginLeft: 3, marginBottom: 2 }}>
+                {transaction !== 'createpool' &&
+                transaction !== 'createoffer' ? (
                   <PayoffProfile
                     floor={values.floor}
                     cap={values.cap}
                     inflection={values.inflection}
                     gradient={values.gradient}
                     hasError={false}
+                    referenceAsset={values.referenceAsset}
+                    offerDirection={values.offerDirection}
                     longDirection={values.offerDirection === 'Long'}
+                    collateralToken={
+                      values.collateralToken
+                        ? values.collateralToken.symbol
+                        : null
+                    }
                   />
                 ) : (
                   <PayoffProfile
@@ -814,7 +823,13 @@ export function ReviewAndSubmit({
                     cap={values.cap}
                     inflection={values.inflection}
                     gradient={values.gradient}
+                    referenceAsset={values.referenceAsset}
                     hasError={false}
+                    collateralToken={
+                      values.collateralToken
+                        ? values.collateralToken.symbol
+                        : null
+                    }
                   />
                 )}
               </Box>

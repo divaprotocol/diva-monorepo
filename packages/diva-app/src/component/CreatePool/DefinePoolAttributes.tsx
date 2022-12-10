@@ -18,8 +18,6 @@ import {
   Card,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
-
-import { PayoffProfile } from './PayoffProfile'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
@@ -35,6 +33,7 @@ import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { PayoffProfile } from '../Graphs/payOffProfile'
 import { toExponentialOrNumber } from '../../Util/utils'
 
 const MaxCollateral = styled.u`
@@ -609,13 +608,17 @@ export function DefinePoolAttributes({
             cap != null &&
             inflection != null &&
             gradient != null && (
-              <Box sx={{ maxWidth: '85%' }}>
+              <Box sx={{ maxWidth: '85%', marginLeft: 3, marginBottom: 2 }}>
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
                   inflection={inflection}
                   gradient={gradient}
                   hasError={hasPaymentProfileError}
+                  referenceAsset={referenceAsset}
+                  collateralToken={
+                    collateralToken ? collateralToken.symbol : null
+                  }
                 />
               </Box>
             )}
