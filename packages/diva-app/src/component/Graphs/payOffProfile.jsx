@@ -22,7 +22,15 @@ export function PayoffProfile(props) {
   const maxPayoutShort = 1
   const theme = useTheme()
   const tickValues = [0, 1 - gradient, 0.5, gradient, 1]
-  const refenAsst = referenceAsset?.slice(0, 8)
+
+  const getShortenedRefAsset = (referenceAsset) => {
+    if (referenceAsset != null && referenceAsset.length >= 10) {
+      const begining = referenceAsset.slice(0, 10)
+
+      return `${begining}...`
+    } else return referenceAsset
+  }
+  const refenAsst = getShortenedRefAsset(referenceAsset)
   const short = [
     {
       x: start,
@@ -355,7 +363,7 @@ export function PayoffProfile(props) {
         .attr('x', 18)
         .attr('y', -5)
         .attr('font-size', '14')
-        .text(refenAsst + '...' + ' at Expiry:')
+        .text(refenAsst + ' at Expiry:')
 
       tooltipPerLine
         .append('text')
