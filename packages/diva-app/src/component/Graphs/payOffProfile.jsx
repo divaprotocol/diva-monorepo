@@ -79,7 +79,7 @@ export function PayoffProfile(props) {
     x: parseFloat(x),
     y: parseFloat(y),
   }))
-  const [chartWidth, setWidth] = useState(400)
+  const [chartWidth, setWidth] = useState(460)
   const [axisLabel, setAxisLabel] = useState('')
   const domainMin = d3.min(longdata, function (d) {
     return d.x
@@ -101,7 +101,7 @@ export function PayoffProfile(props) {
     }
   }, [ref.current])
 
-  const chartHeight = 302
+  const chartHeight = 330
 
   const margin = { top: 10, right: 10, bottom: 30, left: 10 },
     width = chartWidth - margin.left - margin.right,
