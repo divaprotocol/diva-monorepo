@@ -227,6 +227,7 @@ export function ReviewAndSubmit({
   const isWhitelistedDataFeed =
     matchingDataFeedProviders.length > 0 &&
     matchingDataFeedProviders.some((v) => formik.values.dataProvider === v.id)
+
   return (
     <Stack
       direction={mobile ? 'column' : 'row'}
@@ -799,7 +800,8 @@ export function ReviewAndSubmit({
             values.inflection != null &&
             values.gradient != null && (
               <Box sx={{ maxWidth: '85%', marginLeft: 3, marginBottom: 2 }}>
-                {transaction !== 'createpool' ? (
+                {transaction !== 'createpool' &&
+                transaction !== 'createoffer' ? (
                   <PayoffProfile
                     floor={values.floor}
                     cap={values.cap}
