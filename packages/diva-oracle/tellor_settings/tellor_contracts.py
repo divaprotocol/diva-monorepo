@@ -22,3 +22,7 @@ divaDiamond = {
 Tellor_governance_contract_address = {
     "goerli": '0x02803dcFD7Cb32E97320CFe7449BFb45b6C931b8'
 }
+
+TRB_token_contract = {
+    "goerli": '0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2'
+}

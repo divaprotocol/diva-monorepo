@@ -318,3 +318,46 @@ tellor_dispute_abi = '''[
         "type":"function"
     }
 ]'''
+
+tellor_approve_abi = '''[
+    {
+        "inputs":[
+        {
+            "internalType":"address",
+            "name":"_spender",
+            "type":"address"
+        },
+        {
+            "internalType":"uint256",
+            "name":"_amount",
+            "type":"uint256"
+        }
+        ],
+        "name":"approve",
+        "outputs":[
+        {
+            "internalType":"bool",
+            "name":"",
+            "type":"bool"
+        }
+        ],
+        "stateMutability":"nonpayable",
+        "type":"function"
+    }
+]'''
+
+tellor_depositStake_abi = '''[
+    {
+        "inputs":[
+        {
+            "internalType":"uint256",
+            "name":"_amount",
+            "type":"uint256"
+        }
+        ],
+        "name":"depositStake",
+        "outputs":[],
+        "stateMutability":"nonpayable",
+        "type":"function"
+    }
+]'''
