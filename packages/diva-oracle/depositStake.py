@@ -22,7 +22,14 @@ if __name__ == "__main__":
     printn("RUNNING DEPOSIT STAKE SCRIPT", 'green')
     printn("START TIME: %s " % start + f'({dt.datetime.astimezone(start).tzinfo.__str__()})', 'green')
     printn("USER: {}\n".format(config.PUBLIC_KEY), 'green')
-    x = input("Enter Amount: ")
     printn("")
-    depositStake(x, network, w3, tellor_token_contract, tellor_flex_contract)
+
+    allowance = int(w3.fromWei(tellor_token_contract.functions._allowances(config.PUBLIC_KEY, tellor_flex_contract.address).call(), 'ether'))
+    balance = int(w3.fromWei(tellor_token_contract.functions.balanceOf(config.PUBLIC_KEY).call(), 'ether'))
+    printn(f"User allowance: {allowance} TRB")
+    printn(f"User balance: {balance} TRB")
+    printn("")
+    x = input("Enter staking amount: ")
+    printn("")
+    depositStake(int(x), network, w3, tellor_token_contract, tellor_flex_contract, int(allowance))
 

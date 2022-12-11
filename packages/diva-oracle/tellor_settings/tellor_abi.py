@@ -320,6 +320,31 @@ tellor_dispute_abi = '''[
 ]'''
 
 tellor_approve_abi = '''[
+{"inputs":[{"internalType":"address","name":"_user","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+
+    {
+        "inputs":[
+        {
+            "internalType":"address",
+            "name":"",
+            "type":"address"
+        },
+        {
+            "internalType":"address",
+            "name":"",
+            "type":"address"}
+        ],
+        "name":"_allowances",
+        "outputs":[
+        {
+            "internalType":"uint256",
+            "name":"",
+            "type":"uint256"
+        }
+        ],
+        "stateMutability":"view",
+        "type":"function"
+    },
     {
         "inputs":[
         {
