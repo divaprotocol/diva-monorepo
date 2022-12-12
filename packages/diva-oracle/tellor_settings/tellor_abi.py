@@ -384,5 +384,6 @@ tellor_depositStake_abi = '''[
         "outputs":[],
         "stateMutability":"nonpayable",
         "type":"function"
-    }
+    },
+    {"inputs":[{"internalType":"address","name":"_stakerAddress","type":"address"}],"name":"getStakerInfo","outputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"}
 ]'''

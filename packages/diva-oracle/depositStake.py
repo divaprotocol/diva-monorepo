@@ -26,6 +26,8 @@ if __name__ == "__main__":
 
     allowance = int(w3.fromWei(tellor_token_contract.functions._allowances(config.PUBLIC_KEY, tellor_flex_contract.address).call(), 'ether'))
     balance = int(w3.fromWei(tellor_token_contract.functions.balanceOf(config.PUBLIC_KEY).call(), 'ether'))
+    staked = int(w3.fromWei(tellor_flex_contract.functions.getStakerInfo(config.PUBLIC_KEY).call()[1], 'ether'))
+    printn(f"Already staked: {staked} TRB")
     printn(f"User allowance: {allowance} TRB")
     printn(f"User balance: {balance} TRB")
     printn("")
