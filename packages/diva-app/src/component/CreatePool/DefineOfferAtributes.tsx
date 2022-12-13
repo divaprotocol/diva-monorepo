@@ -58,16 +58,42 @@ export function DefineOfferAttributes({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const today = new Date()
+  const {
+    referenceAsset,
+    expiryTime,
+    collateralToken,
+    collateralBalance,
+    inflection,
+    capacity,
+    cap,
+    floor,
+    gradient,
+    payoutProfile,
+    yourShare,
+    takerShare,
+  } = formik.values
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-  const [value, setValue] = useState('Binary')
-  const [direction, setDirection] = useState('Long')
-  const [offerExpiry, setOfferExpiry] = useState(Date.now() + 24 * 60 * 60000) // 1 Day
-  const [expanded, setExpanded] = useState(false)
-  const [everyone, setEveryone] = useState(true)
+  const [value, setValue] = useState(formik.values.payoutProfile)
+  const [direction, setDirection] = useState(formik.values.offerDirection)
+  const [offerExpiry, setOfferExpiry] = useState(
+    Number(formik.values.offerExpiry) * 1000
+  ) // 1 Day
+  const [expanded, setExpanded] = useState(
+    formik.values.takerAddress !== ethers.constants.AddressZero ||
+      capacity !== 'Unlimited' ||
+      Number(formik.values.minTakerContribution) ===
+        formik.values.collateralBalance - formik.values.yourShare
+  )
+  const [everyone, setEveryone] = useState(
+    formik.values.takerAddress === ethers.constants.AddressZero
+  )
   const [offerExpiryToggle, setOfferExpiryToggle] = useState('1 Day')
-  const [fillOrKill, setFillOrKill] = useState(false)
+  const [fillOrKill, setFillOrKill] = useState(
+    Number(formik.values.minTakerContribution) ===
+      formik.values.collateralBalance - formik.values.yourShare
+  )
   const [mobile, setMobile] = useState(false)
-  const [unlimited, setUnlimited] = useState(true)
+  const [unlimited, setUnlimited] = useState(capacity == 'Unlimited')
   const account = useAppSelector(selectUserAddress)
   const { isConnected, disconnect, connect } = useConnectionContext()
   useEffect(() => {
@@ -119,20 +145,7 @@ export function DefineOfferAttributes({
     formik.setFieldValue('minTakerContribution', event.target.value)
   }
   const { referenceAssets, collateralTokens } = useWhitelist()
-  const {
-    referenceAsset,
-    expiryTime,
-    collateralToken,
-    collateralBalance,
-    inflection,
-    capacity,
-    cap,
-    floor,
-    gradient,
-    payoutProfile,
-    yourShare,
-    takerShare,
-  } = formik.values
+
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
   useEffect(() => {
     if (payoutProfile === 'Binary') {
@@ -228,47 +241,42 @@ export function DefineOfferAttributes({
         ..._values,
         capacity: 'Unlimited',
       }))
-    } else {
-      formik.setValues((_values) => ({
-        ..._values,
-        capacity: formik.values.collateralBalance.toString(),
-      }))
     }
   }, [unlimited, formik.values.collateralBalance])
-  useEffect(() => {
-    switch (payoutProfile) {
-      case 'Binary':
-        formik.setFieldValue('cap', formik.values.inflection)
-        formik.setFieldValue('floor', formik.values.inflection)
-        formik.setFieldValue('gradient', 1)
-        break
-      case 'Linear':
-        formik.setFieldValue('gradient', 0.5)
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        break
-      case 'Custom':
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'inflection',
-          (formik.values.cap + formik.values.floor) / 2
-        )
-        break
-    }
-  }, [payoutProfile])
+  // useEffect(() => {
+  //   switch (payoutProfile) {
+  //     case 'Binary':
+  //       formik.setFieldValue('cap', formik.values.inflection)
+  //       formik.setFieldValue('floor', formik.values.inflection)
+  //       formik.setFieldValue('gradient', 1)
+  //       break
+  //     case 'Linear':
+  //       formik.setFieldValue('gradient', 0.5)
+  //       formik.setFieldValue(
+  //         'cap',
+  //         formik.values.inflection + formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'floor',
+  //         formik.values.inflection - formik.values.inflection / 2
+  //       )
+  //       break
+  //     case 'Custom':
+  //       formik.setFieldValue(
+  //         'cap',
+  //         formik.values.inflection + formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'floor',
+  //         formik.values.inflection - formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'inflection',
+  //         (formik.values.cap + formik.values.floor) / 2
+  //       )
+  //       break
+  //   }
+  // }, [payoutProfile])
 
   return (
     <Stack direction={mobile ? 'column' : 'row'}>
@@ -389,7 +397,7 @@ export function DefineOfferAttributes({
                 row
                 aria-labelledby="demo-row-radio-buttons-group-label"
                 name="row-radio-buttons-group"
-                value={value}
+                value={formik.values.payoutProfile}
                 onChange={handleChange}
               >
                 <FormControlLabel
@@ -774,7 +782,7 @@ export function DefineOfferAttributes({
                   row
                   aria-labelledby="demo-row-radio-buttons-group-label"
                   name="row-radio-buttons-group"
-                  value={direction}
+                  value={formik.values.offerDirection}
                   onChange={handleDirectionChange}
                 >
                   <FormControlLabel

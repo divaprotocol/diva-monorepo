@@ -53,7 +53,7 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-  const [value, setValue] = useState('Binary')
+  const [value, setValue] = useState(formik.values.payoutProfile)
   const [mobile, setMobile] = useState(false)
   const handleChange = (event) => {
     setValue(event.target.value)
@@ -152,40 +152,40 @@ export function DefinePoolAttributes({
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
-  useEffect(() => {
-    switch (payoutProfile) {
-      case 'Binary':
-        formik.setFieldValue('cap', formik.values.inflection)
-        formik.setFieldValue('floor', formik.values.inflection)
-        formik.setFieldValue('gradient', 1)
-        break
-      case 'Linear':
-        formik.setFieldValue('gradient', 0.5)
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        break
-      case 'Custom':
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'inflection',
-          (formik.values.cap + formik.values.floor) / 2
-        )
-        break
-    }
-  }, [payoutProfile])
+  // useEffect(() => {
+  //   switch (payoutProfile) {
+  //     case 'Binary':
+  //       formik.setFieldValue('cap', formik.values.inflection)
+  //       formik.setFieldValue('floor', formik.values.inflection)
+  //       formik.setFieldValue('gradient', 1)
+  //       break
+  //     case 'Linear':
+  //       formik.setFieldValue('gradient', 0.5)
+  //       formik.setFieldValue(
+  //         'cap',
+  //         formik.values.inflection + formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'floor',
+  //         formik.values.inflection - formik.values.inflection / 2
+  //       )
+  //       break
+  //     case 'Custom':
+  //       formik.setFieldValue(
+  //         'cap',
+  //         formik.values.inflection + formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'floor',
+  //         formik.values.inflection - formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'inflection',
+  //         (formik.values.cap + formik.values.floor) / 2
+  //       )
+  //       break
+  //   }
+  // }, [payoutProfile])
 
   return (
     <Stack direction={mobile ? 'column' : 'row'}>
@@ -307,7 +307,7 @@ export function DefinePoolAttributes({
                 row
                 aria-labelledby="demo-row-radio-buttons-group-label"
                 name="row-radio-buttons-group"
-                value={value}
+                value={formik.values.payoutProfile}
                 onChange={handleChange}
               >
                 <FormControlLabel
