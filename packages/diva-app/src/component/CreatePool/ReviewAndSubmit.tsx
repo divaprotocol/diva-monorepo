@@ -42,6 +42,9 @@ import { useErcBalance } from '../../hooks/useErcBalance'
 import { setMaxPayout } from '../../Redux/Stats'
 import { ExpandMoreOutlined } from '@mui/icons-material'
 import { _checkConditions } from '../ApproveActionButtons'
+import KeyboardDoubleArrowUpOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowUpOutlined'
+import KeyboardDoubleArrowDownOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowDownOutlined'
+import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -853,74 +856,90 @@ export function ReviewAndSubmit({
                 }}
               >
                 <Container>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ mt: theme.spacing(2) }}
-                    style={{ color: 'white' }}
-                  >
-                    {values.offerDirection === 'Long' ? (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>0.00x</span>
-                      </strong>
-                    ) : (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>
-                          {maxYieldTaker.toFixed(2) + 'x'}
-                        </span>
-                      </strong>
-                    )}{' '}
-                    if reported outcome is{' '}
-                    {values.floor < values.inflection &&
-                    values.inflection < values.cap
-                      ? 'at or '
-                      : ''}{' '}
-                    below {values.floor}
-                  </Typography>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ mt: theme.spacing(2) }}
-                    style={{ color: 'white' }}
-                  >
-                    {values.offerDirection === 'Long' ? (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>
-                          {maxYieldTaker.toFixed(2) + 'x'}
-                        </span>
-                      </strong>
-                    ) : (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>0.00x</span>
-                      </strong>
-                    )}{' '}
-                    if reported outcome is{' '}
-                    {values.floor < values.inflection &&
-                    values.inflection < values.cap
-                      ? 'at or '
-                      : ''}{' '}
-                    above {values.cap}{' '}
-                  </Typography>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                    style={{ color: 'white' }}
-                  >
-                    {values.offerDirection === 'Long' ? (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>
-                          {(values.gradient * maxYieldTaker).toFixed(2) + 'x'}
-                        </span>
-                      </strong>
-                    ) : (
-                      <strong>
-                        <span style={{ color: '#3393E0' }}>
-                          {((1 - values.gradient) * maxYieldTaker).toFixed(2) +
-                            'x'}
-                        </span>
-                      </strong>
-                    )}{' '}
-                    if reported outcome is
-                    {' ' + values.inflection}
-                  </Typography>
+                  <Stack direction={'row'}>
+                    <KeyboardDoubleArrowUpOutlinedIcon
+                      sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                    />
+                    <Typography
+                      fontSize={'0.85rem'}
+                      sx={{ mt: theme.spacing(2) }}
+                      style={{ color: 'white' }}
+                    >
+                      {values.offerDirection === 'Long' ? (
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>0.00x</span>
+                        </strong>
+                      ) : (
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {maxYieldTaker.toFixed(2) + 'x'}
+                          </span>
+                        </strong>
+                      )}{' '}
+                      if reported outcome is{' '}
+                      {values.floor < values.inflection &&
+                      values.inflection < values.cap
+                        ? 'at or '
+                        : ''}{' '}
+                      below {values.floor}
+                    </Typography>
+                  </Stack>
+                  <Stack direction={'row'}>
+                    <KeyboardDoubleArrowRightOutlinedIcon
+                      sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                    />
+                    <Typography
+                      fontSize={'0.85rem'}
+                      sx={{ mt: theme.spacing(2) }}
+                      style={{ color: 'white' }}
+                    >
+                      {values.offerDirection === 'Long' ? (
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {maxYieldTaker.toFixed(2) + 'x'}
+                          </span>
+                        </strong>
+                      ) : (
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>0.00x</span>
+                        </strong>
+                      )}{' '}
+                      if reported outcome is{' '}
+                      {values.floor < values.inflection &&
+                      values.inflection < values.cap
+                        ? 'at or '
+                        : ''}{' '}
+                      above {values.cap}{' '}
+                    </Typography>
+                  </Stack>
+                  <Stack direction={'row'}>
+                    <KeyboardDoubleArrowDownOutlinedIcon
+                      sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                    />
+                    <Typography
+                      fontSize={'0.85rem'}
+                      sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                      style={{ color: 'white' }}
+                    >
+                      {values.offerDirection === 'Long' ? (
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {(values.gradient * maxYieldTaker).toFixed(2) + 'x'}
+                          </span>
+                        </strong>
+                      ) : (
+                        <strong>
+                          <span style={{ color: '#3393E0' }}>
+                            {((1 - values.gradient) * maxYieldTaker).toFixed(
+                              2
+                            ) + 'x'}
+                          </span>
+                        </strong>
+                      )}{' '}
+                      if reported outcome is
+                      {' ' + values.inflection}
+                    </Typography>
+                  </Stack>
                 </Container>
               </Card>
             </Box>
@@ -936,150 +955,165 @@ export function ReviewAndSubmit({
                 }}
               >
                 <Container>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ mt: theme.spacing(2) }}
-                    style={{ color: 'white' }}
-                  >
-                    {values.offerDirection === 'Long' ? (
-                      <>
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>0.00x</span>
-                        </strong>{' '}
-                        your /{' '}
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>
-                            {(
-                              formik.values.collateralBalance /
-                              formik.values.takerShare
-                            ).toFixed(2) + 'x'}
-                          </span>
-                        </strong>{' '}
-                        taker multiple{' '}
-                      </>
-                    ) : (
-                      <>
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>
-                            {(
-                              formik.values.collateralBalance /
-                              formik.values.yourShare
-                            ).toFixed(2) + 'x'}
-                          </span>
-                        </strong>{' '}
-                        your /{' '}
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>0.00x</span>
-                        </strong>{' '}
-                        taker multiple{' '}
-                      </>
-                    )}
-                    if the reported outcome is{' '}
-                    {values.floor < values.inflection &&
-                    values.inflection < values.cap
-                      ? 'at or '
-                      : ''}{' '}
-                    below {values.floor}{' '}
-                  </Typography>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ mt: theme.spacing(2) }}
-                    style={{ color: 'white' }}
-                  >
-                    {values.offerDirection === 'Long' ? (
-                      <>
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>
-                            {(
-                              formik.values.collateralBalance /
-                              formik.values.yourShare
-                            ).toFixed(2) + 'x'}
-                          </span>
-                        </strong>{' '}
-                        your /{' '}
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>0.00x</span>
-                        </strong>{' '}
-                        taker multiple{' '}
-                      </>
-                    ) : (
-                      <>
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>0.00x</span>
-                        </strong>{' '}
-                        your /{' '}
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>
-                            {(
-                              formik.values.collateralBalance /
-                              formik.values.takerShare
-                            ).toFixed(2) + 'x'}
-                          </span>
-                        </strong>{' '}
-                        taker multiple{' '}
-                      </>
-                    )}
-                    if the reported outcome is{' '}
-                    {values.floor < values.inflection &&
-                    values.inflection < values.cap
-                      ? 'at or '
-                      : ''}{' '}
-                    above {values.cap}{' '}
-                  </Typography>
-                  <Typography
-                    fontSize={'0.85rem'}
-                    sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                    style={{ color: 'white' }}
-                  >
-                    {values.offerDirection === 'Long' ? (
-                      <>
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>
-                            {(
-                              (values.gradient *
-                                formik.values.collateralBalance) /
-                              formik.values.yourShare
-                            ).toFixed(2) + 'x'}
-                          </span>
-                        </strong>{' '}
-                        your /{' '}
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>
-                            {(
-                              ((1 - values.gradient) *
-                                formik.values.collateralBalance) /
-                              formik.values.takerShare
-                            ).toFixed(2) + 'x'}
-                          </span>
-                        </strong>{' '}
-                        taker multiple{' '}
-                      </>
-                    ) : (
-                      <>
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>
-                            {(
-                              ((1 - values.gradient) *
-                                formik.values.collateralBalance) /
-                              formik.values.yourShare
-                            ).toFixed(2) + 'x'}
-                          </span>
-                        </strong>{' '}
-                        your /{' '}
-                        <strong>
-                          <span style={{ color: '#3393E0' }}>
-                            {(
-                              (values.gradient *
-                                formik.values.collateralBalance) /
-                              formik.values.takerShare
-                            ).toFixed(2) + 'x'}
-                          </span>
-                        </strong>{' '}
-                        taker multiple{' '}
-                      </>
-                    )}
-                    if the reported outcome is {values.inflection}
-                  </Typography>
+                  <Stack direction={'row'}>
+                    <KeyboardDoubleArrowUpOutlinedIcon
+                      sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                    />
+                    <Typography
+                      fontSize={'0.85rem'}
+                      sx={{ mt: theme.spacing(2) }}
+                      style={{ color: 'white' }}
+                    >
+                      {values.offerDirection === 'Long' ? (
+                        <>
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>0.00x</span>
+                          </strong>{' '}
+                          your /{' '}
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>
+                              {(
+                                formik.values.collateralBalance /
+                                formik.values.takerShare
+                              ).toFixed(2) + 'x'}
+                            </span>
+                          </strong>{' '}
+                          taker multiple{' '}
+                        </>
+                      ) : (
+                        <>
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>
+                              {(
+                                formik.values.collateralBalance /
+                                formik.values.yourShare
+                              ).toFixed(2) + 'x'}
+                            </span>
+                          </strong>{' '}
+                          your /{' '}
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>0.00x</span>
+                          </strong>{' '}
+                          taker multiple{' '}
+                        </>
+                      )}
+                      if the reported outcome is{' '}
+                      {values.floor < values.inflection &&
+                      values.inflection < values.cap
+                        ? 'at or '
+                        : ''}{' '}
+                      below {values.floor}{' '}
+                    </Typography>
+                  </Stack>
+                  <Stack direction={'row'}>
+                    <KeyboardDoubleArrowRightOutlinedIcon
+                      sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                    />
+                    <Typography
+                      fontSize={'0.85rem'}
+                      sx={{ mt: theme.spacing(2) }}
+                      style={{ color: 'white' }}
+                    >
+                      {values.offerDirection === 'Long' ? (
+                        <>
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>
+                              {(
+                                formik.values.collateralBalance /
+                                formik.values.yourShare
+                              ).toFixed(2) + 'x'}
+                            </span>
+                          </strong>{' '}
+                          your /{' '}
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>0.00x</span>
+                          </strong>{' '}
+                          taker multiple{' '}
+                        </>
+                      ) : (
+                        <>
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>0.00x</span>
+                          </strong>{' '}
+                          your /{' '}
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>
+                              {(
+                                formik.values.collateralBalance /
+                                formik.values.takerShare
+                              ).toFixed(2) + 'x'}
+                            </span>
+                          </strong>{' '}
+                          taker multiple{' '}
+                        </>
+                      )}
+                      if the reported outcome is{' '}
+                      {values.floor < values.inflection &&
+                      values.inflection < values.cap
+                        ? 'at or '
+                        : ''}{' '}
+                      above {values.cap}{' '}
+                    </Typography>
+                  </Stack>
+                  <Stack direction={'row'}>
+                    <KeyboardDoubleArrowDownOutlinedIcon
+                      sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                    />
+                    <Typography
+                      fontSize={'0.85rem'}
+                      sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                      style={{ color: 'white' }}
+                    >
+                      {values.offerDirection === 'Long' ? (
+                        <>
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>
+                              {(
+                                (values.gradient *
+                                  formik.values.collateralBalance) /
+                                formik.values.yourShare
+                              ).toFixed(2) + 'x'}
+                            </span>
+                          </strong>{' '}
+                          your /{' '}
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>
+                              {(
+                                ((1 - values.gradient) *
+                                  formik.values.collateralBalance) /
+                                formik.values.takerShare
+                              ).toFixed(2) + 'x'}
+                            </span>
+                          </strong>{' '}
+                          taker multiple{' '}
+                        </>
+                      ) : (
+                        <>
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>
+                              {(
+                                ((1 - values.gradient) *
+                                  formik.values.collateralBalance) /
+                                formik.values.yourShare
+                              ).toFixed(2) + 'x'}
+                            </span>
+                          </strong>{' '}
+                          your /{' '}
+                          <strong>
+                            <span style={{ color: '#3393E0' }}>
+                              {(
+                                (values.gradient *
+                                  formik.values.collateralBalance) /
+                                formik.values.takerShare
+                              ).toFixed(2) + 'x'}
+                            </span>
+                          </strong>{' '}
+                          taker multiple{' '}
+                        </>
+                      )}
+                      if the reported outcome is {values.inflection}
+                    </Typography>
+                  </Stack>
                 </Container>
               </Card>
             </Box>
@@ -1094,88 +1128,103 @@ export function ReviewAndSubmit({
               }}
             >
               <Container>
-                <Typography
-                  fontSize={'0.85rem'}
-                  sx={{ mt: theme.spacing(2) }}
-                  style={{ color: 'white' }}
-                >
-                  <strong>
-                    0.00{' '}
-                    {values.collateralToken != null
-                      ? values.collateralToken.symbol
-                      : ''}
-                    /LONG
-                  </strong>{' '}
-                  and
-                  <strong>
-                    {' '}
-                    1.00{' '}
-                    {values.collateralToken != null
-                      ? values.collateralToken.symbol
-                      : ''}
-                    /SHORT
-                  </strong>{' '}
-                  token if the reported outcome is{' '}
-                  {values.floor < values.inflection &&
-                  values.inflection < values.cap
-                    ? 'at or '
-                    : ''}{' '}
-                  below {values.floor}{' '}
-                </Typography>
-                <Typography
-                  fontSize={'0.85rem'}
-                  sx={{ mt: theme.spacing(2) }}
-                  style={{ color: 'white' }}
-                >
-                  <strong>
-                    1.00{' '}
-                    {values.collateralToken != null
-                      ? values.collateralToken.symbol
-                      : ''}
-                    /LONG
-                  </strong>{' '}
-                  and
-                  <strong>
-                    {' '}
-                    0.00{' '}
-                    {values.collateralToken != null
-                      ? values.collateralToken.symbol
-                      : ''}
-                    /SHORT
-                  </strong>{' '}
-                  token if the reported outcome is{' '}
-                  {values.floor < values.inflection &&
-                  values.inflection < values.cap
-                    ? 'at or '
-                    : ''}{' '}
-                  above {values.cap}{' '}
-                </Typography>
-                <Typography
-                  fontSize={'0.85rem'}
-                  sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                  style={{ color: 'white' }}
-                >
-                  <strong>
-                    {values.gradient.toString() !== ''
-                      ? values.gradient.toFixed(2)
-                      : 0}{' '}
-                    {values.collateralToken != null
-                      ? values.collateralToken.symbol
-                      : ''}
-                    /LONG
-                  </strong>{' '}
-                  and{' '}
-                  <strong>
-                    {values.gradient.toString() !== ''
-                      ? (1 - values.gradient).toFixed(2)
-                      : 1}{' '}
-                    {values.collateralToken != null
-                      ? values.collateralToken.symbol
-                      : ''}
-                    /SHORT
-                  </strong>{' '}
-                  token if the reported outcome is {values.inflection}
-                </Typography>
+                <Stack direction={'row'}>
+                  <KeyboardDoubleArrowUpOutlinedIcon
+                    sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                  />
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    <strong>
+                      0.00{' '}
+                      {values.collateralToken != null
+                        ? values.collateralToken.symbol
+                        : ''}
+                      /LONG
+                    </strong>{' '}
+                    and
+                    <strong>
+                      {' '}
+                      1.00{' '}
+                      {values.collateralToken != null
+                        ? values.collateralToken.symbol
+                        : ''}
+                      /SHORT
+                    </strong>{' '}
+                    token if the reported outcome is{' '}
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    below {values.floor}{' '}
+                  </Typography>
+                </Stack>
+                <Stack direction={'row'}>
+                  <KeyboardDoubleArrowRightOutlinedIcon
+                    sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                  />
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    <strong>
+                      1.00{' '}
+                      {values.collateralToken != null
+                        ? values.collateralToken.symbol
+                        : ''}
+                      /LONG
+                    </strong>{' '}
+                    and
+                    <strong>
+                      {' '}
+                      0.00{' '}
+                      {values.collateralToken != null
+                        ? values.collateralToken.symbol
+                        : ''}
+                      /SHORT
+                    </strong>{' '}
+                    token if the reported outcome is{' '}
+                    {values.floor < values.inflection &&
+                    values.inflection < values.cap
+                      ? 'at or '
+                      : ''}{' '}
+                    above {values.cap}{' '}
+                  </Typography>
+                </Stack>
+                <Stack direction={'row'}>
+                  <KeyboardDoubleArrowDownOutlinedIcon
+                    sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                  />
+                  <Typography
+                    fontSize={'0.85rem'}
+                    sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                    style={{ color: 'white' }}
+                  >
+                    <strong>
+                      {values.gradient.toString() !== ''
+                        ? values.gradient.toFixed(2)
+                        : 0}{' '}
+                      {values.collateralToken != null
+                        ? values.collateralToken.symbol
+                        : ''}
+                      /LONG
+                    </strong>{' '}
+                    and{' '}
+                    <strong>
+                      {values.gradient.toString() !== ''
+                        ? (1 - values.gradient).toFixed(2)
+                        : 1}{' '}
+                      {values.collateralToken != null
+                        ? values.collateralToken.symbol
+                        : ''}
+                      /SHORT
+                    </strong>{' '}
+                    token if the reported outcome is {values.inflection}
+                  </Typography>
+                </Stack>
               </Container>
             </Card>
           )}
