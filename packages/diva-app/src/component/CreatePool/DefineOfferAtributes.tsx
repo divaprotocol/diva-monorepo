@@ -792,7 +792,7 @@ export function DefineOfferAttributes({
               sx={{
                 width: '100%',
                 pt: theme.spacing(5),
-                ml: theme.spacing(3),
+                ml: theme.spacing(mobile ? 0 : 3),
                 pr: theme.spacing(3),
               }}
             >
