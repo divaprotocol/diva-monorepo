@@ -27,13 +27,30 @@ export function DefineAdvanced({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const theme = useTheme()
+  const { capacity, longRecipient, shortRecipient } = formik.values
   const userAddress = useAppSelector(selectUserAddress)
-  const [expanded, setExpanded] = useState(false)
-  const [unlimited, setUnlimited] = useState(true)
-  const { capacity } = formik.values
+  const [expanded, setExpanded] = useState(
+    capacity != 'Unlimited' ||
+      (longRecipient !== undefined &&
+        userAddress !== undefined &&
+        longRecipient.toLowerCase() !== userAddress.toLowerCase()) ||
+      (longRecipient !== undefined &&
+        userAddress !== undefined &&
+        longRecipient.toLowerCase() !== userAddress.toLowerCase())
+  )
+  const [unlimited, setUnlimited] = useState(capacity == 'Unlimited')
+
   const [mobile, setMobile] = useState(false)
-  const [editTaker, setEditTaker] = useState(false)
-  const [editMaker, setEditMaker] = useState(false)
+  const [editTaker, setEditTaker] = useState(
+    shortRecipient !== undefined &&
+      userAddress !== undefined &&
+      shortRecipient.toLowerCase() !== userAddress.toLowerCase()
+  )
+  const [editMaker, setEditMaker] = useState(
+    longRecipient !== undefined &&
+      userAddress !== undefined &&
+      longRecipient.toLowerCase() !== userAddress.toLowerCase()
+  )
 
   useEffect(() => {
     formik.setFieldValue('shortRecipient', userAddress)
