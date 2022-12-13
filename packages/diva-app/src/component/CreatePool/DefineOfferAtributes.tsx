@@ -22,7 +22,7 @@ import {
   Accordion,
   InputLabel,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
@@ -41,6 +41,9 @@ import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import { PayoffProfile } from '../Graphs/payOffProfile'
 import { toExponentialOrNumber } from '../../Util/utils'
+import KeyboardDoubleArrowUpOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowUpOutlined'
+import KeyboardDoubleArrowDownOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowDownOutlined'
+import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -1064,140 +1067,155 @@ export function DefineOfferAttributes({
             }}
           >
             <Container>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                {direction === 'Long' ? (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>0.00x</span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          formik.values.collateralBalance /
-                          formik.values.takerShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                ) : (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          formik.values.collateralBalance /
-                          formik.values.yourShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>0.00x</span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                )}
-                if the reported outcome is{' '}
-                {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
-                {floor}{' '}
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                {direction === 'Long' ? (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          formik.values.collateralBalance /
-                          formik.values.yourShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>0.00x</span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                ) : (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>0.00x</span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          formik.values.collateralBalance /
-                          formik.values.takerShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                )}
-                if the reported outcome is{' '}
-                {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
-                {cap}{' '}
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                {direction === 'Long' ? (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          (gradient * formik.values.collateralBalance) /
-                          formik.values.yourShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          ((1 - gradient) * formik.values.collateralBalance) /
-                          formik.values.takerShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                ) : (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          ((1 - gradient) * formik.values.collateralBalance) /
-                          formik.values.yourShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          (gradient * formik.values.collateralBalance) /
-                          formik.values.takerShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                )}
-                if the reported outcome is {inflection}
-              </Typography>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowUpOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  {direction === 'Long' ? (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            formik.values.collateralBalance /
+                            formik.values.takerShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  ) : (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            formik.values.collateralBalance /
+                            formik.values.yourShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  )}
+                  if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
+                  {floor}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowRightOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  {direction === 'Long' ? (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            formik.values.collateralBalance /
+                            formik.values.yourShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  ) : (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            formik.values.collateralBalance /
+                            formik.values.takerShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  )}
+                  if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
+                  {cap}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowDownOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  {direction === 'Long' ? (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            (gradient * formik.values.collateralBalance) /
+                            formik.values.yourShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            ((1 - gradient) * formik.values.collateralBalance) /
+                            formik.values.takerShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  ) : (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            ((1 - gradient) * formik.values.collateralBalance) /
+                            formik.values.yourShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            (gradient * formik.values.collateralBalance) /
+                            formik.values.takerShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  )}
+                  if the reported outcome is {inflection}
+                </Typography>
+              </Stack>
             </Container>
           </Card>
         </Stack>

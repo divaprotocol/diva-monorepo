@@ -1,5 +1,8 @@
 import { DateTimePicker } from '@mui/lab'
 import ClockIcon from '@mui/icons-material/AccessTime'
+import KeyboardDoubleArrowUpOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowUpOutlined'
+import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined'
+import KeyboardDoubleArrowDownOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowDownOutlined'
 import {
   Box,
   FormControl,
@@ -639,62 +642,78 @@ export function DefinePoolAttributes({
             }}
           >
             <Container>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <strong>
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /SHORT
-                </strong>{' '}
-                token if the reported outcome is{' '}
-                {floor < inflection && inflection < cap
-                  ? 'at or '
-                  : ''} below {floor}{' '}
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <strong>
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /SHORT
-                </strong>{' '}
-                token if the reported outcome is{' '}
-                {floor < inflection && inflection < cap
-                  ? 'at or '
-                  : ''} above {cap}{' '}
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <strong>
-                  {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''}/LONG
-                </strong>{' '}
-                and{' '}
-                <strong>
-                  {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''}/SHORT
-                </strong>{' '}
-                token if the reported outcome is {inflection}
-              </Typography>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowUpOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /LONG
+                  </strong>{' '}
+                  and
+                  <strong>
+                    {' '}
+                    1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap
+                    ? 'at or '
+                    : ''} below {floor}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowRightOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /LONG
+                  </strong>{' '}
+                  and
+                  <strong>
+                    {' '}
+                    0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap
+                    ? 'at or '
+                    : ''} above {cap}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowDownOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
+                    {collateralToken != null ? collateralToken.symbol : ''}/LONG
+                  </strong>{' '}
+                  and{' '}
+                  <strong>
+                    {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
+                    {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is {inflection}
+                </Typography>
+              </Stack>
             </Container>
           </Card>
         </Stack>
