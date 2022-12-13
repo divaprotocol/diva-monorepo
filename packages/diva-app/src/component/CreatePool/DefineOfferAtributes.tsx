@@ -238,11 +238,6 @@ export function DefineOfferAttributes({
         ..._values,
         capacity: 'Unlimited',
       }))
-    } else {
-      formik.setValues((_values) => ({
-        ..._values,
-        capacity: formik.values.collateralBalance.toString(),
-      }))
     }
   }, [unlimited, formik.values.collateralBalance])
   // useEffect(() => {
