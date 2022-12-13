@@ -196,6 +196,7 @@ export function DefineAdvanced({
                   <Checkbox
                     defaultChecked={editTaker}
                     onChange={() => {
+                      formik.setFieldValue('shortRecipient', userAddress)
                       setEditTaker(!editTaker)
                     }}
                   />
