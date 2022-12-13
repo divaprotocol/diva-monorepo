@@ -851,26 +851,6 @@ export function MyOrders() {
           </Stack>
         ) : (
           <Stack height="100%" width="100%">
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'end',
-                flexDirection: 'column',
-                paddingBottom: theme.spacing(2),
-              }}
-            >
-              <Input
-                value={search}
-                placeholder="Filter underlying"
-                aria-label="Filter underlying"
-                onChange={(e) => setSearch(e.target.value)}
-                startAdornment={
-                  <InputAdornment position="start">
-                    <Search />
-                  </InputAdornment>
-                }
-              />
-            </Box>
             <DataGrid
               className={classes.root}
               rows={filteredRows}
