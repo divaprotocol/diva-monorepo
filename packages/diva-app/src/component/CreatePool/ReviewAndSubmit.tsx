@@ -696,7 +696,8 @@ export function ReviewAndSubmit({
                               role="button"
                               onClick={() => {
                                 if (
-                                  actualFillableAmount > collateralWalletBalance
+                                  parseFloat(actualFillableAmount) >
+                                  parseFloat(collateralWalletBalance)
                                 ) {
                                   formik.setFieldValue(
                                     'yourShare',
