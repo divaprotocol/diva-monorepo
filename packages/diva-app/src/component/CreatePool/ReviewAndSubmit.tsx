@@ -143,7 +143,6 @@ export function ReviewAndSubmit({
           formik.values.signature
         )
         .then((params: any) => {
-          console.log('7.999999999999999992')
           setActualFillableAmount(
             formatUnits(params.actualTakerFillableAmount, decimal)
           )
