@@ -166,6 +166,12 @@ export function DefineOfferAttributes({
   }, [formik.values.cap, formik.values.inflection])
   useEffect(() => {
     formik.setFieldValue('takerShare', collateralBalance - yourShare)
+    if (fillOrKill) {
+      formik.setFieldValue(
+        'minTakerContribution',
+        collateralBalance - yourShare
+      )
+    }
   }, [formik.values])
 
   useEffect(() => {
