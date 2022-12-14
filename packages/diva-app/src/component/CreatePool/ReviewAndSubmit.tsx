@@ -782,7 +782,13 @@ export function ReviewAndSubmit({
                       mb: theme.spacing(1),
                     }}
                   >
-                    Remaining: {actualFillableAmount} {tokenSymbol}
+                    Remaining:{' '}
+                    {toExponentialOrNumber(
+                      parseFloat(actualFillableAmount),
+                      2,
+                      2
+                    )}{' '}
+                    {tokenSymbol}
                   </FormHelperText>
                 </Container>
               </Card>
