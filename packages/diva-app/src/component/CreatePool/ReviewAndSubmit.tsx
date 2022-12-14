@@ -144,7 +144,7 @@ export function ReviewAndSubmit({
         )
         .then((params: any) => {
           setActualFillableAmount(
-            Number(formatUnits(params.actualTakerFillableAmount, decimal))
+            formatUnits(params.actualTakerFillableAmount, decimal)
           )
           setTakerFilledAmount(
             Number(formatUnits(params.offerInfo.takerFilledAmount, decimal))
@@ -179,8 +179,8 @@ export function ReviewAndSubmit({
   }, [decimal, diva, formik.values.jsonToExport])
   useEffect(() => {
     if (transaction === 'filloffer' && diva !== undefined) {
-      formik.setFieldValue('yourShare', Number(actualFillableAmount))
-      setMaxPayout(Number(actualFillableAmount) * maxYieldTaker)
+      formik.setFieldValue('yourShare', actualFillableAmount)
+      setMaxPayout(parseFloat(actualFillableAmount) * maxYieldTaker)
     }
   }, [actualFillableAmount, decimal])
   useEffect(() => {
@@ -696,7 +696,8 @@ export function ReviewAndSubmit({
                               role="button"
                               onClick={() => {
                                 if (
-                                  actualFillableAmount > collateralWalletBalance
+                                  parseFloat(actualFillableAmount) >
+                                  parseFloat(collateralWalletBalance)
                                 ) {
                                   formik.setFieldValue(
                                     'yourShare',
@@ -782,7 +783,11 @@ export function ReviewAndSubmit({
                     }}
                   >
                     Remaining:{' '}
-                    {toExponentialOrNumber(actualFillableAmount, 2, 2)}{' '}
+                    {toExponentialOrNumber(
+                      parseFloat(actualFillableAmount),
+                      2,
+                      2
+                    )}{' '}
                     {tokenSymbol}
                   </FormHelperText>
                 </Container>
