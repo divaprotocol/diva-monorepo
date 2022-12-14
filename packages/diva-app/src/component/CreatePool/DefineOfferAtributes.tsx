@@ -166,10 +166,8 @@ export function DefineOfferAttributes({
   }, [formik.values.cap, formik.values.inflection])
   useEffect(() => {
     formik.setFieldValue('takerShare', collateralBalance - yourShare)
-  }, [collateralBalance])
-  useEffect(() => {
-    formik.setFieldValue('takerShare', collateralBalance - yourShare)
-  }, [yourShare])
+  }, [formik.values])
+
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', () => {
@@ -737,17 +735,9 @@ export function DefineOfferAttributes({
                     onBlur={formik.handleBlur}
                     disabled={true}
                     error={formik.errors.takerShare != null}
-                    value={
-                      formik.values.collateralBalance - formik.values.yourShare
-                    } // TODO Update with BigNumber
+                    value={formik.values.takerShare} // TODO Update with BigNumber
                     type="number"
-                    onChange={(event) => {
-                      const collateralBalance = event.target.value
-                      formik.setValues((values) => ({
-                        ...values,
-                        takerShare: parseFloat(collateralBalance), // TODO Update with BigNumber
-                      }))
-                    }}
+                    onChange={formik.handleChange}
                   />
                   {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
