@@ -1,25 +1,23 @@
-import { MetamaskSubprovider } from '@0x/subproviders'
-import { IZeroExContract } from '@0x/contract-wrappers'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
+import { ethers } from 'ethers'
+import ZEROX_ABI from '../abi/IZeroX.json'
 
-export const cancelLimitOrder = async (orderData, chainId) => {
+export const cancelLimitOrder = async (orderData, chainId, provider) => {
+  const signer = provider.getSigner()
+  const exchangeProxyAddress =
+    contractAddress.getContractAddressesForChainOrThrow(chainId).exchangeProxy
+  const exchange = new ethers.Contract(exchangeProxyAddress, ZEROX_ABI, signer)
+
   delete orderData.order.signature
   const order = orderData.order
-  const address = contractAddress.getContractAddressesForChainOrThrow(chainId)
-  const exchangeProxyAddress = address.exchangeProxy
-  const supportedProvider = new MetamaskSubprovider(window.web3.currentProvider)
-  const exchange = new IZeroExContract(
-    exchangeProxyAddress,
-    supportedProvider,
-    {
-      from: order.maker,
-    }
-  )
-
-  const response = await exchange
-    .cancelLimitOrder(order)
-    .awaitTransactionSuccessAsync()
-    .catch(async (err) => console.error('Error logged ' + JSON.stringify(err)))
-  return response
+  try {
+    const response = await exchange.cancelLimitOrder(order)
+    //check the status of the transaction
+    await provider.waitForTransaction(response.hash)
+    return response
+  } catch (err) {
+    console.error('Error logged ' + JSON.stringify(err))
+    return err
+  }
 }

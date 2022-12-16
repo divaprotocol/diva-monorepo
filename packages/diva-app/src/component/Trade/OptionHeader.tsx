@@ -15,6 +15,7 @@ import {
   selectUnderlyingPrice,
 } from '../../Redux/appSlice'
 import { useParams } from 'react-router-dom'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 const AppHeader = styled.header`
   min-height: 10vh;
@@ -42,10 +43,11 @@ export default function OptionHeader(optionData: {
   const underlyingAssetPrice = useAppSelector(
     selectUnderlyingPrice(pool?.referenceAsset)
   )
+  const { sendTransaction } = useConnectionContext()
 
   const handleAddMetaMask = async () => {
     try {
-      await window.ethereum.request({
+      await sendTransaction({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC20',

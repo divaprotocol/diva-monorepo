@@ -1,12 +1,15 @@
 import { Box, Button, Link, Typography, useTheme } from '@mui/material'
 import { useStyles } from '../Trade/Orders/UiStyles'
 import React from 'react'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
 export const WrongChain = (props: any) => {
   const style = useStyles()
   const theme = useTheme()
+  const { sendTransaction } = useConnectionContext()
+
   const handleOpen = async () => {
-    await window.ethereum.request({
+    await sendTransaction({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: '0x5' }],
     })

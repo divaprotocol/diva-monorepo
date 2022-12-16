@@ -1,18 +1,18 @@
-import { IZeroExContract } from '@0x/contract-wrappers'
 import { parseUnits } from 'ethers/lib/utils'
 import { BigNumber } from 'ethers'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
+import { ethers } from 'ethers'
+import ZEROX_ABI from '../abi/IZeroX.json'
 
 export const buyMarketOrder = async (orderData) => {
   let filledOrder = {}
-
+  const signer = orderData.provider.getSigner()
   // Connect to 0x exchange contract
   const address = contractAddress.getContractAddressesForChainOrThrow(
     orderData.chainId
   )
   const exchangeProxyAddress = address.exchangeProxy
-  const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
 
   // Get existing SELL LIMIT orders to fill, already sorted by best price. Note that makerToken = position token and takerToken = collateral token.
   const orders = orderData.existingLimitOrders
@@ -46,12 +46,25 @@ export const buyMarketOrder = async (orderData) => {
     //   res.takerTokenFilledAmount.toString()
     // )
     // console.log(res)
-
-    const response = await exchange
-      .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
-      .awaitTransactionSuccessAsync({ from: orderData.taker })
-      .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
-    return response
+    const exchange = new ethers.Contract(
+      exchangeProxyAddress,
+      ZEROX_ABI,
+      signer
+    )
+    try {
+      const response = await exchange.batchFillLimitOrders(
+        fillOrders,
+        signatures,
+        takerAssetFillAmounts,
+        true
+      )
+      //check the status of the transaction
+      await orderData.provider.waitForTransaction(response.hash)
+      return response
+    } catch (err) {
+      console.error('Error logged ' + JSON.stringify(err))
+      return err
+    }
   }
 
   let fillOrders = []

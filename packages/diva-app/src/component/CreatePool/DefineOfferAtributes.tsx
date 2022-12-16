@@ -22,11 +22,8 @@ import {
   Accordion,
   InputLabel,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
-import { toExponentialOrNumber } from '../../Util/utils'
-
-import { PayoffProfile } from './PayoffProfile'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
@@ -42,6 +39,11 @@ import { selectUserAddress } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import { PayoffProfile } from '../Graphs/payOffProfile'
+import { toExponentialOrNumber } from '../../Util/utils'
+import KeyboardDoubleArrowUpOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowUpOutlined'
+import KeyboardDoubleArrowDownOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowDownOutlined'
+import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -56,16 +58,42 @@ export function DefineOfferAttributes({
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
   const today = new Date()
+  const {
+    referenceAsset,
+    expiryTime,
+    collateralToken,
+    collateralBalance,
+    inflection,
+    capacity,
+    cap,
+    floor,
+    gradient,
+    payoutProfile,
+    yourShare,
+    takerShare,
+  } = formik.values
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-  const [value, setValue] = useState('Binary')
-  const [direction, setDirection] = useState('Long')
-  const [offerExpiry, setOfferExpiry] = useState(Date.now() + 24 * 60 * 60000) // 1 Day
-  const [expanded, setExpanded] = useState(false)
-  const [everyone, setEveryone] = useState(true)
+  const [value, setValue] = useState(formik.values.payoutProfile)
+  const [direction, setDirection] = useState(formik.values.offerDirection)
+  const [offerExpiry, setOfferExpiry] = useState(
+    Number(formik.values.offerExpiry) * 1000
+  ) // 1 Day
+  const [expanded, setExpanded] = useState(
+    formik.values.takerAddress !== ethers.constants.AddressZero ||
+      capacity !== 'Unlimited' ||
+      Number(formik.values.minTakerContribution) ===
+        formik.values.collateralBalance - formik.values.yourShare
+  )
+  const [everyone, setEveryone] = useState(
+    formik.values.takerAddress === ethers.constants.AddressZero
+  )
   const [offerExpiryToggle, setOfferExpiryToggle] = useState('1 Day')
-  const [fillOrKill, setFillOrKill] = useState(false)
+  const [fillOrKill, setFillOrKill] = useState(
+    Number(formik.values.minTakerContribution) ===
+      formik.values.collateralBalance - formik.values.yourShare
+  )
   const [mobile, setMobile] = useState(false)
-  const [unlimited, setUnlimited] = useState(true)
+  const [unlimited, setUnlimited] = useState(capacity == 'Unlimited')
   const account = useAppSelector(selectUserAddress)
   const { isConnected, disconnect, connect } = useConnectionContext()
   useEffect(() => {
@@ -117,20 +145,7 @@ export function DefineOfferAttributes({
     formik.setFieldValue('minTakerContribution', event.target.value)
   }
   const { referenceAssets, collateralTokens } = useWhitelist()
-  const {
-    referenceAsset,
-    expiryTime,
-    collateralToken,
-    collateralBalance,
-    inflection,
-    capacity,
-    cap,
-    floor,
-    gradient,
-    payoutProfile,
-    yourShare,
-    takerShare,
-  } = formik.values
+
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
   useEffect(() => {
     if (payoutProfile === 'Binary') {
@@ -151,15 +166,19 @@ export function DefineOfferAttributes({
   }, [formik.values.cap, formik.values.inflection])
   useEffect(() => {
     formik.setFieldValue('takerShare', collateralBalance - yourShare)
-  }, [collateralBalance])
-  useEffect(() => {
-    formik.setFieldValue('takerShare', collateralBalance - yourShare)
-  }, [yourShare])
+    if (fillOrKill) {
+      formik.setFieldValue(
+        'minTakerContribution',
+        collateralBalance - yourShare
+      )
+    }
+  }, [formik.values])
+
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', () => {
         disconnect()
-        connect()
+        connect('metamask')
         formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
       })
     }
@@ -226,47 +245,42 @@ export function DefineOfferAttributes({
         ..._values,
         capacity: 'Unlimited',
       }))
-    } else {
-      formik.setValues((_values) => ({
-        ..._values,
-        capacity: formik.values.collateralBalance.toString(),
-      }))
     }
   }, [unlimited, formik.values.collateralBalance])
-  useEffect(() => {
-    switch (payoutProfile) {
-      case 'Binary':
-        formik.setFieldValue('cap', formik.values.inflection)
-        formik.setFieldValue('floor', formik.values.inflection)
-        formik.setFieldValue('gradient', 1)
-        break
-      case 'Linear':
-        formik.setFieldValue('gradient', 0.5)
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        break
-      case 'Custom':
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'inflection',
-          (formik.values.cap + formik.values.floor) / 2
-        )
-        break
-    }
-  }, [payoutProfile])
+  // useEffect(() => {
+  //   switch (payoutProfile) {
+  //     case 'Binary':
+  //       formik.setFieldValue('cap', formik.values.inflection)
+  //       formik.setFieldValue('floor', formik.values.inflection)
+  //       formik.setFieldValue('gradient', 1)
+  //       break
+  //     case 'Linear':
+  //       formik.setFieldValue('gradient', 0.5)
+  //       formik.setFieldValue(
+  //         'cap',
+  //         formik.values.inflection + formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'floor',
+  //         formik.values.inflection - formik.values.inflection / 2
+  //       )
+  //       break
+  //     case 'Custom':
+  //       formik.setFieldValue(
+  //         'cap',
+  //         formik.values.inflection + formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'floor',
+  //         formik.values.inflection - formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'inflection',
+  //         (formik.values.cap + formik.values.floor) / 2
+  //       )
+  //       break
+  //   }
+  // }, [payoutProfile])
 
   return (
     <Stack direction={mobile ? 'column' : 'row'}>
@@ -387,7 +401,7 @@ export function DefineOfferAttributes({
                 row
                 aria-labelledby="demo-row-radio-buttons-group-label"
                 name="row-radio-buttons-group"
-                value={value}
+                value={formik.values.payoutProfile}
                 onChange={handleChange}
               >
                 <FormControlLabel
@@ -728,17 +742,9 @@ export function DefineOfferAttributes({
                     onBlur={formik.handleBlur}
                     disabled={true}
                     error={formik.errors.takerShare != null}
-                    value={
-                      formik.values.collateralBalance - formik.values.yourShare
-                    } // TODO Update with BigNumber
+                    value={formik.values.takerShare} // TODO Update with BigNumber
                     type="number"
-                    onChange={(event) => {
-                      const collateralBalance = event.target.value
-                      formik.setValues((values) => ({
-                        ...values,
-                        takerShare: parseFloat(collateralBalance), // TODO Update with BigNumber
-                      }))
-                    }}
+                    onChange={formik.handleChange}
                   />
                   {!isNaN(formik.values.collateralBalance) && (
                     <FormHelperText>
@@ -773,7 +779,7 @@ export function DefineOfferAttributes({
                   row
                   aria-labelledby="demo-row-radio-buttons-group-label"
                   name="row-radio-buttons-group"
-                  value={direction}
+                  value={formik.values.offerDirection}
                   onChange={handleDirectionChange}
                 >
                   <FormControlLabel
@@ -794,7 +800,7 @@ export function DefineOfferAttributes({
               sx={{
                 width: '100%',
                 pt: theme.spacing(5),
-                ml: theme.spacing(3),
+                ml: theme.spacing(mobile ? 0 : 3),
                 pr: theme.spacing(3),
               }}
             >
@@ -1035,13 +1041,17 @@ export function DefineOfferAttributes({
             cap != null &&
             inflection != null &&
             gradient != null && (
-              <Box sx={{ maxWidth: '85%' }}>
+              <Box sx={{ maxWidth: '85%', marginLeft: 3, marginBottom: 2 }}>
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
                   inflection={inflection}
                   gradient={gradient}
                   hasError={hasPaymentProfileError}
+                  referenceAsset={referenceAsset}
+                  collateralToken={
+                    collateralToken ? collateralToken.symbol : null
+                  }
                 />
               </Box>
             )}
@@ -1062,140 +1072,155 @@ export function DefineOfferAttributes({
             }}
           >
             <Container>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                {direction === 'Long' ? (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>0.00x</span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          formik.values.collateralBalance /
-                          formik.values.takerShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                ) : (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          formik.values.collateralBalance /
-                          formik.values.yourShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>0.00x</span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                )}
-                if the reported outcome is{' '}
-                {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
-                {floor}{' '}
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                {direction === 'Long' ? (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          formik.values.collateralBalance /
-                          formik.values.yourShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>0.00x</span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                ) : (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>0.00x</span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          formik.values.collateralBalance /
-                          formik.values.takerShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                )}
-                if the reported outcome is{' '}
-                {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
-                {cap}{' '}
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                {direction === 'Long' ? (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          (gradient * formik.values.collateralBalance) /
-                          formik.values.yourShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          ((1 - gradient) * formik.values.collateralBalance) /
-                          formik.values.takerShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                ) : (
-                  <>
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          ((1 - gradient) * formik.values.collateralBalance) /
-                          formik.values.yourShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    your /{' '}
-                    <strong>
-                      <span style={{ color: '#3393E0' }}>
-                        {(
-                          (gradient * formik.values.collateralBalance) /
-                          formik.values.takerShare
-                        ).toFixed(2) + 'x'}
-                      </span>
-                    </strong>{' '}
-                    taker multiple{' '}
-                  </>
-                )}
-                if the reported outcome is {inflection}
-              </Typography>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowUpOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  {direction === 'Long' ? (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            formik.values.collateralBalance /
+                            formik.values.takerShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  ) : (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            formik.values.collateralBalance /
+                            formik.values.yourShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  )}
+                  if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
+                  {floor}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowRightOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  {direction === 'Long' ? (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            formik.values.collateralBalance /
+                            formik.values.yourShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  ) : (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>0.00x</span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            formik.values.collateralBalance /
+                            formik.values.takerShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  )}
+                  if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
+                  {cap}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowDownOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  {direction === 'Long' ? (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            (gradient * formik.values.collateralBalance) /
+                            formik.values.yourShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            ((1 - gradient) * formik.values.collateralBalance) /
+                            formik.values.takerShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  ) : (
+                    <>
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            ((1 - gradient) * formik.values.collateralBalance) /
+                            formik.values.yourShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      your /{' '}
+                      <strong>
+                        <span style={{ color: '#3393E0' }}>
+                          {(
+                            (gradient * formik.values.collateralBalance) /
+                            formik.values.takerShare
+                          ).toFixed(2) + 'x'}
+                        </span>
+                      </strong>{' '}
+                      taker multiple{' '}
+                    </>
+                  )}
+                  if the reported outcome is {inflection}
+                </Typography>
+              </Stack>
             </Container>
           </Card>
         </Stack>

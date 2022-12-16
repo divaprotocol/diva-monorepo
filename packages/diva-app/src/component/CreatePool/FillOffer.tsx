@@ -25,7 +25,7 @@ export function FillOffer({
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', () => {
         disconnect()
-        connect()
+        connect('metamask')
       })
     }
   }, [])

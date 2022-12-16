@@ -14,7 +14,13 @@ import { useAppSelector } from '../../Redux/hooks'
 import { selectChainId } from '../../Redux/appSlice'
 import { utils } from 'ethers'
 import Tooltip from '@mui/material/Tooltip'
+import SelectorModal from './SelectorModal'
+import WalletConnectProvider from '@walletconnect/web3-provider'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
 
+// const provider = new WalletConnectProvider({
+//   infuraId: '27e484dcd9e3efcfd25a83a78777cdf1',
+// })
 interface ChainSelectorModalProps {
   onClose: () => void
   isOpen: boolean
@@ -47,16 +53,19 @@ const NetworkInfo = ({
   const theme = useTheme()
   const connectedChainId = useAppSelector(selectChainId)
   const isSupportedChain = CURRENT_SUPPORTED_CHAIN_ID.includes(chainId)
+  const { sendTransaction } = useConnectionContext()
 
   const handleNetworkClick = async () => {
     if (!isSupportedChain) return // do nothing if the chain is not supported
+
     try {
-      await window.ethereum.request({
+      await sendTransaction({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: utils.hexStripZeros(utils.hexlify(chainId)) }],
       })
       onClose()
     } catch (err) {
+      //TODO: handle error
       console.error(err)
     }
   }
@@ -100,64 +109,11 @@ const ChainSelectorModal = ({ onClose, isOpen }: ChainSelectorModalProps) => {
   const theme = useTheme()
 
   return (
-    <Modal
-      open={isOpen}
-      onClose={onClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-      sx={{
-        backdropFilter: 'blur(5px)',
-      }}
-    >
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 400,
-          bgcolor: theme.palette.background.default,
-          boxShadow: 24,
-          p: 4,
-          color: theme.palette.text.primary,
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Typography
-            id="modal-modal-title"
-            variant="h3"
-            component="h3"
-            fontWeight={700}
-          >
-            Select network
-          </Typography>
-
-          <CloseIcon
-            sx={{
-              cursor: 'pointer',
-            }}
-            onClick={onClose}
-          />
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gridGap: '16px',
-            marginTop: '16px',
-          }}
-        >
-          {ALL_SUPPORTED_CHAIN_IDS.map((chainId) => (
-            <NetworkInfo key={chainId} chainId={chainId} onClose={onClose} />
-          ))}
-        </Box>
-      </Box>
-    </Modal>
+    <SelectorModal onClose={onClose} isOpen={isOpen} header={'Select network'}>
+      {ALL_SUPPORTED_CHAIN_IDS.map((chainId) => (
+        <NetworkInfo key={chainId} chainId={chainId} onClose={onClose} />
+      ))}
+    </SelectorModal>
   )
 }
 

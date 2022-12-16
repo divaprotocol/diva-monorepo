@@ -46,12 +46,12 @@ const AddToMetamask = ({
   address: string
   symbol: string
 }) => {
-  const { provider } = useConnectionContext()
+  const { provider, sendTransaction } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
     const token = new ethers.Contract(address, ERC20, provider.getSigner())
     const decimal = await token.decimals()
     try {
-      await window.ethereum.request({
+      await sendTransaction({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC20',
