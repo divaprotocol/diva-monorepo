@@ -93,7 +93,6 @@ const BuyOrder = (props: {
   ) => any
 }) => {
   const theme = useTheme()
-  const [buyAmount, setBuyAmount] = useState('')
   const [collateralBalance, setCollateralBalance] = useState(ZERO)
   const [checked, setChecked] = useState(false)
   const [numberOfOptions, setNumberOfOptions] = useState(ZERO) // User input field
