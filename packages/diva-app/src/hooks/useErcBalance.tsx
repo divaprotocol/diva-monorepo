@@ -18,7 +18,11 @@ type Erc20Contract = Contract & {
  * no balance is returned
  */
 export function useErcBalance(address?: string, updated = true) {
-  const { provider, sendTransaction } = useConnectionContext()
+  const {
+    provider,
+    sendTransaction,
+    address: walletAddress,
+  } = useConnectionContext()
   const chainId = useAppSelector(selectChainId)
 
   const [balance, setBalance] = useState<string>()
@@ -43,7 +47,7 @@ export function useErcBalance(address?: string, updated = true) {
     }
 
     run()
-  }, [address, chainId, provider, sendTransaction, updated])
+  }, [address, chainId, provider, sendTransaction, updated, walletAddress])
 
   return balance
 }
