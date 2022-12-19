@@ -47,6 +47,7 @@ jobs:
         run: yarn turbo run build --filter=@diva/infrastructure --filter=@diva/app --cache-dir="./.turbo"
         env:
           CI: false
+          REACT_APP_INFURA_KEY: ${{ secrets.REACT_APP_INFURA_KEY }}
 
       - name: Deploy Infra
         run: yarn turbo run deploy --scope="@diva/infrastructure"

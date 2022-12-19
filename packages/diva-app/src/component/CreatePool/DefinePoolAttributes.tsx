@@ -1,5 +1,8 @@
 import { DateTimePicker } from '@mui/lab'
 import ClockIcon from '@mui/icons-material/AccessTime'
+import KeyboardDoubleArrowUpOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowUpOutlined'
+import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined'
+import KeyboardDoubleArrowDownOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowDownOutlined'
 import {
   Box,
   FormControl,
@@ -18,8 +21,6 @@ import {
   Card,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
-
-import { PayoffProfile } from './PayoffProfile'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
@@ -35,6 +36,7 @@ import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { PayoffProfile } from '../Graphs/payOffProfile'
 import { toExponentialOrNumber } from '../../Util/utils'
 
 const MaxCollateral = styled.u`
@@ -51,7 +53,7 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-  const [value, setValue] = useState('Binary')
+  const [value, setValue] = useState(formik.values.payoutProfile)
   const [mobile, setMobile] = useState(false)
   const handleChange = (event) => {
     setValue(event.target.value)
@@ -150,40 +152,40 @@ export function DefinePoolAttributes({
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
-  useEffect(() => {
-    switch (payoutProfile) {
-      case 'Binary':
-        formik.setFieldValue('cap', formik.values.inflection)
-        formik.setFieldValue('floor', formik.values.inflection)
-        formik.setFieldValue('gradient', 1)
-        break
-      case 'Linear':
-        formik.setFieldValue('gradient', 0.5)
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        break
-      case 'Custom':
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'inflection',
-          (formik.values.cap + formik.values.floor) / 2
-        )
-        break
-    }
-  }, [payoutProfile])
+  // useEffect(() => {
+  //   switch (payoutProfile) {
+  //     case 'Binary':
+  //       formik.setFieldValue('cap', formik.values.inflection)
+  //       formik.setFieldValue('floor', formik.values.inflection)
+  //       formik.setFieldValue('gradient', 1)
+  //       break
+  //     case 'Linear':
+  //       formik.setFieldValue('gradient', 0.5)
+  //       formik.setFieldValue(
+  //         'cap',
+  //         formik.values.inflection + formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'floor',
+  //         formik.values.inflection - formik.values.inflection / 2
+  //       )
+  //       break
+  //     case 'Custom':
+  //       formik.setFieldValue(
+  //         'cap',
+  //         formik.values.inflection + formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'floor',
+  //         formik.values.inflection - formik.values.inflection / 2
+  //       )
+  //       formik.setFieldValue(
+  //         'inflection',
+  //         (formik.values.cap + formik.values.floor) / 2
+  //       )
+  //       break
+  //   }
+  // }, [payoutProfile])
 
   return (
     <Stack direction={mobile ? 'column' : 'row'}>
@@ -305,7 +307,7 @@ export function DefinePoolAttributes({
                 row
                 aria-labelledby="demo-row-radio-buttons-group-label"
                 name="row-radio-buttons-group"
-                value={value}
+                value={formik.values.payoutProfile}
                 onChange={handleChange}
               >
                 <FormControlLabel
@@ -609,13 +611,17 @@ export function DefinePoolAttributes({
             cap != null &&
             inflection != null &&
             gradient != null && (
-              <Box sx={{ maxWidth: '85%' }}>
+              <Box sx={{ maxWidth: '85%', marginLeft: 3, marginBottom: 2 }}>
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
                   inflection={inflection}
                   gradient={gradient}
                   hasError={hasPaymentProfileError}
+                  referenceAsset={referenceAsset}
+                  collateralToken={
+                    collateralToken ? collateralToken.symbol : null
+                  }
                 />
               </Box>
             )}
@@ -636,62 +642,78 @@ export function DefinePoolAttributes({
             }}
           >
             <Container>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <strong>
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /SHORT
-                </strong>{' '}
-                token if the reported outcome is{' '}
-                {floor < inflection && inflection < cap
-                  ? 'at or '
-                  : ''} below {floor}{' '}
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <strong>
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /SHORT
-                </strong>{' '}
-                token if the reported outcome is{' '}
-                {floor < inflection && inflection < cap
-                  ? 'at or '
-                  : ''} above {cap}{' '}
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <strong>
-                  {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''}/LONG
-                </strong>{' '}
-                and{' '}
-                <strong>
-                  {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''}/SHORT
-                </strong>{' '}
-                token if the reported outcome is {inflection}
-              </Typography>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowUpOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /LONG
+                  </strong>{' '}
+                  and
+                  <strong>
+                    {' '}
+                    1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap
+                    ? 'at or '
+                    : ''} below {floor}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowRightOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /LONG
+                  </strong>{' '}
+                  and
+                  <strong>
+                    {' '}
+                    0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap
+                    ? 'at or '
+                    : ''} above {cap}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowDownOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
+                    {collateralToken != null ? collateralToken.symbol : ''}/LONG
+                  </strong>{' '}
+                  and{' '}
+                  <strong>
+                    {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
+                    {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is {inflection}
+                </Typography>
+              </Stack>
             </Container>
           </Card>
         </Stack>
