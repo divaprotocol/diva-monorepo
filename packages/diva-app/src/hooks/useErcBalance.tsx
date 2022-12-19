@@ -4,7 +4,7 @@ import ERC20 from '../abi/ERC20ABI.json'
 import { useEffect, useState } from 'react'
 import { formatUnits } from 'ethers/lib/utils'
 import { useConnectionContext } from './useConnectionContext'
-import { selectChainId } from '../Redux/appSlice'
+import { selectChainId, selectUserAddress } from '../Redux/appSlice'
 import { useAppSelector } from '../Redux/hooks'
 
 type Erc20Contract = Contract & {
@@ -20,6 +20,7 @@ type Erc20Contract = Contract & {
 export function useErcBalance(address?: string, updated = true) {
   const { provider, sendTransaction } = useConnectionContext()
   const chainId = useAppSelector(selectChainId)
+  const userAddress = useAppSelector(selectUserAddress)
 
   const [balance, setBalance] = useState<string>()
 
