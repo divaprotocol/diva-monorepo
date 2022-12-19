@@ -815,6 +815,7 @@ export function ReviewAndSubmit({
                     offerDirection={values.offerDirection}
                     longDirection={values.offerDirection === 'Long'}
                     maxYieldTaker={maxYieldTaker}
+                    showMultiple={true}
                     collateralToken={
                       values.collateralToken
                         ? values.collateralToken.symbol

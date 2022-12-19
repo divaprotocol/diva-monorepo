@@ -14,6 +14,7 @@ export function PayoffProfile(props) {
     collateralToken,
     referenceAsset,
     maxYieldTaker,
+    showMultiple,
   } = props
 
   const padding = cap * 0.1
@@ -166,7 +167,7 @@ export function PayoffProfile(props) {
           .tickValues(tickValues)
           .ticks(4)
           .tickFormat(function (d) {
-            return longDirection ? d * maxYieldTaker + ' x' : d
+            return showMultiple ? d * maxYieldTaker + ' x' : d
           })
       )
       .call((g) => g.select('.domain').remove())
