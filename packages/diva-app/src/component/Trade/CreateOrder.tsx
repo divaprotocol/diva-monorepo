@@ -4,8 +4,8 @@ import styled from 'styled-components'
 import { makeStyles } from '@mui/styles'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-/* import BuyMarket from './Orders/BuyMarket'
-import BuyLimit from './Orders/BuyLimit'
+import BuyMarket from './Orders/BuyMarket'
+/* import BuyLimit from './Orders/BuyLimit'
 import SellLimit from './Orders/SellLimit'
 import SellMarket from './Orders/SellMarket' */
 import {
@@ -224,6 +224,11 @@ export default function CreateOrder(props: {
               label="Sell"
               sx={{ color: '#929292', fontSize: '12px' }}
             />
+            <Tab
+              value="buymarket"
+              label="BuyMarket"
+              sx={{ color: '#929292', fontSize: '12px' }}
+            />
           </Tabs>
         </Card>
         <TabPanel value="buyorder">
@@ -240,6 +245,18 @@ export default function CreateOrder(props: {
         </TabPanel>
         <TabPanel value="sellorder">
           <SellOrder
+            option={option}
+            handleDisplayOrder={getExistingOrders}
+            tokenAddress={props.tokenAddress}
+            exchangeProxy={props.exchangeProxy}
+            chainId={props.chainId}
+            usdPrice={usdPrice}
+            provider={props.provider}
+            approve={approve}
+          />
+        </TabPanel>
+        <TabPanel value="buymarket">
+          <BuyMarket
             option={option}
             handleDisplayOrder={getExistingOrders}
             tokenAddress={props.tokenAddress}

@@ -39,6 +39,7 @@ import {
   calcBreakEven,
   calcPayoffPerToken,
 } from '../../../Util/calcPayoffPerToken'
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
 
 const expiryOrderTime = [
   {
@@ -95,6 +96,9 @@ const SellOrder = (props: {
   ) => any
 }) => {
   const theme = useTheme()
+  const { getWeb3JsProvider, provider } = useConnectionContext()
+  const [Web3Provider, setWeb3Provider] = useState<Web3>()
+  const web3 = new Web3(Web3Provider as any)
   const [checked, setChecked] = useState(false)
   const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
   const [pricePerOption, setPricePerOption] = React.useState(ZERO) // User input field
@@ -135,12 +139,21 @@ const SellOrder = (props: {
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
 
+  useEffect(() => {
+    const init = async () => {
+      const web3 = await getWeb3JsProvider()
+      setWeb3Provider(web3)
+    }
+    init()
+  }, [getWeb3JsProvider])
+
   const handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked)
   }
+  console.log('Collateral TOken Unit', Number(formatUnits(collateralTokenUnit)))
   const handleNumberOfOptions = (value: string) => {
     const nbrOptions = parseUnits(value, decimals)
-    setPricePerOption(pricePerOption)
+    setNumberOfOptions(nbrOptions)
     if (value != '' && checked) {
       if (nbrOptions.gt(0) && pricePerOption.gt(0)) {
         const youReceive = pricePerOption
@@ -303,7 +316,7 @@ const SellOrder = (props: {
       setFillLoading(true)
       const orderData = {
         maker: userAddress,
-        provider: web3,
+        provider: provider,
         isBuy: false,
         nbrOptions: numberOfOptions,
         collateralDecimals: decimals,
@@ -339,7 +352,7 @@ const SellOrder = (props: {
       setFillLoading(true)
       const orderData = {
         taker: userAddress,
-        provider: web3,
+        provider: provider,
         isBuy: false,
         nbrOptions: numberOfOptions, // Number of position tokens the user wants to sell
         collateralDecimals: decimals,
@@ -486,7 +499,82 @@ const SellOrder = (props: {
         })
       })
     }
-  }, [responseBuy, responseSell, userAddress])
+  }, [responseBuy, responseSell, userAddress, Web3Provider])
+
+  //UseEffect function to fetch average price for the SELL Market Order
+  useEffect(() => {
+    // Calculate average price
+    if (numberOfOptions.gt(0) && existingBuyLimitOrders.length > 0) {
+      // If user has entered an input into the Number field and there are existing Buy Limit orders to fill in the orderbook...
+
+      // User input (numberOfOptions) corresponds to the taker token in Buy Limit.
+      let takerAmountToFill = numberOfOptions // <= 18 decimals
+
+      let cumulativeAvgRate = ZERO
+      let cumulativeTaker = ZERO
+      let cumulativeMaker = ZERO
+
+      // Calculate average price. Note that if numberOfOptions exceeds the amount in the orderbook,
+      // existing orders will be cleared and a portion will remain unfilled.
+      // TODO: Consider showing a message to user when desired sell amount exceeds the available amount in the orderbook.
+      existingBuyLimitOrders.forEach((order: any) => {
+        // Loop through each Buy Limit order where makerToken = collateral token (<= 18 decimals) and takerToken = position token (18 decimals)
+
+        let takerAmount = BigNumber.from(order.takerAmount)
+        let makerAmount = BigNumber.from(order.makerAmount)
+        const remainingFillableTakerAmount = BigNumber.from(
+          order.remainingFillableTakerAmount
+        )
+        const expectedRate = BigNumber.from(order.expectedRate) // <= 18 decimals
+
+        // If order is already partially filled, set takerAmount equal to remainingFillableTakerAmount and makerAmount to the corresponding pro-rata fillable makerAmount
+        if (remainingFillableTakerAmount.lt(takerAmount)) {
+          // Existing Buy Limit order was already partially filled
+
+          // Overwrite takerAmount and makerAmount with remaining amounts
+          takerAmount = remainingFillableTakerAmount // 18 decimals
+          makerAmount = remainingFillableTakerAmount
+            .mul(order.expectedRate)
+            .div(collateralTokenUnit) // result has <= 18 decimals
+        }
+
+        // If there are remaining nbrOfOptions (takerAmountToFill), then check whether the current order under consideration will be fully filled or only partially
+        if (takerAmountToFill.gt(0)) {
+          if (takerAmountToFill.lt(takerAmount)) {
+            const makerAmountToFill = expectedRate
+              .mul(takerAmountToFill)
+              .div(collateralTokenUnit)
+            cumulativeMaker = cumulativeMaker.add(makerAmountToFill)
+            cumulativeTaker = cumulativeTaker.add(takerAmountToFill)
+            takerAmountToFill = ZERO // With that, it will not enter this if block again
+          } else {
+            cumulativeTaker = cumulativeTaker.add(takerAmount)
+            cumulativeMaker = cumulativeMaker.add(makerAmount)
+            takerAmountToFill = takerAmountToFill.sub(takerAmount)
+          }
+        }
+      })
+      // Calculate average price to pay excluding 1% fee (result is expressed as an integer with collateral token decimals (<= 18))
+      cumulativeAvgRate = cumulativeMaker
+        .mul(collateralTokenUnit) // scaling for high precision integer math
+        .div(cumulativeTaker)
+
+      if (cumulativeAvgRate.gt(0)) {
+        setAvgExpectedRate(cumulativeAvgRate)
+        // Amount to that the seller/user will receive; result is expressed as an integer with collateral token decimals
+        const youReceive = cumulativeMaker
+        setYouReceive(youReceive)
+      }
+    } else {
+      if (numberOfOptions.eq(0)) {
+        if (existingBuyLimitOrders.length > 0) {
+          setAvgExpectedRate(existingBuyLimitOrders[0].expectedRate)
+        }
+      }
+      setOrderBtnDisabled(true)
+    }
+  }, [numberOfOptions])
+
   useEffect(() => {
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
       BigNumber.from(option.floor),
@@ -629,7 +717,7 @@ const SellOrder = (props: {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end" sx={{ color: '#929292' }}>
-                    {}
+                    {params.tokenType.toUpperCase()}
                   </InputAdornment>
                 ),
               }}
@@ -664,7 +752,7 @@ const SellOrder = (props: {
           </Box>
           <TextField
             id="outlined-number"
-            label="Price per LONG Token"
+            label={`Price per ${params.tokenType.toUpperCase()} token`}
             type="text"
             sx={{ width: '100%' }}
             InputProps={{
@@ -773,7 +861,7 @@ const SellOrder = (props: {
               value="Submit"
               disabled={checked ? createBtnDisabled : fillBtnDisabled}
             >
-              {'Create'}
+              {checked ? 'Create' : 'Fill'}
             </LoadingButton>
           </Stack>
           <Stack

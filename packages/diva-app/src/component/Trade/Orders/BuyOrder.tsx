@@ -38,6 +38,8 @@ import {
   setMaxYield,
   setMaxPayout,
 } from '../../../Redux/Stats'
+import { useConnectionContext } from '../../../hooks/useConnectionContext'
+import { useParams } from 'react-router-dom'
 
 const expiryOrderTime = [
   {
@@ -119,8 +121,8 @@ const BuyOrder = (props: {
   const decimals = option.collateralToken.decimals
   const exchangeProxy = props.exchangeProxy
   const tokenSymbol = option.collateralToken.symbol
-  const makerToken = checked ? option.collateralToken.id : props.tokenAddress
-  const takerToken = checked ? props.tokenAddress : option.collateralToken.id
+  const makerToken = option.collateralToken.id
+  const takerToken = props.tokenAddress
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const takerTokenContract =
     takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
@@ -132,10 +134,18 @@ const BuyOrder = (props: {
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
 
+  useEffect(() => {
+    const init = async () => {
+      const web3 = await getWeb3JsProvider()
+      setWeb3Provider(web3)
+    }
+    init()
+  }, [getWeb3JsProvider, provider])
+
   const handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked)
   }
-  const handleNumberOfOptions = (value: any) => {
+  const handleNumberOfOptions = (value: string) => {
     const nbrOptions = parseUnits(value, decimals)
     console.log('Number of option', nbrOptions)
     setNumberOfOptions(nbrOptions)
@@ -173,22 +183,10 @@ const BuyOrder = (props: {
           .mul(pricePerOption)
           .div(collateralTokenUnit)
         setYouPay(youPay)
-      } else if (collateralBalance.sub(youPay).lt(0)) {
-        setOrderBtnDisabled(true)
-
-        // TODO Below is currently not working as isApproved is updated after this part. To be revisited in a separate PR.
-        // if (isApproved) {
-        //   // Display message only when balance is exceeded in the presence of sufficient approval.
-        //   // Otherwise the normal approval logic will take place where a user can approve a higher amount.
-        //   console.log('Insufficient wallet balance')
-        // }
-      } else {
-        setOrderBtnDisabled(false)
       }
     } else {
       setYouPay(ZERO)
       setPricePerOption(ZERO)
-      setOrderBtnDisabled(true)
     }
   }
   const handleExpirySelection = (event: any) => {
@@ -228,10 +226,7 @@ const BuyOrder = (props: {
           .add(youPay)
           .sub(remainingAllowance)
           .add(BigNumber.from(100))
-        console.log(
-          'required allowance amount for collateral token',
-          amountToApprove
-        )
+
         // Set allowance. Returns 'undefined' if rejected by user.
         const approveResponse = await props.approve(
           amountToApprove,
@@ -239,7 +234,6 @@ const BuyOrder = (props: {
           exchangeProxy,
           userAddress
         )
-        console.log('Approve Response', approveResponse)
         if (approveResponse !== 'undefined') {
           const collateralAllowance = BigNumber.from(approveResponse)
           const remainingAllowance = collateralAllowance.sub(
@@ -300,7 +294,7 @@ const BuyOrder = (props: {
       setFillLoading(true)
       const orderData = {
         maker: userAddress,
-        provider: web3,
+        provider: provider,
         isBuy: true,
         nbrOptions: numberOfOptions,
         collateralDecimals: decimals,
@@ -479,7 +473,7 @@ const BuyOrder = (props: {
         })
       })
     }
-  }, [responseBuy, responseSell, userAddress])
+  }, [responseBuy, responseSell, userAddress, Web3Provider])
   console.log('remaining Allowance:', remainingAllowance)
   //useEffect Function for the buyMarket Order
 
@@ -571,7 +565,7 @@ const BuyOrder = (props: {
         : BigNumber.from(option.finalReferenceValue),
       decimals
     )
-    if (pricePerOption.gt(0) && checked) {
+    if (pricePerOption.gt(0)) {
       dispatch(
         setMaxYield(
           parseFloat(
@@ -698,7 +692,7 @@ const BuyOrder = (props: {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end" sx={{ color: '#929292' }}>
-                    {}
+                    {params.tokenType.toUpperCase()}
                   </InputAdornment>
                 ),
               }}
@@ -733,7 +727,7 @@ const BuyOrder = (props: {
           </Box>
           <TextField
             id="outlined-number"
-            label="Price per LONG Token"
+            label={`Price per ${params.tokenType.toUpperCase()} token`}
             type="text"
             sx={{ width: '100%' }}
             InputProps={{
@@ -840,7 +834,7 @@ const BuyOrder = (props: {
               value="Submit"
               disabled={checked ? createBtnDisabled : fillBtnDisabled}
             >
-              {'Create'}
+              {checked ? 'Create' : 'Fill'}
             </LoadingButton>
           </Stack>
           <Stack
