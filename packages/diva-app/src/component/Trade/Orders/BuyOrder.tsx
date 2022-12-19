@@ -95,6 +95,9 @@ const BuyOrder = (props: {
   ) => any
 }) => {
   const theme = useTheme()
+  const [Web3Provider, setWeb3Provider] = useState<Web3>()
+  const web3 = new Web3(Web3Provider as any)
+  const { getWeb3JsProvider, provider } = useConnectionContext()
   const [collateralBalance, setCollateralBalance] = useState(ZERO)
   const [checked, setChecked] = useState(false)
   const [numberOfOptions, setNumberOfOptions] = useState(ZERO) // User input field
@@ -130,6 +133,7 @@ const BuyOrder = (props: {
   const usdPrice = props.usdPrice
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const dispatch = useAppDispatch()
+  const params: { tokenType: string } = useParams()
   const isLong = window.location.pathname.split('/')[2] === 'long'
   let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
