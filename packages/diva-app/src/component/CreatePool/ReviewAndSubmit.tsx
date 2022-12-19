@@ -814,6 +814,7 @@ export function ReviewAndSubmit({
                     referenceAsset={values.referenceAsset}
                     offerDirection={values.offerDirection}
                     longDirection={values.offerDirection === 'Long'}
+                    maxYieldTaker={maxYieldTaker}
                     collateralToken={
                       values.collateralToken
                         ? values.collateralToken.symbol
