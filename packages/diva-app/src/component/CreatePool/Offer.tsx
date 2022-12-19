@@ -51,12 +51,6 @@ export function Offer() {
           parseFloat(formatUnits(jsonResponse.data.data.gradient, decimals))
         )
         formik.setFieldValue(
-          'yourShare',
-          parseFloat(
-            formatUnits(jsonResponse.data.data.takerCollateralAmount, decimals)
-          )
-        )
-        formik.setFieldValue(
           'makerShare',
           Number(
             formatUnits(jsonResponse.data.data.makerCollateralAmount, decimals)

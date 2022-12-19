@@ -23,6 +23,7 @@ import { formatUnits } from 'ethers/lib/utils'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
+import { LoadingButton } from '@mui/lab'
 
 const PageDiv = styled.div`
   width: 100%;
@@ -123,6 +124,8 @@ export default function OpenOrders(props: {
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
   const address = useAppSelector(selectUserAddress)
+  // const [cancelLoading, setCancelLoading] = useState(false)
+  const [cancelLoading, setCancelLoading] = useState(new Map())
 
   const componentDidMount = async () => {
     const orderBook: any = []
@@ -204,25 +207,47 @@ export default function OpenOrders(props: {
   }, [responseBuy.length, responseSell.length])
 
   async function cancelOrder(order, chainId) {
+    setCancelLoading((prevStates) => {
+      const newStates = new Map(prevStates)
+      newStates.set(orderHash, true)
+      return newStates
+    })
     const orderHash = order.orderHash
     //get the order details in current form from 0x before cancelling it.
     const cancelOrder = await getOrderDetails(orderHash, chainId)
-    cancelLimitOrder(cancelOrder, chainId, provider).then(function (
-      cancelOrderResponse: any
-    ) {
-      if (cancelOrderResponse?.hash != null) {
-        alert('Order successfully cancelled')
-        //need to invalidate orders since orderbook is updated
-        dispatch(setResponseSell([]))
-        dispatch(setResponseBuy([]))
-        responseBuy = []
-        responseSell = []
-        //update orderbook & create orders widget
-        componentDidMount()
-      } else {
-        alert('order could not be cancelled')
-      }
-    })
+    cancelLimitOrder(cancelOrder, chainId, provider)
+      .then(function (cancelOrderResponse: any) {
+        if (cancelOrderResponse?.hash != null) {
+          alert('Order successfully cancelled')
+          //need to invalidate orders since orderbook is updated
+          dispatch(setResponseSell([]))
+          dispatch(setResponseBuy([]))
+          responseBuy = []
+          responseSell = []
+          //update orderbook & create orders widget
+          componentDidMount()
+          setCancelLoading((prevStates) => {
+            const newStates = new Map(prevStates)
+            newStates.set(orderHash, false)
+            return newStates
+          })
+        } else {
+          alert('order could not be cancelled')
+          setCancelLoading((prevStates) => {
+            const newStates = new Map(prevStates)
+            newStates.set(orderHash, false)
+            return newStates
+          })
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+        setCancelLoading((prevStates) => {
+          const newStates = new Map(prevStates)
+          newStates.set(orderHash, false)
+          return newStates
+        })
+      })
   }
 
   return (
@@ -293,14 +318,17 @@ export default function OpenOrders(props: {
                     <TableCell align="right">
                       <Box paddingBottom="20px">
                         <Typography variant="subtitle1">
-                          <Button
+                          <LoadingButton
+                            loading={
+                              cancelLoading.get(order.orderHash) || false
+                            }
                             variant="outlined"
                             startIcon={<DeleteIcon />}
                             size="small"
                             onClick={() => cancelOrder(orders[index], chainId)}
                           >
                             Cancel
-                          </Button>
+                          </LoadingButton>
                         </Typography>
                       </Box>
                     </TableCell>
