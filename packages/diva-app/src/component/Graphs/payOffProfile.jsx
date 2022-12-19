@@ -167,7 +167,7 @@ export function PayoffProfile(props) {
           .tickValues(tickValues)
           .ticks(4)
           .tickFormat(function (d) {
-            return showMultiple ? d * maxYieldTaker + ' x' : d
+            return showMultiple ? (d * maxYieldTaker).toFixed(2) + ' x' : d
           })
       )
       .call((g) => g.select('.domain').remove())
