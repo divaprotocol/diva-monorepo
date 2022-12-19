@@ -224,11 +224,6 @@ export default function CreateOrder(props: {
               label="Sell"
               sx={{ color: '#929292', fontSize: '12px' }}
             />
-            <Tab
-              value="buymarket"
-              label="BuyMarket"
-              sx={{ color: '#929292', fontSize: '12px' }}
-            />
           </Tabs>
         </Card>
         <TabPanel value="buyorder">
@@ -245,18 +240,6 @@ export default function CreateOrder(props: {
         </TabPanel>
         <TabPanel value="sellorder">
           <SellOrder
-            option={option}
-            handleDisplayOrder={getExistingOrders}
-            tokenAddress={props.tokenAddress}
-            exchangeProxy={props.exchangeProxy}
-            chainId={props.chainId}
-            usdPrice={usdPrice}
-            provider={props.provider}
-            approve={approve}
-          />
-        </TabPanel>
-        <TabPanel value="buymarket">
-          <BuyMarket
             option={option}
             handleDisplayOrder={getExistingOrders}
             tokenAddress={props.tokenAddress}
