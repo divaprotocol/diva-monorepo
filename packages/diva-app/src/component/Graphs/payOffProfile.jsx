@@ -90,6 +90,7 @@ export function PayoffProfile(props) {
   const domainMax = d3.max(longdata, function (d) {
     return d.x
   })
+  const f = d3.format('.2f')
 
   useLayoutEffect(() => {
     const callback = () => {
@@ -167,7 +168,7 @@ export function PayoffProfile(props) {
           .tickValues(tickValues)
           .ticks(4)
           .tickFormat(function (d) {
-            return showMultiple ? (d * maxYieldTaker).toFixed(2) + ' x' : d
+            return showMultiple ? f(d * maxYieldTaker) + ' x' : f(d)
           })
       )
       .call((g) => g.select('.domain').remove())
@@ -456,15 +457,19 @@ export function PayoffProfile(props) {
 
         d3.selectAll('.mouse-per-line').attr('transform', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
+          const tooltipValue = formatDecimalComma(y.invert(pos.y).toFixed(2))
           d3.select(this)
             .select('text')
-            .text(formatDecimalComma(y.invert(pos.y).toFixed(2)))
+            .text(function () {
+              return showMultiple
+                ? tooltipValue * maxYieldTaker.toFixed(2)
+                : tooltipValue
+            })
           return 'translate(' + mouse[0] + ',' + pos.y + ')'
         })
 
         d3.selectAll('.tooltip-per-line').attr('transform', function (d, i) {
           var xValue = x.invert(mouse[0])
-
           d3.select(this)
             .select('.tooltip-underlying')
             .text(formatDecimalComma(xValue.toFixed(2)))
