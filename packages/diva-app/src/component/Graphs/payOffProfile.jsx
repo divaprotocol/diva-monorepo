@@ -237,7 +237,9 @@ export function PayoffProfile(props) {
       .attr('y', -margin.left - 10)
       .attr('x', -margin.top - 180)
       .style('font-size', '14px')
-      .text('Payout in' + ' ' + axisLabel)
+      .text(function () {
+        return showMultiple ? 'Gross Multiple' : 'Payout in' + ' ' + axisLabel
+      })
 
     svg
       .append('rect')
