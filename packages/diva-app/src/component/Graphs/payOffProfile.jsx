@@ -13,6 +13,8 @@ export function PayoffProfile(props) {
     longDirection,
     collateralToken,
     referenceAsset,
+    maxYieldTaker,
+    showMultiple,
   } = props
 
   const padding = cap * 0.1
@@ -88,6 +90,7 @@ export function PayoffProfile(props) {
   const domainMax = d3.max(longdata, function (d) {
     return d.x
   })
+  const f = d3.format('.2f')
 
   useLayoutEffect(() => {
     const callback = () => {
@@ -164,6 +167,9 @@ export function PayoffProfile(props) {
           .tickSize(width + 2)
           .tickValues(tickValues)
           .ticks(4)
+          .tickFormat(function (d) {
+            return showMultiple ? f(d * maxYieldTaker) + ' x' : f(d)
+          })
       )
       .call((g) => g.select('.domain').remove())
       .call((g) =>
@@ -231,7 +237,9 @@ export function PayoffProfile(props) {
       .attr('y', -margin.left - 10)
       .attr('x', -margin.top - 180)
       .style('font-size', '14px')
-      .text('Payout in' + ' ' + axisLabel)
+      .text(function () {
+        return showMultiple ? 'Gross Multiple' : 'Payout in' + ' ' + axisLabel
+      })
 
     svg
       .append('rect')
@@ -451,15 +459,19 @@ export function PayoffProfile(props) {
 
         d3.selectAll('.mouse-per-line').attr('transform', function (d, i) {
           var pos = yPos(d, i, mouse[0], lines)
+          const tooltipValue = formatDecimalComma(y.invert(pos.y).toFixed(2))
           d3.select(this)
             .select('text')
-            .text(formatDecimalComma(y.invert(pos.y).toFixed(2)))
+            .text(function () {
+              return showMultiple
+                ? (tooltipValue * maxYieldTaker).toFixed(2) + ' x'
+                : tooltipValue
+            })
           return 'translate(' + mouse[0] + ',' + pos.y + ')'
         })
 
         d3.selectAll('.tooltip-per-line').attr('transform', function (d, i) {
           var xValue = x.invert(mouse[0])
-
           d3.select(this)
             .select('.tooltip-underlying')
             .text(formatDecimalComma(xValue.toFixed(2)))
