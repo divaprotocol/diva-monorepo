@@ -464,7 +464,7 @@ export function PayoffProfile(props) {
             .select('text')
             .text(function () {
               return showMultiple
-                ? tooltipValue * maxYieldTaker.toFixed(2)
+                ? (tooltipValue * maxYieldTaker).toFixed(2) + ' x'
                 : tooltipValue
             })
           return 'translate(' + mouse[0] + ',' + pos.y + ')'
