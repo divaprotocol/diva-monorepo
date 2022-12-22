@@ -66,7 +66,11 @@ export default function MenuItems() {
                 })
 
           return (
-            <Button onClick={() => handleButtonClick(to)} key={key}>
+            <Button
+              style={{ backgroundColor: 'transparent' }}
+              onClick={() => handleButtonClick(to)}
+              key={key}
+            >
               <Box
                 sx={{
                   width: `${navOpen ? '182px' : '67px'}`,
