@@ -67,6 +67,7 @@ export default function MenuItems() {
 
           return (
             <Button
+              disableRipple
               style={{ backgroundColor: 'transparent' }}
               onClick={() => handleButtonClick(to)}
               key={key}
