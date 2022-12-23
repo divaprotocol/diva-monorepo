@@ -455,7 +455,6 @@ const BuyOrder = (props: {
     })
     return existingOrdersAmount
   }
-
   useEffect(() => {
     if (userAddress != null) {
       getCollateralInWallet(userAddress).then(async (val) => {
@@ -478,7 +477,6 @@ const BuyOrder = (props: {
       })
     }
   }, [responseBuy, responseSell, userAddress, Web3Provider])
-  console.log('remaining Allowance:', remainingAllowance)
   //useEffect Function for the buyMarket Order
 
   useEffect(() => {
@@ -690,7 +688,7 @@ const BuyOrder = (props: {
           <Box sx={{ my: theme.spacing(3) }}>
             <TextField
               id="outlined-number"
-              label="You Buy"
+              label="Amount"
               type="text"
               sx={{ width: '100%' }}
               InputProps={{
@@ -712,7 +710,7 @@ const BuyOrder = (props: {
                 {toExponentialOrNumber(
                   Number(formatUnits(collateralBalance, decimals))
                 )}{' '}
-                {option.collateralToken.symbol}{' '}
+                {tokenSymbol}{' '}
               </Typography>
               <Button
                 variant="text"
@@ -794,19 +792,19 @@ const BuyOrder = (props: {
             mt: theme.spacing(-1),
             py: theme.spacing(4),
             px: theme.spacing(2),
-            background: 'linear-gradient(to bottom, #1B3448, #000000 110%)',
+            background: 'linear-gradient(to bottom, #051827, #121212 110%)',
           }}
         >
           <TextField
             id="outlined-number"
-            label="You Pay (inc. fees)"
+            label="You Pay (Inc. fees)"
             type="number"
             disabled
             sx={{ width: '100%', mb: theme.spacing(6) }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end" sx={{ color: '#929292' }}>
-                  {}
+                  {tokenSymbol}
                 </InputAdornment>
               ),
             }}

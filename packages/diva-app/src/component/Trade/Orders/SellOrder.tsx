@@ -388,6 +388,7 @@ const SellOrder = (props: {
       })
     }
   }
+  console.log('Fill Loading', fillLoading)
   // TODO: Outsource this function into a separate file as it's the same across Buy/Sell Limit/Market
   const getOptionsInWallet = async (makerAccount: string) => {
     const allowance = await makerTokenContract.methods
@@ -475,7 +476,6 @@ const SellOrder = (props: {
     })
     return existingOrdersAmount
   }
-
   useEffect(() => {
     if (userAddress != null) {
       getOptionsInWallet(userAddress).then(async (val) => {
@@ -710,8 +710,8 @@ const SellOrder = (props: {
         >
           <Box sx={{ my: theme.spacing(3) }}>
             <TextField
-              id="outlined-number"
-              label="You Sell"
+              id="amount"
+              label="Amount"
               type="text"
               sx={{ width: '100%' }}
               InputProps={{
@@ -751,7 +751,7 @@ const SellOrder = (props: {
             </Typography>
           </Box>
           <TextField
-            id="outlined-number"
+            id="price-per-token"
             label={`Price per ${params.tokenType.toUpperCase()} token`}
             type="text"
             sx={{ width: '100%' }}
@@ -792,7 +792,7 @@ const SellOrder = (props: {
           <Box sx={{ my: theme.spacing(3) }}>
             {checked && (
               <TextField
-                id="outlined-select-currency"
+                id="expiry-time-period"
                 select
                 label="Order Expires in"
                 sx={{ width: '100%' }}
@@ -819,15 +819,15 @@ const SellOrder = (props: {
           }}
         >
           <TextField
-            id="outlined-number"
-            label="You Receive (inc. fees)"
+            id="You Receive"
+            label="You Receive"
             type="number"
             disabled
             sx={{ width: '100%', mb: theme.spacing(6) }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end" sx={{ color: '#929292' }}>
-                  {}
+                  {tokenSymbol}
                 </InputAdornment>
               ),
             }}
