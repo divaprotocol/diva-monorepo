@@ -99,7 +99,7 @@ const SellOrder = (props: {
   const { getWeb3JsProvider, provider } = useConnectionContext()
   const [Web3Provider, setWeb3Provider] = useState<Web3>()
   const web3 = new Web3(Web3Provider as any)
-  const [checked, setChecked] = useState(false)
+  const [checked, setChecked] = useState(true)
   const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
   const [pricePerOption, setPricePerOption] = React.useState(ZERO) // User input field
   const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
@@ -150,7 +150,6 @@ const SellOrder = (props: {
   const handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked)
   }
-  console.log('Collateral TOken Unit', Number(formatUnits(collateralTokenUnit)))
   const handleNumberOfOptions = (value: string) => {
     const nbrOptions = parseUnits(value, decimals)
     setNumberOfOptions(nbrOptions)
@@ -328,6 +327,12 @@ const SellOrder = (props: {
         exchangeProxy: exchangeProxy,
         poolId: option.id,
       }
+      console.log('Maker Token in Sell Limit:', makerToken)
+      console.log('Taker Token in Sell Limit:', takerToken)
+      console.log('User Address', userAddress)
+      console.log('decimals', decimals)
+      console.log('avgExpectedRate', Number(avgExpectedRate))
+      console.log('chainId', props.chainId)
       sellLimitOrder(orderData)
         .then(async (response) => {
           if (response.status === 200) {
@@ -388,13 +393,12 @@ const SellOrder = (props: {
       })
     }
   }
-  console.log('Fill Loading', fillLoading)
   // TODO: Outsource this function into a separate file as it's the same across Buy/Sell Limit/Market
   const getOptionsInWallet = async (makerAccount: string) => {
-    const allowance = await makerTokenContract.methods
+    const allowance = await (checked ? makerTokenContract.methods : takerTokenContract.methods)
       .allowance(makerAccount, exchangeProxy)
       .call()
-    const balance = await makerTokenContract.methods
+    const balance = await (checked ? makerTokenContract.methods : takerTokenContract.methods)
       .balanceOf(makerAccount)
       .call()
     return {
@@ -483,6 +487,31 @@ const SellOrder = (props: {
         setOptionBalance(val.balance)
         setAllowance(val.allowance)
         val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
+/* 
+        // Get Buy Limit orders which the user is going to fill during the Sell Market operation
+        if (responseBuy.length > 0) {
+          getBuyLimitOrders().then((orders) => {
+            setExistingBuyLimitOrders(orders)
+          })
+        }
+
+  */       // Get the user's (taker) existing Sell Limit orders which block some of the user's allowance
+        getTotalSellLimitOrderAmountUser(userAddress).then((amount) => {
+          const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance but should go back to zero if 0x orders are refreshed and reflect the actually fillable amount
+          setExistingSellLimitOrdersAmountUser(amount)
+          setRemainingAllowance(remainingAmount)
+        })
+      })
+    }
+  }, [responseSell, userAddress, Web3Provider])
+
+  useEffect(() => {
+    if (userAddress != null) {
+      getOptionsInWallet(userAddress).then(async (val) => {
+        // Use values returned from getOptionsInWallet to initialize variables
+        setOptionBalance(val.balance)
+        setAllowance(val.allowance)
+        val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
         // Get Buy Limit orders which the user is going to fill during the Sell Market operation
         if (responseBuy.length > 0) {
@@ -499,7 +528,7 @@ const SellOrder = (props: {
         })
       })
     }
-  }, [responseBuy, responseSell, userAddress, Web3Provider])
+  }, [responseBuy, responseSell, userAddress, Web3Provider, checked])
 
   //UseEffect function to fetch average price for the SELL Market Order
   useEffect(() => {
@@ -815,7 +844,7 @@ const SellOrder = (props: {
             mt: theme.spacing(-1),
             py: theme.spacing(4),
             px: theme.spacing(2),
-            background: 'linear-gradient(to bottom, #1B3448, #000000 110%)',
+            background: 'linear-gradient(to bottom, #051827, #121212 110%)',
           }}
         >
           <TextField

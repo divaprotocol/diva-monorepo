@@ -99,7 +99,7 @@ const BuyOrder = (props: {
   const web3 = new Web3(Web3Provider as any)
   const { getWeb3JsProvider, provider } = useConnectionContext()
   const [collateralBalance, setCollateralBalance] = useState(ZERO)
-  const [checked, setChecked] = useState(false)
+  const [checked, setChecked] = useState(true)
   const [numberOfOptions, setNumberOfOptions] = useState(ZERO) // User input field
   const [pricePerOption, setPricePerOption] = useState(ZERO) // User input field
   const [expiry, setExpiry] = useState(5) //Expiry Time
@@ -124,8 +124,9 @@ const BuyOrder = (props: {
   const decimals = option.collateralToken.decimals
   const exchangeProxy = props.exchangeProxy
   const tokenSymbol = option.collateralToken.symbol
-  const makerToken = option.collateralToken.id
-  const takerToken = props.tokenAddress
+  console.log('maker token 1:', props.tokenAddress)
+  const makerToken = checked ? option.collateralToken.id : props.tokenAddress
+  const takerToken = checked ? props.tokenAddress : option.collateralToken.id
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
   const takerTokenContract =
     takerToken != null && new web3.eth.Contract(ERC20_ABI as any, takerToken)
@@ -151,7 +152,6 @@ const BuyOrder = (props: {
   }
   const handleNumberOfOptions = (value: string) => {
     const nbrOptions = parseUnits(value, decimals)
-    console.log('Number of option', nbrOptions)
     setNumberOfOptions(nbrOptions)
     if (value !== '' && checked) {
       if (pricePerOption.gt(0) && nbrOptions.gt(0)) {
@@ -310,7 +310,6 @@ const BuyOrder = (props: {
         exchangeProxy: exchangeProxy,
         poolId: option.id,
       }
-      console.log('Order Data:', orderData)
       buylimitOrder(orderData)
         .then(async (response) => {
           if (response.status === 200) {
@@ -335,7 +334,7 @@ const BuyOrder = (props: {
       setFillLoading(true)
       const orderData = {
         taker: userAddress,
-        provider: web3,
+        provider: provider,
         isBuy: true,
         nbrOptions: numberOfOptions,
         collateralDecimals: decimals,
@@ -345,6 +344,13 @@ const BuyOrder = (props: {
         existingLimitOrders: existingSellLimitOrders,
         chainId: props.chainId,
       }
+      console.log('Maker Token:', makerToken)
+      console.log('Taker Token:', takerToken)
+      console.log('User Address', userAddress)
+      console.log('decimals', decimals)
+      console.log('avgExpectedRate', Number(avgExpectedRate))
+      console.log('existingSellLimitOrders', existingSellLimitOrders)
+      console.log('chainId', props.chainId)
       buyMarketOrder(orderData).then(async (orderFillStatus: any) => {
         if (!(orderFillStatus === undefined)) {
           // On fill order success ...
@@ -368,6 +374,10 @@ const BuyOrder = (props: {
           alert('Order could not be filled.')
         }
       })
+      .catch((error) => {
+        console.error(error)
+      }
+      )
     }
   }
 
@@ -455,6 +465,29 @@ const BuyOrder = (props: {
     })
     return existingOrdersAmount
   }
+  useEffect(() => {
+    if (userAddress != null) {
+      getCollateralInWallet(userAddress).then(async (val) => {
+        // Use values returned from getCollateralInWallet to initialize variables
+        setCollateralBalance(val.balance)
+        setAllowance(val.allowance)
+
+        // Get Sell Limit orders which the user is going to fill during the Buy Market operation
+        /* if (responseSell.length > 0) {
+          getSellLimitOrders().then((orders) => {
+            setExistingSellLimitOrders(orders)
+          })
+        } */
+        // Get the user's (maker) existing Buy Limit orders which block some of the user's allowance
+        getTotalBuyLimitOrderAmountUser(userAddress).then((amount) => {
+          const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance
+          setExistingBuyLimitOrdersAmountUser(amount)
+          setRemainingAllowance(remainingAmount)
+        })
+      })
+    }
+  }, [responseBuy, userAddress, Web3Provider])
+
   useEffect(() => {
     if (userAddress != null) {
       getCollateralInWallet(userAddress).then(async (val) => {
