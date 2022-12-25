@@ -327,12 +327,6 @@ const SellOrder = (props: {
         exchangeProxy: exchangeProxy,
         poolId: option.id,
       }
-      console.log('Maker Token in Sell Limit:', makerToken)
-      console.log('Taker Token in Sell Limit:', takerToken)
-      console.log('User Address', userAddress)
-      console.log('decimals', decimals)
-      console.log('avgExpectedRate', Number(avgExpectedRate))
-      console.log('chainId', props.chainId)
       sellLimitOrder(orderData)
         .then(async (response) => {
           if (response.status === 200) {

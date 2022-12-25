@@ -124,7 +124,6 @@ const BuyOrder = (props: {
   const decimals = option.collateralToken.decimals
   const exchangeProxy = props.exchangeProxy
   const tokenSymbol = option.collateralToken.symbol
-  console.log('maker token 1:', props.tokenAddress)
   const makerToken = checked ? option.collateralToken.id : props.tokenAddress
   const takerToken = checked ? props.tokenAddress : option.collateralToken.id
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
@@ -344,40 +343,33 @@ const BuyOrder = (props: {
         existingLimitOrders: existingSellLimitOrders,
         chainId: props.chainId,
       }
-      console.log('Maker Token:', makerToken)
-      console.log('Taker Token:', takerToken)
-      console.log('User Address', userAddress)
-      console.log('decimals', decimals)
-      console.log('avgExpectedRate', Number(avgExpectedRate))
-      console.log('existingSellLimitOrders', existingSellLimitOrders)
-      console.log('chainId', props.chainId)
-      buyMarketOrder(orderData).then(async (orderFillStatus: any) => {
-        if (!(orderFillStatus === undefined)) {
-          // On fill order success ...
+      buyMarketOrder(orderData)
+        .then(async (orderFillStatus: any) => {
+          if (!(orderFillStatus === undefined)) {
+            // On fill order success ...
 
-          // Wait for 4 secs for 0x to update orders, then handle order book display
-          await new Promise((resolve) => setTimeout(resolve, 4000))
+            // Wait for 4 secs for 0x to update orders, then handle order book display
+            await new Promise((resolve) => setTimeout(resolve, 4000))
 
-          // Reset inputs and state variables
-          await props.handleDisplayOrder()
-          Array.from(document.querySelectorAll('input')).forEach(
-            (input) => (input.value = '')
-          )
-          setNumberOfOptions(ZERO)
-          setFillLoading(false)
-          setYouPay(ZERO)
-          alert('Order successfully filled.')
-        } else {
-          // Rejected by user or tx failure (i.e., orderFillStatus == undefined as no tx receipt was returned)
-          // Do not reset values.
-          setFillLoading(false)
-          alert('Order could not be filled.')
-        }
-      })
-      .catch((error) => {
-        console.error(error)
-      }
-      )
+            // Reset inputs and state variables
+            await props.handleDisplayOrder()
+            Array.from(document.querySelectorAll('input')).forEach(
+              (input) => (input.value = '')
+            )
+            setNumberOfOptions(ZERO)
+            setFillLoading(false)
+            setYouPay(ZERO)
+            alert('Order successfully filled.')
+          } else {
+            // Rejected by user or tx failure (i.e., orderFillStatus == undefined as no tx receipt was returned)
+            // Do not reset values.
+            setFillLoading(false)
+            alert('Order could not be filled.')
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     }
   }
 
@@ -421,7 +413,6 @@ const BuyOrder = (props: {
 
     return orders
   }
-  console.log('Average rate', avgExpectedRate)
   // Check how many existing Buy Limit orders the user has outstanding in the orderbook.
   // Note that in Buy Limit, the makerToken is the collateral token which is the relevant token for approval.
   // TODO: Outsource this function into OpenOrders.ts, potentially integrate into getUserOrders function
@@ -536,7 +527,6 @@ const BuyOrder = (props: {
           order.remainingFillableTakerAmount
         )
         const expectedRate = BigNumber.from(order.expectedRate) // <= 18 decimals
-        console.log('Expected Rate', expectedRate)
         // If order is already partially filled, set takerAmount equal to remainingFillableTakerAmount and makerAmount to the corresponding pro-rata fillable makerAmount
         if (remainingFillableTakerAmount.lt(takerAmount)) {
           // Existing Sell Limit order was already partially filled
