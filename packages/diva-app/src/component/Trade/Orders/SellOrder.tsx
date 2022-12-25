@@ -395,10 +395,16 @@ const SellOrder = (props: {
   }
   // TODO: Outsource this function into a separate file as it's the same across Buy/Sell Limit/Market
   const getOptionsInWallet = async (makerAccount: string) => {
-    const allowance = await (checked ? makerTokenContract.methods : takerTokenContract.methods)
+    const allowance = await (checked
+      ? makerTokenContract.methods
+      : takerTokenContract.methods
+    )
       .allowance(makerAccount, exchangeProxy)
       .call()
-    const balance = await (checked ? makerTokenContract.methods : takerTokenContract.methods)
+    const balance = await (checked
+      ? makerTokenContract.methods
+      : takerTokenContract.methods
+    )
       .balanceOf(makerAccount)
       .call()
     return {
@@ -487,7 +493,7 @@ const SellOrder = (props: {
         setOptionBalance(val.balance)
         setAllowance(val.allowance)
         val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
-/* 
+        /* 
         // Get Buy Limit orders which the user is going to fill during the Sell Market operation
         if (responseBuy.length > 0) {
           getBuyLimitOrders().then((orders) => {
@@ -495,7 +501,7 @@ const SellOrder = (props: {
           })
         }
 
-  */       // Get the user's (taker) existing Sell Limit orders which block some of the user's allowance
+  */ // Get the user's (taker) existing Sell Limit orders which block some of the user's allowance
         getTotalSellLimitOrderAmountUser(userAddress).then((amount) => {
           const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance but should go back to zero if 0x orders are refreshed and reflect the actually fillable amount
           setExistingSellLimitOrdersAmountUser(amount)
