@@ -1074,11 +1074,13 @@ export default function Markets() {
                   id="Whitelisted Oracle"
                   ButtonLabel="Whitelisted Oracle"
                   onClick={handleWhitelistFilter}
+                  sx={{ marginRight: theme.spacing(2) }}
                 />
                 <ButtonFilter
                   id="Hide expired pools"
                   ButtonLabel="Hide Expired"
                   onClick={handleExpiredPools}
+                  sx={{ marginRight: theme.spacing(2) }}
                 />
                 <ButtonFilter
                   id="Has Buy Price"

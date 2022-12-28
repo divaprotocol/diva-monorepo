@@ -11,7 +11,7 @@ type prop = {
 const ButtonFilter = ({ id, ButtonLabel, onClick, sx = [] }: prop) => {
   const [color, setColor] = useState('#ffffffb3')
   return (
-    <Box marginRight={id.startsWith('Has') ? 0 : '30px'}>
+    <Box>
       <Button
         variant="outlined"
         id={id}
