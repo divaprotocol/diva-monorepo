@@ -102,6 +102,7 @@ const BuyOrder = (props: {
   const [checked, setChecked] = useState(true)
   const [numberOfOptions, setNumberOfOptions] = useState(ZERO) // User input field
   const [pricePerOption, setPricePerOption] = useState(ZERO) // User input field
+  const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
   const [expiry, setExpiry] = useState(5) //Expiry Time
   const [avgExpectedRate, setAvgExpectedRate] = useState(ZERO) //Price Per long/short Token
   const [isApproved, setIsApproved] = useState(false)
@@ -568,6 +569,15 @@ const BuyOrder = (props: {
           .mul(parseUnits(feeMultiplier, decimals))
           .div(collateralTokenUnit)
         setYouPay(youPay)
+        const feeAmount = cumulativeTaker
+          .mul(parseUnits(TRADING_FEE.toString(), decimals))
+          .div(collateralTokenUnit)
+        setFeeAmount(feeAmount)
+        /* console.log('Cumulative Taker:', cumulativeTaker.toString())
+        console.log(
+          'Trading Fees',
+          toExponentialOrNumber(Number(formatUnits(TRADING_FEE, decimals)))
+        ) */
       }
     } else {
       if (numberOfOptions.eq(0)) {
@@ -752,13 +762,15 @@ const BuyOrder = (props: {
           </Box>
           <TextField
             id="outlined-number"
-            label={`Price per ${params.tokenType.toUpperCase()} token`}
+            label="Price"
             type="text"
             sx={{ width: '100%' }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end" sx={{ color: '#929292' }}>
                   {tokenSymbol}
+                  {'/'}
+                  {params.tokenType.toUpperCase()}
                 </InputAdornment>
               ),
             }}
@@ -818,7 +830,28 @@ const BuyOrder = (props: {
             background: 'linear-gradient(to bottom, #051827, #121212 110%)',
           }}
         >
-          <TextField
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            mb={theme.spacing(3)}
+          >
+            <Typography variant="h3" textAlign="right">
+              {checked ? 'You Pay' : 'You Pay (incl. Fees)'}
+            </Typography>
+            <Typography variant="h3">
+              {
+                /* checked
+                ? ` ${toExponentialOrNumber(
+                    Number(formatUnits(youPay, decimals))
+                  )} ${tokenSymbol}`
+                :  */ `${toExponentialOrNumber(
+                  Number(formatUnits(youPay, decimals))
+                )}
+               ${tokenSymbol}`
+              }
+            </Typography>
+          </Stack>
+          {/* <TextField
             id="outlined-number"
             label="You Pay (Inc. fees)"
             type="number"
@@ -835,7 +868,7 @@ const BuyOrder = (props: {
               shrink: true,
             }}
             value={toExponentialOrNumber(Number(formatUnits(youPay, decimals)))}
-          />
+          /> */}
           <Stack direction={'row'} spacing={1} mt={theme.spacing(1)}>
             <LoadingButton
               variant="contained"
@@ -868,9 +901,18 @@ const BuyOrder = (props: {
             mt={theme.spacing(1)}
           >
             <Typography variant="h5" color="text.secondary" textAlign="right">
-              Fees
+              {checked
+                ? 'Fees (0%)'
+                : `Fees (${(TRADING_FEE * 100).toFixed(0)}%)`}
             </Typography>
-            <Typography variant="h4">3.10 dUSD</Typography>
+            <Typography variant="h4" color="text.secondary">
+              {checked
+                ? '0'
+                : `${toExponentialOrNumber(
+                    Number(formatUnits(feeAmount, decimals))
+                  )}`}{' '}
+              {tokenSymbol}
+            </Typography>
           </Stack>
           <Stack
             direction="row"
@@ -880,12 +922,13 @@ const BuyOrder = (props: {
             <Typography variant="h5" color="text.secondary" textAlign="right">
               Remaining Allowance
             </Typography>
-            <Typography variant="h4">
+            <Typography variant="h4" color="text.secondary">
               {Number(formatUnits(remainingAllowance, decimals)) < 0.00000000001
                 ? 0
                 : toExponentialOrNumber(
                     Number(formatUnits(remainingAllowance, decimals))
-                  )}
+                  )}{' '}
+              {tokenSymbol}
             </Typography>
           </Stack>
         </Card>

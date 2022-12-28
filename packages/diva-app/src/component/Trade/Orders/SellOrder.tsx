@@ -99,7 +99,6 @@ const SellOrder = (props: {
   const { getWeb3JsProvider, provider } = useConnectionContext()
   const [Web3Provider, setWeb3Provider] = useState<Web3>()
   const web3 = new Web3(Web3Provider as any)
-  const [checked, setChecked] = useState(true)
   const [numberOfOptions, setNumberOfOptions] = React.useState(ZERO) // User input field
   const [pricePerOption, setPricePerOption] = React.useState(ZERO) // User input field
   const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
@@ -111,7 +110,7 @@ const SellOrder = (props: {
     existingSellLimitOrdersAmountUser,
     setExistingSellLimitOrdersAmountUser,
   ] = React.useState(ZERO)
-
+  const [checked, setChecked] = useState(true)
   const [isApproved, setIsApproved] = React.useState(false)
   const [approveLoading, setApproveLoading] = React.useState(false)
   const [fillLoading, setFillLoading] = React.useState(false)
@@ -154,13 +153,15 @@ const SellOrder = (props: {
     const nbrOptions = parseUnits(value, decimals)
     setNumberOfOptions(nbrOptions)
     if (value != '' && checked) {
+      // Sell Limit Order
       if (nbrOptions.gt(0) && pricePerOption.gt(0)) {
         const youReceive = pricePerOption
-          .mul(numberOfOptions)
+          .mul(nbrOptions)
           .div(collateralTokenUnit)
         setYouReceive(youReceive)
       }
     } else if (value != '') {
+      // Sell Market Order
       const feeAmount = nbrOptions
         .mul(parseUnits(TRADING_FEE.toString(), decimals))
         .div(collateralTokenUnit)
@@ -781,13 +782,15 @@ const SellOrder = (props: {
           </Box>
           <TextField
             id="price-per-token"
-            label={`Price per ${params.tokenType.toUpperCase()} token`}
+            label="Price" /* {`Price per ${params.tokenType.toUpperCase()} token`} */
             type="text"
             sx={{ width: '100%' }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end" sx={{ color: '#929292' }}>
                   {tokenSymbol}
+                  {'/'}
+                  {params.tokenType.toUpperCase()}
                 </InputAdornment>
               ),
             }}
@@ -847,9 +850,23 @@ const SellOrder = (props: {
             background: 'linear-gradient(to bottom, #051827, #121212 110%)',
           }}
         >
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            mb={theme.spacing(3)}
+          >
+            <Typography variant="h3" textAlign="right">
+              You Receive
+            </Typography>
+            <Typography variant="h3">
+              {toExponentialOrNumber(Number(formatUnits(youReceive, decimals)))}{' '}
+              {tokenSymbol}
+            </Typography>
+          </Stack>
+          {/* 
           <TextField
             id="You Receive"
-            label="You Receive"
+            label={checked ? `You Receive` : `You receive(Inc. fees)`}
             type="number"
             disabled
             sx={{ width: '100%', mb: theme.spacing(6) }}
@@ -866,7 +883,7 @@ const SellOrder = (props: {
             value={toExponentialOrNumber(
               Number(formatUnits(youReceive, decimals))
             )}
-          />
+          /> */}
           <Stack direction={'row'} spacing={1} mt={theme.spacing(1)}>
             <LoadingButton
               variant="contained"
@@ -899,9 +916,18 @@ const SellOrder = (props: {
             mt={theme.spacing(1)}
           >
             <Typography variant="h5" color="text.secondary" textAlign="right">
-              Fees
+              {checked
+                ? 'Fees (0%)'
+                : `Fees (${(TRADING_FEE * 100).toFixed(0)}%)`}
             </Typography>
-            <Typography variant="h4">3.10 dUSD</Typography>
+            <Typography variant="h4" color="text.secondary">
+              {checked
+                ? '0'
+                : toExponentialOrNumber(
+                    Number(formatUnits(feeAmount, decimals))
+                  )}{' '}
+              {params.tokenType.toUpperCase()}
+            </Typography>
           </Stack>
           <Stack
             direction="row"
@@ -911,12 +937,13 @@ const SellOrder = (props: {
             <Typography variant="h5" color="text.secondary" textAlign="right">
               Remaining Allowance
             </Typography>
-            <Typography variant="h4">
+            <Typography variant="h4" color="text.secondary">
               {Number(formatUnits(remainingAllowance, decimals)) < 0.00000000001
                 ? 0
                 : toExponentialOrNumber(
                     Number(formatUnits(remainingAllowance, decimals))
-                  )}
+                  )}{' '}
+              {params.tokenType.toUpperCase()}
             </Typography>
           </Stack>
         </Card>
