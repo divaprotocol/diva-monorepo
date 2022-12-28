@@ -1100,6 +1100,7 @@ export default function Markets() {
                     borderBottomRightRadius: 0,
                   }}
                 />
+                <Divider orientation="horizontal" />
                 <ButtonFilter
                   id="Has Sell Price"
                   ButtonLabel="Has Sell Price"
