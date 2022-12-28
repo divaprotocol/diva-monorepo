@@ -965,9 +965,17 @@ export default function Markets() {
         whitelist.dataProviders.map((dp) => dp.id).includes(row.dataProvider)
       )
     : hasBuyPriceFilter
-    ? rows.filter((row) => row.Buy !== '-')
+    ? rows.filter((row) =>
+        hasSellPriceFilter
+          ? row.Sell !== '-' && row.Buy !== '-'
+          : row.Buy !== '-'
+      )
     : hasSellPriceFilter
-    ? rows.filter((row) => row.Sell !== '-')
+    ? rows.filter((row) =>
+        hasBuyPriceFilter
+          ? row.Sell !== '-' && row.Buy !== '-'
+          : row.Sell !== '-'
+      )
     : idFilter !== ''
     ? rows.filter((row) => row.Id.includes(idFilter))
     : search != null && search.length > 0
@@ -1176,6 +1184,10 @@ export default function Markets() {
                 setExpiredPoolClicked(false)
                 setSearchInput('')
                 setCheckedState(new Array(4).fill(false))
+                setIdFilter('')
+                setWhitelistFilter(false)
+                setHasBuyPriceFilter(false)
+                setHasSellPriceFilter(false)
               }}
             />
           </Stack>
