@@ -1094,11 +1094,21 @@ export default function Markets() {
                   id="Has Buy Price"
                   ButtonLabel="Has Buy Price"
                   onClick={handleBuyPriceFilter}
+                  sx={{
+                    borderRight: 0,
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 0,
+                  }}
                 />
                 <ButtonFilter
                   id="Has Sell Price"
                   ButtonLabel="Has Sell Price"
                   onClick={handleSellPriceFilter}
+                  sx={{
+                    borderLeft: 0,
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                  }}
                 />
               </Box>
               <Box
