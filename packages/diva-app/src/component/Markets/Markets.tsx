@@ -1090,27 +1090,29 @@ export default function Markets() {
                   onClick={handleExpiredPools}
                   sx={{ marginRight: theme.spacing(2) }}
                 />
-                <ButtonFilter
-                  id="Has Buy Price"
-                  ButtonLabel="Has Buy Price"
-                  onClick={handleBuyPriceFilter}
-                  sx={{
-                    borderRight: 0,
-                    borderTopRightRadius: 0,
-                    borderBottomRightRadius: 0,
-                  }}
-                />
-                <Divider orientation="horizontal" />
-                <ButtonFilter
-                  id="Has Sell Price"
-                  ButtonLabel="Has Sell Price"
-                  onClick={handleSellPriceFilter}
-                  sx={{
-                    borderLeft: 0,
-                    borderTopLeftRadius: 0,
-                    borderBottomLeftRadius: 0,
-                  }}
-                />
+                <Stack direction={'row'}>
+                  <ButtonFilter
+                    id="Has Buy Price"
+                    ButtonLabel="Has Buy Price"
+                    onClick={handleBuyPriceFilter}
+                    sx={{
+                      borderRight: 0,
+                      borderTopRightRadius: 0,
+                      borderBottomRightRadius: 0,
+                    }}
+                  />
+                  <Divider orientation="vertical" />
+                  <ButtonFilter
+                    id="Has Sell Price"
+                    ButtonLabel="Has Sell Price"
+                    onClick={handleSellPriceFilter}
+                    sx={{
+                      borderLeft: 0,
+                      borderTopLeftRadius: 0,
+                      borderBottomLeftRadius: 0,
+                    }}
+                  />
+                </Stack>
               </Box>
               <Box
                 sx={{
