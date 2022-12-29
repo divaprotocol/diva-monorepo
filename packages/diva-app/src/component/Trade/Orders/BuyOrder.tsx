@@ -724,6 +724,7 @@ const BuyOrder = (props: {
               label="Amount"
               type="text"
               sx={{ width: '100%' }}
+              value={formatUnits(numberOfOptions, decimals)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end" sx={{ color: '#929292' }}>
