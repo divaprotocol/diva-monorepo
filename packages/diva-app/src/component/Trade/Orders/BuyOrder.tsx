@@ -17,7 +17,7 @@ import AddIcon from '@mui/icons-material/Add'
 import { LoadingButton } from '@mui/lab'
 import { BigNumber } from 'ethers'
 import Web3 from 'web3'
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
@@ -100,7 +100,7 @@ const BuyOrder = (props: {
   const { getWeb3JsProvider, provider } = useConnectionContext()
   const [collateralBalance, setCollateralBalance] = useState(ZERO)
   const [checked, setChecked] = useState(true)
-  const [numberOfOptions, setNumberOfOptions] = useState(ZERO) // User input field
+  const [numberOfOptions, setNumberOfOptions] = useState('0') // User input field
   const [pricePerOption, setPricePerOption] = useState(ZERO) // User input field
   const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
   const [expiry, setExpiry] = useState(5) //Expiry Time
@@ -152,7 +152,7 @@ const BuyOrder = (props: {
   }
   const handleNumberOfOptions = (value: string) => {
     const nbrOptions = parseUnits(value, decimals)
-    setNumberOfOptions(nbrOptions)
+    setNumberOfOptions(value)
     if (value !== '' && checked) {
       if (pricePerOption.gt(0) && nbrOptions.gt(0)) {
         const youPay = pricePerOption.mul(nbrOptions).div(collateralTokenUnit)
@@ -173,7 +173,7 @@ const BuyOrder = (props: {
       }
     } else {
       setYouPay(ZERO)
-      setNumberOfOptions(ZERO)
+      setNumberOfOptions('0')
       setOrderBtnDisabled(true)
     }
   }
@@ -182,8 +182,8 @@ const BuyOrder = (props: {
     if (value !== '') {
       const pricePerOption = parseUnits(value, decimals)
       setPricePerOption(pricePerOption)
-      if (numberOfOptions.gt(0) && pricePerOption.gt(0)) {
-        const youPay = numberOfOptions
+      if (parseEther(numberOfOptions).gt(0) && pricePerOption.gt(0)) {
+        const youPay = parseEther(numberOfOptions)
           .mul(pricePerOption)
           .div(collateralTokenUnit)
         setYouPay(youPay)
@@ -205,7 +205,7 @@ const BuyOrder = (props: {
     Array.from(document.querySelectorAll('input')).forEach(
       (input) => (input.value = '')
     )
-    setNumberOfOptions(ZERO)
+    setNumberOfOptions('0')
     setPricePerOption(ZERO)
     setYouPay(ZERO)
 
@@ -224,7 +224,7 @@ const BuyOrder = (props: {
     if (!isApproved) {
       // Remaining allowance - youPay (incl. fee) <= 0
       setApproveLoading(true)
-      if (numberOfOptions.gt(0) && checked) {
+      if (parseEther(numberOfOptions).gt(0) && checked) {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals (<= 18)).
         const amountToApprove = allowance
           .add(youPay)
@@ -256,7 +256,7 @@ const BuyOrder = (props: {
         } else {
           setApproveLoading(false)
         }
-      } else if (numberOfOptions.gt(0)) {
+      } else if (parseEther(numberOfOptions).gt(0)) {
         // Calculate required allowance amount for collateral token assuming 1% fee (expressed as an integer with collateral token decimals (<= 18)).
         // NOTE: The assumption that the maximum fee is 1% may not be valid in the future as market makers start posting orders with higher fees.
         // In the worst case, the amountToApprove will be too small due to fees being higher than 1% and the fill transaction may fail.
@@ -357,7 +357,7 @@ const BuyOrder = (props: {
             Array.from(document.querySelectorAll('input')).forEach(
               (input) => (input.value = '')
             )
-            setNumberOfOptions(ZERO)
+            setNumberOfOptions('0')
             setFillLoading(false)
             setYouPay(ZERO)
             alert('Order successfully filled.')
@@ -506,11 +506,14 @@ const BuyOrder = (props: {
 
   useEffect(() => {
     // Calculate average price
-    if (numberOfOptions.gt(0) && existingSellLimitOrders.length > 0) {
+    if (
+      parseEther(numberOfOptions).gt(0) &&
+      existingSellLimitOrders.length > 0
+    ) {
       // If user has entered an input into the Number field and there are existing Sell Limit orders to fill in the orderbook...
 
       // User input (numberOfOptions) corresponds to the maker token in Sell Limit.
-      let makerAmountToFill = numberOfOptions // 18 decimals
+      let makerAmountToFill = parseEther(numberOfOptions) // 18 decimals
 
       let cumulativeAvgRate = ZERO
       let cumulativeTaker = ZERO
@@ -580,7 +583,7 @@ const BuyOrder = (props: {
         ) */
       }
     } else {
-      if (numberOfOptions.eq(0)) {
+      if (parseEther(numberOfOptions).eq(0)) {
         if (existingSellLimitOrders.length > 0) {
           setAvgExpectedRate(existingSellLimitOrders[0].expectedRate)
         }
@@ -724,7 +727,7 @@ const BuyOrder = (props: {
               label="Amount"
               type="text"
               sx={{ width: '100%' }}
-              value={formatUnits(numberOfOptions, decimals)}
+              value={numberOfOptions}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end" sx={{ color: '#929292' }}>
@@ -735,7 +738,14 @@ const BuyOrder = (props: {
               InputLabelProps={{
                 shrink: true,
               }}
-              onChange={(e) => handleNumberOfOptions(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value === '0') {
+                  handleNumberOfOptions(e.target.value)
+                } else {
+                  setNumberOfOptions('0')
+                  handleNumberOfOptions(e.target.value)
+                }
+              }}
             />
             <Typography variant="h5" color="text.secondary" textAlign="right">
               Balance :
@@ -750,9 +760,11 @@ const BuyOrder = (props: {
                 variant="text"
                 color="secondary"
                 onClick={() => {
-                  if (collateralBalance != null) {
-                    setNumberOfOptions(collateralBalance)
-                  }
+                  setNumberOfOptions(
+                    toExponentialOrNumber(
+                      Number(formatUnits(collateralBalance, decimals))
+                    )
+                  )
                 }}
               >
                 {' ('}
