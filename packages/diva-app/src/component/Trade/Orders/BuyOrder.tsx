@@ -151,14 +151,15 @@ const BuyOrder = (props: {
     setChecked(event.target.checked)
   }
   const handleNumberOfOptions = (value: string) => {
-    const nbrOptions = parseUnits(value, decimals)
-    setNumberOfOptions(value)
     if (value !== '' && checked) {
+      const nbrOptions = parseUnits(value, decimals)
+      setNumberOfOptions(value)
       if (pricePerOption.gt(0) && nbrOptions.gt(0)) {
         const youPay = pricePerOption.mul(nbrOptions).div(collateralTokenUnit)
         setYouPay(youPay)
       }
     } else if (value !== '') {
+      setNumberOfOptions(value)
       if (collateralBalance.sub(youPay).lt(0)) {
         setOrderBtnDisabled(true)
 
@@ -727,7 +728,7 @@ const BuyOrder = (props: {
               label="Amount"
               type="text"
               sx={{ width: '100%' }}
-              value={numberOfOptions}
+              value={numberOfOptions === '0' ? '' : numberOfOptions}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end" sx={{ color: '#929292' }}>
