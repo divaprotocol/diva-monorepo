@@ -6,8 +6,8 @@
     "lint": "yarn codegen && yarn build",
     "codegen": "graph codegen",
     "build": "yarn codegen && graph build",
-    "graph:auth": "graph auth --studio $THEGRAPH_ACCESS_TOKEN",
-    "deploy-goerli": "graph deploy --studio $THEGRAPH_ACCESS_SLUG",
+    "graph:auth": "graph auth --studio $DIVA_TELLOR_STUDIO_ACCESS_TOKEN",
+    "deploy-goerli": "graph deploy --studio $DIVA_TELLOR_STUDIO_ACCESS_SLUG",
     "format": "prettier --write ."
   },
   "dependencies": {
