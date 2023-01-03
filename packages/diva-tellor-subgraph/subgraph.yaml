@@ -25,7 +25,7 @@ dataSources:
         - ValueRemoved
       abis:
         - name: Contract
-          file: ./abis/Contract.json
+          file: ./abi/Contract.json
       eventHandlers:
         - event: NewReport(indexed bytes32,indexed uint256,bytes,uint256,bytes,indexed address)
           handler: handleNewReport
