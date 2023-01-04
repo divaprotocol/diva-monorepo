@@ -17,7 +17,7 @@ import AddIcon from '@mui/icons-material/Add'
 import { LoadingButton } from '@mui/lab'
 import { BigNumber } from 'ethers'
 import Web3 from 'web3'
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
@@ -154,8 +154,12 @@ const BuyOrder = (props: {
     if (value !== '' && checked) {
       const nbrOptions = parseUnits(value, decimals)
       setNumberOfOptions(value)
+      console.log('value', value.toString())
+      console.log('pricePerOption', pricePerOption.toString())
+      console.log('nbrOptions', nbrOptions.toString())
       if (pricePerOption.gt(0) && nbrOptions.gt(0)) {
         const youPay = pricePerOption.mul(nbrOptions).div(collateralTokenUnit)
+        console.log('youPay', youPay.toString())
         setYouPay(youPay)
       }
     } else if (value !== '') {
@@ -183,8 +187,8 @@ const BuyOrder = (props: {
     if (value !== '') {
       const pricePerOption = parseUnits(value, decimals)
       setPricePerOption(pricePerOption)
-      if (parseEther(numberOfOptions).gt(0) && pricePerOption.gt(0)) {
-        const youPay = parseEther(numberOfOptions)
+      if (parseUnits(numberOfOptions, decimals).gt(0) && pricePerOption.gt(0)) {
+        const youPay = parseUnits(numberOfOptions, decimals)
           .mul(pricePerOption)
           .div(collateralTokenUnit)
         setYouPay(youPay)
@@ -225,7 +229,7 @@ const BuyOrder = (props: {
     if (!isApproved) {
       // Remaining allowance - youPay (incl. fee) <= 0
       setApproveLoading(true)
-      if (parseEther(numberOfOptions).gt(0) && checked) {
+      if (parseUnits(numberOfOptions, decimals).gt(0) && checked) {
         // Calculate required allowance amount for collateral token (expressed as an integer with collateral token decimals (<= 18)).
         const amountToApprove = allowance
           .add(youPay)
@@ -257,7 +261,7 @@ const BuyOrder = (props: {
         } else {
           setApproveLoading(false)
         }
-      } else if (parseEther(numberOfOptions).gt(0)) {
+      } else if (parseUnits(numberOfOptions, decimals).gt(0)) {
         // Calculate required allowance amount for collateral token assuming 1% fee (expressed as an integer with collateral token decimals (<= 18)).
         // NOTE: The assumption that the maximum fee is 1% may not be valid in the future as market makers start posting orders with higher fees.
         // In the worst case, the amountToApprove will be too small due to fees being higher than 1% and the fill transaction may fail.
@@ -301,7 +305,7 @@ const BuyOrder = (props: {
         maker: userAddress,
         provider: provider,
         isBuy: true,
-        nbrOptions: parseEther(numberOfOptions),
+        nbrOptions: parseUnits(numberOfOptions, decimals),
         collateralDecimals: decimals,
         makerToken: makerToken,
         takerToken: takerToken,
@@ -337,7 +341,7 @@ const BuyOrder = (props: {
         taker: userAddress,
         provider: provider,
         isBuy: true,
-        nbrOptions: parseEther(numberOfOptions),
+        nbrOptions: parseUnits(numberOfOptions, decimals),
         collateralDecimals: decimals,
         makerToken: makerToken,
         takerToken: takerToken,
@@ -508,13 +512,13 @@ const BuyOrder = (props: {
     // Calculate average price
     if (numberOfOptions != '') {
       if (
-        parseEther(numberOfOptions).gt(0) &&
+        parseUnits(numberOfOptions, decimals).gt(0) &&
         existingSellLimitOrders.length > 0
       ) {
         // If user has entered an input into the Number field and there are existing Sell Limit orders to fill in the orderbook...
 
         // User input (numberOfOptions) corresponds to the maker token in Sell Limit.
-        let makerAmountToFill = parseEther(numberOfOptions) // 18 decimals
+        let makerAmountToFill = parseUnits(numberOfOptions, decimals) // 18 decimals // @todo check whether 18 decimals is correct here
 
         let cumulativeAvgRate = ZERO
         let cumulativeTaker = ZERO
@@ -570,8 +574,8 @@ const BuyOrder = (props: {
           // NOTE: youPay is including fees. It assumes that the maximum average fee is 1% which may not be the case if market makers
           // start posting orders with higher fee. Prevent this by excludings such orders from the orderbook.
           const youPay = cumulativeTaker
-            .mul(parseUnits(feeMultiplier, decimals))
-            .div(collateralTokenUnit)
+          // .mul(parseUnits(feeMultiplier, decimals))
+          // .div(collateralTokenUnit)
           setYouPay(youPay)
           const feeAmount = cumulativeTaker
             .mul(parseUnits(TRADING_FEE.toString(), decimals))
@@ -584,7 +588,7 @@ const BuyOrder = (props: {
         )  */
         }
       } else {
-        if (parseEther(numberOfOptions).eq(0)) {
+        if (parseUnits(numberOfOptions, decimals).eq(0)) {
           if (existingSellLimitOrders.length > 0) {
             setAvgExpectedRate(existingSellLimitOrders[0].expectedRate)
           }
@@ -592,7 +596,7 @@ const BuyOrder = (props: {
         setOrderBtnDisabled(true)
       }
     }
-  }, [numberOfOptions])
+  }, [numberOfOptions, checked])
 
   useEffect(() => {
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
@@ -758,7 +762,7 @@ const BuyOrder = (props: {
                   color="secondary"
                   sx={{ pb: theme.spacing(1) }}
                   onClick={() => {
-                    setNumberOfOptions(collateralBalance.toString())
+                    setNumberOfOptions(formatUnits(collateralBalance, decimals))
                   }}
                 >
                   {'('}
@@ -844,7 +848,7 @@ const BuyOrder = (props: {
             mb={theme.spacing(3)}
           >
             <Typography variant="h3" textAlign="right">
-              {checked ? 'You Pay' : 'You Pay (incl. Fees)'}
+              You Pay
             </Typography>
             <Typography variant="h3">
               {
@@ -913,7 +917,7 @@ const BuyOrder = (props: {
                 ? 'Fees (0%)'
                 : `Fees (${(TRADING_FEE * 100).toFixed(0)}%)`}
             </Typography>
-            <Typography variant="h4" color="text.secondary">
+            <Typography variant="h5" color="text.secondary">
               {checked
                 ? '0'
                 : `${toExponentialOrNumber(
@@ -930,7 +934,7 @@ const BuyOrder = (props: {
             <Typography variant="h5" color="text.secondary" textAlign="right">
               Remaining Allowance
             </Typography>
-            <Typography variant="h4" color="text.secondary">
+            <Typography variant="h5" color="text.secondary">
               {Number(formatUnits(remainingAllowance, decimals)) < 0.00000000001
                 ? 0
                 : toExponentialOrNumber(

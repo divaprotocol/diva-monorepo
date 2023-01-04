@@ -20,7 +20,7 @@ import { TRADING_FEE } from '../../../constants'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { selectUserAddress } from '../../../Redux/appSlice'
 import ERC20_ABI from '../../../abi/ERC20ABI.json'
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { useParams } from 'react-router-dom'
 import { toExponentialOrNumber } from '../../../Util/utils'
 import { sellLimitOrder } from '../../../Orders/SellLimit'
@@ -195,9 +195,9 @@ const SellOrder = (props: {
       const pricePerOption = parseUnits(value, decimals)
       setPricePerOption(pricePerOption)
       if (pricePerOption.gt(0)) {
-        if (parseEther(numberOfOptions).gt(0)) {
+        if (parseUnits(numberOfOptions, decimals).gt(0)) {
           const youReceive = pricePerOption
-            .mul(parseEther(numberOfOptions))
+            .mul(parseUnits(numberOfOptions, decimals))
             .div(collateralTokenUnit)
           setYouReceive(youReceive)
         }
@@ -242,10 +242,10 @@ const SellOrder = (props: {
     if (!isApproved) {
       // Remaining allowance - nbrOptions <= 0
       setApproveLoading(true)
-      if (parseEther(numberOfOptions).gt(0) && checked) {
+      if (parseUnits(numberOfOptions, decimals).gt(0) && checked) {
         // Calculate required allowance amount for position token (expressed as an integer with 18 decimals).
         const amountToApprove = allowance
-          .add(parseEther(numberOfOptions))
+          .add(parseUnits(numberOfOptions, decimals))
           .sub(remainingAllowance)
           .add(BigNumber.from(100)) // Adding a buffer of 10 to make sure that there will be always sufficient approval
 
@@ -275,13 +275,13 @@ const SellOrder = (props: {
         } else {
           setApproveLoading(false)
         }
-      } else if (parseEther(numberOfOptions).gt(0)) {
+      } else if (parseUnits(numberOfOptions, decimals).gt(0)) {
         // Calculate required allowance amount for position token assuming 1% fee (expressed as an integer with 18 decimals).
         // NOTE: The assumption that the maximum fee is 1% may not be valid in the future as market makers start posting orders with higher fees.
         // In the worst case, the amountToApprove will be too small due to fees being higher than 1% and the fill transaction may fail.
         // TODO: Exclude orders that have a fee higher than 1% from the orderbook so that users will not get screwed.
         const amountToApprove = allowance
-          .add(parseEther(numberOfOptions))
+          .add(parseUnits(numberOfOptions, decimals))
           .add(feeAmount)
           .sub(remainingAllowance)
           .add(BigNumber.from(100)) // Adding a buffer of 100 to make sure that there will be always sufficient approval
@@ -320,7 +320,7 @@ const SellOrder = (props: {
         maker: userAddress,
         provider: provider,
         isBuy: false,
-        nbrOptions: parseEther(numberOfOptions),
+        nbrOptions: parseUnits(numberOfOptions, decimals),
         collateralDecimals: decimals,
         makerToken: makerToken,
         takerToken: takerToken,
@@ -356,7 +356,7 @@ const SellOrder = (props: {
         taker: userAddress,
         provider: provider,
         isBuy: false,
-        nbrOptions: parseEther(numberOfOptions), // Number of position tokens the user wants to sell
+        nbrOptions: parseUnits(numberOfOptions, decimals), // Number of position tokens the user wants to sell
         collateralDecimals: decimals,
         makerToken: makerToken,
         takerToken: takerToken,
@@ -538,13 +538,13 @@ const SellOrder = (props: {
     // Calculate average price
     if (numberOfOptions !== '') {
       if (
-        parseEther(numberOfOptions).gt(0) &&
+        parseUnits(numberOfOptions, decimals).gt(0) &&
         existingBuyLimitOrders.length > 0
       ) {
         // If user has entered an input into the Number field and there are existing Buy Limit orders to fill in the orderbook...
 
         // User input (numberOfOptions) corresponds to the taker token in Buy Limit.
-        let takerAmountToFill = parseEther(numberOfOptions) // <= 18 decimals
+        let takerAmountToFill = parseUnits(numberOfOptions, decimals) // <= 18 decimals
 
         let cumulativeAvgRate = ZERO
         let cumulativeTaker = ZERO
@@ -602,7 +602,7 @@ const SellOrder = (props: {
           setYouReceive(youReceive)
         }
       } else {
-        if (parseEther(numberOfOptions).eq(0)) {
+        if (parseUnits(numberOfOptions, decimals).eq(0)) {
           if (existingBuyLimitOrders.length > 0) {
             setAvgExpectedRate(existingBuyLimitOrders[0].expectedRate)
           }
@@ -610,7 +610,7 @@ const SellOrder = (props: {
         setOrderBtnDisabled(true)
       }
     }
-  }, [numberOfOptions])
+  }, [numberOfOptions, checked])
 
   useEffect(() => {
     const { payoffPerLongToken, payoffPerShortToken } = calcPayoffPerToken(
@@ -711,11 +711,13 @@ const SellOrder = (props: {
   ])
   useEffect(() => {
     if (numberOfOptions !== '') {
-      if (remainingAllowance.sub(parseEther(numberOfOptions)).lte(0)) {
+      if (
+        remainingAllowance.sub(parseUnits(numberOfOptions, decimals)).lte(0)
+      ) {
         setIsApproved(false)
       } else if (
         remainingAllowance
-          .sub(parseEther(numberOfOptions))
+          .sub(parseUnits(numberOfOptions, decimals))
           .sub(feeAmount)
           .lte(0)
       ) {
@@ -727,17 +729,21 @@ const SellOrder = (props: {
   }, [remainingAllowance, numberOfOptions, userAddress])
   const createBtnDisabled =
     !isApproved ||
-    (numberOfOptions !== '' && !parseEther(numberOfOptions).gt(0)) ||
+    (numberOfOptions !== '' && !parseUnits(numberOfOptions, decimals).gt(0)) ||
     !pricePerOption.gt(0) ||
     (numberOfOptions !== '' &&
-      optionBalance.sub(parseEther(numberOfOptions)).lt(0))
+      optionBalance.sub(parseUnits(numberOfOptions, decimals)).lt(0))
   const fillBtnDisabled =
     !isApproved ||
     orderBtnDisabled ||
     (numberOfOptions !== '' &&
-      optionBalance.sub(parseEther(numberOfOptions)).sub(feeAmount).lt(0))
+      optionBalance
+        .sub(parseUnits(numberOfOptions, decimals))
+        .sub(feeAmount)
+        .lt(0))
   const approveBtnDisabled =
-    isApproved || (numberOfOptions !== '' && !parseEther(numberOfOptions).gt(0)) // No optionBalance.sub(numberOfOptions).lt(0) condition as a user should be able to approve any amount they want
+    isApproved ||
+    (numberOfOptions !== '' && !parseUnits(numberOfOptions, decimals).gt(0)) // No optionBalance.sub(numberOfOptions).lt(0) condition as a user should be able to approve any amount they want
 
   return (
     <Box
@@ -790,7 +796,7 @@ const SellOrder = (props: {
                 sx={{ pb: theme.spacing(1) }}
                 onClick={() => {
                   if (optionBalance != null) {
-                    setNumberOfOptions(optionBalance.toString())
+                    setNumberOfOptions(formatUnits(optionBalance, decimals))
                   }
                 }}
               >
@@ -940,7 +946,7 @@ const SellOrder = (props: {
                 ? 'Fees (0%)'
                 : `Fees (${(TRADING_FEE * 100).toFixed(0)}%)`}
             </Typography>
-            <Typography variant="h4" color="text.secondary">
+            <Typography variant="h5" color="text.secondary">
               {checked
                 ? '0'
                 : toExponentialOrNumber(
@@ -957,7 +963,7 @@ const SellOrder = (props: {
             <Typography variant="h5" color="text.secondary" textAlign="right">
               Remaining Allowance
             </Typography>
-            <Typography variant="h4" color="text.secondary">
+            <Typography variant="h5" color="text.secondary">
               {Number(formatUnits(remainingAllowance, decimals)) < 0.00000000001
                 ? 0
                 : toExponentialOrNumber(
