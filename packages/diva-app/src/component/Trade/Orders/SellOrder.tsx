@@ -781,22 +781,20 @@ const SellOrder = (props: {
                 {toExponentialOrNumber(
                   Number(formatUnits(optionBalance, decimals))
                 )}{' '}
-                {tokenSymbol}{' '}
+                {tokenSymbol}
               </Typography>
               <Button
                 variant="text"
                 color="secondary"
+                size="small"
+                sx={{ pb: theme.spacing(1) }}
                 onClick={() => {
                   if (optionBalance != null) {
-                    setNumberOfOptions(
-                      toExponentialOrNumber(
-                        Number(formatUnits(optionBalance, decimals))
-                      )
-                    )
+                    setNumberOfOptions(optionBalance.toString())
                   }
                 }}
               >
-                {' ('}
+                {'('}
                 Max
                 {')'}
               </Button>

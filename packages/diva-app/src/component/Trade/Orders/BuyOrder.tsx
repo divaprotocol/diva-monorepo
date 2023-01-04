@@ -751,23 +751,21 @@ const BuyOrder = (props: {
                 {toExponentialOrNumber(
                   Number(formatUnits(collateralBalance, decimals))
                 )}{' '}
-                {tokenSymbol}{' '}
+                {tokenSymbol}
+                <Button
+                  variant="text"
+                  size="small"
+                  color="secondary"
+                  sx={{ pb: theme.spacing(1) }}
+                  onClick={() => {
+                    setNumberOfOptions(collateralBalance.toString())
+                  }}
+                >
+                  {'('}
+                  Max
+                  {')'}
+                </Button>
               </Typography>
-              <Button
-                variant="text"
-                color="secondary"
-                onClick={() => {
-                  setNumberOfOptions(
-                    toExponentialOrNumber(
-                      Number(formatUnits(collateralBalance, decimals))
-                    )
-                  )
-                }}
-              >
-                {' ('}
-                Max
-                {')'}
-              </Button>
             </Typography>
           </Box>
           <TextField
