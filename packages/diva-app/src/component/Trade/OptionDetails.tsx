@@ -188,7 +188,7 @@ export default function OptionDetails({
           Max yield
         </Typography>
         {isMaxYield ? (
-          <Typography fontSize="20px" color="primary" pl="10px">
+          <Typography fontSize="20px" color="primary" pl="15px">
             {maxYield}
           </Typography>
         ) : (

@@ -197,7 +197,6 @@ export default function OrderBook(props: {
                   >
                     <Box paddingBottom="20px">
                       <Typography variant="subtitle1">
-                        {console.log('row.buyQuantity', row.buyQuantity)}
                         {row.buyQuantity != ''
                           ? Number(row.buyQuantity)?.toFixed(4)
                           : '-'}
