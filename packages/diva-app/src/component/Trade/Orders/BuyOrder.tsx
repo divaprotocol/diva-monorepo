@@ -485,7 +485,7 @@ const BuyOrder = (props: {
         // Use values returned from getMakerTokenAllowanceAndBalance to initialize variables
         setCollateralBalance(val.balance)
         setAllowance(val.allowance)
-        val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
+        // val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
         // Get Sell Limit orders which the user is going to fill during the Buy Market operation
         if (responseSell.length > 0) {
@@ -501,7 +501,7 @@ const BuyOrder = (props: {
         })
       })
     }
-  }, [responseBuy, responseSell, userAddress, Web3Provider])
+  }, [responseBuy, responseSell, userAddress, Web3Provider, checked])
 
   //useEffect Function for the BUY MARKET Order
   useEffect(() => {

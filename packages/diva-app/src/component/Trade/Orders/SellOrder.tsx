@@ -140,7 +140,7 @@ const SellOrder = (props: {
       setWeb3Provider(web3)
     }
     init()
-  }, [getWeb3JsProvider])
+  }, [getWeb3JsProvider, provider])
 
   const handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked)
@@ -169,11 +169,11 @@ const SellOrder = (props: {
       // MARKET order case
 
       setNumberOfOptions(value)
-      const nbrOptions = parseUnits(value, decimals)
-      const feeAmount = nbrOptions
-        .mul(parseUnits(TRADING_FEE.toString(), decimals))
-        .div(collateralTokenUnit)
-      setFeeAmount(feeAmount)
+      const nbrOptions = parseUnits(value, decimals) // @todo move that out as it's repitition here
+      // const feeAmount = nbrOptions
+      //   .mul(parseUnits(TRADING_FEE.toString(), decimals))
+      //   .div(collateralTokenUnit)
+      // setFeeAmount(feeAmount) // @todo problem here is that the fee is only set, if nbrOfOptions is changed -> Adjust!
       // @todo this part is not in BuyOrder. Align?
 
       // Disable fill order button if nbrOptions incl. fee exceeds user's position token balance
@@ -488,7 +488,7 @@ const SellOrder = (props: {
         // Use values returned from getMakerTokenAllowanceAndBalance to initialize variables
         setOptionBalance(val.balance)
         setAllowance(val.allowance)
-        val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
+        // val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
         // Get Buy Limit orders which the user is going to fill during the Sell Market operation
         if (responseBuy.length > 0) {
@@ -576,7 +576,10 @@ const SellOrder = (props: {
             const youReceive = cumulativeMaker
             setYouReceive(youReceive)
 
-            // @todo Add feeAmount calcs here in line with BuyOrder.tsx?
+            const feeAmount = cumulativeTaker
+              .mul(parseUnits(TRADING_FEE.toString(), decimals))
+              .div(collateralTokenUnit)
+            setFeeAmount(feeAmount)
           }
         } else {
           if (parseUnits(numberOfOptions, decimals).eq(0)) {
