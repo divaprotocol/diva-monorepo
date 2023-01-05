@@ -14,20 +14,23 @@ import {
 } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import AddIcon from '@mui/icons-material/Add'
+import { LoadingButton } from '@mui/lab'
 import { BigNumber } from 'ethers'
 import Web3 from 'web3'
-import { TRADING_FEE } from '../../../constants'
-import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
-import { selectUserAddress } from '../../../Redux/appSlice'
-import ERC20_ABI from '../../../abi/ERC20ABI.json'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
-import { useParams } from 'react-router-dom'
+import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
 import { sellLimitOrder } from '../../../Orders/SellLimit'
+import ERC20_ABI from '../../../abi/ERC20ABI.json'
+import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
+import { selectUserAddress } from '../../../Redux/appSlice'
 import { setResponseSell } from '../../../Redux/TradeOption'
 import { sellMarketOrder } from '../../../Orders/SellMarket'
-import { LoadingButton } from '@mui/lab'
-import { Pool } from '../../../lib/queries'
+import {
+  calcBreakEven,
+  calcPayoffPerToken,
+} from '../../../Util/calcPayoffPerToken'
+import { TRADING_FEE } from '../../../constants'
 import { get0xOpenOrders } from '../../../DataService/OpenOrders'
 import {
   setBreakEven,
@@ -35,11 +38,8 @@ import {
   setMaxPayout,
   setMaxYield,
 } from '../../../Redux/Stats'
-import {
-  calcBreakEven,
-  calcPayoffPerToken,
-} from '../../../Util/calcPayoffPerToken'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
+import { useParams } from 'react-router-dom'
 
 const expiryOrderTime = [
   {
@@ -94,42 +94,42 @@ const SellOrder = (props: {
   ) => any
 }) => {
   const theme = useTheme()
-  const { getWeb3JsProvider, provider } = useConnectionContext()
   const [Web3Provider, setWeb3Provider] = useState<Web3>()
   const web3 = new Web3(Web3Provider as any)
+  const { getWeb3JsProvider, provider } = useConnectionContext()
+  const [optionBalance, setOptionBalance] = React.useState(ZERO)
+  const [checked, setChecked] = useState(true)
   const [numberOfOptions, setNumberOfOptions] = React.useState('') // User input field
   const [pricePerOption, setPricePerOption] = React.useState(ZERO) // User input field
   const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
-  const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
-  const [youReceive, setYouReceive] = React.useState(ZERO)
   const [expiry, setExpiry] = React.useState(5)
+  const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
+  const [isApproved, setIsApproved] = React.useState(false)
+  const [fillLoading, setFillLoading] = React.useState(false)
+  const [approveLoading, setApproveLoading] = React.useState(false)
+  const [allowance, setAllowance] = React.useState(ZERO)
+  const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
+  const [youReceive, setYouReceive] = React.useState(ZERO)
   const [existingBuyLimitOrders, setExistingBuyLimitOrders] = React.useState([])
   const [
     existingSellLimitOrdersAmountUser,
     setExistingSellLimitOrdersAmountUser,
   ] = React.useState(ZERO)
-  const [checked, setChecked] = useState(true)
-  const [isApproved, setIsApproved] = React.useState(false)
-  const [approveLoading, setApproveLoading] = React.useState(false)
-  const [fillLoading, setFillLoading] = React.useState(false)
   const [orderBtnDisabled, setOrderBtnDisabled] = React.useState(true)
-  const [allowance, setAllowance] = React.useState(ZERO)
-  const [remainingAllowance, setRemainingAllowance] = React.useState(ZERO)
-  const [optionBalance, setOptionBalance] = React.useState(ZERO)
 
+  const userAddress = useAppSelector(selectUserAddress)
   const option = props.option
+  const decimals = option.collateralToken.decimals
   const exchangeProxy = props.exchangeProxy
   const tokenSymbol = option.collateralToken.symbol
   const makerToken = props.tokenAddress
   const takerToken = option.collateralToken.id
   const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
-  const usdPrice = props.usdPrice
-  const decimals = option.collateralToken.decimals
   const collateralTokenUnit = parseUnits('1', decimals)
-  const userAddress = useAppSelector(selectUserAddress)
-  const params: { tokenType: string } = useParams()
+  const usdPrice = props.usdPrice
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
   const dispatch = useAppDispatch()
+  const params: { tokenType: string } = useParams()
   const isLong = window.location.pathname.split('/')[2] === 'long'
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
@@ -150,12 +150,12 @@ const SellOrder = (props: {
   }
   const handleNumberOfOptions = (value: string) => {
     // @todo app breaks if `-` is entered as first value; doesn't happen for BUY
+    const nbrOptions = parseUnits(value, decimals)
     if (value != '' && checked) {
       // LIMIT order case
 
       setNumberOfOptions(value)
 
-      const nbrOptions = parseUnits(value, decimals)
       if (nbrOptions.gt(0) && pricePerOption.gt(0)) {
         const youReceive = pricePerOption
           .mul(nbrOptions)
@@ -169,12 +169,6 @@ const SellOrder = (props: {
       // MARKET order case
 
       setNumberOfOptions(value)
-      const nbrOptions = parseUnits(value, decimals) // @todo move that out as it's repitition here
-      // const feeAmount = nbrOptions
-      //   .mul(parseUnits(TRADING_FEE.toString(), decimals))
-      //   .div(collateralTokenUnit)
-      // setFeeAmount(feeAmount) // @todo problem here is that the fee is only set, if nbrOfOptions is changed -> Adjust!
-      // @todo this part is not in BuyOrder. Align?
 
       // Disable fill order button if nbrOptions incl. fee exceeds user's position token balance
       if (optionBalance.sub(nbrOptions).sub(feeAmount).lt(0)) {
@@ -278,9 +272,9 @@ const SellOrder = (props: {
           setIsApproved(true)
           setApproveLoading(false)
           alert(
-            `Allowance for ${toExponentialOrNumber(
+            `Total allowance updated to ${toExponentialOrNumber(
               Number(formatUnits(optionAllowance, decimals))
-            )} ${params.tokenType.toUpperCase()} successfully set. Remaining allowance taking into account existing orders: ${toExponentialOrNumber(
+            )} ${params.tokenType.toUpperCase()}. Remaining allowance taking into account open orders: ${toExponentialOrNumber(
               Number(formatUnits(remainingAllowance, decimals))
             )} ${params.tokenType.toUpperCase()}.`
           )
@@ -370,7 +364,8 @@ const SellOrder = (props: {
       })
     }
   }
-  // TODO: Outsource this function into a separate file as it's the same across Buy/Sell Limit/Market
+
+  // TODO: Outsource this function into a separate file as it's the same across BUY/SELL LIMIT/MARKET
   const getMakerTokenAllowanceAndBalance = async (makerAccount: string) => {
     const allowance = await makerTokenContract.methods
       .allowance(makerAccount, exchangeProxy)
@@ -383,7 +378,8 @@ const SellOrder = (props: {
       allowance: BigNumber.from(allowance),
     }
   }
-  //This will fetch the BUY Limit Order in order to perform the Sell Market Order
+
+  // This will fetch the BUY LIMIT orders to perform the SELL MARKET operation
   const getBuyLimitOrders = async () => {
     const orders: any = []
     responseBuy.forEach((data: any) => {
@@ -399,7 +395,7 @@ const SellOrder = (props: {
         // TODO Consider moving the expectedRate calcs inside get0xOpenOrders
         order['expectedRate'] = makerAmount
           .mul(collateralTokenUnit)
-          .div(takerAmount) // result has collateral token decimals
+          .div(takerAmount)
         order['remainingFillableTakerAmount'] = remainingFillableTakerAmount
         orders.push(order)
       }
@@ -413,14 +409,14 @@ const SellOrder = (props: {
     return orders
   }
 
-  // Check how many existing Sell Limit orders the user has outstanding in the orderbook.
-  // Note that in Sell Limit, the makerToken is the position token which is the relevant token for approval.
+  // Check how many existing SELL LIMIT orders the user has outstanding in the orderbook.
+  // Note that in SELL LIMIT, the makerToken is the position token which is the relevant token for approval.
   // As remainingFillableMakerAmount is not directly available, it has to be backed out from remainingFillableTakerAmount, takerAmount and makerAmount
   // TODO: Outsource this function into OpenOrders.ts, potentially integrate into getUserOrders function
   const getTotalSellLimitOrderAmountUser = async (maker) => {
     let existingOrdersAmount = ZERO
     if (responseSell.length == 0) {
-      // Double check the any limit orders exists
+      // Double check whether any limit orders exist
       const rSell: any = await get0xOpenOrders(
         takerToken,
         makerToken,
@@ -457,30 +453,6 @@ const SellOrder = (props: {
     })
     return existingOrdersAmount
   }
-  // useEffect(() => {
-  //   if (userAddress != null) {
-  //     getMakerTokenAllowanceAndBalance(userAddress).then(async (val) => {
-  //       // Use values returned from getMakerTokenAllowanceAndBalance to initialize variables
-  //       setOptionBalance(val.balance)
-  //       setAllowance(val.allowance)
-  //       val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
-
-  //       // Get Buy Limit orders which the user is going to fill during the Sell Market operation
-  //       if (responseBuy.length > 0) {
-  //         getBuyLimitOrders().then((orders) => {
-  //           setExistingBuyLimitOrders(orders)
-  //         })
-  //       }
-
-  //       // Get the user's (taker) existing Sell Limit orders which block some of the user's allowance
-  //       getTotalSellLimitOrderAmountUser(userAddress).then((amount) => {
-  //         const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance but should go back to zero if 0x orders are refreshed and reflect the actually fillable amount
-  //         setExistingSellLimitOrdersAmountUser(amount)
-  //         setRemainingAllowance(remainingAmount)
-  //       })
-  //     })
-  //   }
-  // }, [responseSell, userAddress, Web3Provider])
 
   useEffect(() => {
     if (userAddress != null) {
@@ -488,16 +460,15 @@ const SellOrder = (props: {
         // Use values returned from getMakerTokenAllowanceAndBalance to initialize variables
         setOptionBalance(val.balance)
         setAllowance(val.allowance)
-        // val.allowance.lte(0) ? setIsApproved(false) : setIsApproved(true)
 
-        // Get Buy Limit orders which the user is going to fill during the Sell Market operation
+        // Get BUY LIMIT orders which the user is going to fill during the SELL MARKET operation
         if (responseBuy.length > 0) {
           getBuyLimitOrders().then((orders) => {
             setExistingBuyLimitOrders(orders)
           })
         }
 
-        // Get the user's (taker) existing Sell Limit orders which block some of the user's allowance
+        // Get the user's (taker) existing SELL LIMIT orders which block some of the user's allowance
         getTotalSellLimitOrderAmountUser(userAddress).then((amount) => {
           const remainingAmount = val.allowance.sub(amount) // May be negative if user manually revokes allowance but should go back to zero if 0x orders are refreshed and reflect the actually fillable amount
           setExistingSellLimitOrdersAmountUser(amount)
@@ -507,7 +478,7 @@ const SellOrder = (props: {
     }
   }, [responseBuy, responseSell, userAddress, Web3Provider, checked])
 
-  //UseEffect function to fetch average price for the SELL MARKET Order
+  // useEffect function to fetch average price for the SELL MARKET order
   useEffect(() => {
     if (!checked) {
       // Calculate average price
@@ -516,9 +487,9 @@ const SellOrder = (props: {
           parseUnits(numberOfOptions, decimals).gt(0) &&
           existingBuyLimitOrders.length > 0
         ) {
-          // If user has entered an input into the Amount field and there are existing Buy Limit orders to fill in the orderbook...
+          // If user has entered an input into the Amount field and there are existing BUY LIMIT orders to fill in the orderbook...
 
-          // User input (numberOfOptions) corresponds to the taker token in Buy Limit.
+          // User input (numberOfOptions) corresponds to the taker token in BUY LIMIT.
           let takerAmountToFill = parseUnits(numberOfOptions, decimals)
 
           let cumulativeAvgRate = ZERO
@@ -529,7 +500,7 @@ const SellOrder = (props: {
           // existing orders will be cleared and a portion will remain unfilled.
           // TODO: Consider showing a message to user when desired sell amount exceeds the available amount in the orderbook.
           existingBuyLimitOrders.forEach((order: any) => {
-            // Loop through each Buy Limit order where makerToken = collateral token (<= 18 decimals) and takerToken = position token (18 decimals)
+            // Loop through each BUY LIMIT order where makerToken = collateral token and takerToken = position token
 
             let takerAmount = BigNumber.from(order.takerAmount)
             let makerAmount = BigNumber.from(order.makerAmount)
@@ -540,7 +511,7 @@ const SellOrder = (props: {
 
             // If order is already partially filled, set takerAmount equal to remainingFillableTakerAmount and makerAmount to the corresponding pro-rata fillable makerAmount
             if (remainingFillableTakerAmount.lt(takerAmount)) {
-              // Existing Buy Limit order was already partially filled
+              // Existing BUY LIMIT order was already partially filled
 
               // Overwrite takerAmount and makerAmount with remaining amounts
               takerAmount = remainingFillableTakerAmount
@@ -565,17 +536,19 @@ const SellOrder = (props: {
               }
             }
           })
-          // Calculate average price to pay excluding 1% fee (result is expressed as an integer with collateral token decimals (<= 18))
+
+          // Calculate average price to pay excluding 1% fee
           cumulativeAvgRate = cumulativeMaker
             .mul(collateralTokenUnit) // scaling for high precision integer math
             .div(cumulativeTaker)
 
           if (cumulativeAvgRate.gt(0)) {
             setAvgExpectedRate(cumulativeAvgRate)
-            // Amount to that the seller/user will receive; result is expressed as an integer with collateral token decimals
+            // Amount to that the seller/user will receive
             const youReceive = cumulativeMaker
             setYouReceive(youReceive)
 
+            // Calculate fee amount (to be paid in position token)
             const feeAmount = cumulativeTaker
               .mul(parseUnits(TRADING_FEE.toString(), decimals))
               .div(collateralTokenUnit)
@@ -685,15 +658,13 @@ const SellOrder = (props: {
     allowance,
     avgExpectedRate,
     option,
-    pricePerOption,
-    usdPrice,
+    pricePerOption, // TODO Consider renaming to "pricePerPositionToken"
+    usdPrice, // TODO Consider renaming to "underlyingValue"
     existingSellLimitOrdersAmountUser,
     userAddress,
   ])
   useEffect(() => {
     if (numberOfOptions !== '') {
-      // @todo Check that feeAmount has the right format because numberOfOptions seems to be converted into an integer
-      console.log('feeAmount', feeAmount.toString())
       if (
         remainingAllowance
           .sub(parseUnits(numberOfOptions, decimals))
@@ -707,6 +678,7 @@ const SellOrder = (props: {
     }
   }, [remainingAllowance, numberOfOptions, userAddress])
 
+  // @todo QUESTION: Is numberOfOptions !== '' needed here?
   const createBtnDisabled =
     !isApproved ||
     (numberOfOptions !== '' && !parseUnits(numberOfOptions, decimals).gt(0)) ||
@@ -789,7 +761,7 @@ const SellOrder = (props: {
           </Box>
           <TextField
             id="price-per-token"
-            label="Price" /* {`Price per ${params.tokenType.toUpperCase()} token`} */
+            label="Price"
             type="text"
             sx={{ width: '100%' }}
             InputProps={{
@@ -870,27 +842,6 @@ const SellOrder = (props: {
               {tokenSymbol}
             </Typography>
           </Stack>
-          {/* 
-          <TextField
-            id="You Receive"
-            label={checked ? `You Receive` : `You receive(Inc. fees)`}
-            type="number"
-            disabled
-            sx={{ width: '100%', mb: theme.spacing(6) }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end" sx={{ color: '#929292' }}>
-                  {tokenSymbol}
-                </InputAdornment>
-              ),
-            }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            value={toExponentialOrNumber(
-              Number(formatUnits(youReceive, decimals))
-            )}
-          /> */}
           <Stack direction={'row'} spacing={1} mt={theme.spacing(1)}>
             <LoadingButton
               variant="contained"
@@ -928,12 +879,6 @@ const SellOrder = (props: {
                 : `Fees (${(TRADING_FEE * 100).toFixed(0)}%)`}
             </Typography>
             <Typography variant="h5" color="text.secondary">
-              {/* {checked
-                ? Number(0).toFixed(4)
-                : toExponentialOrNumber(
-                    Number(formatUnits(feeAmount, decimals))
-                  )}{' '}
-              {params.tokenType.toUpperCase()} */}
               {Number(formatUnits(feeAmount, decimals)) < 0.00000000001
                 ? Number(0).toFixed(4)
                 : toExponentialOrNumber(
