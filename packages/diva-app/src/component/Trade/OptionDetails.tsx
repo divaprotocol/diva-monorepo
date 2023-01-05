@@ -179,7 +179,7 @@ export default function OptionDetails({
               : 'n/a'}
           </Typography>
           <Typography fontSize="20px" color="gray" pl="10px">
-            {pool.collateralToken.symbol}
+            {intrinsicValue != 'n/a' ? pool.collateralToken.symbol : ''}
           </Typography>
         </Stack>
       </Stack>
