@@ -22,6 +22,7 @@ dataSources:
         - PositionToken
         - TestnetUser
         - UserPositionTokens
+        - DIVAOfferFill
       abis:
         - name: DivaDiamond
           file: ./abi/IDIVANew.json
