@@ -126,3 +126,19 @@ type NativeOrderFill @entity {
   takerTokenFilledAmount: BigInt!
   timestamp: BigInt!
 }
+
+# DIVA offer fills
+type DIVAOfferFill @entity {
+  # tx hash - offer hash - log index
+  id: ID!
+  offerHash: Bytes!
+  maker: Bytes!
+  taker: Bytes!
+  makerToken: Bytes!
+  takerToken: Bytes!
+  makerIsLong: Boolean!
+  makerFilledAmount: BigInt!
+  takerFilledAmount: BigInt!
+  pool: Pool!
+  timestamp: BigInt!
+}
