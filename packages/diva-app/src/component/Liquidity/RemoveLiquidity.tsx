@@ -6,30 +6,31 @@ import {
   CircularProgress,
   Collapse,
   Container,
+  Divider,
   IconButton,
+  InputAdornment,
   Input,
   Stack,
+  TextField,
   Typography,
   useTheme,
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
-import {
-  formatEther,
-  formatUnits,
-  parseEther,
-  parseUnits,
-} from 'ethers/lib/utils'
+import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
 import { useCoinIcon } from '../../hooks/useCoinIcon'
 import ERC20 from '../../abi/ERC20ABI.json'
 import Button from '@mui/material/Button'
 import { config } from '../../constants'
 import DIVA_ABI from '../../abi/DIVAABI.json'
+import { toExponentialOrNumber } from '../../Util/utils'
 import { fetchPool } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
+import { selectUserAddress } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { ReactComponent as Star } from '../../Images/star-svgrepo-com.svg'
+import { useAppSelector } from '../../Redux/hooks'
+import LightbulbIcon from '@mui/icons-material/Lightbulb'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -57,9 +58,12 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const [maxCollateral, setMaxCollateral] = React.useState<any>(0)
   const [balanceUpdated, setBalanceUpdated] = React.useState(true)
   const { provider } = useConnectionContext()
+  const account = useAppSelector(selectUserAddress)
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
   const theme = useTheme()
+
+  // TODO Move this part into the useEffect hook so that it updates the user balance on account switch
   const tokenBalanceLong = useErcBalance(
     pool ? pool!.longToken.id : undefined,
     balanceUpdated
@@ -69,6 +73,44 @@ export const RemoveLiquidity = ({ pool }: Props) => {
 
     balanceUpdated
   )
+  const protocolFees =
+    pool &&
+    textFieldValue !== '' &&
+    (
+      parseFloat(formatUnits(pool!.protocolFee)) * parseFloat(textFieldValue)
+    ).toFixed(4)
+
+  const settlementFees =
+    pool &&
+    textFieldValue !== '' &&
+    (
+      parseFloat(formatUnits(pool!.settlementFee)) * parseFloat(textFieldValue)
+    ).toFixed(4)
+
+  const receivingAmount =
+    pool &&
+    textFieldValue !== '' &&
+    (
+      parseFloat(textFieldValue) -
+      (parseFloat(protocolFees) + parseFloat(settlementFees))
+    ).toFixed(4)
+  const returnAmount =
+    textFieldValue == '' ? 0 : Number(parseFloat(textFieldValue).toFixed(4))
+
+  const currentPoolSize =
+    pool &&
+    parseFloat(formatUnits(pool.collateralBalance, decimal)).toFixed(4) +
+      ' ' +
+      pool.collateralToken.symbol
+
+  const yourPoolShare =
+    pool &&
+    Number(
+      (parseFloat(formatUnits(maxCollateral.toString(), decimal)) /
+        parseFloat(formatUnits(pool.collateralBalance, decimal))) *
+        100
+    ).toFixed(4) + ' %'
+
   useEffect(() => {
     if (pool) {
       setOpenExpiredAlert(pool.statusFinalReferenceValue === 'Confirmed')
@@ -83,19 +125,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
           pool!.collateralToken.decimals
         )
         const colLong = longBalance
-          .mul(
-            parseUnits('1', 18)
-              .sub(BigNumber.from(pool.protocolFee))
-              .sub(BigNumber.from(pool.settlementFee))
-          )
-          .div(parseUnits('1', 18))
         const colShort = shortBalance
-          .mul(
-            parseUnits('1', 18)
-              .sub(BigNumber.from(pool.protocolFee))
-              .sub(BigNumber.from(pool.settlementFee))
-          )
-          .div(parseUnits('1', 18))
         {
           colLong.lt(colShort)
             ? setMaxCollateral(colLong)
@@ -106,28 +136,8 @@ export const RemoveLiquidity = ({ pool }: Props) => {
         if (parseFloat(textFieldValue) === 0) {
           setActionEnabled(false)
         } else {
-          setLongToken(
-            formatEther(
-              parseEther(textFieldValue)
-                .mul(parseEther('1'))
-                .div(
-                  parseEther('1')
-                    .sub(BigNumber.from(pool.protocolFee))
-                    .sub(BigNumber.from(pool.settlementFee))
-                )
-            )
-          )
-          setShortToken(
-            formatEther(
-              parseEther(textFieldValue)
-                .mul(parseEther('1'))
-                .div(
-                  parseEther('1')
-                    .sub(BigNumber.from(pool.protocolFee))
-                    .sub(BigNumber.from(pool.settlementFee))
-                )
-            )
-          )
+          setLongToken(textFieldValue)
+          setShortToken(textFieldValue)
           setActionEnabled(true)
         }
       }
@@ -142,7 +152,14 @@ export const RemoveLiquidity = ({ pool }: Props) => {
     } else {
       setOpenAlert(false)
     }
-  }, [tokenBalanceLong, tokenBalanceShort, textFieldValue, chainId, pool])
+  }, [
+    tokenBalanceLong,
+    tokenBalanceShort,
+    textFieldValue,
+    chainId,
+    pool,
+    account,
+  ])
 
   async function removeLiquidityTrade() {
     try {
@@ -163,119 +180,110 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       console.error(error)
     }
   }
+
   return (
-    <Stack
-      direction="row"
-      spacing={2}
-      sx={{
-        mt: theme.spacing(2),
-      }}
-    >
-      <Box>
-        {loading ? (
-          <>
-            <Box pt={2} pb={3}>
-              <Alert severity="info">Removing...</Alert>
-            </Box>
-          </>
-        ) : (
-          ''
-        )}
-        <Collapse in={openExpiredAlert}>
-          <Alert
-            severity="error"
-            action={
-              <IconButton
-                aria-label="close"
-                color="inherit"
-                size="small"
-                onClick={() => {
-                  setOpenExpiredAlert(false)
-                }}
-              >
-                {'X'}
-              </IconButton>
-            }
-            sx={{ mb: 2 }}
+    <>
+      {loading ? (
+        <>
+          <Box pt={2} pb={3} maxWidth="470px">
+            <Alert severity="info">Removing...</Alert>
+          </Box>
+        </>
+      ) : (
+        ''
+      )}
+      <Collapse in={openExpiredAlert}>
+        <Alert
+          severity="error"
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setOpenExpiredAlert(false)
+              }}
+            >
+              {'X'}
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          Final value is already confirmed. Please redeem your tokens in My
+          Positions.
+        </Alert>
+      </Collapse>
+      <Stack
+        direction="row"
+        spacing={theme.spacing(20)}
+        sx={{ my: theme.spacing(6) }}
+      >
+        <Box>
+          <Card
+            sx={{
+              width: '430px',
+              border: '1px solid #383838',
+              background: theme.palette.background.default,
+              borderRadius: '5px',
+              borderBottom: 0,
+              p: theme.spacing(2),
+            }}
           >
-            Final value is already confirmed. Please redeem your tokens in My
-            Positions.
-          </Alert>
-        </Collapse>
-        <Card sx={{ minWidth: '500px', borderRadius: '16px' }}>
-          <Container sx={{ mt: theme.spacing(2) }}>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ mt: theme.spacing(2) }}>Amount</Typography>
-              <Input
-                type="number"
-                inputProps={{ style: { textAlign: 'right' } }}
-                value={textFieldValue}
-                onChange={(e) => {
-                  const amount = e.target.value
-                  if (
-                    amount.split('.')[1] != null &&
-                    amount.split('.')[1]!.length <= decimal
-                  ) {
-                    setTextFieldValue(amount)
-                  } else if (amount.split('.')[1] == null) {
-                    setTextFieldValue(amount)
-                  }
-                }}
-              />
-            </Stack>
+            <TextField
+              id="outlined-number"
+              label="Amount to remove"
+              type="number"
+              sx={{ width: '100%' }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end" sx={{ color: '#929292' }}>
+                    {pool!.collateralToken.symbol}
+                  </InputAdornment>
+                ),
+              }}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              value={textFieldValue}
+              onChange={(e) => {
+                const amount = e.target.value
+                if (
+                  amount.split('.')[1] != null &&
+                  amount.split('.')[1]!.length <= decimal
+                ) {
+                  setTextFieldValue(amount)
+                } else if (amount.split('.')[1] == null) {
+                  setTextFieldValue(amount)
+                }
+              }}
+            />
             {tokenBalanceLong ? (
-              <>
-                <Typography variant="subtitle2" color="text.secondary">
-                  You can remove up to{' '}
-                  {parseFloat(formatUnits(maxCollateral, decimal)).toFixed(4)}{' '}
-                  {pool!.collateralToken.symbol}
-                  {' (after fees) '}
-                  <MaxCollateral
-                    role="button"
-                    onClick={() => {
-                      if (maxCollateral != 0) {
-                        setTextFieldValue(formatUnits(maxCollateral, decimal))
-                      }
-                    }}
-                  >
-                    {'(Max)'}
-                  </MaxCollateral>
+              <Typography
+                variant="h5"
+                color="text.secondary"
+                sx={{ ml: theme.spacing(2) }}
+              >
+                You can remove up to
+                <Typography variant="h4" sx={{ display: 'inline' }}>
+                  &nbsp;
+                  {parseFloat(formatUnits(maxCollateral, decimal)).toFixed(
+                    4
+                  )}{' '}
+                  {pool!.collateralToken.symbol}&nbsp;
                 </Typography>
-              </>
-            ) : (
-              <Typography variant="subtitle2" color="text.secondary">
-                Please connect your wallet
+                {'('}
+                <MaxCollateral
+                  role="button"
+                  onClick={() => {
+                    if (maxCollateral != 0) {
+                      setTextFieldValue(formatUnits(maxCollateral, decimal))
+                    }
+                  }}
+                >
+                  {'Max'}
+                </MaxCollateral>
+                {')'}
               </Typography>
-            )}
-            <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ mt: theme.spacing(2) }}>Long Token</Typography>
-              <Typography sx={{ mt: theme.spacing(2) }}>
-                {(+longToken).toFixed(4)}
-              </Typography>
-            </Stack>
-            {tokenBalanceLong ? (
-              <>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Your balance: {parseFloat(tokenBalanceLong).toFixed(4)}
-                </Typography>
-              </>
-            ) : (
-              <Typography variant="subtitle2" color="text.secondary">
-                Please connect your wallet
-              </Typography>
-            )}
-            <Stack direction="row" justifyContent="space-between">
-              <Typography sx={{ mt: theme.spacing(2) }}>Short Token</Typography>
-              <Typography sx={{ mt: theme.spacing(2) }}>
-                {(+shortToken).toFixed(4)}
-              </Typography>
-            </Stack>
-            {tokenBalanceShort ? (
-              <>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Your balance: {parseFloat(tokenBalanceShort).toFixed(4)}
-                </Typography>
-              </>
             ) : (
               <Typography variant="subtitle2" color="text.secondary">
                 Please connect your wallet
@@ -301,168 +309,207 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 Insufficient wallet balance
               </Alert>
             </Collapse>
-            <div
-              style={{
-                height: '100px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {loading ? (
-                <CircularProgress />
-              ) : (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  type="submit"
-                  value="Submit"
-                  disabled={
-                    !pool ||
-                    actionEnabled == false ||
-                    openExpiredAlert ||
-                    textFieldValue === '' ||
-                    chainId == null ||
-                    openAlert === true
-                  }
-                  onClick={() => {
-                    setLoading(true)
-                    const diva = new ethers.Contract(
-                      config[chainId].divaAddress,
-                      DIVA_ABI,
-                      provider?.getSigner()
-                    )
-                    diva!
-                      .removeLiquidity(
-                        window.location.pathname.split('/')[1],
-                        parseUnits(Number(longToken).toFixed(decimal), decimal) // toFixed(decimal) used to avoid fractional component exceeds decimals error
-                      )
-                      .then((tx) => {
-                        /**
-                         * dispatch action to refetch the pool after action
-                         */
-                        tx.wait().then(() => {
-                          setLoading(false)
-                          setTimeout(() => {
-                            setBalanceUpdated(false)
-                            dispatch(
-                              fetchPool({
-                                graphUrl:
-                                  config[chainId as number].divaSubgraph,
-                                poolId: window.location.pathname.split('/')[1],
-                              })
-                            )
-                          }, 5000)
-                        })
-                      })
-                      .catch((err) => {
-                        setLoading(false)
-                        console.error(err)
-                      })
-                  }}
-                  style={{
-                    maxWidth: theme.spacing(38),
-                    maxHeight: theme.spacing(5),
-                    minWidth: theme.spacing(38),
-                    minHeight: theme.spacing(5),
-                  }}
-                >
-                  Remove
-                </Button>
-              )}
-            </div>
-          </Container>
-        </Card>
-      </Box>
-      <Box>
-        <Container
-          sx={{ width: '490px', mt: theme.spacing(4), mb: theme.spacing(2) }}
-        >
-          <Stack direction="row" justifyContent="space-between">
-            <Typography>Current Pool Size</Typography>
-            <Typography>
-              {pool &&
-                parseFloat(
-                  formatUnits(BigNumber.from(pool.collateralBalance), decimal)
-                ).toFixed(4)}{' '}
-              {pool!.collateralToken.symbol}{' '}
-            </Typography>
-          </Stack>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography>Protocol Fee</Typography>
-            <Typography>
-              {pool &&
-                textFieldValue !== '' &&
-                (
-                  (parseFloat(formatEther(BigNumber.from(pool!.protocolFee))) *
-                    parseFloat(textFieldValue)) /
-                  (1.0 -
-                    parseFloat(formatEther(BigNumber.from(pool.protocolFee))) -
-                    parseFloat(formatEther(BigNumber.from(pool.settlementFee))))
-                ).toFixed(4)}{' '}
-              {pool!.collateralToken.symbol}{' '}
-            </Typography>
-          </Stack>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography>Settlement Fee</Typography>
-            <Typography>
-              {pool &&
-                textFieldValue !== '' &&
-                (
-                  (parseFloat(
-                    formatEther(BigNumber.from(pool!.settlementFee))
-                  ) *
-                    parseFloat(textFieldValue)) /
-                  (1.0 -
-                    parseFloat(formatEther(BigNumber.from(pool.protocolFee))) -
-                    parseFloat(formatEther(BigNumber.from(pool.settlementFee))))
-                ).toFixed(4)}{' '}
-              {pool!.collateralToken.symbol}{' '}
-            </Typography>
-          </Stack>
-        </Container>
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          sx={{
-            minWidth: theme.spacing(82),
-          }}
-        >
+          </Card>
           <Card
             sx={{
-              mt: theme.spacing(2),
-              borderRadius: '16px',
-              width: '450px',
+              width: '430px',
+              height: '280px',
+              border: '1px solid #1B3448',
+              mt: theme.spacing(-1),
+              py: theme.spacing(4),
+              px: theme.spacing(2),
+              background: 'linear-gradient(to bottom, #1B3448, #000000 110%)',
             }}
           >
-            <Container
-              sx={{
-                mt: theme.spacing(2),
-                mb: theme.spacing(2),
-              }}
-            >
-              <Stack direction="row">
-                <Star
-                  style={{
-                    marginTop: theme.spacing(-1),
-                    paddingRight: theme.spacing(1),
-                    height: theme.spacing(4),
-                    width: theme.spacing(4),
-                  }}
-                />
-                <Typography fontSize={'0.85rem'} style={{ color: 'gray' }}>
-                  {' '}
-                  By removing liquidity you are giving back long and short
-                  position tokens proportional to the pool balance and receive
-                  collateral in return
+            <Stack direction="column" spacing={4}>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="h3">Protocol Fee</Typography>
+                <Typography variant="h3">
+                  {protocolFees} {pool!.collateralToken.symbol}
                 </Typography>
               </Stack>
-            </Container>
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="h3">Settlement Fee</Typography>
+                <Typography variant="h3">
+                  {settlementFees} {pool!.collateralToken.symbol}
+                </Typography>
+              </Stack>
+
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="h3">
+                  You will receive (after fees)
+                </Typography>
+                <Typography variant="h3">
+                  {receivingAmount} {pool!.collateralToken.symbol}
+                </Typography>
+              </Stack>
+              <div
+                style={{
+                  height: '100px',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {loading ? (
+                  <CircularProgress />
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    type="submit"
+                    value="Submit"
+                    disabled={
+                      !pool ||
+                      actionEnabled == false ||
+                      openExpiredAlert ||
+                      textFieldValue === '' ||
+                      chainId == null ||
+                      openAlert === true
+                    }
+                    onClick={() => {
+                      setLoading(true)
+                      const diva = new ethers.Contract(
+                        config[chainId].divaAddress,
+                        DIVA_ABI,
+                        provider?.getSigner()
+                      )
+                      diva!
+                        .removeLiquidity(
+                          window.location.pathname.split('/')[1],
+                          parseEther(longToken)
+                        )
+                        .then((tx) => {
+                          /**
+                           * dispatch action to refetch the pool after action
+                           */
+                          tx.wait().then(() => {
+                            setLoading(false)
+                            setTimeout(() => {
+                              setBalanceUpdated(false)
+                              dispatch(
+                                fetchPool({
+                                  graphUrl:
+                                    config[chainId as number].divaSubgraph,
+                                  poolId:
+                                    window.location.pathname.split('/')[1],
+                                })
+                              )
+                            }, 5000)
+                          })
+                        })
+                        .catch((err) => {
+                          setLoading(false)
+                          console.error(err)
+                        })
+                    }}
+                    style={{
+                      maxWidth: theme.spacing(38),
+                      maxHeight: theme.spacing(5),
+                      minWidth: theme.spacing(38),
+                      minHeight: theme.spacing(5),
+                    }}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+            </Stack>
+            {/* <Box>
+              <Typography variant="h6" color="gray">
+                {returnAmount} LONG and SHORT tokens will be returned and burnt.
+              </Typography>
+            </Box> */}
           </Card>
         </Box>
-      </Box>
-    </Stack>
+        <Box>
+          <Stack direction="column" spacing={3} maxWidth={theme.spacing(65)}>
+            <Typography variant="h3" sx={{ mt: theme.spacing(-2) }}>
+              Pool Status
+            </Typography>
+            <Stack direction="row" justifyContent="space-between">
+              <Box>
+                <Typography variant="h4" fontWeight="normal" color="gray">
+                  Pool ID
+                </Typography>
+                <Typography fontSize="20px" color="white">
+                  {pool.id}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="h4" fontWeight="normal" color="gray">
+                  TVL
+                </Typography>
+                <Typography fontSize="20px" color="white">
+                  {currentPoolSize}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="h4" fontWeight="normal" color="#929292">
+                  Your Pool Share
+                </Typography>
+                <Typography fontSize="20px" color="white">
+                  {yourPoolShare}
+                </Typography>
+              </Box>
+            </Stack>
+            {/* <Typography variant="h3">Your Balance</Typography> */}
+            {/* <Stack direction="row" spacing={theme.spacing(4)}>
+              <Box>
+                <Typography variant="h4" fontWeight="normal" color="#929292">
+                  LONG Tokens
+                </Typography>
+                <Typography fontSize="20px" color="white" noWrap>
+                  {(+longToken).toFixed(4)}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="h4" fontWeight="normal" color="#929292">
+                  SHORT Tokens
+                </Typography>
+                <Typography fontSize="20px" color="white" noWrap>
+                  {(+shortToken).toFixed(4)}
+                </Typography>
+              </Box>
+            </Stack> */}
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="flex-start"
+              sx={{
+                mb: theme.spacing(4),
+              }}
+            >
+              <Card
+                sx={{
+                  width: '420px',
+                  border: '1px solid #383838',
+                  borderRadius: '6px',
+                  mt: theme.spacing(2),
+                  p: theme.spacing(3),
+                }}
+              >
+                <Stack direction="row" spacing={2}>
+                  <LightbulbIcon
+                    style={{
+                      height: theme.spacing(3),
+                      width: theme.spacing(3),
+                      color: '#595959',
+                    }}
+                  />
+                  <Typography variant="h3" color="gray" textAlign="justify">
+                    By removing liquidity you are giving back LONG and SHORT
+                    position tokens in equal proportions. The minimum of your
+                    SHORT and LONG token balance determines the collateral
+                    amount you can remove.
+                  </Typography>
+                </Stack>
+              </Card>
+            </Box>
+          </Stack>
+        </Box>
+      </Stack>
+    </>
   )
 }
