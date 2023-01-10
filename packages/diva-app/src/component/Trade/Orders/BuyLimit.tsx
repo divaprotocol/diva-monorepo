@@ -2,7 +2,14 @@ import React, { FormEvent, useState } from 'react'
 import { useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
-import { Container, FormLabel, MenuItem, Stack, Tooltip } from '@mui/material'
+import {
+  Box,
+  Container,
+  FormLabel,
+  MenuItem,
+  Stack,
+  Tooltip,
+} from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
 import { buylimitOrder } from '../../../Orders/BuyLimit'
@@ -109,6 +116,7 @@ export default function BuyLimit(props: {
   const handleNumberOfOptions = (value: string) => {
     if (value !== '') {
       const nbrOptions = parseUnits(value, decimals)
+      console.log('Number of Otions', nbrOptions)
       setNumberOfOptions(nbrOptions)
       if (pricePerOption.gt(0) && nbrOptions.gt(0)) {
         const youPay = pricePerOption.mul(nbrOptions).div(collateralTokenUnit)
