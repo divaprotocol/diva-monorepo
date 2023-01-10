@@ -4,10 +4,6 @@ import styled from 'styled-components'
 import { makeStyles } from '@mui/styles'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-import BuyMarket from './Orders/BuyMarket'
-/* import BuyLimit from './Orders/BuyLimit'
-import SellLimit from './Orders/SellLimit'
-import SellMarket from './Orders/SellMarket' */
 import {
   setMetamaskAccount,
   setResponseBuy,
@@ -15,39 +11,14 @@ import {
 } from '../../Redux/TradeOption'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
-import { fetchOrders, setIsBuy } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
-import { setBreakEven } from '../../Redux/Stats'
 import { useAppSelector } from '../../Redux/hooks'
-import { Card, Divider, useTheme } from '@mui/material'
+import { Card, useTheme } from '@mui/material'
 import BuyOrder from './Orders/BuyOrder'
-import { TabContext, TabList, TabPanel } from '@mui/lab'
+import { TabContext, TabPanel } from '@mui/lab'
 import SellOrder from './Orders/SellOrder'
-/* const useStyles = makeStyles(() => ({
-  root: {
-    flexGrow: 1,
-  },
-  tab: {
-    width: 96,
-    minWidth: 50,
-  },
-}))
 
-const useDividerStyle = makeStyles(() => ({
-  tab: {
-    width: 100,
-    minWidth: 50,
-    borderRight: '1px solid #cccccc',
-  },
-}))
-
-const useTabsBorder = makeStyles(() => ({
-  tabs: {
-    borderBottom: '1px solid #cccccc',
-  },
-}))
- */
 export default function CreateOrder(props: {
   option: Pool
   tokenAddress: string
@@ -136,69 +107,6 @@ export default function CreateOrder(props: {
     })
   }, [option.referenceAsset])
 
-  /* const renderOrderInfo = () => {
-    if (orderType === 0 && priceType === 0) {
-      //Buy Market
-      return (
-        <BuyMarket
-          option={option}
-          handleDisplayOrder={getExistingOrders}
-          tokenAddress={props.tokenAddress}
-          exchangeProxy={props.exchangeProxy}
-          chainId={props.chainId}
-          usdPrice={usdPrice}
-          provider={props.provider}
-          approve={approve}
-        />
-      )
-    }
-    if (orderType === 0 && priceType === 1) {
-      //Buy Limit
-      return (
-        <BuyLimit
-          handleDisplayOrder={getExistingOrders}
-          option={option}
-          tokenAddress={props.tokenAddress}
-          exchangeProxy={props.exchangeProxy}
-          chainId={props.chainId}
-          usdPrice={usdPrice}
-          provider={props.provider}
-          approve={approve}
-        />
-      )
-    }
-    if (orderType === 1 && priceType === 0) {
-      //Sell Market
-      return (
-        <SellMarket
-          option={option}
-          handleDisplayOrder={getExistingOrders}
-          tokenAddress={props.tokenAddress}
-          exchangeProxy={props.exchangeProxy}
-          chainId={props.chainId}
-          usdPrice={usdPrice}
-          provider={props.provider}
-          approve={approve}
-        />
-      )
-    }
-    if (orderType === 1 && priceType === 1) {
-      //Sell Limit
-      return (
-        <SellLimit
-          option={option}
-          handleDisplayOrder={getExistingOrders}
-          tokenAddress={props.tokenAddress}
-          exchangeProxy={props.exchangeProxy}
-          chainId={props.chainId}
-          usdPrice={usdPrice}
-          provider={props.provider}
-          approve={approve}
-        />
-      )
-    }
-  }
- */
   return (
     <>
       <TabContext value={value}>
