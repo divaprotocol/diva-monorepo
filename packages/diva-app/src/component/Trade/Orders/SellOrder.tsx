@@ -150,10 +150,10 @@ const SellOrder = (props: {
   }
   const handleNumberOfOptions = (value: string) => {
     // @todo app breaks if `-` is entered as first value; doesn't happen for BUY
-    const nbrOptions = parseUnits(value, decimals)
+
     if (value != '' && checked) {
       // LIMIT order case
-
+      const nbrOptions = parseUnits(value, decimals)
       setNumberOfOptions(value)
 
       if (nbrOptions.gt(0) && pricePerOption.gt(0)) {
@@ -167,7 +167,7 @@ const SellOrder = (props: {
       setFeeAmount(ZERO)
     } else if (value != '') {
       // MARKET order case
-
+      const nbrOptions = parseUnits(value, decimals)
       setNumberOfOptions(value)
 
       // Disable fill order button if nbrOptions incl. fee exceeds user's position token balance

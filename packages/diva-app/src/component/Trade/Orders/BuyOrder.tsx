@@ -151,10 +151,9 @@ const BuyOrder = (props: {
     }
   }
   const handleNumberOfOptions = (value: string) => {
-    const nbrOptions = parseUnits(value, decimals)
     if (value !== '' && checked) {
       // LIMIT order case
-
+      const nbrOptions = parseUnits(value, decimals)
       setNumberOfOptions(value)
 
       if (pricePerOption.gt(0) && nbrOptions.gt(0)) {
