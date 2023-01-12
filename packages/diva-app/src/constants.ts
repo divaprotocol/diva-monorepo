@@ -1,6 +1,7 @@
 import ethereumLogoUrl from './Images/ethereum-logo.png'
 import polygonMaticLogo from './Images/polygon-matic-logo.svg'
 import arbitrumLogoUrl from './Images/arbitrum_logo.svg'
+import { ReactComponent as tellorLogo } from './Images/tellor.svg'
 import divaLogo from './Images/logo.svg'
 import divaSidebarLogo from './Images/diva-sidebar-logo.svg'
 import divaTextLogo from './Images/diva_logo_text.svg'
@@ -228,6 +229,11 @@ export const APP_BAR_ITEMS = [
     label: 'App Training',
     to: '/tasks',
     icon: TaskIcon,
+  },
+  {
+    label: 'Tellor Dashboard',
+    to: '/tellordashboard/report',
+    icon: tellorLogo,
   },
 ]
 

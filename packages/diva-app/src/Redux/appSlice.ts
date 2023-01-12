@@ -249,7 +249,7 @@ export const fetchPools = createAsyncThunk(
       count,
       poolInfo,
     }
-
+    console.log('req', req)
     try {
       const prices: OrderOutputType[] = await getOrderbookPrices(req)
       // Update price parameters to display market page
