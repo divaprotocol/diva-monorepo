@@ -105,7 +105,7 @@ export function Offer() {
         Number(formatUnits(jsonResponse.data.data.inflection))
       )
       formik.setFieldValue('collateralWalletBalance', jsonResponse.data.data)
-
+      formik.setFieldValue('collateralToken', token.symbol())
       formik.setFieldValue(
         'collateralToken.id',
         jsonResponse.data.data.collateralToken

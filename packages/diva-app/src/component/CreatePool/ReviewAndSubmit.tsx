@@ -192,7 +192,7 @@ export function ReviewAndSubmit({
     tokenContract.symbol().then((symbol) => {
       setTokenSymbol(symbol)
     })
-  }, [])
+  }, [formik.values.collateralToken.id])
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
