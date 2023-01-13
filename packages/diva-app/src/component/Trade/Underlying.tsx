@@ -218,8 +218,8 @@ export default function Underlying() {
       </Stack>
       <Divider orientation="horizontal" />
       <TabPanel value="long" sx={{ paddingBottom: '3em' }}>
-        <Stack direction="row" spacing={15}>
-          <Stack direction="column" width="50%" spacing={2}>
+        <Stack direction="row" spacing={theme.spacing(40)}>
+          <Stack direction="column" spacing={2}>
             <TradeChart
               data={data}
               refAsset={pool.referenceAsset}
@@ -234,13 +234,11 @@ export default function Underlying() {
               mouseHover={true}
               showBreakEven={true}
             />
-            <LeftCompFlexContainer>
-              <OrdersPanel
-                option={pool}
-                tokenAddress={tokenAddress}
-                exchangeProxy={exchangeProxy}
-              />
-            </LeftCompFlexContainer>
+            <OrdersPanel
+              option={pool}
+              tokenAddress={tokenAddress}
+              exchangeProxy={exchangeProxy}
+            />
           </Stack>
           <Box>
             <CreateOrder
@@ -254,8 +252,8 @@ export default function Underlying() {
         </Stack>
       </TabPanel>
       <TabPanel value="short" sx={{ paddingBottom: '3em' }}>
-        <Stack direction="row" spacing={15}>
-          <Stack direction="column" width="50%" spacing={2}>
+        <Stack direction="row" spacing={theme.spacing(40)}>
+          <Stack direction="column" spacing={2}>
             <TradeChart
               data={data}
               refAsset={pool.referenceAsset}
