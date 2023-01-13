@@ -106,8 +106,8 @@ export function PayoffProfile(props) {
     getSvgContainerSize()
     window.addEventListener('resize', getSvgContainerSize)
     return () => window.removeEventListener('resize', getSvgContainerSize)
-  }, [])
-
+  }, [chartWidth])
+  console.log(chartWidth, svgContainer.current)
   const chartHeight = 330
 
   const margin = { top: 10, right: 10, bottom: 30, left: 10 },
