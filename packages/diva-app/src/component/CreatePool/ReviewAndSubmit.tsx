@@ -102,6 +102,15 @@ export function ReviewAndSubmit({
     ERC20,
     provider.getSigner()
   )
+
+  useEffect(() => {
+    token.decimals().then((decimals: number) => {
+      setDecimal(decimals)
+    })
+    token.symbol().then((symbol) => {
+      setTokenSymbol(symbol)
+    })
+  }, [formik.values.collateralToken.id])
   useEffect(() => {
     if (
       diva != undefined &&
@@ -116,7 +125,10 @@ export function ReviewAndSubmit({
         CREATE_POOL_TYPE,
         formik.values.signature,
         address,
-        parseUnits(formik.values.yourShare.toString(), decimal)
+        parseUnits(
+          Number(formik.values.yourShare).toFixed(decimal).toString(),
+          decimal
+        )
       ).then((res) => {
         if (!res.success) {
           setErrorMessage(res.message)
@@ -127,10 +139,6 @@ export function ReviewAndSubmit({
     }
   }, [formik.values, address, diva, divaDomain])
 
-  // QUESTION WHy not move this part into a useEffect hook?
-  token.decimals().then((decimals: number) => {
-    setDecimal(decimals)
-  })
   useEffect(() => {
     if (
       transaction === 'filloffer' &&
@@ -183,16 +191,7 @@ export function ReviewAndSubmit({
       setMaxPayout(parseFloat(actualFillableAmount) * maxYieldTaker)
     }
   }, [actualFillableAmount, decimal])
-  useEffect(() => {
-    const tokenContract = new ethers.Contract(
-      formik.values.collateralToken.id,
-      ERC20,
-      provider.getSigner()
-    )
-    tokenContract.symbol().then((symbol) => {
-      setTokenSymbol(symbol)
-    })
-  }, [formik.values.collateralToken.id])
+
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
@@ -678,7 +677,7 @@ export function ReviewAndSubmit({
                               maxPayout,
                               2,
                               2
-                            )} ${'dUSD'}`}
+                            )} ${tokenSymbol}`}
                           </FormHelperText>
                           <FormHelperText
                             sx={{

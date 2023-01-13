@@ -195,7 +195,10 @@ export const ApproveActionButtons = ({
         CREATE_POOL_TYPE,
         formik.values.signature,
         account,
-        parseUnits(formik.values.yourShare.toString(), decimal)
+        parseUnits(
+          Number(formik.values.yourShare).toFixed(decimal).toString(),
+          decimal
+        )
       ).then((res) => {
         if (!res.success) {
           setErrorMessage(res.message)
@@ -565,7 +568,6 @@ export const ApproveActionButtons = ({
                       })
                     break
                   case 'liquidity':
-                    console.log(formik.values.longRecipient)
                     diva!
                       .addLiquidity(
                         window.location.pathname.split('/')[1],
