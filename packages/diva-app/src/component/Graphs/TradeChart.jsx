@@ -39,7 +39,6 @@ export default function DIVATradeChart(props) {
       setChartWidth(newWidth)
     }
   }
-  console.log('SVG Container is:', svgContainer)
   useEffect(() => {
     getSvgContainerSize()
     window.addEventListener('resize', getSvgContainerSize)
@@ -58,9 +57,6 @@ export default function DIVATradeChart(props) {
   const margin = { top: 15, right: 20, bottom: 40, left: 20 },
     width = chartWidth - margin.left - margin.right,
     height = chartHeight - margin.top - margin.bottom
-  console.log('width is:', width)
-  console.log('height is:', height)
-
   const labelWidth = 30
   const labelHeight = 10
   const blueColorCode = '#3B8DCA'
