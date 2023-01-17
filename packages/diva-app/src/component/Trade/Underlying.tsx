@@ -246,7 +246,8 @@ export default function Underlying() {
         <Stack direction="row" spacing={theme.spacing(15)}>
           <Stack
             direction="column"
-            width={{ lg: '50%', xl: '30%' }}
+            width="50%"
+            /* {{ lg: '50%', xl: '30%' }} */
             spacing={2}
           >
             <TradeChart
@@ -284,7 +285,7 @@ export default function Underlying() {
         <Stack direction="row" spacing={theme.spacing(15)}>
           <Stack
             direction="column"
-            width={{ lg: '50%', xl: '30%' }}
+            width="50%" /* {{ lg: '50%', xl: '30%' }} */
             spacing={2}
           >
             <TradeChart
