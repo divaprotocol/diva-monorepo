@@ -92,6 +92,24 @@ To get a local copy up and running follow these simple steps.
    graph deploy --product hosted-service <GITHUB_USER>/<SUBGRAPH NAME>
    ```
 
+## Using subgraph studio
+
+```
+yarn codegen
+yarn build
+yarn graph:auth
+yarn deploy-goerli diva-tellor-goerli
+```
+
+You can find the subgraph slug as well as the deploy key here: https://thegraph.com/studio/subgraph/diva-tellor-goerli/
+
+There you also have to publish the subgraph which will cost some GRT. Before publishing, you have to to signal with 100 GRT for auto-migration curation. You will
+see a notification at the bottom when you press the publish button.
+
+## Trouble shooting
+* `Event with signature 'NewReport(indexed bytes32,indexed uint256,bytes,uint256,bytes,indexed address)' not present in ABI 'Contract'`: check
+whether the `event` in `eventHandlers` in `subgraph.yaml` file is correctly defined. In particular, check against the ABI file whether the argument types are correct and 
+`index` flag is used correctly.
 
 <!-- ROADMAP -->
 ## Roadmap

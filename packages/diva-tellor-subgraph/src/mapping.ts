@@ -1,13 +1,4 @@
-import {
-  Contract,
-  NewReport,
-  NewStakeAmount,
-  NewStaker,
-  ReporterSlashed,
-  StakeWithdrawRequested,
-  StakeWithdrawn,
-  ValueRemoved
-} from "../generated/Contract/Contract"
+import { NewReport } from "../generated/Contract/Contract"
 import { NewReportEntity } from "../generated/schema"
 
 //export function handleNewGovernanceAddress(event: NewGovernanceAddress): void {
@@ -73,16 +64,16 @@ export function handleNewReport(event: NewReport): void {
 
 //export function handleNewReportingLock(event: NewReportingLock): void {}
 
-export function handleNewStakeAmount(event: NewStakeAmount): void {}
+// export function handleNewStakeAmount(event: NewStakeAmount): void {}
 
-export function handleNewStaker(event: NewStaker): void {}
+// export function handleNewStaker(event: NewStaker): void {}
 
-export function handleReporterSlashed(event: ReporterSlashed): void {}
+// export function handleReporterSlashed(event: ReporterSlashed): void {}
 
-export function handleStakeWithdrawRequested(
-  event: StakeWithdrawRequested
-): void {}
+// export function handleStakeWithdrawRequested(
+//   event: StakeWithdrawRequested
+// ): void {}
 
-export function handleStakeWithdrawn(event: StakeWithdrawn): void {}
+// export function handleStakeWithdrawn(event: StakeWithdrawn): void {}
 
-export function handleValueRemoved(event: ValueRemoved): void {}
+// export function handleValueRemoved(event: ValueRemoved): void {}
