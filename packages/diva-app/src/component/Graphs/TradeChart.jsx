@@ -27,24 +27,36 @@ export default function DIVATradeChart(props) {
   const optionTypeText = isLong ? 'LONG' : 'SHORT'
   const reffeenceAsset = refAsset.slice(0, 8)
   const [chartWidth, setChartWidth] = useState(w)
+  const [chartHeight, setChartHeight] = useState(h)
   const [isLegendResponsive, setLegendResponsive] = useState(true)
 
   const getSvgContainerSize = () => {
     const newWidth = svgContainer.current.clientWidth
-    setChartWidth(newWidth)
+    const modifiedWidth = newWidth * 0.1
+    if (chartWidth > 800) {
+      setChartWidth(newWidth - modifiedWidth)
+    } else {
+      setChartWidth(newWidth)
+    }
   }
-
   useEffect(() => {
     getSvgContainerSize()
     window.addEventListener('resize', getSvgContainerSize)
     return () => window.removeEventListener('resize', getSvgContainerSize)
-  }, [props.w])
+  }, [props.w, props.h])
+
+  useEffect(() => {
+    if (chartWidth > 800) {
+      setChartHeight(chartWidth * 0.45)
+    } else {
+      setChartHeight(h)
+    }
+  }, [chartWidth])
 
   // Set the dimensions and margins of the graph
-  const margin = { top: 15, right: 20, left: 20, bottom: 40 },
+  const margin = { top: 15, right: 20, bottom: 40, left: 20 },
     width = chartWidth - margin.left - margin.right,
-    height = h - margin.top - margin.bottom
-
+    height = chartHeight - margin.top - margin.bottom
   const labelWidth = 30
   const labelHeight = 10
   const blueColorCode = '#3B8DCA'
@@ -89,11 +101,8 @@ export default function DIVATradeChart(props) {
     } else {
       setLegendResponsive(true)
     }
-  }, [chartWidth])
+  }, [chartWidth, chartHeight])
 
-  useEffect(() => {
-    intitalChart()
-  }, [props.w])
   const intitalChart = () => {
     const svg = d3.select(ref.current)
     svg
@@ -103,6 +112,9 @@ export default function DIVATradeChart(props) {
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
   }
 
+  useEffect(() => {
+    intitalChart()
+  }, [chartHeight, chartWidth])
   // Moves the 'group' element to the top left margin
   const draw = () => {
     const svg = d3.select(ref.current)
@@ -617,7 +629,14 @@ export default function DIVATradeChart(props) {
   }
   useEffect(() => {
     draw()
-  }, [props.currentPrice, props.breakEven, width, props.w, isLegendResponsive])
+  }, [
+    props.currentPrice,
+    props.breakEven,
+    props.w,
+    isLegendResponsive,
+    chartWidth,
+    chartHeight,
+  ])
 
   return (
     <div ref={svgContainer} className="line-chart">

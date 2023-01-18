@@ -81,7 +81,7 @@ export function PayoffProfile(props) {
     x: parseFloat(x),
     y: parseFloat(y),
   }))
-  const [chartWidth, setWidth] = useState(460)
+  const [chartWidth, setChartWidth] = useState(460)
   const [axisLabel, setAxisLabel] = useState('')
   const domainMin = d3.min(longdata, function (d) {
     return d.x
@@ -92,18 +92,21 @@ export function PayoffProfile(props) {
   })
   const f = d3.format('.2f')
 
-  useLayoutEffect(() => {
-    const callback = () => {
-      const rect = ref.current?.getBoundingClientRect()
-      setWidth(rect?.width || 0)
-    }
-    window.addEventListener('resize', callback)
-    callback()
-    return () => {
-      window.removeEventListener('resize', callback)
-    }
-  }, [ref.current])
+  const svgContainer = useRef(null)
 
+  const getSvgContainerSize = () => {
+    const newWidth = svgContainer.current.clientWidth
+    if (newWidth >= 460) {
+      setChartWidth(460)
+    } else {
+      setChartWidth(newWidth)
+    }
+  }
+  useEffect(() => {
+    getSvgContainerSize()
+    window.addEventListener('resize', getSvgContainerSize)
+    return () => window.removeEventListener('resize', getSvgContainerSize)
+  }, [chartWidth])
   const chartHeight = 330
 
   const margin = { top: 10, right: 10, bottom: 30, left: 10 },
@@ -500,7 +503,7 @@ export function PayoffProfile(props) {
   }, [props, long, cap, strike, floor, collateralToken, longDirection])
 
   return (
-    <div>
+    <div ref={svgContainer} className="create-chart">
       <svg ref={ref}></svg>
     </div>
   )
