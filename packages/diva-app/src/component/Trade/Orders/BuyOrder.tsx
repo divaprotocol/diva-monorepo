@@ -746,18 +746,31 @@ const BuyOrder = (props: {
             />
             <Typography variant="h5" color="text.secondary" textAlign="right">
               Max Buy Amount:
-              <Typography variant="h4" sx={{ display: 'inline' }}>
+              <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
-                {toExponentialOrNumber(
-                  Number( // @todo 
-                    formatUnits(
-                      collateralBalance
-                        .mul(collateralTokenUnit)
-                        .div(checked ? pricePerOption : avgExpectedRate),
-                      decimals
+                {checked && pricePerOption.gt(ZERO)
+                  ? toExponentialOrNumber(
+                      Number(
+                        formatUnits(
+                          collateralBalance
+                            .mul(collateralTokenUnit)
+                            .div(pricePerOption),
+                          decimals
+                        )
+                      )
                     )
-                  )
-                )}{' '}
+                  : !checked && avgExpectedRate.gt(ZERO)
+                  ? toExponentialOrNumber(
+                      Number(
+                        formatUnits(
+                          collateralBalance
+                            .mul(collateralTokenUnit)
+                            .div(avgExpectedRate),
+                          decimals
+                        )
+                      )
+                    )
+                  : 'please enter price'}{' '}
                 {params.tokenType.toUpperCase()}
                 <Button
                   variant="text"
@@ -766,12 +779,7 @@ const BuyOrder = (props: {
                   sx={{ pb: theme.spacing(1) }}
                   onClick={() => {
                     handleNumberOfOptions(
-                      formatUnits( // @todo
-                        collateralBalance
-                          .mul(collateralTokenUnit)
-                          .div(checked ? pricePerOption : avgExpectedRate),
-                        decimals
-                      )
+                      formatUnits(collateralBalance, decimals)
                     )
                   }}
                 >
