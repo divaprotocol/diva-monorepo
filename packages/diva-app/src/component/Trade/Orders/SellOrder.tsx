@@ -770,7 +770,7 @@ const SellOrder = (props: {
             />
             <Typography variant="h5" color="text.secondary" textAlign="right">
               Max Sell Amount:
-              <Typography variant="h4" sx={{ display: 'inline' }}>
+              <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
                 {toExponentialOrNumber(
                   Number(
