@@ -1,10 +1,13 @@
 import React, { useState, useEffect, FormEvent } from 'react'
 import {
+  Alert,
   Box,
   Button,
   Card,
   Checkbox,
+  Collapse,
   FormControlLabel,
+  IconButton,
   InputAdornment,
   MenuItem,
   Stack,
@@ -102,6 +105,8 @@ const SellOrder = (props: {
   const [numberOfOptions, setNumberOfOptions] = React.useState('') // User input field
   const [pricePerOption, setPricePerOption] = React.useState(ZERO) // User input field
   const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
+  const [balanceAlert, setBalanceAlert] = useState(false) //Alert message for insufficient balance
+  const [orderBookAlert, setOrderBookAlert] = useState(false) //Alert message for no Asks in SellMarket
   const [expiry, setExpiry] = React.useState(5)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
   const [isApproved, setIsApproved] = React.useState(false)
@@ -678,6 +683,22 @@ const SellOrder = (props: {
     }
   }, [remainingAllowance, numberOfOptions, userAddress])
 
+  //Alert message for Insuffcientbalance & No Bids on OrderBook
+  useEffect(() => {
+    if (numberOfOptions != '') {
+      if (youReceive.gt(optionBalance) && youReceive.lte(remainingAllowance)) {
+        setBalanceAlert(true)
+      } else {
+        setBalanceAlert(false)
+      }
+      if (!checked && avgExpectedRate.eq(0)) {
+        setOrderBookAlert(true)
+      } else {
+        setOrderBookAlert(false)
+      }
+    }
+  }, [numberOfOptions, youReceive, avgExpectedRate, checked])
+
   // @todo QUESTION: Is numberOfOptions !== '' needed here?
   const createBtnDisabled =
     !isApproved ||
@@ -842,6 +863,47 @@ const SellOrder = (props: {
               {tokenSymbol}
             </Typography>
           </Stack>
+          <Collapse in={balanceAlert} sx={{ mt: theme.spacing(2) }}>
+            {console.log('balanceAlert', balanceAlert)}
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setBalanceAlert(false)
+                  }}
+                >
+                  {'X'}
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              Insufficient balance
+            </Alert>
+          </Collapse>
+          <Collapse in={orderBookAlert} sx={{ mt: theme.spacing(2) }}>
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setOrderBookAlert(false)
+                  }}
+                >
+                  {'X'}
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              No Bids in orderbook
+            </Alert>
+          </Collapse>
           <Stack direction={'row'} spacing={1} mt={theme.spacing(1)}>
             <LoadingButton
               variant="contained"
