@@ -681,7 +681,7 @@ const BuyOrder = (props: {
     }
   }, [remainingAllowance, youPay, userAddress])
 
-  //Alert message for Insuffcientbalance & No Asks on OrderBook
+  // Alert message for Insuffcientbalance & No Asks on OrderBook
   useEffect(() => {
     if (numberOfOptions != '') {
       if (youPay.gt(collateralBalance) && youPay.lte(remainingAllowance)) {
@@ -745,13 +745,20 @@ const BuyOrder = (props: {
               }}
             />
             <Typography variant="h5" color="text.secondary" textAlign="right">
-              Balance:
+              Max Buy Amount:
               <Typography variant="h4" sx={{ display: 'inline' }}>
                 {' '}
                 {toExponentialOrNumber(
-                  Number(formatUnits(collateralBalance, decimals))
+                  Number( // @todo 
+                    formatUnits(
+                      collateralBalance
+                        .mul(collateralTokenUnit)
+                        .div(checked ? pricePerOption : avgExpectedRate),
+                      decimals
+                    )
+                  )
                 )}{' '}
-                {tokenSymbol}
+                {params.tokenType.toUpperCase()}
                 <Button
                   variant="text"
                   size="small"
@@ -759,7 +766,12 @@ const BuyOrder = (props: {
                   sx={{ pb: theme.spacing(1) }}
                   onClick={() => {
                     handleNumberOfOptions(
-                      formatUnits(collateralBalance, decimals)
+                      formatUnits( // @todo
+                        collateralBalance
+                          .mul(collateralTokenUnit)
+                          .div(checked ? pricePerOption : avgExpectedRate),
+                        decimals
+                      )
                     )
                   }}
                 >
@@ -872,7 +884,6 @@ const BuyOrder = (props: {
             value={toExponentialOrNumber(Number(formatUnits(youPay, decimals)))}
           /> */}
           <Collapse in={balanceAlert} sx={{ mt: theme.spacing(2) }}>
-            {console.log('balanceAlert', balanceAlert)}
             <Alert
               severity="error"
               action={
