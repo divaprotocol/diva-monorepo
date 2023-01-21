@@ -106,6 +106,10 @@ export function DefineOfferAttributes({
 
   const handleChange = (event) => {
     setValue(event.target.value)
+    formik.setFieldValue('cap', formik.initialValues.cap)
+    formik.setFieldValue('floor', formik.initialValues.floor)
+    formik.setFieldValue('inflection', formik.initialValues.inflection)
+    formik.setFieldValue('gradient', formik.initialValues.gradient)
     formik.setFieldValue('payoutProfile', event.target.value)
   }
   const handleDirectionChange = (event) => {
@@ -247,40 +251,6 @@ export function DefineOfferAttributes({
       }))
     }
   }, [unlimited, formik.values.collateralBalance])
-  // useEffect(() => {
-  //   switch (payoutProfile) {
-  //     case 'Binary':
-  //       formik.setFieldValue('cap', formik.values.inflection)
-  //       formik.setFieldValue('floor', formik.values.inflection)
-  //       formik.setFieldValue('gradient', 1)
-  //       break
-  //     case 'Linear':
-  //       formik.setFieldValue('gradient', 0.5)
-  //       formik.setFieldValue(
-  //         'cap',
-  //         formik.values.inflection + formik.values.inflection / 2
-  //       )
-  //       formik.setFieldValue(
-  //         'floor',
-  //         formik.values.inflection - formik.values.inflection / 2
-  //       )
-  //       break
-  //     case 'Custom':
-  //       formik.setFieldValue(
-  //         'cap',
-  //         formik.values.inflection + formik.values.inflection / 2
-  //       )
-  //       formik.setFieldValue(
-  //         'floor',
-  //         formik.values.inflection - formik.values.inflection / 2
-  //       )
-  //       formik.setFieldValue(
-  //         'inflection',
-  //         (formik.values.cap + formik.values.floor) / 2
-  //       )
-  //       break
-  //   }
-  // }, [payoutProfile])
 
   return (
     <Stack direction={mobile ? 'column' : 'row'}>

@@ -150,7 +150,6 @@ export function DefinePoolAttributes({
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
-  console.log(possibleOptions)
   return (
     <Stack direction={mobile ? 'column' : 'row'}>
       <Container sx={{ minWidth: '60%' }}>
