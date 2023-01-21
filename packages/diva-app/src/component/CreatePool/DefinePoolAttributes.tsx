@@ -604,6 +604,7 @@ export function DefinePoolAttributes({
           <Typography
             style={{ color: 'white' }}
             pb={theme.spacing(2)}
+            pt={theme.spacing(2)}
             variant="subtitle1"
           >
             Payoff Profiles
@@ -612,7 +613,13 @@ export function DefinePoolAttributes({
             cap != null &&
             inflection != null &&
             gradient != null && (
-              <Box sx={{ maxWidth: '85%', marginLeft: 3, marginBottom: 2 }}>
+              <Box
+                sx={{
+                  maxWidth: '85%',
+                  marginLeft: 3,
+                  marginBottom: 2,
+                }}
+              >
                 <PayoffProfile
                   floor={floor}
                   cap={cap}

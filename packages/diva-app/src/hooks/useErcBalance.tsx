@@ -48,7 +48,15 @@ export function useErcBalance(address?: string, updated = true) {
     }
 
     run()
-  }, [address, chainId, provider, sendTransaction, updated, walletAddress])
+  }, [
+    address,
+    chainId,
+    provider,
+    sendTransaction,
+    updated,
+    walletAddress,
+    userAddress,
+  ])
 
   return balance
 }
