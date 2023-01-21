@@ -271,7 +271,6 @@ const SellOrder = (props: {
           const remainingAllowance = BigNumber.from(optionAllowance).sub(
             existingSellLimitOrdersAmountUser
           )
-
           setRemainingAllowance(remainingAllowance)
           setAllowance(optionAllowance)
           setIsApproved(true)
@@ -343,6 +342,7 @@ const SellOrder = (props: {
         existingLimitOrders: existingBuyLimitOrders,
         chainId: props.chainId,
       }
+      console.log('avgExpectedRate', avgExpectedRate)
       sellMarketOrder(orderData).then(async (orderFillStatus: any) => {
         if (!(orderFillStatus == undefined)) {
           // On fill order success ...
@@ -423,8 +423,8 @@ const SellOrder = (props: {
     if (responseSell.length == 0) {
       // Double check whether any limit orders exist
       const rSell: any = await get0xOpenOrders(
-        takerToken,
         makerToken,
+        takerToken,
         props.chainId,
         props.provider,
         props.exchangeProxy
@@ -683,10 +683,22 @@ const SellOrder = (props: {
     }
   }, [remainingAllowance, numberOfOptions, userAddress])
 
-  //Alert message for Insuffcientbalance & No Bids on OrderBook
+  // Alert message for Insuffcientbalance & No Bids on OrderBook
   useEffect(() => {
     if (numberOfOptions != '') {
-      if (youReceive.gt(optionBalance) && youReceive.lte(remainingAllowance)) {
+      // Convert user input into BigNumber
+      const nbrOfOptionsBalance = parseUnits(numberOfOptions, decimals)
+
+      // Calculate fee amount (to be paid in position token)
+      const feeAmount = nbrOfOptionsBalance
+        .mul(parseUnits(TRADING_FEE.toString(), decimals))
+        .div(collateralTokenUnit)
+      setFeeAmount(feeAmount)
+      const requiredNbrOfOptionsBalance = nbrOfOptionsBalance.add(feeAmount)
+      if (
+        requiredNbrOfOptionsBalance.gt(optionBalance) &&
+        requiredNbrOfOptionsBalance.lte(remainingAllowance)
+      ) {
         setBalanceAlert(true)
       } else {
         setBalanceAlert(false)
@@ -757,13 +769,22 @@ const SellOrder = (props: {
               onChange={(e) => handleNumberOfOptions(e.target.value)}
             />
             <Typography variant="h5" color="text.secondary" textAlign="right">
-              Balance:
-              <Typography variant="h4" sx={{ display: 'inline' }}>
+              Max Amount:
+              <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
                 {toExponentialOrNumber(
-                  Number(formatUnits(optionBalance, decimals))
+                  Number(
+                    formatUnits(
+                      optionBalance.sub(
+                        optionBalance
+                          .mul(parseUnits(TRADING_FEE.toString(), decimals))
+                          .div(collateralTokenUnit)
+                      ),
+                      decimals
+                    )
+                  )
                 )}{' '}
-                {tokenSymbol}
+                {params.tokenType.toUpperCase()}
               </Typography>
               <Button
                 variant="text"
@@ -771,7 +792,16 @@ const SellOrder = (props: {
                 size="small"
                 sx={{ pb: theme.spacing(1) }}
                 onClick={() => {
-                  handleNumberOfOptions(formatUnits(optionBalance, decimals))
+                  handleNumberOfOptions(
+                    formatUnits(
+                      optionBalance.sub(
+                        optionBalance
+                          .mul(parseUnits(TRADING_FEE.toString(), decimals))
+                          .div(collateralTokenUnit)
+                      ),
+                      decimals
+                    )
+                  )
                 }}
               >
                 {'('}
@@ -864,7 +894,6 @@ const SellOrder = (props: {
             </Typography>
           </Stack>
           <Collapse in={balanceAlert} sx={{ mt: theme.spacing(2) }}>
-            {console.log('balanceAlert', balanceAlert)}
             <Alert
               severity="error"
               action={

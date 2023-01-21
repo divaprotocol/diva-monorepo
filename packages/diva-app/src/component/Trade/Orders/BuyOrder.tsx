@@ -681,7 +681,7 @@ const BuyOrder = (props: {
     }
   }, [remainingAllowance, youPay, userAddress])
 
-  //Alert message for Insuffcientbalance & No Asks on OrderBook
+  // Alert message for Insuffcientbalance & No Asks on OrderBook
   useEffect(() => {
     if (numberOfOptions != '') {
       if (youPay.gt(collateralBalance) && youPay.lte(remainingAllowance)) {
@@ -745,28 +745,86 @@ const BuyOrder = (props: {
               }}
             />
             <Typography variant="h5" color="text.secondary" textAlign="right">
-              Balance:
-              <Typography variant="h4" sx={{ display: 'inline' }}>
+              Max Amount:
+              <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
-                {toExponentialOrNumber(
-                  Number(formatUnits(collateralBalance, decimals))
-                )}{' '}
-                {tokenSymbol}
-                <Button
-                  variant="text"
-                  size="small"
-                  color="secondary"
-                  sx={{ pb: theme.spacing(1) }}
-                  onClick={() => {
-                    handleNumberOfOptions(
-                      formatUnits(collateralBalance, decimals)
-                    )
-                  }}
-                >
-                  {'('}
-                  Max
-                  {')'}
-                </Button>
+                {checked && pricePerOption.gt(ZERO)
+                  ? [
+                      toExponentialOrNumber(
+                        Number(
+                          formatUnits(
+                            collateralBalance
+                              .mul(collateralTokenUnit)
+                              .div(pricePerOption),
+                            decimals
+                          )
+                        )
+                      ),
+                      ' ',
+                      params.tokenType.toUpperCase(),
+                    ]
+                  : !checked && avgExpectedRate.gt(ZERO)
+                  ? [
+                      toExponentialOrNumber(
+                        Number(
+                          formatUnits(
+                            collateralBalance
+                              .mul(collateralTokenUnit)
+                              .div(avgExpectedRate),
+                            decimals
+                          )
+                        )
+                      ),
+                      ' ',
+                      params.tokenType.toUpperCase(),
+                    ]
+                  : 'please enter price'}
+                {checked && pricePerOption.gt(ZERO) ? (
+                  <Button
+                    variant="text"
+                    size="small"
+                    color="secondary"
+                    sx={{ pb: theme.spacing(1) }}
+                    onClick={() => {
+                      handleNumberOfOptions(
+                        formatUnits(
+                          collateralBalance
+                            .mul(collateralTokenUnit)
+                            .div(pricePerOption),
+                          decimals
+                        )
+                      )
+                    }}
+                  >
+                    {'('}
+                    Max
+                    {')'}
+                  </Button>
+                ) : (
+                  !checked &&
+                  avgExpectedRate.gt(ZERO) && (
+                    <Button
+                      variant="text"
+                      size="small"
+                      color="secondary"
+                      sx={{ pb: theme.spacing(1) }}
+                      onClick={() => {
+                        handleNumberOfOptions(
+                          formatUnits(
+                            collateralBalance
+                              .mul(collateralTokenUnit)
+                              .div(avgExpectedRate),
+                            decimals
+                          )
+                        )
+                      }}
+                    >
+                      {'('}
+                      Max
+                      {')'}
+                    </Button>
+                  )
+                )}
               </Typography>
             </Typography>
           </Box>
@@ -853,26 +911,7 @@ const BuyOrder = (props: {
                ${tokenSymbol}`}
             </Typography>
           </Stack>
-          {/* <TextField
-            id="outlined-number"
-            label="You Pay (Inc. fees)"
-            type="number"
-            disabled
-            sx={{ width: '100%', mb: theme.spacing(6) }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end" sx={{ color: '#929292' }}>
-                  {tokenSymbol}
-                </InputAdornment>
-              ),
-            }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            value={toExponentialOrNumber(Number(formatUnits(youPay, decimals)))}
-          /> */}
           <Collapse in={balanceAlert} sx={{ mt: theme.spacing(2) }}>
-            {console.log('balanceAlert', balanceAlert)}
             <Alert
               severity="error"
               action={
