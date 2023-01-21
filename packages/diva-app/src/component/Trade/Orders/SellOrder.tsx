@@ -769,7 +769,7 @@ const SellOrder = (props: {
               onChange={(e) => handleNumberOfOptions(e.target.value)}
             />
             <Typography variant="h5" color="text.secondary" textAlign="right">
-              Max Sell Amount:
+              Max Amount:
               <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
                 {toExponentialOrNumber(
