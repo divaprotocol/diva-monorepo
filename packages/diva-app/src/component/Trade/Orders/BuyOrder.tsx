@@ -749,8 +749,44 @@ const BuyOrder = (props: {
               <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
                 {checked && pricePerOption.gt(ZERO)
-                  ? toExponentialOrNumber(
-                      Number(
+                  ? [
+                      toExponentialOrNumber(
+                        Number(
+                          formatUnits(
+                            collateralBalance
+                              .mul(collateralTokenUnit)
+                              .div(pricePerOption),
+                            decimals
+                          )
+                        )
+                      ),
+                      ' ',
+                      params.tokenType.toUpperCase(),
+                    ]
+                  : !checked && avgExpectedRate.gt(ZERO)
+                  ? [
+                      toExponentialOrNumber(
+                        Number(
+                          formatUnits(
+                            collateralBalance
+                              .mul(collateralTokenUnit)
+                              .div(avgExpectedRate),
+                            decimals
+                          )
+                        )
+                      ),
+                      ' ',
+                      params.tokenType.toUpperCase(),
+                    ]
+                  : 'please enter price'}
+                {checked && pricePerOption.gt(ZERO) ? (
+                  <Button
+                    variant="text"
+                    size="small"
+                    color="secondary"
+                    sx={{ pb: theme.spacing(1) }}
+                    onClick={() => {
+                      handleNumberOfOptions(
                         formatUnits(
                           collateralBalance
                             .mul(collateralTokenUnit)
@@ -758,35 +794,37 @@ const BuyOrder = (props: {
                           decimals
                         )
                       )
-                    )
-                  : !checked && avgExpectedRate.gt(ZERO)
-                  ? toExponentialOrNumber(
-                      Number(
-                        formatUnits(
-                          collateralBalance
-                            .mul(collateralTokenUnit)
-                            .div(avgExpectedRate),
-                          decimals
+                    }}
+                  >
+                    {'('}
+                    Max
+                    {')'}
+                  </Button>
+                ) : (
+                  !checked &&
+                  avgExpectedRate.gt(ZERO) && (
+                    <Button
+                      variant="text"
+                      size="small"
+                      color="secondary"
+                      sx={{ pb: theme.spacing(1) }}
+                      onClick={() => {
+                        handleNumberOfOptions(
+                          formatUnits(
+                            collateralBalance
+                              .mul(collateralTokenUnit)
+                              .div(avgExpectedRate),
+                            decimals
+                          )
                         )
-                      )
-                    )
-                  : 'please enter price'}{' '}
-                {params.tokenType.toUpperCase()}
-                <Button
-                  variant="text"
-                  size="small"
-                  color="secondary"
-                  sx={{ pb: theme.spacing(1) }}
-                  onClick={() => {
-                    handleNumberOfOptions(
-                      formatUnits(collateralBalance, decimals)
-                    )
-                  }}
-                >
-                  {'('}
-                  Max
-                  {')'}
-                </Button>
+                      }}
+                    >
+                      {'('}
+                      Max
+                      {')'}
+                    </Button>
+                  )
+                )}
               </Typography>
             </Typography>
           </Box>
@@ -873,24 +911,6 @@ const BuyOrder = (props: {
                ${tokenSymbol}`}
             </Typography>
           </Stack>
-          {/* <TextField
-            id="outlined-number"
-            label="You Pay (Inc. fees)"
-            type="number"
-            disabled
-            sx={{ width: '100%', mb: theme.spacing(6) }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end" sx={{ color: '#929292' }}>
-                  {tokenSymbol}
-                </InputAdornment>
-              ),
-            }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            value={toExponentialOrNumber(Number(formatUnits(youPay, decimals)))}
-          /> */}
           <Collapse in={balanceAlert} sx={{ mt: theme.spacing(2) }}>
             <Alert
               severity="error"
