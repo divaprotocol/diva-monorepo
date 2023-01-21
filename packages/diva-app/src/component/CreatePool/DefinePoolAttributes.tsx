@@ -56,6 +56,10 @@ export function DefinePoolAttributes({
   const [value, setValue] = useState(formik.values.payoutProfile)
   const [mobile, setMobile] = useState(false)
   const handleChange = (event) => {
+    formik.setFieldValue('cap', formik.initialValues.cap)
+    formik.setFieldValue('floor', formik.initialValues.floor)
+    formik.setFieldValue('inflection', formik.initialValues.inflection)
+    formik.setFieldValue('gradient', formik.initialValues.gradient)
     setValue(event.target.value)
     formik.setFieldValue('payoutProfile', event.target.value)
   }
@@ -66,7 +70,6 @@ export function DefinePoolAttributes({
     expiryTime,
     collateralToken,
     gradient,
-    collateralBalance,
     inflection,
     cap,
     floor,
@@ -84,12 +87,7 @@ export function DefinePoolAttributes({
     if (payoutProfile === 'Linear') {
       formik.setFieldValue('inflection', (floor + cap) / 2)
     }
-  }, [formik.values.floor, formik.values.inflection])
-  useEffect(() => {
-    if (payoutProfile === 'Linear') {
-      formik.setFieldValue('inflection', (cap + floor) / 2)
-    }
-  }, [formik.values.cap, formik.values.inflection])
+  }, [formik.values.floor, formik.values.inflection, formik.values.cap])
   useEffect(() => {
     if (window.ethereum && formik.values.jsonToExport !== '{}') {
       window.ethereum.on('accountsChanged', () => {
@@ -108,7 +106,7 @@ export function DefinePoolAttributes({
   }, [])
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
-  }, [collateralWalletBalance])
+  }, [payoutProfile, collateralWalletBalance])
 
   useEffect(() => {
     if (referenceAssets.length > 0) {
@@ -152,41 +150,7 @@ export function DefinePoolAttributes({
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
-  // useEffect(() => {
-  //   switch (payoutProfile) {
-  //     case 'Binary':
-  //       formik.setFieldValue('cap', formik.values.inflection)
-  //       formik.setFieldValue('floor', formik.values.inflection)
-  //       formik.setFieldValue('gradient', 1)
-  //       break
-  //     case 'Linear':
-  //       formik.setFieldValue('gradient', 0.5)
-  //       formik.setFieldValue(
-  //         'cap',
-  //         formik.values.inflection + formik.values.inflection / 2
-  //       )
-  //       formik.setFieldValue(
-  //         'floor',
-  //         formik.values.inflection - formik.values.inflection / 2
-  //       )
-  //       break
-  //     case 'Custom':
-  //       formik.setFieldValue(
-  //         'cap',
-  //         formik.values.inflection + formik.values.inflection / 2
-  //       )
-  //       formik.setFieldValue(
-  //         'floor',
-  //         formik.values.inflection - formik.values.inflection / 2
-  //       )
-  //       formik.setFieldValue(
-  //         'inflection',
-  //         (formik.values.cap + formik.values.floor) / 2
-  //       )
-  //       break
-  //   }
-  // }, [payoutProfile])
-
+  console.log(possibleOptions)
   return (
     <Stack direction={mobile ? 'column' : 'row'}>
       <Container sx={{ minWidth: '60%' }}>
