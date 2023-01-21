@@ -610,6 +610,22 @@ export function DefineOfferAttributes({
                       {formik.errors.collateralToken}
                     </FormHelperText>
                   )}
+                </FormControl>
+                <FormControl
+                  fullWidth
+                  error={formik.errors.collateralBalance != null}
+                >
+                  <TextField
+                    id="collateralBalance"
+                    name="collateralBalance"
+                    label="Collateral Amount"
+                    inputProps={{ step: 1, min: 0 }}
+                    onBlur={formik.handleBlur}
+                    error={formik.errors.collateralBalance != null}
+                    value={formik.values.collateralBalance}
+                    type="number"
+                    onChange={formik.handleChange}
+                  />
                   {collateralWalletBalance != null && collateralToken != null && (
                     <FormHelperText>
                       Your balance:{' '}
@@ -631,27 +647,6 @@ export function DefineOfferAttributes({
                         Max
                       </MaxCollateral>
                       {')'}
-                    </FormHelperText>
-                  )}
-                </FormControl>
-                <FormControl
-                  fullWidth
-                  error={formik.errors.collateralBalance != null}
-                >
-                  <TextField
-                    id="collateralBalance"
-                    name="collateralBalance"
-                    label="Collateral Amount"
-                    inputProps={{ step: 1, min: 0 }}
-                    onBlur={formik.handleBlur}
-                    error={formik.errors.collateralBalance != null}
-                    value={formik.values.collateralBalance}
-                    type="number"
-                    onChange={formik.handleChange}
-                  />
-                  {formik.errors.collateralBalance != null && (
-                    <FormHelperText>
-                      {formik.errors.collateralBalance}
                     </FormHelperText>
                   )}
                 </FormControl>
