@@ -745,7 +745,7 @@ const BuyOrder = (props: {
               }}
             />
             <Typography variant="h5" color="text.secondary" textAlign="right">
-              Max Buy Amount:
+              Max Amount:
               <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
                 {checked && pricePerOption.gt(ZERO)
