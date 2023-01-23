@@ -43,6 +43,14 @@ import {
 } from '../../../Redux/Stats'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
 import { useParams } from 'react-router-dom'
+import styled from '@emotion/styled'
+
+const MaxCollateral = styled.u`
+  cursor: pointer;
+  &:hover {
+    color: ${(props) => (props.theme as any).palette.primary.main};
+  }
+`
 
 const expiryOrderTime = [
   {
@@ -768,7 +776,12 @@ const SellOrder = (props: {
               }}
               onChange={(e) => handleNumberOfOptions(e.target.value)}
             />
-            <Typography variant="h5" color="text.secondary" textAlign="right">
+            <Typography
+              variant="h5"
+              color="text.secondary"
+              textAlign="right"
+              sx={{ mt: theme.spacing(1) }}
+            >
               Max Amount:
               <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
@@ -784,13 +797,10 @@ const SellOrder = (props: {
                     )
                   )
                 )}{' '}
-                {params.tokenType.toUpperCase()}
+                {params.tokenType.toUpperCase()}{' '}
               </Typography>
-              <Button
-                variant="text"
-                color="secondary"
-                size="small"
-                sx={{ pb: theme.spacing(1) }}
+              <MaxCollateral
+                role="button"
                 onClick={() => {
                   handleNumberOfOptions(
                     formatUnits(
@@ -807,7 +817,7 @@ const SellOrder = (props: {
                 {'('}
                 Max
                 {')'}
-              </Button>
+              </MaxCollateral>
             </Typography>
           </Box>
           <TextField
