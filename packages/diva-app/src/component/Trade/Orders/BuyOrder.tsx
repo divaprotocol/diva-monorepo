@@ -43,6 +43,14 @@ import {
 } from '../../../Redux/Stats'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
 import { useParams } from 'react-router-dom'
+import styled from '@emotion/styled'
+
+const MaxCollateral = styled.u`
+  cursor: pointer;
+  &:hover {
+    color: ${(props) => (props.theme as any).palette.primary.main};
+  }
+`
 
 const expiryOrderTime = [
   {
@@ -109,6 +117,8 @@ const BuyOrder = (props: {
   const [avgExpectedRate, setAvgExpectedRate] = useState(ZERO) //Price Per long/short Token
   const [balanceAlert, setBalanceAlert] = useState(false) //Alert message for insufficient balance
   const [orderBookAlert, setOrderBookAlert] = useState(false) //Alert message for no Asks in BuyMarket
+  const [amountExceedAlert, setAmountExceedAlert] = useState(false) // Alert message for Amount Exceed
+  const [totalQuantity, setTotalQuantity] = useState(0)
   const [isApproved, setIsApproved] = useState(false)
   const [fillLoading, setFillLoading] = React.useState(false)
   const [approveLoading, setApproveLoading] = useState(false)
@@ -486,6 +496,16 @@ const BuyOrder = (props: {
     }
   }, [responseBuy, responseSell, userAddress, Web3Provider, checked])
 
+  //to calculate the total no of order quantity
+  useEffect(() => {
+    const QuantitiesOrderBook = existingSellLimitOrders.map((order) =>
+      Number(formatUnits(order.makerAmount, decimals))
+    )
+    let sumOfQuantity = 0
+    QuantitiesOrderBook.forEach((quantity) => (sumOfQuantity += quantity))
+    setTotalQuantity(sumOfQuantity)
+  }, [numberOfOptions])
+
   //useEffect function to fetch the average price for the BUY MARKET order
   useEffect(() => {
     if (!checked) {
@@ -694,6 +714,14 @@ const BuyOrder = (props: {
       } else {
         setOrderBookAlert(false)
       }
+      if (
+        youPay.gt(collateralBalance) ||
+        (!checked && Number(numberOfOptions) > totalQuantity)
+      ) {
+        setAmountExceedAlert(true)
+      } else {
+        setAmountExceedAlert(false)
+      }
     }
   }, [numberOfOptions, youPay, avgExpectedRate, checked])
 
@@ -744,7 +772,12 @@ const BuyOrder = (props: {
                 handleNumberOfOptions(e.target.value)
               }}
             />
-            <Typography variant="h5" color="text.secondary" textAlign="right">
+            <Typography
+              variant="h5"
+              color="text.secondary"
+              textAlign="right"
+              sx={{ mt: theme.spacing(1) }}
+            >
               Max Amount:
               <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
@@ -778,13 +811,10 @@ const BuyOrder = (props: {
                       ' ',
                       params.tokenType.toUpperCase(),
                     ]
-                  : 'please enter price'}
+                  : 'please enter price'}{' '}
                 {checked && pricePerOption.gt(ZERO) ? (
-                  <Button
-                    variant="text"
-                    size="small"
-                    color="secondary"
-                    sx={{ pb: theme.spacing(1) }}
+                  <MaxCollateral
+                    role="button"
                     onClick={() => {
                       handleNumberOfOptions(
                         formatUnits(
@@ -799,15 +829,12 @@ const BuyOrder = (props: {
                     {'('}
                     Max
                     {')'}
-                  </Button>
+                  </MaxCollateral>
                 ) : (
                   !checked &&
                   avgExpectedRate.gt(ZERO) && (
-                    <Button
-                      variant="text"
-                      size="small"
-                      color="secondary"
-                      sx={{ pb: theme.spacing(1) }}
+                    <MaxCollateral
+                      role="button"
                       onClick={() => {
                         handleNumberOfOptions(
                           formatUnits(
@@ -822,7 +849,7 @@ const BuyOrder = (props: {
                       {'('}
                       Max
                       {')'}
-                    </Button>
+                    </MaxCollateral>
                   )
                 )}
               </Typography>
@@ -912,43 +939,19 @@ const BuyOrder = (props: {
             </Typography>
           </Stack>
           <Collapse in={balanceAlert} sx={{ mt: theme.spacing(2) }}>
-            <Alert
-              severity="error"
-              action={
-                <IconButton
-                  aria-label="close"
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    setBalanceAlert(false)
-                  }}
-                >
-                  {'X'}
-                </IconButton>
-              }
-              sx={{ mb: 2 }}
-            >
+            <Alert severity="error" sx={{ mb: 2 }}>
               Insufficient balance
             </Alert>
           </Collapse>
           <Collapse in={orderBookAlert} sx={{ mt: theme.spacing(2) }}>
-            <Alert
-              severity="error"
-              action={
-                <IconButton
-                  aria-label="close"
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    setOrderBookAlert(false)
-                  }}
-                >
-                  {'X'}
-                </IconButton>
-              }
-              sx={{ mb: 2 }}
-            >
+            <Alert severity="error" sx={{ mb: 2 }}>
               No Asks in orderbook
+            </Alert>
+          </Collapse>
+          <Collapse in={amountExceedAlert}>
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              Amount to be approved exceeds{' '}
+              {checked ? 'Wallet Balance' : 'available quantities'}
             </Alert>
           </Collapse>
           <Stack direction={'row'} spacing={1} mt={theme.spacing(1)}>
