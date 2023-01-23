@@ -46,9 +46,11 @@ export enum SupportedChainId {
 type SingleConfig = {
   readonly name: string
   readonly divaAddress: string
+  readonly tellorAddress: string
   readonly balanceCheckerAddress: string
   readonly exchangeProxy: string
   readonly whitelistAddress: string
+  readonly tellorSubgraph: string
   readonly divaSubgraph: string
   readonly whitelistSubgraph: string
   readonly allOrders: string
@@ -71,9 +73,11 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.MAINNET]: {
     name: 'Ethereum',
     divaAddress: '',
+    tellorAddress: '',
     balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
+    tellorSubgraph: '',
     divaSubgraph: '',
     whitelistSubgraph: '',
     allOrders: '',
@@ -88,9 +92,11 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.ROPSTEN]: {
     name: 'Ropsten',
     divaAddress: '',
+    tellorAddress: '',
     balanceCheckerAddress: '0xD713aeC2156709A6AF392bb84018ACc6b44f1885',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
+    tellorSubgraph: '',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-ropsten',
     whitelistSubgraph:
@@ -106,9 +112,12 @@ export const config: { [key: number]: SingleConfig } = {
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0x659f8bF63Dce2548eB4D9b4BfF6883dddFde4848', // 22.11.2022
+    tellorAddress: '0x3251838bd813fdf6a97D32781e011cce8D225d59',
     balanceCheckerAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
+    tellorSubgraph:
+      'https://api.studio.thegraph.com/query/14411/diva-tellor-goerli/0.0.4',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli-new-2',
     whitelistSubgraph:
@@ -126,9 +135,11 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.POLYGON]: {
     name: 'Polygon',
     divaAddress: '',
+    tellorAddress: '',
     balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
+    tellorSubgraph: '',
     divaSubgraph: '',
     whitelistSubgraph: '',
     allOrders: '',
@@ -143,9 +154,11 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.POLYGON_MUMBAI]: {
     name: 'Mumbai',
     divaAddress: '',
+    tellorAddress: '',
     balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
+    tellorSubgraph: '',
     divaSubgraph: '',
     whitelistSubgraph: '',
     allOrders: '',
@@ -164,9 +177,11 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.ARBITRUM_ONE]: {
     name: 'Arbitrum',
     divaAddress: '',
+    tellorAddress: '',
     balanceCheckerAddress: '',
     exchangeProxy: '',
     whitelistAddress: '',
+    tellorSubgraph: '',
     divaSubgraph: '',
     whitelistSubgraph: '',
     allOrders: '',

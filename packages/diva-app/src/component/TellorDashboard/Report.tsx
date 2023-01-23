@@ -27,13 +27,20 @@ import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
 import DIVA_ABI from '../../abi/DIVAABI.json'
-import { getDateTime, getExpiryMinutesFromNow } from '../../Util/Dates'
+import TELLOR_ABI from '../../abi/TellorPlayground.json'
+import DIVA_ORACLE_TELLOR_ABI from '../../abi/DivaOracleTellor.json'
+import {
+  getDateTime,
+  getExpiryMinutesFromNow,
+  userTimeZone,
+} from '../../Util/Dates'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { GrayText } from '../Trade/Orders/UiStyles'
 import { CoinIconPair } from '../CoinIcon'
 import {
   fetchPools,
+  selectChainId,
   selectPools,
   selectRequestStatus,
   selectUserAddress,
@@ -52,103 +59,155 @@ import { Search } from '@mui/icons-material'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { getColorByStatus, getTopNObjectByProperty } from '../../Util/dashboard'
 import useTheme from '@mui/material/styles/useTheme'
+import request from 'graphql-request'
+import { queryReport } from '../../lib/queries'
 
-export const DueInCell = (props: any) => {
-  const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
-  const statusTimestamp = parseInt(props.row.StatusTimestamp)
-  const { isMobile } = useCustomMediaQuery()
-
-  if (props.row.Status === 'Expired') {
-    const minUntilExp = getExpiryMinutesFromNow(
-      expTimestamp + props.row.SubmissionPeriod
-    )
-
-    if (minUntilExp < props.row.SubmissionPeriod && minUntilExp > 0) {
-      return minUntilExp === 1 ? (
-        <Tooltip placement="top-end" title={props.row.Expiry}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: isMobile ? 'auto' : '150vh',
-            }}
-          >
-            {'<1m'}
-          </div>
+export const UndisputedCell = (props: any) => {
+  const minUntilExp = 0 - getExpiryMinutesFromNow(props.row.StatusTimestamp)
+  if (minUntilExp > 0) {
+    if ((minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) > 0) {
+      // More than a day
+      return (
+        <Tooltip
+          placement="top-end"
+          title={props.row.Expiry + ', ' + userTimeZone()}
+        >
+          <span className="table-cell-trucate">
+            {(minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) +
+              'd ' +
+              ((minUntilExp % (60 * 24)) - (minUntilExp % 60)) / 60 +
+              'h ' +
+              (minUntilExp % 60) +
+              'm '}
+          </span>
         </Tooltip>
-      ) : (
-        <Tooltip placement="top-end" title={props.row.Expiry}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: isMobile ? 'auto' : '150vh',
-            }}
-          >
+      )
+    } else if (
+      (minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) === 0 &&
+      (minUntilExp - (minUntilExp % 60)) / 60 > 0
+    ) {
+      // Less than a day but more than an hour
+      return (
+        <Tooltip
+          placement="top-end"
+          title={props.row.Expiry + ', ' + userTimeZone()}
+        >
+          <span className="table-cell-trucate">
             {(minUntilExp - (minUntilExp % 60)) / 60 +
               'h ' +
               (minUntilExp % 60) +
               'm '}
-          </div>
+          </span>
+        </Tooltip>
+      )
+    } else if ((minUntilExp - (minUntilExp % 60)) / 60 === 0) {
+      // Less than an hour
+      return (
+        <Tooltip
+          placement="top-end"
+          title={props.row.Expiry + ', ' + userTimeZone()}
+        >
+          <span className="table-cell-trucate">
+            {(minUntilExp % 60) + 'm '}
+          </span>
         </Tooltip>
       )
     }
-  }
-  if (props.row.Status === 'Challenged') {
-    const minUntilExp = getExpiryMinutesFromNow(
-      statusTimestamp + props.row.ReviewPeriod
-    )
-
-    if (minUntilExp < props.row.ReviewPeriod && minUntilExp > 0) {
-      return minUntilExp === 1 ? (
-        <Tooltip placement="top-end" title={props.row.Expiry}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: isMobile ? 'auto' : '150vh',
-            }}
-          >
-            {'<1m'}
-          </div>
-        </Tooltip>
-      ) : (
-        <Tooltip placement="top-end" title={props.row.Expiry}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: isMobile ? 'auto' : '150vh',
-            }}
-          >
-            {(minUntilExp - (minUntilExp % 60)) / 60 +
-              'h ' +
-              (minUntilExp % 60) +
-              'm '}
-          </div>
-        </Tooltip>
-      )
-    }
-  }
-
-  return (
-    <Tooltip placement="top-end" title={props.row.Expiry}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: isMobile ? 'auto' : '150vh',
-        }}
+  } else if (Object.is(0, minUntilExp)) {
+    // Using Object.is() to differentiate between +0 and -0
+    return (
+      <Tooltip
+        placement="top-end"
+        title={props.row.Expiry + ', ' + userTimeZone()}
       >
-        {'-'}
-      </div>
-    </Tooltip>
+        <span className="table-cell-trucate">{'<1m'}</span>
+      </Tooltip>
+    )
+  } else {
+    return (
+      <Tooltip
+        placement="top-end"
+        title={props.row.Expiry + ', ' + userTimeZone()}
+      >
+        <span className="table-cell-trucate">{'-'}</span>
+      </Tooltip>
+    )
+  }
+}
+export const DueInCell = (props: any) => {
+  const expTimestamp = new Date(props.row.Expiry.replace(/-/g, '/')).getTime()
+  const minUntilExp = getExpiryMinutesFromNow(
+    expTimestamp / 1000 + Number(props.row.SubmissionPeriod)
   )
+  if (minUntilExp > 0) {
+    if ((minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) > 0) {
+      // More than a day
+      return (
+        <Tooltip
+          placement="top-end"
+          title={props.row.Expiry + ', ' + userTimeZone()}
+        >
+          <span className="table-cell-trucate">
+            {(minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) +
+              'd ' +
+              ((minUntilExp % (60 * 24)) - (minUntilExp % 60)) / 60 +
+              'h ' +
+              (minUntilExp % 60) +
+              'm '}
+          </span>
+        </Tooltip>
+      )
+    } else if (
+      (minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) === 0 &&
+      (minUntilExp - (minUntilExp % 60)) / 60 > 0
+    ) {
+      // Less than a day but more than an hour
+      return (
+        <Tooltip
+          placement="top-end"
+          title={props.row.Expiry + ', ' + userTimeZone()}
+        >
+          <span className="table-cell-trucate">
+            {(minUntilExp - (minUntilExp % 60)) / 60 +
+              'h ' +
+              (minUntilExp % 60) +
+              'm '}
+          </span>
+        </Tooltip>
+      )
+    } else if ((minUntilExp - (minUntilExp % 60)) / 60 === 0) {
+      // Less than an hour
+      return (
+        <Tooltip
+          placement="top-end"
+          title={props.row.Expiry + ', ' + userTimeZone()}
+        >
+          <span className="table-cell-trucate">
+            {(minUntilExp % 60) + 'm '}
+          </span>
+        </Tooltip>
+      )
+    }
+  } else if (Object.is(0, minUntilExp)) {
+    // Using Object.is() to differentiate between +0 and -0
+    return (
+      <Tooltip
+        placement="top-end"
+        title={props.row.Expiry + ', ' + userTimeZone()}
+      >
+        <span className="table-cell-trucate">{'<1m'}</span>
+      </Tooltip>
+    )
+  } else {
+    return (
+      <Tooltip
+        placement="top-end"
+        title={props.row.Expiry + ', ' + userTimeZone()}
+      >
+        <span className="table-cell-trucate">{'-'}</span>
+      </Tooltip>
+    )
+  }
 }
 const SubmitCell = (props: any) => {
   const { provider } = useConnectionContext()
@@ -166,9 +225,19 @@ const SubmitCell = (props: any) => {
         )
       : null
 
+  const tellor =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].tellorAddress,
+          TELLOR_ABI,
+          provider.getSigner()
+        )
+      : null
+
   const [openReport, setOpenReport] = useState(false)
   const [openTip, setOpenTip] = useState(false)
   const [reportValue, setReportValue] = useState('')
+  const [colUsdVal, setColUsdVal] = useState('1')
   const [tipValue, setTipValue] = useState('')
   const [reportLoading, setReportLoading] = useState(false)
   const [tipLoading, setTipLoading] = useState(false)
@@ -194,18 +263,15 @@ const SubmitCell = (props: any) => {
     statusTimestamp < expiryTime.getTime()
       ? expiryTime.getTime()
       : statusTimestamp
-
-  const reportEnabled =
-    (props.row.Status === 'Expired' &&
-      now.getTime() < relevantStartTime + props.row.SubmissionPeriod * 1000) ||
-    (props.row.Status === 'Challenged' &&
-      now.getTime() < relevantStartTime + props.row.ChallengePeriod * 1000)
-
-  const tipEnabled = true
+  const reportEnabled = props.row.Status === 'Expired'
+  const tipEnabled =
+    props.row.Status === 'Expired' || props.row.Status === 'About To Expire'
   // props.row.Status === 'Expired' &&
   // now.getTime() > relevantStartTime + props.row.SubmissionPeriod * 1000
-  const disputeEnabled = true
-  const submitEnabled = true
+  const disputeEnabled = props.row.Reports.length !== 0 //|| props.row.Status === 'Challenged'
+  const settleEnabled =
+    (props.row.Status === 'Submitted' || props.row.Status === 'Challenged') &&
+    now.getTime() > relevantStartTime + props.row.SubmissionPeriod * 1000
   return (
     <Stack
       direction="row"
@@ -217,10 +283,8 @@ const SubmitCell = (props: any) => {
       }}
     >
       <LoadingButton
-        // fill={'#9B51E0'}
         variant="contained"
         onClick={handleOpenReport}
-        // disabled={!enabled || disabledButton}
         disabled={!reportEnabled}
         loading={reportLoading}
         sx={{
@@ -234,7 +298,7 @@ const SubmitCell = (props: any) => {
       <Dialog open={openReport} onClose={handleCloseReport}>
         <DialogContent>
           <DialogContentText>
-            Please provide a value for this option
+            Please provide a value for this option and usd value of collateral
           </DialogContentText>
         </DialogContent>
 
@@ -243,6 +307,12 @@ const SubmitCell = (props: any) => {
             defaultValue=""
             onChange={(e) => {
               setReportValue(e.target.value)
+            }}
+          />
+          <TextField
+            defaultValue=""
+            onChange={(e) => {
+              setColUsdVal(e.target.value)
             }}
           />
           <LoadingButton
@@ -256,12 +326,23 @@ const SubmitCell = (props: any) => {
             onClick={() => {
               setReportLoading(reportValue ? true : false)
               if (diva != null) {
-                diva
-                  .setFinalReferenceValue(
-                    props.id.split('/')[0],
-                    parseUnits(reportValue),
-                    true
-                  )
+                const abiCoder = new ethers.utils.AbiCoder()
+                const queryDataArgs = abiCoder.encode(
+                  ['uint256', 'address', 'uint256'],
+                  [props.id.split('/')[0], diva.address, chainId]
+                )
+                const queryData = abiCoder.encode(
+                  ['string', 'bytes'],
+                  ['DIVAProtocol', queryDataArgs]
+                )
+                const queryId = ethers.utils.keccak256(queryData)
+                const oracleValue = abiCoder.encode(
+                  ['uint256', 'uint256'],
+                  [parseUnits(reportValue), parseUnits(colUsdVal)]
+                )
+                console.log('queryId', queryId)
+                tellor
+                  .submitValue(queryId, oracleValue, 0, queryData)
                   .then((tx) => {
                     /**
                      * dispatch action to refetch the pool after action
@@ -282,7 +363,34 @@ const SubmitCell = (props: any) => {
                     console.error(err)
                     setReportLoading(false)
                   })
+                // diva
+                //   .setFinalReferenceValue(
+                //     props.id.split('/')[0],
+                //     parseUnits(reportValue),
+                //     true
+                //   )
+                //   .then((tx) => {
+                //     /**
+                //      * dispatch action to refetch the pool after action
+                //      */
+                //     tx.wait().then(() => {
+                //       setTimeout(() => {
+                //         dispatch(
+                //           fetchPools({
+                //             page: 0,
+                //             dataProvider: userAddress,
+                //           })
+                //         )
+                //         setReportLoading(false)
+                //       }, 10000)
+                //     })
+                //   })
+                //   .catch((err) => {
+                //     console.error(err)
+                //     setReportLoading(false)
+                //   })
               }
+              setReportLoading(false)
               handleCloseReport()
             }}
           >
@@ -365,8 +473,7 @@ const SubmitCell = (props: any) => {
       <LoadingButton
         variant="contained"
         onClick={handleOpenTip}
-        // disabled={!enabled || disabledButton}
-        disabled={!tipEnabled}
+        disabled={!disputeEnabled}
         loading={tipLoading}
         sx={{
           backgroundColor: '#F2994A',
@@ -379,7 +486,7 @@ const SubmitCell = (props: any) => {
       <Dialog open={openTip} onClose={handleCloseTip}>
         <DialogContent>
           <DialogContentText>
-            Please provide a value for this option
+            Please provide a value for tipping this report
           </DialogContentText>
         </DialogContent>
 
@@ -438,8 +545,7 @@ const SubmitCell = (props: any) => {
       <LoadingButton
         variant="contained"
         onClick={handleOpenTip}
-        // disabled={!enabled || disabledButton}
-        disabled={!tipEnabled}
+        disabled={!settleEnabled}
         loading={tipLoading}
         sx={{
           backgroundColor: '#27AE60',
@@ -559,23 +665,33 @@ const columns: GridColDef[] = [
   },
   {
     minWidth: 200,
-    field: 'finalValue',
+    field: 'ReportedValue',
     align: 'right',
     headerAlign: 'right',
     headerName: 'Reported Value',
-    renderCell: (cell: any) => (
-      <Tooltip title={cell.value}>
-        <span className="table-cell-trucate">{cell.value}</span>
-      </Tooltip>
-    ),
+    renderCell: (cell: any) => {
+      return (
+        <Tooltip title={cell.value}>
+          <span className="table-cell-trucate">{cell.value}</span>
+        </Tooltip>
+      )
+    },
   },
   {
     minWidth: 200,
-    field: 'Repoter',
+    field: 'Reporter',
     headerName: 'Reporter',
     align: 'right',
     headerAlign: 'right',
     type: 'number',
+    renderCell: (props) => {
+      console.log(props.value)
+      return (
+        <Tooltip title={props.value}>
+          <span className="table-cell-trucate">{props.value}</span>
+        </Tooltip>
+      )
+    },
   },
   {
     minWidth: 200,
@@ -584,6 +700,7 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     type: 'number',
+    renderCell: (props) => <UndisputedCell {...props} />,
   },
   {
     minWidth: 200,
@@ -899,12 +1016,21 @@ export function Report() {
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
-
+  const chainId = useAppSelector(selectChainId)
   const dispatch = useDispatch()
   const pools = useAppSelector((state) => selectPools(state))
   const poolsRequestStatus = useAppSelector(selectRequestStatus('app/pools'))
   const { isMobile } = useCustomMediaQuery()
   const theme = useTheme()
+  const { provider } = useConnectionContext()
+  const tellor =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].tellorAddress,
+          TELLOR_ABI,
+          provider?.getSigner()
+        )
+      : null
 
   const handleUnderLyingInput = (e) => {
     setSearch(e.target.value)
@@ -932,7 +1058,48 @@ export function Report() {
   }, [dispatch, page, userAddress])
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
+    const abiCoder = new ethers.utils.AbiCoder()
+    const queryDataArgs = abiCoder.encode(
+      ['uint256', 'address', 'uint256'],
+      [val.id.split('/')[0], config[chainId].divaAddress, chainId]
+    )
+    const queryData = abiCoder.encode(
+      ['string', 'bytes'],
+      ['DIVAProtocol', queryDataArgs]
+    )
+    const queryId = ethers.utils.keccak256(queryData)
+    const reports = []
+    request(
+      'https://api.studio.thegraph.com/query/14411/diva-tellor-goerli/0.0.4',
+      queryReport(queryId)
+    ).then((res) => {
+      if (res.newReportEntities.length > 0) {
+        // console.log(res)
+        res.newReportEntities.map((report) => {
+          tellor.isDisputed(queryId, report._time).then((disputed) => {
+            if (!disputed) {
+              reports.push({
+                queryId: report._queryId,
+                value: report._value,
+                time: report._time,
+                reporter: report._reporter,
+                queryData: report._queryData,
+              })
+            }
+          })
+        })
+      }
+    })
+    if (val.id === '116') {
+      console.log(val.id)
+      console.log(reports.length)
+      console.log(reports[0])
+      console.log(reports[1])
+    }
     const shared = {
+      Reports: reports,
+      Reporter: reports[0]?.reporter,
+      ReportedValue: reports[0]?.value,
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,
       Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
@@ -958,7 +1125,6 @@ export function Report() {
       Inflection: Number(formatUnits(val.inflection)),
       Cap: Number(formatUnits(val.cap)),
     }
-
     return [
       ...acc,
       {
@@ -979,7 +1145,7 @@ export function Report() {
           ).toFixed(4) +
           ' ' +
           val.collateralToken.symbol,
-        Status: status,
+        Status: status === 'Open' ? 'About To Expire' : status,
         StatusTimestamp: val.statusTimestamp,
         finalValue: finalValue,
         SubmissionPeriod: val.submissionPeriod,

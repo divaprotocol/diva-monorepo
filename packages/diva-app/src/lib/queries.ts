@@ -149,7 +149,24 @@ export const queryUser = (id: string, pageSize: number, skip: number) => gql`
   }
 }
 `
-
+export const queryReport = (queryId: string) => gql`
+{
+  newReportEntities(
+    first: 100
+    orderBy: _time
+    orderDirection: asc
+    where: {
+    _queryId: "${queryId}"
+    }
+  ) {
+    _queryId
+    _time
+    _value
+    _reporter
+    _queryData
+  }
+}
+`
 export const queryPools = (
   skip: number,
   pageSize: number,
