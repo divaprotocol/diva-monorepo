@@ -11,8 +11,8 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "^0.37.1",
-    "@graphprotocol/graph-ts": "^0.29.0",
+    "@graphprotocol/graph-cli": "0.25.1",
+    "@graphprotocol/graph-ts": "0.24.1",
     "prettier": "^2.5.1"
   },
   "devDependencies": {
