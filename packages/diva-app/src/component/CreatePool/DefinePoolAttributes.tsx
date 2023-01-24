@@ -507,27 +507,6 @@ export function DefinePoolAttributes({
                       {formik.errors.collateralToken}
                     </FormHelperText>
                   )}
-                  {collateralWalletBalance != null && collateralToken != null && (
-                    <FormHelperText>
-                      Your balance:{' '}
-                      {toExponentialOrNumber(Number(collateralWalletBalance))}{' '}
-                      {collateralToken?.symbol} {'('}
-                      <MaxCollateral
-                        role="button"
-                        onClick={() => {
-                          if (collateralWalletBalance != null) {
-                            formik.setFieldValue(
-                              'collateralBalance',
-                              collateralWalletBalance
-                            )
-                          }
-                        }}
-                      >
-                        Max
-                      </MaxCollateral>
-                      {')'}
-                    </FormHelperText>
-                  )}
                 </FormControl>
                 <FormControl
                   fullWidth
@@ -549,10 +528,25 @@ export function DefinePoolAttributes({
                       {formik.errors.collateralBalance}
                     </FormHelperText>
                   )}
-                  {!isNaN(formik.values.collateralBalance) && (
+                  {collateralWalletBalance != null && collateralToken != null && (
                     <FormHelperText>
-                      You receive {formik.values.collateralBalance} LONG and{' '}
-                      {formik.values.collateralBalance} SHORT tokens
+                      Your balance:{' '}
+                      {toExponentialOrNumber(Number(collateralWalletBalance))}{' '}
+                      {collateralToken?.symbol} {'('}
+                      <MaxCollateral
+                        role="button"
+                        onClick={() => {
+                          if (collateralWalletBalance != null) {
+                            formik.setFieldValue(
+                              'collateralBalance',
+                              collateralWalletBalance
+                            )
+                          }
+                        }}
+                      >
+                        Max
+                      </MaxCollateral>
+                      {')'}
                     </FormHelperText>
                   )}
                 </FormControl>
