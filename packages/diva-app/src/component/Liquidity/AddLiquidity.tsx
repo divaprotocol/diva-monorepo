@@ -273,7 +273,7 @@ export const AddLiquidity = ({ pool }: Props) => {
               mt: theme.spacing(-1),
               py: theme.spacing(4),
               px: theme.spacing(2),
-              background: 'linear-gradient(to bottom, #1B3448, #000000 110%)',
+              background: 'linear-gradient(to bottom, #051827, #121212 110%)',
             }}
           >
             <Stack direction="column" spacing={4} pl={theme.spacing(0.8)}>

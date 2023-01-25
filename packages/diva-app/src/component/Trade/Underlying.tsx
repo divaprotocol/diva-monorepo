@@ -117,6 +117,18 @@ export default function Underlying() {
   }
   return (
     <TabContext value={value}>
+      {/* <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: {
+            sx: 'flex-start',
+            md: 'flex-start',
+            lg: 'flex-start',
+            xl: 'center',
+          },
+        }}
+      > */}
       <Box
         sx={{
           /* maxWidth: '70%',*/ paddingTop: '1em',
@@ -216,10 +228,28 @@ export default function Underlying() {
           </TabList>
         </Box>
       </Stack>
-      <Divider orientation="horizontal" />
+      {/* </Box> */}
+      <Divider orientation="horizontal" sx={{ alignItems: { xl: 'center' } }} />
+      {/* <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: {
+            sx: 'flex-start',
+            md: 'flex-start',
+            lg: 'flex-start',
+            xl: 'center',
+          },
+        }}
+      > */}
       <TabPanel value="long" sx={{ paddingBottom: '3em' }}>
-        <Stack direction="row" spacing={15}>
-          <Stack direction="column" width="50%" spacing={2}>
+        <Stack direction="row" spacing={theme.spacing(15)}>
+          <Stack
+            direction="column"
+            width="50%"
+            /* {{ lg: '50%', xl: '30%' }} */
+            spacing={2}
+          >
             <TradeChart
               data={data}
               refAsset={pool.referenceAsset}
@@ -234,13 +264,11 @@ export default function Underlying() {
               mouseHover={true}
               showBreakEven={true}
             />
-            <LeftCompFlexContainer>
-              <OrdersPanel
-                option={pool}
-                tokenAddress={tokenAddress}
-                exchangeProxy={exchangeProxy}
-              />
-            </LeftCompFlexContainer>
+            <OrdersPanel
+              option={pool}
+              tokenAddress={tokenAddress}
+              exchangeProxy={exchangeProxy}
+            />
           </Stack>
           <Box>
             <CreateOrder
@@ -254,8 +282,12 @@ export default function Underlying() {
         </Stack>
       </TabPanel>
       <TabPanel value="short" sx={{ paddingBottom: '3em' }}>
-        <Stack direction="row" spacing={15}>
-          <Stack direction="column" width="50%" spacing={2}>
+        <Stack direction="row" spacing={theme.spacing(15)}>
+          <Stack
+            direction="column"
+            width="50%" /* {{ lg: '50%', xl: '30%' }} */
+            spacing={2}
+          >
             <TradeChart
               data={data}
               refAsset={pool.referenceAsset}
@@ -293,6 +325,7 @@ export default function Underlying() {
       <TabPanel value="remove">
         <RemoveLiquidity pool={pool!} />
       </TabPanel>
+      {/* </Box> */}
     </TabContext>
   )
 }

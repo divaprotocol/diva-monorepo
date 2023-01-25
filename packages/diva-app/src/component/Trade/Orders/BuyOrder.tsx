@@ -1,10 +1,13 @@
 import React, { useState, useEffect, FormEvent } from 'react'
 import {
+  Alert,
   Box,
   Button,
   Card,
   Checkbox,
+  Collapse,
   FormControlLabel,
+  IconButton,
   InputAdornment,
   MenuItem,
   Stack,
@@ -40,6 +43,14 @@ import {
 } from '../../../Redux/Stats'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
 import { useParams } from 'react-router-dom'
+import styled from '@emotion/styled'
+
+const MaxCollateral = styled.u`
+  cursor: pointer;
+  &:hover {
+    color: ${(props) => (props.theme as any).palette.primary.main};
+  }
+`
 
 const expiryOrderTime = [
   {
@@ -104,6 +115,10 @@ const BuyOrder = (props: {
   const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
   const [expiry, setExpiry] = useState(5) //Expiry Time
   const [avgExpectedRate, setAvgExpectedRate] = useState(ZERO) //Price Per long/short Token
+  const [balanceAlert, setBalanceAlert] = useState(false) //Alert message for insufficient balance
+  const [orderBookAlert, setOrderBookAlert] = useState(false) //Alert message for no Asks in BuyMarket
+  /* const [amountExceedAlert, setAmountExceedAlert] = useState(false) */ // Alert message for Amount Exceed
+  const [totalQuantity, setTotalQuantity] = useState(0)
   const [isApproved, setIsApproved] = useState(false)
   const [fillLoading, setFillLoading] = React.useState(false)
   const [approveLoading, setApproveLoading] = useState(false)
@@ -481,6 +496,16 @@ const BuyOrder = (props: {
     }
   }, [responseBuy, responseSell, userAddress, Web3Provider, checked])
 
+  //to calculate the total no of order quantity
+  /*  useEffect(() => {
+    const QuantitiesOrderBook = existingSellLimitOrders.map((order) =>
+      Number(formatUnits(order.makerAmount, decimals))
+    )
+    let sumOfQuantity = 0
+    QuantitiesOrderBook.forEach((quantity) => (sumOfQuantity += quantity))
+    setTotalQuantity(sumOfQuantity)
+  }, [numberOfOptions]) */
+
   //useEffect function to fetch the average price for the BUY MARKET order
   useEffect(() => {
     if (!checked) {
@@ -676,6 +701,30 @@ const BuyOrder = (props: {
     }
   }, [remainingAllowance, youPay, userAddress])
 
+  // Alert message for Insuffcientbalance & No Asks on OrderBook
+  useEffect(() => {
+    if (numberOfOptions != '') {
+      if (youPay.gt(collateralBalance) && youPay.lte(remainingAllowance)) {
+        setBalanceAlert(true)
+      } else {
+        setBalanceAlert(false)
+      }
+      if (!checked && avgExpectedRate.eq(0)) {
+        setOrderBookAlert(true)
+      } else {
+        setOrderBookAlert(false)
+      } /* 
+      if (
+        youPay.gt(collateralBalance) ||
+        (!checked && Number(numberOfOptions) > totalQuantity)
+      ) {
+        setAmountExceedAlert(true)
+      } else {
+        setAmountExceedAlert(false)
+      } */
+    }
+  }, [numberOfOptions, youPay, avgExpectedRate, checked])
+
   const createBtnDisabled =
     !isApproved ||
     youPay.lte(0) ||
@@ -723,29 +772,86 @@ const BuyOrder = (props: {
                 handleNumberOfOptions(e.target.value)
               }}
             />
-            <Typography variant="h5" color="text.secondary" textAlign="right">
-              Balance:
-              <Typography variant="h4" sx={{ display: 'inline' }}>
+            <Typography
+              variant="h5"
+              color="text.secondary"
+              textAlign="right"
+              sx={{ mt: theme.spacing(1) }}
+            >
+              Max Amount:
+              <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
-                {toExponentialOrNumber(
-                  Number(formatUnits(collateralBalance, decimals))
-                )}{' '}
-                {tokenSymbol}
-                <Button
-                  variant="text"
-                  size="small"
-                  color="secondary"
-                  sx={{ pb: theme.spacing(1) }}
-                  onClick={() => {
-                    handleNumberOfOptions(
-                      formatUnits(collateralBalance, decimals)
-                    )
-                  }}
-                >
-                  {'('}
-                  Max
-                  {')'}
-                </Button>
+                {checked && pricePerOption.gt(ZERO)
+                  ? [
+                      toExponentialOrNumber(
+                        Number(
+                          formatUnits(
+                            collateralBalance
+                              .mul(collateralTokenUnit)
+                              .div(pricePerOption),
+                            decimals
+                          )
+                        )
+                      ),
+                      ' ',
+                      params.tokenType.toUpperCase(),
+                    ]
+                  : !checked && avgExpectedRate.gt(ZERO)
+                  ? [
+                      toExponentialOrNumber(
+                        Number(
+                          formatUnits(
+                            collateralBalance
+                              .mul(collateralTokenUnit)
+                              .div(avgExpectedRate),
+                            decimals
+                          )
+                        )
+                      ),
+                      ' ',
+                      params.tokenType.toUpperCase(),
+                    ]
+                  : 'please enter price'}{' '}
+                {checked && pricePerOption.gt(ZERO) ? (
+                  <MaxCollateral
+                    role="button"
+                    onClick={() => {
+                      handleNumberOfOptions(
+                        formatUnits(
+                          collateralBalance
+                            .mul(collateralTokenUnit)
+                            .div(pricePerOption),
+                          decimals
+                        )
+                      )
+                    }}
+                  >
+                    {'('}
+                    Max
+                    {')'}
+                  </MaxCollateral>
+                ) : (
+                  !checked &&
+                  avgExpectedRate.gt(ZERO) && (
+                    <MaxCollateral
+                      role="button"
+                      onClick={() => {
+                        handleNumberOfOptions(
+                          formatUnits(
+                            collateralBalance
+                              .mul(collateralTokenUnit)
+                              .div(avgExpectedRate),
+                            decimals
+                          )
+                        )
+                      }}
+                    >
+                      {'('}
+                      Max
+                      {')'}
+                    </MaxCollateral>
+                  )
+                )}
               </Typography>
             </Typography>
           </Box>
@@ -832,24 +938,23 @@ const BuyOrder = (props: {
                ${tokenSymbol}`}
             </Typography>
           </Stack>
-          {/* <TextField
-            id="outlined-number"
-            label="You Pay (Inc. fees)"
-            type="number"
-            disabled
-            sx={{ width: '100%', mb: theme.spacing(6) }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end" sx={{ color: '#929292' }}>
-                  {tokenSymbol}
-                </InputAdornment>
-              ),
-            }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            value={toExponentialOrNumber(Number(formatUnits(youPay, decimals)))}
-          /> */}
+          <Collapse in={balanceAlert} sx={{ mt: theme.spacing(2) }}>
+            <Alert severity="error" sx={{ mb: 2 }}>
+              Insufficient balance
+            </Alert>
+          </Collapse>
+          <Collapse in={orderBookAlert} sx={{ mt: theme.spacing(2) }}>
+            <Alert severity="error" sx={{ mb: 2 }}>
+              No Asks in orderbook
+            </Alert>
+          </Collapse>
+          {/* 
+          <Collapse in={amountExceedAlert}>
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              Amount to be approved exceeds{' '}
+              {checked ? 'Wallet Balance' : 'available quantities'}
+            </Alert>
+          </Collapse> */}
           <Stack direction={'row'} spacing={1} mt={theme.spacing(1)}>
             <LoadingButton
               variant="contained"

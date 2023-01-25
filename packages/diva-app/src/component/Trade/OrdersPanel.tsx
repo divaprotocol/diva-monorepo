@@ -8,13 +8,14 @@ import { Pool } from '../../lib/queries'
 import OrderBook from './OrderBook'
 import OptionOrders from './OptionOrders'
 import { TradeHistory } from './TradeHistory'
-import { Box } from '@mui/material'
+import { Box, useTheme } from '@mui/material'
 
 export default function OrdersPanel(props: {
   option: Pool
   tokenAddress: string
   exchangeProxy: string
 }) {
+  const theme = useTheme()
   const [orderType, setOrderTypeValue] = React.useState('orderbook')
 
   const handleOrderTypeChange = (event: any, newValue: string) => {
@@ -23,7 +24,11 @@ export default function OrdersPanel(props: {
   return (
     <Box width="100%">
       <TabContext value={orderType}>
-        <TabList onChange={handleOrderTypeChange} variant="standard">
+        <TabList
+          onChange={handleOrderTypeChange}
+          variant="standard"
+          sx={{ ml: theme.spacing(3) }}
+        >
           <Tab value="orderbook" label="Order Book" />
           <Tab value="openorders" label="Your open orders" />
           <Tab value="tradehistory" label="Trade History" />

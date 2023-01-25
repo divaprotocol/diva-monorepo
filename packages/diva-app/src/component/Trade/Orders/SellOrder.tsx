@@ -1,10 +1,13 @@
 import React, { useState, useEffect, FormEvent } from 'react'
 import {
+  Alert,
   Box,
   Button,
   Card,
   Checkbox,
+  Collapse,
   FormControlLabel,
+  IconButton,
   InputAdornment,
   MenuItem,
   Stack,
@@ -40,6 +43,14 @@ import {
 } from '../../../Redux/Stats'
 import { useConnectionContext } from '../../../hooks/useConnectionContext'
 import { useParams } from 'react-router-dom'
+import styled from '@emotion/styled'
+
+const MaxCollateral = styled.u`
+  cursor: pointer;
+  &:hover {
+    color: ${(props) => (props.theme as any).palette.primary.main};
+  }
+`
 
 const expiryOrderTime = [
   {
@@ -102,6 +113,8 @@ const SellOrder = (props: {
   const [numberOfOptions, setNumberOfOptions] = React.useState('') // User input field
   const [pricePerOption, setPricePerOption] = React.useState(ZERO) // User input field
   const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
+  const [balanceAlert, setBalanceAlert] = useState(false) //Alert message for insufficient balance
+  const [orderBookAlert, setOrderBookAlert] = useState(false) //Alert message for no Asks in SellMarket
   const [expiry, setExpiry] = React.useState(5)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
   const [isApproved, setIsApproved] = React.useState(false)
@@ -266,7 +279,6 @@ const SellOrder = (props: {
           const remainingAllowance = BigNumber.from(optionAllowance).sub(
             existingSellLimitOrdersAmountUser
           )
-
           setRemainingAllowance(remainingAllowance)
           setAllowance(optionAllowance)
           setIsApproved(true)
@@ -338,6 +350,7 @@ const SellOrder = (props: {
         existingLimitOrders: existingBuyLimitOrders,
         chainId: props.chainId,
       }
+      console.log('avgExpectedRate', avgExpectedRate)
       sellMarketOrder(orderData).then(async (orderFillStatus: any) => {
         if (!(orderFillStatus == undefined)) {
           // On fill order success ...
@@ -418,8 +431,8 @@ const SellOrder = (props: {
     if (responseSell.length == 0) {
       // Double check whether any limit orders exist
       const rSell: any = await get0xOpenOrders(
-        takerToken,
         makerToken,
+        takerToken,
         props.chainId,
         props.provider,
         props.exchangeProxy
@@ -678,6 +691,34 @@ const SellOrder = (props: {
     }
   }, [remainingAllowance, numberOfOptions, userAddress])
 
+  // Alert message for Insuffcientbalance & No Bids on OrderBook
+  useEffect(() => {
+    if (numberOfOptions != '') {
+      // Convert user input into BigNumber
+      const nbrOfOptionsBalance = parseUnits(numberOfOptions, decimals)
+
+      // Calculate fee amount (to be paid in position token)
+      const feeAmount = nbrOfOptionsBalance
+        .mul(parseUnits(TRADING_FEE.toString(), decimals))
+        .div(collateralTokenUnit)
+      setFeeAmount(feeAmount)
+      const requiredNbrOfOptionsBalance = nbrOfOptionsBalance.add(feeAmount)
+      if (
+        requiredNbrOfOptionsBalance.gt(optionBalance) &&
+        requiredNbrOfOptionsBalance.lte(remainingAllowance)
+      ) {
+        setBalanceAlert(true)
+      } else {
+        setBalanceAlert(false)
+      }
+      if (!checked && avgExpectedRate.eq(0)) {
+        setOrderBookAlert(true)
+      } else {
+        setOrderBookAlert(false)
+      }
+    }
+  }, [numberOfOptions, youReceive, avgExpectedRate, checked])
+
   // @todo QUESTION: Is numberOfOptions !== '' needed here?
   const createBtnDisabled =
     !isApproved ||
@@ -735,28 +776,48 @@ const SellOrder = (props: {
               }}
               onChange={(e) => handleNumberOfOptions(e.target.value)}
             />
-            <Typography variant="h5" color="text.secondary" textAlign="right">
-              Balance:
-              <Typography variant="h4" sx={{ display: 'inline' }}>
+            <Typography
+              variant="h5"
+              color="text.secondary"
+              textAlign="right"
+              sx={{ mt: theme.spacing(1) }}
+            >
+              Max Amount:
+              <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
                 {toExponentialOrNumber(
-                  Number(formatUnits(optionBalance, decimals))
+                  Number(
+                    formatUnits(
+                      optionBalance.sub(
+                        optionBalance
+                          .mul(parseUnits(TRADING_FEE.toString(), decimals))
+                          .div(collateralTokenUnit)
+                      ),
+                      decimals
+                    )
+                  )
                 )}{' '}
-                {tokenSymbol}
+                {params.tokenType.toUpperCase()}{' '}
               </Typography>
-              <Button
-                variant="text"
-                color="secondary"
-                size="small"
-                sx={{ pb: theme.spacing(1) }}
+              <MaxCollateral
+                role="button"
                 onClick={() => {
-                  handleNumberOfOptions(formatUnits(optionBalance, decimals))
+                  handleNumberOfOptions(
+                    formatUnits(
+                      optionBalance.sub(
+                        optionBalance
+                          .mul(parseUnits(TRADING_FEE.toString(), decimals))
+                          .div(collateralTokenUnit)
+                      ),
+                      decimals
+                    )
+                  )
                 }}
               >
                 {'('}
                 Max
                 {')'}
-              </Button>
+              </MaxCollateral>
             </Typography>
           </Box>
           <TextField
@@ -842,6 +903,46 @@ const SellOrder = (props: {
               {tokenSymbol}
             </Typography>
           </Stack>
+          <Collapse in={balanceAlert} sx={{ mt: theme.spacing(2) }}>
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setBalanceAlert(false)
+                  }}
+                >
+                  {'X'}
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              Insufficient balance
+            </Alert>
+          </Collapse>
+          <Collapse in={orderBookAlert} sx={{ mt: theme.spacing(2) }}>
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setOrderBookAlert(false)
+                  }}
+                >
+                  {'X'}
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              No Bids in orderbook
+            </Alert>
+          </Collapse>
           <Stack direction={'row'} spacing={1} mt={theme.spacing(1)}>
             <LoadingButton
               variant="contained"
