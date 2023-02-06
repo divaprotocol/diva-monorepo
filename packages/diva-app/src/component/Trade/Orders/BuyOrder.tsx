@@ -117,7 +117,7 @@ const BuyOrder = (props: {
   const [avgExpectedRate, setAvgExpectedRate] = useState(ZERO) //Price Per long/short Token
   const [balanceAlert, setBalanceAlert] = useState(false) //Alert message for insufficient balance
   const [orderBookAlert, setOrderBookAlert] = useState(false) //Alert message for no Asks in BuyMarket
-  /* const [amountExceedAlert, setAmountExceedAlert] = useState(false) */ // Alert message for Amount Exceed
+  const [amountExceedAlert, setAmountExceedAlert] = useState(false) // Alert message for Amount Exceed
   const [totalQuantity, setTotalQuantity] = useState(0)
   const [isApproved, setIsApproved] = useState(false)
   const [fillLoading, setFillLoading] = React.useState(false)
@@ -497,15 +497,15 @@ const BuyOrder = (props: {
   }, [responseBuy, responseSell, userAddress, Web3Provider, checked])
 
   //to calculate the total no of order quantity
-  /*  useEffect(() => {
+  useEffect(() => {
     const QuantitiesOrderBook = existingSellLimitOrders.map((order) =>
       Number(formatUnits(order.makerAmount, decimals))
     )
     let sumOfQuantity = 0
     QuantitiesOrderBook.forEach((quantity) => (sumOfQuantity += quantity))
     setTotalQuantity(sumOfQuantity)
-  }, [numberOfOptions]) */
-
+  }, [numberOfOptions])
+  console.log('totalQuantity', totalQuantity)
   //useEffect function to fetch the average price for the BUY MARKET order
   useEffect(() => {
     if (!checked) {
@@ -704,17 +704,27 @@ const BuyOrder = (props: {
   // Alert message for Insuffcientbalance & No Asks on OrderBook
   useEffect(() => {
     if (numberOfOptions != '') {
-      if (youPay.gt(collateralBalance) && youPay.lte(remainingAllowance)) {
-        setBalanceAlert(true)
+      if (youPay.gt(collateralBalance)) {
+        if (youPay.lte(remainingAllowance)) {
+          setBalanceAlert(true)
+        } else {
+          setAmountExceedAlert(true)
+        }
       } else {
+        setAmountExceedAlert(false)
         setBalanceAlert(false)
       }
-      if (!checked && avgExpectedRate.eq(0)) {
-        setOrderBookAlert(true)
+      if (!checked) {
+        if (avgExpectedRate.eq(0)) {
+          setOrderBookAlert(true)
+        } else if (Number(numberOfOptions) > totalQuantity) {
+          setAmountExceedAlert(true)
+        }
       } else {
+        setAmountExceedAlert(false)
         setOrderBookAlert(false)
-      } /* 
-      if (
+      }
+      /* if (
         youPay.gt(collateralBalance) ||
         (!checked && Number(numberOfOptions) > totalQuantity)
       ) {
@@ -948,13 +958,13 @@ const BuyOrder = (props: {
               No Asks in orderbook
             </Alert>
           </Collapse>
-          {/* 
+
           <Collapse in={amountExceedAlert}>
             <Alert severity="warning" sx={{ mb: 2 }}>
               Amount to be approved exceeds{' '}
               {checked ? 'Wallet Balance' : 'available quantities'}
             </Alert>
-          </Collapse> */}
+          </Collapse>
           <Stack direction={'row'} spacing={1} mt={theme.spacing(1)}>
             <LoadingButton
               variant="contained"
