@@ -6,9 +6,9 @@ dataSources:
     name: Contract
     network: goerli
     source:
-      address: "0x7162B9BDfA821230A1669d35289E581341af510c"
+      address: "0x3251838bd813fdf6a97D32781e011cce8D225d59"
       abi: Contract
-      startBlock: 8400000
+      startBlock: 7087046
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
