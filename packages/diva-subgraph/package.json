@@ -4,14 +4,15 @@
   "version": "0.0.1",
   "scripts": {
     "lint": "yarn codegen && yarn build",
-    "codegen": "graph codegen goerli.subgraph.new.yaml",
+    "codegen": "graph codegen goerli.subgraph.yaml",
     "codegen-polygon-pilot": "graph codegen polygon.subgraph.pilot.yaml",
-    "build": "yarn codegen && graph build goerli.subgraph.new.yaml",
+    "build": "yarn codegen && graph build goerli.subgraph.yaml",
     "build-pilot": "yarn codegen-polygon-pilot && graph build polygon.subgraph.pilot.yaml",
     "build-mumbai": "yarn codegen-mumbai && graph build mumbai.subgraph.yaml",
-    "graph:auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
+    "graph:auth-hosted": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
+    "graph:auth-studio": "graph auth --studio $DIVA_SUBGRAPH_STUDIO_ACCESS_TOKEN goerli.subgraph.yaml",
     "deploy": "run-s deploy-goerli-new-2",
-    "deploy-goerli": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-goerli goerli.subgraph.yaml",
+    "deploy-goerli": "graph deploy --studio $DIVA_SUBGRAPH_STUDIO_SLUG goerli.subgraph.yaml",
     "deploy-goerli-new-2": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-goerli-new-2 goerli.subgraph.new.yaml",
     "deploy-mumbai": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-mumbai mumbai.subgraph.yaml",
     "deploy-polygon": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-polygon polygon.subgraph.yaml",
@@ -23,7 +24,7 @@
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.37.1",
-    "@graphprotocol/graph-ts": "^0.29.0",
+    "@graphprotocol/graph-ts": "0.26.0",
     "prettier": "^2.5.1"
   },
   "devDependencies": {
