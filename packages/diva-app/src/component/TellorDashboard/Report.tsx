@@ -3,9 +3,11 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Autocomplete,
   Box,
   Button,
   Checkbox,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -22,10 +24,13 @@ import {
   Typography,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { useEffect, useMemo, useState } from 'react'
+import StarIcon from '@mui/icons-material/Star'
+import StarBorderIcon from '@mui/icons-material/StarBorder'
+import React, { useEffect, useMemo, useState } from 'react'
 import { BigNumber, ethers } from 'ethers'
 import { config } from '../../constants'
 import PoolsTable from '../PoolsTable'
+import ERC20 from '../../abi/ERC20ABI.json'
 import DIVA_ABI from '../../abi/DIVAABI.json'
 import TELLOR_ABI from '../../abi/TellorPlayground.json'
 import DIVA_ORACLE_TELLOR_ABI from '../../abi/DivaOracleTellor.json'
@@ -60,10 +65,12 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { getColorByStatus, getTopNObjectByProperty } from '../../Util/dashboard'
 import useTheme from '@mui/material/styles/useTheme'
 import request from 'graphql-request'
-import { queryReport } from '../../lib/queries'
+import { queryReport, WhitelistCollateralToken } from '../../lib/queries'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { useWhitelist } from '../../hooks/useWhitelist'
 
 export const UndisputedCell = (props: any) => {
-  const minUntilExp = 0 - getExpiryMinutesFromNow(props.row.StatusTimestamp)
+  const minUntilExp = 0 - getExpiryMinutesFromNow(props.row.Reports[0]?.time)
   if (minUntilExp > 0) {
     if ((minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) > 0) {
       // More than a day
@@ -209,12 +216,15 @@ export const DueInCell = (props: any) => {
     )
   }
 }
+const decodeOracleValue = (tellorValue) => {
+  return new ethers.utils.AbiCoder().decode(['uint256', 'uint256'], tellorValue)
+}
 const SubmitCell = (props: any) => {
   const { provider } = useConnectionContext()
-  const userAddress = useAppSelector(selectUserAddress)
   const chainId = provider?.network?.chainId
   const dispatch = useDispatch()
   const { isMobile } = useCustomMediaQuery()
+  const { collateralTokens } = useWhitelist()
 
   const diva =
     chainId != null
@@ -234,14 +244,33 @@ const SubmitCell = (props: any) => {
         )
       : null
 
+  const divaOracleTellor =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].divaOracleTellorAddress,
+          DIVA_ORACLE_TELLOR_ABI,
+          provider.getSigner()
+        )
+      : null
+
   const [openReport, setOpenReport] = useState(false)
   const [openTip, setOpenTip] = useState(false)
+  const [openDispute, setOpenDispute] = useState(false)
+  const [openSettlement, setOpenSettlement] = useState(false)
   const [reportValue, setReportValue] = useState('')
   const [colUsdVal, setColUsdVal] = useState('1')
   const [tipValue, setTipValue] = useState('')
   const [reportLoading, setReportLoading] = useState(false)
-  const [tipLoading, setTipLoading] = useState(false)
+  const [submitLoading, setSubmitLoading] = useState(false)
+  const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
+  const [collateralToken, setCollateralToken] = useState<any>('')
+  const [undisputedPeriod, setUndisputedPeriod] = useState(0)
 
+  useEffect(() => {
+    divaOracleTellor?.getMinPeriodUndisputed().then((period) => {
+      setUndisputedPeriod(period * 1000)
+    })
+  }, [divaOracleTellor])
   const handleOpenReport = () => {
     setOpenReport(true)
   }
@@ -253,6 +282,18 @@ const SubmitCell = (props: any) => {
   }
   const handleCloseTip = () => {
     setOpenTip(false)
+  }
+  const handleOpenDispute = () => {
+    setOpenDispute(true)
+  }
+  const handleCloseDispute = () => {
+    setOpenDispute(false)
+  }
+  const handleOpenSettlement = () => {
+    setOpenSettlement(true)
+  }
+  const handleCloseSettlement = () => {
+    setOpenSettlement(false)
   }
 
   const expiryTime = new Date(props.row.Expiry)
@@ -267,11 +308,15 @@ const SubmitCell = (props: any) => {
   const tipEnabled =
     props.row.Status === 'Expired' || props.row.Status === 'About To Expire'
   // props.row.Status === 'Expired' &&
-  // now.getTime() > relevantStartTime + props.row.SubmissionPeriod * 1000
   const disputeEnabled = props.row.Reports.length !== 0 //|| props.row.Status === 'Challenged'
   const settleEnabled =
-    (props.row.Status === 'Submitted' || props.row.Status === 'Challenged') &&
-    now.getTime() > relevantStartTime + props.row.SubmissionPeriod * 1000
+    // props.row.Status === 'Reported' &&
+    now.getTime() > props.row.Reports[0]?.time * 1000 + undisputedPeriod
+
+  const possibleOptions =
+    collateralTokens?.filter((v) =>
+      v.symbol.includes(referenceAssetSearch.trim())
+    ) || []
   return (
     <Stack
       direction="row"
@@ -340,7 +385,6 @@ const SubmitCell = (props: any) => {
                   ['uint256', 'uint256'],
                   [parseUnits(reportValue), parseUnits(colUsdVal)]
                 )
-                console.log('queryId', queryId)
                 tellor
                   .submitValue(queryId, oracleValue, 0, queryData)
                   .then((tx) => {
@@ -352,43 +396,20 @@ const SubmitCell = (props: any) => {
                         dispatch(
                           fetchPools({
                             page: 0,
-                            dataProvider: userAddress,
+                            dataProvider:
+                              config[
+                                chainId!
+                              ].divaOracleTellorAddress.toLowerCase(),
                           })
                         )
                         setReportLoading(false)
-                      }, 10000)
+                      }, 2000)
                     })
                   })
                   .catch((err) => {
                     console.error(err)
                     setReportLoading(false)
                   })
-                // diva
-                //   .setFinalReferenceValue(
-                //     props.id.split('/')[0],
-                //     parseUnits(reportValue),
-                //     true
-                //   )
-                //   .then((tx) => {
-                //     /**
-                //      * dispatch action to refetch the pool after action
-                //      */
-                //     tx.wait().then(() => {
-                //       setTimeout(() => {
-                //         dispatch(
-                //           fetchPools({
-                //             page: 0,
-                //             dataProvider: userAddress,
-                //           })
-                //         )
-                //         setReportLoading(false)
-                //       }, 10000)
-                //     })
-                //   })
-                //   .catch((err) => {
-                //     console.error(err)
-                //     setReportLoading(false)
-                //   })
               }
               setReportLoading(false)
               handleCloseReport()
@@ -403,7 +424,7 @@ const SubmitCell = (props: any) => {
         onClick={handleOpenTip}
         // disabled={!enabled || disabledButton}
         disabled={!tipEnabled}
-        loading={tipLoading}
+        loading={submitLoading}
         sx={{
           fontSize: isMobile ? '10px' : 'auto',
           padding: isMobile ? '5px 11px' : 'auto',
@@ -417,52 +438,86 @@ const SubmitCell = (props: any) => {
             Please provide a value for this option
           </DialogContentText>
         </DialogContent>
-
         <DialogActions>
-          <TextField
-            defaultValue=""
-            onChange={(e) => {
-              setTipValue(e.target.value)
-            }}
-          />
+          <Stack>
+            <TextField
+              defaultValue=""
+              onChange={(e) => {
+                setTipValue(e.target.value)
+              }}
+            />
+
+            <Autocomplete
+              options={possibleOptions}
+              value={collateralToken}
+              onChange={(_, newValue) => {
+                setCollateralToken(newValue)
+              }}
+              getOptionLabel={(option: WhitelistCollateralToken) =>
+                option?.symbol || ''
+              }
+              onInputChange={(event) => {
+                if (event != null && event.target != null) {
+                  setReferenceAssetSearch((event.target as any).value || '')
+                }
+              }}
+              renderInput={(params) => (
+                <TextField {...params} label="Collateral Asset" />
+              )}
+            />
+          </Stack>
+
           <LoadingButton
             color="primary"
             type="submit"
-            loading={tipLoading}
+            loading={submitLoading}
             sx={{
               fontSize: isMobile ? '10px' : 'auto',
               padding: isMobile ? '5px 11px' : 'auto',
             }}
             onClick={() => {
-              setTipLoading(reportValue ? true : false)
-              if (diva != null) {
-                // diva
-                //   .setFinalReferenceValue(
-                //     props.id.split('/')[0],
-                //     parseUnits(reportValue),
-                //     true
-                //   )
-                //   .then((tx) => {
-                //     /**
-                //      * dispatch action to refetch the pool after action
-                //      */
-                //     tx.wait().then(() => {
-                //       setTimeout(() => {
-                //         dispatch(
-                //           fetchPools({
-                //             page: 0,
-                //             dataProvider: userAddress,
-                //           })
-                //         )
-                //         setTipLoading(false)
-                //       }, 10000)
-                //     })
-                //   })
-                //   .catch((err) => {
-                //     console.error(err)
-                //     setTipLoading(false)
-                //   })
-              }
+              setSubmitLoading(reportValue ? true : false)
+              const token = new ethers.Contract(
+                collateralToken.id,
+                ERC20,
+                provider.getSigner()
+              )
+              token
+                .approve(
+                  divaOracleTellor.address,
+                  parseUnits(tipValue, collateralToken.decimals)
+                )
+                .then((tx) => {
+                  tx.wait().then(() => {
+                    divaOracleTellor
+                      .addTip(
+                        props.id.split('/')[0],
+                        parseUnits(tipValue, collateralToken.decimals),
+                        collateralToken.id
+                      )
+                      .then((tx) => {
+                        tx.wait().then(() => {
+                          setTimeout(() => {
+                            dispatch(
+                              fetchPools({
+                                page: 0,
+                                dataProvider:
+                                  config[
+                                    chainId!
+                                  ].divaOracleTellorAddress.toLowerCase(),
+                              })
+                            )
+                            setReportLoading(false)
+                          }, 2000)
+                        })
+                      })
+                      .catch((err) => {
+                        console.error(err)
+                        setReportLoading(false)
+                      })
+                  })
+                })
+
               handleCloseTip()
             }}
           >
@@ -472,9 +527,9 @@ const SubmitCell = (props: any) => {
       </Dialog>
       <LoadingButton
         variant="contained"
-        onClick={handleOpenTip}
+        onClick={handleOpenDispute}
         disabled={!disputeEnabled}
-        loading={tipLoading}
+        loading={submitLoading}
         sx={{
           backgroundColor: '#F2994A',
           fontSize: isMobile ? '10px' : 'auto',
@@ -483,7 +538,7 @@ const SubmitCell = (props: any) => {
       >
         Dispute
       </LoadingButton>
-      <Dialog open={openTip} onClose={handleCloseTip}>
+      <Dialog open={openDispute} onClose={handleCloseDispute}>
         <DialogContent>
           <DialogContentText>
             Please provide a value for tipping this report
@@ -500,42 +555,56 @@ const SubmitCell = (props: any) => {
           <LoadingButton
             color="primary"
             type="submit"
-            loading={tipLoading}
+            loading={submitLoading}
             sx={{
               fontSize: isMobile ? '10px' : 'auto',
               padding: isMobile ? '5px 11px' : 'auto',
             }}
             onClick={() => {
-              setTipLoading(reportValue ? true : false)
-              if (diva != null) {
-                // diva
-                //   .setFinalReferenceValue(
-                //     props.id.split('/')[0],
-                //     parseUnits(reportValue),
-                //     true
-                //   )
+              setSubmitLoading(reportValue ? true : false)
+
+              const abiCoder = new ethers.utils.AbiCoder()
+              const queryDataArgs = abiCoder.encode(
+                ['uint256', 'address', 'uint256'],
+                [props.id.split('/')[0], diva.address, chainId]
+              )
+              const queryData = abiCoder.encode(
+                ['string', 'bytes'],
+                ['DIVAProtocol', queryDataArgs]
+              )
+              const queryId = ethers.utils.keccak256(queryData)
+              diva.getPoolParameters(props.id.split('/')[0]).then((pool) => {
+                tellor
+                  .beginDispute(queryId, props.row.Reports[0].time)
+                  .then((tx) => {
+                    tx.wait().then(() => {
+                      setTimeout(() => {
+                        dispatch(
+                          fetchPools({
+                            page: 0,
+                            dataProvider:
+                              config[
+                                chainId!
+                              ].divaOracleTellorAddress.toLowerCase(),
+                          })
+                        )
+                        setSubmitLoading(false)
+                      }, 2000)
+                    })
+                  })
+
                 //   .then((tx) => {
                 //     /**
                 //      * dispatch action to refetch the pool after action
                 //      */
-                //     tx.wait().then(() => {
-                //       setTimeout(() => {
-                //         dispatch(
-                //           fetchPools({
-                //             page: 0,
-                //             dataProvider: userAddress,
-                //           })
-                //         )
-                //         setTipLoading(false)
-                //       }, 10000)
-                //     })
+
                 //   })
                 //   .catch((err) => {
                 //     console.error(err)
                 //     setTipLoading(false)
                 //   })
-              }
-              handleCloseTip()
+              })
+              handleCloseDispute()
             }}
           >
             Submit dispute
@@ -544,9 +613,37 @@ const SubmitCell = (props: any) => {
       </Dialog>
       <LoadingButton
         variant="contained"
-        onClick={handleOpenTip}
         disabled={!settleEnabled}
-        loading={tipLoading}
+        loading={submitLoading}
+        onClick={() => {
+          setSubmitLoading(reportValue ? true : false)
+          if (diva != null) {
+            console.log(props.id.split('/')[0])
+            divaOracleTellor
+              .setFinalReferenceValue(Number(props.id.split('/')[0]))
+              .then((tx) => {
+                /**
+                 * dispatch action to refetch the pool after action
+                 */
+                tx.wait().then(() => {
+                  setTimeout(() => {
+                    dispatch(
+                      fetchPools({
+                        page: 0,
+                        dataProvider: config[chainId].divaOracleTellorAddress,
+                      })
+                    )
+                    setSubmitLoading(false)
+                  }, 10000)
+                })
+              })
+              .catch((err) => {
+                console.error(err)
+                setSubmitLoading(false)
+              })
+          }
+          handleCloseSettlement()
+        }}
         sx={{
           backgroundColor: '#27AE60',
           fontSize: isMobile ? '10px' : 'auto',
@@ -555,70 +652,73 @@ const SubmitCell = (props: any) => {
       >
         Settle
       </LoadingButton>
-      <Dialog open={openTip} onClose={handleCloseTip}>
-        <DialogContent>
-          <DialogContentText>
-            Please provide a value for this option
-          </DialogContentText>
-        </DialogContent>
-
-        <DialogActions>
-          <TextField
-            defaultValue=""
-            onChange={(e) => {
-              setTipValue(e.target.value)
-            }}
-          />
-          <LoadingButton
-            color="primary"
-            type="submit"
-            loading={tipLoading}
-            sx={{
-              fontSize: isMobile ? '10px' : 'auto',
-              padding: isMobile ? '5px 11px' : 'auto',
-            }}
-            onClick={() => {
-              setTipLoading(reportValue ? true : false)
-              if (diva != null) {
-                // diva
-                //   .setFinalReferenceValue(
-                //     props.id.split('/')[0],
-                //     parseUnits(reportValue),
-                //     true
-                //   )
-                //   .then((tx) => {
-                //     /**
-                //      * dispatch action to refetch the pool after action
-                //      */
-                //     tx.wait().then(() => {
-                //       setTimeout(() => {
-                //         dispatch(
-                //           fetchPools({
-                //             page: 0,
-                //             dataProvider: userAddress,
-                //           })
-                //         )
-                //         setTipLoading(false)
-                //       }, 10000)
-                //     })
-                //   })
-                //   .catch((err) => {
-                //     console.error(err)
-                //     setTipLoading(false)
-                //   })
-              }
-              handleCloseTip()
-            }}
-          >
-            Submit settlement
-          </LoadingButton>
-        </DialogActions>
-      </Dialog>
     </Stack>
   )
 }
-
+const FavoriteButton = (props: any) => {
+  const [favoritePool, setFavoritePool] = useState(false)
+  const favorites = localStorage.getItem('favorites')
+  const poolId = props.props.id.split('/')[0]
+  const handleFavorite = (poolId) => {
+    if (favorites.includes(poolId)) {
+      setFavoritePool(true)
+    } else {
+      setFavoritePool(false)
+    }
+  }
+  useEffect(() => {
+    if (favorites != null) {
+      if (favorites.includes(poolId)) {
+        setFavoritePool(true)
+      } else {
+        setFavoritePool(false)
+      }
+    }
+  }, [favoritePool])
+  if (favoritePool) {
+    return (
+      <Button
+        onClick={() => {
+          setFavoritePool(!favoritePool)
+          if (favoritePool) {
+            localStorage.setItem(
+              'favorites',
+              favorites.replace(poolId + ',', '')
+            )
+          } else {
+            localStorage.setItem('favorites', favorites + poolId + ',')
+          }
+        }}
+      >
+        <StarIcon />
+      </Button>
+    )
+  } else {
+    return (
+      <Button
+        onClick={() => {
+          setFavoritePool(!favoritePool)
+          if (favoritePool) {
+            localStorage.setItem(
+              'favorites',
+              favorites.replace(poolId + ',', '')
+            )
+          } else {
+            localStorage.setItem('favorites', favorites + poolId + ',')
+          }
+        }}
+      >
+        <StarBorderIcon />
+      </Button>
+    )
+  }
+}
 const columns: GridColDef[] = [
+  {
+    field: 'Favorite',
+    headerName: '',
+    renderCell: (cell) => <FavoriteButton props={cell} />,
+  },
   {
     field: 'Id',
     align: 'left',
@@ -636,10 +736,10 @@ const columns: GridColDef[] = [
   {
     field: 'Underlying',
     flex: 1,
-    minWidth: 200,
+    minWidth: 150,
   },
   {
-    minWidth: 200,
+    minWidth: 150,
     field: 'Expiry',
     align: 'right',
     headerAlign: 'right',
@@ -648,7 +748,7 @@ const columns: GridColDef[] = [
   },
   {
     field: 'ExpiresIn',
-    minWidth: 200,
+    minWidth: 150,
     align: 'right',
     headerAlign: 'right',
     type: 'dateTime',
@@ -660,41 +760,55 @@ const columns: GridColDef[] = [
     align: 'right',
     headerAlign: 'right',
     headerName: 'Reporting Due in',
-    minWidth: 200,
+    minWidth: 150,
     renderCell: (props) => <DueInCell {...props} />,
   },
   {
-    minWidth: 200,
+    minWidth: 150,
     field: 'ReportedValue',
     align: 'right',
     headerAlign: 'right',
     headerName: 'Reported Value',
-    renderCell: (cell: any) => {
-      return (
-        <Tooltip title={cell.value}>
-          <span className="table-cell-trucate">{cell.value}</span>
-        </Tooltip>
-      )
+    renderCell: (props) => {
+      if (props.row.Reports.length > 0) {
+        return (
+          <Tooltip
+            title={formatUnits(
+              decodeOracleValue(props.row.Reports[0].value)[0]
+            )}
+          >
+            <span className="table-cell-trucate">
+              {formatUnits(decodeOracleValue(props.row.Reports[0].value)[0])}
+            </span>
+          </Tooltip>
+        )
+      }
     },
   },
   {
-    minWidth: 200,
+    minWidth: 150,
     field: 'Reporter',
     headerName: 'Reporter',
     align: 'right',
     headerAlign: 'right',
     type: 'number',
+    valueGetter: (params) => {
+      if (params.row.Reports.length > 0) {
+        return params.row.Reports[0].reporter
+      }
+    },
     renderCell: (props) => {
-      console.log(props.value)
       return (
         <Tooltip title={props.value}>
-          <span className="table-cell-trucate">{props.value}</span>
+          <span className="table-cell-trucate">
+            {getShortenedAddress(props.value)}
+          </span>
         </Tooltip>
       )
     },
   },
   {
-    minWidth: 200,
+    minWidth: 150,
     field: 'Undisputed',
     headerName: 'Undisputed since',
     align: 'right',
@@ -707,15 +821,41 @@ const columns: GridColDef[] = [
     field: 'Status',
     align: 'right',
     headerAlign: 'right',
-    renderCell: (props: any) => (
-      <Tooltip
-        title={props.row.Challenges.map((challenge) => {
-          return '[' + formatUnits(challenge.proposedFinalReferenceValue) + '] '
-        })}
-      >
-        <span className="table-cell-trucate">{props.row.Status}</span>
-      </Tooltip>
-    ),
+    renderCell: (props: any) => {
+      if (props.value === 'Open') {
+        return (
+          <Chip
+            sx={{ color: '#F2994A', background: 'rgba(63, 39, 20, 0.6)' }}
+            label={'About To Expire'}
+          />
+        )
+      } else if (props.row.Reports.length > 0) {
+        if (
+          Date.now() >
+          props.row.Reports[0].time * 1000 + props.row.UndisputedPeriod * 1000
+        )
+          return (
+            <Chip
+              sx={{ color: '#6FCF97', background: 'rgba(37, 57, 27, 0.6)' }}
+              label={'Ready For Settlement'}
+            />
+          )
+        else
+          return (
+            <Chip
+              sx={{ color: '#3393E0', background: 'rgba(22, 46, 66, 0.6)' }}
+              label={'Reported'}
+            />
+          )
+      } else if (props.row.Status === 'Expired') {
+        return (
+          <Chip
+            sx={{ color: '#9B51E0', background: 'rgba(155, 81, 224, 0.2)' }}
+            label={'Expired'}
+          />
+        )
+      }
+    },
   },
   {
     field: 'submitValue',
@@ -1012,10 +1152,12 @@ export function Report() {
   const [underlyingButtonLabel, setUnderlyingButtonLabel] =
     useState('Underlying')
   const [search, setSearch] = useState('')
+  const [reportsLoading, setReportsLoading] = useState(true)
   const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
+  const [undisputedPeriod, setUndisputedPeriod] = useState(0)
   const chainId = useAppSelector(selectChainId)
   const dispatch = useDispatch()
   const pools = useAppSelector((state) => selectPools(state))
@@ -1028,6 +1170,14 @@ export function Report() {
       ? new ethers.Contract(
           config[chainId!].tellorAddress,
           TELLOR_ABI,
+          provider?.getSigner()
+        )
+      : null
+  const divaOracleTellor =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].divaOracleTellorAddress,
+          DIVA_ORACLE_TELLOR_ABI,
           provider?.getSigner()
         )
       : null
@@ -1045,17 +1195,21 @@ export function Report() {
       setExpiredPoolClicked(true)
     }
   }
-
   useEffect(() => {
-    if (userAddress != null) {
+    divaOracleTellor.getMinPeriodUndisputed().then((period) => {
+      setUndisputedPeriod(period)
+    })
+  }, [divaOracleTellor])
+  useEffect(() => {
+    if (chainId != null) {
       dispatch(
         fetchPools({
           page,
-          dataProvider: '0x63098cC6EDa33B0FbD07472B1a8dD54D4a5C2153',
+          dataProvider: config[chainId!].divaOracleTellorAddress.toLowerCase(),
         })
       )
     }
-  }, [dispatch, page, userAddress])
+  }, [reportsLoading, dispatch, page, chainId])
 
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const abiCoder = new ethers.utils.AbiCoder()
@@ -1069,33 +1223,28 @@ export function Report() {
     )
     const queryId = ethers.utils.keccak256(queryData)
     const reports = []
-    request(
-      'https://api.studio.thegraph.com/query/14411/diva-tellor-goerli/0.0.4',
-      queryReport(queryId)
-    ).then((res) => {
-      if (res.newReportEntities.length > 0) {
-        // console.log(res)
-        res.newReportEntities.map((report) => {
-          tellor.isDisputed(queryId, report._time).then((disputed) => {
-            if (!disputed) {
-              reports.push({
-                queryId: report._queryId,
-                value: report._value,
-                time: report._time,
-                reporter: report._reporter,
-                queryData: report._queryData,
-              })
-            }
+
+    request(config[chainId].tellorSubgraph, queryReport(queryId)).then(
+      (res) => {
+        if (res.newReportEntities.length > 0) {
+          res.newReportEntities.map((report) => {
+            tellor.isDisputed(queryId, report._time).then((disputed) => {
+              if (!disputed) {
+                reports.push({
+                  queryId: report._queryId,
+                  value: report._value,
+                  time: report._time,
+                  reporter: report._reporter,
+                  queryData: report._queryData,
+                })
+              }
+            })
           })
-        })
+        }
+        setReportsLoading(false)
       }
-    })
-    if (val.id === '116') {
-      console.log(val.id)
-      console.log(reports.length)
-      console.log(reports[0])
-      console.log(reports[1])
-    }
+    )
+
     const shared = {
       Reports: reports,
       Reporter: reports[0]?.reporter,
@@ -1119,12 +1268,22 @@ export function Report() {
       parseFloat(val.fallbackSubmissionPeriod)
     )
 
+    const reportStatus = () => {
+      if (status === 'Open') {
+        return 'About To Expire'
+      } else if (reports.length > 0) {
+        if (Date.now() > reports[0].time * 1000 + undisputedPeriod * 1000) {
+          return 'Ready for settlement'
+        } else return 'Reported'
+      } else return status
+    }
     const payOff = {
       Gradient: Number(formatUnits(val.gradient, val.collateralToken.decimals)),
       Floor: Number(formatUnits(val.floor)),
       Inflection: Number(formatUnits(val.inflection)),
       Cap: Number(formatUnits(val.cap)),
     }
+
     return [
       ...acc,
       {
@@ -1145,7 +1304,8 @@ export function Report() {
           ).toFixed(4) +
           ' ' +
           val.collateralToken.symbol,
-        Status: status === 'Open' ? 'About To Expire' : status,
+        Status: reportStatus() === undefined ? status : reportStatus(),
+        UndisputedPeriod: undisputedPeriod,
         StatusTimestamp: val.statusTimestamp,
         finalValue: finalValue,
         SubmissionPeriod: val.submissionPeriod,
@@ -1156,10 +1316,15 @@ export function Report() {
   }, [] as GridRowModel[])
 
   const filteredRows = useMemo(() => {
+    rows.filter(
+      (row) =>
+        !row.Status.startsWith('Confirmed') &&
+        new Date(row.Expiry).getTime() < Date.now() + 24 * 60 * 60 * 1000
+    )
     if (search != null && search.length > 0) {
       if (expiredPoolClicked) {
         return rows
-          .filter((v) => v.Status.includes('Open'))
+          .filter((v) => v.Status.includes('Expired'))
           .filter(
             (v) =>
               v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
@@ -1174,12 +1339,12 @@ export function Report() {
       }
     } else {
       if (expiredPoolClicked) {
-        return rows.filter((v) => v.Status.includes('Open'))
+        return rows.filter((v) => !v.Status.includes('Expired'))
       } else {
         return rows
       }
     }
-  }, [rows, search, expiredPoolClicked])
+  }, [reportsLoading, rows, search, expiredPoolClicked])
 
   useEffect(() => {
     if (searchInput.length > 0 && searchInput !== null) {
@@ -1321,13 +1486,8 @@ export function Report() {
               disableRowClick={true}
               page={page}
               rowCount={9999}
-              loading={poolsRequestStatus === 'pending'}
-              rows={filteredRows.filter(
-                (row) =>
-                  !row.Status.startsWith('Confirmed') &&
-                  new Date(row.Expiry).getTime() <
-                    Date.now() + 24 * 60 * 60 * 1000
-              )}
+              loading={poolsRequestStatus === 'pending' || reportsLoading}
+              rows={filteredRows}
               columns={columns}
               onPageChange={(page) => setPage(page)}
               selectedPoolsView="Table"
