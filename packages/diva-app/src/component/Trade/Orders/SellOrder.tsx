@@ -734,6 +734,7 @@ const SellOrder = (props: {
               nbrOfOptionsBalance.gt(optionBalance) &&
               nbrOfOptionsBalance.lte(remainingAllowance)
             ) {
+              setAmountExceedAlert(false)
               setQuantityExceedAlert(true)
             } else if (
               nbrOfOptionsBalance.lte(optionBalance) &&
@@ -750,6 +751,9 @@ const SellOrder = (props: {
               nbrOfOptionsBalance.gt(remainingAllowance)
             ) {
               setQuantityExceedAlert(true)
+            } else {
+              setQuantityExceedAlert(false)
+              setAmountExceedAlert(false)
             }
           } else if (Number(numberOfOptions) <= totalQuantity) {
             if (
@@ -764,10 +768,11 @@ const SellOrder = (props: {
             ) {
               setQuantityExceedAlert(false)
               setBalanceAlert(true)
+            } else {
+              setQuantityExceedAlert(false)
+              setAmountExceedAlert(false)
             }
           } else {
-            setQuantityExceedAlert(false)
-            setAmountExceedAlert(false)
             setOrderBookAlert(false)
           }
         }
@@ -797,6 +802,7 @@ const SellOrder = (props: {
       parseUnits(numberOfOptions, decimals).gt(totalQuantity)) */
   const approveBtnDisabled =
     isApproved ||
+    numberOfOptions == '' ||
     (numberOfOptions !== '' && !parseUnits(numberOfOptions, decimals).gt(0)) // No optionBalance.sub(numberOfOptions).lt(0) condition as a user should be able to approve any amount they want
 
   return (
