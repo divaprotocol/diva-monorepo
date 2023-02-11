@@ -11,7 +11,7 @@ w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
 tellor_token_contract = w3.eth.contract(
     address=tellor_contracts.TRB_token_contract[network], abi=tellor.tellor_approve_abi)
 tellor_flex_contract = w3.eth.contract(
-    address=tellor_contracts.Tellor_contract_address[network], abi=tellor.tellor_depositStake_abi)
+    address=tellor_contracts.Tellor_contract_address[network], abi=tellor.tellor_contract_abi)
 max_time_away = dt.timedelta(minutes=config.max_time_away)
 start = dt.datetime.now().replace(microsecond=0)
 

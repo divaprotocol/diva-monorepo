@@ -22,8 +22,10 @@ from termcolor import colored
 waiting_sec = config.waiting_next_iteration
 network = config.network
 w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
+# tellor_contract = w3.eth.contract(
+#     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.TellorPlayground_abi)
 tellor_contract = w3.eth.contract(
-    address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.TellorPlayground_abi)
+    address=tellor_contracts.Tellor_contract_address[network], abi=tellor.tellor_contract_abi)
 max_time_away = dt.timedelta(minutes=config.max_time_away)
 start = dt.datetime.now().replace(microsecond=0)
 
@@ -32,7 +34,7 @@ if __name__ == "__main__":
     printn("*********************************************************", 'green')
     printn("RUNNING TELLOR-DIVA ORACLE", 'green')
     printn("START TIME: %s " % start + f'({dt.datetime.astimezone(start).tzinfo.__str__()})', 'green')
-    printn("DATA PROVIDER: {}\n".format(tellor_contracts.DIVAOracleTellor_contract_address[network]), 'green')
+    printn("DATA PROVIDER: {}\n".format(config.dataprovider), 'green')
     # DO time time check here
 
     if config.value_submission and not config.triggering_setFinRefVal:

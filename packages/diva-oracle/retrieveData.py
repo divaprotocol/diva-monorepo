@@ -11,8 +11,10 @@ from lib.recorder import printbAll, printt
 
 network = config.network
 w3 = Web3(Web3.HTTPProvider(config.PROVIDER_URL[network]))
+# getVal_contract = w3.eth.contract(
+#     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
 getVal_contract = w3.eth.contract(
-    address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+    address=tellor_contracts.Tellor_contract_address[network], abi=tellor.ReportedData_abi)
 max_time_away = dt.timedelta(minutes=config.max_time_away)
 start = dt.datetime.now().replace(microsecond=0)
 
