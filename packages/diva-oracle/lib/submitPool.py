@@ -14,7 +14,7 @@ from termcolor import colored
 import datetime, config
 from lib.recorder import printb, printn, printbAll, printt, printr, update_pending_records, update_records
 from tellor_settings.tellor_retrieveData import retrieveData
-from config.config import submission_tolerance, max_reporting_frame, expiry_floor_time_away, PUBLIC_KEY
+from config.config import submission_tolerance, max_reporting_frame, expiry_floor_time_away, PUBLIC_KEY, additional_buffer_time_lock
 
 
 def extract(lst):
@@ -293,8 +293,8 @@ def tellor_submit_pools_only_actual(df, network, w3, contract):
                     f.write(f"{round(datetime.datetime.now().timestamp(),2)}\n")
                     f.write(f"{round(timelock,2)}\n")
                 print("")
-                print(f"Waiting {int(timelock)+ 10} seconds before next submission")
-                time.sleep(timelock + 10)
+                print(f"Waiting {int(timelock) + additional_buffer_time_lock} seconds before next submission")
+                time.sleep(timelock + additional_buffer_time_lock)
 
 
         else:
