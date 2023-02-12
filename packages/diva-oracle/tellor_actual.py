@@ -34,14 +34,14 @@ if __name__ == "__main__":
         df = pd.json_normalize(resp, ['data', 'pools'])
         if df.empty:
             print("No pools to report on at this time")
-        if dt.datetime.now().timestamp() > config.last_submission_timestamp + config.time_lock:
+        if dt.datetime.now().timestamp() > config.next_submission_timestamp:
             tellor_submit_pools_only_actual(df, network, w3, tellor_contract)
             print(colored("#########################################", "yellow"))
             print(colored("Waiting {} sec before next iteration...".format(waiting_sec), 'yellow'))
             # Wait before next iteration
             time.sleep(waiting_sec)
         else:
-            wt = config.last_submission_timestamp + config.time_lock - dt.datetime.now().timestamp()
-            print(f"Waiting previous timelock period. Remaining waiting time: {wt} seconds")
+            wt = config.next_submission_timestamp - dt.datetime.now().timestamp()
+            print(f"Waiting previous timelock period. Remaining waiting time: {round(wt,2)} seconds")
             time.sleep(wt)
 

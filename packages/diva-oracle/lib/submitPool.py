@@ -290,11 +290,12 @@ def tellor_submit_pools_only_actual(df, network, w3, contract):
                     printn("-- Error in Tellor submission: Continuing with next pool --")
                     continue
                 with open('last_submission.txt', 'w') as f:
-                    f.write(f"{round(datetime.datetime.now().timestamp(),2)}\n")
-                    f.write(f"{round(timelock,2)}\n")
+                    f.write(f"{round(datetime.datetime.now().timestamp() + timelock,2)}\n")
+
                 print("")
-                print(f"Waiting {int(timelock) + additional_buffer_time_lock} seconds before next submission")
-                time.sleep(timelock + additional_buffer_time_lock)
+                wait = timelock + additional_buffer_time_lock
+                print(f"Waiting {int(wait)} seconds before next submission")
+                time.sleep(wait)
 
 
         else:
