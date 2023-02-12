@@ -83,3 +83,7 @@ value_submission = True
 
 # Triggering setFinRefVal():
 triggering_setFinRefVal = True
+
+with open("last_submission.txt") as f:
+    last_submission_timestamp = int(float((f.readline().strip())))
+    time_lock = int(float(f.readline().strip()))
