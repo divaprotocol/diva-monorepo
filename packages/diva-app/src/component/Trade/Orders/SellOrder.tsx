@@ -740,16 +740,19 @@ const SellOrder = (props: {
               nbrOfOptionsBalance.lte(optionBalance) &&
               nbrOfOptionsBalance.lte(remainingAllowance)
             ) {
+              setAmountExceedAlert(false)
               setQuantityExceedAlert(true)
             } else if (
               nbrOfOptionsBalance.gt(optionBalance) &&
               nbrOfOptionsBalance.gt(remainingAllowance)
             ) {
+              setQuantityExceedAlert(false)
               setAmountExceedAlert(true)
             } else if (
               nbrOfOptionsBalance.lte(optionBalance) &&
               nbrOfOptionsBalance.gt(remainingAllowance)
             ) {
+              setAmountExceedAlert(false)
               setQuantityExceedAlert(true)
             } else {
               setQuantityExceedAlert(false)
@@ -773,10 +776,17 @@ const SellOrder = (props: {
               setAmountExceedAlert(false)
             }
           } else {
+            setQuantityExceedAlert(false)
+            setAmountExceedAlert(false)
             setOrderBookAlert(false)
           }
         }
       }
+    } else {
+      setQuantityExceedAlert(false)
+      setAmountExceedAlert(false)
+      setOrderBookAlert(false)
+      setBalanceAlert(false)
     }
   }, [numberOfOptions, youReceive, avgExpectedRate, checked])
 
