@@ -784,7 +784,9 @@ export default function Markets() {
 
   useEffect(() => {
     if (websocketClient !== undefined) {
+      setTablePools(pools)
       // Connect to server using websocket
+      setTablePools(pools)
       websocketClient.onopen = () => {
         console.log('WebSocket Connected')
       }
@@ -806,6 +808,7 @@ export default function Markets() {
     websocketClient.onmessage,
     websocketClient.onopen,
     websocketClient.onclose,
+    pools,
   ])
 
   useEffect(() => {
