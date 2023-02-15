@@ -786,7 +786,6 @@ export default function Markets() {
     if (websocketClient !== undefined) {
       setTablePools(pools)
       // Connect to server using websocket
-      setTablePools(pools)
       websocketClient.onopen = () => {
         console.log('WebSocket Connected')
       }
