@@ -12,6 +12,7 @@
     "deploy-goerli-new-2": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-goerli-new-2 goerli.subgraph.new.yaml",
     "deploy-mumbai": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-mumbai mumbai.subgraph.yaml",
     "deploy-polygon": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-polygon polygon.subgraph.yaml",
+    "deploy-polygon-pilot": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-polygon-pilot polygon.subgraph.pilot.yaml",
     "create-local": "graph create --node http://localhost:8020/ divaprotocol/diva-subgraph",
     "remove-local": "graph remove --node http://localhost:8020/ divaprotocol/diva-subgraph",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 divaprotocol/diva-subgraph"
