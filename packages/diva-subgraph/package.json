@@ -5,7 +5,9 @@
   "scripts": {
     "lint": "yarn codegen && yarn build",
     "codegen": "graph codegen goerli.subgraph.new.yaml",
+    "codegen-polygon-pilot": "graph codegen polygon.subgraph.pilot.yaml",
     "build": "yarn codegen && graph build goerli.subgraph.new.yaml",
+    "build-pilot": "yarn codegen-polygon-pilot && graph build polygon.subgraph.pilot.yaml",
     "graph:auth": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
     "deploy": "run-s deploy-goerli-new-2",
     "deploy-goerli": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-goerli goerli.subgraph.yaml",

@@ -48,7 +48,7 @@ dataSources:
           handler: handleFeeClaimTransferred
         - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
-      file: ./src/mapping_new.ts
+      file: ./src/mapping_pilot.ts
   - kind: ethereum/contract
     name: ExchangeProxy
     network: matic
@@ -68,4 +68,4 @@ dataSources:
       eventHandlers:
         - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
           handler: handleLimitOrderFilledEvent
-      file: ./src/mapping_new.ts
+      file: ./src/mapping_pilot.ts
