@@ -21,6 +21,7 @@ import { Tasks } from './component/Tasks/Tasks'
 import Dashboard from './component/Dashboard/Dashboard'
 import { useCustomMediaQuery } from './hooks/useCustomMediaQuery'
 import { Offer } from './component/CreatePool/Offer'
+import TellorDashboard from './component/TellorDashboard/TellorDashboard'
 
 export const App = () => {
   const chainId = useAppSelector((state) => state.appSlice.chainId)
@@ -58,6 +59,11 @@ export const App = () => {
                 path="/dashboard/:page?"
                 render={(props) => <Dashboard {...props} />}
               />
+              <Route
+                exact
+                path="/tellordashboard/:page?"
+                render={(props) => <TellorDashboard {...props} />}
+              />
               <Route path="/markets/:creatorAddress?">
                 <Markets />
               </Route>
@@ -70,7 +76,6 @@ export const App = () => {
               <Route path="/create">
                 <CreatePool />
               </Route>
-
               <Route path="/">
                 <Redirect from="/" to={`/markets/${DIVA_GOVERNANCE_ADDRESS}`} />
               </Route>

@@ -66,6 +66,7 @@ export default function PoolsTable({
           paginationMode={rowCount != null ? 'server' : 'client'}
           onPageChange={onPageChange}
           page={page}
+          disableSelectionOnClick={disableRowClick}
           onRowClick={
             disableRowClick
               ? undefined
