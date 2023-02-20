@@ -781,6 +781,8 @@ const SellOrder = (props: {
             setOrderBookAlert(false)
           }
         }
+      } else {
+        setOrderBookAlert(false)
       }
     } else {
       setQuantityExceedAlert(false)
@@ -807,9 +809,8 @@ const SellOrder = (props: {
       optionBalance
         .sub(parseUnits(numberOfOptions, decimals))
         .sub(feeAmount)
-        .lt(0)) /* ||
-    (numberOfOptions !== '' &&
-      parseUnits(numberOfOptions, decimals).gt(totalQuantity)) */
+        .lt(0)) ||
+    (numberOfOptions !== '' && Number(numberOfOptions) > totalQuantity)
   const approveBtnDisabled =
     isApproved ||
     numberOfOptions == '' ||
