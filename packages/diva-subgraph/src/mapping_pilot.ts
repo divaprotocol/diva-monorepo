@@ -63,6 +63,26 @@ function handleChallengeEvent(
   challenge.save();
 }
 
+function initParameters(testnetUser: TestnetUser): void {
+  testnetUser.binaryPoolCreated = false;
+  testnetUser.convexPoolCreated = false;
+  testnetUser.linearPoolCreated = false;
+  testnetUser.concavePoolCreated = false;
+  testnetUser.liquidityAdded = false;
+  testnetUser.liquidityRemoved = false;
+  testnetUser.buyLimitOrderCreatedAndFilled = false;
+  testnetUser.buyLimitOrderFilled = false;
+  testnetUser.sellLimitOrderCreatedAndFilled = false;
+  testnetUser.sellLimitOrderFilled = false;
+  testnetUser.reportedValueChallenged = false;
+  testnetUser.finalValueReported = false;
+  testnetUser.feeClaimTransferred = false;
+  testnetUser.feeClaimed = false;
+  testnetUser.positionTokenRedeemed = false;
+  testnetUser.startTime = new BigInt(0);
+  testnetUser.endTime = new BigInt(0);
+}
+
 /**
  * Context:
  * 
@@ -255,6 +275,7 @@ function handleLiquidityEvent(
     poolEntity = new Pool(poolId.toString());
     poolEntity.createdBy = msgSender;
     poolEntity.createdAt = blockTimestamp;
+    poolEntity.collateralBalanceGross = new BigInt(0);
 
 
     // ******************************************************************
@@ -266,6 +287,7 @@ function handleLiquidityEvent(
     let testnetUser = TestnetUser.load(msgSender.toHexString());
     if (!testnetUser) {
       testnetUser = new TestnetUser(msgSender.toHexString());
+      initParameters(testnetUser);
     }
 
     // Check what payoff profile type the user has created (binary, linear, convex or concave)
@@ -417,6 +439,7 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
   let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    initParameters(testnetUser);
   }
   testnetUser.liquidityAdded = true;
 
@@ -452,6 +475,7 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    initParameters(testnetUser);
   }
   testnetUser.liquidityRemoved = true;
 
@@ -508,6 +532,7 @@ export function handleStatusChanged(event: StatusChanged): void {
     let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
     if (!testnetUser) {
       testnetUser = new TestnetUser(event.transaction.from.toHexString());
+      initParameters(testnetUser);
     }
     testnetUser.reportedValueChallenged = true;
 
@@ -531,6 +556,7 @@ export function handleStatusChanged(event: StatusChanged): void {
     let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
     if (!testnetUser) {
       testnetUser = new TestnetUser(event.transaction.from.toHexString());
+      initParameters(testnetUser);
     }
     testnetUser.finalValueReported = true;
 
@@ -574,6 +600,7 @@ export function handleFeeClaimTransferred(event: FeeClaimTransferred): void {
   let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    initParameters(testnetUser);
   }
   testnetUser.feeClaimTransferred = true;
 
@@ -599,6 +626,7 @@ export function handleFeeClaimed(event: FeeClaimed): void {
   let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    initParameters(testnetUser);
   }
   testnetUser.feeClaimed = true;
 
@@ -618,6 +646,7 @@ export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void 
   let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
   if (!testnetUser) {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
+    initParameters(testnetUser);
   }
   testnetUser.positionTokenRedeemed = true;
 

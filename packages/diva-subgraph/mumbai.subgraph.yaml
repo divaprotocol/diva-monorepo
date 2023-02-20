@@ -1,17 +1,17 @@
-specVersion: 0.0.2
+specVersion: 0.0.4
 schema:
-  file: ./schema.graphql
+  file: ./schema_new.graphql
 dataSources:
   - kind: ethereum/contract
     name: DivaDiamond
     network: mumbai
     source:
-      address: "0x625aBcb0C7371d6691796E972089d75eD356523b"
+      address: "0x4ff4970258d109a596C65411b1b29f9569F215ff"
       abi: DivaDiamond
-      startBlock: 26504423
+      startBlock: 32099482
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -21,28 +21,51 @@ dataSources:
         - FeeRecipientCollateralToken
         - PositionToken
         - TestnetUser
+        - UserPositionTokens
       abis:
         - name: DivaDiamond
-          file: ../diva-contracts/abis/diamond.json
+          file: ./abi/IDIVAPilot.json
         - name: Erc20Token
-          file: ../diva-contracts/abis/erc20.json
+          file: ./abi/IERC20.json
         - name: PositionTokenABI
-          file: ../diva-contracts/abis/position-token.json
+          file: ./abi/IPositionToken.json
+        - name: PermissionedPositionTokenABI
+          file: ./abi/IPermissionedPositionToken.json
       eventHandlers:
-        - event: LiquidityAdded(indexed uint256,indexed address,uint256)
+        - event: LiquidityAdded(indexed uint256,indexed address,indexed address,uint256)
           handler: handleLiquidityAdded
-        - event: LiquidityRemoved(indexed uint256,indexed address,uint256)
+        - event: LiquidityRemoved(indexed uint256,indexed address,indexed address,uint256)
           handler: handleLiquidityRemoved
-        - event: PoolIssued(indexed uint256,indexed address,uint256)
+        - event: PoolIssued(indexed uint256,indexed address,indexed address,uint256,address)
           handler: handlePoolIssued
         - event: StatusChanged(indexed uint8,indexed address,indexed uint256,uint256)
           handler: handleStatusChanged
         - event: FeeClaimAllocated(indexed uint256,indexed address,uint256)
           handler: handleFeeClaimAllocated
-        - event: FeesClaimed(indexed address,indexed address,uint256)
-          handler: handleFeesClaimed
+        - event: FeeClaimed(indexed address,indexed address,uint256)
+          handler: handleFeeClaimed
         - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
           handler: handleFeeClaimTransferred
         - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
-      file: ./src/mapping.ts
+      file: ./src/mapping_pilot.ts
+  - kind: ethereum/contract
+    name: ExchangeProxy
+    network: mumbai
+    source:
+      address: "0xF471D32cb40837bf24529FCF17418fC1a4807626"
+      abi: IZeroEx
+      startBlock: 32099482
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - NativeOrderFill
+      abis:
+        - name: IZeroEx
+          file: ./abi/IZeroEx.json
+      eventHandlers:
+        - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
+          handler: handleLimitOrderFilledEvent
+      file: ./src/mapping_pilot.ts
