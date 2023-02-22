@@ -18,7 +18,7 @@ from config.config import submission_tolerance, max_reporting_frame, expiry_floo
 
 
 def extract(lst):
-    return [item[0] for item in lst]
+    return [item[1] for item in lst]
 
 # Function to create output console message
 def printDataToBeSubmitted(pool_id, ts_date, opair, price, date, collAsset, collAddr, proxy, coll_to_usd, coll_date):
