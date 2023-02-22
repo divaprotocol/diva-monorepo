@@ -24,6 +24,7 @@ if __name__ == "__main__":
     printn("USER: {}\n".format(config.PUBLIC_KEY), 'green')
     printn("")
 
+    # Note: The TRB token has 18 decimals
     allowance = int(w3.fromWei(tellor_token_contract.functions._allowances(config.PUBLIC_KEY, tellor_flex_contract.address).call(), 'ether'))
     balance = int(w3.fromWei(tellor_token_contract.functions.balanceOf(config.PUBLIC_KEY).call(), 'ether'))
     staked = int(w3.fromWei(tellor_flex_contract.functions.getStakerInfo(config.PUBLIC_KEY).call()[1], 'ether'))

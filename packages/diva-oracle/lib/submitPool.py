@@ -445,7 +445,7 @@ def tellor_submit_pools_specific_pool(network, w3, contract, poolid):
     #     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
     getVal_contract = w3.eth.contract(
         address=tellor_contracts.Tellor_contract_address[network], abi=tellor.ReportedData_abi)
-
+    
     try:
         resp = run_graph_query(queryPool(poolid),
                                network)
@@ -523,8 +523,11 @@ def tellor_submit_pools_specific_pool(network, w3, contract, poolid):
 def tellor_triggering_setFinRefVal_specific_pool(network, w3, pool_id):
     DIVAOracleTellor_contract = w3.eth.contract(
         address=tellor_contracts.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
+    # getVal_contract = w3.eth.contract(
+    #     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+    
     getVal_contract = w3.eth.contract(
-        address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+        address=tellor_contracts.Tellor_contract_address[network], abi=tellor.ReportedData_abi)
 
     if pool_id in blocked_pools_by_whitelist:
         return

@@ -1,3 +1,8 @@
+# Script to submit values to Tellor Flex contract. Script does not trigger the 
+# setFinalReferenceValue function in the DIVA Tellor Oracle adapter. To do that
+# either run the `setFinalReferenceValue.py` script or the `tellor.py` script with
+# `value_submission = False` and `triggering_setFinRefVal = True`.
+
 import tellor_settings.tellor_abi as tellor
 import tellor_settings.tellor_contracts as tellor_contracts
 import datetime as dt
