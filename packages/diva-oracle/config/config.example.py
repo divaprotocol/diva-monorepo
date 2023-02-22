@@ -87,5 +87,5 @@ triggering_setFinRefVal = True
 additional_buffer_time_lock = 10
 
 with open("last_submission.txt") as f:
-    next_submission_timestamp = int(float((f.readline().strip()))) + int(float(f.readline().strip()))
+    next_submission_timestamp = int(float((f.readline().strip())))
 
