@@ -4,7 +4,7 @@ import ERC20 from '../abi/ERC20ABI.json'
 import { useEffect, useState } from 'react'
 import { formatUnits } from 'ethers/lib/utils'
 import { useConnectionContext } from './useConnectionContext'
-import { selectChainId } from '../Redux/appSlice'
+import { selectChainId, selectUserAddress } from '../Redux/appSlice'
 import { useAppSelector } from '../Redux/hooks'
 
 type Erc20Contract = Contract & {
@@ -18,8 +18,13 @@ type Erc20Contract = Contract & {
  * no balance is returned
  */
 export function useErcBalance(address?: string, updated = true) {
-  const { provider, sendTransaction } = useConnectionContext()
+  const {
+    provider,
+    sendTransaction,
+    address: walletAddress,
+  } = useConnectionContext()
   const chainId = useAppSelector(selectChainId)
+  const userAddress = useAppSelector(selectUserAddress)
 
   const [balance, setBalance] = useState<string>()
 
@@ -33,8 +38,8 @@ export function useErcBalance(address?: string, updated = true) {
             ERC20,
             signer
           ) as Erc20Contract
-          const myAddress = await signer.getAddress()
-          const _balance = await contract.balanceOf(myAddress)
+          /* const myAddress = await signer.getAddress() */
+          const _balance = await contract.balanceOf(userAddress)
           setBalance(formatUnits(_balance, await contract.decimals()))
         } catch (err) {
           console.warn(err)
@@ -43,7 +48,15 @@ export function useErcBalance(address?: string, updated = true) {
     }
 
     run()
-  }, [address, chainId, provider, sendTransaction, updated])
+  }, [
+    address,
+    chainId,
+    provider,
+    sendTransaction,
+    updated,
+    walletAddress,
+    userAddress,
+  ])
 
   return balance
 }

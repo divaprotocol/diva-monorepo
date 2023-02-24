@@ -57,6 +57,7 @@ import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import { Search } from '@mui/icons-material'
 import { getTopNObjectByProperty } from '../../Util/dashboard'
+import { useWhitelist } from '../../hooks/useWhitelist'
 
 export const ExpiresInCell = (props: any) => {
   //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
@@ -240,6 +241,14 @@ const MobileFilterOptions = ({
   createdBy,
   setCreatedBy,
   handleCreatorInput,
+  handleSellPriceFilter,
+  sellPriceFilter,
+  handleBuyPriceFilter,
+  buyPriceFilter,
+  idInput,
+  handleIdFilterChange,
+  handleWhitelistFilter,
+  whitelistFilter,
 }) => {
   const theme = useTheme()
 
@@ -280,6 +289,64 @@ const MobileFilterOptions = ({
         },
       }}
     >
+      <Accordion
+        sx={{
+          backgroundColor: '#000000',
+          '&:before': {
+            display: 'none',
+          },
+          marginTop: theme.spacing(3.5),
+          marginBottom: theme.spacing(1),
+        }}
+        defaultExpanded
+      >
+        <AccordionSummary
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+          sx={{
+            padding: '0px',
+            backgroundColor: '#000000',
+          }}
+          expandIcon={<ArrowDropUpIcon />}
+        >
+          <Typography
+            sx={{
+              fontSize: '16px',
+            }}
+          >
+            Asset Id
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails
+          sx={{
+            backgroundColor: '#000000',
+            padding: 0,
+          }}
+        >
+          <Box>
+            <TextField
+              value={idInput}
+              aria-label="Filter creator"
+              sx={{
+                width: '100%',
+                height: theme.spacing(6.25),
+                marginTop: theme.spacing(2),
+              }}
+              onChange={handleIdFilterChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Enter Asset Id"
+              color="secondary"
+            />
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+      <Divider />
       <Accordion
         sx={{
           backgroundColor: '#000000',
@@ -453,11 +520,56 @@ const MobileFilterOptions = ({
           justifyContent={'space-between'}
           alignItems={'center'}
         >
+          <Box>Whitelisted Oracle</Box>
+          <Switch checked={whitelistFilter} onChange={handleWhitelistFilter} />
+        </Stack>
+      </Stack>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: theme.spacing(2.5),
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
           <Box>Hide Expired Pools</Box>
           <Switch
             checked={expiredPoolClicked}
             onChange={() => setExpiredPoolClicked(!expiredPoolClicked)}
           />
+        </Stack>
+      </Stack>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: theme.spacing(2.5),
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Has Buy Price</Box>
+          <Switch checked={buyPriceFilter} onChange={handleBuyPriceFilter} />
+        </Stack>
+      </Stack>
+      <Divider />
+      <Stack
+        sx={{
+          paddingTop: theme.spacing(2.5),
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent={'space-between'}
+          alignItems={'center'}
+        >
+          <Box>Has Sell Price</Box>
+          <Switch checked={sellPriceFilter} onChange={handleSellPriceFilter} />
         </Stack>
       </Stack>
     </Box>
@@ -493,6 +605,24 @@ export default function Markets() {
   const [searchInput, setSearchInput] = useState<string>('')
   const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
   const [mobileCreatorFilter, setMobileCreatorFilter] = useState<string>('')
+  const [idFilter, setIdFilter] = useState('')
+  const [whitelistFilter, setWhitelistFilter] = useState(false)
+  const [hasBuyPriceFilter, setHasBuyPriceFilter] = useState(false)
+  const [hasSellPriceFilter, setHasSellPriceFilter] = useState(false)
+  const whitelist = useWhitelist()
+  const handleSellPriceFilter = () => {
+    setHasSellPriceFilter(!hasSellPriceFilter)
+  }
+  const handleBuyPriceFilter = () => {
+    setHasBuyPriceFilter(!hasBuyPriceFilter)
+  }
+  const handleWhitelistFilter = () => {
+    setWhitelistFilter(!whitelistFilter)
+  }
+
+  const handleIdFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIdFilter(event.target.value)
+  }
 
   const handleCreatorInput = (e: any) => {
     setCreatedBy(e.target.value)
@@ -654,6 +784,7 @@ export default function Markets() {
 
   useEffect(() => {
     if (websocketClient !== undefined) {
+      setTablePools(pools)
       // Connect to server using websocket
       websocketClient.onopen = () => {
         console.log('WebSocket Connected')
@@ -676,6 +807,7 @@ export default function Markets() {
     websocketClient.onmessage,
     websocketClient.onopen,
     websocketClient.onclose,
+    pools,
   ])
 
   useEffect(() => {
@@ -721,6 +853,7 @@ export default function Markets() {
         buy: '-',
         sell: '-',
       },
+      dataProvider: val.dataProvider,
     }
 
     const payOff = {
@@ -829,25 +962,41 @@ export default function Markets() {
       setSelectedPoolsView('Grid')
     }
   }, [isMobile])
-
-  const filteredRows =
-    search != null && search.length > 0
-      ? expiredPoolClicked
-        ? rows
-            .filter((v) => v.Status.includes('Open'))
-            .filter(
-              (v) =>
-                v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
-                search.toLowerCase().includes(v.Underlying.toLowerCase())
-            )
-        : rows.filter(
+  const filteredRows = whitelistFilter
+    ? rows.filter((row) =>
+        whitelist.dataProviders.map((dp) => dp.id).includes(row.dataProvider)
+      )
+    : hasBuyPriceFilter
+    ? rows.filter((row) =>
+        hasSellPriceFilter
+          ? row.Sell !== '-' && row.Buy !== '-'
+          : row.Buy !== '-'
+      )
+    : hasSellPriceFilter
+    ? rows.filter((row) =>
+        hasBuyPriceFilter
+          ? row.Sell !== '-' && row.Buy !== '-'
+          : row.Sell !== '-'
+      )
+    : idFilter !== ''
+    ? rows.filter((row) => row.Id.includes(idFilter))
+    : search != null && search.length > 0
+    ? expiredPoolClicked
+      ? rows
+          .filter((v) => v.Status.includes('Open'))
+          .filter(
             (v) =>
               v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
               search.toLowerCase().includes(v.Underlying.toLowerCase())
           )
-      : expiredPoolClicked
-      ? rows.filter((v) => v.Status.includes('Open'))
-      : rows
+      : rows.filter(
+          (v) =>
+            v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
+            search.toLowerCase().includes(v.Underlying.toLowerCase())
+        )
+    : expiredPoolClicked
+    ? rows.filter((v) => v.Status.includes('Open'))
+    : rows
 
   useEffect(() => {
     if (searchInput.length > 0 && searchInput !== null) {
@@ -903,6 +1052,12 @@ export default function Markets() {
                 justifyContent="space-between"
               >
                 <DropDownFilter
+                  id="Asset Id"
+                  DropDownButtonLabel={'Asset Id'}
+                  InputValue={idFilter}
+                  onInputChange={handleIdFilterChange}
+                />
+                <DropDownFilter
                   id="Creator Filter"
                   DropDownButtonLabel={
                     history.location.pathname === `/markets/`
@@ -926,10 +1081,40 @@ export default function Markets() {
                   onInputChange={handleUnderLyingInput}
                 />
                 <ButtonFilter
+                  id="Whitelisted Oracle"
+                  ButtonLabel="Whitelisted Oracle"
+                  onClick={handleWhitelistFilter}
+                  sx={{ marginRight: theme.spacing(2) }}
+                />
+                <ButtonFilter
                   id="Hide expired pools"
                   ButtonLabel="Hide Expired"
                   onClick={handleExpiredPools}
+                  sx={{ marginRight: theme.spacing(2) }}
                 />
+                <Stack direction={'row'}>
+                  <ButtonFilter
+                    id="Has Buy Price"
+                    ButtonLabel="Has Buy Price"
+                    onClick={handleBuyPriceFilter}
+                    sx={{
+                      borderRight: 0,
+                      borderTopRightRadius: 0,
+                      borderBottomRightRadius: 0,
+                    }}
+                  />
+                  <Divider orientation="vertical" />
+                  <ButtonFilter
+                    id="Has Sell Price"
+                    ButtonLabel="Has Sell Price"
+                    onClick={handleSellPriceFilter}
+                    sx={{
+                      borderLeft: 0,
+                      borderTopLeftRadius: 0,
+                      borderBottomLeftRadius: 0,
+                    }}
+                  />
+                </Stack>
               </Box>
               <Box
                 sx={{
@@ -995,6 +1180,14 @@ export default function Markets() {
                   createdBy={createdBy}
                   setCreatedBy={setCreatedBy}
                   handleCreatorInput={handleCreatorInput}
+                  handleBuyPriceFilter={handleBuyPriceFilter}
+                  buyPriceFilter={hasBuyPriceFilter}
+                  handleSellPriceFilter={handleSellPriceFilter}
+                  sellPriceFilter={hasSellPriceFilter}
+                  handleWhitelistFilter={handleWhitelistFilter}
+                  handleIdFilterChange={handleIdFilterChange}
+                  idInput={idFilter}
+                  whitelistFilter={whitelistFilter}
                 />
               }
               onApplyFilter={() => {
@@ -1006,6 +1199,10 @@ export default function Markets() {
                 setExpiredPoolClicked(false)
                 setSearchInput('')
                 setCheckedState(new Array(4).fill(false))
+                setIdFilter('')
+                setWhitelistFilter(false)
+                setHasBuyPriceFilter(false)
+                setHasSellPriceFilter(false)
               }}
             />
           </Stack>

@@ -51,12 +51,6 @@ export function Offer() {
           parseFloat(formatUnits(jsonResponse.data.data.gradient, decimals))
         )
         formik.setFieldValue(
-          'yourShare',
-          parseFloat(
-            formatUnits(jsonResponse.data.data.takerCollateralAmount, decimals)
-          )
-        )
-        formik.setFieldValue(
           'makerShare',
           Number(
             formatUnits(jsonResponse.data.data.makerCollateralAmount, decimals)
@@ -119,7 +113,7 @@ export function Offer() {
       formik.setFieldValue(
         'capacity',
         jsonResponse.data.data.capacity ===
-          '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+          ethers.constants.MaxUint256.toString()
           ? 'Unlimited'
           : jsonResponse.data.data.capacity
       )

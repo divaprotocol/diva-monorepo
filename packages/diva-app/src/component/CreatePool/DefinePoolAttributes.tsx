@@ -1,5 +1,8 @@
 import { DateTimePicker } from '@mui/lab'
 import ClockIcon from '@mui/icons-material/AccessTime'
+import KeyboardDoubleArrowUpOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowUpOutlined'
+import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined'
+import KeyboardDoubleArrowDownOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowDownOutlined'
 import {
   Box,
   FormControl,
@@ -18,8 +21,6 @@ import {
   Card,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
-
-import { PayoffProfile } from './PayoffProfile'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
@@ -35,6 +36,7 @@ import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { PayoffProfile } from '../Graphs/payOffProfile'
 import { toExponentialOrNumber } from '../../Util/utils'
 
 const MaxCollateral = styled.u`
@@ -51,9 +53,13 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-  const [value, setValue] = useState('Binary')
+  const [value, setValue] = useState(formik.values.payoutProfile)
   const [mobile, setMobile] = useState(false)
   const handleChange = (event) => {
+    formik.setFieldValue('cap', formik.initialValues.cap)
+    formik.setFieldValue('floor', formik.initialValues.floor)
+    formik.setFieldValue('inflection', formik.initialValues.inflection)
+    formik.setFieldValue('gradient', formik.initialValues.gradient)
     setValue(event.target.value)
     formik.setFieldValue('payoutProfile', event.target.value)
   }
@@ -64,7 +70,6 @@ export function DefinePoolAttributes({
     expiryTime,
     collateralToken,
     gradient,
-    collateralBalance,
     inflection,
     cap,
     floor,
@@ -82,12 +87,7 @@ export function DefinePoolAttributes({
     if (payoutProfile === 'Linear') {
       formik.setFieldValue('inflection', (floor + cap) / 2)
     }
-  }, [formik.values.floor, formik.values.inflection])
-  useEffect(() => {
-    if (payoutProfile === 'Linear') {
-      formik.setFieldValue('inflection', (cap + floor) / 2)
-    }
-  }, [formik.values.cap, formik.values.inflection])
+  }, [formik.values.floor, formik.values.inflection, formik.values.cap])
   useEffect(() => {
     if (window.ethereum && formik.values.jsonToExport !== '{}') {
       window.ethereum.on('accountsChanged', () => {
@@ -106,7 +106,7 @@ export function DefinePoolAttributes({
   }, [])
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
-  }, [collateralWalletBalance])
+  }, [payoutProfile, collateralWalletBalance])
 
   useEffect(() => {
     if (referenceAssets.length > 0) {
@@ -150,41 +150,6 @@ export function DefinePoolAttributes({
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
-  useEffect(() => {
-    switch (payoutProfile) {
-      case 'Binary':
-        formik.setFieldValue('cap', formik.values.inflection)
-        formik.setFieldValue('floor', formik.values.inflection)
-        formik.setFieldValue('gradient', 1)
-        break
-      case 'Linear':
-        formik.setFieldValue('gradient', 0.5)
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        break
-      case 'Custom':
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'inflection',
-          (formik.values.cap + formik.values.floor) / 2
-        )
-        break
-    }
-  }, [payoutProfile])
-
   return (
     <Stack direction={mobile ? 'column' : 'row'}>
       <Container sx={{ minWidth: '60%' }}>
@@ -305,7 +270,7 @@ export function DefinePoolAttributes({
                 row
                 aria-labelledby="demo-row-radio-buttons-group-label"
                 name="row-radio-buttons-group"
-                value={value}
+                value={formik.values.payoutProfile}
                 onChange={handleChange}
               >
                 <FormControlLabel
@@ -542,26 +507,6 @@ export function DefinePoolAttributes({
                       {formik.errors.collateralToken}
                     </FormHelperText>
                   )}
-                  {collateralWalletBalance != null && collateralToken != null && (
-                    <FormHelperText>
-                      Your balance:{' '}
-                      {toExponentialOrNumber(Number(collateralWalletBalance))}{' '}
-                      {collateralToken?.symbol}{' '}
-                      <MaxCollateral
-                        role="button"
-                        onClick={() => {
-                          if (collateralWalletBalance != null) {
-                            formik.setFieldValue(
-                              'collateralBalance',
-                              collateralWalletBalance
-                            )
-                          }
-                        }}
-                      >
-                        (Max)
-                      </MaxCollateral>
-                    </FormHelperText>
-                  )}
                 </FormControl>
                 <FormControl
                   fullWidth
@@ -583,10 +528,25 @@ export function DefinePoolAttributes({
                       {formik.errors.collateralBalance}
                     </FormHelperText>
                   )}
-                  {!isNaN(formik.values.collateralBalance) && (
+                  {collateralWalletBalance != null && collateralToken != null && (
                     <FormHelperText>
-                      You receive {formik.values.collateralBalance} LONG and{' '}
-                      {formik.values.collateralBalance} SHORT tokens
+                      Your balance:{' '}
+                      {toExponentialOrNumber(Number(collateralWalletBalance))}{' '}
+                      {collateralToken?.symbol} {'('}
+                      <MaxCollateral
+                        role="button"
+                        onClick={() => {
+                          if (collateralWalletBalance != null) {
+                            formik.setFieldValue(
+                              'collateralBalance',
+                              collateralWalletBalance
+                            )
+                          }
+                        }}
+                      >
+                        Max
+                      </MaxCollateral>
+                      {')'}
                     </FormHelperText>
                   )}
                 </FormControl>
@@ -601,6 +561,7 @@ export function DefinePoolAttributes({
           <Typography
             style={{ color: 'white' }}
             pb={theme.spacing(2)}
+            pt={theme.spacing(2)}
             variant="subtitle1"
           >
             Payoff Profiles
@@ -609,13 +570,23 @@ export function DefinePoolAttributes({
             cap != null &&
             inflection != null &&
             gradient != null && (
-              <Box sx={{ maxWidth: '85%' }}>
+              <Box
+                sx={{
+                  maxWidth: '85%',
+                  marginLeft: 3,
+                  marginBottom: 2,
+                }}
+              >
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
                   inflection={inflection}
                   gradient={gradient}
                   hasError={hasPaymentProfileError}
+                  referenceAsset={referenceAsset}
+                  collateralToken={
+                    collateralToken ? collateralToken.symbol : null
+                  }
                 />
               </Box>
             )}
@@ -636,62 +607,78 @@ export function DefinePoolAttributes({
             }}
           >
             <Container>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <strong>
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /SHORT
-                </strong>{' '}
-                token if the reported outcome is{' '}
-                {floor < inflection && inflection < cap
-                  ? 'at or '
-                  : ''} below {floor}{' '}
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <strong>
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}
-                  /SHORT
-                </strong>{' '}
-                token if the reported outcome is{' '}
-                {floor < inflection && inflection < cap
-                  ? 'at or '
-                  : ''} above {cap}{' '}
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <strong>
-                  {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''}/LONG
-                </strong>{' '}
-                and{' '}
-                <strong>
-                  {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''}/SHORT
-                </strong>{' '}
-                token if the reported outcome is {inflection}
-              </Typography>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowUpOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /LONG
+                  </strong>{' '}
+                  and
+                  <strong>
+                    {' '}
+                    1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap
+                    ? 'at or '
+                    : ''} below {floor}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowRightOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /LONG
+                  </strong>{' '}
+                  and
+                  <strong>
+                    {' '}
+                    0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap
+                    ? 'at or '
+                    : ''} above {cap}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowDownOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
+                    {collateralToken != null ? collateralToken.symbol : ''}/LONG
+                  </strong>{' '}
+                  and{' '}
+                  <strong>
+                    {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
+                    {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is {inflection}
+                </Typography>
+              </Stack>
             </Container>
           </Card>
         </Stack>

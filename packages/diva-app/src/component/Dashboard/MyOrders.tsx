@@ -55,7 +55,7 @@ const MyOrdersPoolCard = ({
 }: {
   row: GridRowModel
   cancelOrder: (event: any, orderHash: string, chainId: string) => Promise<void>
-  loadingValue: boolean
+  loadingValue: any
 }) => {
   const { icon, Id, type, quantity, price, payReceive, position, orderHash } =
     row
@@ -186,7 +186,7 @@ const MyOrdersPoolCard = ({
             sx={{
               fontSize: '10px',
             }}
-            loading={loadingValue}
+            loading={loadingValue.get(orderHash) || false}
           >
             Cancel
           </LoadingButton>
@@ -352,7 +352,7 @@ const MobileFilterOptions = ({
 export function MyOrders() {
   const [dataOrders, setDataOrders] = useState([])
   const [page, setPage] = useState(0)
-  const [loadingValue, setLoadingValue] = useState(false)
+  const [loadingValue, setLoadingValue] = useState(new Map())
   const [underlyingButtonLabel, setUnderlyingButtonLabel] =
     useState('Underlying')
   const [search, setSearch] = useState('')
@@ -547,7 +547,11 @@ export function MyOrders() {
 
   async function cancelOrder(event, orderHash, chainId) {
     event.stopPropagation()
-    setLoadingValue(true)
+    setLoadingValue((prevStates) => {
+      const newStates = new Map(prevStates)
+      newStates.set(orderHash, true)
+      return newStates
+    })
     //get the order details in current form from 0x before cancelling it.
     const cancelOrder = await getOrderDetails(orderHash, chainId)
     cancelLimitOrder(cancelOrder, chainId, provider).then(function (
@@ -562,7 +566,11 @@ export function MyOrders() {
         /* setLoadingValue(false) */
         alert('order could not be canceled')
       }
-      setLoadingValue(false)
+      setLoadingValue((prevStates) => {
+        const newStates = new Map(prevStates)
+        newStates.set(orderHash, false)
+        return newStates
+      })
     })
   }
 
@@ -655,7 +663,7 @@ export function MyOrders() {
           variant="outlined"
           startIcon={<DeleteIcon />}
           size="small"
-          loading={loadingValue}
+          loading={loadingValue.get(cell.value) || false}
           onClick={(event) => cancelOrder(event, cell.value, chainId)}
         >
           Cancel
@@ -851,26 +859,6 @@ export function MyOrders() {
           </Stack>
         ) : (
           <Stack height="100%" width="100%">
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'end',
-                flexDirection: 'column',
-                paddingBottom: theme.spacing(2),
-              }}
-            >
-              <Input
-                value={search}
-                placeholder="Filter underlying"
-                aria-label="Filter underlying"
-                onChange={(e) => setSearch(e.target.value)}
-                startAdornment={
-                  <InputAdornment position="start">
-                    <Search />
-                  </InputAdornment>
-                }
-              />
-            </Box>
             <DataGrid
               className={classes.root}
               rows={filteredRows}

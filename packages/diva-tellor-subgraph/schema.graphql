@@ -1,0 +1,10 @@
+type NewReportEntity @entity {
+  id: ID!
+  _queryId: Bytes! # Bytes32
+  _time: BigInt! # uint256/UnixTimestamp
+  _value: Bytes! # Bytes
+  _nonce: BigInt! # uint256
+  _queryData: Bytes! # Bytes
+  _reporter: Bytes! # Address
+  txnHash: Bytes!
+}

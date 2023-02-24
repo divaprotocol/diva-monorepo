@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: DivaDiamond
-    network: mumbai
+    network: matic
     source:
-      address: "0x4ff4970258d109a596C65411b1b29f9569F215ff"
+      address: "0xFf7d52432B19521276962B67FFB432eCcA609148"
       abi: DivaDiamond
-      startBlock: 32099482
+      startBlock: 39351153
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -51,11 +51,11 @@ dataSources:
       file: ./src/mapping_pilot.ts
   - kind: ethereum/contract
     name: ExchangeProxy
-    network: mumbai
+    network: matic
     source:
-      address: "0xF471D32cb40837bf24529FCF17418fC1a4807626"
+      address: "0xDef1C0ded9bec7F1a1670819833240f027b25EfF"
       abi: IZeroEx
-      startBlock: 32099482
+      startBlock: 30679655
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
