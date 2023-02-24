@@ -10,7 +10,7 @@ Tellor_contract_address = {
 DIVAOracleTellor_contract_address = {
     "ropsten": '',
     "rinkeby": '',
-    "goerli": '0x63098cC6EDa33B0FbD07472B1a8dD54D4a5C2153' # 10 sec delay for testing
+    "goerli": '0x9959f7f8eFa6B77069e817c1Af97094A9CC830FD'#'0x63098cC6EDa33B0FbD07472B1a8dD54D4a5C2153' # 10 sec delay for testing
 }
 
 divaDiamond = {
@@ -21,4 +21,8 @@ divaDiamond = {
 
 Tellor_governance_contract_address = {
     "goerli": '0x02803dcFD7Cb32E97320CFe7449BFb45b6C931b8'
+}
+
+TRB_token_contract = {
+    "goerli": '0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2'
 }

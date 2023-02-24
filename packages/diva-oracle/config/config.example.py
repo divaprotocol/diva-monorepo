@@ -1,6 +1,6 @@
 PRIVATE_KEY = ''
 PUBLIC_KEY = ''
-dataprovider = ''  # Use '0x63098cC6EDa33B0FbD07472B1a8dD54D4a5C2153' for Tellor as dataprovider
+dataprovider = ''  # Use '0x9959f7f8eFa6B77069e817c1Af97094A9CC830FD' for Tellor as dataprovider
 
 
 # This is for gmail
@@ -59,8 +59,8 @@ timeout = 1800
 # Latest Kraken price before expiry: max minutes away
 max_time_away = 60
 
-# Reporting needed only for pools that are not older than 24 hours
-max_reporting_frame = 24
+# Reporting needed only for pools that are not older than 7 days
+max_reporting_frame = 24 * 7
 
 # Reporting will be done only for pools that are expired at least 300 sec before
 expiry_floor_time_away = 300
@@ -78,8 +78,17 @@ submission_tolerance = 0.5
 # Threshold: If account balance is below threshold, print balance in red. Else print balance in green.
 acc_balance_threshold = 5
 
-# Value submission to pools:
+# Value submission to pools inside `tellor.py` script.
+# NOTE: The reporting delay is not implemented in `tellor.py` and hence submissions will revert
+# during the lock period.
 value_submission = True
 
 # Triggering setFinRefVal():
 triggering_setFinRefVal = True
+
+# Reporting delay after the reporting waiting period has expired (relevant if actual Tellor is used)
+additional_buffer_time_lock = 10
+
+with open("last_submission.txt") as f:
+    next_submission_timestamp = int(float((f.readline().strip())))
+

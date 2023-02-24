@@ -10,7 +10,7 @@ PUBLIC_KEY = config.PUBLIC_KEY
 
 
 def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract):
-    printbAll("Sending price to Tellor playground...", underline=True)
+    printbAll("Sending price to Tellor...", underline=True)
     printn("Network: %s" % network)
     printn("Contract address: %s" % my_contract.address)
     printn("Reporter address: %s" % PUBLIC_KEY)
@@ -43,7 +43,7 @@ def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract)
         transaction_receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=config.timeout)
 
         printn("")
-        printb("Success: ", "Price submitted to Tellor playground", 'green')
+        printb("Success: ", "Price submitted to Tellor", 'green')
         printn("https://%s.etherscan.io/tx/%s" % (network, txn_hash.hex()))
         time.sleep(5)
         try:
@@ -56,10 +56,10 @@ def submitTellorValue(pool_id, finalRefVal, collToUSD, network, w3, my_contract)
         except:
             printn("No Gas Data available at this point.")
 
-        return 0
+        return 0#, w3.eth.getBlock(transaction_receipt.blockNumber).timestamp
 
     except Exception as err:
         printb("Failure: ", err.args[0].__str__(), 'red')
-        return 1
+        return 1#, 1
 
 
