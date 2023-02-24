@@ -94,3 +94,8 @@ poetry add pandas
 - Python poetry docs: https://python-poetry.org/docs/
 
 ### Tellor Oracle details
+
+
+### How to run it
+* Run `tellor_actual.py` to report to Tellor Flex taking into account the reporting delay based on staked TRB amount
+* Run `tellor.py` with `value_submission = False` in `config.py` to push the reported values into DIVA Protocol

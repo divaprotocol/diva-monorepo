@@ -78,7 +78,9 @@ submission_tolerance = 0.5
 # Threshold: If account balance is below threshold, print balance in red. Else print balance in green.
 acc_balance_threshold = 5
 
-# Value submission to pools:
+# Value submission to pools inside `tellor.py` script.
+# NOTE: The reporting delay is not implemented in `tellor.py` and hence submissions will revert
+# during the lock period.
 value_submission = True
 
 # Triggering setFinRefVal():
