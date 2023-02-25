@@ -1,6 +1,6 @@
 specVersion: 0.0.4
 schema:
-  file: ./schema_new.graphql
+  file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: DivaDiamond

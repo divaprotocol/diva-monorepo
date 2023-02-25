@@ -8,7 +8,7 @@ import {
   FeeClaimAllocated,
   FeeClaimTransferred,
   FeesClaimed,
-  PositionTokenRedeemed
+  PositionTokenRedeemed,
 } from "../generated/DivaDiamond/DivaDiamond";
 import { Erc20Token } from "../generated/DivaDiamond/Erc20Token";
 import { PositionTokenABI } from "../generated/DivaDiamond/PositionTokenABI";
@@ -23,7 +23,7 @@ import {
   TestnetUser,
   UserPositionToken,
   User,
-  NativeOrderFill
+  NativeOrderFill,
 } from "../generated/schema";
 
 /**
@@ -65,7 +65,7 @@ function handleLiquidityEvent(
   let shortTokenContract = PositionTokenABI.bind(parameters.shortToken);
   let longTokenContract = PositionTokenABI.bind(parameters.longToken);
   let entity = Pool.load(poolId.toString());
-  
+
   //set user to position token mapping
   let userEntity = User.load(msgSender.toHexString());
   if (!userEntity) {
@@ -73,24 +73,29 @@ function handleLiquidityEvent(
     userEntity.save();
   }
   let userShortPositionTokenEntity = UserPositionToken.load(
-    msgSender.toHexString() + "-" + parameters.shortToken.toHexString())
+    msgSender.toHexString() + "-" + parameters.shortToken.toHexString()
+  );
   if (!userShortPositionTokenEntity) {
-    userShortPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.shortToken.toHexString());
+    userShortPositionTokenEntity = new UserPositionToken(
+      msgSender.toHexString() + "-" + parameters.shortToken.toHexString()
+    );
     userShortPositionTokenEntity.user = msgSender.toHexString();
     userShortPositionTokenEntity.positionToken = parameters.shortToken.toHexString();
     userShortPositionTokenEntity.receivedAt = blockTimestamp; // doesn't enter this if clause on remove assuming user is only using the app
     userShortPositionTokenEntity.save();
   }
   let userLongPositionTokenEntity = UserPositionToken.load(
-    msgSender.toHexString() + "-" + parameters.longToken.toHexString())
+    msgSender.toHexString() + "-" + parameters.longToken.toHexString()
+  );
   if (!userLongPositionTokenEntity) {
-    userLongPositionTokenEntity = new UserPositionToken(msgSender.toHexString() + "-" + parameters.longToken.toHexString());
+    userLongPositionTokenEntity = new UserPositionToken(
+      msgSender.toHexString() + "-" + parameters.longToken.toHexString()
+    );
     userLongPositionTokenEntity.user = msgSender.toHexString();
     userLongPositionTokenEntity.positionToken = parameters.longToken.toHexString();
     userLongPositionTokenEntity.receivedAt = blockTimestamp;
     userLongPositionTokenEntity.save();
   }
-
 
   //pool entity
   if (!entity) {
@@ -103,46 +108,46 @@ function handleLiquidityEvent(
       testnetUser = new TestnetUser(msgSender.toHexString());
     }
 
-    const unit = BigInt.fromString("1000000000000000000") // 1e18
+    const unit = BigInt.fromString("1000000000000000000"); // 1e18
 
-    let gradient = parameters.collateralBalanceLongInitial.times(unit).div(
-      parameters.collateralBalanceLongInitial.plus(parameters.collateralBalanceShortInitial)) // TODO: account for collateral token decimals and then scale to 18 decimals
+    let gradient = parameters.collateralBalanceLongInitial
+      .times(unit)
+      .div(parameters.collateralBalanceLongInitial.plus(parameters.collateralBalanceShortInitial)); // TODO: account for collateral token decimals and then scale to 18 decimals
 
     let gradientLinear = new BigInt(1); // CHECK with Sascha
     if (parameters.cap != parameters.floor) {
-      gradientLinear = (parameters.inflection.minus(parameters.floor)).times(unit).div(
-        parameters.cap.minus(parameters.floor));
+      gradientLinear = parameters.inflection
+        .minus(parameters.floor)
+        .times(unit)
+        .div(parameters.cap.minus(parameters.floor));
     }
 
-    if (parameters.floor.equals(parameters.inflection) &&
-      parameters.inflection.equals(parameters.cap)) {
-        testnetUser.binaryPoolCreated = true
+    if (
+      parameters.floor.equals(parameters.inflection) &&
+      parameters.inflection.equals(parameters.cap)
+    ) {
+      testnetUser.binaryPoolCreated = true;
     } else if (gradient.equals(gradientLinear)) {
-      testnetUser.linearPoolCreated = true
+      testnetUser.linearPoolCreated = true;
     } else if (gradient.gt(gradientLinear)) {
-      testnetUser.concavePoolCreated = true
+      testnetUser.concavePoolCreated = true;
     } else if (gradient.lt(gradientLinear)) {
-      testnetUser.convexPoolCreated = true
+      testnetUser.convexPoolCreated = true;
     }
 
     if (testnetUser.startTime.equals(new BigInt(0))) {
-      testnetUser.startTime = blockTimestamp
-      testnetUser.endTime = blockTimestamp
+      testnetUser.startTime = blockTimestamp;
+      testnetUser.endTime = blockTimestamp;
     } else {
-      testnetUser.endTime = blockTimestamp
+      testnetUser.endTime = blockTimestamp;
     }
-    
 
     testnetUser.save();
   }
 
-  let collateralTokenEntity = CollateralToken.load(
-    parameters.collateralToken.toHexString()
-  );
+  let collateralTokenEntity = CollateralToken.load(parameters.collateralToken.toHexString());
   if (!collateralTokenEntity) {
-    collateralTokenEntity = new CollateralToken(
-      parameters.collateralToken.toHexString()
-    );
+    collateralTokenEntity = new CollateralToken(parameters.collateralToken.toHexString());
 
     let tokenContract = Erc20Token.bind(parameters.collateralToken);
     collateralTokenEntity.name = tokenContract.name();
@@ -167,9 +172,7 @@ function handleLiquidityEvent(
     longTokenEntity.save();
   }
 
-  let shortTokenEntity = PositionToken.load(
-    parameters.shortToken.toHexString()
-  );
+  let shortTokenEntity = PositionToken.load(parameters.shortToken.toHexString());
   if (!shortTokenEntity) {
     shortTokenEntity = new PositionToken(parameters.shortToken.toHexString());
 
@@ -193,8 +196,7 @@ function handleLiquidityEvent(
   entity.supplyLong = longTokenContract.totalSupply();
   entity.expiryTime = parameters.expiryTime;
   entity.collateralToken = collateralTokenEntity.id;
-  entity.collateralBalanceShortInitial =
-    parameters.collateralBalanceShortInitial;
+  entity.collateralBalanceShortInitial = parameters.collateralBalanceShortInitial;
   entity.collateralBalanceLongInitial = parameters.collateralBalanceLongInitial;
   entity.collateralBalance = parameters.collateralBalance;
   entity.shortToken = parameters.shortToken.toHexString();
@@ -243,8 +245,7 @@ function handleFeeClaimEvent(
       recipient.toHexString() + "-" + collateralTokenAddress.toHexString()
     );
     feeRecipientCollateralTokenEntity.feeRecipient = recipient.toHexString();
-    feeRecipientCollateralTokenEntity.collateralToken =
-      collateralTokenAddress.toHexString();
+    feeRecipientCollateralTokenEntity.collateralToken = collateralTokenAddress.toHexString();
   }
 
   if (isIncrease) {
@@ -273,16 +274,15 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
     testnetUser = new TestnetUser(event.transaction.from.toHexString());
   }
   testnetUser.liquidityAdded = true;
-  
+
   if (testnetUser.startTime.equals(new BigInt(0))) {
-    testnetUser.startTime = event.block.timestamp
-    testnetUser.endTime = event.block.timestamp
+    testnetUser.startTime = event.block.timestamp;
+    testnetUser.endTime = event.block.timestamp;
   } else {
-    testnetUser.endTime = event.block.timestamp
+    testnetUser.endTime = event.block.timestamp;
   }
 
   testnetUser.save();
-
 }
 
 export function handleLiquidityRemoved(event: LiquidityRemoved): void {
@@ -301,14 +301,13 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   testnetUser.liquidityRemoved = true;
 
   if (testnetUser.startTime.equals(new BigInt(0))) {
-    testnetUser.startTime = event.block.timestamp
-    testnetUser.endTime = event.block.timestamp
+    testnetUser.startTime = event.block.timestamp;
+    testnetUser.endTime = event.block.timestamp;
   } else {
-    testnetUser.endTime = event.block.timestamp
+    testnetUser.endTime = event.block.timestamp;
   }
 
   testnetUser.save();
-
 }
 
 export function handlePoolIssued(event: PoolIssued): void {
@@ -344,14 +343,13 @@ export function handleStatusChanged(event: StatusChanged): void {
     testnetUser.reportedValueChallenged = true;
 
     if (testnetUser.startTime.equals(new BigInt(0))) {
-      testnetUser.startTime = event.block.timestamp
-      testnetUser.endTime = event.block.timestamp
+      testnetUser.startTime = event.block.timestamp;
+      testnetUser.endTime = event.block.timestamp;
     } else {
-      testnetUser.endTime = event.block.timestamp
+      testnetUser.endTime = event.block.timestamp;
     }
 
     testnetUser.save();
-
   } else if (event.params.statusFinalReferenceValue === 1) {
     // log.info("event.address: ", [event.address.toHexString()])
     // log.info("event.transaction.from: ", [event.transaction.from.toHexString()])
@@ -362,14 +360,13 @@ export function handleStatusChanged(event: StatusChanged): void {
     testnetUser.finalValueReported = true;
 
     if (testnetUser.startTime.equals(new BigInt(0))) {
-      testnetUser.startTime = event.block.timestamp
-      testnetUser.endTime = event.block.timestamp
+      testnetUser.startTime = event.block.timestamp;
+      testnetUser.endTime = event.block.timestamp;
     } else {
-      testnetUser.endTime = event.block.timestamp
+      testnetUser.endTime = event.block.timestamp;
     }
 
     testnetUser.save();
-
   }
 }
 
@@ -388,12 +385,7 @@ export function handleFeeClaimAllocated(event: FeeClaimAllocated): void {
 export function handleFeeClaimTransferred(event: FeeClaimTransferred): void {
   log.info("handleFeeClaimTransferred fired", []);
 
-  handleFeeClaimEvent(
-    event.params.collateralToken,
-    event.params.to,
-    event.params.amount,
-    true
-  ); // true is increase
+  handleFeeClaimEvent(event.params.collateralToken, event.params.to, event.params.amount, true); // true is increase
   handleFeeClaimEvent(
     event.params.collateralToken,
     event.transaction.from,
@@ -408,14 +400,13 @@ export function handleFeeClaimTransferred(event: FeeClaimTransferred): void {
   testnetUser.feeClaimsTransferred = true;
 
   if (testnetUser.startTime.equals(new BigInt(0))) {
-    testnetUser.startTime = event.block.timestamp
-    testnetUser.endTime = event.block.timestamp
+    testnetUser.startTime = event.block.timestamp;
+    testnetUser.endTime = event.block.timestamp;
   } else {
-    testnetUser.endTime = event.block.timestamp
+    testnetUser.endTime = event.block.timestamp;
   }
 
   testnetUser.save();
-
 }
 
 export function handleFeesClaimed(event: FeesClaimed): void {
@@ -434,10 +425,10 @@ export function handleFeesClaimed(event: FeesClaimed): void {
   testnetUser.feesClaimed = true;
 
   if (testnetUser.startTime.equals(new BigInt(0))) {
-    testnetUser.startTime = event.block.timestamp
-    testnetUser.endTime = event.block.timestamp
+    testnetUser.startTime = event.block.timestamp;
+    testnetUser.endTime = event.block.timestamp;
   } else {
-    testnetUser.endTime = event.block.timestamp
+    testnetUser.endTime = event.block.timestamp;
   }
 
   testnetUser.save();
@@ -453,34 +444,38 @@ export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void 
   testnetUser.positionTokenRedeemed = true;
 
   if (testnetUser.startTime.equals(new BigInt(0))) {
-    testnetUser.startTime = event.block.timestamp
-    testnetUser.endTime = event.block.timestamp
+    testnetUser.startTime = event.block.timestamp;
+    testnetUser.endTime = event.block.timestamp;
   } else {
-    testnetUser.endTime = event.block.timestamp
+    testnetUser.endTime = event.block.timestamp;
   }
 
   testnetUser.save();
-
 }
 
 export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
   log.info("handleLimitOrderFilledEvent", []);
 
-  let id = event.transaction.hash.toHexString() + '-' + event.params.orderHash.toHex() + '-' + event.logIndex.toString();
+  let id =
+    event.transaction.hash.toHexString() +
+    "-" +
+    event.params.orderHash.toHex() +
+    "-" +
+    event.logIndex.toString();
 
   let nativeOrderFillEntity = NativeOrderFill.load(id);
 
   if (!nativeOrderFillEntity) {
-      nativeOrderFillEntity = new NativeOrderFill(id);
-      nativeOrderFillEntity.orderHash = event.params.orderHash;
-      nativeOrderFillEntity.maker = event.params.maker;
-      nativeOrderFillEntity.taker = event.params.taker;
-      nativeOrderFillEntity.makerToken = event.params.makerToken;
-      nativeOrderFillEntity.takerToken = event.params.takerToken;
-      nativeOrderFillEntity.makerTokenFilledAmount = event.params.makerTokenFilledAmount;
-      nativeOrderFillEntity.takerTokenFilledAmount = event.params.takerTokenFilledAmount;
-      nativeOrderFillEntity.timestamp = event.block.timestamp;
-      nativeOrderFillEntity.save();
+    nativeOrderFillEntity = new NativeOrderFill(id);
+    nativeOrderFillEntity.orderHash = event.params.orderHash;
+    nativeOrderFillEntity.maker = event.params.maker;
+    nativeOrderFillEntity.taker = event.params.taker;
+    nativeOrderFillEntity.makerToken = event.params.makerToken;
+    nativeOrderFillEntity.takerToken = event.params.takerToken;
+    nativeOrderFillEntity.makerTokenFilledAmount = event.params.makerTokenFilledAmount;
+    nativeOrderFillEntity.takerTokenFilledAmount = event.params.takerTokenFilledAmount;
+    nativeOrderFillEntity.timestamp = event.block.timestamp;
+    nativeOrderFillEntity.save();
   }
 
   let testnetUserMaker = TestnetUser.load(event.params.maker.toHexString());
@@ -507,9 +502,12 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     }
 
     let userPositionTokenEntity = UserPositionToken.load(
-      event.params.maker.toHexString() + "-" + event.params.takerToken.toHexString())
+      event.params.maker.toHexString() + "-" + event.params.takerToken.toHexString()
+    );
     if (!userPositionTokenEntity) {
-      userPositionTokenEntity = new UserPositionToken(event.params.maker.toHexString() + "-" + event.params.takerToken.toHexString());
+      userPositionTokenEntity = new UserPositionToken(
+        event.params.maker.toHexString() + "-" + event.params.takerToken.toHexString()
+      );
       userPositionTokenEntity.user = event.params.maker.toHexString();
       userPositionTokenEntity.positionToken = event.params.takerToken.toHexString();
       userPositionTokenEntity.receivedAt = event.block.timestamp;
@@ -521,8 +519,8 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     testnetUserTaker.buyLimitOrderFilled = true;
     testnetUserMaker.save();
     testnetUserTaker.save();
-  } 
-  
+  }
+
   // sell limit: maker token = position token; taker token = collateral token
   // after fill, taker receives position tokens
   let makerTokenEntity = PositionToken.load(event.params.makerToken.toHexString());
@@ -534,9 +532,12 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     }
 
     let userPositionTokenEntity = UserPositionToken.load(
-      event.params.taker.toHexString() + "-" + event.params.makerToken.toHexString())
+      event.params.taker.toHexString() + "-" + event.params.makerToken.toHexString()
+    );
     if (!userPositionTokenEntity) {
-      userPositionTokenEntity = new UserPositionToken(event.params.taker.toHexString() + "-" + event.params.makerToken.toHexString());
+      userPositionTokenEntity = new UserPositionToken(
+        event.params.taker.toHexString() + "-" + event.params.makerToken.toHexString()
+      );
       userPositionTokenEntity.user = event.params.taker.toHexString();
       userPositionTokenEntity.positionToken = event.params.makerToken.toHexString();
       userPositionTokenEntity.receivedAt = event.block.timestamp;
@@ -549,5 +550,4 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     testnetUserMaker.save();
     testnetUserTaker.save();
   }
-
 }
