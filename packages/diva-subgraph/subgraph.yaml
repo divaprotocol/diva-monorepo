@@ -25,7 +25,7 @@ dataSources:
         - DIVAOfferFill
       abis:
         - name: DivaDiamond
-          file: ./abi/IDIVANew.json
+          file: ./abi/IDIVA.json
         - name: Erc20Token
           file: ./abi/IERC20.json
         - name: PositionTokenABI
@@ -49,7 +49,7 @@ dataSources:
           handler: handleFeeClaimTransferred
         - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
-      file: ./src/mapping_new.ts
+      file: ./src/mapping.ts
   - kind: ethereum/contract
     name: ExchangeProxy
     network: goerli
@@ -69,4 +69,4 @@ dataSources:
       eventHandlers:
         - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
           handler: handleLimitOrderFilledEvent
-      file: ./src/mapping_new.ts
+      file: ./src/mapping.ts

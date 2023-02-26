@@ -1,14 +1,14 @@
 specVersion: 0.0.4
 schema:
-  file: ./schema_new.graphql
+  file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: DivaDiamond
     network: goerli
     source:
-      address: "0x659f8bF63Dce2548eB4D9b4BfF6883dddFde4848"
+      address: "0xa6E26dbA7aA0d065b3C866Bb61B4AeF3Bb9d4874" # done
       abi: DivaDiamond
-      startBlock: 7997700
+      startBlock: 8556014 # done
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -25,7 +25,7 @@ dataSources:
         - DIVAOfferFill
       abis:
         - name: DivaDiamond
-          file: ./abi/IDIVANew.json
+          file: ./abi/IDIVA.json
         - name: Erc20Token
           file: ./abi/IERC20.json
         - name: PositionTokenABI
@@ -49,14 +49,14 @@ dataSources:
           handler: handleFeeClaimTransferred
         - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
-      file: ./src/mapping_new.ts
+      file: ./src/mapping.ts
   - kind: ethereum/contract
     name: ExchangeProxy
     network: goerli
     source:
       address: "0xf91bb752490473b8342a3e964e855b9f9a2a668e"
       abi: IZeroEx
-      startBlock: 7087046
+      startBlock: 8556014 # done
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -69,4 +69,4 @@ dataSources:
       eventHandlers:
         - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
           handler: handleLimitOrderFilledEvent
-      file: ./src/mapping_new.ts
+      file: ./src/mapping.ts
