@@ -7,11 +7,13 @@
     "codegen": "graph codegen goerli.subgraph.yaml",
     "build": "yarn codegen && graph build goerli.subgraph.yaml",
     "graph:auth-hosted": "graph auth --product hosted-service $THEGRAPH_ACCESS_TOKEN",
-    "graph:auth-studio": "graph auth --studio $DIVA_SUBGRAPH_STUDIO_ACCESS_TOKEN goerli.subgraph.yaml",
+    "graph:auth-goerli-studio": "graph auth --studio $DIVA_SUBGRAPH_STUDIO_ACCESS_TOKEN goerli.subgraph.yaml",
+    "graph:auth-mumbai-studio": "graph auth --studio $DIVA_SUBGRAPH_STUDIO_ACCESS_TOKEN mumbai.subgraph.yaml",
     "deploy": "run-s deploy:goerli:studio deploy:mumbai:hosted deploy:polygon:hosted",
     "deploy:goerli:hosted": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-goerli-230226 goerli.subgraph.yaml",
     "deploy:goerli:studio": "graph deploy --studio $DIVA_SUBGRAPH_STUDIO_SLUG_230226 goerli.subgraph.yaml",
     "deploy:mumbai:hosted": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-mumbai-230226 mumbai.subgraph.yaml",
+    "deploy:mumbai:studio": "graph deploy --studio $DIVA_SUBGRAPH_STUDIO_MUMBAI_SLUG_230226 mumbai.subgraph.yaml",
     "deploy:polygon:hosted": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-polygon-230226 polygon.subgraph.yaml",
     "create-local": "graph create --node http://localhost:8020/ divaprotocol/diva-subgraph",
     "remove-local": "graph remove --node http://localhost:8020/ divaprotocol/diva-subgraph",
@@ -19,7 +21,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "^0.37.1",
+    "@graphprotocol/graph-cli": "0.42.2",
     "@graphprotocol/graph-ts": "0.26.0",
     "prettier": "^2.5.1"
   },
