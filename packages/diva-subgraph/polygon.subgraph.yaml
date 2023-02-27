@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: matic
     source:
-      address: "0x60f5A0c12457761558f5d9933f5924fE8907eBcf" # done
+      address: "0x60f5A0c12457761558f5d9933f5924fE8907eBcf"
       abi: DivaDiamond
-      startBlock: 39701204 # done
+      startBlock: 39701204
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

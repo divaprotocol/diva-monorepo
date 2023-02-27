@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: mumbai
     source:
-      address: "0xa761003C34936b760473eD993B2B6208aB07782E" # done
+      address: "0xa761003C34936b760473eD993B2B6208aB07782E"
       abi: DivaDiamond
-      startBlock: 32419100 # done
+      startBlock: 32419100
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -54,9 +54,9 @@ dataSources:
     name: ExchangeProxy
     network: mumbai
     source:
-      address: "0xf471d32cb40837bf24529fcf17418fc1a4807626" # done
+      address: "0xf471d32cb40837bf24529fcf17418fc1a4807626"
       abi: IZeroEx
-      startBlock: 32419100 # done
+      startBlock: 32419100
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

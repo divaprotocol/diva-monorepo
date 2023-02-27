@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: sepolia
     source:
-      address: "0xF554e0FE7F75BaA00d76c4347fc098C9F88D2D25" # done
+      address: "0xF554e0FE7F75BaA00d76c4347fc098C9F88D2D25"
       abi: DivaDiamond
-      startBlock: 2971871 # done
+      startBlock: 2971871
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

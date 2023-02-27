@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: goerli
     source:
-      address: "0xa6E26dbA7aA0d065b3C866Bb61B4AeF3Bb9d4874" # done
+      address: "0xa6E26dbA7aA0d065b3C866Bb61B4AeF3Bb9d4874"
       abi: DivaDiamond
-      startBlock: 8556014 # done
+      startBlock: 8556014
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -56,7 +56,7 @@ dataSources:
     source:
       address: "0xf91bb752490473b8342a3e964e855b9f9a2a668e"
       abi: IZeroEx
-      startBlock: 8556014 # done
+      startBlock: 8556014
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
