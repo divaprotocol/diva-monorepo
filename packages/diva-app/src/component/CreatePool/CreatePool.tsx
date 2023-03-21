@@ -88,6 +88,7 @@ export function CreatePool() {
   }, [formik.values.collateralToken])
   const handleConfigPick = (event: SelectChangeEvent) => {
     setConfigPicked(event.target.value)
+    formik.setFieldValue('configPicked', event.target.value)
   }
   // actions after pool is successfully created
   const handlePoolSuccess = () => {

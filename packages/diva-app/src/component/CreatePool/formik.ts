@@ -36,6 +36,7 @@ export type Values = {
   poolId?: string
   offerHash?: string
   permissionedERC721Token: string
+  configPicked: string
 }
 
 export const initialValues: Values = {
@@ -71,6 +72,7 @@ export const initialValues: Values = {
   poolId: '',
   offerHash: '',
   permissionedERC721Token: ethers.constants.AddressZero,
+  configPicked: '',
 }
 
 type Errors = {
@@ -104,6 +106,7 @@ export const useCreatePoolFormik = () => {
           longRecipient,
           shortRecipient,
           permissionedERC721Token,
+          offerExpiry,
         } = values
 
         if (collateralToken != null && dataProvider != null) {
@@ -189,6 +192,14 @@ export const useCreatePoolFormik = () => {
         errors.expiryTime = `Expiry time cannot be earlier than ${
           threshold / 1000 / 60
         } minutes from now`
+      }
+      if (
+        values.expiryTime.getTime() < Number(values.offerExpiry) * 1000 &&
+        values.configPicked === 'createoffer'
+      ) {
+        console.log(values.configPicked)
+        errors.offerExpiry =
+          'Offer expiry must be earlier than observation time'
       }
       if (values.takerAddress == null) {
         errors.takerAddress = 'Taker address must not be empty'
