@@ -104,12 +104,12 @@ export const config: { [key: number]: SingleConfig } = {
     isSupported: true,
   },
   [SupportedChainId.GOERLI]: {
-    divaAddress: '0x659f8bF63Dce2548eB4D9b4BfF6883dddFde4848', // 22.11.2022
+    divaAddress: '0xa6E26dbA7aA0d065b3C866Bb61B4AeF3Bb9d4874', // 26.02.2023
     balanceCheckerAddress: '0x9293ff9733AC7666A8251564C083191c3DA8BE19',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x017aA6E15e406b85b8b1dF322e39444D819C8F43',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-goerli-new-2',
+      'https://api.studio.thegraph.com/query/14411/diva-goerli-230226/0.0.1',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-goerli',
     allOrders: 'https://eip712api.xyz/0x/orderbook/v1/orders/',
@@ -124,12 +124,14 @@ export const config: { [key: number]: SingleConfig } = {
   },
   [SupportedChainId.POLYGON]: {
     name: 'Polygon',
-    divaAddress: '',
+    divaAddress: '0x60f5A0c12457761558f5d9933f5924fE8907eBcf',
     balanceCheckerAddress: '',
-    exchangeProxy: '',
-    whitelistAddress: '',
-    divaSubgraph: '',
-    whitelistSubgraph: '',
+    exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
+    whitelistAddress: '0x3bcBFBd63f0387fF1b72a4C580fA7758C04B718d',
+    divaSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-polygon-230226',
+    whitelistSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-polygon',
     allOrders: '',
     order: '',
     offer: '',
@@ -141,12 +143,14 @@ export const config: { [key: number]: SingleConfig } = {
   },
   [SupportedChainId.POLYGON_MUMBAI]: {
     name: 'Mumbai',
-    divaAddress: '',
+    divaAddress: '0xa761003C34936b760473eD993B2B6208aB07782E',
     balanceCheckerAddress: '',
-    exchangeProxy: '',
-    whitelistAddress: '',
-    divaSubgraph: '',
-    whitelistSubgraph: '',
+    exchangeProxy: '0xf471d32cb40837bf24529fcf17418fc1a4807626',
+    whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
+    divaSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-mumbai-230226',
+    whitelistSubgraph:
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-mumbai',
     allOrders: '',
     order: '',
     offer: '',
