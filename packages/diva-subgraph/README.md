@@ -117,12 +117,495 @@ After deploying a new subgraph, add the correspondig commands in the `package.js
 
 # Example queries
 
+* [Pool data](#pool-data)
+* [Pool data for data providers](#pool-data-for-data-providers)
+* [Fee claims](#fee-claims)
+* [Challenges](#challenges)
+* [User positions](#user-positions)
 
+Refer to the official The Graph [docs](https://thegraph.com/docs/en/querying/querying-best-practices/#sending-a-query-to-a-graph-ql-api) for best practices in querying subgraph data.
+
+## Pool data
+
+The following query can be used to pull the data for a given pool Id (here pool Id = 1):
+
+```js
+{
+  pools(where: {id: 1}) {
+    id
+    referenceAsset
+    floor
+    inflection
+    cap
+    gradient  
+    supplyShort
+    supplyLong
+    expiryTime
+    collateralToken {
+      id
+      name
+      symbol
+      decimals
+    }
+    collateralBalance    
+    collateralBalanceGross
+    capacity
+    shortToken {
+      id
+      name
+      symbol
+      decimals
+    }
+    longToken {
+      id
+      name
+      symbol
+      decimals
+    }
+    finalReferenceValue
+    statusFinalReferenceValue
+    statusTimestamp
+    payoutLong
+    payoutShort
+    dataProvider
+    protocolFee
+    settlementFee
+    submissionPeriod
+    challengePeriod
+    reviewPeriod
+    fallbackSubmissionPeriod
+    permissionedERC721Token
+    createdBy
+    createdAt
+  }
+}
+```
+
+Sample output from the above query:
+
+```js
+{
+  "data": {
+    "pools": [
+      {
+        "id": "1",
+        "referenceAsset": "ETH/USD",
+        "floor": "2000000000000000000000",
+        "inflection": "2500000000000000000000",
+        "cap": "3000000000000000000000",
+        "gradient": "500000000000000000",
+        "supplyShort": "100000000000000000000",
+        "supplyLong": "100000000000000000000",
+        "expiryTime": "1679479028",
+        "collateralToken": {
+          "id": "0xfa158c9b780a4213f3201ae74cca013712c8538d",
+          "name": "DIVA USD",
+          "symbol": "dUSD",
+          "decimals": 18
+        },
+        "collateralBalance": "100000000000000000000",
+        "collateralBalanceGross": "100000000000000000000",
+        "capacity": "200000000000000000000",
+        "shortToken": {
+          "id": "0x40624669b4ae83a1745b6094e3016f6f9b4214cf",
+          "name": "S1",
+          "symbol": "S1",
+          "decimals": 18
+        },
+        "longToken": {
+          "id": "0xde318bba1a74cf9cf052e9ae94330aa4f02c6fb5",
+          "name": "L1",
+          "symbol": "L1",
+          "decimals": 18
+        },
+        "finalReferenceValue": "0",
+        "statusFinalReferenceValue": "Open",
+        "statusTimestamp": "1677479088",
+        "payoutLong": "0",
+        "payoutShort": "0",
+        "dataProvider": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
+        "protocolFee": "2500000000000000",
+        "settlementFee": "500000000000000",
+        "submissionPeriod": "604800",
+        "challengePeriod": "259200",
+        "reviewPeriod": "432000",
+        "fallbackSubmissionPeriod": "864000",
+        "permissionedERC721Token": "0x0000000000000000000000000000000000000000",
+        "createdBy": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
+        "createdAt": "1677479088"
+      }
+    ]
+  }
+}
+```
+
+## Pool data for data providers
+
+Data providers that are looking to track pools where they have been selected for outcome reporting can use the following pool query, reduced to the most relevant fields for their specific needs. Please ensure that you provide the data provider address in the `where` condition in lowercase.
+
+```js
+{ 
+    pools (first: 1000, where: {
+      expiryTime_gt: "1667147292",
+      expiryTime_lte: "1687752092",
+      statusFinalReferenceValue: "Open",
+      dataProvider: "0x9adefeb576dcf52f5220709c1b267d89d5208d78"}
+      ) {
+        id
+        referenceAsset
+        expiryTime
+        dataProvider
+        finalReferenceValue
+        statusFinalReferenceValue
+        statusTimestamp
+        collateralToken {
+          id
+          name
+          symbol
+          decimals
+        }
+        collateralBalanceGross
+        settlementFee
+        challenges {
+          challengedBy
+          proposedFinalReferenceValue
+        }
+        submissionPeriod
+        challengePeriod
+        reviewPeriod
+        createdAt
+        createdBy
+    }
+}
+```
+
+Sample output of the above query:
+
+```js
+{
+  "data": {
+    "pools": [
+      {
+        "id": "1",
+        "referenceAsset": "ETH/USD",
+        "expiryTime": "1679479028",
+        "dataProvider": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
+        "finalReferenceValue": "0",
+        "statusFinalReferenceValue": "Open",
+        "statusTimestamp": "1677479088",
+        "collateralToken": {
+          "id": "0xfa158c9b780a4213f3201ae74cca013712c8538d",
+          "name": "DIVA USD",
+          "symbol": "dUSD",
+          "decimals": 18
+        },
+        "collateralBalanceGross": "100000000000000000000",
+        "settlementFee": "500000000000000",
+        "challenges": [],
+        "submissionPeriod": "604800",
+        "challengePeriod": "259200",
+        "reviewPeriod": "432000",
+        "createdAt": "1677479088",
+        "createdBy": "0x9adefeb576dcf52f5220709c1b267d89d5208d78"
+      }
+    ]
+  }
+}
+```
+
+
+
+## Fee claims
+
+Query to pull the fee claims for a given address (has to be provided in lower case):
+
+```js
+{
+  feeRecipients(where: {id: "0x9adefeb576dcf52f5220709c1b267d89d5208d78"}) {
+    id
+    collateralTokens {
+      amount
+      collateralToken {
+        id
+        name
+        symbol
+        decimals
+      }
+    }
+  }
+}
+```
+
+Sample output from the above query:
+
+```js
+{
+  "data": {
+    "feeRecipients": [
+      {
+        "id": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
+        "collateralTokens": [
+          {
+            "amount": "32695586760280840",
+            "collateralToken": {
+              "id": "0x867e53fede91d27101e062bf7002143ebaea3e30",
+              "name": "WAGMI18",
+              "symbol": "WAGMI18"
+            }
+          },
+          {
+            "amount": "30000",
+            "collateralToken": {
+              "id": "0x8ca8de48c4507fa54a83dde7ac68097e87520eec",
+              "name": "WAGMI6",
+              "symbol": "WAGMI6"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Challenges
+
+Query to retrieve the submitted challenges for a given poolId (here poolId = 5):
+
+```js
+{
+  challenges(where: {pool: "5"}) {
+    challengedBy
+    proposedFinalReferenceValue
+    pool {
+      id
+    }
+  }
+}
+```
+
+Sample output of above query:
+
+```js
+{
+  "data": {
+    "challenges": [
+      {
+        "challengedBy": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
+        "proposedFinalReferenceValue": "1670000000000000000000",
+        "pool": {
+          "id": "5"
+        }
+      }
+    ]
+  }
+}
+```
+
+## User positions
+
+Query to retrieve a shortlist of position tokens that a user may own. The shortlist is constructed based on user interactions with the DIVA Protocol as well as the 0x Protocol. Note that position tokens received via different avenues (e.g., Uniswap or simple transfer) will not appear in this list.
+
+```js
+{
+  user(id: "0x9adefeb576dcf52f5220709c1b267d89d5208d78" ){
+    id
+    positionTokens(first: 100,
+      orderDirection: desc,
+      orderBy: receivedAt,) {
+        receivedAt,
+        positionToken {
+        id
+        name
+        symbol
+        decimals
+        owner
+        pool {
+          id
+          referenceAsset
+          floor
+          inflection
+          cap
+          gradient  
+          supplyShort
+          supplyLong
+          expiryTime
+          collateralToken {
+            id
+            name
+            symbol
+            decimals
+          }
+          collateralBalance    
+          collateralBalanceGross
+          capacity
+          shortToken {
+            id
+            name
+            symbol
+            decimals
+          }
+          longToken {
+            id
+            name
+            symbol
+            decimals
+          }
+          finalReferenceValue
+          statusFinalReferenceValue
+          statusTimestamp
+          payoutLong
+          payoutShort
+          dataProvider
+          protocolFee
+          settlementFee
+          submissionPeriod
+          challengePeriod
+          reviewPeriod
+          fallbackSubmissionPeriod
+          permissionedERC721Token
+          createdBy
+          createdAt
+        }
+      }
+    }
+  }
+}
+```
+
+Sample output of above query:
+
+```js
+{
+  "data": {
+    "user": {
+      "id": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
+      "positionTokens": [
+        {
+          "receivedAt": "1677479088",
+          "positionToken": {
+            "id": "0xde318bba1a74cf9cf052e9ae94330aa4f02c6fb5",
+            "name": "L1",
+            "symbol": "L1",
+            "decimals": 18,
+            "owner": "0xa6e26dba7aa0d065b3c866bb61b4aef3bb9d4874",
+            "pool": {
+              "id": "1",
+              "referenceAsset": "ETH/USD",
+              "floor": "2000000000000000000000",
+              "inflection": "2500000000000000000000",
+              "cap": "3000000000000000000000",
+              "gradient": "500000000000000000",
+              "supplyShort": "100000000000000000000",
+              "supplyLong": "100000000000000000000",
+              "expiryTime": "1679479028",
+              "collateralToken": {
+                "id": "0xfa158c9b780a4213f3201ae74cca013712c8538d",
+                "name": "DIVA USD",
+                "symbol": "dUSD",
+                "decimals": 18
+              },
+              "collateralBalance": "100000000000000000000",
+              "collateralBalanceGross": "100000000000000000000",
+              "capacity": "200000000000000000000",
+              "shortToken": {
+                "id": "0x40624669b4ae83a1745b6094e3016f6f9b4214cf",
+                "name": "S1",
+                "symbol": "S1",
+                "decimals": 18
+              },
+              "longToken": {
+                "id": "0xde318bba1a74cf9cf052e9ae94330aa4f02c6fb5",
+                "name": "L1",
+                "symbol": "L1",
+                "decimals": 18
+              },
+              "finalReferenceValue": "0",
+              "statusFinalReferenceValue": "Open",
+              "statusTimestamp": "1677479088",
+              "payoutLong": "0",
+              "payoutShort": "0",
+              "dataProvider": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
+              "protocolFee": "2500000000000000",
+              "settlementFee": "500000000000000",
+              "submissionPeriod": "604800",
+              "challengePeriod": "259200",
+              "reviewPeriod": "432000",
+              "fallbackSubmissionPeriod": "864000",
+              "permissionedERC721Token": "0x0000000000000000000000000000000000000000",
+              "createdBy": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
+              "createdAt": "1677479088"
+            }
+          }
+        },
+        {
+          "receivedAt": "1677479088",
+          "positionToken": {
+            "id": "0x40624669b4ae83a1745b6094e3016f6f9b4214cf",
+            "name": "S1",
+            "symbol": "S1",
+            "decimals": 18,
+            "owner": "0xa6e26dba7aa0d065b3c866bb61b4aef3bb9d4874",
+            "pool": {
+              "id": "1",
+              "referenceAsset": "ETH/USD",
+              "floor": "2000000000000000000000",
+              "inflection": "2500000000000000000000",
+              "cap": "3000000000000000000000",
+              "gradient": "500000000000000000",
+              "supplyShort": "100000000000000000000",
+              "supplyLong": "100000000000000000000",
+              "expiryTime": "1679479028",
+              "collateralToken": {
+                "id": "0xfa158c9b780a4213f3201ae74cca013712c8538d",
+                "name": "DIVA USD",
+                "symbol": "dUSD",
+                "decimals": 18
+              },
+              "collateralBalance": "100000000000000000000",
+              "collateralBalanceGross": "100000000000000000000",
+              "capacity": "200000000000000000000",
+              "shortToken": {
+                "id": "0x40624669b4ae83a1745b6094e3016f6f9b4214cf",
+                "name": "S1",
+                "symbol": "S1",
+                "decimals": 18
+              },
+              "longToken": {
+                "id": "0xde318bba1a74cf9cf052e9ae94330aa4f02c6fb5",
+                "name": "L1",
+                "symbol": "L1",
+                "decimals": 18
+              },
+              "finalReferenceValue": "0",
+              "statusFinalReferenceValue": "Open",
+              "statusTimestamp": "1677479088",
+              "payoutLong": "0",
+              "payoutShort": "0",
+              "dataProvider": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
+              "protocolFee": "2500000000000000",
+              "settlementFee": "500000000000000",
+              "submissionPeriod": "604800",
+              "challengePeriod": "259200",
+              "reviewPeriod": "432000",
+              "fallbackSubmissionPeriod": "864000",
+              "permissionedERC721Token": "0x0000000000000000000000000000000000000000",
+              "createdBy": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
+              "createdAt": "1677479088"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
 
 # Trouble shooting
 
-* Error on deployment: `The Subgraph Studio only allows subgraphs for these networks: mainnet, rinkeby`
-   * Solution: Try to install the dependencies by running `yarn` in the `diva-monorepo` directory.
+| Error        | Solution |
+| :---------------- |:---------------- |
+| `The Subgraph Studio only allows subgraphs for these networks: mainnet, rinkeby`  | Try to install the dependencies by running `yarn` in the `diva-monorepo` directory and deploy again. |
 
 # Links
 
