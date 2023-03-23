@@ -125,17 +125,17 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.POLYGON]: {
     name: 'Polygon',
     divaAddress: '0x60f5A0c12457761558f5d9933f5924fE8907eBcf',
-    balanceCheckerAddress: '',
+    balanceCheckerAddress: '0xA83ea2A711D6f3c3F53be275bB40ab60b246c677',
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x3bcBFBd63f0387fF1b72a4C580fA7758C04B718d',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-polygon-230226',
     whitelistSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-polygon',
-    allOrders: '',
-    order: '',
-    offer: '',
-    orderbook: '',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-polygon', // TODO: add entries
+    allOrders: '', // TODO
+    order: '', // TODO
+    offer: '', // TODO
+    orderbook: '', // TODO
     explorer: 'https://polygonscan.com/',
     logoUrl: polygonMaticLogo,
     nativeCurrency: { name: 'Polygon Matic', symbol: 'MATIC', decimals: 18 },
@@ -144,17 +144,17 @@ export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.POLYGON_MUMBAI]: {
     name: 'Mumbai',
     divaAddress: '0xa761003C34936b760473eD993B2B6208aB07782E',
-    balanceCheckerAddress: '',
+    balanceCheckerAddress: '0x12d998fEC98158dD816eD6EB49CF33e31765fd32',
     exchangeProxy: '0xf471d32cb40837bf24529fcf17418fc1a4807626',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-mumbai-230226',
     whitelistSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-mumbai',
-    allOrders: '',
-    order: '',
-    offer: '',
-    orderbook: '',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-mumbai', // TODO: add entries
+    allOrders: '', // TODO
+    order: '', // TODO
+    offer: '', // TODO
+    orderbook: '', // TODO
     explorer: 'https://mumbai.polygonscan.com/',
     logoUrl: polygonMaticLogo,
     nativeCurrency: {
