@@ -1,5 +1,5 @@
 import pandas as pd
-
+import math
 from lib.df_utils import extend_DataFrame
 from lib.SendPrice import sendPrice
 from lib.QueryGraph import *
@@ -11,14 +11,14 @@ from tellor_settings.tellor_setFinalReferenceValue import setFinRefVal
 import tellor_settings.tellor_contracts as tellor_contracts
 import time
 from termcolor import colored
-import datetime
+import datetime, config
 from lib.recorder import printb, printn, printbAll, printt, printr, update_pending_records, update_records
 from tellor_settings.tellor_retrieveData import retrieveData
-from config.config import submission_tolerance, max_reporting_frame, expiry_floor_time_away
+from config.config import submission_tolerance, max_reporting_frame, expiry_floor_time_away, PUBLIC_KEY, additional_buffer_time_lock
 
 
 def extract(lst):
-    return [item[0] for item in lst]
+    return [item[1] for item in lst]
 
 # Function to create output console message
 def printDataToBeSubmitted(pool_id, ts_date, opair, price, date, collAsset, collAddr, proxy, coll_to_usd, coll_date):
@@ -104,7 +104,7 @@ def tellor_submit_pools(df, network, w3, contract):
     DIVAOracleTellor_contract = w3.eth.contract(
         address=tellor_contracts.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
     getVal_contract = w3.eth.contract(
-        address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+        address=tellor_contracts.Tellor_contract_address[network], abi=tellor.ReportedData_abi)
     numberPools = 0
     try:
         while True:
@@ -123,7 +123,7 @@ def tellor_submit_pools(df, network, w3, contract):
     # taking this out for now, keeps in a pending pools but doesn't resubmit on error
     #for j in pendingPools[network]:
     #   df = df[df["id"] != j]
-
+    last_report_time = 0
     for i in range(df.shape[0]):
         pair = df['referenceAsset'].iloc[i]
         opair = pair
@@ -172,11 +172,11 @@ def tellor_submit_pools(df, network, w3, contract):
             except:
                 printn("-- Error while checking for already submitted values --", 'red')
 
-            if submit or (submission_tolerance == 0):
+            if (submit or (submission_tolerance == 0)):
                 # Tellor oracle has 2 steps submitting value to contract and setting final reference value
                 sTV = submitTellorValue(pool_id=pool_id, finalRefVal=price,
                                         collToUSD=coll_asset_to_usd, network=network, w3=w3, my_contract=contract)
-                if sTV == 1:
+                if sTV[1] == 1:
                     printn("-- Error in Tellor submission: Continuing with next pool --")
                     continue
                 # TODO Pull a delay from contract
@@ -204,11 +204,116 @@ def tellor_submit_pools(df, network, w3, contract):
     return
 
 
+def tellor_submit_pools_only_actual(df, network, w3, contract):
+    if df.empty:
+        return
+    #getVal_contract = w3.eth.contract(
+    #    address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+    getVal_contract = w3.eth.contract(
+        address=tellor_contracts.Tellor_contract_address[network], abi=tellor.ReportedData_abi)
+    numberPools = 0
+    try:
+        while True:
+            lastId = df.id.iloc[-1]
+            if numberPools == df.shape[0]:
+                break
+            numberPools = df.shape[0]
+            resp = run_graph_query(tellor_query(lastId, tellor_contracts.DIVAOracleTellor_contract_address[network]), network)
+            df = extend_DataFrame(df, resp)
+    except:
+        printn("Error: Could not query graph.")
+
+    df = transform_expiryTimes(df)
+    df = df.sort_values(by=['expiryTime'], ignore_index=True)
+
+    # taking this out for now, keeps in a pending pools but doesn't resubmit on error
+    #for j in pendingPools[network]:
+    #   df = df[df["id"] != j]
+
+    for i in range(df.shape[0]):
+        pair = df['referenceAsset'].iloc[i]
+        opair = pair
+        pair = pair.replace("/", "")
+        ts_date = df['expiryTime'].iloc[i]
+        pool_id = df['id'].iloc[i]
+
+        if pool_id in blocked_pools_by_whitelist:
+            return
+
+        price, date = getKrakenPrice(
+            pair=pair, ts_date=ts_date)
+        #print('Price timestamp', date)
+
+        # This function will get collToUSD format:
+        coll_asset_to_usd, coll_date, proxy = getKrakenCollateralConversion(
+            df['collateralToken.symbol'].iloc[i], df['collateralToken.id'].iloc[i], ts_date=ts_date)
+        if coll_asset_to_usd == "NotWhiteListed":
+            printb("Failure: ", "Error while fetching collateral to USD rate. Blocking submission, add to blocked list")
+            printn("Potential reason: Collateral asset missing in mapping.")
+            #print("collateral asset not whitelisted, blocking submission, add to blocked list")
+            blocked_pools_by_whitelist.append(pool_id)
+            return
+        #print("coll asset value from kraken", coll_asset_to_usd)
+        if (price, date) != (-1, -1):
+            # submit pool price
+            printn("-----------------------------------------")
+            printDataToBeSubmitted(pool_id, ts_date, opair, price, date, df['collateralToken.symbol'].iloc[i], df['collateralToken.id'].iloc[i], proxy, coll_asset_to_usd, coll_date)
+            try:
+                # We want to submit a value if nobody else has done so, or if others have done but their values differ from my value
+                # by more than a tolerance percentage.
+                submit = False
+                others_values = retrieveData(pool_id, network, getVal_contract)
+                if others_values and submission_tolerance != 0:
+                    printbAll("Already submitted values are: ", underline=True)
+                    printt(others_values)
+                    values_ref = extract(others_values)
+                    diff = [abs(price / x - 1) * 100 for x in values_ref]
+                    diff_ = [x < submission_tolerance for x in diff]
+                    if sum(diff_) == 0:  # If there is at least reported value within the tolerance, you don't report.
+                        submit = True
+                    else:
+                        printn("At least one submitted value is within the specified {}% tolerance. No submission will be done.".format(submission_tolerance))
+                elif not others_values:
+                    submit = True
+            except:
+                printn("-- Error while checking for already submitted values --", 'red')
+
+            stakeamount = int(w3.fromWei(contract.functions.getStakeAmount().call(), 'ether'))
+            staked = int(w3.fromWei(contract.functions.getStakerInfo(PUBLIC_KEY).call()[1], 'ether'))
+            timelock = 12/math.floor(staked/stakeamount) * 60 * 60
+
+            if submit or (submission_tolerance == 0):
+                # Tellor oracle has 2 steps submitting value to contract and setting final reference value
+                sTV = submitTellorValue(pool_id=pool_id, finalRefVal=price,
+                                        collToUSD=coll_asset_to_usd, network=network, w3=w3, my_contract=contract)
+                if sTV == 1:
+                    printn("-- Error in Tellor submission: Continuing with next pool --")
+                    continue
+                with open('last_submission.txt', 'w') as f:
+                    f.write(f"{round(datetime.datetime.now().timestamp() + timelock,2)}\n")
+
+                print("")
+                wait = timelock + additional_buffer_time_lock
+                print(f"Waiting {int(wait)} seconds before next submission")
+                time.sleep(wait)
+
+
+        else:
+            pendingPools[network].append(pool_id)
+            printb("Failure: ", "No price available or pair not available")
+            message = "Pood id %s : No price available or Pair not available" % pool_id
+            update_pending_records(message)
+    return
+
+
+
 def tellor_submit_pools_only(df, network, w3, contract):
     if df.empty:
         return
+    #getVal_contract = w3.eth.contract(
+    #    address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
     getVal_contract = w3.eth.contract(
-        address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+        address=tellor_contracts.Tellor_contract_address[network], abi=tellor.ReportedData_abi)
     numberPools = 0
     try:
         while True:
@@ -283,7 +388,6 @@ def tellor_submit_pools_only(df, network, w3, contract):
                 if sTV == 1:
                     printn("-- Error in Tellor submission: Continuing with next pool --")
                     continue
-
         else:
             pendingPools[network].append(pool_id)
             printb("Failure: ", "No price available or pair not available")
@@ -291,13 +395,17 @@ def tellor_submit_pools_only(df, network, w3, contract):
             update_pending_records(message)
     return
 
+
 def trigger_setFinRefVal_only(df, network, w3):
     if df.empty:
         return
     DIVAOracleTellor_contract = w3.eth.contract(
         address=tellor_contracts.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
+    #getVal_contract = w3.eth.contract(
+    #    address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+
     getVal_contract = w3.eth.contract(
-        address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+        address=tellor_contracts.Tellor_contract_address[network], abi=tellor.ReportedData_abi)
     numberPools = 0
     try:
         while True:
@@ -333,9 +441,11 @@ def trigger_setFinRefVal_only(df, network, w3):
 
 
 def tellor_submit_pools_specific_pool(network, w3, contract, poolid):
+    # getVal_contract = w3.eth.contract(
+    #     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
     getVal_contract = w3.eth.contract(
-        address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
-
+        address=tellor_contracts.Tellor_contract_address[network], abi=tellor.ReportedData_abi)
+    
     try:
         resp = run_graph_query(queryPool(poolid),
                                network)
@@ -413,8 +523,11 @@ def tellor_submit_pools_specific_pool(network, w3, contract, poolid):
 def tellor_triggering_setFinRefVal_specific_pool(network, w3, pool_id):
     DIVAOracleTellor_contract = w3.eth.contract(
         address=tellor_contracts.DIVAOracleTellor_contract_address[network], abi=tellor.DIVAOracleTellor_abi)
+    # getVal_contract = w3.eth.contract(
+    #     address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+    
     getVal_contract = w3.eth.contract(
-        address=tellor_contracts.TellorPlayground_contract_address[network], abi=tellor.ReportedData_abi)
+        address=tellor_contracts.Tellor_contract_address[network], abi=tellor.ReportedData_abi)
 
     if pool_id in blocked_pools_by_whitelist:
         return

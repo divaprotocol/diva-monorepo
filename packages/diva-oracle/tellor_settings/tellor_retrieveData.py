@@ -22,7 +22,7 @@ def retrieveData(pool_id, network, my_contract):
             timestmp = my_contract.functions.getTimestampbyQueryIdandIndex('0x' + queryId.hexdigest(), idx).call()
             date = datetime.datetime.fromtimestamp(timestmp).__str__()
             data = my_contract.functions.retrieveData('0x' + queryId.hexdigest(), timestmp).call()
-            disp = my_contract.functions.isDisputed('0x' + queryId.hexdigest(), timestmp).call()  # Later we have to use the function isInDispute()
+            disp = my_contract.functions.isInDispute('0x' + queryId.hexdigest(), timestmp).call() #disp = my_contract.functions.isDisputed('0x' + queryId.hexdigest(), timestmp).call()  # Later we have to use the function isInDispute()
             if data != b'':
                 val = eth_abi.decode_abi(['uint256', 'uint256'],data)
                 values.append([idx, float(web3.Web3.fromWei(val[0], 'ether')), float(web3.Web3.fromWei(val[1], 'ether')), timestmp, date, disp])
