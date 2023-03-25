@@ -724,7 +724,6 @@ const SellOrder = (props: {
       } else {
         setBalanceAlert(false)
       }
-      console.log('NumberofOprions', Number(numberOfOptions))
       if (!checked) {
         if (avgExpectedRate.eq(0)) {
           setOrderBookAlert(true)
@@ -782,6 +781,14 @@ const SellOrder = (props: {
           }
         }
       } else {
+        if (
+          nbrOfOptionsBalance.gt(optionBalance) &&
+          nbrOfOptionsBalance.gt(remainingAllowance)
+        ) {
+          setAmountExceedAlert(true)
+        } else {
+          setAmountExceedAlert(false)
+        }
         setOrderBookAlert(false)
       }
     } else {
