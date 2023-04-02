@@ -29,6 +29,7 @@ const CREATE_POOL_OFFER_STRUCT = [
   { type: 'address', name: 'permissionedERC721Token' },
   { type: 'uint256', name: 'salt' },
 ]
+
 export const CREATE_POOL_TYPE = {
   OfferCreateContingentPool: CREATE_POOL_OFFER_STRUCT,
 }
@@ -55,6 +56,7 @@ type SingleConfig = {
   readonly offer: string
   readonly orderbook: string
   readonly explorer: string
+  readonly websocket: string
   readonly logoUrl: string
   readonly nativeCurrency: {
     name: string
@@ -79,6 +81,7 @@ export const config: { [key: number]: SingleConfig } = {
     order: '',
     offer: '',
     orderbook: '',
+    websocket: '',
     explorer: 'https://etherscan.io/',
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
@@ -98,6 +101,7 @@ export const config: { [key: number]: SingleConfig } = {
     order: 'https://ropsten.api.0x.org/orderbook/v1/order/',
     offer: '',
     orderbook: 'https://ropsten.api.0x.org/orderbook/v1',
+    websocket: '',
     explorer: 'https://ropsten.etherscan.io/',
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ropsten Ether', symbol: 'ropETH', decimals: 18 },
@@ -116,6 +120,7 @@ export const config: { [key: number]: SingleConfig } = {
     order: 'https://eip712api.xyz/0x/orderbook/v1/order/',
     orderbook: 'https://eip712api.xyz/0x/orderbook/v1',
     offer: 'https://eip712api.xyz/diva/offer/v1/',
+    websocket: 'wss://eip712api.xyz/websocket',
     explorer: 'https://goerli.etherscan.io/',
     name: 'Görli',
     logoUrl: ethereumLogoUrl,
@@ -132,14 +137,15 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-polygon-230226',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-polygon', // TODO: add entries
-    allOrders: '', // TODO
-    order: '', // TODO
-    offer: '', // TODO
-    orderbook: '', // TODO
+    allOrders: 'https://polygon.eip712api.xyz/0x/orderbook/v1/orders/',
+    order: 'https://polygon.eip712api.xyz/0x/orderbook/v1/order/',
+    orderbook: 'https://polygon.eip712api.xyz/0x/orderbook/v1',
+    offer: 'https://polygon.eip712api.xyz/diva/offer/v1/',
+    websocket: 'wss://polygon.eip712api.xyz/websocket',
     explorer: 'https://polygonscan.com/',
     logoUrl: polygonMaticLogo,
     nativeCurrency: { name: 'Polygon Matic', symbol: 'MATIC', decimals: 18 },
-    isSupported: false,
+    isSupported: true,
   },
   [SupportedChainId.POLYGON_MUMBAI]: {
     name: 'Mumbai',
@@ -151,10 +157,11 @@ export const config: { [key: number]: SingleConfig } = {
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-mumbai-230226',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-mumbai', // TODO: add entries
-    allOrders: '', // TODO
-    order: '', // TODO
-    offer: '', // TODO
-    orderbook: '', // TODO
+    allOrders: 'https://mumbai.eip712api.xyz/0x/orderbook/v1/orders/',
+    order: 'https://mumbai.eip712api.xyz/0x/orderbook/v1/order/',
+    orderbook: 'https://mumbai.eip712api.xyz/0x/orderbook/v1',
+    offer: 'https://mumbai.eip712api.xyz/diva/offer/v1/',
+    websocket: 'wss://mumbai.eip712api.xyz/websocket',
     explorer: 'https://mumbai.polygonscan.com/',
     logoUrl: polygonMaticLogo,
     nativeCurrency: {
@@ -162,7 +169,7 @@ export const config: { [key: number]: SingleConfig } = {
       symbol: 'mMATIC',
       decimals: 18,
     },
-    isSupported: false,
+    isSupported: true,
   },
   [SupportedChainId.ARBITRUM_ONE]: {
     name: 'Arbitrum',
@@ -176,6 +183,7 @@ export const config: { [key: number]: SingleConfig } = {
     order: '',
     offer: '',
     orderbook: '',
+    websocket: '',
     explorer: 'https://arbiscan.io/',
     logoUrl: arbitrumLogoUrl,
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
@@ -189,7 +197,11 @@ export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = Object.values(
 ).filter((id) => typeof id === 'number') as SupportedChainId[]
 
 // current supported chain
-export const CURRENT_SUPPORTED_CHAIN_ID = [SupportedChainId.GOERLI]
+export const CURRENT_SUPPORTED_CHAIN_ID = [
+  SupportedChainId.GOERLI,
+  SupportedChainId.POLYGON,
+  SupportedChainId.POLYGON_MUMBAI,
+]
 
 // DIVA Governance address which is the default creator of pools on Markets page and trading fee recipient
 export const DIVA_GOVERNANCE_ADDRESS =
@@ -234,9 +246,6 @@ export const APP_BAR_ITEMS = [
     icon: TaskIcon,
   },
 ]
-
-// websocket url
-export const WEBSOCKET_URL = 'wss://eip712api.xyz/websocket'
 
 // wallet images
 export const WALLET_IMAGES = {
