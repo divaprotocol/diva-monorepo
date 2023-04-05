@@ -11,9 +11,9 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { useState, useEffect } from 'react'
+import { config } from '../../constants'
 import { useAppSelector } from '../../Redux/hooks'
 import { ORDER_TYPE } from '../../Models/orderbook'
-import { WEBSOCKET_URL } from '../../constants'
 import {
   createTable,
   get0xOpenOrders,
@@ -37,7 +37,7 @@ export default function OrderBook(props: {
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
   const [websocketClient, setWebsocketClient] = useState(
-    new WebSocket(WEBSOCKET_URL)
+    new WebSocket(config[chainId].websocket)
   )
   const componentDidMount = async () => {
     const orders = []
@@ -161,7 +161,7 @@ export default function OrderBook(props: {
       return () => {
         websocketClient.onclose = () => {
           console.log('WebSocket Disconnected')
-          setWebsocketClient(new WebSocket(WEBSOCKET_URL))
+          setWebsocketClient(new WebSocket(config[chainId].websocket))
         }
       }
     }
