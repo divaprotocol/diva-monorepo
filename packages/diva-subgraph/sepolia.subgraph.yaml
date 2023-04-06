@@ -1,14 +1,14 @@
 specVersion: 0.0.4
 schema:
-  file: ./schema_new.graphql
+  file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: DivaDiamond
-    network: matic
+    network: sepolia
     source:
-      address: "0xFf7d52432B19521276962B67FFB432eCcA609148"
+      address: "0xF554e0FE7F75BaA00d76c4347fc098C9F88D2D25"
       abi: DivaDiamond
-      startBlock: 39351153
+      startBlock: 2971871
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -22,9 +22,10 @@ dataSources:
         - PositionToken
         - TestnetUser
         - UserPositionTokens
+        - DIVAOfferFill
       abis:
         - name: DivaDiamond
-          file: ./abi/IDIVAPilot.json
+          file: ./abi/IDIVA.json
         - name: Erc20Token
           file: ./abi/IERC20.json
         - name: PositionTokenABI
@@ -48,24 +49,28 @@ dataSources:
           handler: handleFeeClaimTransferred
         - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
-      file: ./src/mapping_pilot.ts
-  - kind: ethereum/contract
-    name: ExchangeProxy
-    network: matic
-    source:
-      address: "0xDef1C0ded9bec7F1a1670819833240f027b25EfF"
-      abi: IZeroEx
-      startBlock: 30679655
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.6
-      language: wasm/assemblyscript
-      entities:
-        - NativeOrderFill
-      abis:
-        - name: IZeroEx
-          file: ./abi/IZeroEx.json
-      eventHandlers:
-        - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
-          handler: handleLimitOrderFilledEvent
-      file: ./src/mapping_pilot.ts
+      file: ./src/mapping.ts
+  
+  # 0x protocol is not yet available on sepolia.
+  # Check here the available networks: https://github.com/0xProject/protocol/blob/development/packages/contract-addresses/addresses.json
+
+  # - kind: ethereum/contract
+  #   name: ExchangeProxy
+  #   network: sepolia
+  #   source:
+  #     address: "" # update
+  #     abi: IZeroEx
+  #     startBlock: 0 # update
+  #   mapping:
+  #     kind: ethereum/events
+  #     apiVersion: 0.0.6
+  #     language: wasm/assemblyscript
+  #     entities:
+  #       - NativeOrderFill
+  #     abis:
+  #       - name: IZeroEx
+  #         file: ./abi/IZeroEx.json
+  #     eventHandlers:
+  #       - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
+  #         handler: handleLimitOrderFilledEvent
+  #     file: ./src/mapping.ts

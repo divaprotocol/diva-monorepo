@@ -1,6 +1,7 @@
 import { GridColDef, GridRowModel } from '@mui/x-data-grid'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import { formatUnits } from 'ethers/lib/utils'
+import { config } from '../../constants'
 import {
   getDateTime,
   getExpiryMinutesFromNow,
@@ -14,6 +15,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CoinIconPair } from '../CoinIcon'
 import {
   fetchPools,
+  selectChainId,
   selectPools,
   selectRequestStatus,
 } from '../../Redux/appSlice'
@@ -32,7 +34,7 @@ import {
 } from '@mui/material'
 import ViewModuleIcon from '@mui/icons-material/ViewModule'
 import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
-import { DIVA_GOVERNANCE_ADDRESS, WEBSOCKET_URL } from '../../constants'
+import { DIVA_GOVERNANCE_ADDRESS } from '../../constants'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
 import { ORDER_TYPE } from '../../Models/orderbook'
@@ -598,8 +600,9 @@ export default function Markets() {
   const [selectedPoolsView, setSelectedPoolsView] = useState<'Grid' | 'Table'>(
     'Table'
   )
+  const chainId = useAppSelector(selectChainId)
   const [websocketClient, setWebsocketClient] = useState(
-    new WebSocket(WEBSOCKET_URL)
+    new WebSocket(config[chainId].websocket)
   )
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
   const [searchInput, setSearchInput] = useState<string>('')
@@ -799,7 +802,7 @@ export default function Markets() {
       return () => {
         websocketClient.onclose = () => {
           console.log('WebSocket Disconnected')
-          setWebsocketClient(new WebSocket(WEBSOCKET_URL))
+          setWebsocketClient(new WebSocket(config[chainId!].websocket))
         }
       }
     }

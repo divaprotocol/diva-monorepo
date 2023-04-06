@@ -1,14 +1,14 @@
 specVersion: 0.0.4
 schema:
-  file: ./schema_new.graphql
+  file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: DivaDiamond
     network: mumbai
     source:
-      address: "0x4ff4970258d109a596C65411b1b29f9569F215ff"
+      address: "0xa761003C34936b760473eD993B2B6208aB07782E"
       abi: DivaDiamond
-      startBlock: 32099482
+      startBlock: 32419100
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -22,9 +22,10 @@ dataSources:
         - PositionToken
         - TestnetUser
         - UserPositionTokens
+        - DIVAOfferFill
       abis:
         - name: DivaDiamond
-          file: ./abi/IDIVAPilot.json
+          file: ./abi/IDIVA.json
         - name: Erc20Token
           file: ./abi/IERC20.json
         - name: PositionTokenABI
@@ -48,14 +49,14 @@ dataSources:
           handler: handleFeeClaimTransferred
         - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
-      file: ./src/mapping_pilot.ts
+      file: ./src/mapping.ts
   - kind: ethereum/contract
     name: ExchangeProxy
     network: mumbai
     source:
-      address: "0xF471D32cb40837bf24529FCF17418fC1a4807626"
+      address: "0xf471d32cb40837bf24529fcf17418fc1a4807626"
       abi: IZeroEx
-      startBlock: 32099482
+      startBlock: 32419100
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -68,4 +69,4 @@ dataSources:
       eventHandlers:
         - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
           handler: handleLimitOrderFilledEvent
-      file: ./src/mapping_pilot.ts
+      file: ./src/mapping.ts
