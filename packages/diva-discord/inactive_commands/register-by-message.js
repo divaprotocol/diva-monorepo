@@ -1,4 +1,4 @@
-const ERC20_ABI = require('@diva/contracts/abis/erc20.json')
+const ERC20_ABI = require('../abi/ERC20ABI.json')
 const { parseEther, parseUnits, formatUnits } = require('@ethersproject/units')
 
 module.exports = {

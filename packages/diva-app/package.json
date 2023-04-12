@@ -7,7 +7,6 @@
     "@0x/contract-wrappers": "^13.18.1",
     "@0x/protocol-utils": "^1.9.3",
     "@0x/subproviders": "6.5.4",
-    "@diva/contracts": "*",
     "@emotion/react": "^11.5.0",
     "@emotion/styled": "^11.3.0",
     "@ethersproject/providers": "^5.6.4",
