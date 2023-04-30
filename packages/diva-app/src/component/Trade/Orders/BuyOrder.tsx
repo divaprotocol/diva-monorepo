@@ -708,6 +708,9 @@ const BuyOrder = (props: {
       // Convert user input into BigNumber
       const nbrOfOptionsBalance = parseUnits(numberOfOptions, decimals)
       const totalAmountPrice = nbrOfOptionsBalance.mul(avgExpectedRate)
+      const maxAmount = collateralBalance
+        .mul(collateralTokenUnit)
+        .div(avgExpectedRate)
 
       if (youPay.gt(collateralBalance)) {
         if (youPay.lte(remainingAllowance)) {
@@ -725,25 +728,26 @@ const BuyOrder = (props: {
         } else {
           if (Number(numberOfOptions) > totalQuantity) {
             if (
-              nbrOfOptionsBalance.gt(collateralBalance) &&
+              nbrOfOptionsBalance.gt(maxAmount) &&
+              totalAmountPrice.lte(remainingAllowance)
+            ) {
+              setBalanceAlert(true)
+              setAmountExceedAlert(false)
+              setQuantityExceedAlert(true)
+            } else if (
+              nbrOfOptionsBalance.lte(maxAmount) &&
               totalAmountPrice.lte(remainingAllowance)
             ) {
               setAmountExceedAlert(false)
               setQuantityExceedAlert(true)
             } else if (
-              nbrOfOptionsBalance.lte(collateralBalance) &&
-              totalAmountPrice.lte(remainingAllowance)
-            ) {
-              setAmountExceedAlert(false)
-              setQuantityExceedAlert(true)
-            } else if (
-              nbrOfOptionsBalance.gt(collateralBalance) &&
+              nbrOfOptionsBalance.gt(maxAmount) &&
               totalAmountPrice.gt(remainingAllowance)
             ) {
               setQuantityExceedAlert(false)
               setAmountExceedAlert(true)
             } else if (
-              nbrOfOptionsBalance.lte(collateralBalance) &&
+              nbrOfOptionsBalance.lte(maxAmount) &&
               totalAmountPrice.gt(remainingAllowance)
             ) {
               setAmountExceedAlert(false)
@@ -754,13 +758,13 @@ const BuyOrder = (props: {
             }
           } else if (Number(numberOfOptions) <= totalQuantity) {
             if (
-              nbrOfOptionsBalance.gt(collateralBalance) &&
+              nbrOfOptionsBalance.gt(maxAmount) &&
               totalAmountPrice.gt(remainingAllowance)
             ) {
               setQuantityExceedAlert(false)
               setAmountExceedAlert(true)
             } else if (
-              nbrOfOptionsBalance.gt(collateralBalance) &&
+              nbrOfOptionsBalance.gt(maxAmount) &&
               totalAmountPrice.lte(remainingAllowance)
             ) {
               setQuantityExceedAlert(false)
@@ -777,13 +781,14 @@ const BuyOrder = (props: {
         }
       } else {
         if (
-          nbrOfOptionsBalance.gt(collateralBalance) &&
+          nbrOfOptionsBalance.gt(maxAmount) &&
           totalAmountPrice.gt(remainingAllowance)
         ) {
           setAmountExceedAlert(true)
         } else {
           setAmountExceedAlert(false)
         }
+        setQuantityExceedAlert(false)
         setOrderBookAlert(false)
       }
     } else {
@@ -801,7 +806,8 @@ const BuyOrder = (props: {
   const fillBtnDisabled =
     !isApproved ||
     orderBtnDisabled ||
-    collateralBalance.sub(youPay).sub(feeAmount).lt(0)
+    collateralBalance.sub(youPay).sub(feeAmount).lt(0) ||
+    (numberOfOptions !== '' && Number(numberOfOptions) > totalQuantity)
   const approveBtnDisabled = isApproved || youPay.lte(0) // No collateralBalance.sub(youPay).lt(0) condition as a user should be able to approve any amount they want
 
   return (

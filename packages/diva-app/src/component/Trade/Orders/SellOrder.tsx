@@ -733,6 +733,7 @@ const SellOrder = (props: {
               nbrOfOptionsBalance.gt(optionBalance) &&
               nbrOfOptionsBalance.lte(remainingAllowance)
             ) {
+              setBalanceAlert(true)
               setAmountExceedAlert(false)
               setQuantityExceedAlert(true)
             } else if (
@@ -789,6 +790,7 @@ const SellOrder = (props: {
         } else {
           setAmountExceedAlert(false)
         }
+        setQuantityExceedAlert(false)
         setOrderBookAlert(false)
       }
     } else {
