@@ -708,9 +708,9 @@ const BuyOrder = (props: {
       // Convert user input into BigNumber
       const nbrOfOptionsBalance = parseUnits(numberOfOptions, decimals)
       const totalAmountPrice = nbrOfOptionsBalance.mul(avgExpectedRate)
-      const maxAmount = collateralBalance
-        .mul(collateralTokenUnit)
-        .div(avgExpectedRate)
+      const maxAmount =
+        !avgExpectedRate.eq(0) &&
+        collateralBalance.mul(collateralTokenUnit).div(avgExpectedRate)
 
       if (youPay.gt(collateralBalance)) {
         if (youPay.lte(remainingAllowance)) {
