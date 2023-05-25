@@ -55,7 +55,7 @@ function handleChallengeEvent(
 ): void {
   let challenge = new Challenge(challengeId);
 
-  challenge.pool = poolId.toString();
+  challenge.pool = poolId.toHexString();
   challenge.challengedBy = challengedBy;
   challenge.proposedFinalReferenceValue = proposedFinalReferenceValue;
   challenge.save();
@@ -225,7 +225,7 @@ function handleLiquidityEvent(
     longTokenEntity.name = longTokenContract.name();
     longTokenEntity.symbol = longTokenContract.symbol();
     longTokenEntity.decimals = longTokenContract.decimals();
-    longTokenEntity.pool = longTokenContract.poolId().toString();
+    longTokenEntity.pool = longTokenContract.poolId().toHexString();
     longTokenEntity.owner = longTokenContract.owner();
 
     // Save results in entity
@@ -248,7 +248,7 @@ function handleLiquidityEvent(
     shortTokenEntity.name = shortTokenContract.name();
     shortTokenEntity.symbol = shortTokenContract.symbol();
     shortTokenEntity.decimals = shortTokenContract.decimals();
-    shortTokenEntity.pool = shortTokenContract.poolId().toString();
+    shortTokenEntity.pool = shortTokenContract.poolId().toHexString();
     shortTokenEntity.owner = shortTokenContract.owner();
 
     // Save results in entity
@@ -260,13 +260,13 @@ function handleLiquidityEvent(
   // ******************************************
 
   // Check whether a Pool entity already exists for the provided `poolId`
-  let poolEntity = Pool.load(poolId.toString());
+  let poolEntity = Pool.load(poolId.toHexString());
 
   // If not, add it. The if clause is entered on `createContingentPool` or `fillOfferCreateContingentPool` only.
   // It is not entered on add or remove liquidity. As a result, the task completion status for create contingent pool
   // related tasks is updated inside this if clause.
   if (!poolEntity) {
-    poolEntity = new Pool(poolId.toString());
+    poolEntity = new Pool(poolId.toHexString());
     poolEntity.createdBy = msgSender;
     poolEntity.createdAt = blockTimestamp;
     poolEntity.collateralBalanceGross = new BigInt(0);
