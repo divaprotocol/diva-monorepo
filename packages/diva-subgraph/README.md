@@ -131,7 +131,7 @@ The following query can be used to pull the data for a given pool Id (here pool 
 
 ```js
 {
-  pools(where: {id: 1}) {
+  pools(where: {id: "0x0fe386eff10c6903026ac911ea5e2d5076148a8f55aeea170f69a12e6da4353f"}) {
     id
     referenceAsset
     floor
@@ -188,7 +188,7 @@ Sample output from the above query:
   "data": {
     "pools": [
       {
-        "id": "1",
+        "id": "0x0fe386eff10c6903026ac911ea5e2d5076148a8f55aeea170f69a12e6da4353f",
         "referenceAsset": "ETH/USD",
         "floor": "2000000000000000000000",
         "inflection": "2500000000000000000000",
@@ -286,7 +286,7 @@ Sample output of the above query:
   "data": {
     "pools": [
       {
-        "id": "1",
+        "id": "0x0fe386eff10c6903026ac911ea5e2d5076148a8f55aeea170f69a12e6da4353f",
         "referenceAsset": "ETH/USD",
         "expiryTime": "1679479028",
         "dataProvider": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
@@ -370,11 +370,11 @@ Sample output from the above query:
 
 ## Challenges
 
-Query to retrieve the submitted challenges for a given poolId (here poolId = 5):
+Query to retrieve the submitted challenges for a given poolId (here poolId = "0x0fe386eff10c6903026ac911ea5e2d5076148a8f55aeea170f69a12e6da4353f"):
 
 ```js
 {
-  challenges(where: {pool: "5"}) {
+  challenges(where: {pool: "0x0fe386eff10c6903026ac911ea5e2d5076148a8f55aeea170f69a12e6da4353f"}) {
     challengedBy
     proposedFinalReferenceValue
     pool {
@@ -394,7 +394,7 @@ Sample output of above query:
         "challengedBy": "0x9adefeb576dcf52f5220709c1b267d89d5208d78",
         "proposedFinalReferenceValue": "1670000000000000000000",
         "pool": {
-          "id": "5"
+          "id": "0x0fe386eff10c6903026ac911ea5e2d5076148a8f55aeea170f69a12e6da4353f"
         }
       }
     ]
@@ -490,7 +490,7 @@ Sample output of above query:
             "decimals": 18,
             "owner": "0xa6e26dba7aa0d065b3c866bb61b4aef3bb9d4874",
             "pool": {
-              "id": "1",
+              "id": "0x0fe386eff10c6903026ac911ea5e2d5076148a8f55aeea170f69a12e6da4353f",
               "referenceAsset": "ETH/USD",
               "floor": "2000000000000000000000",
               "inflection": "2500000000000000000000",
@@ -547,7 +547,7 @@ Sample output of above query:
             "decimals": 18,
             "owner": "0xa6e26dba7aa0d065b3c866bb61b4aef3bb9d4874",
             "pool": {
-              "id": "1",
+              "id": "0x0fe386eff10c6903026ac911ea5e2d5076148a8f55aeea170f69a12e6da4353f",
               "referenceAsset": "ETH/USD",
               "floor": "2000000000000000000000",
               "inflection": "2500000000000000000000",

@@ -637,6 +637,25 @@ export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void 
   }
 
   testnetUser.save();
+
+  // ******************************************
+  // *** Update the pool collateral balance ***
+  // ******************************************
+
+  // Connect to DIVA contract
+  let contract = DivaDiamond.bind(event.address);
+
+  // Get parameters for the provided `poolId`
+  let parameters = contract.getPoolParameters(event.params.poolId);
+
+  // Load the Pool entity. It already exists at that point.
+  let poolEntity = Pool.load(event.params.poolId.toHexString());
+
+  // Update (net) pool collateral balance
+  poolEntity!.collateralBalance = parameters.collateralBalance;
+
+  // Save results in entity
+  poolEntity!.save();
 }
 
 export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
