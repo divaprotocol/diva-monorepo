@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: mumbai
     source:
-      address: "0xa761003C34936b760473eD993B2B6208aB07782E"
+      address: "0x05029c04AFB6cf53Ef0af7af7e970E53A7143bD3"
       abi: DivaDiamond
-      startBlock: 32419100
+      startBlock: 35664266
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -33,21 +33,21 @@ dataSources:
         - name: PermissionedPositionTokenABI
           file: ./abi/IPermissionedPositionToken.json
       eventHandlers:
-        - event: LiquidityAdded(indexed uint256,indexed address,indexed address,uint256)
+        - event: LiquidityAdded(indexed bytes32,indexed address,indexed address,uint256)
           handler: handleLiquidityAdded
-        - event: LiquidityRemoved(indexed uint256,indexed address,indexed address,uint256)
+        - event: LiquidityRemoved(indexed bytes32,indexed address,indexed address,uint256)
           handler: handleLiquidityRemoved
-        - event: PoolIssued(indexed uint256,indexed address,indexed address,uint256,address)
+        - event: PoolIssued(indexed bytes32,indexed address,indexed address,uint256,address)
           handler: handlePoolIssued
-        - event: StatusChanged(indexed uint8,indexed address,indexed uint256,uint256)
+        - event: StatusChanged(indexed uint8,indexed address,indexed bytes32,uint256)
           handler: handleStatusChanged
-        - event: FeeClaimAllocated(indexed uint256,indexed address,uint256)
+        - event: FeeClaimAllocated(indexed bytes32,indexed address,uint256)
           handler: handleFeeClaimAllocated
         - event: FeeClaimed(indexed address,indexed address,uint256)
           handler: handleFeeClaimed
         - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
           handler: handleFeeClaimTransferred
-        - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
+        - event: PositionTokenRedeemed(indexed bytes32,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
       file: ./src/mapping.ts
   - kind: ethereum/contract

@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: goerli
     source:
-      address: "0xa6E26dbA7aA0d065b3C866Bb61B4AeF3Bb9d4874"
+      address: "0x131e157322b3DDaE6eF28a124f566bC9c177De69"
       abi: DivaDiamond
-      startBlock: 8556014
+      startBlock: 9018169
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -33,21 +33,21 @@ dataSources:
         - name: PermissionedPositionTokenABI
           file: ./abi/IPermissionedPositionToken.json
       eventHandlers:
-        - event: LiquidityAdded(indexed uint256,indexed address,indexed address,uint256)
+        - event: LiquidityAdded(indexed bytes32,indexed address,indexed address,uint256)
           handler: handleLiquidityAdded
-        - event: LiquidityRemoved(indexed uint256,indexed address,indexed address,uint256)
+        - event: LiquidityRemoved(indexed bytes32,indexed address,indexed address,uint256)
           handler: handleLiquidityRemoved
-        - event: PoolIssued(indexed uint256,indexed address,indexed address,uint256,address)
+        - event: PoolIssued(indexed bytes32,indexed address,indexed address,uint256,address)
           handler: handlePoolIssued
-        - event: StatusChanged(indexed uint8,indexed address,indexed uint256,uint256)
+        - event: StatusChanged(indexed uint8,indexed address,indexed bytes32,uint256)
           handler: handleStatusChanged
-        - event: FeeClaimAllocated(indexed uint256,indexed address,uint256)
+        - event: FeeClaimAllocated(indexed bytes32,indexed address,uint256)
           handler: handleFeeClaimAllocated
         - event: FeeClaimed(indexed address,indexed address,uint256)
           handler: handleFeeClaimed
         - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
           handler: handleFeeClaimTransferred
-        - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
+        - event: PositionTokenRedeemed(indexed bytes32,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
       file: ./src/mapping.ts
   - kind: ethereum/contract

@@ -1,4 +1,4 @@
-import { Address, BigInt, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, Bytes, log } from "@graphprotocol/graph-ts";
 import {
   DivaDiamond,
   LiquidityAdded,
@@ -48,7 +48,7 @@ import {
  *
  */
 function handleChallengeEvent(
-  poolId: BigInt,
+  poolId: Bytes,
   challengedBy: Address,
   proposedFinalReferenceValue: BigInt,
   challengeId: string
@@ -102,7 +102,7 @@ function initParameters(testnetUser: TestnetUser): void {
  * @param blockTimestamp Timestamp of the block that the transaction was part of
  */
 function handleLiquidityEvent(
-  poolId: BigInt,
+  poolId: Bytes,
   longRecipient: Address,
   shortRecipient: Address,
   divaAddress: Address,

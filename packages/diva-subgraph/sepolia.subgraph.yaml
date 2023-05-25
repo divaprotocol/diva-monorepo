@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: sepolia
     source:
-      address: "0xF554e0FE7F75BaA00d76c4347fc098C9F88D2D25"
+      address: "0x8ca8dE48c4507fa54a83Dde7ac68097e87520eEc"
       abi: DivaDiamond
-      startBlock: 2971871
+      startBlock: 3506285
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -33,21 +33,21 @@ dataSources:
         - name: PermissionedPositionTokenABI
           file: ./abi/IPermissionedPositionToken.json
       eventHandlers:
-        - event: LiquidityAdded(indexed uint256,indexed address,indexed address,uint256)
+        - event: LiquidityAdded(indexed bytes32,indexed address,indexed address,uint256)
           handler: handleLiquidityAdded
-        - event: LiquidityRemoved(indexed uint256,indexed address,indexed address,uint256)
+        - event: LiquidityRemoved(indexed bytes32,indexed address,indexed address,uint256)
           handler: handleLiquidityRemoved
-        - event: PoolIssued(indexed uint256,indexed address,indexed address,uint256,address)
+        - event: PoolIssued(indexed bytes32,indexed address,indexed address,uint256,address)
           handler: handlePoolIssued
-        - event: StatusChanged(indexed uint8,indexed address,indexed uint256,uint256)
+        - event: StatusChanged(indexed uint8,indexed address,indexed bytes32,uint256)
           handler: handleStatusChanged
-        - event: FeeClaimAllocated(indexed uint256,indexed address,uint256)
+        - event: FeeClaimAllocated(indexed bytes32,indexed address,uint256)
           handler: handleFeeClaimAllocated
         - event: FeeClaimed(indexed address,indexed address,uint256)
           handler: handleFeeClaimed
         - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
           handler: handleFeeClaimTransferred
-        - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
+        - event: PositionTokenRedeemed(indexed bytes32,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
       file: ./src/mapping.ts
   
