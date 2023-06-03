@@ -709,8 +709,10 @@ const BuyOrder = (props: {
       const nbrOfOptionsBalance = parseUnits(numberOfOptions, decimals)
       const totalAmountPrice = nbrOfOptionsBalance.mul(avgExpectedRate)
       const maxAmount =
-        !avgExpectedRate.eq(0) &&
-        collateralBalance.mul(collateralTokenUnit).div(avgExpectedRate)
+        checked && pricePerOption.gt(ZERO)
+          ? collateralBalance.mul(collateralTokenUnit).div(pricePerOption)
+          : !avgExpectedRate.eq(0) &&
+            collateralBalance.mul(collateralTokenUnit).div(avgExpectedRate)
 
       if (youPay.gt(collateralBalance)) {
         if (youPay.lte(remainingAllowance)) {
@@ -779,7 +781,7 @@ const BuyOrder = (props: {
             setOrderBookAlert(false)
           }
         }
-      } else {
+      } else if (Number(maxAmount) != 0) {
         if (
           nbrOfOptionsBalance.gt(maxAmount) &&
           totalAmountPrice.gt(remainingAllowance)
@@ -797,7 +799,7 @@ const BuyOrder = (props: {
       setOrderBookAlert(false)
       setBalanceAlert(false)
     }
-  }, [numberOfOptions, youPay, avgExpectedRate, checked])
+  }, [numberOfOptions, youPay, avgExpectedRate, checked, pricePerOption])
 
   const createBtnDisabled =
     !isApproved ||
