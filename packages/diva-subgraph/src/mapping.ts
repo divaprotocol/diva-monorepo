@@ -250,13 +250,13 @@ function handleLiquidityEvent(
   poolEntity.gradient = parameters.gradient; // Updated at create only
   poolEntity.collateralBalance = parameters.collateralBalance; // Updated at create/add/remove
   poolEntity.collateralBalanceGross = poolEntity.collateralBalanceGross.plus(collateralAmount); // Updated during create/add/remove
-  // poolEntity.finalReferenceValue is initialized with 0 and update at `StatusChanged` event
+  poolEntity.finalReferenceValue = parameters.finalReferenceValue; // Set to 0 at create and update at `StatusChanged` event
   poolEntity.capacity = parameters.capacity; // Updated at create only
   poolEntity.statusTimestamp = parameters.statusTimestamp; // Updated at create and `StatusChanged` events
   poolEntity.shortToken = parameters.shortToken.toHexString(); // Updated at create only
-  // poolEntity.payoutShort is initialized with 0 and updated at `StatusChanged` event when the final reference value is confirmed
+  poolEntity.payoutShort = parameters.payoutShort; // Set to 0 at create and updated at `StatusChanged` event when the final reference value is confirmed
   poolEntity.longToken = parameters.longToken.toHexString(); // Updated at create only
-  // poolEntity.payoutLong is initialized with 0 and updated at `StatusChanged` event when the final reference value is confirmed
+  poolEntity.payoutLong = parameters.payoutLong; // Set to 0 and updated at `StatusChanged` event when the final reference value is confirmed
   poolEntity.collateralToken = collateralTokenEntity.id; // Updated at create only
   poolEntity.expiryTime = parameters.expiryTime; // Updated at create only
   poolEntity.dataProvider = parameters.dataProvider; // Updated at create only
@@ -278,7 +278,6 @@ function handleLiquidityEvent(
   poolEntity.supplyShort = shortTokenContract.totalSupply(); // Updated at create/add/remove
   poolEntity.supplyLong = longTokenContract.totalSupply(); // Updated at create/add/remove
   poolEntity.permissionedERC721Token = permissionedERC721Token.toHexString(); // Updated at create only
-
   poolEntity.statusFinalReferenceValue = _translateStatus(parameters.statusFinalReferenceValue);
 
   // Save results in entity
@@ -451,7 +450,7 @@ export function handleStatusChanged(event: StatusChanged): void {
   handleStatusChangedEvent(
     event.params.poolId,
     event.address
-  )
+  );
 
   // Handle data emitted during challenges such as the challenger address as well as the new
   // proposed value.
@@ -476,7 +475,8 @@ export function handleFeeClaimAllocated(event: FeeClaimAllocated): void {
   let contract = DivaDiamond.bind(event.address);
   let parameters = contract.getPoolParameters(event.params.poolId);
   handleFeeClaimEvent(parameters.collateralToken, event.params.recipient, event.address);
-} // @todo Check whether it handles reserved fee claims correctly, i.e. whether the reserved fee claim
+}
+// @todo Check whether it handles reserved fee claims correctly, i.e. whether the reserved fee claim
 // is reflected because for reserved fee claim, there is another event called `ReservedClaimAllocated`.
 
 /**

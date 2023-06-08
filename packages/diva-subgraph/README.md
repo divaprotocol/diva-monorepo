@@ -10,13 +10,16 @@ The DIVA subgraph is available on the following networks:
 
 | Network        | Explorer URL |Development URL | Service |
 | :---------------- |:---------------- |:---------------- |:---------------- |
-| **Mainnet**                                                               |                                                                                                                                                           |||
-| Ethereum  | ... ||Subgraph Studio|
-| Polygon  | https://thegraph.com/explorer/subgraph/divaprotocol/diva-polygon-230226 |https://api.thegraph.com/subgraphs/name/divaprotocol/diva-polygon-230226|Hosted Service|
-| Arbitrum  | ... ||Hosted Service|
-**Testnet**                                                               |                                                                                                                                                           |||
-| Goerli  |https://thegraph.com/studio/subgraph/diva-goerli-230226/playground| https://api.studio.thegraph.com/query/14411/diva-goerli-230226/0.0.1 |Subgraph Studio|
-| Mumbai  |https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-mumbai-230226| https://api.thegraph.com/subgraphs/name/divaprotocol/diva-mumbai-230226 |Hosted Service|
+| **Mainnet**||||
+| Ethereum  | https://thegraph.com/studio/subgraph/diva-protocol-v1-ethereum |https://api.studio.thegraph.com/query/14411/diva-protocol-v1-ethereum/0.0.2|Subgraph Studio|
+| Polygon  | https://thegraph.com/explorer/subgraph/divaprotocol/diva-protocol-v1-polygon |https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-polygon|Hosted Service|
+| Arbitrum  | https://thegraph.com/studio/subgraph/diva-protocol-v1-arbitrum-one |https://api.studio.thegraph.com/query/14411/diva-protocol-v1-arbitrum-one/0.0.2|Subgraph Studio|
+| Gnosis  | https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-protocol-v1-gnosis |https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-gnosis|Hosted Service|
+**Testnet**||||
+| Goerli  |https://thegraph.com/studio/subgraph/diva-protocol-v1-goerli| https://api.studio.thegraph.com/query/14411/diva-protocol-v1-goerli/0.0.2 |Subgraph Studio|
+| Mumbai  |https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-protocol-v1-mumbai| https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-mumbai |Hosted Service|
+|Sepolia|https://thegraph.com/studio/subgraph/diva-protocol-v1-sepolia/playground|https://api.studio.thegraph.com/query/14411/diva-protocol-v1-sepolia/0.0.2|Subgraph Studio|
+|Arbitrum Goerli|https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-protocol-v1-arbitrum-test|https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-arbitrum-test|Hosted Service|
 
 The following sections provide a comprehensive guide how to create, deploy and publish the DIVA subgraph on new networks and environments.
 
@@ -95,10 +98,10 @@ Note that unlike [deploying to the Subgraph Studio](#deploying-a-subgraph-on-the
 
 If you want to deploy the subgraph to the Subgraph Studio, you'll need to replace the `$DIVA_SUBGRAPH_STUDIO_ACCESS_TOKEN` placeholder in the `package.json` file with your Access Token. Once you've done that, run the following command to authenticate your access:
 ```
-graph:auth-goerli-studio
+graph:auth:goerli:studio
 ```
 
-Next, replace the `$DIVA_SUBGRAPH_STUDIO_SLUG_230226` placeholder in the `package.json` file with the actual slug of the subgraph. Then, deploy your subgraph by running:
+Then, deploy your subgraph by running:
 ```
 yarn deploy:goerli:studio
 ```
@@ -107,7 +110,7 @@ You will be asked to enter a version label. We recommend using the version forma
 
 Note that deploying the subgraph to Subgraph Studio allows you to test and update the subgraph's metadata, but it does not publish the subgraph to the decentralized network. To publish the subgraph, you have to click the "Publish" button in the Studio UI.
 
->⚠️**Important:** Don't forget to undo the `$DIVA_SUBGRAPH_STUDIO_ACCESS_TOKEN` and `$DIVA_SUBGRAPH_STUDIO_SLUG_230226` replacements after you've deployed the subgraph.
+>⚠️**Important:** Don't forget to undo the `$DIVA_SUBGRAPH_STUDIO_ACCESS_TOKEN` replacement after you've deployed the subgraph.
 
 >💡**Note:** The slug is a unique identifier for every subgraph in Subgraph Studio. Slugs need to be added as organization secrets in Github in order to ensure a successful Github run.
 
@@ -605,7 +608,8 @@ Sample output of above query:
 
 | Error        | Solution |
 | :---------------- |:---------------- |
-| `The Subgraph Studio only allows subgraphs for these networks: mainnet, rinkeby`  | Try to install the dependencies by running `yarn` in the `diva-monorepo` directory and deploy again. |
+| `The Subgraph Studio only allows subgraphs for these networks: mainnet, rinkeby`  | Try to install the dependencies by running `yarn` in the `diva-monorepo` directory and deploy again. If you are facing `multiaddr` package related issues, try to remove the `@graphprotocol-cli` package via `yarn remove @graphprotocol-cli`, clean the cache via `yarn clean cache` and then install it again via `yarn add @graphprotocol-cli`. Also, read all the error messages. You may need to upgrade node to `16.14.0` at least. The goal is to have Current and Wanted version aligned when running `npm outdated @graphprotocol/graph-cli`. |
+|`ForbiddenOnly certain IPFS methods are allowed`|Upgrade `@graphprotocol/graph-cli` to the latest version via `yarn upgrad @graphprotocol/graph-cli` and try to deploy the subgraph again.|
 
 # Links
 
