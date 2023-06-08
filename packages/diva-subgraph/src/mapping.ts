@@ -12,7 +12,6 @@ import {
 } from "../generated/DivaDiamond/DivaDiamond";
 import { Erc20Token } from "../generated/DivaDiamond/Erc20Token";
 import { PositionTokenABI } from "../generated/DivaDiamond/PositionTokenABI";
-// import { PermissionedPositionTokenABI } from "../generated/DivaDiamond/PermissionedPositionTokenABI";
 import { LimitOrderFilled } from "../generated/ExchangeProxy/IZeroEx";
 import {
   Pool,
@@ -21,31 +20,23 @@ import {
   CollateralToken,
   FeeRecipientCollateralToken,
   PositionToken,
-  TestnetUser,
   UserPositionToken,
   User,
   NativeOrderFill,
 } from "../generated/schema";
 
-// TODO Add in subgraph yml file
+// @todo Add in subgraph yml file
 // - event: OfferFilled(indexed bytes32,indexed address,indexed address,uint256)
 // handler: handleOfferFilled
 // - event: OfferCancelled(indexed bytes32,indexed address)
 // handler: handleOfferCancelled
 
 /**
- * TODO
- * - Add collateralBalanceGross
- * - Add permissionedERC721Token to Pool entity
- * - Add
- */
-
-/**
- *
- * handleChallengeEvent
- *
- * Adds challenge events
- *
+ * @notice Function to handle challenge related events emitted by DIVA Protocol.
+ * @param poolId The pool Id affected.
+ * @param challengedBy The address of the challenger.
+ * @param proposedFinalReferenceValue The proposed final reference value by the challenger.
+ * @param challengeId Challenge entity Id.
  */
 function handleChallengeEvent(
   poolId: Bytes,
@@ -61,35 +52,12 @@ function handleChallengeEvent(
   challenge.save();
 }
 
-function initParameters(testnetUser: TestnetUser): void {
-  testnetUser.binaryPoolCreated = false;
-  testnetUser.convexPoolCreated = false;
-  testnetUser.linearPoolCreated = false;
-  testnetUser.concavePoolCreated = false;
-  testnetUser.liquidityAdded = false;
-  testnetUser.liquidityRemoved = false;
-  testnetUser.buyLimitOrderCreatedAndFilled = false;
-  testnetUser.buyLimitOrderFilled = false;
-  testnetUser.sellLimitOrderCreatedAndFilled = false;
-  testnetUser.sellLimitOrderFilled = false;
-  testnetUser.reportedValueChallenged = false;
-  testnetUser.finalValueReported = false;
-  testnetUser.feeClaimTransferred = false;
-  testnetUser.feeClaimed = false;
-  testnetUser.positionTokenRedeemed = false;
-  testnetUser.startTime = new BigInt(0);
-  testnetUser.endTime = new BigInt(0);
-}
-
 /**
- * Context:
- *
  * UserPositionToken entity: Frontend application may want to display a user's existing positions.
- * As looping through all position tokens that have ever been created in DIVA Protocol is not an efficient solution,
- * a shortlist of position tokens that a user may own is maintained. This is achieved by logging any interaction where
- * the user received position tokens in a UserPositionToken mapping. Interactions including creating a new pool,
- * adding liquidity to a new pool, purchasing position tokens.
- * Note that the user to position token mapping is not created if the user purchased the position token other than via 0x protocol.
+ * To optimize performance and avoid looping through all position tokens, a mapping of user interactions is maintained.
+ * Whenever a user receives position tokens through actions such as creating a new pool, adding liquidity to a pool,
+ * or purchasing tokens via the 0x protocol, the user's ownership of those tokens is logged in the UserPositionToken mapping.
+ * It's important to note that the mapping is not created for position tokens purchased outside of the 0x protocol.
  */
 
 /**
@@ -255,9 +223,9 @@ function handleLiquidityEvent(
     shortTokenEntity.save();
   }
 
-  // ******************************************
-  // *** Update Pool entity and TestnetUser ***
-  // ******************************************
+  // **************************
+  // *** Update Pool entity ***
+  // **************************
 
   // Check whether a Pool entity already exists for the provided `poolId`
   let poolEntity = Pool.load(poolId.toHexString());
@@ -282,13 +250,13 @@ function handleLiquidityEvent(
   poolEntity.gradient = parameters.gradient; // Updated at create only
   poolEntity.collateralBalance = parameters.collateralBalance; // Updated at create/add/remove
   poolEntity.collateralBalanceGross = poolEntity.collateralBalanceGross.plus(collateralAmount); // Updated during create/add/remove
-  // poolEntity.finalReferenceValue = parameters.finalReferenceValue; // Initialized with 0 and update at `StatusChanged` event
+  // poolEntity.finalReferenceValue is initialized with 0 and update at `StatusChanged` event
   poolEntity.capacity = parameters.capacity; // Updated at create only
   poolEntity.statusTimestamp = parameters.statusTimestamp; // Updated at create and `StatusChanged` events
   poolEntity.shortToken = parameters.shortToken.toHexString(); // Updated at create only
-  // poolEntity.payoutShort = parameters.payoutShort; // Initialized with 0 and update at `StatusChanged` event when final value is confirmed
+  // poolEntity.payoutShort is initialized with 0 and updated at `StatusChanged` event when the final reference value is confirmed
   poolEntity.longToken = parameters.longToken.toHexString(); // Updated at create only
-  // poolEntity.payoutLong = parameters.payoutLong; // Initialized with 0 and update at `StatusChanged` event when final value is confirmed
+  // poolEntity.payoutLong is initialized with 0 and updated at `StatusChanged` event when the final reference value is confirmed
   poolEntity.collateralToken = collateralTokenEntity.id; // Updated at create only
   poolEntity.expiryTime = parameters.expiryTime; // Updated at create only
   poolEntity.dataProvider = parameters.dataProvider; // Updated at create only
@@ -335,6 +303,7 @@ function handleFeeClaimEvent(
   // Get updated claim amount
   let claim = contract.getClaim(collateralTokenAddress, recipient);
 
+  // Update fee related entities
   let feeRecipientEntity = FeeRecipient.load(recipient.toHexString());
   let feeRecipientCollateralTokenEntity = FeeRecipientCollateralToken.load(
     recipient.toHexString() + "-" + collateralTokenAddress.toHexString()
@@ -367,6 +336,7 @@ function handleFeeClaimEvent(
 export function handleLiquidityAdded(event: LiquidityAdded): void {
   log.info("handleLiquidityAdded", []);
 
+  // Update pool parameters
   handleLiquidityEvent(
     event.params.poolId,
     event.params.longRecipient,
@@ -387,6 +357,7 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
 export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   log.info("handleLiquidityRemoved", []);
 
+  // Update pool parameters
   handleLiquidityEvent(
     event.params.poolId,
     event.params.longTokenHolder,
@@ -439,7 +410,7 @@ function handleStatusChangedEvent(
   // Load the Pool entity, which already exists at that point
   let poolEntity = Pool.load(poolId.toHexString());
 
-  // Update relevant parameters
+  // Update relevant pool parameters
   poolEntity!.collateralBalance = parameters.collateralBalance;
   poolEntity!.finalReferenceValue = parameters.finalReferenceValue;
   poolEntity!.statusTimestamp = parameters.statusTimestamp;
