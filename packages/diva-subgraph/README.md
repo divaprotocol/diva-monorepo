@@ -8,18 +8,18 @@ The storage structure of the data and the relationships are defined in the `sche
 
 The DIVA subgraph is available on the following networks:
 
-| Network        | Explorer URL |Development URL | Service |
-| :---------------- |:---------------- |:---------------- |:---------------- |
-| **Mainnet**||||
-| Ethereum  | https://thegraph.com/studio/subgraph/diva-protocol-v1-ethereum |https://api.studio.thegraph.com/query/14411/diva-protocol-v1-ethereum/0.0.2|Subgraph Studio|
-| Polygon  | https://thegraph.com/explorer/subgraph/divaprotocol/diva-protocol-v1-polygon |https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-polygon|Hosted Service|
-| Arbitrum  | https://thegraph.com/studio/subgraph/diva-protocol-v1-arbitrum-one |https://api.studio.thegraph.com/query/14411/diva-protocol-v1-arbitrum-one/0.0.2|Subgraph Studio|
-| Gnosis  | https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-protocol-v1-gnosis |https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-gnosis|Hosted Service|
+| Network        | Explorer URL |Development URL | Service | Published|
+| :---------------- |:---------------- |:---------------- |:---------------- |:---------------- |
+| **Mainnet**|||||
+| Ethereum  | https://thegraph.com/studio/subgraph/diva-protocol-v1-ethereum |https://api.studio.thegraph.com/query/14411/diva-protocol-v1-ethereum/0.0.2|Subgraph Studio|❌No|
+| Polygon  | https://thegraph.com/explorer/subgraph/divaprotocol/diva-protocol-v1-polygon |https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-polygon|Hosted Service|✅Yes|
+| Arbitrum  | https://thegraph.com/studio/subgraph/diva-protocol-v1-arbitrum-one |https://api.studio.thegraph.com/query/14411/diva-protocol-v1-arbitrum-one/0.0.2|Subgraph Studio|❌No|
+| Gnosis  | https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-protocol-v1-gnosis |https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-gnosis|Hosted Service|✅Yes|
 **Testnet**||||
-| Goerli  |https://thegraph.com/studio/subgraph/diva-protocol-v1-goerli| https://api.studio.thegraph.com/query/14411/diva-protocol-v1-goerli/0.0.2 |Subgraph Studio|
-| Mumbai  |https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-protocol-v1-mumbai| https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-mumbai |Hosted Service|
-|Sepolia|https://thegraph.com/studio/subgraph/diva-protocol-v1-sepolia/playground|https://api.studio.thegraph.com/query/14411/diva-protocol-v1-sepolia/0.0.2|Subgraph Studio|
-|Arbitrum Goerli|https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-protocol-v1-arbitrum-test|https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-arbitrum-test|Hosted Service|
+| Goerli  |https://thegraph.com/studio/subgraph/diva-protocol-v1-goerli| https://api.studio.thegraph.com/query/14411/diva-protocol-v1-goerli/0.0.2 |Subgraph Studio|❌No|
+| Mumbai  |https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-protocol-v1-mumbai| https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-mumbai |Hosted Service|✅Yes|
+|Sepolia|https://thegraph.com/studio/subgraph/diva-protocol-v1-sepolia/playground|https://api.studio.thegraph.com/query/14411/diva-protocol-v1-sepolia/0.0.2|Subgraph Studio|❌No|
+|Arbitrum Goerli|https://thegraph.com/hosted-service/subgraph/divaprotocol/diva-protocol-v1-arbitrum-test|https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-arbitrum-test|Hosted Service|✅Yes|
 
 The following sections provide a comprehensive guide how to create, deploy and publish the DIVA subgraph on new networks and environments.
 
