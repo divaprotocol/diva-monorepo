@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: matic
     source:
-      address: "0xb6038e15b5065ca4E33210C156d06311Ec26B21D"
+      address: "0x2C9c47E7d254e493f02acfB410864b9a86c28e1D"
       abi: DivaDiamond
-      startBlock: 43095645
+      startBlock: 43546633
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -20,7 +20,6 @@ dataSources:
         - FeeRecipient
         - FeeRecipientCollateralToken
         - PositionToken
-        - TestnetUser
         - UserPositionTokens
         - DIVAOfferFill
       abis:
@@ -50,13 +49,15 @@ dataSources:
         - event: PositionTokenRedeemed(indexed bytes32,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
       file: ./src/mapping.ts
+  
+  # 0x protocol related subgraph
   - kind: ethereum/contract
     name: ExchangeProxy
     network: matic
     source:
       address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
       abi: IZeroEx
-      startBlock: 39701204
+      startBlock: 43546633
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

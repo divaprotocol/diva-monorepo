@@ -93,13 +93,14 @@ function initParameters(testnetUser: TestnetUser): void {
  */
 
 /**
- * @notice Function to handle PoolIssued, LiquidityAdded and LiquidityRemoved events.
- * @param poolId The pool Id affected
- * @param longRecipient The recipient address of the long position token in PoolIssued and LiquidityAdded events. msgSender in LiquidityRemoved event.
- * @param shortRecipient The recipient address of the short position token in PoolIssued and LiquidityAdded events. msgSender in LiquidityRemoved event.
- * @param divaAddress DIVA contract address
- * @param msgSender Address that triggered the underlying transaction
- * @param blockTimestamp Timestamp of the block that the transaction was part of
+ * @notice Function to handle `PoolIssued`, `LiquidityAdded` and `LiquidityRemoved` events emitted
+ * by DIVA Protocol.
+ * @param poolId The pool Id affected.
+ * @param longRecipient The recipient address of the long position token.
+ * @param shortRecipient The recipient address of the short position token.
+ * @param divaAddress DIVA contract address.
+ * @param msgSender Address that triggered the transaction.
+ * @param blockTimestamp Timestamp of the block that included the transaction.
  */
 function handleLiquidityEvent(
   poolId: Bytes,
@@ -132,8 +133,7 @@ function handleLiquidityEvent(
   // Check whether a User entity for `shortRecipient` already exists
   let shortRecipientEntity = User.load(shortRecipient.toHexString());
 
-  // If not, add it. Could be the case during PoolIssued, LiquidityAdded or LiquidityRemoved events.
-  // QUESTION StatusChanged events as well? I think so because msg.sender could be anyone (msg.sender is used as dummy for shortRecipient and longRecipient in StatusChanged event handling)
+  // If not, add it. Is the case at create. Could be the case at add/remove.
   if (!shortRecipientEntity) {
     shortRecipientEntity = new User(shortRecipient.toHexString());
     shortRecipientEntity.save();
@@ -270,56 +270,6 @@ function handleLiquidityEvent(
     poolEntity.createdBy = msgSender;
     poolEntity.createdAt = blockTimestamp;
     poolEntity.collateralBalanceGross = new BigInt(0);
-
-    // ******************************************************************
-    // *** Update TestnetUser entity for create contingent pool tasks ***
-    // ******************************************************************
-
-    // Add testnet user. Here msgSender, i.e. the user that triggered the transaction is the relevant user.
-    // This addition is done once when the pool entity is established-
-    let testnetUser = TestnetUser.load(msgSender.toHexString());
-    if (!testnetUser) {
-      testnetUser = new TestnetUser(msgSender.toHexString());
-      initParameters(testnetUser);
-    }
-
-    // Check what payoff profile type the user has created (binary, linear, convex or concave)
-    // and flag the corresponding task as completed
-    const unit = BigInt.fromString("1000000000000000000"); // 1e18
-
-    // Scale gradient to 18 decimals
-    const decimals = shortTokenContract.decimals();
-    const scaling = BigInt.fromI32(10).pow(18 - <u8>decimals);
-    let gradient = parameters.gradient.times(scaling);
-
-    if (parameters.floor.equals(parameters.cap)) {
-      testnetUser.binaryPoolCreated = true;
-    } else {
-      // Calculate the hypothetical gradient if it was a linear curve
-      const gradientLinear = parameters.inflection
-        .minus(parameters.floor)
-        .times(unit)
-        .div(parameters.cap.minus(parameters.floor));
-
-      // Compare hypothetical gradientLinear with actual gradient set by user
-      if (gradient.equals(gradientLinear)) {
-        testnetUser.linearPoolCreated = true;
-      } else if (gradient.gt(gradientLinear)) {
-        testnetUser.concavePoolCreated = true;
-      } else if (gradient.lt(gradientLinear)) {
-        testnetUser.convexPoolCreated = true;
-      }
-    }
-
-    if (testnetUser.startTime.equals(new BigInt(0))) {
-      testnetUser.startTime = blockTimestamp;
-      testnetUser.endTime = blockTimestamp;
-    } else {
-      testnetUser.endTime = blockTimestamp;
-    }
-
-    // Save results in entity
-    testnetUser.save();
   }
 
   // **************************
@@ -330,15 +280,15 @@ function handleLiquidityEvent(
   poolEntity.inflection = parameters.inflection; // Updated at create only
   poolEntity.cap = parameters.cap; // Updated at create only
   poolEntity.gradient = parameters.gradient; // Updated at create only
-  poolEntity.collateralBalance = parameters.collateralBalance; // Updated during create/add/remove using the updated value inside DIVA protocol
-  poolEntity.collateralBalanceGross = poolEntity.collateralBalanceGross.plus(collateralAmount); // Updated during create/add/remove using the updated value inside DIVA protocol
-  poolEntity.finalReferenceValue = parameters.finalReferenceValue; // Set at StatusChanged event
+  poolEntity.collateralBalance = parameters.collateralBalance; // Updated at create/add/remove
+  poolEntity.collateralBalanceGross = poolEntity.collateralBalanceGross.plus(collateralAmount); // Updated during create/add/remove
+  // poolEntity.finalReferenceValue = parameters.finalReferenceValue; // Initialized with 0 and update at `StatusChanged` event
   poolEntity.capacity = parameters.capacity; // Updated at create only
-  poolEntity.statusTimestamp = parameters.statusTimestamp; // Updated at PoolIssued and StatusChanged events
+  poolEntity.statusTimestamp = parameters.statusTimestamp; // Updated at create and `StatusChanged` events
   poolEntity.shortToken = parameters.shortToken.toHexString(); // Updated at create only
-  poolEntity.payoutShort = parameters.payoutShort; // Updated on StatusChanged event (only when status changes to Confirmed)
+  // poolEntity.payoutShort = parameters.payoutShort; // Initialized with 0 and update at `StatusChanged` event when final value is confirmed
   poolEntity.longToken = parameters.longToken.toHexString(); // Updated at create only
-  poolEntity.payoutLong = parameters.payoutLong; // Updated on StatusChanged event (only when status changes to Confirmed)
+  // poolEntity.payoutLong = parameters.payoutLong; // Initialized with 0 and update at `StatusChanged` event when final value is confirmed
   poolEntity.collateralToken = collateralTokenEntity.id; // Updated at create only
   poolEntity.expiryTime = parameters.expiryTime; // Updated at create only
   poolEntity.dataProvider = parameters.dataProvider; // Updated at create only
@@ -346,42 +296,34 @@ function handleLiquidityEvent(
   poolEntity.settlementFee = contract.getFees(parameters.indexFees).settlementFee; // Updated at create only
   poolEntity.submissionPeriod = BigInt.fromI32(
     contract.getSettlementPeriods(parameters.indexSettlementPeriods).submissionPeriod
-  );
+  ); // Updated at create only
   poolEntity.challengePeriod = BigInt.fromI32(
     contract.getSettlementPeriods(parameters.indexSettlementPeriods).challengePeriod
-  );
+  ); // Updated at create only
   poolEntity.reviewPeriod = BigInt.fromI32(
     contract.getSettlementPeriods(parameters.indexSettlementPeriods).reviewPeriod
-  );
+  ); // Updated at create only
   poolEntity.fallbackSubmissionPeriod = BigInt.fromI32(
     contract.getSettlementPeriods(parameters.indexSettlementPeriods).fallbackSubmissionPeriod
-  );
+  ); // Updated at create only
   poolEntity.referenceAsset = parameters.referenceAsset; // Updated at create only
-  poolEntity.supplyShort = shortTokenContract.totalSupply(); // Updated during create/add/remove
-  poolEntity.supplyLong = longTokenContract.totalSupply(); // Updated during create/add/remove
+  poolEntity.supplyShort = shortTokenContract.totalSupply(); // Updated at create/add/remove
+  poolEntity.supplyLong = longTokenContract.totalSupply(); // Updated at create/add/remove
+  poolEntity.permissionedERC721Token = permissionedERC721Token.toHexString(); // Updated at create only
 
-  // TODO: Add permissionedERC721Token to PoolIssued event
-  poolEntity.permissionedERC721Token = permissionedERC721Token.toHexString();
-
-  // QUESTION Add longRecipient and shortRecipient? -> maybe in dedicated PoolIssued and LiquidityAdded entities rather than in "cumulative" Pool entity
-
-  let status = parameters.statusFinalReferenceValue; // Updated at PoolIssued and StatusChanged events
-
-  // Translate status from number to string
-  if (status === 0) {
-    poolEntity.statusFinalReferenceValue = "Open";
-  } else if (status === 1) {
-    poolEntity.statusFinalReferenceValue = "Submitted";
-  } else if (status === 2) {
-    poolEntity.statusFinalReferenceValue = "Challenged";
-  } else if (status === 3) {
-    poolEntity.statusFinalReferenceValue = "Confirmed";
-  }
+  poolEntity.statusFinalReferenceValue = _translateStatus(parameters.statusFinalReferenceValue);
 
   // Save results in entity
   poolEntity.save();
 }
 
+// @todo Check whether getClaim also reflects reserved fees that were allocated
+/**
+ * @notice Function to read the updated fee claim and store it in the fee related entities.
+ * @param collateralTokenAddress The address of the collateral token in which the fee is denominated.
+ * @param recipient Recipient of fee claim.
+ * @param divaAddress DIVA Protocol contract address from which the fee claim is read.
+ */
 function handleFeeClaimEvent(
   collateralTokenAddress: Address,
   recipient: Address,
@@ -412,20 +354,19 @@ function handleFeeClaimEvent(
 
   feeRecipientCollateralTokenEntity.amount = claim;
 
-  // if (isIncrease) {
-  //   feeRecipientCollateralTokenEntity.amount =
-  //     feeRecipientCollateralTokenEntity.amount.plus(amount);
-  // } else {
-  //   feeRecipientCollateralTokenEntity.amount =
-  //     feeRecipientCollateralTokenEntity.amount.minus(amount);
-  // }
-
+  // Save results in entities
   feeRecipientEntity.save();
   feeRecipientCollateralTokenEntity.save();
 }
 
+/**
+ * @notice Function to handle `LiquidityAdded` events emitted by DIVA Protocol when
+ * liquidity is added to existing pools.
+ * @param event `LiquidityAdded` event data.
+ */
 export function handleLiquidityAdded(event: LiquidityAdded): void {
   log.info("handleLiquidityAdded", []);
+
   handleLiquidityEvent(
     event.params.poolId,
     event.params.longRecipient,
@@ -434,63 +375,39 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
     event.transaction.from,
     event.block.timestamp,
     event.params.collateralAmount,
-    new Address(0)
+    new Address(0) // permissionedERC721Token; only relevant when a new pool is created
   );
-
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
-  if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
-    initParameters(testnetUser);
-  }
-  testnetUser.liquidityAdded = true;
-
-  if (testnetUser.startTime.equals(new BigInt(0))) {
-    testnetUser.startTime = event.block.timestamp;
-    testnetUser.endTime = event.block.timestamp;
-  } else {
-    testnetUser.endTime = event.block.timestamp;
-  }
-
-  testnetUser.save();
 }
 
+/**
+ * @notice Function to handle `LiquidityRemoved` events emitted by DIVA Protocol when
+ * liquidity is removed from existing pools.
+ * @param event `LiquidityRemoved` event data.
+ */
 export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   log.info("handleLiquidityRemoved", []);
+
   handleLiquidityEvent(
     event.params.poolId,
-    event.params.longTokenHolder, // COMMENT Place holder for longRecipient
-    event.params.shortTokenHolder, // COMMENT Place holder for shortRecipient
+    event.params.longTokenHolder,
+    event.params.shortTokenHolder,
     event.address,
     event.transaction.from,
     event.block.timestamp,
     new BigInt(0), // Do not add to collateralBalanceGross on remove liquidity
-    new Address(0)
+    new Address(0) // permissionedERC721Token; only relevant when a new pool is created
   );
-
-  // ************************************************************
-  // *** Update TestnetUser entity for remove liquidity task ***
-  // ************************************************************
-
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
-  if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
-    initParameters(testnetUser);
-  }
-  testnetUser.liquidityRemoved = true;
-
-  if (testnetUser.startTime.equals(new BigInt(0))) {
-    testnetUser.startTime = event.block.timestamp;
-    testnetUser.endTime = event.block.timestamp;
-  } else {
-    testnetUser.endTime = event.block.timestamp;
-  }
-
-  // Save result in entity
-  testnetUser.save();
 }
 
+/**
+ * @notice Function to handle `PoolIssued` events emitted by DIVA Protocol when a new
+ * contingent pool is created.
+ * @param event `PoolIssued` event data.
+ */
 export function handlePoolIssued(event: PoolIssued): void {
   log.info("handlePoolIssued fired", []);
+
+  // Update pool parameters
   handleLiquidityEvent(
     event.params.poolId, // Newly created poolId
     event.params.longRecipient, // Long position token recipient address
@@ -503,18 +420,70 @@ export function handlePoolIssued(event: PoolIssued): void {
   );
 }
 
+/**
+ * @notice Function to handle `StatusChanged` events emitted by DIVA Protocol when the status of the
+ * final reference value changes.
+ * @param poolId The pool Id affected.
+ * @param divaAddress DIVA contract address.
+ */
+function handleStatusChangedEvent(
+  poolId: Bytes,
+  divaAddress: Address,
+): void {
+  // Connect to DIVA contract
+  let contract = DivaDiamond.bind(divaAddress);
+
+  // Get parameters for the provided `poolId`
+  let parameters = contract.getPoolParameters(poolId);
+
+  // Load the Pool entity, which already exists at that point
+  let poolEntity = Pool.load(poolId.toHexString());
+
+  // Update relevant parameters
+  poolEntity!.collateralBalance = parameters.collateralBalance;
+  poolEntity!.finalReferenceValue = parameters.finalReferenceValue;
+  poolEntity!.statusTimestamp = parameters.statusTimestamp;
+  poolEntity!.payoutShort = parameters.payoutShort;
+  poolEntity!.payoutLong = parameters.payoutLong;
+  poolEntity!.statusFinalReferenceValue = _translateStatus(parameters.statusFinalReferenceValue);
+
+  // Save results in entity
+  poolEntity!.save();
+}
+
+// Auxiliary function to translate numeric status into a descriptive string
+function _translateStatus(status: i32): string {
+  if (status === 0) {
+    return "Open";
+  } else if (status === 1) {
+    return "Submitted";
+  } else if (status === 2) {
+    return "Challenged";
+  } else if (status === 3) {
+    return "Confirmed";
+  } else {
+    return "Unknown";
+  }
+}
+
+/**
+ * @notice Function to handle `StatusChanged` events emitted by DIVA Protocol when the status of
+ * the final reference value changes to Submitted, Challenged or Confirmed stage.
+ * @param event `StatusChanged` event data.
+ */
 export function handleStatusChanged(event: StatusChanged): void {
   log.info("handleStatusChanged fired", []);
-  handleLiquidityEvent(
+
+  // Update pool parameters including `finalReferenceValue`, `statusTimestamp`, `statusFinalReferenceValue`,
+  // `payoutShort`, `payoutLong`, and (net) pool collateral balance (due to fees being charged on
+  // final value confirmation).
+  handleStatusChangedEvent(
     event.params.poolId,
-    event.transaction.from, // COMMENT Place holder for longRecipient
-    event.transaction.from, // COMMENT Place holder for shortRecipient
-    event.address,
-    event.transaction.from,
-    event.block.timestamp,
-    new BigInt(0), // Do not add to collateralBalanceGross on redeem
-    new Address(0)
-  );
+    event.address
+  )
+
+  // Handle data emitted during challenges such as the challenger address as well as the new
+  // proposed value.
   if (event.params.statusFinalReferenceValue === 2) {
     handleChallengeEvent(
       event.params.poolId,
@@ -522,125 +491,56 @@ export function handleStatusChanged(event: StatusChanged): void {
       event.params.proposedFinalReferenceValue,
       event.transaction.hash.toHex() + "-" + event.logIndex.toString()
     );
-
-    // *******************************************************************
-    // *** Update TestnetUser entity for challenge reported value task ***
-    // *******************************************************************
-
-    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
-    if (!testnetUser) {
-      testnetUser = new TestnetUser(event.transaction.from.toHexString());
-      initParameters(testnetUser);
-    }
-    testnetUser.reportedValueChallenged = true;
-
-    if (testnetUser.startTime.equals(new BigInt(0))) {
-      testnetUser.startTime = event.block.timestamp;
-      testnetUser.endTime = event.block.timestamp;
-    } else {
-      testnetUser.endTime = event.block.timestamp;
-    }
-
-    testnetUser.save();
-  } else if (event.params.statusFinalReferenceValue === 1) {
-    // log.info("event.address: ", [event.address.toHexString()])
-    // log.info("event.transaction.from: ", [event.transaction.from.toHexString()])
-
-    // *************************************************************
-    // *** Update TestnetUser entity for report final value task ***
-    // *************************************************************
-
-    let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
-    if (!testnetUser) {
-      testnetUser = new TestnetUser(event.transaction.from.toHexString());
-      initParameters(testnetUser);
-    }
-    testnetUser.finalValueReported = true;
-
-    if (testnetUser.startTime.equals(new BigInt(0))) {
-      testnetUser.startTime = event.block.timestamp;
-      testnetUser.endTime = event.block.timestamp;
-    } else {
-      testnetUser.endTime = event.block.timestamp;
-    }
-
-    testnetUser.save();
   }
 }
 
+/**
+ * @notice Function to handle `FeeClaimAllocated` events emitted by DIVA Protocol when the
+ * final value is confirmed and fees are allocated to the respective recipients.
+ * @param event `FeeClaimAllocated` event data.
+ */
 export function handleFeeClaimAllocated(event: FeeClaimAllocated): void {
   log.info("handleFeeClaim fired", []);
+
   let contract = DivaDiamond.bind(event.address);
   let parameters = contract.getPoolParameters(event.params.poolId);
   handleFeeClaimEvent(parameters.collateralToken, event.params.recipient, event.address);
-}
+} // @todo Check whether it handles reserved fee claims correctly, i.e. whether the reserved fee claim
+// is reflected because for reserved fee claim, there is another event called `ReservedClaimAllocated`.
 
+/**
+ * @notice Function to handle `FeeClaimTransferred` events emitted by DIVA Protocol when users transfer
+ * their fee claim to a new recipient.
+ * @param event `FeeClaimTransferred` event data.
+ */
 export function handleFeeClaimTransferred(event: FeeClaimTransferred): void {
   log.info("handleFeeClaimTransferred fired", []);
 
+  // Read updated fee claims for sender and recipient and store it in the respective entities 
   handleFeeClaimEvent(event.params.collateralToken, event.params.to, event.address);
   handleFeeClaimEvent(event.params.collateralToken, event.transaction.from, event.address);
-
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
-  if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
-    initParameters(testnetUser);
-  }
-  testnetUser.feeClaimTransferred = true;
-
-  if (testnetUser.startTime.equals(new BigInt(0))) {
-    testnetUser.startTime = event.block.timestamp;
-    testnetUser.endTime = event.block.timestamp;
-  } else {
-    testnetUser.endTime = event.block.timestamp;
-  }
-
-  testnetUser.save();
 }
 
+/**
+ * @notice Function to handle `FeeClaimed` events emitted by DIVA Protocol when data providers
+ * or treasury claim their fees.
+ * @param event `FeeClaimed` event data.
+ */
 export function handleFeeClaimed(event: FeeClaimed): void {
   log.info("handleFeeClaimed fired", []);
+
+  // Read updated fee claim and store it in the respective entities 
   handleFeeClaimEvent(event.params.collateralToken, event.transaction.from, event.address);
-
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
-  if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
-    initParameters(testnetUser);
-  }
-  testnetUser.feeClaimed = true;
-
-  if (testnetUser.startTime.equals(new BigInt(0))) {
-    testnetUser.startTime = event.block.timestamp;
-    testnetUser.endTime = event.block.timestamp;
-  } else {
-    testnetUser.endTime = event.block.timestamp;
-  }
-
-  testnetUser.save();
 }
 
+/**
+ * @notice Function to handle `PositionTokenRedeemed` events emitted by DIVA Protocol when
+ * position token holders claim their payouts.
+ * @dev Updates the (net) collateral balance in `Pool` entity.
+ * @param event `PositionTokenRedeemed` event data.
+ */
 export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void {
   log.info("handlePositionTokenRedeemed fired", []);
-
-  let testnetUser = TestnetUser.load(event.transaction.from.toHexString());
-  if (!testnetUser) {
-    testnetUser = new TestnetUser(event.transaction.from.toHexString());
-    initParameters(testnetUser);
-  }
-  testnetUser.positionTokenRedeemed = true;
-
-  if (testnetUser.startTime.equals(new BigInt(0))) {
-    testnetUser.startTime = event.block.timestamp;
-    testnetUser.endTime = event.block.timestamp;
-  } else {
-    testnetUser.endTime = event.block.timestamp;
-  }
-
-  testnetUser.save();
-
-  // ******************************************
-  // *** Update the pool collateral balance ***
-  // ******************************************
 
   // Connect to DIVA contract
   let contract = DivaDiamond.bind(event.address);
@@ -658,6 +558,12 @@ export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void 
   poolEntity!.save();
 }
 
+/**
+ * @notice Function to handle `LimitOrderFilled` events emitted by 0x Protocol on
+ * limit order fill.
+ * @dev Updates the user position token holdings list.
+ * @param event `LimitOrderFilled` event data.
+ */
 export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
   log.info("handleLimitOrderFilledEvent", []);
 
@@ -683,23 +589,16 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     nativeOrderFillEntity.save();
   }
 
-  let testnetUserMaker = TestnetUser.load(event.params.maker.toHexString());
-  if (!testnetUserMaker) {
-    testnetUserMaker = new TestnetUser(event.params.maker.toHexString());
-  }
-
-  let testnetUserTaker = TestnetUser.load(event.params.taker.toHexString());
-  if (!testnetUserTaker) {
-    testnetUserTaker = new TestnetUser(event.params.taker.toHexString());
-  }
-
-  // buy limit: maker token = collateral token; taker token = position token
-  // after fill, maker receives position tokens
-  // check if taker token is a position token
+  // Buy Limit: maker token = collateral token; taker token = position token.
+  // After fill, maker receives position tokens. Hence, add maker to user list.
+  
+  // Check if taker token is a position token. If it is, add recipient of position
+  // token (maker) to user list. If not, proceed with checking whether the maker
+  // token is a position token.
   let takerTokenEntity = PositionToken.load(event.params.takerToken.toHexString());
   if (takerTokenEntity) {
-    // taker token is position token (buy limit order)
-    // add buyer of position token to user list (seller already added before)
+    // Taker token is position token.
+    // Add recipient of position token (maker) to user list.
     let userEntity = User.load(event.params.maker.toHexString());
     if (!userEntity) {
       userEntity = new User(event.params.maker.toHexString());
@@ -718,18 +617,17 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       userPositionTokenEntity.receivedAt = event.block.timestamp;
       userPositionTokenEntity.save();
     }
-
-    // Update TestnetUser entity
-    testnetUserMaker.buyLimitOrderCreatedAndFilled = true;
-    testnetUserTaker.buyLimitOrderFilled = true;
-    testnetUserMaker.save();
-    testnetUserTaker.save();
   }
 
-  // sell limit: maker token = position token; taker token = collateral token
-  // after fill, taker receives position tokens
+  // Sell Limit: maker token = position token; taker token = collateral token.
+  // After fill, taker receives position tokens. Hence, add taker to user list.
+  
+  // Check if maker token is a position token. If it is, add recipient of position
+  // token (taker) to user list. If not, don't update anything.
   let makerTokenEntity = PositionToken.load(event.params.makerToken.toHexString());
   if (makerTokenEntity) {
+    // Maker token is a position token
+    // Add recipient of position token (taker) to user list
     let userEntity = User.load(event.params.taker.toHexString());
     if (!userEntity) {
       userEntity = new User(event.params.taker.toHexString());
@@ -748,11 +646,5 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
       userPositionTokenEntity.receivedAt = event.block.timestamp;
       userPositionTokenEntity.save();
     }
-
-    // Update TestnetUser entity
-    testnetUserMaker.sellLimitOrderCreatedAndFilled = true;
-    testnetUserTaker.sellLimitOrderFilled = true;
-    testnetUserMaker.save();
-    testnetUserTaker.save();
   }
 }

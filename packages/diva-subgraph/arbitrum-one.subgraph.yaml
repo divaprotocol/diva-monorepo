@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: DivaDiamond
-    network: goerli
+    network: arbitrum-one
     source:
       address: "0x2C9c47E7d254e493f02acfB410864b9a86c28e1D"
       abi: DivaDiamond
-      startBlock: 9122807
+      startBlock: 97844096
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -50,14 +50,14 @@ dataSources:
           handler: handlePositionTokenRedeemed
       file: ./src/mapping.ts
   
-  # 0x protocol related subgraph
+  # 0x protocol related subgraph  
   - kind: ethereum/contract
     name: ExchangeProxy
-    network: goerli
+    network: arbitrum-one
     source:
-      address: "0xf91bb752490473b8342a3e964e855b9f9a2a668e"
+      address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
       abi: IZeroEx
-      startBlock: 9122807
+      startBlock: 97844096
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

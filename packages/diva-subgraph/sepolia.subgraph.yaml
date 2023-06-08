@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: sepolia
     source:
-      address: "0x8ca8dE48c4507fa54a83Dde7ac68097e87520eEc"
+      address: "0x2C9c47E7d254e493f02acfB410864b9a86c28e1D"
       abi: DivaDiamond
-      startBlock: 3506285
+      startBlock: 3624462
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -20,7 +20,6 @@ dataSources:
         - FeeRecipient
         - FeeRecipientCollateralToken
         - PositionToken
-        - TestnetUser
         - UserPositionTokens
         - DIVAOfferFill
       abis:
@@ -51,26 +50,6 @@ dataSources:
           handler: handlePositionTokenRedeemed
       file: ./src/mapping.ts
   
-  # 0x protocol is not yet available on sepolia.
-  # Check here the available networks: https://github.com/0xProject/protocol/blob/development/packages/contract-addresses/addresses.json
-
-  # - kind: ethereum/contract
-  #   name: ExchangeProxy
-  #   network: sepolia
-  #   source:
-  #     address: "" # update
-  #     abi: IZeroEx
-  #     startBlock: 0 # update
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.6
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - NativeOrderFill
-  #     abis:
-  #       - name: IZeroEx
-  #         file: ./abi/IZeroEx.json
-  #     eventHandlers:
-  #       - event: LimitOrderFilled(bytes32,address,address,address,address,address,uint128,uint128,uint128,uint256,bytes32)
-  #         handler: handleLimitOrderFilledEvent
-  #     file: ./src/mapping.ts
+  # 0x protocol is not available on Sepolia.
+  # Check the following link for available networks:
+  # https://github.com/0xProject/protocol/blob/development/packages/contract-addresses/addresses.json
