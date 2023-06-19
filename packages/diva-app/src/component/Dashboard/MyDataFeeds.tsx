@@ -52,6 +52,7 @@ import { Search } from '@mui/icons-material'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { getColorByStatus, getTopNObjectByProperty } from '../../Util/dashboard'
 import useTheme from '@mui/material/styles/useTheme'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 export const DueInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
@@ -285,7 +286,11 @@ const columns: GridColDef[] = [
     field: 'Id',
     align: 'left',
     renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
-    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+    renderCell: (cell) => (
+      <Tooltip title={cell.value}>
+        <GrayText>{getShortenedAddress(cell.value)}</GrayText>
+      </Tooltip>
+    ),
   },
   {
     field: 'Icon',

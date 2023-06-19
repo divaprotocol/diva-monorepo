@@ -59,6 +59,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { Search } from '@mui/icons-material'
 import { getTopNObjectByProperty, getColorByStatus } from '../../Util/dashboard'
 import useTheme from '@mui/material/styles/useTheme'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 type Response = {
   [token: string]: BigNumber
@@ -598,7 +599,11 @@ const columns: GridColDef[] = [
     field: 'Id',
     align: 'left',
     renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
-    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+    renderCell: (cell) => (
+      <Tooltip title={cell.value}>
+        <GrayText>{getShortenedAddress(cell.value)}</GrayText>
+      </Tooltip>
+    ),
   },
   {
     field: 'Icon',
@@ -945,7 +950,7 @@ export function MyPositions() {
       {
         ...shared,
         id: `${val.id}/long`,
-        Id: 'L' + val.id,
+        Id: val.id,
         address: val.longToken,
         TVL:
           parseFloat(
@@ -966,7 +971,7 @@ export function MyPositions() {
       {
         ...shared,
         id: `${val.id}/short`,
-        Id: 'S' + val.id,
+        Id: val.id,
         address: val.shortToken,
         TVL:
           parseFloat(
@@ -986,6 +991,8 @@ export function MyPositions() {
       },
     ]
   }, [] as GridRowModel[])
+
+  console.log(rows)
 
   const tokenAddresses = positionTokens.map((v) => v.id)
 
