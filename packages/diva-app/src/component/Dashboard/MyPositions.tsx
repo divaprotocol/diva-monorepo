@@ -723,8 +723,9 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
 
   if (!row) return
 
-  const { Icon, Id, Floor, TVL, finalValue, Cap, Balance, Status } = row
+  const { Icon, AssetId, Floor, TVL, finalValue, Cap, Balance, Status } = row
 
+  // Fields in mobile view
   const DATA_ARRAY = [
     {
       label: 'Floor',
@@ -793,7 +794,7 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
                 fontSize: '9.2px',
               }}
             >
-              #{Id}
+              #{AssetId}
             </Typography>
             <AddToMetamask row={row} />
           </Box>
@@ -957,7 +958,6 @@ export function MyPositions() {
         ...shared,
         id: `${val.id}/long`,
         AssetId: val.longToken.symbol,
-        PoolId: val.id,
         address: val.longToken,
         TVL:
           parseFloat(
@@ -979,7 +979,6 @@ export function MyPositions() {
         ...shared,
         id: `${val.id}/short`,
         AssetId: val.shortToken.symbol,
-        PoolId: val.id,
         address: val.shortToken,
         TVL:
           parseFloat(

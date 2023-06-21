@@ -15,6 +15,7 @@ import {
   AccordionSummary,
   Checkbox,
   TextField,
+  Tooltip,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -47,6 +48,7 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { getTopNObjectByProperty } from '../../Util/dashboard'
 import useTheme from '@mui/material/styles/useTheme'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 const MyOrdersPoolCard = ({
   row,
@@ -510,7 +512,7 @@ export function MyOrders() {
         const shortFields = {
           id: 'short' + records.indexOf(record as never),
           position: 'short',
-          symbol: sellOrderShort[0].shortToken.symbol,
+          AssetId: sellOrderShort[0].shortToken.symbol,
         }
         dataOrders.push({ ...fields, ...shortFields })
       }
@@ -519,7 +521,7 @@ export function MyOrders() {
         const longFields = {
           id: 'long' + records.indexOf(record as never),
           position: 'long',
-          symbol: sellOrderLong[0].longToken.symbol,
+          AssetId: sellOrderLong[0].longToken.symbol,
         }
         dataOrders.push({ ...fields, ...longFields })
       }
@@ -528,7 +530,7 @@ export function MyOrders() {
         const shortFields = {
           id: 'short' + records.indexOf(record as never),
           position: 'short',
-          symbol: buyOrderShort[0].shortToken.symbol,
+          AssetId: buyOrderShort[0].shortToken.symbol,
         }
         dataOrders.push({ ...fields, ...shortFields })
       }
@@ -537,7 +539,7 @@ export function MyOrders() {
         const longFields = {
           id: 'long' + records.indexOf(record as never),
           position: 'long',
-          symbol: buyOrderLong[0].longToken.symbol,
+          AssetId: buyOrderLong[0].longToken.symbol,
         }
         dataOrders.push({ ...fields, ...longFields })
       }
@@ -586,11 +588,21 @@ export function MyOrders() {
 
   const columns: GridColDef[] = [
     {
-      field: 'symbol',
+      field: 'AssetId',
       align: 'left',
       renderHeader: (_header) => <GrayText>{'Asset Id'}</GrayText>,
       renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
     },
+    // {
+    //   field: 'PoolId',
+    //   align: 'left',
+    //   renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
+    //   renderCell: (cell) => (
+    //     <Tooltip title={cell.value}>
+    //       <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
+    //     </Tooltip>
+    //   ),
+    // },
     {
       field: 'icon',
       align: 'right',

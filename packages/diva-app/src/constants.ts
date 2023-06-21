@@ -88,9 +88,9 @@ export const projectId = '9f5f0ef1c7544c029b0aa9ca622759c3'
 export const config: { [key: number]: SingleConfig } = {
   [SupportedChainId.MAINNET]: {
     name: 'Ethereum',
-    divaAddress: '',
-    balanceCheckerAddress: '',
-    exchangeProxy: '',
+    divaAddress: '0x2C9c47E7d254e493f02acfB410864b9a86c28e1D',
+    balanceCheckerAddress: '0x5A8f3607162FCbB44a286044ED777EEd4d131e09',
+    exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '',
     divaSubgraph: '',
     whitelistSubgraph: '',
@@ -283,9 +283,9 @@ export const config: { [key: number]: SingleConfig } = {
   },
   [SupportedChainId.ARBITRUM_ONE]: {
     name: 'Arbitrum',
-    divaAddress: '',
-    balanceCheckerAddress: '',
-    exchangeProxy: '',
+    divaAddress: '0x2C9c47E7d254e493f02acfB410864b9a86c28e1D',
+    balanceCheckerAddress: '0x5A8f3607162FCbB44a286044ED777EEd4d131e09',
+    exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '',
     divaSubgraph: '',
     whitelistSubgraph: '',

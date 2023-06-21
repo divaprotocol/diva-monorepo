@@ -283,12 +283,19 @@ const SubmitCell = (props: any) => {
 
 const columns: GridColDef[] = [
   {
-    field: 'Id',
+    field: 'AssetId',
+    align: 'left',
+    headerAlign: 'left',
+    renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
+    field: 'PoolId',
     align: 'left',
     renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
     renderCell: (cell) => (
       <Tooltip title={cell.value}>
-        <GrayText>{getShortenedAddress(cell.value)}</GrayText>
+        <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
       </Tooltip>
     ),
   },
@@ -363,8 +370,9 @@ const columns: GridColDef[] = [
 const MyDataFeedsTokenCard = ({ row }: { row: GridRowModel }) => {
   if (!row) return
 
-  const { Icon, Id, Floor, finalValue, Cap, Status, Inflection } = row
+  const { Icon, AssetId, Floor, finalValue, Cap, Status, Inflection } = row
 
+  // Fields in mobile view
   const DATA_ARRAY = [
     {
       label: 'Floor',
@@ -426,7 +434,7 @@ const MyDataFeedsTokenCard = ({ row }: { row: GridRowModel }) => {
                 fontSize: '9.2px',
               }}
             >
-              #{Id}
+              #{AssetId}
             </Typography>
           </Box>
           <Box>
@@ -684,6 +692,7 @@ export function MyDataFeeds() {
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,
+      PoolId: val.id,
       Underlying: val.referenceAsset,
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
@@ -720,7 +729,7 @@ export function MyDataFeeds() {
       {
         ...shared,
         id: `${val.id}/long`,
-        Id: val.id,
+        AssetId: val.longToken.symbol,
         address: val.longToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
