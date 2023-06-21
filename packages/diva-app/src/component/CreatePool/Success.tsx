@@ -39,17 +39,12 @@ const MetaMaskImage = styled.img`
   cursor: pointer;
 `
 
-const AddToMetamask = ({
-  address,
-  symbol,
-}: {
-  address: string
-  symbol: string
-}) => {
+const AddToMetamask = ({ address }: { address: string }) => {
   const { provider, sendTransaction } = useConnectionContext()
   const handleAddMetaMask = async (e) => {
     const token = new ethers.Contract(address, ERC20, provider.getSigner())
     const decimal = await token.decimals()
+    const tokenSymbol = await token.symbol()
     try {
       await sendTransaction({
         method: 'wallet_watchAsset',
@@ -57,7 +52,7 @@ const AddToMetamask = ({
           type: 'ERC20',
           options: {
             address: address,
-            symbol: symbol, // A ticker symbol or shorthand, up to 5 chars.
+            symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
             decimals: decimal,
             image:
               'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
@@ -231,7 +226,7 @@ export function Success({
                   {getShortenedAddress(longToken)}
                 </Link>{' '}
               </Typography>
-              <AddToMetamask address={longToken} symbol={'L-' + poolId} />
+              <AddToMetamask address={longToken} />
             </Stack>
           )}
           {transactionType === 'filloffer' &&
@@ -253,7 +248,7 @@ export function Success({
                     {getShortenedAddress(shortToken)}
                   </Link>{' '}
                 </Typography>
-                <AddToMetamask address={shortToken} symbol={'S-' + poolId} />
+                <AddToMetamask address={shortToken} />
               </Stack>
             )}
           {transactionType === 'createoffer' && (
@@ -283,7 +278,7 @@ export function Success({
                   {getShortenedAddress(longToken)}
                 </Link>{' '}
               </Typography>
-              <AddToMetamask address={longToken} symbol={'L-' + poolId} />
+              <AddToMetamask address={longToken} />
             </Stack>
           )}
           {transactionType === 'createpool' && (
@@ -304,7 +299,7 @@ export function Success({
                   {getShortenedAddress(shortToken)}
                 </Link>{' '}
               </Typography>
-              <AddToMetamask address={shortToken} symbol={'S-' + poolId} />
+              <AddToMetamask address={shortToken} />
             </Stack>
           )}
           {transactionType === 'createoffer' && (

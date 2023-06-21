@@ -81,8 +81,7 @@ const AddToMetamask = (props: any) => {
       provider.getSigner()
     )
     const decimal = await token.decimals()
-    const tokenSymbol =
-      props.row.id.split('/')[1][0].toUpperCase() + props.row.id.split('/')[0]
+    const tokenSymbol = await token.symbol()
     try {
       await sendTransaction({
         method: 'wallet_watchAsset',
