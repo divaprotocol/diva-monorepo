@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useFormik } from 'formik'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -5,7 +6,8 @@ import { useDiva } from '../../hooks/useDiva'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { ethers } from 'ethers'
 import { useAppSelector } from '../../Redux/hooks'
-import { selectUserAddress } from '../../Redux/appSlice'
+import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
+import { config } from '../../constants'
 const defaultDate = new Date()
 defaultDate.setHours(defaultDate.getHours() + 25)
 export type Values = {
@@ -79,8 +81,10 @@ type Errors = {
 export const useCreatePoolFormik = () => {
   const { provider, isConnected } = useConnectionContext()
   const userAddress = useAppSelector(selectUserAddress)
+  const chainId = useAppSelector(selectChainId)
   initialValues.longRecipient = userAddress
   initialValues.shortRecipient = userAddress
+  initialValues.collateralToken = config[chainId].collateralTokens?.[0]
   const contract = useDiva()
   const _formik = useFormik({
     initialValues,
@@ -186,9 +190,8 @@ export const useCreatePoolFormik = () => {
         values.expiryTime != null &&
         values.expiryTime.getTime() - Date.now() < threshold
       ) {
-        errors.expiryTime = `Expiry time cannot be earlier than ${
-          threshold / 1000 / 60
-        } minutes from now`
+        errors.expiryTime = `Expiry time cannot be earlier than ${threshold / 1000 / 60
+          } minutes from now`
       }
       if (values.takerAddress == null) {
         errors.takerAddress = 'Taker address must not be empty'

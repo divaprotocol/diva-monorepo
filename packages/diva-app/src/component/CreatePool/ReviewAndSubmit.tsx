@@ -80,6 +80,7 @@ export function ReviewAndSubmit({
   const collateralWalletBalance = useErcBalance(
     formik.values.collateralToken.id
   )
+  console.log(collateralWalletBalance)
   // QUESTION Why not use hook that will also handle null values?
   const diva = new ethers.Contract(
     config[chainId!].divaAddress, //Goerli

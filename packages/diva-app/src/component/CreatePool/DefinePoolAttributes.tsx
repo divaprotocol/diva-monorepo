@@ -20,7 +20,7 @@ import {
   Container,
   Card,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
@@ -38,6 +38,9 @@ import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { PayoffProfile } from '../Graphs/payOffProfile'
 import { toExponentialOrNumber } from '../../Util/utils'
+import { config } from '../../constants'
+import { useAppSelector } from '../../Redux/hooks'
+import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -64,6 +67,8 @@ export function DefinePoolAttributes({
     formik.setFieldValue('payoutProfile', event.target.value)
   }
   const { referenceAssets, collateralTokens } = useWhitelist()
+  const chainId = useAppSelector(selectChainId)
+  const userAddress = useAppSelector(selectUserAddress)
   const { disconnect, connect } = useConnectionContext()
   const {
     referenceAsset,
@@ -75,6 +80,7 @@ export function DefinePoolAttributes({
     floor,
     payoutProfile,
   } = formik.values
+
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
   useEffect(() => {
     if (payoutProfile === 'Binary') {
@@ -150,6 +156,22 @@ export function DefinePoolAttributes({
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
+  const isCustomReferenceAssetAllowed = useMemo(
+    () => config[chainId].isCustomReferenceAssetAllowed,
+    [chainId]
+  )
+  const isCustomCollateralAssetAllowed = useMemo(
+    () => config[chainId].isCustomCollateralAssetAllowed,
+    [chainId]
+  )
+  const isAdmin = useMemo(
+    () =>
+      config[chainId]?.adminAddress?.toLocaleLowerCase() ===
+      userAddress.toLocaleLowerCase(),
+    [chainId, userAddress]
+  )
+
+  console.log(collateralToken)
   return (
     <Stack direction={mobile ? 'column' : 'row'}>
       <Container sx={{ minWidth: '60%' }}>
@@ -223,7 +245,11 @@ export function DefinePoolAttributes({
                     </>
                   )}
                   onInputChange={(event) => {
-                    if (event != null && event.target != null) {
+                    if (
+                      event != null &&
+                      event.target != null &&
+                      (isCustomReferenceAssetAllowed || isAdmin)
+                    ) {
                       formik.setFieldValue(
                         'referenceAsset',
                         (event.target as any).value || ''
@@ -483,11 +509,15 @@ export function DefinePoolAttributes({
                     onChange={(_, newValue) => {
                       formik.setFieldValue('collateralToken', newValue)
                     }}
-                    getOptionLabel={(option: WhitelistCollateralToken) =>
-                      option?.symbol || ''
-                    }
+                    getOptionLabel={(option: WhitelistCollateralToken) => {
+                      return option?.symbol || ''
+                    }}
                     onInputChange={(event) => {
-                      if (event != null && event.target != null) {
+                      if (
+                        event != null &&
+                        event.target != null &&
+                        (isCustomCollateralAssetAllowed || isAdmin)
+                      ) {
                         setReferenceAssetSearch(
                           (event.target as any).value || ''
                         )

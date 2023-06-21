@@ -13,26 +13,55 @@ export function useWhitelist() {
     () => request(config[chainId].whitelistSubgraph, queryWhitelist)
   )
 
+  let dataProviders
+  let collateralTokens
+  let referenceAssets
+
   const dataFeeds = whitelistQuery.data?.dataFeeds
-  const dataProviders = whitelistQuery.data?.dataProviders
-  const collateralTokens = whitelistQuery.data?.collateralTokens
 
-  const referenceAssets = (dataFeeds || [])
-    .filter((v) => v.active)
-    .map((v) => {
-      return v.referenceAssetUnified
-    })
-    .filter((value, index, self) => self.indexOf(value) === index)
+  if (chainId === 137 || chainId === 80001) {
+    dataProviders = config[chainId].dataProviders
+    collateralTokens = config[chainId].collateralTokens
+    referenceAssets = config[chainId].referenceAssets
 
-  const getProvidersByAsset = (referenceAssetUnified: string) =>
-    dataProviders?.filter((p) =>
-      p.dataFeeds.some((f) => f.referenceAssetUnified === referenceAssetUnified)
-    )
-  return {
-    dataFeeds,
-    dataProviders,
-    collateralTokens,
-    referenceAssets,
-    getProvidersByAsset,
+    const getProvidersByAsset = (referenceAssetUnified: string) =>
+      dataProviders?.filter((p) =>
+        p.dataFeeds.some(
+          (f) => f.referenceAssetUnified === referenceAssetUnified
+        )
+      )
+
+    return {
+      dataFeeds,
+      dataProviders,
+      collateralTokens,
+      referenceAssets,
+      getProvidersByAsset,
+    }
+  } else {
+    dataProviders = whitelistQuery.data?.dataProviders
+    collateralTokens = whitelistQuery.data?.collateralTokens
+
+    referenceAssets = (dataFeeds || [])
+      .filter((v) => v.active)
+      .map((v) => {
+        return v.referenceAssetUnified
+      })
+      .filter((value, index, self) => self.indexOf(value) === index)
+
+    const getProvidersByAsset = (referenceAssetUnified: string) =>
+      dataProviders?.filter((p) =>
+        p.dataFeeds.some(
+          (f) => f.referenceAssetUnified === referenceAssetUnified
+        )
+      )
+
+    return {
+      dataFeeds,
+      dataProviders,
+      collateralTokens,
+      referenceAssets,
+      getProvidersByAsset,
+    }
   }
 }

@@ -8,6 +8,7 @@ import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
 import TaskIcon from '@mui/icons-material/Task'
 import metamaskLogo from './Images/meta-mask-logo.png'
 import walletConnectLogo from './Images/wallet-connect-logo.png'
+import { WhitelistCollateralToken } from './lib/queries'
 
 const CREATE_POOL_OFFER_STRUCT = [
   { type: 'address', name: 'maker' },
@@ -43,6 +44,16 @@ export enum SupportedChainId {
   ARBITRUM_ONE = 42161,
 }
 
+type DataProviders = {
+  dataFeeds: {
+    active: boolean
+    id: string
+    referenceAssetUnified: string
+  }[]
+  id: string
+  name: string
+}
+
 type SingleConfig = {
   readonly name: string
   readonly divaAddress: string
@@ -64,6 +75,12 @@ type SingleConfig = {
     decimals: number
   }
   readonly isSupported: boolean
+  readonly isCustomReferenceAssetAllowed: boolean
+  readonly isCustomCollateralAssetAllowed: boolean
+  readonly referenceAssets: string[]
+  readonly adminAddress?: string
+  readonly collateralTokens?: WhitelistCollateralToken[]
+  readonly dataProviders?: DataProviders[]
 }
 
 export const projectId = '9f5f0ef1c7544c029b0aa9ca622759c3'
@@ -86,6 +103,9 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     isSupported: false,
+    referenceAssets: ['BTC/USD', 'ETH/USD'],
+    isCustomReferenceAssetAllowed: false,
+    isCustomCollateralAssetAllowed: false,
   },
   [SupportedChainId.ROPSTEN]: {
     name: 'Ropsten',
@@ -106,6 +126,9 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Ropsten Ether', symbol: 'ropETH', decimals: 18 },
     isSupported: true,
+    referenceAssets: ['BTC/USD', 'ETH/USD'],
+    isCustomReferenceAssetAllowed: false,
+    isCustomCollateralAssetAllowed: false,
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0xa6E26dbA7aA0d065b3C866Bb61B4AeF3Bb9d4874', // 26.02.2023
@@ -126,6 +149,9 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
     isSupported: true,
+    referenceAssets: ['BTC/USD', 'ETH/USD'],
+    isCustomReferenceAssetAllowed: true,
+    isCustomCollateralAssetAllowed: true,
   },
   [SupportedChainId.POLYGON]: {
     name: 'Polygon',
@@ -146,6 +172,49 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: polygonMaticLogo,
     nativeCurrency: { name: 'Polygon Matic', symbol: 'MATIC', decimals: 18 },
     isSupported: true,
+    isCustomReferenceAssetAllowed: false,
+    isCustomCollateralAssetAllowed: false,
+    referenceAssets: ['BTC/USD', 'ETH/USD'],
+    collateralTokens: [
+      {
+        id: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+        name: 'USDT',
+        symbol: 'USDT',
+        decimals: 18,
+      },
+      {
+        id: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+        name: 'WETH',
+        symbol: 'WETH',
+        decimals: 18,
+      },
+      {
+        id: '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6',
+        name: 'WBTC',
+        symbol: 'WBTC',
+        decimals: 18,
+      },
+      {
+        id: '0x39e896451487f03dC2489AcAef1788C787885d35',
+        name: 'PILOT',
+        symbol: 'PILOT',
+        decimals: 18,
+      },
+    ],
+    adminAddress: '0x9AdEFeb576dcF52F5220709c1B267d89d5208D78',
+    dataProviders: [
+      {
+        id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',
+        name: 'Tellor',
+        dataFeeds: [
+          {
+            active: true,
+            id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',
+            referenceAssetUnified: 'BTC/ETH',
+          },
+        ],
+      },
+    ],
   },
   [SupportedChainId.POLYGON_MUMBAI]: {
     name: 'Mumbai',
@@ -170,6 +239,47 @@ export const config: { [key: number]: SingleConfig } = {
       decimals: 18,
     },
     isSupported: true,
+    isCustomReferenceAssetAllowed: true,
+    isCustomCollateralAssetAllowed: true,
+    collateralTokens: [
+      {
+        id: '0xf5d5Ea0a5E86C543bEC01a9e4f513525365a86fD',
+        name: 'DIVA USD',
+        symbol: 'dUSD',
+        decimals: 18,
+      },
+      {
+        id: '0x91F13B8da062f9a042dbD37D2e61FBfAcEB267aC',
+        name: 'WAGMI18',
+        symbol: 'WAGMI18',
+        decimals: 18,
+      },
+    ],
+    referenceAssets: ['BTC/USD', 'ETH/USD'],
+    dataProviders: [
+      {
+        id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',
+        name: 'Tellor',
+        dataFeeds: [
+          {
+            active: true,
+            id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',
+            referenceAssetUnified: 'BTC/ETH',
+          },
+        ],
+      },
+      {
+        id: '0x0625855A4D292216ADEFA8043cDc69a6c99724C9',
+        name: 'Tellor Playground',
+        dataFeeds: [
+          {
+            active: true,
+            id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',
+            referenceAssetUnified: 'BTC/ETH',
+          },
+        ],
+      },
+    ],
   },
   [SupportedChainId.ARBITRUM_ONE]: {
     name: 'Arbitrum',
@@ -188,6 +298,9 @@ export const config: { [key: number]: SingleConfig } = {
     logoUrl: arbitrumLogoUrl,
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     isSupported: false,
+    referenceAssets: ['BTC/USD', 'ETH/USD'],
+    isCustomReferenceAssetAllowed: false,
+    isCustomCollateralAssetAllowed: false,
   },
 }
 
