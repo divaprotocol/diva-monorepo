@@ -29,7 +29,7 @@ const AppHeader = styled.header`
 export default function OptionHeader(optionData: {
   TokenAddress: string
   ReferenceAsset: string
-  isLong: boolean
+  tokenSymbol: string
   poolId: string
   tokenDecimals: number
 }) {
@@ -37,9 +37,8 @@ export default function OptionHeader(optionData: {
 
   const params: { poolId: string; tokenType: string } = useParams()
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
-  const { TokenAddress, isLong } = optionData
+  const { TokenAddress, tokenSymbol } = optionData
   const headerTitle = optionData.ReferenceAsset
-  const tokenSymbol = isLong ? `L${optionData.poolId}` : `S${optionData.poolId}`
   const underlyingAssetPrice = useAppSelector(
     selectUnderlyingPrice(pool?.referenceAsset)
   )
@@ -54,7 +53,7 @@ export default function OptionHeader(optionData: {
           options: {
             address: TokenAddress,
             symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
-            decimals: 18,
+            decimals: optionData.tokenDecimals,
             image:
               'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
           },
