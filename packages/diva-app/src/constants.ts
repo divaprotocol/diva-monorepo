@@ -317,7 +317,7 @@ export const CURRENT_SUPPORTED_CHAIN_ID = [
 
 // DIVA Governance address which is the default creator of pools on Markets page and trading fee recipient
 export const DIVA_GOVERNANCE_ADDRESS =
-  '0xBb0F479895915F80f6fEb5BABcb0Ad39a0D7eF4E'
+  '0x1062CCC9F9a4bBcf565799683b6c00eA525ECb9F'
 
 // Trading fee; 0.01 corresponds to 1%
 export const TRADING_FEE = 0.01

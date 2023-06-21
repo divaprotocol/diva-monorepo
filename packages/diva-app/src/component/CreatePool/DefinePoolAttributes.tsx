@@ -166,8 +166,8 @@ export function DefinePoolAttributes({
   )
   const isAdmin = useMemo(
     () =>
-      config[chainId]?.adminAddress?.toLocaleLowerCase() ===
-      userAddress.toLocaleLowerCase(),
+      config[chainId]?.adminAddress?.toLowerCase() ===
+      userAddress?.toLowerCase(),
     [chainId, userAddress]
   )
 
