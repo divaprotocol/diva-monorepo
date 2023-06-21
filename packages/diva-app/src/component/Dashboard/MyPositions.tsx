@@ -561,7 +561,7 @@ const Payoff = (props: any) => {
     intrinsicValue.payoffPerShortToken != null &&
     intrinsicValue.payoffPerLongToken != null
   ) {
-    if (props.row.Id.toLowerCase().startsWith('s')) {
+    if (props.row.AssetId.toLowerCase().startsWith('s')) {
       return (
         <div>
           {(
@@ -595,12 +595,19 @@ const Payoff = (props: any) => {
 
 const columns: GridColDef[] = [
   {
-    field: 'Id',
+    field: 'AssetId',
     align: 'left',
+    headerAlign: 'left',
     renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
+    field: 'PoolId',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
     renderCell: (cell) => (
       <Tooltip title={cell.value}>
-        <GrayText>{getShortenedAddress(cell.value)}</GrayText>
+        <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
       </Tooltip>
     ),
   },
@@ -922,7 +929,7 @@ export function MyPositions() {
     )
 
     const shared = {
-      Id: val.id,
+      PoolId: val.id,
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,
       Floor: formatUnits(val.floor),
@@ -949,7 +956,8 @@ export function MyPositions() {
       {
         ...shared,
         id: `${val.id}/long`,
-        Id: val.id,
+        AssetId: val.longToken.symbol,
+        PoolId: val.id,
         address: val.longToken,
         TVL:
           parseFloat(
@@ -970,7 +978,8 @@ export function MyPositions() {
       {
         ...shared,
         id: `${val.id}/short`,
-        Id: val.id,
+        AssetId: val.shortToken.symbol,
+        PoolId: val.id,
         address: val.shortToken,
         TVL:
           parseFloat(
@@ -1115,8 +1124,8 @@ export function MyPositions() {
   }, [filteredRows, search, expiredPoolClicked, confirmedPoolClicked])
 
   const sortedRows = filteredRowsByOptions.sort((a, b) => {
-    const aId = parseFloat(a.Id.substring(1))
-    const bId = parseFloat(b.Id.substring(1))
+    const aId = parseFloat(a.AssetId.substring(1))
+    const bId = parseFloat(b.AssetId.substring(1))
 
     return bId - aId
   })
@@ -1215,7 +1224,7 @@ export function MyPositions() {
                   </Button>
                   <Box>
                     {sortedRows.map((row) => (
-                      <MyPositionsTokenCard row={row} key={row.Id} />
+                      <MyPositionsTokenCard row={row} key={row.AssetId} />
                     ))}
                   </Box>
                   <Pagination
