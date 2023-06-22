@@ -133,10 +133,7 @@ export const fetchUnderlyingPrice = createAsyncThunk(
 export const fetchPool = createAsyncThunk(
   'app/pool',
   async ({ graphUrl, poolId }: { graphUrl: string; poolId: string }) => {
-    const res = await request<{ pool: Pool }>(
-      graphUrl,
-      queryPool(parseInt(poolId))
-    )
+    const res = await request<{ pool: Pool }>(graphUrl, queryPool(poolId))
 
     return res.pool
   }
@@ -214,19 +211,18 @@ export const fetchPools = createAsyncThunk(
         chainId,
       }
     }
-
     const poolInfo: PoolInfoType[] = []
     pools.map((poolPair: Pool) => {
       poolInfo.push({
         baseToken: getAddress(poolPair.longToken.id),
         quoteToken: getAddress(poolPair.collateralToken.id),
-        poolId: poolPair.longToken.name,
+        poolId: poolPair.id,
         collateralTokenDecimals: poolPair.collateralToken.decimals,
       })
       poolInfo.push({
         baseToken: getAddress(poolPair.shortToken.id),
         quoteToken: getAddress(poolPair.collateralToken.id),
-        poolId: poolPair.shortToken.name,
+        poolId: poolPair.id,
         collateralTokenDecimals: poolPair.collateralToken.decimals,
       })
     })
@@ -249,9 +245,9 @@ export const fetchPools = createAsyncThunk(
       count,
       poolInfo,
     }
-
     try {
       const prices: OrderOutputType[] = await getOrderbookPrices(req)
+      // @todo Updated poolId logic in prices
       // Update price parameters to display market page
       pools = pools.map((pool: Pool) => {
         return (pool = {

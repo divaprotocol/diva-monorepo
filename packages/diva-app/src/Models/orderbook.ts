@@ -9,7 +9,7 @@ export interface PoolInfoType extends BaseInterface {
 }
 
 export interface OrderbookPriceRequest {
-  chainId: number // chanin id
+  chainId: number // chain id
   page: number // current page. start from 0
   perPage: number // page size
   graphUrl: string // graphql url to getting the pools

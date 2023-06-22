@@ -237,7 +237,7 @@ export const queryFeeRecipients = (address: string) => gql`
   }
 `
 
-export const queryPool = (poolId: number) => gql`
+export const queryPool = (poolId: string) => gql`
   {
     pool(id: ${poolId}) {
       id
@@ -440,7 +440,7 @@ export const queryWhitelist = gql`
     }
   }
 `
-export const queryChallenge = (poolId: number) => gql`
+export const queryChallenge = (poolId: string) => gql`
   {
     challenges(where: { pool: "${poolId}" }) {
       proposedFinalReferenceValue
