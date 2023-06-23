@@ -121,6 +121,13 @@ export function DefinePoolAttributes({
   }, [referenceAssets.length])
 
   useEffect(() => {
+    formik.setFieldValue(
+      'collateralToken',
+      config[chainId].collateralTokens?.[0]
+    )
+  }, [chainId])
+
+  useEffect(() => {
     if (
       collateralToken != null &&
       formik.values.gradient.toString() != '' &&
@@ -171,7 +178,6 @@ export function DefinePoolAttributes({
     [chainId, userAddress]
   )
 
-  console.log(collateralToken)
   return (
     <Stack direction={mobile ? 'column' : 'row'}>
       <Container sx={{ minWidth: '60%' }}>

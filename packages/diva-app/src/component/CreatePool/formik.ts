@@ -85,6 +85,8 @@ export const useCreatePoolFormik = () => {
   initialValues.longRecipient = userAddress
   initialValues.shortRecipient = userAddress
   initialValues.collateralToken = config[chainId].collateralTokens?.[0]
+
+
   const contract = useDiva()
   const _formik = useFormik({
     initialValues,
