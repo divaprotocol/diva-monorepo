@@ -110,6 +110,8 @@ export default function Underlying() {
   }
   const data = generatePayoffChartData(OptionParams, currentPrice)
   const tokenAddress = value === 'long' ? pool.longToken.id : pool.shortToken.id
+  const tokenSymbol =
+    value === 'long' ? pool.longToken.symbol : pool.shortToken.symbol
 
   const handleChange = (event: any, newValue: string) => {
     history.push(`/${params.poolId}/${newValue}`)
@@ -138,7 +140,7 @@ export default function Underlying() {
         <OptionHeader
           ReferenceAsset={pool.referenceAsset}
           TokenAddress={tokenAddress}
-          isLong={isLong}
+          tokenSymbol={tokenSymbol}
           poolId={pool.id}
           tokenDecimals={pool.collateralToken.decimals}
         />

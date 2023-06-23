@@ -1,7 +1,11 @@
-export function getShortenedAddress(address: string) {
+export function getShortenedAddress(
+  address: string,
+  beginLength = 6,
+  endLength = 4
+) {
   if (address != null) {
-    const begin = address.slice(0, 6)
-    const end = address.slice(address.length - 4)
+    const begin = address.slice(0, beginLength)
+    const end = address.slice(address.length - endLength)
 
     return `${begin}...${end}`
   } else return ''

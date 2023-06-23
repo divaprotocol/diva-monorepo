@@ -81,8 +81,7 @@ const AddToMetamask = (props: any) => {
       provider.getSigner()
     )
     const decimal = await token.decimals()
-    const tokenSymbol =
-      props.row.id.split('/')[1][0].toUpperCase() + props.row.id.split('/')[0]
+    const tokenSymbol = await token.symbol()
     try {
       await sendTransaction({
         method: 'wallet_watchAsset',
@@ -562,7 +561,7 @@ const Payoff = (props: any) => {
     intrinsicValue.payoffPerShortToken != null &&
     intrinsicValue.payoffPerLongToken != null
   ) {
-    if (props.row.Id.toLowerCase().startsWith('s')) {
+    if (props.row.AssetId.toLowerCase().startsWith('s')) {
       return (
         <div>
           {(
@@ -596,12 +595,19 @@ const Payoff = (props: any) => {
 
 const columns: GridColDef[] = [
   {
-    field: 'Id',
+    field: 'AssetId',
     align: 'left',
+    headerAlign: 'left',
     renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
+    field: 'PoolId',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
     renderCell: (cell) => (
       <Tooltip title={cell.value}>
-        <GrayText>{getShortenedAddress(cell.value)}</GrayText>
+        <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
       </Tooltip>
     ),
   },
@@ -717,8 +723,9 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
 
   if (!row) return
 
-  const { Icon, Id, Floor, TVL, finalValue, Cap, Balance, Status } = row
+  const { Icon, AssetId, Floor, TVL, finalValue, Cap, Balance, Status } = row
 
+  // Fields in mobile view
   const DATA_ARRAY = [
     {
       label: 'Floor',
@@ -787,7 +794,7 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
                 fontSize: '9.2px',
               }}
             >
-              #{Id}
+              #{AssetId}
             </Typography>
             <AddToMetamask row={row} />
           </Box>
@@ -923,7 +930,7 @@ export function MyPositions() {
     )
 
     const shared = {
-      Id: val.id,
+      PoolId: val.id,
       Icon: val.referenceAsset,
       Underlying: val.referenceAsset,
       Floor: formatUnits(val.floor),
@@ -950,7 +957,7 @@ export function MyPositions() {
       {
         ...shared,
         id: `${val.id}/long`,
-        Id: val.id,
+        AssetId: val.longToken.symbol,
         address: val.longToken,
         TVL:
           parseFloat(
@@ -971,7 +978,7 @@ export function MyPositions() {
       {
         ...shared,
         id: `${val.id}/short`,
-        Id: val.id,
+        AssetId: val.shortToken.symbol,
         address: val.shortToken,
         TVL:
           parseFloat(
@@ -1116,8 +1123,8 @@ export function MyPositions() {
   }, [filteredRows, search, expiredPoolClicked, confirmedPoolClicked])
 
   const sortedRows = filteredRowsByOptions.sort((a, b) => {
-    const aId = parseFloat(a.Id.substring(1))
-    const bId = parseFloat(b.Id.substring(1))
+    const aId = parseFloat(a.AssetId.substring(1))
+    const bId = parseFloat(b.AssetId.substring(1))
 
     return bId - aId
   })
@@ -1216,7 +1223,7 @@ export function MyPositions() {
                   </Button>
                   <Box>
                     {sortedRows.map((row) => (
-                      <MyPositionsTokenCard row={row} key={row.Id} />
+                      <MyPositionsTokenCard row={row} key={row.AssetId} />
                     ))}
                   </Box>
                   <Pagination
