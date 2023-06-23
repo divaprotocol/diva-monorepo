@@ -216,7 +216,7 @@ export function Success({
               ml: theme.spacing(
                 transactionType === 'filloffer' ||
                   transactionType === 'createpool'
-                  ? 12
+                  ? 30
                   : 48
               ),
             }}
@@ -227,7 +227,11 @@ export function Success({
           {transactionType === 'filloffer' && (
             <Typography>The offer has been filled successfully</Typography>
           )}
-          {transactionType === 'filloffer' && <h4>Pool ID: {poolId}</h4>}
+          {transactionType === 'filloffer' && (
+            <h4>
+              Pool ID: <span style={{ fontWeight: 'normal' }}>{poolId}</span>
+            </h4>
+          )}
           {transactionType === 'createoffer' && (
             <Typography>Your offer has been created successfully</Typography>
           )}
@@ -282,7 +286,11 @@ export function Success({
           {transactionType === 'createpool' && (
             <h4>Your pool has been created successfully</h4>
           )}
-          {transactionType === 'createpool' && <h4>Pool ID: {poolId}</h4>}
+          {transactionType === 'createpool' && (
+            <h4>
+              Pool ID: <span style={{ fontWeight: 'normal' }}>{poolId}</span>
+            </h4>
+          )}
           {transactionType === 'createpool' && (
             <Stack direction={'row'} spacing={5}>
               <Typography>
