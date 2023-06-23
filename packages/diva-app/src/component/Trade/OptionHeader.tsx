@@ -2,10 +2,7 @@ import styled from 'styled-components'
 import '../../Util/Dates'
 import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
-import {
-  getEtherscanLink,
-  EtherscanLinkType,
-} from '../../Util/getEtherscanLink'
+import { getExploreLink, EtherscanLinkType } from '../../Util/getEtherscanLink'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
@@ -102,7 +99,7 @@ export default function OptionHeader(optionData: {
             underline={'none'}
             rel="noopener noreferrer"
             target="_blank"
-            href={getEtherscanLink(
+            href={getExploreLink(
               chainId,
               optionData.TokenAddress,
               EtherscanLinkType.ADDRESS

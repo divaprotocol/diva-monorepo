@@ -6,27 +6,23 @@ import {
   Link,
   Popover,
   Stack,
-  TextareaAutosize,
   TextField,
   Tooltip,
   Typography,
   useTheme,
 } from '@mui/material'
 import { Box } from '@mui/material'
-import { config, CREATE_POOL_TYPE } from '../../constants'
+import { config } from '../../constants'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import DIVA_ABI from '../../abi/DIVAABI.json'
 import { useCreatePoolFormik } from './formik'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
-import { BigNumber, ethers } from 'ethers'
-import {
-  EtherscanLinkType,
-  getEtherscanLink,
-} from '../../Util/getEtherscanLink'
+import { ethers } from 'ethers'
+import { EtherscanLinkType, getExploreLink } from '../../Util/getEtherscanLink'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import { useAppSelector } from '../../Redux/hooks'
-import { selectUserAddress } from '../../Redux/appSlice'
+import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 import InsertLinkTwoToneIcon from '@mui/icons-material/InsertLinkTwoTone'
 import ERC20 from '../../abi/ERC20ABI.json'
 import { ContentCopy, Download } from '@mui/icons-material'
@@ -80,6 +76,7 @@ const AddToMetamask = ({
     </>
   )
 }
+
 const congratsSvg = (
   <svg
     width="100"
@@ -163,32 +160,33 @@ export function Success({
   const history = useHistory()
   const [shortToken, setShortToken] = useState()
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
-  const [poolId, setPoolId] = useState<number>()
+  const [poolId, setPoolId] = useState<string>()
   const theme = useTheme()
   const { provider } = useConnectionContext()
+  const signer = provider?.getSigner()
   const userAddress = useAppSelector(selectUserAddress)
   const copied = Boolean(anchorEl)
-  const chainId = provider?.network?.chainId
-  const etherscanProvider = new ethers.providers.EtherscanProvider(chainId)
+  const chainId = useAppSelector(selectChainId)
   const onPopupClose = () => {
     setAnchorEl(null)
   }
+
   const diva =
     chainId != null
-      ? new ethers.Contract(
-          config[chainId!].divaAddress,
-          DIVA_ABI,
-          provider.getSigner()
-        )
+      ? new ethers.Contract(config[chainId]?.divaAddress, DIVA_ABI, signer)
       : null
 
   useEffect(() => {
+    setPoolId(formik.values.poolId)
+
     diva.getPoolParameters(formik.values.poolId).then((pool) => {
+      console.log(pool, 'pools info')
       setShortToken(pool.shortToken)
       setLongToken(pool.longToken)
-      setPoolId(Number(formik.values.poolId))
+      setPoolId(formik.values.poolId)
     })
-  }, [formik.values.poolId])
+  }, [diva, formik.values.poolId])
+
   return (
     <Container>
       <Box display="flex" justifyContent="center" alignItems="center">
@@ -222,7 +220,7 @@ export function Success({
                   underline={'none'}
                   rel="noopener noreferrer"
                   target="_blank"
-                  href={getEtherscanLink(
+                  href={getExploreLink(
                     chainId,
                     longToken,
                     EtherscanLinkType.ADDRESS
@@ -244,7 +242,7 @@ export function Success({
                     underline={'none'}
                     rel="noopener noreferrer"
                     target="_blank"
-                    href={getEtherscanLink(
+                    href={getExploreLink(
                       chainId,
                       shortToken,
                       EtherscanLinkType.ADDRESS
@@ -274,7 +272,7 @@ export function Success({
                   underline={'none'}
                   rel="noopener noreferrer"
                   target="_blank"
-                  href={getEtherscanLink(
+                  href={getExploreLink(
                     chainId,
                     longToken,
                     EtherscanLinkType.ADDRESS
@@ -295,7 +293,7 @@ export function Success({
                   underline={'none'}
                   rel="noopener noreferrer"
                   target="_blank"
-                  href={getEtherscanLink(
+                  href={getExploreLink(
                     chainId,
                     shortToken,
                     EtherscanLinkType.ADDRESS

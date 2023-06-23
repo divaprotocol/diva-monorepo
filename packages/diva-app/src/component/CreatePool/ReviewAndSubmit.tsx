@@ -80,7 +80,6 @@ export function ReviewAndSubmit({
   const collateralWalletBalance = useErcBalance(
     formik.values.collateralToken.id
   )
-  console.log(collateralWalletBalance)
   // QUESTION Why not use hook that will also handle null values?
   const diva = new ethers.Contract(
     config[chainId!].divaAddress, //Goerli
@@ -128,10 +127,12 @@ export function ReviewAndSubmit({
     }
   }, [formik.values, address, diva, divaDomain])
 
-  // QUESTION WHy not move this part into a useEffect hook?
-  token.decimals().then((decimals: number) => {
-    setDecimal(decimals)
-  })
+  useEffect(() => {
+    token.decimals().then((decimals: number) => {
+      setDecimal(decimals)
+    })
+  }, [token])
+
   useEffect(() => {
     if (
       transaction === 'filloffer' &&

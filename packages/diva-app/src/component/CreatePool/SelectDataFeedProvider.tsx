@@ -15,10 +15,7 @@ import { config } from '../../constants'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { useCreatePoolFormik } from './formik'
-import {
-  EtherscanLinkType,
-  getEtherscanLink,
-} from '../../Util/getEtherscanLink'
+import { EtherscanLinkType, getExploreLink } from '../../Util/getEtherscanLink'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import React, { useEffect, useState } from 'react'
 import { useAppSelector } from '../../Redux/hooks'
@@ -186,7 +183,7 @@ export function SelectDataFeedProvider({
                 underline={'none'}
                 rel="noopener noreferrer"
                 target="_blank"
-                href={getEtherscanLink(
+                href={getExploreLink(
                   chainId,
                   formik.values.dataProvider,
                   EtherscanLinkType.ADDRESS
