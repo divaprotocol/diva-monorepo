@@ -159,6 +159,8 @@ export function Success({
   const [longToken, setLongToken] = useState()
   const history = useHistory()
   const [shortToken, setShortToken] = useState()
+  const [longTokenSymbol, setLongTokenSymbol] = useState()
+  const [shortTokenSymbol, setShortTokenSymbol] = useState()
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null)
   const [poolId, setPoolId] = useState<string>()
   const theme = useTheme()
@@ -184,6 +186,24 @@ export function Success({
       setShortToken(pool.shortToken)
       setLongToken(pool.longToken)
       setPoolId(formik.values.poolId)
+
+      const longTokenContract = new ethers.Contract(
+        longToken,
+        ERC20,
+        provider.getSigner()
+      )
+      longTokenContract.symbol().then((val) => {
+        setLongTokenSymbol(val)
+      })
+
+      const shortTokenContract = new ethers.Contract(
+        shortToken,
+        ERC20,
+        provider.getSigner()
+      )
+      shortTokenContract.symbol().then((val) => {
+        setShortTokenSymbol(val)
+      })
     })
   }, [diva, formik.values.poolId])
 
@@ -214,7 +234,7 @@ export function Success({
           {transactionType === 'filloffer' && values.offerDirection === 'Long' && (
             <Stack direction={'row'} spacing={5}>
               <Typography>
-                Long token: {'L' + poolId + ' - '}
+                Long token: {longTokenSymbol + ' - '}
                 <Link
                   style={{ color: 'gray' }}
                   underline={'none'}
@@ -229,14 +249,14 @@ export function Success({
                   {getShortenedAddress(longToken)}
                 </Link>{' '}
               </Typography>
-              <AddToMetamask address={longToken} symbol={'L-' + poolId} />
+              <AddToMetamask address={longToken} symbol={longTokenSymbol} />
             </Stack>
           )}
           {transactionType === 'filloffer' &&
             values.offerDirection === 'Short' && (
               <Stack direction={'row'} spacing={5}>
                 <Typography>
-                  Long token: {'S' + poolId + ' - '}
+                  Long token: {longTokenSymbol + ' - '}
                   <Link
                     style={{ color: 'gray' }}
                     underline={'none'}
@@ -251,7 +271,7 @@ export function Success({
                     {getShortenedAddress(shortToken)}
                   </Link>{' '}
                 </Typography>
-                <AddToMetamask address={shortToken} symbol={'S-' + poolId} />
+                <AddToMetamask address={shortToken} symbol={shortTokenSymbol} />
               </Stack>
             )}
           {transactionType === 'createoffer' && (
@@ -266,7 +286,7 @@ export function Success({
           {transactionType === 'createpool' && (
             <Stack direction={'row'} spacing={5}>
               <Typography>
-                Long token: {'L' + poolId + ' - '}
+                Long token: {longTokenSymbol + ' - '}
                 <Link
                   style={{ color: 'gray' }}
                   underline={'none'}
@@ -281,13 +301,13 @@ export function Success({
                   {getShortenedAddress(longToken)}
                 </Link>{' '}
               </Typography>
-              <AddToMetamask address={longToken} symbol={'L-' + poolId} />
+              <AddToMetamask address={longToken} symbol={longTokenSymbol} />
             </Stack>
           )}
           {transactionType === 'createpool' && (
             <Stack direction={'row'} spacing={5}>
               <Typography>
-                Short token: {'S' + poolId + ' - '}
+                Short token: {shortTokenSymbol + ' - '}
                 <Link
                   style={{ color: 'gray' }}
                   underline={'none'}
@@ -302,7 +322,7 @@ export function Success({
                   {getShortenedAddress(shortToken)}
                 </Link>{' '}
               </Typography>
-              <AddToMetamask address={shortToken} symbol={'S-' + poolId} />
+              <AddToMetamask address={shortToken} symbol={shortTokenSymbol} />
             </Stack>
           )}
           {transactionType === 'createoffer' && (
