@@ -47,7 +47,6 @@ export enum SupportedChainId {
 type DataProviders = {
   dataFeeds: {
     active: boolean
-    id: string
     referenceAssetUnified: string
   }[]
   id: string
@@ -174,7 +173,7 @@ export const config: { [key: number]: SingleConfig } = {
     isSupported: true,
     isCustomReferenceAssetAllowed: false,
     isCustomCollateralAssetAllowed: false,
-    referenceAssets: ['BTC/USD', 'ETH/USD'],
+    referenceAssets: ['BTC/USD', 'ETH/USD', 'TRB/USD'],
     collateralTokens: [
       {
         id: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
@@ -209,8 +208,15 @@ export const config: { [key: number]: SingleConfig } = {
         dataFeeds: [
           {
             active: true,
-            id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',
-            referenceAssetUnified: 'BTC/ETH',
+            referenceAssetUnified: 'BTC/USD',
+          },
+          {
+            active: true,
+            referenceAssetUnified: 'ETH/USD',
+          },
+          {
+            active: true,
+            referenceAssetUnified: 'TRB/USD',
           },
         ],
       },
@@ -255,7 +261,7 @@ export const config: { [key: number]: SingleConfig } = {
         decimals: 18,
       },
     ],
-    referenceAssets: ['BTC/USD', 'ETH/USD'],
+    referenceAssets: ['BTC/USD', 'ETH/USD', 'TRB/USD'],
     dataProviders: [
       {
         id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',
@@ -263,8 +269,15 @@ export const config: { [key: number]: SingleConfig } = {
         dataFeeds: [
           {
             active: true,
-            id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',
-            referenceAssetUnified: 'BTC/ETH',
+            referenceAssetUnified: 'BTC/USD',
+          },
+          {
+            active: true,
+            referenceAssetUnified: 'ETH/USD',
+          },
+          {
+            active: true,
+            referenceAssetUnified: 'TRB/USD',
           },
         ],
       },
@@ -274,8 +287,15 @@ export const config: { [key: number]: SingleConfig } = {
         dataFeeds: [
           {
             active: true,
-            id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',
-            referenceAssetUnified: 'BTC/ETH',
+            referenceAssetUnified: 'BTC/USD',
+          },
+          {
+            active: true,
+            referenceAssetUnified: 'ETH/USD',
+          },
+          {
+            active: true,
+            referenceAssetUnified: 'TRB/USD',
           },
         ],
       },
