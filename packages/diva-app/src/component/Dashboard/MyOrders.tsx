@@ -59,8 +59,17 @@ const MyOrdersPoolCard = ({
   cancelOrder: (event: any, orderHash: string, chainId: string) => Promise<void>
   loadingValue: any
 }) => {
-  const { icon, Id, type, quantity, price, payReceive, position, orderHash } =
-    row
+  const {
+    icon,
+    PoolId,
+    AssetId,
+    type,
+    quantity,
+    price,
+    payReceive,
+    position,
+    orderHash,
+  } = row
 
   const history = useHistory()
   const chainId = useAppSelector(selectChainId)
@@ -95,7 +104,7 @@ const MyOrdersPoolCard = ({
         }}
         spacing={1.6}
         onClick={() => {
-          history.push(`../../${Id}/${position}`)
+          history.push(`../../${PoolId}/${position}`)
         }}
       >
         <Box
@@ -125,7 +134,7 @@ const MyOrdersPoolCard = ({
                 fontSize: '9.2px',
               }}
             >
-              #{Id}
+              #{AssetId}
             </Typography>
           </Box>
           <Stack direction="row" spacing={1.6} alignItems="center">
@@ -443,7 +452,7 @@ export function MyOrders() {
     price = Number(payReceive) / Number(takerAmount)
     return {
       type: type,
-      Id: poolId,
+      PoolId: poolId,
       icon: underlying,
       underlying: underlying,
       quantity: quantity,
@@ -479,7 +488,7 @@ export function MyOrders() {
     price = askAmount
     return {
       type: type,
-      Id: poolId,
+      PoolId: poolId,
       icon: underlying,
       underlying: underlying,
       quantity: quantity,
@@ -513,6 +522,7 @@ export function MyOrders() {
           id: 'short' + records.indexOf(record as never),
           position: 'short',
           AssetId: sellOrderShort[0].shortToken.symbol,
+          PoolId: sellOrderShort[0].id,
         }
         dataOrders.push({ ...fields, ...shortFields })
       }
@@ -522,6 +532,7 @@ export function MyOrders() {
           id: 'long' + records.indexOf(record as never),
           position: 'long',
           AssetId: sellOrderLong[0].longToken.symbol,
+          PoolId: sellOrderLong[0].id,
         }
         dataOrders.push({ ...fields, ...longFields })
       }
@@ -531,6 +542,7 @@ export function MyOrders() {
           id: 'short' + records.indexOf(record as never),
           position: 'short',
           AssetId: buyOrderShort[0].shortToken.symbol,
+          PoolId: buyOrderShort[0].id,
         }
         dataOrders.push({ ...fields, ...shortFields })
       }
@@ -540,6 +552,7 @@ export function MyOrders() {
           id: 'long' + records.indexOf(record as never),
           position: 'long',
           AssetId: buyOrderLong[0].longToken.symbol,
+          PoolId: buyOrderLong[0].id,
         }
         dataOrders.push({ ...fields, ...longFields })
       }
@@ -593,16 +606,16 @@ export function MyOrders() {
       renderHeader: (_header) => <GrayText>{'Asset Id'}</GrayText>,
       renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
     },
-    // {
-    //   field: 'PoolId',
-    //   align: 'left',
-    //   renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
-    //   renderCell: (cell) => (
-    //     <Tooltip title={cell.value}>
-    //       <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
-    //     </Tooltip>
-    //   ),
-    // },
+    {
+      field: 'PoolId',
+      align: 'left',
+      renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
+      renderCell: (cell) => (
+        <Tooltip title={cell.value}>
+          <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
+        </Tooltip>
+      ),
+    },
     {
       field: 'icon',
       align: 'right',

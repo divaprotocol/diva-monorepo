@@ -31,6 +31,7 @@ import {
   Pagination,
   Radio,
   TextField,
+  Tooltip,
 } from '@mui/material'
 import PoolsTable from '../PoolsTable'
 import { getDateTime } from '../../Util/Dates'
@@ -44,13 +45,24 @@ import { Search } from '@mui/icons-material'
 import { getTopNObjectByProperty } from '../../Util/dashboard'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import useTheme from '@mui/material/styles/useTheme'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 const columns: GridColDef[] = [
   {
-    field: 'symbol',
+    field: 'AssetId',
     align: 'left',
     renderHeader: (_header) => <GrayText>{'Asset Id'}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
+    field: 'PoolId',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
+    renderCell: (cell) => (
+      <Tooltip title={cell.value}>
+        <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
+      </Tooltip>
+    ),
   },
   {
     field: 'icon',
@@ -109,7 +121,7 @@ const columns: GridColDef[] = [
 ]
 
 const TradeHistoryTabTokenCars = ({ row }: { row: GridRowModel }) => {
-  const { Underlying, symbol, type, quantity, price, payReceive, timestamp } =
+  const { Underlying, AssetId, type, quantity, price, payReceive, timestamp } =
     row
 
   const DATA_ARRAY = [
@@ -169,7 +181,7 @@ const TradeHistoryTabTokenCars = ({ row }: { row: GridRowModel }) => {
                 fontSize: '9.2px',
               }}
             >
-              #{symbol}
+              #{AssetId}
             </Typography>
           </Box>
           <Stack direction="row" spacing={1.6} alignItems="center">
@@ -616,6 +628,7 @@ export function TradeHistoryTab() {
     orderFillsMaker.isSuccess,
     !pools,
     !collateralTokens,
+    userAddress,
   ])
 
   const rows: GridRowModel[] =
@@ -625,7 +638,8 @@ export function TradeHistoryTab() {
             ...acc,
             {
               id: order.id,
-              symbol: order.symbol,
+              AssetId: order.symbol,
+              PoolId: order.id,
               icon: order.underlying,
               type: order.type,
               Underlying: order.underlying,
