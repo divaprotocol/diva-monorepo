@@ -817,6 +817,8 @@ export default function Markets() {
     pools,
   ])
 
+  console.log('this is re-rendering')
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       dispatch(fetchPools({ page, createdBy }))

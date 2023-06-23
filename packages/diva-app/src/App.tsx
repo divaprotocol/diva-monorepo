@@ -58,7 +58,7 @@ export const App = () => {
                 path="/dashboard/:page?"
                 render={(props) => <Dashboard {...props} />}
               />
-              <Route path="/markets/${DIVA_GOVERNANCE_ADDRESS}">
+              <Route path={`/markets/${DIVA_GOVERNANCE_ADDRESS}`}>
                 <Markets />
               </Route>
               <Route path="/offer/:hash">
@@ -70,7 +70,6 @@ export const App = () => {
               <Route path="/create">
                 <CreatePool />
               </Route>
-
               <Route path="/">
                 <Redirect from="/" to={`/markets/${DIVA_GOVERNANCE_ADDRESS}`} />
               </Route>
