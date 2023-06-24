@@ -114,8 +114,8 @@ export default function PoolsTable({
                   rowSpacing={theme.spacing(5.25)}
                   justifyContent="center"
                 >
-                  {rows.map((row) => (
-                    <Grid item key={row.Id}>
+                  {rows.map((row, key) => (
+                    <Grid item key={key}>
                       <PoolCard row={row} />
                     </Grid>
                   ))}

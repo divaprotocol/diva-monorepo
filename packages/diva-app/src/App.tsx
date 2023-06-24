@@ -58,7 +58,7 @@ export const App = () => {
                 path="/dashboard/:page?"
                 render={(props) => <Dashboard {...props} />}
               />
-              <Route path={`/markets/${DIVA_GOVERNANCE_ADDRESS}`}>
+              <Route path="/markets/:creatorAddress?">
                 <Markets />
               </Route>
               <Route path="/offer/:hash">
@@ -73,13 +73,6 @@ export const App = () => {
               <Route path="/">
                 <Redirect from="/" to={`/markets/${DIVA_GOVERNANCE_ADDRESS}`} />
               </Route>
-
-              {/* <Route path="/">
-                <Redirect
-                  from="/"
-                  to={`/App Training/${DIVA_GOVERNANCE_ADDRESS}`}
-                />
-              </Route> */}
             </Switch>
           ) : (
             <WrongChain />
