@@ -417,7 +417,7 @@ export const getOrderbookPricesOutput = (
   // Formatting data format for using market page tables
   priceResponse.records.map((poolPrice: PriceResponseType) => {
     const poolInfo = getPoolInformation(poolPrice, poolInfoArray)
-    const type = poolInfo.poolId[0] === 'S' ? 'Sell' : 'Buy'
+    const type = poolPrice.side === 'Short' ? 'Sell' : 'Buy'
     const decimals = poolInfo.collateralTokenDecimals
     const price: PriceOutputType = {
       poolId: poolInfo.poolId, // pool id
