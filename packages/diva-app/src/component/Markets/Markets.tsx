@@ -702,12 +702,12 @@ export default function Markets() {
         const tokens = getMakerTakerTokens(checkOrders)
 
         // Check pool type
-        const poolType =
-          tokens.indexOf(tablePool.shortToken.id) !== -1 ? 'S' : 'L'
+        const side =
+          tokens.indexOf(tablePool.shortToken.id) !== -1 ? 'Short' : 'Long'
 
         // Check the token address of table row
         const tokenAddress =
-          poolType === 'S' ? tablePool.shortToken.id : tablePool.longToken.id
+        side === 'Long' ? tablePool.longToken.id : tablePool.shortToken.id
 
         // Get first records and second records
         const firstRecords = checkOrders.first.bids.records
@@ -743,7 +743,7 @@ export default function Markets() {
         )
 
         if (completeOrderBook.length !== 0) {
-          if (poolType === 'L') {
+          if (side === 'Long') {
             // Update the pool's long price information with the updated information
             updatePool = {
               ...tablePool,
@@ -756,8 +756,8 @@ export default function Markets() {
                   bid: completeOrderBook[0].bid,
                   bidExpiry: completeOrderBook[0].buyExpiry,
                   bidQuantity: completeOrderBook[0].buyQuantity,
-                  orderType: poolType,
-                  poolId: poolType + tablePool.id,
+                  orderType: side,
+                  poolId: tablePool.id,
                 },
               },
             }
@@ -774,8 +774,8 @@ export default function Markets() {
                   bid: completeOrderBook[0].bid,
                   bidExpiry: completeOrderBook[0].buyExpiry,
                   bidQuantity: completeOrderBook[0].buyQuantity,
-                  orderType: poolType,
-                  poolId: poolType + tablePool.id,
+                  orderType: side,
+                  poolId: tablePool.id,
                 },
               },
             }
@@ -969,6 +969,7 @@ export default function Markets() {
       setSelectedPoolsView('Grid')
     }
   }, [isMobile])
+
   const filteredRows = whitelistFilter
     ? rows.filter((row) =>
         whitelist.dataProviders.map((dp) => dp.id).includes(row.dataProvider)

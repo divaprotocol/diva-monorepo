@@ -405,6 +405,7 @@ const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
     bidQuantity: bidnbrOptions, // best bid quantity
     ask, // best ask
     askQuantity: asknbrOptions, // best ask quantity
+    side: price.side, // Pool type `Long` or `Short`
   }
 }
 
@@ -426,6 +427,7 @@ export const getOrderbookPricesOutput = (
       bid: poolPrice.bids.length !== 0 ? poolPrice.bids[0] : {}, // best bid of pool
       ask: poolPrice.asks.length !== 0 ? poolPrice.asks[0] : {}, // best ask of pool
       decimals: decimals, // collateral token decimals of pool
+      side: poolPrice.side, // Pool type `Long` or `Short`
     }
 
     output.push(getOrderOutput(price))

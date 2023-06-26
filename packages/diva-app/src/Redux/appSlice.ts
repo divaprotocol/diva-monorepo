@@ -254,10 +254,12 @@ export const fetchPools = createAsyncThunk(
           ...pool,
           prices: {
             long: prices.filter(
-              (price: OrderOutputType) => price.poolId === 'L' + pool.id
+              (price: OrderOutputType) =>
+                price.side === pool.id && price.side === 'Long'
             )[0],
             short: prices.filter(
-              (price: OrderOutputType) => price.poolId === 'S' + pool.id
+              (price: OrderOutputType) =>
+                price.side === pool.id && price.side === 'Short'
             )[0],
           },
         })
