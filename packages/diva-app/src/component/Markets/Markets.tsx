@@ -138,9 +138,16 @@ export const ExpiresInCell = (props: any) => {
 
 const columns: GridColDef[] = [
   {
-    field: 'Id',
+    field: 'AssetId',
     align: 'left',
+    headerAlign: 'left',
     renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
+    field: 'PoolId',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
     renderCell: (cell) => (
       <Tooltip title={cell.value}>
         <GrayText>{getShortenedAddress(cell.value)}</GrayText>
@@ -875,7 +882,8 @@ export default function Markets() {
       {
         ...shared,
         id: `${val.id}/long`,
-        Id: val.id,
+        AssetId: val.longToken.symbol,
+        PoolId: val.id,
         address: val.longToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
@@ -919,7 +927,8 @@ export default function Markets() {
       {
         ...shared,
         id: `${val.id}/short`,
-        Id: val.id,
+        PoolId: val.id,
+        AssetId: val.shortToken.symbol,
         address: val.shortToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,
