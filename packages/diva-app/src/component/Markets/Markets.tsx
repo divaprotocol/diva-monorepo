@@ -707,7 +707,7 @@ export default function Markets() {
 
         // Check the token address of table row
         const tokenAddress =
-        side === 'Long' ? tablePool.longToken.id : tablePool.shortToken.id
+          side === 'Long' ? tablePool.longToken.id : tablePool.shortToken.id
 
         // Get first records and second records
         const firstRecords = checkOrders.first.bids.records
