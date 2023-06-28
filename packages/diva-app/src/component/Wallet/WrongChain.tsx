@@ -8,10 +8,10 @@ export const WrongChain = (props: any) => {
   const theme = useTheme()
   const { sendTransaction } = useConnectionContext()
 
-  const handleOpen = async () => {
+  const handleOpen = async (chainId: string) => {
     await sendTransaction({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x5' }],
+      params: [{ chainId: chainId }],
     })
   }
   return (
@@ -26,8 +26,9 @@ export const WrongChain = (props: any) => {
           width: '100%',
         }}
       >
-        Unsupported network, please <Button onClick={handleOpen}>Switch</Button>{' '}
-        to Goerli network in your Metamask wallet.
+        Unsupported network, please switch to{' '}
+        <Button onClick={() => handleOpen('0x89')}>Polygon</Button> or{' '}
+        <Button onClick={() => handleOpen('0x13881')}>Mumbai</Button> network.
       </Typography>
     </Box>
   )
