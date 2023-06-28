@@ -327,7 +327,7 @@ export const config: { [key: number]: SingleConfig } = {
     referenceAssets: ['BTC/USD', 'ETH/USD'],
     isCustomReferenceAssetAllowed: false,
     isCustomCollateralAssetAllowed: false,
-    isCustomDataProviderAllowed: true,
+    isCustomDataProviderAllowed: false,
   },
 }
 
