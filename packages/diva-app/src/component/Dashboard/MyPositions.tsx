@@ -402,14 +402,21 @@ const SubmitButton = (props: any) => {
   const statusExpMin = getExpiryMinutesFromNow(
     Number(props.row.StatusTimestamp)
   )
+  // @todo Read the settlement related periods from the DIVA contract rather than hard-coding them here
   if (props.row.Status === 'Submitted') {
-    if (statusExpMin + 24 * 60 + 5 < 0) {
+    if (statusExpMin + 3 * 24 * 60 + 5 < 0) {
+      // 3 days after value submission and no challenge, user can redeem
+      // their payout. 5 seconds tolerance applied to account for discrepancy
+      // between block timestamp and actual timestamp.
       buttonName = 'Redeem'
     } else {
       buttonName = 'Challenge'
     }
   } else if (props.row.Status === 'Challenged') {
-    if (statusExpMin + 48 * 60 + 5 < 0) {
+    if (statusExpMin + 5 * 24 * 60 + 5 < 0) {
+      // 5 days after a challenge and no new value submission by the data provider,
+      // user can redeem their payout. 5 seconds tolerance applied to account for
+      // discrepancy between block timestamp and actual timestamp.
       buttonName = 'Redeem'
     } else {
       buttonName = 'Challenge'
@@ -418,8 +425,13 @@ const SubmitButton = (props: any) => {
     buttonName = 'Redeem'
   } else if (
     props.row.Status === 'Expired' &&
-    statusExpMin + 24 * 60 * 5 + 5 < 0
+    statusExpMin + 17 * 24 * 60 + 5 < 0
   ) {
+    // 17 days after pool expiration without submission by the data provider
+    // or the fallback data provider, the user can redeem their payout.
+    // Note that in this case, the user will first call `setFinalReferenceValue`
+    // to confirm the final reference price at inflection and then call
+    // `redeemPositionToken` function
     buttonName = 'Redeem'
   }
   const handleOpen = () => {

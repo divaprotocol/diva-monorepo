@@ -8,10 +8,10 @@ export const WrongChain = (props: any) => {
   const theme = useTheme()
   const { sendTransaction } = useConnectionContext()
 
-  const handleOpen = async (chainId: string) => {
+  const handleOpen = async (chainIdHex: string) => {
     await sendTransaction({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: chainId }],
+      params: [{ chainId: chainIdHex }],
     })
   }
   return (
