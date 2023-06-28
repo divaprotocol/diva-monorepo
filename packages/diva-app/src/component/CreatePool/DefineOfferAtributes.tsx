@@ -22,7 +22,7 @@ import {
   Accordion,
   InputLabel,
 } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { ethers } from 'ethers'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
@@ -35,7 +35,7 @@ import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { getDateTime, userTimeZone } from '../../Util/Dates'
 import MenuItem from '@mui/material/MenuItem'
 import { useAppSelector } from '../../Redux/hooks'
-import { selectUserAddress } from '../../Redux/appSlice'
+import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
@@ -44,6 +44,7 @@ import { toExponentialOrNumber } from '../../Util/utils'
 import KeyboardDoubleArrowUpOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowUpOutlined'
 import KeyboardDoubleArrowDownOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowDownOutlined'
 import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined'
+import { config } from '../../constants'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -94,8 +95,9 @@ export function DefineOfferAttributes({
   )
   const [mobile, setMobile] = useState(false)
   const [unlimited, setUnlimited] = useState(capacity == 'Unlimited')
-  const account = useAppSelector(selectUserAddress)
-  const { isConnected, disconnect, connect } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+  const chainId = useAppSelector(selectChainId)
+  const { disconnect, connect } = useConnectionContext()
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
@@ -151,6 +153,7 @@ export function DefineOfferAttributes({
   const { referenceAssets, collateralTokens } = useWhitelist()
 
   const collateralWalletBalance = useErcBalance(collateralToken?.id)
+  console.log(collateralWalletBalance)
   useEffect(() => {
     if (payoutProfile === 'Binary') {
       formik.setFieldValue('gradient', 1)
@@ -206,6 +209,13 @@ export function DefineOfferAttributes({
   }, [referenceAssets.length])
 
   useEffect(() => {
+    formik.setFieldValue(
+      'collateralToken',
+      config[chainId].collateralTokens?.[0]
+    )
+  }, [chainId])
+
+  useEffect(() => {
     if (
       collateralToken != null &&
       formik.values.gradient.toString() != '' &&
@@ -243,6 +253,22 @@ export function DefineOfferAttributes({
     formik.errors.gradient != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
+  const isCustomReferenceAssetAllowed = useMemo(
+    () => config[chainId].isCustomReferenceAssetAllowed,
+    [chainId]
+  )
+  const isCustomCollateralAssetAllowed = useMemo(
+    () => config[chainId].isCustomCollateralAssetAllowed,
+    [chainId]
+  )
+
+  const isAdmin = useMemo(
+    () =>
+      config[chainId]?.adminAddress?.toLowerCase() ===
+      userAddress?.toLowerCase(),
+    [chainId, userAddress]
+  )
+
   useEffect(() => {
     if (unlimited) {
       formik.setValues((_values) => ({
@@ -325,7 +351,11 @@ export function DefineOfferAttributes({
                     </>
                   )}
                   onInputChange={(event) => {
-                    if (event != null && event.target != null) {
+                    if (
+                      event != null &&
+                      event.target != null &&
+                      (isCustomReferenceAssetAllowed || isAdmin)
+                    ) {
                       formik.setFieldValue(
                         'referenceAsset',
                         (event.target as any).value || ''
@@ -590,7 +620,11 @@ export function DefineOfferAttributes({
                       option?.symbol || ''
                     }
                     onInputChange={(event) => {
-                      if (event != null && event.target != null) {
+                      if (
+                        event != null &&
+                        event.target != null &&
+                        (isCustomCollateralAssetAllowed || isAdmin)
+                      ) {
                         setReferenceAssetSearch(
                           (event.target as any).value || ''
                         )

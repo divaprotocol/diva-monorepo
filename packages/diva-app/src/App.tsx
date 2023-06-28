@@ -50,9 +50,9 @@ export const App = () => {
             <LoadingBox />
           ) : config[chainId]?.isSupported ? (
             <Switch>
-              <Route exact path="/tasks">
+              {/* <Route exact path="/tasks">
                 <Tasks />
-              </Route>
+              </Route> */}
               <Route
                 exact
                 path="/dashboard/:page?"

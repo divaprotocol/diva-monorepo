@@ -17,9 +17,9 @@ import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { useCreatePoolFormik } from './formik'
 import { EtherscanLinkType, getExploreLink } from '../../Util/getEtherscanLink'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useAppSelector } from '../../Redux/hooks'
-import { selectChainId } from '../../Redux/appSlice'
+import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 const linkSVG = (
   <svg
     width="16"
@@ -45,6 +45,7 @@ export function SelectDataFeedProvider({
   const { referenceAsset } = formik.values
   const whitelist = useWhitelist()
   const chainId = useAppSelector(selectChainId)
+  const userAddress = useAppSelector(selectUserAddress)
   const matchingDataFeedProviders = whitelist.dataProviders.filter((p) =>
     p.dataFeeds.some((f) => f.referenceAssetUnified === referenceAsset)
   )
@@ -95,6 +96,20 @@ export function SelectDataFeedProvider({
     )
   }
 
+  const isCustomDataProviderAllowed = useMemo(
+    () => config[chainId].isCustomDataProviderAllowed,
+    [chainId]
+  )
+
+  const isAdmin = useMemo(
+    () =>
+      config[chainId]?.adminAddress?.toLowerCase() ===
+      userAddress?.toLowerCase(),
+    [chainId, userAddress]
+  )
+
+  console.log(config[chainId].adminAddress)
+
   return (
     <Stack direction={mobile ? 'column' : 'row'} spacing={theme.spacing(2)}>
       <Container>
@@ -131,7 +146,11 @@ export function SelectDataFeedProvider({
                   />
                 )}
                 onInputChange={(event) => {
-                  if (event != null && event.target != null) {
+                  if (
+                    event != null &&
+                    event.target != null &&
+                    (isCustomDataProviderAllowed || isAdmin)
+                  ) {
                     formik.setFieldValue(
                       'dataProvider',
                       (event.target as any).value || '',

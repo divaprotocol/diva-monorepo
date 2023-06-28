@@ -76,6 +76,7 @@ type SingleConfig = {
   readonly isSupported: boolean
   readonly isCustomReferenceAssetAllowed: boolean
   readonly isCustomCollateralAssetAllowed: boolean
+  readonly isCustomDataProviderAllowed: boolean
   readonly referenceAssets: string[]
   readonly adminAddress?: string
   readonly collateralTokens?: WhitelistCollateralToken[]
@@ -105,6 +106,7 @@ export const config: { [key: number]: SingleConfig } = {
     referenceAssets: ['BTC/USD', 'ETH/USD'],
     isCustomReferenceAssetAllowed: false,
     isCustomCollateralAssetAllowed: false,
+    isCustomDataProviderAllowed: false,
   },
   [SupportedChainId.ROPSTEN]: {
     name: 'Ropsten',
@@ -128,6 +130,7 @@ export const config: { [key: number]: SingleConfig } = {
     referenceAssets: ['BTC/USD', 'ETH/USD'],
     isCustomReferenceAssetAllowed: false,
     isCustomCollateralAssetAllowed: false,
+    isCustomDataProviderAllowed: false,
   },
   [SupportedChainId.GOERLI]: {
     divaAddress: '0xa6E26dbA7aA0d065b3C866Bb61B4AeF3Bb9d4874', // 26.02.2023
@@ -151,6 +154,7 @@ export const config: { [key: number]: SingleConfig } = {
     referenceAssets: ['BTC/USD', 'ETH/USD'],
     isCustomReferenceAssetAllowed: true,
     isCustomCollateralAssetAllowed: true,
+    isCustomDataProviderAllowed: true,
   },
   [SupportedChainId.POLYGON]: {
     name: 'Polygon',
@@ -173,6 +177,7 @@ export const config: { [key: number]: SingleConfig } = {
     isSupported: true,
     isCustomReferenceAssetAllowed: false,
     isCustomCollateralAssetAllowed: false,
+    isCustomDataProviderAllowed: false,
     referenceAssets: ['BTC/USD', 'ETH/USD', 'TRB/USD'],
     collateralTokens: [
       {
@@ -247,6 +252,7 @@ export const config: { [key: number]: SingleConfig } = {
     isSupported: true,
     isCustomReferenceAssetAllowed: true,
     isCustomCollateralAssetAllowed: true,
+    isCustomDataProviderAllowed: true,
     collateralTokens: [
       {
         id: '0xf5d5Ea0a5E86C543bEC01a9e4f513525365a86fD',
@@ -321,6 +327,7 @@ export const config: { [key: number]: SingleConfig } = {
     referenceAssets: ['BTC/USD', 'ETH/USD'],
     isCustomReferenceAssetAllowed: false,
     isCustomCollateralAssetAllowed: false,
+    isCustomDataProviderAllowed: true,
   },
 }
 
@@ -371,11 +378,6 @@ export const APP_BAR_ITEMS = [
     label: 'Create',
     to: '/Create',
     icon: Add,
-  },
-  {
-    label: 'App Training',
-    to: '/tasks',
-    icon: TaskIcon,
   },
 ]
 
