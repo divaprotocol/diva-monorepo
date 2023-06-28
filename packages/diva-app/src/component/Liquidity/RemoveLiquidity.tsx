@@ -31,6 +31,7 @@ import { selectUserAddress } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useAppSelector } from '../../Redux/hooks'
 import LightbulbIcon from '@mui/icons-material/Lightbulb'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -434,7 +435,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                   Pool ID
                 </Typography>
                 <Typography fontSize="20px" color="white">
-                  {pool.id}
+                  {getShortenedAddress(pool.id, 6, 0)}
                 </Typography>
               </Box>
               <Box>

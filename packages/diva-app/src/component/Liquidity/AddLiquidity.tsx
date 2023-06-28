@@ -37,6 +37,8 @@ import { ReactComponent as ShortPool } from '../../Images/short-trade-page-icon.
 import AccordionDetails from '@mui/material/AccordionDetails'
 import { useCreatePoolFormik } from '../CreatePool/formik'
 import Accordion from '@mui/material/Accordion'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
+
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -546,7 +548,7 @@ export const AddLiquidity = ({ pool }: Props) => {
                         Pool ID
                       </Typography>
                       <Typography fontSize="20px" color="white">
-                        {pool.id}
+                        {getShortenedAddress(pool.id, 6, 0)}
                       </Typography>
                     </Box>
                     <Box>
