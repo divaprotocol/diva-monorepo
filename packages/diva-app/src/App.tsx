@@ -61,7 +61,7 @@ export const App = () => {
               <Route path="/markets/:creatorAddress?">
                 <Markets />
               </Route>
-              <Route path="/offer/:hash">
+              <Route path="/offer/:chain/:hash">
                 <Offer />
               </Route>
               <Route path="/:poolId/:tokenType">
