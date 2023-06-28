@@ -369,7 +369,12 @@ export function Success({
             )}
             {transactionType === 'createoffer' && (
               <TextField
-                value={window.location.origin + '/offer/' + values.offerHash}
+                value={
+                  window.location.origin +
+                  '/offer/' +
+                  `${chainId}/` +
+                  values.offerHash
+                }
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -380,6 +385,7 @@ export function Success({
                           navigator.clipboard.writeText(
                             window.location.origin +
                               '/offer/' +
+                              `${chainId}/` +
                               values.offerHash
                           )
                         }}
