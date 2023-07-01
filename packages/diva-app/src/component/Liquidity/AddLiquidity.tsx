@@ -69,7 +69,7 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [editShortRecipient, setEditShortRecipient] = useState(false)
   console.log(account)
   // TODO Move this part into useEffect
-  const tokenBalance = useErcBalance(
+  const { balance: tokenBalance } = useErcBalance(
     pool ? pool!.collateralToken.id : undefined,
     balanceUpdated
   )

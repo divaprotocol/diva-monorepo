@@ -15,25 +15,21 @@ import {
   Radio,
   Container,
   Card,
-  Select,
   AccordionSummary,
   AccordionDetails,
   Checkbox,
   Accordion,
-  InputLabel,
 } from '@mui/material'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ethers } from 'ethers'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
-import { DefineAdvanced } from './DefineAdvancedAttributes'
-import { CheckCircle, Circle, Report } from '@mui/icons-material'
+import { CheckCircle, Report } from '@mui/icons-material'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
-import { getDateTime, userTimeZone } from '../../Util/Dates'
-import MenuItem from '@mui/material/MenuItem'
+
 import { useAppSelector } from '../../Redux/hooks'
 import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -152,8 +148,9 @@ export function DefineOfferAttributes({
   }
   const { referenceAssets, collateralTokens } = useWhitelist()
 
-  const collateralWalletBalance = useErcBalance(collateralToken?.id)
-  console.log(collateralWalletBalance)
+  const { balance: collateralWalletBalance } = useErcBalance(
+    collateralToken?.id
+  )
   useEffect(() => {
     if (payoutProfile === 'Binary') {
       formik.setFieldValue('gradient', 1)

@@ -13,28 +13,22 @@ import {
   Typography,
   useTheme,
   Tooltip,
-  FormLabel,
   RadioGroup,
   FormControlLabel,
   Radio,
   Container,
   Card,
+  Skeleton,
 } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
-import {
-  CheckCircle,
-  Circle,
-  FormatListBulleted,
-  Report,
-} from '@mui/icons-material'
+import { CheckCircle, Report } from '@mui/icons-material'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
-import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { PayoffProfile } from '../Graphs/payOffProfile'
 import { toExponentialOrNumber } from '../../Util/utils'
@@ -81,7 +75,9 @@ export function DefinePoolAttributes({
     payoutProfile,
   } = formik.values
 
-  const collateralWalletBalance = useErcBalance(collateralToken?.id)
+  const { balance: collateralWalletBalance, isLoading } = useErcBalance(
+    collateralToken?.id
+  )
   useEffect(() => {
     if (payoutProfile === 'Binary') {
       formik.setFieldValue('gradient', 1)
@@ -564,26 +560,43 @@ export function DefinePoolAttributes({
                       {formik.errors.collateralBalance}
                     </FormHelperText>
                   )}
-                  {collateralWalletBalance != null && collateralToken != null && (
-                    <FormHelperText>
-                      Your balance:{' '}
-                      {toExponentialOrNumber(Number(collateralWalletBalance))}{' '}
-                      {collateralToken?.symbol} {'('}
-                      <MaxCollateral
-                        role="button"
-                        onClick={() => {
-                          if (collateralWalletBalance != null) {
-                            formik.setFieldValue(
-                              'collateralBalance',
-                              collateralWalletBalance
-                            )
-                          }
-                        }}
-                      >
-                        Max
-                      </MaxCollateral>
-                      {')'}
-                    </FormHelperText>
+                  {isLoading ? (
+                    <Skeleton
+                      variant="rectangular"
+                      width={210}
+                      height={15}
+                      sx={{
+                        marginLeft: '1rem',
+                        marginTop: '3px',
+                      }}
+                    />
+                  ) : (
+                    <>
+                      {collateralWalletBalance !== null &&
+                        collateralToken !== null && (
+                          <FormHelperText>
+                            Your balance:{' '}
+                            {toExponentialOrNumber(
+                              Number(collateralWalletBalance)
+                            )}{' '}
+                            {collateralToken?.symbol} {'('}
+                            <MaxCollateral
+                              role="button"
+                              onClick={() => {
+                                if (collateralWalletBalance != null) {
+                                  formik.setFieldValue(
+                                    'collateralBalance',
+                                    collateralWalletBalance
+                                  )
+                                }
+                              }}
+                            >
+                              Max
+                            </MaxCollateral>
+                            {')'}
+                          </FormHelperText>
+                        )}
+                    </>
                   )}
                 </FormControl>
               </Stack>

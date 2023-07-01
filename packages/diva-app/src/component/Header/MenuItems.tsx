@@ -53,6 +53,8 @@ export default function MenuItems() {
         sx={{
           marginTop: '80px',
           borderTop: '1px solid #4F4F4F',
+          width: `${navOpen ? '182px' : '67px'}`,
+          overflow: 'hidden',
         }}
       >
         {APP_BAR_ITEMS.map(({ label, to, icon, isRoot }, key) => {
@@ -71,6 +73,9 @@ export default function MenuItems() {
               style={{ backgroundColor: 'transparent' }}
               onClick={() => handleButtonClick(to)}
               key={key}
+              sx={{
+                padding: '0',
+              }}
             >
               <Box
                 sx={{

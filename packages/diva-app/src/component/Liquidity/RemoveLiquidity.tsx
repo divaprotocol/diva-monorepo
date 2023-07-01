@@ -65,11 +65,11 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const theme = useTheme()
 
   // TODO Move this part into the useEffect hook so that it updates the user balance on account switch
-  const tokenBalanceLong = useErcBalance(
+  const { balance: tokenBalanceLong } = useErcBalance(
     pool ? pool!.longToken.id : undefined,
     balanceUpdated
   )
-  const tokenBalanceShort = useErcBalance(
+  const { balance: tokenBalanceShort } = useErcBalance(
     pool ? pool!.shortToken.id : undefined,
 
     balanceUpdated
