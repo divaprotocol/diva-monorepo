@@ -1,6 +1,6 @@
+/* eslint-disable prettier/prettier */
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { BigNumber, providers } from 'ethers'
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import {
   FeeRecipient,
   Pool,
@@ -133,9 +133,15 @@ export const fetchUnderlyingPrice = createAsyncThunk(
 export const fetchPool = createAsyncThunk(
   'app/pool',
   async ({ graphUrl, poolId }: { graphUrl: string; poolId: string }) => {
-    const res = await request<{ pool: Pool }>(graphUrl, queryPool(poolId))
+    try {
 
-    return res.pool
+      const res = await request<{ pool: Pool }>(graphUrl, queryPool(poolId).query, queryPool(poolId).variables)
+      return res.pool
+    } catch (err) {
+      console.error(err)
+      // handle the error further here, or throw it to be handled by the calling code
+    }
+
   }
 )
 
@@ -353,6 +359,7 @@ export const appSlice = createSlice({
     })
 
     builder.addCase(fetchPool.fulfilled, (state, action) => {
+      console.log(action.payload)
       addPools(state, [action.payload], state.chainId)
     })
 
@@ -590,8 +597,8 @@ export const selectUserAddress = (state: RootState) =>
 
 export const selectUnderlyingPrice =
   (asset: string) =>
-  (state: RootState): string | undefined =>
-    selectAppStateByChain(state).underlyingPrice[asset]
+    (state: RootState): string | undefined =>
+      selectAppStateByChain(state).underlyingPrice[asset]
 
 export const selectFeeRecipients = (state: RootState) =>
   selectAppStateByChain(state).feeRecipients

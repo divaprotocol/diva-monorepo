@@ -3,10 +3,8 @@ import {
   Card,
   Collapse,
   Container,
-  Divider,
   IconButton,
   InputAdornment,
-  Input,
   Stack,
   useTheme,
   Box,
@@ -67,7 +65,6 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [expanded, setExpanded] = useState(false)
   const [editLongRecipient, setEditLongRecipient] = useState(false)
   const [editShortRecipient, setEditShortRecipient] = useState(false)
-  console.log(account)
   // TODO Move this part into useEffect
   const { balance: tokenBalance } = useErcBalance(
     pool ? pool!.collateralToken.id : undefined,

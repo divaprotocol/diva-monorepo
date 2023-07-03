@@ -5,7 +5,6 @@ import divaLogo from './Images/logo.svg'
 import divaSidebarLogo from './Images/diva-sidebar-logo.svg'
 import divaTextLogo from './Images/diva_logo_text.svg'
 import { Add, Person, ShowChartOutlined } from '@mui/icons-material'
-import TaskIcon from '@mui/icons-material/Task'
 import metamaskLogo from './Images/meta-mask-logo.png'
 import walletConnectLogo from './Images/wallet-connect-logo.png'
 import { WhitelistCollateralToken } from './lib/queries'
@@ -234,7 +233,7 @@ export const config: { [key: number]: SingleConfig } = {
     exchangeProxy: '0xf471d32cb40837bf24529fcf17418fc1a4807626',
     whitelistAddress: '0x5a4385BAf615A35f79787A5cEDFb7ac44Fb26D7e',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-mumbai ',
+      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-mumbai',
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-mumbai', // TODO: add entries
     allOrders: 'https://mumbai.eip712api.xyz/0x/orderbook/v1/orders/',
