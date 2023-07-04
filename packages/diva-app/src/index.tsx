@@ -21,6 +21,7 @@ import { createDivaTheme } from './lib/createDivaTheme'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import 'react-vis/dist/style.css'
 import { ConnectionProvider } from './component/ConnectionProvider'
+import ErrorBoundary from './ErrorBoundary'
 
 const queryClient = new QueryClient()
 
@@ -49,13 +50,15 @@ const WithProviders = () => {
     >
       <QueryClientProvider client={queryClient}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <ThemeProvider theme={theme}>
-            <Provider store={store}>
-              <ConnectionProvider>
-                <App />
-              </ConnectionProvider>
-            </Provider>
-          </ThemeProvider>
+          <ErrorBoundary>
+            <ThemeProvider theme={theme}>
+              <Provider store={store}>
+                <ConnectionProvider>
+                  <App />
+                </ConnectionProvider>
+              </Provider>
+            </ThemeProvider>
+          </ErrorBoundary>
         </LocalizationProvider>
       </QueryClientProvider>
     </Box>

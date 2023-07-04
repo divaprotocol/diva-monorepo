@@ -286,7 +286,7 @@ export function DefinePoolAttributes({
                 />
                 {formik.errors.expiryTime != null && (
                   <FormHelperText sx={{ color: 'red' }}>
-                    {formik.errors.expiryTime}
+                    {`${formik.errors.expiryTime}`}
                   </FormHelperText>
                 )}
               </FormControl>
@@ -536,7 +536,7 @@ export function DefinePoolAttributes({
                   />
                   {formik.errors.collateralToken != null && (
                     <FormHelperText>
-                      {formik.errors.collateralToken}
+                      {`${formik.errors.collateralToken}`}
                     </FormHelperText>
                   )}
                 </FormControl>
