@@ -9,6 +9,7 @@ import {
   InputAdornment,
   Stack,
   TextField,
+  Tooltip,
   Typography,
   useTheme,
 } from '@mui/material'
@@ -438,9 +439,11 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 <Typography variant="h4" fontWeight="normal" color="gray">
                   Pool ID
                 </Typography>
-                <Typography fontSize="20px" color="white">
-                  {getShortenedAddress(pool.id, 6, 0)}
-                </Typography>
+                <Tooltip title={pool.id}>
+                  <Typography fontSize="20px" color="white">
+                    {getShortenedAddress(pool.id, 6, 0)}
+                  </Typography>
+                </Tooltip>
               </Box>
               <Box>
                 <Typography variant="h4" fontWeight="normal" color="gray">

@@ -3,7 +3,10 @@ import '../../Util/Dates'
 import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import { getExploreLink, EtherscanLinkType } from '../../Util/getEtherscanLink'
-import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import {
+  getShortenedAddress,
+  shortenString,
+} from '../../Util/getShortenedAddress'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import {
@@ -36,9 +39,6 @@ export default function OptionHeader(optionData: {
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
   const { TokenAddress, tokenSymbol } = optionData
   const headerTitle = optionData.ReferenceAsset
-  const underlyingAssetPrice = useAppSelector(
-    selectUnderlyingPrice(pool?.referenceAsset)
-  )
   const { sendTransaction } = useConnectionContext()
 
   const handleAddMetaMask = async () => {
@@ -68,15 +68,17 @@ export default function OptionHeader(optionData: {
       <Stack direction="column">
         <Stack direction="row">
           <CoinIconPair assetName={headerTitle} isLargeIcon />
-          <Typography
-            variant="h1"
-            sx={{
-              ml: '20px',
-              transform: 'translateY(-20%)',
-            }}
-          >
-            {headerTitle}
-          </Typography>
+          <Tooltip title={headerTitle} placement="right">
+            <Typography
+              variant="h1"
+              sx={{
+                ml: '20px',
+                transform: 'translateY(-20%)',
+              }}
+            >
+              {shortenString(headerTitle)}
+            </Typography>
+          </Tooltip>
         </Stack>
         <Stack direction="row" ml="100px" mt="-10px">
           <Tooltip title="Add to Metamask">

@@ -29,7 +29,7 @@ import { ExpiresInCell } from './Markets/Markets'
 import { useCustomMediaQuery } from '../hooks/useCustomMediaQuery'
 
 interface Props {
-  row: GridRowModel
+  row: any
 }
 
 interface StyledButtonProps extends ButtonProps {
@@ -58,7 +58,10 @@ const PoolCard = ({ row }: Props) => {
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
   const [usdPrice, setUsdPrice] = useState('') // TODO rename as the underlying doesn't need to be an asset priced in USD
-  const pool = useAppSelector((state) => selectPool(state, row.Id))
+  const pool = useAppSelector((state) =>
+    // Extract the value before the first forward slash ("/") in the path
+    selectPool(state, row.id.match(/^([^/]+)/)?.[0])
+  )
   const theme = useTheme()
   const history = useHistory()
   const dataSource = useWhitelist()

@@ -10,3 +10,10 @@ export function getShortenedAddress(
     return `${begin}...${end}`
   } else return ''
 }
+
+export function shortenString(str: string): string {
+  if (str.length > 15) {
+    return str.substring(0, 12) + '...'
+  }
+  return str
+}
