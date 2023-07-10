@@ -59,7 +59,20 @@ const DisclaimerModal = ({ isOpen, onAgree, onDisagree }) => {
           className={classes.disclaimerText}
           marginBottom="16px"
         >
-          Disclaimer text
+          <div>
+            <p>
+              The DIVA App is a universal platform for creating, trading and
+              settling derivative contracts peer-to-peer. This may include
+              prediction markets, insurance, structured products, conditional
+              donations, swaps and many more products that derive their payout
+              from the outcome of an external event.
+            </p>
+            <p>
+              It is important to note that certain legal restrictions may apply
+              to the use of the DIVA App in different jurisdictions,
+              particularly concerning residents or entities subject to US laws.
+            </p>
+          </div>
         </Typography>
         <FormControlLabel
           control={
@@ -68,7 +81,9 @@ const DisclaimerModal = ({ isOpen, onAgree, onDisagree }) => {
               onChange={handleCheckboxChange}
             />
           }
-          label="I confirm that I am not a US citizen"
+          label="I confirm that I am
+              not a US Person or any other entity that is subject to laws that may
+              prohibit the interaction with the DIVA App."
         />
       </DialogContent>
       <DialogActions
