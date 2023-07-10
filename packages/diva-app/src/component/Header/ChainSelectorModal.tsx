@@ -107,7 +107,6 @@ const NetworkInfo = ({
 
 const ChainSelectorModal = ({ onClose, isOpen }: ChainSelectorModalProps) => {
   const theme = useTheme()
-
   return (
     <SelectorModal onClose={onClose} isOpen={isOpen} header={'Select network'}>
       {ALL_SUPPORTED_CHAIN_IDS.map((chainId) => (
