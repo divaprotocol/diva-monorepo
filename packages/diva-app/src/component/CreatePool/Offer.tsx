@@ -16,6 +16,7 @@ import { ReviewAndSubmit } from './ReviewAndSubmit'
 import { Alert, Box, useTheme } from '@mui/material'
 import { ApproveActionButtons } from '../ApproveActionButtons'
 import { Success } from './Success'
+import { useParams } from 'react-router-dom'
 export function Offer() {
   const formik = useCreatePoolFormik()
   const { provider } = useConnectionContext()
@@ -23,7 +24,7 @@ export function Offer() {
   const theme = useTheme()
   const userAddress = useAppSelector(selectUserAddress)
   const [decimal, setDecimal] = useState(18)
-  const offerHash = window.location.pathname.split('/')[2]
+  const { hash: offerHash }: { chain: string; hash: string } = useParams()
   const jsonResponse = useQuery(`json-${offerHash + chainId}`, async () => {
     if (chainId != undefined) {
       const response = axios.get(

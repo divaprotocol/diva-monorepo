@@ -138,10 +138,21 @@ export const ExpiresInCell = (props: any) => {
 
 const columns: GridColDef[] = [
   {
-    field: 'Id',
+    field: 'AssetId',
     align: 'left',
+    headerAlign: 'left',
     renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
+    field: 'PoolId',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
+    renderCell: (cell) => (
+      <Tooltip title={cell.value}>
+        <GrayText>{getShortenedAddress(cell.value)}</GrayText>
+      </Tooltip>
+    ),
   },
   {
     field: 'Icon',
@@ -612,6 +623,7 @@ export default function Markets() {
   const [whitelistFilter, setWhitelistFilter] = useState(false)
   const [hasBuyPriceFilter, setHasBuyPriceFilter] = useState(false)
   const [hasSellPriceFilter, setHasSellPriceFilter] = useState(false)
+  const [filteredRows, setFilteredRows] = useState([])
   const whitelist = useWhitelist()
   const handleSellPriceFilter = () => {
     setHasSellPriceFilter(!hasSellPriceFilter)
@@ -698,12 +710,12 @@ export default function Markets() {
         const tokens = getMakerTakerTokens(checkOrders)
 
         // Check pool type
-        const poolType =
-          tokens.indexOf(tablePool.shortToken.id) !== -1 ? 'S' : 'L'
+        const side =
+          tokens.indexOf(tablePool.shortToken.id) !== -1 ? 'Short' : 'Long'
 
         // Check the token address of table row
         const tokenAddress =
-          poolType === 'S' ? tablePool.shortToken.id : tablePool.longToken.id
+          side === 'Long' ? tablePool.longToken.id : tablePool.shortToken.id
 
         // Get first records and second records
         const firstRecords = checkOrders.first.bids.records
@@ -739,7 +751,7 @@ export default function Markets() {
         )
 
         if (completeOrderBook.length !== 0) {
-          if (poolType === 'L') {
+          if (side === 'Long') {
             // Update the pool's long price information with the updated information
             updatePool = {
               ...tablePool,
@@ -752,8 +764,8 @@ export default function Markets() {
                   bid: completeOrderBook[0].bid,
                   bidExpiry: completeOrderBook[0].buyExpiry,
                   bidQuantity: completeOrderBook[0].buyQuantity,
-                  orderType: poolType,
-                  poolId: poolType + tablePool.id,
+                  orderType: side,
+                  poolId: tablePool.id,
                 },
               },
             }
@@ -770,8 +782,8 @@ export default function Markets() {
                   bid: completeOrderBook[0].bid,
                   bidExpiry: completeOrderBook[0].buyExpiry,
                   bidQuantity: completeOrderBook[0].buyQuantity,
-                  orderType: poolType,
-                  poolId: poolType + tablePool.id,
+                  orderType: side,
+                  poolId: tablePool.id,
                 },
               },
             }
@@ -829,135 +841,141 @@ export default function Markets() {
     return () => clearTimeout(timeout)
   }, [createdBy, history])
 
-  const rows: GridRowModel[] = tablePools.reduce((acc, val) => {
-    const { status } = getAppStatus(
-      val.expiryTime,
-      val.statusTimestamp,
-      val.statusFinalReferenceValue,
-      val.finalReferenceValue,
-      val.inflection,
-      parseFloat(val.submissionPeriod),
-      parseFloat(val.challengePeriod),
-      parseFloat(val.reviewPeriod),
-      parseFloat(val.fallbackSubmissionPeriod)
-    )
+  const rows: GridRowModel[] = useMemo(() => {
+    return tablePools.reduce((acc, val) => {
+      const { status } = getAppStatus(
+        val.expiryTime,
+        val.statusTimestamp,
+        val.statusFinalReferenceValue,
+        val.finalReferenceValue,
+        val.inflection,
+        parseFloat(val.submissionPeriod),
+        parseFloat(val.challengePeriod),
+        parseFloat(val.reviewPeriod),
+        parseFloat(val.fallbackSubmissionPeriod)
+      )
 
-    const shared = {
-      Icon: val.referenceAsset,
-      Underlying: val.referenceAsset,
-      Floor: formatUnits(val.floor),
-      Inflection: formatUnits(val.inflection),
-      Cap: formatUnits(val.cap),
-      Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
-      Expiry: getDateTime(val.expiryTime),
-      Sell: '-',
-      Buy: '-',
-      MaxYield: {
-        buy: '-',
-        sell: '-',
-      },
-      dataProvider: val.dataProvider,
-    }
-
-    const payOff = {
-      Gradient: Number(formatUnits(val.gradient, val.collateralToken.decimals)),
-      Floor: Number(formatUnits(val.floor)),
-      Inflection: Number(formatUnits(val.inflection)),
-      Cap: Number(formatUnits(val.cap)),
-    }
-
-    return [
-      ...acc,
-      {
-        ...shared,
-        id: `${val.id}/long`,
-        Id: 'L' + val.id,
-        address: val.longToken,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: true,
-        }),
-        TVL:
-          parseFloat(
-            formatUnits(
-              BigNumber.from(val.collateralBalance),
-              val.collateralToken.decimals
-            )
-          ).toFixed(2) +
-          ' ' +
-          val.collateralToken.symbol,
-        Status: status,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : formatUnits(val.finalReferenceValue),
-        Sell:
-          val.prices?.long !== undefined &&
-          Number(val.prices.long.bid).toFixed(2) !== '0.00'
-            ? Number(val.prices.long.bid).toFixed(2)
-            : '-',
-        Buy:
-          val.prices?.long !== undefined &&
-          Number(val.prices.long.ask).toFixed(2) !== '0.00'
-            ? Number(val.prices.long.ask).toFixed(2)
-            : '-',
+      const shared = {
+        Icon: val.referenceAsset,
+        Underlying: val.referenceAsset,
+        Floor: formatUnits(val.floor),
+        Inflection: formatUnits(val.inflection),
+        Cap: formatUnits(val.cap),
+        Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
+        Expiry: getDateTime(val.expiryTime),
+        Sell: '-',
+        Buy: '-',
         MaxYield: {
-          buy:
-            val.prices?.long !== undefined && val.prices.long.ask !== ''
-              ? Number(1 / Number(val.prices.long.ask)).toFixed(2) + 'x'
-              : '-',
-          sell:
-            val.prices?.long !== undefined && val.prices.long.bid !== ''
-              ? Number(1 / Number(val.prices.long.bid)).toFixed(2) + 'x'
-              : '-',
+          buy: '-',
+          sell: '-',
         },
-      },
-      {
-        ...shared,
-        id: `${val.id}/short`,
-        Id: 'S' + val.id,
-        address: val.shortToken,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: false,
-        }),
-        TVL:
-          parseFloat(
-            formatUnits(
-              BigNumber.from(val.collateralBalance),
-              val.collateralToken.decimals
-            )
-          ).toFixed(2) +
-          ' ' +
-          val.collateralToken.symbol,
-        Status: status,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : formatUnits(val.finalReferenceValue),
-        Sell:
-          val.prices?.short !== undefined &&
-          Number(val.prices.short.bid).toFixed(2) !== '0.00'
-            ? Number(val.prices.short.bid).toFixed(2)
-            : '-',
-        Buy:
-          val.prices?.short !== undefined &&
-          Number(val.prices.short.ask).toFixed(2) !== '0.00'
-            ? Number(val.prices.short.ask).toFixed(2)
-            : '-',
-        MaxYield: {
-          buy:
-            val.prices?.short !== undefined && val.prices.short.ask !== ''
-              ? Number(1 / Number(val.prices.short.ask)).toFixed(2) + 'x'
+        dataProvider: val.dataProvider,
+      }
+
+      const payOff = {
+        Gradient: Number(
+          formatUnits(val.gradient, val.collateralToken.decimals)
+        ),
+        Floor: Number(formatUnits(val.floor)),
+        Inflection: Number(formatUnits(val.inflection)),
+        Cap: Number(formatUnits(val.cap)),
+      }
+
+      return [
+        ...acc,
+        {
+          ...shared,
+          id: `${val.id}/long`,
+          AssetId: val.longToken.symbol,
+          PoolId: val.id,
+          address: val.longToken,
+          PayoffProfile: generatePayoffChartData({
+            ...payOff,
+            IsLong: true,
+          }),
+          TVL:
+            parseFloat(
+              formatUnits(
+                BigNumber.from(val.collateralBalance),
+                val.collateralToken.decimals
+              )
+            ).toFixed(2) +
+            ' ' +
+            val.collateralToken.symbol,
+          Status: status,
+          finalValue:
+            val.statusFinalReferenceValue === 'Open'
+              ? '-'
+              : formatUnits(val.finalReferenceValue),
+          Sell:
+            val.prices?.long !== undefined &&
+            Number(val.prices.long.bid).toFixed(2) !== '0.00'
+              ? Number(val.prices.long.bid).toFixed(2)
               : '-',
-          sell:
-            val.prices?.short !== undefined && val.prices.short.bid !== ''
-              ? Number(1 / Number(val.prices.short.bid)).toFixed(2) + 'x'
+          Buy:
+            val.prices?.long !== undefined &&
+            Number(val.prices.long.ask).toFixed(2) !== '0.00'
+              ? Number(val.prices.long.ask).toFixed(2)
               : '-',
+          MaxYield: {
+            buy:
+              val.prices?.long !== undefined && val.prices.long.ask !== ''
+                ? Number(1 / Number(val.prices.long.ask)).toFixed(2) + 'x'
+                : '-',
+            sell:
+              val.prices?.long !== undefined && val.prices.long.bid !== ''
+                ? Number(1 / Number(val.prices.long.bid)).toFixed(2) + 'x'
+                : '-',
+          },
         },
-      },
-    ]
-  }, [] as GridRowModel[])
+        {
+          ...shared,
+          id: `${val.id}/short`,
+          PoolId: val.id,
+          AssetId: val.shortToken.symbol,
+          address: val.shortToken,
+          PayoffProfile: generatePayoffChartData({
+            ...payOff,
+            IsLong: false,
+          }),
+          TVL:
+            parseFloat(
+              formatUnits(
+                BigNumber.from(val.collateralBalance),
+                val.collateralToken.decimals
+              )
+            ).toFixed(2) +
+            ' ' +
+            val.collateralToken.symbol,
+          Status: status,
+          finalValue:
+            val.statusFinalReferenceValue === 'Open'
+              ? '-'
+              : formatUnits(val.finalReferenceValue),
+          Sell:
+            val.prices?.short !== undefined &&
+            Number(val.prices.short.bid).toFixed(2) !== '0.00'
+              ? Number(val.prices.short.bid).toFixed(2)
+              : '-',
+          Buy:
+            val.prices?.short !== undefined &&
+            Number(val.prices.short.ask).toFixed(2) !== '0.00'
+              ? Number(val.prices.short.ask).toFixed(2)
+              : '-',
+          MaxYield: {
+            buy:
+              val.prices?.short !== undefined && val.prices.short.ask !== ''
+                ? Number(1 / Number(val.prices.short.ask)).toFixed(2) + 'x'
+                : '-',
+            sell:
+              val.prices?.short !== undefined && val.prices.short.bid !== ''
+                ? Number(1 / Number(val.prices.short.bid)).toFixed(2) + 'x'
+                : '-',
+          },
+        },
+      ]
+    }, [] as GridRowModel[])
+  }, [tablePools])
 
   // set card view on mobile devices
   useEffect(() => {
@@ -965,48 +983,66 @@ export default function Markets() {
       setSelectedPoolsView('Grid')
     }
   }, [isMobile])
-  const filteredRows = whitelistFilter
-    ? rows.filter((row) =>
-        whitelist.dataProviders.map((dp) => dp.id).includes(row.dataProvider)
-      )
-    : hasBuyPriceFilter
-    ? rows.filter((row) =>
-        hasSellPriceFilter
-          ? row.Sell !== '-' && row.Buy !== '-'
-          : row.Buy !== '-'
-      )
-    : hasSellPriceFilter
-    ? rows.filter((row) =>
-        hasBuyPriceFilter
-          ? row.Sell !== '-' && row.Buy !== '-'
-          : row.Sell !== '-'
-      )
-    : idFilter !== ''
-    ? rows.filter((row) => row.Id.includes(idFilter))
-    : search != null && search.length > 0
-    ? expiredPoolClicked
-      ? rows
-          .filter((v) => v.Status.includes('Open'))
-          .filter(
-            (v) =>
-              v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
-              search.toLowerCase().includes(v.Underlying.toLowerCase())
-          )
+
+  useEffect(() => {
+    let filtered = [...rows] // copy of rows to not mutate original data
+
+    if (whitelistFilter) {
+      filtered = filterByWhitelist(filtered)
+    } else if (hasBuyPriceFilter || hasSellPriceFilter) {
+      filtered = filterByPrices(filtered, hasBuyPriceFilter, hasSellPriceFilter)
+    } else if (idFilter !== '') {
+      filtered = filterById(filtered, idFilter)
+    } else if (search != null && search.length > 0) {
+      filtered = filterBySearch(filtered, search, expiredPoolClicked)
+    } else if (expiredPoolClicked) {
+      filtered = filterByExpiredPool(filtered)
+    }
+
+    setFilteredRows(filtered)
+  }, [
+    rows,
+    whitelistFilter,
+    hasBuyPriceFilter,
+    hasSellPriceFilter,
+    idFilter,
+    search,
+    expiredPoolClicked,
+  ])
+
+  const filterByWhitelist = (rows) =>
+    rows.filter((row) =>
+      whitelist.dataProviders.map((dp) => dp.id).includes(row.dataProvider)
+    )
+
+  const filterByPrices = (rows, hasBuy, hasSell) =>
+    rows.filter((row) =>
+      hasBuy && hasSell
+        ? row.Sell !== '-' && row.Buy !== '-'
+        : hasBuy
+        ? row.Buy !== '-'
+        : row.Sell !== '-'
+    )
+
+  const filterById = (rows, idFilter) =>
+    rows.filter((row) => row.AssetId.includes(idFilter))
+
+  const filterBySearch = (rows, search, expiredPoolClicked) =>
+    expiredPoolClicked
+      ? rows.filter(
+          (v) =>
+            v.Status.includes('Open') &&
+            (v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
+              search.toLowerCase().includes(v.Underlying.toLowerCase()))
+        )
       : rows.filter(
           (v) =>
             v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
             search.toLowerCase().includes(v.Underlying.toLowerCase())
         )
-    : expiredPoolClicked
-    ? rows.filter((v) => v.Status.includes('Open'))
-    : rows
 
-  useEffect(() => {
-    if (searchInput.length > 0 && searchInput !== null) {
-      setCheckedState(new Array(4).fill(false))
-      setSearch(searchInput)
-    }
-  }, [searchInput])
+  const filterByExpiredPool = (rows) =>
+    rows.filter((v) => v.Status.includes('Open'))
 
   return (
     <>

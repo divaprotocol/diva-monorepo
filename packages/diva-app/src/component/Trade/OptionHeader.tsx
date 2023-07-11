@@ -2,11 +2,11 @@ import styled from 'styled-components'
 import '../../Util/Dates'
 import { IconButton, Link, Stack, Tooltip, Typography } from '@mui/material'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
+import { getExploreLink, EtherscanLinkType } from '../../Util/getEtherscanLink'
 import {
-  getEtherscanLink,
-  EtherscanLinkType,
-} from '../../Util/getEtherscanLink'
-import { getShortenedAddress } from '../../Util/getShortenedAddress'
+  getShortenedAddress,
+  shortenString,
+} from '../../Util/getShortenedAddress'
 import { CoinIconPair } from '../CoinIcon'
 import { useAppSelector } from '../../Redux/hooks'
 import {
@@ -29,7 +29,7 @@ const AppHeader = styled.header`
 export default function OptionHeader(optionData: {
   TokenAddress: string
   ReferenceAsset: string
-  isLong: boolean
+  tokenSymbol: string
   poolId: string
   tokenDecimals: number
 }) {
@@ -37,12 +37,8 @@ export default function OptionHeader(optionData: {
 
   const params: { poolId: string; tokenType: string } = useParams()
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
-  const { TokenAddress, isLong } = optionData
+  const { TokenAddress, tokenSymbol } = optionData
   const headerTitle = optionData.ReferenceAsset
-  const tokenSymbol = isLong ? `L${optionData.poolId}` : `S${optionData.poolId}`
-  const underlyingAssetPrice = useAppSelector(
-    selectUnderlyingPrice(pool?.referenceAsset)
-  )
   const { sendTransaction } = useConnectionContext()
 
   const handleAddMetaMask = async () => {
@@ -54,7 +50,7 @@ export default function OptionHeader(optionData: {
           options: {
             address: TokenAddress,
             symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
-            decimals: 18,
+            decimals: optionData.tokenDecimals,
             image:
               'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
           },
@@ -72,15 +68,17 @@ export default function OptionHeader(optionData: {
       <Stack direction="column">
         <Stack direction="row">
           <CoinIconPair assetName={headerTitle} isLargeIcon />
-          <Typography
-            variant="h1"
-            sx={{
-              ml: '20px',
-              transform: 'translateY(-20%)',
-            }}
-          >
-            {headerTitle}
-          </Typography>
+          <Tooltip title={headerTitle} placement="right">
+            <Typography
+              variant="h1"
+              sx={{
+                ml: '20px',
+                transform: 'translateY(-20%)',
+              }}
+            >
+              {shortenString(headerTitle)}
+            </Typography>
+          </Tooltip>
         </Stack>
         <Stack direction="row" ml="100px" mt="-10px">
           <Tooltip title="Add to Metamask">
@@ -102,7 +100,7 @@ export default function OptionHeader(optionData: {
             underline={'none'}
             rel="noopener noreferrer"
             target="_blank"
-            href={getEtherscanLink(
+            href={getExploreLink(
               chainId,
               optionData.TokenAddress,
               EtherscanLinkType.ADDRESS

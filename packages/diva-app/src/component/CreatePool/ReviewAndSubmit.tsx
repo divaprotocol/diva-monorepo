@@ -77,7 +77,7 @@ export function ReviewAndSubmit({
   const [takerFilledAmount, setTakerFilledAmount] = useState(0)
   const [decimal, setDecimal] = useState(18)
   const [dataProvider, setDataProvider] = useState('')
-  const collateralWalletBalance = useErcBalance(
+  const { balance: collateralWalletBalance } = useErcBalance(
     formik.values.collateralToken.id
   )
   // QUESTION Why not use hook that will also handle null values?
@@ -127,10 +127,12 @@ export function ReviewAndSubmit({
     }
   }, [formik.values, address, diva, divaDomain])
 
-  // QUESTION WHy not move this part into a useEffect hook?
-  token.decimals().then((decimals: number) => {
-    setDecimal(decimals)
-  })
+  useEffect(() => {
+    token.decimals().then((decimals: number) => {
+      setDecimal(decimals)
+    })
+  }, [token])
+
   useEffect(() => {
     if (
       transaction === 'filloffer' &&

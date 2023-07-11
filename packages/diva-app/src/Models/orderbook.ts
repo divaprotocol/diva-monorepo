@@ -9,7 +9,7 @@ export interface PoolInfoType extends BaseInterface {
 }
 
 export interface OrderbookPriceRequest {
-  chainId: number // chanin id
+  chainId: number // chain id
   page: number // current page. start from 0
   perPage: number // page size
   graphUrl: string // graphql url to getting the pools
@@ -42,6 +42,7 @@ interface OrderbookPriceResponse {
 export interface PriceResponseType extends BaseInterface {
   bids: OrderbookPriceResponse[] // best bids
   asks: OrderbookPriceResponse[] // best asks
+  side: string // pool type
 }
 
 export interface PriceOutputType extends BaseInterface {
@@ -50,6 +51,7 @@ export interface PriceOutputType extends BaseInterface {
   decimals: number // collateral token decimals of pool
   bid: OrderbookPriceResponse // best bid
   ask: OrderbookPriceResponse // best ask
+  side: string // pool type
 }
 
 export interface OrderOutputType {
@@ -61,6 +63,7 @@ export interface OrderOutputType {
   ask?: string // bese ask
   bidQuantity: string // bid quantity
   askQuantity: string // ask quantity
+  side: string // pool type
 }
 
 export const ORDER_TYPE = {

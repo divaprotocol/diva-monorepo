@@ -1,22 +1,16 @@
-const ETHERSCAN_PREFIXES: { [chainId: number]: string } = {
-  [1]: '',
-  [3]: 'ropsten.',
-  [4]: 'rinkeby.',
-  [5]: 'goerli.',
-  [42]: 'kovan.',
-}
+import { config } from '../constants'
 
 export enum EtherscanLinkType {
   TRANSACTION = 'transaction',
   ADDRESS = 'address',
 }
 
-export function getEtherscanLink(
+export function getExploreLink(
   chainId = 5, // QUESTION Is this the default value?
   address: string,
   type: EtherscanLinkType
 ): string {
-  const prefix = `https://${ETHERSCAN_PREFIXES[chainId] ?? ''}etherscan.io`
+  const prefix = config[chainId].explorer
 
   switch (type) {
     case EtherscanLinkType.TRANSACTION:

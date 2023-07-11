@@ -52,6 +52,7 @@ import { Search } from '@mui/icons-material'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { getColorByStatus, getTopNObjectByProperty } from '../../Util/dashboard'
 import useTheme from '@mui/material/styles/useTheme'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 export const DueInCell = (props: any) => {
   const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
@@ -282,10 +283,21 @@ const SubmitCell = (props: any) => {
 
 const columns: GridColDef[] = [
   {
-    field: 'Id',
+    field: 'AssetId',
+    align: 'left',
+    headerAlign: 'left',
+    renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
+    field: 'PoolId',
     align: 'left',
     renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
-    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+    renderCell: (cell) => (
+      <Tooltip title={cell.value}>
+        <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
+      </Tooltip>
+    ),
   },
   {
     field: 'Icon',
@@ -358,8 +370,9 @@ const columns: GridColDef[] = [
 const MyDataFeedsTokenCard = ({ row }: { row: GridRowModel }) => {
   if (!row) return
 
-  const { Icon, Id, Floor, finalValue, Cap, Status, Inflection } = row
+  const { Icon, AssetId, Floor, finalValue, Cap, Status, Inflection } = row
 
+  // Fields in mobile view
   const DATA_ARRAY = [
     {
       label: 'Floor',
@@ -421,7 +434,7 @@ const MyDataFeedsTokenCard = ({ row }: { row: GridRowModel }) => {
                 fontSize: '9.2px',
               }}
             >
-              #{Id}
+              #{AssetId}
             </Typography>
           </Box>
           <Box>
@@ -679,6 +692,7 @@ export function MyDataFeeds() {
   const rows: GridRowModel[] = pools.reduce((acc, val) => {
     const shared = {
       Icon: val.referenceAsset,
+      PoolId: val.id,
       Underlying: val.referenceAsset,
       Floor: formatUnits(val.floor),
       Inflection: formatUnits(val.inflection),
@@ -715,7 +729,7 @@ export function MyDataFeeds() {
       {
         ...shared,
         id: `${val.id}/long`,
-        Id: val.id,
+        AssetId: val.longToken.symbol,
         address: val.longToken,
         PayoffProfile: generatePayoffChartData({
           ...payOff,

@@ -2,24 +2,15 @@ import {
   Box,
   Button,
   Stack,
-  InputAdornment,
-  Input,
   Pagination,
   CircularProgress,
-  Grid,
-  Typography,
   Divider,
-  Radio,
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Checkbox,
-  TextField,
+  Tooltip,
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { formatUnits } from 'ethers/lib/utils'
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { getOrderDetails, getUserOrders } from '../../DataService/OpenOrders'
 import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import {
@@ -31,10 +22,9 @@ import {
 } from '../../Redux/appSlice'
 import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { getDateTime } from '../../Util/Dates'
-import { Search } from '@mui/icons-material'
 import { CoinIconPair } from '../CoinIcon'
 import { useHistory } from 'react-router-dom'
-import { DataGrid, GridColDef, GridRowModel } from '@mui/x-data-grid'
+import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { makeStyles } from '@mui/styles'
 import { ExpiresInCell } from '../Markets/Markets'
@@ -43,311 +33,11 @@ import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { FilterDrawerModal } from './FilterDrawerMobile'
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
-import { getTopNObjectByProperty } from '../../Util/dashboard'
 import useTheme from '@mui/material/styles/useTheme'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-
-const MyOrdersPoolCard = ({
-  row,
-  cancelOrder,
-  loadingValue,
-}: {
-  row: GridRowModel
-  cancelOrder: (event: any, orderHash: string, chainId: string) => Promise<void>
-  loadingValue: any
-}) => {
-  const { icon, Id, type, quantity, price, payReceive, position, orderHash } =
-    row
-
-  const history = useHistory()
-  const chainId = useAppSelector(selectChainId)
-
-  const DATA_ARRAY = [
-    {
-      label: 'Type',
-      value: type,
-    },
-    {
-      label: 'Quantity',
-      value: quantity.toFixed(4),
-    },
-    {
-      label: 'Price',
-      value: price.toFixed(4),
-    },
-    {
-      label: 'Pay/Receive',
-      value: payReceive.toFixed(4),
-    },
-  ]
-
-  return (
-    <>
-      <Divider light />
-      <Stack
-        sx={{
-          fontSize: '10px',
-          width: '100%',
-          margin: '12px 0',
-        }}
-        spacing={1.6}
-        onClick={() => {
-          history.push(`../../${Id}/${position}`)
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gridGap: '8px',
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize: '12px',
-                fontWeight: 500,
-              }}
-            >
-              {icon}
-            </Typography>
-            <Typography
-              sx={{
-                fontSize: '9.2px',
-              }}
-            >
-              #{Id}
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={1.6} alignItems="center">
-            <Typography
-              sx={{
-                fontSize: '10px',
-                fontWeight: 500,
-                color: '#828282',
-              }}
-            >
-              Order Expires In
-            </Typography>
-            <ExpiresInCell row={row} {...row} />
-          </Stack>
-        </Box>
-        <Grid
-          container
-          rowGap={1.6}
-          justifyContent="space-between"
-          columnGap={'3px'}
-        >
-          {DATA_ARRAY.map(({ label, value }, i) => (
-            <Grid item key={i} xs={5}>
-              <Stack
-                direction="row"
-                justifyContent={'space-between'}
-                sx={{
-                  flexGrow: 1,
-                }}
-              >
-                <Box
-                  sx={{
-                    color: '#828282',
-                    minWidth: '60px',
-                  }}
-                >
-                  {label}
-                </Box>
-                {label === 'Type' ? (
-                  <>
-                    {value === 'BUY' ? (
-                      <GreenText>{value}</GreenText>
-                    ) : (
-                      <RedText>{value}</RedText>
-                    )}
-                  </>
-                ) : (
-                  <Box>{value}</Box>
-                )}
-              </Stack>
-            </Grid>
-          ))}
-        </Grid>
-        <Stack alignItems="flex-end">
-          <LoadingButton
-            variant="outlined"
-            startIcon={<DeleteIcon />}
-            size="small"
-            onClick={(event) => cancelOrder(event, orderHash, chainId)}
-            sx={{
-              fontSize: '10px',
-            }}
-            loading={loadingValue.get(orderHash) || false}
-          >
-            Cancel
-          </LoadingButton>
-        </Stack>
-      </Stack>
-      <Divider light />
-    </>
-  )
-}
-
-const MobileFilterOptions = ({
-  buyClicked,
-  setBuyClicked,
-  sellClicked,
-  setSellClicked,
-  rows,
-  searchInput,
-  setSearchInput,
-  checkedState,
-  setCheckedState,
-  setSearch,
-}) => {
-  const theme = useTheme()
-
-  const top4UnderlyingTokens = useMemo(
-    () => getTopNObjectByProperty(rows, 'underlying', 4),
-    [rows]
-  )
-
-  const handleOnChange = (position) => {
-    const updatedCheckedState = checkedState.map((item, index) =>
-      index === position ? !item : item
-    )
-
-    setCheckedState(updatedCheckedState)
-
-    const underlyingTokenString = updatedCheckedState
-      .map((currentState, index) => {
-        if (currentState === true) {
-          return top4UnderlyingTokens[index]
-        }
-      })
-      .filter((item) => item !== undefined)
-      .map((item) => item.token)
-      .join(' ')
-      .toString()
-
-    setSearch(underlyingTokenString)
-  }
-
-  return (
-    <>
-      <Accordion
-        sx={{
-          backgroundColor: '#000000',
-          '&:before': {
-            display: 'none',
-          },
-          marginTop: theme.spacing(3.5),
-        }}
-        defaultExpanded
-      >
-        <AccordionSummary
-          aria-controls="panel1a-content"
-          id="panel1a-header"
-          sx={{
-            padding: '0px',
-            backgroundColor: '#000000',
-          }}
-          expandIcon={<ArrowDropUpIcon />}
-        >
-          <Typography
-            sx={{
-              fontSize: '16px',
-            }}
-          >
-            Underlying
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails
-          sx={{
-            backgroundColor: '#000000',
-            padding: '0px',
-          }}
-        >
-          <Box>
-            <TextField
-              value={searchInput}
-              aria-label="Filter creator"
-              sx={{ width: '100%', height: '50px', marginTop: '16px' }}
-              onChange={(event) => setSearchInput(event.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search color="secondary" />
-                  </InputAdornment>
-                ),
-              }}
-              placeholder="Enter Underlying"
-              color="secondary"
-            />
-          </Box>
-          <Stack
-            spacing={0.6}
-            sx={{
-              marginTop: theme.spacing(2),
-              fontSize: '14px',
-            }}
-          >
-            {top4UnderlyingTokens.map((underlying, index) => (
-              <Stack
-                direction="row"
-                justifyContent={'space-between'}
-                alignItems={'center'}
-                key={index}
-              >
-                <Box>{underlying.token}</Box>
-                <Checkbox
-                  checked={checkedState[index]}
-                  id={`custom-checkbox-${index}`}
-                  onChange={() => handleOnChange(index)}
-                />
-              </Stack>
-            ))}
-          </Stack>
-        </AccordionDetails>
-      </Accordion>
-      <Divider />
-      <Stack
-        sx={{
-          paddingTop: theme.spacing(2.5),
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>Buy</Box>
-          <Radio
-            checked={buyClicked}
-            size="small"
-            onClick={() => setBuyClicked(!buyClicked)}
-          />
-        </Stack>
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>Sell</Box>
-          <Radio
-            checked={sellClicked}
-            size="small"
-            onClick={() => setSellClicked(!sellClicked)}
-          />
-        </Stack>
-      </Stack>
-    </>
-  )
-}
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { MyOrdersPoolCard } from './MyOrdersPoolCard'
+import { MobileFilterOptions } from './MobileFilterOptions'
 
 export function MyOrders() {
   const [dataOrders, setDataOrders] = useState([])
@@ -441,7 +131,7 @@ export function MyOrders() {
     price = Number(payReceive) / Number(takerAmount)
     return {
       type: type,
-      Id: poolId,
+      PoolId: poolId,
       icon: underlying,
       underlying: underlying,
       quantity: quantity,
@@ -477,7 +167,7 @@ export function MyOrders() {
     price = askAmount
     return {
       type: type,
-      Id: poolId,
+      PoolId: poolId,
       icon: underlying,
       underlying: underlying,
       quantity: quantity,
@@ -510,7 +200,8 @@ export function MyOrders() {
         const shortFields = {
           id: 'short' + records.indexOf(record as never),
           position: 'short',
-          symbol: sellOrderShort[0].shortToken.symbol,
+          AssetId: sellOrderShort[0].shortToken.symbol,
+          PoolId: sellOrderShort[0].id,
         }
         dataOrders.push({ ...fields, ...shortFields })
       }
@@ -519,7 +210,8 @@ export function MyOrders() {
         const longFields = {
           id: 'long' + records.indexOf(record as never),
           position: 'long',
-          symbol: sellOrderLong[0].longToken.symbol,
+          AssetId: sellOrderLong[0].longToken.symbol,
+          PoolId: sellOrderLong[0].id,
         }
         dataOrders.push({ ...fields, ...longFields })
       }
@@ -528,7 +220,8 @@ export function MyOrders() {
         const shortFields = {
           id: 'short' + records.indexOf(record as never),
           position: 'short',
-          symbol: buyOrderShort[0].shortToken.symbol,
+          AssetId: buyOrderShort[0].shortToken.symbol,
+          PoolId: buyOrderShort[0].id,
         }
         dataOrders.push({ ...fields, ...shortFields })
       }
@@ -537,7 +230,8 @@ export function MyOrders() {
         const longFields = {
           id: 'long' + records.indexOf(record as never),
           position: 'long',
-          symbol: buyOrderLong[0].longToken.symbol,
+          AssetId: buyOrderLong[0].longToken.symbol,
+          PoolId: buyOrderLong[0].id,
         }
         dataOrders.push({ ...fields, ...longFields })
       }
@@ -586,10 +280,20 @@ export function MyOrders() {
 
   const columns: GridColDef[] = [
     {
-      field: 'symbol',
+      field: 'AssetId',
       align: 'left',
       renderHeader: (_header) => <GrayText>{'Asset Id'}</GrayText>,
       renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+    },
+    {
+      field: 'PoolId',
+      align: 'left',
+      renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
+      renderCell: (cell) => (
+        <Tooltip title={cell.value}>
+          <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
+        </Tooltip>
+      ),
     },
     {
       field: 'icon',
@@ -801,10 +505,10 @@ export function MyOrders() {
                   Filters
                 </Button>
                 <Box>
-                  {filteredRows.map((row, i) => (
+                  {filteredRows.map((row) => (
                     <MyOrdersPoolCard
                       row={row}
-                      key={i}
+                      key={row.id}
                       cancelOrder={cancelOrder}
                       loadingValue={loadingValue}
                     />
@@ -869,7 +573,7 @@ export function MyOrders() {
               selectedPoolsView="Table"
               page={page}
               onRowClick={(row) => {
-                history.push(`../../${row.row.Id}/${row.row.position}`)
+                history.push(`../../${row.row.PoolId}/${row.row.position}`)
               }}
               componentsProps={{
                 row: {

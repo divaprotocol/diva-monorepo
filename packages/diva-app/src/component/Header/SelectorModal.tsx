@@ -1,4 +1,4 @@
-import { useTheme, Theme } from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles'
 import Modal from '@mui/material/Modal'
 import Box from '@mui/material/Box'
 import CloseIcon from '@mui/icons-material/Close'
@@ -40,6 +40,11 @@ const SelectorModal = ({
           boxShadow: 24,
           p: 4,
           color: theme.palette.text.primary,
+          '@media (max-width: 600px)': {
+            width: '75%',
+            margin: 0,
+            borderRadius: 0,
+          },
         }}
       >
         <Box

@@ -1,13 +1,4 @@
-import styled from 'styled-components'
-import {
-  Box,
-  Card,
-  Container,
-  Divider,
-  Stack,
-  Typography,
-  useTheme,
-} from '@mui/material'
+import { Box, Divider, Stack, useTheme } from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
@@ -20,8 +11,7 @@ import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
 import OptionHeader from './OptionHeader'
 import { config } from '../../constants'
-import React, { useState, useEffect } from 'react'
-import { BigNumber } from 'ethers'
+import { useState, useEffect } from 'react'
 import OrdersPanel from './OrdersPanel'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -31,7 +21,6 @@ import { useDispatch } from 'react-redux'
 import {
   fetchPool,
   fetchUnderlyingPrice,
-  selectIsBuy,
   selectPool,
   selectChainId,
   selectUnderlyingPrice,
@@ -44,31 +33,19 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 import RemoveOutlinedIcon from '@mui/icons-material/RemoveOutlined'
 import { ReactComponent as LongPool } from '../../Images/long-trade-page-icon.svg'
 import { ReactComponent as ShortPool } from '../../Images/short-trade-page-icon.svg'
-import BuyOrder from './Orders/BuyOrder'
 
-const LeftCompFlexContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  flex-basis: 100%;
-`
-const LeftDiv = styled.div`
-  width: 50%;
-`
-const RightDiv = styled.div`
-  width: 35%;
-`
 export default function Underlying() {
   const history = useHistory()
   const params: { poolId: string; tokenType: string } = useParams()
   const isLong = params.tokenType === 'long'
-  const currentTab =
-    history.location.pathname === `/${params.poolId}/add`
-      ? 'add'
-      : history.location.pathname === `/${params.poolId}/remove`
-      ? 'remove'
-      : history.location.pathname === `/${params.poolId}/short`
-      ? 'short'
-      : 'long'
+
+  const pathsToTab = {
+    [`/${params.poolId}/add`]: 'add',
+    [`/${params.poolId}/remove`]: 'remove',
+    [`/${params.poolId}/short`]: 'short',
+  }
+  const currentTab = pathsToTab[history.location.pathname] || 'long'
+
   const [value, setValue] = useState(currentTab)
   const breakEven = useAppSelector((state) => state.stats.breakEven)
   const chainId = useAppSelector(selectChainId)
@@ -110,11 +87,14 @@ export default function Underlying() {
   }
   const data = generatePayoffChartData(OptionParams, currentPrice)
   const tokenAddress = value === 'long' ? pool.longToken.id : pool.shortToken.id
+  const tokenSymbol =
+    value === 'long' ? pool.longToken.symbol : pool.shortToken.symbol
 
   const handleChange = (event: any, newValue: string) => {
-    history.push(`/${params.poolId}/${newValue}`)
     setValue(newValue)
+    history.push(`/${params.poolId}/${newValue}`)
   }
+
   return (
     <TabContext value={value}>
       {/* <Box
@@ -138,7 +118,7 @@ export default function Underlying() {
         <OptionHeader
           ReferenceAsset={pool.referenceAsset}
           TokenAddress={tokenAddress}
-          isLong={isLong}
+          tokenSymbol={tokenSymbol}
           poolId={pool.id}
           tokenDecimals={pool.collateralToken.decimals}
         />

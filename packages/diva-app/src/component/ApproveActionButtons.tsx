@@ -547,8 +547,9 @@ export const ApproveActionButtons = ({
                             formik.setFieldValue(
                               'poolId',
                               receipt.events.find(
-                                (x: any) => x.event === 'PoolIssued'
-                              ).args.poolId
+                                (x: any) =>
+                                  x.address === config[chainId]?.divaAddress
+                              ).topics[1]
                             )
                             setActionLoading(false)
                             setIsPoolCreated(true)

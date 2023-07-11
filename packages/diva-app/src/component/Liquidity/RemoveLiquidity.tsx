@@ -1,36 +1,32 @@
-import { BigNumber, Contract, ethers } from 'ethers'
+import { ethers } from 'ethers'
 import {
   Alert,
   Box,
   Card,
   CircularProgress,
   Collapse,
-  Container,
-  Divider,
   IconButton,
   InputAdornment,
-  Input,
   Stack,
   TextField,
+  Tooltip,
   Typography,
   useTheme,
 } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
-import { useCoinIcon } from '../../hooks/useCoinIcon'
-import ERC20 from '../../abi/ERC20ABI.json'
 import Button from '@mui/material/Button'
 import { config } from '../../constants'
 import DIVA_ABI from '../../abi/DIVAABI.json'
-import { toExponentialOrNumber } from '../../Util/utils'
 import { fetchPool } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { selectUserAddress } from '../../Redux/appSlice'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useAppSelector } from '../../Redux/hooks'
 import LightbulbIcon from '@mui/icons-material/Lightbulb'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -38,16 +34,13 @@ const MaxCollateral = styled.u`
     color: ${(props) => (props.theme as any).palette.primary.main};
   }
 `
-const CoinIcon = (address: any) => {
-  return <img alt={address} src={useCoinIcon(address)} style={{ height: 30 }} />
-}
+
 type Props = {
   pool?: any
 }
 
 export const RemoveLiquidity = ({ pool }: Props) => {
   const [textFieldValue, setTextFieldValue] = useState('')
-
   const [openExpiredAlert, setOpenExpiredAlert] = React.useState(false)
   const [longToken, setLongToken] = React.useState('')
   const [shortToken, setShortToken] = React.useState('')
@@ -64,11 +57,11 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const theme = useTheme()
 
   // TODO Move this part into the useEffect hook so that it updates the user balance on account switch
-  const tokenBalanceLong = useErcBalance(
+  const { balance: tokenBalanceLong } = useErcBalance(
     pool ? pool!.longToken.id : undefined,
     balanceUpdated
   )
-  const tokenBalanceShort = useErcBalance(
+  const { balance: tokenBalanceShort } = useErcBalance(
     pool ? pool!.shortToken.id : undefined,
 
     balanceUpdated
@@ -97,11 +90,22 @@ export const RemoveLiquidity = ({ pool }: Props) => {
   const returnAmount =
     textFieldValue == '' ? 0 : Number(parseFloat(textFieldValue).toFixed(4))
 
-  const currentPoolSize =
-    pool &&
-    parseFloat(formatUnits(pool.collateralBalance, decimal)).toFixed(4) +
-      ' ' +
-      pool.collateralToken.symbol
+  // const currentPoolSize =
+  //   pool &&
+  //   parseFloat(formatUnits(pool.collateralBalance, decimal)).toFixed(4) +
+  //     ' ' +
+  //     pool.collateralToken.symbol
+
+  const currentPoolSize = useMemo(() => {
+    if (pool) {
+      return (
+        parseFloat(formatUnits(pool.collateralBalance, decimal)).toFixed(4) +
+        ' ' +
+        pool.collateralToken.symbol
+      )
+    }
+    return null
+  }, [pool, decimal])
 
   const yourPoolShare =
     pool &&
@@ -161,7 +165,28 @@ export const RemoveLiquidity = ({ pool }: Props) => {
     account,
   ])
 
-  async function removeLiquidityTrade() {
+  // Not using this function
+  // async function removeLiquidityTrade() {
+  //   try {
+  //     setLoading(true)
+  //     const diva = new ethers.Contract(
+  //       config[chainId].divaAddress,
+  //       DIVA_ABI,
+  //       provider?.getSigner()
+  //     )
+  //     const tx = await diva!.removeLiquidity(
+  //       window.location.pathname.split('/')[1],
+  //       parseUnits(longToken, decimal)
+  //     )
+  //     await tx?.wait()
+  //     setLoading(false)
+  //   } catch (error) {
+  //     setLoading(false)
+  //     console.error(error)
+  //   }
+  // }
+
+  const handleRemoveClick = async () => {
     try {
       setLoading(true)
       const diva = new ethers.Contract(
@@ -169,15 +194,31 @@ export const RemoveLiquidity = ({ pool }: Props) => {
         DIVA_ABI,
         provider?.getSigner()
       )
+
       const tx = await diva!.removeLiquidity(
         window.location.pathname.split('/')[1],
-        parseUnits(longToken, decimal)
+        parseEther(longToken)
       )
-      await tx?.wait()
+
+      await tx.wait()
+
+      // Dispatch action to refetch the pool after action
       setLoading(false)
-    } catch (error) {
+      setBalanceUpdated(false)
+
+      // Add additional delay to ensure the contract state has been updated on-chain
+      // suggestion: delay value can be dynamic based on the network
+      setTimeout(() => {
+        dispatch(
+          fetchPool({
+            graphUrl: config[chainId as number].divaSubgraph,
+            poolId: pool.id,
+          })
+        )
+      }, 6000)
+    } catch (err) {
       setLoading(false)
-      console.error(error)
+      console.error(err)
     }
   }
 
@@ -368,42 +409,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                       chainId == null ||
                       openAlert === true
                     }
-                    onClick={() => {
-                      setLoading(true)
-                      const diva = new ethers.Contract(
-                        config[chainId].divaAddress,
-                        DIVA_ABI,
-                        provider?.getSigner()
-                      )
-                      diva!
-                        .removeLiquidity(
-                          window.location.pathname.split('/')[1],
-                          parseEther(longToken)
-                        )
-                        .then((tx) => {
-                          /**
-                           * dispatch action to refetch the pool after action
-                           */
-                          tx.wait().then(() => {
-                            setLoading(false)
-                            setTimeout(() => {
-                              setBalanceUpdated(false)
-                              dispatch(
-                                fetchPool({
-                                  graphUrl:
-                                    config[chainId as number].divaSubgraph,
-                                  poolId:
-                                    window.location.pathname.split('/')[1],
-                                })
-                              )
-                            }, 5000)
-                          })
-                        })
-                        .catch((err) => {
-                          setLoading(false)
-                          console.error(err)
-                        })
-                    }}
+                    onClick={() => handleRemoveClick()}
                     style={{
                       maxWidth: theme.spacing(38),
                       maxHeight: theme.spacing(5),
@@ -433,9 +439,11 @@ export const RemoveLiquidity = ({ pool }: Props) => {
                 <Typography variant="h4" fontWeight="normal" color="gray">
                   Pool ID
                 </Typography>
-                <Typography fontSize="20px" color="white">
-                  {pool.id}
-                </Typography>
+                <Tooltip title={pool.id}>
+                  <Typography fontSize="20px" color="white">
+                    {getShortenedAddress(pool.id, 6, 0)}
+                  </Typography>
+                </Tooltip>
               </Box>
               <Box>
                 <Typography variant="h4" fontWeight="normal" color="gray">

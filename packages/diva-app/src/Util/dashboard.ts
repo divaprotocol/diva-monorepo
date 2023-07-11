@@ -62,3 +62,8 @@ export const getColorByStatus = (status: string) => {
       }
   }
 }
+
+export function extractHash(fullString: string): string {
+  const parts = fullString.split('-')
+  return parts[0] // returns the first part before the "-"
+}
