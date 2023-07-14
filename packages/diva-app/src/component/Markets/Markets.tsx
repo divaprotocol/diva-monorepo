@@ -60,6 +60,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import { Search } from '@mui/icons-material'
 import { getTopNObjectByProperty } from '../../Util/dashboard'
 import { useWhitelist } from '../../hooks/useWhitelist'
+import { fetchIpfs } from '../Trade/Underlying'
 
 export const ExpiresInCell = (props: any) => {
   //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
@@ -699,6 +700,8 @@ export default function Markets() {
     const updatedTablePools = tablePools.map((tablePool) => {
       const orders = ordersArray.filter((item) => item.poolId === tablePool.id)
 
+      console.log(orders)
+
       if (orders.length === 0) {
         return tablePool
       } else {
@@ -750,6 +753,13 @@ export default function Markets() {
           orderPrices[ORDER_TYPE.SELL]
         )
 
+        if (tablePool.referenceAsset.endsWith('.json')) {
+          const json = fetchIpfs(tablePool.referenceAsset, (res) => {
+            console.log(res)
+          })
+          console.log(json)
+        }
+
         if (completeOrderBook.length !== 0) {
           if (side === 'Long') {
             // Update the pool's long price information with the updated information
@@ -796,6 +806,8 @@ export default function Markets() {
 
     setTablePools(updatedTablePools)
   }
+
+  // console.log(tablePools)
 
   useEffect(() => {
     if (websocketClient !== undefined) {

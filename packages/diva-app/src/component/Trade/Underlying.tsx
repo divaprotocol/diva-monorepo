@@ -25,7 +25,7 @@ import {
   selectChainId,
   selectUnderlyingPrice,
 } from '../../Redux/appSlice'
-import { formatUnits, formatEther } from 'ethers/lib/utils'
+import { formatUnits, formatEther, poll } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
 import { AddLiquidity } from '../Liquidity/AddLiquidity'
 import { RemoveLiquidity } from '../Liquidity/RemoveLiquidity'
@@ -33,6 +33,19 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 import RemoveOutlinedIcon from '@mui/icons-material/RemoveOutlined'
 import { ReactComponent as LongPool } from '../../Images/long-trade-page-icon.svg'
 import { ReactComponent as ShortPool } from '../../Images/short-trade-page-icon.svg'
+
+export const fetchIpfs = async (asset, callback) => {
+  try {
+    const response = await fetch(asset)
+    if (!response.ok) throw new Error(response.statusText)
+    const json = await response.json()
+    if (json.title !== undefined) {
+      callback(json.title)
+    }
+  } catch (error) {
+    console.error(`Failed to fetch asset: ${error.message}`)
+  }
+}
 
 export default function Underlying() {
   const history = useHistory()
@@ -55,6 +68,7 @@ export default function Underlying() {
   const exchangeProxy = chainContractAddress.exchangeProxy
   const theme = useTheme()
   const dispatch = useDispatch()
+  const [headerTitle, setHeaderTitle] = useState<string>('')
 
   useEffect(() => {
     dispatch(
@@ -69,12 +83,17 @@ export default function Underlying() {
   const currentPrice = useAppSelector(
     selectUnderlyingPrice(pool?.referenceAsset)
   )
-  useEffect(() => {
-    if (pool?.referenceAsset != null)
-      dispatch(fetchUnderlyingPrice(pool.referenceAsset))
-  }, [pool, dispatch])
 
-  if (pool == null) {
+  useEffect(() => {
+    if (pool?.referenceAsset !== null) {
+      dispatch(fetchUnderlyingPrice(pool.referenceAsset))
+      if (pool.referenceAsset.endsWith('.json')) {
+        fetchIpfs(pool.referenceAsset, setHeaderTitle)
+      }
+    }
+  }, [pool.referenceAsset, dispatch])
+
+  if (pool === null) {
     return <LoadingBox />
   }
 
@@ -97,21 +116,9 @@ export default function Underlying() {
 
   return (
     <TabContext value={value}>
-      {/* <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: {
-            sx: 'flex-start',
-            md: 'flex-start',
-            lg: 'flex-start',
-            xl: 'center',
-          },
-        }}
-      > */}
       <Box
         sx={{
-          /* maxWidth: '70%',*/ paddingTop: '1em',
+          paddingTop: '1em',
           ml: '10px',
         }}
       >
@@ -121,6 +128,7 @@ export default function Underlying() {
           tokenSymbol={tokenSymbol}
           poolId={pool.id}
           tokenDecimals={pool.collateralToken.decimals}
+          JsonHeaderTitle={headerTitle}
         />
         <OptionDetails pool={pool} isLong={isLong} />
       </Box>

@@ -60,6 +60,7 @@ import { Search } from '@mui/icons-material'
 import { getTopNObjectByProperty, getColorByStatus } from '../../Util/dashboard'
 import useTheme from '@mui/material/styles/useTheme'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { sendAddAssetTransaction } from '../../Util/walletUtils'
 
 type Response = {
   [token: string]: BigNumber
@@ -82,23 +83,16 @@ const AddToMetamask = (props: any) => {
     )
     const decimal = await token.decimals()
     const tokenSymbol = await token.symbol()
-    try {
-      await sendTransaction({
-        method: 'wallet_watchAsset',
-        params: {
-          type: 'ERC20',
-          options: {
-            address: props.row.address.id,
-            symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
-            decimals: decimal,
-            image:
-              'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
-          },
-        } as any,
-      })
-    } catch (error) {
-      console.error('Error in HandleAddMetaMask', error)
+
+    const options = {
+      address: props.row.address.id,
+      symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
+      decimals: decimal,
+      image:
+        'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
     }
+
+    await sendAddAssetTransaction(sendTransaction, options)
   }
   return (
     <>
