@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useLayoutEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useTheme } from '@mui/material'
 import * as d3 from 'd3'
 
@@ -175,11 +175,12 @@ export function PayoffProfile(props) {
           })
       )
       .call((g) => g.select('.domain').remove())
-      .call((g) =>
-        g
-          .selectAll('.tick:not(:first-of-type) line')
-          .attr('stroke-opacity', 0.5)
-          .style('stroke', '#3393E0')
+      .call(
+        (g) =>
+          g
+            .selectAll('.tick:not(:first-of-type) line')
+            .attr('stroke-opacity', 0.5)
+        // .style('stroke', '#3393E0')
       )
       .call((g) => g.selectAll('.tick text').attr('x', 4).attr('dy', -4))
 
@@ -439,7 +440,7 @@ export function PayoffProfile(props) {
           pos = null
 
         //eslint-disable-next-line
-    while (true) {
+        while (true) {
           target = Math.floor((beginning + end) / 2)
           pos = l[i].getPointAtLength(target)
           if ((target === end || target === beginning) && pos.x !== m) {

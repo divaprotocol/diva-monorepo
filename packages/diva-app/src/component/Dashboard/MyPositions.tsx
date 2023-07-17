@@ -46,7 +46,7 @@ import {
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { ExpiresInCell } from '../Markets/Markets'
+import { ExpiresInCell } from '../Markets/ExpiresInCell'
 import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'

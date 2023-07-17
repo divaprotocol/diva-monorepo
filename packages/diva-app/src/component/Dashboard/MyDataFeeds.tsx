@@ -41,7 +41,7 @@ import {
 import { useDispatch } from 'react-redux'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { ExpiresInCell } from '../Markets/Markets'
+import { ExpiresInCell } from '../Markets/ExpiresInCell'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import { getAppStatus } from '../../Util/getAppStatus'

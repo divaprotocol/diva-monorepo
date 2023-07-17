@@ -5,7 +5,7 @@ import { selectChainId } from '../../Redux/appSlice'
 import { useHistory } from 'react-router-dom'
 import { GridRowModel } from '@mui/x-data-grid'
 import { GreenText, RedText } from '../Trade/Orders/UiStyles'
-import { ExpiresInCell } from '../Markets/Markets'
+import { ExpiresInCell } from '../Markets/ExpiresInCell'
 import { useAppSelector } from '../../Redux/hooks'
 
 export const MyOrdersPoolCard = ({

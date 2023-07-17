@@ -25,7 +25,7 @@ import TradeChart from './Graphs/TradeChart'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import styled from 'styled-components'
-import { ExpiresInCell } from './Markets/Markets'
+import { ExpiresInCell } from './Markets/ExpiresInCell'
 import { useCustomMediaQuery } from '../hooks/useCustomMediaQuery'
 
 interface Props {
@@ -154,7 +154,7 @@ const PoolCard = ({ row }: Props) => {
           >
             <CoinIconPair assetName={row.Icon} />
           </Box>
-          <Tooltip title={row.Icon}>
+          <Tooltip title={row.Underlying}>
             <Typography
               variant={isMobile ? 'h3' : 'h2'}
               color={'#fff'}
@@ -163,7 +163,7 @@ const PoolCard = ({ row }: Props) => {
               }}
               noWrap
             >
-              {row.Icon}
+              {row.Underlying}
             </Typography>
           </Tooltip>
         </Box>
