@@ -54,323 +54,19 @@ import { getColorByStatus, getTopNObjectByProperty } from '../../Util/dashboard'
 import useTheme from '@mui/material/styles/useTheme'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 
-export const DueInCell = (props: any) => {
-  const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
-  const statusTimestamp = parseInt(props.row.StatusTimestamp)
-  const { isMobile } = useCustomMediaQuery()
-
-  if (props.row.Status === 'Expired') {
-    const minUntilExp = getExpiryMinutesFromNow(
-      expTimestamp + props.row.SubmissionPeriod
-    )
-
-    if (minUntilExp < props.row.SubmissionPeriod && minUntilExp > 0) {
-      return minUntilExp === 1 ? (
-        <Tooltip placement="top-end" title={props.row.Expiry}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: isMobile ? 'auto' : '150vh',
-            }}
-          >
-            {'<1m'}
-          </div>
-        </Tooltip>
-      ) : (
-        <Tooltip placement="top-end" title={props.row.Expiry}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: isMobile ? 'auto' : '150vh',
-            }}
-          >
-            {(minUntilExp - (minUntilExp % 60)) / 60 +
-              'h ' +
-              (minUntilExp % 60) +
-              'm '}
-          </div>
-        </Tooltip>
-      )
-    }
-  }
-  if (props.row.Status === 'Challenged') {
-    const minUntilExp = getExpiryMinutesFromNow(
-      statusTimestamp + props.row.ReviewPeriod
-    )
-
-    if (minUntilExp < props.row.ReviewPeriod && minUntilExp > 0) {
-      return minUntilExp === 1 ? (
-        <Tooltip placement="top-end" title={props.row.Expiry}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: isMobile ? 'auto' : '150vh',
-            }}
-          >
-            {'<1m'}
-          </div>
-        </Tooltip>
-      ) : (
-        <Tooltip placement="top-end" title={props.row.Expiry}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: isMobile ? 'auto' : '150vh',
-            }}
-          >
-            {(minUntilExp - (minUntilExp % 60)) / 60 +
-              'h ' +
-              (minUntilExp % 60) +
-              'm '}
-          </div>
-        </Tooltip>
-      )
-    }
-  }
-
-  return (
-    <Tooltip placement="top-end" title={props.row.Expiry}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: isMobile ? 'auto' : '150vh',
-        }}
-      >
-        {'-'}
-      </div>
-    </Tooltip>
-  )
-}
-const SubmitCell = (props: any) => {
-  const { provider } = useConnectionContext()
-  const userAddress = useAppSelector(selectUserAddress)
-  const chainId = provider?.network?.chainId
-  const dispatch = useDispatch()
-  const { isMobile } = useCustomMediaQuery()
-
-  const diva =
-    chainId != null
-      ? new ethers.Contract(
-          config[chainId!].divaAddress,
-          DIVA_ABI,
-          provider.getSigner()
-        )
-      : null
-
-  const [open, setOpen] = useState(false)
-  const [textFieldValue, setTextFieldValue] = useState('')
-  const [loadingValue, setLoadingValue] = useState(false)
-
-  const handleOpen = () => {
-    setOpen(true)
-  }
-
-  const handleClose = () => {
-    setOpen(false)
-  }
-
-  const expiryTime = new Date(props.row.Expiry)
-  const statusTimestamp = props.row.StatusTimestamp * 1000
-  const now = new Date()
-
-  // Set relevant start time for submissionPeriodEnd calculations. Before expiry, the expiryTime is the relevant start time.
-  // After expiry, when status == Challenged, the statusTimestamp (i.e. time of challenge) is the relevant start time.
-  const relevantStartTime =
-    statusTimestamp < expiryTime.getTime()
-      ? expiryTime.getTime()
-      : statusTimestamp
-
-  // Flag for enabling the SUBMIT VALUE button
-  const enabled =
-    (props.row.Status === 'Expired' &&
-      now.getTime() < relevantStartTime + props.row.SubmissionPeriod * 1000) ||
-    (props.row.Status === 'Challenged' &&
-      now.getTime() < relevantStartTime + props.row.ChallengePeriod * 1000)
-
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        width: isMobile ? 'auto' : '100%',
-      }}
-    >
-      <LoadingButton
-        variant="contained"
-        onClick={handleOpen}
-        // disabled={!enabled || disabledButton}
-        disabled={!enabled}
-        loading={loadingValue}
-        sx={{
-          fontSize: isMobile ? '10px' : 'auto',
-          padding: isMobile ? '5px 11px' : 'auto',
-        }}
-      >
-        Submit value
-      </LoadingButton>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogContent>
-          <DialogContentText>
-            Please provide a value for this option
-          </DialogContentText>
-        </DialogContent>
-
-        <DialogActions>
-          <TextField
-            defaultValue=""
-            onChange={(e) => {
-              setTextFieldValue(e.target.value)
-            }}
-          />
-          <LoadingButton
-            color="primary"
-            type="submit"
-            loading={loadingValue}
-            sx={{
-              fontSize: isMobile ? '10px' : 'auto',
-              padding: isMobile ? '5px 11px' : 'auto',
-            }}
-            onClick={() => {
-              setLoadingValue(textFieldValue ? true : false)
-              if (diva != null) {
-                diva
-                  .setFinalReferenceValue(
-                    props.id.split('/')[0],
-                    parseUnits(textFieldValue),
-                    true
-                  )
-                  .then((tx) => {
-                    /**
-                     * dispatch action to refetch the pool after action
-                     */
-                    tx.wait().then(() => {
-                      setTimeout(() => {
-                        dispatch(
-                          fetchPools({
-                            page: 0,
-                            dataProvider: userAddress,
-                          })
-                        )
-                        setLoadingValue(false)
-                      }, 10000)
-                    })
-                  })
-                  .catch((err) => {
-                    console.error(err)
-                    setLoadingValue(false)
-                  })
-              }
-              handleClose()
-            }}
-          >
-            Submit value
-          </LoadingButton>
-        </DialogActions>
-      </Dialog>
-    </Box>
-  )
-}
-
-const columns: GridColDef[] = [
-  {
-    field: 'AssetId',
-    align: 'left',
-    headerAlign: 'left',
-    renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
-    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
-  },
-  {
-    field: 'PoolId',
-    align: 'left',
-    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
-    renderCell: (cell) => (
-      <Tooltip title={cell.value}>
-        <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
-      </Tooltip>
-    ),
-  },
-  {
-    field: 'Icon',
-    align: 'right',
-    disableReorder: true,
-    disableColumnMenu: true,
-    headerName: '',
-    renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
-  },
-  {
-    field: 'Underlying',
-    flex: 1,
-    minWidth: 100,
-  },
-  { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
-  { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
-  {
-    field: 'Expiry',
-    minWidth: 170,
-    align: 'right',
-    headerAlign: 'right',
-    type: 'dateTime',
-    headerName: 'Expires in',
-    renderCell: (props) => <ExpiresInCell {...props} />,
-  },
-  {
-    field: 'finalValue',
-    align: 'right',
-    headerAlign: 'right',
-    headerName: 'Final Value',
-    renderCell: (cell: any) => (
-      <Tooltip title={cell.value}>
-        <span className="table-cell-trucate">{cell.value}</span>
-      </Tooltip>
-    ),
-  },
-  {
-    field: 'Status',
-    align: 'right',
-    headerAlign: 'right',
-    renderCell: (props: any) => (
-      <Tooltip
-        title={props.row.Challenges.map((challenge) => {
-          return '[' + formatUnits(challenge.proposedFinalReferenceValue) + '] '
-        })}
-      >
-        <span className="table-cell-trucate">{props.row.Status}</span>
-      </Tooltip>
-    ),
-  },
-  {
-    field: 'subPeriod',
-    align: 'right',
-    headerAlign: 'right',
-    headerName: 'Due in',
-    minWidth: 100,
-    renderCell: (props) => <DueInCell {...props} />,
-  },
-  {
-    field: 'submitValue',
-    align: 'right',
-    headerAlign: 'right',
-    headerName: '',
-    minWidth: 200,
-    renderCell: (props) => <SubmitCell {...props} />,
-  },
-]
-
 const MyDataFeedsTokenCard = ({ row }: { row: GridRowModel }) => {
   if (!row) return
 
-  const { Icon, AssetId, Floor, finalValue, Cap, Status, Inflection } = row
+  const {
+    Icon,
+    AssetId,
+    Floor,
+    finalValue,
+    Cap,
+    Status,
+    Inflection,
+    Underlying,
+  } = row
 
   // Fields in mobile view
   const DATA_ARRAY = [
@@ -425,9 +121,10 @@ const MyDataFeedsTokenCard = ({ row }: { row: GridRowModel }) => {
               sx={{
                 fontSize: '12px',
                 fontWeight: 500,
+                maxWidth: '110px',
               }}
             >
-              {Icon}
+              {Underlying}
             </Typography>
             <Typography
               sx={{
@@ -647,6 +344,320 @@ const MobileFilterOptions = ({
   )
 }
 
+const columns: GridColDef[] = [
+  {
+    field: 'AssetId',
+    align: 'left',
+    headerAlign: 'left',
+    renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
+    renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
+    field: 'PoolId',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
+    renderCell: (cell) => (
+      <Tooltip title={cell.value}>
+        <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
+      </Tooltip>
+    ),
+  },
+  {
+    field: 'Icon',
+    align: 'right',
+    disableReorder: true,
+    disableColumnMenu: true,
+    headerName: '',
+    renderCell: (cell) => <CoinIconPair assetName={cell.value} />,
+  },
+  {
+    field: 'Underlying',
+    flex: 1,
+    minWidth: 100,
+  },
+  { field: 'Floor', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Inflection', align: 'right', headerAlign: 'right', type: 'number' },
+  { field: 'Cap', align: 'right', headerAlign: 'right', type: 'number' },
+  {
+    field: 'Expiry',
+    minWidth: 170,
+    align: 'right',
+    headerAlign: 'right',
+    type: 'dateTime',
+    headerName: 'Expires in',
+    renderCell: (props) => <ExpiresInCell {...props} />,
+  },
+  {
+    field: 'finalValue',
+    align: 'right',
+    headerAlign: 'right',
+    headerName: 'Final Value',
+    renderCell: (cell: any) => (
+      <Tooltip title={cell.value}>
+        <span className="table-cell-trucate">{cell.value}</span>
+      </Tooltip>
+    ),
+  },
+  {
+    field: 'Status',
+    align: 'right',
+    headerAlign: 'right',
+    renderCell: (props: any) => (
+      <Tooltip
+        title={props.row.Challenges.map((challenge) => {
+          return '[' + formatUnits(challenge.proposedFinalReferenceValue) + '] '
+        })}
+      >
+        <span className="table-cell-trucate">{props.row.Status}</span>
+      </Tooltip>
+    ),
+  },
+  {
+    field: 'subPeriod',
+    align: 'right',
+    headerAlign: 'right',
+    headerName: 'Due in',
+    minWidth: 100,
+    renderCell: (props) => <DueInCell {...props} />,
+  },
+  {
+    field: 'submitValue',
+    align: 'right',
+    headerAlign: 'right',
+    headerName: '',
+    minWidth: 200,
+    renderCell: (props) => <SubmitCell {...props} />,
+  },
+]
+
+export const DueInCell = (props: any) => {
+  const expTimestamp = new Date(props.row.Expiry).getTime() / 1000
+  const statusTimestamp = parseInt(props.row.StatusTimestamp)
+  const { isMobile } = useCustomMediaQuery()
+
+  if (props.row.Status === 'Expired') {
+    const minUntilExp = getExpiryMinutesFromNow(
+      expTimestamp + props.row.SubmissionPeriod
+    )
+
+    if (minUntilExp < props.row.SubmissionPeriod && minUntilExp > 0) {
+      return minUntilExp === 1 ? (
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: isMobile ? 'auto' : '150vh',
+            }}
+          >
+            {'<1m'}
+          </div>
+        </Tooltip>
+      ) : (
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: isMobile ? 'auto' : '150vh',
+            }}
+          >
+            {(minUntilExp - (minUntilExp % 60)) / 60 +
+              'h ' +
+              (minUntilExp % 60) +
+              'm '}
+          </div>
+        </Tooltip>
+      )
+    }
+  }
+  if (props.row.Status === 'Challenged') {
+    const minUntilExp = getExpiryMinutesFromNow(
+      statusTimestamp + props.row.ReviewPeriod
+    )
+
+    if (minUntilExp < props.row.ReviewPeriod && minUntilExp > 0) {
+      return minUntilExp === 1 ? (
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: isMobile ? 'auto' : '150vh',
+            }}
+          >
+            {'<1m'}
+          </div>
+        </Tooltip>
+      ) : (
+        <Tooltip placement="top-end" title={props.row.Expiry}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: isMobile ? 'auto' : '150vh',
+            }}
+          >
+            {(minUntilExp - (minUntilExp % 60)) / 60 +
+              'h ' +
+              (minUntilExp % 60) +
+              'm '}
+          </div>
+        </Tooltip>
+      )
+    }
+  }
+
+  return (
+    <Tooltip placement="top-end" title={props.row.Expiry}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: isMobile ? 'auto' : '150vh',
+        }}
+      >
+        {'-'}
+      </div>
+    </Tooltip>
+  )
+}
+
+const SubmitCell = (props: any) => {
+  const { provider } = useConnectionContext()
+  const userAddress = useAppSelector(selectUserAddress)
+  const chainId = provider?.network?.chainId
+  const dispatch = useDispatch()
+  const { isMobile } = useCustomMediaQuery()
+
+  const diva =
+    chainId != null
+      ? new ethers.Contract(
+          config[chainId!].divaAddress,
+          DIVA_ABI,
+          provider.getSigner()
+        )
+      : null
+
+  const [open, setOpen] = useState(false)
+  const [textFieldValue, setTextFieldValue] = useState('')
+  const [loadingValue, setLoadingValue] = useState(false)
+
+  const handleOpen = () => {
+    setOpen(true)
+  }
+
+  const handleClose = () => {
+    setOpen(false)
+  }
+
+  const expiryTime = new Date(props.row.Expiry)
+  const statusTimestamp = props.row.StatusTimestamp * 1000
+  const now = new Date()
+
+  // Set relevant start time for submissionPeriodEnd calculations. Before expiry, the expiryTime is the relevant start time.
+  // After expiry, when status == Challenged, the statusTimestamp (i.e. time of challenge) is the relevant start time.
+  const relevantStartTime =
+    statusTimestamp < expiryTime.getTime()
+      ? expiryTime.getTime()
+      : statusTimestamp
+
+  // Flag for enabling the SUBMIT VALUE button
+  const enabled =
+    (props.row.Status === 'Expired' &&
+      now.getTime() < relevantStartTime + props.row.SubmissionPeriod * 1000) ||
+    (props.row.Status === 'Challenged' &&
+      now.getTime() < relevantStartTime + props.row.ChallengePeriod * 1000)
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        width: isMobile ? 'auto' : '100%',
+      }}
+    >
+      <LoadingButton
+        variant="contained"
+        onClick={handleOpen}
+        // disabled={!enabled || disabledButton}
+        disabled={!enabled}
+        loading={loadingValue}
+        sx={{
+          fontSize: isMobile ? '10px' : 'auto',
+          padding: isMobile ? '5px 11px' : 'auto',
+        }}
+      >
+        Submit value
+      </LoadingButton>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogContent>
+          <DialogContentText>
+            Please provide a value for this option
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <TextField
+            defaultValue=""
+            onChange={(e) => {
+              setTextFieldValue(e.target.value)
+            }}
+          />
+          <LoadingButton
+            color="primary"
+            type="submit"
+            loading={loadingValue}
+            sx={{
+              fontSize: isMobile ? '10px' : 'auto',
+              padding: isMobile ? '5px 11px' : 'auto',
+            }}
+            onClick={() => {
+              setLoadingValue(textFieldValue ? true : false)
+              if (diva != null) {
+                diva
+                  .setFinalReferenceValue(
+                    props.id.split('/')[0],
+                    parseUnits(textFieldValue),
+                    true
+                  )
+                  .then((tx) => {
+                    /**
+                     * dispatch action to refetch the pool after action
+                     */
+                    tx.wait().then(() => {
+                      setTimeout(() => {
+                        dispatch(
+                          fetchPools({
+                            page: 0,
+                            dataProvider: userAddress,
+                          })
+                        )
+                        setLoadingValue(false)
+                      }, 10000)
+                    })
+                  })
+                  .catch((err) => {
+                    console.error(err)
+                    setLoadingValue(false)
+                  })
+              }
+              handleClose()
+            }}
+          >
+            Submit value
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  )
+}
+
 export function MyDataFeeds() {
   const userAddress = useAppSelector(selectUserAddress)
   const [page, setPage] = useState(0)
@@ -656,6 +667,7 @@ export function MyDataFeeds() {
   const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
+  const [rows, setRows] = useState([])
   const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
 
   const dispatch = useDispatch()
@@ -689,70 +701,93 @@ export function MyDataFeeds() {
     }
   }, [dispatch, page, userAddress])
 
-  const rows: GridRowModel[] = pools.reduce((acc, val) => {
-    const shared = {
-      Icon: val.referenceAsset,
-      PoolId: val.id,
-      Underlying: val.referenceAsset,
-      Floor: formatUnits(val.floor),
-      Inflection: formatUnits(val.inflection),
-      Cap: formatUnits(val.cap),
-      Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
-      Expiry: getDateTime(val.expiryTime),
-      Sell: 'TBD',
-      Buy: 'TBD',
-      MaxYield: 'TBD',
-      Challenges: val.challenges,
+  useEffect(() => {
+    const getRows = async () => {
+      const allRowsPromises = pools.map(async (val) => {
+        let json = null
+
+        if (val.referenceAsset.endsWith('.json')) {
+          const response = await fetch(val.referenceAsset)
+          json = await response.json()
+        }
+
+        const shared = {
+          Icon: val.referenceAsset,
+          PoolId: val.id,
+          Underlying: json?.title ? json.title : val.referenceAsset,
+          Floor: formatUnits(val.floor),
+          Inflection: formatUnits(val.inflection),
+          Cap: formatUnits(val.cap),
+          Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
+          Expiry: getDateTime(val.expiryTime),
+          Sell: 'TBD',
+          Buy: 'TBD',
+          MaxYield: 'TBD',
+          Challenges: val.challenges,
+        }
+
+        const { status, finalValue } = getAppStatus(
+          val.expiryTime,
+          val.statusTimestamp,
+          val.statusFinalReferenceValue,
+          val.finalReferenceValue,
+          val.inflection,
+          parseFloat(val.submissionPeriod),
+          parseFloat(val.challengePeriod),
+          parseFloat(val.reviewPeriod),
+          parseFloat(val.fallbackSubmissionPeriod)
+        )
+
+        const payOff = {
+          Gradient: Number(
+            formatUnits(val.gradient, val.collateralToken.decimals)
+          ),
+          Floor: Number(formatUnits(val.floor)),
+          Inflection: Number(formatUnits(val.inflection)),
+          Cap: Number(formatUnits(val.cap)),
+        }
+
+        return [
+          {
+            ...shared,
+            id: `${val.id}/long`,
+            AssetId: val.longToken.symbol,
+            address: val.longToken,
+            PayoffProfile: generatePayoffChartData({
+              ...payOff,
+              IsLong: true,
+            }),
+            TVL:
+              parseFloat(
+                formatUnits(
+                  BigNumber.from(val.collateralBalance),
+                  val.collateralToken.decimals
+                )
+              ).toFixed(4) +
+              ' ' +
+              val.collateralToken.symbol,
+            Status: status,
+            StatusTimestamp: val.statusTimestamp,
+            finalValue: finalValue,
+            SubmissionPeriod: val.submissionPeriod,
+            ReviewPeriod: val.reviewPeriod,
+            ChallengePeriod: val.challengePeriod,
+          },
+        ]
+      })
+
+      const allRows = await Promise.all(allRowsPromises)
+
+      // Flatten the array of arrays to get final rows
+      const rows = allRows.reduce((acc, val) => acc.concat(val), [])
+
+      setRows(rows)
     }
 
-    const { status, finalValue } = getAppStatus(
-      val.expiryTime,
-      val.statusTimestamp,
-      val.statusFinalReferenceValue,
-      val.finalReferenceValue,
-      val.inflection,
-      parseFloat(val.submissionPeriod),
-      parseFloat(val.challengePeriod),
-      parseFloat(val.reviewPeriod),
-      parseFloat(val.fallbackSubmissionPeriod)
-    )
-
-    const payOff = {
-      Gradient: Number(formatUnits(val.gradient, val.collateralToken.decimals)),
-      Floor: Number(formatUnits(val.floor)),
-      Inflection: Number(formatUnits(val.inflection)),
-      Cap: Number(formatUnits(val.cap)),
+    if (pools.length > 0) {
+      getRows()
     }
-
-    return [
-      ...acc,
-      {
-        ...shared,
-        id: `${val.id}/long`,
-        AssetId: val.longToken.symbol,
-        address: val.longToken,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: true,
-        }),
-        TVL:
-          parseFloat(
-            formatUnits(
-              BigNumber.from(val.collateralBalance),
-              val.collateralToken.decimals
-            )
-          ).toFixed(4) +
-          ' ' +
-          val.collateralToken.symbol,
-        Status: status,
-        StatusTimestamp: val.statusTimestamp,
-        finalValue: finalValue,
-        SubmissionPeriod: val.submissionPeriod,
-        ReviewPeriod: val.reviewPeriod,
-        ChallengePeriod: val.challengePeriod,
-      },
-    ]
-  }, [] as GridRowModel[])
+  }, [pools])
 
   const filteredRows = useMemo(() => {
     if (search != null && search.length > 0) {

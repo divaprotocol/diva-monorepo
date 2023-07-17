@@ -18,7 +18,6 @@ export const MyOrdersPoolCard = ({
   loadingValue: any
 }) => {
   const {
-    icon,
     PoolId,
     AssetId,
     type,
@@ -27,6 +26,7 @@ export const MyOrdersPoolCard = ({
     payReceive,
     position,
     orderHash,
+    underlying,
   } = row
 
   const history = useHistory()
@@ -50,6 +50,8 @@ export const MyOrdersPoolCard = ({
       value: payReceive.toFixed(4),
     },
   ]
+
+  console.log(row)
 
   return (
     <>
@@ -83,9 +85,10 @@ export const MyOrdersPoolCard = ({
               sx={{
                 fontSize: '12px',
                 fontWeight: 500,
+                maxWidth: '110px',
               }}
             >
-              {icon}
+              {underlying}
             </Typography>
             <Typography
               sx={{
