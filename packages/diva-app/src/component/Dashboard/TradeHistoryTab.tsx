@@ -290,6 +290,7 @@ export function TradeHistoryTab() {
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
   const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
   const [searchInput, setSearchInput] = useState('')
+  const [rows, setRows] = useState([])
 
   const orders: any[] = []
   const dispatch = useAppDispatch()
@@ -510,26 +511,41 @@ export function TradeHistoryTab() {
     userAddress,
   ])
 
-  const rows: GridRowModel[] =
-    history.length != 0
-      ? history.reduce((acc, order) => {
-          return [
-            ...acc,
-            {
-              id: order.id,
-              AssetId: order.symbol,
-              PoolId: order.id,
-              icon: order.underlying,
-              type: order.type,
-              Underlying: order.underlying,
-              quantity: parseFloat(order.quantity).toFixed(2),
-              payReceive: parseFloat(order.paidReceived).toFixed(4),
-              price: parseFloat(order.price).toFixed(4),
-              timestamp: getDateTime(order.timestamp),
-            },
-          ]
-        }, [])
-      : []
+  useEffect(() => {
+    const getRows = async () => {
+      const allRowsPromises = history.map(async (order) => {
+        let json = null
+        console.log(order.underlying)
+
+        if (order.underlying.endsWith('.json')) {
+          const response = await fetch(order.underlying)
+          json = await response.json()
+        }
+
+        return [
+          {
+            id: order.id,
+            AssetId: order.symbol,
+            PoolId: order.id,
+            icon: order.underlying,
+            type: order.type,
+            Underlying: json?.title ? json.title : order.underlying,
+            quantity: parseFloat(order.quantity).toFixed(2),
+            payReceive: parseFloat(order.paidReceived).toFixed(4),
+            price: parseFloat(order.price).toFixed(4),
+            timestamp: getDateTime(order.timestamp),
+          },
+        ]
+      })
+
+      const allRows = await Promise.all(allRowsPromises)
+
+      const rows = allRows.reduce((acc, val) => acc.concat(val), [])
+
+      setRows(rows)
+    }
+    getRows()
+  }, [history])
 
   const filteredRows = useMemo(() => {
     if (search != null && search.length > 0) {
