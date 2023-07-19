@@ -210,7 +210,7 @@ export const config: { [key: number]: SingleConfig } = {
         decimals: 18,
       },
     ],
-    adminAddress: '0x9AdEFeb576dcF52F5220709c1B267d89d5208D78',
+    adminAddress: '0x3E50a9F4DC9CCF7aFaBb7337cf57D63dFa12acc0',
     dataProviders: [
       {
         id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',
@@ -349,7 +349,7 @@ export const CURRENT_SUPPORTED_CHAIN_ID = [
 
 // DIVA Governance address which is the default creator of pools on Markets page and trading fee recipient
 export const DIVA_GOVERNANCE_ADDRESS =
-  '0x1062CCC9F9a4bBcf565799683b6c00eA525ECb9F'
+  '0x3E50a9F4DC9CCF7aFaBb7337cf57D63dFa12acc0'
 
 // Trading fee; 0.01 corresponds to 1%
 export const TRADING_FEE = 0.01
