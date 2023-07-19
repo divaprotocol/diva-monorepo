@@ -1,7 +1,7 @@
 import { useCreatePoolFormik } from './formik'
 import { Stack, TextField } from '@mui/material'
 import React, { useEffect } from 'react'
-import { FileUpload, FileUploadProps } from './FileUpload'
+import { FileUpload } from './FileUpload'
 import { formatUnits } from 'ethers/lib/utils'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import ERC20 from '../../abi/ERC20ABI.json'
@@ -17,10 +17,12 @@ export function FillOffer({
 }) {
   const [uploadedJson, setUploadedJson] = React.useState<any>('{}')
   const userAddress = useAppSelector(selectUserAddress)
-  const walletBalance = useErcBalance(JSON.parse(uploadedJson).collateralToken)
+  const { balance: walletBalance } = useErcBalance(
+    JSON.parse(uploadedJson).collateralToken
+  )
   const { provider } = useConnectionContext()
   const [decimal, setDecimal] = React.useState(18)
-  const { isConnected, disconnect, connect } = useConnectionContext()
+  const { disconnect, connect } = useConnectionContext()
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on('accountsChanged', () => {

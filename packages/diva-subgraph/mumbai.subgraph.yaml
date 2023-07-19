@@ -6,9 +6,9 @@ dataSources:
     name: DivaDiamond
     network: mumbai
     source:
-      address: "0xa761003C34936b760473eD993B2B6208aB07782E"
+      address: "0x2C9c47E7d254e493f02acfB410864b9a86c28e1D"
       abi: DivaDiamond
-      startBlock: 32419100
+      startBlock: 36448321
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -20,7 +20,6 @@ dataSources:
         - FeeRecipient
         - FeeRecipientCollateralToken
         - PositionToken
-        - TestnetUser
         - UserPositionTokens
         - DIVAOfferFill
       abis:
@@ -33,30 +32,32 @@ dataSources:
         - name: PermissionedPositionTokenABI
           file: ./abi/IPermissionedPositionToken.json
       eventHandlers:
-        - event: LiquidityAdded(indexed uint256,indexed address,indexed address,uint256)
+        - event: LiquidityAdded(indexed bytes32,indexed address,indexed address,uint256)
           handler: handleLiquidityAdded
-        - event: LiquidityRemoved(indexed uint256,indexed address,indexed address,uint256)
+        - event: LiquidityRemoved(indexed bytes32,indexed address,indexed address,uint256)
           handler: handleLiquidityRemoved
-        - event: PoolIssued(indexed uint256,indexed address,indexed address,uint256,address)
+        - event: PoolIssued(indexed bytes32,indexed address,indexed address,uint256,address)
           handler: handlePoolIssued
-        - event: StatusChanged(indexed uint8,indexed address,indexed uint256,uint256)
+        - event: StatusChanged(indexed uint8,indexed address,indexed bytes32,uint256)
           handler: handleStatusChanged
-        - event: FeeClaimAllocated(indexed uint256,indexed address,uint256)
+        - event: FeeClaimAllocated(indexed bytes32,indexed address,uint256)
           handler: handleFeeClaimAllocated
         - event: FeeClaimed(indexed address,indexed address,uint256)
           handler: handleFeeClaimed
         - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
           handler: handleFeeClaimTransferred
-        - event: PositionTokenRedeemed(indexed uint256,indexed address,uint256,uint256,indexed address)
+        - event: PositionTokenRedeemed(indexed bytes32,indexed address,uint256,uint256,indexed address)
           handler: handlePositionTokenRedeemed
       file: ./src/mapping.ts
+
+  # 0x protocol related subgraph
   - kind: ethereum/contract
     name: ExchangeProxy
     network: mumbai
     source:
       address: "0xf471d32cb40837bf24529fcf17418fc1a4807626"
       abi: IZeroEx
-      startBlock: 32419100
+      startBlock: 36448321
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6

@@ -1,5 +1,5 @@
 import { LocalGasStation } from '@mui/icons-material'
-import { Box } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import { useState } from 'react'
 import { useCoinIcon } from '../hooks/useCoinIcon'
 
@@ -7,13 +7,13 @@ import localCoinImages from '../Util/localCoinImages.json'
 const assetLogoPath = '/images/coin-logos/'
 const existsLocally = (file: string) => localCoinImages.includes(file)
 
-type prop = {
+type CoinProps = {
   asset?: string
   assetName?: string
   isLargeIcon?: boolean
 }
 
-const Placeholder = ({ asset }: prop) => {
+const Placeholder = ({ asset }: CoinProps) => {
   return (
     <svg height="100%" overflow="visible" viewBox="4 0 30 30">
       <circle
@@ -33,69 +33,71 @@ const Placeholder = ({ asset }: prop) => {
         fontSize="20px"
         dy=".3em"
       >
-        {asset.charAt(0)}
+        {asset.charAt(0).toUpperCase()}
       </text>
     </svg>
   )
 }
 
-const CoinIcon = ({ assetName }: prop) => {
+const CoinIcon = ({ assetName }: CoinProps) => {
+  let component
   let imgSrc = useCoinIcon(assetName)
   const [showPlaceholder, setShowPlaceholder] = useState(false)
+
   if (showPlaceholder || imgSrc == null) {
-    return <Placeholder asset={assetName} />
+    component = <Placeholder asset={assetName} />
   } else if (assetName.includes('Gas')) {
-    return <LocalGasStation />
+    component = <LocalGasStation />
   } else if (existsLocally(assetName + '.png')) {
     imgSrc = assetLogoPath + assetName.toUpperCase() + '.png'
+    component = (
+      <img
+        alt={assetName}
+        src={imgSrc}
+        onError={() => {
+          setShowPlaceholder(true)
+        }}
+        style={{ display: 'block', height: '100%' }}
+      />
+    )
   }
 
-  return (
-    <img
-      alt={assetName}
-      src={imgSrc}
-      onError={() => {
-        setShowPlaceholder(true)
-      }}
-      style={{ display: 'block', height: '100%' }}
-    />
-  )
+  return component
 }
 
-export const CoinIconPair = ({ assetName, isLargeIcon }: prop) => {
-  const assets = assetName.split('/')
+const IconBox = ({ assetName, isLargeIcon }: CoinProps) => (
+  <Box
+    sx={{
+      height: isLargeIcon ? '45px' : '30px',
+      display: 'flex',
+    }}
+  >
+    <CoinIcon assetName={assetName} />
+  </Box>
+)
 
-  if (assets.length === 1) {
-    return (
-      <Box
-        sx={{
-          height: `${isLargeIcon ? 45 : 30}`,
-        }}
-      >
-        <CoinIcon assetName={assets[0]} />
-      </Box>
-    )
-  } else if (assets.length === 2) {
-    return (
-      <>
-        <Box
-          sx={{
-            height: `${isLargeIcon ? '45px' : '30px'}`,
-          }}
-        >
-          <CoinIcon assetName={assets[0]} />
-        </Box>
-        <Box
-          marginLeft={-1}
-          sx={{
-            height: `${isLargeIcon ? '45px' : '30px'}`,
-          }}
-        >
-          <CoinIcon assetName={assets[1]} />
-        </Box>
-      </>
-    )
-  } else {
-    return <></>
+export const CoinIconPair = ({ assetName, isLargeIcon }: CoinProps) => {
+  const assets = assetName.split('/')
+  const isJson = assetName.endsWith('.json')
+
+  // Single asset or .json file
+  if (assets.length === 1 || isJson) {
+    return <IconBox assetName={assets[0]} isLargeIcon={isLargeIcon} />
   }
+
+  // Two assets
+  if (assets.length === 2) {
+    return (
+      <Stack direction="row">
+        <IconBox assetName={assets[0]} isLargeIcon={isLargeIcon} />
+        <Box marginLeft={-1}>
+          <IconBox assetName={assets[1]} isLargeIcon={isLargeIcon} />
+        </Box>
+      </Stack>
+    )
+  }
+
+  // Fallback
+  console.warn('Invalid assetName passed to CoinIconPair:', assetName)
+  return <Placeholder assetName={'?'} />
 }

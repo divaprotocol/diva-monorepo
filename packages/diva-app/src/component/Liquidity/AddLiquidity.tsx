@@ -3,10 +3,8 @@ import {
   Card,
   Collapse,
   Container,
-  Divider,
   IconButton,
   InputAdornment,
-  Input,
   Stack,
   useTheme,
   Box,
@@ -37,6 +35,8 @@ import { ReactComponent as ShortPool } from '../../Images/short-trade-page-icon.
 import AccordionDetails from '@mui/material/AccordionDetails'
 import { useCreatePoolFormik } from '../CreatePool/formik'
 import Accordion from '@mui/material/Accordion'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
+
 const MaxCollateral = styled.u`
   cursor: pointer;
   &:hover {
@@ -65,9 +65,8 @@ export const AddLiquidity = ({ pool }: Props) => {
   const [expanded, setExpanded] = useState(false)
   const [editLongRecipient, setEditLongRecipient] = useState(false)
   const [editShortRecipient, setEditShortRecipient] = useState(false)
-  console.log(account)
   // TODO Move this part into useEffect
-  const tokenBalance = useErcBalance(
+  const { balance: tokenBalance } = useErcBalance(
     pool ? pool!.collateralToken.id : undefined,
     balanceUpdated
   )
@@ -545,9 +544,11 @@ export const AddLiquidity = ({ pool }: Props) => {
                       <Typography variant="h4" fontWeight="normal" color="gray">
                         Pool ID
                       </Typography>
-                      <Typography fontSize="20px" color="white">
-                        {pool.id}
-                      </Typography>
+                      <Tooltip title={pool.id}>
+                        <Typography fontSize="20px" color="white">
+                          {getShortenedAddress(pool.id, 6, 0)}
+                        </Typography>
+                      </Tooltip>
                     </Box>
                     <Box>
                       <Typography variant="h4" fontWeight="normal" color="gray">

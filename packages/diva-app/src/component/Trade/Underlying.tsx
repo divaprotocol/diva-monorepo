@@ -1,13 +1,4 @@
-import styled from 'styled-components'
-import {
-  Box,
-  Card,
-  Container,
-  Divider,
-  Stack,
-  Typography,
-  useTheme,
-} from '@mui/material'
+import { Box, Divider, Stack, useTheme } from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
@@ -20,8 +11,7 @@ import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
 import OptionHeader from './OptionHeader'
 import { config } from '../../constants'
-import React, { useState, useEffect } from 'react'
-import { BigNumber } from 'ethers'
+import { useState, useEffect } from 'react'
 import OrdersPanel from './OrdersPanel'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -31,12 +21,11 @@ import { useDispatch } from 'react-redux'
 import {
   fetchPool,
   fetchUnderlyingPrice,
-  selectIsBuy,
   selectPool,
   selectChainId,
   selectUnderlyingPrice,
 } from '../../Redux/appSlice'
-import { formatUnits, formatEther } from 'ethers/lib/utils'
+import { formatUnits, formatEther, poll } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
 import { AddLiquidity } from '../Liquidity/AddLiquidity'
 import { RemoveLiquidity } from '../Liquidity/RemoveLiquidity'
@@ -44,31 +33,32 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 import RemoveOutlinedIcon from '@mui/icons-material/RemoveOutlined'
 import { ReactComponent as LongPool } from '../../Images/long-trade-page-icon.svg'
 import { ReactComponent as ShortPool } from '../../Images/short-trade-page-icon.svg'
-import BuyOrder from './Orders/BuyOrder'
 
-const LeftCompFlexContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  flex-basis: 100%;
-`
-const LeftDiv = styled.div`
-  width: 50%;
-`
-const RightDiv = styled.div`
-  width: 35%;
-`
+export const fetchIpfs = async (asset, callback) => {
+  try {
+    const response = await fetch(asset)
+    if (!response.ok) throw new Error(response.statusText)
+    const json = await response.json()
+    if (json.title !== undefined) {
+      callback(json.title)
+    }
+  } catch (error) {
+    console.error(`Failed to fetch asset: ${error.message}`)
+  }
+}
+
 export default function Underlying() {
   const history = useHistory()
   const params: { poolId: string; tokenType: string } = useParams()
   const isLong = params.tokenType === 'long'
-  const currentTab =
-    history.location.pathname === `/${params.poolId}/add`
-      ? 'add'
-      : history.location.pathname === `/${params.poolId}/remove`
-      ? 'remove'
-      : history.location.pathname === `/${params.poolId}/short`
-      ? 'short'
-      : 'long'
+
+  const pathsToTab = {
+    [`/${params.poolId}/add`]: 'add',
+    [`/${params.poolId}/remove`]: 'remove',
+    [`/${params.poolId}/short`]: 'short',
+  }
+  const currentTab = pathsToTab[history.location.pathname] || 'long'
+
   const [value, setValue] = useState(currentTab)
   const breakEven = useAppSelector((state) => state.stats.breakEven)
   const chainId = useAppSelector(selectChainId)
@@ -78,6 +68,7 @@ export default function Underlying() {
   const exchangeProxy = chainContractAddress.exchangeProxy
   const theme = useTheme()
   const dispatch = useDispatch()
+  const [headerTitle, setHeaderTitle] = useState<string>('')
 
   useEffect(() => {
     dispatch(
@@ -92,12 +83,17 @@ export default function Underlying() {
   const currentPrice = useAppSelector(
     selectUnderlyingPrice(pool?.referenceAsset)
   )
-  useEffect(() => {
-    if (pool?.referenceAsset != null)
-      dispatch(fetchUnderlyingPrice(pool.referenceAsset))
-  }, [pool, dispatch])
 
-  if (pool == null) {
+  useEffect(() => {
+    if (pool?.referenceAsset !== null) {
+      dispatch(fetchUnderlyingPrice(pool.referenceAsset))
+      if (pool.referenceAsset.endsWith('.json')) {
+        fetchIpfs(pool.referenceAsset, setHeaderTitle)
+      }
+    }
+  }, [pool.referenceAsset, dispatch])
+
+  if (pool === null) {
     return <LoadingBox />
   }
 
@@ -110,37 +106,29 @@ export default function Underlying() {
   }
   const data = generatePayoffChartData(OptionParams, currentPrice)
   const tokenAddress = value === 'long' ? pool.longToken.id : pool.shortToken.id
+  const tokenSymbol =
+    value === 'long' ? pool.longToken.symbol : pool.shortToken.symbol
 
   const handleChange = (event: any, newValue: string) => {
-    history.push(`/${params.poolId}/${newValue}`)
     setValue(newValue)
+    history.push(`/${params.poolId}/${newValue}`)
   }
+
   return (
     <TabContext value={value}>
-      {/* <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: {
-            sx: 'flex-start',
-            md: 'flex-start',
-            lg: 'flex-start',
-            xl: 'center',
-          },
-        }}
-      > */}
       <Box
         sx={{
-          /* maxWidth: '70%',*/ paddingTop: '1em',
+          paddingTop: '1em',
           ml: '10px',
         }}
       >
         <OptionHeader
           ReferenceAsset={pool.referenceAsset}
           TokenAddress={tokenAddress}
-          isLong={isLong}
+          tokenSymbol={tokenSymbol}
           poolId={pool.id}
           tokenDecimals={pool.collateralToken.decimals}
+          JsonHeaderTitle={headerTitle}
         />
         <OptionDetails pool={pool} isLong={isLong} />
       </Box>

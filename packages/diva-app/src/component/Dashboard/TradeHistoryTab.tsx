@@ -26,11 +26,11 @@ import {
   Button,
   Checkbox,
   CircularProgress,
-  Grid,
   InputAdornment,
   Pagination,
   Radio,
   TextField,
+  Tooltip,
 } from '@mui/material'
 import PoolsTable from '../PoolsTable'
 import { getDateTime } from '../../Util/Dates'
@@ -41,16 +41,28 @@ import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import { FilterDrawerModal } from './FilterDrawerMobile'
 import { Search } from '@mui/icons-material'
-import { getTopNObjectByProperty } from '../../Util/dashboard'
+import { extractHash, getTopNObjectByProperty } from '../../Util/dashboard'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import useTheme from '@mui/material/styles/useTheme'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { TradeHistoryTabTokenCars } from './TradeHistoryTabTokenCars'
 
 const columns: GridColDef[] = [
   {
-    field: 'symbol',
+    field: 'AssetId',
     align: 'left',
     renderHeader: (_header) => <GrayText>{'Asset Id'}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
+    field: 'PoolId',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
+    renderCell: (cell) => (
+      <Tooltip title={extractHash(cell.value)}>
+        <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
+      </Tooltip>
+    ),
   },
   {
     field: 'icon',
@@ -107,127 +119,6 @@ const columns: GridColDef[] = [
     minWidth: 200,
   },
 ]
-
-const TradeHistoryTabTokenCars = ({ row }: { row: GridRowModel }) => {
-  const { Underlying, symbol, type, quantity, price, payReceive, timestamp } =
-    row
-
-  const DATA_ARRAY = [
-    {
-      label: 'Type',
-      value: type,
-    },
-    {
-      label: 'Quantity',
-      value: quantity,
-    },
-    {
-      label: 'Price',
-      value: price,
-    },
-    {
-      label: 'Pay/Receive',
-      value: payReceive,
-    },
-  ]
-
-  return (
-    <>
-      <Divider light />
-      <Stack
-        sx={{
-          fontSize: '10px',
-          width: '100%',
-          margin: '12px 0',
-        }}
-        spacing={1.6}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gridGap: '8px',
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize: '12px',
-                fontWeight: 500,
-              }}
-            >
-              {Underlying}
-            </Typography>
-            <Typography
-              sx={{
-                fontSize: '9.2px',
-              }}
-            >
-              #{symbol}
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={1.6} alignItems="center">
-            <Typography
-              sx={{
-                fontSize: '10px',
-                fontWeight: 500,
-                color: '#828282',
-              }}
-            >
-              Timestamp
-            </Typography>
-            <Typography
-              sx={{
-                fontSize: '10px',
-              }}
-            >
-              {timestamp}
-            </Typography>
-          </Stack>
-        </Box>
-        <Grid
-          container
-          rowGap={1.6}
-          justifyContent="space-between"
-          columnGap={'3px'}
-        >
-          {DATA_ARRAY.map(({ label, value }, index) => (
-            <Grid item key={index} xs={5}>
-              <Stack direction="row" justifyContent={'space-between'}>
-                <Box
-                  sx={{
-                    color: '#828282',
-                  }}
-                >
-                  {label}
-                </Box>
-                {label === 'Type' ? (
-                  <>
-                    {value === 'BUY' ? (
-                      <GreenText>{value}</GreenText>
-                    ) : (
-                      <RedText>{value}</RedText>
-                    )}
-                  </>
-                ) : (
-                  <Box>{value}</Box>
-                )}
-              </Stack>
-            </Grid>
-          ))}
-        </Grid>
-        <Stack alignItems="flex-end"></Stack>
-      </Stack>
-      <Divider light />
-    </>
-  )
-}
 
 const MobileFilterOptions = ({
   rows,
@@ -399,6 +290,7 @@ export function TradeHistoryTab() {
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false)
   const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
   const [searchInput, setSearchInput] = useState('')
+  const [rows, setRows] = useState([])
 
   const orders: any[] = []
   const dispatch = useAppDispatch()
@@ -616,27 +508,44 @@ export function TradeHistoryTab() {
     orderFillsMaker.isSuccess,
     !pools,
     !collateralTokens,
+    userAddress,
   ])
 
-  const rows: GridRowModel[] =
-    history.length != 0
-      ? history.reduce((acc, order) => {
-          return [
-            ...acc,
-            {
-              id: order.id,
-              symbol: order.symbol,
-              icon: order.underlying,
-              type: order.type,
-              Underlying: order.underlying,
-              quantity: parseFloat(order.quantity).toFixed(2),
-              payReceive: parseFloat(order.paidReceived).toFixed(4),
-              price: parseFloat(order.price).toFixed(4),
-              timestamp: getDateTime(order.timestamp),
-            },
-          ]
-        }, [])
-      : []
+  useEffect(() => {
+    const getRows = async () => {
+      const allRowsPromises = history.map(async (order) => {
+        let json = null
+        console.log(order.underlying)
+
+        if (order.underlying.endsWith('.json')) {
+          const response = await fetch(order.underlying)
+          json = await response.json()
+        }
+
+        return [
+          {
+            id: order.id,
+            AssetId: order.symbol,
+            PoolId: order.id,
+            icon: order.underlying,
+            type: order.type,
+            Underlying: json?.title ? json.title : order.underlying,
+            quantity: parseFloat(order.quantity).toFixed(2),
+            payReceive: parseFloat(order.paidReceived).toFixed(4),
+            price: parseFloat(order.price).toFixed(4),
+            timestamp: getDateTime(order.timestamp),
+          },
+        ]
+      })
+
+      const allRows = await Promise.all(allRowsPromises)
+
+      const rows = allRows.reduce((acc, val) => acc.concat(val), [])
+
+      setRows(rows)
+    }
+    getRows()
+  }, [history])
 
   const filteredRows = useMemo(() => {
     if (search != null && search.length > 0) {
@@ -831,13 +740,17 @@ export function TradeHistoryTab() {
             </Stack>
           ) : (
             <PoolsTable
-              disableRowClick
               page={page}
               rows={filteredRows}
               columns={columns}
               loading={orderFills.isLoading || orderFillsMaker.isLoading}
               onPageChange={(page) => setPage(page)}
               selectedPoolsView="Table"
+              handleRowClick={(row) => {
+                // const position =
+                //   row.row.AssetId.split('/')[0] === 'L' ? 'long' : 'short'
+                // history.push(`../../${row.row.PoolId}/${position}`)
+              }}
             />
           )}
         </>

@@ -221,9 +221,9 @@
         "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "poolId_",
-        "type": "uint256"
+        "type": "bytes32"
       },
       {
         "internalType": "uint8",
@@ -308,9 +308,9 @@
     "name": "poolId",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "",
-        "type": "uint256"
+        "type": "bytes32"
       }
     ],
     "stateMutability": "view",

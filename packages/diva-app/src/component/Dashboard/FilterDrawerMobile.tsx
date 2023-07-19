@@ -59,12 +59,19 @@ export const FilterDrawerModal = ({
             <CloseIcon fontSize="small" />
           </Box>
         </Stack>
-        {children}
+        <Stack
+          sx={{
+            height: 'calc(100vh - 150px)',
+          }}
+        >
+          {children}
+        </Stack>
+
         <Box
           sx={{
             position: 'absolute',
             width: '84%',
-            bottom: '50px',
+            bottom: '40px',
           }}
         >
           <Stack

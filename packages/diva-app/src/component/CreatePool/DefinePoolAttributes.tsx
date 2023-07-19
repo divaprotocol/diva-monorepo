@@ -13,31 +13,28 @@ import {
   Typography,
   useTheme,
   Tooltip,
-  FormLabel,
   RadioGroup,
   FormControlLabel,
   Radio,
   Container,
   Card,
+  Skeleton,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
-import {
-  CheckCircle,
-  Circle,
-  FormatListBulleted,
-  Report,
-} from '@mui/icons-material'
+import { CheckCircle, Report } from '@mui/icons-material'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
-import { getDateTime, userTimeZone } from '../../Util/Dates'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { PayoffProfile } from '../Graphs/payOffProfile'
 import { toExponentialOrNumber } from '../../Util/utils'
+import { config } from '../../constants'
+import { useAppSelector } from '../../Redux/hooks'
+import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -64,6 +61,8 @@ export function DefinePoolAttributes({
     formik.setFieldValue('payoutProfile', event.target.value)
   }
   const { referenceAssets, collateralTokens } = useWhitelist()
+  const chainId = useAppSelector(selectChainId)
+  const userAddress = useAppSelector(selectUserAddress)
   const { disconnect, connect } = useConnectionContext()
   const {
     referenceAsset,
@@ -75,7 +74,10 @@ export function DefinePoolAttributes({
     floor,
     payoutProfile,
   } = formik.values
-  const collateralWalletBalance = useErcBalance(collateralToken?.id)
+
+  const { balance: collateralWalletBalance, isLoading } = useErcBalance(
+    collateralToken?.id
+  )
   useEffect(() => {
     if (payoutProfile === 'Binary') {
       formik.setFieldValue('gradient', 1)
@@ -115,6 +117,13 @@ export function DefinePoolAttributes({
   }, [referenceAssets.length])
 
   useEffect(() => {
+    formik.setFieldValue(
+      'collateralToken',
+      config[chainId].collateralTokens?.[0]
+    )
+  }, [chainId])
+
+  useEffect(() => {
     if (
       collateralToken != null &&
       formik.values.gradient.toString() != '' &&
@@ -150,6 +159,21 @@ export function DefinePoolAttributes({
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
+  const isCustomReferenceAssetAllowed = useMemo(
+    () => config[chainId].isCustomReferenceAssetAllowed,
+    [chainId]
+  )
+  const isCustomCollateralAssetAllowed = useMemo(
+    () => config[chainId].isCustomCollateralAssetAllowed,
+    [chainId]
+  )
+  const isAdmin = useMemo(
+    () =>
+      config[chainId]?.adminAddress?.toLowerCase() ===
+      userAddress?.toLowerCase(),
+    [chainId, userAddress]
+  )
+
   return (
     <Stack direction={mobile ? 'column' : 'row'}>
       <Container sx={{ minWidth: '60%' }}>
@@ -223,7 +247,11 @@ export function DefinePoolAttributes({
                     </>
                   )}
                   onInputChange={(event) => {
-                    if (event != null && event.target != null) {
+                    if (
+                      event != null &&
+                      event.target != null &&
+                      (isCustomReferenceAssetAllowed || isAdmin)
+                    ) {
                       formik.setFieldValue(
                         'referenceAsset',
                         (event.target as any).value || ''
@@ -258,7 +286,7 @@ export function DefinePoolAttributes({
                 />
                 {formik.errors.expiryTime != null && (
                   <FormHelperText sx={{ color: 'red' }}>
-                    {formik.errors.expiryTime}
+                    {`${formik.errors.expiryTime}`}
                   </FormHelperText>
                 )}
               </FormControl>
@@ -483,11 +511,15 @@ export function DefinePoolAttributes({
                     onChange={(_, newValue) => {
                       formik.setFieldValue('collateralToken', newValue)
                     }}
-                    getOptionLabel={(option: WhitelistCollateralToken) =>
-                      option?.symbol || ''
-                    }
+                    getOptionLabel={(option: WhitelistCollateralToken) => {
+                      return option?.symbol || ''
+                    }}
                     onInputChange={(event) => {
-                      if (event != null && event.target != null) {
+                      if (
+                        event != null &&
+                        event.target != null &&
+                        (isCustomCollateralAssetAllowed || isAdmin)
+                      ) {
                         setReferenceAssetSearch(
                           (event.target as any).value || ''
                         )
@@ -504,7 +536,7 @@ export function DefinePoolAttributes({
                   />
                   {formik.errors.collateralToken != null && (
                     <FormHelperText>
-                      {formik.errors.collateralToken}
+                      {`${formik.errors.collateralToken}`}
                     </FormHelperText>
                   )}
                 </FormControl>
@@ -528,26 +560,43 @@ export function DefinePoolAttributes({
                       {formik.errors.collateralBalance}
                     </FormHelperText>
                   )}
-                  {collateralWalletBalance != null && collateralToken != null && (
-                    <FormHelperText>
-                      Your balance:{' '}
-                      {toExponentialOrNumber(Number(collateralWalletBalance))}{' '}
-                      {collateralToken?.symbol} {'('}
-                      <MaxCollateral
-                        role="button"
-                        onClick={() => {
-                          if (collateralWalletBalance != null) {
-                            formik.setFieldValue(
-                              'collateralBalance',
-                              collateralWalletBalance
-                            )
-                          }
-                        }}
-                      >
-                        Max
-                      </MaxCollateral>
-                      {')'}
-                    </FormHelperText>
+                  {isLoading ? (
+                    <Skeleton
+                      variant="rectangular"
+                      width={210}
+                      height={15}
+                      sx={{
+                        marginLeft: '1rem',
+                        marginTop: '3px',
+                      }}
+                    />
+                  ) : (
+                    <>
+                      {collateralWalletBalance !== null &&
+                        collateralToken !== null && (
+                          <FormHelperText>
+                            Your balance:{' '}
+                            {toExponentialOrNumber(
+                              Number(collateralWalletBalance)
+                            )}{' '}
+                            {collateralToken?.symbol} {'('}
+                            <MaxCollateral
+                              role="button"
+                              onClick={() => {
+                                if (collateralWalletBalance != null) {
+                                  formik.setFieldValue(
+                                    'collateralBalance',
+                                    collateralWalletBalance
+                                  )
+                                }
+                              }}
+                            >
+                              Max
+                            </MaxCollateral>
+                            {')'}
+                          </FormHelperText>
+                        )}
+                    </>
                   )}
                 </FormControl>
               </Stack>

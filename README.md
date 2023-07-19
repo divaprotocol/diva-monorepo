@@ -14,7 +14,7 @@ Optional:
 
 ## Getting started
 
-1. Run `yarn` in this repository to install all dependencies.
+1. Run `yarn` in this repository to install all dependencies. 
 2. Run `yarn dev` to start the application and development server at localhost:3000
 
 This runs the application located at packages/diva-app.

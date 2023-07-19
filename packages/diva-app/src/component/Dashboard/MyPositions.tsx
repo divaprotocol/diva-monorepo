@@ -46,7 +46,7 @@ import {
 } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { ExpiresInCell } from '../Markets/Markets'
+import { ExpiresInCell } from '../Markets/ExpiresInCell'
 import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import BalanceCheckerABI from '../../abi/BalanceCheckerABI.json'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
@@ -59,6 +59,8 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import { Search } from '@mui/icons-material'
 import { getTopNObjectByProperty, getColorByStatus } from '../../Util/dashboard'
 import useTheme from '@mui/material/styles/useTheme'
+import { getShortenedAddress } from '../../Util/getShortenedAddress'
+import { sendAddAssetTransaction } from '../../Util/walletUtils'
 
 type Response = {
   [token: string]: BigNumber
@@ -80,25 +82,17 @@ const AddToMetamask = (props: any) => {
       provider.getSigner()
     )
     const decimal = await token.decimals()
-    const tokenSymbol =
-      props.row.id.split('/')[1][0].toUpperCase() + props.row.id.split('/')[0]
-    try {
-      await sendTransaction({
-        method: 'wallet_watchAsset',
-        params: {
-          type: 'ERC20',
-          options: {
-            address: props.row.address.id,
-            symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
-            decimals: decimal,
-            image:
-              'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
-          },
-        } as any,
-      })
-    } catch (error) {
-      console.error('Error in HandleAddMetaMask', error)
+    const tokenSymbol = await token.symbol()
+
+    const options = {
+      address: props.row.address.id,
+      symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
+      decimals: decimal,
+      image:
+        'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
     }
+
+    await sendAddAssetTransaction(sendTransaction, options)
   }
   return (
     <>
@@ -402,14 +396,21 @@ const SubmitButton = (props: any) => {
   const statusExpMin = getExpiryMinutesFromNow(
     Number(props.row.StatusTimestamp)
   )
+  // @todo Read the settlement related periods from the DIVA contract rather than hard-coding them here
   if (props.row.Status === 'Submitted') {
-    if (statusExpMin + 24 * 60 + 5 < 0) {
+    if (statusExpMin + 3 * 24 * 60 + 5 < 0) {
+      // 3 days after value submission and no challenge, user can redeem
+      // their payout. 5 seconds tolerance applied to account for discrepancy
+      // between block timestamp and actual timestamp.
       buttonName = 'Redeem'
     } else {
       buttonName = 'Challenge'
     }
   } else if (props.row.Status === 'Challenged') {
-    if (statusExpMin + 48 * 60 + 5 < 0) {
+    if (statusExpMin + 5 * 24 * 60 + 5 < 0) {
+      // 5 days after a challenge and no new value submission by the data provider,
+      // user can redeem their payout. 5 seconds tolerance applied to account for
+      // discrepancy between block timestamp and actual timestamp.
       buttonName = 'Redeem'
     } else {
       buttonName = 'Challenge'
@@ -418,8 +419,13 @@ const SubmitButton = (props: any) => {
     buttonName = 'Redeem'
   } else if (
     props.row.Status === 'Expired' &&
-    statusExpMin + 24 * 60 * 5 + 5 < 0
+    statusExpMin + 17 * 24 * 60 + 5 < 0
   ) {
+    // 17 days after pool expiration without submission by the data provider
+    // or the fallback data provider, the user can redeem their payout.
+    // Note that in this case, the user will first call `setFinalReferenceValue`
+    // to confirm the final reference price at inflection and then call
+    // `redeemPositionToken` function
     buttonName = 'Redeem'
   }
   const handleOpen = () => {
@@ -561,7 +567,7 @@ const Payoff = (props: any) => {
     intrinsicValue.payoffPerShortToken != null &&
     intrinsicValue.payoffPerLongToken != null
   ) {
-    if (props.row.Id.toLowerCase().startsWith('s')) {
+    if (props.row.AssetId.toLowerCase().startsWith('s')) {
       return (
         <div>
           {(
@@ -595,10 +601,21 @@ const Payoff = (props: any) => {
 
 const columns: GridColDef[] = [
   {
-    field: 'Id',
+    field: 'AssetId',
     align: 'left',
+    headerAlign: 'left',
     renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
+    field: 'PoolId',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
+    renderCell: (cell) => (
+      <Tooltip title={cell.value}>
+        <GrayText>{getShortenedAddress(cell.value, 6, 0)}</GrayText>
+      </Tooltip>
+    ),
   },
   {
     field: 'Icon',
@@ -712,8 +729,10 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
 
   if (!row) return
 
-  const { Icon, Id, Floor, TVL, finalValue, Cap, Balance, Status } = row
+  const { AssetId, Floor, TVL, finalValue, Cap, Balance, Status, Underlying } =
+    row
 
+  // Fields in mobile view
   const DATA_ARRAY = [
     {
       label: 'Floor',
@@ -740,6 +759,7 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
       value: 0,
     },
   ]
+  console.log('row', row)
 
   return (
     <>
@@ -773,16 +793,17 @@ const MyPositionsTokenCard = ({ row }: { row: GridRowModel }) => {
               sx={{
                 fontSize: '12px',
                 fontWeight: 500,
+                maxWidth: '110px',
               }}
             >
-              {Icon}
+              {Underlying}
             </Typography>
             <Typography
               sx={{
                 fontSize: '9.2px',
               }}
             >
-              #{Id}
+              #{AssetId}
             </Typography>
             <AddToMetamask row={row} />
           </Box>
@@ -860,6 +881,7 @@ export function MyPositions() {
   const [underlyingButtonLabel, setUnderlyingButtonLabel] =
     useState('Underlying')
   const [search, setSearch] = useState('')
+  const [rows, setRows] = useState([])
   const [searchInput, setSearchInput] = useState('')
   const [expiredPoolClicked, setExpiredPoolClicked] = useState(false)
   const [confirmedPoolClicked, setConfirmedPoolClicked] = useState(false)
@@ -904,88 +926,110 @@ export function MyPositions() {
     }
   }
 
-  const rows: GridRowModel[] = tokenPools.reduce((acc, val) => {
-    const { finalValue, status } = getAppStatus(
-      val.expiryTime,
-      val.statusTimestamp,
-      val.statusFinalReferenceValue,
-      val.finalReferenceValue,
-      val.inflection,
-      parseFloat(val.submissionPeriod),
-      parseFloat(val.challengePeriod),
-      parseFloat(val.reviewPeriod),
-      parseFloat(val.fallbackSubmissionPeriod)
-    )
+  // Get all rows
+  useEffect(() => {
+    const getRows = async () => {
+      const allRowsPromises = tokenPools.map(async (val) => {
+        let json = null
 
-    const shared = {
-      Id: val.id,
-      Icon: val.referenceAsset,
-      Underlying: val.referenceAsset,
-      Floor: formatUnits(val.floor),
-      Inflection: formatUnits(val.inflection),
-      Cap: formatUnits(val.cap),
-      Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
-      Expiry: getDateTime(val.expiryTime),
-      Sell: 'TBD',
-      Buy: 'TBD',
-      MaxYield: 'TBD',
-      StatusTimestamp: val.statusTimestamp,
-      Payoff: val,
+        if (val.referenceAsset.endsWith('.json')) {
+          const response = await fetch(val.referenceAsset)
+          json = await response.json()
+        }
+
+        const { finalValue, status } = getAppStatus(
+          val.expiryTime,
+          val.statusTimestamp,
+          val.statusFinalReferenceValue,
+          val.finalReferenceValue,
+          val.inflection,
+          parseFloat(val.submissionPeriod),
+          parseFloat(val.challengePeriod),
+          parseFloat(val.reviewPeriod),
+          parseFloat(val.fallbackSubmissionPeriod)
+        )
+
+        const shared = {
+          PoolId: val.id,
+          Icon: val.referenceAsset,
+          Underlying: json?.title ? json.title : val.referenceAsset,
+          Floor: formatUnits(val.floor),
+          Inflection: formatUnits(val.inflection),
+          Cap: formatUnits(val.cap),
+          Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
+          Expiry: getDateTime(val.expiryTime),
+          Sell: 'TBD',
+          Buy: 'TBD',
+          MaxYield: 'TBD',
+          StatusTimestamp: val.statusTimestamp,
+          Payoff: val,
+        }
+
+        const payOff = {
+          Gradient: Number(
+            formatUnits(val.gradient, val.collateralToken.decimals)
+          ),
+          Floor: Number(formatUnits(val.floor)),
+          Inflection: Number(formatUnits(val.inflection)),
+          Cap: Number(formatUnits(val.cap)),
+        }
+
+        return [
+          {
+            ...shared,
+            id: `${val.id}/long`,
+            AssetId: val.longToken.symbol,
+            address: val.longToken,
+            TVL:
+              parseFloat(
+                formatUnits(
+                  BigNumber.from(val.collateralBalance),
+                  val.collateralToken.decimals
+                )
+              ).toFixed(2) +
+              ' ' +
+              val.collateralToken.symbol,
+            PayoffProfile: generatePayoffChartData({
+              ...payOff,
+              IsLong: true,
+            }),
+            Status: status,
+            finalValue: finalValue,
+          },
+          {
+            ...shared,
+            id: `${val.id}/short`,
+            AssetId: val.shortToken.symbol,
+            address: val.shortToken,
+            TVL:
+              parseFloat(
+                formatUnits(
+                  BigNumber.from(val.collateralBalance),
+                  val.collateralToken.decimals
+                )
+              ).toFixed(2) +
+              ' ' +
+              val.collateralToken.symbol,
+            PayoffProfile: generatePayoffChartData({
+              ...payOff,
+              IsLong: false,
+            }),
+            Status: status,
+            finalValue: finalValue,
+          },
+        ]
+      })
+
+      const allRows = await Promise.all(allRowsPromises)
+
+      // Flatten the array of arrays to get final rows
+      const rows = allRows.reduce((acc, val) => acc.concat(val), [])
+
+      setRows(rows)
     }
 
-    const payOff = {
-      Gradient: Number(formatUnits(val.gradient, val.collateralToken.decimals)),
-      Floor: Number(formatUnits(val.floor)),
-      Inflection: Number(formatUnits(val.inflection)),
-      Cap: Number(formatUnits(val.cap)),
-    }
-
-    return [
-      ...acc,
-      {
-        ...shared,
-        id: `${val.id}/long`,
-        Id: 'L' + val.id,
-        address: val.longToken,
-        TVL:
-          parseFloat(
-            formatUnits(
-              BigNumber.from(val.collateralBalance),
-              val.collateralToken.decimals
-            )
-          ).toFixed(2) +
-          ' ' +
-          val.collateralToken.symbol,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: true,
-        }),
-        Status: status,
-        finalValue: finalValue,
-      },
-      {
-        ...shared,
-        id: `${val.id}/short`,
-        Id: 'S' + val.id,
-        address: val.shortToken,
-        TVL:
-          parseFloat(
-            formatUnits(
-              BigNumber.from(val.collateralBalance),
-              val.collateralToken.decimals
-            )
-          ).toFixed(2) +
-          ' ' +
-          val.collateralToken.symbol,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: false,
-        }),
-        Status: status,
-        finalValue: finalValue,
-      },
-    ]
-  }, [] as GridRowModel[])
+    getRows()
+  }, [tokenPools])
 
   const tokenAddresses = positionTokens.map((v) => v.id)
 
@@ -1109,8 +1153,8 @@ export function MyPositions() {
   }, [filteredRows, search, expiredPoolClicked, confirmedPoolClicked])
 
   const sortedRows = filteredRowsByOptions.sort((a, b) => {
-    const aId = parseFloat(a.Id.substring(1))
-    const bId = parseFloat(b.Id.substring(1))
+    const aId = parseFloat(a.AssetId.substring(1))
+    const bId = parseFloat(b.AssetId.substring(1))
 
     return bId - aId
   })
@@ -1209,7 +1253,7 @@ export function MyPositions() {
                   </Button>
                   <Box>
                     {sortedRows.map((row) => (
-                      <MyPositionsTokenCard row={row} key={row.Id} />
+                      <MyPositionsTokenCard row={row} key={row.AssetId} />
                     ))}
                   </Box>
                   <Pagination

@@ -1,6 +1,6 @@
+/* eslint-disable prettier/prettier */
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { BigNumber, providers } from 'ethers'
-import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import {
   FeeRecipient,
   Pool,
@@ -133,12 +133,15 @@ export const fetchUnderlyingPrice = createAsyncThunk(
 export const fetchPool = createAsyncThunk(
   'app/pool',
   async ({ graphUrl, poolId }: { graphUrl: string; poolId: string }) => {
-    const res = await request<{ pool: Pool }>(
-      graphUrl,
-      queryPool(parseInt(poolId))
-    )
+    try {
 
-    return res.pool
+      const res = await request<{ pool: Pool }>(graphUrl, queryPool(poolId).query, queryPool(poolId).variables)
+      return res.pool
+    } catch (err) {
+      console.error(err)
+      // handle the error further here, or throw it to be handled by the calling code
+    }
+
   }
 )
 
@@ -214,19 +217,18 @@ export const fetchPools = createAsyncThunk(
         chainId,
       }
     }
-
     const poolInfo: PoolInfoType[] = []
     pools.map((poolPair: Pool) => {
       poolInfo.push({
         baseToken: getAddress(poolPair.longToken.id),
         quoteToken: getAddress(poolPair.collateralToken.id),
-        poolId: poolPair.longToken.name,
+        poolId: poolPair.id,
         collateralTokenDecimals: poolPair.collateralToken.decimals,
       })
       poolInfo.push({
         baseToken: getAddress(poolPair.shortToken.id),
         quoteToken: getAddress(poolPair.collateralToken.id),
-        poolId: poolPair.shortToken.name,
+        poolId: poolPair.id,
         collateralTokenDecimals: poolPair.collateralToken.decimals,
       })
     })
@@ -249,19 +251,21 @@ export const fetchPools = createAsyncThunk(
       count,
       poolInfo,
     }
-
     try {
       const prices: OrderOutputType[] = await getOrderbookPrices(req)
+      // @todo Updated poolId logic in prices
       // Update price parameters to display market page
       pools = pools.map((pool: Pool) => {
         return (pool = {
           ...pool,
           prices: {
             long: prices.filter(
-              (price: OrderOutputType) => price.poolId === 'L' + pool.id
+              (price: OrderOutputType) =>
+                price.poolId === pool.id && price.side === 'Long'
             )[0],
             short: prices.filter(
-              (price: OrderOutputType) => price.poolId === 'S' + pool.id
+              (price: OrderOutputType) =>
+                price.poolId === pool.id && price.side === 'Short'
             )[0],
           },
         })
@@ -355,6 +359,7 @@ export const appSlice = createSlice({
     })
 
     builder.addCase(fetchPool.fulfilled, (state, action) => {
+      console.log(action.payload)
       addPools(state, [action.payload], state.chainId)
     })
 
@@ -592,8 +597,8 @@ export const selectUserAddress = (state: RootState) =>
 
 export const selectUnderlyingPrice =
   (asset: string) =>
-  (state: RootState): string | undefined =>
-    selectAppStateByChain(state).underlyingPrice[asset]
+    (state: RootState): string | undefined =>
+      selectAppStateByChain(state).underlyingPrice[asset]
 
 export const selectFeeRecipients = (state: RootState) =>
   selectAppStateByChain(state).feeRecipients

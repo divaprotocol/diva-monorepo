@@ -25,25 +25,25 @@ import TradeChart from './Graphs/TradeChart'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import styled from 'styled-components'
-import { ExpiresInCell } from './Markets/Markets'
+import { ExpiresInCell } from './Markets/ExpiresInCell'
 import { useCustomMediaQuery } from '../hooks/useCustomMediaQuery'
 
 interface Props {
-  row: GridRowModel
+  row: any
 }
 
 interface StyledButtonProps extends ButtonProps {
-  backgroundColor?: string
-  borderColor?: string
-  isMobile?: boolean
+  backgroundcolor: string
+  bordercolor: string
+  ismobile: boolean
 }
 
 const BuyAndSellButton = styled(Button)<StyledButtonProps>(
-  ({ theme, backgroundColor, borderColor, isMobile }) => ({
-    width: `${isMobile ? '120px' : '160px'}`,
+  ({ backgroundcolor, bordercolor, ismobile }) => ({
+    width: `${ismobile ? '120px' : '160px'}`,
     height: '60px',
-    background: backgroundColor,
-    border: `1px solid ${borderColor}`,
+    background: backgroundcolor,
+    border: `1px solid ${bordercolor}`,
     boxShadow: '0px 3px 1px -2px rgba(0, 0, 0, 0.2)',
     filter:
       'drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.14)) drop-shadow(0px 1px 5px rgba(0, 0, 0, 0.12))',
@@ -58,7 +58,10 @@ const PoolCard = ({ row }: Props) => {
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
   const [usdPrice, setUsdPrice] = useState('') // TODO rename as the underlying doesn't need to be an asset priced in USD
-  const pool = useAppSelector((state) => selectPool(state, row.Id.substring(1)))
+  const pool = useAppSelector((state) =>
+    // Extract the value before the first forward slash ("/") in the path
+    selectPool(state, row.id.match(/^([^/]+)/)?.[0])
+  )
   const theme = useTheme()
   const history = useHistory()
   const dataSource = useWhitelist()
@@ -151,7 +154,7 @@ const PoolCard = ({ row }: Props) => {
           >
             <CoinIconPair assetName={row.Icon} />
           </Box>
-          <Tooltip title={row.Icon}>
+          <Tooltip title={row.Underlying}>
             <Typography
               variant={isMobile ? 'h3' : 'h2'}
               color={'#fff'}
@@ -160,7 +163,7 @@ const PoolCard = ({ row }: Props) => {
               }}
               noWrap
             >
-              {row.Icon}
+              {row.Underlying}
             </Typography>
           </Tooltip>
         </Box>
@@ -303,10 +306,10 @@ const PoolCard = ({ row }: Props) => {
         }}
       >
         <BuyAndSellButton
-          backgroundColor="linear-gradient(180deg, rgba(18, 18, 18, 0) -60%, rgba(51, 147, 224, 0.3) 100%)"
-          borderColor="#3393E0"
+          backgroundcolor="linear-gradient(180deg, rgba(18, 18, 18, 0) -60%, rgba(51, 147, 224, 0.3) 100%)"
+          bordercolor="#3393E0"
           onClick={handleBuyAndSellClick}
-          isMobile={isMobile}
+          ismobile={isMobile}
         >
           <Stack>
             <div>BUY</div>
@@ -314,10 +317,10 @@ const PoolCard = ({ row }: Props) => {
           </Stack>
         </BuyAndSellButton>
         <BuyAndSellButton
-          backgroundColor="linear-gradient(180deg, rgba(18, 18, 18, 0) -33.33%, rgba(211, 47, 47, 0.6) 100%)"
-          borderColor="#D32F2F"
+          backgroundcolor="linear-gradient(180deg, rgba(18, 18, 18, 0) -33.33%, rgba(211, 47, 47, 0.6) 100%)"
+          bordercolor="#D32F2F"
           onClick={handleBuyAndSellClick}
-          isMobile={isMobile}
+          ismobile={isMobile}
         >
           <Stack>
             <div>SELL</div>

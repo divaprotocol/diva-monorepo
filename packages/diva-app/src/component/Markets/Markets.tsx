@@ -1,25 +1,7 @@
-import { GridColDef, GridRowModel } from '@mui/x-data-grid'
-import PoolsTable, { PayoffCell } from '../PoolsTable'
+import { GridColDef } from '@mui/x-data-grid'
 import { formatUnits } from 'ethers/lib/utils'
-import { config } from '../../constants'
-import {
-  getDateTime,
-  getExpiryMinutesFromNow,
-  userTimeZone,
-} from '../../Util/Dates'
-import { Pool } from '../../lib/queries'
-import { generatePayoffChartData } from '../../Graphs/DataGenerator'
 import { BigNumber } from 'ethers'
-import { GrayText } from '../Trade/Orders/UiStyles'
-import { useEffect, useMemo, useState } from 'react'
-import { CoinIconPair } from '../CoinIcon'
-import {
-  fetchPools,
-  selectChainId,
-  selectPools,
-  selectRequestStatus,
-} from '../../Redux/appSlice'
-import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
+import { useEffect, useState } from 'react'
 import {
   AppBar,
   Box,
@@ -28,15 +10,30 @@ import {
   Tooltip,
   Toolbar,
   useTheme,
-  Checkbox,
   Divider,
-  Switch,
 } from '@mui/material'
 import ViewModuleIcon from '@mui/icons-material/ViewModule'
 import ViewHeadlineIcon from '@mui/icons-material/ViewHeadline'
-import { DIVA_GOVERNANCE_ADDRESS } from '../../constants'
 import Typography from '@mui/material/Typography'
 import { ShowChartOutlined } from '@mui/icons-material'
+import { useHistory, useParams } from 'react-router-dom'
+import FilterListIcon from '@mui/icons-material/FilterList'
+
+import { DIVA_GOVERNANCE_ADDRESS } from '../../constants'
+import PoolsTable, { PayoffCell } from '../PoolsTable'
+import { config } from '../../constants'
+import { getDateTime } from '../../Util/Dates'
+import { Pool } from '../../lib/queries'
+import { generatePayoffChartData } from '../../Graphs/DataGenerator'
+import { GrayText } from '../Trade/Orders/UiStyles'
+import { CoinIconPair } from '../CoinIcon'
+import {
+  fetchPools,
+  selectChainId,
+  selectPools,
+  selectRequestStatus,
+} from '../../Redux/appSlice'
+import { useAppDispatch, useAppSelector } from '../../Redux/hooks'
 import { ORDER_TYPE } from '../../Models/orderbook'
 import { getAppStatus, statusDescription } from '../../Util/getAppStatus'
 import {
@@ -44,104 +41,33 @@ import {
   getResponse,
   mapOrderData,
 } from '../../DataService/OpenOrders'
-import { useHistory, useParams } from 'react-router-dom'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
-import FilterListIcon from '@mui/icons-material/FilterList'
 import { FilterDrawerModal } from '../Dashboard/FilterDrawerMobile'
-import Accordion from '@mui/material/Accordion'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import TextField from '@mui/material/TextField'
-import InputAdornment from '@mui/material/InputAdornment'
-import { Search } from '@mui/icons-material'
-import { getTopNObjectByProperty } from '../../Util/dashboard'
 import { useWhitelist } from '../../hooks/useWhitelist'
-
-export const ExpiresInCell = (props: any) => {
-  //replaces all occurances of "-" with "/", firefox doesn't support "-" in a date string
-  const expTimestamp = new Date(props.row.Expiry.replace(/-/g, '/')).getTime()
-  const minUntilExp = getExpiryMinutesFromNow(expTimestamp / 1000)
-  if (minUntilExp > 0) {
-    if ((minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) > 0) {
-      // More than a day
-      return (
-        <Tooltip
-          placement="top-end"
-          title={props.row.Expiry + ', ' + userTimeZone()}
-        >
-          <span className="table-cell-trucate">
-            {(minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) +
-              'd ' +
-              ((minUntilExp % (60 * 24)) - (minUntilExp % 60)) / 60 +
-              'h ' +
-              (minUntilExp % 60) +
-              'm '}
-          </span>
-        </Tooltip>
-      )
-    } else if (
-      (minUntilExp - (minUntilExp % (60 * 24))) / (60 * 24) === 0 &&
-      (minUntilExp - (minUntilExp % 60)) / 60 > 0
-    ) {
-      // Less than a day but more than an hour
-      return (
-        <Tooltip
-          placement="top-end"
-          title={props.row.Expiry + ', ' + userTimeZone()}
-        >
-          <span className="table-cell-trucate">
-            {(minUntilExp - (minUntilExp % 60)) / 60 +
-              'h ' +
-              (minUntilExp % 60) +
-              'm '}
-          </span>
-        </Tooltip>
-      )
-    } else if ((minUntilExp - (minUntilExp % 60)) / 60 === 0) {
-      // Less than an hour
-      return (
-        <Tooltip
-          placement="top-end"
-          title={props.row.Expiry + ', ' + userTimeZone()}
-        >
-          <span className="table-cell-trucate">
-            {(minUntilExp % 60) + 'm '}
-          </span>
-        </Tooltip>
-      )
-    }
-  } else if (Object.is(0, minUntilExp)) {
-    // Using Object.is() to differentiate between +0 and -0
-    return (
-      <Tooltip
-        placement="top-end"
-        title={props.row.Expiry + ', ' + userTimeZone()}
-      >
-        <span className="table-cell-trucate">{'<1m'}</span>
-      </Tooltip>
-    )
-  } else {
-    return (
-      <Tooltip
-        placement="top-end"
-        title={props.row.Expiry + ', ' + userTimeZone()}
-      >
-        <span className="table-cell-trucate">{'-'}</span>
-      </Tooltip>
-    )
-  }
-}
+import { fetchIpfs } from '../Trade/Underlying'
+import { MobileFilterOptions } from './MobileFilterOptions'
+import { ExpiresInCell } from './ExpiresInCell'
 
 const columns: GridColDef[] = [
   {
-    field: 'Id',
+    field: 'AssetId',
     align: 'left',
+    headerAlign: 'left',
     renderHeader: (header) => <GrayText>{'Asset Id'}</GrayText>,
     renderCell: (cell) => <GrayText>{cell.value}</GrayText>,
+  },
+  {
+    field: 'PoolId',
+    align: 'left',
+    renderHeader: (header) => <GrayText>{'Pool Id'}</GrayText>,
+    renderCell: (cell) => (
+      <Tooltip title={cell.value}>
+        <GrayText>{getShortenedAddress(cell.value)}</GrayText>
+      </Tooltip>
+    ),
   },
   {
     field: 'Icon',
@@ -231,353 +157,6 @@ const columns: GridColDef[] = [
   },
 ]
 
-const MobileFilterOptions = ({
-  setSearch,
-  expiredPoolClicked,
-  setExpiredPoolClicked,
-  rows,
-  checkedState,
-  setCheckedState,
-  searchInput,
-  setSearchInput,
-  createdBy,
-  setCreatedBy,
-  handleCreatorInput,
-  handleSellPriceFilter,
-  sellPriceFilter,
-  handleBuyPriceFilter,
-  buyPriceFilter,
-  idInput,
-  handleIdFilterChange,
-  handleWhitelistFilter,
-  whitelistFilter,
-}) => {
-  const theme = useTheme()
-
-  const top4UnderlyingTokens = useMemo(
-    () => getTopNObjectByProperty(rows, 'Underlying', 4),
-    [rows]
-  )
-
-  const handleOnChange = (position) => {
-    const updatedCheckedState = checkedState.map((item, index) =>
-      index === position ? !item : item
-    )
-
-    setCheckedState(updatedCheckedState)
-
-    const underlyingTokenString = updatedCheckedState
-      .map((currentState, index) => {
-        if (currentState === true) {
-          return top4UnderlyingTokens[index]
-        }
-      })
-      .filter((item) => item !== undefined)
-      .map((item) => item.token)
-      .join(' ')
-      .toString()
-
-    setSearch(underlyingTokenString)
-  }
-
-  return (
-    <Box
-      sx={{
-        overflowY: 'scroll',
-        msOverflowStyle: 'none',
-        scrollbarWidth: 'none',
-        '&::-webkit-scrollbar': {
-          display: 'none',
-        },
-      }}
-    >
-      <Accordion
-        sx={{
-          backgroundColor: '#000000',
-          '&:before': {
-            display: 'none',
-          },
-          marginTop: theme.spacing(3.5),
-          marginBottom: theme.spacing(1),
-        }}
-        defaultExpanded
-      >
-        <AccordionSummary
-          aria-controls="panel1a-content"
-          id="panel1a-header"
-          sx={{
-            padding: '0px',
-            backgroundColor: '#000000',
-          }}
-          expandIcon={<ArrowDropUpIcon />}
-        >
-          <Typography
-            sx={{
-              fontSize: '16px',
-            }}
-          >
-            Asset Id
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails
-          sx={{
-            backgroundColor: '#000000',
-            padding: 0,
-          }}
-        >
-          <Box>
-            <TextField
-              value={idInput}
-              aria-label="Filter creator"
-              sx={{
-                width: '100%',
-                height: theme.spacing(6.25),
-                marginTop: theme.spacing(2),
-              }}
-              onChange={handleIdFilterChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search color="secondary" />
-                  </InputAdornment>
-                ),
-              }}
-              placeholder="Enter Asset Id"
-              color="secondary"
-            />
-          </Box>
-        </AccordionDetails>
-      </Accordion>
-      <Divider />
-      <Accordion
-        sx={{
-          backgroundColor: '#000000',
-          '&:before': {
-            display: 'none',
-          },
-          marginTop: theme.spacing(3.5),
-          marginBottom: theme.spacing(1),
-        }}
-        defaultExpanded
-      >
-        <AccordionSummary
-          aria-controls="panel1a-content"
-          id="panel1a-header"
-          sx={{
-            padding: '0px',
-            backgroundColor: '#000000',
-          }}
-          expandIcon={<ArrowDropUpIcon />}
-        >
-          <Typography
-            sx={{
-              fontSize: '16px',
-            }}
-          >
-            Creator
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails
-          sx={{
-            backgroundColor: '#000000',
-            padding: 0,
-          }}
-        >
-          <Box>
-            <TextField
-              value={createdBy}
-              aria-label="Filter creator"
-              sx={{
-                width: '100%',
-                height: theme.spacing(6.25),
-                marginTop: theme.spacing(2),
-              }}
-              onChange={handleCreatorInput}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search color="secondary" />
-                  </InputAdornment>
-                ),
-              }}
-              placeholder="Enter Creator"
-              color="secondary"
-            />
-          </Box>
-          <Stack
-            spacing={0.6}
-            sx={{
-              marginTop: theme.spacing(2),
-              fontSize: '14px',
-            }}
-          >
-            <Stack
-              direction="row"
-              justifyContent={'space-between'}
-              alignItems={'center'}
-            >
-              <Box>Diva Governance</Box>
-              <Checkbox
-                checked={createdBy === DIVA_GOVERNANCE_ADDRESS}
-                id={`checkbox-diva-governance`}
-                onChange={() => {
-                  if (createdBy === DIVA_GOVERNANCE_ADDRESS) {
-                    setCreatedBy('')
-                  } else {
-                    setCreatedBy(DIVA_GOVERNANCE_ADDRESS)
-                  }
-                }}
-              />
-            </Stack>
-          </Stack>
-        </AccordionDetails>
-      </Accordion>
-      <Divider />
-      <Accordion
-        sx={{
-          backgroundColor: '#000000',
-          '&:before': {
-            display: 'none',
-          },
-          marginY: theme.spacing(1),
-        }}
-      >
-        <AccordionSummary
-          aria-controls="panel1a-content"
-          id="panel1a-header"
-          sx={{
-            padding: 0,
-            backgroundColor: '#000000',
-          }}
-          expandIcon={<ArrowDropUpIcon />}
-        >
-          <Typography
-            sx={{
-              fontSize: '16px',
-            }}
-          >
-            Underlying
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails
-          sx={{
-            backgroundColor: '#000000',
-            padding: 0,
-          }}
-        >
-          <Box>
-            <TextField
-              value={searchInput}
-              aria-label="Filter creator"
-              sx={{
-                width: '100%',
-                height: theme.spacing(6.25),
-                marginTop: theme.spacing(2),
-              }}
-              onChange={(event) => setSearchInput(event.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search color="secondary" />
-                  </InputAdornment>
-                ),
-              }}
-              placeholder="Enter Underlying"
-              color="secondary"
-            />
-          </Box>
-          <Stack
-            spacing={0.6}
-            sx={{
-              marginTop: theme.spacing(2),
-              fontSize: '14px',
-            }}
-          >
-            {top4UnderlyingTokens.map((underlying, index) => (
-              <Stack
-                direction="row"
-                justifyContent={'space-between'}
-                alignItems={'center'}
-                key={index}
-              >
-                <Box>{underlying.token}</Box>
-                <Checkbox
-                  checked={checkedState[index]}
-                  id={`custom-checkbox-${index}`}
-                  onChange={() => handleOnChange(index)}
-                />
-              </Stack>
-            ))}
-          </Stack>
-        </AccordionDetails>
-      </Accordion>
-      <Divider />
-      <Stack
-        sx={{
-          paddingTop: theme.spacing(2.5),
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>Whitelisted Oracle</Box>
-          <Switch checked={whitelistFilter} onChange={handleWhitelistFilter} />
-        </Stack>
-      </Stack>
-      <Divider />
-      <Stack
-        sx={{
-          paddingTop: theme.spacing(2.5),
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>Hide Expired Pools</Box>
-          <Switch
-            checked={expiredPoolClicked}
-            onChange={() => setExpiredPoolClicked(!expiredPoolClicked)}
-          />
-        </Stack>
-      </Stack>
-      <Divider />
-      <Stack
-        sx={{
-          paddingTop: theme.spacing(2.5),
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>Has Buy Price</Box>
-          <Switch checked={buyPriceFilter} onChange={handleBuyPriceFilter} />
-        </Stack>
-      </Stack>
-      <Divider />
-      <Stack
-        sx={{
-          paddingTop: theme.spacing(2.5),
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent={'space-between'}
-          alignItems={'center'}
-        >
-          <Box>Has Sell Price</Box>
-          <Switch checked={sellPriceFilter} onChange={handleSellPriceFilter} />
-        </Stack>
-      </Stack>
-    </Box>
-  )
-}
-
 export default function Markets() {
   const history = useHistory()
   const theme = useTheme()
@@ -607,12 +186,15 @@ export default function Markets() {
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false)
   const [searchInput, setSearchInput] = useState<string>('')
   const [checkedState, setCheckedState] = useState(new Array(4).fill(false))
-  const [mobileCreatorFilter, setMobileCreatorFilter] = useState<string>('')
   const [idFilter, setIdFilter] = useState('')
   const [whitelistFilter, setWhitelistFilter] = useState(false)
   const [hasBuyPriceFilter, setHasBuyPriceFilter] = useState(false)
   const [hasSellPriceFilter, setHasSellPriceFilter] = useState(false)
+  const [rows, setRows] = useState([])
+  const [filteredRows, setFilteredRows] = useState([])
+
   const whitelist = useWhitelist()
+
   const handleSellPriceFilter = () => {
     setHasSellPriceFilter(!hasSellPriceFilter)
   }
@@ -687,6 +269,8 @@ export default function Markets() {
     const updatedTablePools = tablePools.map((tablePool) => {
       const orders = ordersArray.filter((item) => item.poolId === tablePool.id)
 
+      console.log(orders)
+
       if (orders.length === 0) {
         return tablePool
       } else {
@@ -698,12 +282,12 @@ export default function Markets() {
         const tokens = getMakerTakerTokens(checkOrders)
 
         // Check pool type
-        const poolType =
-          tokens.indexOf(tablePool.shortToken.id) !== -1 ? 'S' : 'L'
+        const side =
+          tokens.indexOf(tablePool.shortToken.id) !== -1 ? 'Short' : 'Long'
 
         // Check the token address of table row
         const tokenAddress =
-          poolType === 'S' ? tablePool.shortToken.id : tablePool.longToken.id
+          side === 'Long' ? tablePool.longToken.id : tablePool.shortToken.id
 
         // Get first records and second records
         const firstRecords = checkOrders.first.bids.records
@@ -738,8 +322,15 @@ export default function Markets() {
           orderPrices[ORDER_TYPE.SELL]
         )
 
+        if (tablePool.referenceAsset.endsWith('.json')) {
+          const json = fetchIpfs(tablePool.referenceAsset, (res) => {
+            console.log(res)
+          })
+          console.log(json)
+        }
+
         if (completeOrderBook.length !== 0) {
-          if (poolType === 'L') {
+          if (side === 'Long') {
             // Update the pool's long price information with the updated information
             updatePool = {
               ...tablePool,
@@ -752,8 +343,8 @@ export default function Markets() {
                   bid: completeOrderBook[0].bid,
                   bidExpiry: completeOrderBook[0].buyExpiry,
                   bidQuantity: completeOrderBook[0].buyQuantity,
-                  orderType: poolType,
-                  poolId: poolType + tablePool.id,
+                  orderType: side,
+                  poolId: tablePool.id,
                 },
               },
             }
@@ -770,8 +361,8 @@ export default function Markets() {
                   bid: completeOrderBook[0].bid,
                   bidExpiry: completeOrderBook[0].buyExpiry,
                   bidQuantity: completeOrderBook[0].buyQuantity,
-                  orderType: poolType,
-                  poolId: poolType + tablePool.id,
+                  orderType: side,
+                  poolId: tablePool.id,
                 },
               },
             }
@@ -829,135 +420,159 @@ export default function Markets() {
     return () => clearTimeout(timeout)
   }, [createdBy, history])
 
-  const rows: GridRowModel[] = tablePools.reduce((acc, val) => {
-    const { status } = getAppStatus(
-      val.expiryTime,
-      val.statusTimestamp,
-      val.statusFinalReferenceValue,
-      val.finalReferenceValue,
-      val.inflection,
-      parseFloat(val.submissionPeriod),
-      parseFloat(val.challengePeriod),
-      parseFloat(val.reviewPeriod),
-      parseFloat(val.fallbackSubmissionPeriod)
-    )
+  // Get all rows of table
+  useEffect(() => {
+    const getRows = async () => {
+      const allRowsPromises = tablePools.map(async (val) => {
+        let json = null
 
-    const shared = {
-      Icon: val.referenceAsset,
-      Underlying: val.referenceAsset,
-      Floor: formatUnits(val.floor),
-      Inflection: formatUnits(val.inflection),
-      Cap: formatUnits(val.cap),
-      Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
-      Expiry: getDateTime(val.expiryTime),
-      Sell: '-',
-      Buy: '-',
-      MaxYield: {
-        buy: '-',
-        sell: '-',
-      },
-      dataProvider: val.dataProvider,
+        if (val.referenceAsset.endsWith('.json')) {
+          const response = await fetch(val.referenceAsset)
+          json = await response.json()
+        }
+
+        const { status } = getAppStatus(
+          val.expiryTime,
+          val.statusTimestamp,
+          val.statusFinalReferenceValue,
+          val.finalReferenceValue,
+          val.inflection,
+          parseFloat(val.submissionPeriod),
+          parseFloat(val.challengePeriod),
+          parseFloat(val.reviewPeriod),
+          parseFloat(val.fallbackSubmissionPeriod)
+        )
+
+        const shared = {
+          Icon: val.referenceAsset,
+          Underlying: json?.title ? json.title : val.referenceAsset,
+          Floor: formatUnits(val.floor),
+          Inflection: formatUnits(val.inflection),
+          Cap: formatUnits(val.cap),
+          Gradient: formatUnits(val.gradient, val.collateralToken.decimals),
+          Expiry: getDateTime(val.expiryTime),
+          Sell: '-',
+          Buy: '-',
+          MaxYield: {
+            buy: '-',
+            sell: '-',
+          },
+          dataProvider: val.dataProvider,
+        }
+
+        const payOff = {
+          Gradient: Number(
+            formatUnits(val.gradient, val.collateralToken.decimals)
+          ),
+          Floor: Number(formatUnits(val.floor)),
+          Inflection: Number(formatUnits(val.inflection)),
+          Cap: Number(formatUnits(val.cap)),
+        }
+
+        return [
+          {
+            ...shared,
+            id: `${val.id}/long`,
+            AssetId: val.longToken.symbol,
+            PoolId: val.id,
+            address: val.longToken,
+            PayoffProfile: generatePayoffChartData({
+              ...payOff,
+              IsLong: true,
+            }),
+            TVL:
+              parseFloat(
+                formatUnits(
+                  BigNumber.from(val.collateralBalance),
+                  val.collateralToken.decimals
+                )
+              ).toFixed(2) +
+              ' ' +
+              val.collateralToken.symbol,
+            Status: status,
+            finalValue:
+              val.statusFinalReferenceValue === 'Open'
+                ? '-'
+                : formatUnits(val.finalReferenceValue),
+            Sell:
+              val.prices?.long !== undefined &&
+              Number(val.prices.long.bid).toFixed(2) !== '0.00'
+                ? Number(val.prices.long.bid).toFixed(2)
+                : '-',
+            Buy:
+              val.prices?.long !== undefined &&
+              Number(val.prices.long.ask).toFixed(2) !== '0.00'
+                ? Number(val.prices.long.ask).toFixed(2)
+                : '-',
+            MaxYield: {
+              buy:
+                val.prices?.long !== undefined && val.prices.long.ask !== ''
+                  ? Number(1 / Number(val.prices.long.ask)).toFixed(2) + 'x'
+                  : '-',
+              sell:
+                val.prices?.long !== undefined && val.prices.long.bid !== ''
+                  ? Number(1 / Number(val.prices.long.bid)).toFixed(2) + 'x'
+                  : '-',
+            },
+          },
+          {
+            ...shared,
+            id: `${val.id}/short`,
+            PoolId: val.id,
+            AssetId: val.shortToken.symbol,
+            address: val.shortToken,
+            PayoffProfile: generatePayoffChartData({
+              ...payOff,
+              IsLong: false,
+            }),
+            TVL:
+              parseFloat(
+                formatUnits(
+                  BigNumber.from(val.collateralBalance),
+                  val.collateralToken.decimals
+                )
+              ).toFixed(2) +
+              ' ' +
+              val.collateralToken.symbol,
+            Status: status,
+            finalValue:
+              val.statusFinalReferenceValue === 'Open'
+                ? '-'
+                : formatUnits(val.finalReferenceValue),
+            Sell:
+              val.prices?.short !== undefined &&
+              Number(val.prices.short.bid).toFixed(2) !== '0.00'
+                ? Number(val.prices.short.bid).toFixed(2)
+                : '-',
+            Buy:
+              val.prices?.short !== undefined &&
+              Number(val.prices.short.ask).toFixed(2) !== '0.00'
+                ? Number(val.prices.short.ask).toFixed(2)
+                : '-',
+            MaxYield: {
+              buy:
+                val.prices?.short !== undefined && val.prices.short.ask !== ''
+                  ? Number(1 / Number(val.prices.short.ask)).toFixed(2) + 'x'
+                  : '-',
+              sell:
+                val.prices?.short !== undefined && val.prices.short.bid !== ''
+                  ? Number(1 / Number(val.prices.short.bid)).toFixed(2) + 'x'
+                  : '-',
+            },
+          },
+        ]
+      })
+
+      const allRows = await Promise.all(allRowsPromises)
+
+      // Flatten the array of arrays to get final rows
+      const rows = allRows.reduce((acc, val) => acc.concat(val), [])
+
+      setRows(rows)
     }
 
-    const payOff = {
-      Gradient: Number(formatUnits(val.gradient, val.collateralToken.decimals)),
-      Floor: Number(formatUnits(val.floor)),
-      Inflection: Number(formatUnits(val.inflection)),
-      Cap: Number(formatUnits(val.cap)),
-    }
-
-    return [
-      ...acc,
-      {
-        ...shared,
-        id: `${val.id}/long`,
-        Id: 'L' + val.id,
-        address: val.longToken,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: true,
-        }),
-        TVL:
-          parseFloat(
-            formatUnits(
-              BigNumber.from(val.collateralBalance),
-              val.collateralToken.decimals
-            )
-          ).toFixed(2) +
-          ' ' +
-          val.collateralToken.symbol,
-        Status: status,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : formatUnits(val.finalReferenceValue),
-        Sell:
-          val.prices?.long !== undefined &&
-          Number(val.prices.long.bid).toFixed(2) !== '0.00'
-            ? Number(val.prices.long.bid).toFixed(2)
-            : '-',
-        Buy:
-          val.prices?.long !== undefined &&
-          Number(val.prices.long.ask).toFixed(2) !== '0.00'
-            ? Number(val.prices.long.ask).toFixed(2)
-            : '-',
-        MaxYield: {
-          buy:
-            val.prices?.long !== undefined && val.prices.long.ask !== ''
-              ? Number(1 / Number(val.prices.long.ask)).toFixed(2) + 'x'
-              : '-',
-          sell:
-            val.prices?.long !== undefined && val.prices.long.bid !== ''
-              ? Number(1 / Number(val.prices.long.bid)).toFixed(2) + 'x'
-              : '-',
-        },
-      },
-      {
-        ...shared,
-        id: `${val.id}/short`,
-        Id: 'S' + val.id,
-        address: val.shortToken,
-        PayoffProfile: generatePayoffChartData({
-          ...payOff,
-          IsLong: false,
-        }),
-        TVL:
-          parseFloat(
-            formatUnits(
-              BigNumber.from(val.collateralBalance),
-              val.collateralToken.decimals
-            )
-          ).toFixed(2) +
-          ' ' +
-          val.collateralToken.symbol,
-        Status: status,
-        finalValue:
-          val.statusFinalReferenceValue === 'Open'
-            ? '-'
-            : formatUnits(val.finalReferenceValue),
-        Sell:
-          val.prices?.short !== undefined &&
-          Number(val.prices.short.bid).toFixed(2) !== '0.00'
-            ? Number(val.prices.short.bid).toFixed(2)
-            : '-',
-        Buy:
-          val.prices?.short !== undefined &&
-          Number(val.prices.short.ask).toFixed(2) !== '0.00'
-            ? Number(val.prices.short.ask).toFixed(2)
-            : '-',
-        MaxYield: {
-          buy:
-            val.prices?.short !== undefined && val.prices.short.ask !== ''
-              ? Number(1 / Number(val.prices.short.ask)).toFixed(2) + 'x'
-              : '-',
-          sell:
-            val.prices?.short !== undefined && val.prices.short.bid !== ''
-              ? Number(1 / Number(val.prices.short.bid)).toFixed(2) + 'x'
-              : '-',
-        },
-      },
-    ]
-  }, [] as GridRowModel[])
+    getRows()
+  }, [tablePools])
 
   // set card view on mobile devices
   useEffect(() => {
@@ -965,48 +580,66 @@ export default function Markets() {
       setSelectedPoolsView('Grid')
     }
   }, [isMobile])
-  const filteredRows = whitelistFilter
-    ? rows.filter((row) =>
-        whitelist.dataProviders.map((dp) => dp.id).includes(row.dataProvider)
-      )
-    : hasBuyPriceFilter
-    ? rows.filter((row) =>
-        hasSellPriceFilter
-          ? row.Sell !== '-' && row.Buy !== '-'
-          : row.Buy !== '-'
-      )
-    : hasSellPriceFilter
-    ? rows.filter((row) =>
-        hasBuyPriceFilter
-          ? row.Sell !== '-' && row.Buy !== '-'
-          : row.Sell !== '-'
-      )
-    : idFilter !== ''
-    ? rows.filter((row) => row.Id.includes(idFilter))
-    : search != null && search.length > 0
-    ? expiredPoolClicked
-      ? rows
-          .filter((v) => v.Status.includes('Open'))
-          .filter(
-            (v) =>
-              v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
-              search.toLowerCase().includes(v.Underlying.toLowerCase())
-          )
+
+  useEffect(() => {
+    let filtered = [...rows] // copy of rows to not mutate original data
+
+    if (whitelistFilter) {
+      filtered = filterByWhitelist(filtered)
+    } else if (hasBuyPriceFilter || hasSellPriceFilter) {
+      filtered = filterByPrices(filtered, hasBuyPriceFilter, hasSellPriceFilter)
+    } else if (idFilter !== '') {
+      filtered = filterById(filtered, idFilter)
+    } else if (search != null && search.length > 0) {
+      filtered = filterBySearch(filtered, search, expiredPoolClicked)
+    } else if (expiredPoolClicked) {
+      filtered = filterByExpiredPool(filtered)
+    }
+
+    setFilteredRows(filtered)
+  }, [
+    rows,
+    whitelistFilter,
+    hasBuyPriceFilter,
+    hasSellPriceFilter,
+    idFilter,
+    search,
+    expiredPoolClicked,
+  ])
+
+  const filterByWhitelist = (rows) =>
+    rows.filter((row) =>
+      whitelist.dataProviders.map((dp) => dp.id).includes(row.dataProvider)
+    )
+
+  const filterByPrices = (rows, hasBuy, hasSell) =>
+    rows.filter((row) =>
+      hasBuy && hasSell
+        ? row.Sell !== '-' && row.Buy !== '-'
+        : hasBuy
+        ? row.Buy !== '-'
+        : row.Sell !== '-'
+    )
+
+  const filterById = (rows, idFilter) =>
+    rows.filter((row) => row.AssetId.includes(idFilter))
+
+  const filterBySearch = (rows, search, expiredPoolClicked) =>
+    expiredPoolClicked
+      ? rows.filter(
+          (v) =>
+            v.Status.includes('Open') &&
+            (v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
+              search.toLowerCase().includes(v.Underlying.toLowerCase()))
+        )
       : rows.filter(
           (v) =>
             v.Underlying.toLowerCase().includes(search.toLowerCase()) ||
             search.toLowerCase().includes(v.Underlying.toLowerCase())
         )
-    : expiredPoolClicked
-    ? rows.filter((v) => v.Status.includes('Open'))
-    : rows
 
-  useEffect(() => {
-    if (searchInput.length > 0 && searchInput !== null) {
-      setCheckedState(new Array(4).fill(false))
-      setSearch(searchInput)
-    }
-  }, [searchInput])
+  const filterByExpiredPool = (rows) =>
+    rows.filter((v) => v.Status.includes('Open'))
 
   return (
     <>

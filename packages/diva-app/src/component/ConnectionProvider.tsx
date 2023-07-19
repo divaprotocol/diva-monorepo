@@ -1,6 +1,6 @@
 import { BaseProvider, ExternalProvider } from '@ethersproject/providers'
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
-import { BigNumber, providers } from 'ethers'
+import { BigNumber, ethers, providers } from 'ethers'
 import useLocalStorage from 'use-local-storage'
 import detectEthereumProvider from '@metamask/detect-provider'
 import { useDispatch } from 'react-redux'
@@ -154,6 +154,7 @@ export const ConnectionProvider = ({ children }) => {
         setState((_state) => ({
           ..._state,
           chainId: BigNumber.from(ethereum.chainId).toNumber(),
+          provider: new ethers.providers.Web3Provider(window.ethereum),
         }))
       })
 

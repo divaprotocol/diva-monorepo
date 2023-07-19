@@ -1,6 +1,6 @@
 import { LoadingButton } from '@mui/lab'
 import { Box, Button, Typography, Theme, useTheme } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
@@ -10,6 +10,7 @@ import SelectorModal from '../Header/SelectorModal'
 import styled from '@emotion/styled'
 import { WALLET_IMAGES } from '../../constants'
 import useLocalStorage from 'use-local-storage'
+import DisclaimerModal from './DisclaimerModal'
 
 const SUPPORTED_WALLET_LIST = [
   {
@@ -104,6 +105,50 @@ export function ConnectWalletButton() {
   const [isWalletSelectorModalOpen, setIsWalletSelectorModalOpen] =
     useState<boolean>(false)
 
+  const [modalIsOpen, setModalIsOpen] = useState(false)
+  const [userAgreed, setUserAgreed] = useState(false)
+
+  useEffect(() => {
+    // Check if the user has previously agreed to the disclaimer
+    const agreementStatus = localStorage.getItem('userAgreed')
+    if (agreementStatus) {
+      setUserAgreed(true)
+    }
+  })
+
+  const handleAgree = () => {
+    // Store the agreement status in local storage
+    localStorage.setItem('userAgreed', 'true')
+    setUserAgreed(true)
+    setModalIsOpen(false)
+    setIsWalletSelectorModalOpen(true)
+  }
+
+  const handleDisagree = () => {
+    setModalIsOpen(false)
+  }
+
+  const buttonSize = isMobile ? 'small' : 'large'
+  const buttonStyle = { marginLeft: '10px', textDecoration: 'capitalize' }
+
+  const handleConnect = () => {
+    if (isConnected && userAddress) {
+      disconnect()
+    } else {
+      if (userAgreed) {
+        setIsWalletSelectorModalOpen(true)
+      } else {
+        // Show disclaimer modal
+        setModalIsOpen(true)
+      }
+    }
+  }
+
+  const buttonText =
+    isConnected && userAddress
+      ? getShortenedAddress(userAddress)
+      : 'Connect Wallet'
+
   return (
     <>
       <Box>
@@ -111,31 +156,32 @@ export function ConnectWalletButton() {
           <LoadingButton
             variant="contained"
             color="primary"
-            size={isMobile ? 'small' : 'large'}
+            size={buttonSize}
             loading={chainId == null}
             type="submit"
             value="Submit"
-            sx={{ marginLeft: '10px' }}
-            onClick={() => isConnected && userAddress && disconnect()}
+            sx={buttonStyle}
+            onClick={handleConnect}
           >
-            {isConnected && userAddress
-              ? getShortenedAddress(userAddress)
-              : 'Connect Wallet'}
+            {buttonText}
           </LoadingButton>
         ) : (
           <Button
             variant="contained"
             color="primary"
-            sx={{ marginLeft: '10px', textDecoration: 'capitalize' }}
-            size={isMobile ? 'small' : 'large'}
-            onClick={() => {
-              setIsWalletSelectorModalOpen(true)
-            }}
+            size={buttonSize}
+            sx={buttonStyle}
+            onClick={handleConnect}
           >
-            Connect Wallet
+            {buttonText}
           </Button>
         )}
       </Box>
+      <DisclaimerModal
+        isOpen={modalIsOpen}
+        onAgree={handleAgree}
+        onDisagree={handleDisagree}
+      />
       <SelectorModal
         onClose={() => setIsWalletSelectorModalOpen(false)}
         isOpen={isWalletSelectorModalOpen}
