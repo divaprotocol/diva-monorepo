@@ -183,7 +183,13 @@ export const config: { [key: number]: SingleConfig } = {
         id: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
         name: 'USDT',
         symbol: 'USDT',
-        decimals: 18,
+        decimals: 6,
+      },
+      {
+        id: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6,
       },
       {
         id: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
@@ -195,7 +201,7 @@ export const config: { [key: number]: SingleConfig } = {
         id: '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6',
         name: 'WBTC',
         symbol: 'WBTC',
-        decimals: 18,
+        decimals: 8,
       },
       {
         id: '0x39e896451487f03dC2489AcAef1788C787885d35',
@@ -204,7 +210,7 @@ export const config: { [key: number]: SingleConfig } = {
         decimals: 18,
       },
     ],
-    adminAddress: '0x9AdEFeb576dcF52F5220709c1B267d89d5208D78',
+    adminAddress: '0x3E50a9F4DC9CCF7aFaBb7337cf57D63dFa12acc0',
     dataProviders: [
       {
         id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',
@@ -343,7 +349,7 @@ export const CURRENT_SUPPORTED_CHAIN_ID = [
 
 // DIVA Governance address which is the default creator of pools on Markets page and trading fee recipient
 export const DIVA_GOVERNANCE_ADDRESS =
-  '0x1062CCC9F9a4bBcf565799683b6c00eA525ECb9F'
+  '0x3E50a9F4DC9CCF7aFaBb7337cf57D63dFa12acc0'
 
 // Trading fee; 0.01 corresponds to 1%
 export const TRADING_FEE = 0.01
