@@ -112,7 +112,6 @@ export function ConnectWalletButton() {
     // Check if the user has previously agreed to the disclaimer
     const agreementStatus = localStorage.getItem('userAgreed')
     if (agreementStatus) {
-      console.log(agreementStatus)
       setUserAgreed(true)
     }
   })

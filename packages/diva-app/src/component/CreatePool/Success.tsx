@@ -28,6 +28,7 @@ import ERC20 from '../../abi/ERC20ABI.json'
 import { ContentCopy, Download } from '@mui/icons-material'
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
 import { useHistory } from 'react-router-dom'
+import { sendAddAssetTransaction } from '../../Util/walletUtils'
 
 const MetaMaskImage = styled.img`
   width: 20px;
@@ -43,26 +44,20 @@ const AddToMetamask = ({
   symbol: string
 }) => {
   const { provider, sendTransaction } = useConnectionContext()
+
   const handleAddMetaMask = async (e) => {
     const token = new ethers.Contract(address, ERC20, provider.getSigner())
     const decimal = await token.decimals()
-    try {
-      await sendTransaction({
-        method: 'wallet_watchAsset',
-        params: {
-          type: 'ERC20',
-          options: {
-            address: address,
-            symbol: symbol, // A ticker symbol or shorthand, up to 5 chars.
-            decimals: decimal,
-            image:
-              'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
-          },
-        } as any,
-      })
-    } catch (error) {
-      console.error('Error in HandleAddMetaMask', error)
+
+    const options = {
+      address: address,
+      symbol: symbol,
+      decimals: decimal,
+      image:
+        'https://res.cloudinary.com/dphrdrgmd/image/upload/v1641730802/image_vanmig.png',
     }
+
+    await sendAddAssetTransaction(sendTransaction, options)
   }
   return (
     <>

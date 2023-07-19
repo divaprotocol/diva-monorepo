@@ -27,7 +27,7 @@ import { useHistory } from 'react-router-dom'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { GrayText, GreenText, RedText } from '../Trade/Orders/UiStyles'
 import { makeStyles } from '@mui/styles'
-import { ExpiresInCell } from '../Markets/Markets'
+import { ExpiresInCell } from '../Markets/ExpiresInCell'
 import { useCustomMediaQuery } from '../../hooks/useCustomMediaQuery'
 import DropDownFilter from '../PoolsTableFilter/DropDownFilter'
 import ButtonFilter from '../PoolsTableFilter/ButtonFilter'
@@ -269,9 +269,35 @@ export function MyOrders() {
   }
 
   const componentDidMount = async () => {
-    const userOrders = await getUserOrders(makerAccount, chainId)
-    const dataOrders = getDataOrders(userOrders)
-    setDataOrders(dataOrders)
+    try {
+      const userOrders = await getUserOrders(makerAccount, chainId)
+      const dataOrders = await getDataOrders(userOrders)
+
+      const allJsonResponse = await Promise.all(
+        dataOrders.map(async (order) => {
+          let json = null
+          if (order.underlying.endsWith('json')) {
+            try {
+              const response = await fetch(order.underlying)
+              json = await response.json()
+            } catch (error) {
+              console.error(
+                `Error fetching JSON for order: ${order.underlying}`,
+                error
+              )
+            }
+          }
+          return {
+            ...order,
+            underlying: json?.title ? json.title : order.underlying,
+          }
+        })
+      )
+
+      setDataOrders(allJsonResponse)
+    } catch (error) {
+      console.error('An error occurred while fetching user orders:', error)
+    }
   }
 
   useEffect(() => {

@@ -68,6 +68,21 @@ export default function OptionDetails({
     <Stack direction="row" mt="15px" spacing={3}>
       <Stack direction="column">
         <Typography variant="h4" fontWeight="normal" color="gray" pl="15px">
+          Created at
+        </Typography>
+        <Tooltip
+          title={
+            getDateTime(pool.createdAt).slice(11, 19) + ' ' + userTimeZone()
+          }
+          arrow
+        >
+          <Typography fontSize="20px" pl="15px" color="white">
+            {getDateTime(pool.createdAt).slice(0, 10)}
+          </Typography>
+        </Tooltip>
+      </Stack>
+      <Stack direction="column">
+        <Typography variant="h4" fontWeight="normal" color="gray" pl="15px">
           Expires at
         </Typography>
         <Tooltip
