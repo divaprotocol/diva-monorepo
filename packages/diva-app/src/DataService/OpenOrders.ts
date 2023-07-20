@@ -2,7 +2,7 @@ import axios from 'axios'
 import {
   config,
   NULL_ADDRESS,
-  DIVA_GOVERNANCE_ADDRESS,
+  TRADING_FEE_RECIPIENT,
   TRADING_FEE,
 } from '../constants'
 import { BigNumber, ethers } from 'ethers'

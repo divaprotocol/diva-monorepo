@@ -2,7 +2,7 @@ import { parseUnits, splitSignature } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
-import { DIVA_GOVERNANCE_ADDRESS, TRADING_FEE } from '../constants'
+import { TRADING_FEE_RECIPIENT, TRADING_FEE } from '../constants'
 import { getFutureExpiryInSeconds } from '../Util/utils'
 import { zeroXTypes, zeroXDomain } from '../lib/zeroX'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -40,7 +40,7 @@ export const sellLimitOrder = async (orderData) => {
     takerAmount: collateralTokenAmount.toString(),
     maker: orderData.maker,
     sender: NULL_ADDRESS,
-    feeRecipient: DIVA_GOVERNANCE_ADDRESS,
+    feeRecipient: TRADING_FEE_RECIPIENT,
     takerTokenFeeAmount: collateralTokenFeeAmount.toString(),
     expiry: getFutureExpiryInSeconds(orderData.orderExpiry),
     salt: Date.now().toString(),
