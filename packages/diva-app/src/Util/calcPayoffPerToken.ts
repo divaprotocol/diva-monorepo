@@ -84,46 +84,51 @@ export function calcBreakEven(
   const SCALING = parseUnits('1', 18 - collateralTokenDecimals)
   const UNIT = parseUnits('1')
 
+  console.log('Hi')
+  console.log('price', price.toString())
+  console.log('collateralTokenDecimals', collateralTokenDecimals)
+
   // Convert inputs into Big Numbers
   floor = BigNumber.from(floor)
   inflection = BigNumber.from(inflection)
   cap = BigNumber.from(cap)
   gradient = BigNumber.from(gradient)
 
-  // Scale gradient to 18 decimals for calculation purposes as floor, inflection, etc.
-  // have 18 decimals
+  // Scale gradient and price to 18 decimals for calculation purposes
+  // as floor, inflection, etc. have 18 decimals
   const gradientScaled = gradient.mul(SCALING)
+  const priceScaled = price.mul(SCALING)
 
   let breakEven
 
-  if (price.gt(UNIT) || price.lt(BigNumber.from(0))) {
+  if (priceScaled.gt(UNIT) || priceScaled.lt(BigNumber.from(0))) {
     breakEven = 'n/a'
   } else {
     if (isLong) {
-      if (price.eq(gradientScaled)) {
+      if (priceScaled.eq(gradientScaled)) {
         breakEven = inflection
-      } else if (price.lt(gradientScaled)) {
-        breakEven = price
+      } else if (priceScaled.lt(gradientScaled)) {
+        breakEven = priceScaled
           .mul(inflection.sub(floor))
           .div(gradientScaled)
           .add(floor)
       } else {
-        breakEven = price
+        breakEven = priceScaled
           .sub(gradientScaled)
           .mul(cap.sub(inflection))
           .div(UNIT.sub(gradientScaled))
           .add(inflection)
       }
     } else {
-      if (price.eq(UNIT.sub(gradientScaled))) {
+      if (priceScaled.eq(UNIT.sub(gradientScaled))) {
         breakEven = inflection
-      } else if (price.gt(UNIT.sub(gradientScaled))) {
-        breakEven = UNIT.sub(price)
+      } else if (priceScaled.gt(UNIT.sub(gradientScaled))) {
+        breakEven = UNIT.sub(priceScaled)
           .mul(inflection.sub(floor))
           .div(gradientScaled)
           .add(floor)
       } else {
-        breakEven = UNIT.sub(price)
+        breakEven = UNIT.sub(priceScaled)
           .sub(gradientScaled)
           .mul(cap.sub(inflection))
           .div(UNIT.sub(gradientScaled))
