@@ -17,7 +17,7 @@ import { useMemo } from 'react'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 
 import { getTopNObjectByProperty } from '../../Util/dashboard'
-import { DIVA_GOVERNANCE_ADDRESS } from '../../constants'
+import { DEFAULT_MARKETS_CREATED_BY } from '../../constants'
 
 const FilterAccordion = ({ title, children }) => {
   const theme = useTheme()
@@ -185,13 +185,13 @@ export const MobileFilterOptions = ({
           >
             <Box>Diva Governance</Box>
             <Checkbox
-              checked={createdBy === DIVA_GOVERNANCE_ADDRESS}
+              checked={createdBy === DEFAULT_MARKETS_CREATED_BY}
               id={`checkbox-diva-governance`}
               onChange={() => {
-                if (createdBy === DIVA_GOVERNANCE_ADDRESS) {
+                if (createdBy === DEFAULT_MARKETS_CREATED_BY) {
                   setCreatedBy('')
                 } else {
-                  setCreatedBy(DIVA_GOVERNANCE_ADDRESS)
+                  setCreatedBy(DEFAULT_MARKETS_CREATED_BY)
                 }
               }}
             />
