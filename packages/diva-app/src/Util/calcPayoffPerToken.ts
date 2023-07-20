@@ -84,10 +84,6 @@ export function calcBreakEven(
   const SCALING = parseUnits('1', 18 - collateralTokenDecimals)
   const UNIT = parseUnits('1')
 
-  console.log('Hi')
-  console.log('price', price.toString())
-  console.log('collateralTokenDecimals', collateralTokenDecimals)
-
   // Convert inputs into Big Numbers
   floor = BigNumber.from(floor)
   inflection = BigNumber.from(inflection)
