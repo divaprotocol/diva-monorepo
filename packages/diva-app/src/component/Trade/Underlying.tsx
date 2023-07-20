@@ -256,6 +256,7 @@ export default function Underlying() {
               option={pool}
               tokenAddress={tokenAddress}
               exchangeProxy={exchangeProxy}
+              currentTab={value}
             />
           </Stack>
           <Box>
@@ -294,6 +295,7 @@ export default function Underlying() {
               option={pool}
               tokenAddress={tokenAddress}
               exchangeProxy={exchangeProxy}
+              currentTab={value}
             />
           </Stack>
           <Box>

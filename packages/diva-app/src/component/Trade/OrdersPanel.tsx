@@ -14,6 +14,7 @@ export default function OrdersPanel(props: {
   option: Pool
   tokenAddress: string
   exchangeProxy: string
+  currentTab: string // LONG/SHORT tab
 }) {
   const theme = useTheme()
   const [orderType, setOrderTypeValue] = React.useState('orderbook')
@@ -38,6 +39,7 @@ export default function OrdersPanel(props: {
             option={props.option}
             tokenAddress={props.tokenAddress}
             exchangeProxy={props.exchangeProxy}
+            currentTab={props.currentTab}
           />
         </TabPanel>
         <TabPanel value="openorders">

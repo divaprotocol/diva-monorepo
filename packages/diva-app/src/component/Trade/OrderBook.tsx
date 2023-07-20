@@ -28,20 +28,26 @@ export default function OrderBook(props: {
   option: Pool
   tokenAddress: string
   exchangeProxy: string
+  currentTab: string // LONG/SHORT tab
 }) {
   const option = props.option
   const optionTokenAddress = props.tokenAddress
-  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
+  // let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
+  // let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const [orderBook, setOrderBook] = useState([] as any)
+  const [responseBuy, setResponseBuy] = useState([] as any)
+  const [responseSell, setResponseSell] = useState([] as any)
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
   const [websocketClient, setWebsocketClient] = useState(
     new WebSocket(config[chainId].websocket)
   )
-  const componentDidMount = async () => {
-    const orders = []
-    if (responseSell.length === 0) {
+
+  useEffect(() => {
+    console.log('props.currentTab', props.currentTab)
+    const fetchOrders = async () => {
+      const orders = []
+      // if (responseSell.length === 0) {
       const rSell = await get0xOpenOrders(
         optionTokenAddress,
         option.collateralToken.id,
@@ -49,11 +55,12 @@ export default function OrderBook(props: {
         provider,
         props.exchangeProxy
       )
-      if (rSell.length > 0) {
-        responseSell = rSell
-      }
-    }
-    if (responseBuy.length === 0) {
+      // if (rSell.length > 0) {
+      //   responseSell = rSell
+      // }
+      setResponseSell(rSell.length > 0 ? rSell : [])
+      // }
+      // if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
         option.collateralToken.id,
         optionTokenAddress,
@@ -61,49 +68,60 @@ export default function OrderBook(props: {
         provider,
         props.exchangeProxy
       )
-      if (rBuy.length > 0) {
-        responseBuy = rBuy
-      }
+      console.log('hi')
+      // if (rBuy.length > 0) {
+      //   responseBuy = rBuy
+      // }
+      setResponseBuy(rBuy.length > 0 ? rBuy : [])
+      // }
+
+      // Keep this for debugging
+      // const buyOrdersByMakerAddress = responseBuy.filter((v) =>
+      //   v.order.maker.includes('0xfb34097980eb94bdec8ee4a1eafab92d29d177d9')
+      // )
+      // console.log('buyOrdersByMakerAddress', buyOrdersByMakerAddress)
+
+      // Keep for debugging
+      // const sellOrdersByMakerAddress = responseSell.filter((v) =>
+      //   v.order.maker.includes('0xfb34097980eb94bdec8ee4a1eafab92d29d177d9')
+      // )
+      // console.log('sellOrdersByMakerAddress', sellOrdersByMakerAddress)
+
+      const orderBookBuy = mapOrderData(
+        responseBuy,
+        option.collateralToken.decimals,
+        ORDER_TYPE.BUY
+      )
+      orders.push(orderBookBuy)
+
+      const orderBookSell = mapOrderData(
+        responseSell,
+        option.collateralToken.decimals,
+        ORDER_TYPE.SELL
+      )
+      orders.push(orderBookSell)
+
+      //put both buy & sell orders in one array to format table rows
+      const completeOrderBook = createTable(
+        orders[ORDER_TYPE.BUY],
+        orders[ORDER_TYPE.SELL]
+      )
+      setOrderBook(completeOrderBook)
+      console.log(completeOrderBook)
+      console.log('orderbook updated', props.currentTab)
     }
 
-    // Keep this for debugging
-    // const buyOrdersByMakerAddress = responseBuy.filter((v) =>
-    //   v.order.maker.includes('0xfb34097980eb94bdec8ee4a1eafab92d29d177d9')
-    // )
-    // console.log('buyOrdersByMakerAddress', buyOrdersByMakerAddress)
+    fetchOrders()
 
-    // Keep for debugging
-    // const sellOrdersByMakerAddress = responseSell.filter((v) =>
-    //   v.order.maker.includes('0xfb34097980eb94bdec8ee4a1eafab92d29d177d9')
-    // )
-    // console.log('sellOrdersByMakerAddress', sellOrdersByMakerAddress)
-
-    const orderBookBuy = mapOrderData(
-      responseBuy,
-      option.collateralToken.decimals,
-      ORDER_TYPE.BUY
-    )
-    orders.push(orderBookBuy)
-
-    const orderBookSell = mapOrderData(
-      responseSell,
-      option.collateralToken.decimals,
-      ORDER_TYPE.SELL
-    )
-    orders.push(orderBookSell)
-
-    //put both buy & sell orders in one array to format table rows
-    const completeOrderBook = createTable(
-      orders[ORDER_TYPE.BUY],
-      orders[ORDER_TYPE.SELL]
-    )
-    setOrderBook(completeOrderBook)
-  }
-
-  useEffect(() => {
-    componentDidMount()
+    // // Cleanup function
+    // return () => {
+    //   // Close the websocket connection
+    //   if (websocketClient) {
+    //     websocketClient.close()
+    //   }
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [responseBuy, responseSell, provider])
+  }, [provider, props.currentTab])
 
   useEffect(() => {
     if (websocketClient !== undefined) {
