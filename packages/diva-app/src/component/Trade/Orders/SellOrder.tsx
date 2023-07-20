@@ -698,9 +698,11 @@ const SellOrder = (props: {
       const nbrOfOptionsBalance = parseUnits(numberOfOptions, decimals)
 
       // Calculate fee amount (to be paid in position token)
-      const feeAmount = nbrOfOptionsBalance
-        .mul(parseUnits(TRADING_FEE.toString(), decimals))
-        .div(collateralTokenUnit)
+      const feeAmount = checked
+        ? ZERO
+        : nbrOfOptionsBalance
+            .mul(parseUnits(TRADING_FEE.toString(), decimals))
+            .div(collateralTokenUnit)
       setFeeAmount(feeAmount)
       const requiredNbrOfOptionsBalance = nbrOfOptionsBalance.add(feeAmount)
       if (
@@ -786,16 +788,7 @@ const SellOrder = (props: {
               <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
                 {toExponentialOrNumber(
-                  Number(
-                    formatUnits(
-                      optionBalance.sub(
-                        optionBalance
-                          .mul(parseUnits(TRADING_FEE.toString(), decimals))
-                          .div(collateralTokenUnit)
-                      ),
-                      decimals
-                    )
-                  )
+                  Number(formatUnits(optionBalance.sub(feeAmount), decimals))
                 )}{' '}
                 {params.tokenType.toUpperCase()}{' '}
               </Typography>
@@ -803,14 +796,7 @@ const SellOrder = (props: {
                 role="button"
                 onClick={() => {
                   handleNumberOfOptions(
-                    formatUnits(
-                      optionBalance.sub(
-                        optionBalance
-                          .mul(parseUnits(TRADING_FEE.toString(), decimals))
-                          .div(collateralTokenUnit)
-                      ),
-                      decimals
-                    )
+                    formatUnits(optionBalance.sub(feeAmount), decimals)
                   )
                 }}
               >
