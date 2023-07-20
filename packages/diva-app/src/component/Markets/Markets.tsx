@@ -19,7 +19,7 @@ import { ShowChartOutlined } from '@mui/icons-material'
 import { useHistory, useParams } from 'react-router-dom'
 import FilterListIcon from '@mui/icons-material/FilterList'
 
-import { DIVA_GOVERNANCE_ADDRESS } from '../../constants'
+import { DEFAULT_MARKETS_CREATED_BY } from '../../constants'
 import PoolsTable, { PayoffCell } from '../PoolsTable'
 import { config } from '../../constants'
 import { getDateTime } from '../../Util/Dates'
@@ -68,6 +68,7 @@ const columns: GridColDef[] = [
         <GrayText>{getShortenedAddress(cell.value)}</GrayText>
       </Tooltip>
     ),
+    hide: true,
   },
   {
     field: 'Icon',
@@ -114,6 +115,7 @@ const columns: GridColDef[] = [
         {cell.value}
       </Typography>
     ),
+    hide: true,
   },
   {
     field: 'Buy',
@@ -125,6 +127,7 @@ const columns: GridColDef[] = [
         {cell.value}
       </Typography>
     ),
+    hide: true,
   },
   {
     field: 'MaxYield',
@@ -136,6 +139,7 @@ const columns: GridColDef[] = [
         {cell.value.buy}
       </Typography>
     ),
+    hide: true,
   },
   {
     field: 'Status',
@@ -704,9 +708,9 @@ export default function Markets() {
                   onInputChange={handleCreatorInput}
                   MenuItemLabel="Diva Governance"
                   onMenuItemClick={() => {
-                    setCreatedBy(DIVA_GOVERNANCE_ADDRESS)
+                    setCreatedBy(DEFAULT_MARKETS_CREATED_BY)
                     setCreatorButtonLabel(
-                      getShortenedAddress(DIVA_GOVERNANCE_ADDRESS)
+                      getShortenedAddress(DEFAULT_MARKETS_CREATED_BY)
                     )
                   }}
                 />
@@ -831,7 +835,7 @@ export default function Markets() {
               }}
               onClearFilter={() => {
                 setSearch('')
-                setCreatedBy(DIVA_GOVERNANCE_ADDRESS)
+                setCreatedBy(DEFAULT_MARKETS_CREATED_BY)
                 setExpiredPoolClicked(false)
                 setSearchInput('')
                 setCheckedState(new Array(4).fill(false))

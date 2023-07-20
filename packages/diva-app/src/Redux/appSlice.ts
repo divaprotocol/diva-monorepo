@@ -27,7 +27,8 @@ import {
 } from '../Models/orderbook'
 import {
   config,
-  DIVA_GOVERNANCE_ADDRESS,
+  DEFAULT_MARKETS_CREATED_BY,
+  TRADING_FEE_RECIPIENT,
   NULL_ADDRESS,
   DEFAULT_TAKER_TOKEN_FEE,
   DEFAULT_THRESHOLD,
@@ -234,7 +235,7 @@ export const fetchPools = createAsyncThunk(
     })
 
     const taker = NULL_ADDRESS
-    const feeRecipient = DIVA_GOVERNANCE_ADDRESS
+    const feeRecipient = TRADING_FEE_RECIPIENT
     const takerTokenFee = DEFAULT_TAKER_TOKEN_FEE
     const threshold = DEFAULT_THRESHOLD
     const count = 1
@@ -582,12 +583,12 @@ export const selectToken = (state: RootState, poolId: string) => {
 
 export const selectMainPools = (state: RootState) =>
   selectAppStateByChain(state).pools.filter(
-    (p) => p?.createdBy === DIVA_GOVERNANCE_ADDRESS.toLowerCase()
+    (p) => p?.createdBy === DEFAULT_MARKETS_CREATED_BY.toLowerCase()
   )
 
 export const selectOtherPools = (state: RootState) =>
   selectAppStateByChain(state).pools.filter(
-    (p) => p?.createdBy !== DIVA_GOVERNANCE_ADDRESS.toLowerCase()
+    (p) => p?.createdBy !== DEFAULT_MARKETS_CREATED_BY.toLowerCase()
   )
 
 export const selectChainId = (state: RootState) => state.appSlice.chainId
