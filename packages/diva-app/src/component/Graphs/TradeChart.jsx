@@ -25,7 +25,8 @@ export default function DIVATradeChart(props) {
   }))
 
   const optionTypeText = isLong ? 'LONG' : 'SHORT'
-  const reffeenceAsset = refAsset.slice(0, 8)
+  const referenceAsset =
+    refAsset.length > 8 ? refAsset.slice(0, 8) + '...' : refAsset
   const [chartWidth, setChartWidth] = useState(w)
   const [chartHeight, setChartHeight] = useState(h)
   const [isLegendResponsive, setLegendResponsive] = useState(true)
@@ -447,7 +448,7 @@ export default function DIVATradeChart(props) {
         .attr('x', 18)
         .attr('y', 40)
         .attr('font-size', '14')
-        .text(reffeenceAsset + '...' + ' at Expiry:')
+        .text(referenceAsset + ' at Expiry:')
 
       tooltipPerLine
         .append('text')
