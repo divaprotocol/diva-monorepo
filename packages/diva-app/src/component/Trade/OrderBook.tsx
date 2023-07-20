@@ -31,8 +31,6 @@ export default function OrderBook(props: {
 }) {
   const option = props.option
   const optionTokenAddress = props.tokenAddress
-  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
   const [orderBook, setOrderBook] = useState([] as any)
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
@@ -41,30 +39,22 @@ export default function OrderBook(props: {
   )
   const componentDidMount = async () => {
     const orders = []
-    if (responseSell.length === 0) {
-      const rSell = await get0xOpenOrders(
-        optionTokenAddress,
-        option.collateralToken.id,
-        chainId,
-        provider,
-        props.exchangeProxy
-      )
-      if (rSell.length > 0) {
-        responseSell = rSell
-      }
-    }
-    if (responseBuy.length === 0) {
-      const rBuy = await get0xOpenOrders(
-        option.collateralToken.id,
-        optionTokenAddress,
-        chainId,
-        provider,
-        props.exchangeProxy
-      )
-      if (rBuy.length > 0) {
-        responseBuy = rBuy
-      }
-    }
+
+    const rSell = await get0xOpenOrders(
+      optionTokenAddress,
+      option.collateralToken.id,
+      chainId,
+      provider,
+      props.exchangeProxy
+    )
+
+    const rBuy = await get0xOpenOrders(
+      option.collateralToken.id,
+      optionTokenAddress,
+      chainId,
+      provider,
+      props.exchangeProxy
+    )
 
     // Keep this for debugging
     // const buyOrdersByMakerAddress = responseBuy.filter((v) =>
@@ -79,20 +69,20 @@ export default function OrderBook(props: {
     // console.log('sellOrdersByMakerAddress', sellOrdersByMakerAddress)
 
     const orderBookBuy = mapOrderData(
-      responseBuy,
+      rBuy,
       option.collateralToken.decimals,
       ORDER_TYPE.BUY
     )
     orders.push(orderBookBuy)
 
     const orderBookSell = mapOrderData(
-      responseSell,
+      rSell,
       option.collateralToken.decimals,
       ORDER_TYPE.SELL
     )
     orders.push(orderBookSell)
 
-    //put both buy & sell orders in one array to format table rows
+    // Put both buy & sell orders in one array to format table rows
     const completeOrderBook = createTable(
       orders[ORDER_TYPE.BUY],
       orders[ORDER_TYPE.SELL]
@@ -103,7 +93,7 @@ export default function OrderBook(props: {
   useEffect(() => {
     componentDidMount()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [responseBuy, responseSell, provider])
+  }, [provider, optionTokenAddress])
 
   useEffect(() => {
     if (websocketClient !== undefined) {

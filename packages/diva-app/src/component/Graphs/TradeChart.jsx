@@ -174,11 +174,12 @@ export default function DIVATradeChart(props) {
           .ticks(3)
       )
       .call((g) => g.select('.domain').remove())
-      .call((g) =>
-        g
-          .selectAll('.tick:not(:first-of-type) line')
-          .attr('stroke-opacity', 0.5)
-          .style('stroke', '#3393E0')
+      .call(
+        (g) =>
+          g
+            .selectAll('.tick:not(:first-of-type) line')
+            .attr('stroke-opacity', 0.5)
+        // .style('stroke', '#3393E0')
       )
       .call((g) => g.selectAll('.tick text').attr('x', 4).attr('dy', -4))
 
@@ -198,7 +199,7 @@ export default function DIVATradeChart(props) {
       .attr('d', valueline)
       .style('fill', 'none')
       .style('stroke', function () {
-        return mouseHover ? 'grey' : blueColorCode
+        return blueColorCode
       })
       .style('stroke-width', '4px')
       .attr('class', function () {
