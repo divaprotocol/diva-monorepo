@@ -159,6 +159,8 @@ const SellOrder = (props: {
     setChecked(event.target.checked)
     if (event.target.checked) {
       setFeeAmount(ZERO)
+    } else {
+      setPricePerOption(ZERO)
     }
   }
   const handleNumberOfOptions = (value: string) => {
