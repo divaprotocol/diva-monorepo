@@ -25,7 +25,7 @@ import {
   selectChainId,
   selectUnderlyingPrice,
 } from '../../Redux/appSlice'
-import { formatUnits, formatEther, poll } from 'ethers/lib/utils'
+import { formatUnits, formatEther } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
 import { AddLiquidity } from '../Liquidity/AddLiquidity'
 import { RemoveLiquidity } from '../Liquidity/RemoveLiquidity'
@@ -46,6 +46,46 @@ export const fetchIpfs = async (asset, callback) => {
     console.error(`Failed to fetch asset: ${error.message}`)
   }
 }
+
+const StyledTabList = ({ onChange, tabs }) => (
+  <TabList
+    onChange={onChange}
+    variant="standard"
+    sx={{
+      mt: '-10px',
+      height: '48px',
+      alignItems: 'center',
+      borderRight: 1,
+      borderColor: '#929292',
+    }}
+  >
+    {tabs.map((tab) => (
+      <Tab
+        value={tab.value}
+        icon={tab.icon}
+        iconPosition="start"
+        label={tab.label}
+        sx={{ color: '#929292' }}
+        key={tab.value}
+      />
+    ))}
+  </TabList>
+)
+
+const StyledDivider = ({ label }) => (
+  <Divider
+    orientation="horizontal"
+    textAlign="left"
+    color="#929292"
+    sx={{
+      '&::before, &::after': {
+        borderColor: '#929292',
+      },
+    }}
+  >
+    {label}
+  </Divider>
+)
 
 export default function Underlying() {
   const history = useHistory()
@@ -134,102 +174,31 @@ export default function Underlying() {
       </Box>
       <Stack direction="row" mt="40px" ml="28px">
         <Box mr="20px">
-          <Divider
-            orientation="horizontal"
-            textAlign="left"
-            color="#929292"
-            sx={{
-              '&::before, &::after': {
-                borderColor: '#929292',
-              },
-            }}
-          >
-            Trade
-          </Divider>
-          <TabList
+          <StyledDivider label="Trade" />
+          <StyledTabList
             onChange={handleChange}
-            variant="standard"
-            sx={{
-              mt: '-10px',
-              height: '48px',
-              alignItems: 'center',
-              borderRight: 1,
-              borderColor: '#929292',
-            }}
-          >
-            <Tab
-              value="long"
-              icon={<LongPool />}
-              iconPosition="start"
-              label="Long"
-              sx={{ color: '#929292' }}
-            />
-            <Tab
-              value="short"
-              icon={<ShortPool />}
-              iconPosition="start"
-              label="Short"
-              sx={{ color: '#929292' }}
-            />
-          </TabList>
+            tabs={[
+              { value: 'long', icon: <LongPool />, label: 'Long' },
+              { value: 'short', icon: <ShortPool />, label: 'Short' },
+            ]}
+          />
         </Box>
         <Box>
-          <Divider
-            orientation="horizontal"
-            textAlign="left"
-            color="#929292"
-            sx={{
-              '&::before, &::after': {
-                borderColor: '#929292',
-              },
-            }}
-          >
-            Liquidity
-          </Divider>
-
-          <TabList
+          <StyledDivider label="Liquidity" />
+          <StyledTabList
             onChange={handleChange}
-            variant="standard"
-            sx={{
-              mt: '-10px',
-              height: '48px',
-              alignItems: 'center',
-              borderRight: 1,
-              borderColor: '#929292',
-              color: '#929292',
-            }}
-          >
-            <Tab
-              value="add"
-              icon={<AddOutlinedIcon />}
-              iconPosition="start"
-              label="Add"
-              sx={{ color: '#929292' }}
-            />
-            <Tab
-              value="remove"
-              icon={<RemoveOutlinedIcon />}
-              iconPosition="start"
-              label="Remove"
-              sx={{ color: '#929292' }}
-            />
-          </TabList>
+            tabs={[
+              { value: 'add', icon: <AddOutlinedIcon />, label: 'Add' },
+              {
+                value: 'remove',
+                icon: <RemoveOutlinedIcon />,
+                label: 'Remove',
+              },
+            ]}
+          />
         </Box>
       </Stack>
-      {/* </Box> */}
       <Divider orientation="horizontal" sx={{ alignItems: { xl: 'center' } }} />
-      {/* <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: {
-            sx: 'flex-start',
-            md: 'flex-start',
-            lg: 'flex-start',
-            xl: 'center',
-          },
-        }}
-      > */}
       <TabPanel value="long" sx={{ paddingBottom: '3em' }}>
         <Stack direction="row" spacing={theme.spacing(15)}>
           <Stack
