@@ -58,7 +58,10 @@ export default function OrderBook(props: {
       // if (rSell.length > 0) {
       //   responseSell = rSell
       // }
-      setResponseSell(rSell.length > 0 ? rSell : [])
+      // setResponseSell(rSell.length > 0 ? rSell : [])
+      setResponseSell(rSell)
+      console.log('rSell')
+      console.log(rSell)
       // }
       // if (responseBuy.length === 0) {
       const rBuy = await get0xOpenOrders(
@@ -68,11 +71,11 @@ export default function OrderBook(props: {
         provider,
         props.exchangeProxy
       )
-      console.log('hi')
       // if (rBuy.length > 0) {
       //   responseBuy = rBuy
       // }
-      setResponseBuy(rBuy.length > 0 ? rBuy : [])
+      // setResponseBuy(rBuy.length > 0 ? rBuy : [])
+      setResponseBuy(rBuy)
       // }
 
       // Keep this for debugging
@@ -87,15 +90,18 @@ export default function OrderBook(props: {
       // )
       // console.log('sellOrdersByMakerAddress', sellOrdersByMakerAddress)
 
+      console.log('responseBuy', responseBuy)
       const orderBookBuy = mapOrderData(
-        responseBuy,
+        rBuy,
         option.collateralToken.decimals,
         ORDER_TYPE.BUY
       )
       orders.push(orderBookBuy)
+      console.log('orderBookBuy')
+      console.log(orderBookBuy)
 
       const orderBookSell = mapOrderData(
-        responseSell,
+        rSell,
         option.collateralToken.decimals,
         ORDER_TYPE.SELL
       )
@@ -121,7 +127,7 @@ export default function OrderBook(props: {
     //   }
     // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [provider, props.currentTab])
+  }, [provider, optionTokenAddress])
 
   useEffect(() => {
     if (websocketClient !== undefined) {
