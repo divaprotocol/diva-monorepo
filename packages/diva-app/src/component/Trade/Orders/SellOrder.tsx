@@ -109,7 +109,7 @@ const SellOrder = (props: {
   const web3 = new Web3(Web3Provider as any)
   const { getWeb3JsProvider, provider } = useConnectionContext()
   const [optionBalance, setOptionBalance] = React.useState(ZERO)
-  const [checked, setChecked] = useState(true)
+  const [checked, setChecked] = useState(false)
   const [numberOfOptions, setNumberOfOptions] = React.useState('') // User input field
   const [pricePerOption, setPricePerOption] = React.useState(ZERO) // User input field
   const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
@@ -162,6 +162,8 @@ const SellOrder = (props: {
     setChecked(event.target.checked)
     if (event.target.checked) {
       setFeeAmount(ZERO)
+    } else {
+      setPricePerOption(ZERO)
     }
   }
   const handleNumberOfOptions = (value: string) => {
@@ -711,9 +713,11 @@ const SellOrder = (props: {
       const nbrOfOptionsBalance = parseUnits(numberOfOptions, decimals)
 
       // Calculate fee amount (to be paid in position token)
-      const feeAmount = nbrOfOptionsBalance
-        .mul(parseUnits(TRADING_FEE.toString(), decimals))
-        .div(collateralTokenUnit)
+      const feeAmount = checked
+        ? ZERO
+        : nbrOfOptionsBalance
+            .mul(parseUnits(TRADING_FEE.toString(), decimals))
+            .div(collateralTokenUnit)
       setFeeAmount(feeAmount)
       const requiredNbrOfOptionsBalance = nbrOfOptionsBalance.add(feeAmount)
       if (
@@ -870,16 +874,7 @@ const SellOrder = (props: {
               <Typography variant="h5" sx={{ display: 'inline' }}>
                 {' '}
                 {toExponentialOrNumber(
-                  Number(
-                    formatUnits(
-                      optionBalance.sub(
-                        optionBalance
-                          .mul(parseUnits(TRADING_FEE.toString(), decimals))
-                          .div(collateralTokenUnit)
-                      ),
-                      decimals
-                    )
-                  )
+                  Number(formatUnits(optionBalance.sub(feeAmount), decimals))
                 )}{' '}
                 {params.tokenType.toUpperCase()}{' '}
               </Typography>
@@ -887,14 +882,7 @@ const SellOrder = (props: {
                 role="button"
                 onClick={() => {
                   handleNumberOfOptions(
-                    formatUnits(
-                      optionBalance.sub(
-                        optionBalance
-                          .mul(parseUnits(TRADING_FEE.toString(), decimals))
-                          .div(collateralTokenUnit)
-                      ),
-                      decimals
-                    )
+                    formatUnits(optionBalance.sub(feeAmount), decimals)
                   )
                 }}
               >

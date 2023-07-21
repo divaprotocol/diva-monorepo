@@ -10,7 +10,7 @@ import Markets from './component/Markets/Markets'
 import { useAppSelector } from './Redux/hooks'
 import { LoadingBox } from './component/LoadingBox'
 
-import { config, DIVA_GOVERNANCE_ADDRESS } from './constants'
+import { config, DEFAULT_MARKETS_CREATED_BY } from './constants'
 import { WrongChain } from './component/Wallet/WrongChain'
 import Dashboard from './component/Dashboard/Dashboard'
 import { Offer } from './component/CreatePool/Offer'
@@ -46,7 +46,7 @@ export const App = () => {
             <CreatePool />
           </Route>
           <Route path="/">
-            <Redirect from="/" to={`/markets/${DIVA_GOVERNANCE_ADDRESS}`} />
+            <Redirect from="/" to={`/markets/${DEFAULT_MARKETS_CREATED_BY}`} />
           </Route>
         </Switch>
       ) : (

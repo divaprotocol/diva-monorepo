@@ -347,9 +347,13 @@ export const CURRENT_SUPPORTED_CHAIN_ID = [
   SupportedChainId.POLYGON_MUMBAI,
 ]
 
-// DIVA Governance address which is the default creator of pools on Markets page and trading fee recipient
-export const DIVA_GOVERNANCE_ADDRESS =
+// Pools created by this address to be displayed as default on the Markets page
+export const DEFAULT_MARKETS_CREATED_BY =
   '0x3E50a9F4DC9CCF7aFaBb7337cf57D63dFa12acc0'
+
+// Trading fee recipient
+export const TRADING_FEE_RECIPIENT =
+  '0x1062CCC9F9a4bBcf565799683b6c00eA525ECb9F'
 
 // Trading fee; 0.01 corresponds to 1%
 export const TRADING_FEE = 0.01

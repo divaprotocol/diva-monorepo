@@ -240,7 +240,7 @@ export default function Underlying() {
           >
             <TradeChart
               data={data}
-              refAsset={pool.referenceAsset}
+              refAsset={headerTitle ? headerTitle : pool.referenceAsset}
               currentPrice={currentPrice}
               payOut={pool.collateralToken.symbol}
               w={650}

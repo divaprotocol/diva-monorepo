@@ -109,7 +109,7 @@ const BuyOrder = (props: {
   const web3 = new Web3(Web3Provider as any)
   const { getWeb3JsProvider, provider } = useConnectionContext()
   const [collateralBalance, setCollateralBalance] = useState(ZERO)
-  const [checked, setChecked] = useState(true)
+  const [checked, setChecked] = useState(false)
   const [numberOfOptions, setNumberOfOptions] = useState('') // User input field
   const [pricePerOption, setPricePerOption] = useState(ZERO) // User input field
   const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
@@ -164,6 +164,8 @@ const BuyOrder = (props: {
     setChecked(event.target.checked)
     if (event.target.checked) {
       setFeeAmount(ZERO)
+    } else {
+      setPricePerOption(ZERO)
     }
   }
   const handleNumberOfOptions = (value: string) => {

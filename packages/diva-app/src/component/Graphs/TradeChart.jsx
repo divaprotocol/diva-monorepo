@@ -25,7 +25,8 @@ export default function DIVATradeChart(props) {
   }))
 
   const optionTypeText = isLong ? 'LONG' : 'SHORT'
-  const reffeenceAsset = refAsset.slice(0, 8)
+  const referenceAsset =
+    refAsset.length > 8 ? refAsset.slice(0, 8) + '...' : refAsset
   const [chartWidth, setChartWidth] = useState(w)
   const [chartHeight, setChartHeight] = useState(h)
   const [isLegendResponsive, setLegendResponsive] = useState(true)
@@ -173,11 +174,12 @@ export default function DIVATradeChart(props) {
           .ticks(3)
       )
       .call((g) => g.select('.domain').remove())
-      .call((g) =>
-        g
-          .selectAll('.tick:not(:first-of-type) line')
-          .attr('stroke-opacity', 0.5)
-          .style('stroke', '#3393E0')
+      .call(
+        (g) =>
+          g
+            .selectAll('.tick:not(:first-of-type) line')
+            .attr('stroke-opacity', 0.5)
+        // .style('stroke', '#3393E0')
       )
       .call((g) => g.selectAll('.tick text').attr('x', 4).attr('dy', -4))
 
@@ -197,7 +199,7 @@ export default function DIVATradeChart(props) {
       .attr('d', valueline)
       .style('fill', 'none')
       .style('stroke', function () {
-        return mouseHover ? 'grey' : blueColorCode
+        return blueColorCode
       })
       .style('stroke-width', '4px')
       .attr('class', function () {
@@ -447,7 +449,7 @@ export default function DIVATradeChart(props) {
         .attr('x', 18)
         .attr('y', 40)
         .attr('font-size', '14')
-        .text(reffeenceAsset + '...' + ' at Expiry:')
+        .text(referenceAsset + ' at Expiry:')
 
       tooltipPerLine
         .append('text')
