@@ -108,8 +108,6 @@ export function SelectDataFeedProvider({
     [chainId, userAddress]
   )
 
-  console.log(config[chainId].adminAddress)
-
   return (
     <Stack direction={mobile ? 'column' : 'row'} spacing={theme.spacing(2)}>
       <Container>
