@@ -16,7 +16,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import Button from '@mui/material/Button'
 import { config } from '../../constants'
 import DIVA_ABI from '../../abi/DIVAABI.json'
@@ -66,6 +66,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
 
     balanceUpdated
   )
+
   const protocolFees =
     pool &&
     textFieldValue !== '' &&
@@ -197,7 +198,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
 
       const tx = await diva!.removeLiquidity(
         window.location.pathname.split('/')[1],
-        parseEther(longToken)
+        parseUnits(longToken, decimal)
       )
 
       await tx.wait()
