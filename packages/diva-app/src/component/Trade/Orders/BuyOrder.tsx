@@ -148,8 +148,6 @@ const BuyOrder = (props: {
   const dispatch = useAppDispatch()
   const params: { tokenType: string } = useParams()
   const isLong = window.location.pathname.split('/')[2] === 'long'
-  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  const responseSell = useAppSelector((state) => state.tradeOption.responseSell)
 
   useEffect(() => {
     const init = async () => {
@@ -401,10 +399,19 @@ const BuyOrder = (props: {
     }
   }
 
-  // This will fetch the SELL LIMIT orders to perform the BUY MARKET operation
+  // Get SELL LIMIT orders which the user is going to fill during the BUY MARKET operation
   const getSellLimitOrders = async () => {
     const orders: any = []
-    responseSell.forEach((data: any) => {
+
+    const rSell: any = await get0xOpenOrders(
+      takerToken, // position token
+      makerToken, // collateral token
+      props.chainId,
+      props.provider,
+      props.exchangeProxy
+    )
+
+    rSell.forEach((data: any) => {
       const order = JSON.parse(JSON.stringify(data.order))
 
       const takerAmount = BigNumber.from(order.takerAmount) // collateral token
@@ -435,18 +442,16 @@ const BuyOrder = (props: {
   // TODO: Outsource this function into OpenOrders.ts, potentially integrate into getUserOrders function
   const getTotalBuyLimitOrderAmountUser = async (maker) => {
     let existingOrdersAmount = ZERO
-    if (responseBuy.length == 0) {
-      // Double check whether any limit orders exist
-      const rBuy: any = await get0xOpenOrders(
-        makerToken,
-        takerToken,
-        props.chainId,
-        props.provider,
-        props.exchangeProxy
-      )
-      responseBuy = rBuy
-    }
-    responseBuy.forEach((data: any) => {
+
+    const rBuy: any = await get0xOpenOrders(
+      makerToken, // collateral token
+      takerToken, // position token
+      props.chainId,
+      props.provider,
+      props.exchangeProxy
+    )
+
+    rBuy.forEach((data: any) => {
       const order = data.order
 
       if (order.maker == maker) {
@@ -482,11 +487,9 @@ const BuyOrder = (props: {
         setAllowance(val.allowance)
 
         // Get SELL LIMIT orders which the user is going to fill during the BUY MARKET operation
-        if (responseSell.length > 0) {
-          getSellLimitOrders().then((orders) => {
-            setExistingSellLimitOrders(orders)
-          })
-        }
+        getSellLimitOrders().then((orders) => {
+          setExistingSellLimitOrders(orders)
+        })
 
         // Get the user's (maker) existing BUY LIMIT orders which block some of the user's allowance
         getTotalBuyLimitOrderAmountUser(userAddress).then((amount) => {
@@ -496,7 +499,7 @@ const BuyOrder = (props: {
         })
       })
     }
-  }, [responseBuy, responseSell, userAddress, Web3Provider, checked])
+  }, [userAddress, Web3Provider, checked])
 
   //to calculate the total no of order quantity
   /*  useEffect(() => {
