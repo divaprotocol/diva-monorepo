@@ -85,7 +85,7 @@ export function CreatePool() {
         setDecimal(decimals)
       })
     }
-  }, [formik.values.collateralToken])
+  }, [formik.values.collateralToken, provider]) // provider trigger used to have the decimals updated on Create page open
   const handleConfigPick = (event: SelectChangeEvent) => {
     setConfigPicked(event.target.value)
   }
