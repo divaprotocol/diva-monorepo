@@ -70,30 +70,32 @@ export default function Underlying() {
   const dispatch = useDispatch()
   const [headerTitle, setHeaderTitle] = useState<string>('')
 
-  useEffect(() => {
-    dispatch(
-      fetchPool({
-        graphUrl: config[chainId as number].divaSubgraph,
-        poolId: params.poolId,
-      })
-    )
-  }, [value, chainId, dispatch, params.poolId])
-
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
-  const currentPrice = useAppSelector(
-    selectUnderlyingPrice(pool?.referenceAsset)
-  )
 
   useEffect(() => {
-    if (pool?.referenceAsset !== null) {
+    if (!pool) {
+      // Fetch pool if not available in the Redux store, which can happen if the
+      // Trade page is accessed directly via a link and not via the Markets page
+      dispatch(
+        fetchPool({
+          graphUrl: config[chainId as number].divaSubgraph,
+          poolId: params.poolId,
+        })
+      )
+    } else {
+      // Once pool is defined, fetch the referenceAsset.
       dispatch(fetchUnderlyingPrice(pool.referenceAsset))
       if (pool.referenceAsset.endsWith('.json')) {
         fetchIpfs(pool.referenceAsset, setHeaderTitle)
       }
     }
-  }, [pool.referenceAsset, dispatch])
+  }, [pool, value, chainId, dispatch, params.poolId])
 
-  if (pool === null) {
+  const currentPrice = useAppSelector(
+    selectUnderlyingPrice(pool?.referenceAsset)
+  )
+
+  if (!pool) {
     return <LoadingBox />
   }
 
