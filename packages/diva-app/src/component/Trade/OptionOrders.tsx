@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
-import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import 'styled-components'
 import styled from 'styled-components'
 import Typography from '@mui/material/Typography'
@@ -13,7 +12,6 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
-import Button from '@mui/material/Button'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { get0xOpenOrders, getOrderDetails } from '../../DataService/OpenOrders'
 import { getDateTime } from '../../Util/Dates'
@@ -24,13 +22,14 @@ import { cancelLimitOrder } from '../../Orders/CancelLimitOrder'
 import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
 import { useDispatch } from 'react-redux'
 import { LoadingButton } from '@mui/lab'
+import { OrderbookPriceResponse } from '../../Models/orderbook'
 
 const PageDiv = styled.div`
   width: 100%;
 `
 
 function mapOrderData(
-  records: [],
+  records: OrderbookPriceResponse[],
   option: Pool,
   optionTokenAddress: string,
   account: string
@@ -117,54 +116,35 @@ export default function OpenOrders(props: {
 }) {
   const option = props.option
   const optionTokenAddress = props.tokenAddress
-  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-  const dispatch = useDispatch()
   const [orders, setOrders] = useState([])
   const chainId = useAppSelector(selectChainId)
   const { provider } = useConnectionContext()
   const address = useAppSelector(selectUserAddress)
-  // const [cancelLoading, setCancelLoading] = useState(false)
   const [cancelLoading, setCancelLoading] = useState(new Map())
 
   const componentDidMount = async () => {
     const orderBook: any = []
-    if (responseSell.length === 0) {
-      const rSell = await get0xOpenOrders(
-        optionTokenAddress,
-        option.collateralToken.id,
-        chainId,
-        provider,
-        props.exchangeProxy
-      )
-      if (rSell.length > 0) {
-        responseSell = rSell
-        dispatch(setResponseSell(responseSell))
-      }
-    }
 
-    if (responseBuy.length === 0) {
-      const rBuy = await get0xOpenOrders(
-        option.collateralToken.id,
-        optionTokenAddress,
-        chainId,
-        provider,
-        props.exchangeProxy
-      )
-      if (rBuy.length > 0) {
-        responseBuy = rBuy
-        dispatch(setResponseBuy(responseBuy))
-      }
-    }
-    const orderBookBuy = mapOrderData(
-      responseBuy,
-      option,
+    const rSell = await get0xOpenOrders(
       optionTokenAddress,
-      address
+      option.collateralToken.id,
+      chainId,
+      provider,
+      props.exchangeProxy
     )
 
+    const rBuy = await get0xOpenOrders(
+      option.collateralToken.id,
+      optionTokenAddress,
+      chainId,
+      provider,
+      props.exchangeProxy
+    )
+
+    const orderBookBuy = mapOrderData(rBuy, option, optionTokenAddress, address)
+
     const orderBookSell = mapOrderData(
-      responseSell,
+      rSell,
       option,
       optionTokenAddress,
       address
@@ -189,22 +169,8 @@ export default function OpenOrders(props: {
   }
 
   useEffect(() => {
-    if (responseBuy.length === 0 || responseSell.length === 0) {
-      componentDidMount()
-    }
+    componentDidMount()
   }, [])
-
-  useEffect(() => {
-    if (responseBuy.length > 0 || responseSell.length > 0) {
-      componentDidMount()
-    }
-    return () => {
-      if (responseBuy.length > 0 || responseSell.length > 0) {
-        dispatch(setResponseSell([]))
-        dispatch(setResponseBuy([]))
-      }
-    }
-  }, [responseBuy.length, responseSell.length])
 
   async function cancelOrder(order, chainId) {
     setCancelLoading((prevStates) => {
@@ -219,11 +185,6 @@ export default function OpenOrders(props: {
       .then(function (cancelOrderResponse: any) {
         if (cancelOrderResponse?.hash != null) {
           alert('Order successfully cancelled')
-          //need to invalidate orders since orderbook is updated
-          dispatch(setResponseSell([]))
-          dispatch(setResponseBuy([]))
-          responseBuy = []
-          responseSell = []
           //update orderbook & create orders widget
           componentDidMount()
           setCancelLoading((prevStates) => {

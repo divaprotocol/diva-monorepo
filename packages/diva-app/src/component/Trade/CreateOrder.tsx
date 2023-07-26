@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import 'styled-components'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
 import { useDispatch } from 'react-redux'
@@ -59,6 +58,7 @@ export default function CreateOrder(props: {
     }
   }
 
+  // @todo remove as orders are no longer stored in Redux
   const getExistingOrders = async () => {
     //updates orders components
     const responseSell: OrderbookPriceResponse[] = await get0xOpenOrders(
@@ -75,17 +75,16 @@ export default function CreateOrder(props: {
       props.provider,
       props.exchangeProxy
     )
-    if (responseSell.length > 0) {
-      dispatch(setResponseSell(responseSell))
-    }
-    if (responseBuy.length > 0) {
-      dispatch(setResponseBuy(responseBuy))
-    }
+    // if (responseSell.length > 0) {
+    //   dispatch(setResponseSell(responseSell))
+    // }
+    // if (responseBuy.length > 0) {
+    //   dispatch(setResponseBuy(responseBuy))
+    // }
   }
 
   useEffect(() => {
     getUnderlyingPrice(option.referenceAsset).then((data) => {
-      console.log('data', data)
       if (data != null || data != undefined) {
         setUsdPrice(data)
       } else {
