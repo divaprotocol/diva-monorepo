@@ -22,7 +22,7 @@ export interface OrderbookPriceRequest {
   poolInfo: PoolInfoType[]
 }
 
-interface OrderbookPriceResponse {
+export interface OrderbookPriceResponse {
   order?: {
     maker: string // maker address of order
     taker: string // taker address of order

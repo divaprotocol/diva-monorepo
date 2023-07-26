@@ -1,11 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { OrderbookPriceResponse } from '../Models/orderbook'
 
 interface TradeOptionState {
   allOptions: []
   allOptionsLiquidity: []
   userAccount: string
-  responseBuy: []
-  responseSell: []
+  responseBuy: OrderbookPriceResponse[]
+  responseSell: OrderbookPriceResponse[]
   optionSellOrdersTotal: number
   optionBuyOrdersTotal: number
 }
@@ -24,11 +25,17 @@ export const tradeOptionSlice = createSlice({
   name: 'option',
   initialState,
   reducers: {
-    setResponseBuy: (state, action: PayloadAction<[]>) => {
+    setResponseBuy: (
+      state,
+      action: PayloadAction<OrderbookPriceResponse[]>
+    ) => {
       state.responseBuy = action.payload
     },
 
-    setResponseSell: (state, action: PayloadAction<[]>) => {
+    setResponseSell: (
+      state,
+      action: PayloadAction<OrderbookPriceResponse[]>
+    ) => {
       state.responseSell = action.payload
     },
 
