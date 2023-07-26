@@ -78,15 +78,9 @@ const IconBox = ({ assetName, isLargeIcon }: CoinProps) => (
 
 export const CoinIconPair = ({ assetName, isLargeIcon }: CoinProps) => {
   const assets = assetName.split('/')
-  const isJson = assetName.endsWith('.json')
 
-  // Single asset or .json file
-  if (assets.length === 1 || isJson) {
-    return <IconBox assetName={assets[0]} isLargeIcon={isLargeIcon} />
-  }
-
-  // Two assets
   if (assets.length === 2) {
+    // Two assets
     return (
       <Stack direction="row">
         <IconBox assetName={assets[0]} isLargeIcon={isLargeIcon} />
@@ -95,9 +89,8 @@ export const CoinIconPair = ({ assetName, isLargeIcon }: CoinProps) => {
         </Box>
       </Stack>
     )
+  } else {
+    // Single asset, asset name with multiple '/' or .json file
+    return <IconBox assetName={assets[0]} isLargeIcon={isLargeIcon} />
   }
-
-  // Fallback
-  console.warn('Invalid assetName passed to CoinIconPair:', assetName)
-  return <Placeholder assetName={'?'} />
 }
