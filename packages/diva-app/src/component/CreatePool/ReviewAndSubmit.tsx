@@ -82,7 +82,7 @@ export function ReviewAndSubmit({
   )
   // QUESTION Why not use hook that will also handle null values?
   const diva = new ethers.Contract(
-    config[chainId!].divaAddress, //Goerli
+    config[chainId!].divaAddress,
     DIVA_ABI,
     provider.getSigner()
   )

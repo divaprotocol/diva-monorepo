@@ -414,7 +414,7 @@ export default function Markets() {
     }, 300)
 
     return () => clearTimeout(timeout)
-  }, [createdBy, dispatch, history, page])
+  }, [createdBy, dispatch, history, page, chainId])
 
   useEffect(() => {
     const timeout = setTimeout(() => {

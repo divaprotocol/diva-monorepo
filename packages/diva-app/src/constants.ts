@@ -365,6 +365,8 @@ export const DEFAULT_THRESHOLD = 100
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 
+export const MARKETS_PREVIEW_CHAIN_ID = 137
+
 export const ICONS_URL = {
   diva: divaLogo,
   divaSidebarLogo: divaSidebarLogo,
