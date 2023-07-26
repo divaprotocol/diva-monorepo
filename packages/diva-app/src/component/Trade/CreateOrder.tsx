@@ -1,23 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import 'styled-components'
-import styled from 'styled-components'
-import { makeStyles } from '@mui/styles'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-import {
-  setMetamaskAccount,
-  setResponseBuy,
-  setResponseSell,
-} from '../../Redux/TradeOption'
+import { setResponseBuy, setResponseSell } from '../../Redux/TradeOption'
 import { get0xOpenOrders } from '../../DataService/OpenOrders'
 import { Pool } from '../../lib/queries'
 import { useDispatch } from 'react-redux'
 import { getUnderlyingPrice } from '../../lib/getUnderlyingPrice'
-import { useAppSelector } from '../../Redux/hooks'
 import { Card, useTheme } from '@mui/material'
 import BuyOrder from './Orders/BuyOrder'
 import { TabContext, TabPanel } from '@mui/lab'
 import SellOrder from './Orders/SellOrder'
+import { OrderbookPriceResponse } from '../../Models/orderbook'
 
 export default function CreateOrder(props: {
   option: Pool
@@ -26,22 +20,15 @@ export default function CreateOrder(props: {
   chainId: number
   provider: any
 }) {
-  //const op = useSelector((state) => state.tradeOption.option)
   const option = props.option
   const dispatch = useDispatch()
-  /* const classes = useStyles() */
   const theme = useTheme()
-  /* const dividerClass = useDividerStyle()
-  const tabsClass = useTabsBorder() */
   const [value, setValue] = useState('buyorder')
-  const [orderType, setOrderTypeValue] = useState(0)
-  const [priceType, setPriceTypeValue] = useState(0)
   const [usdPrice, setUsdPrice] = useState('')
-  let responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
-  let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
+
   useEffect(() => {
     getExistingOrders()
-  }, [orderType, priceType])
+  }, [])
 
   const handleChange = (event: any, newValue: string) => {
     setValue(newValue)
@@ -74,14 +61,14 @@ export default function CreateOrder(props: {
 
   const getExistingOrders = async () => {
     //updates orders components
-    responseSell = await get0xOpenOrders(
+    const responseSell: OrderbookPriceResponse[] = await get0xOpenOrders(
       props.tokenAddress,
       option.collateralToken.id,
       props.chainId,
       props.provider,
       props.exchangeProxy
     )
-    responseBuy = await get0xOpenOrders(
+    const responseBuy: OrderbookPriceResponse[] = await get0xOpenOrders(
       option.collateralToken.id,
       props.tokenAddress,
       props.chainId,
@@ -98,15 +85,18 @@ export default function CreateOrder(props: {
 
   useEffect(() => {
     getUnderlyingPrice(option.referenceAsset).then((data) => {
+      console.log('data', data)
       if (data != null || data != undefined) {
         setUsdPrice(data)
       } else {
         //handle undefined object return
-        console.warn('Please handle me i am undefined')
+        console.warn('Please handle me, I am undefined')
       }
     })
   }, [option.referenceAsset])
 
+  // @todo Card component seems redundant here. Moving Tabs into TabPanel components seems to achieve
+  // the same outcome with a bit of additional styling
   return (
     <>
       <TabContext value={value}>
