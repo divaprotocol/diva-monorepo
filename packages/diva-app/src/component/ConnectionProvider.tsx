@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux'
 import { setChainId, setUserAddress } from '../Redux/appSlice'
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import Web3 from 'web3'
+import { MARKETS_PREVIEW_CHAIN_ID } from '../constants'
 
 type MetamaskProvider = ExternalProvider &
   BaseProvider & {
@@ -209,7 +210,7 @@ export const ConnectionProvider = ({ children }) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (state.chainId == null) {
-        setState((_state) => ({ ..._state, chainId: 5 }))
+        setState((_state) => ({ ..._state, chainId: MARKETS_PREVIEW_CHAIN_ID }))
       }
     }, 3000)
     return () => clearTimeout(timeout)
