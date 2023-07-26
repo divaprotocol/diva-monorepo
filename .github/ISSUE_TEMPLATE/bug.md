@@ -18,7 +18,7 @@ assignees: ""
 3. App crashes (see screenshot)
 -->
 
-## Screenshots / Sreen recording
+## Screenshots / Screen recording
 
 <!-- Screenshots and/or screen recordings really go a long way to explain
 something and help us to tackle the issue. (We use loom for this https://www.loom.com/) -->

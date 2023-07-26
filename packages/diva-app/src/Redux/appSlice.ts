@@ -316,6 +316,7 @@ export const fetchPositionTokens = createAsyncThunk(
 )
 
 const addPools = (_state: AppStateByChain, pools: Pool[], chainId?: number) => {
+  console.log('chainId', chainId)
   const newPools = pools.map((p) => p.id)
   const state = _state[chainId]
 

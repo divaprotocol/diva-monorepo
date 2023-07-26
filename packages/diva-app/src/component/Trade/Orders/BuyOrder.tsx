@@ -27,7 +27,6 @@ import { buylimitOrder } from '../../../Orders/BuyLimit'
 import ERC20_ABI from '../../../abi/ERC20ABI.json'
 import { useAppDispatch, useAppSelector } from '../../../Redux/hooks'
 import { selectUserAddress } from '../../../Redux/appSlice'
-import { setResponseBuy } from '../../../Redux/TradeOption'
 import { buyMarketOrder } from '../../../Orders/BuyMarket'
 import {
   calcBreakEven,
@@ -321,9 +320,6 @@ const BuyOrder = (props: {
       buylimitOrder(orderData)
         .then(async (response) => {
           if (response.status === 200) {
-            //need to invalidate cache order response since orderbook is updated
-            dispatch(setResponseBuy([]))
-
             // Wait for 2 secs for 0x to update orders, then handle order book display
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
