@@ -14,7 +14,6 @@ type CoinProps = {
 }
 
 const Placeholder = ({ asset }: CoinProps) => {
-  console.log('asset', asset)
   return (
     <svg height="100%" overflow="visible" viewBox="4 0 30 30">
       <circle
