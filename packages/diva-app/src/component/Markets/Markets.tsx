@@ -706,7 +706,7 @@ export default function Markets() {
                   }
                   InputValue={createdBy}
                   onInputChange={handleCreatorInput}
-                  MenuItemLabel="Diva Governance"
+                  MenuItemLabel="Default Markets"
                   onMenuItemClick={() => {
                     setCreatedBy(DEFAULT_MARKETS_CREATED_BY)
                     setCreatorButtonLabel(
