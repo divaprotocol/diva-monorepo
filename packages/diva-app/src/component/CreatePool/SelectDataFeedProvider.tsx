@@ -20,6 +20,7 @@ import { getShortenedAddress } from '../../Util/getShortenedAddress'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
+import { isAdminUser } from '../../Util/utils'
 const linkSVG = (
   <svg
     width="16"
@@ -102,10 +103,8 @@ export function SelectDataFeedProvider({
   )
 
   const isAdmin = useMemo(
-    () =>
-      config[chainId]?.adminAddress?.toLowerCase() ===
-      userAddress?.toLowerCase(),
-    [chainId, userAddress]
+    () => isAdminUser(userAddress, chainId, config),
+    [userAddress, chainId]
   )
 
   return (

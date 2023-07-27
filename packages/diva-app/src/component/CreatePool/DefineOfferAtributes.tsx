@@ -41,6 +41,7 @@ import KeyboardDoubleArrowUpOutlinedIcon from '@mui/icons-material/KeyboardDoubl
 import KeyboardDoubleArrowDownOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowDownOutlined'
 import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined'
 import { config } from '../../constants'
+import { isAdminUser } from '../../Util/utils'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -260,10 +261,8 @@ export function DefineOfferAttributes({
   )
 
   const isAdmin = useMemo(
-    () =>
-      config[chainId]?.adminAddress?.toLowerCase() ===
-      userAddress?.toLowerCase(),
-    [chainId, userAddress]
+    () => isAdminUser(userAddress, chainId, config),
+    [userAddress, chainId]
   )
 
   useEffect(() => {
