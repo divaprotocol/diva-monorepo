@@ -77,7 +77,7 @@ type SingleConfig = {
   readonly isCustomCollateralAssetAllowed: boolean
   readonly isCustomDataProviderAllowed: boolean
   readonly referenceAssets: string[]
-  readonly adminAddress?: string
+  readonly adminAddresses?: string[]
   readonly collateralTokens?: WhitelistCollateralToken[]
   readonly dataProviders?: DataProviders[]
 }
@@ -210,7 +210,10 @@ export const config: { [key: number]: SingleConfig } = {
         decimals: 18,
       },
     ],
-    adminAddress: '0x3E50a9F4DC9CCF7aFaBb7337cf57D63dFa12acc0',
+    adminAddresses: [
+      '0x3E50a9F4DC9CCF7aFaBb7337cf57D63dFa12acc0',
+      '0x1062CCC9F9a4bBcf565799683b6c00eA525ECb9F',
+    ],
     dataProviders: [
       {
         id: '0x7950db13cc37774614b0aa406e42a4c4f0bf26a6',

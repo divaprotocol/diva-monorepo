@@ -35,6 +35,7 @@ import { toExponentialOrNumber } from '../../Util/utils'
 import { config } from '../../constants'
 import { useAppSelector } from '../../Redux/hooks'
 import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
+import { isAdminUser } from '../../Util/utils'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -167,11 +168,10 @@ export function DefinePoolAttributes({
     () => config[chainId].isCustomCollateralAssetAllowed,
     [chainId]
   )
+
   const isAdmin = useMemo(
-    () =>
-      config[chainId]?.adminAddress?.toLowerCase() ===
-      userAddress?.toLowerCase(),
-    [chainId, userAddress]
+    () => isAdminUser(userAddress, chainId, config),
+    [userAddress, chainId]
   )
 
   return (
