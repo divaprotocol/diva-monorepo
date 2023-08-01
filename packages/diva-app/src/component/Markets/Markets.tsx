@@ -115,7 +115,6 @@ const columns: GridColDef[] = [
         {cell.value}
       </Typography>
     ),
-    hide: true,
   },
   {
     field: 'Buy',
@@ -127,7 +126,6 @@ const columns: GridColDef[] = [
         {cell.value}
       </Typography>
     ),
-    hide: true,
   },
   {
     field: 'MaxYield',
@@ -139,7 +137,6 @@ const columns: GridColDef[] = [
         {cell.value.buy}
       </Typography>
     ),
-    hide: true,
   },
   {
     field: 'Status',
