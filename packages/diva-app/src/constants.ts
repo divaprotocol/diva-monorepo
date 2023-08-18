@@ -274,6 +274,12 @@ export const config: { [key: number]: SingleConfig } = {
         symbol: 'WAGMI18',
         decimals: 18,
       },
+      {
+        id: '0xbA99068Cb134ADdf11d437dbD99e9ae5032832c5',
+        name: 'dUSD6',
+        symbol: 'dUSD6',
+        decimals: 6,
+      },
     ],
     referenceAssets: ['BTC/USD', 'ETH/USD', 'TRB/USD'],
     dataProviders: [
