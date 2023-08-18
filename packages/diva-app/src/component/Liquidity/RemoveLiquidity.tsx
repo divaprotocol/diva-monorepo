@@ -220,6 +220,8 @@ export const RemoveLiquidity = ({ pool }: Props) => {
     } catch (err) {
       setLoading(false)
       console.error(err)
+    } finally {
+      setTextFieldValue('0')
     }
   }
 
