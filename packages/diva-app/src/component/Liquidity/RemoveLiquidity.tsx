@@ -221,7 +221,7 @@ export const RemoveLiquidity = ({ pool }: Props) => {
       setLoading(false)
       console.error(err)
     } finally {
-      setTextFieldValue('0')
+      setTextFieldValue('')
     }
   }
 
