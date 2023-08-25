@@ -117,7 +117,8 @@ const BuyOrder = (props: {
   const [avgExpectedRate, setAvgExpectedRate] = useState(ZERO) //Price Per long/short Token
   const [balanceAlert, setBalanceAlert] = useState(false) //Alert message for insufficient balance
   const [orderBookAlert, setOrderBookAlert] = useState(false) //Alert message for no Asks in BuyMarket
-  /* const [amountExceedAlert, setAmountExceedAlert] = useState(false) */ // Alert message for Amount Exceed
+  const [amountExceedAlert, setAmountExceedAlert] = useState(false) // Alert message for Amount Exceed
+  const [quantityExceedAlert, setQuantityExceedAlert] = useState(false)
   const [totalQuantity, setTotalQuantity] = useState(0)
   const [isApproved, setIsApproved] = useState(false)
   const [fillLoading, setFillLoading] = React.useState(false)
@@ -499,15 +500,15 @@ const BuyOrder = (props: {
   }, [responseBuy, responseSell, userAddress, Web3Provider, checked])
 
   //to calculate the total no of order quantity
-  /*  useEffect(() => {
+  useEffect(() => {
     const QuantitiesOrderBook = existingSellLimitOrders.map((order) =>
       Number(formatUnits(order.makerAmount, decimals))
     )
     let sumOfQuantity = 0
     QuantitiesOrderBook.forEach((quantity) => (sumOfQuantity += quantity))
     setTotalQuantity(sumOfQuantity)
-  }, [numberOfOptions]) */
-
+  }, [numberOfOptions])
+  console.log('totalQuantity', totalQuantity)
   //useEffect function to fetch the average price for the BUY MARKET order
   useEffect(() => {
     if (!checked) {
@@ -706,26 +707,101 @@ const BuyOrder = (props: {
   // Alert message for Insuffcientbalance & No Asks on OrderBook
   useEffect(() => {
     if (numberOfOptions != '') {
-      if (youPay.gt(collateralBalance) && youPay.lte(remainingAllowance)) {
-        setBalanceAlert(true)
-      } else {
-        setBalanceAlert(false)
-      }
-      if (!checked && avgExpectedRate.eq(0)) {
-        setOrderBookAlert(true)
-      } else {
-        setOrderBookAlert(false)
-      } /* 
-      if (
-        youPay.gt(collateralBalance) ||
-        (!checked && Number(numberOfOptions) > totalQuantity)
-      ) {
-        setAmountExceedAlert(true)
+      // Convert user input into BigNumber
+      const nbrOfOptionsBalance = parseUnits(numberOfOptions, decimals)
+      const totalAmountPrice = nbrOfOptionsBalance.mul(avgExpectedRate)
+      const maxAmount =
+        checked && pricePerOption.gt(ZERO)
+          ? collateralBalance.mul(collateralTokenUnit).div(pricePerOption)
+          : !avgExpectedRate.eq(0) &&
+            collateralBalance.mul(collateralTokenUnit).div(avgExpectedRate)
+
+      if (youPay.gt(collateralBalance)) {
+        if (youPay.lte(remainingAllowance)) {
+          setBalanceAlert(true)
+        } else {
+          setAmountExceedAlert(true)
+        }
       } else {
         setAmountExceedAlert(false)
-      } */
+        setBalanceAlert(false)
+      }
+      if (!checked) {
+        if (avgExpectedRate.eq(0)) {
+          setOrderBookAlert(true)
+        } else {
+          if (Number(numberOfOptions) > totalQuantity) {
+            if (
+              nbrOfOptionsBalance.gt(maxAmount) &&
+              totalAmountPrice.lte(remainingAllowance)
+            ) {
+              setBalanceAlert(true)
+              setAmountExceedAlert(false)
+              setQuantityExceedAlert(true)
+            } else if (
+              nbrOfOptionsBalance.lte(maxAmount) &&
+              totalAmountPrice.lte(remainingAllowance)
+            ) {
+              setAmountExceedAlert(false)
+              setQuantityExceedAlert(true)
+            } else if (
+              nbrOfOptionsBalance.gt(maxAmount) &&
+              totalAmountPrice.gt(remainingAllowance)
+            ) {
+              setQuantityExceedAlert(false)
+              setAmountExceedAlert(true)
+            } else if (
+              nbrOfOptionsBalance.lte(maxAmount) &&
+              totalAmountPrice.gt(remainingAllowance)
+            ) {
+              setAmountExceedAlert(false)
+              setQuantityExceedAlert(true)
+            } else {
+              setQuantityExceedAlert(false)
+              setAmountExceedAlert(false)
+            }
+          } else if (Number(numberOfOptions) <= totalQuantity) {
+            if (
+              nbrOfOptionsBalance.gt(maxAmount) &&
+              totalAmountPrice.gt(remainingAllowance)
+            ) {
+              setQuantityExceedAlert(false)
+              setAmountExceedAlert(true)
+            } else if (
+              nbrOfOptionsBalance.gt(maxAmount) &&
+              totalAmountPrice.lte(remainingAllowance)
+            ) {
+              setQuantityExceedAlert(false)
+              setBalanceAlert(true)
+            } else {
+              setQuantityExceedAlert(false)
+              setAmountExceedAlert(false)
+            }
+          } else {
+            setQuantityExceedAlert(false)
+            setAmountExceedAlert(false)
+            setOrderBookAlert(false)
+          }
+        }
+      } else if (Number(maxAmount) != 0) {
+        if (
+          nbrOfOptionsBalance.gt(maxAmount) &&
+          totalAmountPrice.gt(remainingAllowance)
+        ) {
+          setAmountExceedAlert(true)
+        } else {
+          setAmountExceedAlert(false)
+        }
+        setQuantityExceedAlert(false)
+        setOrderBookAlert(false)
+      }
+    } else {
+      setQuantityExceedAlert(false)
+      setAmountExceedAlert(false)
+      setOrderBookAlert(false)
+      setBalanceAlert(false)
     }
-  }, [numberOfOptions, youPay, avgExpectedRate, checked])
+  }, [numberOfOptions, youPay, avgExpectedRate, checked, pricePerOption])
 
   const createBtnDisabled =
     !isApproved ||
@@ -734,7 +810,8 @@ const BuyOrder = (props: {
   const fillBtnDisabled =
     !isApproved ||
     orderBtnDisabled ||
-    collateralBalance.sub(youPay).sub(feeAmount).lt(0)
+    collateralBalance.sub(youPay).sub(feeAmount).lt(0) ||
+    (numberOfOptions !== '' && Number(numberOfOptions) > totalQuantity)
   const approveBtnDisabled = isApproved || youPay.lte(0) // No collateralBalance.sub(youPay).lt(0) condition as a user should be able to approve any amount they want
 
   return (
@@ -947,16 +1024,19 @@ const BuyOrder = (props: {
           </Collapse>
           <Collapse in={orderBookAlert} sx={{ mt: theme.spacing(2) }}>
             <Alert severity="error" sx={{ mb: 2 }}>
-              No Asks in orderbook
+              No Bids in orderbook
             </Alert>
           </Collapse>
-          {/* 
+          <Collapse in={quantityExceedAlert} sx={{ mt: theme.spacing(2) }}>
+            <Alert severity="error" sx={{ mb: 2 }}>
+              Exceeds Available Quantity
+            </Alert>
+          </Collapse>
           <Collapse in={amountExceedAlert}>
             <Alert severity="warning" sx={{ mb: 2 }}>
-              Amount to be approved exceeds{' '}
-              {checked ? 'Wallet Balance' : 'available quantities'}
+              Amount to be approved exceeds Wallet Balance
             </Alert>
-          </Collapse> */}
+          </Collapse>
           <Stack direction={'row'} spacing={1} mt={theme.spacing(1)}>
             <LoadingButton
               variant="contained"

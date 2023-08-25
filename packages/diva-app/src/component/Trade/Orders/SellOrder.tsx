@@ -115,6 +115,9 @@ const SellOrder = (props: {
   const [feeAmount, setFeeAmount] = React.useState(ZERO) // User input field
   const [balanceAlert, setBalanceAlert] = useState(false) //Alert message for insufficient balance
   const [orderBookAlert, setOrderBookAlert] = useState(false) //Alert message for no Asks in SellMarket
+  const [amountExceedAlert, setAmountExceedAlert] = useState(false) // Alert message for Amount Exceed
+  const [quantityExceedAlert, setQuantityExceedAlert] = useState(false)
+  const [totalQuantity, setTotalQuantity] = useState(0)
   const [expiry, setExpiry] = React.useState(5)
   const [avgExpectedRate, setAvgExpectedRate] = React.useState(ZERO)
   const [isApproved, setIsApproved] = React.useState(false)
@@ -493,6 +496,16 @@ const SellOrder = (props: {
     }
   }, [responseBuy, responseSell, userAddress, Web3Provider, checked])
 
+  //to calculate the total no of order quantity
+  useEffect(() => {
+    const QuantitiesOrderBook = existingBuyLimitOrders.map((order) =>
+      Number(formatUnits(order.takerAmount, decimals))
+    )
+    let sumOfQuantity = 0
+    QuantitiesOrderBook.forEach((quantity) => (sumOfQuantity += quantity))
+    setTotalQuantity(sumOfQuantity)
+  }, [numberOfOptions])
+  console.log('totalQuantity', totalQuantity)
   // useEffect function to fetch average price for the SELL MARKET order
   useEffect(() => {
     if (!checked) {
@@ -715,11 +728,80 @@ const SellOrder = (props: {
       } else {
         setBalanceAlert(false)
       }
-      if (!checked && avgExpectedRate.eq(0)) {
-        setOrderBookAlert(true)
+      if (!checked) {
+        if (avgExpectedRate.eq(0)) {
+          setOrderBookAlert(true)
+        } else {
+          if (Number(numberOfOptions) > totalQuantity) {
+            if (
+              nbrOfOptionsBalance.gt(optionBalance) &&
+              nbrOfOptionsBalance.lte(remainingAllowance)
+            ) {
+              setBalanceAlert(true)
+              setAmountExceedAlert(false)
+              setQuantityExceedAlert(true)
+            } else if (
+              nbrOfOptionsBalance.lte(optionBalance) &&
+              nbrOfOptionsBalance.lte(remainingAllowance)
+            ) {
+              setAmountExceedAlert(false)
+              setQuantityExceedAlert(true)
+            } else if (
+              nbrOfOptionsBalance.gt(optionBalance) &&
+              nbrOfOptionsBalance.gt(remainingAllowance)
+            ) {
+              setQuantityExceedAlert(false)
+              setAmountExceedAlert(true)
+            } else if (
+              nbrOfOptionsBalance.lte(optionBalance) &&
+              nbrOfOptionsBalance.gt(remainingAllowance)
+            ) {
+              setAmountExceedAlert(false)
+              setQuantityExceedAlert(true)
+            } else {
+              setQuantityExceedAlert(false)
+              setAmountExceedAlert(false)
+            }
+          } else if (Number(numberOfOptions) <= totalQuantity) {
+            if (
+              nbrOfOptionsBalance.gt(optionBalance) &&
+              nbrOfOptionsBalance.gt(remainingAllowance)
+            ) {
+              setQuantityExceedAlert(false)
+              setAmountExceedAlert(true)
+            } else if (
+              nbrOfOptionsBalance.gt(optionBalance) &&
+              nbrOfOptionsBalance.lte(remainingAllowance)
+            ) {
+              setQuantityExceedAlert(false)
+              setBalanceAlert(true)
+            } else {
+              setQuantityExceedAlert(false)
+              setAmountExceedAlert(false)
+            }
+          } else {
+            setQuantityExceedAlert(false)
+            setAmountExceedAlert(false)
+            setOrderBookAlert(false)
+          }
+        }
       } else {
+        if (
+          nbrOfOptionsBalance.gt(optionBalance) &&
+          nbrOfOptionsBalance.gt(remainingAllowance)
+        ) {
+          setAmountExceedAlert(true)
+        } else {
+          setAmountExceedAlert(false)
+        }
+        setQuantityExceedAlert(false)
         setOrderBookAlert(false)
       }
+    } else {
+      setQuantityExceedAlert(false)
+      setAmountExceedAlert(false)
+      setOrderBookAlert(false)
+      setBalanceAlert(false)
     }
   }, [numberOfOptions, youReceive, avgExpectedRate, checked])
 
@@ -740,9 +822,11 @@ const SellOrder = (props: {
       optionBalance
         .sub(parseUnits(numberOfOptions, decimals))
         .sub(feeAmount)
-        .lt(0))
+        .lt(0)) ||
+    (numberOfOptions !== '' && Number(numberOfOptions) > totalQuantity)
   const approveBtnDisabled =
     isApproved ||
+    numberOfOptions == '' ||
     (numberOfOptions !== '' && !parseUnits(numberOfOptions, decimals).gt(0)) // No optionBalance.sub(numberOfOptions).lt(0) condition as a user should be able to approve any amount they want
 
   return (
@@ -892,43 +976,23 @@ const SellOrder = (props: {
             </Typography>
           </Stack>
           <Collapse in={balanceAlert} sx={{ mt: theme.spacing(2) }}>
-            <Alert
-              severity="error"
-              action={
-                <IconButton
-                  aria-label="close"
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    setBalanceAlert(false)
-                  }}
-                >
-                  {'X'}
-                </IconButton>
-              }
-              sx={{ mb: 2 }}
-            >
+            <Alert severity="error" sx={{ mb: 2 }}>
               Insufficient balance
             </Alert>
           </Collapse>
           <Collapse in={orderBookAlert} sx={{ mt: theme.spacing(2) }}>
-            <Alert
-              severity="error"
-              action={
-                <IconButton
-                  aria-label="close"
-                  color="inherit"
-                  size="small"
-                  onClick={() => {
-                    setOrderBookAlert(false)
-                  }}
-                >
-                  {'X'}
-                </IconButton>
-              }
-              sx={{ mb: 2 }}
-            >
+            <Alert severity="error" sx={{ mb: 2 }}>
               No Bids in orderbook
+            </Alert>
+          </Collapse>
+          <Collapse in={quantityExceedAlert} sx={{ mt: theme.spacing(2) }}>
+            <Alert severity="error" sx={{ mb: 2 }}>
+              Exceeds Available Quantity
+            </Alert>
+          </Collapse>
+          <Collapse in={amountExceedAlert}>
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              Amount to be approved exceeds Wallet Balance
             </Alert>
           </Collapse>
           <Stack direction={'row'} spacing={1} mt={theme.spacing(1)}>
