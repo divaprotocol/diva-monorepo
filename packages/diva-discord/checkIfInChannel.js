@@ -1,3 +1,5 @@
+const Config = require('./config.json')
+
 const Discord = require('discord.js');
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, 
     Discord.Intents.FLAGS.GUILD_MESSAGES,
@@ -39,7 +41,7 @@ async function main() {
     }
 }
 
-client.login('OTYwMjEzNTIwODM2ODYyMDcz.YknKhw.LSaop_5zflueATmsyTiAX4w6wQU'); // replace with your bot token
+client.login(Config.TOKEN); // replace with your bot token
 
 client.on("ready", async() => {
     main();
