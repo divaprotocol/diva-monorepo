@@ -13,7 +13,8 @@ https://discord.com/api/oauth2/authorize?client_id=960213520836862073&permission
 start bot in powershell via:
 - cd packages/diva-discord
 #yarn hardhat run index.js --network ropsten
-yarn hardhat run index.js --network goerli
+#yarn hardhat run index.js --network goerli
+yarn hardhat run index.js --network polygon_mumbai
 
 extract list of users
 - cd packages/diva-discord
