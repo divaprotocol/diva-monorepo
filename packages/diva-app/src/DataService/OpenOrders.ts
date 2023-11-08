@@ -2,13 +2,22 @@ import axios from 'axios'
 import {
   config,
   NULL_ADDRESS,
-  divaGovernanceAddress,
-  tradingFee,
+  TRADING_FEE_RECIPIENT,
+  TRADING_FEE,
 } from '../constants'
 import { BigNumber, ethers } from 'ethers'
+import { formatUnits, parseUnits } from 'ethers/lib/utils'
+import { getExpiryMinutesFromNow } from '../Util/Dates'
 import BalanceCheckerABI from '../abi/BalanceCheckerABI.json'
 import ERC20ABI from '../abi/ERC20ABI.json'
-import { parseUnits } from 'ethers/lib/utils'
+import {
+  PoolInfoType,
+  OrderbookPriceRequest,
+  OrderOutputType,
+  PriceResponseType,
+  PriceOutputType,
+} from '../Models/orderbook'
+import { Pool } from '../lib/queries'
 
 /**
  * Filter for orders that can actually be filled, i.e. where makers
@@ -42,7 +51,7 @@ async function getFillableOrders(
   // Connect to BalanceChecker contract which implements the `getMinOfBalancesOrAllowances` which allows to
   // obtain the minimum of allowance and balance for an array of maker address with one single call
   const contract = new ethers.Contract(
-    config[chainId].balanceCheckAddress,
+    config[chainId].balanceCheckerAddress,
     BalanceCheckerABI,
     provider
   )
@@ -198,7 +207,7 @@ export const get0xOpenOrders = async (
   // - takerToken = quoteToken
   const urlPrefix =
     config[chainId].orderbook +
-    '?quoteToken=' +
+    '/pair?quoteToken=' +
     makerToken +
     '&baseToken=' +
     takerToken
@@ -234,69 +243,254 @@ export const get0xOpenOrders = async (
       return []
     })
 
-  // Get taker and maker token decimals to be used in takerTokenFeeAmount calcs
-  const takerTokenContract = new ethers.Contract(takerToken, ERC20ABI, provider)
-  const makerTokenContract = new ethers.Contract(makerToken, ERC20ABI, provider)
+  // // Get taker and maker token decimals to be used in takerTokenFeeAmount calcs
+  // const takerTokenContract = new ethers.Contract(takerToken, ERC20ABI, provider)
+  // const makerTokenContract = new ethers.Contract(makerToken, ERC20ABI, provider)
 
-  const takerTokenDecimals = await takerTokenContract.decimals()
-  const makerTokenDecimals = await makerTokenContract.decimals()
+  // const takerTokenDecimals = await takerTokenContract.decimals()
+  // const makerTokenDecimals = await makerTokenContract.decimals()
 
-  const takerTokenUnit = parseUnits('1', takerTokenDecimals)
-  const makerTokenUnit = parseUnits('1', makerTokenDecimals)
+  // const takerTokenUnit = parseUnits('1', takerTokenDecimals)
+  // const makerTokenUnit = parseUnits('1', makerTokenDecimals)
 
-  // Get actually fillable orders by checking the maker allowance. Reasons for this filter is that
-  // 0x may return orders that are not mutually fillable. This can happen if a maker
-  // revokes/reduces the allowance for the makerToken after the order creation.
-  const fillableOrders = await getFillableOrders(
-    res,
-    makerToken,
-    exchangeProxy,
-    chainId,
-    provider,
-    makerTokenUnit,
-    takerTokenUnit
-  )
+  // // Get actually fillable orders by checking the maker allowance. Reasons for this filter is that
+  // // 0x may return orders that are not mutually fillable. This can happen if a maker
+  // // revokes/reduces the allowance for the makerToken after the order creation.
+  // const fillableOrders = await getFillableOrders(
+  //   res,
+  //   makerToken,
+  //   exchangeProxy,
+  //   chainId,
+  //   provider,
+  //   makerTokenUnit,
+  //   takerTokenUnit
+  // )
 
-  // Apply additional filters to ensure fillability of orders displayed in the orderbook
-  const filteredOrders = []
+  // // Apply additional filters to ensure fillability of orders displayed in the orderbook
+  // const filteredOrders = []
 
-  // Threshold for small orders. All orders with remainingFillableTakerAmount smaller than or equal to this value will be filtered out.
-  // NOTE: Choosing a minRemainingFillableTakerAmount of 100 allows to deduct a small buffer of 10 from takerAssetFillAmount without the risk of ending up with a negative amount to be filled.
-  // This buffer is required to account for order fill failures experienced when trying to set takerAssetFillAmount equal to or close to remainingFillableTakerAmount.
-  const minRemainingFillableTakerAmount = 100
+  // // Threshold for small orders. All orders with remainingFillableTakerAmount smaller than or equal to this value will be filtered out.
+  // // NOTE: Choosing a minRemainingFillableTakerAmount of 100 allows to deduct a small buffer of 10 from takerAssetFillAmount without the risk of ending up with a negative amount to be filled.
+  // // This buffer is required to account for order fill failures experienced when trying to set takerAssetFillAmount equal to or close to remainingFillableTakerAmount.
+  // const minRemainingFillableTakerAmount = 100
 
-  // Max absolute deviation between actual fee and expected fee allowed; expressed as an integer in smallest unit of taker token
-  const toleranceTakerTokenFeeAmount = 1
+  // // Max absolute deviation between actual fee and expected fee allowed; expressed as an integer in smallest unit of taker token
+  // const toleranceTakerTokenFeeAmount = 1
 
-  // Apply filters
-  fillableOrders.forEach((order) => {
-    // Calculate expected fee amount and that actually attached to the order
-    const takerTokenFeeAmountExpected = BigNumber.from(
-      BigNumber.from(order.order.takerAmount)
-        .mul(parseUnits(tradingFee.toString(), takerTokenDecimals))
-        .div(takerTokenUnit)
+  // // Apply filters
+  // fillableOrders.forEach((order) => {
+  //   // Calculate expected fee amount and that actually attached to the order
+  //   const takerTokenFeeAmountExpected = BigNumber.from(
+  //     BigNumber.from(order.order.takerAmount)
+  //       .mul(parseUnits(tradingFee.toString(), takerTokenDecimals))
+  //       .div(takerTokenUnit)
+  //   )
+  //   const takerTokenFeeAmountActual = BigNumber.from(
+  //     order.order.takerTokenFeeAmount
+  //   )
+  //   if (
+  //     BigNumber.from(order.metaData.remainingFillableTakerAmount).gt(
+  //       minRemainingFillableTakerAmount
+  //     ) && // Ensure some minimum amount for the order size to avoid any rounding related issues when dealing with small amounts
+  //     order.order.taker === NULL_ADDRESS && // Ensure that orders are fillable by anyone and not reserved for a specific address
+  //     order.order.feeRecipient === divaGovernanceAddress.toLowerCase() && // Ensure that the feeRecipient is DIVA Governance address
+  //     takerTokenFeeAmountActual.gte(
+  //       takerTokenFeeAmountExpected.sub(toleranceTakerTokenFeeAmount)
+  //     ) &&
+  //     takerTokenFeeAmountActual.lte(
+  //       takerTokenFeeAmountExpected.add(toleranceTakerTokenFeeAmount)
+  //     ) // Ensure correct fee is attached
+  //   ) {
+  //     filteredOrders.push(order)
+  //   }
+  // })
+
+  // return filteredOrders
+
+  return res
+}
+
+/**
+ * A function to get pool information from the pool information array using the baseToken and quoteToken of the pool.
+ * @param {PriceResponseType} poolResponse // orderbook price response
+ * @param {PoolInfoType[]} poolInfoArray // pool information array
+ * @returns {PoolInfoType}
+ */
+const getPoolInformation = (
+  poolResponse: PriceResponseType,
+  poolInfoArray: PoolInfoType[]
+): PoolInfoType => {
+  // Filter pool information by baseToken and quoteToken of the pool
+  const poolInfo = poolInfoArray.filter(
+    (pair: PoolInfoType) =>
+      poolResponse.baseToken === pair.baseToken &&
+      poolResponse.quoteToken === pair.quoteToken
+  )[0]
+
+  return poolInfo
+}
+
+/**
+ * A function to get orders by order output type from order price information
+ * @param {PriceOutputType} price // orderbook price information
+ * @returns {OrderOutputType}
+ */
+const getOrderOutput = (price: PriceOutputType): OrderOutputType => {
+  const poolId = price.poolId
+  let orderType = 'buy'
+  if (price.type !== 'Buy') {
+    orderType = 'sell'
+  }
+
+  let bidExpiry = 0
+  let bid = ''
+  let bidnbrOptions = ''
+  if (price.bid.order !== undefined) {
+    const order = price.bid
+    bidExpiry = getExpiryMinutesFromNow(order.order.expiry)
+    // Calculate Bid amount
+    const bidAmount = BigNumber.from(order.order.makerAmount)
+      .mul(parseUnits('1', price.decimals))
+      .div(BigNumber.from(order.order.takerAmount)) // result is in collateral token decimals
+
+    // Value to display in the orderbook
+    bid = formatUnits(bidAmount, price.decimals)
+
+    // Display remainingFillableTakerAmount as the quantity in the orderbook
+    bidnbrOptions = formatUnits(
+      BigNumber.from(order.metaData.remainingFillableTakerAmount),
+      price.decimals
     )
-    const takerTokenFeeAmountActual = BigNumber.from(
-      order.order.takerTokenFeeAmount
-    )
+  }
+
+  let askExpiry = 0
+  let ask = ''
+  let asknbrOptions = ''
+  if (price.ask.order !== undefined) {
+    const order = price.ask
+    askExpiry = getExpiryMinutesFromNow(order.order.expiry)
+    // Calculate Ask amount
+    const askAmount = BigNumber.from(order.order.takerAmount)
+      .mul(parseUnits('1', price.decimals))
+      .div(BigNumber.from(order.order.makerAmount)) // result is in collateral token decimals
+
+    // Value to display in the orderbook
+    ask = formatUnits(askAmount, price.decimals)
+
     if (
-      BigNumber.from(order.metaData.remainingFillableTakerAmount).gt(
-        minRemainingFillableTakerAmount
-      ) && // Ensure some minimum amount for the order size to avoid any rounding related issues when dealing with small amounts
-      order.order.taker === NULL_ADDRESS && // Ensure that orders are fillable by anyone and not reserved for a specific address
-      order.order.feeRecipient === divaGovernanceAddress.toLowerCase() && // Ensure that the feeRecipient is DIVA Governance address
-      takerTokenFeeAmountActual.gte(
-        takerTokenFeeAmountExpected.sub(toleranceTakerTokenFeeAmount)
-      ) &&
-      takerTokenFeeAmountActual.lte(
-        takerTokenFeeAmountExpected.add(toleranceTakerTokenFeeAmount)
-      ) // Ensure correct fee is attached
+      BigNumber.from(order.metaData.remainingFillableTakerAmount).lt(
+        BigNumber.from(order.order.takerAmount)
+      )
     ) {
-      filteredOrders.push(order)
+      const remainingFillableMakerAmount = BigNumber.from(
+        order.metaData.remainingFillableTakerAmount
+      )
+        .mul(BigNumber.from(order.order.makerAmount))
+        .div(BigNumber.from(order.order.takerAmount))
+      asknbrOptions = formatUnits(remainingFillableMakerAmount, price.decimals)
+    } else {
+      asknbrOptions = formatUnits(
+        BigNumber.from(order.order.makerAmount),
+        price.decimals
+      )
     }
+  }
+
+  return {
+    bidExpiry: bidExpiry + ' mins', // expiry time of best bid
+    askExpiry: askExpiry + ' mins', // expiry time of best ask
+    orderType, // order type
+    poolId, // pool id
+    bid, // best bid
+    bidQuantity: bidnbrOptions, // best bid quantity
+    ask, // best ask
+    askQuantity: asknbrOptions, // best ask quantity
+    side: price.side, // Pool type `Long` or `Short`
+  }
+}
+
+export const getOrderbookPricesOutput = (
+  priceResponse: any,
+  poolInfoArray: PoolInfoType[]
+) => {
+  const output: OrderOutputType[] = []
+  // Formatting data format for using market page tables
+  priceResponse.records.map((poolPrice: PriceResponseType) => {
+    const poolInfo = getPoolInformation(poolPrice, poolInfoArray)
+    const type = poolPrice.side === 'Short' ? 'Sell' : 'Buy'
+    const decimals = poolInfo.collateralTokenDecimals
+    const price: PriceOutputType = {
+      poolId: poolInfo.poolId, // pool id
+      type: type, // pool type
+      baseToken: poolPrice.baseToken, // pool baseToken
+      quoteToken: poolPrice.quoteToken, // pool quoteToken
+      bid: poolPrice.bids.length !== 0 ? poolPrice.bids[0] : {}, // best bid of pool
+      ask: poolPrice.asks.length !== 0 ? poolPrice.asks[0] : {}, // best ask of pool
+      decimals: decimals, // collateral token decimals of pool
+      side: poolPrice.side, // Pool type `Long` or `Short`
+    }
+
+    output.push(getOrderOutput(price))
   })
 
-  return filteredOrders
+  return output
+}
+
+/**
+ * A function to get orderbook price using orderbook price endpoint
+ * @param {OrderbookPriceRequest} req // orderbook price request
+ * @returns {OrderOutputType[]}
+ */
+export const getOrderbookPrices = async (
+  req: OrderbookPriceRequest
+): Promise<OrderOutputType[]> => {
+  // Generate an orderbook price endpoint
+  let urlPrefix =
+    config[req.chainId].orderbook + `/pairs?graphUrl=${req.graphUrl}`
+
+  // Add createdBy by parameter to orderbook price endpoint
+  if (req.createdBy !== undefined) {
+    urlPrefix += `&createdBy=${req.createdBy}`
+  }
+  // Add taker by parameter to orderbook price endpoint
+  if (req.taker !== undefined) {
+    urlPrefix += `&taker=${req.taker}`
+  }
+  // Add feeRecipient by parameter to orderbook price endpoint
+  if (req.feeRecipient !== undefined) {
+    urlPrefix += `&feeRecipient=${req.feeRecipient}`
+  }
+  // Add takerTokenFee by parameter to orderbook price endpoint
+  if (req.takerTokenFee !== undefined) {
+    urlPrefix += `&takerTokenFee=${req.takerTokenFee}`
+  }
+  // Add threshold by parameter to orderbook price endpoint
+  if (req.threshold !== undefined) {
+    urlPrefix += `&threshold=${req.threshold}`
+  }
+  // Add count by parameter to orderbook price endpoint
+  if (req.count !== undefined) {
+    urlPrefix += `&count=${req.count}`
+  }
+  // Add 1 to the current page because the page parameter starts at 0.
+  const url = urlPrefix + `&page=${req.page + 1}&perPage=${req.perPage}`
+
+  // Get orderbook price response from orderbook price endpoint
+  const prices: OrderOutputType[] = await axios
+    .get(url)
+    .then(async function (response) {
+      const priceResponse: any = response.data
+
+      const output = getOrderbookPricesOutput(priceResponse, req.poolInfo)
+
+      return output
+    })
+    .catch((err) => {
+      console.error(err)
+      return []
+    })
+
+  return prices
 }
 
 export const getOrderDetails = (orderHash: string, chainId) => {
@@ -324,5 +518,147 @@ export const getUserOrders = async (trader: string, chainId) => {
         return {}
       })
     return res
+  }
+}
+
+export const getAddress = (address: string) => {
+  return ethers.utils.getAddress(address)
+}
+
+/**
+ * Prepare the data to be displayed in the orderbook (price, quantity and expires in)
+ */
+export const mapOrderData = (
+  records: any[],
+  decimals: number,
+  orderType: number // 0 = BUY, 1 = SELL
+) => {
+  // Get orderbook (comes already filtered and clean-up; see OpenOrders.tsx)
+  const orderbook: any = records.map((record: any) => {
+    const order = record.order
+    const metaData = record.metaData
+    const orders: any = {}
+
+    // Buy Limit (orderType = 0)
+    if (orderType === 0) {
+      orders.expiry = getExpiryMinutesFromNow(order.expiry)
+      orders.orderType = 'buy'
+      orders.id = 'buy' + records.indexOf(record as never)
+
+      // Calculate Bid amount
+      const bidAmount = BigNumber.from(order.makerAmount)
+        .mul(parseUnits('1', decimals))
+        .div(BigNumber.from(order.takerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
+      orders.bid = formatUnits(bidAmount, decimals)
+
+      // Display remainingFillableTakerAmount as the quantity in the orderbook
+      orders.nbrOptions = formatUnits(
+        BigNumber.from(metaData.remainingFillableTakerAmount),
+        decimals
+      )
+    }
+
+    // Sell Limit (orderType = 1)
+    if (orderType === 1) {
+      orders.expiry = getExpiryMinutesFromNow(order.expiry)
+      orders.orderType = 'sell'
+      orders.id = 'sell' + records.indexOf(record as never)
+
+      // Calculate Ask amount
+      const askAmount = BigNumber.from(order.takerAmount)
+        .mul(parseUnits('1', decimals))
+        .div(BigNumber.from(order.makerAmount)) // result is in collateral token decimals
+
+      // Value to display in the orderbook
+      orders.ask = formatUnits(askAmount, decimals)
+
+      if (
+        BigNumber.from(metaData.remainingFillableTakerAmount).lt(
+          BigNumber.from(order.takerAmount)
+        )
+      ) {
+        const remainingFillableMakerAmount = BigNumber.from(
+          metaData.remainingFillableTakerAmount
+        )
+          .mul(BigNumber.from(order.makerAmount))
+          .div(BigNumber.from(order.takerAmount))
+        orders.nbrOptions = formatUnits(remainingFillableMakerAmount, decimals)
+      } else {
+        orders.nbrOptions = formatUnits(
+          BigNumber.from(order.makerAmount),
+          decimals
+        )
+      }
+    }
+    return orders
+  })
+
+  return orderbook
+}
+
+export const createTable = (buyOrders: any, sellOrders: any) => {
+  // Get orderbook table length
+  const buyOrdersCount = buyOrders !== 'undefined' ? buyOrders.length : 0
+  const sellOrdersCount = sellOrders !== 'undefined' ? sellOrders.length : 0
+  const tableLength =
+    buyOrdersCount >= sellOrdersCount ? buyOrdersCount : sellOrdersCount
+
+  const table: any = []
+  if (tableLength === 0) {
+    return table
+  } else {
+    for (let j = 0; j < tableLength; j++) {
+      const buyOrder = buyOrders[j]
+      const sellOrder = sellOrders[j]
+      const row = {
+        buyExpiry: buyOrder?.expiry == null ? '-' : buyOrder.expiry + ' mins',
+        buyQuantity: buyOrder?.nbrOptions == null ? '' : buyOrder.nbrOptions,
+        bid: buyOrder?.bid == null ? '' : buyOrder.bid,
+        sellExpiry:
+          sellOrder?.expiry == null ? '-' : sellOrder.expiry + ' mins',
+        sellQuantity: sellOrder?.nbrOptions == null ? '' : sellOrder.nbrOptions,
+        ask: sellOrder?.ask == null ? '' : sellOrder.ask,
+      }
+      table.push(row)
+    }
+    return table
+  }
+}
+
+export const getResponse = (
+  makerToken: string,
+  firstOrdersBid: any[],
+  secondOrdersBid: any[]
+) => {
+  let responseSell = []
+  let responseBuy = []
+  // Get responseBuy and responseSell using makerToken
+  if (firstOrdersBid.length !== 0) {
+    // If the bids for the first order is not empty
+    const bidOrder = firstOrdersBid[0].order
+    if (getAddress(bidOrder.makerToken) === getAddress(makerToken)) {
+      responseBuy = secondOrdersBid
+      responseSell = firstOrdersBid
+    } else {
+      responseBuy = firstOrdersBid
+      responseSell = secondOrdersBid
+    }
+    // If the bids for the first order is empty and the bids for the second order is not empty
+  } else if (secondOrdersBid.length !== 0) {
+    const bidOrder = secondOrdersBid[0].order
+    if (getAddress(bidOrder.makerToken) === getAddress(makerToken)) {
+      responseBuy = firstOrdersBid
+      responseSell = secondOrdersBid
+    } else {
+      responseBuy = secondOrdersBid
+      responseSell = firstOrdersBid
+    }
+  }
+
+  return {
+    responseBuy,
+    responseSell,
   }
 }

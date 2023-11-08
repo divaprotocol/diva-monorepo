@@ -1,7 +1,8 @@
+// This hook is currently not used but kept for future potential use
 import { ethers } from 'ethers'
 import { useEffect, useMemo, useState } from 'react'
 import { useConnectionContext } from './useConnectionContext'
-import DIVA_ABI from '@diva/contracts/abis/diamond.json'
+import DIVA_ABI from '../abi/DIVAABI.json'
 import { config } from '../constants'
 
 export const useGovernanceParameters = () => {
@@ -27,11 +28,17 @@ export const useGovernanceParameters = () => {
   useEffect(() => {
     if (diva) {
       diva.getGovernanceParameters().then((governanceParameters) => {
-        setSubmissionPeriod(governanceParameters.submissionPeriod.toNumber())
-        setChallengePeriod(governanceParameters.challengePeriod.toNumber())
-        setReviewPeriod(governanceParameters.reviewPeriod.toNumber())
+        setSubmissionPeriod(
+          governanceParameters.currentSettlementPeriods.submissionPeriod // TODO Pull that information from pool query instead doing this as these might not apply to a specific pool
+        )
+        setChallengePeriod(
+          governanceParameters.currentSettlementPeriods.challengePeriod
+        )
+        setReviewPeriod(
+          governanceParameters.currentSettlementPeriods.reviewPeriod
+        )
         setFallbackPeriod(
-          governanceParameters.fallbackSubmissionPeriod.toNumber()
+          governanceParameters.currentSettlementPeriods.fallbackSubmissionPeriod
         )
       })
     }

@@ -1,14 +1,21 @@
 import { Box, Button, Tooltip } from '@mui/material'
 import { Stack } from '@mui/material'
-import { Link, matchPath, useLocation } from 'react-router-dom'
+import { matchPath, useHistory, useLocation } from 'react-router-dom'
 import { APP_BAR_ITEMS, ICONS_URL } from '../../constants'
 import { useState } from 'react'
 import ArrowRightIcon from '@mui/icons-material/ArrowRight'
 
 export default function MenuItems() {
   const location = useLocation()
-
+  const history = useHistory()
   const [navOpen, setNavOpen] = useState(false)
+  const handleButtonClick = (path) => {
+    if (path === '/Create' && location.pathname.startsWith('/Create')) {
+      window.location.reload()
+    } else {
+      history.push(path)
+    }
+  }
 
   return (
     <Stack
@@ -21,7 +28,7 @@ export default function MenuItems() {
         position: 'relative',
       }}
     >
-      <Link to="/">
+      <Button onClick={() => history.push('/')}>
         <Box
           sx={{
             width: 30,
@@ -41,14 +48,16 @@ export default function MenuItems() {
             width={navOpen ? '90px' : '0'}
           />
         </Box>
-      </Link>
+      </Button>
       <Box
         sx={{
           marginTop: '80px',
           borderTop: '1px solid #4F4F4F',
+          width: `${navOpen ? '182px' : '67px'}`,
+          overflow: 'hidden',
         }}
       >
-        {APP_BAR_ITEMS.map(({ label, to, icon, isRoot }) => {
+        {APP_BAR_ITEMS.map(({ label, to, icon, isRoot }, key) => {
           const Icon = icon
           const isActive =
             isRoot && location.pathname.startsWith('/markets/')
@@ -59,10 +68,13 @@ export default function MenuItems() {
                 })
 
           return (
-            <Link
-              to={to}
-              style={{
-                textDecoration: 'none',
+            <Button
+              disableRipple
+              style={{ backgroundColor: 'transparent' }}
+              onClick={() => handleButtonClick(to)}
+              key={key}
+              sx={{
+                padding: '0',
               }}
             >
               <Box
@@ -95,7 +107,7 @@ export default function MenuItems() {
                   </Box>
                 </Box>
               </Box>
-            </Link>
+            </Button>
           )
         })}
       </Box>

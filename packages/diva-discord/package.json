@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@diva/contracts": "*",
     "discord.js": "^13.6.0",
     "enmap": "^5.8.13",
     "@nomiclabs/hardhat-ethers": "^2.0.3",

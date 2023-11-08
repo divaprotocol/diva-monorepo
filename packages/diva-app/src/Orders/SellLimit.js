@@ -1,28 +1,32 @@
-import { MetamaskSubprovider } from '@0x/subproviders'
-import { parseUnits } from 'ethers/lib/utils'
+import { parseUnits, splitSignature } from 'ethers/lib/utils'
 import { NULL_ADDRESS } from './Config'
 import { utils } from './Config'
 import { config } from '../constants'
-import { divaGovernanceAddress, tradingFee } from '../constants'
+import { TRADING_FEE_RECIPIENT, TRADING_FEE } from '../constants'
 import { getFutureExpiryInSeconds } from '../Util/utils'
+import { zeroXTypes, zeroXDomain } from '../lib/zeroX'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const contractAddress = require('@0x/contract-addresses')
 
 export const sellLimitOrder = async (orderData) => {
-  const metamaskProvider = new MetamaskSubprovider(window.ethereum)
+  const { chainId } = orderData
+  const signer = orderData.provider.getSigner()
+  const ZeroXChainContractAddress =
+    contractAddress.getContractAddressesForChainOrThrow(chainId).exchangeProxy
 
   const collateralTokenUnit = parseUnits('1', orderData.collateralDecimals)
-  const positionTokenUnit = parseUnits('1')
 
   const nbrOptionsToSell = orderData.nbrOptions
 
   // Derive the collateralTokenAmount (takerAmount in Sell Limit) from the user's nbrOptionsToSell input.
   const collateralTokenAmount = nbrOptionsToSell
     .mul(orderData.limitPrice) // limitPrice is expressed as an integer with collateral token decimals
-    .div(positionTokenUnit) // correction factor in integer multiplication
+    .div(collateralTokenUnit) // correction factor in integer multiplication
 
   // Calculate trading fee amount (expressed as an integer with collateral token decimals)
   // Note that the fee is paid in collateral token which is the taker token in Sell Limit
   const collateralTokenFeeAmount = collateralTokenAmount
-    .mul(parseUnits(tradingFee.toString(), orderData.collateralDecimals))
+    .mul(parseUnits(TRADING_FEE.toString(), orderData.collateralDecimals))
     .div(collateralTokenUnit)
 
   // Get 0x API url to post order
@@ -36,21 +40,36 @@ export const sellLimitOrder = async (orderData) => {
     takerAmount: collateralTokenAmount.toString(),
     maker: orderData.maker,
     sender: NULL_ADDRESS,
-    feeRecipient: divaGovernanceAddress,
+    feeRecipient: TRADING_FEE_RECIPIENT,
     takerTokenFeeAmount: collateralTokenFeeAmount.toString(),
     expiry: getFutureExpiryInSeconds(orderData.orderExpiry),
     salt: Date.now().toString(),
     chainId: orderData.chainId,
     verifyingContract: orderData.exchangeProxy,
+    pool: '0x0000000000000000000000000000000000000000000000000000000000000000',
+    taker: NULL_ADDRESS,
   })
 
   // TODO: Export this part into a separate function
   try {
-    const signature = await order.getSignatureWithProviderAsync(
-      metamaskProvider,
-      utils.SignatureType.EIP712 // Optional
+    const signedTypedData = await signer._signTypedData(
+      zeroXDomain({
+        chainId: orderData.chainId,
+        verifyingContract: ZeroXChainContractAddress,
+      }),
+      zeroXTypes,
+      order
     )
-    const signedOrder = { ...order, signature }
+    const { r, s, v } = splitSignature(signedTypedData)
+    const signature = {
+      v: v,
+      r: r,
+      s: s,
+      signatureType: 2,
+    }
+    const poolId = orderData.poolId
+    const signedOrder = { ...order, signature, poolId }
+
     const resp = await fetch(networkUrl, {
       method: 'POST',
       body: JSON.stringify(signedOrder),

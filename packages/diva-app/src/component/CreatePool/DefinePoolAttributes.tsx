@@ -1,5 +1,8 @@
 import { DateTimePicker } from '@mui/lab'
 import ClockIcon from '@mui/icons-material/AccessTime'
+import KeyboardDoubleArrowUpOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowUpOutlined'
+import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined'
+import KeyboardDoubleArrowDownOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowDownOutlined'
 import {
   Box,
   FormControl,
@@ -10,30 +13,29 @@ import {
   Typography,
   useTheme,
   Tooltip,
-  FormLabel,
   RadioGroup,
   FormControlLabel,
   Radio,
   Container,
   Card,
+  Skeleton,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
-
-import { PayoffProfile } from './PayoffProfile'
+import { useEffect, useMemo, useState } from 'react'
 import { useCreatePoolFormik } from './formik'
 import { useErcBalance } from '../../hooks/useErcBalance'
 import styled from '@emotion/styled'
 import { DefineAdvanced } from './DefineAdvancedAttributes'
-import {
-  CheckCircle,
-  Circle,
-  FormatListBulleted,
-  Report,
-} from '@mui/icons-material'
+import { CheckCircle, Report } from '@mui/icons-material'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistCollateralToken } from '../../lib/queries'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
-import { getDateTime, userTimeZone } from '../../Util/Dates'
+import { useConnectionContext } from '../../hooks/useConnectionContext'
+import { PayoffProfile } from '../Graphs/payOffProfile'
+import { toExponentialOrNumber } from '../../Util/utils'
+import { config } from '../../constants'
+import { useAppSelector } from '../../Redux/hooks'
+import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
+import { isAdminUser } from '../../Util/utils'
 
 const MaxCollateral = styled.u`
   cursor: pointer;
@@ -49,27 +51,55 @@ export function DefinePoolAttributes({
 }) {
   const today = new Date()
   const [referenceAssetSearch, setReferenceAssetSearch] = useState('')
-  const [value, setValue] = useState('Binary')
+  const [value, setValue] = useState(formik.values.payoutProfile)
   const [mobile, setMobile] = useState(false)
   const handleChange = (event) => {
+    formik.setFieldValue('cap', formik.initialValues.cap)
+    formik.setFieldValue('floor', formik.initialValues.floor)
+    formik.setFieldValue('inflection', formik.initialValues.inflection)
+    formik.setFieldValue('gradient', formik.initialValues.gradient)
     setValue(event.target.value)
     formik.setFieldValue('payoutProfile', event.target.value)
   }
   const { referenceAssets, collateralTokens } = useWhitelist()
+  const chainId = useAppSelector(selectChainId)
+  const userAddress = useAppSelector(selectUserAddress)
+  const { disconnect, connect } = useConnectionContext()
   const {
     referenceAsset,
     expiryTime,
     collateralToken,
-    collateralBalanceShort,
-    collateralBalanceLong,
-    tokenSupply,
+    gradient,
     inflection,
     cap,
     floor,
-    gradient,
     payoutProfile,
   } = formik.values
-  const collateralWalletBalance = useErcBalance(collateralToken?.id)
+
+  const { balance: collateralWalletBalance, isLoading } = useErcBalance(
+    collateralToken?.id
+  )
+  useEffect(() => {
+    if (payoutProfile === 'Binary') {
+      formik.setFieldValue('gradient', 1)
+      formik.setFieldValue('cap', formik.values.inflection)
+      formik.setFieldValue('floor', formik.values.inflection)
+    }
+  }, [formik.values])
+  useEffect(() => {
+    if (payoutProfile === 'Linear') {
+      formik.setFieldValue('inflection', (floor + cap) / 2)
+    }
+  }, [formik.values.floor, formik.values.inflection, formik.values.cap])
+  useEffect(() => {
+    if (window.ethereum && formik.values.jsonToExport !== '{}') {
+      window.ethereum.on('accountsChanged', () => {
+        disconnect()
+        connect('metamask')
+        formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
+      })
+    }
+  }, [])
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
@@ -79,7 +109,7 @@ export function DefinePoolAttributes({
   }, [])
   useEffect(() => {
     formik.setFieldValue('collateralWalletBalance', collateralWalletBalance)
-  }, [collateralWalletBalance])
+  }, [payoutProfile, collateralWalletBalance])
 
   useEffect(() => {
     if (referenceAssets.length > 0) {
@@ -88,47 +118,30 @@ export function DefinePoolAttributes({
   }, [referenceAssets.length])
 
   useEffect(() => {
+    formik.setFieldValue(
+      'collateralToken',
+      config[chainId].collateralTokens?.[0]
+    )
+  }, [chainId])
+
+  useEffect(() => {
     if (
       collateralToken != null &&
       formik.values.gradient.toString() != '' &&
       formik.values.gradient >= 0 &&
       formik.values.gradient <= 1 &&
-      formik.values.collateralBalance.toString() != ''
+      formik.values.collateralBalance.toString() != '' &&
+      !isNaN(formik.values.collateralBalance)
     ) {
-      const collateralBalanceLong = parseUnits(
-        formik.values.collateralBalance,
+      const collateralBalance = parseUnits(
+        formik.values.collateralBalance.toString(),
         collateralToken.decimals
       )
-        .mul(
-          parseUnits(
-            formik.values.gradient.toString(),
-            collateralToken.decimals
-          )
-        )
-        .div(parseUnits('1', collateralToken.decimals))
-      const collateralBalanceShort = parseUnits(
-        formik.values.collateralBalance,
-        collateralToken.decimals
-      )
-        .mul(
-          parseUnits('1', collateralToken.decimals).sub(
-            parseUnits(
-              formik.values.gradient.toString(),
-              collateralToken.decimals
-            )
-          )
-        )
-        .div(parseUnits('1', collateralToken.decimals))
-
       formik.setValues((_values) => ({
         ..._values,
-        collateralBalanceLong: parseFloat(
-          formatUnits(collateralBalanceLong, collateralToken.decimals)
+        collateralBalance: parseFloat(
+          formatUnits(collateralBalance, collateralToken.decimals)
         ),
-        collateralBalanceShort: parseFloat(
-          formatUnits(collateralBalanceShort, collateralToken.decimals)
-        ),
-        tokenSupply: parseFloat(formik.values.collateralBalance),
       }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -141,64 +154,25 @@ export function DefinePoolAttributes({
       v.symbol.includes(referenceAssetSearch.trim())
     ) || []
 
-  const setCollateralBalance = (num: number) => {
-    let long = 0
-    let short = 0
-
-    if (num > 0) {
-      const half = num / 2
-      long = short = half
-    }
-    formik.setValues(
-      {
-        ...formik.values,
-        collateralBalanceLong: long,
-        collateralBalanceShort: short,
-      },
-      true
-    )
-  }
-
   const hasPaymentProfileError =
     formik.errors.floor != null ||
     formik.errors.cap != null ||
     formik.errors.inflection != null
 
   const isCustomReferenceAsset = referenceAssets.includes(referenceAsset)
-  useEffect(() => {
-    switch (payoutProfile) {
-      case 'Binary':
-        formik.setFieldValue('cap', formik.values.inflection)
-        formik.setFieldValue('floor', formik.values.inflection)
-        formik.setFieldValue('gradient', 1)
-        break
-      case 'Linear':
-        formik.setFieldValue('gradient', 0.5)
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        break
-      case 'Custom':
-        formik.setFieldValue(
-          'cap',
-          formik.values.inflection + formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'floor',
-          formik.values.inflection - formik.values.inflection / 2
-        )
-        formik.setFieldValue(
-          'inflection',
-          (formik.values.cap + formik.values.floor) / 2
-        )
-        break
-    }
-  }, [payoutProfile])
+  const isCustomReferenceAssetAllowed = useMemo(
+    () => config[chainId].isCustomReferenceAssetAllowed,
+    [chainId]
+  )
+  const isCustomCollateralAssetAllowed = useMemo(
+    () => config[chainId].isCustomCollateralAssetAllowed,
+    [chainId]
+  )
+
+  const isAdmin = useMemo(
+    () => isAdminUser(userAddress, chainId, config),
+    [userAddress, chainId]
+  )
 
   return (
     <Stack direction={mobile ? 'column' : 'row'}>
@@ -273,7 +247,11 @@ export function DefinePoolAttributes({
                     </>
                   )}
                   onInputChange={(event) => {
-                    if (event != null && event.target != null) {
+                    if (
+                      event != null &&
+                      event.target != null &&
+                      (isCustomReferenceAssetAllowed || isAdmin)
+                    ) {
                       formik.setFieldValue(
                         'referenceAsset',
                         (event.target as any).value || ''
@@ -295,7 +273,7 @@ export function DefinePoolAttributes({
                     onBlur: formik.handleBlur,
                     error: formik.errors.expiryTime != null,
                   }}
-                  label="Expiry Time"
+                  label="Observation Time"
                   onChange={(event) => {
                     formik.setFieldValue('expiryTime', event)
                   }}
@@ -308,107 +286,11 @@ export function DefinePoolAttributes({
                 />
                 {formik.errors.expiryTime != null && (
                   <FormHelperText sx={{ color: 'red' }}>
-                    {formik.errors.expiryTime}
+                    {`${formik.errors.expiryTime}`}
                   </FormHelperText>
                 )}
               </FormControl>
             </Stack>
-            <Box>
-              <h3>Collateral</h3>
-
-              <Stack pb={3} spacing={2} direction={mobile ? 'column' : 'row'}>
-                <FormControl
-                  fullWidth
-                  error={formik.errors.collateralToken != null}
-                >
-                  <Autocomplete
-                    options={possibleOptions}
-                    value={collateralToken}
-                    onChange={(_, newValue) => {
-                      formik.setFieldValue('collateralToken', newValue)
-                    }}
-                    getOptionLabel={(option: WhitelistCollateralToken) =>
-                      option?.symbol || ''
-                    }
-                    onInputChange={(event) => {
-                      if (event != null && event.target != null) {
-                        setReferenceAssetSearch(
-                          (event.target as any).value || ''
-                        )
-                      }
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        error={formik.errors.collateralToken != null}
-                        onBlur={formik.handleBlur}
-                        {...params}
-                        label="Collateral Asset"
-                      />
-                    )}
-                  />
-                  {formik.errors.collateralToken != null && (
-                    <FormHelperText>
-                      {formik.errors.collateralToken}
-                    </FormHelperText>
-                  )}
-                  {collateralWalletBalance != null && collateralToken != null && (
-                    <FormHelperText>
-                      Your balance:{' '}
-                      {parseFloat(collateralWalletBalance).toFixed(4)}{' '}
-                      {collateralToken?.symbol}{' '}
-                      <MaxCollateral
-                        role="button"
-                        onClick={() => {
-                          if (collateralWalletBalance != null) {
-                            formik.setFieldValue(
-                              'collateralBalance',
-                              collateralWalletBalance
-                            )
-                          }
-                        }}
-                      >
-                        (Max)
-                      </MaxCollateral>
-                    </FormHelperText>
-                  )}
-                </FormControl>
-                <FormControl
-                  fullWidth
-                  error={formik.errors.collateralBalance != null}
-                >
-                  <TextField
-                    id="collateralBalance"
-                    name="collateralBalance"
-                    label="Collateral Amount"
-                    inputProps={{ step: 1, min: 0 }}
-                    onBlur={formik.handleBlur}
-                    error={formik.errors.collateralBalance != null}
-                    value={formik.values.collateralBalance}
-                    type="number"
-                    onChange={(event) => {
-                      const collateralBalance = event.target.value
-
-                      formik.setValues((values) => ({
-                        ...values,
-                        collateralBalance,
-                        tokenSupply: parseFloat(collateralBalance),
-                      }))
-                    }}
-                  />
-                  {formik.errors.collateralBalance != null && (
-                    <FormHelperText>
-                      {formik.errors.collateralBalance}
-                    </FormHelperText>
-                  )}
-                  {!isNaN(formik.values.tokenSupply) && (
-                    <FormHelperText>
-                      You receive {formik.values.tokenSupply} LONG and{' '}
-                      {formik.values.tokenSupply} SHORT tokens
-                    </FormHelperText>
-                  )}
-                </FormControl>
-              </Stack>
-            </Box>
 
             <h3>Payoff Type</h3>
             <FormControl>
@@ -416,7 +298,7 @@ export function DefinePoolAttributes({
                 row
                 aria-labelledby="demo-row-radio-buttons-group-label"
                 name="row-radio-buttons-group"
-                value={value}
+                value={formik.values.payoutProfile}
                 onChange={handleChange}
               >
                 <FormControlLabel
@@ -460,23 +342,11 @@ export function DefinePoolAttributes({
                         max: cap,
                       }}
                       type="number"
-                      onChange={(event) => {
-                        if (payoutProfile === 'Binary') {
-                          formik.handleChange(event)
-                          formik.setValues((values) => ({
-                            ...values,
-                            cap: parseFloat(event.target.value),
-                            floor: parseFloat(event.target.value),
-                            inflection: parseFloat(event.target.value),
-                            gradient: 1,
-                          }))
-                        }
-                      }}
+                      onChange={formik.handleChange}
                       value={inflection}
                       sx={{ width: mobile ? '100%' : '48%' }}
                     />
                   </Tooltip>
-                  <DefineAdvanced formik={formik} />
                 </Box>
               )}
               {value === 'Linear' && (
@@ -499,17 +369,7 @@ export function DefinePoolAttributes({
                         label="Floor"
                         value={floor}
                         type="number"
-                        onChange={(event) => {
-                          if (payoutProfile === 'Linear') {
-                            formik.handleChange(event)
-                            formik.setValues((values) => ({
-                              ...values,
-                              floor: parseFloat(event.target.value),
-                              inflection:
-                                (parseFloat(event.target.value) + cap) / 2,
-                            }))
-                          }
-                        }}
+                        onChange={formik.handleChange}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
@@ -526,20 +386,11 @@ export function DefinePoolAttributes({
                         label="Cap"
                         value={cap}
                         type="number"
-                        onChange={(event) => {
-                          formik.handleChange(event)
-                          formik.setValues((values) => ({
-                            ...values,
-                            cap: parseFloat(event.target.value),
-                            inflection:
-                              (parseFloat(event.target.value) + floor) / 2,
-                          }))
-                        }}
+                        onChange={formik.handleChange}
                         sx={{ width: '100%' }}
                       />
                     </Tooltip>
                   </Stack>
-                  <DefineAdvanced formik={formik} />
                 </Box>
               )}
               {value === 'Custom' && (
@@ -642,11 +493,115 @@ export function DefinePoolAttributes({
                         </Tooltip>
                       </Stack>
                     </Stack>
-                    <DefineAdvanced formik={formik} />
                   </FormControl>
                 </Box>
               )}
             </Stack>
+            <Box>
+              <h3>Collateral</h3>
+
+              <Stack pb={3} spacing={2} direction={mobile ? 'column' : 'row'}>
+                <FormControl
+                  fullWidth
+                  error={formik.errors.collateralToken != null}
+                >
+                  <Autocomplete
+                    options={possibleOptions}
+                    value={collateralToken}
+                    onChange={(_, newValue) => {
+                      formik.setFieldValue('collateralToken', newValue)
+                    }}
+                    getOptionLabel={(option: WhitelistCollateralToken) => {
+                      return option?.symbol || ''
+                    }}
+                    onInputChange={(event) => {
+                      if (
+                        event != null &&
+                        event.target != null &&
+                        (isCustomCollateralAssetAllowed || isAdmin)
+                      ) {
+                        setReferenceAssetSearch(
+                          (event.target as any).value || ''
+                        )
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        error={formik.errors.collateralToken != null}
+                        onBlur={formik.handleBlur}
+                        {...params}
+                        label="Collateral Asset"
+                      />
+                    )}
+                  />
+                  {formik.errors.collateralToken != null && (
+                    <FormHelperText>
+                      {`${formik.errors.collateralToken}`}
+                    </FormHelperText>
+                  )}
+                </FormControl>
+                <FormControl
+                  fullWidth
+                  error={formik.errors.collateralBalance != null}
+                >
+                  <TextField
+                    id="collateralBalance"
+                    name="collateralBalance"
+                    label="Collateral Amount"
+                    inputProps={{ step: 1, min: 0 }}
+                    onBlur={formik.handleBlur}
+                    error={formik.errors.collateralBalance != null}
+                    value={formik.values.collateralBalance}
+                    type="number"
+                    onChange={formik.handleChange}
+                  />
+                  {formik.errors.collateralBalance != null && (
+                    <FormHelperText>
+                      {formik.errors.collateralBalance}
+                    </FormHelperText>
+                  )}
+                  {isLoading ? (
+                    <Skeleton
+                      variant="rectangular"
+                      width={210}
+                      height={15}
+                      sx={{
+                        marginLeft: '1rem',
+                        marginTop: '3px',
+                      }}
+                    />
+                  ) : (
+                    <>
+                      {collateralWalletBalance !== null &&
+                        collateralToken !== null && (
+                          <FormHelperText>
+                            Your balance:{' '}
+                            {toExponentialOrNumber(
+                              Number(collateralWalletBalance)
+                            )}{' '}
+                            {collateralToken?.symbol} {'('}
+                            <MaxCollateral
+                              role="button"
+                              onClick={() => {
+                                if (collateralWalletBalance != null) {
+                                  formik.setFieldValue(
+                                    'collateralBalance',
+                                    collateralWalletBalance
+                                  )
+                                }
+                              }}
+                            >
+                              Max
+                            </MaxCollateral>
+                            {')'}
+                          </FormHelperText>
+                        )}
+                    </>
+                  )}
+                </FormControl>
+              </Stack>
+            </Box>
+            <DefineAdvanced formik={formik} />
           </Container>
         </Box>
       </Container>
@@ -655,27 +610,43 @@ export function DefinePoolAttributes({
           <Typography
             style={{ color: 'white' }}
             pb={theme.spacing(2)}
+            pt={theme.spacing(2)}
             variant="subtitle1"
           >
-            Payoff Profile
+            Payoff Profiles
           </Typography>
           {floor != null &&
             cap != null &&
             inflection != null &&
-            tokenSupply != null &&
-            tokenSupply > 0 && (
-              <Box sx={{ maxWidth: '85%' }}>
+            gradient != null && (
+              <Box
+                sx={{
+                  maxWidth: '85%',
+                  marginLeft: 3,
+                  marginBottom: 2,
+                }}
+              >
                 <PayoffProfile
                   floor={floor}
                   cap={cap}
                   inflection={inflection}
+                  gradient={gradient}
                   hasError={hasPaymentProfileError}
-                  collateralBalanceLong={collateralBalanceLong}
-                  collateralBalanceShort={collateralBalanceShort}
-                  tokenSupply={tokenSupply}
+                  referenceAsset={referenceAsset}
+                  collateralToken={
+                    collateralToken ? collateralToken.symbol : null
+                  }
                 />
               </Box>
             )}
+          <Typography
+            pb={theme.spacing(1)}
+            pt={theme.spacing(1)}
+            variant="subtitle1"
+            color="white"
+          >
+            Payoff Scenarios
+          </Typography>
           <Card
             style={{
               maxWidth: theme.spacing(60),
@@ -685,115 +656,78 @@ export function DefinePoolAttributes({
             }}
           >
             <Container>
-              <Typography
-                pb={theme.spacing(1)}
-                pt={theme.spacing(1)}
-                variant="subtitle1"
-              >
-                Payoff Scenarios
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
-                <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} below{' '}
-                  {floor}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  0.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  1.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
-                </strong>{' '}
-                token
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} /> If{' '}
-                {referenceAsset} is{' '}
-                <strong>
-                  {floor < inflection && inflection < cap ? 'at or ' : ''} above{' '}
-                  {cap}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  1.00 {collateralToken != null ? collateralToken.symbol : ''}{' '}
-                  per LONG
-                </strong>{' '}
-                and
-                <strong>
-                  {' '}
-                  0.00 {collateralToken != null
-                    ? collateralToken.symbol
-                    : ''}{' '}
-                  per SHORT
-                </strong>{' '}
-                token
-              </Typography>
-              <Typography
-                fontSize={'0.85rem'}
-                sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
-                style={{ color: 'white' }}
-              >
-                <Circle sx={{ height: 0.02, maxWidth: 0.02 }} />
-                If {referenceAsset} is{' '}
-                <strong>
-                  {' '}
-                  at
-                  {' ' + inflection}{' '}
-                </strong>{' '}
-                on{' '}
-                {expiryTime != null && !isNaN(expiryTime.getTime())
-                  ? expiryTime.toLocaleString().slice(0, 11) +
-                    ' ' +
-                    getDateTime(Number(expiryTime) / 1000).slice(11, 19) +
-                    ' ' +
-                    userTimeZone()
-                  : ''}
-                , the payout will be{' '}
-                <strong>
-                  {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  LONG
-                </strong>{' '}
-                and{' '}
-                <strong>
-                  {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
-                  {collateralToken != null ? collateralToken.symbol : ''} per
-                  SHORT
-                </strong>{' '}
-                token
-              </Typography>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowUpOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /LONG
+                  </strong>{' '}
+                  and
+                  <strong>
+                    {' '}
+                    1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap
+                    ? 'at or '
+                    : ''} below {floor}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowRightOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    1.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /LONG
+                  </strong>{' '}
+                  and
+                  <strong>
+                    {' '}
+                    0.00 {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is{' '}
+                  {floor < inflection && inflection < cap
+                    ? 'at or '
+                    : ''} above {cap}{' '}
+                </Typography>
+              </Stack>
+              <Stack direction={'row'}>
+                <KeyboardDoubleArrowDownOutlinedIcon
+                  sx={{ mt: theme.spacing(2), mr: theme.spacing(2) }}
+                />
+                <Typography
+                  fontSize={'0.85rem'}
+                  sx={{ pb: theme.spacing(2), mt: theme.spacing(2) }}
+                  style={{ color: 'white' }}
+                >
+                  <strong>
+                    {gradient.toString() !== '' ? gradient.toFixed(2) : 0}{' '}
+                    {collateralToken != null ? collateralToken.symbol : ''}/LONG
+                  </strong>{' '}
+                  and{' '}
+                  <strong>
+                    {gradient.toString() !== '' ? (1 - gradient).toFixed(2) : 1}{' '}
+                    {collateralToken != null ? collateralToken.symbol : ''}
+                    /SHORT
+                  </strong>{' '}
+                  token if the reported outcome is {inflection}
+                </Typography>
+              </Stack>
             </Container>
           </Card>
         </Stack>

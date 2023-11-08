@@ -1,6 +1,6 @@
+/* eslint-disable prettier/prettier */
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { BigNumber, providers } from 'ethers'
-import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils'
 import {
   FeeRecipient,
   Pool,
@@ -15,9 +15,24 @@ import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import request from 'graphql-request'
 import { RootState } from './Store'
-import { get0xOpenOrders } from '../DataService/OpenOrders'
-import { config, divaGovernanceAddress } from '../constants'
-import { useConnectionContext } from '../hooks/useConnectionContext'
+import {
+  getAddress,
+  get0xOpenOrders,
+  getOrderbookPrices,
+} from '../DataService/OpenOrders'
+import {
+  OrderbookPriceRequest,
+  OrderOutputType,
+  PoolInfoType,
+} from '../Models/orderbook'
+import {
+  config,
+  DEFAULT_MARKETS_CREATED_BY,
+  TRADING_FEE_RECIPIENT,
+  NULL_ADDRESS,
+  DEFAULT_TAKER_TOKEN_FEE,
+  DEFAULT_THRESHOLD,
+} from '../constants'
 
 type RequestState = 'pending' | 'fulfilled' | 'rejected'
 
@@ -64,6 +79,7 @@ export const initialState: AppStateByChain = {
   1: defaultAppState,
   3: defaultAppState,
   4: defaultAppState,
+  5: defaultAppState,
   42: defaultAppState,
   137: defaultAppState,
   80001: defaultAppState,
@@ -118,12 +134,15 @@ export const fetchUnderlyingPrice = createAsyncThunk(
 export const fetchPool = createAsyncThunk(
   'app/pool',
   async ({ graphUrl, poolId }: { graphUrl: string; poolId: string }) => {
-    const res = await request<{ pool: Pool }>(
-      graphUrl,
-      queryPool(parseInt(poolId))
-    )
+    try {
 
-    return res.pool
+      const res = await request<{ pool: Pool }>(graphUrl, queryPool(poolId).query, queryPool(poolId).variables)
+      return res.pool
+    } catch (err) {
+      console.error(err)
+      // handle the error further here, or throw it to be handled by the calling code
+    }
+
   }
 )
 
@@ -169,39 +188,105 @@ export const fetchPools = createAsyncThunk(
     }
 
     if (config[chainId] == null) {
-      console.error(`constants for chainId: "${chainId}" are not configured`)
+      console.error(`constants for chainId: '${chainId}' are not configured`)
       return { pools: [] }
     }
 
     const graphUrl = config[chainId].divaSubgraph
 
-    let res: Pool[]
+    let pools: Pool[]
 
     try {
       const result = await request(
         graphUrl,
         queryPools(
-          Math.max(page, 0) * pageSize,
-          pageSize,
+          (Math.max(page, 0) * pageSize) / 2, // Because there are 2 rows (long and short) in the table for every pool
+          pageSize / 2, // Because there are 2 rows (long and short) in the table for every pool
           createdBy,
           dataProvider
         )
       )
 
-      res = result.pools
+      pools = result.pools
     } catch (err) {
       /**
        * Handle error and fail gracefully
        */
-      console.error(err)
+      console.error(err, 'error is fetching pools')
       return {
         pools: [],
         chainId,
       }
     }
+    const poolInfo: PoolInfoType[] = []
+    pools.map((poolPair: Pool) => {
+      poolInfo.push({
+        baseToken: getAddress(poolPair.longToken.id),
+        quoteToken: getAddress(poolPair.collateralToken.id),
+        poolId: poolPair.id,
+        collateralTokenDecimals: poolPair.collateralToken.decimals,
+      })
+      poolInfo.push({
+        baseToken: getAddress(poolPair.shortToken.id),
+        quoteToken: getAddress(poolPair.collateralToken.id),
+        poolId: poolPair.id,
+        collateralTokenDecimals: poolPair.collateralToken.decimals,
+      })
+    })
+
+    const taker = NULL_ADDRESS
+    const feeRecipient = TRADING_FEE_RECIPIENT
+    const takerTokenFee = DEFAULT_TAKER_TOKEN_FEE
+    const threshold = DEFAULT_THRESHOLD
+    const count = 1
+    const req: OrderbookPriceRequest = {
+      chainId,
+      page,
+      perPage: pageSize,
+      graphUrl,
+      createdBy,
+      taker,
+      feeRecipient,
+      takerTokenFee,
+      threshold,
+      count,
+      poolInfo,
+    }
+    try {
+      const prices: OrderOutputType[] = await getOrderbookPrices(req)
+      // @todo Updated poolId logic in prices
+      // Update price parameters to display market page
+      pools = pools.map((pool: Pool) => {
+        return (pool = {
+          ...pool,
+          prices: {
+            long: prices.filter(
+              (price: OrderOutputType) =>
+                price.poolId === pool.id && price.side === 'Long'
+            )[0],
+            short: prices.filter(
+              (price: OrderOutputType) =>
+                price.poolId === pool.id && price.side === 'Short'
+            )[0],
+          },
+        })
+      })
+    } catch (err) {
+      console.error(err, 'error is fetching pools bid and asks')
+
+      return {
+        pools: pools.map((pool: Pool) => {
+          return (pool = {
+            ...pool,
+            prices: {},
+          })
+        }),
+        chainId,
+      }
+    }
 
     return {
-      pools: res,
+      pools,
       chainId,
     }
   }
@@ -275,6 +360,7 @@ export const appSlice = createSlice({
     })
 
     builder.addCase(fetchPool.fulfilled, (state, action) => {
+      console.log(action.payload)
       addPools(state, [action.payload], state.chainId)
     })
 
@@ -373,10 +459,8 @@ export const selectPayoff = (
     BigNumber.from(pool.floor),
     BigNumber.from(pool.inflection),
     BigNumber.from(pool.cap),
-    BigNumber.from(pool.collateralBalanceLongInitial),
-    BigNumber.from(pool.collateralBalanceShortInitial),
+    BigNumber.from(pool.gradient),
     BigNumber.from(finalReferenceValue),
-    BigNumber.from(pool.supplyInitial),
     pool.collateralToken.decimals
   )
   if (payoff == null) return undefined
@@ -399,32 +483,6 @@ export const selectIntrinsicValue = (
   }
 }
 
-export const selectMaxPayout = (
-  state: RootState,
-  poolId: string,
-  isLong: boolean
-) => {
-  const pool = selectPool(state, poolId)
-  if (pool == null) return undefined
-  return formatEther(
-    BigNumber.from(
-      isLong
-        ? pool.collateralBalanceLongInitial
-        : pool.collateralBalanceShortInitial
-    )
-      .add(
-        BigNumber.from(
-          isLong
-            ? pool.collateralBalanceShortInitial
-            : pool.collateralBalanceLongInitial
-        )
-      )
-      .mul(parseUnits('1', 18 - pool.collateralToken.decimals))
-      .mul(parseEther('1'))
-      .div(BigNumber.from(pool.supplyInitial))
-  )
-}
-
 export const selectOrder = (
   state: RootState,
   poolId: string,
@@ -443,96 +501,94 @@ export const selectToken = (state: RootState, poolId: string) => {
   return pool?.collateralToken
 }
 
-export const selectMaxYield = (
-  state: RootState,
-  poolId: string,
-  isLong: boolean
-) => {
-  const _B = BigNumber
-  const token = selectToken(state, poolId)
-  const maxPayout = selectMaxPayout(state, poolId, isLong)
-  const avgExpectedRate = selectExpectedRate(state)
-  if (maxPayout == null || avgExpectedRate === undefined) return undefined
-  return {
-    buy: parseFloat(
-      formatEther(
-        parseEther(maxPayout).div(
-          parseUnits(String(avgExpectedRate.buy), token.decimals)
-        )
-      )
-    ).toFixed(2),
-    sell: parseFloat(
-      formatEther(
-        parseEther(maxPayout).div(
-          parseUnits(String(avgExpectedRate.sell), token.decimals)
-        )
-      )
-    ).toFixed(2),
-  }
-}
+// QUESTION Seems not to be used anywhere. Remove?
+// export const selectMaxYield = (state: RootState, poolId: string) => {
+//   const _B = BigNumber
+//   const token = selectToken(state, poolId)
+//   const maxPayout = '1'
+//   const avgExpectedRate = selectExpectedRate(state)
+//   if (avgExpectedRate === undefined) return undefined
+//   return {
+//     buy: parseFloat(
+//       formatUnits(
+//         parseUnits(maxPayout, token.decimals).div(
+//           parseUnits(String(avgExpectedRate.buy), token.decimals)
+//         )
+//       )
+//     ).toFixed(2),
+//     sell: parseFloat(
+//       formatUnits(
+//         parseUnits(maxPayout, token.decimals).div(
+//           parseUnits(String(avgExpectedRate.sell), token.decimals)
+//         )
+//       )
+//     ).toFixed(2),
+//   }
+// }
 
-export const selectBreakEven = (
-  state: RootState,
-  poolId: string,
-  isLong: boolean
-) => {
-  const pool = selectPool(state, poolId)
-  if (pool == null) return undefined
-  const usdPrice = selectPrice(state, pool.referenceAsset)
-  if (usdPrice == null) return undefined
-  const be1 = parseEther(usdPrice)
-    .mul(BigNumber.from(pool.inflection))
-    .sub(BigNumber.from(pool.floor))
-    .mul(BigNumber.from(isLong ? pool.supplyLong : pool.supplyShort))
-    .div(
-      BigNumber.from(
-        isLong
-          ? pool.collateralBalanceLongInitial
-          : pool.collateralBalanceShortInitial
-      )
-    )
-    .add(BigNumber.from(pool.floor))
-  const be2 = parseEther(usdPrice)
-    .mul(BigNumber.from(pool.supplyLong))
-    .sub(
-      BigNumber.from(
-        isLong
-          ? pool.collateralBalanceLongInitial
-          : pool.collateralBalanceShortInitial
-      )
-    )
-    .mul(BigNumber.from(pool.cap).sub(BigNumber.from(pool.inflection)))
-    .div(
-      BigNumber.from(
-        isLong
-          ? pool.collateralBalanceShortInitial
-          : pool.collateralBalanceLongInitial
-      )
-    )
-    .add(BigNumber.from(pool.inflection))
-  if (
-    BigNumber.from(pool.floor).lte(be1) &&
-    be1.lte(BigNumber.from(pool.inflection))
-  ) {
-    return formatEther(be1)
-  } else if (
-    BigNumber.from(pool.inflection).lt(be2) &&
-    be2.lte(BigNumber.from(pool.cap))
-  ) {
-    return formatEther(be2)
-  } else {
-    return 'n/a'
-  }
-}
+// QUESTION Seems not to be used anywhere. Remove?
+// export const selectBreakEven = (
+//   state: RootState,
+//   poolId: string,
+//   isLong: boolean
+// ) => {
+//   const pool = selectPool(state, poolId)
+//   if (pool == null) return undefined
+//   const usdPrice = selectPrice(state, pool.referenceAsset)
+//   if (usdPrice == null) return undefined
+//   const be1 = parseUnits(usdPrice)
+//     .mul(BigNumber.from(pool.inflection))
+//     .sub(BigNumber.from(pool.floor))
+//     .mul(BigNumber.from(isLong ? pool.supplyLong : pool.supplyShort))
+//     .div(
+//       BigNumber.from(
+//         isLong
+//           ? pool.collateralBalanceLongInitial
+//           : pool.collateralBalanceShortInitial
+//       )
+//     )
+//     .add(BigNumber.from(pool.floor))
+//   const be2 = parseUnits(usdPrice)
+//     .mul(BigNumber.from(pool.supplyLong))
+//     .sub(
+//       BigNumber.from(
+//         isLong
+//           ? pool.collateralBalanceLongInitial
+//           : pool.collateralBalanceShortInitial
+//       )
+//     )
+//     .mul(BigNumber.from(pool.cap).sub(BigNumber.from(pool.inflection)))
+//     .div(
+//       BigNumber.from(
+//         isLong
+//           ? pool.collateralBalanceShortInitial
+//           : pool.collateralBalanceLongInitial
+//       )
+//     )
+//     .add(BigNumber.from(pool.inflection))
+//   if (
+//     BigNumber.from(pool.floor).lte(be1) &&
+//     be1.lte(BigNumber.from(pool.inflection))
+//   ) {
+//     return formatUnits(be1)
+//   } else if (
+//     BigNumber.from(pool.inflection).lt(be2) &&
+//     be2.lte(BigNumber.from(pool.cap))
+//   ) {
+//     return formatUnits(be2)
+//   } else {
+//     return 'n/a'
+//   }
+// }
 
 export const selectMainPools = (state: RootState) =>
   selectAppStateByChain(state).pools.filter(
-    (p) => p?.createdBy === divaGovernanceAddress.toLowerCase()
+    (p) => p?.createdBy === DEFAULT_MARKETS_CREATED_BY.toLowerCase()
   )
 
 export const selectOtherPools = (state: RootState) =>
   selectAppStateByChain(state).pools.filter(
-    (p) => p?.createdBy !== divaGovernanceAddress.toLowerCase()
+    (p) => p?.createdBy !== DEFAULT_MARKETS_CREATED_BY.toLowerCase()
   )
 
 export const selectChainId = (state: RootState) => state.appSlice.chainId
@@ -542,8 +598,8 @@ export const selectUserAddress = (state: RootState) =>
 
 export const selectUnderlyingPrice =
   (asset: string) =>
-  (state: RootState): string | undefined =>
-    selectAppStateByChain(state).underlyingPrice[asset]
+    (state: RootState): string | undefined =>
+      selectAppStateByChain(state).underlyingPrice[asset]
 
 export const selectFeeRecipients = (state: RootState) =>
   selectAppStateByChain(state).feeRecipients

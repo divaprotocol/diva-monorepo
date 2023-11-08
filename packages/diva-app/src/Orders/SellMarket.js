@@ -1,22 +1,23 @@
-import { IZeroExContract } from '@0x/contract-wrappers'
 import { BigNumber } from 'ethers'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const contractAddress = require('@0x/contract-addresses')
+import { ethers } from 'ethers'
+import ZEROX_ABI from '../abi/IZeroX.json'
 
 export const sellMarketOrder = async (orderData) => {
   let filledOrder = {}
+  const signer = orderData.provider.getSigner()
 
   // Connect to 0x exchange contract
   const address = contractAddress.getContractAddressesForChainOrThrow(
     orderData.chainId
   )
   const exchangeProxyAddress = address.exchangeProxy
-  const exchange = new IZeroExContract(exchangeProxyAddress, window.ethereum)
 
   // Get existing BUY LIMIT orders to fill, already sorted by best price. Note that makerToken = collateral token and takerToken = position token.
   const orders = orderData.existingLimitOrders
 
-  // User input converted from decimal number into an integer with 18 decimals of type BigNumber
+  // User input
   let nbrOptionsToSell = orderData.nbrOptions
 
   // Initialize input arrays for batchFillLimitOrders function
@@ -31,11 +32,25 @@ export const sellMarketOrder = async (orderData) => {
     signatures = fillOrders.map(({ signature, ...rest }) => signature)
     fillOrders = fillOrders.map(({ signature, ...rest }) => rest)
 
-    const response = await exchange
-      .batchFillLimitOrders(fillOrders, signatures, takerAssetFillAmounts, true)
-      .awaitTransactionSuccessAsync({ from: orderData.taker })
-      .catch((err) => console.error('Error logged ' + JSON.stringify(err)))
-    return response
+    const exchange = new ethers.Contract(
+      exchangeProxyAddress,
+      ZEROX_ABI,
+      signer
+    )
+    try {
+      const response = await exchange.batchFillLimitOrders(
+        fillOrders,
+        signatures,
+        takerAssetFillAmounts,
+        true
+      )
+      //check the status of the transaction
+      await orderData.provider.waitForTransaction(response.hash)
+      return response
+    } catch (err) {
+      console.error('Error logged ' + JSON.stringify(err))
+      return err
+    }
   }
 
   let fillOrders = []

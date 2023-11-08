@@ -14,7 +14,7 @@ Optional:
 
 ## Getting started
 
-1. Run `yarn` in this repository to install all dependencies.
+1. Run `yarn` in this repository to install all dependencies. 
 2. Run `yarn dev` to start the application and development server at localhost:3000
 
 This runs the application located at packages/diva-app.
@@ -29,7 +29,3 @@ To work on the app go there and make the changes you want.
 - `yarn build` Builds packages for development
 
 ## Troubleshooting
-
-### Missing abis
-
-If typescript or the subgraphs don't compile because they're missing abis from the @diva/contracts package, go to packages/diva-contract and run `yarn build`.

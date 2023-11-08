@@ -1,7 +1,7 @@
 const Config = require('./config.json')
 const { ethers } = require('hardhat')
 
-const ERC20_ABI = require('@diva/contracts/abis/erc20.json')
+const ERC20_ABI = require('abi/ERC20ABI.json')
 const { parseEther } = require('@ethersproject/units')
 
 const Enmap = require('enmap')

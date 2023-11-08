@@ -25,23 +25,25 @@ import TradeChart from './Graphs/TradeChart'
 import { calcPayoffPerToken } from '../Util/calcPayoffPerToken'
 import { getUnderlyingPrice } from '../lib/getUnderlyingPrice'
 import styled from 'styled-components'
-import { ExpiresInCell } from './Markets/Markets'
+import { ExpiresInCell } from './Markets/ExpiresInCell'
+import { useCustomMediaQuery } from '../hooks/useCustomMediaQuery'
 
 interface Props {
-  row: GridRowModel
+  row: any
 }
 
 interface StyledButtonProps extends ButtonProps {
-  backgroundColor?: string
-  borderColor?: string
+  backgroundcolor: string
+  bordercolor: string
+  ismobile: boolean
 }
 
 const BuyAndSellButton = styled(Button)<StyledButtonProps>(
-  ({ theme, backgroundColor, borderColor }) => ({
-    width: '160px',
+  ({ backgroundcolor, bordercolor, ismobile }) => ({
+    width: `${ismobile ? '120px' : '160px'}`,
     height: '60px',
-    background: backgroundColor,
-    border: `1px solid ${borderColor}`,
+    background: backgroundcolor,
+    border: `1px solid ${bordercolor}`,
     boxShadow: '0px 3px 1px -2px rgba(0, 0, 0, 0.2)',
     filter:
       'drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.14)) drop-shadow(0px 1px 5px rgba(0, 0, 0, 0.12))',
@@ -55,12 +57,15 @@ const BuyAndSellButton = styled(Button)<StyledButtonProps>(
 const PoolCard = ({ row }: Props) => {
   const [dataSourceName, setDataSourceName] = useState('')
   const [checkIcon, setCheckIcon] = useState(true)
-  const [usdPrice, setUsdPrice] = useState('')
-
-  const pool = useAppSelector((state) => selectPool(state, row.Id.substring(1)))
+  const [usdPrice, setUsdPrice] = useState('') // TODO rename as the underlying doesn't need to be an asset priced in USD
+  const pool = useAppSelector((state) =>
+    // Extract the value before the first forward slash ("/") in the path
+    selectPool(state, row.id.match(/^([^/]+)/)?.[0])
+  )
   const theme = useTheme()
   const history = useHistory()
   const dataSource = useWhitelist()
+  const { isMobile } = useCustomMediaQuery()
 
   const IsLong = row.id.split('/')[1] === 'long'
   const decimals = pool.collateralToken.decimals
@@ -92,12 +97,10 @@ const PoolCard = ({ row }: Props) => {
     BigNumber.from(pool.floor),
     BigNumber.from(pool.inflection),
     BigNumber.from(pool.cap),
-    BigNumber.from(pool.collateralBalanceLongInitial),
-    BigNumber.from(pool.collateralBalanceShortInitial),
+    BigNumber.from(pool.gradient),
     pool.statusFinalReferenceValue === 'Open' && usdPrice != ''
       ? parseUnits(usdPrice)
       : BigNumber.from(pool.finalReferenceValue),
-    BigNumber.from(pool.supplyInitial),
     decimals
   )
 
@@ -117,11 +120,11 @@ const PoolCard = ({ row }: Props) => {
   return (
     <Box
       sx={{
-        width: '400px',
-        height: '660px',
+        width: `${isMobile ? theme.spacing(43.75) : theme.spacing(50)}`,
+        height: theme.spacing(82.5),
         border: '1px solid #383838',
         background: theme.palette.background.default,
-        borderRadius: '8px',
+        borderRadius: theme.spacing(1),
         overflow: 'hidden',
       }}
     >
@@ -139,6 +142,8 @@ const PoolCard = ({ row }: Props) => {
         <Box
           sx={{
             display: 'flex',
+            alignItems: 'center',
+            maxWidth: '50%',
           }}
         >
           <Box
@@ -149,16 +154,16 @@ const PoolCard = ({ row }: Props) => {
           >
             <CoinIconPair assetName={row.Icon} />
           </Box>
-          <Tooltip title={row.Icon}>
+          <Tooltip title={row.Underlying}>
             <Typography
-              variant="h2"
+              variant={isMobile ? 'h3' : 'h2'}
               color={'#fff'}
               sx={{
                 maxWidth: '200px',
               }}
               noWrap
             >
-              {row.Icon}
+              {row.Underlying}
             </Typography>
           </Tooltip>
         </Box>
@@ -202,7 +207,7 @@ const PoolCard = ({ row }: Props) => {
         data={row.PayoffProfile}
         refAsset={pool.referenceAsset}
         payOut={pool.collateralToken.symbol}
-        w={380}
+        w={isMobile ? 330 : 380}
         h={220}
         isLong={IsLong}
         currentPrice={currentPrice}
@@ -294,29 +299,32 @@ const PoolCard = ({ row }: Props) => {
       <Stack
         direction="row"
         sx={{
-          justifyContent: 'center',
+          justifyContent: 'space-between',
           marginTop: '16px',
+          alignItems: 'space-between',
+          padding: '0 20px',
         }}
-        spacing={'40px'}
       >
         <BuyAndSellButton
-          backgroundColor="linear-gradient(180deg, rgba(18, 18, 18, 0) -60%, rgba(51, 147, 224, 0.3) 100%)"
-          borderColor="#3393E0"
+          backgroundcolor="linear-gradient(180deg, rgba(18, 18, 18, 0) -60%, rgba(51, 147, 224, 0.3) 100%)"
+          bordercolor="#3393E0"
           onClick={handleBuyAndSellClick}
+          ismobile={isMobile}
         >
           <Stack>
             <div>BUY</div>
-            <div>-</div>
+            <div>{row.Buy}</div>
           </Stack>
         </BuyAndSellButton>
         <BuyAndSellButton
-          backgroundColor="linear-gradient(180deg, rgba(18, 18, 18, 0) -33.33%, rgba(211, 47, 47, 0.6) 100%)"
-          borderColor="#D32F2F"
+          backgroundcolor="linear-gradient(180deg, rgba(18, 18, 18, 0) -33.33%, rgba(211, 47, 47, 0.6) 100%)"
+          bordercolor="#D32F2F"
           onClick={handleBuyAndSellClick}
+          ismobile={isMobile}
         >
           <Stack>
             <div>SELL</div>
-            <div>-</div>
+            <div>{row.Sell}</div>
           </Stack>
         </BuyAndSellButton>
       </Stack>
@@ -336,7 +344,7 @@ const PoolCard = ({ row }: Props) => {
               color: '#3393E0',
             }}
           >
-            -
+            {row.MaxYield.buy}
           </Typography>
         </Box>
         <Box>
@@ -349,7 +357,7 @@ const PoolCard = ({ row }: Props) => {
               color: '#3393E0',
             }}
           >
-            -
+            {row.MaxYield.sell}
           </Typography>
         </Box>
       </Stack>

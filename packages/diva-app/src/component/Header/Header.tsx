@@ -87,10 +87,12 @@ export default function Header() {
   const theme = useTheme()
   const { isMobile } = useCustomMediaQuery()
 
-  const [showBanner, setShowBanner] = useState(true)
+  const [showBanner, setShowBanner] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  useEffect(() => {
+  // APPBar Banner
+  {
+    /* useEffect(() => {
     const data = window.localStorage.getItem('DIVA_BANNER')
     if (data !== null) setShowBanner(JSON.parse(data))
   }, [])
@@ -98,7 +100,8 @@ export default function Header() {
   useEffect(() => {
     window.localStorage.setItem('DIVA_BANNER', JSON.stringify(showBanner))
   }, [showBanner])
-
+*/
+  }
   // close the mobile menu when the screen size changes to desktop
   useEffect(() => {
     if (!isMobile) setIsMobileMenuOpen(false)

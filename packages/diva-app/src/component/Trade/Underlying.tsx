@@ -1,8 +1,8 @@
-import styled from 'styled-components'
-import { Container, Divider, Paper, Stack, useTheme } from '@mui/material'
+import { Box, Divider, Stack, useTheme } from '@mui/material'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
+import Tab from '@mui/material/Tab'
 import CreateOrder from './CreateOrder'
 import { useParams } from 'react-router'
 import { useHistory } from 'react-router-dom'
@@ -11,9 +11,7 @@ import TradeChart from '../Graphs/TradeChart'
 import OptionDetails from './OptionDetails'
 import OptionHeader from './OptionHeader'
 import { config } from '../../constants'
-import Tab from '@mui/material/Tab'
-import React, { useState, useEffect } from 'react'
-import { Liquidity } from '../Liquidity/Liquidity'
+import { useState, useEffect } from 'react'
 import OrdersPanel from './OrdersPanel'
 import { useAppSelector } from '../../Redux/hooks'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
@@ -23,40 +21,44 @@ import { useDispatch } from 'react-redux'
 import {
   fetchPool,
   fetchUnderlyingPrice,
-  selectIsBuy,
   selectPool,
   selectChainId,
   selectUnderlyingPrice,
 } from '../../Redux/appSlice'
-import { formatUnits, parseEther, formatEther } from 'ethers/lib/utils'
+import { formatUnits, formatEther, poll } from 'ethers/lib/utils'
 import { LoadingBox } from '../LoadingBox'
+import { AddLiquidity } from '../Liquidity/AddLiquidity'
+import { RemoveLiquidity } from '../Liquidity/RemoveLiquidity'
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
+import RemoveOutlinedIcon from '@mui/icons-material/RemoveOutlined'
+import { ReactComponent as LongPool } from '../../Images/long-trade-page-icon.svg'
+import { ReactComponent as ShortPool } from '../../Images/short-trade-page-icon.svg'
 
-const LeftCompFlexContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  flex-basis: 100%;
-`
-const LeftDiv = styled.div`
-  width: 60%;
-`
-const RightDiv = styled.div`
-  width: 35%;
-`
+export const fetchIpfs = async (asset, callback) => {
+  try {
+    const response = await fetch(asset)
+    if (!response.ok) throw new Error(response.statusText)
+    const json = await response.json()
+    if (json.title !== undefined) {
+      callback(json.title)
+    }
+  } catch (error) {
+    console.error(`Failed to fetch asset: ${error.message}`)
+  }
+}
+
 export default function Underlying() {
   const history = useHistory()
   const params: { poolId: string; tokenType: string } = useParams()
   const isLong = params.tokenType === 'long'
-  const currentTab =
-    history.location.pathname ===
-    `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity`
-      ? 'liquidity'
-      : history.location.pathname ===
-        `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity/add`
-      ? 'liquidity'
-      : history.location.pathname ===
-        `/${params.poolId}/${isLong ? 'long' : 'short'}/liquidity/remove`
-      ? 'liquidity'
-      : 'trade'
+
+  const pathsToTab = {
+    [`/${params.poolId}/add`]: 'add',
+    [`/${params.poolId}/remove`]: 'remove',
+    [`/${params.poolId}/short`]: 'short',
+  }
+  const currentTab = pathsToTab[history.location.pathname] || 'long'
+
   const [value, setValue] = useState(currentTab)
   const breakEven = useAppSelector((state) => state.stats.breakEven)
   const chainId = useAppSelector(selectChainId)
@@ -66,128 +68,254 @@ export default function Underlying() {
   const exchangeProxy = chainContractAddress.exchangeProxy
   const theme = useTheme()
   const dispatch = useDispatch()
-
-  useEffect(() => {
-    dispatch(
-      fetchPool({
-        graphUrl: config[chainId as number].divaSubgraph,
-        poolId: params.poolId,
-      })
-    )
-  }, [chainId, dispatch, params.poolId])
+  const [headerTitle, setHeaderTitle] = useState<string>('')
 
   const pool = useAppSelector((state) => selectPool(state, params.poolId))
+
+  useEffect(() => {
+    if (!pool) {
+      // Fetch pool if not available in the Redux store, which can happen if the
+      // Trade page is accessed directly via a link and not via the Markets page
+      dispatch(
+        fetchPool({
+          graphUrl: config[chainId as number].divaSubgraph,
+          poolId: params.poolId,
+        })
+      )
+    } else {
+      // Once pool is defined, fetch the referenceAsset.
+      dispatch(fetchUnderlyingPrice(pool.referenceAsset))
+      if (pool.referenceAsset.endsWith('.json')) {
+        fetchIpfs(pool.referenceAsset, setHeaderTitle)
+      }
+    }
+  }, [pool, value, chainId, dispatch, params.poolId])
+
   const currentPrice = useAppSelector(
     selectUnderlyingPrice(pool?.referenceAsset)
   )
-  useEffect(() => {
-    if (pool?.referenceAsset != null)
-      dispatch(fetchUnderlyingPrice(pool.referenceAsset))
-  }, [pool, dispatch])
 
-  if (pool == null) {
+  if (!pool) {
     return <LoadingBox />
   }
 
   const OptionParams = {
-    CollateralBalanceLong: Number(
-      formatUnits(
-        pool.collateralBalanceLongInitial,
-        pool.collateralToken.decimals
-      )
-    ),
-    CollateralBalanceShort: Number(
-      formatUnits(
-        pool.collateralBalanceShortInitial,
-        pool.collateralToken.decimals
-      )
-    ),
+    Gradient: Number(formatUnits(pool.gradient, pool.collateralToken.decimals)),
     Floor: Number(formatEther(pool.floor)),
     Inflection: Number(formatEther(pool.inflection)),
     Cap: Number(formatEther(pool.cap)),
-    TokenSupply: Number(formatEther(pool.supplyInitial)),
     IsLong: isLong,
   }
   const data = generatePayoffChartData(OptionParams, currentPrice)
-  const tokenAddress = isLong ? pool.longToken.id : pool.shortToken.id
+  const tokenAddress = value === 'long' ? pool.longToken.id : pool.shortToken.id
+  const tokenSymbol =
+    value === 'long' ? pool.longToken.symbol : pool.shortToken.symbol
+
   const handleChange = (event: any, newValue: string) => {
-    history.push(`/${params.poolId}/${isLong ? 'long' : 'short'}/` + newValue)
     setValue(newValue)
+    history.push(`/${params.poolId}/${newValue}`)
   }
+
   return (
-    <Container
-      sx={{ paddingTop: '1em', paddingBottom: '3em', minHeight: '140%' }}
-    >
-      <TabContext value={value}>
-        <TabList
-          onChange={handleChange}
-          variant="standard"
-          centered
-          sx={{ mb: theme.spacing(4) }}
-        >
-          <Tab value="trade" label="Trade" />
-          <Tab value="liquidity" label="Liquidity" />
-        </TabList>
-        <TabPanel value="trade">
-          <Stack direction="row" spacing={2}>
-            <LeftDiv>
-              <Stack spacing={2}>
-                <Paper>
-                  <OptionHeader
-                    ReferenceAsset={pool.referenceAsset}
-                    TokenAddress={tokenAddress}
-                    isLong={isLong}
-                    poolId={pool.id}
-                    tokenDecimals={pool.collateralToken.decimals}
-                  />
-                  <OptionDetails pool={pool} isLong={isLong} />
-                </Paper>
-                <Paper>
-                  <TradeChart
-                    data={data}
-                    refAsset={pool.referenceAsset}
-                    currentPrice={currentPrice}
-                    payOut={pool.collateralToken.symbol}
-                    w={650}
-                    h={336}
-                    isLong={OptionParams.IsLong}
-                    breakEven={breakEven}
-                    floor={OptionParams.Floor}
-                    cap={OptionParams.Cap}
-                    mouseHover={true}
-                    showBreakEven={true}
-                  />
-                </Paper>
-                <Paper>
-                  <LeftCompFlexContainer>
-                    <OrdersPanel
-                      option={pool}
-                      tokenAddress={tokenAddress}
-                      exchangeProxy={exchangeProxy}
-                    />
-                  </LeftCompFlexContainer>
-                </Paper>
-              </Stack>
-            </LeftDiv>
-            <RightDiv>
-              <Stack spacing={2}>
-                <Paper>
-                  <CreateOrder
-                    option={pool}
-                    tokenAddress={tokenAddress}
-                    exchangeProxy={exchangeProxy}
-                    chainId={chainId}
-                    provider={provider}
-                  />
-                </Paper>
-              </Stack>
-            </RightDiv>
+    <TabContext value={value}>
+      <Box
+        sx={{
+          paddingTop: '1em',
+          ml: '10px',
+        }}
+      >
+        <OptionHeader
+          ReferenceAsset={pool.referenceAsset}
+          TokenAddress={tokenAddress}
+          tokenSymbol={tokenSymbol}
+          poolId={pool.id}
+          tokenDecimals={pool.collateralToken.decimals}
+          JsonHeaderTitle={headerTitle}
+        />
+        <OptionDetails pool={pool} isLong={isLong} />
+      </Box>
+      <Stack direction="row" mt="40px" ml="28px">
+        <Box mr="20px">
+          <Divider
+            orientation="horizontal"
+            textAlign="left"
+            color="#929292"
+            sx={{
+              '&::before, &::after': {
+                borderColor: '#929292',
+              },
+            }}
+          >
+            Trade
+          </Divider>
+          <TabList
+            onChange={handleChange}
+            variant="standard"
+            sx={{
+              mt: '-10px',
+              height: '48px',
+              alignItems: 'center',
+              borderRight: 1,
+              borderColor: '#929292',
+            }}
+          >
+            <Tab
+              value="long"
+              icon={<LongPool />}
+              iconPosition="start"
+              label="Long"
+              sx={{ color: '#929292' }}
+            />
+            <Tab
+              value="short"
+              icon={<ShortPool />}
+              iconPosition="start"
+              label="Short"
+              sx={{ color: '#929292' }}
+            />
+          </TabList>
+        </Box>
+        <Box>
+          <Divider
+            orientation="horizontal"
+            textAlign="left"
+            color="#929292"
+            sx={{
+              '&::before, &::after': {
+                borderColor: '#929292',
+              },
+            }}
+          >
+            Liquidity
+          </Divider>
+
+          <TabList
+            onChange={handleChange}
+            variant="standard"
+            sx={{
+              mt: '-10px',
+              height: '48px',
+              alignItems: 'center',
+              borderRight: 1,
+              borderColor: '#929292',
+              color: '#929292',
+            }}
+          >
+            <Tab
+              value="add"
+              icon={<AddOutlinedIcon />}
+              iconPosition="start"
+              label="Add"
+              sx={{ color: '#929292' }}
+            />
+            <Tab
+              value="remove"
+              icon={<RemoveOutlinedIcon />}
+              iconPosition="start"
+              label="Remove"
+              sx={{ color: '#929292' }}
+            />
+          </TabList>
+        </Box>
+      </Stack>
+      {/* </Box> */}
+      <Divider orientation="horizontal" sx={{ alignItems: { xl: 'center' } }} />
+      {/* <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: {
+            sx: 'flex-start',
+            md: 'flex-start',
+            lg: 'flex-start',
+            xl: 'center',
+          },
+        }}
+      > */}
+      <TabPanel value="long" sx={{ paddingBottom: '3em' }}>
+        <Stack direction="row" spacing={theme.spacing(15)}>
+          <Stack
+            direction="column"
+            width="50%"
+            /* {{ lg: '50%', xl: '30%' }} */
+            spacing={2}
+          >
+            <TradeChart
+              data={data}
+              refAsset={headerTitle ? headerTitle : pool.referenceAsset}
+              currentPrice={currentPrice}
+              payOut={pool.collateralToken.symbol}
+              w={650}
+              h={336}
+              isLong={OptionParams.IsLong}
+              breakEven={breakEven}
+              floor={OptionParams.Floor}
+              cap={OptionParams.Cap}
+              mouseHover={true}
+              showBreakEven={true}
+            />
+            <OrdersPanel
+              option={pool}
+              tokenAddress={tokenAddress}
+              exchangeProxy={exchangeProxy}
+            />
           </Stack>
-        </TabPanel>
-        <TabPanel value="liquidity">
-          <Liquidity pool={pool} />
-        </TabPanel>
-      </TabContext>
-    </Container>
+          <Box>
+            <CreateOrder
+              option={pool}
+              tokenAddress={tokenAddress}
+              exchangeProxy={exchangeProxy}
+              chainId={chainId}
+              provider={provider}
+            />
+          </Box>
+        </Stack>
+      </TabPanel>
+      <TabPanel value="short" sx={{ paddingBottom: '3em' }}>
+        <Stack direction="row" spacing={theme.spacing(15)}>
+          <Stack
+            direction="column"
+            width="50%" /* {{ lg: '50%', xl: '30%' }} */
+            spacing={2}
+          >
+            <TradeChart
+              data={data}
+              refAsset={headerTitle ? headerTitle : pool.referenceAsset}
+              currentPrice={currentPrice}
+              payOut={pool.collateralToken.symbol}
+              w={650}
+              h={336}
+              isLong={OptionParams.IsLong}
+              breakEven={breakEven}
+              floor={OptionParams.Floor}
+              cap={OptionParams.Cap}
+              mouseHover={true}
+              showBreakEven={true}
+            />
+            <OrdersPanel
+              option={pool}
+              tokenAddress={tokenAddress}
+              exchangeProxy={exchangeProxy}
+            />
+          </Stack>
+          <Box>
+            <CreateOrder
+              option={pool}
+              tokenAddress={tokenAddress}
+              exchangeProxy={exchangeProxy}
+              chainId={chainId}
+              provider={provider}
+            />
+          </Box>
+        </Stack>
+      </TabPanel>
+      <TabPanel value="add">
+        <AddLiquidity pool={pool!} />
+      </TabPanel>
+      <TabPanel value="remove">
+        <RemoveLiquidity pool={pool!} />
+      </TabPanel>
+      {/* </Box> */}
+    </TabContext>
   )
 }

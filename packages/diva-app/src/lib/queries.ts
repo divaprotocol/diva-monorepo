@@ -35,8 +35,8 @@ export type Pool = {
   capacity: string
   challenges: Challenge[]
   collateralBalance: string
-  collateralBalanceLongInitial: string
-  collateralBalanceShortInitial: string
+  collateralBalanceGross: string
+  gradient: string
   collateralToken: CollateralTokenEntity
   dataProvider: string
   expiryTime: string
@@ -46,20 +46,29 @@ export type Pool = {
   inflection: string
   longToken: PositionToken
   shortToken: PositionToken
-  redemptionAmountLongToken: string
-  redemptionAmountShortToken: string
-  redemptionFee: string
+  payoutLong: string
+  payoutShort: string
+  protocolFee: string
   referenceAsset: string
   settlementFee: string
   statusFinalReferenceValue: string
   statusTimestamp: string
   intrinsicValue?: string
-  supplyInitial: string
+  // supplyInitial: string
   supplyLong: string
   supplyShort: string
 
+  // QUESTION add the following missing fields?
+  submissionPeriod: string
+  challengePeriod: string
+  reviewPeriod: string
+  fallbackSubmissionPeriod: string
+  permissionedERC721Token: string
+
   createdBy: string
   createdAt: string
+
+  prices?: any
 }
 
 export type User = {
@@ -87,7 +96,6 @@ export const queryUser = (id: string, pageSize: number, skip: number) => gql`
           floor
           inflection
           cap
-          supplyInitial
           supplyShort
           supplyLong
           expiryTime
@@ -97,8 +105,8 @@ export const queryUser = (id: string, pageSize: number, skip: number) => gql`
             decimals
             symbol
           }
-          collateralBalanceShortInitial
-          collateralBalanceLongInitial
+          collateralBalanceGross
+          gradient
           collateralBalance
           shortToken {
             id
@@ -116,14 +124,19 @@ export const queryUser = (id: string, pageSize: number, skip: number) => gql`
           }
           finalReferenceValue
           statusFinalReferenceValue
-          redemptionAmountLongToken
-          redemptionAmountShortToken
+          payoutLong
+          payoutShort
           statusTimestamp
           dataProvider
-          redemptionFee
+          protocolFee
           settlementFee
           createdBy
           createdAt
+          submissionPeriod
+          challengePeriod
+          reviewPeriod
+          fallbackSubmissionPeriod
+          permissionedERC721Token
           capacity
           expiryTime
           challenges {
@@ -157,7 +170,6 @@ export const queryPools = (
       floor
       inflection
       cap
-      supplyInitial
       supplyShort
       supplyLong
       expiryTime
@@ -167,8 +179,8 @@ export const queryPools = (
         decimals
         symbol
       }
-      collateralBalanceShortInitial
-      collateralBalanceLongInitial
+      collateralBalanceGross
+      gradient
       collateralBalance
       shortToken {
         id
@@ -186,14 +198,19 @@ export const queryPools = (
       }
       finalReferenceValue
       statusFinalReferenceValue
-      redemptionAmountLongToken
-      redemptionAmountShortToken
+      payoutLong
+      payoutShort
       statusTimestamp
       dataProvider
-      redemptionFee
+      protocolFee
       settlementFee
       createdBy
       createdAt
+      submissionPeriod
+      challengePeriod
+      reviewPeriod
+      fallbackSubmissionPeriod
+      permissionedERC721Token
       capacity
       expiryTime
       challenges {
@@ -220,60 +237,69 @@ export const queryFeeRecipients = (address: string) => gql`
   }
 `
 
-export const queryPool = (poolId: number) => gql`
-  {
-    pool(id: ${poolId}) {
-      id
-      referenceAsset
-      floor
-      inflection
-      cap
-      supplyInitial
-      supplyShort
-      supplyLong
-      expiryTime
-      collateralToken {
-        id
-        name
-        decimals
-        symbol
+export const queryPool = (poolId: string) => {
+  return {
+    query: gql`
+      query Pool($poolId: String!) {
+        pool(id: $poolId) {
+          id
+          referenceAsset
+          floor
+          inflection
+          cap
+          supplyShort
+          supplyLong
+          expiryTime
+          collateralToken {
+            id
+            name
+            decimals
+            symbol
+          }
+          collateralBalanceGross
+          gradient
+          collateralBalance
+          shortToken {
+            id
+            name
+            symbol
+            decimals
+            owner
+          }
+          longToken {
+            id
+            name
+            symbol
+            decimals
+            owner
+          }
+          finalReferenceValue
+          statusFinalReferenceValue
+          payoutLong
+          payoutShort
+          statusTimestamp
+          dataProvider
+          protocolFee
+          settlementFee
+          createdBy
+          createdAt
+          submissionPeriod
+          challengePeriod
+          reviewPeriod
+          fallbackSubmissionPeriod
+          permissionedERC721Token
+          capacity
+          expiryTime
+          challenges {
+            challengedBy
+            proposedFinalReferenceValue
+          }
+        }
       }
-      collateralBalanceShortInitial
-      collateralBalanceLongInitial
-      collateralBalance
-      shortToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      longToken {
-        id
-        name
-        symbol
-        decimals
-        owner
-      }
-      finalReferenceValue
-      statusFinalReferenceValue
-      redemptionAmountLongToken
-      redemptionAmountShortToken
-      statusTimestamp
-      dataProvider
-      redemptionFee
-      settlementFee
-      createdBy
-      createdAt
-      capacity
-      expiryTime
-      challenges {
-        challengedBy
-        proposedFinalReferenceValue
-      }
-    }
+    `,
+    variables: { poolId },
   }
-`
+}
 
 export type DataFeed = {
   dataProvider: {
@@ -419,7 +445,7 @@ export const queryWhitelist = gql`
     }
   }
 `
-export const queryChallenge = (poolId: number) => gql`
+export const queryChallenge = (poolId: string) => gql`
   {
     challenges(where: { pool: "${poolId}" }) {
       proposedFinalReferenceValue

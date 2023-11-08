@@ -11,19 +11,52 @@ import {
   FormHelperText,
   FormControlLabel,
   Tooltip,
+  Stack,
+  Container,
+  useTheme,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useCreatePoolFormik } from './formik'
+import { ethers } from 'ethers'
+import { useAppSelector } from '../../Redux/hooks'
+import { selectUserAddress } from '../../Redux/appSlice'
 
 export function DefineAdvanced({
   formik,
 }: {
   formik: ReturnType<typeof useCreatePoolFormik>
 }) {
-  const [expanded, setExpanded] = useState(false)
-  const [unlimited, setUnlimited] = useState(true)
-  const { tokenSupply, capacity } = formik.values
+  const theme = useTheme()
+  const { capacity, longRecipient, shortRecipient } = formik.values
+  const userAddress = useAppSelector(selectUserAddress)
+  const [expanded, setExpanded] = useState(
+    capacity != 'Unlimited' ||
+      (longRecipient !== undefined &&
+        userAddress !== undefined &&
+        longRecipient.toLowerCase() !== userAddress.toLowerCase()) ||
+      (longRecipient !== undefined &&
+        userAddress !== undefined &&
+        longRecipient.toLowerCase() !== userAddress.toLowerCase())
+  )
+  const [unlimited, setUnlimited] = useState(capacity == 'Unlimited')
+
   const [mobile, setMobile] = useState(false)
+  const [editTaker, setEditTaker] = useState(
+    shortRecipient !== undefined &&
+      userAddress !== undefined &&
+      shortRecipient.toLowerCase() !== userAddress.toLowerCase()
+  )
+  const [editMaker, setEditMaker] = useState(
+    longRecipient !== undefined &&
+      userAddress !== undefined &&
+      longRecipient.toLowerCase() !== userAddress.toLowerCase()
+  )
+
+  useEffect(() => {
+    formik.setFieldValue('shortRecipient', userAddress)
+    formik.setFieldValue('longRecipient', userAddress)
+  }, [userAddress])
+
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
@@ -37,11 +70,6 @@ export function DefineAdvanced({
         ..._values,
         capacity: 'Unlimited',
       }))
-    } else {
-      formik.setValues((_values) => ({
-        ..._values,
-        capacity: formik.values.collateralBalance,
-      }))
     }
   }, [unlimited, formik.values.collateralBalance])
 
@@ -50,7 +78,7 @@ export function DefineAdvanced({
       expanded={expanded}
       onChange={() => setExpanded(!expanded)}
       sx={{
-        maxWidth: mobile ? '100%' : '48%',
+        maxWidth: !mobile ? '95%' : '48%',
         background: 'none',
         padding: 0,
         borderTop: 'none',
@@ -71,36 +99,112 @@ export function DefineAdvanced({
       </AccordionSummary>
       <AccordionDetails sx={{ padding: 0 }}>
         <Box pb={3}>
-          <FormControl fullWidth error={formik.errors.capacity != null}>
-            <Tooltip
-              placement="top-end"
-              title="Maximum collateral that the pool can accept."
-            >
-              <TextField
-                name="capacity"
-                error={formik.errors.capacity != null}
-                disabled={unlimited}
-                onBlur={formik.handleBlur}
-                id="capacity"
-                label="Maximum Pool Capacity"
-                value={capacity}
-                helperText={
-                  formik.errors.capacity != null ? formik.errors.capacity : ''
+          <Stack direction={mobile ? 'column' : 'row'}>
+            <Container sx={{ margin: -2, padding: 1 }}>
+              <FormControl
+                fullWidth
+                error={formik.errors.minTakerContribution != null}
+              >
+                <Tooltip placement="top-end" title="Long Recipient Address">
+                  <TextField
+                    name="longRecipient"
+                    error={formik.errors.longRecipient != null}
+                    disabled={!editMaker}
+                    onBlur={formik.handleBlur}
+                    id="longRecipient"
+                    label="Long Recipient Address"
+                    value={formik.values.longRecipient}
+                    helperText={
+                      formik.errors.longRecipient != null
+                        ? formik.errors.longRecipient
+                        : ''
+                    }
+                    type="string"
+                    onChange={(event) => {
+                      formik.setFieldValue('longRecipient', event.target.value)
+                    }}
+                  />
+                </Tooltip>
+              </FormControl>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    defaultChecked={editMaker}
+                    onChange={() => {
+                      formik.setFieldValue('longRecipient', userAddress)
+                      setEditMaker(!editMaker)
+                    }}
+                  />
                 }
-                type="number"
-                onChange={formik.handleChange}
+                label="Edit"
               />
-            </Tooltip>
-          </FormControl>
-          <FormControlLabel
-            control={
-              <Checkbox
-                defaultChecked={unlimited}
-                onChange={() => setUnlimited(!unlimited)}
+              <FormControl fullWidth error={formik.errors.capacity != null}>
+                <Tooltip
+                  placement="top-end"
+                  title="Maximum collateral that the pool can accept."
+                >
+                  <TextField
+                    name="capacity"
+                    error={formik.errors.capacity != null}
+                    disabled={unlimited}
+                    onBlur={formik.handleBlur}
+                    id="capacity"
+                    label="Maximum Pool Capacity"
+                    value={capacity}
+                    helperText={
+                      formik.errors.capacity != null
+                        ? formik.errors.capacity
+                        : ''
+                    }
+                    type="number"
+                    onChange={formik.handleChange}
+                  />
+                </Tooltip>
+              </FormControl>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    defaultChecked={unlimited}
+                    onChange={() => {
+                      formik.setFieldValue('capacity', 'Unlimited')
+                      setUnlimited(!unlimited)
+                    }}
+                  />
+                }
+                label="Unlimited"
               />
-            }
-            label="Unlimited"
-          />
+            </Container>
+            <Container sx={{ margin: -3, padding: 2, pr: 4, ml: -1.5, mr: -8 }}>
+              <FormControl fullWidth error={formik.errors.takerAddress != null}>
+                <Tooltip placement="top-end" title="Short Recipient Address">
+                  <TextField
+                    name="shortRecipientAddress"
+                    disabled={!editTaker}
+                    id="shortRecipientAddress"
+                    label="Short Recipient Address"
+                    value={formik.values.shortRecipient}
+                    onChange={(event) => {
+                      formik.setFieldValue('shortRecipient', event.target.value)
+                    }}
+                    type="text"
+                  />
+                </Tooltip>
+              </FormControl>
+              <FormControlLabel
+                sx={{ pb: theme.spacing(2) }}
+                control={
+                  <Checkbox
+                    defaultChecked={editTaker}
+                    onChange={() => {
+                      formik.setFieldValue('shortRecipient', userAddress)
+                      setEditTaker(!editTaker)
+                    }}
+                  />
+                }
+                label="Edit"
+              />
+            </Container>
+          </Stack>
         </Box>
       </AccordionDetails>
     </Accordion>

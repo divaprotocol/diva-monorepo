@@ -2,6 +2,9 @@ import {
   Alert,
   Box,
   Button,
+  FormControl,
+  InputLabel,
+  Select,
   Snackbar,
   Stack,
   Step,
@@ -16,7 +19,7 @@ import { useCreatePoolFormik } from './formik'
 import { SelectDataFeedProvider } from './SelectDataFeedProvider'
 import { LoadingButton } from '@mui/lab'
 import { ethers } from 'ethers'
-import ERC20 from '@diva/contracts/abis/erc20.json'
+import ERC20 from '../../abi/ERC20ABI.json'
 import { useEffect, useState } from 'react'
 import { useConnectionContext } from '../../hooks/useConnectionContext'
 import { ApproveActionButtons } from '../ApproveActionButtons'
@@ -24,6 +27,10 @@ import { useHistory } from 'react-router-dom'
 import { Add } from '@mui/icons-material'
 import { Success } from './Success'
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
+import MenuItem from '@mui/material/MenuItem'
+import { SelectChangeEvent } from '@mui/material/Select'
+import { DefineOfferAttributes } from './DefineOfferAtributes'
+import { FillOffer } from './FillOffer'
 
 export function CreatePool() {
   const [decimal, setDecimal] = useState(18)
@@ -32,6 +39,7 @@ export function CreatePool() {
   const { provider } = useConnectionContext()
   const history = useHistory()
   const [mobile, setMobile] = useState(false)
+  const [configPicked, setConfigPicked] = useState<string>('createpool')
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)
@@ -44,16 +52,26 @@ export function CreatePool() {
   let step = null
   switch (formik.values.step) {
     case 1:
-      step = <DefinePoolAttributes formik={formik} />
+      {
+        configPicked === 'createpool' &&
+          (step = <DefinePoolAttributes formik={formik} />)
+      }
+      {
+        configPicked === 'createoffer' &&
+          (step = <DefineOfferAttributes formik={formik} />)
+      }
+      {
+        configPicked === 'filloffer' && (step = <FillOffer formik={formik} />)
+      }
       break
     case 2:
       step = <SelectDataFeedProvider formik={formik} />
       break
     case 3:
-      step = <ReviewAndSubmit formik={formik} />
+      step = <ReviewAndSubmit formik={formik} transaction={configPicked} />
       break
     case 4:
-      step = <Success formik={formik} />
+      step = <Success formik={formik} transactionType={configPicked} />
       break
   }
   useEffect(() => {
@@ -67,26 +85,14 @@ export function CreatePool() {
         setDecimal(decimals)
       })
     }
-  }, [formik.values.collateralToken])
-
+  }, [formik.values.collateralToken, provider]) // provider trigger used to have the decimals updated on Create page open
+  const handleConfigPick = (event: SelectChangeEvent) => {
+    setConfigPicked(event.target.value)
+  }
   // actions after pool is successfully created
   const handlePoolSuccess = () => {
     formik.setFieldValue('step', formik.values.step + 1, true)
   }
-  const arrowSvg = (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M12 4L10.59 5.41L16.17 11H4V13H16.17L10.59 18.59L12 20L20 12L12 4Z"
-        fill="white"
-      />
-    </svg>
-  )
 
   return (
     <Box>
@@ -98,7 +104,9 @@ export function CreatePool() {
         }}
       >
         <Add style={{ fontSize: 34, padding: 20, paddingRight: 10 }} />
-        <h2> Create Pool</h2>
+        {configPicked === 'createpool' && <h2> Create Pool</h2>}
+        {configPicked === 'createoffer' && <h2> Create Offer</h2>}
+        {configPicked === 'filloffer' && <h2> Fill Offer</h2>}
       </Box>
       <Container maxWidth="xl">
         <Box pt={5} pb={10}>
@@ -111,22 +119,54 @@ export function CreatePool() {
             alternativeLabel
           >
             <Step>
-              <StepLabel>Pool</StepLabel>
+              <StepLabel>
+                {configPicked === 'filloffer' ? 'Upload' : 'Pool'}
+              </StepLabel>
             </Step>
-            <Step>
-              <StepLabel>Oracle</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>Review</StepLabel>
-            </Step>
+            {configPicked !== 'filloffer' && (
+              <Step>
+                <StepLabel>Oracle</StepLabel>
+              </Step>
+            )}
+            {configPicked === 'createpool' && (
+              <Step>
+                <StepLabel>Review</StepLabel>
+              </Step>
+            )}
+            {configPicked === 'createoffer' && (
+              <Step>
+                <StepLabel>Sign</StepLabel>
+              </Step>
+            )}
+            {configPicked === 'filloffer' && (
+              <Step>
+                <StepLabel>Fill</StepLabel>
+              </Step>
+            )}
           </Stepper>
+          <Stack direction="row" justifyContent="end">
+            {formik.values.step === 1 && (
+              <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                <Select
+                  labelId="create-select-label"
+                  id="create-select-label"
+                  value={configPicked}
+                  onChange={handleConfigPick}
+                >
+                  <MenuItem value={'createpool'}>Create Pool</MenuItem>
+                  <MenuItem value={'createoffer'}>Create Offer</MenuItem>
+                  <MenuItem value={'filloffer'}>Fill Offer</MenuItem>
+                </Select>
+              </FormControl>
+            )}
+          </Stack>
           <Box pt={8}>
             {formik.status != null && (
               <Alert severity="info">{formik.status}</Alert>
             )}
             {step}
           </Box>
-          {!formik.isValid && (
+          {!formik.isValid && formik.values.step < 4 && (
             <Box pb={3} pt={2}>
               {Object.keys(formik.errors).map((key) => (
                 <Box pt={2} key={key}>
@@ -161,31 +201,38 @@ export function CreatePool() {
             {formik.values.step === 3 ? (
               <ApproveActionButtons
                 collateralTokenAddress={formik.values.collateralToken.id}
-                onTransactionSuccess={handlePoolSuccess}
+                onTransactionSuccess={() => handlePoolSuccess()}
                 pool={formik.values}
                 decimal={decimal}
-                textFieldValue={formik.values.collateralBalance}
-                transactionType={'create'}
+                textFieldValue={formik.values.collateralBalance.toString()}
+                transactionType={configPicked}
+                formik={formik}
               />
             ) : formik.values.step === 4 ? (
-              <Button
-                variant="text"
-                sx={{
-                  mt: theme.spacing(8),
-                  ml: theme.spacing(mobile ? 35 : 115),
-                }}
-                onClick={() => {
-                  history.push('/dashboard/mypositions')
-                }}
-              >
-                My Positions
-                <ArrowForwardOutlinedIcon sx={{ ml: theme.spacing(1) }} />
-              </Button>
+              configPicked !== 'filloffer' &&
+              configPicked !== 'createoffer' && (
+                <Button
+                  variant="text"
+                  sx={{
+                    mt: theme.spacing(8),
+                    ml: theme.spacing(mobile ? 10 : 115),
+                  }}
+                  onClick={() => {
+                    history.push('/dashboard/mypositions')
+                  }}
+                >
+                  My Positions
+                  <ArrowForwardOutlinedIcon sx={{ ml: theme.spacing(1) }} />
+                </Button>
+              )
             ) : (
               <LoadingButton
                 variant="contained"
                 onClick={() => {
                   formik.handleSubmit()
+                  if (configPicked === 'filloffer') {
+                    formik.setFieldValue('step', formik.values.step + 1, true)
+                  }
                 }}
                 sx={{ width: theme.spacing(16) }}
                 loading={

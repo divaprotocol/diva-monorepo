@@ -125,6 +125,7 @@ export const WhiteText = styled.div`
   aligned: left;
   font-size: 16px;
   color: white;
+  justify-items: center;
 `
 
 export const GreenText = styled.div`

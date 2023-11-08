@@ -15,14 +15,12 @@ import { config } from '../../constants'
 import { useWhitelist } from '../../hooks/useWhitelist'
 import { WhitelistQueryResponse, queryWhitelist } from '../../lib/queries'
 import { useCreatePoolFormik } from './formik'
-import {
-  EtherscanLinkType,
-  getEtherscanLink,
-} from '../../Util/getEtherscanLink'
+import { EtherscanLinkType, getExploreLink } from '../../Util/getEtherscanLink'
 import { getShortenedAddress } from '../../Util/getShortenedAddress'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useAppSelector } from '../../Redux/hooks'
-import { selectChainId } from '../../Redux/appSlice'
+import { selectChainId, selectUserAddress } from '../../Redux/appSlice'
+import { isAdminUser } from '../../Util/utils'
 const linkSVG = (
   <svg
     width="16"
@@ -32,8 +30,8 @@ const linkSVG = (
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M3.33333 3.33333V12.6667H12.6667V8H14V12.6667C14 13.4 13.4 14 12.6667 14H3.33333C2.59333 14 2 13.4 2 12.6667V3.33333C2 2.6 2.59333 2 3.33333 2H8V3.33333H3.33333ZM9.33333 3.33333V2H14V6.66667H12.6667V4.27333L6.11333 10.8267L5.17333 9.88667L11.7267 3.33333H9.33333Z"
       fill="#3393E0"
     />
@@ -48,6 +46,7 @@ export function SelectDataFeedProvider({
   const { referenceAsset } = formik.values
   const whitelist = useWhitelist()
   const chainId = useAppSelector(selectChainId)
+  const userAddress = useAppSelector(selectUserAddress)
   const matchingDataFeedProviders = whitelist.dataProviders.filter((p) =>
     p.dataFeeds.some((f) => f.referenceAssetUnified === referenceAsset)
   )
@@ -98,6 +97,16 @@ export function SelectDataFeedProvider({
     )
   }
 
+  const isCustomDataProviderAllowed = useMemo(
+    () => config[chainId].isCustomDataProviderAllowed,
+    [chainId]
+  )
+
+  const isAdmin = useMemo(
+    () => isAdminUser(userAddress, chainId, config),
+    [userAddress, chainId]
+  )
+
   return (
     <Stack direction={mobile ? 'column' : 'row'} spacing={theme.spacing(2)}>
       <Container>
@@ -134,7 +143,11 @@ export function SelectDataFeedProvider({
                   />
                 )}
                 onInputChange={(event) => {
-                  if (event != null && event.target != null) {
+                  if (
+                    event != null &&
+                    event.target != null &&
+                    (isCustomDataProviderAllowed || isAdmin)
+                  ) {
                     formik.setFieldValue(
                       'dataProvider',
                       (event.target as any).value || '',
@@ -186,7 +199,7 @@ export function SelectDataFeedProvider({
                 underline={'none'}
                 rel="noopener noreferrer"
                 target="_blank"
-                href={getEtherscanLink(
+                href={getExploreLink(
                   chainId,
                   formik.values.dataProvider,
                   EtherscanLinkType.ADDRESS

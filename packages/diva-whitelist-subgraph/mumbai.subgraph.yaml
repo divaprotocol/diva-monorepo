@@ -1,8 +1,8 @@
-specVersion: 0.0.2
+specVersion: 0.0.4
 schema:
   file: ./schema.graphql
 dataSources:
-  - kind: ethereum
+  - kind: ethereum/contract
     name: DIVAWhitelist
     network: mumbai
     source:
@@ -11,7 +11,7 @@ dataSources:
       startBlock: 26436789
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - DataProviderAdded
@@ -24,9 +24,9 @@ dataSources:
         - CollateralTokenDeleted
       abis:
         - name: Erc20Token
-          file: ../diva-contracts/abis/erc20.json
+          file: ./abi/IERC20.json
         - name: DIVAWhitelist
-          file: ./DIVAWhitelist.json
+          file: ./abi/IDIVAWhitelist.json
       eventHandlers:
         - event: DataProviderAdded(indexed address)
           handler: handleDataProviderAdded

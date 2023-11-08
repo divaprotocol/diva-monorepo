@@ -1,0 +1,55 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: DivaDiamond
+    network: sepolia
+    source:
+      address: "0x2C9c47E7d254e493f02acfB410864b9a86c28e1D"
+      abi: DivaDiamond
+      startBlock: 3624462
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Challenge
+        - CollateralToken
+        - FeeRecipient
+        - FeeRecipientCollateralToken
+        - PositionToken
+        - UserPositionTokens
+        - DIVAOfferFill
+      abis:
+        - name: DivaDiamond
+          file: ./abi/IDIVA.json
+        - name: Erc20Token
+          file: ./abi/IERC20.json
+        - name: PositionTokenABI
+          file: ./abi/IPositionToken.json
+        - name: PermissionedPositionTokenABI
+          file: ./abi/IPermissionedPositionToken.json
+      eventHandlers:
+        - event: LiquidityAdded(indexed bytes32,indexed address,indexed address,uint256)
+          handler: handleLiquidityAdded
+        - event: LiquidityRemoved(indexed bytes32,indexed address,indexed address,uint256)
+          handler: handleLiquidityRemoved
+        - event: PoolIssued(indexed bytes32,indexed address,indexed address,uint256,address)
+          handler: handlePoolIssued
+        - event: StatusChanged(indexed uint8,indexed address,indexed bytes32,uint256)
+          handler: handleStatusChanged
+        - event: FeeClaimAllocated(indexed bytes32,indexed address,uint256)
+          handler: handleFeeClaimAllocated
+        - event: FeeClaimed(indexed address,indexed address,uint256)
+          handler: handleFeeClaimed
+        - event: FeeClaimTransferred(indexed address,indexed address,indexed address,uint256)
+          handler: handleFeeClaimTransferred
+        - event: PositionTokenRedeemed(indexed bytes32,indexed address,uint256,uint256,indexed address)
+          handler: handlePositionTokenRedeemed
+      file: ./src/mapping.ts
+  
+  # 0x protocol is not available on Sepolia.
+  # Check the following link for available networks:
+  # https://github.com/0xProject/protocol/blob/development/packages/contract-addresses/addresses.json
