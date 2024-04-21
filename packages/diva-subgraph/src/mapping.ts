@@ -23,6 +23,7 @@ import {
   UserPositionToken,
   User,
   NativeOrderFill,
+  Liquidity,
 } from "../generated/schema";
 
 // @todo Add in subgraph yml file
@@ -335,6 +336,16 @@ function handleFeeClaimEvent(
 export function handleLiquidityAdded(event: LiquidityAdded): void {
   log.info("handleLiquidityAdded", []);
 
+  // Update Liquidity entity. The Liquidity entity already exists at this point, hence 
+  // no existence check needed here.
+  let liquidityEntity = Liquidity.load(event.params.poolId.toHexString());
+  liquidityEntity.longTokenHolder = event.params.longRecipient;
+  liquidityEntity.shortTokenHolder = event.params.shortRecipient;
+  liquidityEntity.collateralAmount = event.params.collateralAmount;
+  liquidityEntity.eventType = "Added";
+  liquidityEntity.timestamp = event.block.timestamp;
+  liquidityEntity.save();
+
   // Update pool parameters
   handleLiquidityEvent(
     event.params.poolId,
@@ -356,6 +367,16 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
 export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   log.info("handleLiquidityRemoved", []);
 
+  // Update Liquidity entity. The Liquidity entity already exists at this point, hence 
+  // no existence check needed here.
+  let liquidityEntity = Liquidity.load(event.params.poolId.toHexString());
+  liquidityEntity.longTokenHolder = event.params.longTokenHolder;
+  liquidityEntity.shortTokenHolder = event.params.shortTokenHolder;
+  liquidityEntity.collateralAmount = event.params.collateralAmount;
+  liquidityEntity.eventType = "Removed";
+  liquidityEntity.timestamp = event.block.timestamp;
+  liquidityEntity.save();
+
   // Update pool parameters
   handleLiquidityEvent(
     event.params.poolId,
@@ -376,6 +397,16 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
  */
 export function handlePoolIssued(event: PoolIssued): void {
   log.info("handlePoolIssued fired", []);
+
+  // Update Liquidity entity. The Liquidity entity doesn't exist at some point, hence a new one 
+  // has to be created, no existence check needed
+  let liquidityEntity = new Liquidity(event.params.poolId.toHexString())
+  liquidityEntity.longTokenHolder = event.params.longRecipient;
+  liquidityEntity.shortTokenHolder = event.params.shortRecipient;
+  liquidityEntity.collateralAmount = event.params.collateralAmount;
+  liquidityEntity.eventType = "Issued";
+  liquidityEntity.timestamp = event.block.timestamp;
+  liquidityEntity.save();
 
   // Update pool parameters
   handleLiquidityEvent(

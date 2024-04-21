@@ -85,6 +85,10 @@ const expiryOrderTime = [
     value: 60 * 24,
     label: '1 Day',
   },
+  {
+    value: 60 * 24 * 365,
+    label: '1 Year',
+  },
 ]
 
 const ZERO = BigNumber.from(0)

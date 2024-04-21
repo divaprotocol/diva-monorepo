@@ -209,10 +209,18 @@ export const config: { [key: number]: SingleConfig } = {
         symbol: 'PILOT',
         decimals: 18,
       },
+      {
+        id: '0x40caD342a67Bf49A2c384203025ad1eBEE1E30c5',
+        name: 'dUSD',
+        symbol: 'dUSD',
+        decimals: 18,
+      },
     ],
     adminAddresses: [
-      '0x3E50a9F4DC9CCF7aFaBb7337cf57D63dFa12acc0',
+      '0xa0eed79B4F55a55cdFAA8F4cCaf4b1DEbee5FB69',
       '0x1062CCC9F9a4bBcf565799683b6c00eA525ECb9F',
+      '0xd288B4A23ECc79Eb4bb4661147f3AB3294919F54',
+      '0x9AdEFeb576dcF52F5220709c1B267d89d5208D78',
     ],
     dataProviders: [
       {

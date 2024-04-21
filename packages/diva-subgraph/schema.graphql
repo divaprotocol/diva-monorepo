@@ -122,3 +122,14 @@ type DIVAOfferFill @entity {
   pool: Pool!
   timestamp: BigInt!
 }
+
+# Entity tracking the changes in liquidity
+type Liquidity @entity {
+  id: ID! # original -> poolId
+  longTokenHolder: Address!
+  shortTokenHolder: Address!
+  collateralAmount: BigInt!
+  eventType: String! # Could be "Issued", "Added", or "Removed"
+  timestamp: BigInt! # Block timestamp
+}
+
