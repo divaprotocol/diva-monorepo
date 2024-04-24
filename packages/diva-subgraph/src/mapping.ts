@@ -587,6 +587,7 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     nativeOrderFillEntity.takerToken = event.params.takerToken;
     nativeOrderFillEntity.makerTokenFilledAmount = event.params.makerTokenFilledAmount;
     nativeOrderFillEntity.takerTokenFilledAmount = event.params.takerTokenFilledAmount;
+    nativeOrderFillEntity.takerTokenFeeFilledAmount = event.params.takerTokenFeeFilledAmount;
     nativeOrderFillEntity.timestamp = event.block.timestamp;
     nativeOrderFillEntity.save();
   }

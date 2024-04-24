@@ -104,6 +104,7 @@ type NativeOrderFill @entity {
   takerToken: Bytes!
   makerTokenFilledAmount: BigInt!
   takerTokenFilledAmount: BigInt!
+  takerTokenFeeFilledAmount: BigInt!
   timestamp: BigInt!
 }
 
