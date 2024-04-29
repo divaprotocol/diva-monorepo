@@ -336,9 +336,11 @@ function handleFeeClaimEvent(
 export function handleLiquidityAdded(event: LiquidityAdded): void {
   log.info("handleLiquidityAdded", []);
 
-  // Update Liquidity entity. The Liquidity entity already exists at this point, hence 
-  // no existence check needed here.
+  // Log liquidity addition event in Liquidity entity
   let liquidityEntity = Liquidity.load(event.params.poolId.toHexString());
+  if (!liquidityEntity) {
+    liquidityEntity = new Liquidity(event.params.poolId.toHexString());
+  }
   liquidityEntity.longTokenHolder = event.params.longRecipient;
   liquidityEntity.shortTokenHolder = event.params.shortRecipient;
   liquidityEntity.collateralAmount = event.params.collateralAmount;
@@ -367,9 +369,11 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
 export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   log.info("handleLiquidityRemoved", []);
 
-  // Update Liquidity entity. The Liquidity entity already exists at this point, hence 
-  // no existence check needed here.
+  // Log liquidity removal event in Liquidity entity
   let liquidityEntity = Liquidity.load(event.params.poolId.toHexString());
+  if (!liquidityEntity) {
+    liquidityEntity = new Liquidity(event.params.poolId.toHexString());
+  }
   liquidityEntity.longTokenHolder = event.params.longTokenHolder;
   liquidityEntity.shortTokenHolder = event.params.shortTokenHolder;
   liquidityEntity.collateralAmount = event.params.collateralAmount;
@@ -398,9 +402,11 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
 export function handlePoolIssued(event: PoolIssued): void {
   log.info("handlePoolIssued fired", []);
 
-  // Update Liquidity entity. The Liquidity entity doesn't exist at some point, hence a new one 
-  // has to be created, no existence check needed
-  let liquidityEntity = new Liquidity(event.params.poolId.toHexString())
+  // Log pool creation event (initial liquidity addition) in Liquidity entity
+  let liquidityEntity = Liquidity.load(event.params.poolId.toHexString());
+  if (!liquidityEntity) {
+    liquidityEntity = new Liquidity(event.params.poolId.toHexString());
+  }
   liquidityEntity.longTokenHolder = event.params.longRecipient;
   liquidityEntity.shortTokenHolder = event.params.shortRecipient;
   liquidityEntity.collateralAmount = event.params.collateralAmount;
