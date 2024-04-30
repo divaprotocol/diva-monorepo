@@ -341,6 +341,7 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
   if (!liquidityEntity) {
     liquidityEntity = new Liquidity(event.params.poolId.toHexString());
   }
+  liquidityEntity.msgSender = event.transaction.from;
   liquidityEntity.longTokenHolder = event.params.longRecipient;
   liquidityEntity.shortTokenHolder = event.params.shortRecipient;
   liquidityEntity.collateralAmount = event.params.collateralAmount;
@@ -374,9 +375,10 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   if (!liquidityEntity) {
     liquidityEntity = new Liquidity(event.params.poolId.toHexString());
   }
+  liquidityEntity.msgSender = event.transaction.from;
   liquidityEntity.longTokenHolder = event.params.longTokenHolder;
   liquidityEntity.shortTokenHolder = event.params.shortTokenHolder;
-  liquidityEntity.collateralAmount = event.params.collateralAmount;
+  liquidityEntity.collateralAmount = event.params.collateralAmount; // amount before fees
   liquidityEntity.eventType = "Removed";
   liquidityEntity.timestamp = event.block.timestamp;
   liquidityEntity.save();
@@ -407,6 +409,7 @@ export function handlePoolIssued(event: PoolIssued): void {
   if (!liquidityEntity) {
     liquidityEntity = new Liquidity(event.params.poolId.toHexString());
   }
+  liquidityEntity.msgSender = event.transaction.from;
   liquidityEntity.longTokenHolder = event.params.longRecipient;
   liquidityEntity.shortTokenHolder = event.params.shortRecipient;
   liquidityEntity.collateralAmount = event.params.collateralAmount;

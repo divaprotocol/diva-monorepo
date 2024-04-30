@@ -125,8 +125,10 @@ type DIVAOfferFill @entity {
 }
 
 # Entity tracking the changes in liquidity
+# Note that offers are not yet covered here; only `addLiquidity` and `removeLiquidity`
 type Liquidity @entity {
   id: ID! # original -> poolId
+  msgSender: Bytes!
   longTokenHolder: Bytes!
   shortTokenHolder: Bytes!
   collateralAmount: BigInt!

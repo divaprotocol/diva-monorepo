@@ -17,7 +17,7 @@
     "deploy:polygon:hosted": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-protocol-v1-polygon polygon.subgraph.yaml",
     "deploy:gnosis:hosted": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-protocol-v1-gnosis gnosis.subgraph.yaml",
     "deploy:goerli:studio": "graph deploy --studio diva-protocol-v1-goerli goerli.subgraph.yaml",
-    "deploy:sepolia:studio": "graph deploy --studio diva-protocol-v1-sepolia sepolia.subgraph.yaml",
+    "deploy:sepolia:studio": "graph deploy --studio diva-protocol-v1-sepolia-test sepolia.subgraph.yaml",
     "deploy:arbitrumTest:hosted": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-protocol-v1-arbitrum-test arbitrum-goerli.subgraph.yaml",
     "deploy:mumbai:hosted": "graph deploy --node https://api.thegraph.com/deploy/ divaprotocol/diva-protocol-v1-mumbai mumbai.subgraph.yaml",
     "create-local": "graph create --node http://localhost:8020/ divaprotocol/diva-subgraph",
