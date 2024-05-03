@@ -202,6 +202,8 @@ export function Success({
     })
   }, [diva, formik.values.poolId])
 
+  console.log('transactionType', transactionType)
+
   return (
     <Container>
       <Box display="flex" justifyContent="center" alignItems="center">
