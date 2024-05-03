@@ -6,35 +6,42 @@ on:
       - packages/*-subgraph/**/*
 
 name: Deploy production subgraph
+
 jobs:
-  pr:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
 
-      - uses: actions/setup-node@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: '18'
+          cache: 'yarn'
 
-      - name: Cache Modules
-        id: cache-modules
+      - name: Cache Node Modules and ABIs
         uses: actions/cache@v2
         with:
           path: |
             **/node_modules
-            node_modules
+            **/.yarn/cache
             **/abis
-          key: ${{ hashFiles('**/yarn.lock', '**/package.json', 'yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock', '**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
       - name: Install dependencies
-        if: steps.cache-modules.outputs.cache-hit != 'true'
-        run: yarn
-      - name: Authenticate the graph and deploy
+        run: yarn install --frozen-lockfile
+
+      - name: Verify Node.js and Yarn Versions
+        run: |
+          node -v
+          yarn -v
+
+      - name: Authenticate with The Graph and Deploy
         env: 
-          THEGRAPH_ACCESS_TOKEN: ${{ secrets.THEGRAPH_ACCESS_TOKEN_TEST }}
+          THEGRAPH_ACCESS_TOKEN: ${{ secrets.THEGRAPH_ACCESS_TOKEN_PROD }}
         run: |
           yarn graph:auth
           yarn turbo run deploy --scope="@diva/*-subgraph"

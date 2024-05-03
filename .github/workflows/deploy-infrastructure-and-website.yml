@@ -8,12 +8,13 @@ on:
       - 'packages/diva-infrastructure/**'
       - '.github/workflows/deploy-infrastructure-and-website.yml'
 
-name: Deploy Infrastructure
+name: Deploy Infrastructure and Website
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Configure AW0S credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -23,41 +24,41 @@ jobs:
       - name: Checkout current branch
         uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: '18'
+          cache: 'yarn'
 
-      - name: Cache Modules
-        id: cache-modules
+      - name: Cache Node Modules and Turbo Cache
         uses: actions/cache@v2
         with:
           path: |
             **/node_modules
-            node_modules
-          key: ${{ hashFiles('**/yarn.lock', '**/package.json', 'yarn.lock') }}
-
-      - name: Cache Turbo Cache
-        id: build-turbo
-        uses: actions/cache@v2
-        with:
-          path: .turbo
-          key: ${{ hashFiles('packages/**/*') }}
+            **/.yarn/cache
+            .turbo
+          key: ${{ runner.os }}-yarn-turbo-${{ hashFiles('**/yarn.lock', '**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-turbo-
 
       - name: Install dependencies
-        if: steps.cache-modules.outputs.cache-hit != 'true'
-        run: yarn
+        run: yarn install --frozen-lockfile
 
-      - name: Build
+      - name: Verify Node.js and Yarn Versions
+        run: |
+          node -v
+          yarn -v
+
+      - name: Build Infrastructure and App
         run: yarn turbo run build --filter=@diva/infrastructure --filter=@diva/app --cache-dir="./.turbo"
         env:
           CI: false
           REACT_APP_INFURA_KEY: ${{ secrets.REACT_APP_INFURA_KEY }}
 
-      - name: Deploy Infra
+      - name: Deploy Infrastructure
         run: yarn turbo run deploy --scope="@diva/infrastructure"
 
-      - name: sync to s3 and invalidate cache
+      - name: Sync to S3 and Invalidate CloudFront Cache
         run: |
           aws s3 sync packages/diva-app/build s3://app.diva.finance
           aws cloudfront create-invalidation --distribution-id E2HCWZDF4NN8G6 --paths '/*'
-
