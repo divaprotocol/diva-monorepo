@@ -16,7 +16,20 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: '18'
+        
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Check Node.js and Yarn versions
+        run: |
+          node -v
+          yarn -v
 
       - name: Install dependencies
         run: yarn
