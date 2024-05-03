@@ -230,27 +230,28 @@ export function Success({
           {transactionType === 'createoffer' && (
             <Typography>Your offer has been created successfully</Typography>
           )}
-          {transactionType === 'filloffer' && values.offerDirection === 'Long' && (
-            <Stack direction={'row'} spacing={5}>
-              <Typography>
-                Long token: {longTokenSymbol + ' - '}
-                <Link
-                  style={{ color: 'gray' }}
-                  underline={'none'}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  href={getExploreLink(
-                    chainId,
-                    longToken,
-                    EtherscanLinkType.ADDRESS
-                  )}
-                >
-                  {getShortenedAddress(longToken)}
-                </Link>{' '}
-              </Typography>
-              <AddToMetamask address={longToken} symbol={longTokenSymbol} />
-            </Stack>
-          )}
+          {transactionType === 'filloffer' &&
+            values.offerDirection === 'Long' && (
+              <Stack direction={'row'} spacing={5}>
+                <Typography>
+                  Long token: {longTokenSymbol + ' - '}
+                  <Link
+                    style={{ color: 'gray' }}
+                    underline={'none'}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href={getExploreLink(
+                      chainId,
+                      longToken,
+                      EtherscanLinkType.ADDRESS
+                    )}
+                  >
+                    {getShortenedAddress(longToken)}
+                  </Link>{' '}
+                </Typography>
+                <AddToMetamask address={longToken} symbol={longTokenSymbol} />
+              </Stack>
+            )}
           {transactionType === 'filloffer' &&
             values.offerDirection === 'Short' && (
               <Stack direction={'row'} spacing={5}>

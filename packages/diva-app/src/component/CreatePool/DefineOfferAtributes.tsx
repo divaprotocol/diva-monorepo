@@ -656,29 +656,30 @@ export function DefineOfferAttributes({
                     type="number"
                     onChange={formik.handleChange}
                   />
-                  {collateralWalletBalance != null && collateralToken != null && (
-                    <FormHelperText>
-                      Your balance:{' '}
-                      {toExponentialOrNumber(
-                        parseFloat(collateralWalletBalance)
-                      )}{' '}
-                      {collateralToken?.symbol} {'('}
-                      <MaxCollateral
-                        role="button"
-                        onClick={() => {
-                          if (collateralWalletBalance != null) {
-                            formik.setFieldValue(
-                              'collateralBalance',
-                              collateralWalletBalance
-                            )
-                          }
-                        }}
-                      >
-                        Max
-                      </MaxCollateral>
-                      {')'}
-                    </FormHelperText>
-                  )}
+                  {collateralWalletBalance != null &&
+                    collateralToken != null && (
+                      <FormHelperText>
+                        Your balance:{' '}
+                        {toExponentialOrNumber(
+                          parseFloat(collateralWalletBalance)
+                        )}{' '}
+                        {collateralToken?.symbol} {'('}
+                        <MaxCollateral
+                          role="button"
+                          onClick={() => {
+                            if (collateralWalletBalance != null) {
+                              formik.setFieldValue(
+                                'collateralBalance',
+                                collateralWalletBalance
+                              )
+                            }
+                          }}
+                        >
+                          Max
+                        </MaxCollateral>
+                        {')'}
+                      </FormHelperText>
+                    )}
                 </FormControl>
               </Stack>
             </Box>

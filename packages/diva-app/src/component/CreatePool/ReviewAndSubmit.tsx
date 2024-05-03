@@ -109,6 +109,7 @@ export function ReviewAndSubmit({
       formik.values != undefined &&
       address != null
     ) {
+      console.log('CREATE_POOL_TYPE', CREATE_POOL_TYPE)
       _checkConditions(
         diva,
         divaDomain,

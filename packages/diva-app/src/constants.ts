@@ -162,7 +162,7 @@ export const config: { [key: number]: SingleConfig } = {
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x3bcBFBd63f0387fF1b72a4C580fA7758C04B718d',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-polygon',
+      'https://api.studio.thegraph.com/query/73880/diva-protocol-v1-polygon/latest', // picking the latest version: replace "latest" with version number if you want to use a specific version of the subgraph
     whitelistSubgraph:
       'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-polygon', // TODO: add entries
     allOrders: 'https://polygon.eip712api.xyz/0x/orderbook/v1/orders/',
