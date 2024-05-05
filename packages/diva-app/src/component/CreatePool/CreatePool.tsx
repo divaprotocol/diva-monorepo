@@ -49,6 +49,7 @@ export function CreatePool() {
   }, [])
   const [isSnackbarOpen, setIsSnackbarOpen] = useState<boolean>(false)
 
+  console.log('formik.values.step', formik.values.step)
   let step = null
   switch (formik.values.step) {
     case 1:

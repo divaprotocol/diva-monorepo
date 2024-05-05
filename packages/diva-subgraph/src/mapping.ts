@@ -336,11 +336,17 @@ function handleFeeClaimEvent(
 export function handleLiquidityAdded(event: LiquidityAdded): void {
   log.info("handleLiquidityAdded", []);
 
+  // Create a unique ID for the Liquidity entity to store every single liquidity event as a separate entry
+  let id = event.params.poolId.toHexString() + '-' + 
+           event.transaction.hash.toHexString() + "-" + 
+           event.logIndex.toString();
+
   // Log liquidity addition event in Liquidity entity
-  let liquidityEntity = Liquidity.load(event.params.poolId.toHexString());
+  let liquidityEntity = Liquidity.load(id);
   if (!liquidityEntity) {
-    liquidityEntity = new Liquidity(event.params.poolId.toHexString());
+    liquidityEntity = new Liquidity(id);
   }
+  liquidityEntity.pool = event.params.poolId.toHexString();
   liquidityEntity.msgSender = event.transaction.from;
   liquidityEntity.longTokenHolder = event.params.longRecipient;
   liquidityEntity.shortTokenHolder = event.params.shortRecipient;
@@ -370,11 +376,17 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
 export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   log.info("handleLiquidityRemoved", []);
 
+  // Create a unique ID for the Liquidity entity to store every single liquidity event as a separate entry
+  let id = event.params.poolId.toHexString() + '-' + 
+           event.transaction.hash.toHexString() + "-" + 
+           event.logIndex.toString();
+
   // Log liquidity removal event in Liquidity entity
-  let liquidityEntity = Liquidity.load(event.params.poolId.toHexString());
+  let liquidityEntity = Liquidity.load(id);
   if (!liquidityEntity) {
-    liquidityEntity = new Liquidity(event.params.poolId.toHexString());
+    liquidityEntity = new Liquidity(id);
   }
+  liquidityEntity.pool = event.params.poolId.toHexString();
   liquidityEntity.msgSender = event.transaction.from;
   liquidityEntity.longTokenHolder = event.params.longTokenHolder;
   liquidityEntity.shortTokenHolder = event.params.shortTokenHolder;
@@ -404,11 +416,17 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
 export function handlePoolIssued(event: PoolIssued): void {
   log.info("handlePoolIssued fired", []);
 
+  // Create a unique ID for the Liquidity entity to store every single liquidity event as a separate entry
+  let id = event.params.poolId.toHexString() + '-' + 
+           event.transaction.hash.toHexString() + "-" + 
+           event.logIndex.toString();
+
   // Log pool creation event (initial liquidity addition) in Liquidity entity
-  let liquidityEntity = Liquidity.load(event.params.poolId.toHexString());
+  let liquidityEntity = Liquidity.load(id);
   if (!liquidityEntity) {
-    liquidityEntity = new Liquidity(event.params.poolId.toHexString());
+    liquidityEntity = new Liquidity(id);
   }
+  liquidityEntity.pool = event.params.poolId.toHexString();
   liquidityEntity.msgSender = event.transaction.from;
   liquidityEntity.longTokenHolder = event.params.longRecipient;
   liquidityEntity.shortTokenHolder = event.params.shortRecipient;

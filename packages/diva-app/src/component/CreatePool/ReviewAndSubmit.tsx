@@ -103,13 +103,14 @@ export function ReviewAndSubmit({
     provider.getSigner()
   )
   useEffect(() => {
+    console.log('formik.values', formik.values)
+    console.log('address', address)
     if (
       diva != undefined &&
       divaDomain != undefined &&
       formik.values != undefined &&
       address != null
     ) {
-      console.log('CREATE_POOL_TYPE', CREATE_POOL_TYPE)
       _checkConditions(
         diva,
         divaDomain,
