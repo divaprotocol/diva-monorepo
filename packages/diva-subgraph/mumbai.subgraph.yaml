@@ -23,6 +23,7 @@ dataSources:
         - UserPositionTokens
         - DIVAOfferFill
         - Liquidity
+        - Claim
       abis:
         - name: DivaDiamond
           file: ./abi/IDIVA.json

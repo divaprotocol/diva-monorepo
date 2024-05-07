@@ -24,6 +24,7 @@ import {
   User,
   NativeOrderFill,
   Liquidity,
+  Claim
 } from "../generated/schema";
 
 // @todo Add in subgraph yml file
@@ -585,6 +586,25 @@ export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void 
 
   // Save results in entity
   poolEntity!.save();
+
+  // Add to Claim entity
+  // Create a unique ID for the Claim entity to store every single liquidity event as a separate entry
+  let id = event.params.poolId.toHexString() + '-' + 
+           event.transaction.hash.toHexString() + "-" + 
+           event.logIndex.toString();
+
+  // Log claim (redeem position token) events in Claim entity
+  let claimEntity = Claim.load(id);
+  if (!claimEntity) {
+    claimEntity = new Claim(id);
+  }
+  claimEntity.pool = event.params.poolId.toHexString();
+  claimEntity.positionToken = event.params.positionToken.toHexString();
+  claimEntity.amountPositionToken = event.params.amountPositionToken;
+  claimEntity.collateralAmountReturned = event.params.collateralAmountReturned;
+  claimEntity.returnedTo = event.params.returnedTo;
+  claimEntity.timestamp = event.block.timestamp;
+  claimEntity.save();
 }
 
 /**

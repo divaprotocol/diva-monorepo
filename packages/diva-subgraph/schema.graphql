@@ -137,3 +137,12 @@ type Liquidity @entity {
   timestamp: BigInt! # Block timestamp
 }
 
+type Claim @entity {
+  id: ID! # poolId - tx hash - log index
+  pool: Pool!
+  positionToken: PositionToken!
+  amountPositionToken: BigInt!
+  collateralAmountReturned: BigInt!
+  returnedTo: Bytes!
+  timestamp: BigInt! # Block timestamp
+}

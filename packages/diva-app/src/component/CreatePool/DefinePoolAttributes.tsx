@@ -1,4 +1,4 @@
-import { DateTimePicker } from '@mui/lab'
+import { DateTimePicker } from '@mui/x-date-pickers'
 import ClockIcon from '@mui/icons-material/AccessTime'
 import KeyboardDoubleArrowUpOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowUpOutlined'
 import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined'
