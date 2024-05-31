@@ -9,10 +9,10 @@
     },
     "graph:auth": {},
     "deploy": {
-      "dependsOn": ["build", "graph:auth"]
+      "dependsOn": ["build"]
     },
     "deploy-staging": {
-      "dependsOn": ["build", "graph:auth"]
+      "dependsOn": ["build"]
     },
     "test": {},
     "dev": {
