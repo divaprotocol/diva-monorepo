@@ -175,15 +175,13 @@ export function Success({
 
   useEffect(() => {
     setPoolId(formik.values.poolId)
-
     diva.getPoolParameters(formik.values.poolId).then((pool) => {
-      console.log(pool, 'pools info')
       setShortToken(pool.shortToken)
       setLongToken(pool.longToken)
       setPoolId(formik.values.poolId)
 
       const longTokenContract = new ethers.Contract(
-        longToken,
+        pool.longToken,
         ERC20,
         provider.getSigner()
       )
@@ -192,7 +190,7 @@ export function Success({
       })
 
       const shortTokenContract = new ethers.Contract(
-        shortToken,
+        pool.shortToken,
         ERC20,
         provider.getSigner()
       )
@@ -201,8 +199,6 @@ export function Success({
       })
     })
   }, [diva, formik.values.poolId])
-
-  console.log('transactionType', transactionType)
 
   return (
     <Container>

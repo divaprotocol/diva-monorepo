@@ -1,4 +1,4 @@
-import { DateTimePicker } from '@mui/lab'
+import { DateTimePicker } from '@mui/x-date-pickers'
 import ClockIcon from '@mui/icons-material/AccessTime'
 import {
   Box,
@@ -367,22 +367,22 @@ export function DefineOfferAttributes({
               </FormControl>
               <FormControl fullWidth>
                 <DateTimePicker
-                  InputProps={{
-                    name: 'expiryTime',
-                    id: 'expiryTime',
-                    onBlur: formik.handleBlur,
-                    error: formik.errors.expiryTime != null,
-                  }}
+                  // InputProps={{
+                  //   name: 'expiryTime',
+                  //   id: 'expiryTime',
+                  //   onBlur: formik.handleBlur,
+                  //   error: formik.errors.expiryTime != null,
+                  // }}
                   label="Observation Time"
                   onChange={(event) => {
                     formik.setFieldValue('expiryTime', event)
                   }}
                   minDate={today}
                   value={expiryTime}
-                  components={{
-                    OpenPickerIcon: ClockIcon,
-                  }}
-                  renderInput={(params) => <TextField {...params} />}
+                  // components={{
+                  //   OpenPickerIcon: ClockIcon,
+                  // }}
+                  // renderInput={(params) => <TextField {...params} />}
                 />
                 {formik.errors.expiryTime != null && (
                   <FormHelperText sx={{ color: 'red' }}>
@@ -807,20 +807,20 @@ export function DefineOfferAttributes({
                 fullWidth
               >
                 <DateTimePicker
-                  InputProps={{
-                    name: 'offerDuration',
-                    id: 'offerDuration',
-                    onBlur: formik.handleBlur,
-                    error: formik.errors.offerExpiry != null,
-                  }}
+                  // InputProps={{
+                  //   name: 'offerDuration',
+                  //   id: 'offerDuration',
+                  //   onBlur: formik.handleBlur,
+                  //   error: formik.errors.offerExpiry != null,
+                  // }}
                   label="Offer Expires in"
                   onChange={handleOfferExpiryChange}
                   minDate={today}
                   value={offerExpiry}
-                  components={{
-                    OpenPickerIcon: ClockIcon,
-                  }}
-                  renderInput={(params) => <TextField {...params} />}
+                  // components={{
+                  //   OpenPickerIcon: ClockIcon,
+                  // }}
+                  // renderInput={(params) => <TextField {...params} />}
                 />
                 {formik.errors.offerExpiry != null && (
                   <FormHelperText sx={{ color: 'red' }}>

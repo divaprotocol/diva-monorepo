@@ -75,7 +75,7 @@ export function DefinePoolAttributes({
     floor,
     payoutProfile,
   } = formik.values
-
+  // console.log('expiryTime', expiryTime)
   const { balance: collateralWalletBalance, isLoading } = useErcBalance(
     collateralToken?.id
   )
@@ -267,22 +267,22 @@ export function DefinePoolAttributes({
               </FormControl>
               <FormControl fullWidth>
                 <DateTimePicker
-                  InputProps={{
-                    name: 'expiryTime',
-                    id: 'expiryTime',
-                    onBlur: formik.handleBlur,
-                    error: formik.errors.expiryTime != null,
-                  }}
+                  // InputProps={{
+                  //   name: 'expiryTime',
+                  //   id: 'expiryTime',
+                  //   onBlur: formik.handleBlur,
+                  //   error: formik.errors.expiryTime != null,
+                  // }}
                   label="Observation Time"
                   onChange={(event) => {
                     formik.setFieldValue('expiryTime', event)
                   }}
                   minDate={today}
                   value={expiryTime}
-                  components={{
-                    OpenPickerIcon: ClockIcon,
-                  }}
-                  renderInput={(params) => <TextField {...params} />}
+                  // components={{
+                  //   OpenPickerIcon: ClockIcon,
+                  // }}
+                  // renderInput={(params) => <TextField {...params} />}
                 />
                 {formik.errors.expiryTime != null && (
                   <FormHelperText sx={{ color: 'red' }}>
