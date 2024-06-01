@@ -164,7 +164,7 @@ export const config: { [key: number]: SingleConfig } = {
     divaSubgraph:
       'https://api.studio.thegraph.com/query/73880/diva-protocol-v1-polygon/version/latest', // picking the latest version: replace "latest" with version number if you want to use a specific version of the subgraph
     whitelistSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-polygon', // TODO: add entries
+      'https://api.studio.thegraph.com/query/73880/diva-whitelist-polygon/version/latest', // TODO: add entries
     allOrders: 'https://polygon.eip712api.xyz/0x/orderbook/v1/orders/',
     order: 'https://polygon.eip712api.xyz/0x/orderbook/v1/order/',
     orderbook: 'https://polygon.eip712api.xyz/0x/orderbook/v1',
