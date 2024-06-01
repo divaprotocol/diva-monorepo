@@ -28,14 +28,22 @@ export const getUnderlyingPrice = async (underlyingAssets: string) => {
         await fetch('https://api.coingecko.com/api/v3/coins/list')
       ).json()
 
+      /**
+       * Retrieves the CoinGecko ID for a given cryptocurrency symbol.
+       *
+       * @param {string} coinSymbol - The symbol of the cryptocurrency to find the ID for.
+       * @returns {string} The CoinGecko ID of the cryptocurrency.
+       */
       const getCoinIdFromSymbol = (coinSymbol: string) => {
-        const { id } = coinsList.filter(
-          ({ symbol }: coin) =>
-            symbol?.toLowerCase() === coinSymbol.toLowerCase()
-        )[0]
+        const { id } =
+          coinsList.find(
+            ({ symbol }: coin) =>
+              symbol?.toLowerCase() === coinSymbol.toLowerCase()
+          ) || {}
 
         return id
       }
+
       const assetPriceData = await CoinGeckoClient.simple.price({
         ids: getCoinIdFromSymbol(asset),
         vs_currencies: 'usd',
