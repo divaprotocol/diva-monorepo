@@ -467,7 +467,7 @@ const SellOrder = (props: {
   }
 
   useEffect(() => {
-    if (userAddress != null) {
+    if (provider && userAddress) {
       getMakerTokenAllowanceAndBalance(userAddress).then(async (val) => {
         // Use values returned from getMakerTokenAllowanceAndBalance to initialize variables
         setOptionBalance(val.balance)
