@@ -187,8 +187,14 @@ export const config: { [key: number]: SingleConfig } = {
       },
       {
         id: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
-        name: 'USDC',
-        symbol: 'USDC',
+        name: 'USDC.e (bridged)',
+        symbol: 'USDC.e (bridged)',
+        decimals: 6,
+      },
+      {
+        id: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
+        name: 'USDC (native)',
+        symbol: 'USDC (native)',
         decimals: 6,
       },
       {
@@ -221,6 +227,7 @@ export const config: { [key: number]: SingleConfig } = {
       '0x1062CCC9F9a4bBcf565799683b6c00eA525ECb9F',
       '0xd288B4A23ECc79Eb4bb4661147f3AB3294919F54',
       '0x9AdEFeb576dcF52F5220709c1B267d89d5208D78',
+      '0x9253698409C7f8BB24dddb9653c74b8Fe149eDbd',
     ],
     dataProviders: [
       {
