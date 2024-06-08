@@ -105,19 +105,20 @@ export const AddLiquidity = ({ pool }: Props) => {
 
   const [remainingAllowance, setRemainingAllowance] = useState('')
   useEffect(() => {
-    if (account) {
+    if (provider && account && config) {
       const getRemainingAllowance = async () => {
         const allowance = await token.allowance(
           account,
-          config[chainId]?.divaAddress
+          config[chainId].divaAddress
         )
+        console.log('allowance', allowance.toString())
         setRemainingAllowance(
           toExponentialOrNumber(Number(formatUnits(allowance, decimal)))
         )
       }
       getRemainingAllowance()
     }
-  }, [account, chainId, token])
+  }, [account, chainId, token, provider])
   return (
     <>
       {loading ? (
