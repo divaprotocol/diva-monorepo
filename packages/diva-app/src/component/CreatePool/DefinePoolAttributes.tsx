@@ -75,7 +75,7 @@ export function DefinePoolAttributes({
     floor,
     payoutProfile,
   } = formik.values
-  // console.log('expiryTime', expiryTime)
+
   const { balance: collateralWalletBalance, isLoading } = useErcBalance(
     collateralToken?.id
   )
