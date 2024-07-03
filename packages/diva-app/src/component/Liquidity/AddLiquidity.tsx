@@ -104,6 +104,7 @@ export const AddLiquidity = ({ pool }: Props) => {
   }, [textFieldValue, pool, tokenBalance])
 
   const [remainingAllowance, setRemainingAllowance] = useState('')
+
   useEffect(() => {
     if (provider && account && config[chainId]) {
       const getRemainingAllowance = async () => {
