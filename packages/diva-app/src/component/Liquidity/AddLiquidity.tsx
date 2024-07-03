@@ -104,12 +104,13 @@ export const AddLiquidity = ({ pool }: Props) => {
   }, [textFieldValue, pool, tokenBalance])
 
   const [remainingAllowance, setRemainingAllowance] = useState('')
+
   useEffect(() => {
-    if (account) {
+    if (provider && account && config[chainId]) {
       const getRemainingAllowance = async () => {
         const allowance = await token.allowance(
           account,
-          config[chainId]?.divaAddress
+          config[chainId].divaAddress
         )
         setRemainingAllowance(
           toExponentialOrNumber(Number(formatUnits(allowance, decimal)))
@@ -117,7 +118,7 @@ export const AddLiquidity = ({ pool }: Props) => {
       }
       getRemainingAllowance()
     }
-  }, [account, chainId, token])
+  }, [account, config, chainId, token, provider])
   return (
     <>
       {loading ? (

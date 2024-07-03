@@ -175,15 +175,13 @@ export function Success({
 
   useEffect(() => {
     setPoolId(formik.values.poolId)
-
     diva.getPoolParameters(formik.values.poolId).then((pool) => {
-      console.log(pool, 'pools info')
       setShortToken(pool.shortToken)
       setLongToken(pool.longToken)
       setPoolId(formik.values.poolId)
 
       const longTokenContract = new ethers.Contract(
-        longToken,
+        pool.longToken,
         ERC20,
         provider.getSigner()
       )
@@ -192,7 +190,7 @@ export function Success({
       })
 
       const shortTokenContract = new ethers.Contract(
-        shortToken,
+        pool.shortToken,
         ERC20,
         provider.getSigner()
       )
@@ -230,27 +228,28 @@ export function Success({
           {transactionType === 'createoffer' && (
             <Typography>Your offer has been created successfully</Typography>
           )}
-          {transactionType === 'filloffer' && values.offerDirection === 'Long' && (
-            <Stack direction={'row'} spacing={5}>
-              <Typography>
-                Long token: {longTokenSymbol + ' - '}
-                <Link
-                  style={{ color: 'gray' }}
-                  underline={'none'}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  href={getExploreLink(
-                    chainId,
-                    longToken,
-                    EtherscanLinkType.ADDRESS
-                  )}
-                >
-                  {getShortenedAddress(longToken)}
-                </Link>{' '}
-              </Typography>
-              <AddToMetamask address={longToken} symbol={longTokenSymbol} />
-            </Stack>
-          )}
+          {transactionType === 'filloffer' &&
+            values.offerDirection === 'Long' && (
+              <Stack direction={'row'} spacing={5}>
+                <Typography>
+                  Long token: {longTokenSymbol + ' - '}
+                  <Link
+                    style={{ color: 'gray' }}
+                    underline={'none'}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    href={getExploreLink(
+                      chainId,
+                      longToken,
+                      EtherscanLinkType.ADDRESS
+                    )}
+                  >
+                    {getShortenedAddress(longToken)}
+                  </Link>{' '}
+                </Typography>
+                <AddToMetamask address={longToken} symbol={longTokenSymbol} />
+              </Stack>
+            )}
           {transactionType === 'filloffer' &&
             values.offerDirection === 'Short' && (
               <Stack direction={'row'} spacing={5}>

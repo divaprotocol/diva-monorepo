@@ -52,6 +52,7 @@ const MaxCollateral = styled.u`
     color: ${(props) => (props.theme as any).palette.primary.main};
   }
 `
+
 export function ReviewAndSubmit({
   formik,
   transaction,
@@ -102,30 +103,34 @@ export function ReviewAndSubmit({
     ERC20,
     provider.getSigner()
   )
-  useEffect(() => {
-    if (
-      diva != undefined &&
-      divaDomain != undefined &&
-      formik.values != undefined &&
-      address != null
-    ) {
-      _checkConditions(
-        diva,
-        divaDomain,
-        formik.values.jsonToExport, // offerCreationStats,
-        CREATE_POOL_TYPE,
-        formik.values.signature,
-        address,
-        parseUnits(formik.values.yourShare.toString(), decimal)
-      ).then((res) => {
-        if (!res.success) {
-          setErrorMessage(res.message)
-        } else {
-          setErrorMessage('')
-        }
-      })
-    }
-  }, [formik.values, address, diva, divaDomain])
+
+  // @todo Commented out this useEffect because it was causing problems in Create step 3 for some reason.
+  // It looked like this function was running although we didn't create an offer and hence formik.values.jsonToExport was undefined
+  // useEffect(() => {
+  //   console.log('formik.values', formik.values)
+  //   if (
+  //     diva != undefined &&
+  //     divaDomain != undefined &&
+  //     formik.values != undefined &&
+  //     address != null
+  //   ) {
+  //     _checkConditions(
+  //       diva,
+  //       divaDomain,
+  //       formik.values.jsonToExport, // offerCreationStats,
+  //       CREATE_POOL_TYPE,
+  //       formik.values.signature,
+  //       address,
+  //       parseUnits(formik.values.yourShare.toString(), decimal)
+  //     ).then((res) => {
+  //       if (!res.success) {
+  //         setErrorMessage(res.message)
+  //       } else {
+  //         setErrorMessage('')
+  //       }
+  //     })
+  //   }
+  // }, [formik.values, address, diva, divaDomain])
 
   useEffect(() => {
     token.decimals().then((decimals: number) => {

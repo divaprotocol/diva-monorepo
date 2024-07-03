@@ -18,8 +18,7 @@ import {
 import CheckIcon from '@mui/icons-material/Check'
 import AddIcon from '@mui/icons-material/Add'
 import { LoadingButton } from '@mui/lab'
-import { BigNumber } from 'ethers'
-import Web3 from 'web3'
+import { BigNumber, ethers } from 'ethers'
 import { formatUnits, parseUnits } from 'ethers/lib/utils'
 import { Pool } from '../../../lib/queries'
 import { toExponentialOrNumber } from '../../../Util/utils'
@@ -85,6 +84,10 @@ const expiryOrderTime = [
     value: 60 * 24,
     label: '1 Day',
   },
+  {
+    value: 60 * 24 * 365,
+    label: '1 Year',
+  },
 ]
 
 const ZERO = BigNumber.from(0)
@@ -105,9 +108,7 @@ const SellOrder = (props: {
   ) => any
 }) => {
   const theme = useTheme()
-  const [Web3Provider, setWeb3Provider] = useState<Web3>()
-  const web3 = new Web3(Web3Provider as any)
-  const { getWeb3JsProvider, provider } = useConnectionContext()
+  const { provider } = useConnectionContext()
   const [optionBalance, setOptionBalance] = React.useState(ZERO)
   const [checked, setChecked] = useState(false)
   const [numberOfOptions, setNumberOfOptions] = React.useState('') // User input field
@@ -137,7 +138,11 @@ const SellOrder = (props: {
   const tokenSymbol = option.collateralToken.symbol
   const makerToken = props.tokenAddress
   const takerToken = option.collateralToken.id
-  const makerTokenContract = new web3.eth.Contract(ERC20_ABI as any, makerToken)
+  const makerTokenContract = new ethers.Contract(
+    makerToken,
+    ERC20_ABI as any,
+    provider?.getSigner()
+  )
   const collateralTokenUnit = parseUnits('1', decimals)
   const usdPrice = props.usdPrice
   const maxPayout = useAppSelector((state) => state.stats.maxPayout)
@@ -146,14 +151,6 @@ const SellOrder = (props: {
   const isLong = window.location.pathname.split('/')[2] === 'long'
   const responseBuy = useAppSelector((state) => state.tradeOption.responseBuy)
   let responseSell = useAppSelector((state) => state.tradeOption.responseSell)
-
-  useEffect(() => {
-    const init = async () => {
-      const web3 = await getWeb3JsProvider()
-      setWeb3Provider(web3)
-    }
-    init()
-  }, [getWeb3JsProvider, provider])
 
   const handleChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
     setChecked(event.target.checked)
@@ -243,9 +240,10 @@ const SellOrder = (props: {
     setYouReceive(ZERO)
     setFeeAmount(ZERO)
 
-    const allowance = await makerTokenContract.methods
-      .allowance(userAddress, exchangeProxy)
-      .call()
+    const allowance = await makerTokenContract.allowance(
+      userAddress,
+      exchangeProxy
+    )
     const remainingAllowance = BigNumber.from(allowance).sub(
       existingSellLimitOrdersAmountUser
     )
@@ -382,12 +380,11 @@ const SellOrder = (props: {
 
   // TODO: Outsource this function into a separate file as it's the same across BUY/SELL LIMIT/MARKET
   const getMakerTokenAllowanceAndBalance = async (makerAccount: string) => {
-    const allowance = await makerTokenContract.methods
-      .allowance(makerAccount, exchangeProxy)
-      .call()
-    const balance = await makerTokenContract.methods
-      .balanceOf(makerAccount)
-      .call()
+    const allowance = await makerTokenContract.allowance(
+      makerAccount,
+      exchangeProxy
+    )
+    const balance = await makerTokenContract.balanceOf(makerAccount)
     return {
       balance: BigNumber.from(balance),
       allowance: BigNumber.from(allowance),
@@ -470,7 +467,7 @@ const SellOrder = (props: {
   }
 
   useEffect(() => {
-    if (userAddress != null) {
+    if (provider && userAddress) {
       getMakerTokenAllowanceAndBalance(userAddress).then(async (val) => {
         // Use values returned from getMakerTokenAllowanceAndBalance to initialize variables
         setOptionBalance(val.balance)
@@ -491,7 +488,7 @@ const SellOrder = (props: {
         })
       })
     }
-  }, [responseBuy, responseSell, userAddress, Web3Provider, checked])
+  }, [responseBuy, responseSell, userAddress, provider, checked])
 
   // useEffect function to fetch average price for the SELL MARKET order
   useEffect(() => {

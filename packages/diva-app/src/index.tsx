@@ -6,14 +6,14 @@ import 'core-js/stable'
 import 'react-app-polyfill/stable'
 
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import './index.css'
 import { App } from './App'
 import reportWebVitals from './reportWebVitals'
 import store from './Redux/Store'
 import { Provider } from 'react-redux'
-import LocalizationProvider from '@mui/lab/LocalizationProvider'
-import AdapterDateFns from '@mui/lab/AdapterDateFns'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { ThemeProvider } from '@mui/material/styles'
 import { useMediaQuery } from '@mui/material'
 import { Box } from '@mui/system'
@@ -65,7 +65,9 @@ const WithProviders = () => {
   )
 }
 
-ReactDOM.render(<WithProviders />, document.getElementById('root'))
+const container = document.getElementById('root')
+const root = createRoot(container!)
+root.render(<WithProviders />)
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

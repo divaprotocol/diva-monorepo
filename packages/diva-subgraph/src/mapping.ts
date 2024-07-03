@@ -23,6 +23,8 @@ import {
   UserPositionToken,
   User,
   NativeOrderFill,
+  Liquidity,
+  Claim
 } from "../generated/schema";
 
 // @todo Add in subgraph yml file
@@ -335,6 +337,25 @@ function handleFeeClaimEvent(
 export function handleLiquidityAdded(event: LiquidityAdded): void {
   log.info("handleLiquidityAdded", []);
 
+  // Create a unique ID for the Liquidity entity to store every single liquidity event as a separate entry
+  let id = event.params.poolId.toHexString() + '-' + 
+           event.transaction.hash.toHexString() + "-" + 
+           event.logIndex.toString();
+
+  // Log liquidity addition event in Liquidity entity
+  let liquidityEntity = Liquidity.load(id);
+  if (!liquidityEntity) {
+    liquidityEntity = new Liquidity(id);
+  }
+  liquidityEntity.pool = event.params.poolId.toHexString();
+  liquidityEntity.msgSender = event.transaction.from;
+  liquidityEntity.longTokenHolder = event.params.longRecipient;
+  liquidityEntity.shortTokenHolder = event.params.shortRecipient;
+  liquidityEntity.collateralAmount = event.params.collateralAmount;
+  liquidityEntity.eventType = "Added";
+  liquidityEntity.timestamp = event.block.timestamp;
+  liquidityEntity.save();
+
   // Update pool parameters
   handleLiquidityEvent(
     event.params.poolId,
@@ -356,6 +377,25 @@ export function handleLiquidityAdded(event: LiquidityAdded): void {
 export function handleLiquidityRemoved(event: LiquidityRemoved): void {
   log.info("handleLiquidityRemoved", []);
 
+  // Create a unique ID for the Liquidity entity to store every single liquidity event as a separate entry
+  let id = event.params.poolId.toHexString() + '-' + 
+           event.transaction.hash.toHexString() + "-" + 
+           event.logIndex.toString();
+
+  // Log liquidity removal event in Liquidity entity
+  let liquidityEntity = Liquidity.load(id);
+  if (!liquidityEntity) {
+    liquidityEntity = new Liquidity(id);
+  }
+  liquidityEntity.pool = event.params.poolId.toHexString();
+  liquidityEntity.msgSender = event.transaction.from;
+  liquidityEntity.longTokenHolder = event.params.longTokenHolder;
+  liquidityEntity.shortTokenHolder = event.params.shortTokenHolder;
+  liquidityEntity.collateralAmount = event.params.collateralAmount; // amount before fees
+  liquidityEntity.eventType = "Removed";
+  liquidityEntity.timestamp = event.block.timestamp;
+  liquidityEntity.save();
+
   // Update pool parameters
   handleLiquidityEvent(
     event.params.poolId,
@@ -376,6 +416,25 @@ export function handleLiquidityRemoved(event: LiquidityRemoved): void {
  */
 export function handlePoolIssued(event: PoolIssued): void {
   log.info("handlePoolIssued fired", []);
+
+  // Create a unique ID for the Liquidity entity to store every single liquidity event as a separate entry
+  let id = event.params.poolId.toHexString() + '-' + 
+           event.transaction.hash.toHexString() + "-" + 
+           event.logIndex.toString();
+
+  // Log pool creation event (initial liquidity addition) in Liquidity entity
+  let liquidityEntity = Liquidity.load(id);
+  if (!liquidityEntity) {
+    liquidityEntity = new Liquidity(id);
+  }
+  liquidityEntity.pool = event.params.poolId.toHexString();
+  liquidityEntity.msgSender = event.transaction.from;
+  liquidityEntity.longTokenHolder = event.params.longRecipient;
+  liquidityEntity.shortTokenHolder = event.params.shortRecipient;
+  liquidityEntity.collateralAmount = event.params.collateralAmount;
+  liquidityEntity.eventType = "Issued";
+  liquidityEntity.timestamp = event.block.timestamp;
+  liquidityEntity.save();
 
   // Update pool parameters
   handleLiquidityEvent(
@@ -527,6 +586,25 @@ export function handlePositionTokenRedeemed(event: PositionTokenRedeemed): void 
 
   // Save results in entity
   poolEntity!.save();
+
+  // Add to Claim entity
+  // Create a unique ID for the Claim entity to store every single liquidity event as a separate entry
+  let id = event.params.poolId.toHexString() + '-' + 
+           event.transaction.hash.toHexString() + "-" + 
+           event.logIndex.toString();
+
+  // Log claim (redeem position token) events in Claim entity
+  let claimEntity = Claim.load(id);
+  if (!claimEntity) {
+    claimEntity = new Claim(id);
+  }
+  claimEntity.pool = event.params.poolId.toHexString();
+  claimEntity.positionToken = event.params.positionToken.toHexString();
+  claimEntity.amountPositionToken = event.params.amountPositionToken;
+  claimEntity.collateralAmountReturned = event.params.collateralAmountReturned;
+  claimEntity.returnedTo = event.params.returnedTo;
+  claimEntity.timestamp = event.block.timestamp;
+  claimEntity.save();
 }
 
 /**
@@ -556,6 +634,7 @@ export function handleLimitOrderFilledEvent(event: LimitOrderFilled): void {
     nativeOrderFillEntity.takerToken = event.params.takerToken;
     nativeOrderFillEntity.makerTokenFilledAmount = event.params.makerTokenFilledAmount;
     nativeOrderFillEntity.takerTokenFilledAmount = event.params.takerTokenFilledAmount;
+    nativeOrderFillEntity.takerTokenFeeFilledAmount = event.params.takerTokenFeeFilledAmount;
     nativeOrderFillEntity.timestamp = event.block.timestamp;
     nativeOrderFillEntity.save();
   }

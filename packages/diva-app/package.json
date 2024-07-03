@@ -19,6 +19,7 @@
     "@mui/material": "^5.1.0",
     "@mui/styles": "^5.1.0",
     "@mui/x-data-grid": "^5.2.1",
+    "@mui/x-date-pickers": "^7.3.2",
     "@reduxjs/toolkit": "^1.6.1",
     "@synthetixio/synpress": "^1.1.1",
     "@testing-library/jest-dom": "^5.14.1",

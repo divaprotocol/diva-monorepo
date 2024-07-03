@@ -51,7 +51,6 @@ export async function _checkConditions(
       offerCreateContingentPool,
       signature
     )
-
   // Confirm that the offer is fillable
   // 0: INVALID, 1: CANCELLED, 2: FILLED, 3: EXPIRED, 4: FILLABLE
   if (relevantStateParams.offerInfo.status === 0) {
@@ -180,31 +179,34 @@ export const ApproveActionButtons = ({
         }
       : null
   const [mobile, setMobile] = useState(false)
-  useEffect(() => {
-    if (
-      diva != undefined &&
-      divaDomain != undefined &&
-      formik != undefined &&
-      formik.values != undefined &&
-      account != null
-    ) {
-      _checkConditions(
-        diva,
-        divaDomain,
-        formik.values.jsonToExport, // offerCreationStats,
-        CREATE_POOL_TYPE,
-        formik.values.signature,
-        account,
-        parseUnits(formik.values.yourShare.toString(), decimal)
-      ).then((res) => {
-        if (!res.success) {
-          setErrorMessage(res.message)
-        } else {
-          setErrorMessage('All good')
-        }
-      })
-    }
-  }, [formik != undefined && formik.values, account, diva, divaDomain])
+
+  // @todo Commented out this useEffect because it was causing problems in Create step 3 for some reason.
+  // It looked like this function was running although we didn't create an offer and hence formik.values.jsonToExport was undefined
+  // useEffect(() => {
+  //   if (
+  //     diva != undefined &&
+  //     divaDomain != undefined &&
+  //     formik != undefined &&
+  //     formik.values != undefined &&
+  //     account != null
+  //   ) {
+  //     _checkConditions(
+  //       diva,
+  //       divaDomain,
+  //       formik.values.jsonToExport, // offerCreationStats,
+  //       CREATE_POOL_TYPE,
+  //       formik.values.signature,
+  //       account,
+  //       parseUnits(formik.values.yourShare.toString(), decimal)
+  //     ).then((res) => {
+  //       if (!res.success) {
+  //         setErrorMessage(res.message)
+  //       } else {
+  //         setErrorMessage('All good')
+  //       }
+  //     })
+  //   }
+  // }, [formik != undefined && formik.values, account, diva, divaDomain])
   useEffect(() => {
     if (window.innerWidth < 768) {
       setMobile(true)

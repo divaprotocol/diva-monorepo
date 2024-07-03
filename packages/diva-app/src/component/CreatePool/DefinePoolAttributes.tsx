@@ -1,4 +1,4 @@
-import { DateTimePicker } from '@mui/lab'
+import { DateTimePicker } from '@mui/x-date-pickers'
 import ClockIcon from '@mui/icons-material/AccessTime'
 import KeyboardDoubleArrowUpOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowUpOutlined'
 import KeyboardDoubleArrowRightOutlinedIcon from '@mui/icons-material/KeyboardDoubleArrowRightOutlined'
@@ -267,22 +267,22 @@ export function DefinePoolAttributes({
               </FormControl>
               <FormControl fullWidth>
                 <DateTimePicker
-                  InputProps={{
-                    name: 'expiryTime',
-                    id: 'expiryTime',
-                    onBlur: formik.handleBlur,
-                    error: formik.errors.expiryTime != null,
-                  }}
+                  // InputProps={{
+                  //   name: 'expiryTime',
+                  //   id: 'expiryTime',
+                  //   onBlur: formik.handleBlur,
+                  //   error: formik.errors.expiryTime != null,
+                  // }}
                   label="Observation Time"
                   onChange={(event) => {
                     formik.setFieldValue('expiryTime', event)
                   }}
                   minDate={today}
                   value={expiryTime}
-                  components={{
-                    OpenPickerIcon: ClockIcon,
-                  }}
-                  renderInput={(params) => <TextField {...params} />}
+                  // components={{
+                  //   OpenPickerIcon: ClockIcon,
+                  // }}
+                  // renderInput={(params) => <TextField {...params} />}
                 />
                 {formik.errors.expiryTime != null && (
                   <FormHelperText sx={{ color: 'red' }}>

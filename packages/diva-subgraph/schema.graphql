@@ -104,6 +104,7 @@ type NativeOrderFill @entity {
   takerToken: Bytes!
   makerTokenFilledAmount: BigInt!
   takerTokenFilledAmount: BigInt!
+  takerTokenFeeFilledAmount: BigInt!
   timestamp: BigInt!
 }
 
@@ -121,4 +122,27 @@ type DIVAOfferFill @entity {
   takerFilledAmount: BigInt!
   pool: Pool!
   timestamp: BigInt!
+}
+
+# Entity tracking the changes in liquidity
+# Note that offers are not yet covered here; only `addLiquidity` and `removeLiquidity`
+type Liquidity @entity {
+  id: ID! # poolId - tx hash - log index
+  pool: Pool!
+  msgSender: Bytes!
+  longTokenHolder: Bytes!
+  shortTokenHolder: Bytes!
+  collateralAmount: BigInt!
+  eventType: String! # Could be "Issued", "Added", or "Removed"
+  timestamp: BigInt! # Block timestamp
+}
+
+type Claim @entity {
+  id: ID! # poolId - tx hash - log index
+  pool: Pool!
+  positionToken: PositionToken!
+  amountPositionToken: BigInt!
+  collateralAmountReturned: BigInt!
+  returnedTo: Bytes!
+  timestamp: BigInt! # Block timestamp
 }

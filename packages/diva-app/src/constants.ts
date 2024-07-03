@@ -162,9 +162,9 @@ export const config: { [key: number]: SingleConfig } = {
     exchangeProxy: '0xdef1c0ded9bec7f1a1670819833240f027b25eff',
     whitelistAddress: '0x3bcBFBd63f0387fF1b72a4C580fA7758C04B718d',
     divaSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-protocol-v1-polygon',
+      'https://api.studio.thegraph.com/query/73880/diva-protocol-v1-polygon/version/latest', // picking the latest version: replace "latest" with version number if you want to use a specific version of the subgraph
     whitelistSubgraph:
-      'https://api.thegraph.com/subgraphs/name/divaprotocol/diva-whitelist-polygon', // TODO: add entries
+      'https://api.studio.thegraph.com/query/73880/diva-whitelist-polygon/version/latest', // TODO: add entries
     allOrders: 'https://polygon.eip712api.xyz/0x/orderbook/v1/orders/',
     order: 'https://polygon.eip712api.xyz/0x/orderbook/v1/order/',
     orderbook: 'https://polygon.eip712api.xyz/0x/orderbook/v1',
@@ -187,8 +187,14 @@ export const config: { [key: number]: SingleConfig } = {
       },
       {
         id: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
-        name: 'USDC',
-        symbol: 'USDC',
+        name: 'USDC.e (bridged)',
+        symbol: 'USDC.e (bridged)',
+        decimals: 6,
+      },
+      {
+        id: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
+        name: 'USDC (native)',
+        symbol: 'USDC (native)',
         decimals: 6,
       },
       {
@@ -209,10 +215,19 @@ export const config: { [key: number]: SingleConfig } = {
         symbol: 'PILOT',
         decimals: 18,
       },
+      {
+        id: '0x40caD342a67Bf49A2c384203025ad1eBEE1E30c5',
+        name: 'dUSD',
+        symbol: 'dUSD',
+        decimals: 18,
+      },
     ],
     adminAddresses: [
-      '0x3E50a9F4DC9CCF7aFaBb7337cf57D63dFa12acc0',
+      '0xa0eed79B4F55a55cdFAA8F4cCaf4b1DEbee5FB69',
       '0x1062CCC9F9a4bBcf565799683b6c00eA525ECb9F',
+      '0xd288B4A23ECc79Eb4bb4661147f3AB3294919F54',
+      '0x9AdEFeb576dcF52F5220709c1B267d89d5208D78',
+      '0x9253698409C7f8BB24dddb9653c74b8Fe149eDbd',
     ],
     dataProviders: [
       {
