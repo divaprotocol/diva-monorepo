@@ -82,6 +82,8 @@ Note that the `build` command defined in the `package.json` file is based on the
 
 ### Deploying to Hosted service
 
+>⚠️**Note:** The Hosted service has been discontinued. Deploy on the Subgraph Studio instead.
+
 If you want to deploy the subgraph to the Hosted Service, you first need to authenticate your access to the Hosted Service by running the following command:
 ```
 yarn graph:auth:hosted
@@ -96,9 +98,13 @@ Note that unlike [deploying to the Subgraph Studio](#deploying-a-subgraph-on-the
 
 ### Deploying to Subgraph Studio
 
-If you want to deploy the subgraph to the Subgraph Studio, you'll need to replace the `$DIVA_SUBGRAPH_STUDIO_ACCESS_TOKEN` placeholder in the `package.json` file with your Access Token. Once you've done that, run the following command to authenticate your access:
+In order to deploy your subgraph, you first have to create the subgraph entity through The Graph website. 
+
+For this, go to [Subgraph Studio](https://thegraph.com/studio/) and click "Create a Subgraph" button. Enter a name and click the "Create Subgraph" button.
+
+On the page you are redirected to, copy paste the Deploy key. Then replace the `$DIVA_SUBGRAPH_STUDIO_ACCESS_TOKEN` placeholder in the `package.json` file with your Deploy key. Once you've done that, run the following command to authenticate your access:
 ```
-graph:auth:goerli:studio
+yarn graph:auth:goerli:studio
 ```
 
 Then, deploy your subgraph by running:
