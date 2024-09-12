@@ -60,7 +60,7 @@ module.exports = {
       accounts: {
         mnemonic: MNEMONIC, 
       },
-      gasPrice: 8000000000,
+      //gasPrice: 8000000000,
     },
     polygon: {
       url: process.env.ALCHEMY_URL_POLYGON_MAINNET,
